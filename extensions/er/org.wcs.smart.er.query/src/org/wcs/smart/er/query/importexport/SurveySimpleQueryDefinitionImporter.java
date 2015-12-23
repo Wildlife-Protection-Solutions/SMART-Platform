@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.MissionQuery;
@@ -63,7 +64,7 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 	}
 
 	@Override
-	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
+	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
 		
 		if (qTypeInternal.equals(MissionTrackQuery.KEY)){
 			IFilter filter = null;
@@ -75,7 +76,7 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try {
-				SurveyQueryValidator validator = new SurveyQueryValidator(uuidLookup, session);
+				SurveyQueryValidator validator = new SurveyQueryValidator(importCa, uuidLookup, session);
 				warnings.addAll(validator.validate(filter));
 			} finally {
 				session.getTransaction().rollback();
@@ -93,7 +94,7 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try {
-				SurveyQueryValidator validator = new SurveyQueryValidator(uuidLookup, session);
+				SurveyQueryValidator validator = new SurveyQueryValidator(importCa, uuidLookup, session);
 				warnings.addAll(validator.validate(queryFilter.getFilter()));
 			} finally {
 				session.getTransaction().rollback();
@@ -105,9 +106,9 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 	}
 
 	@Override
-	public Query importQuery(QueryType qt) throws Exception{
+	public Query importQuery(QueryType qt, ConservationArea importCa) throws Exception{
 		qTypeInternal = qt.getQueryType();
-		Query query = super.importQuery(qt);
+		Query query = super.importQuery(qt, importCa);
 		for (QueryPart part : qt.getQueryPart()) {
 			if (part.getKey().equals("surveyDesignFilter")){ //$NON-NLS-1$
 				((ISurveyQuery)query).setSurveyDesign(part.getValue());

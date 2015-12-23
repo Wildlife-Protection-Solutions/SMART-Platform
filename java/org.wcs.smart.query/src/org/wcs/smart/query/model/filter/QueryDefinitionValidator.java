@@ -64,10 +64,11 @@ public class QueryDefinitionValidator {
 	protected IDataModelManager manager;
 	
 	protected ConservationArea ca;
+
 	/**
-	 * @param langCode the language value of the query 
-	 * @param uuidLookup a uuid lookup map that looks up uuid values
 	 * @param session database session
+	 * @param manager
+	 * @param conservationArea
 	 * 
 	 */
 	public QueryDefinitionValidator(Session session, IDataModelManager manager, ConservationArea ca ){
@@ -191,9 +192,9 @@ public class QueryDefinitionValidator {
 	 * 
 	 * @return
 	 */
-	public NamedItem findValue(String langCode, String value, String objectType, List<String> warnings){
+	public NamedItem findValue(String langCode, String value, String objectType, List<String> warnings,  String caField){
 		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c" +  caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
@@ -218,9 +219,9 @@ public class QueryDefinitionValidator {
 	 * 
 	 * @return the matching item or null if nothing found
 	 */
-	public NamedKeyItem findKeyValue(String key, String objectType){
+	public NamedKeyItem findKeyValue(String key, String objectType, String caField){
 		
-		String sql = "SELECT c FROM " + objectType + " c WHERE keyId = :keyId and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT c FROM " + objectType + " c WHERE keyId = :keyId and c" + caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$

@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -55,6 +56,18 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 
 	private DataModel dm = null;
 	private Integer dmDepth = null;
+	private ConservationArea conservationArea = null;
+	
+	public CaDataModelManagerImpl(){
+		this(SmartDB.getCurrentConservationArea());
+	}
+	
+	public CaDataModelManagerImpl(ConservationArea ca){
+		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+			throw new IllegalStateException("Cannot use the CaDataModelManager for multiple conservation area analysis.");
+		}
+		this.conservationArea = ca;
+	}
 	
 	/**
 	 * Clears the current data model
@@ -159,7 +172,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	@Override
 	public Attribute getAttribute(Session session, String attributeKey){
 		Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
+		q.setParameter("ca", conservationArea.getUuid()); //$NON-NLS-1$
 		q.setParameter("key", attributeKey); //$NON-NLS-1$
 		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
@@ -218,7 +231,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	@Override
 	public Category getCategory(Session session, String categoryKey){
 		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("key", categoryKey); //$NON-NLS-1$
 		q.setCacheable(true);
 		@SuppressWarnings("unchecked")
@@ -261,7 +274,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	public List<Category> getCategories(Session session, int level){
 		String query = "FROM Category WHERE conservationArea = :ca AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
 		Query q = session.createQuery(query);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
 		
 		List<Category> cats = q.list();
@@ -280,7 +293,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	@Override
 	public AttributeListItem getAttributeListItem(Session session, String attributeKey, String attributeListItem){
 		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key and a.keyId = :attributeKey"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("key", attributeListItem); //$NON-NLS-1$
 		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
@@ -303,7 +316,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	@Override
 	public AttributeTreeNode getAttributeTreeNode(Session session, String attributeKey, String attributeTreeHKey){
 		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key and a.keyId = :attribute"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("key", attributeTreeHKey); //$NON-NLS-1$
 		q.setParameter("attribute", attributeKey); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
@@ -384,8 +397,6 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		if (dmDepth != null){
 			return dmDepth;
 		}
-		
-	
 		int numCategory = 0;
 		for (Category cat : getDataModel().getActiveCategories()) {
 			numCategory = Math.max(numCategory, getDepth(cat));
@@ -450,7 +461,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+				dm = HibernateManager.loadDataModel(conservationArea, session);
 				
 				//load into memory; no-lazy loading here.
 				for (Category cat: dm.getCategories()){

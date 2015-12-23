@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
@@ -185,7 +184,6 @@ public class EmployeeDialog extends Dialog {
 			if (toUpdate == null){
 				toUpdate = new Employee();
 				toUpdate.setConservationArea(ca);
-				ca.getEmployees().add(toUpdate);
 			}
 			eComposite.updateEmploye(toUpdate);
 			

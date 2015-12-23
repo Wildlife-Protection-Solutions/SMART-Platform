@@ -23,7 +23,7 @@ package org.wcs.smart.intelligence.query.export;
 
 import java.util.ArrayList;
 
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.query.importexport.IQueryImporter;
@@ -31,6 +31,7 @@ import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.query.xml.model.QueryType;
 
 /**
@@ -63,15 +64,15 @@ public class IntelligenceSummaryDefinitionImporter implements IQueryImporter{
 	 * 
 	 */
 	@Override
-	public Query importQuery(QueryType qt) throws Exception{
+	public Query importQuery(QueryType qt, ConservationArea caImport) throws Exception{
 		warnings.clear();
 		
 		IntelligenceSummaryQuery summaryQuery = createQuery();
 		QueryImportEngine.importNames(summaryQuery, qt);
 		
-		summaryQuery.setConservationArea(SmartDB.getCurrentConservationArea());
-		summaryQuery.setOwner(SmartDB.getCurrentEmployee());
-		summaryQuery.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
+		summaryQuery.setConservationArea(caImport);
+		summaryQuery.setOwner(ImportQueryUtil.findEmployee(caImport));
+		summaryQuery.setConservationAreaFilter((new ConservationAreaFilter(true, caImport)).asString());
 		
 		return summaryQuery;
 	}

@@ -23,6 +23,8 @@ package org.wcs.smart.patrol.query.model;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,10 +33,12 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -70,18 +74,21 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 	
 	private String langCode;
 	private HashMap<String, UuidItemType> uuidLookup;
-	
+	private ConservationArea importCa;
 
 	/**
 	 * @param langCode the language value of the query 
 	 * @param uuidLookup a uuid lookup map that looks up uuid values
 	 * @param session database session
+	 * @param queryDmManager
+	 * @param ConservationArea 
 	 * 
 	 */
 	public PatrolQueryValidator(String langCode, HashMap<String, UuidItemType> uuidLookup, 
 			Session session, IDataModelManager queryDmManager, ConservationArea ca ){
 		super(session, queryDmManager, ca);
 		
+		this.importCa = ca;
 		this.langCode = langCode;
 		this.uuidLookup = uuidLookup;
 	}
@@ -143,7 +150,48 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 	}
 	
 	
+	private boolean validateObject(Object x){
+		if (x instanceof Station){
+			if (((Station)x).getConservationArea().equals(importCa)){
+				return true;
+			}
+		}else if (x instanceof Team){
+			if (((Team)x).getConservationArea().equals(importCa)){
+				return true;
+			}
+		}else if (x instanceof PatrolMandate){
+			if (((PatrolMandate)x).getConservationArea().equals(importCa)){
+				return true;
+			}
+		}else if (x instanceof PatrolTransportType){
+			if (((PatrolTransportType)x).getConservationArea().equals(importCa)){
+				return true;
+			}
+		}else if (x instanceof Employee){
+			if (((Employee)x).getConservationArea().equals(importCa)){
+				return true;
+			}
+		}else if (x instanceof ConservationArea){
+			return true;
+		}else if (x instanceof Rank){
+			if (((Rank)x).getAgency().getConservationArea().equals(importCa)){
+				return true;
+			}
+		}else if (x instanceof Agency){
+			if (((Agency)x).getConservationArea().equals(importCa)){
+				return true;
+			}
+		}
+		return false;
+	}
 	
+	private String getCaField(PatrolQueryOption op){
+		String field = ".conservationArea"; //$NON-NLS-1$
+		if (op == PatrolQueryOption.RANK){
+			field = ".agency.conservationArea"; //$NON-NLS-1$
+		}
+		return field;
+	}
 	
 	class FilterValidatorVisitor implements IFilterVisitor{
 
@@ -159,27 +207,8 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 					if (op.getType() == PatrolQueryOptionType.UUID){
 						UUID uuid = UuidUtils.stringToUuid( ((PatrolFilter)filter).getValue() );
 						Object x = op.getObject(session, uuid);
-						if (x instanceof Station){
-							if (((Station)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-								return ;
-							}
-						}else if (x instanceof Team){
-							if (((Team)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-								return ;
-							}
-						}else if (x instanceof PatrolMandate){
-							if (((PatrolMandate)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-								return ;
-							}
-						}else if (x instanceof PatrolTransportType){
-							if (((PatrolTransportType)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-								return ;
-							}
-						}else if (x instanceof Employee){
-							if (((Employee)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-								return;
-							}
-						}else if (x instanceof ConservationArea){
+						if (validateObject(x)){
+							//object existing in db; do not need to look it up
 							return;
 						}
 						
@@ -196,7 +225,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 										Messages.PatrolQueryValidator_CouldNotMatchFilter,
 										new Object[]{filter.asString()}));
 							}
-							NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass().getSimpleName());
+							NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass().getSimpleName(), getCaField(op));
 							if (it != null){
 								((PatrolFilter)filter).setValue(UuidUtils.uuidToString(it.getUuid()));
 								return;
@@ -210,7 +239,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 										Messages.PatrolQueryValidator_CouldNotMatchFilter,
 										new Object[]{filter.asString()}));
 							}
-							NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings);							
+							NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings, getCaField(op));							
 							if (it == null){
 								throw new Exception(MessageFormat.format(
 									Messages.FilterValidator_PatrolFilter_ValueMatchingError,
@@ -268,27 +297,8 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 							String key = groupBy.getItems()[i];
 							UUID uuid = UuidUtils.stringToUuid(key);
 							Object x = op.getObject(session, uuid);
-							if (x instanceof Station){
-								if (((Station)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-									return ;
-								}
-							}else if (x instanceof Team){
-								if (((Team)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-									return ;
-								}
-							}else if (x instanceof PatrolMandate){
-								if (((PatrolMandate)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-									return ;
-								}
-							}else if (x instanceof PatrolTransportType){
-								if (((PatrolTransportType)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-									return ;
-								}
-							}else if (x instanceof Employee){
-								if (((Employee)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-									return;
-								}
-							}else if (x instanceof ConservationArea){
+							if (validateObject(x)){
+								//object existing in db; do not need to look it up
 								return;
 							}
 							if (NamedKeyItem.class.isAssignableFrom(op.getSourceClass())){
@@ -297,7 +307,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 									throw new Exception(MessageFormat.format(
 										COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
 								}
-								NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass().getSimpleName());
+								NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass().getSimpleName(), getCaField(op));
 								if (it != null){
 									groupBy.getItems()[i] = UuidUtils.uuidToString(it.getUuid());
 									continue;
@@ -311,7 +321,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 									throw new Exception(MessageFormat.format(
 										COULDNOTRESOLVE_ERRMSG, new Object[]{groupBy.asString()}));
 								}
-								NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings);
+								NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass().getSimpleName(), warnings, getCaField(op));
 								if (it == null) {
 									throw new Exception(
 										MessageFormat.format(
@@ -348,11 +358,15 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 							
 						}
 					} else if (op.getType() == PatrolQueryOptionType.KEY){
+						Collection<ConservationArea> toSearch = Collections.singleton(importCa);
+						if (importCa.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+							toSearch = SmartDB.getConservationAreaConfiguration().getConservationAreas();
+						}
 						for (String key : groupBy.getItems()){
 							//look for key in database
 							Long cnt = (Long) session.createCriteria(op.getSourceClass())
 									.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-									.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())) //$NON-NLS-1$
+									.add(Restrictions.in("conservationArea", toSearch)) //$NON-NLS-1$
 									.setProjection(Projections.rowCount()).list().get(0); 
 								if (cnt == 0){
 									throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_KeyNotFoundError, new Object[]{op.getGuiName(Locale.getDefault()), key}));

@@ -24,7 +24,7 @@ package org.wcs.smart.observation.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -56,9 +56,9 @@ public class ObsGriddedQueryDefImporter extends GriddedQueryDefinitionImporter{
 	 * There is nothing special to validate in these queries.  
 	 */
 	@Override
-	protected void validateQuery(GridQueryDefinition def, String langCode,
+	protected void validateQuery(ConservationArea caImport, GridQueryDefinition def, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
-		QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
+		QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getManager(caImport), caImport);
 		if (def.getValueFilter() != null){
 			warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
 		}

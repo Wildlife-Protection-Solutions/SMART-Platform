@@ -253,6 +253,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     }    
 
     public static void updateWorkbenchWindowTitle(){
+    	if (SmartDB.getCurrentConservationArea() == null) return;
     	WorkbenchJob job = new WorkbenchJob("refresh title") { //$NON-NLS-1$
 			
 			@Override

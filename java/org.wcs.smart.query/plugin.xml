@@ -458,7 +458,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.query.export"
-                  label="%menu.query.exportquery.command.label"
+                  label="%menu.query.exportquery.command.label1"
                   mnemonic="%menu.query.exportquery.command.mnemonic"
                   style="push"
                   tooltip="%menu.query.exportquery.command.tooltip">
@@ -912,6 +912,27 @@
       <handler
             class="org.wcs.smart.query.ui.importexport.ExportQueryHandler$ExportQueryHandlerWrapper"
             commandId="org.wcs.smart.query.export">
+         <enabledWhen>
+            <and>
+               <with
+                     variable="activeEditorInput">
+                  <instanceof
+                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
+                  </instanceof>
+               </with>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.single">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.multi">
+                     </equals>
+                  </or>
+               </with>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.query.ui.querylist.DeleteItemHandler$DeleteItemHandlerWrapper"
@@ -981,7 +1002,7 @@
             commandId="org.wcs.smart.query.translate">
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.importexport.ExportMultiQueryHandler$ExportMultiQueryHandlerWrapper"
+            class="org.wcs.smart.query.ui.importexport.ExportQueryDefHandler$ExportQueryDefHandlerWrapper"
             commandId="org.wcs.smart.query.exportmulti">
       </handler>
    </extension>

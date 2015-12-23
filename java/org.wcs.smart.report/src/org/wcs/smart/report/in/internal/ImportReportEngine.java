@@ -543,7 +543,7 @@ public class ImportReportEngine {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try{
-					importedQuery = qi.importQuery(queryFile);
+					importedQuery = qi.importQuery(queryFile, SmartDB.getCurrentConservationArea());
 					queryWarnings.addAll( qi.getWarnings());
 					return Status.OK_STATUS;
 				}catch (Exception ex){

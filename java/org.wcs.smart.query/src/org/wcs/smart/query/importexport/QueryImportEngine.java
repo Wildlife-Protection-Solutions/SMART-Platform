@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -100,7 +101,7 @@ public class QueryImportEngine {
 	 * @throws Exception if the file cannot be converted to a query.
 	 * 
 	 */
-	public org.wcs.smart.query.model.Query importQuery(File file) throws Exception{
+	public org.wcs.smart.query.model.Query importQuery(File file, ConservationArea importCa) throws Exception{
 		warnings.clear();
 		
 		Query q = null;
@@ -122,7 +123,7 @@ public class QueryImportEngine {
 			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType, new Object[]{ qt.getQueryType()}));
 		}
 		
-		org.wcs.smart.query.model.Query importedQuery = importer.importQuery(qt);
+		org.wcs.smart.query.model.Query importedQuery = importer.importQuery(qt, importCa);
 		warnings.addAll(importer.getWarnings());
 		return importedQuery;
 		

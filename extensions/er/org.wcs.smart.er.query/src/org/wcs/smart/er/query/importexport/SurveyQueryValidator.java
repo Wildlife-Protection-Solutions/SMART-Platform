@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -75,7 +76,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 	private static final String COULDNOTRESOLVE_ERRMSG = Messages.SurveyQueryValidator_FilterError;
 	
 	private HashMap<String, UuidItemType> uuidLookup;
-	
+	private ConservationArea ca;
 
 	/**
 	 *  
@@ -84,7 +85,21 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 	 * 
 	 */
 	public SurveyQueryValidator(HashMap<String, UuidItemType> uuidLookup, Session session ){
-		super(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
+		this(SmartDB.getCurrentConservationArea(), uuidLookup, session);
+	}
+
+
+	/**
+	 * Create a query validator for a conservation area that is not the current
+	 * conservation area.
+	 *   
+	 * @param uuidLookup a uuid lookup map that looks up uuid values
+	 * @param session database session
+	 * 
+	 */
+	public SurveyQueryValidator(ConservationArea ca, HashMap<String, UuidItemType> uuidLookup, Session session ){
+		super(session, QueryDataModelManager.getManager(ca), ca);
+		this.ca = ca;
 		this.uuidLookup = uuidLookup;
 	}
 
@@ -152,7 +167,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					Object x = session.get(Employee.class, uuid);
 					if (x != null 
 							&& x instanceof Employee
-							&& ((Employee)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+							&& ((Employee)x).getConservationArea().equals(ca)){
 						return;
 					}
 					UuidItemType item = uuidLookup.get(  UuidUtils.uuidToString(((MissionMemberFilter)filter).getUuid())  );
@@ -177,7 +192,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 						Object x = session.get(Mission.class, uuid);
 						if (x != null 
 								&& x instanceof Mission
-								&& ((Mission)x).getSurvey().getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+								&& ((Mission)x).getSurvey().getSurveyDesign().getConservationArea().equals(ca)){
 							return;
 						}
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MissionNotFound, new Object[]{filter.asString()}));
@@ -188,7 +203,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 						Object x = session.get(Survey.class, uuid);
 						if (x != null 
 								&& x instanceof Survey
-								&& ((Survey)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+								&& ((Survey)x).getSurveyDesign().getConservationArea().equals(ca)){
 							return;
 						}
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SurveyNotFound, new Object[]{filter.asString()}));
@@ -201,7 +216,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					Object x = session.get(SamplingUnit.class, UuidUtils.stringToUuid(suFilter.getUuid()));
 					if (x != null 
 							&& x instanceof SamplingUnit
-							&& ((SamplingUnit)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+							&& ((SamplingUnit)x).getSurveyDesign().getConservationArea().equals(ca)){
 						return;
 					}
 					UuidItemType item = uuidLookup.get(  suFilter.getUuid() );
@@ -216,7 +231,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof MissionPropertyFilter){
 					MissionPropertyFilter mpFilter = (MissionPropertyFilter) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(mpFilter.getAttributeKey(), MissionAttribute.class.getSimpleName());
+					NamedKeyItem it = findKeyValue(mpFilter.getAttributeKey(), MissionAttribute.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MisisonAttributeNotFound, new Object[]{mpFilter.getAttributeKey()}));
 					}
@@ -226,7 +241,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof SamplingUnitAttributeFilter){
 					SamplingUnitAttributeFilter mpFilter = (SamplingUnitAttributeFilter) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(mpFilter.getSamplingUnitAttributeKey(), SamplingUnitAttribute.class.getSimpleName());
+					NamedKeyItem it = findKeyValue(mpFilter.getSamplingUnitAttributeKey(), SamplingUnitAttribute.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuAttributeNotFound, new Object[]{mpFilter.getSamplingUnitAttributeKey()}));
 					}
@@ -236,7 +251,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof SurveyDesignFilter){
 					NamedKeyItem it = findKeyValue(
 							((SurveyDesignFilter) filter).getKey(),
-							SurveyDesign.class.getSimpleName());
+							SurveyDesign.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SurveyDesignNotFound, new Object[]{((SurveyDesignFilter) filter).getKey()}));
 					}
@@ -260,7 +275,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				if (filter instanceof MissionAttributeGroupBy) {
 					MissionAttributeGroupBy gb = (MissionAttributeGroupBy) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), MissionAttribute.class.getSimpleName());
+					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), MissionAttribute.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MissionAttributeKeyNotFound, new Object[]{gb.getAttributeKey()}));
 					}
@@ -273,7 +288,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof SamplingUnitAttributeGroupBy){
 					SamplingUnitAttributeGroupBy gb = (SamplingUnitAttributeGroupBy) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), SamplingUnitAttribute.class.getSimpleName());
+					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), SamplingUnitAttribute.class.getSimpleName(), ".conservationArea"); //$NON-NLS-1$
 					if (it == null){
 						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuAttributeKeyNotFound, new Object[]{gb.getAttributeKey()}));
 					}
@@ -288,7 +303,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					for (int i = 0; i < items.length;i++){
 						Object x = session.get(SamplingUnit.class, UuidUtils.stringToUuid(items[i]));
 						if (x != null 
-							&& ((SamplingUnit)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+							&& ((SamplingUnit)x).getSurveyDesign().getConservationArea().equals(ca)){
 							continue;
 						}
 						UuidItemType item = uuidLookup.get( items[i] );
@@ -325,7 +340,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
-		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		
 		List<?> results = query.list();
 		if (results.size() == 0){
@@ -352,7 +367,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
-		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		
 		List<?> results = query.list();
 		if (results.size() == 0 || results.size() > 1){
@@ -375,7 +390,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
-		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		
 		List<?> results = query.list();
 		if (results.size() == 0 || results.size() > 1){

@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
@@ -55,7 +56,7 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 	}
 
 	@Override
-	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
+	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
 		QueryFilter queryFilter = null;
 		try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
 			Parser parser = new Parser(is);
@@ -66,7 +67,7 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			EntityQueryValidator validator = new EntityQueryValidator(session);
+			EntityQueryValidator validator = new EntityQueryValidator(importCa, session);
 			warnings.addAll(validator.validate(queryFilter.getFilter()));
 		} finally {
 			session.getTransaction().rollback();

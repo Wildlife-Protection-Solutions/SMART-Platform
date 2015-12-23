@@ -174,7 +174,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 			Session session = HibernateManager.openSession();
 			try{
 				for (String entityType : entityTypes){
-					EntityType et = EntityHibernateManager.getEntityType(entityType, session);
+					EntityType et = EntityHibernateManager.getInstance().getEntityType(entityType, session);
 					for (EntityAttribute ea : et.getAttributes()){
 						EntityAttributeQueryColumn newcol = new EntityAttributeQueryColumn("[" + et.getName() + "]" + ea.getName(), et.getKeyId(), ea.getKeyId(), ea.getDmAttribute().getType()); //$NON-NLS-1$ //$NON-NLS-2$
 						q.getQueryColumns(Locale.getDefault(), null).add(newcol);

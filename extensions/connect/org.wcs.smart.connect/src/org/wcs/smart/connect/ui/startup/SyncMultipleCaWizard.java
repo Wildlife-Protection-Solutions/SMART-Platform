@@ -35,6 +35,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.WarningDialog;
@@ -228,12 +229,10 @@ public class SyncMultipleCaWizard extends Wizard {
 				try{
 					connectPassword = ConnectPlugIn.decryptPassword(cu, desktopPass);
 				}catch (Exception ex){
-					//TODO:
-					ex.printStackTrace();
+					SmartPlugIn.displayLog(ex.getMessage(), ex);
 				}
 			}
 			if (connectPassword == null){
-				//TODO: get connect username/password for ca
 				cu = null;
 				//validate password
 				final String[] values = new String[]{null, null};
@@ -241,7 +240,6 @@ public class SyncMultipleCaWizard extends Wizard {
 
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
 						UserNamePasswordDialog userPassDialog = new UserNamePasswordDialog(activeShell, 
 								Messages.SyncMultipleCaWizard_UserpassDialogTitle,
 								MessageFormat.format(Messages.SyncMultipleCaWizard_ConnectUserpassDialogMessage, ca.getNameLabel()),
@@ -262,8 +260,6 @@ public class SyncMultipleCaWizard extends Wizard {
 				cu.setConnectUsername(values[0]);
 				cu.setConnectPassword(values[1]);
 				connectPassword = values[1];
-				
-				//TODO: validate
 			}
 			if (cu == null) continue;
 				

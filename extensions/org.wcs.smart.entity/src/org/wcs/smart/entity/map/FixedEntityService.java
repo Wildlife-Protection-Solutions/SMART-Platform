@@ -174,7 +174,7 @@ public class FixedEntityService extends IService {
 						protected IStatus run(IProgressMonitor monitor) {
 //							Session s = HibernateManager.openSession();
 //							try{
-								for (EntityType et : EntityHibernateManager.getActiveEntityTypes()){
+								for (EntityType et : EntityHibernateManager.getInstance().getActiveEntityTypes()){
 									if (et.getType() == EntityType.Type.FIXED){
 										members.add(new FixedEntityGeoResource(FixedEntityService.this, et.getName(), et.getKeyId()));
 									}

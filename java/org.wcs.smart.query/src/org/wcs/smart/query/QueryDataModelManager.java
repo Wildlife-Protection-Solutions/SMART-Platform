@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.CaDataModelManagerImpl;
 import org.wcs.smart.query.internal.MultiCaDataModelManagerImpl;
@@ -39,7 +40,8 @@ public class QueryDataModelManager {
 	
 	/**
 	 * 
-	 * @return the active data model manager
+	 * @return the active data model manager for the
+	 * currnet conservation area
 	 */
 	public static IDataModelManager getInstance(){
 		if (instance == null){
@@ -52,4 +54,23 @@ public class QueryDataModelManager {
 		return instance;
 	}
 	
+	/**
+	 * If the conservation area provided is the same as the current 
+	 * conservation area this will return a call to getInstance(); otherwise
+	 * it will made a new manager for the given conservation area.
+	 * 
+	 * @param ca the conservation area to get the data model manager for
+	 * 
+	 * @return
+	 */
+	public static IDataModelManager getManager(ConservationArea ca){
+		if (ca.equals(SmartDB.getCurrentConservationArea())){
+			return getInstance();
+		}
+		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+			return new MultiCaDataModelManagerImpl();
+		}else{
+			return new CaDataModelManagerImpl(ca);
+		}
+	}
 }

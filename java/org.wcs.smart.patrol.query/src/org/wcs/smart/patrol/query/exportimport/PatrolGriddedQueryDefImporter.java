@@ -24,7 +24,7 @@ package org.wcs.smart.patrol.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryValidator;
@@ -53,10 +53,10 @@ public class PatrolGriddedQueryDefImporter extends GriddedQueryDefinitionImporte
 	}
 
 	@Override
-	protected void validateQuery(GridQueryDefinition def, String langCode,
+	protected void validateQuery(ConservationArea caImport, GridQueryDefinition def, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
 		
-		PatrolQueryValidator validator = new PatrolQueryValidator(langCode,uuidLookup, session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
+		PatrolQueryValidator validator = new PatrolQueryValidator(langCode,uuidLookup, session, QueryDataModelManager.getManager(caImport), caImport);
 		if (def.getValueFilter() != null){
 			warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
 		}

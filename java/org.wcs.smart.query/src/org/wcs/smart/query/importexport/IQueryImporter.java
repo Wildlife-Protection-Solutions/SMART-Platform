@@ -23,6 +23,7 @@ package org.wcs.smart.query.importexport;
 
 import java.util.ArrayList;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.xml.model.QueryType;
@@ -51,15 +52,16 @@ public interface IQueryImporter {
 	
 	/**
 	 * Imports the given xml query.  This function is responsible
-	 * for converting to the internal mdoel format.  It is not responsible
+	 * for converting to the internal model format.  It is not responsible
 	 * for saving the query to the database.  That is done in a separate
 	 * process.
 	 * 
 	 * @param qt the xml query type to import.
+	 * @param the conservation area 
 	 * @return the imported query definition
 	 * @throws Exception if the query cannot be imported
 	 */
-	public Query importQuery(QueryType xmlQuery) throws Exception;
+	public Query importQuery(QueryType xmlQuery, ConservationArea ca) throws Exception;
 	
 	/**
 	 * Warnings are displayed to the user and the user is allowed to choose
