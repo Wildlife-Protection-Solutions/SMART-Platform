@@ -88,7 +88,7 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
 		}
 		
-		QueryImportEngine.importNames(wq, qt, caImport);
+		QueryImportEngine.importNames(wq, qt, importCa);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){
