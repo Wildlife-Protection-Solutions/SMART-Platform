@@ -68,7 +68,7 @@ public class IntelligenceSummaryDefinitionImporter implements IQueryImporter{
 		warnings.clear();
 		
 		IntelligenceSummaryQuery summaryQuery = createQuery();
-		QueryImportEngine.importNames(summaryQuery, qt);
+		QueryImportEngine.importNames(summaryQuery, qt, caImport);
 		
 		summaryQuery.setConservationArea(caImport);
 		summaryQuery.setOwner(ImportQueryUtil.findEmployee(caImport));

@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryFolder;
@@ -134,6 +136,6 @@ public interface IQueryHibernateManager {
 	 * @return
 	 */
 	public List<org.wcs.smart.query.model.Query> findQuery(Session session, 
-			String queryName, IQueryType queryType);
+			String queryName, IQueryType queryType, ConservationArea ca, Employee search);
 	
 }

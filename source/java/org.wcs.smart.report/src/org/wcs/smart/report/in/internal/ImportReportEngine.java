@@ -68,6 +68,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -79,6 +81,7 @@ import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
@@ -122,10 +125,11 @@ public class ImportReportEngine {
 	 * 
 	 * @param file the report export to import
 	 * @param folder the destination folder  (RootReportFolder or ReportFolder)
+	 * @param ca the conservation to import the report into
 	 * @return <code>true</code> if successful, <code>false</code> if cancelled
 	 * @throws Exception if error occurs
 	 */
-	public boolean importReport(File file, Object folder) throws Exception{
+	public boolean importReport(File file, Object folder, ConservationArea importCa) throws Exception{
 		this.display = Display.getDefault();
 		
 		//unzip report deifnition file
@@ -147,13 +151,13 @@ public class ImportReportEngine {
 		if (reportPropFile == null){
 			throw new Exception(Messages.ImportReportEngine_Error_NoPropertiesFile);
 		}
-		Report newReport = readReportInfo(reportPropFile);
-		
+		Report newReport = readReportInfo(reportPropFile, importCa);
+		Employee assignedEmployee = ImportQueryUtil.findEmployee(importCa);
 		
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
-			Report importReport = validateReport(newReport);
+			Report importReport = validateReport(newReport, importCa, assignedEmployee);
 			if (importReport == null){
 				//cancel pressed
 				return false;
@@ -171,11 +175,11 @@ public class ImportReportEngine {
 					importReport.setShared( ((ReportFolder)folder).getEmployee() == null );
 				}
 				
-				importReport.setId(ReportManager.generateReportId(session));
-				if (SmartDB.isMultipleAnalysis() && importReport.getShared()){
+				importReport.setId(ReportManager.generateReportId(importCa, session));
+				if (importCa.getUuid().equals(ConservationArea.MULTIPLE_CA) && importReport.getShared()){
 					importReport.setOwner(SmartDB.getSharedEmployee(session));
 				}else{
-					importReport.setOwner(SmartDB.getCurrentEmployee());
+					importReport.setOwner(assignedEmployee);
 				}
 			}else{
 				//existing query
@@ -190,7 +194,7 @@ public class ImportReportEngine {
 			File reportXmlFile = new File(tmpDir, newReport.getFilename());
 			
 			//process queries
-			if (!processQueries(reportXmlFile, tmpDir, importReport.getShared())){
+			if (!processQueries(reportXmlFile, tmpDir, importReport.getShared(), importReport.getOwner(), importCa)){
 				return false ;
 			}
 
@@ -297,13 +301,13 @@ public class ImportReportEngine {
 	 * @return newly created report object
 	 * @throws Exception
 	 */
-	private Report readReportInfo(File f) throws Exception{
+	private Report readReportInfo(File f, ConservationArea newCa) throws Exception{
 		Properties prop = new Properties();
 		try(InputStream inStream = new FileInputStream(f)){
 			prop.load(inStream);
 		}		
 		Report r = new Report();
-		r.setConservationArea(SmartDB.getCurrentConservationArea());
+		r.setConservationArea(newCa);
 		
 		for (Object o : prop.keySet()){
 			if (o.equals("filename")){ //$NON-NLS-1$
@@ -322,7 +326,7 @@ public class ImportReportEngine {
 					}
 					r.setName(r.findName(SmartDB.getCurrentLanguage()));
 					if (r.getName() == null){
-						r.setName(r.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+						r.setName(r.findName(newCa.getDefaultLanguage()));
 					}
 				}finally{
 					s.getTransaction().rollback();
@@ -346,14 +350,14 @@ public class ImportReportEngine {
 	 * @return the report object to save to; if the user wants to overwrite an existing report this will
 	 * be the existing report object, otherwise it will be a new report object 
 	 */
-	private Report validateReport(final Report report){
+	private Report validateReport(final Report report, ConservationArea newCa, Employee newEmployee){
 		
 		String hql = "Select r from Report as  r join r.names as l where l.value = :name and ((r.owner = :owner and r.shared = 'false') or r.shared = 'true') and r.conservationArea = :ca"; //$NON-NLS-1$
 		Query query = session.createQuery(hql);
 		
 		query.setParameter("name", report.getName()); //$NON-NLS-1$
-		query.setParameter("owner", SmartDB.getCurrentEmployee()); //$NON-NLS-1$
-		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		query.setParameter("owner", newEmployee); //$NON-NLS-1$
+		query.setParameter("ca", newCa); //$NON-NLS-1$
 		
 		List<?> reports = query.list();
 		if (reports.size() == 0){
@@ -362,7 +366,7 @@ public class ImportReportEngine {
 		}else if (reports.size() == 1){
 			Report existing = (Report) reports.get(0);
 			
-			if (existing.getOwner().equals(SmartDB.getCurrentEmployee()) && !existing.getShared()){
+			if (existing.getOwner().equals(newEmployee) && !existing.getShared()){
 				
 				final int[] overwrite = new int[]{-1};
 				display.syncExec(new Runnable(){
@@ -386,8 +390,8 @@ public class ImportReportEngine {
 				
 			}else{
 				//shared
-				if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
-						SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER ){
+				if (newEmployee.getSmartUserLevel() == SmartUserLevel.ADMIN || 
+						newEmployee.getSmartUserLevel() == SmartUserLevel.MANAGER ){
 					
 					final int[] overwrite = new int[]{-1};
 					display.syncExec(new Runnable(){
@@ -475,7 +479,9 @@ public class ImportReportEngine {
 	 * @throws Exception
 	 */
 	private boolean  processQueries(File reportFile, 
-			File queryDir, boolean sharedReport) throws Exception{
+			File queryDir, boolean sharedReport,
+			Employee reportEmployee,
+			ConservationArea importCa) throws Exception{
 		
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
@@ -489,7 +495,7 @@ public class ImportReportEngine {
 				if (handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
 					//smart dataset
 					if (!processQuery(handle.getQueryText().split(":")[1],  //$NON-NLS-1$
-							queryDir, handle, sharedReport)){
+							queryDir, handle, sharedReport, reportEmployee, importCa)){
 						return false;
 					}
 				}
@@ -524,7 +530,9 @@ public class ImportReportEngine {
 	private boolean processQuery(String queryUuid, 
 			File queryDir, 
 			OdaDataSetHandle handle,
-			boolean sharedReport) throws Exception{
+			boolean sharedReport,
+			Employee reportEmployee, 
+			ConservationArea importCa) throws Exception{
 		
 		final File queryFile = new File(queryDir, queryUuid + ".query"); //$NON-NLS-1$
 		if (!queryFile.exists()){
@@ -543,7 +551,7 @@ public class ImportReportEngine {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try{
-					importedQuery = qi.importQuery(queryFile, SmartDB.getCurrentConservationArea());
+					importedQuery = qi.importQuery(queryFile, importCa);
 					queryWarnings.addAll( qi.getWarnings());
 					return Status.OK_STATUS;
 				}catch (Exception ex){
@@ -558,7 +566,7 @@ public class ImportReportEngine {
 		}
 		
 		
-		org.wcs.smart.query.model.Query smartQuery = findQuery(queryUuid, importedQuery, sharedReport);
+		org.wcs.smart.query.model.Query smartQuery = findQuery(queryUuid, importedQuery, sharedReport, reportEmployee, importCa);
 		if (smartQuery == null){
 			//cancel selected
 			return false;
@@ -614,6 +622,7 @@ public class ImportReportEngine {
 	private List<org.wcs.smart.query.model.Query> queriesModified = new ArrayList<org.wcs.smart.query.model.Query>();
 	
 	private HashMap<String, String> oldToNewQueries = new HashMap<String, String>();
+	
 	/**
 	 * Finds the database query that matches the imported query
 	 * 
@@ -634,19 +643,21 @@ public class ImportReportEngine {
 	private org.wcs.smart.query.model.Query findQuery(
 			String queryUuid,
 			final org.wcs.smart.query.model.Query importedQuery,
-			boolean sharedReport) throws Exception{
+			boolean sharedReport,
+			Employee reportEmployee,
+			ConservationArea importCa) throws Exception{
 		
 		final List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
 
 		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(importedQuery.getTypeKey());
 		//search by uuid
 		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.getInstance().findQuery(session, UuidUtils.stringToUuid(queryUuid), type);
-		if (uuidQuery != null && uuidQuery.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+		if (uuidQuery != null && uuidQuery.getConservationArea().equals(importCa)){
 			queries.add(uuidQuery);
 		}else{
 			//search by name
 			queries.addAll( QueryHibernateManager.getInstance().findQuery(session, 
-						importedQuery.getName(), type) );
+						importedQuery.getName(), type, importCa, reportEmployee) );
 		}
 		
 		if (sharedReport){
@@ -681,7 +692,7 @@ public class ImportReportEngine {
 				display.syncExec(new Runnable(){
 					@Override
 					public void run() {
-						QueryImportMessageDialog importDia = new QueryImportMessageDialog(Display.getDefault().getActiveShell(), importedQuery.getName(), canOverwrite(importedQuery));
+						QueryImportMessageDialog importDia = new QueryImportMessageDialog(Display.getDefault().getActiveShell(), importedQuery.getName(), canOverwrite(importedQuery, reportEmployee));
 						int ret = importDia.open();
 						if (ret == QueryImportMessageDialog.CANCEL_INDEX){
 							data[0] = null;
@@ -755,7 +766,7 @@ public class ImportReportEngine {
 			if (op == ImportOption.USE_EXISTING){
 				return smartQuery;
 			}else if (op == ImportOption.OVERWRITE){
-				if (!canOverwrite(smartQuery)){
+				if (!canOverwrite(smartQuery, reportEmployee)){
 					display.syncExec(new Runnable() {
 						@Override
 						public void run() {
@@ -808,12 +819,12 @@ public class ImportReportEngine {
 	 * @param query
 	 * @return
 	 */
-	private boolean canOverwrite(org.wcs.smart.query.model.Query query){
+	private boolean canOverwrite(org.wcs.smart.query.model.Query query, Employee employee){
 		
-		boolean admin =  SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
-					SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER;
+		boolean admin =  employee.getSmartUserLevel() == SmartUserLevel.ADMIN || 
+				employee.getSmartUserLevel() == SmartUserLevel.MANAGER;
 		boolean isShared = query.getIsShared();
-		boolean amOwner = query.getOwner().equals(SmartDB.getCurrentEmployee());
+		boolean amOwner = query.getOwner().equals(employee);
 		
 		return (admin && isShared) || (amOwner && !isShared); 
 	}
