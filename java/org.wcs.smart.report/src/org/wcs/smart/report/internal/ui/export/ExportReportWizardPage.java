@@ -43,6 +43,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -71,7 +73,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class ExportReportDialog extends TitleAreaDialog {
+public class ExportReportWizardPage  extends WizardPage  {
 	private static final String EXPORT_DIALOGITTLE = Messages.ExportReportDialog_ExportDialogTitle;
 
 	private static final String FORMAT_SETTING = "Format"; //$NON-NLS-1$
@@ -80,26 +82,49 @@ public class ExportReportDialog extends TitleAreaDialog {
 
 	private static IDialogSettings settings = new DialogSettings("org.wcs.smart.report.exportdialog"); //$NON-NLS-1$
 	
-	private String fileName;
-	private IExportFormat emitter;
+	private boolean multipleFiles;
 	
 	private Text txtFileName;
 	private ComboViewer cmbEmitters;
-	private boolean multipleFiles;
-	private List<Report> reports;
 	private TableViewer lstReports;
+	private Button btnBrowse;
+	private List<Report> selectedReports;
 	
+	private IExportFormat caExport = new IExportFormat() {
+		
+		@Override
+		public String getName() {
+			return "To Conservation Area";
+		}
+		
+		@Override
+		public String getFileExtension() {
+			return null;
+		}
+		
+		@Override
+		public Object getExporter() {
+			return null;
+		}
+	};
+	
+	public void updateSettings(){
+		if (multipleFiles){
+			settings.put(DIRECTORY_SETTING, txtFileName.getText());
+		}else{
+			settings.put(DIRECTORY_SETTING, (new File(txtFileName.getText())).getParent());
+		}
+		settings.put(FORMAT_SETTING, getExporter().getName());
+	}
 	/**
 	 * @param parentShell
 	 * @param reports to export 
 	 * 
 	 */
-	public ExportReportDialog(Shell parentShell, List<Report> reports, boolean isMultiple) {
-		super(parentShell);
+	public ExportReportWizardPage(boolean isMultiple, List<Report> initReports) {
+		super("page1"); //$NON-NLS-1$
 		this.multipleFiles = isMultiple;
-		
-		this.reports = new ArrayList<Report>();
-		this.reports.addAll(reports);
+		this.selectedReports = initReports;
 	}
 	
 	/**
@@ -107,44 +132,23 @@ public class ExportReportDialog extends TitleAreaDialog {
 	 * @return ouptut file/directory selected by the user
 	 */
 	public String getOutputDir(){
-		return this.fileName;
+		return txtFileName.getText();
 	}
-	/**
-	 * @return the output format selected by the user
-	 */
-	public IExportFormat getOutputFormat(){
-		return this.emitter;
-	}
+	
 	
 	public List<Report> getSelectedReports(){
-		return this.reports;
-	}
-	
-	/**
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
-	 */
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, Messages.ExportReportDialog_ExportButton,
-				true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
-		
-		updateButtons();
+		return selectedReports;
 	}
 	
 	/**
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	protected Composite createDialogArea(Composite parent) {
-		parent = (Composite) super.createDialogArea(parent);
+	public void createControl(Composite parent) {
+		
 		if (!multipleFiles){
-			getShell().setText(Messages.ExportReportDialog_DialogTitleA1);
-			setTitle(Messages.ExportReportDialog_DialogTitleA1 + ": " + reports.get(0).getName()); //$NON-NLS-1$
-			
+			setTitle(Messages.ExportReportDialog_DialogTitleA1 + ": " + selectedReports.get(0).getName()); //$NON-NLS-1$
 		}else{
-			getShell().setText(Messages.ExportReportDialog_DialogTitleB);
 			setTitle(Messages.ExportReportDialog_MultiExportPageTitle);
 		}
 		setMessage(Messages.ExportReportDialog_DialogMessage);
@@ -163,7 +167,11 @@ public class ExportReportDialog extends TitleAreaDialog {
 		cmbEmitters.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object object){
-				return ((IExportFormat)object).getName() + " (." + ((IExportFormat)object).getFileExtension() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				String name = ((IExportFormat)object).getName();
+				if (((IExportFormat)object).getFileExtension() != null){
+					name += " (." + ((IExportFormat)object).getFileExtension() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				return name;
 			}
 		});
 		IExportFormat[] formats= ExportReportEngine.getSupportedExportFormats();
@@ -173,7 +181,28 @@ public class ExportReportDialog extends TitleAreaDialog {
 				return Collator.getInstance().compare(o1.getName(), o2.getName());
 			}
 		});
-		cmbEmitters.setInput(formats);
+		List<IExportFormat> allFormats = new ArrayList<IExportFormat>(Arrays.asList(formats));
+		allFormats.add(caExport);
+		cmbEmitters.setInput(allFormats);
+		
+		cmbEmitters.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = ((IStructuredSelection) cmbEmitters.getSelection());
+				if (selection == null || selection.isEmpty()) {
+					return;
+				}
+				boolean enableFolder = selection.getFirstElement() == caExport;
+				txtFileName.setEnabled(!enableFolder);
+				btnBrowse.setEnabled(!enableFolder);
+				
+				try{
+					getWizard().getContainer().updateButtons();
+				}catch (Exception ex){
+					//buttons likely not configured yet
+				}
+			}
+		});
 		
 		if (!this.multipleFiles) {
 			cmbEmitters
@@ -208,7 +237,7 @@ public class ExportReportDialog extends TitleAreaDialog {
 		
 		txtFileName = new Text(comp, SWT.BORDER);
 		txtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		Button btnBrowse = new Button(comp, SWT.NONE);
+		btnBrowse = new Button(comp, SWT.NONE);
 		btnBrowse.setText(Messages.ExportReportDialog_BrowseButton);
 
 		String x = settings.get(FORMAT_SETTING);
@@ -231,9 +260,14 @@ public class ExportReportDialog extends TitleAreaDialog {
 			lstReports.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 			lstReports.setContentProvider(ArrayContentProvider.getInstance());
 			lstReports.setLabelProvider(new ReportLabelProvider());
-			lstReports.setInput(reports);
+			lstReports.setInput(selectedReports);
 			((GridData)lstReports.getControl().getLayoutData()).heightHint = 150;
-			
+			lstReports.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					validate();
+				}
+			});
 			Composite buttonPnl = new Composite(comp, SWT.NONE);
 			buttonPnl.setLayout(new GridLayout());
 			buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -247,13 +281,13 @@ public class ExportReportDialog extends TitleAreaDialog {
 					ReportListDialog d = new ReportListDialog(getShell());
 					if (d.open() == ReportListDialog.OK){
 						for (Report r : d.getSelectedReports()){
-							if (!reports.contains(r)){
-								reports.add(r);
+							if (!selectedReports.contains(r)){
+								selectedReports.add(r);
 							}
 						}
 					}
 					lstReports.refresh();
-					updateButtons();
+					validate();
 				}
 			});
 			
@@ -267,10 +301,10 @@ public class ExportReportDialog extends TitleAreaDialog {
 					IStructuredSelection selection = (IStructuredSelection) lstReports.getSelection();
 					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 						Object x = (Object) iterator.next();
-						reports.remove(x);
+						selectedReports.remove(x);
 					}
 					lstReports.refresh();
-					updateButtons();
+					validate();
 				}
 			});
 		}
@@ -285,11 +319,13 @@ public class ExportReportDialog extends TitleAreaDialog {
 			txtFileName.setText(location);
 			addDirectoryListener(btnBrowse);
 		}else{
-			location += File.separator + ExportReportEngine.getOutputFileName(reports.get(0), null, defaultExport.getFileExtension()).getName();
+			location += File.separator + ExportReportEngine.getOutputFileName(selectedReports.get(0), null, defaultExport.getFileExtension()).getName();
 			txtFileName.setText(location);
 			addFileListner(btnBrowse);
 		}
-		return comp;
+		
+		validate();
+		setControl(comp);
 	}
 	
 	/*
@@ -332,80 +368,75 @@ public class ExportReportDialog extends TitleAreaDialog {
 		});
 	}
 	
-	private void updateButtons(){
-		if (lstReports != null){
-			if (reports.size() == 0){
-				getButton(OK).setEnabled(false);
-			}else{
-				getButton(OK).setEnabled(true);
-			}
+	@Override
+	public IWizardPage getNextPage(){
+		if (getExporter() == caExport){
+			return getWizard().getPage(ExportReportCaListPage.PAGE_NAME);
+		}else{
+			return null;
 		}
 	}
+
+	public IExportFormat getExporter(){
+		return (IExportFormat) ((IStructuredSelection)cmbEmitters.getSelection()).getFirstElement();
+	}
 	
-	@Override
+	public boolean exportToConservationArea(){
+		return getExporter() == caExport;
+	}
 	/**
 	 * Validate the input before continuing
 	 */
-	protected void okPressed(){
-		File dir = new File(txtFileName.getText());
-		
-		if (multipleFiles){
-			if (!checkDirectory(dir)){
-				return;
-			}
-		}else {
-			if (!checkDirectory(dir.getParentFile())){
-				return;
+	protected void validate(){
+		String error = null;
+		if (!exportToConservationArea()){
+			if (txtFileName.getText().trim().isEmpty()){
+				error = "Ouput location must be provided.";
 			}
 		}
 		
-		updateValues();
-		super.okPressed();
+		if (selectedReports.isEmpty()){
+			error = "At least one report must be selected";
+		}
+		
+		setErrorMessage(error);
+		setPageComplete(error == null);
 	}
 	
-	private boolean checkDirectory(File dir){
-		if (!dir.exists()){
-			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGITTLE, 
-					MessageFormat.format(Messages.ExportReportDialog_DirDoesNotExist1, new Object[]{dir.toString()}))){
-				return false;
-			}else{
-				if (!SmartUtils.createDirectory(dir)){
-					return false;
-				}
-			}
-		}
-		if (!dir.isDirectory()){
-			MessageDialog.openError(getShell(), Messages.ExportReportDialog_Error_DialogTitle, Messages.ExportReportDialog_InvalidDir);
-			return false;
-		}
-		return true;
-	}
-	
-	private void updateValues(){
-		fileName = txtFileName.getText();
-		IStructuredSelection selection = ((IStructuredSelection)cmbEmitters.getSelection());
-		if (selection != null && !selection.isEmpty()){
-			emitter = (IExportFormat)selection.getFirstElement();
-		}
-		try{
-			if (this.multipleFiles){
-				settings.put(DIRECTORY_SETTING, (new File(fileName)).toString());
-			}else{
-				settings.put(DIRECTORY_SETTING, (new File(fileName)).getParent()  );
-			}
-			settings.put(FORMAT_SETTING, emitter.getName());
-		}catch (Exception ex){
-			//eatme
-		}
-	}
-	
-	/**
-	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
-	 * @return <code>true</code>
-	 */
-	@Override
-	public boolean isResizable() {
-		return true;
-	}
+//	private boolean checkDirectory(File dir){
+//		if (!dir.exists()){
+//			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGITTLE, 
+//					MessageFormat.format(Messages.ExportReportDialog_DirDoesNotExist1, new Object[]{dir.toString()}))){
+//				return false;
+//			}else{
+//				if (!SmartUtils.createDirectory(dir)){
+//					return false;
+//				}
+//			}
+//		}
+//		if (!dir.isDirectory()){
+//			MessageDialog.openError(getShell(), Messages.ExportReportDialog_Error_DialogTitle, Messages.ExportReportDialog_InvalidDir);
+//			return false;
+//		}
+//		return true;
+//	}
+//	
+//	private void updateValues(){
+//		fileName = txtFileName.getText();
+//		IStructuredSelection selection = ((IStructuredSelection)cmbEmitters.getSelection());
+//		if (selection != null && !selection.isEmpty()){
+//			emitter = (IExportFormat)selection.getFirstElement();
+//		}
+//		try{
+//			if (this.multipleFiles){
+//				settings.put(DIRECTORY_SETTING, (new File(fileName)).toString());
+//			}else{
+//				settings.put(DIRECTORY_SETTING, (new File(fileName)).getParent()  );
+//			}
+//			settings.put(FORMAT_SETTING, emitter.getName());
+//		}catch (Exception ex){
+//			//eatme
+//		}
+//	}
 
 }

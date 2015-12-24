@@ -28,6 +28,8 @@ import java.util.UUID;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryHibernateManager;
@@ -225,15 +227,15 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 */
 	@SuppressWarnings("unchecked")
 	public List<org.wcs.smart.query.model.Query> findQuery(Session session, 
-			String queryName, IQueryType queryType) {
+			String queryName, IQueryType queryType, ConservationArea ca, Employee search) {
 		
 		
 		List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
 		String hsql = "SELECT q FROM " + queryType.getHibernateClass().getSimpleName() + " q, Label l WHERE l.id.element = q.uuid and q.conservationArea = :ca " +  //$NON-NLS-1$//$NON-NLS-2$
 				"and l.value = :name and (q.isShared = 'true' or (q.isShared = 'false' and q.owner = :employee))"; //$NON-NLS-1$ 
 		Query query = session.createQuery(hsql); 
-		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		query.setParameter("employee", SmartDB.getCurrentEmployee()); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
+		query.setParameter("employee", search); //$NON-NLS-1$
 		query.setParameter("name", queryName); //$NON-NLS-1$
 		List<org.wcs.smart.query.model.Query> list = query.list();
 		for (org.wcs.smart.query.model.Query q : list){

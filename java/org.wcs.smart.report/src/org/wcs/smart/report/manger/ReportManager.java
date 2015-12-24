@@ -50,6 +50,7 @@ import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
@@ -155,10 +156,10 @@ public class ReportManager {
 	 * @return the next report id
 	 * @throws Exception
 	 */
-	public static String generateReportId(Session session) throws Exception{
+	public static String generateReportId(ConservationArea ca, Session session) throws Exception{
 		String newId = "000001"; //$NON-NLS-1$
 		Query q = session.createQuery("SELECT max(id) FROM Report WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		Object maxid = q.list().get(0);
 		if (maxid != null){
 			int x = Integer.parseInt(maxid.toString());

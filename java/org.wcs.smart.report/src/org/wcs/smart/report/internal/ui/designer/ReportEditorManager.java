@@ -234,7 +234,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 					Session s = HibernateManager.openSession();
 					try {
 						s.beginTransaction();
-						copy.setId(ReportManager.generateReportId(s));
+						copy.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), s));
 						copy.setFilename(ReportManager.generateFilename(copy));
 						s.save(copy);
 						

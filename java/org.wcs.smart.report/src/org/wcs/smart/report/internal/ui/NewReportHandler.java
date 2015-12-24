@@ -128,7 +128,7 @@ public class NewReportHandler {
 					hsession.beginTransaction();
 					
 					//save report object o database
-					report.setId(ReportManager.generateReportId(hsession));
+					report.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), hsession));
 					report.setFilename(ReportManager.generateFilename(report));
 					
 					hsession.save(report);

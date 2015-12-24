@@ -41,6 +41,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.internal.ReportDefintionExporter;
 import org.wcs.smart.report.in.internal.ImportReportEngine;
@@ -228,7 +229,7 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 	
 	private boolean importReport(File file, Object reportFolder) throws Exception{
 		ImportReportEngine importer = new ImportReportEngine();
-		return importer.importReport(file, reportFolder);
+		return importer.importReport(file, reportFolder, SmartDB.getCurrentConservationArea());
 	}
 	
 	/**
