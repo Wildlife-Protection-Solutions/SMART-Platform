@@ -196,6 +196,9 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				
 			}
 		});
+
+		customizeTableViewerEditor(patrolTypeTblViewer);
+		
 		Composite composite = new Composite(container, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,
@@ -278,19 +281,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			}
 		});
-		
-		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(transportTblViewer, new FocusCellHighlighter(transportTblViewer){});
-		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(transportTblViewer) {
-			protected boolean isEditorActivationEvent(
-					ColumnViewerEditorActivationEvent event) {
-				return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
-						|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
-						|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
-						|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
-			}
-		};
-		TableViewerEditor.create(transportTblViewer, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
 
+		customizeTableViewerEditor(transportTblViewer);
 		
 		composite = new Composite(container, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
@@ -410,6 +402,19 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		return container;
 	}
 
+	private void customizeTableViewerEditor(TableViewer viewer) {
+		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(viewer, new FocusCellHighlighter(viewer){});
+		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(viewer) {
+			protected boolean isEditorActivationEvent(ColumnViewerEditorActivationEvent event) {
+				return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
+						|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
+						|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
+						|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
+			}
+		};
+		TableViewerEditor.create(viewer, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
+	}
+	
 	/**
 	 * 
 	 * @return a collection of all transport types
@@ -439,7 +444,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	/*
 	 * Creates station table columns
 	 */
-	private void createTypeColumns(TableViewer viewer) {
+	private void createTypeColumns(final TableViewer viewer) {
 		
 		/* Active Column */
 			TableViewerColumn viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
@@ -473,7 +478,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			column.setMoveable(true);
 
 			layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
-			layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+			layout.setColumnData(column, new ColumnWeightData(2,ColumnWeightData.MINIMUM_WIDTH, true));
 			
 			viewerColumn.setLabelProvider(new ColumnLabelProvider() {
 				@Override
@@ -485,7 +490,68 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			});
 
-		
+			/* Max Speed Column */
+			viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+			column = viewerColumn.getColumn();
+			column.setText(Messages.PatrolTypePropertyPage_MaxSpeed_ColumnHeader);
+			column.setToolTipText(Messages.PatrolTypePropertyPage_MaxSpeed_ColumnTooltip);
+			column.setResizable(true);
+			column.setMoveable(true);
+
+			layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+			layout.setColumnData(column, new ColumnWeightData(3,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+			final ColumnLabelProvider labelProvider = new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof PatrolType){
+						return String.valueOf(((PatrolType)element).getMaxSpeed());
+					}
+					return super.getText(element);
+				}
+			};
+			viewerColumn.setLabelProvider(labelProvider);
+
+			viewerColumn.setEditingSupport(new EditingSupport(viewer) {
+				@Override
+				protected CellEditor getCellEditor(Object element) {
+					return new TextCellEditor(viewer.getTable());
+				}
+
+				@Override
+				protected boolean canEdit(Object element) {
+					return true;
+				}
+				@Override
+				protected Object getValue(Object element) {
+					return labelProvider.getText(element);
+				}
+
+				@Override
+				protected void setValue(Object element, Object value) {
+					if (element instanceof PatrolType) {
+						PatrolType pt = (PatrolType) element;
+						Integer v = null;
+						try {
+							v = Integer.valueOf(String.valueOf(value));
+						} catch (NumberFormatException e) {
+							//nothing, "v" will remain null in case input is not a number
+						}
+						if (v == null || v < PatrolType.MAX_SPEED_MIN_VALUE || v > PatrolType.MAX_SPEED_MAX_VALUE) {
+							reportError();
+							return;
+						}
+						pt.setMaxSpeed(v);
+						setChangesMade(true);
+						viewer.refresh();
+					}					
+				}
+				
+				private void reportError() {
+					MessageDialog.openError(getShell(), Messages.PatrolTypePropertyPage_InvalidMaxSpeed_DialogTitle, MessageFormat.format(Messages.PatrolTypePropertyPage_InvalidMaxSpeed_DialogMessage, PatrolType.MAX_SPEED_MIN_VALUE, PatrolType.MAX_SPEED_MAX_VALUE));
+				}
+			});
+			
 	}
 	
 	

@@ -117,6 +117,7 @@ public class PatrolTemplateCloner implements
 			PatrolType newt = new PatrolType();
 			newt.setConservationArea(engine.getNewCa());
 			newt.setIsActive(t.getIsActive());
+			newt.setMaxSpeed(t.getMaxSpeed());
 			newt.setType(t.getType());
 			newt.setTransportTypes(new ArrayList<PatrolTransportType>());
 			

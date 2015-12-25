@@ -54,6 +54,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Team;
@@ -285,7 +286,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param s active sesion
 	 * @return list of default patrol types
 	 */
-	public static List<PatrolType> createPatrolTypes(ConservationArea ca, Session s){
+	private static List<PatrolType> createPatrolTypes(ConservationArea ca, Session s){
 		List<PatrolType> types = new ArrayList<PatrolType>();
 		s.beginTransaction();
 		try {
@@ -293,7 +294,9 @@ public class PatrolHibernateManager extends HibernateManager{
 				PatrolType pt = new PatrolType();
 				pt.setConservationArea(ca);
 				pt.setIsActive(true);
-				pt.setType(PatrolType.Type.values()[i]);
+				Type t = PatrolType.Type.values()[i];
+				pt.setType(t);
+				pt.setMaxSpeed(t.getDefaultMaxSpeed());
 
 				s.save(pt);
 				types.add(pt);
@@ -306,8 +309,23 @@ public class PatrolHibernateManager extends HibernateManager{
 			s.close();
 			return null;
 		}
-		
 	}
+	
+	public static PatrolType getPatrolType(ConservationArea ca, Session s, PatrolType.Type type) {
+		if (type == null) {
+			return null;
+		}
+		try {
+			Criteria query = s.createCriteria(PatrolType.class)
+					.add(Restrictions.eq("id.conservationArea", ca)) //$NON-NLS-1$
+					.add(Restrictions.eq("id.type", type)); //$NON-NLS-1$
+			return (PatrolType)query.uniqueResult();
+		} catch (Exception e) {
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_LoadPatrolTypeError + type, e);
+			return null;
+		}
+	}
+	
 	/**
 	 * Determines if a patrol id already exists in the database
 	 * for the given conservation area.

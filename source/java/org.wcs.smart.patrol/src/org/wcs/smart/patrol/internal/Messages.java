@@ -251,6 +251,7 @@ public class Messages extends NLS {
 	public static String PatrolHibernateManager_20;
 	public static String PatrolHibernateManager_21;
 	public static String PatrolHibernateManager_Error_CouldNoSavePatrol;
+	public static String PatrolHibernateManager_LoadPatrolTypeError;
 	public static String PatrolIdComposite_DuplicateIdWarning;
 	public static String PatrolIdComposite_Error_InvalidId;
 	public static String PatrolIdComposite_Id_Label;
@@ -521,8 +522,12 @@ public class Messages extends NLS {
 	public static String PatrolTypePropertyPage_Error_DuplicateTransportOption;
 	public static String PatrolTypePropertyPage_Error_InvalidTransportType;
 	public static String PatrolTypePropertyPage_Error_SavingChanges;
+	public static String PatrolTypePropertyPage_InvalidMaxSpeed_DialogMessage;
+	public static String PatrolTypePropertyPage_InvalidMaxSpeed_DialogTitle;
 	public static String PatrolTypePropertyPage_InvalidType_DialogTitle;
 	public static String PatrolTypePropertyPage_LanguageLabel;
+	public static String PatrolTypePropertyPage_MaxSpeed_ColumnHeader;
+	public static String PatrolTypePropertyPage_MaxSpeed_ColumnTooltip;
 	public static String PatrolTypePropertyPage_PageName;
 	public static String PatrolTypePropertyPage_PatrolType_ColumnHeader;
 	public static String PatrolTypePropertyPage_TransportOptionsLabel;

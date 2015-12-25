@@ -58,6 +58,14 @@ import org.wcs.smart.ca.ConservationArea;
 	@AssociationOverride(name = "id.patrolType", 
 		joinColumns = @JoinColumn(name = "patrol_type")) })
 public class PatrolType {
+	
+	//Min and max values for max_speed are the same as in CyberTracker
+	public static final int MAX_SPEED_MIN_VALUE = 0;
+	public static final int MAX_SPEED_MAX_VALUE = 10000;
+
+	public static final int MAX_SPEED_GROUND_DEFAULT = 120;
+	public static final int MAX_SPEED_MARINE_DEFAULT = 70;
+	public static final int MAX_SPEED_AIR_DEFAULT = 500;
 
 	/**
 	 * The supported patrol types.
@@ -73,12 +81,22 @@ public class PatrolType {
 		public String getGuiName(Locale l){
 			return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, Locale.getDefault());
 		}
+
+		public int getDefaultMaxSpeed() {
+			switch (this) {
+			case GROUND: return MAX_SPEED_GROUND_DEFAULT;
+			case MARINE: return MAX_SPEED_MARINE_DEFAULT;
+			case AIR: return MAX_SPEED_AIR_DEFAULT;
+			}
+			return MAX_SPEED_MAX_VALUE;
+		}
 	}
 
 	public static final Integer MAX_TRANSPORT_NAME_LENGTH = 128;
 	
 	private PatrolTypePk pk;
 	private boolean isActive;
+	private Integer maxSpeed;
 	private List<PatrolTransportType> transportTypes;
 	
 	public PatrolType(){
@@ -131,6 +149,15 @@ public class PatrolType {
 	 */
 	public void setIsActive(boolean isActive){
 		this.isActive = isActive;
+	}
+	
+	@Column(name = "max_speed")
+	public Integer getMaxSpeed() {
+		return maxSpeed;
+	}
+	
+	public void setMaxSpeed(Integer maxSpeed) {
+		this.maxSpeed = maxSpeed;
 	}
 	
 	/**
