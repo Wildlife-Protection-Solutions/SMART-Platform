@@ -117,9 +117,9 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 		page1.updateSettings();
 		IExportFormat exporter = page1.getExporter();
 		File outputLocation = new File(page1.getOutputDir());
-		List<Report> selectedReports = page1.getSelectedReports();
+		final List<Report> selectedReports = page1.getSelectedReports();
 		boolean toCa = page1.exportToConservationArea();
-		List<ConservationArea> cas = page2.getConservationAreasToExport();
+		final List<ConservationArea> cas = page2.getConservationAreasToExport();
 		
 		if (!toCa){
 			if (isMultiple){
@@ -184,7 +184,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 			return;
 		}
 		
-		List<String> errors = new ArrayList<String>();
+		final List<String> errors = new ArrayList<String>();
 		ReportDefintionExporter defexporter = new ReportDefintionExporter();
 		HashMap<Report, File> exports = new HashMap<Report, File>();
 		
