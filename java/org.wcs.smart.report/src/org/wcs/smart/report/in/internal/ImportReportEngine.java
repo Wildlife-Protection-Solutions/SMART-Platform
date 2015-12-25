@@ -532,7 +532,7 @@ public class ImportReportEngine {
 			OdaDataSetHandle handle,
 			boolean sharedReport,
 			Employee reportEmployee, 
-			ConservationArea importCa) throws Exception{
+			final ConservationArea importCa) throws Exception{
 		
 		final File queryFile = new File(queryDir, queryUuid + ".query"); //$NON-NLS-1$
 		if (!queryFile.exists()){
@@ -644,7 +644,7 @@ public class ImportReportEngine {
 			String queryUuid,
 			final org.wcs.smart.query.model.Query importedQuery,
 			boolean sharedReport,
-			Employee reportEmployee,
+			final Employee reportEmployee,
 			ConservationArea importCa) throws Exception{
 		
 		final List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();

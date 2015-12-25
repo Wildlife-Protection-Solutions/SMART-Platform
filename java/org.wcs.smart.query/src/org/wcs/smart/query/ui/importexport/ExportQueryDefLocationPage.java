@@ -102,11 +102,11 @@ public class ExportQueryDefLocationPage extends WizardPage {
 		btnCa.setText(Messages.ExportQueryDefLocationPage_CaOpLabel);
 
 		
-		Composite stack = new Composite(main, SWT.NONE);
+		final Composite stack = new Composite(main, SWT.NONE);
 		stack.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		stack.setLayout(new StackLayout());
 		
-		Composite fileComp = new Composite(stack, SWT.NONE);
+		final Composite fileComp = new Composite(stack, SWT.NONE);
 		fileComp.setLayout(new GridLayout(2, false));
 		
 		txtFile = new Text(fileComp, SWT.BORDER);
@@ -136,7 +136,7 @@ public class ExportQueryDefLocationPage extends WizardPage {
 			}
 		});
 		
-		Composite caComp = new Composite(stack, SWT.NONE);
+		final Composite caComp = new Composite(stack, SWT.NONE);
 		caComp.setLayout(new GridLayout());
 		
 		
