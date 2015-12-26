@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
@@ -115,7 +116,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		Map<PatrolScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
 		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
 		ScreenOption so_type = screenOptions.get(PatrolScreenOptionMeta.TYPE);
-		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, so_type);
+		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, so_type, ca, session);
 		//patrol type & transport
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
 		String errorMsg = validatePatrolTypes(patrolTypes);
@@ -123,7 +124,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, errorMsg, null);
 			return null;
 		}
-		id = addTypeTransportNodes(id, result, elements, patrolTypes, screenOptions, session);
+		id = addTypeTransportNodes(id, result, elements, ctProps, patrolTypes, screenOptions, session);
 		//patrol armed
 		so = screenOptions.get(PatrolScreenOptionMeta.ARMED);
 		if (so == null || so.isVisible()) {
@@ -328,13 +329,15 @@ public class PatrolScreensUtil extends ScreensUtil {
 		}
 	}
 	
-	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, ScreenOption so_type) {
+	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, ScreenOption so_type, ConservationArea ca, Session session) {
 		CyberTrackerId elId = null;
 		if (so_type != null  && !so_type.isVisible() && so_type.getStringValue() != null) {
 			//patrol type is configured as a default value, but we still need to force speed limitation
 			//that is why we add this limitation here - for "Begin Patrol" screen option
-			int maxSpeed = getMaxSpeed(PatrolType.Type.valueOf(so_type.getStringValue()));
-			elId = addElementsGpsAccuracyItem(elements, Messages.PatrolScreens_Begin, null, 49, maxSpeed);
+			Type type = PatrolType.Type.valueOf(so_type.getStringValue());
+			PatrolType pType = PatrolHibernateManager.getPatrolType(ca, session, type);
+			int maxSpeed = getMaxSpeed(pType);
+			elId = addElementsGpsAccuracyItem(elements, Messages.PatrolScreens_Begin, null, ctProps.getDilutionOfPrecision(), maxSpeed);
 		} else {
 			elId = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin).get(0);
 		}
@@ -342,16 +345,16 @@ public class PatrolScreensUtil extends ScreensUtil {
 		return addStartScreen(id, container, elements, ctProps, content);
 	}
 
-	private int getMaxSpeed(PatrolType.Type type) {
-		//TODO: remove this hardcode!!!
-		if (type == null)
-			return 10000;
-		switch (type) {
-		case GROUND: return 120;
-		case MARINE: return 70;
-		case AIR: return 500;
+	private int getMaxSpeed(PatrolType type) {
+		if (type == null) {
+			SmartPlugIn.log("PatrolType is undefined when exporting to CyberTracker. Max value is used.", null); //$NON-NLS-1$
+			return PatrolType.MAX_SPEED_MAX_VALUE;
 		}
-		return 10000;
+		if (type.getMaxSpeed() == null) {
+			SmartPlugIn.log("MaxSpeed for PatrolType is undefined when exporting to CyberTracker. Max value is used.", null); //$NON-NLS-1$
+			return PatrolType.MAX_SPEED_MAX_VALUE;
+		}
+		return type.getMaxSpeed();
 	}
 
 	private String validatePatrolTypes(List<PatrolType> pTypes) {
@@ -393,7 +396,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		return list;
 	}
 	
-	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, List<PatrolType> pTypes, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, Session session) {
+	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, List<PatrolType> pTypes, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, Session session) {
 		ScreenOption typeOption = screenOptions.get(PatrolScreenOptionMeta.TYPE);
 		if (typeOption == null || typeOption.isVisible()) {
 			List<CyberTrackerId> typeIds = new ArrayList<CyberTrackerId>();
@@ -403,8 +406,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 				final String name = type.getGuiName(Locale.getDefault());
 				final String tag0 = type.name();
 				types.add(name);
-				//TODO: remove hardcode!!!
-				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, 49, getMaxSpeed(type)));
+				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, ctProps.getDilutionOfPrecision(), getMaxSpeed(patrolType)));
 			}
 			String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
 			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
