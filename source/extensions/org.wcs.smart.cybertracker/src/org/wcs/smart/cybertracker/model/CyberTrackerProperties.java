@@ -100,6 +100,10 @@ public class CyberTrackerProperties {
 	
 	public static final int SKIP_BUTTON_TIMEOUT_MIN_VALUE = 0;
 	public static final int SKIP_BUTTON_TIMEOUT_MAX_VALUE = Integer.MAX_VALUE;
+	
+	public static final int DILUTION_OF_PRECISION_MIN_VALUE = 0;
+	public static final int DILUTION_OF_PRECISION_MAX_VALUE = 49;
+	
 
 	public enum ProjectionFormat {
 		DEGREE_MIN_SEC(Messages.CyberTrackerProperties_ProjectonFormat_DegreeMinSec, 0),
@@ -168,6 +172,8 @@ public class CyberTrackerProperties {
     private static final int utmZone = 0;
 
     private static final int maxPhotoCount = 10;
+    
+    private static final int dilutionOfPrecision = DILUTION_OF_PRECISION_MAX_VALUE;
     
 	private Map<OptionID, CyberTrackerPropertiesOption> options;
 	
@@ -467,5 +473,12 @@ public class CyberTrackerProperties {
 	}
 	public void setMaxPhotoCount(int count) {
 		getOption(OptionID.MAX_PHOTO_COUNT).setIntegerValue(count);
+	}
+
+	public int getDilutionOfPrecision() {
+		return getIntValue(OptionID.DILUTION_OF_PRECISION, dilutionOfPrecision);
+	}
+	public void setDilutionOfPrecision(int dop) {
+		getOption(OptionID.DILUTION_OF_PRECISION).setIntegerValue(dop);
 	}
 }

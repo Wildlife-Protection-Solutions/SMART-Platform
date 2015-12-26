@@ -139,6 +139,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerProperties_ProjectonFormat_DecemalDegree;
 	public static String CyberTrackerProperties_ProjectonFormat_DegreeMinSec;
 	public static String CyberTrackerProperties_ProjectonFormat_UTM;
+	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision;
+	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision_Invalid;
+	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision_Tooltip;
 	public static String CyberTrackerPropertiesDialog_0;
 	public static String CyberTrackerPropertiesDialog_1;
 	public static String CyberTrackerPropertiesDialog_10;

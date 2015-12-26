@@ -100,6 +100,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private Button btnManualGPS;
     private Button btnAllowSkipManual;
     
+    private Text txtDilutionOfPrecision;
+    
     private Text txtFileName;
     private Button btnLock100;
     private Button btnUseMapOnSkip;
@@ -114,6 +116,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private ControlDecoration sightingFixCountDecoration;
     private ControlDecoration trackTimerDecoration;
     private ControlDecoration skipButtonTimeoutDecoration;
+    
+    private ControlDecoration dilutionOfPrecisionDecoration;
     
     private ControlDecoration storageTimeDecoration;
     
@@ -796,8 +800,39 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
+
 		
-		
+
+
+		Label lblDilutionOfPrecision = new Label(gpsContainer, SWT.NONE);
+		lblDilutionOfPrecision.setText(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision);
+		lblDilutionOfPrecision.setToolTipText(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision_Tooltip);
+
+		txtDilutionOfPrecision = new Text(gpsContainer, SWT.BORDER);
+		txtDilutionOfPrecision.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtDilutionOfPrecision.setToolTipText(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision_Tooltip);
+		txtDilutionOfPrecision.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isDilutionOfPrecisionValid()) {
+					dilutionOfPrecisionDecoration.hide();
+				} else {
+					dilutionOfPrecisionDecoration.show();
+				}
+				changesMade();
+			}
+		});
+
+		dilutionOfPrecisionDecoration = new ControlDecoration(txtDilutionOfPrecision, SWT.LEFT);
+		dilutionOfPrecisionDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		dilutionOfPrecisionDecoration.setShowHover(true);
+		dilutionOfPrecisionDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision_Invalid, CyberTrackerProperties.DILUTION_OF_PRECISION_MIN_VALUE, CyberTrackerProperties.DILUTION_OF_PRECISION_MAX_VALUE));
+		dilutionOfPrecisionDecoration.hide();
+
+
+
+
 		Label lblMapFilename = new Label(fieldmapContainer, SWT.NONE);
 		lblMapFilename.setText(Messages.CyberTrackerPropertiesDialog_40);
 		lblMapFilename.setToolTipText(Messages.CyberTrackerPropertiesDialog_41);
@@ -912,6 +947,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		cbProjection.setSelection(new StructuredSelection(ctProperties.getProjection()));
 		txtUtmZome.setText(String.valueOf(ctProperties.getUtmZone()));
 		txtSkipButtonTimeout.setText(String.valueOf(ctProperties.getSkipButtonTimeout()));
+		txtDilutionOfPrecision.setText(String.valueOf(ctProperties.getDilutionOfPrecision()));
 		btnUseMapOnSkip.setSelection(ctProperties.isUseMapOnSkip());
 		btnManualGPS.setSelection(ctProperties.isManualGps());
 		btnAllowSkipManual.setSelection(ctProperties.isAllowSkipManualGps());
@@ -941,6 +977,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ctProperties.setProjection((Integer)selection.getFirstElement());
 		ctProperties.setUtmZone(Integer.valueOf(txtUtmZome.getText()));
 		ctProperties.setSkipButtonTimeout(Integer.valueOf(txtSkipButtonTimeout.getText()));
+		ctProperties.setDilutionOfPrecision(Integer.valueOf(txtDilutionOfPrecision.getText()));
 		
 		ctProperties.setShowEdit(btnShowEdit.getSelection());
 		ctProperties.setShowGPS(btnShowGPS.getSelection());
@@ -1020,6 +1057,18 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		}
 	}
+
+	private boolean isDilutionOfPrecisionValid() {
+		if (txtDilutionOfPrecision == null || txtDilutionOfPrecision.getText() == null || txtDilutionOfPrecision.getText().isEmpty())
+			return false;
+		try {
+			Integer result = Integer.valueOf(txtDilutionOfPrecision.getText());
+			return result >= CyberTrackerProperties.DILUTION_OF_PRECISION_MIN_VALUE && result <= CyberTrackerProperties.DILUTION_OF_PRECISION_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
 	
 	private boolean isTrackTimerValid() {
 		if (txtTrackTimer == null || txtTrackTimer.getText() == null || txtTrackTimer.getText().isEmpty())
@@ -1072,7 +1121,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private boolean validate() {
 		return isStorageTimeValid() && isExitPinValid() && isMaxPhotoCountValid() &&
 				isSigtingAccuracyValid() && isSigtingFixCountValid() && 
-				isTrackTimerValid() && isSkipButtonTimeoutValid() && isTrackAccuracyValid() && isUtmZoneValid();
+				isTrackTimerValid() && isSkipButtonTimeoutValid() && isDilutionOfPrecisionValid() &&
+				isTrackAccuracyValid() && isUtmZoneValid();
 	}
 
 	public interface IPropsChangeListener {
