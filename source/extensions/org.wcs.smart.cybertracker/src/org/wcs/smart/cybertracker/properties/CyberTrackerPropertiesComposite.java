@@ -1115,7 +1115,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	}
 
 	private boolean isFileNameDecorationValid() {
-		return new File(txtFileName.getText()).isFile();
+		return txtFileName.getText().isEmpty() || new File(txtFileName.getText()).isFile();
 	}
 
 	private boolean validate() {
