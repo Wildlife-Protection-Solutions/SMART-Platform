@@ -60,8 +60,8 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.DatamodelCategorySelectorDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
@@ -97,7 +97,7 @@ public abstract class AbstractInfoComposite extends Composite {
 
 	public abstract Object getSourceObject();
 	
-	public abstract boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button);
+	public abstract boolean isButtonValid(ConfigurableModelEditorDefaultTab.ControlButton button);
 	
 	/**
 	 * Process a button action.
@@ -106,7 +106,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	 * @return the resulting item to select from the model viewer or null if nothing
 	 * to select
 	 */
-	public void processButton(ConfigurableModelEditDialog.ControlButton button){
+	public void processButton(ConfigurableModelEditorDefaultTab.ControlButton button){
 		if (button == ControlButton.ADD_CATEGORY){
 			addDatamodelCategory();
 		}else if (button == ControlButton.ADD_GROUP){

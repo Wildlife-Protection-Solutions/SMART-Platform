@@ -71,10 +71,12 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_ReadFile_Error;
 	public static String CmXmlToSmartImporter_Reading;
 	public static String CmXmlToSmartImporter_Saving;
+	public static String ConfigurableModelEditDialog_LoadExtensionError;
 	public static String ConfigurableModelEditDialog_Message;
 	public static String ConfigurableModelEditDialog_PropertiesLabel;
 	public static String ConfigurableModelEditDialog_SaveError;
 	public static String ConfigurableModelEditDialog_Title;
+	public static String ConfigurableModelEditorDefaultTab_TabName;
 	public static String ConfigurableModelFactory_BlankCmTaskName;
 	public static String ConfigurableModelFactory_ProgressMessage;
 	public static String ConfigurableModelFactory_TaskName;

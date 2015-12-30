@@ -47,6 +47,12 @@ public class DataentryPlugIn extends AbstractUIPlugin {
 	private DataModelListener dmListener = new DataModelListener();
 	
 	/**
+	 * Extension id for Additional Data associated with Configurable Model
+	 */
+	public static final String CM_EXTRADATA_EXTENSION_ID = "org.wcs.smart.dataentry.extradata"; //$NON-NLS-1$
+
+	
+	/**
 	 * The constructor
 	 */
 	public DataentryPlugIn() {

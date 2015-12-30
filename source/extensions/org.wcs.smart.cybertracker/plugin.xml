@@ -198,5 +198,11 @@
             clazz="org.wcs.smart.cybertracker.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
+   <extension
+         point="org.wcs.smart.dataentry.extradata">
+      <tab
+            content="org.wcs.smart.cybertracker.properties.ConfigurableModelEditorCyberTrackerTab">
+      </tab>
+   </extension>
 
 </plugin>

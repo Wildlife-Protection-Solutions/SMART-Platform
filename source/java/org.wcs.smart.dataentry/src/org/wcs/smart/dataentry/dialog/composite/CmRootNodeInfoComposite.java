@@ -27,8 +27,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -57,7 +57,7 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		createDisplayNameControls(container);
 	}
 
-	public boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button){
+	public boolean isButtonValid(ConfigurableModelEditorDefaultTab.ControlButton button){
 		if (button == ControlButton.DELETE){
 			return false;
 		}
