@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -72,7 +72,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	/**
 	 * attribute composites have no controls
 	 */
-	public boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button){
+	public boolean isButtonValid(ConfigurableModelEditorDefaultTab.ControlButton button){
 		return false;
 	}
 	

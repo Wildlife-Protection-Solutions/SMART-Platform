@@ -42,8 +42,8 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -81,7 +81,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			createCategoryControls();
 	}
 	
-	public boolean isButtonValid(ConfigurableModelEditDialog.ControlButton button){
+	public boolean isButtonValid(ConfigurableModelEditorDefaultTab.ControlButton button){
 		if (isGroup){
 			//groups enable all buttons
 			return true;
