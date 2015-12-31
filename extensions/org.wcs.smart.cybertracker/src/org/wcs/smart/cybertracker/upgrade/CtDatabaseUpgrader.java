@@ -44,7 +44,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) {
-String currentPluginVersion = null;
+		String currentPluginVersion = null;
 		
 		Session s = HibernateManager.openSession();
 		try{
