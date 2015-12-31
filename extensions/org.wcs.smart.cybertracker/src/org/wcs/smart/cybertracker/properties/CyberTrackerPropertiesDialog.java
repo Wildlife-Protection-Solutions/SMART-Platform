@@ -21,20 +21,35 @@
  */
 package org.wcs.smart.cybertracker.properties;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -47,6 +62,9 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog {
 
 	private CyberTrackerProperties ctProperties;
+	
+	private Text txtProfileName;
+	private ControlDecoration profileNameDecoration;
 	
 	private CyberTrackerPropertiesComposite tabs;
 	
@@ -70,6 +88,53 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		main.setLayout(layout);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite topCmp = new Composite(main, SWT.NONE);
+		GridLayout topLayout = new GridLayout(3, false);
+		topLayout.horizontalSpacing = 7; //need this to properly fit error decorator
+		topCmp.setLayout(topLayout);
+		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		Label lblProfileName = new Label(topCmp, SWT.NONE);
+		lblProfileName.setText(Messages.CyberTrackerPropertiesDialog_ProfileName);
+		lblProfileName.setToolTipText(Messages.CyberTrackerPropertiesDialog_ProfileName_Tooltip);
+
+		txtProfileName = new Text(topCmp, SWT.BORDER);
+		txtProfileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtProfileName.setToolTipText(Messages.CyberTrackerPropertiesDialog_ProfileName_Tooltip);
+		txtProfileName.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isProfileNameValid()) {
+					profileNameDecoration.hide();
+				} else {
+					profileNameDecoration.show();
+				}
+				setChangesMade(true);
+			}
+		});
+
+		profileNameDecoration = new ControlDecoration(txtProfileName, SWT.LEFT);
+		profileNameDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		profileNameDecoration.setShowHover(true);
+		profileNameDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_ProfileName_Invalid, org.wcs.smart.ca.Label.MAX_LENGTH));
+		profileNameDecoration.hide();
+		
+		Button btnTranslate = new Button(topCmp, SWT.PUSH);
+		btnTranslate.setText(Messages.CyberTrackerPropertiesDialog_Translate);
+		btnTranslate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (ctProperties != null){
+//					TranslateSimpleListItemDialog translateDialog = new TranslateSimpleListItemDialog(getShell(), ctProperties);
+//					if (translateDialog.open() == Window.OK){
+//						updateText(ctProperties);
+//						setChangesMade(true);
+//					}
+				}
+			}
+		});
 		
 		tabs = new CyberTrackerPropertiesComposite(main);
 		tabs.populateValuesFromObj(ctProperties);
@@ -85,6 +150,16 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
 		
 		return main;
+	}
+
+	private void updateText(NamedItem item){
+		String name = item.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		txtProfileName.setText(name);
+	}
+	
+	protected boolean isProfileNameValid() {
+		return txtProfileName != null && txtProfileName.getText() != null 
+				&& txtProfileName.getText().length() <= org.wcs.smart.ca.Label.MAX_LENGTH;
 	}
 
 	@Override
