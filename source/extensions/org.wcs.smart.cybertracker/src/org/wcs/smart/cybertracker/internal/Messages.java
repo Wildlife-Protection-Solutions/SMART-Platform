@@ -197,6 +197,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip;
 	public static String CyberTrackerPropertiesDialog_MaxPhotoCountInvalid;
 	public static String CyberTrackerPropertiesDialog_Message;
+	public static String CyberTrackerPropertiesDialog_ProfileName;
+	public static String CyberTrackerPropertiesDialog_ProfileName_Invalid;
+	public static String CyberTrackerPropertiesDialog_ProfileName_Tooltip;
 	public static String CyberTrackerPropertiesDialog_Projection;
 	public static String CyberTrackerPropertiesDialog_Projection_Tooltip;
 	public static String CyberTrackerPropertiesDialog_Save_Error;
@@ -224,6 +227,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_TrackTimer;
 	public static String CyberTrackerPropertiesDialog_TrackTimer_Tooltip;
 	public static String CyberTrackerPropertiesDialog_TrackTimerInvalid;
+	public static String CyberTrackerPropertiesDialog_Translate;
 	public static String CyberTrackerPropertiesDialog_UtmZone;
 	public static String CyberTrackerPropertiesDialog_UtmZone_Tooltip;
 	public static String CyberTrackerPropertiesDialog_UtmZoneInvalid;
