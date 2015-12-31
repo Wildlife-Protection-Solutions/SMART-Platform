@@ -64,7 +64,7 @@ public class UpgradeEngine {
 		}
 	}
 	
-	private Set<IDatabaseUpgrader> upgradersRun = new HashSet<IDatabaseUpgrader>();;
+	private Set<IDatabaseUpgrader> upgradersRun = new HashSet<IDatabaseUpgrader>();
 	
 	public UpgradeEngine(){
 		
