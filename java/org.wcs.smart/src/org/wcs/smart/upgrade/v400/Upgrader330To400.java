@@ -26,19 +26,17 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Upgrades from database version 330 to 400.
@@ -52,7 +50,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 	private String dbUrl = null;
 	
 	public void upgrade(final IProgressMonitor monitor) {
-		monitor.subTask("Upgrading from 3.3.0 to 4.0.0");
+		monitor.subTask(Messages.Upgrader330To400_ProcessMessage);
 		final Session s = HibernateManager.openSession();
 		try{
 			s.doWork(new Work() {
@@ -66,7 +64,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog("Error upgrading from 3.3.0 to 4.0.0", e);
+								SmartPlugIn.displayLog(Messages.Upgrader330To400_Error, e);
 							}
 						});
 					}finally {
@@ -92,6 +90,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 	}
 
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
+		@SuppressWarnings("nls")
 		String[] sql = new String[]{
 			/* aggregations */
 			"alter table smart.dm_aggregation_i18n drop constraint dm_aggregation_i18n_fk",
@@ -352,7 +351,12 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 			"ALTER TABLE SMART.CONFIGURABLE_MODEL ADD CONSTRAINT CONFIGURABLE_MODEL_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
 			"ALTER TABLE SMART.WAYPOINT ADD CONSTRAINT WAYPOINT_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
 		
-			"alter table smart.employee alter column smartpassword set data type varchar(256)"
+			"alter table smart.employee alter column smartpassword set data type varchar(256)",
+			
+			"alter table smart.PATROL_TYPE ADD COLUMN max_speed INTEGER",
+			"update smart.PATROL_TYPE set max_speed = 120 WHERE PATROL_TYPE = 'GROUND'",
+			"update smart.PATROL_TYPE set max_speed = 70 WHERE PATROL_TYPE = 'MARINE'",
+			"update smart.PATROL_TYPE set max_speed = 500 WHERE PATROL_TYPE = 'AIR'"
 		};
 		
 		for (String s : sql){
@@ -360,8 +364,8 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 			c.createStatement().execute(s);
 		}
 		/* UPDATE PASSWORDS */
-		String querysql = "select uuid, smartpassword from smart.employee where smartpassword is not null";
-		String upsql = "UPDATE smart.employee set smartpassword = ? where uuid = ?";
+		String querysql = "select uuid, smartpassword from smart.employee where smartpassword is not null"; //$NON-NLS-1$
+		String upsql = "UPDATE smart.employee set smartpassword = ? where uuid = ?"; //$NON-NLS-1$
 		
 		try(ResultSet rs = c.createStatement().executeQuery(querysql);
 				PreparedStatement ps = c.prepareStatement(upsql);){
