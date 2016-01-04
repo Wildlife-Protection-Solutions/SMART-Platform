@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
@@ -121,11 +122,13 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		});
 		
 		CyberTrackerPropertiesComposite ctPropCmp = new CyberTrackerPropertiesComposite(main);
+		ctPropCmp.setReadOnly(true);
 		ctPropCmp.populateValuesFromObj(new CyberTrackerProperties()); //TODO: need real data
 		ctPropCmp.addPropsChangeListener(new IPropsChangeListener(){
 			@Override
 			public void changesMade() {
-				//TODO: it should be readonly!!!!
+				//we should appear here only in case of error in implementation for read-only mode!
+				SmartPlugIn.displayLog("Changes to profile are not allowed here. Edit the profile to make changes.", null);
 			}
 		});
 		

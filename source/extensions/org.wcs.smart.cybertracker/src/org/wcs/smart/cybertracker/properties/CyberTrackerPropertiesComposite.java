@@ -47,6 +47,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
@@ -1003,6 +1004,21 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		return true;
 	}
 	
+	public void setReadOnly(boolean isReadOnly) {
+		Control[] controls = new Control[] {btnAutoNext,
+				btnLargeScrollBars, btnKioskMode, btnSimpleCamera, btnCanPause, txtExitPin,
+				txtSightingAccuracy, txtSightingFixCount, txtTrackTimer, timeOffset.getControl(),
+				cbProjection.getControl(), txtUtmZome, txtSkipButtonTimeout, txtDilutionOfPrecision,
+				btnShowEdit, btnShowGPS, txtStorageTime, txtMaxPhotoCount,
+				btnUseTitleBar, btnLargeTitles, btnLargeTabs, btnDisableEditing, btnSdCard,
+				btnTestTime, btnResetOnSync, btnResetOnNext, txtTrackAccuracy, btnUseGpsTime,
+				btnManualGPS, btnAllowSkipManual, txtFileName, btnLock100, btnUseMapOnSkip}; 
+
+		for (Control control : controls) {
+			control.setEnabled(!isReadOnly);
+		}
+	}
+
 	private boolean isExitPinValid() {
 		if (txtExitPin == null || txtExitPin.getText() == null || txtExitPin.getText().isEmpty())
 			return false;
@@ -1186,5 +1202,5 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return super.getText(element);
 		}
 	}
-	
+
 }
