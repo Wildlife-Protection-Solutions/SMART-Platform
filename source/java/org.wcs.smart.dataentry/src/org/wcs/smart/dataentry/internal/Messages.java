@@ -112,11 +112,14 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_XmlFiles;
 	public static String CreateNewOpDialog_BlankCmOp;
 	public static String CreateNewOpDialog_BlankCmToolTip;
+	public static String CreateNewOpDialog_CmTemplateOp;
+	public static String CreateNewOpDialog_CmTemplateToolTip;
 	public static String CreateNewOpDialog_DialogMessage;
 	public static String CreateNewOpDialog_DialogTitle;
 	public static String CreateNewOpDialog_DmTemplateOp;
 	public static String CreateNewOpDialog_DmTemplateToolTip;
 	public static String CreateNewOpDialog_NameLabel;
+	public static String CreateNewOpDialog_NoConfigurableModelSelected_Error;
 	public static String CreateNewOpDialog_TemplateLabel;
 	public static String DataentryHibernateManager_ConfigurableModel_Save_Error;
 	public static String DatamodelCatecorySelectorDialog_Button_Add;

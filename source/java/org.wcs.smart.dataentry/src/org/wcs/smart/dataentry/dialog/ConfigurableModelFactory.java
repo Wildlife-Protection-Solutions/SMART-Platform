@@ -64,14 +64,13 @@ public class ConfigurableModelFactory {
 	}
 	
 	/**
-	 * Creates an empty configurable model with the default name.
-	 * 
+	 * Creates a configurable model using another configurable model as a template.
 	 * @return
 	 */
-	public static ConfigurableModel createBlankModel(){
-		return createBlankModel(Messages.ConfigurableModelPropertyDialog_ConfigurableModelDeafultName);
+	public static ConfigurableModel createConfigurableModelClone(ConfigurableModel template, String name, IProgressMonitor monitor) {
+		//TODO: implement
+		return null;
 	}
-	
 	
 	/**
 	 * Creates an configurable model from the conservation area
