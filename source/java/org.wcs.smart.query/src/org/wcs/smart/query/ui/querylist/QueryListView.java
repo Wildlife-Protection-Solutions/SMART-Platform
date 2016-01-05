@@ -252,9 +252,6 @@ public class QueryListView {
 			@Override
 			public boolean performDrop(Object data) {
 				boolean ok = super.performDrop(data);
-//				if (ok){
-//					setChangesMade(true);
-//				}
 				return ok;
 			}
 		});
