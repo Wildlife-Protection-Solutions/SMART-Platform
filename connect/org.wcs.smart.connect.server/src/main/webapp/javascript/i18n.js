@@ -6,7 +6,9 @@ function i18n(key){
 		lang = navigator.language || navigator.userLanguage
 	}
 
-	if(lang == "es"){
+	if(lang == "en"){
+		return labels_en[key];
+	}else if(lang == "es"){
 		return labels_es[key];
 	}else if(lang == "fr"){
 		return labels_fr[key];
