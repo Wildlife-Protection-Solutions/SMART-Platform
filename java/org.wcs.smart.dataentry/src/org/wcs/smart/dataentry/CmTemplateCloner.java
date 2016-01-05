@@ -174,6 +174,8 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		clonedNode.setNodeOrder(toCopy.getNodeOrder());
 		clonedNode.setPhotoAllowed(toCopy.isPhotoAllowed());
 		clonedNode.setPhotoRequired(toCopy.isPhotoRequired());
+		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
+		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
 		
 		if (toCopy.getCategory() != null){
 			clonedNode.setCategory(findNewCategory(toCopy.getCategory()));
