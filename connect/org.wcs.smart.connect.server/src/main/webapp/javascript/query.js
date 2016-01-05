@@ -103,22 +103,15 @@ function createQueryTable(){
 		var ele = objects[i];
 		ele.parentElement.removeChild(ele);
 	}
-
-	if(queries.length== 0){ //no results
- 		var row = document.createElement("div");
- 		row.style.backgroundColor = "#F00";
- 		row.className = "queryrow";
- 	    row.innerHTML = "No queries found. Try a different search or contact your adminsitrator to give you permissions to queries you are looking for.";
- 		parent.appendChild(row);
- 	}
-	
+	var drawnRowCount = 0;
  	for (var i = 0; i < queries.length; i ++){
  		selectedCa = document.getElementById('caselect').value; 
  		if(selectedCa == 'allcas' || selectedCa == queries[i].conservationArea){
- 		if(search == "" || isFoundInRow(queries[i]) ){
+ 		 if(search == "" || isFoundInRow(queries[i]) ){
+ 			drawnRowCount++;
 	 		var row = tableCreateRow(parent, 
 	 				[queries[i].conservationArea, queries[i].id, queries[i].name, queries[i].type, null, null], 
-	 				"queryrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+	 				"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 	 		
 	 		row.dataset.queryuuid = queries[i].uuid;
 	 		row.dataset.queryname = queries[i].name;
@@ -134,8 +127,16 @@ function createQueryTable(){
 	 		csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=waypointdate";
 	 		csvlink.innerHTML = "csv";
 	 		row.childNodes[5].appendChild(csvlink);
+ 		 }
  		}
- 		}
+ 	}
+ 	
+ 	if(queries.length == 0 || drawnRowCount == 0){ //no results or they were all filtered out
+ 		var row = document.createElement("div");
+ 		row.style.backgroundColor = "#F00";
+ 		row.className = "queryrow";
+ 	    row.innerHTML = i18n("query.noqueriesfound");
+ 		parent.appendChild(row);
  	}
 }
 
@@ -175,7 +176,7 @@ function dynamicSort(property) {
         property = property.substr(1);
     }
     return function (a,b) {
-        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        var result = (a[property].toUpperCase() < b[property].toUpperCase()) ? -1 : (a[property].toUpperCase() > b[property].toUpperCase()) ? 1 : 0;
         return result * sortOrder;
     }
 }

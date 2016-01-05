@@ -66,5 +66,6 @@ labels_en= {
 "ca.refreshingcas": "Refreshing Conservation Area Table...",
 "query.refreshingqueries": "Refreshing Queries Table...",
 "query.runquery":"Run Query",
+"query.noqueriesfound":"No queries found. Try a different search or contact your adminsitrator to give you permissions to queries you are looking for.",
 "":""
 }
