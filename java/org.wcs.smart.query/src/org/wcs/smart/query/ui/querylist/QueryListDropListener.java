@@ -91,7 +91,9 @@ public class QueryListDropListener extends ViewerDropAdapter {
 				//want to close any editors associated with given input
 				final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(query);
 				if (editor != null){
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditor(editor, true);
+					if (!PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditor(editor, true)){
+						continue;
+					}
 				}
 				//run job to update query folder
 				Job internalUpdate = new Job("Update Query Folder"){ //$NON-NLS-1$

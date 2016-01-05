@@ -61,6 +61,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Dialog box for modifying query information.  This includes the query
@@ -247,13 +248,17 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 				
 			}
 		});
-		
+		Label lblSystemId = new Label(main, SWT.NONE);
+		lblSystemId.setText("System ID:");
+		Label lblUuid = new Label(main, SWT.NONE);
+		lblUuid.setText(UuidUtils.uuidToString(query.getUuid()));
 		Label lblOwner = new Label(main, SWT.NONE);
 		lblOwner.setText(Messages.QueryPropertiesDialog_CreatorLabel);
 		Label lblOwnerName = new Label(main, SWT.NONE);
 		lblOwnerName.setText(SmartLabelProvider.getFullLabel(query.getOwner()));
 		
 
+		
 		List<AbstractQueryPropertyProvider> allProps = new ArrayList<AbstractQueryPropertyProvider>();
 		allProps.addAll(QueryPlugIn.getPropertyProviders());
 		
