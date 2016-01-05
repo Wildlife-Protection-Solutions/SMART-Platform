@@ -30,12 +30,16 @@ import java.util.Queue;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -67,9 +71,38 @@ public class ConfigurableModelFactory {
 	 * Creates a configurable model using another configurable model as a template.
 	 * @return
 	 */
-	public static ConfigurableModel createConfigurableModelClone(ConfigurableModel template, String name, IProgressMonitor monitor) {
-		//TODO: implement
-		return null;
+	public static ConfigurableModel createConfigurableModelClone(ConfigurableModel cm, String name, IProgressMonitor monitor) {
+		monitor.beginTask(Messages.ConfigurableModelFactory_TaskName, 1);
+		
+		monitor.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
+		ConfigurableModel clone = createBlankModel(name);
+		
+		int count = 0;
+		Queue<CmNode> toProcess = new LinkedList<CmNode>();
+		toProcess.addAll(cm.getNodes());
+		while(!toProcess.isEmpty()) {
+			CmNode node = toProcess.remove();
+			count ++;
+			toProcess.addAll(node.getChildren());
+		}
+		monitor.beginTask(Messages.ConfigurableModelFactory_TaskName, count + 2); //+2 is for default lists and trees
+		
+		//clone nodes
+		for(CmNode kid : cm.getNodes()){
+			processNode(null, kid, clone, monitor);
+		}
+		if (monitor.isCanceled()) return null;
+		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultLists);
+		monitor.worked(1);
+		clone.setDefaultLists(cloneCmAttributeList(cm.getDefaultLists(), clone, null));
+		if (monitor.isCanceled()) return null;
+		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultTrees);
+		monitor.worked(1);
+		clone.setDefaultTrees(cloneCmAttributeTree(cm.getDefaultTrees(), null, clone, null));
+
+		if (monitor.isCanceled()) return null;
+		monitor.done();
+		return clone;
 	}
 	
 	/**
@@ -194,4 +227,121 @@ public class ConfigurableModelFactory {
 			break;
 		}
 	}
+
+
+	//this is adopted copy from ConservationAreaClonerEngine
+	private static void copyLabels(NamedItem copyFrom, NamedItem copyTo){
+		for (Label l : copyFrom.getNames()){
+			Label clone = new Label();
+			clone.setLanguage(l.getLanguage());
+			clone.setValue(l.getValue());
+			clone.setElement(copyTo);
+			copyTo.getNames().add(clone);
+		}
+	}
+
+	//this is adopted copy from CmTemplateCloner
+	private static void processNode(CmNode clonedParent, CmNode toCopy, ConfigurableModel clonedModel, IProgressMonitor monitor) {
+		monitor.subTask(MessageFormat.format(Messages.ConfigurableModelFactory_ProcessCmNode, toCopy.getName()));
+		monitor.worked(1);
+		
+		if (monitor.isCanceled()) return;
+		
+		CmNode clonedNode = new CmNode();
+		
+		clonedNode.setModel(clonedModel);
+		clonedNode.setNodeOrder(toCopy.getNodeOrder());
+		clonedNode.setPhotoAllowed(toCopy.isPhotoAllowed());
+		clonedNode.setPhotoRequired(toCopy.isPhotoRequired());
+		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
+		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
+		
+		if (toCopy.getCategory() != null){
+			clonedNode.setCategory(toCopy.getCategory());
+		}else{
+			clonedNode.setCategory(null);
+		}
+		copyLabels(toCopy, clonedNode);
+		for (CmAttribute att : toCopy.getCmAttributes()){
+			CmAttribute clonedAtt = cloneAttribute(att, clonedModel);
+			clonedAtt.setNode(clonedNode);
+			clonedNode.getCmAttributes().add(clonedAtt);
+		}
+		
+		//add to parent
+		if (clonedParent != null){
+			clonedNode.setParent(clonedParent);
+			clonedParent.getChildren().add(clonedNode);
+		}else{
+			clonedModel.getNodes().add(clonedNode);
+		}
+		
+		//process kids
+		for (CmNode kid : toCopy.getChildren()){
+			processNode(clonedNode,kid,clonedModel, monitor);
+		}
+	}
+
+	private static CmAttribute cloneAttribute(CmAttribute attributeToClone, ConfigurableModel cm) {
+		CmAttribute clone = new CmAttribute();
+		
+		clone.setAttribute(attributeToClone.getAttribute());
+		
+		//clone options
+		for (CmAttributeOption op : attributeToClone.getCmAttributeOptions().values()){
+			CmAttributeOption clonedOp = cloneOption(op);
+			clonedOp.setCmAttribute(clone);
+			clone.getCmAttributeOptions().put(clonedOp.getOptionId(), clonedOp);
+		}
+		copyLabels(attributeToClone, clone);
+		clone.setOrder(attributeToClone.getOrder());
+		clone.setList(cloneCmAttributeList(attributeToClone.getList(), cm, clone));
+		clone.setTree(cloneCmAttributeTree(attributeToClone.getTree(), null, cm, clone));
+		return clone;
+	}
+	
+	private static CmAttributeOption cloneOption(CmAttributeOption op) {
+		CmAttributeOption cloned = new CmAttributeOption();
+		cloned.setBooleanValue(op.getBooleanValue());
+		cloned.setDoubleValue(op.getDoubleValue());
+		cloned.setOptionId(op.getOptionId());
+		cloned.setStringValue(op.getStringValue());
+		cloned.setUuidValue(op.getUuidValue());
+		return cloned;
+	}
+	
+	private static List<CmAttributeListItem> cloneCmAttributeList(List<CmAttributeListItem> srcList, ConfigurableModel cm, CmAttribute cmAttribute) {
+		List<CmAttributeListItem> clonedList = new ArrayList<CmAttributeListItem>();
+		for (CmAttributeListItem listItem : srcList) {
+			CmAttributeListItem clone = new CmAttributeListItem();
+			clone.setConfigurableModel(cm);
+			copyLabels(listItem, clone);
+			clone.setIsActive(listItem.getIsActive());
+			clone.setListOrder(listItem.getListOrder());
+			clone.setListItem(listItem.getListItem());
+			clone.setDmAttribute(listItem.getDmAttribute());
+			clone.setAttribute(cmAttribute);
+			clonedList.add(clone);
+		}
+		return clonedList;
+	}
+
+	private static List<CmAttributeTreeNode> cloneCmAttributeTree(List<CmAttributeTreeNode> srcTree, CmAttributeTreeNode parent, ConfigurableModel cm, CmAttribute cmAttribute) {
+		List<CmAttributeTreeNode> clonedTree = new ArrayList<CmAttributeTreeNode>();
+		for (CmAttributeTreeNode treeItem : srcTree) {
+			CmAttributeTreeNode clone = new CmAttributeTreeNode();
+			clone.setConfigurableModel(cm);
+			copyLabels(treeItem, clone);
+			clone.setIsActive(treeItem.getIsActive());
+			clone.setNodeOrder(treeItem.getNodeOrder());
+			clone.setDmTreeNode(treeItem.getDmTreeNode());
+			clone.setDmAttribute(treeItem.getDmAttribute());
+			clone.setAttribute(cmAttribute);
+			clone.setParent(parent);
+			clone.setChildren(cloneCmAttributeTree(treeItem.getChildren(), clone, cm, cmAttribute));
+			clonedTree.add(clone);
+		}
+		return clonedTree;
+	}
+	
 }
