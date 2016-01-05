@@ -70,10 +70,21 @@ public class NewReportHandler {
 	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, final Shell activeShell){
 		Object value = null;
 		
-		if (thisSelection != null && thisSelection instanceof IStructuredSelection&& !((IStructuredSelection)thisSelection).isEmpty() ){
+		if (thisSelection != null 
+				&& thisSelection instanceof IStructuredSelection 
+				&& !((IStructuredSelection)thisSelection).isEmpty() ){
 			Object first = ((IStructuredSelection)thisSelection).getFirstElement();
 			if (first instanceof ReportFolder || first instanceof RootReportFolder){
 				value = first;
+			}else if (first instanceof Report){
+				value = ((Report) first).getFolder();
+				if (value == null){
+					if ( ((Report)first).getShared()){
+						value = RootReportFolder.CA_ROOT_FOLDER;
+					}else{
+						value = RootReportFolder.USER_ROOT_FOLDER;
+					}
+				}
 			}
 		}
 		

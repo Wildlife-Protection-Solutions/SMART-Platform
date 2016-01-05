@@ -256,6 +256,28 @@
             allPopups="false"
             locationURI="popup:org.wcs.smart.report.ReportListView">
          <command
+               commandId="org.wcs.smart.report.newReport"
+               icon="images/icons/etool16/report_new.png"
+               label="%reportlist.popupmenu.newreport.command.name"
+               mnemonic="%reportlist.popupmenu.newreport.command.mnemonic"
+               style="push"
+               tooltip="%reportlist.popupmenu.newreport.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <test
+                           args="newreport"
+                           property="org.wcs.smart.report.menu.editable">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
                commandId="org.wcs.smart.report.newFolder"
                icon="images/icons/etool16/folder_add.png"
                label="%reportlist.popupmenu.newfolder.command.name"

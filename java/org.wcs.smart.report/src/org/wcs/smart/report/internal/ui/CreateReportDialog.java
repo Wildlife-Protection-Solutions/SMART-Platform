@@ -22,6 +22,9 @@
 package org.wcs.smart.report.internal.ui;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -32,9 +35,12 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
 import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
@@ -78,6 +84,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 
 	private Text txtName = null;
 	private Object selectedItem = null;
+	private Object initItem = null;
 	private String reportName = null;
 	private TreeViewer reportList;
 	private boolean includeName;
@@ -114,7 +121,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 			String defaultName, boolean includeName) {
 		
 		super(parent);
-		this.selectedItem = rootFolder;
+		this.initItem = rootFolder;
 		this.includeName = includeName;
 		if (defaultName != null){
 			this.reportName = defaultName;
@@ -241,28 +248,47 @@ public class CreateReportDialog extends TitleAreaDialog {
 			}
 		});
 		
-		reportList.getTree().addSelectionListener(new SelectionAdapter() {
+		reportList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void selectionChanged(SelectionChangedEvent event) {
 				selectedItem = ((IStructuredSelection) reportList
 						.getSelection()).getFirstElement();
 
-				validate();
+				validate();	
 			}
 		});
 		
 		((GridData)reportList.getTree().getLayoutData()).heightHint = 300;
 
-		if (selectedItem instanceof RootReportFolder){
-			reportList.setSelection(new StructuredSelection(selectedItem));
+		if (initItem instanceof RootReportFolder){
+			reportList.setSelection(new StructuredSelection(initItem));
 			reportList.expandToLevel(2);
-		}else if (selectedItem instanceof ReportFolder){
-			//TODO: fix this code somehow
-			//auto open and select the selecte ditem
-			//i have tried this more than one way; the deferredtree seems to
-			//not allow you to expend a path.
+		}else if (initItem instanceof ReportFolder){
+			List<Object> folders = new ArrayList<Object>();
+			ReportFolder tmp = (ReportFolder) initItem;
+
+			tmp = tmp.getParentFolder();
+			while(tmp != null){
+				folders.add(tmp);
+				tmp = tmp.getParentFolder();
+			}
+			if (((ReportFolder) initItem).getEmployee() != null){
+				folders.add(RootReportFolder.USER_ROOT_FOLDER);
+			}else{
+				folders.add(RootReportFolder.CA_ROOT_FOLDER);
+			}
+			Collections.reverse(folders);
+			TreePath p = new TreePath(folders.toArray());
+			((LazyReportContentProvider)reportList.getContentProvider()).setInitialExpandedPath(new TreePath[]{p}, new StructuredSelection(initItem));
+			
 			reportList.expandToLevel(2);
+			reportList.refresh();
+			
+			
+//			reportList.setInput(Messages.CreateReportDialog_LoadingLabel);
+//			reportList.refresh(folders.get(0));
 		}
+		
 		return main;
 	}
 
@@ -326,7 +352,9 @@ public class CreateReportDialog extends TitleAreaDialog {
 				btnNewFolder.setEnabled(true);
 			}
 		}
-		getButton(IDialogConstants.OK_ID).setEnabled(ok);
+		if (getButton(IDialogConstants.OK_ID) != null){
+			getButton(IDialogConstants.OK_ID).setEnabled(ok);
+		}
 	}
 
 	/**
