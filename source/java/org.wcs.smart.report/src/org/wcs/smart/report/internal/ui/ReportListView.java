@@ -21,12 +21,21 @@
  */
 package org.wcs.smart.report.internal.ui;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
@@ -37,6 +46,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
@@ -46,22 +56,37 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
 import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.IMenuService;
+import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
+import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.manger.ReportManager;
@@ -70,6 +95,7 @@ import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.report.ui.LazyReportContentProvider;
 import org.wcs.smart.report.ui.ReportLabelProvider;
+import org.wcs.smart.report.ui.SmartReportEditorInput;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
@@ -238,6 +264,18 @@ public class ReportListView {
 		});
 		reportList.addSelectionChangedListener(new ViewerSelectionListener(selService));
 		
+		/* dnd support */
+		int operations = DND.DROP_COPY | DND.DROP_MOVE ;
+		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+		reportList.addDragSupport(operations, transferTypes , new ReportListDragListener(reportList));
+		reportList.addDropSupport(operations, transferTypes, new ReportListDropListener(reportList){
+			@Override
+			public boolean performDrop(Object data) {
+				boolean ok = super.performDrop(data);
+				return ok;
+			}
+		});
+		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
 		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.report.ReportListView"); //$NON-NLS-1$
@@ -287,5 +325,200 @@ public class ReportListView {
 		public ReportListViewWrapper(){
 			super(ReportListView.class);
 		}
+	}
+	
+	
+	private class ReportListDragListener implements DragSourceListener {
+
+		private TreeViewer viewer;
+		
+		public ReportListDragListener(TreeViewer viewer){
+			this.viewer = viewer;
+		}
+		
+		
+		/**
+		 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart(org.eclipse.swt.dnd.DragSourceEvent)
+		 */
+		@Override
+		public void dragStart(DragSourceEvent event) {
+			LocalSelectionTransfer.getTransfer().setSelection(viewer.getSelection());
+			event.doit = true;
+
+		}
+
+		/**
+		 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData(org.eclipse.swt.dnd.DragSourceEvent)
+		 */
+		@Override
+		public void dragSetData(DragSourceEvent event) {
+			if (LocalSelectionTransfer.getTransfer()
+					.isSupportedType(event.dataType)) {
+				event.data = viewer.getSelection();
+			}
+
+		}
+
+		/**
+		 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished(org.eclipse.swt.dnd.DragSourceEvent)
+		 */
+		@Override
+		public void dragFinished(DragSourceEvent event) {
+			LocalSelectionTransfer.getTransfer().setSelection(null);
+//			viewer.refresh();
+		}
+
+	}
+	
+	private class ReportListDropListener extends ViewerDropAdapter {
+		/**
+		 * @param viewer
+		 */
+		protected ReportListDropListener(TreeViewer viewer) {
+			super(viewer);
+		}
+		
+		@Override
+		 public void dragOver(DropTargetEvent event) {
+			super.dragOver(event);
+			event.feedback = DND.FEEDBACK_SELECT | DND.FEEDBACK_SCROLL  | DND.FEEDBACK_EXPAND;
+		}
+		
+		/**
+		 * @see org.eclipse.jface.viewers.ViewerDropAdapter#performDrop(java.lang.Object)
+		 */
+		@Override
+		public boolean performDrop(Object data) {
+			
+			StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
+			if (selection == null){
+				return false;
+			}
+			
+			final Object currentTarget = getCurrentTarget();
+			if (!(currentTarget instanceof ReportFolder || currentTarget instanceof RootReportFolder)) return false;
+
+			final TreePath[] expanded = ((TreeViewer)ReportListDropListener.this.getViewer()).getExpandedTreePaths();
+			final Set<Job> jobs = Collections.synchronizedSet(new HashSet<Job>());
+			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+				Object select = (Object) iterator.next();
+				if (select instanceof Report){
+					final Report report = (Report) select;
+					//want to close any editors associated with given input
+					final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(new SmartReportEditorInput(report));
+					if (editor != null){
+						if (!PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditor(editor, true)){
+							continue;
+						}
+					}
+					//run job to update query folder
+					Job internalUpdate = new Job("Update Query Folder"){ //$NON-NLS-1$
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							
+							Session s = HibernateManager.openSession();
+							Report r = null;
+							boolean isChanged = false;
+							try{
+								s.beginTransaction();
+								r = (Report) s.load(Report.class, report.getUuid());
+								ReportFolder targetFolder = null;
+								boolean isShared = false;
+								if (currentTarget instanceof ReportFolder){
+									targetFolder = (ReportFolder)currentTarget;
+									isShared = (targetFolder.getEmployee() == null);
+								}else{
+									isShared = ((RootReportFolder)currentTarget).isShared();
+								}
+								
+								if (r.getFolder() == null && targetFolder != null ||
+										r.getFolder() != null && targetFolder == null ||
+										r.getFolder() != null && !r.getFolder().equals(targetFolder) ||
+										r.getShared() != isShared){
+								
+									isChanged = true;
+									r.setFolder(targetFolder);
+									r.setShared(isShared);
+								}
+								s.getTransaction().commit();
+							}catch (Exception ex){
+								if (s.getTransaction().isActive()) s.getTransaction().rollback();
+								ReportPlugIn.log(ex.getMessage(), ex);
+								return Status.OK_STATUS;
+							}finally{
+								s.close();
+							}
+							// fire changed event if folder was changed
+							if (isChanged){
+								final Report fr = r;
+								Display.getDefault().syncExec(new Runnable(){
+									@Override
+									public void run() {
+										ReportEventManager.getInstance().fireReportUpdated(fr);
+										//this reopens in the wrong perspective which we don't want, so we just won't open for now
+//										if (editor != null){
+//											//reopen the editor
+//											try {
+//												PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editor.getEditorInput(), editor.getSite().getId());
+//											} catch (PartInitException e) {
+//												ReportPlugIn.log(e.getMessage(), e);
+//											}
+//										}
+									}
+								});
+							}
+							return Status.OK_STATUS;
+							
+						}
+						
+					};
+					internalUpdate.setSystem(true);
+					jobs.add(internalUpdate);
+					internalUpdate.schedule();
+					internalUpdate.addJobChangeListener(new JobChangeAdapter() {
+						@Override
+						public void done(IJobChangeEvent event) {
+							jobs.remove(event.getJob());
+							if (jobs.size() == 0){
+								//refresh viewer
+								Display.getDefault().syncExec(new Runnable(){
+									@Override
+									public void run() {
+										((LazyReportContentProvider)((TreeViewer)ReportListDropListener.this.getViewer()).getContentProvider()).setInitialExpandedPath(expanded);
+										ReportListDropListener.this.getViewer().refresh();							
+									}});
+							}							
+						}
+					});
+					
+				};
+			}
+			
+			return true;
+		}
+
+		/**
+		 * @see org.eclipse.jface.viewers.ViewerDropAdapter#validateDrop(java.lang.Object, int, org.eclipse.swt.dnd.TransferData)
+		 */
+		@Override
+		public boolean validateDrop(Object target, int operation,
+				TransferData transferType) {
+
+			StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
+			if (selection == null){
+				return false;
+			}
+			
+			if (!(target instanceof ReportFolder || target instanceof RootReportFolder)){
+				return false;
+			}
+			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+				Object type = (Object) iterator.next();
+				//at least one item is a query editor input so we can move it
+				if (type instanceof Report) return true;
+			}
+			return false;
+		}
+
 	}
 }

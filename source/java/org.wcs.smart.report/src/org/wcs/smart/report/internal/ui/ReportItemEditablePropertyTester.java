@@ -52,6 +52,10 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 	 */
 	public static final String EDIT = "edit"; //$NON-NLS-1$
 	/**
+	 * if the selection can have a new report added to it 
+	 */
+	public static final String NEWREPORT = "newreport"; //$NON-NLS-1$
+	/**
 	 * if the selection can have a child folder added to it
 	 */
 	public static final String NEWFOLDER = "newfolder"; //$NON-NLS-1$
@@ -80,7 +84,7 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 		}
 		String operator = (String)args[0];
 		if (receiver instanceof RootReportFolder){
-			if (operator.equals(NEWFOLDER)){
+			if (operator.equals(NEWFOLDER) || operator.equals(NEWREPORT)){
 				if (((RootReportFolder)receiver) == RootReportFolder.CA_ROOT_FOLDER){
 					//ca only modifiable by admin/managers
 					if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
@@ -122,7 +126,7 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 			
 		}
 		if (receiver instanceof Report){
-			if (operator.equals(NEWFOLDER)){
+			if (operator.equals(NEWFOLDER) ||  operator.equals(NEWREPORT)){
 				return false;
 			}
 			

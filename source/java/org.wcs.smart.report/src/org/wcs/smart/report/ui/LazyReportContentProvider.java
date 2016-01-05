@@ -24,13 +24,23 @@ package org.wcs.smart.report.ui;
 import java.text.Collator;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.ui.internal.progress.ProgressMessages;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
+import org.eclipse.ui.progress.WorkbenchJob;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
@@ -109,7 +119,53 @@ public class LazyReportContentProvider extends BaseWorkbenchContentProvider{
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput){
 		if(viewer instanceof AbstractTreeViewer){
-			manager = new DeferredTreeContentManager((AbstractTreeViewer) viewer);
+			final TreeViewer treeViewer = (TreeViewer) viewer;
+			manager = new DeferredTreeContentManager((AbstractTreeViewer) viewer){
+				/**
+				 * Create a UIJob to add the children to the parent in the tree viewer.
+				 * 
+				 * @param parent
+				 * @param children
+				 * @param monitor
+				 */
+				@Override
+				protected void addChildren(final Object parent, final Object[] children,
+						IProgressMonitor monitor) {
+					WorkbenchJob updateJob = new WorkbenchJob(
+							ProgressMessages.DeferredTreeContentManager_AddingChildren) {
+						/*
+						 * (non-Javadoc)
+						 * 
+						 * @see org.eclipse.ui.progress.UIJob#runInUIThread(org.eclipse.core.runtime.IProgressMonitor)
+						 */
+						@Override
+						public IStatus runInUIThread(IProgressMonitor updateMonitor) {
+							// Cancel the job if the tree viewer got closed
+							if (treeViewer.getControl().isDisposed()
+									|| updateMonitor.isCanceled()) {
+								return Status.CANCEL_STATUS;
+							}
+							treeViewer.add(parent, children);
+							
+							if (itemsToExpand == null || itemsToExpand.isEmpty()) return Status.OK_STATUS;
+							
+							for (Object child : children){
+								if (itemsToExpand.contains(child)){
+									//we want to expand this child
+									itemsToExpand.remove(child);
+									getChildren(child);
+									treeViewer.setExpandedState(child, true);
+								}
+							}
+							treeViewer.setSelection(defaultSelection);
+							return Status.OK_STATUS;
+						}
+					};
+					updateJob.setSystem(true);
+					updateJob.schedule();
+
+				}
+			};
 		}
 		super.inputChanged(viewer, oldInput, newInput);
 	}
@@ -194,6 +250,23 @@ public class LazyReportContentProvider extends BaseWorkbenchContentProvider{
 		}});
 	}
 	
-	
+	private Set<Object> itemsToExpand = new HashSet<Object>();
+	private ISelection defaultSelection = null;
+	/**
+	 * A set of tree path elements to expand as children are loaded.  This will expand each element
+	 * in the tree path, loading kids as required.
+	 * @param paths
+	 */
+	public void setInitialExpandedPath(TreePath[] paths){
+		for (TreePath p : paths){
+			for (int i = 0; i < p.getSegmentCount(); i ++){
+				itemsToExpand.add(p.getSegment(i));
+			}
+		}
+	}
+	public void setInitialExpandedPath(TreePath[] paths, ISelection defaultSelection){
+		this.defaultSelection = defaultSelection;
+		setInitialExpandedPath(paths);
+	}
 
 }
