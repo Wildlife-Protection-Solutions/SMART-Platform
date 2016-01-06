@@ -1,9 +1,10 @@
-#Run me in a Powershell window (that is in the local directory) with the command:  & .\updateNonEnglishFiles.ps1
-#I will update the other 11 language files with any new keys in the labels_en.js file, keeping any existing translations in the other language files.
+#first, copy this file to the directory with all the js language files, something like: ..\SMART_checkout\connect\org.wcs.smart.connect.server\src\main\webapp\javascript\i18n\
 
+#Run a Powershell window and navigate to the above directory then run the script with the command:  & .\updateNonEnglishFiles.ps1
+#It will update the other 11 language files with any new keys in the labels_en.js file, keeping any existing translations in the other language files.
+#delete the copy of your file so it doens't get committed there and packaged up etc.
 
-#I need to be in the same directory as all the labels_en.js, labels_fr.js, etc files.
-#The files need to be named exactly like that, the engligh file need a "":"" array entry as the last entry (with no comma after it on the last entry)
+#The files need to be named exactly like labels_xx.js , the english file need a "":"" array entry as the last entry (with no comma after it on the last entry)
 #All new keys need to go in the _en.js file, if you put new ones straight into fr or other they will be lost through this process.
 
 #to add new languages, just add a line like process_lang("zh"); with your new language code, the script will create a new file with all english in it.
