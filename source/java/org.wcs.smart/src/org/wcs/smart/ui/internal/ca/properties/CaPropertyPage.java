@@ -49,7 +49,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -286,10 +285,17 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			ca.getLanguages().addAll(languages);
 			session.saveOrUpdate(ca);
 			tx.commit();
-			setChangesMade(false);
 			
+			// update the cached settings
+			SmartDB.getCurrentConservationArea().setLanguages(ca.getLanguages());
+			SmartDB.getCurrentConservationArea().setId(ca.getId());
+			SmartDB.getCurrentConservationArea().setName(ca.getName());
+			
+			setChangesMade(false);
+
+			// update the workbench window
 			SmartWorkbenchWindowAdvisor.updateWorkbenchWindowTitle();
-//			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setText("TEST");
+
 			return true;
 		}catch (RuntimeException ex){
 			tx.rollback();
