@@ -26,37 +26,37 @@
    </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
-         SMART Intelligence Plug-in contains an intelligence module that allows to organize, maintain and query intelligence information.
+         The SMART Intelligence plug-in contains an intelligence module that allows users to organize, maintain and query intelligence information. Intelligence information may have been gathered by earlier patrols, or may have been received from external sources. Intelligence information may be useful to Conservation Area managers when they plan future patrols.
       </description>
    </category-def>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
-         SMART Planning Plug-in contains a plan module that allows to organize, maintain and query planning information.
+         The SMART Planning plug-in contains a plan module that allows users to organize, maintain and query planning information. Plans allow for a set of targets (such as total distance patrolled or specific locations to visit) to be assigned to a patrol or series of patrols.
       </description>
    </category-def>
    <category-def name="independentincident" label="SMART Independent Incident Plug-in">
       <description>
-         SMART Independent Incident Plug-in provides the ability to record observations against the data model that are not associated with a patrol (or any other object).
+         The SMART Independent Incident plug-in provides the ability to record observations (using the data model) that are not associated with a patrol (or any other data collection object within SMART).
       </description>
    </category-def>
    <category-def name="entity" label="SMART Entity Tracking Plug-in">
       <description>
-         The entity tracking plugin provides the ability to track individual entities (animals or fixed), their attributes, and record observations associated with the entities.
+         The SMART Entity Tracking plug-in provides the ability to record and track specific entities that move (such as individual animals) or fixed entities (such as a gate or bridge), record their attributes, and record observations associated with the entities.
       </description>
    </category-def>
    <category-def name="ecologicalrecords" label="SMART Ecological Records Plug-in">
       <description>
-         The ecological records plugin provides the ability to create, manage and query surveys.
+         The SMART Ecological Records (SMART-ER) plug-in extends the SMART capability to more scientific data collection and analysis of species, their habitats and disturbances. The Ecological Records plug-in is used for recording and analysing field survey data.
       </description>
    </category-def>
    <category-def name="connect" label="SMART Connect">
       <description>
-         Plugin to allow SMART Desktop to communicate with a SMART Connect Server.
+         The SMART Connect plug-in allows SMART Desktop software to communicate and share data over the Internet with a SMART Connect Server.
       </description>
    </category-def>
    <category-def name="cybertracker" label="SMART Cybertracker">
       <description>
-         SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
+         The SMART CyberTracker (SMART-CT) plug-in provides compatibility with the CyberTracker application - which itself runs on a GPS-enabled handheld device. Using this plug-in, SMART users are able to create and deploy CyberTracker applications based on the Data Model or a Configurable Model (a simplified data model for the CyberTracker application). The plug-in also provides the ability to work directly with handheld devices while exporting/importing data, doing all of the interaction with CyberTracker in the background.
       </description>
    </category-def>
 </site>
