@@ -263,6 +263,7 @@ public class Messages extends NLS {
 	public static String CaPropertyPage_Error_CannotRemoveDefault;
 	public static String CaPropertyPage_Error_SavingChanages;
 	public static String CaPropertyPage_ErrorDialogTitle;
+	public static String CaPropertyPage_FallbackTooltip;
 	public static String CaPropertyPage_LocaleToAddLabel;
 	public static String CaPropertyPage_PageName;
 	public static String CaPropertyPage_SaveWarning_Message1;
@@ -281,6 +282,7 @@ public class Messages extends NLS {
 	public static String CaWizard_CaDef_CaDef_PageName;
 	public static String CaWizard_CaDef_DefaultLangInfo1;
 	public static String CaWizard_CaDef_DefaultLangLable1;
+	public static String CaWizard_CaDef_FallbackTooltip;
 	public static String CaWizard_CaDef_PageDescription;
 	public static String CaWizard_CaDef_PageTitle;
 	public static String CaWizard_UserDef_PageDescription;
