@@ -86,7 +86,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		
 		Label lblLang = new Label(composite, SWT.NONE);
 		lblLang.setText(Messages.CaWizard_CaDef_DefaultLangLable1);
-		lblLang.setToolTipText("The language used when the system language is not supported by SMART.  The system language is set by the operating system, but can be overwritten in the SMART ini file.");
+		lblLang.setToolTipText(Messages.CaWizard_CaDef_FallbackTooltip);
 		
 		lstViewer = new ComboViewer(composite,  SWT.DROP_DOWN | SWT.READ_ONLY);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
