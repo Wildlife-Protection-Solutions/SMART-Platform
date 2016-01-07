@@ -226,7 +226,14 @@ public abstract class SimpleQuery extends StyledQuery {
 		setConservationAreaFilter(q.getConservationAreaFilter());
 	}
 	
-	
+	/**
+	 * Returns all columns that can be included in the query if they
+	 * are visible or not.
+	 * 
+	 * @param l
+	 * @param session
+	 * @return
+	 */
 	@Transient
 	public List<QueryColumn> getQueryColumns(Locale l, Session session){
 		if (queryColumns != null) return queryColumns;

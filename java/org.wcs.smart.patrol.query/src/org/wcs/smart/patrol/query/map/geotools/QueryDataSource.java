@@ -75,7 +75,10 @@ public class QueryDataSource extends AbstractDataStore{
 		this.query = query;
 	}
 	
-
+	public void reset(){
+		schemas.clear();
+	}
+	
 	/**
 	 * @see org.geotools.data.AbstractDataStore#dispose()
 	 */
@@ -101,6 +104,14 @@ public class QueryDataSource extends AbstractDataStore{
 		return new QueryFeatureReader(this.query, getSchema(typeName));
 	}
 
+	
+	/**
+	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
+	 */
+	@Override
+	public void removeSchema(String typeName) throws IOException {
+		schemas.remove(typeName);
+	}
 	
 	/**
 	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)

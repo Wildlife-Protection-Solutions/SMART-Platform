@@ -49,7 +49,7 @@ import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.model.Query;
 
 /**
- * A udig service for a smart waypoint or patrol queries.
+ * A udig service for a ecological record queries.
  * 
  * 
  * @author Emily
@@ -111,10 +111,10 @@ public class QueryService extends IQueryService {
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
 		}
-		if (ds instanceof SurveyQueryDataSource){
-			((SurveyQueryDataSource)ds).resetSchema(SurveyQueryDataSource.WAYPOINT_TYPE);
-			((SurveyQueryDataSource)ds).resetSchema(SurveyQueryDataSource.TRACKS_TYPE);
-			
+		if (ds != null){
+			for (String name : ds.getTypeNames()){
+				ds.removeSchema(name);
+			}
 		}
 	}	
 	
@@ -232,11 +232,6 @@ public class QueryService extends IQueryService {
                 				query.getTypeKey().equals(MissionQuery.KEY) || 
                 				query.getTypeKey().equals(MissionTrackQuery.KEY)){
                 			ds = new SurveyQueryDataSource((SimpleQuery)query);
-                		
-//                		}else if (query.getType().getClass().equals(PatrolWaypointQueryType.class) ){
-//                    		ds = new SurveyObsQueryDataSource((PatrolWaypointQuery)query);
-//                		}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
-//                			ds = new SurveyQueryDataSource((PatrolQuery)query);
                 		}
                 	}else{
                 		//use factory

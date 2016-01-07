@@ -114,9 +114,10 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	}
 
 	/**
-	 * Removes the cached schemas 
+	 * @see org.geotools.data.AbstractDataStore#removeSchema(java.lang.String)
 	 */
-	public void resetSchema(String typeName){
+	@Override
+	public void removeSchema(String typeName) throws IOException {
 		schemas.remove(typeName);
 	}
 	

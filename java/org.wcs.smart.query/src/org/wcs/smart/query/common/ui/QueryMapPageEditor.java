@@ -155,7 +155,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
     /**
      * Job to refresh the service and map.
      */
-    private Job refreshJob = new Job(Messages.QueryMapPageEditor_RefreshJobName){
+    private Job refreshJob = new Job(Messages.QueryMapPageEditor_RefreshJobName1){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (queryService != null){

@@ -109,6 +109,11 @@ public class QueryService extends IQueryService {
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
 		}
+		if (ds != null){
+			for (String name : ds.getTypeNames()){
+				ds.removeSchema(name);
+			}
+		}
 	}	
 	
 	
@@ -150,9 +155,9 @@ public class QueryService extends IQueryService {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
 					if (query.getTypeKey().equals(EntityObservationQuery.KEY) || 
-							query.getTypeKey().getClass().equals(EntityWaypointQuery.KEY) ){
+							query.getTypeKey().equals(EntityWaypointQuery.KEY) ){
 						members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
-					}else if (query.getTypeKey().getClass().equals(EntityGriddedQuery.KEY) ){
+					}else if (query.getTypeKey().equals(EntityGriddedQuery.KEY) ){
 						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}
 				}

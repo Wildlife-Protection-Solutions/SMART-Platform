@@ -391,13 +391,13 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		IntelligenceRecordResultItem item = new IntelligenceRecordResultItem();
 		item.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		item.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		item.setUuid(rs.getBytes("intel_uuid")); //$NON-NLS-1$
+		item.setUuid(UuidUtils.byteToUUID(rs.getBytes("intel_uuid"))); //$NON-NLS-1$
 		item.setName(rs.getString("intel_name")); //$NON-NLS-1$
 		item.setReceivedDate(rs.getDate("intel_datereceived")); //$NON-NLS-1$
 		item.setFromDate(rs.getDate("intel_fromdate")); //$NON-NLS-1$
 		item.setToDate(rs.getDate("intel_todate")); //$NON-NLS-1$
 		
-		item.setSourceUuid(rs.getBytes("intel_sourceuuid")); //$NON-NLS-1$
+		item.setSourceUuid(UuidUtils.byteToUUID(rs.getBytes("intel_sourceuuid"))); //$NON-NLS-1$
 		item.setSource(rs.getString("intel_source")); //$NON-NLS-1$
 		
 		item.setPatrolId(rs.getString("intel_patrolid")); //$NON-NLS-1$

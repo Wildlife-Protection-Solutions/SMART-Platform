@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.observation.query.map.geotools;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -56,14 +57,16 @@ public class QueryResultItemFeature {
 	 * @return created feature 
 	 */
 	public static SimpleFeature createObservationFeature(ObservationQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
-		
-		Object[] data = new Object[columns.size() + 2];
-		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
-		data[1] = it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
-		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
-		}		
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+		List<Object> data = new ArrayList<Object>();
+		data.add(gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY())));
+		data.add(it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ 
+		int i = 0;
+		for (QueryColumn c : columns){
+			if (c.isVisible()){
+				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));
+			}
+		}
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
 		
 	}
 }

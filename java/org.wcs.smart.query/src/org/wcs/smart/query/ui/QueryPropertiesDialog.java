@@ -251,13 +251,11 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		Label lblSystemId = new Label(main, SWT.NONE);
 		lblSystemId.setText(Messages.QueryPropertiesDialog_SystemIdLabel);
 		Label lblUuid = new Label(main, SWT.NONE);
-		lblUuid.setText(UuidUtils.uuidToString(query.getUuid()));
+		lblUuid.setText((query.getUuid() == null ? "" : UuidUtils.uuidToString(query.getUuid()))); //$NON-NLS-1$
 		Label lblOwner = new Label(main, SWT.NONE);
 		lblOwner.setText(Messages.QueryPropertiesDialog_CreatorLabel);
 		Label lblOwnerName = new Label(main, SWT.NONE);
 		lblOwnerName.setText(SmartLabelProvider.getFullLabel(query.getOwner()));
-		
-
 		
 		List<AbstractQueryPropertyProvider> allProps = new ArrayList<AbstractQueryPropertyProvider>();
 		allProps.addAll(QueryPlugIn.getPropertyProviders());

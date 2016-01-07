@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.map.geotools;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -62,15 +63,16 @@ public class QueryResultItemFeature {
 	 * @return created feature 
 	 */
 	public static SimpleFeature createObservationFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
-		
-		Object[] data = new Object[columns.size() + 2];
-		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
-		data[1] = it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+		List<Object> data = new ArrayList<Object>();
+		data.add(gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY())));
+		data.add(it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		int i = 0;
+		for (QueryColumn c : columns){
+			if (c.isVisible()){
+				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));
+			}
 		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
 	}
 	
 	
@@ -87,10 +89,10 @@ public class QueryResultItemFeature {
 	 */
 	public static SimpleFeature createTrackFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
 		
-		Object[] data = new Object[columns.size() + 2];
+		List<Object> data = new ArrayList<Object>();
 		
 		if (it.getTrack() == null || it.getTrack().size() == 0) {
-			data[0] = gf.createLineString((Coordinate[]) null);
+			data.add(gf.createLineString((Coordinate[]) null));
 		} else {
 			try {
 				WKBReader reader = new WKBReader();
@@ -99,19 +101,22 @@ public class QueryResultItemFeature {
 				for (int i = 0; i < lss.length; i ++){
 					lss[i] = (LineString)reader.read(tracks.get(i));
 				}
-				data[0] = gf.createMultiLineString(lss);
+				data.add(gf.createMultiLineString(lss));
 			} catch (ParseException e) {
-				data[0] = gf.createLineString((Coordinate[]) null);
+				data.add(gf.createLineString((Coordinate[]) null));
 				PatrolQueryPlugIn.log(MessageFormat.format(Messages.QueryResultItemFeature_GeomParseError, new Object[]{it.getPatrolId()}), e);
 			}
 		}
 		
-		data[1] = it.getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$
+		data.add(it.getPatrolId() + "." + System.nanoTime()); //$NON-NLS-1$
 		
-		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+		int i = 0;
+		for (QueryColumn c : columns){
+			if (c.isVisible()){
+				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));
+			}
 		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
 		
 	}
 }

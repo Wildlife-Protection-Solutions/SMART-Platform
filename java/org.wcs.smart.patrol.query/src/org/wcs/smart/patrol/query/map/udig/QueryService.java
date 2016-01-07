@@ -111,6 +111,11 @@ public class QueryService extends IQueryService {
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
 		}
+		if (ds != null){
+			for (String name : ds.getTypeNames()){
+				ds.removeSchema(name);
+			}
+		}
 	}	
 	
 	

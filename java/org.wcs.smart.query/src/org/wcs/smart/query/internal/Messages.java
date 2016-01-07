@@ -425,7 +425,7 @@ public class Messages extends NLS {
 	public static String QueryMapPageEditor_AddLayerJobName;
 	public static String QueryMapPageEditor_ErrorLoadingPages;
 	public static String QueryMapPageEditor_ErrorRefreshing;
-	public static String QueryMapPageEditor_RefreshJobName;
+	public static String QueryMapPageEditor_RefreshJobName1;
 	public static String QueryMapPageEditor_UnknownStatus;
 	public static String QueryResultsEditor_Error_CouldNotLoad;
 	public static String QueryResultsEditor_Error_CouldNotParse;
