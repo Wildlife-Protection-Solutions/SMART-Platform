@@ -176,7 +176,6 @@ public class ReportDefintionExporter implements IReportExporter {
 				}
 			}
 		}
-		rdh.save();
 		rdh.close();
 		
 	}
