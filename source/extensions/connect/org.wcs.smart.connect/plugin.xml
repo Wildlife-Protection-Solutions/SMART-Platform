@@ -27,6 +27,33 @@
       </class>
    </extension>
    <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="smart_connect">
+      </FilestoreDirectory>
+   </extension>
+   <extension
+         point="org.wcs.smart.startup.db">
+      <StartUpRunner
+            class="org.wcs.smart.connect.replication.DerbyStartUpRunner">
+      </StartUpRunner>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.login">
+      <loginHandler
+            clazz="org.wcs.smart.connect.replication.LoginHandler">
+      </loginHandler>
+   </extension>
+   <extension
+         point="org.wcs.smart.startupoption">
+      <StartUpOption
+            clazz="org.wcs.smart.connect.ui.startup.ImportFromConnectStartupOption">
+      </StartUpOption>
+      <StartUpOption
+            clazz="org.wcs.smart.connect.ui.startup.SyncMultiStartupOption">
+      </StartUpOption>
+   </extension>
+   <extension
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.connect.configuration.show"
@@ -48,6 +75,74 @@
             id="org.wcs.smart.connect.server.changelog.sync"
             name="%syncall.command.name">
       </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.connect.server.changelog.up"
+            icon="images/icons/obj16/server_upload.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.changelog.down"
+            icon="images/icons/obj16/server_download.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.configuration.show"
+            icon="images/icons/obj16/server_configure.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.exportca"
+            icon="images/icons/obj16/server_ca_upload.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.changelog.sync"
+            icon="images/icons/obj16/server_sync.png">
+      </image>
+   </extension>
+   <extension
+         id="id2"
+         point="org.eclipse.e4.workbench.model">
+      <processor
+            apply="always"
+            beforefragment="false"
+            class="org.wcs.smart.connect.ui.StatusLineConfigProcessor">
+      </processor>
+      <processor
+            apply="always"
+            beforefragment="false"
+            class="org.wcs.smart.connect.server.replication.SyncOnStartupProcessor">
+      </processor>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.connect.CloneConnect"
+            id="org.wcs.smart.connect.CloneConnectConservationArea">
+      </templateCloner>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.updatesite.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.updatesite.OnUninstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.connect.updatesite.ChangeTrackerInstaller">
+      </ChangeLogTracker>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -187,68 +282,6 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.ca.login">
-      <loginHandler
-            clazz="org.wcs.smart.connect.replication.LoginHandler">
-      </loginHandler>
-   </extension>
-   <extension
-         point="org.wcs.smart.startupoption">
-      <StartUpOption
-            clazz="org.wcs.smart.connect.ui.startup.ImportFromConnectStartupOption">
-      </StartUpOption>
-      <StartUpOption
-            clazz="org.wcs.smart.connect.ui.startup.SyncMultiStartupOption">
-      </StartUpOption>
-   </extension>
-   <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
-            class="org.wcs.smart.connect.updatesite.OnInstallAction"
-            name="onInstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="4.0.0">
-      </action>
-   </extension>
-   <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
-            class="org.wcs.smart.connect.updatesite.OnUninstallAction"
-            name="onUninstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="4.0.0">
-      </action>
-   </extension>
-   <extension
-         point="org.wcs.smart.changelog.installer">
-      <ChangeLogTracker
-            clazz="org.wcs.smart.connect.updatesite.ChangeTrackerInstaller">
-      </ChangeLogTracker>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commandImages">
-      <image
-            commandId="org.wcs.smart.connect.server.changelog.up"
-            icon="images/icons/obj16/server_upload.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.connect.server.changelog.down"
-            icon="images/icons/obj16/server_download.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.connect.configuration.show"
-            icon="images/icons/obj16/server_configure.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.connect.server.exportca"
-            icon="images/icons/obj16/server_ca_upload.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.connect.server.changelog.sync"
-            icon="images/icons/obj16/server_sync.png">
-      </image>
-   </extension>
-   <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
             class="org.wcs.smart.connect.replication.ReplicationEnabledPropertyTester"
@@ -259,37 +292,10 @@
       </propertyTester>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
-      <FilestoreDirectory
-            directory="smart_connect">
-      </FilestoreDirectory>
-   </extension>
-   <extension
-         point="org.wcs.smart.startup.db">
-      <StartUpRunner
-            class="org.wcs.smart.connect.replication.DerbyStartUpRunner">
-      </StartUpRunner>
-   </extension>
-   <extension
-         id="id2"
-         point="org.eclipse.e4.workbench.model">
-      <processor
-            apply="always"
-            beforefragment="false"
-            class="org.wcs.smart.connect.ui.StatusLineConfigProcessor">
-      </processor>
-      <processor
-            apply="always"
-            beforefragment="false"
-            class="org.wcs.smart.connect.server.replication.SyncOnStartupProcessor">
-      </processor>
-   </extension>
-   <extension
-         point="org.wcs.smart.ca.templateCloner">
-      <templateCloner
-            class="org.wcs.smart.connect.CloneConnect"
-            id="org.wcs.smart.connect.CloneConnectConservationArea">
-      </templateCloner>
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.connect.upgrade.ConnectDatabaseUpgrader">
+      </dbUpgrader>
    </extension>
 
 </plugin>
