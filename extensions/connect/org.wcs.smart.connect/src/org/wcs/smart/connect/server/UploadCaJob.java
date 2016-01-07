@@ -135,8 +135,6 @@ public class UploadCaJob extends FileUploaderJob {
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			//disable replication 
-			DerbyReplicationManager.INSTANCE.disableReplication(s);
 
 			//clean up change log and upload table
 			ChangeLogTableManager.INSTANCE.deleteAll(s, connect.getServer().getConservationArea());

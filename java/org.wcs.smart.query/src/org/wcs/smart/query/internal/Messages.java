@@ -312,6 +312,7 @@ public class Messages extends NLS {
 	public static String QueryHeaderComposite_IdFieldLabel;
 	public static String QueryHeaderComposite_NameToLongDialogTitle;
 	public static String QueryHeaderComposite_NameToLongMsg;
+	public static String QueryHeaderComposite_QueryNameLabel;
 	public static String QueryHibernateManager_CaQueryFolderName;
 	public static String QueryHibernateManager_CouldNotSaveQueryError;
 	public static String QueryHibernateManager_MyQueryFolderName;
@@ -462,6 +463,7 @@ public class Messages extends NLS {
 	public static String QueryPropertiesDialog_ColumnsLabel;
 	public static String QueryPropertiesDialog_DeSelectAllLabel;
 	public static String QueryPropertiesDialog_SelectAllLabel;
+	public static String QueryPropertiesDialog_SystemIdLabel;
 	
 	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
 	public static String CsvSummaryExporter_CSV_ExporterName;

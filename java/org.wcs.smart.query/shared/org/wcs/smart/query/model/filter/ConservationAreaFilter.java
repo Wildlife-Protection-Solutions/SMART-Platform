@@ -38,6 +38,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class ConservationAreaFilter implements IFilter {
 
+	public static final String CA_SPLITTER = ","; //$NON-NLS-1$
+	
 	/**
 	 * Parses a conservation area filter from
 	 * the string representation of the filter
@@ -53,7 +55,7 @@ public class ConservationAreaFilter implements IFilter {
 		}else{
 			filter.setIncludeAll(false);		
 			try {
-				String[] bits = caFilterAsString.split(","); //$NON-NLS-1$
+				String[] bits = caFilterAsString.split(CA_SPLITTER);
 				for (int i = 0; i < bits.length; i++) {
 					try{
 						filter.addConservationArea(UuidUtils.stringToUuid(bits[i].trim()));
@@ -238,7 +240,7 @@ public class ConservationAreaFilter implements IFilter {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < caFilters.size(); i ++){
 			if (i != 0){
-				sb.append(","); //$NON-NLS-1$
+				sb.append(CA_SPLITTER);
 			}
 			sb.append( UuidUtils.uuidToString( caFilters.get(i) ) );
 		}

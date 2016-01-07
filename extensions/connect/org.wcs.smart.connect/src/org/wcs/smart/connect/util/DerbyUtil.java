@@ -27,6 +27,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
+
 /**
  * Derby utilities to support connect replication.
  * @author Emily
@@ -60,5 +63,39 @@ public class DerbyUtil {
 		rs.next();
 		return rs.getLong(1);
 	}
+	
+	public static Boolean isReplicationEnabled(byte[] cauuid) throws SQLException{
+		Connection c = DriverManager.getConnection("jdbc:default:connection"); //$NON-NLS-1$
+		return isReplicationEnabled(cauuid, c);
+	}
+	
+	public static Boolean isReplicationEnabled(byte[] cauuid, Connection c) throws SQLException{
+		if (cauuid == null) return Boolean.FALSE;
+		
+		//check application property
+		String sql = "values syscs_util.syscs_get_database_property( '" + DerbyReplicationManager.LOGGING_DB_PROPERTY + "' )"; //$NON-NLS-1$ //$NON-NLS-2$
+		try(ResultSet rs = c.createStatement().executeQuery(sql)){
+			rs.next();
+			if (!rs.getBoolean(1)){
+				return Boolean.FALSE;
+			}
+		}
+		
+		sql = "SELECT status from smart.connect_status where ca_uuid = ?"; //$NON-NLS-1$
+		PreparedStatement ps = c.prepareStatement(sql);
+		ps.setBytes(1, cauuid);
+		try(ResultSet rs = ps.executeQuery()){
+			if (rs.next()){
+				ConnectServerStatus.Status status = ConnectServerStatus.Status.valueOf(rs.getString(1));
+				if (status == null) return false;
+				if (status == ConnectServerStatus.Status.UPLOAD ||
+					status == ConnectServerStatus.Status.DONE){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 
 }

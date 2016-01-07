@@ -21,14 +21,12 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Named;
 
-import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -38,17 +36,10 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.export.IExportFormat;
-import org.wcs.smart.report.export.IReportExporter;
-import org.wcs.smart.report.export.internal.ExportReportEngine;
-import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ExportReportWizard;
-import org.wcs.smart.report.internal.ui.export.ExportReportWizardPage;
 import org.wcs.smart.report.model.Report;
 /**
  * Handler for exporting reports.
@@ -89,43 +80,6 @@ public class ExportReportHandler {
 		ExportReportWizard exportWizard = new ExportReportWizard(isMultiple, selectedReports);
 		WizardDialog wd = new WizardDialog(activeShell, exportWizard);
 		wd.open();
-//		if (dia.open() != Window.OK){
-//			return ;
-//		}
-//		
-//		selectedReports = dia.getSelectedReports();
-//		IExportFormat format = dia.getOutputFormat();
-//		File outputLocation = new File(dia.getOutputDir());
-//		
-//		
-//		if (isMultiple){
-//			//dir provided			
-//			ExportReportEngine.validateDirectory(outputLocation);
-//		}
-//		if (format.getExporter() instanceof EmitterInfo){
-//			EmitterInfo outputFormat = (EmitterInfo) format.getExporter();
-//			//export reports
-//			try {
-//				if (isMultiple){
-//					ExportReportEngine.exportReports(selectedReports, outputLocation, null, outputFormat);
-//				}else{
-//					ExportReportEngine.exportReports(selectedReports, null, outputLocation, outputFormat);
-//				}
-//			} catch (Exception e) {
-//				ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
-//			}
-//		}else if (format.getExporter() instanceof IReportExporter){
-//			IReportExporter exporter = (IReportExporter) format.getExporter();
-//			try {
-//				if (isMultiple){
-//					ExportReportEngine.exportReports(selectedReports, outputLocation, null, exporter);
-//				}else{
-//					ExportReportEngine.exportReports(selectedReports, null, outputLocation, exporter);
-//				}
-//			} catch (Exception e) {
-//				ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
-//			}
-//		}
 	}
 	
 	public static class ExportReportHandlerWrapper extends AbstractHandler {

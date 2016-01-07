@@ -249,7 +249,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			}
 		});
 		Label lblSystemId = new Label(main, SWT.NONE);
-		lblSystemId.setText("System ID:");
+		lblSystemId.setText(Messages.QueryPropertiesDialog_SystemIdLabel);
 		Label lblUuid = new Label(main, SWT.NONE);
 		lblUuid.setText(UuidUtils.uuidToString(query.getUuid()));
 		Label lblOwner = new Label(main, SWT.NONE);

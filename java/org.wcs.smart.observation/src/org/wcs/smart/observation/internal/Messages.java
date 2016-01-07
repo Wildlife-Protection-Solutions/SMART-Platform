@@ -141,6 +141,8 @@ public class Messages extends NLS {
 	public static String GPSBabel_Error_CouldNotImport;
 	public static String GPSBabel_Error_ProcessTerminatedTooLong;
 	public static String GPSBabel_Error_ReadingBabelOps;
+	public static String GPSDataImport_DateTimeRequired;
+
 	public static String GPSDataImport_TrackError_CouldNotParseFile;
 	public static String GPSDataImport_Progress_ImportingFromGPS;
 	public static String GPSDataImport_Progress_ParsingTrackPoints;

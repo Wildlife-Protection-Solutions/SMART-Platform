@@ -23,6 +23,14 @@
 package org.wcs.smart.connect.replication;
 
 import org.eclipse.core.expressions.PropertyTester;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.progress.WorkbenchJob;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Property tester for replication properties. 
@@ -40,7 +48,25 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 		if (property.equals("isEnabled")){ //$NON-NLS-1$
 			//querying the database for the state causes session issues in other
 			//unless done in a job, and this is not necessary
-			return DerbyReplicationManager.INSTANCE.getLocalReplicationState();	
+			final boolean[] isEnabled = new boolean[]{false};
+			Job j = new Job("replicationstatus") {
+				
+				@Override
+				public IStatus run(IProgressMonitor monitor) {
+					Session s = HibernateManager.openSession();
+					isEnabled[0] = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
+			try {
+				j.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+			return isEnabled[0];	
 		}return false;
 	}
 

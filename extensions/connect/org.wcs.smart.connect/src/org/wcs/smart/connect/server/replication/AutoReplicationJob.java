@@ -28,11 +28,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
-import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
+import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -48,7 +49,7 @@ import org.wcs.smart.hibernate.SmartDB;
 /**
  * Job to manage auto replication of data to/from the smart
  * connect server. 
- * 
+ * This replicates data for the current Conservation Area only.
  * @author Emily
  *
  */
@@ -57,7 +58,7 @@ public class AutoReplicationJob extends Job {
 	private SmartConnect smartConnect;
 	private Long millisecondsToRepeat = -1l;
 	private boolean reschedule = true;
-	
+	private ConservationArea caToReplicate = null;
 	private boolean statusOnly;
 	
 	/**
@@ -80,6 +81,7 @@ public class AutoReplicationJob extends Job {
 	public AutoReplicationJob(boolean statusOnly) {
 		super(Messages.AutoReplicationJob_jobname);
 		this.statusOnly = statusOnly;
+		this.caToReplicate = SmartDB.getCurrentConservationArea();
 	}
 
 	
@@ -99,16 +101,18 @@ public class AutoReplicationJob extends Job {
 		monitor.beginTask(Messages.AutoReplicationJob_TaskName, 3);
 		setServerStatus(ConnectStatusManager.ServerStatus.CONNECTING, null);
 		
-		if (!DerbyReplicationManager.INSTANCE.getLocalReplicationState()){
-			setServerStatus(ServerStatus.ERROR, Messages.AutoReplicationJob_ReplicationNoEnabledError);
-			return Status.OK_STATUS;
-		}
 		monitor.subTask(Messages.AutoReplicationJob_ServerSubTaskName);
-		Session s = HibernateManager.openSession();
 		ConnectServer server = null;
 		ConnectUser user = null;
 		ConnectServerStatus serverStatus = null;
+		
+		Session s = HibernateManager.openSession();
 		try{
+			if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(caToReplicate.getUuid(), s)){
+				setServerStatus(ServerStatus.ERROR, Messages.AutoReplicationJob_ReplicationNoEnabledError);
+				return Status.OK_STATUS;
+			}
+			
 			server = ConnectHibernateManager.getConnectServer(s);
 			serverStatus = ConnectHibernateManager.getConnectServerStatus(s);
 			user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);

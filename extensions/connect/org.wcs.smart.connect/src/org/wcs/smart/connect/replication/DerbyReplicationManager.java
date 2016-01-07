@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
@@ -39,10 +40,24 @@ import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
+import org.wcs.smart.connect.util.DerbyUtil;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Manager for starting and stopping the derby change logging.
+ * 
+ * The database uses the functions DerbyUtil.isReplicationEnabled(cauuid) to determine
+ * if a change to a table should be logged. There are two separate controls for change logging:
+ * One is the conservation area.  If the conservation area has been uploaded or is uploading
+ * to a connect server than changes to that conservation area can be logged.  Otherwise
+ * changes will never be logged. 
+ * The second is the LOGGING_DB_PROPERTY.  This allows the application to turn off all
+ * logging regardless of what is set for the conservation area.  This is useful when 
+ * applying change logs or deleting a conservation area.  By default this should be turned on 
+ * and only turned off when specifically wanting to disable change logging.
+ * 
+ *  
  * 
  * @author Emily
  *
@@ -70,30 +85,15 @@ public enum DerbyReplicationManager {
 	
 	private Thread fileStoreReplication;
 	private FileStoreWatcher watcher;
+	private boolean replicationState = false;
 	
-	private Boolean enabledState = null;
-	
-	private List<IReplicationEventListener> listeners = new ArrayList<IReplicationEventListener>();
-
-	
-	
-	public void addListener(IReplicationEventListener listener){
-		listeners.add(listener);
-	}
-	
-	private void fireEvents(){
-		for (IReplicationEventListener l : listeners){
-			l.handleEvent();
-		}
-	}
 	/**
 	 * This MUST BE wrapped in a transaction that is committed
 	 * @param session
 	 * @throws Exception
 	 */
 	public void enableReplication(Session session) throws Exception{
-		this.enabledState = true;
-		setReplicationEnabled(session, true);
+		setSystemReplicationEnabled(session, true);
 
 		//file watch for changes to file store
 		watcher = new FileStoreWatcher();
@@ -103,8 +103,6 @@ public enum DerbyReplicationManager {
 		//run filestore watcher in new thread (background)		
 		fileStoreReplication = new Thread(watcher);
 		fileStoreReplication.start();
-		
-		fireEvents();
 	}
 	
 	/**
@@ -113,8 +111,7 @@ public enum DerbyReplicationManager {
 	 * @throws Exception
 	 */
 	public void disableReplication(Session session) throws Exception{
-		this.enabledState = false;
-		setReplicationEnabled(session, false);
+		setSystemReplicationEnabled(session, false);
 		
 		if (watcher != null){
 			watcher.deregister();
@@ -125,27 +122,38 @@ public enum DerbyReplicationManager {
 			fileStoreReplication.interrupt();
 			fileStoreReplication = null;
 		}
-		
-		fireEvents();
-		
 	}
 
 	/**
-	 * This MUST BE wrapped in a transaction that is committed
+	 * 
+	 * @return true if the last call was to enableReplication, otherwise false.
+	 */
+	public boolean getSystemReplicationState(){
+		return this.replicationState;
+	}
+	/**
+	 * Sets the state of the database property LOGGING_DB_PROPERTY.  
+	 * This MUST BE wrapped in a transaction and be committed.
+	 * 
 	 * @param session
 	 * @param isEnabled
 	 */
-	private void setReplicationEnabled(Session session, final boolean isEnabled){
+	private void setSystemReplicationEnabled(Session session, final boolean isEnabled){
+		this.replicationState = isEnabled;
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
 				connection.createStatement().execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('" + LOGGING_DB_PROPERTY + "', " + (isEnabled ? "true" : "null") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}});
 	}
+	
 	/**
-	 * Determines if replication can be enabled for a given
-	 * conservation area.  This gets the conservation area status and ensures it
-	 * is either done or processing.  If no status or backup or error status returns false.
+	 * Determines if replication should be enabled for a given
+	 * Conservation Area.   A ConservationArea can be replicated if a connect
+	 * server is configured, and the associated status is one of UPLOAD or DONE.  This
+	 * does not check if logging is enabled. If no connect server
+	 * status is found, or the status is backup or error false is returned.
+	 * 
 	 * @return
 	 */
 	public boolean canReplicate(Session session, ConservationArea ca){
@@ -164,24 +172,11 @@ public enum DerbyReplicationManager {
 	}
 	
 	/**
-	 * Determines if replication is enabled by tracking the calls
-	 * to disable and enable replication and not querying the 
-	 * database state.  Will return false if state is undetermined.
-	 * @return
-	 */
-	public boolean getLocalReplicationState(){
-		if (enabledState == null){
-			return false;
-		}
-		return enabledState;
-	}
-	/**
-	 * Queries the database for the logging_db_property
 	 * 
 	 * @param session
-	 * @return
+	 * @return the state of the LOGGING_DB_PROPERTY database value
 	 */
-	public boolean isReplicationEnabled(Session session){
+	public boolean isReplicationSystemEnabled(Session session){
 		return session.doReturningWork(new ReturningWork<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
@@ -199,18 +194,33 @@ public enum DerbyReplicationManager {
 				}
 				return false;
 			}
-		});
-		
+		});	
 	}
-	
-	public interface IReplicationEventListener{
-		public boolean handleEvent();
+
+	/**
+	 * Determines if replication is enabled for a given
+	 * Conservation Area.  This checks the status of the 
+	 * LOGGING_DB_PROPERTY and the Conservation Area connect
+	 * status.
+	 * This calls the same function used by the database triggers
+	 * to determine if a change should be logged.
+	 * @param cauuid 
+	 * @param session
+	 * @return
+	 * @throws SQLException
+	 */
+	public Boolean isReplicationEnabled(final UUID cauuid, Session session) {
+		return session.doReturningWork(new ReturningWork<Boolean>() {
+			@Override
+			public Boolean execute(Connection connection) throws SQLException {
+				return DerbyUtil.isReplicationEnabled(UuidUtils.uuidToByte(cauuid), connection);
+			}
+		});
 	}
 	
 	public Boolean hasLocalChanges(Session session){
-		//replication not enabled
-		if (!enabledState) return null;
-		
+		if (!canReplicate(session, SmartDB.getCurrentConservationArea())) return null;
+
 		ConnectSyncHistoryRecord  rec = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, 
 				SmartDB.getCurrentConservationArea(), ConnectSyncHistoryRecord.Type.UPLOAD);
 		Long currentRevision = ChangeLogTableManager.INSTANCE.getMaxLocalRevision(session, 

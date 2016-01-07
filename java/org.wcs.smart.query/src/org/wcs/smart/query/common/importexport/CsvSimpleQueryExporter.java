@@ -156,7 +156,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		if (((SimpleQuery)query).getVisibleColumns() != null){
 			HashSet<String> columnKeys = new HashSet<String>();
 		
-			String[] keys = ((SimpleQuery)query).getVisibleColumns().split(",");
+			String[] keys = ((SimpleQuery)query).getVisibleColumns().split(SimpleQuery.COLUMN_SPLITTER);
 			for (String key : keys){
 				columnKeys.add(key);
 			}

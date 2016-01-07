@@ -74,8 +74,6 @@ public class LoginHandler implements ILoginHandler {
 	@Override
 	public void onLogin() throws Exception {
 		//ensure replication is disabled; we will enable later if required
-		//this should be done when db started up; but we'll redo it here to 
-		//be sure.
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
@@ -88,32 +86,39 @@ public class LoginHandler implements ILoginHandler {
 		//never replicate multiple conservation areas
 		if (SmartDB.isMultipleAnalysis()) return ;
 		
+
+		
 		ConnectServerStatus status;
 		s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			status = (ConnectServerStatus)s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());
-			if (status == null){
-				return;
-			}
+			//enable replication; we always want to enable replication if logging
+			//into a database; triggers will ensure only correct ca data is recorded in
+			//the log tables
+			DerbyReplicationManager.INSTANCE.enableReplication(s);
+
+			//get status
+			status = (ConnectServerStatus)s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());	
 			s.getTransaction().commit();
 		}finally{
 			s.close();
 		}
 
+		if (status == null){
+			return;
+		}
+		
 		//process any existing ca upload task
 		//this may effect replication state which is why we disable/enable
 		//replication state again after completed
 		processCaUploadEvents(status);
 		
-		//sort out replication
+		//clean up replication
 		s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
 			
-			if (DerbyReplicationManager.INSTANCE.canReplicate(s, SmartDB.getCurrentConservationArea())){
-				DerbyReplicationManager.INSTANCE.enableReplication(s);
-			}else{
+			if (!DerbyReplicationManager.INSTANCE.canReplicate(s, SmartDB.getCurrentConservationArea())){
 				//delete any replication records or sync history records
 				ChangeLogTableManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
 				SyncHistoryManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());

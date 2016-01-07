@@ -49,6 +49,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.ui.ConservationAreaLabelProvider;
 
 /**
@@ -81,12 +82,12 @@ public class ExportReportCaListPage extends WizardPage {
 		main.setLayout(new GridLayout());
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Conservation Areas:");
+		lbl.setText(Messages.ExportReportCaListPage_CaList);
 
 		caList = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		caList.setContentProvider(ArrayContentProvider.getInstance());
 		caList.setLabelProvider(new ConservationAreaLabelProvider());
-		caList.setInput("Loading...");
+		caList.setInput(Messages.ExportReportCaListPage_LoadingLbl);
 		caList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		caList.getTable().addKeyListener(new KeyAdapter() {
 			
@@ -119,8 +120,8 @@ public class ExportReportCaListPage extends WizardPage {
 		loadConservationAreas();
 		validate();
 		
-		setTitle("Export Report");
-		setMessage("Select Conservation Areas to export reports to");
+		setTitle(Messages.ExportReportCaListPage_Title);
+		setMessage(Messages.ExportReportCaListPage_Message);
 		setControl(main);
 	}
 
@@ -162,7 +163,7 @@ public class ExportReportCaListPage extends WizardPage {
 	private void validate() {
 		String error = null;
 		if (caList.getCheckedElements().length == 0){
-			error = "At least one Conservation Area must be selected";
+			error = Messages.ExportReportCaListPage_Error;
 		}
 		
 		setErrorMessage(error);

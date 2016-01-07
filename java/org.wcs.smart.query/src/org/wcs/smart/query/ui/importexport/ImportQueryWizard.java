@@ -295,6 +295,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 			query.setOwner(SmartDB.getCurrentEmployee());
 		}
 		
+		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{

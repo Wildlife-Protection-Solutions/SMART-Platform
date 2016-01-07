@@ -57,6 +57,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public abstract class SimpleQuery extends StyledQuery {
 
+	public static final String COLUMN_SPLITTER = ","; //$NON-NLS-1$
+	
 	/* db fields */
 	protected String strQueryFilter;
 	protected String visibleColumns = null;
@@ -125,7 +127,7 @@ public abstract class SimpleQuery extends StyledQuery {
 		for (QueryColumn col : queryColumns){
 			if (col.isVisible() ){
 				sb.append(col.getKey());
-				sb.append(","); //$NON-NLS-1$
+				sb.append(COLUMN_SPLITTER);
 			}else{
 				all = false;
 			}
@@ -237,7 +239,7 @@ public abstract class SimpleQuery extends StyledQuery {
 			queryColumns = new ArrayList<QueryColumn>();
 			HashSet<String> visible = null;
 			if (visibleColumns != null){
-				String[] bits = visibleColumns.split(","); //$NON-NLS-1$
+				String[] bits = visibleColumns.split(COLUMN_SPLITTER);
 				visible = new HashSet<String>();
 				for (int i = 0; i < bits.length; i ++){
 					visible.add(bits[i]);

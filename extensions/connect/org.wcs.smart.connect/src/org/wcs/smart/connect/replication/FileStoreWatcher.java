@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Session;
@@ -50,7 +51,6 @@ import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -125,10 +125,12 @@ public class FileStoreWatcher implements Runnable{
     	Path relativePath = FileSystems.getDefault()
     			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
     			.relativize(p);
-    	if (!relativePath.getName(0).toString().matches(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid() ))){
-    		//not in the current conservation area folder.  We just
-    		//don't care.
-    		//TODO: document this 
+    	
+    	UUID caUuid = null;
+    	try{
+    		caUuid = UuidUtils.stringToUuid(relativePath.getName(0).toString());
+    	}catch (Exception ex){
+    		//no in a ca directory so we do not replication
     		return;
     	}
     	
@@ -145,18 +147,21 @@ public class FileStoreWatcher implements Runnable{
     			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
     			.relativize(p)
     			.toString());
-    	
-    	ChangeLogItem item = new ChangeLogItem();
-    	item.setAction(type);
-    	item.setConservationArea(SmartDB.getCurrentConservationArea().getUuid());
-    	item.setFileName(relativeFileName);
-    	item.setSource(Source.LOCAL);
 
     	Session s = HibernateManager.openSession();
     	try{
-    		s.beginTransaction();
-    		ChangeLogTableManager.INSTANCE.addItem(s, item);
-    		s.getTransaction().commit();
+    		if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(caUuid, s)){
+    			s.beginTransaction();
+    			
+    			ChangeLogItem item = new ChangeLogItem();
+    	    	item.setAction(type);
+    	    	item.setConservationArea(caUuid);
+    	    	item.setFileName(relativeFileName);
+    	    	item.setSource(Source.LOCAL);
+    	    	
+    			ChangeLogTableManager.INSTANCE.addItem(s, item);
+    			s.getTransaction().commit();
+    		}
     	}finally{
     		s.close();
     	}
