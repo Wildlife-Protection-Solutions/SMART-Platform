@@ -257,7 +257,7 @@ public class Messages extends NLS {
 	public static String CaInfoComposite_NameLabel;
 	public static String CaPropertyPage_ConfirmDialogMessage;
 	public static String CaPropertyPage_ConfirmDialogTitle;
-	public static String CaPropertyPage_DefaultLanguageLabel;
+	public static String CaPropertyPage_DefaultLanguageLabel1;
 	public static String CaPropertyPage_Dialog_Title;
 	public static String CaPropertyPage_DialogMessage;
 	public static String CaPropertyPage_Error_CannotRemoveDefault;
@@ -279,8 +279,8 @@ public class Messages extends NLS {
 	public static String CategoryDMAdvisor_Error_NotCategory;
 	public static String CategoryInfoPanel_OpMultiple;
 	public static String CaWizard_CaDef_CaDef_PageName;
-	public static String CaWizard_CaDef_DefaultLangInfo;
-	public static String CaWizard_CaDef_DefaultLangLable;
+	public static String CaWizard_CaDef_DefaultLangInfo1;
+	public static String CaWizard_CaDef_DefaultLangLable1;
 	public static String CaWizard_CaDef_PageDescription;
 	public static String CaWizard_CaDef_PageTitle;
 	public static String CaWizard_UserDef_PageDescription;
