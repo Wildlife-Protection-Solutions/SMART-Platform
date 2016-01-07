@@ -105,7 +105,7 @@ public class QueryHeaderComposite extends Composite {
 		gl.marginHeight = 0;
 		gl.verticalSpacing = 0;
 		setLayout(gl);
-		lblType = toolkit.createLabel(this, "");
+		lblType = toolkit.createLabel(this, ""); //$NON-NLS-1$
 		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		FontData[] fd = lblType.getFont().getFontData();
 		fd[0].setHeight(fd[0].getHeight()-1);
@@ -118,7 +118,7 @@ public class QueryHeaderComposite extends Composite {
 				f.dispose();
 			}
 		});
-		Label lblSummary = toolkit.createLabel(this, "Query Name:");
+		Label lblSummary = toolkit.createLabel(this, Messages.QueryHeaderComposite_QueryNameLabel);
 		lblSummary.setForeground(headerColor);
 		lblSummary.setFont(headerFont);
 		

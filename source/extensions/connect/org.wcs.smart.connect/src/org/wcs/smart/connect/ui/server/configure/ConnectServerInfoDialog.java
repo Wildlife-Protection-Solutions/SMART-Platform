@@ -367,17 +367,12 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				monitor.beginTask(Messages.ConnectServerInfoDialog_DeleteServerTaskName, 7);
+				monitor.beginTask(Messages.ConnectServerInfoDialog_DeleteServerTaskName, 6);
 				
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
-					
-					monitor.subTask(Messages.ConnectServerInfoDialog_DisableSubTasName);
-					DerbyReplicationManager.INSTANCE.disableReplication(s);
-					monitor.worked(1);
-					if (monitor.isCanceled()) return;
-					
+
 					ConservationArea ca = SmartDB.getCurrentConservationArea();
 					(new CaConnectDeleteHandler()).beforeDelete(ca, s, new SubProgressMonitor(monitor, 6));
 					

@@ -49,6 +49,7 @@ import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.AutoReplicationJob;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Status control that is displayed in the status bar
@@ -198,11 +199,11 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 			
 			String message = null;
 			ServerStatus status = ServerStatus.ERROR;
-					
-			if (DerbyReplicationManager.INSTANCE.getLocalReplicationState()){
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try{
+			
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try{
+				if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), session)){
 					Boolean hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
 					if (hasChanges != null){
 						if (hasChanges){
@@ -211,12 +212,13 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 							status = ServerStatus.UPTODATE;
 						}
 					}
-				}finally{
-					session.getTransaction().rollback();
-					session.close();
+				}else{
+					message = Messages.StatusLineControl_ServernotFound;
 				}
-			}else{
-				message = Messages.StatusLineControl_ServernotFound;
+				
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
 			}
 			updateLocalStatus(status, message);
 

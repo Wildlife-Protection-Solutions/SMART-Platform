@@ -315,7 +315,7 @@ public class ApplyChangeLogJob extends Job {
 		
 		Path filestoreDir = tempDirectory.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 			
-		boolean replicationEnabled = DerbyReplicationManager.INSTANCE.getLocalReplicationState();
+		boolean replicationEnabled = DerbyReplicationManager.INSTANCE.getSystemReplicationState();
 		
 		//gets the current user; for resetting after applying changes
 		SmartDB.DbUser currentUser = SmartDB.DbUser.ADMIN;
@@ -329,7 +329,7 @@ public class ApplyChangeLogJob extends Job {
 			
 			//if not logged into a ca the replication won't be enabled
 			//and we do not want to re-enable it when complete
-			replicationEnabled = DerbyReplicationManager.INSTANCE.isReplicationEnabled(session);
+			replicationEnabled = DerbyReplicationManager.INSTANCE.isReplicationSystemEnabled(session);
 			if (replicationEnabled){
 				// disable replication in db so we don't log items twice
 				DerbyReplicationManager.INSTANCE.disableReplication(session);

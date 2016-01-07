@@ -203,16 +203,17 @@ public class UploadCaEngine {
 				
 			});
 			
-			//enable replication so we catch any changes made while the ca is uploaded to server
-			s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				DerbyReplicationManager.INSTANCE.enableReplication(s);
-				s.getTransaction().commit();
-			}catch(Exception ex){
-				//this should fail
-				throw new Exception(Messages.UploadCaEngine_EnableFailed + ex.getMessage(), ex);
-			}
+			//not necessary; controlled by status table in database
+//			//enable replication so we catch any changes made while the ca is uploaded to server
+//			s = HibernateManager.openSession();
+//			s.beginTransaction();
+//			try{
+//				DerbyReplicationManager.INSTANCE.enableReplication(s);
+//				s.getTransaction().commit();
+//			}catch(Exception ex){
+//				//this should fail
+//				throw new Exception(Messages.UploadCaEngine_EnableFailed + ex.getMessage(), ex);
+//			}
 			
 			UploadCaJob job = new UploadCaJob(connect, localStatus);
 			job.addJobChangeListener(new JobChangeAdapter() {

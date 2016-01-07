@@ -64,7 +64,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	
 	public CaDataModelManagerImpl(ConservationArea ca){
 		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			throw new IllegalStateException("Cannot use the CaDataModelManager for multiple conservation area analysis.");
+			throw new IllegalStateException("Cannot use the CaDataModelManager for multiple conservation area analysis."); //$NON-NLS-1$
 		}
 		this.conservationArea = ca;
 	}

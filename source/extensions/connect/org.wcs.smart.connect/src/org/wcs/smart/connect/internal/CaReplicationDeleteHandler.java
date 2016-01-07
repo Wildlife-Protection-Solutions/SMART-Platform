@@ -69,7 +69,7 @@ public class CaReplicationDeleteHandler implements ICaDeleteHandler {
 			public void afterCompletion(int status) {
 				if (status != Status.STATUS_COMMITTED){
 					//transaction not committed we need to re-enable replication
-					
+					//TODO: we should only do this if replication was enabled in the first place
 					resetException = null;
 					Job restart = new Job(Messages.CaReplicationDeleteHandler_JobName) {
 						@Override

@@ -152,9 +152,9 @@ public class QueryImportEngine {
 				if (qn.getIsDefault()){
 					xmlDefaultName = qn.getName();
 				}
-				List<?> values = session.createCriteria(Language.class).add(Restrictions.eq("ca", 
+				List<?> values = session.createCriteria(Language.class).add(Restrictions.eq("ca",  //$NON-NLS-1$
 						importCa))
-						.add(Restrictions.eq("code",qn.getLanguage())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+						.add(Restrictions.eq("code",qn.getLanguage())).list(); //$NON-NLS-1$
 				if (values.size() > 0){
 					for (Object l : values){
 						query.updateName((Language)l, qn.getName());

@@ -481,7 +481,7 @@ public class GPSDataImport {
 			@Override
 			public int compare(Waypoint o1, Waypoint o2) {
 				if (o1.getDateTime() == null || o2.getDateTime() == null){
-					throw new RuntimeException("Some of the track points do not have date/times associated with them.  All track points need a date/time to import into SMART");
+					throw new RuntimeException(Messages.GPSDataImport_DateTimeRequired);
 				}
 				return o1.getDateTime().compareTo(o2.getDateTime());
 			}

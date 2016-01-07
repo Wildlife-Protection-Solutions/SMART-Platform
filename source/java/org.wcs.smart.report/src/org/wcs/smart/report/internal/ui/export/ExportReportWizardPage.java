@@ -23,7 +23,6 @@ package org.wcs.smart.report.internal.ui.export;
 
 import java.io.File;
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -31,10 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -55,7 +51,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.internal.ExportReportEngine;
@@ -63,7 +58,6 @@ import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.ui.ReportLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for exporting reports to file.
@@ -74,7 +68,6 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class ExportReportWizardPage  extends WizardPage  {
-	private static final String EXPORT_DIALOGITTLE = Messages.ExportReportDialog_ExportDialogTitle;
 
 	private static final String FORMAT_SETTING = "Format"; //$NON-NLS-1$
 
@@ -94,7 +87,7 @@ public class ExportReportWizardPage  extends WizardPage  {
 		
 		@Override
 		public String getName() {
-			return "To Conservation Area";
+			return Messages.ExportReportWizardPage_CaOption;
 		}
 		
 		@Override
@@ -391,52 +384,17 @@ public class ExportReportWizardPage  extends WizardPage  {
 		String error = null;
 		if (!exportToConservationArea()){
 			if (txtFileName.getText().trim().isEmpty()){
-				error = "Ouput location must be provided.";
+				error = Messages.ExportReportWizardPage_OutputRequired;
 			}
 		}
 		
 		if (selectedReports.isEmpty()){
-			error = "At least one report must be selected";
+			error = Messages.ExportReportWizardPage_ReportRequired;
 		}
 		
 		setErrorMessage(error);
 		setPageComplete(error == null);
 	}
 	
-//	private boolean checkDirectory(File dir){
-//		if (!dir.exists()){
-//			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGITTLE, 
-//					MessageFormat.format(Messages.ExportReportDialog_DirDoesNotExist1, new Object[]{dir.toString()}))){
-//				return false;
-//			}else{
-//				if (!SmartUtils.createDirectory(dir)){
-//					return false;
-//				}
-//			}
-//		}
-//		if (!dir.isDirectory()){
-//			MessageDialog.openError(getShell(), Messages.ExportReportDialog_Error_DialogTitle, Messages.ExportReportDialog_InvalidDir);
-//			return false;
-//		}
-//		return true;
-//	}
-//	
-//	private void updateValues(){
-//		fileName = txtFileName.getText();
-//		IStructuredSelection selection = ((IStructuredSelection)cmbEmitters.getSelection());
-//		if (selection != null && !selection.isEmpty()){
-//			emitter = (IExportFormat)selection.getFirstElement();
-//		}
-//		try{
-//			if (this.multipleFiles){
-//				settings.put(DIRECTORY_SETTING, (new File(fileName)).toString());
-//			}else{
-//				settings.put(DIRECTORY_SETTING, (new File(fileName)).getParent()  );
-//			}
-//			settings.put(FORMAT_SETTING, emitter.getName());
-//		}catch (Exception ex){
-//			//eatme
-//		}
-//	}
 
 }

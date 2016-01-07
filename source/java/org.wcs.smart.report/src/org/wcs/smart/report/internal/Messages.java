@@ -35,6 +35,11 @@ public class Messages extends NLS {
 	public static String ExportLibraryHandler_ExportOk;
 	public static String ExportLibraryHandler_LocationLabel;
 	public static String ExportLibraryHandler_ZipFilterName;
+	public static String ExportReportCaListPage_CaList;
+	public static String ExportReportCaListPage_Error;
+	public static String ExportReportCaListPage_LoadingLbl;
+	public static String ExportReportCaListPage_Message;
+	public static String ExportReportCaListPage_Title;
 	public static String ExportReportDialog_AllFilesFilterName;
 	public static String ExportReportDialog_BrowseButton;
 	public static String ExportReportDialog_DialogMessage;
@@ -60,6 +65,13 @@ public class Messages extends NLS {
 	public static String ExportReportHandler_ExportError;
 	public static String ExportReportJob_ErrorExportingReport;
 	public static String ExportReportJob_ExportReportJobName;
+	public static String ExportReportWizard_DialogMessage;
+	public static String ExportReportWizard_DialogTitle;
+	public static String ExportReportWizard_ExportError;
+	public static String ExportReportWizard_ImportComplete;
+	public static String ExportReportWizardPage_CaOption;
+	public static String ExportReportWizardPage_OutputRequired;
+	public static String ExportReportWizardPage_ReportRequired;
 	public static String ImportLibraryHandler_AllFilesFilterName;
 	public static String ImportLibraryHandler_ErrorImportingLibrary;
 	public static String ImportLibraryHandler_FileLabel;

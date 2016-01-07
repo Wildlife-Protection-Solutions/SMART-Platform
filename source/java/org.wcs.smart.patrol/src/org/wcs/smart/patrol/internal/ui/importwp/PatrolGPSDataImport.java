@@ -396,7 +396,7 @@ public class PatrolGPSDataImport {
 	 */
 	public static Track convertToTrack(List<Waypoint> coordinates){
 		if (coordinates.isEmpty()) return null;
-		if (coordinates.size() == 1) throw new RuntimeException("Multiple points required to generate a track.  Only a single point found.");
+		if (coordinates.size() == 1) throw new RuntimeException("Multiple points required to generate a track.  Only a single point found."); //$NON-NLS-1$
 		LineString track = GPSDataImport.convertToLineString(coordinates, Track.ZTIMEZONE);
 		Track t = new Track();
 		t.setLineString(track);

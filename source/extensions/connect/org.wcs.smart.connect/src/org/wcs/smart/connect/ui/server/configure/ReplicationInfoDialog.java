@@ -187,7 +187,7 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 
 		Session session = HibernateManager.openSession();
 		try{
-			if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){
+			if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), session)){
 				lblEnabled.setText(Messages.ReplicationInfoDialog_EnabledState);
 			}else{
 				lblEnabled.setText(Messages.ReplicationInfoDialog_DisabledState);

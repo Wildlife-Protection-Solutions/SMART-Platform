@@ -68,9 +68,6 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 	private ExportReportWizardPage page1;
 	private ExportReportCaListPage page2;
 	
-	private boolean hasError = false;
-	private boolean importFile = true;
-	
 	private boolean isMultiple;
 	private List<Report> initReports;
 	
@@ -178,7 +175,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 		//export to ca
 		File tempDir;
 		try {
-			tempDir = Files.createTempDirectory("smartreports").toFile();
+			tempDir = Files.createTempDirectory("smartreports").toFile(); //$NON-NLS-1$
 		} catch (IOException e1) {
 			ReportPlugIn.displayLog(e1.getMessage(), e1);
 			return;
@@ -189,13 +186,13 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 		HashMap<Report, File> exports = new HashMap<Report, File>();
 		
 		for (Report r : selectedReports){
-			File file = new File(tempDir, r.getId() + System.nanoTime() + ".zip");
+			File file = new File(tempDir, r.getId() + System.nanoTime() + ".zip"); //$NON-NLS-1$
 			try {
 				defexporter.exportReport(file, r, null, new NullProgressMonitor());
 				exports.put(r, file);
 			} catch (Exception e) {
 				ReportPlugIn.log(e.getMessage(), e);
-				errors.add(MessageFormat.format("Error exporting report {0}: {1}", r.getName(), e.getMessage()));
+				errors.add(MessageFormat.format(Messages.ExportReportWizard_ExportError, r.getName(), e.getMessage()));
 			}
 			
 			if (monitor.isCanceled()){
@@ -222,14 +219,14 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 					incnt++;
 				}catch (Exception ex){
 					ReportPlugIn.log(ex.getMessage(), ex);
-					errors.add(MessageFormat.format("Error exporting report {0}: {1}", export.getKey().getName(), ex.getMessage()));
+					errors.add(MessageFormat.format(Messages.ExportReportWizard_ExportError, export.getKey().getName(), ex.getMessage()));
 				}
 			}
-			caInfo.add(MessageFormat.format("{0}: imported {1} of {2}", ca.getNameLabel(), incnt, selectedReports.size() ));
+			caInfo.add(MessageFormat.format(Messages.ExportReportWizard_ImportComplete, ca.getNameLabel(), incnt, selectedReports.size() ));
 		}
 		ExportReportEngine.exportReports(selectedReports, tempDir, null, defexporter);
 		
-		errors.add(0, "");
+		errors.add(0, ""); //$NON-NLS-1$
 		for (String info : caInfo){
 			errors.add(0, info);
 		}
@@ -239,7 +236,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 			@Override
 			public void run() {
 				WarningDialog wd = new WarningDialog(getShell(), 
-						"Export Reports", "Exporting to Conservation Area completed.", errors);
+						Messages.ExportReportWizard_DialogTitle, Messages.ExportReportWizard_DialogMessage, errors);
 				wd.open();		
 			}
 			
