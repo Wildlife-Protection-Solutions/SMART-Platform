@@ -126,9 +126,6 @@ public class ChangeLogPackager {
 	/*
 	 * Zips changelog file and metadata file
 	 */
-	/*
-	 * Zips changelog file and metadata file
-	 */
 	private void zipPackage(IProgressMonitor monitor) throws Exception{
 		File[] filesToZip;
 		if (Files.exists(filestorePath)){
@@ -166,38 +163,43 @@ public class ChangeLogPackager {
 		}
 		
 		Session s = HibernateManager.openSession();
-		
-		s.doWork(new Work(){
-
-			@Override
-			public void execute(Connection connection) throws SQLException {
-
-				try(OutputStream fout = Files.newOutputStream(changelogFile);
-						ObjectOutputStream oout = new ObjectOutputStream(fout)){
-					oout.writeInt(items.size());
-					
-					ChangeLogItemSerializer serializer = new ChangeLogItemSerializer() {
-						@Override
-						public void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException{
-							ps.setBytes(index, UuidUtils.uuidToByte(value));
-						}
-
-						@Override
-						protected int convertType(int type, int precision) {
-							if (type == Types.BINARY && precision == 16){
-								//uuid
-								return Types.OTHER;
+		s.beginTransaction();
+		try{
+			s.doWork(new Work(){
+	
+				@Override
+				public void execute(Connection connection) throws SQLException {
+	
+					try(OutputStream fout = Files.newOutputStream(changelogFile);
+							ObjectOutputStream oout = new ObjectOutputStream(fout)){
+						oout.writeInt(items.size());
+						
+						ChangeLogItemSerializer serializer = new ChangeLogItemSerializer() {
+							@Override
+							public void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException{
+								ps.setBytes(index, UuidUtils.uuidToByte(value));
 							}
-							return type;
+	
+							@Override
+							protected int convertType(int type, int precision) {
+								if (type == Types.BINARY && precision == 16){
+									//uuid
+									return Types.OTHER;
+								}
+								return type;
+							}
+						};
+						for (ChangeLogItem i : items){
+							serializer.serialize(oout, i, filestorePath, connection);
 						}
-					};
-					for (ChangeLogItem i : items){
-						serializer.serialize(oout, i, filestorePath, connection);
+					}catch (Exception ex){		
+						throw new SQLException (ex);
 					}
-				}catch (Exception ex){		
-					throw new SQLException (ex);
-				}
-			}});
+				}});
+		}finally{
+			s.getTransaction().rollback();
+			s.close();
+		}
 		
 	}
 	

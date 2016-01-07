@@ -54,7 +54,11 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 				@Override
 				public IStatus run(IProgressMonitor monitor) {
 					Session s = HibernateManager.openSession();
-					isEnabled[0] = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
+					try{
+						isEnabled[0] = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
+					}finally{
+						s.close();
+					}
 					return Status.OK_STATUS;
 				}
 			};
