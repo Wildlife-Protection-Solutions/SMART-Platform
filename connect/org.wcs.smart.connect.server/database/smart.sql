@@ -839,6 +839,7 @@ CREATE TABLE smart.patrol_type
    CA_UUID uuid NOT NULL,
    PATROL_TYPE varchar(6) NOT NULL,
    IS_ACTIVE boolean NOT NULL,
+   max_speed INTEGER,
    PRIMARY KEY (CA_UUID,PATROL_TYPE)
 );
 
