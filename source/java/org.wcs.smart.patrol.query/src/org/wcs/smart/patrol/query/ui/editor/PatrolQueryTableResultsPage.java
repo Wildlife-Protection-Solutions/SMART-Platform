@@ -92,7 +92,7 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 			toolkit = null;
 		}
 	}
-
+	
 	public void setQuery(){
 		content.initValues(parentEditor.getQueryInternal());
 	}

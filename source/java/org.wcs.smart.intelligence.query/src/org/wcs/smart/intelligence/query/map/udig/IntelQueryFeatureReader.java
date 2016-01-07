@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -44,6 +45,8 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -65,6 +68,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	private IntelligenceRecordResultItem currentIntel = null;
 	private Iterator<IntelligencePoint> subInterator;
 	private SimpleFeature next;
+	private List<QueryColumn> cols = null;
 	/**
 	 * Creates a new feature reader.
 	 * 
@@ -73,7 +77,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	 */
 	public IntelQueryFeatureReader(IntelligenceRecordQuery query,
 			SimpleFeatureType ftype) {
-		
+		cols = query.getQueryColumns(Locale.getDefault(), null);
 		this.ftype = ftype;
 		this.fIterator = null;
 		
@@ -108,7 +112,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 		}
 	
 		IntelligencePoint ip = subInterator.next();
-		return toSimpleFeature(ftype, currentIntel, ip);
+		return toSimpleFeature(cols, ftype, currentIntel, ip);
 	}
 	
 	/**
@@ -118,61 +122,17 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	 * @param ip intelligence point
 	 * @return 
 	 */
-	public static SimpleFeature toSimpleFeature(SimpleFeatureType ftype, IntelligenceRecordResultItem currentIntel, IntelligencePoint ip){
-		int size = FixedQueryColumn.FixedColumns.values().length+2;
-		if (!SmartDB.isMultipleAnalysis()){
-			size = size - 2;
-		}
-		Object[] data = new Object[size];
+	public static SimpleFeature toSimpleFeature(List<QueryColumn> columns, SimpleFeatureType ftype, IntelligenceRecordResultItem currentIntel, IntelligencePoint ip){		
+		List<Object>data = new ArrayList<Object>();
+		data.add(gf.createPoint(new Coordinate(ip.getX(), ip.getY())));
+		data.add(UuidUtils.uuidToString(ip.getUuid()));
 		int i = 0;
-		data[i++] = gf.createPoint(new Coordinate(ip.getX(), ip.getY()));
-		data[i++] = UuidUtils.uuidToString(ip.getUuid());
-		for (FixedQueryColumn.FixedColumns c : FixedQueryColumn.FixedColumns.values()){
-			boolean add = true;
-			if (c == FixedColumns.CA_ID || c == FixedColumns.CA_NAME){
-				if (!SmartDB.isMultipleAnalysis()){
-					add = false;
-				}
-			}
-			if (add){
-				switch(c){
-				case CA_ID:
-					data[i++] = currentIntel.getConservationAreaId();
-					break;
-				case CA_NAME:
-					data[i++] = currentIntel.getConservationAreaName();
-					break;
-				case INTEL_DATE_FROM:
-					data[i++] = currentIntel.getFromDate();
-					break;
-				case INTEL_DATE_RECIEVED:
-					data[i++] = currentIntel.getReceivedDate();
-					break;
-				case INTEL_DATE_TO:
-					data[i++] = currentIntel.getToDate();
-					break;
-				case INTEL_DESCRIPTION:
-					data[i++] = currentIntel.getDescription();
-					break;
-				case INTEL_INFORMANT_ID:
-					data[i++] = currentIntel.getInformantId();
-					break;
-				case INTEL_NAME:
-					data[i++] = currentIntel.getName();
-					break;
-				case INTEL_PATROL_SOURCE:
-					data[i++] = currentIntel.getPatrolId();
-					break;
-				case INTEL_SOURCE:
-					data[i++] = currentIntel.getSource();
-					break;
-				default:
-					break;
-					
-				}
+		for (QueryColumn c : columns){
+			if (c.isVisible()){
+				data.add(QueryColumnUtils.getValue(currentIntel, c, ftype.getDescriptor(i++)));
 			}
 		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
 	}
 	/**
 	 * @see org.geotools.data.FeatureReader#close()

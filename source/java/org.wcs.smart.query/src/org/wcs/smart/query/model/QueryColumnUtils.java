@@ -78,6 +78,7 @@ public abstract class QueryColumnUtils implements Cloneable{
 		StringBuilder sb = new StringBuilder();
 		HashSet<String> names = new HashSet<String>();
 		for (int i = 0; i < columns.size(); i++){
+			if (!columns.get(i).isVisible()) continue;	//skip non visible columns
 			sb.append(","); //$NON-NLS-1$
 			String name = columns.get(i).getName();
 			name = name.replaceAll(" ", "_"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -88,6 +89,10 @@ public abstract class QueryColumnUtils implements Cloneable{
 			while(names.contains(tempname)){
 				tempname = name + "_" + cnt; //$NON-NLS-1$
 				cnt++;
+			}
+			//Name is not a valid attribute name
+			if (tempname.equalsIgnoreCase("Name")){ //$NON-NLS-1$
+				tempname = tempname +"_"; //$NON-NLS-1$
 			}
 			
 			sb.append(tempname);

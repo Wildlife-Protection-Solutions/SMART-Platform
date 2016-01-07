@@ -103,6 +103,14 @@ public class QueryDataSource extends AbstractDataStore{
 
 	
 	/**
+	 * @see org.geotools.data.AbstractDataStore#removeSchema(java.lang.String)
+	 */
+	@Override
+	public void removeSchema(String typeName) throws IOException {
+		schemas.remove(typeName);
+	}
+	
+	/**
 	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
 	 */
 	@Override

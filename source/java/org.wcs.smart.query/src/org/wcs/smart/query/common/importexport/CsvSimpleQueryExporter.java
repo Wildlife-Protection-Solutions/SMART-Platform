@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -149,22 +150,14 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
 			}catch(Exception ex){}
 		}
-		// filter columns 
+		
+		//filter visible columns 
 		//in SMART this returns all possible query columns; we only want to include visible query columns
-		List<QueryColumn> columns = ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null);
-		
-		if (((SimpleQuery)query).getVisibleColumns() != null){
-			HashSet<String> columnKeys = new HashSet<String>();
-		
-			String[] keys = ((SimpleQuery)query).getVisibleColumns().split(SimpleQuery.COLUMN_SPLITTER);
-			for (String key : keys){
-				columnKeys.add(key);
-			}
-			for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
-				QueryColumn column = (QueryColumn) iterator.next();
-				if (!columnKeys.contains(column.getKey())){
-					iterator.remove();
-				}
+		List<QueryColumn> columns = new ArrayList<QueryColumn>(((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null));
+		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
+			QueryColumn column = (QueryColumn) iterator.next();
+			if (!column.isVisible()) {
+				iterator.remove();
 			}
 		}
 		

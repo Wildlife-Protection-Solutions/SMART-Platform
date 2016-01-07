@@ -257,8 +257,7 @@ public class QueryEditorTableContent {
 			public void linkActivated(HyperlinkEvent e) {
 				QueryPropertiesDialog dialog = new QueryPropertiesDialog(editor.getSite().getShell(), editor.getQuery());
 				if (dialog.open() == Window.OK){
-					initValues(editor.getQueryInternal());
-					editor.setDirty(true);
+					editor.queryPropertiesChange();
 				}
 			}
 		});

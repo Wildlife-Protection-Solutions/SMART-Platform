@@ -247,6 +247,16 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 	
 	/**
+	 * Called when changes are made to the query properties page.
+	 * 
+	 */
+	public void queryPropertiesChange(){
+		setDirty(true);
+		page1.initPage();
+		page2.refresh();
+	}
+	
+	/**
 	 * @return the query results display table
 	 */
 	public QueryLazyResultsTable getQueryResultsTable() {

@@ -38,7 +38,6 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.model.Query;
@@ -105,6 +104,11 @@ public class QueryService extends IQueryService {
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
 		}
+		if (ds != null){
+			for (String name : ds.getTypeNames()){
+				ds.removeSchema(name);
+			}
+		}
 	}	
 	
 	
@@ -145,7 +149,7 @@ public class QueryService extends IQueryService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query.getTypeKey().equals(IntelligenceRecordQueryType.class)){ 
+					if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY)){ 
 						members.add(new QueryGeoResource(this, IntelQueryDataSource.INTEL_TYPE));
 					}
 				}
@@ -210,7 +214,7 @@ public class QueryService extends IQueryService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		if (query.getTypeKey().equals(IntelligenceRecordQueryType.class) ){
+                		if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY) ){
                 			ds = new IntelQueryDataSource((IntelligenceRecordQuery)query);
                 		}
                 	}else{

@@ -95,6 +95,14 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
 	 */
 	@Override
+	public void removeSchema(String typeName) throws IOException {
+		schemas.remove(typeName);
+	}
+	
+	/**
+	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
+	 */
+	@Override
 	public SimpleFeatureType getSchema(String typeName) throws IOException {
 		SimpleFeatureType type = schemas.get(typeName);
 		if (type == null){
@@ -123,8 +131,7 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	}
 	
 	
-	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
-		
+	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){ 
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:MultiLineString:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$

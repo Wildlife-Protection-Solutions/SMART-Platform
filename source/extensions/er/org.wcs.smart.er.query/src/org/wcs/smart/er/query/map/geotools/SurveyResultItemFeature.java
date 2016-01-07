@@ -34,6 +34,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -55,6 +56,15 @@ public class SurveyResultItemFeature {
 	private static GeometryFactory gf = new GeometryFactory();
 	
 	
+	private static void addQueryColumnData(IResultItem it, SimpleFeatureType ftype, List<QueryColumn> columns, List<Object> data){
+		int i = 0;
+		for (QueryColumn c : columns){
+			if (c.isVisible()){
+				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));
+			}
+		}
+	}
+	
 	/**
 	 * Converts a query result item to a feature.
 	 * The feature type must have been generated 
@@ -66,13 +76,12 @@ public class SurveyResultItemFeature {
 	 * @return created feature 
 	 */
 	public static SimpleFeature createObservationFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
-		Object[] data = new Object[columns.size() + 2];
-		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
-		data[1] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
-		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
-		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+		List<Object> data = new ArrayList<Object>();
+		
+		data.add(gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY())));
+		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		addQueryColumnData(it, ftype, columns, data);
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
 	}
 	
 	/**
@@ -86,17 +95,16 @@ public class SurveyResultItemFeature {
 	 * @return created feature 
 	 */
 	public static SimpleFeature createTrackFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
-		Object[] data = new Object[columns.size() + 2];
+		List<Object> data = new ArrayList<Object>();
 		Geometry g = null;
 		if (it.getTracks() != null && it.getTracks().size() > 0){
 			g = gf.createMultiLineString(it.getTracks().toArray(new LineString[it.getTracks().size()]));
 		}
-		data[0] = g;
-		data[1] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
-		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
-		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+		data.add(g);
+		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		addQueryColumnData(it, ftype, columns, data);
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
 	}
 	
 	/**
@@ -111,23 +119,21 @@ public class SurveyResultItemFeature {
 	 */
 	public static SimpleFeature createTrackFeature(MissionTrackResultItem it, Session session,
 			List<QueryColumn> columns, SimpleFeatureType ftype){
-		Object[] data = new Object[columns.size() + 2];
-		MissionTrack mt = (MissionTrack) session.load(MissionTrack.class, it.getTrackUuid());
+		List<Object> data = new ArrayList<Object>();
+		
+		Geometry g = null;
 		try{
-			data[0] = mt.getLineString();
+			MissionTrack mt = (MissionTrack) session.load(MissionTrack.class, it.getTrackUuid());
+			g = mt.getLineString();
 		}catch (Exception ex){
 			ERQueryPlugIn.log(ex.getMessage(), ex);
 		}
-		data[1] = it.getMissionId() + "." + UuidUtils.uuidToString(it.getTrackUuid()); //$NON-NLS-1$ 
+		data.add(g);
+		data.add(it.getMissionId() + "." + UuidUtils.uuidToString(it.getTrackUuid())); //$NON-NLS-1$ 
 		
-		for (int i = 0; i < columns.size(); i ++){
-			if (i == 3){
-				data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
-			}else{
-				data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
-			}
-		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+		addQueryColumnData(it, ftype, columns, data);
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
 	}
 	
 	/**

@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.query.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.wcs.smart.query.common.engine.IResultItem;
 
@@ -35,13 +36,13 @@ public class IntelligenceRecordResultItem implements IResultItem {
 
 	private String conservationAreaName;
 	private String conservationAreaId;
-	private byte[] uuid;
+	private UUID uuid;
 	private String name;
 	private Date receivedDate;
 	private Date fromDate;
 	private Date toDate;
 	private String source;
-	private byte[] sourceUuid;
+	private UUID sourceUuid;
 	private String patrolId;
 	private String informantId;
 	private String description;
@@ -58,10 +59,10 @@ public class IntelligenceRecordResultItem implements IResultItem {
 	public void setConservationAreaId(String conservationAreaId) {
 		this.conservationAreaId = conservationAreaId;
 	}
-	public byte[] getUuid() {
+	public UUID getUuid() {
 		return uuid;
 	}
-	public void setUuid(byte[] uuid) {
+	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
 	}
 	public String getName() {
@@ -94,10 +95,10 @@ public class IntelligenceRecordResultItem implements IResultItem {
 	public void setSource(String source) {
 		this.source = source;
 	}
-	public byte[] getSourceUuid() {
+	public UUID getSourceUuid() {
 		return sourceUuid;
 	}
-	public void setSourceUuid(byte[] sourceUuid) {
+	public void setSourceUuid(UUID sourceUuid) {
 		this.sourceUuid = sourceUuid;
 	}
 	public String getPatrolId() {

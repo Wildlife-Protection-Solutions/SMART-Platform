@@ -32,12 +32,10 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.internal.Messages;
-import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
-import org.wcs.smart.intelligence.query.model.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * A geotools intelligence record query data source that 
@@ -92,6 +90,13 @@ public class IntelQueryDataSource extends AbstractDataStore{
 		return new IntelQueryFeatureReader(this.query, getSchema(typeName));
 	}
 
+	/**
+	 * @see org.geotools.data.AbstractDataStore#removeSchema(java.lang.String)
+	 */
+	@Override
+	public void removeSchema(String typeName) throws IOException {
+		schemas.remove(typeName);
+	}
 	
 	/**
 	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
@@ -130,20 +135,10 @@ public class IntelQueryDataSource extends AbstractDataStore{
 	 * Create feature definition string from query columns.
 	 */
 	private static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
-		
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:Point:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$
-		for (FixedQueryColumn.FixedColumns c : FixedQueryColumn.FixedColumns.values()){
-			if (c == FixedColumns.CA_ID || c == FixedColumns.CA_NAME){
-				if (SmartDB.isMultipleAnalysis()){
-					sb.append("," + c.getGuiName(Locale.getDefault()) + ":" + c.type.geotoolsType ); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}else{
-				//for some reason "Name" is not a valid attribute name
-				sb.append("," + (c.getGuiName(Locale.getDefault()).equalsIgnoreCase("Name") ? c.getGuiName(Locale.getDefault()) + "_" : c.getGuiName(Locale.getDefault())) + ":" + c.type.geotoolsType );  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}
-		}		
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
 		return sb.toString();
 	}
 	

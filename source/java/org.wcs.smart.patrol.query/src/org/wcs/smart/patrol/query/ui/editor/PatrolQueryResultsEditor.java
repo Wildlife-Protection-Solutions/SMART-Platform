@@ -80,7 +80,6 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 
 	private QueryProxy query;
 	private PatrolQueryTableResultsPage page1;
-//	private PatrolQueryMapPage page2;
 	private QueryMapPageEditor page2;
 	private boolean isDirty = false;
 	
@@ -232,6 +231,16 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 
 	/**
+	 * Called when changes are made to the query properties page.
+	 * 
+	 */
+	public void queryPropertiesChange(){
+		setDirty(true);
+		page1.setQuery();
+		page2.refresh();
+	}
+	
+	/**
 	 * @return 
 	 * @return the query results display table
 	 */
@@ -295,7 +304,6 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				page1.setQuery();
 			}
 			
-//			page2 = new PatrolQueryMapPage(this);
 			page2 = new QueryMapPageEditor(this);
 			addPage(1, page2, input);
 			setPageText(1, Messages.PatrolQueryResultsEditor_MapTabName);

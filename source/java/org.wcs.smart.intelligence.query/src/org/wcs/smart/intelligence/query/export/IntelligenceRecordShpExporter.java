@@ -71,7 +71,7 @@ public class IntelligenceRecordShpExporter extends ShapeQueryExporter{
 		try{
 			Intelligence i = (Intelligence) s.load(Intelligence.class, currentIntel.getUuid());
 			for (IntelligencePoint ip : i.getPoints()){
-				features.add(IntelQueryFeatureReader.toSimpleFeature(ftype, currentIntel, ip));
+				features.add(IntelQueryFeatureReader.toSimpleFeature(queryColumns, ftype, currentIntel, ip));
 			}
 		}finally{
 			s.close();
