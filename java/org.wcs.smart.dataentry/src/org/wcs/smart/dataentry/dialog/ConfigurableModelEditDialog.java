@@ -79,6 +79,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		main.setLayout(mainLayout);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		setChangesMade(model.getUuid() == null);
+		
 		List<IConfigurableModelEditorTabContent> extraTabs = getExtraTabs();
 		
 		ConfigurableModelEditorDefaultTab defaultTab = new ConfigurableModelEditorDefaultTab(this);
@@ -104,8 +106,6 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			//no extra tabs create old fashioned content without tabs
 			defaultTab.createTabContent(main);
 		}
-		
-		setChangesMade(model.getUuid() == null);
 		
 		setTitle(Messages.ConfigurableModelEditDialog_Title);
 		setMessage(Messages.ConfigurableModelEditDialog_Message);
