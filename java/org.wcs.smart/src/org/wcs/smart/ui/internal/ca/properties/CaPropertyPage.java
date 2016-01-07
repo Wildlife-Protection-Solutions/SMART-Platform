@@ -107,7 +107,8 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 
 		lbl = new Label(caComposite, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		lbl.setText(Messages.CaPropertyPage_DefaultLanguageLabel);
+		lbl.setText(Messages.CaPropertyPage_DefaultLanguageLabel1);
+		lbl.setToolTipText("The language used when the system language is not supported by SMART.  The system language is set by the operating system, but can be overwritten in the SMART ini file." );
 		
 		lbl = new Label(caComposite, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));

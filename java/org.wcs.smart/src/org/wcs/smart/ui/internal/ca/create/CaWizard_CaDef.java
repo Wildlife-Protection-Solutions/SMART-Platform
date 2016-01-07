@@ -85,7 +85,8 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		});
 		
 		Label lblLang = new Label(composite, SWT.NONE);
-		lblLang.setText(Messages.CaWizard_CaDef_DefaultLangLable);
+		lblLang.setText(Messages.CaWizard_CaDef_DefaultLangLable1);
+		lblLang.setToolTipText("The language used when the system language is not supported by SMART.  The system language is set by the operating system, but can be overwritten in the SMART ini file.");
 		
 		lstViewer = new ComboViewer(composite,  SWT.DROP_DOWN | SWT.READ_ONLY);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -115,7 +116,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		lblDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)lblDescription.getLayoutData()).widthHint = 100;
 		((GridData)lblDescription.getLayoutData()).horizontalIndent = 8;
-		lblDescription.setText(Messages.CaWizard_CaDef_DefaultLangInfo);
+		lblDescription.setText(Messages.CaWizard_CaDef_DefaultLangInfo1);
 		
 		setControl(composite);
 		
