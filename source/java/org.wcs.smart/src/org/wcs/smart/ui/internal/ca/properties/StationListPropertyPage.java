@@ -78,6 +78,7 @@ import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.UUIDBinaryType;
+import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -272,16 +273,18 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		
-		btnDelete = new Button(composite, SWT.NONE);
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setEnabled(false);
-		btnDelete.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				deleteStation();
-			}
-		});
+		if (PermissionManager.INSTANCE.canDelete(Station.class)){
+			btnDelete = new Button(composite, SWT.NONE);
+			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			btnDelete.setEnabled(false);
+			btnDelete.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					deleteStation();
+				}
+			});
+		}
 		
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -290,7 +293,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
 				if (stn != null){
 					btnDisable.setEnabled(true);
-					btnDelete.setEnabled(true);
+					if (btnDelete != null) btnDelete.setEnabled(true);
 					if (stn.getIsActive()){
 						btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					}else{

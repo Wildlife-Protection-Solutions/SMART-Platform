@@ -105,23 +105,25 @@ public class EmployeeComposite extends Composite {
 
 	private List<Agency> agencies;
 	
+	public static final int AGENCY_RANK = 1 << 1;
+	public static final int SMART_USER = 1 << 2;
+	public static final int END_DATE = 1 << 3;
+	public static final int SMART_USER_LEVEL = 1 << 4;
 	/**
 	 * Create the composite.
 	 * 
 	 * @param parent
-	 * @param style
+	 * @param localStyle any combination of AGENCY_RANK, SMART_USER, END_DATE, SMART_USER_LEVEL
 	 */
-	public EmployeeComposite(Composite parent, int style,
-			boolean includeAgencyRank, boolean includeEnd, 
-			boolean includeUserLevel, List<Agency> agencies) {
-		super(parent, style);
+	public EmployeeComposite(Composite parent, int localStyle, List<Agency> agencies) {
+		super(parent, SWT.NONE);
 
 		this.agencies = agencies;
 
-		createControl(includeAgencyRank, includeEnd, includeUserLevel);
+		createControl(localStyle);
 	}
 
-	public void createControl(boolean includeAgencyRank, boolean includeEnd, boolean includeUserLevel) {
+	public void createControl(int localStyle) {
 		setLayout(new GridLayout(2, false));
 		KeyListener validate = new KeyAdapter() {
 			@Override
@@ -160,7 +162,7 @@ public class EmployeeComposite extends Composite {
 		data.horizontalIndent = 8;
 		dtEmploymentStart.setLayoutData(data);
 
-		if (includeEnd){
+		if ((localStyle & END_DATE) == END_DATE){
 			Label blank = new Label(this, SWT.NULL);
 			blank.setVisible(false);
 			
@@ -221,7 +223,7 @@ public class EmployeeComposite extends Composite {
 		opFemale.setText(Messages.EmployeeComposite_Female_Label);
 		opFemale.addSelectionListener(changedGender);
 
-		if (includeAgencyRank){
+		if ((localStyle & AGENCY_RANK) == AGENCY_RANK){
 			createLabelField(this, SmartLabelProvider.EMP_AGENCY + ":"); //$NON-NLS-1$
 			cmbViewerAgency = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
 			cmbViewerAgency.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -270,71 +272,72 @@ public class EmployeeComposite extends Composite {
 			
 			updateRanks();
 		}
-		
-		smartc = new Group(this, SWT.NONE );
-		smartc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		smartc.setLayout(new GridLayout(2, false));
-		
-		chSmartUser = new Button(smartc, SWT.CHECK);
-		chSmartUser.setText(Messages.EmployeeComposite_IsSmartUser_Label);
-		chSmartUser.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2,1));
-		chSmartUser.addSelectionListener(new SelectionAdapter() {		
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (chSmartUser.getSelection()){
-					enableSmartUser(true);
-				}else{
-					enableSmartUser(false);
-				}
-				validate();
-			}
-		});
-		if (includeUserLevel){
-			createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER_LEVEL + ":"); //$NON-NLS-1$
-			cmbSmartUserLevel = new ComboViewer(smartc , SWT.READ_ONLY | SWT.BORDER);
-			cmbSmartUserLevel.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-			cmbSmartUserLevel.setLabelProvider(new LabelProvider(){
+		if ((localStyle & SMART_USER) == SMART_USER){
+			smartc = new Group(this, SWT.NONE );
+			smartc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			smartc.setLayout(new GridLayout(2, false));
+			
+			chSmartUser = new Button(smartc, SWT.CHECK);
+			chSmartUser.setText(Messages.EmployeeComposite_IsSmartUser_Label);
+			chSmartUser.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2,1));
+			chSmartUser.addSelectionListener(new SelectionAdapter() {		
 				@Override
-				public String getText(Object element){
-					return ((Employee.SmartUserLevel)element).name();
-				}
-			});
-			cmbSmartUserLevel.setContentProvider(ArrayContentProvider.getInstance());
-			cmbSmartUserLevel.setInput(new Employee.SmartUserLevel[]{Employee.SmartUserLevel.DATA_ENTRY, Employee.SmartUserLevel.ANALYST, Employee.SmartUserLevel.MANAGER, Employee.SmartUserLevel.ADMIN});
-			cmbSmartUserLevel.getCombo().select(0);
-			cmbSmartUserLevel.addSelectionChangedListener(new ISelectionChangedListener() {
-				
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
+				public void widgetSelected(SelectionEvent e) {
+					if (chSmartUser.getSelection()){
+						enableSmartUser(true);
+					}else{
+						enableSmartUser(false);
+					}
 					validate();
 				}
 			});
-			((GridData)cmbSmartUserLevel.getCombo().getLayoutData()).horizontalIndent = 10;
-		}
-		
-		smartc.setText(Messages.EmployeeComposite_SmartUser_Label);
-		createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER + ":"); //$NON-NLS-1$
-		txtSmartId = createTextField(smartc, SWT.NONE,
-				Employee.MAX_SMART_ID_LENGTH, validate);
-
-		
-		createLabelField(smartc, Messages.EmployeeComposite_Password_Label);
-		txtSmartPassword = createTextField(smartc, SWT.PASSWORD,
-				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
-		txtSmartPassword.setData(MODIFIED_KEY, Boolean.FALSE);
-		txtSmartPassword.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				txtSmartPassword.setData(MODIFIED_KEY, Boolean.TRUE);
+			if ((localStyle & SMART_USER_LEVEL) == SMART_USER_LEVEL){
+				createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER_LEVEL + ":"); //$NON-NLS-1$
+				cmbSmartUserLevel = new ComboViewer(smartc , SWT.READ_ONLY | SWT.BORDER);
+				cmbSmartUserLevel.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				cmbSmartUserLevel.setLabelProvider(new LabelProvider(){
+					@Override
+					public String getText(Object element){
+						return ((Employee.SmartUserLevel)element).name();
+					}
+				});
+				cmbSmartUserLevel.setContentProvider(ArrayContentProvider.getInstance());
+				cmbSmartUserLevel.setInput(new Employee.SmartUserLevel[]{Employee.SmartUserLevel.DATA_ENTRY, Employee.SmartUserLevel.ANALYST, Employee.SmartUserLevel.MANAGER, Employee.SmartUserLevel.ADMIN});
+				cmbSmartUserLevel.getCombo().select(0);
+				cmbSmartUserLevel.addSelectionChangedListener(new ISelectionChangedListener() {
+					
+					@Override
+					public void selectionChanged(SelectionChangedEvent event) {
+						validate();
+					}
+				});
+				((GridData)cmbSmartUserLevel.getCombo().getLayoutData()).horizontalIndent = 10;
 			}
-		});
-		
-		createLabelField(smartc, Messages.EmployeeComposite_Password2_Label);
-		txtSmartPassword2 = createTextField(smartc, SWT.PASSWORD,
-				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
-		
-		enableSmartUser(false);
-		chSmartUser.setSelection(false);
+			
+			smartc.setText(Messages.EmployeeComposite_SmartUser_Label);
+			createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER + ":"); //$NON-NLS-1$
+			txtSmartId = createTextField(smartc, SWT.NONE,
+					Employee.MAX_SMART_ID_LENGTH, validate);
+	
+			
+			createLabelField(smartc, Messages.EmployeeComposite_Password_Label);
+			txtSmartPassword = createTextField(smartc, SWT.PASSWORD,
+					Employee.MAX_SMART_PASSWORD_LENGTH, validate);
+			txtSmartPassword.setData(MODIFIED_KEY, Boolean.FALSE);
+			txtSmartPassword.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					txtSmartPassword.setData(MODIFIED_KEY, Boolean.TRUE);
+				}
+			});
+			
+			createLabelField(smartc, Messages.EmployeeComposite_Password2_Label);
+			txtSmartPassword2 = createTextField(smartc, SWT.PASSWORD,
+					Employee.MAX_SMART_PASSWORD_LENGTH, validate);
+			
+			enableSmartUser(false);
+			chSmartUser.setSelection(false);
+		}
 		
 		cdGiveName = createDecoration(txtGivenName);
 		cdFamilyName = createDecoration(txtFamilyName);
@@ -344,9 +347,9 @@ public class EmployeeComposite extends Composite {
 		if (dtEmploymentEnd != null){
 			cdEmploymentEnd = createDecoration(dtEmploymentEnd);
 		}
-		cdSmartId = createDecoration(txtSmartId);
-		cdSmartPassword = createDecoration(txtSmartPassword);
-		cdSmartPassword2 = createDecoration(txtSmartPassword2);
+		if (txtSmartId != null) cdSmartId = createDecoration(txtSmartId);
+		if (txtSmartPassword != null) cdSmartPassword = createDecoration(txtSmartPassword);
+		if (txtSmartPassword2 != null) cdSmartPassword2 = createDecoration(txtSmartPassword2);
 
 		validate();
 	}
@@ -512,7 +515,8 @@ public class EmployeeComposite extends Composite {
 			}
 		}
 		
-		if (chSmartUser.getSelection()){
+		
+		if (chSmartUser != null && chSmartUser.getSelection()){
 			if (txtSmartId.getText().trim().isEmpty()
 					||! SmartUtils.isSimpleString(txtSmartId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_MED_REGEX, Employee.MAX_SMART_ID_LENGTH, Employee.MIN_SMART_ID_LENGTH)) {
 				cdSmartId.show();
@@ -551,7 +555,7 @@ public class EmployeeComposite extends Composite {
 			if (hide){
 				cdSmartPassword2.hide();
 			}
-		}else{
+		}else if (chSmartUser != null){
 			cdSmartId.hide();
 			cdSmartPassword.hide();
 			cdSmartPassword2.hide();
@@ -605,32 +609,35 @@ public class EmployeeComposite extends Composite {
 			cmbViewerAgency.setComparator(comp); 
 		}
 		
-		if (e.getSmartUserId() != null){
-			chSmartUser.setSelection(true);
-			
-			txtSmartId.setText(e.getSmartUserId());
-			txtSmartPassword.setText(e.getSmartPassword());
-			txtSmartPassword2.setText(e.getSmartPassword());
-			if (cmbSmartUserLevel != null){
-				if (e.getSmartUserLevel() != null){
-					cmbSmartUserLevel.setSelection( new StructuredSelection(e.getSmartUserLevel()));
-				}else{
-					cmbSmartUserLevel.setSelection( new StructuredSelection(Employee.SmartUserLevel.DATA_ENTRY));
+		if (chSmartUser != null){
+			if (e.getSmartUserId() != null){
+				chSmartUser.setSelection(true);
+				
+				txtSmartId.setText(e.getSmartUserId());
+				txtSmartPassword.setText(e.getSmartPassword());
+				txtSmartPassword2.setText(e.getSmartPassword());
+				if (cmbSmartUserLevel != null){
+					if (e.getSmartUserLevel() != null){
+						cmbSmartUserLevel.setSelection( new StructuredSelection(e.getSmartUserLevel()));
+					}else{
+						cmbSmartUserLevel.setSelection( new StructuredSelection(Employee.SmartUserLevel.DATA_ENTRY));
+					}
+				}
+				enableSmartUser(true);
+			}else{
+				enableSmartUser(false);
+				chSmartUser.setSelection(false);
+				txtSmartId.setText(""); //$NON-NLS-1$
+				txtSmartPassword.setText(""); //$NON-NLS-1$
+				txtSmartPassword2.setText(""); //$NON-NLS-1$
+				if (cmbSmartUserLevel != null){
+					cmbSmartUserLevel.setSelection(new StructuredSelection(Employee.SmartUserLevel.DATA_ENTRY));
 				}
 			}
-			enableSmartUser(true);
-		}else{
-			enableSmartUser(false);
-			chSmartUser.setSelection(false);
-			txtSmartId.setText(""); //$NON-NLS-1$
-			txtSmartPassword.setText(""); //$NON-NLS-1$
-			txtSmartPassword2.setText(""); //$NON-NLS-1$
-			if (cmbSmartUserLevel != null){
-				cmbSmartUserLevel.setSelection(new StructuredSelection(Employee.SmartUserLevel.DATA_ENTRY));
-			}
+			txtSmartPassword.setData(MODIFIED_KEY, false);
 		}
+		
 		enableFields(!chNotActive.getSelection());
-		txtSmartPassword.setData(MODIFIED_KEY, false);
 		validate();
 	}
 	private void enableFields(boolean enable){
@@ -645,7 +652,7 @@ public class EmployeeComposite extends Composite {
 				this.opMale,
 				this.opFemale,
 				this.chSmartUser,
-				this.cmbSmartUserLevel.getCombo(),
+				this.cmbSmartUserLevel == null ? null : this.cmbSmartUserLevel.getCombo(),
 				this.cmbViewerAgency.getCombo(),
 				this.cmbViewerRank.getCombo()
 		};
@@ -654,7 +661,7 @@ public class EmployeeComposite extends Composite {
 				controls[i].setEnabled(enable);
 			}
 		}
-		if (enable){
+		if (chSmartUser != null && enable){
 			enableSmartUser(chSmartUser.getSelection());
 		}
 	}
@@ -724,32 +731,42 @@ public class EmployeeComposite extends Composite {
 			}
 		}
 		
-		if (chSmartUser.getSelection()){
-			if ((Boolean)txtSmartPassword.getData(MODIFIED_KEY)){
-				//if password was modified then update it otherwise leave it alone
-				e.setSmartPassword(HibernateManager.generatePassword(txtSmartPassword.getText()));
-			}
-			e.setSmartUserId(txtSmartId.getText().trim());
-			if (cmbSmartUserLevel != null){
-				IStructuredSelection a = (IStructuredSelection) cmbSmartUserLevel.getSelection();
-				if (!a.isEmpty()){
-					e.setSmartUserLevel( ((Employee.SmartUserLevel)a.getFirstElement())  );
+		if (chSmartUser != null){
+			if (chSmartUser.getSelection()){
+				if ((Boolean)txtSmartPassword.getData(MODIFIED_KEY)){
+					//if password was modified then update it otherwise leave it alone
+					e.setSmartPassword(HibernateManager.generatePassword(txtSmartPassword.getText()));
 				}
+				e.setSmartUserId(txtSmartId.getText().trim());
+				if (cmbSmartUserLevel != null){
+					IStructuredSelection a = (IStructuredSelection) cmbSmartUserLevel.getSelection();
+					if (!a.isEmpty()){
+						e.setSmartUserLevel( ((Employee.SmartUserLevel)a.getFirstElement())  );
+					}
+				}
+			}else{
+				e.setSmartUserId(null);
+				e.setSmartUserLevel(null);
+				e.setSmartPassword(null);
 			}
-		}else{
-			e.setSmartUserId(null);
-			e.setSmartUserLevel(null);
-			e.setSmartPassword(null);
 		}
 	}
 	
-
-
-	
+	/**
+	 * The entered smart user id or null if user
+	 * cannot enter smart user id.
+	 * @return
+	 */
 	public String getSmartUser(){
+		if (txtSmartId == null) return null;
 		return this.txtSmartId.getText();
 	}
+	/**
+	 * 
+	 * @return true if the user can enter smart username otherwise false
+	 */
 	public boolean getSmartUserSelected(){
+		if (chSmartUser == null) return false;
 		return this.chSmartUser.getSelection();
 	}
 }

@@ -75,6 +75,7 @@ import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
@@ -107,7 +108,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private TableViewer tblEmployee;
 	private FilterComposite txtFilter;
 	private Composite container;
-
+	private Button btnDelete;
+	
 	private Set<EmployeeTableViewerColumn> tableColumns = new HashSet<EmployeeTableViewerColumn>();
 	
 	private EmployeeNameFilter nameFilter;
@@ -245,23 +247,25 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		});
 		btnEdit.setEnabled(false);
 		
-		final Button btnDelete = new Button(composite, SWT.NONE);
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setToolTipText(Messages.EmployeePropertyPage_Delete_Tooltip);
-		btnDelete.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteEmployees();
-			}
-		});
-		btnDelete.setEnabled(false);
+		if (PermissionManager.INSTANCE.canDelete(Employee.class)){
+			btnDelete = new Button(composite, SWT.NONE);
+			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			btnDelete.setToolTipText(Messages.EmployeePropertyPage_Delete_Tooltip);
+			btnDelete.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					deleteEmployees();
+				}
+			});
+			btnDelete.setEnabled(false);
+		}
 		
 		tblEmployee.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				btnEdit.setEnabled( !tblEmployee.getSelection().isEmpty() );
-				btnDelete.setEnabled( !tblEmployee.getSelection().isEmpty() );
+				if (btnDelete != null) btnDelete.setEnabled( !tblEmployee.getSelection().isEmpty() );
 			}
 		});
 		
@@ -505,11 +509,16 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
 		
-		for (int i = 0; i < EmployeeColumn.values().length; i ++){
-			final EmployeeColumn colum = EmployeeColumn.values()[i];
-			EmployeeTableViewerColumn col = new EmployeeTableViewerColumn(tableViewer, colum);
-			col.setLabelProvider(new EmployeeDataColumnProvider(colum));
-			tableColumns.add(col);
+		for (EmployeeColumn colum : EmployeeColumn.values()){
+			boolean add = true;
+			if (colum == EmployeeColumn.SMART_USER || colum ==  EmployeeColumn.SMART_USER_LEVEL){
+				add = PermissionManager.INSTANCE.canConfigureSmartUser(); 
+			}
+			if (add){
+				EmployeeTableViewerColumn col = new EmployeeTableViewerColumn(tableViewer, colum);
+				col.setLabelProvider(new EmployeeDataColumnProvider(colum));
+				tableColumns.add(col);
+			}
 		}
 		
 		tableViewer.setComparator(sorter);

@@ -353,10 +353,54 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 		
 			"alter table smart.employee alter column smartpassword set data type varchar(256)",
 			
+			//max speed changes
 			"alter table smart.PATROL_TYPE ADD COLUMN max_speed INTEGER",
 			"update smart.PATROL_TYPE set max_speed = 120 WHERE PATROL_TYPE = 'GROUND'",
 			"update smart.PATROL_TYPE set max_speed = 70 WHERE PATROL_TYPE = 'MARINE'",
-			"update smart.PATROL_TYPE set max_speed = 500 WHERE PATROL_TYPE = 'AIR'"
+			"update smart.PATROL_TYPE set max_speed = 500 WHERE PATROL_TYPE = 'AIR'",
+			
+			// permission changes for analyst users
+			"GRANT ALL PRIVILEGES ON  smart.track TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.wp_attachments TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.WP_OBSERVATION_ATTRIBUTES TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.WP_OBSERVATION TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.WAYPOINT TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.PATROL_LEG_DAY TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.PATROL_LEG_MEMBERS TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.PATROL_LEG TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.PATROL TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.TRACK TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.OBSERVATION_ATTACHMENT TO analyst",
+			"GRANT ALL PRIVILEGES ON  smart.PATROL_WAYPOINT TO analyst",
+			"GRANT SELECT ON SMART.CM_NODE to analyst",
+			"GRANT SELECT ON SMART.CM_ATTRIBUTE_LIST to analyst",
+			"GRANT SELECT ON SMART.CM_ATTRIBUTE_TREE_NODE to analyst",
+			"GRANT SELECT ON SMART.CM_ATTRIBUTE_OPTION to analyst",
+			
+			"GRANT SELECT ON SMART.AGENCY to analyst",
+			"GRANT SELECT ON SMART.RANK to analyst",
+			"GRANT SELECT ON SMART.AGENCY to dataentry",
+			"GRANT SELECT ON SMART.RANK to dataentry",
+			"GRANT SELECT ON SMART.AGENCY to manager",
+			"GRANT SELECT ON SMART.RANK to manager",
+			
+			"GRANT INSERT ON  SMART.STATION TO analyst",
+			"GRANT INSERT ON  SMART.STATION TO dataentry",
+			"GRANT INSERT ON  SMART.STATION TO manager",
+			"GRANT UPDATE ON  SMART.STATION TO analyst",
+			"GRANT UPDATE ON  SMART.STATION TO dataentry",
+			"GRANT UPDATE ON  SMART.STATION TO manager",
+			
+			"GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO analyst",
+			"GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO dataentry",
+			"GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO manager",
+			
+			"GRANT INSERT ON  SMART.EMPLOYEE TO analyst",
+			"GRANT INSERT ON  SMART.EMPLOYEE TO dataentry",
+			"GRANT INSERT ON  SMART.EMPLOYEE TO manager",
+			"GRANT UPDATE ON  SMART.EMPLOYEE TO analyst",
+			"GRANT UPDATE ON  SMART.EMPLOYEE TO dataentry",
+			"GRANT UPDATE ON  SMART.EMPLOYEE TO manager",
 		};
 		
 		for (String s : sql){

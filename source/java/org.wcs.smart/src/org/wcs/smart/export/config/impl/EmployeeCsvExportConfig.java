@@ -69,9 +69,7 @@ public class EmployeeCsvExportConfig extends AbstractCsvExportConfig {
 		return Messages.ExportEmployeeDialog_CSVFormat_1
 				+ SharedUtils.LINE_SEPARATOR
 				+ MessageFormat.format(
-						Messages.ExportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, Employee.DB_MALE + "/" + Employee.DB_FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
-				+ SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR
-				+ Messages.ExportEmployeeDialog_CSVFormat_3;
+						Messages.ExportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, Employee.DB_MALE + "/" + Employee.DB_FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}); //$NON-NLS-1$
 	}
 
 	@Override

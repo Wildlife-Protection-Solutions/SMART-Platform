@@ -45,46 +45,12 @@
                label="%delete.command.name"
                style="push"
                tooltip="%delete.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.incident.new"
                label="%newincident.command.name"
                style="push"
                tooltip="%newincident.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.independentincident.filter"
@@ -104,23 +70,6 @@
                   mnemonic="%newincident.command.mnemonic"
                   style="push"
                   tooltip="%newincident.command.tooltip2">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.independentincident.separator1"
@@ -131,46 +80,12 @@
                   mnemonic="%export.command.mnemonic"
                   style="push"
                   tooltip="%export.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.independentincident.import"
                   mnemonic="%import.command.mnemonic"
                   style="push"
                   tooltip="%import.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.independentincident.separator2"
@@ -205,23 +120,6 @@
                mnemonic="%delete.command.mnemomic"
                style="push"
                tooltip="%delete.command.tooltip2">
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -256,26 +154,10 @@
                tooltip="%new.command.tooltip2">
             <visibleWhen
                   checkEnabled="false">
-               <and>
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </and>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -332,52 +214,20 @@
             class="org.wcs.smart.incident.ui.NewIncidentHandler$NewIncidentHandlerWrapper"
             commandId="org.wcs.smart.incident.new">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.incident.ui.DeleteIncidentHandler$DeleteIncidentHandlerWrapper"
             commandId="org.wcs.smart.incident.delete">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
          <enabledWhen>
             <with
@@ -406,52 +256,20 @@
             class="org.wcs.smart.incident.ui.ImportIncidentHandler$ImportIncidentHandlerWrapper"
             commandId="org.wcs.smart.independentincident.import">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.incident.ui.ExportIncidentHandler$ExportIncidentHandlerWrapper"
             commandId="org.wcs.smart.independentincident.export">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
       </handler>
    </extension>

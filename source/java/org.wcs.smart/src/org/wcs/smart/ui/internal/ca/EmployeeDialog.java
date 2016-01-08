@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
@@ -109,7 +110,15 @@ public class EmployeeDialog extends Dialog {
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
-		eComposite = new EmployeeComposite(composite, SWT.NONE, true, toUpdate!=null, true, agencies){
+		
+		int style = EmployeeComposite.AGENCY_RANK;
+		if (PermissionManager.INSTANCE.canConfigureSmartUser()){
+			style = style | EmployeeComposite.SMART_USER | EmployeeComposite.SMART_USER_LEVEL;
+		}
+		if (toUpdate != null){
+			style = style | EmployeeComposite.END_DATE;
+		}
+		eComposite = new EmployeeComposite(composite, style, agencies){
 			@Override
 			public boolean validate(){
 				boolean valid = super.validate();

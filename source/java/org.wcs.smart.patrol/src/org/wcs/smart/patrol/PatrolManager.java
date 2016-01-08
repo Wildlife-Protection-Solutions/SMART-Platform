@@ -80,16 +80,13 @@ public class PatrolManager {
 	 * that described reason why can't be edited.
 	 */
 	public String canEdit(Patrol patrol, ObservationOptions ops){
-		
-		//analyst users can never edit
-		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
-			return Messages.PatrolEditor_EditError_InsufficientPrivledges;
-		}
 		if (ops.getEditTime() == null || ops.getEditTime() < 0){
 			return null;
 		}else if (patrol.getStartDate() == null){
 			return null;
-		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
+		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY ||
+				SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST 
+				){
 			Date d = new Date();
 			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
 			if (patrol.getStartDate().after(d)){

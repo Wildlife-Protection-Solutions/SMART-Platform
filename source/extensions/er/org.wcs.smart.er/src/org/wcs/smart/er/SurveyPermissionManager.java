@@ -75,15 +75,14 @@ public class SurveyPermissionManager {
 				level == SmartUserLevel.ADMIN){
 			return null;
 		}
-		if (level == SmartUserLevel.ANALYST){
-			return Messages.SurveyPermissionManager_InsufficientPrivileges;
-		}
-		if (level == SmartUserLevel.DATA_ENTRY){
+		if (level == SmartUserLevel.DATA_ENTRY ||
+				level == SmartUserLevel.ANALYST){
 			if (op.getEditTime() == null || op.getEditTime() < 0){
 				return null;
 			}else if (survey.getStartDate() == null){
 				return null;
-			}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
+			}else if (level == Employee.SmartUserLevel.DATA_ENTRY || 
+					level == Employee.SmartUserLevel.ANALYST){
 				Date d = new Date();
 				d.setTime( d.getTime() - (long)op.getEditTime() * 24 * 60 * 60 * 1000 );
 				if (survey.getStartDate().after(d)){
@@ -113,15 +112,13 @@ public class SurveyPermissionManager {
 				level == SmartUserLevel.ADMIN){
 			return null;
 		}
-		if (level == SmartUserLevel.ANALYST){
-			return Messages.SurveyPermissionManager_InsufficientPrivileges;
-		}
-		if (level == SmartUserLevel.DATA_ENTRY){
+		if (level == SmartUserLevel.DATA_ENTRY || level == SmartUserLevel.ANALYST){
 			if (op.getEditTime() == null || op.getEditTime() < 0){
 				return null;
 			}else if (mission.getStartDate() == null){
 				return null;
-			}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
+			}else if (level == Employee.SmartUserLevel.DATA_ENTRY ||
+					level == Employee.SmartUserLevel.ANALYST){
 				Date d = new Date();
 				d.setTime( d.getTime() - (long)op.getEditTime() * 24 * 60 * 60 * 1000 );
 				if (mission.getStartDate().after(d)){
@@ -179,7 +176,8 @@ public class SurveyPermissionManager {
 		SmartUserLevel level = SmartDB.getCurrentEmployee().getSmartUserLevel();
 		if (level == SmartUserLevel.MANAGER ||
 				level == SmartUserLevel.ADMIN || 
-				level == SmartUserLevel.DATA_ENTRY){
+				level == SmartUserLevel.DATA_ENTRY ||
+				level == SmartUserLevel.ANALYST){
 			return true;
 		}
 		return false;
