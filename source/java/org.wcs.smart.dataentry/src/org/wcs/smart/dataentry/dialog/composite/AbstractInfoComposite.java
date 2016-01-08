@@ -194,6 +194,7 @@ public abstract class AbstractInfoComposite extends Composite {
 					public void run(IProgressMonitor monitor)
 							throws InvocationTargetException,
 							InterruptedException {
+						HibernateManager.initContext();
 						monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, dialog.getCategories().size());
 						for (Category c : dialog.getCategories()){
 							monitor.subTask(c.getName());
