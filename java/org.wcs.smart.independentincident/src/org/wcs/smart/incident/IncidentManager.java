@@ -34,14 +34,10 @@ public class IncidentManager {
 	 * that described reason why can't be edited.
 	 */
 	public String canEdit(Waypoint waypoint, ObservationOptions ops){
-		
-		//analyst users can never edit
-		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
-			return Messages.IncidentManager_InsufficientPrivilegesToEdit;
-		}
 		if (ops.getEditTime() == null || ops.getEditTime() < 0){
 			return null;
-		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
+		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY || 
+				SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST ){
 			Date d = new Date();
 			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
 			if (waypoint.getDateTime().after(d)){

@@ -44,6 +44,14 @@
                commandId="org.wcs.smart.dataentry.showConfigurableModel"
                label="%cm.command.label"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>

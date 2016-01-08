@@ -164,7 +164,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 	public TrackPointDialog(Shell parentShell, boolean canEdit) {
 		super(parentShell);
 		DATEFORMAT.setTimeZone(getTrackZTimezone());
-		
+		this.canEdit = canEdit;
 	}
 
 	protected abstract TimeZone getTrackZTimezone();

@@ -64,8 +64,7 @@ public class CaWizard_UserDef extends CaWizardPage{
 	public void createControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NULL);
 		container.setLayout(new FillLayout());
-		compEmployee = new EmployeeCompositeLocal(container, SWT.NONE,
-				false, false, false, null);
+		compEmployee = new EmployeeCompositeLocal(container, EmployeeComposite.SMART_USER, null);
 		setControl(container);
 		compEmployee.validate();
 	}
@@ -97,10 +96,8 @@ public class CaWizard_UserDef extends CaWizardPage{
 	 */
 	class EmployeeCompositeLocal extends EmployeeComposite{
 
-		public EmployeeCompositeLocal(Composite parent, int style,
-				boolean includeAgencyRank, boolean includeEnd,
-				boolean includeUserLevel, List<Agency> agencies) {
-			super(parent, style, includeAgencyRank, includeEnd, includeUserLevel, agencies);
+		public EmployeeCompositeLocal(Composite parent, int localStyle, List<Agency> agencies) {
+			super(parent, localStyle, agencies);
 			
 			//must create a smart user
 			super.chSmartUser.setVisible(false);

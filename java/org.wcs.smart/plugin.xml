@@ -368,6 +368,14 @@
                   label="%caprop.command.label"
                   mnemonic="%caprop.command.mnemonic"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.separator2"
@@ -378,6 +386,14 @@
                   label="%agencyrank.command.label"
                   mnemonic="%agencyrank.command.mnemonic"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.command.ca.employees.show"
@@ -399,6 +415,14 @@
                   mnemonic="%manageprojections.command.mnemonic"
                   style="push"
                   tooltip="%manageprojections.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.command.ca.areas.show"
@@ -406,12 +430,28 @@
                   label="%boundaries.command.label"
                   mnemonic="%boundaries.command.mnemonic"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.command.ca.basemaps.show"
                   label="%basemaps.command.label"
                   mnemonic="%basemaps.command.mnemonic"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.command.ca.datamodel.show"
@@ -419,6 +459,14 @@
                   label="%datamodel.command.label"
                   mnemonic="%datamodel.command.mnemonic"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.separator1"
@@ -431,20 +479,21 @@
                   mnemonic="%deleteca.command.mnemonic"
                   style="push"
                   tooltip="%deleteca.command.tooltip">
-            </command>
-            <visibleWhen
-                  checkEnabled="true">
-               <and>
+               <visibleWhen
+                     checkEnabled="false">
                   <test
                         forcePluginActivation="true"
                         property="org.wcs.smart.smartAdminUser"
                         value="admin">
                   </test>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </and>
+               </visibleWhen>
+            </command>
+            <visibleWhen
+                  checkEnabled="true">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
             </visibleWhen>
          </menu>
          <menu

@@ -20,23 +20,6 @@
                   mnemonic="%patrol.newpatrol.command.mnemonic"
                   style="push"
                   tooltip="%patrol.newpatrol.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.patrol.exportPatrol"
@@ -45,23 +28,6 @@
                   mnemonic="%patrol.export.command.mnemonic"
                   style="push"
                   tooltip="%patrol.export.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.patrol.importPatrol"
@@ -70,23 +36,6 @@
                   mnemonic="%patrol.importpatrols.command.mnemonic"
                   style="push"
                   tooltip="%patrol.importpatrols.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.patrol.separator1"
@@ -185,26 +134,10 @@
                tooltip="%patroltoolbar.newpatrol.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
-               <and>
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </and>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -218,23 +151,6 @@
                mnemonic="%patrollist.delete.command.mnemonic"
                style="push"
                tooltip="%patrollist.delete.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.patrol.newPatrol"
@@ -243,29 +159,6 @@
                mnemonic="%patroltoolbar.newpatrol.command.mnemonic"
                style="push"
                tooltip="%patroltoolbar.newpatrol.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <and>
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </and>
-            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.ShowPatrolFilter"
@@ -285,23 +178,6 @@
                mnemonic="%popup.delete.command.mnemonic"
                style="push"
                tooltip="%popup.delete.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -425,78 +301,30 @@
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.NewPatrolHandler$NewPatrolHandlerWrapper"
             commandId="org.wcs.smart.patrol.newPatrol">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.xml.export.ExportPatrolHandler$ExportPatrolHandlerWrapper"
             commandId="org.wcs.smart.patrol.exportPatrol">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.patrol.xml.in.ImportPatrolHandler$ImportPatrolHandlerWrapper"
             commandId="org.wcs.smart.patrol.importPatrol">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
       </handler>
       <handler
@@ -513,26 +341,10 @@
             class="org.wcs.smart.patrol.internal.ui.views.DeletePatrolHandler$DeletePatrolHandlerWrapper"
             commandId="org.wcs.smart.patrol.view.DeletePatrol">
          <activeWhen>
-            <and>
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="dataentry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </and>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
          </activeWhen>
          <enabledWhen>
             <with
