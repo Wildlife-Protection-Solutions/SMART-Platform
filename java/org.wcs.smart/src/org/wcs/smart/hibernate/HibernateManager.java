@@ -352,7 +352,6 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return list of conservation areas 
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<ConservationArea> findConservationAreas(String userName, String password) throws Exception{
 		Session x = HibernateManager.openSession();
 		Transaction tx = x.beginTransaction();
@@ -362,7 +361,7 @@ public class HibernateManager extends SmartHibernateManager{
 			q.setParameter("userid", userName); //$NON-NLS-1$
 			q.setParameterList("users", new Integer[]{Employee.SmartUserLevel.ADMIN.ordinal(), Employee.SmartUserLevel.ANALYST.ordinal(), Employee.SmartUserLevel.MANAGER.ordinal()}); //$NON-NLS-1$
 			
-			List data = q.list();
+			List<?> data = q.list();
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();
 			for(Object v : data){
 				ConservationArea ca = (ConservationArea) ((Object[])v)[0];
