@@ -36,7 +36,9 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Class to merge datamodels. 
+ * Merges two datamodels, returning a data model that only
+ * includes items that exist in all datamodels.
+ *  
  * @author Emily
  *
  */

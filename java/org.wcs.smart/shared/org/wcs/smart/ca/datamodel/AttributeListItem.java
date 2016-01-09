@@ -53,7 +53,7 @@ public class AttributeListItem extends DmObject{
 		super();
 	}
 	/**
-	 * 
+	 * 0 based
 	 * @return set order of the item in the list
 	 */
 	@Column(name="list_order")
