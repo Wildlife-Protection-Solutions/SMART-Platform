@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -73,9 +74,12 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
+import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
@@ -232,7 +236,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			public void selectionChanged(SelectionChangedEvent event) {
 				((DataModelLabelProvider)viewer.getLabelProvider()).setLanguage(getLanguage());
 				viewer.refresh();
-				
+				//refresh selection to refresh panels
+				viewer.setSelection(viewer.getSelection());
 			}
 		});
 		
@@ -385,10 +390,29 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		setButtonLayoutData(btnModifyElement);		
 		
 		Composite bottomComp = new Composite(thisparent, SWT.NONE);
-		bottomComp.setLayout(new GridLayout(1, false));
-		/* import button @ bottom */
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginWidth = 0;
+		gl.marginHeight = 0;
+		bottomComp.setLayout(gl);
+		
+		//merge
+		Button mergeButton = new Button(bottomComp, SWT.PUSH);
+		mergeButton.setText(Messages.DataModelPropertyPage_MergeButton);
+		mergeButton.setToolTipText(Messages.DataModelPropertyPage_MergeTooltip);
+		mergeButton.addSelectionListener(new SelectionAdapter() {		
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				mergeDataModel();
+				viewer.refresh();
+				//update selection to refresh panel
+				viewer.setSelection(viewer.getSelection());
+			}
+		});
+		
+		//export 
 		Button exportButton = new Button(bottomComp, SWT.PUSH);
 		exportButton.setText(Messages.DataModelPropertyPage_ExportXml_Button);
+		exportButton.setToolTipText(Messages.DataModelPropertyPage_ExportTooltip);
 		exportButton.addSelectionListener(new SelectionAdapter() {		
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -403,6 +427,89 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		return thisparent;
 	}
 
+	private void mergeDataModel(){
+		if (changesMade){
+			if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_SaveDialogTitle, Messages.DataModelPropertyPage_SaveDialogMessage)){
+				return;
+			}
+			if (!performSave()) return;
+			if (changesMade) return;	//something went wrong 
+		}
+		FileDialog fd = new FileDialog(this.getShell(), SWT.OPEN);
+		fd.setFilterNames(new String[]{Messages.DataModelPropertyPage_XmlFile_FilterName});
+		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
+		
+		String file = fd.open();
+		if (file == null){
+			//nothing selected
+			return;
+		}
+		final File f = new File(file);
+		if (!f.exists()){
+			MessageDialog.openError(getShell(), Messages.DataModelPropertyPage_ErrorDialogTitle, MessageFormat.format(Messages.DataModelPropertyPage_FileNotFound, f.toString()));
+			return;
+		}
+		
+		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					try{
+						monitor.beginTask(Messages.DataModelPropertyPage_TaskName, 2);
+						DataModel sourceDm = ((DataModel) viewer.getInput());
+						
+						monitor.subTask(Messages.DataModelPropertyPage_Progress1);
+						DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
+						DataModel targetDm = converter.convert(f, currentCa, false);
+						monitor.worked(1);
+						
+						monitor.subTask(Messages.DataModelPropertyPage_Progress2);
+						DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, currentCa);
+						
+						final List<String> warnings = updater.merge(new SubProgressMonitor(monitor, 1));
+						//add any new objects that are not saved via relationships
+						for (Attribute a : sourceDm.getAttributes()){
+							if (a.getUuid() == null){
+								session.save(a);
+							}
+						}
+						for (Category c : sourceDm.getCategories()){
+							if (c.getUuid() == null){
+								session.save(c);
+							}
+						}
+						
+						
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								setChangesMade(true);
+								if (warnings.size() > 0){
+									WarningDialog wd = new WarningDialog(getShell(), 
+											Messages.DataModelPropertyPage_WarningDialogTitle, Messages.DataModelPropertyPage_WarningsMessage, warnings);
+									wd.open();
+								}
+							}	
+						});
+						
+						monitor.done();
+					}catch (final Exception ex){
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(Messages.DataModelPropertyPage_MergerError + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
+							}});
+					}
+				}
+			});
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_MergerError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+		}
+	}
+	
 	/**
 	 * Exports the current model as defined (not necessary saved) to an xml file.
 	 */

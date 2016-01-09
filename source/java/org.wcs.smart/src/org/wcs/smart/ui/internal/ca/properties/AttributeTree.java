@@ -682,12 +682,14 @@ public class AttributeTree {
 					parent.setChildren(new ArrayList<AttributeTreeNode>());
 				}
 				parent.getChildren().add(it);
+				it.setIsActive(parent.getIsActive());
 			}else{
 				getRootNodes().add(it);
+				it.setIsActive(true);
 			}
 			viewer.setExpandedState(x, true);
 			
-			it.setIsActive(true);
+			
 			if (siblings == null){
 				it.setNodeOrder(0);
 			}else{

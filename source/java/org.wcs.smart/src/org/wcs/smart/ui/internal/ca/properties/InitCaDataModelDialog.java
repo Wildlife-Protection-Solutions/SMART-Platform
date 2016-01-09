@@ -248,6 +248,10 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			caViewer.setLabelProvider(new ConservationAreaLabelProvider());
 			caViewer.setInput(areas.toArray());
 			caViewer.setSelection(new StructuredSelection(areas.get(0)));
+			GridData ld = new GridData(SWT.FILL, SWT.FILL, true, false);
+			ld.widthHint = 120;
+			caViewer.getControl().setLayoutData(ld);
+			
 		}
 	}
 
