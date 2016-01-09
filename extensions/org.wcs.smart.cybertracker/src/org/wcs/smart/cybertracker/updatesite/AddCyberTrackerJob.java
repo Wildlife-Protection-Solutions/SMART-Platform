@@ -63,7 +63,7 @@ public class AddCyberTrackerJob extends Job {
 			session.beginTransaction();
 			if (currentVersion == null){
 				buildTables(session);
-				currentVersion = CyberTrackerPlugIn.DB_VERSION_1;
+				currentVersion = CyberTrackerPlugIn.DB_VERSION_3_0;
 			}
 			//run the upgrader to upgrade to the current version
 			CtDatabaseUpgrader.upgrade(currentVersion, session);
@@ -135,6 +135,6 @@ public class AddCyberTrackerJob extends Job {
 			session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst").executeUpdate(); //$NON-NLS-1$
 			session.createSQLQuery("GRANT SELECT ON smart.ct_properties_option to login").executeUpdate(); //$NON-NLS-1$
 		}
-		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_1, session);
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_3_0, session);
 	}
 }

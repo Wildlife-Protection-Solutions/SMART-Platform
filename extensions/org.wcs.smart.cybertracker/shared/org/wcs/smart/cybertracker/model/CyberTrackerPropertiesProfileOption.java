@@ -31,46 +31,85 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 
 /**
  * Class responsible for representing specific option
- * among CyberTracker Properties that applies to specific Conservation Area
+ * among CyberTracker Properties that applies to specific properties profile
  * 
  * @author elitvin
- * @since 1.0.0
+ * @since 4.0.0
  */
 @Entity
-@Table(name = "smart.ct_properties_option")
-public class CyberTrackerPropertiesOption extends UuidItem {
-	
-	public enum OptionID {
-		STORAGE_TIME
+@Table(name = "smart.ct_properties_profile_option")
+public class CyberTrackerPropertiesProfileOption extends UuidItem {
+
+	public enum ProfileOptionID {
+		APP_NAME,
+		LARGE_SCROLL_BARS,
+		KIOSK_MODE,
+		SIMPLE_CAMERA,
+		EXIT_PIN,
+		
+		SIGHTING_ACCURACY,
+		SIGHTING_FIX_COUNT,
+		WAYPOINT_TIMER,
+		GPS_TIME_ZONE,
+		SKIP_BUTTON_TIMEOUT,
+
+		PROJECTION,
+		UTM_ZONE,
+		
+		USE_TITLE_BAR,
+		USE_LARGE_TITLES,
+		USE_LARGE_TABS,
+		
+		DISABLE_EDITING,
+		USE_SD_CARD,
+		TEST_TIME,
+		RESET_ON_SYNC,
+		RESET_ON_NEXT,
+		
+		TRACK_ACCURACY,
+		
+		USE_GPS_TIME,
+		MANUAL_GPS,
+		ALLOW_SKIP_MANUAL_GPS,
+		
+		FIELD_MAP_FILENAME,
+		LOCK100,
+		USE_MAP_ON_SKIP,
+		
+		AUTO_NEXT,
+		CAN_PAUSE,
+		SHOW_EDIT,
+		SHOW_GPS,
+		MAX_PHOTO_COUNT,
+		DILUTION_OF_PRECISION;
 	}
 
-	private ConservationArea conservationArea;
-	private OptionID optionId;
+	private CyberTrackerPropertiesProfile profile;
+	private ProfileOptionID optionId;
 //	private Boolean booleanValue;
 	private Double doubleValue;
 	private Integer integerValue;
 	private String stringValue;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public ConservationArea getConservationArea() {
-		return conservationArea;
+	@JoinColumn(name="profile_uuid", referencedColumnName="uuid")
+	public CyberTrackerPropertiesProfile getProfile() {
+		return profile;
 	}
-	public void setConservationArea(ConservationArea conservationArea) {
-		this.conservationArea = conservationArea;
+	public void setProfile(CyberTrackerPropertiesProfile profile) {
+		this.profile = profile;
 	}
 
 	@Column(name="option_id")
 	@Enumerated(EnumType.STRING)
-	public OptionID getOptionId() {
+	public ProfileOptionID getOptionId() {
 		return optionId;
 	}
-	public void setOptionId(OptionID optionId) {
+	public void setOptionId(ProfileOptionID optionId) {
 		this.optionId = optionId;
 	}
 	

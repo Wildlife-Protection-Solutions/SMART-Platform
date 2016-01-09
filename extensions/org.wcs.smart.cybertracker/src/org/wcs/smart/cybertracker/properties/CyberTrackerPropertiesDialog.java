@@ -42,12 +42,10 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -61,23 +59,20 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog {
 
-	private CyberTrackerProperties ctProperties;
+	private CyberTrackerPropertiesProfile ctProperties;
 	
 	private Text txtProfileName;
 	private ControlDecoration profileNameDecoration;
 	
 	private CyberTrackerPropertiesComposite tabs;
 	
-	public CyberTrackerPropertiesDialog(Shell shell) {
+	public CyberTrackerPropertiesDialog(Shell shell, CyberTrackerPropertiesProfile profile) {
 		super(shell, Messages.CyberTrackerPropertiesDialog_Title);
-		Session session = HibernateManager.openSession();
-		try {
-			ctProperties = CyberTrackerHibernateManager.getProperties(session);
-		} finally {
-			session.close();
-		}
-		if (ctProperties == null)
-			ctProperties = new CyberTrackerProperties();
+		Session s = getSession();
+		//this dialog is designed to work with its own session,
+		//if it is not possible to close external session before launching this dialog than launch a dialog in a separate thread
+		s.beginTransaction();
+		ctProperties = (CyberTrackerPropertiesProfile) s.merge(profile);
 	}
 
 	@Override
@@ -102,10 +97,12 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		txtProfileName = new Text(topCmp, SWT.BORDER);
 		txtProfileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtProfileName.setToolTipText(Messages.CyberTrackerPropertiesDialog_ProfileName_Tooltip);
+		txtProfileName.setText(ctProperties.getName() != null ? ctProperties.getName() : ""); //$NON-NLS-1$
 		txtProfileName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (isProfileNameValid()) {
+					ctProperties.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), txtProfileName.getText());
 					profileNameDecoration.hide();
 				} else {
 					profileNameDecoration.show();
@@ -127,11 +124,11 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (ctProperties != null){
-//					TranslateSimpleListItemDialog translateDialog = new TranslateSimpleListItemDialog(getShell(), ctProperties);
-//					if (translateDialog.open() == Window.OK){
-//						updateText(ctProperties);
-//						setChangesMade(true);
-//					}
+					TranslateSimpleListItemDialog translateDialog = new TranslateSimpleListItemDialog(getShell(), ctProperties);
+					if (translateDialog.open() == Window.OK){
+						updateText(ctProperties);
+						setChangesMade(true);
+					}
 				}
 			}
 		});
@@ -164,21 +161,22 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 	@Override
 	protected boolean performSave() {
-		if (!tabs.recordValuesToObj(ctProperties)) {
+		if (!isProfileNameValid() || !tabs.recordValuesToObj(ctProperties)) {
 			MessageDialog.openError(getShell(), Messages.CyberTrackerPropertiesDialog_Error, Messages.CyberTrackerPropertiesDialog_DataNotValid);
 			return false;
 		}
-		
-		Session session = HibernateManager.openSession();
+
+		Session session = getSession();
 		try {
-			CyberTrackerHibernateManager.saveProperties(ctProperties, session);
+			session.saveOrUpdate(ctProperties);
+			session.getTransaction().commit();
+			//start a new transaction
+			session.getTransaction().begin();
 			setChangesMade(false);
 			return true;
 		} catch (Exception e) {
 			SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_Save_Error, e);
 			return false;
-		}finally {
-			session.close();
 		}
 	}
 

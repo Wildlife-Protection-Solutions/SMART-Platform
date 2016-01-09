@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.IConfigurableModelEditorTabContent;
@@ -123,7 +123,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		
 		CyberTrackerPropertiesComposite ctPropCmp = new CyberTrackerPropertiesComposite(main);
 		ctPropCmp.setReadOnly(true);
-		ctPropCmp.populateValuesFromObj(new CyberTrackerProperties()); //TODO: need real data
+		ctPropCmp.populateValuesFromObj(new CyberTrackerPropertiesProfile()); //TODO: need real data
 		ctPropCmp.addPropsChangeListener(new IPropsChangeListener(){
 			@Override
 			public void changesMade() {

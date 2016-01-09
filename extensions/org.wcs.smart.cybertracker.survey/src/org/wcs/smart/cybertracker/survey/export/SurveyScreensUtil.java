@@ -33,7 +33,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
@@ -42,12 +41,12 @@ import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
-import org.wcs.smart.cybertracker.survey.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
@@ -89,14 +88,13 @@ public class SurveyScreensUtil extends ScreensUtil {
 	}
 
 	@Override
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
 		registerDatatype(elements, DATATYPE_SURVEY);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
 		ScreenOption so;
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
-		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
 		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps);
 		
 		
@@ -206,7 +204,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		return result;
 	}
 
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter, CyberTrackerProperties ctProps) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter, CyberTrackerPropertiesProfile ctProps) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		
@@ -269,7 +267,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		return id;
 	}
 
-	private CyberTrackerId createEndSamplingUnitNodes(MetaExportResult container, Elements elements, CyberTrackerId suId, CyberTrackerProperties ctProps) {
+	private CyberTrackerId createEndSamplingUnitNodes(MetaExportResult container, Elements elements, CyberTrackerId suId, CyberTrackerPropertiesProfile ctProps) {
 		CyberTrackerId startSuId = new CyberTrackerId();
 		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.SurveyScreensUtil_StartSamplingUnitOption);
 		List<String> resScrValues = getCtUtil().listItemIds(resScrIds);
@@ -283,7 +281,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		return startSuId;
 	}
 	
-	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {
+	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps) {
 		StartScreensContent content = StartScreensContent.create(elements, Messages.SurveyScreensUtil_StartSurvey, Messages.SurveyScreensUtil_StartSurveyTitle, Messages.SurveyScreensUtil_BeginSurvey);
 		return addStartScreen(id, container, elements, ctProps, content);
 	}

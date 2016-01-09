@@ -30,7 +30,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
@@ -95,7 +95,7 @@ public class CyberTrackerUtil {
 		return screensFactory;
 	}
 
-	public CyberTrackerProperties getCtProperties() {
+	public CyberTrackerPropertiesProfile getCtProperties() {
 		return screensFactory.getCtProperties();
 	}
 	

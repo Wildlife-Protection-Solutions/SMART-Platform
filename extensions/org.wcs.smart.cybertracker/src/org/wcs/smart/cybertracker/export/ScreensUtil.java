@@ -36,7 +36,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.filter.Categories;
@@ -79,7 +79,7 @@ public class ScreensUtil {
 		this.screensFactory = ctUtil.getScreensFactory();
 	}
 	
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
 //		MetaExportResult result = new MetaExportResult();
 		return null; //TODO: in case we want to export without any meta screens logic for that should be placed here
 	}
@@ -94,7 +94,7 @@ public class ScreensUtil {
 		ElementsUtil.addElementsItem(elements, RESULT_DATATYPE, id.getItemId(), datatype);
 	}
 	
-	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, StartScreensContent content) {
+	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, StartScreensContent content) {
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
 		ids.add(content.getStartScreenItemId());
 		ids.addAll(ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ExitCyberTracker));
@@ -131,7 +131,7 @@ public class ScreensUtil {
 		return idsBegin.get(0);
 	}
 
-	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, List<CyberTrackerId> nodeIds, CyberTrackerProperties ctProps) {
+	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, List<CyberTrackerId> nodeIds, CyberTrackerPropertiesProfile ctProps) {
 		if (nextTaskOptions.size() != nodeIds.size()) {
 			throw new IllegalArgumentException("Unable to build next task node. Number of task options is not equal to the number of referenced nodes."); //$NON-NLS-1$
 		}
@@ -161,7 +161,7 @@ public class ScreensUtil {
 		}
 		addBatteryControl(node);
 		
-		CyberTrackerProperties properties = ctUtil.getCtProperties();
+		CyberTrackerPropertiesProfile properties = ctUtil.getCtProperties();
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		control2.setShowBack("False"); //$NON-NLS-1$
 		if (properties.isShowEdit()) {
@@ -183,7 +183,7 @@ public class ScreensUtil {
 		return endId;
 	}
 
-	protected CyberTrackerId createPauseTripNodes(MetaExportResult container, Elements elements, CyberTrackerId nextTaskId, CyberTrackerProperties ctProps, PauseNodesLabels labels) {
+	protected CyberTrackerId createPauseTripNodes(MetaExportResult container, Elements elements, CyberTrackerId nextTaskId, CyberTrackerPropertiesProfile ctProps, PauseNodesLabels labels) {
 		if (!ctProps.isCanPause()) {
 			return null;
 		}
@@ -362,11 +362,11 @@ public class ScreensUtil {
 		node.getData().getControls().getControl().add(formulaControl);
 	}
 
-	protected void addGpsConfiguration(Node node, CyberTrackerProperties props) {
+	protected void addGpsConfiguration(Node node, CyberTrackerPropertiesProfile props) {
 		addGpsConfiguration(node, props, null);
 	}
 	
-	protected void addGpsConfiguration(Node node, CyberTrackerProperties props, Integer timerOverride) {
+	protected void addGpsConfiguration(Node node, CyberTrackerPropertiesProfile props, Integer timerOverride) {
 		Control gpsConf = screensFactory.createConfigureGPSControl13(props);
 		if (timerOverride != null) {
 			gpsConf.setWaypointTimer(timerOverride);

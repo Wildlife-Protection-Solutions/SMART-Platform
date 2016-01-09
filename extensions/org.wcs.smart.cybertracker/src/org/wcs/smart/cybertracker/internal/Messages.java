@@ -113,6 +113,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerFileImportDialog_Message;
 	public static String CyberTrackerFileImportDialog_OtherFile;
 	public static String CyberTrackerFileImportDialog_Title;
+	public static String CyberTrackerHibernateManager_CreateDefaultProfile_Error;
 	public static String CyberTrackerImportComposite_Add;
 	public static String CyberTrackerImportComposite_Error;
 	public static String CyberTrackerImportComposite_ExtensionsError;
