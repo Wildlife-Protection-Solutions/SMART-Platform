@@ -54,11 +54,12 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties.ProjectionFormat;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile.ProjectionFormat;
 
 /**
  * Composite that contains controls to edit CyberTracker properties.
+ * 
  * @author elitvin
  * @since 4.0.0
  */
@@ -95,7 +96,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private Button btnUseGpsTime;
     private ComboViewer timeOffset;
     private Text txtSkipButtonTimeout;
-    private Text txtStorageTime;
     private Text txtMaxPhotoCount;
     
     private Button btnManualGPS;
@@ -119,8 +119,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private ControlDecoration skipButtonTimeoutDecoration;
     
     private ControlDecoration dilutionOfPrecisionDecoration;
-    
-    private ControlDecoration storageTimeDecoration;
     
     private ControlDecoration FileNameDecoration;
 
@@ -461,41 +459,11 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		exitPinDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		exitPinDecoration.setShowHover(true);
-		exitPinDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_ExitPinInvalid, CyberTrackerProperties.EXIT_PIN_MIN_VALUE, CyberTrackerProperties.EXIT_PIN_MAX_VALUE));
+		exitPinDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_ExitPinInvalid, CyberTrackerPropertiesProfile.EXIT_PIN_MIN_VALUE, CyberTrackerPropertiesProfile.EXIT_PIN_MAX_VALUE));
 		exitPinDecoration.hide();
 		
 		
 
-		Label lblStorageTime = new Label(generalContainer, SWT.NONE);
-		lblStorageTime.setText(Messages.CyberTrackerPropertiesDialog_StorageTime);
-		lblStorageTime.setToolTipText(Messages.CyberTrackerPropertiesDialog_StorageTime_Tooltip);
-
-		txtStorageTime = new Text(generalContainer, SWT.BORDER);
-		txtStorageTime.setToolTipText(Messages.CyberTrackerPropertiesDialog_StorageTime_Tooltip);
-		txtStorageTime.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtStorageTime.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (isStorageTimeValid()) {
-					storageTimeDecoration.hide();
-				} else {
-					storageTimeDecoration.show();
-				}
-				changesMade();
-			}
-
-		});
-
-		storageTimeDecoration = new ControlDecoration(txtStorageTime, SWT.LEFT);
-		storageTimeDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		storageTimeDecoration.setShowHover(true);
-		storageTimeDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_StorageTimeInvalid, CyberTrackerProperties.STORAGE_TIME_MIN_VALUE, CyberTrackerProperties.STORAGE_TIME_MAX_VALUE));
-		storageTimeDecoration.hide();
-		
-		
-		
-		
 		Label lblMaxPhotoCount = new Label(generalContainer, SWT.NONE);
 		lblMaxPhotoCount.setText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount);
 		lblMaxPhotoCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip);
@@ -520,7 +488,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		maxPhotoCountDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		maxPhotoCountDecoration.setShowHover(true);
-		maxPhotoCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_MaxPhotoCountInvalid, CyberTrackerProperties.MAX_PHOTO_COUNT_MIN_VALUE, CyberTrackerProperties.MAX_PHOTO_COUNT_MAX_VALUE));
+		maxPhotoCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_MaxPhotoCountInvalid, CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MIN_VALUE, CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MAX_VALUE));
 		maxPhotoCountDecoration.hide();
 		
 		
@@ -549,7 +517,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		sightingAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		sightingAccuracyDecoration.setShowHover(true);
-		sightingAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingAccuracyIvalid, CyberTrackerProperties.SIGHTING_ACCURACY_MIN_VALUE, CyberTrackerProperties.SIGHTING_ACCURACY_MAX_VALUE));
+		sightingAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingAccuracyIvalid, CyberTrackerPropertiesProfile.SIGHTING_ACCURACY_MIN_VALUE, CyberTrackerPropertiesProfile.SIGHTING_ACCURACY_MAX_VALUE));
 		sightingAccuracyDecoration.hide();
 		
 
@@ -595,7 +563,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		TrackAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		TrackAccuracyDecoration.setShowHover(true);
-		TrackAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_30, CyberTrackerProperties.TRACK_ACCURACY_MIN_VALUE, CyberTrackerProperties.TRACK_ACCURACY_MAX_VALUE));
+		TrackAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_30, CyberTrackerPropertiesProfile.TRACK_ACCURACY_MIN_VALUE, CyberTrackerPropertiesProfile.TRACK_ACCURACY_MAX_VALUE));
 		TrackAccuracyDecoration.hide();
 		
 
@@ -603,7 +571,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		sightingFixCountDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		sightingFixCountDecoration.setShowHover(true);
-		sightingFixCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingFixCountInvalid, CyberTrackerProperties.SIGHTING_FIX_COUNT_MIN_VALUE, CyberTrackerProperties.SIGHTING_FIX_COUNT_MAX_VALUE));
+		sightingFixCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingFixCountInvalid, CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MIN_VALUE, CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MAX_VALUE));
 		sightingFixCountDecoration.hide();
 		
 		Label lblTrackTimer = new Label(gpsContainer, SWT.NONE);
@@ -629,7 +597,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		trackTimerDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		trackTimerDecoration.setShowHover(true);
-		trackTimerDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_TrackTimerInvalid, CyberTrackerProperties.TIME_TRACK_MIN_VALUE, CyberTrackerProperties.TIME_TRACK_MAX_VALUE));
+		trackTimerDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_TrackTimerInvalid, CyberTrackerPropertiesProfile.TIME_TRACK_MIN_VALUE, CyberTrackerPropertiesProfile.TIME_TRACK_MAX_VALUE));
 		trackTimerDecoration.hide();
 
 		
@@ -663,7 +631,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		timeOffset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
 		timeOffset.setLabelProvider(new CyberTrackerGMTLabelProvider());
- 		timeOffset.setInput(CyberTrackerProperties.GMT_VALUES);
+ 		timeOffset.setInput(CyberTrackerPropertiesProfile.GMT_VALUES);
 		timeOffset.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -716,7 +684,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		utmZoneDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		utmZoneDecoration.setShowHover(true);
-		utmZoneDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_UtmZoneInvalid, CyberTrackerProperties.UTM_ZONE_MIN_VALUE, CyberTrackerProperties.UTM_ZONE_MAX_VALUE));
+		utmZoneDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_UtmZoneInvalid, CyberTrackerPropertiesProfile.UTM_ZONE_MIN_VALUE, CyberTrackerPropertiesProfile.UTM_ZONE_MAX_VALUE));
 		utmZoneDecoration.hide();
 
 		
@@ -745,7 +713,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		skipButtonTimeoutDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		skipButtonTimeoutDecoration.setShowHover(true);
-		skipButtonTimeoutDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeoutInvalid, CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MIN_VALUE, CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MAX_VALUE));
+		skipButtonTimeoutDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeoutInvalid, CyberTrackerPropertiesProfile.SKIP_BUTTON_TIMEOUT_MIN_VALUE, CyberTrackerPropertiesProfile.SKIP_BUTTON_TIMEOUT_MAX_VALUE));
 		skipButtonTimeoutDecoration.hide();
 		
 
@@ -828,7 +796,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		dilutionOfPrecisionDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		dilutionOfPrecisionDecoration.setShowHover(true);
-		dilutionOfPrecisionDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision_Invalid, CyberTrackerProperties.DILUTION_OF_PRECISION_MIN_VALUE, CyberTrackerProperties.DILUTION_OF_PRECISION_MAX_VALUE));
+		dilutionOfPrecisionDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision_Invalid, CyberTrackerPropertiesProfile.DILUTION_OF_PRECISION_MIN_VALUE, CyberTrackerPropertiesProfile.DILUTION_OF_PRECISION_MAX_VALUE));
 		dilutionOfPrecisionDecoration.hide();
 
 
@@ -920,7 +888,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		}
 	}
 	
-	public void populateValuesFromObj(CyberTrackerProperties ctProperties) {
+	public void populateValuesFromObj(CyberTrackerPropertiesProfile ctProperties) {
 		btnUseTitleBar.setSelection(ctProperties.isUseTitleBar());
 		btnLargeTitles.setSelection(ctProperties.isUseLargeTitles());
 		btnLargeScrollBars.setSelection(ctProperties.isLargeScrollBars());
@@ -937,7 +905,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnResetOnSync.setSelection(ctProperties.isResetOnSync());
 		btnResetOnNext.setSelection(ctProperties.isResetOnNext());
 		txtExitPin.setText(String.valueOf(ctProperties.getExitPin()));
-		txtStorageTime.setText(String.valueOf(ctProperties.getStorageTime()));
 		txtMaxPhotoCount.setText(String.valueOf(ctProperties.getMaxPhotoCount()));
 		txtSightingAccuracy.setText(String.valueOf(ctProperties.getSightingAccuracy()));
 		txtSightingFixCount.setText(String.valueOf(ctProperties.getSightingFixCount()));
@@ -956,7 +923,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnLock100.setSelection(ctProperties.isLock100());
 	}
 
-	public boolean recordValuesToObj(CyberTrackerProperties ctProperties) {
+	public boolean recordValuesToObj(CyberTrackerPropertiesProfile ctProperties) {
 		if (!validate()) {
 			return false;
 		}
@@ -982,7 +949,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		
 		ctProperties.setShowEdit(btnShowEdit.getSelection());
 		ctProperties.setShowGPS(btnShowGPS.getSelection());
-		ctProperties.setStorageTime(Integer.valueOf(txtStorageTime.getText()));
 		ctProperties.setMaxPhotoCount(Integer.valueOf(txtMaxPhotoCount.getText()));
 		
 		ctProperties.setUseTitleBar(btnUseTitleBar.getSelection());
@@ -1009,7 +975,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				btnLargeScrollBars, btnKioskMode, btnSimpleCamera, btnCanPause, txtExitPin,
 				txtSightingAccuracy, txtSightingFixCount, txtTrackTimer, timeOffset.getControl(),
 				cbProjection.getControl(), txtUtmZome, txtSkipButtonTimeout, txtDilutionOfPrecision,
-				btnShowEdit, btnShowGPS, txtStorageTime, txtMaxPhotoCount,
+				btnShowEdit, btnShowGPS, txtMaxPhotoCount,
 				btnUseTitleBar, btnLargeTitles, btnLargeTabs, btnDisableEditing, btnSdCard,
 				btnTestTime, btnResetOnSync, btnResetOnNext, txtTrackAccuracy, btnUseGpsTime,
 				btnManualGPS, btnAllowSkipManual, txtFileName, btnLock100, btnUseMapOnSkip}; 
@@ -1024,7 +990,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Integer result = Integer.valueOf(txtExitPin.getText());
-			return result >= CyberTrackerProperties.EXIT_PIN_MIN_VALUE && result <= CyberTrackerProperties.EXIT_PIN_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.EXIT_PIN_MIN_VALUE && result <= CyberTrackerPropertiesProfile.EXIT_PIN_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1035,7 +1001,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Double result = Double.valueOf(txtTrackAccuracy.getText());
-			return result >= CyberTrackerProperties.TRACK_ACCURACY_MIN_VALUE && result <= CyberTrackerProperties.TRACK_ACCURACY_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.TRACK_ACCURACY_MIN_VALUE && result <= CyberTrackerPropertiesProfile.TRACK_ACCURACY_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1046,7 +1012,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Double result = Double.valueOf(txtSightingAccuracy.getText());
-			return result >= CyberTrackerProperties.SIGHTING_ACCURACY_MIN_VALUE && result <= CyberTrackerProperties.SIGHTING_ACCURACY_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.SIGHTING_ACCURACY_MIN_VALUE && result <= CyberTrackerPropertiesProfile.SIGHTING_ACCURACY_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1057,7 +1023,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Integer result = Integer.valueOf(txtSightingFixCount.getText());
-			return result >= CyberTrackerProperties.SIGHTING_FIX_COUNT_MIN_VALUE && result <= CyberTrackerProperties.SIGHTING_FIX_COUNT_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MIN_VALUE && result <= CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1068,7 +1034,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Integer result = Integer.valueOf(txtSkipButtonTimeout.getText());
-			return result >= CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MIN_VALUE && result <= CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.SKIP_BUTTON_TIMEOUT_MIN_VALUE && result <= CyberTrackerPropertiesProfile.SKIP_BUTTON_TIMEOUT_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1079,7 +1045,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Integer result = Integer.valueOf(txtDilutionOfPrecision.getText());
-			return result >= CyberTrackerProperties.DILUTION_OF_PRECISION_MIN_VALUE && result <= CyberTrackerProperties.DILUTION_OF_PRECISION_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.DILUTION_OF_PRECISION_MIN_VALUE && result <= CyberTrackerPropertiesProfile.DILUTION_OF_PRECISION_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1091,18 +1057,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Integer result = Integer.valueOf(txtTrackTimer.getText());
-			return result >= CyberTrackerProperties.TIME_TRACK_MIN_VALUE && result <= CyberTrackerProperties.TIME_TRACK_MAX_VALUE;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
-	private boolean isStorageTimeValid() {
-		if (txtStorageTime == null || txtStorageTime.getText() == null || txtStorageTime.getText().isEmpty())
-			return false;
-		try {
-			Integer result = Integer.valueOf(txtStorageTime.getText());
-			return result >= CyberTrackerProperties.STORAGE_TIME_MIN_VALUE && result <= CyberTrackerProperties.STORAGE_TIME_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.TIME_TRACK_MIN_VALUE && result <= CyberTrackerPropertiesProfile.TIME_TRACK_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1113,7 +1068,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Integer result = Integer.valueOf(txtUtmZome.getText());
-			return result >= CyberTrackerProperties.UTM_ZONE_MIN_VALUE && result <= CyberTrackerProperties.UTM_ZONE_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.UTM_ZONE_MIN_VALUE && result <= CyberTrackerPropertiesProfile.UTM_ZONE_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1124,7 +1079,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		try {
 			Integer result = Integer.valueOf(txtMaxPhotoCount.getText());
-			return result >= CyberTrackerProperties.MAX_PHOTO_COUNT_MIN_VALUE && result <= CyberTrackerProperties.MAX_PHOTO_COUNT_MAX_VALUE;
+			return result >= CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MIN_VALUE && result <= CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MAX_VALUE;
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -1135,7 +1090,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	}
 
 	private boolean validate() {
-		return isStorageTimeValid() && isExitPinValid() && isMaxPhotoCountValid() &&
+		return isExitPinValid() && isMaxPhotoCountValid() &&
 				isSigtingAccuracyValid() && isSigtingFixCountValid() && 
 				isTrackTimerValid() && isSkipButtonTimeoutValid() && isDilutionOfPrecisionValid() &&
 				isTrackAccuracyValid() && isUtmZoneValid();

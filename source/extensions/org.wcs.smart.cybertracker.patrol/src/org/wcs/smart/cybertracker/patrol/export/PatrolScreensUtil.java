@@ -45,7 +45,7 @@ import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.elements.GpsSightingAccuracy;
@@ -105,7 +105,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 	 * @return root id
 	 */
 	@Override
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
 		registerDatatype(elements, DATATYPE_PATROL);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
@@ -114,7 +114,6 @@ public class PatrolScreensUtil extends ScreensUtil {
 		CyberTrackerId startId = new CyberTrackerId();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		Map<PatrolScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
-		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
 		ScreenOption so_type = screenOptions.get(PatrolScreenOptionMeta.TYPE);
 		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, so_type, ca, session);
 		//patrol type & transport
@@ -281,7 +280,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		return result;
 	}
 
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerProperties ctProps) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerPropertiesProfile ctProps) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		
@@ -329,7 +328,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		}
 	}
 	
-	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, ScreenOption so_type, ConservationArea ca, Session session) {
+	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, ScreenOption so_type, ConservationArea ca, Session session) {
 		CyberTrackerId elId = null;
 		if (so_type != null  && !so_type.isVisible() && so_type.getStringValue() != null) {
 			//patrol type is configured as a default value, but we still need to force speed limitation
@@ -396,7 +395,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		return list;
 	}
 	
-	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, List<PatrolType> pTypes, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, Session session) {
+	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, List<PatrolType> pTypes, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, Session session) {
 		ScreenOption typeOption = screenOptions.get(PatrolScreenOptionMeta.TYPE);
 		if (typeOption == null || typeOption.isVisible()) {
 			List<CyberTrackerId> typeIds = new ArrayList<CyberTrackerId>();

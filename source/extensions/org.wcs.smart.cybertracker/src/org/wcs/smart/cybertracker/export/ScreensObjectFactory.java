@@ -23,7 +23,7 @@ package org.wcs.smart.cybertracker.export;
 
 import java.util.List;
 
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
@@ -50,13 +50,13 @@ public class ScreensObjectFactory {
 	private static final int LIST_MODE_DEFAULT = 1;
 	private static final int LIST_MODE_NUMBERS = 5;
 
-	private CyberTrackerProperties ctProperties;
+	private CyberTrackerPropertiesProfile ctProperties;
 	
-	public ScreensObjectFactory(CyberTrackerProperties properties) {
+	public ScreensObjectFactory(CyberTrackerPropertiesProfile properties) {
 		this.ctProperties = properties;
 	}
 	
-	public CyberTrackerProperties getCtProperties() {
+	public CyberTrackerPropertiesProfile getCtProperties() {
 		return ctProperties;
 	}
 	
@@ -86,7 +86,7 @@ public class ScreensObjectFactory {
     	</Root>
 	</Screens>
 	 */
-	public Screens createScreens(List<Node> screenNodes, CyberTrackerProperties properties, String appName) {
+	public Screens createScreens(List<Node> screenNodes, CyberTrackerPropertiesProfile properties, String appName) {
 		Screens screens = new Screens();
 		Screens.Root root = new Screens.Root();
 		screens.setRoot(root);
@@ -144,7 +144,7 @@ public class ScreensObjectFactory {
 		return screens;
 	}
 	
-	private MovingMaps createMovingMaps(CyberTrackerProperties properties) {
+	private MovingMaps createMovingMaps(CyberTrackerPropertiesProfile properties) {
 		MovingMaps movingMaps = new MovingMaps();
 		
 		MovingMaps.Items items = new MovingMaps.Items();
@@ -1027,7 +1027,7 @@ public class ScreensObjectFactory {
     	<UseRangeFinderForAltitude>False</UseRangeFinderForAltitude> <!-- will be added as default by CyberTracker -->
 	</Control>
 	 */
-	public Controls.Control createConfigureGPSControl13(CyberTrackerProperties props) {
+	public Controls.Control createConfigureGPSControl13(CyberTrackerPropertiesProfile props) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{440B2C86-D385-4EFC-8ACE-5D3C0A4A016B}"); //$NON-NLS-1$
 		control.setId(13);

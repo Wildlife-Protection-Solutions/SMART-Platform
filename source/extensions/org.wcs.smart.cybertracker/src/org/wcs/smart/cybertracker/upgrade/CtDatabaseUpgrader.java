@@ -49,7 +49,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		Session s = HibernateManager.openSession();
 		try{
 			Map<String, String> versions = UpgradeEngine.getVersions(s);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happen //$NON-NLS-1$
 			currentPluginVersion = versions.get(CyberTrackerPlugIn.PLUGIN_ID);
 		}finally{
 			s.close();
@@ -89,20 +89,10 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param session in current transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
-		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_1)){
-			upgradeV1ToV2(session);
+		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_3_0)){
+			CtDatabaseUpgrader30To40 upgrader30To40 = new CtDatabaseUpgrader30To40();
+			upgrader30To40.upgrade(session);
 		}
 	}
 	
-	private static void upgradeV1ToV2(Session session){
-		@SuppressWarnings("nls")
-		String[] sql = new String[]{
-			"ALTER TABLE SMART.CT_PROPERTIES_OPTION DROP CONSTRAINT CT_PROPERTIES_OPTION_CA_UUID_FK",
-			"ALTER TABLE SMART.CT_PROPERTIES_OPTION ADD CONSTRAINT CT_PROPERTIES_OPTION_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE" 
-		};
-		for (String s : sql){
-			session.createSQLQuery(s).executeUpdate();
-		}
-		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_2, session);
-	}
 }
