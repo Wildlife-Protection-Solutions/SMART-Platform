@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,6 +30,8 @@ import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 /**
  * Clones the cybertracker properties when creating
  * a new conservation area from a template.
@@ -44,6 +47,34 @@ public class CybertrackerTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
+		@SuppressWarnings("unchecked")
+		List<CyberTrackerPropertiesProfile> profiles = engine.getSession().createCriteria(CyberTrackerPropertiesProfile.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
+		monitor.beginTask(Messages.CybertrackerTemplateCloner_CloningCtProfiles, profiles.size());
+		for (CyberTrackerPropertiesProfile p : profiles) {
+			monitor.subTask(MessageFormat.format(Messages.CybertrackerTemplateCloner_Copying, p.getName()));
+
+			CyberTrackerPropertiesProfile clone = new CyberTrackerPropertiesProfile();
+			clone.setConservationArea(engine.getNewCa());
+			engine.copyLabels(p, clone);
+			clone.setDefault(p.isDefault());
+			engine.getSession().save(clone);
+			engine.getSession().flush();
+			
+			for (CyberTrackerPropertiesProfileOption templateOption : p.getOptions().values()) {
+				CyberTrackerPropertiesProfileOption newOption = new CyberTrackerPropertiesProfileOption();
+				newOption.setProfile(clone);
+				newOption.setOptionId(templateOption.getOptionId());
+				newOption.setDoubleValue(templateOption.getDoubleValue());
+				newOption.setIntegerValue(templateOption.getIntegerValue());
+				newOption.setStringValue(templateOption.getStringValue());
+
+				engine.getSession().save(newOption);
+				engine.getSession().flush();
+			}
+			
+			monitor.worked(1);
+		}
+		
 		monitor.beginTask(Messages.CybertrackerTemplateCloner_CloningCtOptions, 1);
 
 		@SuppressWarnings("unchecked")
