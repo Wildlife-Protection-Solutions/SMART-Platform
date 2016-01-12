@@ -25,7 +25,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.inject.Named;
 
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
@@ -56,7 +55,7 @@ public class ShowDataModelPropertyPageHandler {
 	private Session loadedSession = null;
 	
 	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
 
 		dialog = new DataModelPropertyPage( activeShell );
 		
