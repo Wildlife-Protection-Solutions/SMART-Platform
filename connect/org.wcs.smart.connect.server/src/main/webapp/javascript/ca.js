@@ -1,8 +1,11 @@
-var CAURL = "../api/conservationarea/";
+var CAURL = "../api/conservationarea";
 var DOWNLOADCA = false;
 
 /* configure events on html elements */
 window.onload = function(){
+	//add new ca
+	document.querySelector("#btnNewCa").onclick=clearAndShowNewCaDialog;
+	
 	//delete user
 	elements = document.querySelectorAll(".deleteca");
 	for (var i = 0; i < elements.length; i ++){
@@ -15,6 +18,37 @@ window.onload = function(){
 	}
 }
 
+function clearAndShowNewCaDialog(){
+ 	document.querySelector("input[name=calabel]").value = "";
+ 	document.querySelector("input[name=newcauuid]").value = "";
+ 	document.querySelector("#newDialog > #dialogerror").style.display = "none";
+ 	displayDialog('newDialog', 'main');
+}
+
+function createca(){
+	var caLabel = document.querySelector("input[name=calabel]").value;
+ 	var uuid = document.querySelector("input[name=newcauuid]").value;
+ 	closeDialog('newDialog');
+	var geturl = CAURL + '?cauuid=' + encodeURIComponent(uuid) + '&name=' + encodeURIComponent(caLabel);
+	var oReq = new XMLHttpRequest();
+	oReq.onload = cacreated;
+	oReq.open("POST", geturl, true);
+	oReq.send();
+	return false;
+}
+
+function cacreated(){
+	if (this.status == 204) {
+		displayInfo("Conservation area created.");
+	} else if (this.status == 401){
+		displayError(parseError(i18n("ca.errorcreatingca") + ". Unauthorized.", this.responseText));
+	}else{
+		displayError(parseError(i18n("ca.errorcreatingca"), this.responseText));
+	}
+	refreshCaList();
+}
+
+
 function cancelCaDownload(){
 	DOWNLOADCA = false;
 	closeDialog('downloadDialog')
@@ -25,7 +59,7 @@ function downloadca(){
 	displayDialog('downloadDialog', 'main');
 	
 	var cauuid = this.dataset.cauuid;
-	var geturl = CAURL + encodeURIComponent(cauuid) + '?data=all';
+	var geturl = CAURL + '/' + encodeURIComponent(cauuid) + '?data=all';
 	var oReq = new XMLHttpRequest();
 	oReq.onload = updateDownloadProgress;
 	oReq.cauuid=cauuid;
@@ -137,7 +171,7 @@ function deleteca(){
 	var oReq = new XMLHttpRequest();
 	oReq.onload = caDeleted;
 	oReq.cauuid=cauuid;
-	oReq.open("DELETE", CAURL + encodeURIComponent(cauuid) + "?username=" + encodeURIComponent(username) + "&password="+encodeURIComponent(password)+"&dataonly="+encodeURIComponent(dataonly), true);
+	oReq.open("DELETE", CAURL + '/' +encodeURIComponent(cauuid) + "?username=" + encodeURIComponent(username) + "&password="+encodeURIComponent(password)+"&dataonly="+encodeURIComponent(dataonly), true);
 	oReq.send();
 	
 	closeDialog('deleteDialog');
@@ -173,7 +207,7 @@ function refreshCaList(){
 		
  	var oReq = new XMLHttpRequest();
  	oReq.onload = createCaTable;
- 	oReq.open("Get", CAURL, true);
+ 	oReq.open("Get", CAURL + '/', true);
  	oReq.send();
 }
 

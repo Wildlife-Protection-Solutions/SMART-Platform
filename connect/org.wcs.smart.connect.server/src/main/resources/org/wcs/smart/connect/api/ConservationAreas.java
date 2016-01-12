@@ -682,6 +682,58 @@ public class ConservationAreas extends HttpServlet{
 	}
 	
 	/**
+	 * Creates a new conservation area with no data.  Both parameters are optional and generated
+	 * by the system if not provided.
+	 * 
+	 * @param caUuid
+	 * @return
+	 */
+	@POST
+	@Path("")
+	public void createConservationArea(@QueryParam("cauuid") String caUuid, @QueryParam("name") String name){
+		UUID uuid = null;
+		if (caUuid != null && !caUuid.trim().isEmpty()){
+			try{
+				uuid = UuidUtils.stringToUuid(caUuid);
+			}catch (Exception ex){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format("Invalid Conservation Area uuid {0} provided.", caUuid));	
+			}
+		}else{
+			uuid = UUID.randomUUID();
+		}
+		
+		if (name == null || name.trim().isEmpty()){
+			name = "Unknown";
+		}
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			validateAdd(s);
+			
+			ConservationAreaInfo ca = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
+					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
+			if (ca != null){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Conservation Area with given uuid already exists on the server.");
+			}
+			ca = new ConservationAreaInfo();
+			ca.setLabel(name);
+			ca.setUuid(uuid);
+			ca.setVersion(null);
+			ca.setStatus(Status.NODATA);
+					
+			s.save(ca);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Conservation Area could not be created.");
+		}
+		
+	}
+		
+	
+	/**
 	 * Initiates an upload CA session.
 	 * 
 	 * @param caUuid

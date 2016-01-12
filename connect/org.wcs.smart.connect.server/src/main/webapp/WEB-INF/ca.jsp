@@ -56,7 +56,13 @@
 	</div>  
 </div>
 
+<div>
+<button id="btnNewCa" class="block button top-spacer">Create New</button>
 </div>
+
+</div>
+
+
 
 <%@include file="footer.jsp" %>
 
@@ -95,6 +101,33 @@
    	<div class="block top-spacer" style="text-align:right">
      <input class="button" type="button" value="Cancel" onclick="return cancelCaDownload();" />
     </div>
+  </div>
+  
+<div id="newDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Create New Conservation Area</div>
+  <div id="dialogerror" class="errorsection"></div>
+  
+  <form id="createform" onsubmit="return createca();" >
+    <div id="confirmtype">
+    	<p>Create a new Conservation Area on SMART Connect.</p>
+    	<p>If you want 
+    	to upload SMART Desktop data to Connect you should NOT use this function, 
+    	but upload the Conservation Area directly from the SMART Desktop.  If you do use this option 
+    	the UUID must match the SMART Desktop Unique System
+    	ID found in the Conservation Area Properties page.</p>
+    	<p>If you never want to upload SMART
+    	Desktop data to SMART Connect leave the UUID field blank.</p>
+    </div>
+    <label class="block">Label:</label>
+    <input type="text" name="calabel" class="formtext block" />
+	<label class="block top-spacer">UUID:</label>
+    <input type="text" name="newcauuid" class="formtext block" />
+    
+    <div class="block top-spacer" style="text-align:right">
+     <input class="button" type="submit" value="Create" />
+     <input class="button" type="button" value="Cancel" onclick="closeDialog('newDialog')" />
+    </div>
+  </form>
   </div>
 </body>
 </html>
