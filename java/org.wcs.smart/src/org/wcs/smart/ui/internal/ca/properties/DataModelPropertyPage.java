@@ -85,6 +85,7 @@ import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
 import org.wcs.smart.ui.ca.properties.AttributeInfoPanel;
 import org.wcs.smart.ui.internal.ca.CategoryDialogPage;
+import org.wcs.smart.ui.internal.ca.properties.handlers.ShowDataModelPropertyPageHandler;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
@@ -403,9 +404,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				mergeDataModel();
-				viewer.refresh();
-				//update selection to refresh panel
-				viewer.setSelection(viewer.getSelection());
+				
 			}
 		});
 		
@@ -470,6 +469,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, currentCa);
 						
 						final List<String> warnings = updater.merge(new SubProgressMonitor(monitor, 1));
+						
 						//add any new objects that are not saved via relationships
 						for (Attribute a : sourceDm.getAttributes()){
 							if (a.getUuid() == null){
@@ -482,7 +482,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}
 						}
 						
-						
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
@@ -492,6 +491,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 											Messages.DataModelPropertyPage_WarningDialogTitle, Messages.DataModelPropertyPage_WarningsMessage, warnings);
 									wd.open();
 								}
+								viewer.refresh();
+								//update selection to refresh panel
+								viewer.setSelection(viewer.getSelection());
 							}	
 						});
 						
@@ -500,14 +502,23 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(Messages.DataModelPropertyPage_MergerError + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
-							}});
+								SmartPlugIn.displayLog(Messages.DataModelPropertyPage_MergerError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+								closeAndReopen();
+							}	
+						});
 					}
 				}
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_MergerError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+			closeAndReopen();
 		}
+	}
+	
+	private void closeAndReopen(){
+		Shell parent = getParentShell();
+		DataModelPropertyPage.this.close();
+		(new ShowDataModelPropertyPageHandler()).execute(parent);
 	}
 	
 	/**
