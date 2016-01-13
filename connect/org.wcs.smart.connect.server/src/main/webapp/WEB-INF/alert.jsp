@@ -105,8 +105,8 @@
 			<option value=5><fmt:message key="alert.eventimportance5" /></option>
 			</select>
 			
-			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label><input id="long" type="text" name="long">
-			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label><input id="lat" type="text" name="lat" >
+			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label><input id="long" type="text" name="long">
+			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label><input id="lat" type="text" name="lat" >
 			
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
 			<textarea name="alert_description" rows="5" cols="72"></textarea>
