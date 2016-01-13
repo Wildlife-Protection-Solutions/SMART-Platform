@@ -5,9 +5,8 @@
 <head>
 
 <%@include file="includes.jsp" %>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
-
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/leaflet.css"/>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/alert.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
