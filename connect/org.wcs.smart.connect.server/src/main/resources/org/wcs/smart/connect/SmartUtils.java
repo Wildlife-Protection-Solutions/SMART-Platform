@@ -24,6 +24,7 @@ package org.wcs.smart.connect;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 
 import javax.servlet.ServletRequest;
 import javax.ws.rs.core.HttpHeaders;
@@ -36,6 +37,8 @@ import javax.ws.rs.core.HttpHeaders;
  */
 public class SmartUtils {
 
+	private static final char[] ALPHACHARS = "0123456789abcdefghiljklmnopqrstuvwxyz".toCharArray();
+	
 	/**
 	 * Finds the locale provided in the given headers.  Returns
 	 * english locale if no locale found in headers.
@@ -60,6 +63,20 @@ public class SmartUtils {
 	 */
 	public static Locale getRequestLocale(ServletRequest request){
 		return request.getLocale();
+	}
+	
+	/**
+	 * Generates a random string with the given length
+	 * @param length
+	 * @return
+	 */
+	public static String randomString(int length){
+		char[] buf = new char[length];
+		Random r = new Random();
+		for (int i = 0; i < length; i ++){
+			buf[i] = ALPHACHARS[r.nextInt(ALPHACHARS.length)];
+		}
+		return new String(buf);
 	}
 	
 //	/**

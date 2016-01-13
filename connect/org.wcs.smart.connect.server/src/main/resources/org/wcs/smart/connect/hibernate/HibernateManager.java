@@ -55,7 +55,7 @@ public class HibernateManager {
 	 * @return
 	 */
 	public static Session getSession(ServletContext context){
-		return ((SessionFactory)context.getAttribute(CONTEXT_KEY)).getCurrentSession();
+		return getSessionFactory(context).getCurrentSession();
 	}
 	
 	/**

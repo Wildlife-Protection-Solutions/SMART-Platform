@@ -1,61 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
-xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" 
-id="SMARTConnectServer" 
-version="3.1">
-  <display-name>connect</display-name>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="SMARTConnectServer" version="3.1">
+	<display-name>connect</display-name>
 
-  <servlet> 
-    <servlet-name>home</servlet-name>
-    <jsp-file>/WEB-INF/home.jsp</jsp-file>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>home</servlet-name>
-    <url-pattern>/connect/home</url-pattern>
-  </servlet-mapping>
-  
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>connect</web-resource-name>
-      <url-pattern>/connect/*</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>smart</role-name>
-    </auth-constraint>
-    <user-data-constraint>
-      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-    </user-data-constraint>
-  </security-constraint>
-  
-  
-<!--     <security-constraint> -->
-<!--     <web-resource-collection> -->
-<!--       <web-resource-name>api</web-resource-name> -->
-<!--       <url-pattern>/api/*</url-pattern> -->
-<!--     </web-resource-collection> -->
-<!--     <auth-constraint> -->
-<!--       <role-name>smart</role-name> -->
-<!--     </auth-constraint> -->
-<!--     <user-data-constraint> -->
-<!--       <transport-guarantee>CONFIDENTIAL</transport-guarantee> -->
-<!--     </user-data-constraint> -->
-<!--   </security-constraint> -->
-  <login-config>
-    <auth-method>FORM</auth-method>
-    <realm-name>BCryptRealm</realm-name>
-    <form-login-config>
-      <form-login-page>/login</form-login-page>
-      <form-error-page>/loginerror</form-error-page>
-    </form-login-config>
- </login-config>
-  
-  
-  <resource-ref>
- 	<description>SMART Database</description>
- 	<res-ref-name>jdbc/smart</res-ref-name>
- 	<res-type>javax.sql.DataSource</res-type>
-	 <res-auth>Container</res-auth>
+	<servlet>
+		<servlet-name>home</servlet-name>
+		<jsp-file>/WEB-INF/home.jsp</jsp-file>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>home</servlet-name>
+		<url-pattern>/connect/home</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>forgotpassword</servlet-name>
+		<jsp-file>/WEB-INF/forgotpassword.jsp</jsp-file>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>forgotpassword</servlet-name>
+		<url-pattern>/forgot</url-pattern>
+	</servlet-mapping>
+	
+		
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>connect</web-resource-name>
+			<url-pattern>/connect/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>smart</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
+
+	<!-- <security-constraint> -->
+	<!-- <web-resource-collection> -->
+	<!-- <web-resource-name>api</web-resource-name> -->
+	<!-- <url-pattern>/api/*</url-pattern> -->
+	<!-- </web-resource-collection> -->
+	<!-- <auth-constraint> -->
+	<!-- <role-name>smart</role-name> -->
+	<!-- </auth-constraint> -->
+	<!-- <user-data-constraint> -->
+	<!-- <transport-guarantee>CONFIDENTIAL</transport-guarantee> -->
+	<!-- </user-data-constraint> -->
+	<!-- </security-constraint> -->
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<realm-name>BCryptRealm</realm-name>
+		<form-login-config>
+			<form-login-page>/login</form-login-page>
+			<form-error-page>/loginerror</form-error-page>
+		</form-login-config>
+	</login-config>
+
+
+	<resource-ref>
+		<description>SMART Database</description>
+		<res-ref-name>jdbc/smart</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
 	</resource-ref>
-
+	<resource-ref>
+		<description>Mail server for sending notifications.</description>
+		<res-ref-name>mail/Session</res-ref-name>
+		<res-type>javax.mail.Sessione</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
 </web-app>

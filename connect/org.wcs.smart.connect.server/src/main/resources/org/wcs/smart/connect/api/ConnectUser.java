@@ -326,7 +326,7 @@ public class ConnectUser extends HttpServlet {
     	return null;
     }
     
-    public String validatePassword(String password, Locale l){
+    public static String validatePassword(String password, Locale l){
     	//TODO: fix me
     	if (password == null 
     			|| (!password.endsWith("smart") && password.length() < SmartUser.MIN_PASS_LENGTH) //$NON-NLS-1$
