@@ -84,6 +84,7 @@ CREATE TABLE connect.users
 	resetdatetime timestamp,
 	UNIQUE(username),
 	UNIQUE (uuid),
+	UNIQUE(resetid),
 	PRIMARY KEY (uuid, username)
 ) WITHOUT OIDS;
 
