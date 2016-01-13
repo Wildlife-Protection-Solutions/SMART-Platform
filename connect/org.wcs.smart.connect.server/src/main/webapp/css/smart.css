@@ -389,6 +389,12 @@ div.scrollable {
 	font-size:0.9em;
 }
 
+.button:disabled, .button:disabled:hover{
+    color: #CCCCCC;
+    background-color: #EEEEEE;
+} 
+
+
 /*----------------------------------------------------------------------*/
 /* Tabbed Alerts page styles*/
 article.tabs{
