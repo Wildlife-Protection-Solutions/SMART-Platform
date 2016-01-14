@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -123,7 +125,13 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());
 		lstBasemaps.setInput(new String[]{Messages.LoadBasemapDialog_Loading});
 		lstBasemaps.getList().addListener(SWT.Selection, validateListener);
-	
+		lstBasemaps.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				okPressed();
+			}
+		});
+		
 		chUseDefault = new Button(main, SWT.CHECK);
 		chUseDefault.setText(Messages.LoadBasemapDialog_SessionDefaultButton);
 		chUseDefault.setSelection(false);

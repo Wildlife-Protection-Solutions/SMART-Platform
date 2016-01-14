@@ -71,10 +71,10 @@ public abstract class ChangeLogDeserializer {
 					for (int i = 0; i < size; i ++){
 						ChangeLogItem it = (ChangeLogItem) oin.readObject();
 	
-						if (!shouldProcess(it)){
+						if (!shouldProcess(it, changeLogFilestoreDir)){
 							if (it.getAction() == Action.INSERT ||
 									it.getAction() == Action.UPDATE){
-								//read the remaining data and ingore
+								//read the remaining data and ignore
 								readObject(oin);
 							}
 							continue;
@@ -114,7 +114,7 @@ public abstract class ChangeLogDeserializer {
 		}
 	}
 	
-	protected abstract boolean shouldProcess(ChangeLogItem item) throws ConflictException;
+	protected abstract boolean shouldProcess(ChangeLogItem item,  Path changeLogPackage) throws ConflictException;
 
 	
 	private HashMap<String, Object> readObject(ObjectInputStream is) throws Exception{

@@ -19,37 +19,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.replication.changelog;
+package org.wcs.smart.connect.server.replication;
 
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.replication.changelog.ConflictException;
 
 /**
- * SMART conflict exception thrown when trying to apply a change
- * log record to an row already modified.
+ * Implementation of ConflictException that
+ * localizes message.
  * 
  * @author Emily
  *
  */
-public abstract class ConflictException extends Exception{
-	
-	/**
-	 * 
-	 */
+public class ConflictExceptionImpl extends ConflictException{
+
 	private static final long serialVersionUID = 1L;
 
-	private String message;
-	
-	public ConflictException(ChangeLogItem item){
-		super();
-		message = createMessage(item);
+	public ConflictExceptionImpl(ChangeLogItem item) {
+		super(item);
 	}
-	
-	@Override
-	public String getMessage(){
-		return message;
-	}
-	
-	protected abstract String createMessage(ChangeLogItem item);
-	
-}
 
+	@Override
+	protected String createMessage(ChangeLogItem item) {
+		StringBuilder sb= new StringBuilder();
+		sb.append(Messages.ConflictExceptionImpl_ConflictMessage);
+		sb.append("\n"); //$NON-NLS-1$
+		if (item.getFileName() != null){
+			sb.append(Messages.ConflictExceptionImpl_FileLabel + item.getFileName());
+		}else{
+			sb.append(Messages.ConflictExceptionImpl_TableLabel);
+			sb.append(item.getTableName());
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append(item.getFieldName1() + ": " + item.getKey1().toString()); //$NON-NLS-1$
+			if (item.getFieldName2() != null){
+				sb.append("\n"); //$NON-NLS-1$
+				sb.append(item.getFieldName2() + ": " ); //$NON-NLS-1$
+				if (item.getKey2() != null){
+					sb.append(item.getKey2().toString());	
+				}else{
+					sb.append(item.getKey2String());
+				}
+			}
+		}
+		sb.append("\n\n"); //$NON-NLS-1$
+		sb.append(Messages.ConflictExceptionImpl_ResolutionMessage);
+			
+		return sb.toString();
+	}
+
+}

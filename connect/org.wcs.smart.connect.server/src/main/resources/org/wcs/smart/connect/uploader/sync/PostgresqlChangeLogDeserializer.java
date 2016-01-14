@@ -57,9 +57,13 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		super.processFile(session);
 	}
 	
+	/**
+	 * This just checks for existence of the item already.  The assumption
+	 * is that there will no conflicts and the local desktop uploading
+	 * changes has already confirmed there should be no conflicts.
+	 */
 	@Override
-	protected boolean shouldProcess(ChangeLogItem it) {
-		//TODO: review this
+	protected boolean shouldProcess(ChangeLogItem it, Path changeLogPackage ) {
 		if (ChangeLogManager.INSTANCE.constains(session, it)){
 			//we already have this item
 			return false;
