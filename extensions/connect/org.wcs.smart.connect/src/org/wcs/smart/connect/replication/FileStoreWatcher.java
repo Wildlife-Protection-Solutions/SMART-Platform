@@ -143,6 +143,16 @@ public class FileStoreWatcher implements Runnable{
     		type = ChangeLogItem.Action.FS_DELETE;
     	}
     	
+    	if (type == ChangeLogItem.Action.FS_UPDATE){
+    		if (!Files.exists(p)){
+    			//path has been deleted by next event skip
+    			return;
+    		}
+    		if (Files.isDirectory(p)){
+    			//don't want to log changes to directories
+    			return;
+    		}
+    	}
     	final String relativeFileName = FilenameUtils.separatorsToUnix(FileSystems.getDefault()
     			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
     			.relativize(p)
@@ -150,6 +160,7 @@ public class FileStoreWatcher implements Runnable{
 
     	Session s = HibernateManager.openSession();
     	try{
+    		System.out.println("file modified:" + p.toString());
     		if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(caUuid, s)){
     			s.beginTransaction();
     			

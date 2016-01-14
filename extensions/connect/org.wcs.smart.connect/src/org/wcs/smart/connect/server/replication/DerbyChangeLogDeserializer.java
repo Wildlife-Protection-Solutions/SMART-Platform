@@ -78,22 +78,80 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		super.processFile(session);
 	}
 	
-	public boolean shouldProcess(ChangeLogItem it) throws ConflictException{
+	public boolean shouldProcess(ChangeLogItem it, Path changeLogPackage) throws ConflictException{
 		if (ChangeLogTableManager.INSTANCE.constains(session, it)){
 			//we already have this item
 			return false;
 		}
 
-		if (it.getAction() == Action.FS_DELETE || 
-				it.getAction() == Action.FS_INSERT ||
-				it.getAction() == Action.FS_UPDATE){
-			//TODO: determine if files need to checked for conflicts
+		//conflict checking deleting filestore items
+		if (it.getAction() == Action.FS_DELETE){
+			Criteria c = session.createCriteria(ChangeLogItem.class);
+			c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
+			c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
+			c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
+			List<ChangeLogItem> changes = c.list();
+			
+			//we there is anything other than a delete throw a conflict exception
+			//if we both deleted the same thing we will not throw a conflict
+			for (ChangeLogItem i : changes){
+				if (i.getAction() != Action.FS_DELETE){
+					throw new ConflictExceptionImpl(it);					
+				}
+			}
+			return true;
+		}
+		
+		//conflict checking updating filestore items
+		if (it.getAction() == Action.FS_UPDATE){
+			//in the logging we do not log updates to directories so this much be a file
+			//any any other file modification/addition/deletion should cause a conflict
+			Criteria c = session.createCriteria(ChangeLogItem.class);
+			c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
+			c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
+			c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
+			c.setProjection(Projections.rowCount());
+			Long cnt = (Long) c.uniqueResult();
+			if (cnt > 0){
+				throw new ConflictExceptionImpl(it);
+			}
+			
+			return true;
+		}
+		
+		if (it.getAction() ==  Action.FS_INSERT){
+			Criteria c = session.createCriteria(ChangeLogItem.class);
+			c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
+			c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
+			c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
+			
+			//if we both create the same directory this should not be a conflict
+			Path fromPath = changeLogPackage.resolve(it.getFileName());
+			if (Files.exists(fromPath)){
+				if (Files.isDirectory(fromPath)){
+					//if its a directory and all other changes are also create changes
+					//we are ok to continue
+					List<ChangeLogItem> others = (List<ChangeLogItem>) c.list();
+					for (ChangeLogItem o : others){
+						if(o.getAction() != Action.FS_INSERT){
+							throw new ConflictExceptionImpl(it);
+						}
+					}
+					return true;
+				}
+			}
+			
+			//check for conflicts
+			c.setProjection(Projections.rowCount());
+			Long cnt = (Long) c.uniqueResult();
+			if (cnt > 0){
+				throw new ConflictExceptionImpl(it);
+			}
+			
 			return true;
 		}
 
-		/* 
-		 * Conflict checking 
-		 */
+		// Conflict checking data records
 		Criteria c = session.createCriteria(ChangeLogItem.class);
 		c.add(Restrictions.eq("tableName", it.getTableName())); //$NON-NLS-1$
 		c.add(Restrictions.eq("conservationArea", it.getConservationArea())); //$NON-NLS-1$
@@ -120,7 +178,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		c.setProjection(Projections.rowCount());
 		Long cnt = (Long) c.uniqueResult();
 		if (cnt > 0){
-			throw new ConflictException(it);
+			throw new ConflictExceptionImpl(it);
 		}
 		return true;
 	}

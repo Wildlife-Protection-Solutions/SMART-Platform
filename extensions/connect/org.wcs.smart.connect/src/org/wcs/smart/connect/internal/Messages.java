@@ -77,6 +77,10 @@ public class Messages extends NLS {
 	public static String CleanUpReplicationJob_jobname;
 	public static String CloneConnect_CloneTaskName;
 	public static String CompositeX509TrustManager_SshError;
+	public static String ConflictExceptionImpl_ConflictMessage;
+	public static String ConflictExceptionImpl_FileLabel;
+	public static String ConflictExceptionImpl_ResolutionMessage;
+	public static String ConflictExceptionImpl_TableLabel;
 	public static String ConnectCaListPage_CaLabel;
 	public static String ConnectCaListPage_CouldNotConnect1;
 	public static String ConnectCaListPage_CouldNotConnect2;
