@@ -492,18 +492,26 @@ function createRoleTable(){
  	allRoles = JSON.parse(this.responseText);
  	for (var i = 0; i < allRoles.length; i ++){
  		var row = tableCreateRow(parent, 
- 				[allRoles[i].name, null], 
+ 				[allRoles[i].name, null, null], 
  				"rolerow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.roleid = allRoles[i].key;
  		row.onclick = showRoleInfo;
  	
+ 		var editicon = document.createElement("a");
+ 		editicon.className="update-icon";
+ 		editicon.title="edit role";
+ 		editicon.dataset.roleid = allRoles[i].key;
+ 		editicon.onclick = clearAndShowEditRoleDialog;
+ 		editicon.href="";
+ 		row.childNodes[1].appendChild(editicon);
+ 		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
  		deleteicon.title="delete role";
  		deleteicon.dataset.roleid = allRoles[i].key;
  		deleteicon.onclick = deleteRole;
  		deleteicon.href="";
- 		row.childNodes[1].appendChild(deleteicon);
+ 		row.childNodes[2].appendChild(deleteicon);
  	}
 }
 /* clears and displays new user dialog */
@@ -519,7 +527,12 @@ function clearAndShowNewUserDialog(){
 /* clears and displays new user dialog */
 function clearAndShowNewRoleDialog(){
  	document.querySelector("input[name=rolename]").value = "";
+ 	document.querySelector("input[name=roleid]").value = "";
  	document.querySelector("#roledialogerror").style.display = "none";
+	
+ 	document.querySelector("#createrolebtn").value="Create Role";
+	document.querySelector("#newroleform").onsubmit = createNewRole;
+		
  	displayDialog('newRoleDialog', 'main');
 }
 
@@ -763,6 +776,56 @@ function roleAddedToUser(){
 	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
 }
 
+function clearAndShowEditRoleDialog() {
+	var roleid = this.dataset.roleid;
+	
+	var rolename ="";
+	for (var i = 0; i < allRoles.length; i ++){
+		if (allRoles[i].key == roleid){
+			rolename = allRoles[i].name;
+		}
+	}
+	document.querySelector("input[name=roleid]").value = roleid;
+	document.querySelector("input[name=rolename]").value = rolename;
+	document.querySelector("#createrolebtn").value="Update Role";
+	document.querySelector("#newroleform").onsubmit = updateRole;
+	document.querySelector("#roledialogerror").style.display = "none";
+	displayDialog('newRoleDialog', 'main');
+	return false;
+}
+
+//updates a role
+function updateRole() {
+	var rolename = document.querySelector("input[name=rolename]").value;
+	var roleid = document.querySelector("input[name=roleid]").value;
+	
+	var error = "";
+	if (rolename.length == 0 ) {
+		error = "The role name cannot be blank.";
+	}
+
+	if (error.length > 0){
+		document.querySelector("#roledialogerror").innerHTML = error;
+		document.querySelector("#roledialogerror").style.display = "block";
+		return false;
+	}
+	
+	var jsonData = {
+		"name" : rolename
+	};
+
+	//make ajax call
+	hideInfo();
+
+	closeDialog('newRoleDialog');
+	var oReq = new XMLHttpRequest();
+	oReq.onload = roleUpdated;
+	oReq.open("PUT", PRIVILEGE_URL + "/roles/" + roleid, true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
 //creates a new role
 function createNewRole() {
 	var rolename = document.querySelector("input[name=rolename]").value;
@@ -784,7 +847,6 @@ function createNewRole() {
 
 	//make ajax call
 	hideInfo();
-	document.querySelector("#message").style.display = "none";
 
 	closeDialog('newRoleDialog');
 	var oReq = new XMLHttpRequest();
@@ -859,4 +921,13 @@ function roleCreated() {
 	}
 	refreshRolesTable();
 }
-
+function roleUpdated() {
+	allRoles = null;
+	
+	if (this.status == 201) {
+		displayInfo("Role Updated");
+	} else {
+		displayError(parseError("", this.responseText));
+	}
+	refreshRolesTable();
+}

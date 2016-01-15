@@ -36,6 +36,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -317,6 +318,40 @@ public class ConnectUserAction extends HttpServlet {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Error creating new role.", ex); //$NON-NLS-1$
+		}
+	}
+	
+	/**
+	 * Updates the role name. Uses the name property of the action
+	 * object and generated a new uuid string as the role id;
+	 * 
+	 * @param username
+	 * @param action
+	 */
+	@PUT
+    @Path("/roles/{roleid}")
+    public void updateRole(@PathParam("roleid") String roleid,
+    		SmartUserPermissionProxy action){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			SmartRole role = (SmartRole) s.get(SmartRole.class, roleid);
+			if (role == null){
+				throw new SmartConnectException(Status.NOT_FOUND);
+			}
+			role.setRoleName(action.getName());
+			s.save(role);
+			s.getTransaction().commit();
+			
+			response.setStatus(Response.Status.CREATED.getStatusCode());
+			response.flushBuffer();
+		
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			if (ex instanceof SmartConnectException) throw (SmartConnectException)ex;
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					"Error creating new role.", ex); //$NON-NLS-1$
 		}

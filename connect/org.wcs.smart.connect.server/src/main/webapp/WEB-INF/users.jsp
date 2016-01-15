@@ -88,6 +88,7 @@
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell">Role Name</div>
 				<div class="table-cell smart-table-cell"></div>
+				<div class="table-cell smart-table-cell"></div>
 			</div>
   		</div>
 
@@ -135,9 +136,10 @@
   <div>Create a new role.</div>
   <form id="newroleform" >
     <label class="block top-spacer">Rolename:</label>
+    <input type="hidden" name="roleid" />
     <input type="text" name="rolename" class="formtext block" />
     <div class="block top-spacer" style="text-align:right">
-     <input class="button" type="submit" value="Create Role" />
+     <input class="button" type="submit" id="createrolebtn" value="Create Role" />
      <input class="button" type="button" id="cancelnewrole" value="Cancel" />
     </div>
   </form>
