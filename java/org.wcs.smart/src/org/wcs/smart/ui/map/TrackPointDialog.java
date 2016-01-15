@@ -93,6 +93,7 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
+import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.render.ViewportModel;
 import org.locationtech.udig.project.render.IViewportModelListener;
@@ -560,9 +561,6 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 				if (TrackPointDialog.this.getContents() == null || 
 						TrackPointDialog.this.getContents().isDisposed() || 
 						mapViewer == null) return;
-				
-				mapViewer.getMap().getRenderManager().refresh(null);
-				
 				createTrackPointLayer();
 				createTrackLayer();
 

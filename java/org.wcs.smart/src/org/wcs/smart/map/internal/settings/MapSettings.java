@@ -73,7 +73,6 @@ import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
-import org.locationtech.udig.project.internal.render.impl.ViewportModelImpl;
 import org.locationtech.udig.ui.palette.ColourScheme;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
@@ -471,7 +470,7 @@ public class MapSettings {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		((ViewportModelImpl)currentMap.getViewportModel()).zoomToExtent();
+		currentMap.getRenderManager().refresh(null);
 	}
 
 	/**

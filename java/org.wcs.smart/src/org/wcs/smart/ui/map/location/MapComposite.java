@@ -53,6 +53,7 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.render.ViewportModel;
 import org.locationtech.udig.project.render.displayAdapter.IMapDisplayListener;
@@ -183,7 +184,7 @@ public class MapComposite extends Composite implements MapPart {
 			@Override
 			public void done(IJobChangeEvent event) {
 				if (isDisposed() || mapViewer == null) return;
-				mapViewer.getMap().getRenderManager().refresh(null);
+				mapViewer.getMap().sendCommandSync(new ZoomExtentCommand());
 			}
 		});
 		defaultLayer.schedule();
