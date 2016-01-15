@@ -67,7 +67,6 @@
   <div class="pageheader"><fmt:message key="alert.pageheader" /></div>
   <div>
     <div id="message" class="msgsection"></div>
-    <div id="error" class="errorsection"></div>
   </div>
   <article id="tabs" class="tabs">
 	<section id="tab1" class="">

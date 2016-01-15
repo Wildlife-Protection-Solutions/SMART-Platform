@@ -39,6 +39,9 @@ public class SmartUserPermissionProxy {
 	private String resourceName;
 	private UUID resource;
 	
+	protected SmartUserPermissionProxy(){
+		
+	}
 	public SmartUserPermissionProxy(Type type){
 		this.type = type;
 	}

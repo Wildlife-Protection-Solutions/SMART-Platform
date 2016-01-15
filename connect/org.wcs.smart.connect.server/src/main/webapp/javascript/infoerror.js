@@ -1,11 +1,10 @@
-//hide error message
-function hideError() {
-	document.querySelector("#error").style.display = "none";
-}
+
 //displays error message
 function displayError(msg) {
-	document.querySelector("#error").style.display = "block";
-	document.querySelector("#error").innerHTML = msg;
+	var element = document.querySelector("#message");
+	element.style.display = "block";
+	element.innerHTML = msg;
+	element.className = "errorsection";
 }
 
 function hideInfo(){
@@ -13,8 +12,10 @@ function hideInfo(){
 }
 
 function displayInfo(msg){
-	document.querySelector("#message").style.display = "block";
-	document.querySelector("#message").innerHTML = msg;
+	var element = document.querySelector("#message");
+	element.style.display = "block";
+	element.innerHTML = msg;
+	element.className = "msgsection";
 }
 
 /*

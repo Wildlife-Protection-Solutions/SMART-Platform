@@ -166,7 +166,6 @@ function deleteca(){
 	if (!ok) return false;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = caDeleted;

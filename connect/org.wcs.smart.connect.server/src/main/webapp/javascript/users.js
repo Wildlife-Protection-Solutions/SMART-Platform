@@ -6,8 +6,6 @@ var allRoles = null;
 
 /* configure events on html elements */
 window.onload = function(){
-	//add new user
-	document.querySelector("#btnNewUser").onclick=clearAndShowNewUserDialog;
 	
 	document.querySelector("#roletab").onclick=function(){showTab("roletab");}
 	document.querySelector("#actiontab").onclick=function(){showTab("actiontab");}
@@ -30,11 +28,19 @@ window.onload = function(){
 	}
 	
 	//new user dialog
-	document.querySelector("#cancelnewuser").onclick = function(){
-		closeDialog('newUserDialog');
-	};
+	document.querySelector("#btnNewUser").onclick=clearAndShowNewUserDialog;
+	document.querySelector("#cancelnewuser").onclick = function(){closeDialog('newUserDialog');};
 	document.querySelector("#newuserform").onsubmit = createNewUser;
+
+	//new role
+	document.querySelector("#btnNewRole").onclick=clearAndShowNewRoleDialog;
+	document.querySelector("#cancelnewrole").onclick = function(){closeDialog('newRoleDialog');};
+	document.querySelector("#newroleform").onsubmit = createNewRole;
+
 	clearUserInfo();
+	
+	document.querySelector("#roledetailinner").style.display = "none";
+	refreshRolesTable();
 }
 
 function showTab(name){
@@ -101,11 +107,11 @@ function showUserInfo(){
 	if (this == null || this.dataset.username == null) return;
 	var username = this.dataset.username;
 	document.querySelector("#userinfo").style.display="block";
-	var currentSelection = document.querySelector(".selecteduser");
+	var currentSelection = document.querySelector("#usertable > .smart-table-selectedrow");
 	if (currentSelection != null){
-		currentSelection.className = currentSelection.className.replace(/(?:^|\s)selecteduser(?!\S)/ , '' );
+		currentSelection.className = currentSelection.className.replace(/(?:^|\s)smart-table-selectedrow(?!\S)/ , '' );
 	}
-	this.className = this.className + " selecteduser";
+	this.className = this.className + " smart-table-selectedrow";
 	var oReq = new XMLHttpRequest();
  	oReq.onload = setUserDetails;
  	oReq.open("Get", USER_URL + encodeURIComponent(username), true);
@@ -162,7 +168,7 @@ function setUserPrivileges(){
 	tableAddHeader(actionTable, [i18n("users.action"), i18n("users.resource"), ""]);
 	tableAddHeader(roleTable, ["Role Name", ""]);
 	
-	document.querySelector("#addRole").setAttribute("onClick", "addRole('" + this.username + "');")
+	document.querySelector("#addRole").setAttribute("onClick", "addRoleToUser('" + this.username + "');")
 	document.querySelector("#addAction").setAttribute("onClick", "addAction('" + this.username + "');")
 	
 	updateActionsDropDown();
@@ -199,12 +205,100 @@ function setUserPrivileges(){
 			deleteicon.title="remove action";
 			deleteicon.dataset.username = this.username;
 			deleteicon.dataset.roleKey = privis[i].key;
-			deleteicon.onclick = deleteRole;
+			deleteicon.onclick = deleteRoleUser;
 			deleteicon.href="";
 			row.childNodes[1].appendChild(deleteicon);
 		}	
 	}
 }
+
+/* updates role info section with the current selected role */
+function showRoleInfo(){
+	if (this == null || this.dataset.roleid == null) return;
+	var roleid = this.dataset.roleid;
+	
+	var currentSelection = document.querySelector("#allroletable > .smart-table-selectedrow");
+	if (currentSelection != null){
+		currentSelection.className = currentSelection.className.replace(/(?:^|\s)smart-table-selectedrow(?!\S)/ , '' );
+	}
+	this.className = this.className + " smart-table-selectedrow";
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = setRoleDetails;
+ 	oReq.roleid = roleid;
+ 	oReq.open("Get", PRIVILEGE_URL + "/roles/" + encodeURIComponent(roleid) + "/action", true);
+ 	oReq.send();
+}
+
+/* callback for setting user actions */
+function setRoleDetails(){
+	document.querySelector("#roledetailinner").style.display = "block";
+	if (this.status != 200){
+		displayError(parseError("Error loading role details.", this.responseText));
+		return;
+	}
+	
+	loadActions();
+	
+	var ele = document.querySelector("#userinfodefaults");
+	var table = document.querySelector("#actiontable");
+	if (table != null){
+		table.parentElement.removeChild(table);
+	}
+	table = document.querySelector("#roletable");
+	if (table != null){
+		table.parentElement.removeChild(table);
+	}
+	
+	var rolename ="";
+	for (var i = 0; i < allRoles.length; i ++){
+		if (allRoles[i].key == this.roleid){
+			rolename = allRoles[i].name;
+		}
+	}
+	var html = "<div style='margin-top: 5px'><span class='label-header'>Rolename: </span><span>" + rolename + "</span></div>";
+	document.querySelector("#roleinfodefaults").innerHTML = html;
+	
+	var privis = JSON.parse(this.responseText);
+	
+	var existing = document.querySelector("#roleactiontable");
+	if (existing != null){
+		existing.parentElement.removeChild(existing);
+	}
+	var actionElement = document.querySelector("#roledetailinner");
+	
+	var actionTable = tableCreate();
+	actionTable.id = "roleactiontable";
+	actionElement.appendChild(actionTable);
+	
+	tableAddHeader(actionTable, [i18n("users.action"), i18n("users.resource"), ""]);
+	
+	document.querySelector("#addRoleAction").setAttribute("onClick", "addActionToRole('" + this.roleid + "');")
+	updateActionsDropDown();
+	
+	var actionCnt = 1;
+	var roleCnt = 0;
+	for (var i = 0; i < privis.length; i ++){
+		
+		if (privis[i].type.toUpperCase() == "ACTION"){
+			var row = tableCreateRow(actionTable, 
+					[privis[i].name, privis[i].resourceName, ""], 
+					 (actionCnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+			actionCnt++;
+			var deleteicon = document.createElement("a");
+			deleteicon.className="delete-icon";
+			deleteicon.title="remove action from role";
+			deleteicon.dataset.roleid = this.roleid;
+			deleteicon.dataset.actionKey = privis[i].key;
+			if (privis[i].resource != null){
+				deleteicon.dataset.resourceKey = privis[i].resource;
+			}
+			deleteicon.onclick = deleteActionFromRole;
+			deleteicon.href="";
+			row.childNodes[2].appendChild(deleteicon);	
+		}
+	}
+}
+
 
 /* update actions drop down values */
 function updateRolesDropDown(){
@@ -228,44 +322,47 @@ function updateRolesDropDown(){
 
 /* update actions drop down values */
 function updateActionsDropDown(){
-	var ddactions = document.querySelector("#actionKey");
-	if (ddactions == null) return;
-	if (ddactions != null){
-		while(ddactions.lastChild){
-			ddactions.removeChild(ddactions.lastChild);
-		}
-	}
-	ddactions.setAttribute("onchange", "updateActionResourceDropDown(); return false;");
 	
-	var ddresources = document.querySelector("#actionResourceKey");
-	if (ddresources != null){
-		while(ddresources.lastChild){
-			ddresources.removeChild(ddresources.lastChild);
+	var dropdowns = [document.querySelector("#actionKey"), document.querySelector("#roleActionKey")];
+	var resourcedd = [document.querySelector("#actionResourceKey"), document.querySelector("#roleActionResourceKey")];
+	for (var i = 0; i < dropdowns.length; i ++){
+		var ddactions = dropdowns[i];
+		if (ddactions != null){
+			while(ddactions.lastChild){
+				ddactions.removeChild(ddactions.lastChild);
+			}
+			var ddresources = resourcedd[i];
+			if (ddresources != null){
+				ddactions.setAttribute("onchange", "updateActionResourceDropDown(\"" + ddactions.id + "\", \"" + ddresources.id + "\"); return false;");
+				
+				while(ddresources.lastChild){
+					ddresources.removeChild(ddresources.lastChild);
+				}
+			}
+			if (allActions != null){
+				for (var j = 0; j < allActions.length; j ++){
+					var op = document.createElement("option");
+					op.value=allActions[j].key;
+					op.innerHTML = allActions[j].name;
+					ddactions.appendChild(op);
+				}
+				ddactions.selectedIndex = 0;
+				updateActionResourceDropDown(ddactions.id, ddresources.id);
+			}
 		}
-	}
-	if (allActions == null) return;
-	
-	for (var i = 0; i < allActions.length; i ++){
-		var op = document.createElement("option");
-		op.value=allActions[i].key;
-		op.innerHTML = allActions[i].name;
-		ddactions.appendChild(op);
-	}
-	ddactions.selectedIndex = 0;
-	updateActionResourceDropDown();
+	} 
 }
 
 /* update the resources drop down based on the action selection */
-function updateActionResourceDropDown(){
-	var ddresources = document.querySelector("#actionResourceKey");
+function updateActionResourceDropDown(actionElementId, resourceElementId){
+	var ddresources = document.querySelector("#" + resourceElementId);
 	if (ddresources != null){
 		while(ddresources.lastChild){
 			ddresources.removeChild(ddresources.lastChild);
 		}
 	}
 	
-	var ddactions = document.querySelector("#actionKey");
-	var ddresources = document.querySelector("#actionResourceKey");
+	var ddactions = document.querySelector("#" + actionElementId);
 	if (ddactions == null || allActions == null || ddresources == null) return;
 	var selectedActionKey = ddactions.options[ddactions.selectedIndex].value;
 	for (var i = 0; i < allActions.length; i ++){
@@ -284,16 +381,38 @@ function updateActionResourceDropDown(){
 	}
 }
 
-/* reload users table */
-function refreshUsers(){
+
+/* reload roles table */
+function refreshRolesTable(){
 	//clear current table
-	var objects = document.querySelectorAll("div.userrow");
+	var objects = document.querySelectorAll("div.rolerow");
 	for (var i = 0; i < objects.length; i++){
 		var ele = objects[i];
 		ele.parentElement.removeChild(ele);
 	}
 
-	var parent = document.querySelector("div.usertable");
+	var parent = document.querySelector("#allroletable");
+	var row = document.createElement("div");
+	row.className="rolerow";
+	row.innerHTML="Loading...";
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createRoleTable;
+ 	oReq.open("Get", PRIVILEGE_URL + "/roles", true);
+ 	oReq.send();
+}
+
+/* reload users table */
+function refreshUsers(){
+	//clear current table
+	var objects = document.querySelectorAll("#usertable > .userrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.querySelector("#usertable");
 	var row = document.createElement("div");
 	row.className="userrow";
 	row.innerHTML=i18n("users.refreshusertable");
@@ -327,7 +446,7 @@ function createUserTable(){
 		ele.parentElement.removeChild(ele);
 	}
 	
-	var parent = document.querySelector("div.usertable");
+	var parent = document.querySelector("#usertable");
  	var users = JSON.parse(this.responseText);
  	for (var i = 0; i < users.length; i ++){
  		var row = tableCreateRow(parent, 
@@ -346,6 +465,47 @@ function createUserTable(){
  	}
 }
 
+
+/* callback that displays all user info */
+function createRoleTable(){
+	clearUserInfo();
+	if (this.status != 200) {
+		var msg = i18n("alert.errorlabel");
+		if (this.status == 401){
+			msg += i18n("alert.unathorized");
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table
+	var objects = document.querySelectorAll("#allroletable > .rolerow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.querySelector("#allroletable");
+ 	allRoles = JSON.parse(this.responseText);
+ 	for (var i = 0; i < allRoles.length; i ++){
+ 		var row = tableCreateRow(parent, 
+ 				[allRoles[i].name, null], 
+ 				"rolerow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		row.dataset.roleid = allRoles[i].key;
+ 		row.onclick = showRoleInfo;
+ 	
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="delete-icon";
+ 		deleteicon.title="delete role";
+ 		deleteicon.dataset.roleid = allRoles[i].key;
+ 		deleteicon.onclick = deleteRole;
+ 		deleteicon.href="";
+ 		row.childNodes[1].appendChild(deleteicon);
+ 	}
+}
 /* clears and displays new user dialog */
 function clearAndShowNewUserDialog(){
  	document.querySelector("input[name=password1]").value = "";
@@ -356,6 +516,13 @@ function clearAndShowNewUserDialog(){
  	displayDialog('newUserDialog', 'main');
 }
 
+/* clears and displays new user dialog */
+function clearAndShowNewRoleDialog(){
+ 	document.querySelector("input[name=rolename]").value = "";
+ 	document.querySelector("#roledialogerror").style.display = "none";
+ 	displayDialog('newRoleDialog', 'main');
+}
+
 /* delete user */
 function deleteUser(){
 	var username = this.dataset.username;
@@ -363,7 +530,6 @@ function deleteUser(){
 	if (!ok) return false;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = userDeleted;
@@ -372,16 +538,32 @@ function deleteUser(){
 	oReq.send();
 	return false;	
 }
-/* delete role */
+
+/* deletes role */
 function deleteRole(){
+	var roleId = this.dataset.roleid;
+	
+	hideInfo();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = roleDeleted;
+	var loc = PRIVILEGE_URL + "/roles/";
+	loc += encodeURIComponent(roleId);
+	oReq.open("DELETE", loc, true);
+	oReq.send();
+	
+	return false;	
+}
+
+/* delete role from user*/
+function deleteRoleUser(){
 	var username = this.dataset.username;
 	var role = this.dataset.roleKey;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
-	oReq.onload = roleDeleted;
+	oReq.onload = roleDeletedUser;
 	oReq.smartuser = username;
 	var loc = PRIVILEGE_URL + "/user/";
 	loc += encodeURIComponent(username);
@@ -400,7 +582,6 @@ function deleteAction(){
 	var resource = this.dataset.resourceKey;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = actionDeleted;
@@ -417,7 +598,51 @@ function deleteAction(){
 	return false;	
 }
 
-/* add action */
+/* delete action */
+function deleteActionFromRole(){
+	var roleid = this.dataset.roleid;
+	var action = this.dataset.actionKey;
+	var resource = this.dataset.resourceKey;
+	
+	hideInfo();
+	
+	var loc = PRIVILEGE_URL + "/roles/";
+	loc += encodeURIComponent(roleid);
+	loc += "/action";
+	loc += "/" + encodeURIComponent(action);
+	if (resource != null){
+		loc += "/" + encodeURIComponent(resource);
+	}
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = actionDeletedFromRole;
+	oReq.roleid = roleid;
+	oReq.open("DELETE", loc, true);
+	oReq.send();
+	return false;	
+}
+
+/* add action to role */
+function addActionToRole(roleid){
+	var ddactions = document.querySelector("#roleActionKey");
+	var ddresources = document.querySelector("#roleActionResourceKey");
+	
+	var selectedActionKey = ddactions.options[ddactions.selectedIndex].value;
+	var selectedResourceKey = ddresources.options[ddresources.selectedIndex].value;
+	
+	hideInfo();
+	var oReq = new XMLHttpRequest();
+	oReq.onload = actionAddedToRole;
+	oReq.roleid = roleid;
+	var loc = PRIVILEGE_URL + "/roles/" + encodeURIComponent(roleid) + "/action/" + encodeURIComponent(selectedActionKey);
+	if (selectedResourceKey.length > 0){
+		loc += "/" + selectedResourceKey;
+	}
+	oReq.open("POST", loc, true);
+	oReq.send();
+}
+
+/* add action to user*/
 function addAction(username){
 	var ddactions = document.querySelector("#actionKey");
 	var ddresources = document.querySelector("#actionResourceKey");
@@ -426,7 +651,6 @@ function addAction(username){
 	var selectedResourceKey = ddresources.options[ddresources.selectedIndex].value;
 	
 	hideInfo();
-	hideError();
 	var oReq = new XMLHttpRequest();
 	oReq.onload = actionAdded;
 	oReq.smartuser = username;
@@ -440,15 +664,14 @@ function addAction(username){
 
 
 /* add role */
-function addRole(username){
+function addRoleToUser(username){
 	var ddactions = document.querySelector("#roleKey");
 	var selectedRoleKey = ddactions.options[ddactions.selectedIndex].value;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
-	oReq.onload = roleAdded;
+	oReq.onload = roleAddedToUser;
 	oReq.smartuser = username;
 	var loc = PRIVILEGE_URL + "/user/" + encodeURIComponent(username) + "/role/" + encodeURIComponent(selectedRoleKey);
 	oReq.open("POST", loc, true);
@@ -479,16 +702,37 @@ function actionDeleted() {
 	} else {
 		displayError(parseError(i18n("alert.errordeletingaction") + this.smartuser, this.responseText));
 	}
-	showUserInfo.call(document.querySelector(".selecteduser"));
+	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
 }
+//callback for delete action 
+function actionDeletedFromRole() {
+	if (this.status == 204) {
+		displayInfo("Role updated");
+	} else {
+		displayError(parseError("Error deleting action from role", this.responseText));
+	}
+	showRoleInfo.call(document.querySelector("#allroletable > .smart-table-selectedrow"));
+}
+
 //callback for delete role 
-function roleDeleted() {
+function roleDeletedUser() {
 	if (this.status == 204) {
 		displayInfo(this.smartuser + " updated");
 	} else {
 		displayError(parseError("Error deleting role for " + this.smartuser, this.responseText));
 	}
-	showUserInfo.call(document.querySelector(".selecteduser"));
+	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
+}
+
+//callback for delete role 
+function roleDeleted() {
+	allRoles = null;
+	if (this.status == 204) {
+		displayInfo("Role deleted");
+	} else {
+		displayError(parseError("Error deleting role.", this.responseText));
+	}
+	refreshRolesTable();
 }
 
 //callback for add action
@@ -498,17 +742,59 @@ function actionAdded(){
 	} else {
 		displayError(parseError(i18n("alert.erroraddingaction")+ this.smartuser, this.responseText));
 	}
-	showUserInfo.call(document.querySelector(".selecteduser"));
+	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
 }
 //callback for add action
-function roleAdded(){
+function actionAddedToRole(){
+	if (this.status == 204) {
+		displayInfo("Role updated");
+	} else {
+		displayError(parseError("Error adding action to role.", this.responseText));
+	}
+	showRoleInfo.call(document.querySelector("#allroletable > .smart-table-selectedrow"));
+}
+//callback for add action
+function roleAddedToUser(){
 	if (this.status == 204) {
 		displayInfo(this.smartuser + " updated");
 	} else {
 		displayError(parseError("Error adding role for user " + this.smartuser, this.responseText));
 	}
-	showUserInfo.call(document.querySelector(".selecteduser"));
+	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
 }
+
+//creates a new role
+function createNewRole() {
+	var rolename = document.querySelector("input[name=rolename]").value;
+	
+	var error = "";
+	if (rolename.length == 0 ) {
+		error = "A name is required for the role.";
+	}
+
+	if (error.length > 0){
+		document.querySelector("#roledialogerror").innerHTML = error;
+		document.querySelector("#roledialogerror").style.display = "block";
+		return false;
+	}
+	
+	var jsonData = {
+		"name" : rolename
+	};
+
+	//make ajax call
+	hideInfo();
+	document.querySelector("#message").style.display = "none";
+
+	closeDialog('newRoleDialog');
+	var oReq = new XMLHttpRequest();
+	oReq.onload = roleCreated;
+	oReq.open("POST", PRIVILEGE_URL + "/roles", true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
 //creates a new user
 function createNewUser() {
 	var pass1 = document.querySelector("input[name=password1]").value;
@@ -538,7 +824,6 @@ function createNewUser() {
 	};
 
 	//make ajax call
-	hideError();
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
@@ -563,4 +848,15 @@ function userCreated() {
 	refreshUsers();
 }
 
+//callback for creating user 
+function roleCreated() {
+	allRoles = null;
+	
+	if (this.status == 201) {
+		displayInfo("New role created");
+	} else {
+		displayError(parseError("Error creating new role.", this.responseText));
+	}
+	refreshRolesTable();
+}
 

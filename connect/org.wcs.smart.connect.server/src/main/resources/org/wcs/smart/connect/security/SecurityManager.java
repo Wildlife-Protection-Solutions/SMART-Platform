@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.connect.security;
 
+import java.util.Locale;
 import java.util.UUID;
+
+import javax.ws.rs.core.Response;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -29,6 +32,9 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUserAction;
 
 /**
@@ -118,4 +124,35 @@ public enum SecurityManager {
 		}
 	}
 
+	
+	/**
+	 * Ensure there is at least one user with admin action
+	 * OR associated with a role with admin action
+	 * 
+	 * Throws an exception if no admin user found
+	 */
+	public void validateSingleAdminUser(Session s, Locale l){
+		Long adminCnt = (Long) s.createCriteria(SmartUserAction.class)
+				.add(Restrictions.eq("action", AdminAccountAction.KEY)) //$NON-NLS-1$
+				.setProjection(Projections.rowCount()).uniqueResult();
+		if (adminCnt > 0) {
+			return;
+		}
+		
+		//a user with a role with admin action
+		//check roles for permission
+		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  ";
+		queryString += "WHERE a.role = role AND a.action = :adminAction ";
+		Query q= s.createQuery(queryString);
+		q.setParameter("adminAction", AdminAccountAction.KEY);
+		Long adminRoleCnt = (Long) q.uniqueResult();
+		if (adminRoleCnt > 0){
+			return;
+		}		
+		
+		throw new SmartConnectException(
+				Response.Status.BAD_REQUEST,
+				Messages.getString("ConnectUserAction.AdminError", l)); //$NON-NLS-1$
+		
+	}
 }

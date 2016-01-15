@@ -46,7 +46,6 @@
 
 <div>
   <div id="message" class="msgsection"></div>
-  <div id="error" class="errorsection"></div>
 </div>
 <div class="top-spacer"  style="margin-left: -20px" >
 

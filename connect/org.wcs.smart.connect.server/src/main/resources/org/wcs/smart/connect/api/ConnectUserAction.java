@@ -42,10 +42,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 import org.wcs.smart.connect.SmartUtils;
@@ -54,8 +54,10 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartActionsProxy;
 import org.wcs.smart.connect.model.SmartRole;
+import org.wcs.smart.connect.model.SmartRoleAction;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserPermissionProxy;
+import org.wcs.smart.connect.model.SmartUserPermissionProxy.Type;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.ActionManager;
 import org.wcs.smart.connect.security.AdminAccountAction;
@@ -64,7 +66,8 @@ import org.wcs.smart.connect.security.ResourceOption;
 import org.wcs.smart.connect.security.SecurityManager;
 
 /**
- * SMART Connect REST API for configuring user permission and actions.
+ * SMART Connect REST API for configuring user and role
+ * permissions and actions.
  * 
  * @author Emily
  *
@@ -138,10 +141,11 @@ public class ConnectUserAction extends HttpServlet {
 	}
 	
 	/**
-	 * Lists all available actions.
+	 * Lists all available roles.
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	@GET
     @Path("/roles")
     public List<SmartActionsProxy> getRoles(){
@@ -273,15 +277,13 @@ public class ConnectUserAction extends HttpServlet {
 			s.flush();
 			
 			// we need at least one admin user
-			Long adminCnt = (Long) s.createCriteria(SmartUserAction.class)
-					.add(Restrictions.eq("action", AdminAccountAction.KEY)) //$NON-NLS-1$
-					.setProjection(Projections.rowCount()).uniqueResult();
-			if (adminCnt <= 0) {
-				throw new SmartConnectException(
-						Response.Status.BAD_REQUEST,
-						Messages.getString("ConnectUserAction.AdminError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			}
+			SecurityManager.INSTANCE.validateSingleAdminUser(s, SmartUtils.getRequestLocale(request));
+			
 			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -290,6 +292,137 @@ public class ConnectUserAction extends HttpServlet {
 		}	
 	}
 	
+	/**
+	 * Creates a new role. Uses the name property of the action
+	 * object and generated a new uuid string as the role id;
+	 * 
+	 * @param username
+	 * @param action
+	 */
+	@POST
+    @Path("/roles")
+    public void createRole(SmartUserPermissionProxy action){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			SmartRole role = new SmartRole();
+			role.setRoleId(UUID.randomUUID().toString().replaceAll("-",""));
+			role.setIsSystem(false);
+			role.setRoleName(action.getName());
+			s.save(role);
+			s.getTransaction().commit();
+			
+			response.setStatus(Response.Status.CREATED.getStatusCode());
+			response.flushBuffer();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Error creating new role.", ex); //$NON-NLS-1$
+		}
+	}
+	/**
+	 * Removes a role from the system, includes removing any user
+	 * links to the role.
+	 * 
+	 * @param username
+	 * @param action
+	 */
+	@DELETE
+    @Path("/roles/{roleid}")
+    public void deleteRole(@PathParam("roleid") String roleid){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			SmartRole role = (SmartRole) s.get(SmartRole.class, roleid);
+			if (role == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+			s.delete(role);
+			
+			s.flush();
+			
+			// we need at least one admin user
+			SecurityManager.INSTANCE.validateSingleAdminUser(s, SmartUtils.getRequestLocale(request));
+			
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Error removing role.", ex); //$NON-NLS-1$
+		}	
+	}
+	
+	/**
+	 * Removes an action from a given role.
+	 * 
+	 * @param username
+	 * @param action
+	 */
+	@DELETE
+    @Path("/roles/{roleid}/action/{action}")
+    public void deleteRoleAction(@PathParam("roleid") String roleid,
+    		@PathParam("action") String action){
+		deleteRoleActions(roleid, action, null);
+	}
+	
+	/**
+	 * Removes an action and specific resource from a given role.
+	 * 
+	 * @param username
+	 * @param action
+	 * @param resource
+	 */
+	@DELETE
+    @Path("/roles/{roleid}/action/{action}/{resource}")
+    public void deleteRoleActions(@PathParam("roleid") String roleid,
+    		@PathParam("action") String action,
+    		@PathParam("resource") String resource){
+		
+		validateUser();
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			SmartRole role = (SmartRole) s.get(SmartRole.class, roleid);
+			if (role == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+			
+			@SuppressWarnings("unchecked")
+			List<SmartRoleAction> actions = s.createCriteria(SmartRoleAction.class)
+					.add(Restrictions.eq("role", role))
+					.add(Restrictions.eq("action", action))
+					.list();
+			
+			for(SmartRoleAction a : actions){
+				if ((resource == null && a.getResource() == null) ||
+					(a.getResource() != null && a.getResource().toString().equals(resource))){		
+					s.delete(a);
+				}
+			}
+			s.flush();
+			
+			// we need at least one admin user
+			SecurityManager.INSTANCE.validateSingleAdminUser(s, SmartUtils.getRequestLocale(request));
+			
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Error removing action from role.", ex); //$NON-NLS-1$
+		}	
+	}
 	
 	/**
 	 * Adds a new action for a given user.
@@ -341,11 +474,109 @@ public class ConnectUserAction extends HttpServlet {
 	}
 	
 	/**
+	 * Gets all actions associated with a given role
+	 * @param roleid
+	 */
+	@SuppressWarnings("unchecked")
+	@GET
+    @Path("/roles/{roleid}/action")
+    public List<SmartUserPermissionProxy> getRoleActions(@PathParam("roleid") String roleid){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			SmartRole role = (SmartRole) s.get(SmartRole.class, roleid);
+			if (role == null){
+				return null;
+			}
+			List<SmartUserPermissionProxy> privis = new ArrayList<SmartUserPermissionProxy>();
+			
+			List<SmartRoleAction> actions = s.createCriteria(SmartRoleAction.class)
+					.add(Restrictions.eq("role", role))
+					.list();
+			for (SmartRoleAction a : actions){
+				SmartUserPermissionProxy proxy = new SmartUserPermissionProxy(Type.ACTION);
+				proxy.setKey(a.getAction());
+				proxy.setResource(a.getResource());
+				
+				ISmartConnectAction action = ActionManager.INSTANCE.findAction(a.getAction());
+				proxy.setName(action.getActionName(a.getAction(), SmartUtils.getRequestLocale(request)));
+				if (a.getResource() != null){
+					proxy.setResourceName(action.getResourceName(a.getResource(), s, SmartUtils.getRequestLocale(request)));
+				}
+				privis.add(proxy);
+			}
+			
+			return privis;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR);
+		}finally{
+			s.getTransaction().rollback();
+		}
+	}
+	
+	
+	/**
+	 * Adds a new action to a role.
+	 * @param username
+	 * @param actionKey
+	 */
+	@POST
+    @Path("/roles/{roleid}/action/{action}")
+    public void addRoleAction(@PathParam("roleid") String roleid,
+    		@PathParam("action") String actionKey){
+		addRoleActions(roleid, actionKey, null);
+	}
+	
+	/**
+	 * Add a new action with a specific resource to a role
+	 * @param username
+	 * @param actionKey
+	 * @param resourceKey
+	 */
+	@POST
+    @Path("/roles/{roleid}/action/{action}/{resource}")
+    public void addRoleActions(@PathParam("roleid") String roleid,
+    		@PathParam("action") String actionKey,
+    		@PathParam("resource") String resourceKey){
+		validateUser();
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			SmartRole role = (SmartRole) s.get(SmartRole.class, roleid);
+			if (role == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "Role not found.");
+			}
+			
+			SmartRoleAction newaction = new SmartRoleAction();
+			newaction.setAction(actionKey);
+			newaction.setRole(role);
+			if (resourceKey != null){
+				newaction.setResource(UUID.fromString(resourceKey));
+			}
+			s.save(newaction);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			if(ex instanceof ConstraintViolationException){
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+						"Error adding new action to role: Contraint Violoation. This is most likely because the user already has the permission you are trying to add.", ex); //$NON-NLS-1$
+			}else{
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+						":Error adding new action to role.", ex); //$NON-NLS-1$
+			}
+		}
+	}
+	
+	/**
 	 * Removes an role from a given user.
 	 * 
 	 * @param username
 	 * @param action
 	 */
+	@SuppressWarnings("unchecked")
 	@DELETE
     @Path("/user/{username}/role/{role}")
     public void deleteUserRole(@PathParam("username") String username,
@@ -356,7 +587,7 @@ public class ConnectUserAction extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			@SuppressWarnings("unchecked")
+			
 			Query q = s.createQuery("FROM SmartUserRole r WHERE r.id.username = :username and r.id.role.roleId = :roleId");
 			q.setParameter("username", username);
 			q.setParameter("roleId", role);
@@ -368,16 +599,13 @@ public class ConnectUserAction extends HttpServlet {
 			s.flush();
 			
 			// we need at least one admin user
-			//TODO: check this now with roles as well as action
-//			Long adminCnt = (Long) s.createCriteria(SmartUserAction.class)
-//					.add(Restrictions.eq("action", AdminAccountAction.KEY)) //$NON-NLS-1$
-//					.setProjection(Projections.rowCount()).uniqueResult();
-//			if (adminCnt <= 0) {
-//				throw new SmartConnectException(
-//						Response.Status.BAD_REQUEST,
-//						Messages.getString("ConnectUserAction.AdminError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-//			}
+			SecurityManager.INSTANCE.validateSingleAdminUser(s, SmartUtils.getRequestLocale(request));
+			
 			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -429,4 +657,6 @@ public class ConnectUserAction extends HttpServlet {
 			
 		}
 	}
+	
+
 }

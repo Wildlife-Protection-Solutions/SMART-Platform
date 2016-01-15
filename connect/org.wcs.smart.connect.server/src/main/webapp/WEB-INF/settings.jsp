@@ -24,9 +24,7 @@
   <div class="pageheader"><fmt:message key="settings.pageheader" /></div>
   <div>
     <div id="message" class="msgsection"></div>
-    <div id="error" class="errorsection"></div>
-<!--     	<button id="btnNewStyle" class="block button top-spacer">Create New Style</button> -->
-    </div>
+   </div>
 
 
 <div class="overflow settingsTable">

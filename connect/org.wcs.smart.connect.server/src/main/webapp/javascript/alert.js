@@ -204,9 +204,7 @@ function createNewAlert() {
 	};
 
 	//make ajax call
-	hideError();
 	hideInfo();
-	document.querySelector("#message").style.display = "none";
 
 	var oReq = new XMLHttpRequest();
 	oReq.onload = alertCreated;
@@ -241,9 +239,6 @@ function showError(error) {
 }
 
 function settab(tab){
-//	hideInfo();
-//	hideError();
-
 	remove_all_tab_classes();
 	switch(tab){
 		case 2:
@@ -321,7 +316,6 @@ function deleteAlert(){
 	if (!ok) return false;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = alertDeleted;
@@ -346,8 +340,6 @@ function alertDeleted() {
 function refreshAlerts(){
 	//clear current table
 	hideInfo();
-	hideError();
-	
 	
 	var objects = document.querySelectorAll("tr.alertrow");
 	for (var i = 0; i < objects.length; i++){
@@ -468,7 +460,6 @@ function updateAlert(){
 	document.getElementById("updatealertform").uuid.value = uuid;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = showCurrentAlert;
@@ -517,7 +508,6 @@ function submitUpdatedAlert(){
 		return false;
 	}
 	hideInfo();
-	hideError();
 	
 	//generate the data to send
 	data = {
@@ -576,13 +566,9 @@ function getFilteredUrl(base){
 	filteredUrl += getFilter("filterCa", started, "caUuidFilter");
 	
 	filteredUrl += "&textSearchFilter=" +  document.getElementById("filterText").value;
-	
-	
 
-	
-	
 	var dateSelect = document.getElementById("filterDate").value;
-	hideError();	
+	
 	if(dateSelect == -1){//custom dates
 		var from = new Date(document.getElementById('datePickerFrom').value.substring(4)).getTime();//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
 		var to = new Date(document.getElementById('datePickerTo').value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.

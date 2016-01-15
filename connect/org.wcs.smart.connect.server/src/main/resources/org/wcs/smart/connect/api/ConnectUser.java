@@ -54,7 +54,6 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUser;
-import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
@@ -290,14 +289,8 @@ public class ConnectUser extends HttpServlet {
 			s.delete(toDelete);
 			s.flush();
 			//cannot delete the last administrator user
-			Long adminCnt = (Long) s.createCriteria(SmartUserAction.class)
-				.add(Restrictions.eq("action", AdminAccountAction.KEY)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount())
-				.uniqueResult();
-			if (adminCnt <= 0){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST,
-						Messages.getString("ConnectUser.DeleteAdminErr", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			}
+			SecurityManager.INSTANCE.validateSingleAdminUser(s, SmartUtils.getRequestLocale(request));
+			
 			s.getTransaction().commit();
 			
 			//if we are deleting the current user we should auto logout

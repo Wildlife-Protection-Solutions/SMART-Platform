@@ -104,7 +104,6 @@ function createNewStyle() {
 	};
 
 	//make ajax call
-	hideError();
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
@@ -225,7 +224,6 @@ function deleteLayer(){
 	if (!ok) return false;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = layerDeleted;
@@ -268,7 +266,6 @@ function createNewLayer(){
 	};
 
 	//make ajax call
-	hideError();
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
@@ -298,7 +295,6 @@ function updateLayer(){
 	document.getElementById("maplayersform").uuid.value = uuid;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = showCurrentLayer;
@@ -361,7 +357,6 @@ function submitUpdateLayer(){
 	};
 
 	//make ajax call
-	hideError();
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
@@ -473,10 +468,7 @@ function updateType(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
 	document.getElementById("alerttypesform").uuid.value = uuid;
 	
-
-	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = showCurrentType;
@@ -519,7 +511,6 @@ function deleteType(){
 	if (!ok) return false;
 	
 	hideInfo();
-	hideError();
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = typeDeleted;
@@ -553,7 +544,6 @@ function createNewType(){
 	};
 
 	//make ajax call
-	hideError();
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
@@ -593,7 +583,6 @@ function submitUpdateType(){
 		"opacity" : typeOpacity
 	};
 	//make ajax call
-	hideError();
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
@@ -704,7 +693,6 @@ function saveDefaults(){
 	var uuid = document.getElementById("filter_uuid").value;
 	
 	//make ajax call
-	hideError();
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 

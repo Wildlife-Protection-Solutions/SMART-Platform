@@ -5,6 +5,8 @@
 <head>
 <%@include file="includes.jsp" %>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
+
 <title>SMART Connect - User Account</title>
 
 <script>
@@ -17,8 +19,7 @@
 		var user = document.querySelector("input[name=username]").value;
 		var email = document.querySelector("input[name=email]").value;
 		if (user.length == 0) {
-			document.querySelector("#error").innerHTML = "<fmt:message key="myaccount.userrequired" />";
-			document.querySelector("#error").style.display = "block";
+			displayError("<fmt:message key="myaccount.userrequired" />");
 			return false;
 		}
 
@@ -34,8 +35,7 @@
 
 	//calls the POST REST api for the user update
 	function updateUserAjax(userName, jsonData) {
-		hideError();
-		document.querySelector("#message").style.display = "none";
+		hideInfo();
 
 		var oReq = new XMLHttpRequest();
 		oReq.onload = userUpdated;
@@ -48,7 +48,8 @@
 	function userUpdated() {
 		if (this.status == 200) {
 			//ok
-			document.querySelector("#message").style.display = "block";
+			displayInfo("<fmt:message key="myaccount.accountupdated" />");
+			
 			var user = JSON.parse(this.responseText);
 
 			document.querySelector("input[name=currentuser]").innerHTML = user.username;
@@ -66,15 +67,6 @@
 		}
 	}
 
-	//hide error message
-	function hideError() {
-		document.querySelector("#error").style.display = "none";
-	}
-	//displays error message
-	function displayError(msg) {
-		document.querySelector("#error").style.display = "block";
-		document.querySelector("#error").innerHTML = msg;
-	}
 
 	//makes and AJAX REST call to update username
 	function updatePassword() {
@@ -110,7 +102,7 @@
 <div id="main">
 <div class="pageheader">My Account</div>
 <div id="message" class="msgsection"><fmt:message key="myaccount.accountupdated"/></div>
-<div id="error" class="errorsection"></div>
+
 <p class="infomessage"><fmt:message key="myaccount.info"/></p>
 
 <form style="width:220px; display: block" id="userform" onsubmit="return updateUser();" >
