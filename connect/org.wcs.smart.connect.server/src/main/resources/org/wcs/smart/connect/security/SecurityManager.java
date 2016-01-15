@@ -24,6 +24,7 @@ package org.wcs.smart.connect.security;
 import java.util.UUID;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
@@ -41,6 +42,30 @@ public enum SecurityManager {
 	INSTANCE;
 
 	public boolean canAccess(Session s, String username, String action, UUID resource){
+		
+		//check roles for permission
+		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  ";
+		queryString += "WHERE a.role = role AND r.id.username = :username AND ( a.action = :adminAction OR ";
+		if (resource == null){
+			queryString += " (a.action = :action and a.resource is null)";
+		}else {
+			queryString += " (a.action = :action and (a.resource is null OR a.resource = :resource))";
+		}
+		queryString += "  )";
+
+		Query query = s.createQuery(queryString);
+		query.setParameter("username",  username);
+		query.setParameter("adminAction", AdminAccountAction.KEY);
+		query.setParameter("action", action);
+		if (resource != null){
+			query.setParameter("resource", resource);
+		}
+		Long cnt = (Long)query.uniqueResult();
+		if (cnt >  0){
+			return true;
+		}
+		
+		//check actions for permission
 		Criterion r = null;
 		if (resource == null){
 			r = Restrictions.and(
@@ -62,12 +87,12 @@ public enum SecurityManager {
 						r))
 				.setProjection(Projections.rowCount());
 
-		Long cnt = (Long) c.uniqueResult();
-		if (cnt == 0){
-			return false;
-		}else{
+		Long cnt2 = (Long) c.uniqueResult();
+		if (cnt2 > 0){
 			return true;
 		}
+		return false;
+
 	}
 	
 	public boolean canAccess(Session s, String username, String action){

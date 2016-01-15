@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.api;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +43,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -51,8 +53,10 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartActionsProxy;
+import org.wcs.smart.connect.model.SmartRole;
 import org.wcs.smart.connect.model.SmartUserAction;
-import org.wcs.smart.connect.model.SmartUserActionProxy;
+import org.wcs.smart.connect.model.SmartUserPermissionProxy;
+import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.ActionManager;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.ISmartConnectAction;
@@ -65,13 +69,12 @@ import org.wcs.smart.connect.security.SecurityManager;
  * @author Emily
  *
  */
-@Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectUser.PATH +
-		ConnectRESTApplication.PATH_SEPERATOR + ConnectUserAction.PATH)
+@Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectUserAction.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
 public class ConnectUserAction extends HttpServlet {
 	
-	public static final String PATH = "actions";
+	public static final String PATH = "privileges";
 	
 	private static final long serialVersionUID = 1L;
 	private final Logger logger = Logger.getLogger(ConnectUserAction.class.getName());
@@ -102,7 +105,7 @@ public class ConnectUserAction extends HttpServlet {
 	 * @return
 	 */
 	@GET
-    @Path("/")
+    @Path("/actions")
     public List<SmartActionsProxy> getActions(){
 		validateUser();
 		Session s = HibernateManager.getSession(context, request.getLocale());
@@ -135,14 +138,45 @@ public class ConnectUserAction extends HttpServlet {
 	}
 	
 	/**
-	 * Lists all actions associated with a given user.
+	 * Lists all available actions.
+	 * 
+	 * @return
+	 */
+	@GET
+    @Path("/roles")
+    public List<SmartActionsProxy> getRoles(){
+		validateUser();
+		Session s = HibernateManager.getSession(context, request.getLocale());
+		s.beginTransaction();
+		try{
+			List<SmartRole> roles = s.createCriteria(SmartRole.class)
+					.add(Restrictions.eq("isSystem", false)).list();
+			
+			List<SmartActionsProxy> actionResources = new ArrayList<SmartActionsProxy>();
+			for (SmartRole r : roles){
+				SmartActionsProxy proxy = new SmartActionsProxy(r.rolename, r.roleId);
+				actionResources.add(proxy);
+			}
+			
+			return actionResources;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					Messages.getString("ConnectUserAction.ActionError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+	
+	/**
+	 * Lists all roles and actions associated with a given user.
 	 * 
 	 * @param username
 	 * @return
 	 */
 	@GET
-    @Path("/{username}")
-    public List<SmartUserActionProxy> getUserActions(@PathParam("username") String username){
+    @Path("/user/{username}")
+    public List<SmartUserPermissionProxy> getUserPrivileges(@PathParam("username") String username){
 		validateUser();
 		
 		Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
@@ -153,20 +187,35 @@ public class ConnectUserAction extends HttpServlet {
 					.add(Restrictions.eq("username", username))
 					.list();
 			
-			List<SmartUserActionProxy> items = new ArrayList<SmartUserActionProxy>();
+			List<SmartUserPermissionProxy> items = new ArrayList<SmartUserPermissionProxy>();
 			for (SmartUserAction a : actions){
-				SmartUserActionProxy p = new SmartUserActionProxy();
-				p.setActionKey(a.getAction());
+				SmartUserPermissionProxy p = new SmartUserPermissionProxy(SmartUserPermissionProxy.Type.ACTION);
+				p.setKey(a.getAction());
 				p.setResource(a.getResource());
 				
 				ISmartConnectAction action = ActionManager.INSTANCE.findAction(a.getAction());
-				p.setActionName(action.getActionName(a.getAction(), SmartUtils.getRequestLocale(request)));
+				p.setName(action.getActionName(a.getAction(), SmartUtils.getRequestLocale(request)));
 				if (a.getResource() != null){
 					p.setResourceName(action.getResourceName(a.getResource(), s, SmartUtils.getRequestLocale(request)));
 				}
 				items.add(p);
 			}
+			
+			@SuppressWarnings("unchecked")
+			List<SmartUserRole> roles = s.createCriteria(SmartUserRole.class)
+					.add(Restrictions.eq("id.username", username))
+					.list();
+			
+			for (SmartUserRole r : roles){
+				if (!r.getRole().isSystem){
+					SmartUserPermissionProxy p = new SmartUserPermissionProxy(SmartUserPermissionProxy.Type.ROLE);
+					p.setKey(r.getRole().getRoleId());
+					p.setName(r.getRole().getRoleName());
+					items.add(p);
+				}
+			}
 			return items;
+			
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR,
@@ -183,8 +232,8 @@ public class ConnectUserAction extends HttpServlet {
 	 * @param action
 	 */
 	@DELETE
-    @Path("/{username}/{action}")
-    public void getUserActions(@PathParam("username") String username,
+    @Path("/user/{username}/action/{action}")
+    public void deleteUserAction(@PathParam("username") String username,
     		@PathParam("action") String action
     		){
 		deleteUserActions(username, action, null);
@@ -198,7 +247,7 @@ public class ConnectUserAction extends HttpServlet {
 	 * @param resource
 	 */
 	@DELETE
-    @Path("/{username}/{action}/{resource}")
+    @Path("/user/{username}/action/{action}/{resource}")
     public void deleteUserActions(@PathParam("username") String username,
     		@PathParam("action") String action,
     		@PathParam("resource") String resource){
@@ -248,7 +297,7 @@ public class ConnectUserAction extends HttpServlet {
 	 * @param actionKey
 	 */
 	@POST
-    @Path("/{username}/{action}")
+    @Path("/user/{username}/action/{action}")
     public void addUserActions(@PathParam("username") String username,
     		@PathParam("action") String actionKey){
 		addUserActions(username, actionKey, null);
@@ -261,7 +310,7 @@ public class ConnectUserAction extends HttpServlet {
 	 * @param resourceKey
 	 */
 	@POST
-    @Path("/{username}/{action}/{resource}")
+    @Path("/user/{username}/action/{action}/{resource}")
     public void addUserActions(@PathParam("username") String username,
     		@PathParam("action") String actionKey,
     		@PathParam("resource") String resourceKey){
@@ -288,6 +337,96 @@ public class ConnectUserAction extends HttpServlet {
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 						Messages.getString("ConnectUserAction.UserAddError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 			}
+		}
+	}
+	
+	/**
+	 * Removes an role from a given user.
+	 * 
+	 * @param username
+	 * @param action
+	 */
+	@DELETE
+    @Path("/user/{username}/role/{role}")
+    public void deleteUserRole(@PathParam("username") String username,
+    		@PathParam("role") String role){
+    		
+		validateUser();
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			@SuppressWarnings("unchecked")
+			Query q = s.createQuery("FROM SmartUserRole r WHERE r.id.username = :username and r.id.role.roleId = :roleId");
+			q.setParameter("username", username);
+			q.setParameter("roleId", role);
+			
+			List<SmartUserRole> roles = q.list();
+			for(SmartUserRole a : roles){
+				s.delete(a);
+			}
+			s.flush();
+			
+			// we need at least one admin user
+			//TODO: check this now with roles as well as action
+//			Long adminCnt = (Long) s.createCriteria(SmartUserAction.class)
+//					.add(Restrictions.eq("action", AdminAccountAction.KEY)) //$NON-NLS-1$
+//					.setProjection(Projections.rowCount()).uniqueResult();
+//			if (adminCnt <= 0) {
+//				throw new SmartConnectException(
+//						Response.Status.BAD_REQUEST,
+//						Messages.getString("ConnectUserAction.AdminError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+//			}
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Error deleting role.", ex); //$NON-NLS-1$
+		}	
+	}
+	
+	
+	/**
+	 * Adds a new action for a given user.
+	 * @param username
+	 * @param actionKey
+	 */
+	@POST
+    @Path("/user/{username}/role/{role}")
+    public void addUserRole(@PathParam("username") String username,
+    		@PathParam("role") String roleId){
+	
+		validateUser();
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			SmartRole role = (SmartRole) s.get(SmartRole.class, roleId);
+			if (role == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
+						MessageFormat.format("The role {0} does not exist.", roleId)); //$NON-NLS-1$ 
+			}
+			
+			SmartUserRole newrole = new SmartUserRole();
+			newrole.setRole(role);
+			newrole.setUsername(username);
+			
+			s.save(newrole);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			if (ex instanceof SmartConnectException ){
+				throw ex;
+			}
+			if(ex instanceof ConstraintViolationException){
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR,
+						"Error adding new role: Contraint Violoation. This is most likely because the user already has this role applied to it.", ex);
+			}
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+						"Error adding new role.", ex); //$NON-NLS-1$
+			
 		}
 	}
 }

@@ -15,6 +15,8 @@ DROP TABLE IF EXISTS connect.connect_plugin_version;
 DROP TABLE IF EXISTS connect.user_actions;
 DROP TABLE IF EXISTS connect.users;
 DROP TABLE IF EXISTS connect.user_roles;
+DROP TABLE IF EXISTS connect.role;
+DROP TABLE IF EXISTS connect.role_actions;
 DROP TABLE IF EXISTS connect.upload_status;
 DROP TABLE IF EXISTS connect.upload_item;
 DROP TABLE IF EXISTS connect.work_item;
@@ -106,9 +108,29 @@ CREATE UNIQUE INDEX useractions_unq2 ON connect.user_actions(username, action, r
 CREATE TABLE connect.user_roles
 (
 	username varchar NOT NULL,
-	role varchar NOT NULL,
-	PRIMARY KEY (username, role)
+	role_id varchar(32) NOT NULL,
+	PRIMARY KEY (username, role_id)
 ) WITHOUT OIDS;
+
+CREATE TABLE connect.roles
+(
+	role_id varchar(32) NOT NULL,
+	rolename varchar NOT NULL,
+	is_system boolean not null default false,
+	PRIMARY KEY (role_id)
+) WITHOUT OIDS;
+
+CREATE TABLE connect.role_actions
+(
+	uuid uuid NOT NULL,	
+	role_id varchar(32) NOT NULL,
+	action varchar NOT NULL,
+	resource uuid,
+	PRIMARY KEY (uuid)
+) WITHOUT OIDS;
+CREATE UNIQUE INDEX roleactions_unq1 ON connect.role_actions(role_id, action) WHERE resource IS NULL;
+CREATE UNIQUE INDEX roleactions_unq2 ON connect.role_actions(role_id, action, resource) WHERE resource IS NOT NULL;
+
 
 CREATE TYPE connect.alert_status AS ENUM ('ACTIVE', 'DISABLED');
 
@@ -222,6 +244,25 @@ ALTER TABLE connect.user_actions
 	ON UPDATE CASCADE
 	ON DELETE CASCADE;
 
+ALTER TABLE connect.user_roles
+	ADD FOREIGN KEY (username)
+	REFERENCES connect.users (username)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE;
+
+ALTER TABLE connect.user_roles
+	ADD FOREIGN KEY (role_id)
+	REFERENCES connect.roles (role_id)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE;
+	
+ALTER TABLE connect.role_actions
+	ADD FOREIGN KEY (role_id)
+	REFERENCES connect.roles (role_id)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE;
+	
+	
 ALTER TABLE connect.alerts
 	ADD FOREIGN KEY (ca_uuid)
 	REFERENCES connect.ca_info (ca_uuid)
@@ -241,6 +282,7 @@ ALTER TABLE connect.alerts
 	ON UPDATE RESTRICT
 ;
 
+INSERT INTO connect.roles (role_id, rolename, is_system) values ('smart', 'SYSTEM ROLE', true);
 
 	
 CREATE OR REPLACE FUNCTION manage_user_roles() RETURNS TRIGGER AS $$
@@ -255,11 +297,11 @@ CREATE OR REPLACE FUNCTION manage_user_roles() RETURNS TRIGGER AS $$
         ELSIF (TG_OP = 'UPDATE') THEN
          	IF (OLD.username != NEW.username) THEN
         		DELETE FROM connect.user_roles WHERE username = OLD.username;
-        		INSERT INTO connect.user_roles (username, role) values (NEW.username, 'smart');
+        		INSERT INTO connect.user_roles (username, role_id) values (NEW.username, 'smart');
         	END IF;
             RETURN NEW;
         ELSIF (TG_OP = 'INSERT') THEN
-            INSERT INTO connect.user_roles (username, role) VALUES (NEW.username, 'smart');
+            INSERT INTO connect.user_roles (username, role_id) VALUES (NEW.username, 'smart');
             RETURN NEW;
         END IF;
         RETURN NULL; -- result is ignored since this is an AFTER trigger

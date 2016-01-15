@@ -29,28 +29,59 @@ import java.util.UUID;
  * @author Emily
  *
  */
-public class SmartUserActionProxy {
+public class SmartUserPermissionProxy {
 
-	private String actionName;
+	public enum Type {ACTION, ROLE};
+	
+	private Type type;
+	private String name;
+	private String key;
 	private String resourceName;
-	private String actionKey;
 	private UUID resource;
 	
-	public String getActionKey(){
-		return this.actionKey;
+	public SmartUserPermissionProxy(Type type){
+		this.type = type;
 	}
 	
-	public void setActionKey(String key){
-		this.actionKey = key;
+	/**
+	 * The type of permission (role or action)
+	 * @return
+	 */
+	public Type getType(){
+		return type;
+	}
+	public void setType(Type type){
+		this.type = type;
 	}
 	
-	public String getActionName(){
-		return this.actionName;
-	}
-	public void setActionName(String name){
-		this.actionName = name;
+	/**
+	 * The action or role key
+	 * @return
+	 */
+	public String getKey(){
+		return this.key;
 	}
 	
+	public void setKey(String key){
+		this.key = key;
+	}
+	
+	/**
+	 * The action or role name
+	 * @return
+	 */
+	public String getName(){
+		return this.name;
+	}
+	public void setName(String name){
+		this.name = name;
+	}
+	
+	/**
+	 * The resource name.
+	 * Specific to actions with resources 
+	 * @return
+	 */
 	public String getResourceName(){
 		return this.resourceName;
 	}
@@ -59,6 +90,11 @@ public class SmartUserActionProxy {
 		this.resourceName = name;
 	}
 	
+	/**
+	 * The resource key.  Specific
+	 * to actions with resources.
+	 * @return
+	 */
 	public UUID getResource(){
 		return this.resource;
 	}
