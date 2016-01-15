@@ -20,6 +20,10 @@ h2{
 	font-weight: bold;
 }
 
+.select-limit{
+	max-width:24em;
+}
+
 .smart-text{
 	color: #324A73;
 	font-weight: bold;
@@ -116,6 +120,10 @@ h2{
 }
 .smart-table-rowoff{
 	background-color: #EEEEEE;
+}
+
+.smart-table-selectedrow{
+	background-color: #72A6C8;
 }
 
 #userheader{
@@ -275,10 +283,6 @@ h2{
 	float: right;
 }
 
-.selecteduser{
-	background-color: #72A6C8;
-}
-
 
 #map { 
 	height: 100%;
@@ -394,7 +398,52 @@ div.scrollable {
     background-color: #EEEEEE;
 } 
 
+.add_select_section{
+	margin-bottom: 15px; 
+	padding-top:5px; 
+}
 
+.border-section{
+	background-color: white; 
+	padding: 10px; 
+	border: 1px solid #3A4469; 
+	border-radius: 3px;
+}
+
+/* SMART Tabs */
+
+.tabheader{
+	border-bottom: 1px solid #CCCCCC;
+	border-radius: 3px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	margin-bottom: 5px;
+}
+.tab:hover{
+	text-decoration: underline;
+	
+}
+.tab{
+	border-left: 1px solid #CCCCCC;
+	color: #3A4469;
+	padding-left: 5px;
+	padding-right: 5px;
+	cursor: pointer;
+}
+
+.tab:first-child{
+	border-left: 0px;
+}
+
+.tabbody{
+	padding-top:5px;
+}
+.tabselected{
+	color: #3A4469;
+	font-weight:bold;
+}
+
+	
 /*----------------------------------------------------------------------*/
 /* Tabbed Alerts page styles*/
 article.tabs{
