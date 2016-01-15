@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Item;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -166,7 +167,7 @@ public class NameCellEditor implements ICellModifier {
 	}
 	
 	private void fireQueryNameChangeListener(final Query query){
-		viewer.getTree().getDisplay().syncExec(new Runnable(){
+		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
 				QueryEventManager.getInstance().fireQueryNameModified(query);
@@ -175,7 +176,7 @@ public class NameCellEditor implements ICellModifier {
 	}
 	
 	private void fireFolderNameChangeListener(final QueryFolder folder){
-		viewer.getTree().getDisplay().syncExec(new Runnable(){
+		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
 				QueryEventManager.getInstance().fireFolderRenamed(folder);
