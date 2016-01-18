@@ -138,6 +138,7 @@ public class PatrolImporter extends AbstractPatrolImporter {
 	protected boolean checkDuplicate(final CyberTrackerPatrol ctPatrol, Patrol patrol, final Session session){
 		
 		Criteria c = session.createCriteria(Patrol.class);
+		c.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 		c.add(Restrictions.eq("startDate", patrol.getStartDate())); //$NON-NLS-1$
 		c.add(Restrictions.eq("endDate", patrol.getEndDate())); //$NON-NLS-1$
 		c.add(Restrictions.eq("patrolType", patrol.getPatrolType())); //$NON-NLS-1$
