@@ -40,9 +40,8 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
-import org.wcs.smart.cybertracker.importer.SightsMultiObsUtil;
-import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -136,7 +135,7 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 				addWarning(warnMsg);
 			}
 			
-			List<S> sList = SightsMultiObsUtil.convertMultiObs(ctPatrol);
+			List<S> sList = extractAndPreProcessSights(ctPatrol);
 			for (S s : sList) {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
 			}

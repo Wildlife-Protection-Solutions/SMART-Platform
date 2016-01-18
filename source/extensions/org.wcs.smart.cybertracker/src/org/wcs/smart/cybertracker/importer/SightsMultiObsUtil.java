@@ -30,7 +30,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
@@ -49,11 +48,7 @@ public class SightsMultiObsUtil {
 	 * 
 	 * @return
 	 */
-	public static final List<S> convertMultiObs(AbstractCyberTrackerData ctData) {
-		return convertMultiObs(ctData.getSData(), ctData.getElementsMap());
-	}
-	
-	private static final List<S> convertMultiObs(List<S> sData, Map<String, E> eMap) {
+	static final List<S> convertMultiObs(List<S> sData, Map<String, E> eMap) {
 		//create and register some fake data that may be useful to import multiobservation groups
 		FakeData fakeData = new FakeData();
 		eMap.remove(fakeData.eAddAsNew.getI());
