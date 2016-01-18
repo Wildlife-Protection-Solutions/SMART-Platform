@@ -6,6 +6,8 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.internal.messages"; //$NON-NLS-1$
 	public static String AddCyberTrackerJob_ErrorMsg;
 	public static String AddCyberTrackerJob_ErrorTitle;
+	public static String AbstractSmartImporter_ElementMissing;
+	public static String AbstractSmartImporter_NonstaticDataBeforeStart;
 	public static String AbstractSmartImporter_Observer_InvalidData;
 	public static String AbstractSmartImporter_Observer_NotFound;
 	public static String AddCyberTrackerJob_InstallCtJobName;
