@@ -47,6 +47,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
@@ -465,6 +466,80 @@ public abstract class AbstractSmartImporter {
 		}
 	}
 
+	protected List<S> extractAndPreProcessSights(AbstractCyberTrackerData ctData) {
+		List<S> sData = validateData(ctData);
+		return SightsMultiObsUtil.convertMultiObs(sData, ctData.getElementsMap());
+		
+	}	
+	
+	private List<S> validateData(AbstractCyberTrackerData ctData) {
+		List<S> result = new ArrayList<S>(ctData.getSData().size());
+		for (S s : ctData.getSData()) {
+			result.add(validateNoExtraData(s, ctData.getElementsMap()));
+		}
+		return result;
+	}
+
+	/**
+	 * in one of the customers dataset we had some strange output from CT device (ticket #1626).
+	 * #DefaultPtrolValues, Resume Patrol, #DefaultAttributeValues were recorded
+	 * before "Start Patrol" item is recorded. This validation is indented to detect
+	 * and remove this data of unknown nature (probably bug in CT) as this data may causes errors on import.
+	 * @param s
+	 * @param eMap 
+	 */
+	private S validateNoExtraData(S s, Map<String, E> eMap) {
+		List<A> invalid = new ArrayList<A>();
+		boolean started = false;
+		for (A a : s.getA()) {
+			started =  started || ScreensUtil.RESULT_ID.equals(a.getN()) || ScreensUtil.RESULT_START_DATE.equals(a.getN()) || ScreensUtil.RESULT_START_TIME.equals(a.getN());
+			E e = eMap.get(a.getI());
+			if (e == null) {
+				addWarning(MessageFormat.format(Messages.AbstractSmartImporter_ElementMissing, a.getN(), a.getI()));
+				invalid.add(a);
+			} else if (!started) {
+				//no start patrol record yet, only static data is valid (also ignore if value is empty)
+				if (e.getStatic() == null && a.getV() != null) {
+					addWarning(MessageFormat.format(Messages.AbstractSmartImporter_NonstaticDataBeforeStart, a.getN(), a.getI(), getDateTime(s)));
+					invalid.add(a);
+				}
+			}
+		}
+		return invalid.isEmpty() ? s : cloneExcluding(s, invalid);
+	}
+
+	protected Date getDateTime(S s) {
+		Date date = null;
+		Time time = null;
+		for (S.A a : s.getA()) {
+			String i = a.getI();
+			String v = a.getV();
+			if (ICyberTrackerConstants.DATE.equals(i)) {
+				try {
+					DateFormat formatter = createCyberTrackerDateFormatter();
+					date = formatter.parse(v);
+					if (time != null) {
+						return combine(date, time);
+					}
+				} catch (ParseException e) {
+					CyberTrackerPlugIn.log(e.getMessage(), e);
+				}
+			} else if (ICyberTrackerConstants.TIME.equals(i)) {
+				time = Time.valueOf(v);
+				if (date != null) {
+					return combine(date, time);
+				}
+			}
+		}
+		return combine(date, time);
+	}
+
+	private S cloneExcluding(S s, List<A> toExclude) {
+		S sClone = new S();
+		sClone.getA().addAll(s.getA());
+		sClone.getA().removeAll(toExclude);
+		return sClone;
+	}
 	
 	public List<String> getWarnings() {
 		return warnings;

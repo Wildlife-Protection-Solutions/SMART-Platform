@@ -31,9 +31,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.cybertracker.importer.SightsMultiObsUtil;
-import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -90,7 +89,7 @@ public class PatrolImporter extends AbstractPatrolImporter {
 					return null;
 				}
 			}
-			List<S> sList = SightsMultiObsUtil.convertMultiObs(ctPatrol);
+			List<S> sList = extractAndPreProcessSights(ctPatrol);
 			for (S s : sList) {
 				addObservations(patrol.getFirstLeg(), s, ctPatrol.getElementsMap(), session);
 			}

@@ -47,7 +47,6 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.ImportWarningDialog;
-import org.wcs.smart.cybertracker.importer.SightsMultiObsUtil;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
@@ -143,7 +142,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			}
 			
 			//import observations
-			List<S> sList = SightsMultiObsUtil.convertMultiObs(ctSurvey);
+			List<S> sList = extractAndPreProcessSights(ctSurvey);
 			for (S s : sList) {
 				MissionDay mday = findOrAddMissionDay(mission, s);
 				Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap(), session);
