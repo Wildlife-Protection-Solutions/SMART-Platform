@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.cybertracker.properties;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -46,6 +50,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -66,13 +71,37 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	
 	private CyberTrackerPropertiesComposite tabs;
 	
-	public CyberTrackerPropertiesDialog(Shell shell, CyberTrackerPropertiesProfile profile) {
+	public CyberTrackerPropertiesDialog(Shell shell, final CyberTrackerPropertiesProfile profile) {
 		super(shell, Messages.CyberTrackerPropertiesDialog_Title);
-		Session s = getSession();
-		//this dialog is designed to work with its own session,
-		//if it is not possible to close external session before launching this dialog than launch a dialog in a separate thread
-		s.beginTransaction();
-		ctProperties = (CyberTrackerPropertiesProfile) s.merge(profile);
+		if (profile.getUuid() == null) {
+			//this is a newly created profile
+			ctProperties = profile;
+		} else {
+			//reloading current profile with full data
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+			try {
+				pmd.run(true, false, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						monitor.beginTask(Messages.CyberTrackerPropertiesDialog_LoadProfile_Task, 1);
+						Session s = HibernateManager.openSession();
+						s.beginTransaction();
+						try {
+							ctProperties = (CyberTrackerPropertiesProfile) s.get(CyberTrackerPropertiesProfile.class, profile.getUuid());
+							ctProperties.getNames().size();
+							ctProperties.getOptions().size();
+						} catch (Exception ex) {
+							SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, ex);
+						} finally {
+							s.getTransaction().rollback();
+							s.close();
+						}
+					}
+				});
+			} catch (Exception e) {
+				SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, e);
+			}
+		}
 	}
 
 	@Override
@@ -159,25 +188,47 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 				&& txtProfileName.getText().length() <= org.wcs.smart.ca.Label.MAX_LENGTH;
 	}
 
+	@Deprecated
+	@Override
+	public Session getSession() {
+		throw new UnsupportedOperationException("It is not allowed to use session attached to this thread."); //$NON-NLS-1$
+	}
+	
 	@Override
 	protected boolean performSave() {
 		if (!isProfileNameValid() || !tabs.recordValuesToObj(ctProperties)) {
 			MessageDialog.openError(getShell(), Messages.CyberTrackerPropertiesDialog_Error, Messages.CyberTrackerPropertiesDialog_DataNotValid);
 			return false;
 		}
-
-		Session session = getSession();
+		final boolean[] isOk = {false};
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
-			session.saveOrUpdate(ctProperties);
-			session.getTransaction().commit();
-			//start a new transaction
-			session.getTransaction().begin();
-			setChangesMade(false);
-			return true;
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask(Messages.CyberTrackerPropertiesDialog_SaveProfile_Task, 1);
+					Session s = HibernateManager.openSession();
+					s.beginTransaction();
+					try {
+						s.saveOrUpdate(ctProperties);
+						s.getTransaction().commit();
+						isOk[0] = true;
+					} catch (Exception ex) {
+						s.getTransaction().rollback();
+						SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_SaveProfile_Error, ex);
+					} finally {
+						s.close();
+					}
+				}
+			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_Save_Error, e);
-			return false;
+			SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_SaveProfile_Error, e);
 		}
+
+		if (isOk[0]) {
+			setChangesMade(false);
+		}
+		return isOk[0];
 	}
 
 }
