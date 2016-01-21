@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
@@ -74,12 +75,20 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			session.flush();
 			
 			//update ca item label
-			String sql = "SELECT id, name from smart.conservation_area WHERE uuid = :uuid"; //$NON-NLS-1$
-			List<?> data = session.createSQLQuery(sql).setParameter("uuid", info.getUuid(), PostgresUUIDType.INSTANCE).list(); //$NON-NLS-1$
-			if (data.size() > 0){
-				info.setLabel( ((Object[])data.get(0))[1].toString() + " [" + ((Object[])data.get(0))[0].toString() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+			ConservationArea area = (ConservationArea) session.get(ConservationArea.class, info.getUuid());
+			if (area != null){
+				info.setLabel( area.getName() + " [" + area.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (area.getIsCcaa()){
+					info.setStatus(ConservationAreaInfo.Status.CCAA);
+				}else{
+					info.setStatus(ConservationAreaInfo.Status.DATA);
+				}
+			}else{
+				//this should never happen
+				info.setStatus(ConservationAreaInfo.Status.NODATA);
+				throw new Exception("Conservation Area was loaded but Conservation Area details were not found. Delete the Conservation area and try again.");
 			}
-			info.setStatus(ConservationAreaInfo.Status.DATA);
+			
 			//update item status
 			item.setStatus(Status.COMPLETE);
 			

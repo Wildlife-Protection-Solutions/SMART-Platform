@@ -143,6 +143,12 @@ public class PostgresqlCaLoader {
 		HashMap<String, List<String>> keys = getTableConstraints(session);
 		Set<String> processed = new HashSet<String>();
 		
+		//To support CCAA if the table is not provided we assume we already loaded it
+		for (String tablename : keys.keySet()){
+			if (!allTables.contains(tablename)){
+				processed.add(tablename);
+			}
+		}
 		Queue<String> tablesToProcess = new LinkedList<String>();
 		tablesToProcess.addAll(tables.keySet());
 

@@ -66,7 +66,7 @@ CREATE TABLE connect.ca_info
 ) WITHOUT OIDS;
 
 ALTER TABLE connect.ca_info ADD CONSTRAINT status_chk 
-CHECK (status IN ('UPLOADING', 'DATA', 'NODATA'));
+CHECK (status IN ('UPLOADING', 'DATA', 'NODATA', 'CCAA'));
 
 CREATE TABLE connect.connect_plugin_version
 (

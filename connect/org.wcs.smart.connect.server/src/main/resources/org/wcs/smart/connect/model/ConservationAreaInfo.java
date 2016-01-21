@@ -51,6 +51,7 @@ public class ConservationAreaInfo {
 	public enum Status{
 		UPLOADING,
 		DATA,
+		CCAA,
 		NODATA
 	}
 	
