@@ -12,6 +12,16 @@ public class Messages extends NLS {
 	public static String AbstractSmartImporter_Observer_NotFound;
 	public static String AddCyberTrackerJob_InstallCtJobName;
 	public static String AddCyberTrackerJob_Progress1;
+	public static String CreateNewProfileOpDialog_Blank;
+	public static String CreateNewProfileOpDialog_Blank_Tooltip;
+	public static String CreateNewProfileOpDialog_DefaultProfileName;
+	public static String CreateNewProfileOpDialog_Message;
+	public static String CreateNewProfileOpDialog_Name;
+	public static String CreateNewProfileOpDialog_Profile;
+	public static String CreateNewProfileOpDialog_Profile_Tooltip;
+	public static String CreateNewProfileOpDialog_ProfileTemplate_Required;
+	public static String CreateNewProfileOpDialog_Template;
+	public static String CreateNewProfileOpDialog_Title;
 	public static String CtDatabaseUpgrader_ErrorTitle;
 	public static String CtDatabaseUpgrader_UpgradeError;
 	public static String CtDatabaseUpgrader_UpgradeTask;
@@ -247,6 +257,7 @@ public class Messages extends NLS {
 	public static String ManageProfilesDialog_Button_Create;
 	public static String ManageProfilesDialog_Button_Delete;
 	public static String ManageProfilesDialog_Button_Edit;
+	public static String ManageProfilesDialog_CreateProfile_Erorr;
 	public static String ManageProfilesDialog_DefaultProfilePostfix;
 	public static String ManageProfilesDialog_LoadProfileList_Error;
 	public static String ManageProfilesDialog_LoadProfileList_Task;

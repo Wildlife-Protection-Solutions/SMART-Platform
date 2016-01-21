@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -53,7 +54,6 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -84,7 +84,6 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 
 	@Override
 	protected Composite createContent(Composite parent) {
-		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -103,9 +102,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		profilesViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				CyberTrackerPropertiesProfile p = getSelectedProfile();
-				btnEdit.setEnabled(p != null);
-				btnDelete.setEnabled(p != null && !p.isDefault());
+				updateState();
 			}
 		});
 
@@ -124,7 +121,6 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 
 		btnEdit = new Button(btnCmp, SWT.PUSH);
 		btnEdit.setText(Messages.ManageProfilesDialog_Button_Edit);
-		btnEdit.setEnabled(false);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -134,7 +130,6 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		
 		btnDelete = new Button(btnCmp, SWT.PUSH);
 		btnDelete.setText(Messages.ManageProfilesDialog_Button_Delete);
-		btnDelete.setEnabled(false);
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -142,11 +137,23 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
+		updateState();
 		setTitle(Messages.ManageProfilesDialog_Title);
 		setMessage(Messages.ManageProfilesDialog_Message);
 		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
 		
 		return main;
+	}
+	
+	protected void updateState() {
+		CyberTrackerPropertiesProfile p = getSelectedProfile();
+		btnEdit.setEnabled(p != null);
+		btnDelete.setEnabled(p != null && !p.isDefault());
+	}
+	
+	private void reloadData() {
+		profilesViewer.setInput(getProfilesList());
+		updateState();
 	}
 	
 	protected CyberTrackerPropertiesProfile getSelectedProfile() {
@@ -156,8 +163,26 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	protected void createNewProfile() {
-		// TODO Auto-generated method stub
+		CreateNewProfileOpDialog opDialog = new CreateNewProfileOpDialog(getShell(), getProfilesList());
+		if (opDialog.open() == Window.OK){
+			CyberTrackerPropertiesProfile initProfile  = null;
 		
+			try{
+				initProfile = opDialog.getProfile();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(Messages.ManageProfilesDialog_CreateProfile_Erorr + ex.getLocalizedMessage(), ex);
+				return;
+			}
+			if (initProfile == null){
+				//cancelled or invalid model
+				return;
+			}
+			Dialog dialog = new CyberTrackerPropertiesDialog(getShell(), initProfile);
+			dialog.open();
+			
+			//refresh list
+			reloadData();
+		}
 	}
 
 	protected void deleteCurrentProfile() {
@@ -168,6 +193,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	protected void editCurrentProfile() {
 		Dialog dialog = new CyberTrackerPropertiesDialog(getShell(), getSelectedProfile());
 		dialog.open();
+		reloadData();
 	}
 
 	private List<CyberTrackerPropertiesProfile> getProfilesList() {
@@ -208,15 +234,4 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		return true;
 	}
 
-	private class CtProfileLabelProvider extends NamedItemLabelProvider {
-		@Override
-		public String getText(Object element) {
-			if (element instanceof CyberTrackerPropertiesProfile) {
-				CyberTrackerPropertiesProfile p = (CyberTrackerPropertiesProfile) element;
-				String name = super.getText(element);
-				return p.isDefault() ? name + Messages.ManageProfilesDialog_DefaultProfilePostfix : name;
-			}
-			return super.getText(element);
-		}
-	}
 }
