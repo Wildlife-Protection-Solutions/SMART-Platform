@@ -106,6 +106,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 
 	@Override
 	protected Composite createContent(Composite parent) {
+		setChangesMade(ctProperties.getUuid() == null);
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
