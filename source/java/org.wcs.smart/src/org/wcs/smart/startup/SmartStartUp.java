@@ -281,17 +281,16 @@ public class SmartStartUp {
 						session.close();
 					}
 					
-					
 					//	disconnect from the database & setup correct user level
-					
-					HibernateManager.endSessionFactory(true);					
+					HibernateManager.endSessionFactory(true);
+					ConservationAreaConfiguration config = null;
 					Session s = HibernateManager.openSession();
 					try{
-						ConservationAreaConfiguration config = new ConservationAreaConfiguration(ca, areas, ccaaUser, users, s);
-						SmartDB.setConservationAreaConfiguration(ccaaUser, password, ca, config);
+						config = new ConservationAreaConfiguration(ca, areas, ccaaUser, users, s);
 					}finally{
-						if (s.isOpen()) s.close();
+						s.close();
 					}
+					SmartDB.setConservationAreaConfiguration(ccaaUser, password, ca, config);
 				}
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
@@ -306,15 +305,14 @@ public class SmartStartUp {
 				}
 				//	disconnect from the database & setup correct user level
 				HibernateManager.endSessionFactory(true);
-				
+				ConservationAreaConfiguration config = null;
 				Session s = HibernateManager.openSession();
 				try{
-					ConservationAreaConfiguration config = 
-							new ConservationAreaConfiguration(ca, Collections.singleton(ca),e, Collections.singleton(e), s);
-					SmartDB.setConservationAreaConfiguration(e, password, ca, config);
+					config = new ConservationAreaConfiguration(ca, Collections.singleton(ca),e, Collections.singleton(e), s);
 				}finally{
-					if (s.isOpen()) s.close();
+					s.close();
 				}
+				SmartDB.setConservationAreaConfiguration(e, password, ca, config);
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
 				return false;

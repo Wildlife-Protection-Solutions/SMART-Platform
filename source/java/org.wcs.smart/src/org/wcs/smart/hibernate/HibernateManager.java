@@ -151,7 +151,6 @@ public class HibernateManager extends SmartHibernateManager{
 			return null;
 		}finally{
 			tx.rollback();
-			x.close();
 		}
 	}
 	

@@ -201,42 +201,21 @@ public class DownloadCaEngine {
 				return false;
 			}
 
-			//we don't revert back here; that will be done after download complete
-			HibernateManager.endSessionFactory(true);
-			HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
-			
-			final ConservationArea fdesktopCa = desktopCa;
-		
-			//delete ca
-			ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
-			final boolean[] cont = new boolean[]{true};
-			try{
-				pmd.run(true, false, new IRunnableWithProgress() {
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						DisplayAccess.accessDisplayDuringStartup();
-						monitor.setTaskName(Messages.DownloadCaEngine_DeleteTaskName);
-						try{
-							ConservationAreaManager.getInstance().deleteConservationArea(fdesktopCa, monitor, false);
-						}catch (final Exception ex){
-							cont[0] = false;
-							SmartPlugIn.displayLog(Messages.DownloadCaEngine_CaDataError, ex);	
-						}		
-					}
-				});
-			}catch (Exception ex){
-				SmartPlugIn.displayLog( Messages.DownloadCaEngine_CaDataError, ex);
+			if (!deleteCa(desktopCa, activeShell)){
 				return false;
 			}
-			if (!cont[0]) return false;
 		}
 		
 		//ensure ca is removed
-		s = HibernateManager.openSession();
+		return validateCaDeleted();
+	}
+
+	public boolean validateCaDeleted(){
+		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
 			
-			desktopCa = (ConservationArea)s.get(ConservationArea.class, info.getUuid());
+			ConservationArea desktopCa = (ConservationArea)s.get(ConservationArea.class, info.getUuid());
 			if (desktopCa != null){
 				//at some point something went wrong
 				return false;
@@ -245,6 +224,35 @@ public class DownloadCaEngine {
 		}finally{
 			s.close();
 		}
+		return true;
+	}
+	public boolean deleteCa(final ConservationArea ca, final Shell activeShell){
+		//we don't revert back here; that will be done after download complete
+		HibernateManager.endSessionFactory(true);
+		HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+		
+		//delete ca
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
+		final boolean[] cont = new boolean[]{true};
+		try{
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					DisplayAccess.accessDisplayDuringStartup();
+					monitor.setTaskName(Messages.DownloadCaEngine_DeleteTaskName);
+					try{
+						ConservationAreaManager.getInstance().deleteConservationArea(ca, monitor, false);
+					}catch (final Exception ex){
+						cont[0] = false;
+						SmartPlugIn.displayLog(Messages.DownloadCaEngine_CaDataError, ex);	
+					}		
+				}
+			});
+		}catch (Exception ex){
+			SmartPlugIn.displayLog( Messages.DownloadCaEngine_CaDataError, ex);
+			return false;
+		}
+		if (!cont[0]) return false;
 		return true;
 	}
 }

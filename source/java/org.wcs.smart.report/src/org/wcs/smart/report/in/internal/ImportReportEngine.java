@@ -70,7 +70,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -390,8 +389,7 @@ public class ImportReportEngine {
 				
 			}else{
 				//shared
-				if (newEmployee.getSmartUserLevel() == SmartUserLevel.ADMIN || 
-						newEmployee.getSmartUserLevel() == SmartUserLevel.MANAGER ){
+				if (ReportManager.canModifyCaReports()){
 					
 					final int[] overwrite = new int[]{-1};
 					display.syncExec(new Runnable(){
@@ -821,8 +819,7 @@ public class ImportReportEngine {
 	 */
 	private boolean canOverwrite(org.wcs.smart.query.model.Query query, Employee employee){
 		
-		boolean admin =  employee.getSmartUserLevel() == SmartUserLevel.ADMIN || 
-				employee.getSmartUserLevel() == SmartUserLevel.MANAGER;
+		boolean admin =  ReportManager.canModifyCaReports();
 		boolean isShared = query.getIsShared();
 		boolean amOwner = query.getOwner().equals(employee);
 		

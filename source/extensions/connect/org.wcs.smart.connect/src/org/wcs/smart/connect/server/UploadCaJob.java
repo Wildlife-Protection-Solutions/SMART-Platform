@@ -34,7 +34,6 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerStatus;
-import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.hibernate.HibernateManager;
 

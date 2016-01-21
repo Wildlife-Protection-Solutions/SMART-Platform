@@ -52,6 +52,7 @@ import org.wcs.smart.report.export.internal.ExportReportEngine;
 import org.wcs.smart.report.export.internal.ReportDefintionExporter;
 import org.wcs.smart.report.in.internal.ImportReportEngine;
 import org.wcs.smart.report.internal.Messages;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.RootReportFolder;
 
@@ -203,8 +204,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 		for (ConservationArea ca : cas){
 			Employee e = ImportQueryUtil.findEmployee(ca);
 			RootReportFolder folder = null;
-			if (e.getSmartUserLevel() == SmartUserLevel.ADMIN ||
-					e.getSmartUserLevel() == SmartUserLevel.MANAGER){
+			if (ReportManager.canModifyCaReports()){
 				folder = RootReportFolder.CA_ROOT_FOLDER;
 			}else if (e.getSmartUserLevel() == SmartUserLevel.ANALYST){
 				folder = RootReportFolder.USER_ROOT_FOLDER;

@@ -132,14 +132,19 @@ public class ConservationAreaConfiguration {
 		}
 		this.language = HibernateManager.findLanguage(session, l, conservationArea);
 		
-//		for (ConservationArea ca : conservationAreas){
-//			Language language = HibernateManager.findLanguage(session, l, ca);
-//			if (language != null){
-//				mainConservationArea = ca;
-////				this.displayLanguage = language;
-//				break;
-//			}
-//		}
+		for (ConservationArea ca : conservationAreas){
+			for (Language lt : ca.getLanguages()){
+				if (lt.getCode().equalsIgnoreCase(I18nUtil.localeToString(l))){
+					mainConservationArea = ca;
+					break;
+				}else if (lt.getCode().equalsIgnoreCase(l.getLanguage())){
+					mainConservationArea = ca;
+					break;
+				}
+			}
+			if (mainConservationArea != null) break;
+		}
+		
 		if (mainConservationArea == null && conservationAreas.size() > 0){
 			mainConservationArea = conservationAreas.iterator().next();
 //			this.displayLanguage = mainConservationArea.getDefaultLanguage();

@@ -175,8 +175,7 @@ public class Label  {
 		  }
 	}
 	
-	private static synchronized String searchAll(UUID element, Session session){
-		Locale lang = (Locale) I18nUtil.getLocale();
+	private static synchronized String searchAll(Locale lang, UUID element, Session session){
 		if (lang == null) return ""; //$NON-NLS-1$
 		
 		List<?> options = session.createCriteria(Label.class)
@@ -216,14 +215,14 @@ public class Label  {
 			Session session) {
 		Object ltemp = I18nUtil.getLocale();
 		if (ltemp instanceof Locale){
-			return searchAll(elementuuid, session);
+			return searchAll((Locale)ltemp, elementuuid, session);
 		}
 		UUID lang = (UUID)ltemp;
 		UUID ca = I18nUtil.getCa();
 		if (lang == null || ca == null){
-			return searchAll(elementuuid, session);
+			return searchAll(Locale.getDefault(), elementuuid, session);
 		}
-	
+
 		if (elementuuid == null || ca == null){
 			return ""; //$NON-NLS-1$
 		}
@@ -252,37 +251,47 @@ public class Label  {
 					break;
 				}
 			}
-			
-//			final String elementuuidstr = SmartUtils.encodeHex(elementuuid);
-			final String elementuuidstr = UuidUtils.uuidToString(elementuuid);
-			final String[] temp = new String[]{null};
-			Language llang = (Language) session.load(Language.class, lang);
-			final String searchCode = llang.getCode();
-			//for whatever reason when i did this as hibernate queries
-			//i could not load entity tables in reports; I don't understand why
-			//but it would try to load additional objects that weren't needed and this causes
-			//all sorts of addition problems.
-			//TODO: the x'elementuuid' in the following statements is not going to work in postgresql
-			session.doWork(new Work(){
-				@Override
-				public void execute(Connection c) throws SQLException {
-					
-					//try to find with the same language/country code
-					String query = "SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
-							"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
-							"' and a.code = '" + searchCode + "'"; //$NON-NLS-1$ //$NON-NLS-2$
-					try(ResultSet rs = c.createStatement().executeQuery(query)){
-						if (rs.next()){
-							temp[0] = rs.getString(1);
-							return;
+			if (lbl == null){
+				final String elementuuidstr = UuidUtils.uuidToString(elementuuid);
+				final String[] temp = new String[]{null};
+				Language llang = (Language) session.load(Language.class, lang);
+				final String searchCode = llang.getCode();
+				//for whatever reason when i did this as hibernate queries
+				//i could not load entity tables in reports; I don't understand why
+				//but it would try to load additional objects that weren't needed and this causes
+				//all sorts of addition problems.
+				//TODO: the x'elementuuid' in the following statements is not going to work in postgresql
+				session.doWork(new Work(){
+					@Override
+					public void execute(Connection c) throws SQLException {
+						
+						//try to find with the same language/country code
+						String query = "SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
+								"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
+								"' and a.code = '" + searchCode + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+						try(ResultSet rs = c.createStatement().executeQuery(query)){
+							if (rs.next()){
+								temp[0] = rs.getString(1);
+								return;
+							}
 						}
-					}
-					//try to find with the same language code
-					if (searchCode.contains("_")) { //$NON-NLS-1$
+						//try to find with the same language code
+						if (searchCode.contains("_")) { //$NON-NLS-1$
+							query = "SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
+									"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
+									"' and a.code = '" +  //$NON-NLS-1$
+									searchCode.split("_")[0] + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+							try(ResultSet rs = c.createStatement().executeQuery(query)){
+								if (rs.next()){
+									temp[0] = rs.getString(1);
+									return;
+								}
+							}
+						}
+						//try to find any forcing default to be first
 						query = "SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
 								"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
-								"' and a.code = '" +  //$NON-NLS-1$
-								searchCode.split("_")[0] + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+								"' order by a.ISDEFAULT desc"; //$NON-NLS-1$ 
 						try(ResultSet rs = c.createStatement().executeQuery(query)){
 							if (rs.next()){
 								temp[0] = rs.getString(1);
@@ -290,19 +299,10 @@ public class Label  {
 							}
 						}
 					}
-					//try to find any forcing default to be first
-					query = "SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
-							"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
-							"' order by a.ISDEFAULT desc"; //$NON-NLS-1$ 
-					try(ResultSet rs = c.createStatement().executeQuery(query)){
-						if (rs.next()){
-							temp[0] = rs.getString(1);
-							return;
-						}
-					}
-				}});
-			if (temp[0] != null){
-				description = temp[0];
+				});
+				if (temp[0] != null){
+					description = temp[0];
+				}
 			}
 		}
 		if (lbl != null) {
