@@ -196,6 +196,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_KioskMode_Tooltip;
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars;
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip;
+	public static String CyberTrackerPropertiesDialog_LoadProfile_Error;
+	public static String CyberTrackerPropertiesDialog_LoadProfile_Task;
 	public static String CyberTrackerPropertiesDialog_MaxPhotoCount;
 	public static String CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip;
 	public static String CyberTrackerPropertiesDialog_MaxPhotoCountInvalid;
@@ -206,6 +208,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_Projection;
 	public static String CyberTrackerPropertiesDialog_Projection_Tooltip;
 	public static String CyberTrackerPropertiesDialog_Save_Error;
+	public static String CyberTrackerPropertiesDialog_SaveProfile_Error;
+	public static String CyberTrackerPropertiesDialog_SaveProfile_Task;
 	public static String CyberTrackerPropertiesDialog_ShowEdit;
 	public static String CyberTrackerPropertiesDialog_ShowEdit_Tooltip;
 	public static String CyberTrackerPropertiesDialog_ShowGPS;
@@ -240,6 +244,14 @@ public class Messages extends NLS {
 	public static String DataModelWrapper_Name;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Yes;
+	public static String ManageProfilesDialog_Button_Create;
+	public static String ManageProfilesDialog_Button_Delete;
+	public static String ManageProfilesDialog_Button_Edit;
+	public static String ManageProfilesDialog_DefaultProfilePostfix;
+	public static String ManageProfilesDialog_LoadProfileList_Error;
+	public static String ManageProfilesDialog_LoadProfileList_Task;
+	public static String ManageProfilesDialog_Message;
+	public static String ManageProfilesDialog_Title;
 	public static String PatrolScreens_Begin_GPSRequiredMessage;
 	public static String PatrolScreens_Confirm;
 	public static String PatrolScreens_Exit_Title;
