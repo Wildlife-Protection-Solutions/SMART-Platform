@@ -54,6 +54,9 @@ public class HibernateDataExporter implements ICaDataExporter {
 		List<TableInfo> info = HibernateManager.getTableInformation();
 		monitor.beginTask(Messages.HibernateDataExporter_Progress_ExportMappedTables, info.size());
 		for (TableInfo in : info) {
+			if (exportEngine.getConservationArea().getIsCcaa() && !SmartHibernateManager.supportsCcaa(in.getClazz())){
+				continue;
+			}
 			if (monitor.isCanceled()){
 				return;
 			}
@@ -80,4 +83,13 @@ public class HibernateDataExporter implements ICaDataExporter {
 		monitor.done();
 	}
 
+	/**
+	 * Hibernate table support is determined for each table
+	 * by the extension point.
+	 * @returns true
+	 */
+	@Override
+	public boolean supportsCcaa() {
+		return true;
+	}
 }

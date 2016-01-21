@@ -103,10 +103,12 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery">
+            class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery">
+            class="org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

@@ -5,34 +5,42 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.dataentry.model.ConfigurableModel">
+            class="org.wcs.smart.dataentry.model.ConfigurableModel"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".model.conservationArea"
-            class="org.wcs.smart.dataentry.model.CmNode">
+            class="org.wcs.smart.dataentry.model.CmNode"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".node.model.conservationArea"
-            class="org.wcs.smart.dataentry.model.CmAttribute">
+            class="org.wcs.smart.dataentry.model.CmAttribute"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".cmAttribute.node.model.conservationArea"
-            class="org.wcs.smart.dataentry.model.CmAttributeOption">
+            class="org.wcs.smart.dataentry.model.CmAttributeOption"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".configurableModel.conservationArea"
-            class="org.wcs.smart.dataentry.model.CmAttributeTreeNode">
+            class="org.wcs.smart.dataentry.model.CmAttributeTreeNode"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".configurableModel.conservationArea"
-            class="org.wcs.smart.dataentry.model.CmAttributeListItem">
+            class="org.wcs.smart.dataentry.model.CmAttributeListItem"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.dataentry.model.ScreenOption">
+            class="org.wcs.smart.dataentry.model.ScreenOption"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".screenOption.conservationArea"
-            class="org.wcs.smart.dataentry.model.ScreenOptionUuid">
+            class="org.wcs.smart.dataentry.model.ScreenOptionUuid"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

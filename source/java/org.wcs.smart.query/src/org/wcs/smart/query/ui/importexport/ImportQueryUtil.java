@@ -127,7 +127,7 @@ public class ImportQueryUtil {
 		}
 	
 		//set the owner
-		if (query.getIsShared() && ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+		if (query.getIsShared() && ca.getIsCcaa()){
 			//shared queries in the cross-ca analysis do not have a user
 			query.setOwner(SmartDB.getSharedEmployee());
 		}

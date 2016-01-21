@@ -93,7 +93,9 @@ public class SelectCaDialog extends TitleAreaDialog {
 			//access all queries/reports saved by any user
 			Session s = HibernateManager.openSession();
 			try{
-				newConfiguration = new ConservationAreaConfiguration(cas, 
+				newConfiguration = new ConservationAreaConfiguration(SmartDB.getCurrentConservationArea(), 
+						cas, 
+						SmartDB.getCurrentEmployee(),
 					SmartDB.getConservationAreaConfiguration().getEmployees(),
 					s);
 			}finally{

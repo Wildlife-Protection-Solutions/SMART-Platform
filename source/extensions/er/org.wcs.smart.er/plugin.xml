@@ -28,69 +28,86 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.er.model.SurveyDesign">
+            class="org.wcs.smart.er.model.SurveyDesign"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".surveyDesign.conservationArea"
-            class="org.wcs.smart.er.model.SamplingUnit">
+            class="org.wcs.smart.er.model.SamplingUnit"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.waypoint.conservationArea"
-            class="org.wcs.smart.er.model.SurveyWaypoint">
+            class="org.wcs.smart.er.model.SurveyWaypoint"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".missionDay.mission.survey.surveyDesign.conservationArea"
-            class="org.wcs.smart.er.model.MissionTrack">
+            class="org.wcs.smart.er.model.MissionTrack"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.mission.survey.surveyDesign.conservationArea"
-            class="org.wcs.smart.er.model.MissionPropertyValue">
+            class="org.wcs.smart.er.model.MissionPropertyValue"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.surveyDesign.conservationArea"
-            class="org.wcs.smart.er.model.MissionProperty">
+            class="org.wcs.smart.er.model.MissionProperty"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".attribute.conservationArea"
-            class="org.wcs.smart.er.model.MissionAttributeListItem">
+            class="org.wcs.smart.er.model.MissionAttributeListItem"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.er.model.MissionAttribute">
+            class="org.wcs.smart.er.model.MissionAttribute"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".survey.surveyDesign.conservationArea"
-            class="org.wcs.smart.er.model.Mission">
+            class="org.wcs.smart.er.model.Mission"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".surveyDesign.conservationArea"
-            class="org.wcs.smart.er.model.Survey">
+            class="org.wcs.smart.er.model.Survey"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.member.conservationArea"
-            class="org.wcs.smart.er.model.MissionMember">
+            class="org.wcs.smart.er.model.MissionMember"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".surveyDesign.conservationArea"
-            class="org.wcs.smart.er.model.SurveyDesignProperty">
+            class="org.wcs.smart.er.model.SurveyDesignProperty"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.er.model.SamplingUnitAttribute">
+            class="org.wcs.smart.er.model.SamplingUnitAttribute"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.samplingUnitAttribute.conservationArea"
-            class="org.wcs.smart.er.model.SamplingUnitAttributeValue">
+            class="org.wcs.smart.er.model.SamplingUnitAttributeValue"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.samplingUnitAttribute.conservationArea"
-            class="org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute">
+            class="org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".attribute.conservationArea"
-            class="org.wcs.smart.er.model.SamplingUnitAttributeListItem">
+            class="org.wcs.smart.er.model.SamplingUnitAttributeListItem"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".mission.survey.surveyDesign.conservationArea"
-            class="org.wcs.smart.er.model.MissionDay">
+            class="org.wcs.smart.er.model.MissionDay"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

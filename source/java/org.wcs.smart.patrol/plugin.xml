@@ -367,40 +367,50 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.patrol.model.PatrolMandate">
+            class="org.wcs.smart.patrol.model.PatrolMandate"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.conservationArea"
-            class="org.wcs.smart.patrol.model.PatrolType">
+            class="org.wcs.smart.patrol.model.PatrolType"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.patrol.model.PatrolTransportType">
+            class="org.wcs.smart.patrol.model.PatrolTransportType"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.patrol.model.Team">
+            class="org.wcs.smart.patrol.model.Team"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".patrol.conservationArea"
-            class="org.wcs.smart.patrol.model.PatrolLeg">
+            class="org.wcs.smart.patrol.model.PatrolLeg"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.patrol.model.Patrol">
+            class="org.wcs.smart.patrol.model.Patrol"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".patrolLeg.patrol.conservationArea"
-            class="org.wcs.smart.patrol.model.PatrolLegDay">
+            class="org.wcs.smart.patrol.model.PatrolLegDay"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.patrolLeg.patrol.conservationArea"
-            class="org.wcs.smart.patrol.model.PatrolLegMember">
+            class="org.wcs.smart.patrol.model.PatrolLegMember"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".patrolLegDay.patrolLeg.patrol.conservationArea"
-            class="org.wcs.smart.patrol.model.Track">
+            class="org.wcs.smart.patrol.model.Track"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.waypoint.conservationArea"
-            class="org.wcs.smart.patrol.model.PatrolWaypoint">
+            class="org.wcs.smart.patrol.model.PatrolWaypoint"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

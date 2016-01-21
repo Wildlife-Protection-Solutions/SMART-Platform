@@ -314,6 +314,13 @@
                   tooltip="%manageprojections.command.tooltip">
             </command>
             <command
+                  commandId="org.wcs.smart.command.ccaa.users.show"
+                  icon="images/icons/etool16/user.png"
+                  label="Manager Users..."
+                  style="push"
+                  tooltip="manages ccaa users">
+            </command>
+            <command
                   commandId="org.eclipse.ui.file.export"
                   id="x"
                   label="%exportmap.command.label"
@@ -809,6 +816,10 @@
                optional="true">
          </commandParameter>
       </command>
+      <command
+            id="org.wcs.smart.command.ccaa.users.show"
+            name="Manager Users...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -977,6 +988,18 @@
             class="org.wcs.smart.map.internal.ActivateMapToolHandler"
             commandId="org.wcs.smart.command.maptool.activate">
       </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowCcaaUsersPropertyPageHandler$ShowCcaaUsersPropertyPageHandlerWrapper"
+            commandId="org.wcs.smart.command.ccaa.users.show">
+         <activeWhen>
+            <not>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </not>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
@@ -1021,75 +1044,97 @@
          point="org.wcs.smart.hibernate.mapping">
       <class
             ca_property=".uuid"
-            class="org.wcs.smart.ca.ConservationArea">
+            class="org.wcs.smart.ca.ConservationArea"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.ca.Agency">
+            class="org.wcs.smart.ca.Agency"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".agency.conservationArea"
-            class="org.wcs.smart.ca.Rank">
+            class="org.wcs.smart.ca.Rank"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.Employee">
+            class="org.wcs.smart.ca.Employee"
+            supportsCcaa="true">
       </class>
       <class
             ca_property=".id.language.ca"
-            class="org.wcs.smart.ca.Label">
+            class="org.wcs.smart.ca.Label"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.ca.Station">
+            class="org.wcs.smart.ca.Station"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.Language">
+            class="org.wcs.smart.ca.Language"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.ca.Area">
+            class="org.wcs.smart.ca.Area"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.datamodel.Aggregation">
+            class="org.wcs.smart.ca.datamodel.Aggregation"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".attribute.conservationArea"
-            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
+            class="org.wcs.smart.ca.datamodel.AttributeTreeNode"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.datamodel.Attribute">
+            class="org.wcs.smart.ca.datamodel.Attribute"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".attribute.conservationArea"
-            class="org.wcs.smart.ca.datamodel.AttributeListItem">
+            class="org.wcs.smart.ca.datamodel.AttributeListItem"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.datamodel.Category">
+            class="org.wcs.smart.ca.datamodel.Category"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.category.conservationArea"
-            class="org.wcs.smart.ca.datamodel.CategoryAttribute">
+            class="org.wcs.smart.ca.datamodel.CategoryAttribute"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.datamodel.DmObject">
+            class="org.wcs.smart.ca.datamodel.DmObject"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.UuidItem">
+            class="org.wcs.smart.ca.UuidItem"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.NamedDescriptionItem">
+            class="org.wcs.smart.ca.NamedDescriptionItem"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.DescriptionLabel">
+            class="org.wcs.smart.ca.DescriptionLabel"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.BasemapDefinition">
+            class="org.wcs.smart.ca.BasemapDefinition"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.ca.Projection">
+            class="org.wcs.smart.ca.Projection"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.ca.datamodel.AggregationLabel">
+            class="org.wcs.smart.ca.datamodel.AggregationLabel"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.SmartStyle">
+            class="org.wcs.smart.ca.SmartStyle"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

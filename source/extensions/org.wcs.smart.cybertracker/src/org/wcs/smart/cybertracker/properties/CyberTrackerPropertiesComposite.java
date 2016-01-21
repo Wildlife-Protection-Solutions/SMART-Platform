@@ -55,7 +55,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
-import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile.ProjectionFormat;
+import org.wcs.smart.cybertracker.model.ProjectionFormat;
 
 /**
  * Composite that contains controls to edit CyberTracker properties.

@@ -69,4 +69,12 @@ public class DataStoreDataExporter implements ICaDataExporter {
 
 	}
 
+	/**
+	 * There may map data and reports templates in the ccaa folder
+	 * @Returns true
+	 */
+	@Override
+	public boolean supportsCcaa() {
+		return true;
+	}
 }

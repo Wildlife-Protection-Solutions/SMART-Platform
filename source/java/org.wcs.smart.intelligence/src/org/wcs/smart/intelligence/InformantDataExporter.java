@@ -68,4 +68,12 @@ public class InformantDataExporter implements ICaDataExporter {
 		monitor.done();
 	}
 
+	/**
+	 * No informant data in CCAA analysis
+	 * @returns false
+	 */
+	@Override
+	public boolean supportsCcaa() {
+		return false;
+	}
 }

@@ -110,6 +110,7 @@ public class CaExporter {
 				ICaDataExportEngine engine = new DerbyCaDataExportEngine(tempDir, ca, session);
 				for (ICaDataExporter exporter: exporters){
 					if (monitor.isCanceled()) return;
+					if (ca.getIsCcaa() && !exporter.supportsCcaa()) continue;
 					exporter.exportData(engine, new SubProgressMonitor(monitor, 10));
 					monitor.worked(10);
 				}

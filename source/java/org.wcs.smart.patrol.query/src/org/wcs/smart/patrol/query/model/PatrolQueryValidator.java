@@ -359,7 +359,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 						}
 					} else if (op.getType() == PatrolQueryOptionType.KEY){
 						Collection<ConservationArea> toSearch = Collections.singleton(importCa);
-						if (importCa.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+						if (importCa.getIsCcaa()){
 							toSearch = SmartDB.getConservationAreaConfiguration().getConservationAreas();
 						}
 						for (String key : groupBy.getItems()){

@@ -231,22 +231,28 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.er.query.model.SurveyObservationQuery">
+            class="org.wcs.smart.er.query.model.SurveyObservationQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.er.query.model.SurveyWaypointQuery">
+            class="org.wcs.smart.er.query.model.SurveyWaypointQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.er.query.model.SurveyGriddedQuery">
+            class="org.wcs.smart.er.query.model.SurveyGriddedQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.er.query.model.SurveySummaryQuery">
+            class="org.wcs.smart.er.query.model.SurveySummaryQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.er.query.model.MissionQuery">
+            class="org.wcs.smart.er.query.model.MissionQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.er.query.model.MissionTrackQuery">
+            class="org.wcs.smart.er.query.model.MissionTrackQuery"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

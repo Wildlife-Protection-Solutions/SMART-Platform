@@ -73,23 +73,8 @@ public class LoginHandler implements ILoginHandler {
 
 	@Override
 	public void onLogin() throws Exception {
-		//ensure replication is disabled; we will enable later if required
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			DerbyReplicationManager.INSTANCE.disableReplication(s);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
-		}
-		
-		//never replicate multiple conservation areas
-		if (SmartDB.isMultipleAnalysis()) return ;
-		
-
-		
 		ConnectServerStatus status;
-		s = HibernateManager.openSession();
+		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
 			//enable replication; we always want to enable replication if logging

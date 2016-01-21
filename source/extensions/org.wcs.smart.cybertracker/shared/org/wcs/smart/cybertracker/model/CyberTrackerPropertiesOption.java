@@ -51,7 +51,6 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 
 	private ConservationArea conservationArea;
 	private OptionID optionId;
-//	private Boolean booleanValue;
 	private Double doubleValue;
 	private Integer integerValue;
 	private String stringValue;

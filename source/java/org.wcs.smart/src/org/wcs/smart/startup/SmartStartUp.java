@@ -24,6 +24,7 @@ package org.wcs.smart.startup;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -42,6 +43,7 @@ import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -200,7 +202,7 @@ public class SmartStartUp {
 	 * @return true if successfully logged in, false otherwise
 	 */
 	public static boolean login(ConservationArea ca, String userName, String password ){
-		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+		if (ca.getIsCcaa()){
 			// we are performing cross-ca analysis and need to do something
 			// different
 			List<ConservationArea> areas;
@@ -237,8 +239,30 @@ public class SmartStartUp {
 					
 					Session session = HibernateManager.openSession();
 					session.beginTransaction();
+					Employee ccaaUser = null;
 					try{
-						List<?> results = session.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", Locale.getDefault().getLanguage())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+						ccaaUser = (Employee)session.createCriteria(Employee.class)
+								.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+								.add(Restrictions.eq("smartUserId", users.get(0).getSmartUserId())) //$NON-NLS-1$
+								.uniqueResult();
+						if (ccaaUser == null){
+							ccaaUser = new Employee();
+							ccaaUser.setGender(Employee.DB_MALE);
+							ccaaUser.setSmartUserId(users.get(0).getSmartUserId());
+							ccaaUser.setGivenName(ccaaUser.getSmartUserId());
+							ccaaUser.setFamilyName(""); //$NON-NLS-1$
+							ccaaUser.setStartEmploymentDate(new Date());
+							ccaaUser.setId(ccaaUser.getSmartUserId());
+							ccaaUser.setConservationArea(ca);
+							ccaaUser.setSmartUserLevel(SmartUserLevel.ADMIN);
+							session.save(ccaaUser);
+							session.flush();
+						}
+						
+						List<?> results = session.createCriteria(Language.class)
+								.add(Restrictions.eq("ca", ca)) //$NON-NLS-1$
+								.add(Restrictions.eq("code", Locale.getDefault().getLanguage())) //$NON-NLS-1$
+								.list(); 
 						if (results.size() == 0){
 							Language lang = new Language();
 							lang.setCa(ca);
@@ -252,6 +276,7 @@ public class SmartStartUp {
 					}catch (Exception ex){
 						session.getTransaction().rollback();
 						SmartPlugIn.log(ex.getMessage(), ex);
+						return false;
 					}finally{
 						session.close();
 					}
@@ -262,13 +287,11 @@ public class SmartStartUp {
 					HibernateManager.endSessionFactory(true);					
 					Session s = HibernateManager.openSession();
 					try{
-						ConservationAreaConfiguration config = new ConservationAreaConfiguration(areas, users, s);
-						SmartDB.setConservationAreaConfiguration(users.get(0), password, ca, config);
+						ConservationAreaConfiguration config = new ConservationAreaConfiguration(ca, areas, ccaaUser, users, s);
+						SmartDB.setConservationAreaConfiguration(ccaaUser, password, ca, config);
 					}finally{
 						if (s.isOpen()) s.close();
 					}
-										
-					return true;
 				}
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
@@ -287,7 +310,7 @@ public class SmartStartUp {
 				Session s = HibernateManager.openSession();
 				try{
 					ConservationAreaConfiguration config = 
-							new ConservationAreaConfiguration(Collections.singleton(ca), Collections.singleton(e), s);
+							new ConservationAreaConfiguration(ca, Collections.singleton(ca),e, Collections.singleton(e), s);
 					SmartDB.setConservationAreaConfiguration(e, password, ca, config);
 				}finally{
 					if (s.isOpen()) s.close();

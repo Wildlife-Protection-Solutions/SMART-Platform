@@ -124,19 +124,24 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.patrol.query.model.PatrolSummaryQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolSummaryQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.patrol.query.model.PatrolQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.patrol.query.model.PatrolGriddedQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolGriddedQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.patrol.query.model.PatrolWaypointQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolWaypointQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.patrol.query.model.PatrolObservationQuery">
+            class="org.wcs.smart.patrol.query.model.PatrolObservationQuery"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

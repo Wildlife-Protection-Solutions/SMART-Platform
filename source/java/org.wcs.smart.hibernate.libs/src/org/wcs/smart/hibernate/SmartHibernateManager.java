@@ -23,10 +23,12 @@ package org.wcs.smart.hibernate;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.BaseSessionEventListener;
 import org.hibernate.Interceptor;
@@ -325,20 +327,35 @@ public class SmartHibernateManager {
 	 * @param clazz the mapped hibernate query
 	 * @return the ca_property 
 	 */
-	public static final String getHqlExportQuery(Class<?> clazz){
-		if (Platform.getExtensionRegistry() == null) return null;
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
-		try {
-			for (IConfigurationElement e : config) {
-				Class<?> clzz = Class.forName(e.getAttribute("class")); //$NON-NLS-1$
-				if (clzz == clazz){
-					return e.getAttribute("ca_property"); //$NON-NLS-1$
-				}
-			}
-		}catch (Exception ex){
-			ex.printStackTrace();
+	private static HashMap<Class<?>, Object[]> hibernateClassMetadata = null;;
+	public static final String getHqlExportQuery(Class<?> clazz) throws ClassNotFoundException, InvalidRegistryObjectException{
+		readClassMetadata();
+		Object[] values = hibernateClassMetadata.get(clazz);
+		if (values != null){
+			return (String)values[0];
 		}
 		return null;
+	}
+	public static final Boolean supportsCcaa(Class<?> clazz) throws ClassNotFoundException, InvalidRegistryObjectException{
+		readClassMetadata();
+		Object[] values = hibernateClassMetadata.get(clazz);
+		if (values != null){
+			return (Boolean)values[1];
+		}
+		return null;
+	}
+	
+	private static void readClassMetadata() throws ClassNotFoundException, InvalidRegistryObjectException{
+		if (hibernateClassMetadata != null) return;
+		if (Platform.getExtensionRegistry() == null) ;
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
+		hibernateClassMetadata = new HashMap<Class<?>, Object[]>();
+		for (IConfigurationElement e : config) {
+			Class<?> clzz = Class.forName(e.getAttribute("class")); //$NON-NLS-1$
+			String caProp = e.getAttribute("ca_property");
+			Boolean containsCcaa = Boolean.valueOf(e.getAttribute("supportsCcaa"));
+			hibernateClassMetadata.put(clzz, new Object[]{caProp, containsCcaa});
+		}
 	}
 	
 }

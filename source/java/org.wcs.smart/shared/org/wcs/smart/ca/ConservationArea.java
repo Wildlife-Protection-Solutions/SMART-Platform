@@ -133,7 +133,19 @@ public class ConservationArea extends UuidItem {
 	public void setLanguages(Set<Language> lang){
 		this.languages = lang;
 	}
-		
+	
+	/**
+	 * Determines if the current Conservation Area is a special
+	 * cross conservation area query or not.
+	 * This is currently done by checking the UUID.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public boolean getIsCcaa(){
+		return getUuid().equals(MULTIPLE_CA);
+	}
+	
 	@Transient
 	public Language getDefaultLanguage(){
 		for(Language lang: this.languages){

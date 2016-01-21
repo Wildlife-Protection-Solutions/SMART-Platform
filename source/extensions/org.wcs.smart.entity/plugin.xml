@@ -418,18 +418,22 @@
          point="org.wcs.smart.hibernate.mapping">
       <class
             ca_property=".entityType.conservationArea"
-            class="org.wcs.smart.entity.model.Entity">
+            class="org.wcs.smart.entity.model.Entity"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".entityType.conservationArea"
-            class="org.wcs.smart.entity.model.EntityAttribute">
+            class="org.wcs.smart.entity.model.EntityAttribute"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.entity.entityType.conservationArea"
-            class="org.wcs.smart.entity.model.EntityAttributeValue">
+            class="org.wcs.smart.entity.model.EntityAttributeValue"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.entity.model.EntityType">
+            class="org.wcs.smart.entity.model.EntityType"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

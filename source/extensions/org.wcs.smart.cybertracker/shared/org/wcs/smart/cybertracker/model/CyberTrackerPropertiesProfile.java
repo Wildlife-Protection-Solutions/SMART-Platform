@@ -37,7 +37,6 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
 
 /**
@@ -114,33 +113,6 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	public static final int DILUTION_OF_PRECISION_MIN_VALUE = 0;
 	public static final int DILUTION_OF_PRECISION_MAX_VALUE = 49;
-	
-
-	public enum ProjectionFormat {
-		DEGREE_MIN_SEC(Messages.CyberTrackerProperties_ProjectonFormat_DegreeMinSec, 0),
-		DECEMAL_DEGREE(Messages.CyberTrackerProperties_ProjectonFormat_DecemalDegree, 1),
-		UTM(Messages.CyberTrackerProperties_ProjectonFormat_UTM, 2);
-		private String guiName;
-		private int id;
-		ProjectionFormat(String guiName, int id) {
-			this.guiName = guiName;
-			this.id = id;
-		}
-		public String getGuiName() {
-			return this.guiName;
-		}
-		public int getId() {
-			return id;
-		}
-		public static Integer[] getIds() {
-			ProjectionFormat[] values = ProjectionFormat.values();
-			Integer[] ids = new Integer[values.length];
-			for (int i = 0; i < values.length; i++) {
-				ids[i] = values[i].getId();
-			}
-			return ids;
-		}
-	}
 
 	//default properties
 	private static final boolean largeScrollBars = false;

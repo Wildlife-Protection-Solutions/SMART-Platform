@@ -365,9 +365,11 @@ public class HibernateManager extends SmartHibernateManager{
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();
 			for(Object v : data){
 				ConservationArea ca = (ConservationArea) ((Object[])v)[0];
-				String pass = (String) ((Object[])v)[1];
-				if (validatePassword(password, pass)){
-					areas.add(ca);
+				if (!ca.getIsCcaa()){
+					String pass = (String) ((Object[])v)[1];
+					if (validatePassword(password, pass)){
+						areas.add(ca);
+					}
 				}
 			}
 			return areas;

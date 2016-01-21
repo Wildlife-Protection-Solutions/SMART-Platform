@@ -111,4 +111,14 @@ public class DataModelExporter implements ICaDataExporter {
 		exportEngine.writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
 		
 	}
+
+	/**
+	 * CCAA do not have data models; therefore we having to export here.
+	 * 
+	 * @return false
+	 */
+	@Override
+	public boolean supportsCcaa() {
+		return false;
+	}
 }

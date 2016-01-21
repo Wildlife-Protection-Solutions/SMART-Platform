@@ -1009,10 +1009,12 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.query.model.QueryFolder">
+            class="org.wcs.smart.query.model.QueryFolder"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.query.model.Query">
+            class="org.wcs.smart.query.model.Query"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

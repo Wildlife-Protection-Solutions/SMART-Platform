@@ -152,7 +152,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 	@Override
 	public void refreshPanel(){
 		if (filterTreeViewer != null){
-			areaNode.clearAreas();
+			if (areaNode != null) areaNode.clearAreas();
 			filterTreeViewer.setInput(LOADING_TEXT);
 			filterTreeViewer.refresh();
 			refreshJob.cancel();
