@@ -41,6 +41,17 @@ public interface ICaDataExporter {
 	 */
 	void exportData(ICaDataExportEngine exportEngine, IProgressMonitor monitor) throws Exception;
 
+	/**
+	 * Orders the execution of the exporters.
+	 * 
+	 * @return
+	 */
 	int getRunLevel();
+	
+	/**
+	 * 
+	 * @return true if the exporter should be run for exporting the CCAA data
+	 */
+	boolean supportsCcaa();  
 	
 }

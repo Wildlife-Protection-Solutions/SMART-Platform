@@ -222,16 +222,20 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.observation.query.model.ObservationGriddedQuery">
+            class="org.wcs.smart.observation.query.model.ObservationGriddedQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.observation.query.model.ObservationWaypointQuery">
+            class="org.wcs.smart.observation.query.model.ObservationWaypointQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.observation.query.model.ObservationSummaryQuery">
+            class="org.wcs.smart.observation.query.model.ObservationSummaryQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.observation.query.model.ObsObservationQuery">
+            class="org.wcs.smart.observation.query.model.ObsObservationQuery"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

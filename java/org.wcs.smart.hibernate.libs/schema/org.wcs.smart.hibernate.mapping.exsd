@@ -84,6 +84,13 @@ to be exported manually using a datamodel export listener.
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="supportsCcaa" type="boolean" use="required">
+            <annotation>
+               <documentation>
+                  True if the table contains CCAA data, false otherwise.  For example this should be true for basemap tables, but false for patrol data.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

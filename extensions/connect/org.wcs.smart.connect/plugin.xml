@@ -4,26 +4,32 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.connect.model.ConnectServer">
+            class="org.wcs.smart.connect.model.ConnectServer"
+            supportsCcaa="true">
       </class>
       <class
             ca_property=".server.conservationArea"
-            class="org.wcs.smart.connect.model.ConnectUser">
+            class="org.wcs.smart.connect.model.ConnectUser"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".uuid"
-            class="org.wcs.smart.connect.model.ConnectServerStatus">
+            class="org.wcs.smart.connect.model.ConnectServerStatus"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.connect.model.ConnectSyncHistoryRecord">
+            class="org.wcs.smart.connect.model.ConnectSyncHistoryRecord"
+            supportsCcaa="true">
       </class>
       <class
             ca_property=".conservationArea"
-            class="org.wcs.smart.connect.model.ChangeLogItem">
+            class="org.wcs.smart.connect.model.ChangeLogItem"
+            supportsCcaa="true">
       </class>
       <class
             ca_property=".id.server.conservationArea"
-            class="org.wcs.smart.connect.model.ConnectServerOption">
+            class="org.wcs.smart.connect.model.ConnectServerOption"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension
@@ -174,6 +180,18 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.connect.server.downloadccaa"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <not>
+                     <test
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </not>
+               </visibleWhen>
+            </command>
+            <command
                   commandId="org.wcs.smart.connect.server.exportca"
                   style="push">
                <visibleWhen
@@ -212,13 +230,6 @@
                   </or>
                </visibleWhen>
             </command>
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution
@@ -229,13 +240,6 @@
             <control
                   class="org.wcs.smart.connect.ui.StatusLineControl"
                   id="org.wcs.smart.connect.status.control">
-               <visibleWhen
-                     checkEnabled="true">
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </visibleWhen>
             </control>
          </toolbar>
       </menuContribution>

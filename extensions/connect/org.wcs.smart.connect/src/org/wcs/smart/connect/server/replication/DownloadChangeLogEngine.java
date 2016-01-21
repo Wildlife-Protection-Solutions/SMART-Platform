@@ -70,13 +70,7 @@ public class DownloadChangeLogEngine {
 	 * @return
 	 * @throws Exception
 	 */
-	public void downloadInstall() throws Exception{
-
-		/* the ca info */
-		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			throw new Exception(Messages.DownloadChangeLogEngine_CCAAError);
-		}
-		
+	public void downloadInstall() throws Exception{		
 		//acquire lock
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			throw new Exception(Messages.DownloadChangeLogEngine_AlreadyProcessingError);		

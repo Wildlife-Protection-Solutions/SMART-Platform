@@ -724,25 +724,31 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.intelligence.model.Intelligence">
+            class="org.wcs.smart.intelligence.model.Intelligence"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".intelligence.conservationArea"
-            class="org.wcs.smart.intelligence.model.IntelligencePoint">
+            class="org.wcs.smart.intelligence.model.IntelligencePoint"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".intelligence.conservationArea"
-            class="org.wcs.smart.intelligence.model.IntelligenceAttachment">
+            class="org.wcs.smart.intelligence.model.IntelligenceAttachment"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.patrol.conservationArea"
-            class="org.wcs.smart.intelligence.model.PatrolIntelligence">
+            class="org.wcs.smart.intelligence.model.PatrolIntelligence"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.intelligence.model.IntelligenceSource">
+            class="org.wcs.smart.intelligence.model.IntelligenceSource"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.intelligence.model.Informant">
+            class="org.wcs.smart.intelligence.model.Informant"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

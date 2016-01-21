@@ -86,7 +86,7 @@ public class EntityHibernateManager {
 	 * @return
 	 */
 	public EntityType getEntityType(String entityType,  Session session){
-		if (conservationArea.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+		if (conservationArea.getIsCcaa()){
 			return EntityTypeCcaaManager.getInstance().findType(entityType);
 		}
 		org.hibernate.Query hq = session.createQuery("FROM EntityType WHERE keyId = :key and conservationArea = :ca"); //$NON-NLS-1$
@@ -112,7 +112,7 @@ public class EntityHibernateManager {
 	 * @throws Exception
 	 */
 	public EntityAttribute getEntityAttribute(String entityKey, String entityAttributeKey, Session session) throws Exception{
-		if (conservationArea.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+		if (conservationArea.getIsCcaa()){
 			EntityType et = EntityTypeCcaaManager.getInstance().findType(entityKey);
 			if (et == null){
 				return null;
@@ -144,7 +144,7 @@ public class EntityHibernateManager {
 	 * @return
 	 */
 	public List<EntityType> getActiveEntityTypes(){
-		if (conservationArea.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+		if (conservationArea.getIsCcaa()){
 			return EntityTypeCcaaManager.getInstance().getAllEntityTypes();
 		}
 		
@@ -177,7 +177,7 @@ public class EntityHibernateManager {
 	 * @return
 	 */
 	public List<EntityType> getEntityTypes(Session session){
-		if (conservationArea.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+		if (conservationArea.getIsCcaa()){
 			return EntityTypeCcaaManager.getInstance().getAllEntityTypes();
 		}
 		Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca "); //$NON-NLS-1$

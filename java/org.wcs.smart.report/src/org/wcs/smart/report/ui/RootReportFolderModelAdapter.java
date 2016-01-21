@@ -119,8 +119,8 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 				List<?> kidFolders = s
 						.createCriteria(ReportFolder.class)
 						.add(Restrictions.isNull("parentFolder")) //$NON-NLS-1$
-						.add(Restrictions.in("employee",  //$NON-NLS-1$
-								SmartDB.getConservationAreaConfiguration().getEmployees()))
+						.add(Restrictions.eq("employee",  //$NON-NLS-1$
+								SmartDB.getConservationAreaConfiguration().getCcaaUser()))
 						.add(Restrictions.eq("conservationArea",  //$NON-NLS-1$
 								root.getConservationArea())).list();
 				kids.addAll(kidFolders);
@@ -128,7 +128,7 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 						.createCriteria(Report.class)
 						.add(Restrictions.isNull("folder"))  //$NON-NLS-1$
 						.add(Restrictions.eq("shared", false))  //$NON-NLS-1$
-						.add(Restrictions.in("owner",SmartDB.getConservationAreaConfiguration().getEmployees()))  //$NON-NLS-1$
+						.add(Restrictions.eq("owner",SmartDB.getConservationAreaConfiguration().getCcaaUser()))  //$NON-NLS-1$
 						.add(Restrictions.eq("conservationArea",  //$NON-NLS-1$
 								root.getConservationArea())).list();
 				kids.addAll(kidQueries);

@@ -45,11 +45,17 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 			return Messages.EmployeeDeleteAdvisor_Error_NotEmployee;
 		}
 		Employee e = (Employee)object;
+		if (e.getConservationArea().getIsCcaa()){
+			//ccaa analysis does not require any users; they are created as needed
+			return null;
+		}
+		
 		Long cnt = (Long) session.createCriteria(Employee.class)
 				.add(Restrictions.eq("conservationArea", e.getConservationArea())) //$NON-NLS-1$
 				.add(Restrictions.ne("uuid", e.getUuid())) //$NON-NLS-1$
 				.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN)) //$NON-NLS-1$
 				.setProjection(Projections.rowCount()).uniqueResult();
+		
 		if (cnt == 0){
 			return Messages.EmployeeDeleteAdvisor_Error_NoMoreAdmin;
 		}else{

@@ -125,14 +125,17 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption">
+            class="org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption"
+            supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile">
+            class="org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".profile.conservationArea"
-            class="org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption">
+            class="org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

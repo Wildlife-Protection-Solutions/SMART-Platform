@@ -42,27 +42,33 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.observation.model.Waypoint">
+            class="org.wcs.smart.observation.model.Waypoint"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".waypoint.conservationArea"
-            class="org.wcs.smart.observation.model.WaypointObservation">
+            class="org.wcs.smart.observation.model.WaypointObservation"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.observation.waypoint.conservationArea"
-            class="org.wcs.smart.observation.model.WaypointObservationAttribute">
+            class="org.wcs.smart.observation.model.WaypointObservationAttribute"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".observation.waypoint.conservationArea"
-            class="org.wcs.smart.observation.model.ObservationAttachment">
+            class="org.wcs.smart.observation.model.ObservationAttachment"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".waypoint.conservationArea"
-            class="org.wcs.smart.observation.model.WaypointAttachment">
+            class="org.wcs.smart.observation.model.WaypointAttachment"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".uuid"
-            class="org.wcs.smart.observation.model.ObservationOptions">
+            class="org.wcs.smart.observation.model.ObservationOptions"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

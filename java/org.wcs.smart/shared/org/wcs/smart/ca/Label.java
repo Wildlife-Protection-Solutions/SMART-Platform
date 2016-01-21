@@ -76,8 +76,6 @@ public class Label  {
 		id = new LabelItemPK();
 	}
 
-	
-	
 	public String getValue(){
 		return value;
 	}

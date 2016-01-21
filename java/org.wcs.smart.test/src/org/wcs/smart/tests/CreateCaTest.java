@@ -83,12 +83,17 @@ public class CreateCaTest {
 		
 		Session session = Hibernate.openSession();
 		session.beginTransaction();
-		session.save(ca);
-		
-		Hibernate.generateEmployeeId(e1, session);
-		session.save(e1);
-		session.getTransaction().commit();
-		session.close();
+		try{
+			session.save(ca);
+			Hibernate.generateEmployeeId(e1, session);
+			session.save(e1);
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			session.getTransaction().rollback();
+			ex.printStackTrace();
+		}finally{
+			session.close();
+		}
 		
 		DataModel dm = null;
 		try{

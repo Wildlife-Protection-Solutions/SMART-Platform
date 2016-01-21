@@ -176,7 +176,7 @@ public class ImportReportEngine {
 				}
 				
 				importReport.setId(ReportManager.generateReportId(importCa, session));
-				if (importCa.getUuid().equals(ConservationArea.MULTIPLE_CA) && importReport.getShared()){
+				if (importCa.getIsCcaa() && importReport.getShared()){
 					importReport.setOwner(SmartDB.getSharedEmployee(session));
 				}else{
 					importReport.setOwner(assignedEmployee);

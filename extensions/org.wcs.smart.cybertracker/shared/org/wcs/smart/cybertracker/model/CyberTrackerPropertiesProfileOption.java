@@ -90,7 +90,6 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 
 	private CyberTrackerPropertiesProfile profile;
 	private ProfileOptionID optionId;
-//	private Boolean booleanValue;
 	private Double doubleValue;
 	private Integer integerValue;
 	private String stringValue;

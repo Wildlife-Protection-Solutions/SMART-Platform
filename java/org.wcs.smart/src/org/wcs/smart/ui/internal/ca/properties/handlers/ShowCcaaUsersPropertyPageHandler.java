@@ -19,44 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.internal.ca.export;
+package org.wcs.smart.ui.internal.ca.properties.handlers;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.ca.export.ICaDataExportEngine;
-import org.wcs.smart.ca.export.ICaDataExporter;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.internal.Messages;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.wcs.smart.ui.internal.ca.properties.CcaaUserPropertyPage;
 
 /**
- * Exports the db_versions table in the CA Export 
+ * Handler for displaying employee property page.
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
-public class PlugInConfigurationExporter implements ICaDataExporter {
+public class ShowCcaaUsersPropertyPageHandler extends ShowPropertyPageHandler {
 
-	public static final String CONFIG_TABLE_NAME = "db_versions"; //$NON-NLS-1$
-
-	@Override
-	public int getRunLevel() {
-		return 0;
-	}
-
-	@Override
-	public void exportData(ICaDataExportEngine exportEngine,
-			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.PlugInConfigurationExporter_ExportingVersions, 1);
-		exportEngine.writeQuery(CONFIG_TABLE_NAME, "SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL); //$NON-NLS-1$
-		monitor.done();
-		
-	}
-	
 	/**
-	 * @returns true
+	 * @param page
 	 */
-	@Override
-	public boolean supportsCcaa() {
-		return true;
+	public ShowCcaaUsersPropertyPageHandler() {
+		super(CcaaUserPropertyPage.class);
 	}
 
+	// E3
+	public static class ShowCcaaUsersPropertyPageHandlerWrapper extends DIHandler<ShowCcaaUsersPropertyPageHandler> {
+		public ShowCcaaUsersPropertyPageHandlerWrapper() {
+			super(ShowCcaaUsersPropertyPageHandler.class);
+		}
+	}
 }

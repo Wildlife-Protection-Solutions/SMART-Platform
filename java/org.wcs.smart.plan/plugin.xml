@@ -613,27 +613,37 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.plan.model.Plan">
+            class="org.wcs.smart.plan.model.Plan"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".plan.conservationArea"
-            class="org.wcs.smart.plan.model.NumericPlanTarget">
+            class="org.wcs.smart.plan.model.NumericPlanTarget"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".plan.conservationArea"
-            class="org.wcs.smart.plan.model.AdministrativePlanTarget">
+            class="org.wcs.smart.plan.model.AdministrativePlanTarget"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".id.plan.conservationArea"
-            class="org.wcs.smart.plan.model.PatrolPlan">
+            class="org.wcs.smart.plan.model.PatrolPlan"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".plan.conservationArea"
-            class="org.wcs.smart.plan.model.SpatialPlanTarget">
+            class="org.wcs.smart.plan.model.SpatialPlanTarget"
+            supportsCcaa="false">
       </class>
       <class
             ca_property=".planTarget.plan.conservationArea"
-            class="org.wcs.smart.plan.model.SpatialPlanTargetPoint">
+            class="org.wcs.smart.plan.model.SpatialPlanTargetPoint"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.plan.model.PlanTarget"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

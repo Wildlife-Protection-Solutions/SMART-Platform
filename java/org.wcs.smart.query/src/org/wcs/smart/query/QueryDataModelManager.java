@@ -67,7 +67,7 @@ public class QueryDataModelManager {
 		if (ca.equals(SmartDB.getCurrentConservationArea())){
 			return getInstance();
 		}
-		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
+		if (ca.getIsCcaa()){
 			return new MultiCaDataModelManagerImpl();
 		}else{
 			return new CaDataModelManagerImpl(ca);

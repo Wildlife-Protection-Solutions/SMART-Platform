@@ -23,7 +23,6 @@ package org.wcs.smart.report;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IEmployeeListener;
 
@@ -46,79 +45,26 @@ public class ReportEmployeeListener implements IEmployeeListener {
 
 	
 	private void checkReport(Employee e, Session s){
-		//need to update any cross-ca reports associated with this user
-		//to another user with the same userid
-		StringBuilder innerSql = new StringBuilder();
-		innerSql.append("select case when min(b.uuid) is not null then min(b.uuid) else :user end as newuuid from "); //$NON-NLS-1$
-		innerSql.append(" Employee b "); //$NON-NLS-1$
-		innerSql.append(" WHERE b.smartUserId = :userid AND "); //$NON-NLS-1$
-		innerSql.append(" b.uuid != :user "); //$NON-NLS-1$
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("update Report "); //$NON-NLS-1$
-		sql.append(" qf set qf.owner = ( "); //$NON-NLS-1$
-		sql.append(innerSql);
-		sql.append(") where qf.owner = :userid2 and qf.conservationArea.uuid = :ca " ); //$NON-NLS-1$
-			
-		Query q = s.createQuery(sql.toString());
-		q.setParameter("userid", e.getSmartUserId()); //$NON-NLS-1$
-		q.setParameter("user", e.getUuid()); //$NON-NLS-1$
-		q.setParameter("userid2", e); //$NON-NLS-1$
-		q.setParameter("ca", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
-		q.executeUpdate();	
-		
-		
-		//at this point we cannot move it anywhere so we should just delete it
-		sql = new StringBuilder();
-		sql.append("Delete from Report "); //$NON-NLS-1$
-		sql.append(" WHERE conservationArea.uuid = :ca1 AND owner = :owner"); //$NON-NLS-1$
-		
-		q = s.createQuery(sql.toString());
-		q.setParameter("ca1", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
-		q.setParameter("owner", e); //$NON-NLS-1$
-		
-		q.executeUpdate();
+		if (e.getConservationArea().getIsCcaa()){
+			//ccaa queries we delete all associated queries and folders
+			StringBuilder sql = new StringBuilder();
+			sql.append("DELETE from Report "); //$NON-NLS-1$
+			sql.append(" WHERE owner = :owner"); //$NON-NLS-1$
+			Query q = s.createQuery(sql.toString());
+			q.setParameter("owner", e); //$NON-NLS-1$
+			q.executeUpdate();
+		}
 	}
 	
 	private void checkReportFolder(Employee e, Session s){
-		//need to update any cross-ca reports associated with this user
-		//to another user with the same userid
-		StringBuilder innerSql = new StringBuilder();
-		innerSql.append("select case when min(b.uuid) is not null then min(b.uuid) else :user end as newuuid from "); //$NON-NLS-1$
-		innerSql.append(" Employee b "); //$NON-NLS-1$
-		innerSql.append(" WHERE b.smartUserId = :userid AND "); //$NON-NLS-1$
-		innerSql.append(" b.uuid != :user "); //$NON-NLS-1$
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("update ReportFolder "); //$NON-NLS-1$
-		sql.append(" qf set qf.employee = ( "); //$NON-NLS-1$
-		sql.append(innerSql);
-		sql.append(") where qf.employee = :userid2 and qf.conservationArea.uuid = :ca " ); //$NON-NLS-1$
-			
-		Query q = s.createQuery(sql.toString());
-		q.setParameter("userid", e.getSmartUserId()); //$NON-NLS-1$
-		q.setParameter("user", e.getUuid()); //$NON-NLS-1$
-		q.setParameter("userid2", e); //$NON-NLS-1$
-		q.setParameter("ca", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
-		q.executeUpdate();	
-		
-		
-		//at this point we cannot move it anywhere so we should just delete it
-		sql = new StringBuilder();
-		sql.append("Update from ReportFolder set parentFolder = null "); //$NON-NLS-1$
-		sql.append(" WHERE conservationArea.uuid = :ca1 AND employee = :owner"); //$NON-NLS-1$
-		q = s.createQuery(sql.toString());
-		q.setParameter("ca1", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
-		q.setParameter("owner", e); //$NON-NLS-1$
-		q.executeUpdate();
-		
-		sql = new StringBuilder();
-		sql.append("Delete from ReportFolder "); //$NON-NLS-1$
-		sql.append(" WHERE conservationArea.uuid = :ca1 AND employee = :owner"); //$NON-NLS-1$
-		q = s.createQuery(sql.toString());
-		q.setParameter("ca1", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
-		q.setParameter("owner", e); //$NON-NLS-1$
-		
-		q.executeUpdate();
+		if (e.getConservationArea().getIsCcaa()){
+			//ccaa queries we delete all associated queries and folders
+			StringBuilder sql = new StringBuilder();
+			sql.append("DELETE from ReportFolder "); //$NON-NLS-1$
+			sql.append(" WHERE employee = :owner"); //$NON-NLS-1$
+			Query q = s.createQuery(sql.toString());
+			q.setParameter("owner", e); //$NON-NLS-1$
+			q.executeUpdate();
+		}
 	}
 }

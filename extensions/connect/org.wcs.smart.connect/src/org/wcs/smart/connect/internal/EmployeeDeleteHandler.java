@@ -38,6 +38,7 @@ public class EmployeeDeleteHandler implements IEmployeeListener {
 
 	@Override
 	public void beforeDelete(Employee e, Session s) {
+		//TODO: sort out ccaa stuff - may need to move to a different employee if possible
 		ConnectUser cu = ConnectHibernateManager.getConnectUser(e, s);
 		if (cu != null){
 			s.delete(cu);

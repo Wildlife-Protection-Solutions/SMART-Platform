@@ -168,7 +168,7 @@ public class SmartDB {
 	
 	public static boolean isMultipleAnalysis(){
 		try{
-			return getCurrentConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
+			return getCurrentConservationArea().getIsCcaa();
 		}catch (NullPointerException ex){
 			return false;
 		}

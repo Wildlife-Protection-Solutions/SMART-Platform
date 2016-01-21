@@ -809,14 +809,17 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.report.model.ReportFolder">
+            class="org.wcs.smart.report.model.ReportFolder"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.report.model.Report">
+            class="org.wcs.smart.report.model.Report"
+            supportsCcaa="true">
       </class>
       <class
             ca_property=".id.report.conservationArea"
-            class="org.wcs.smart.report.model.ReportQuery">
+            class="org.wcs.smart.report.model.ReportQuery"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

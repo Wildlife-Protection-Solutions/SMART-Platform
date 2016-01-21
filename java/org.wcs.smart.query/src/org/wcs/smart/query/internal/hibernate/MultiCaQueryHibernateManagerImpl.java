@@ -86,7 +86,7 @@ public class MultiCaQueryHibernateManagerImpl extends
 		userRootFolder.setName(MY_QUERIES_NAME);
 		userRootFolder.setUuid(USER_QUERY_KEY);
 		userRootFolder.setConservationArea(SmartDB.getCurrentConservationArea());
-		userRootFolder.setEmployee(SmartDB.getCurrentEmployee());
+		userRootFolder.setEmployee(SmartDB.getConservationAreaConfiguration().getCcaaUser());
 		userRootFolder.setRootFolder(true);
 		
 		
@@ -103,7 +103,7 @@ public class MultiCaQueryHibernateManagerImpl extends
 			@SuppressWarnings("unchecked")
 		List<QueryFolder> userFolders = session.createCriteria(QueryFolder.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.in("employee", SmartDB.getConservationAreaConfiguration().getEmployees())) //$NON-NLS-1$
+				.add(Restrictions.eq("employee", SmartDB.getConservationAreaConfiguration().getCcaaUser())) //$NON-NLS-1$
 				.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
 			
 		userRootFolder.setChildren(userFolders);
@@ -134,7 +134,7 @@ public class MultiCaQueryHibernateManagerImpl extends
 			List<org.wcs.smart.query.model.Query> objects = session.createCriteria(type.getHibernateClass())
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.add(Restrictions.or(Restrictions.eq("isShared", true), //$NON-NLS-1$
-						Restrictions.in("owner", SmartDB.getConservationAreaConfiguration().getEmployees()))) //$NON-NLS-1$
+						Restrictions.eq("owner", SmartDB.getConservationAreaConfiguration().getCcaaUser()))) //$NON-NLS-1$
 				.list();
 			
 			for (org.wcs.smart.query.model.Query q : objects){
@@ -163,40 +163,5 @@ public class MultiCaQueryHibernateManagerImpl extends
 		}
 		return queries;
 	}
-
-
-//	
-//	private Collection<ListItem> getNamedKeyItem(Session session, Class<? extends NamedKeyItem> clazz, boolean onlyActive) {
-//		
-//		HashMap<String, ListItem> keyToItem = new HashMap<String, ListItem>();
-//		
-//			Criteria c = session
-//					.createCriteria(clazz)
-//					.add(Restrictions.in("conservationArea", SmartDB //$NON-NLS-1$
-//							.getConservationAreaConfiguration()
-//							.getConservationAreas()));
-//			if (onlyActive){
-//				c.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
-//			}
-//			List<?> teams = c.list();
-//
-//			for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
-//				NamedKeyItem namedItem = (NamedKeyItem) iterator.next();
-//				ListItem item = keyToItem.get(namedItem.getKeyId());
-//				if (item == null) {
-//					item = new ListItem(null, namedItem.getName(), namedItem.getKeyId());
-//					keyToItem.put(namedItem.getKeyId(), item);
-//				} else if (namedItem.getNames().iterator().next().getLanguage().getCa().equals(
-//						SmartDB.getConservationAreaConfiguration()
-//								.getMainConservationArea())) {
-//					item.updateName(namedItem.getName());
-//				}
-//
-//			}
-//		
-//
-//		return keyToItem.values();
-//
-//	}
 
 }

@@ -113,16 +113,20 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.entity.query.model.EntityObservationQuery">
+            class="org.wcs.smart.entity.query.model.EntityObservationQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.entity.query.model.EntityGriddedQuery">
+            class="org.wcs.smart.entity.query.model.EntityGriddedQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.entity.query.model.EntityWaypointQuery">
+            class="org.wcs.smart.entity.query.model.EntityWaypointQuery"
+            supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.entity.query.model.EntitySummaryQuery">
+            class="org.wcs.smart.entity.query.model.EntitySummaryQuery"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

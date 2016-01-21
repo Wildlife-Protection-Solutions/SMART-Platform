@@ -79,9 +79,6 @@ public class UploadChangeLogEngine {
 	 * @throws Exception
 	 */
 	public void createUpload(IProgressMonitor monitor) throws NothingToUpdateException, PackageToLargeException, Exception{
-	
-		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)) throw new Exception(Messages.UploadChangeLogEngine_CCAAError);
-		
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			throw new Exception(Messages.UploadChangeLogEngine_AlreadyProcessing);
 		}

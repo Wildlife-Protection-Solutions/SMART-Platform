@@ -431,8 +431,10 @@ public class ApplyChangeLogJob extends Job {
 			//ensure usernames & passwords are the same
 			//we are comparing the hashed values here; not the unhashed values
 			//this is the best we can do but will not be perfect
-			if (!afterDownload.getSmartUserId().equals(currentEmployee.getSmartUserId()) ||
-				!afterDownload.getSmartPassword().equals(currentEmployee.getSmartPassword())){
+			//NOTE: this doesn't effect ccaa 
+			if (!SmartDB.getCurrentConservationArea().getIsCcaa()
+				&& (!afterDownload.getSmartUserId().equals(currentEmployee.getSmartUserId()) ||
+				!afterDownload.getSmartPassword().equals(currentEmployee.getSmartPassword()))){
 				//the username or password are different we need to prompt for the new password
 				//if they cannot provide the necessary info, we need to logout
 				Display.getDefault().syncExec(new Runnable(){
@@ -474,9 +476,11 @@ public class ApplyChangeLogJob extends Job {
 							}
 						}
 	
+						//TODO: fix for CCAA analysis
 						//update configuration to use new employee
-						ConservationAreaConfiguration cc = new ConservationAreaConfiguration(
-								Collections.singleton(currentEmployee.getConservationArea()), 
+						ConservationAreaConfiguration cc = new ConservationAreaConfiguration(SmartDB.getCurrentConservationArea(),
+								Collections.singleton(currentEmployee.getConservationArea()),
+								afterDownload,
 								Collections.singleton(afterDownload), s);
 						SmartDB.setConservationAreaConfiguration(afterDownload, 
 								password, currentEmployee.getConservationArea(), cc);

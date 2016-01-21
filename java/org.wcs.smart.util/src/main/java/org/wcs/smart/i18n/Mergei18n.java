@@ -127,7 +127,9 @@ public class Mergei18n {
             for(File tmp : transToMerge){
                 filesList.add(tmp);
             }
-
+            if (flangDir.getName().startsWith(matchDir)){
+            	filesList.add(flangDir);
+            }
         }
 
         for (File ft : filesList){

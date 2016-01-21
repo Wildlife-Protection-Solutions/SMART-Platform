@@ -32,19 +32,20 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.util.I18nUtil;
 
 /**
- * System configuration when performing cross conservation analysis.
- * This configuration tracks the conservation areas available
- * and the "main" conservation area used for querying shared objects
- * (such as the data model).
+ * System configuration.
+ * This configuration tracks the conservation areas available (for
+ * cross conservation area analysis), the current language, the
+ * current user, and collection of users (for ccaa analysis).
  * 
  * @author Emily
  *
  */
 public class ConservationAreaConfiguration {
 
+	private ConservationArea conservationArea;
 	private Collection<ConservationArea> conservationAreas;
 	private Collection<Employee> employees;
-	
+	private Employee ccaaUser;
 	private ConservationArea mainConservationArea;
 	private Language language;
 	
@@ -52,14 +53,28 @@ public class ConservationAreaConfiguration {
 	 * The set of conservation areas logged into
 	 * @param conservationAreas
 	 */
-	public ConservationAreaConfiguration(Collection<ConservationArea> conservationAreas,
+	public ConservationAreaConfiguration(
+			ConservationArea ca,
+			Collection<ConservationArea> conservationAreas,
+			Employee ccaaUser,
 			Collection<Employee> employees,
-			Session session){
+			Session session){			
 		this.conservationAreas = conservationAreas;
 		this.employees = employees;
+		this.ccaaUser = ccaaUser;
+		this.conservationArea = ca;
 		computeMainConservationArea(session);
 	}
-
+	
+	/**
+	 * The employee object created against the CCAA database for storing
+	 * queries/reports against.
+	 * @return
+	 */
+	public Employee getCcaaUser(){
+		return this.ccaaUser;
+	}
+	
 	/**
 	 * 
 	 * @return List of employee objects that represent the
@@ -80,10 +95,10 @@ public class ConservationAreaConfiguration {
 	
 	
 	/**
-	 * 
+	 *
 	 * @return the list of conservation areas
 	 */
-	public Collection<ConservationArea> getConservationAreas(){
+	public Collection<ConservationArea> getConservationAreas() {
 		return this.conservationAreas;
 	}
 	
@@ -96,7 +111,7 @@ public class ConservationAreaConfiguration {
 	}
 	
 	/**
-	 * The language associated with the main conservation area
+	 * The language associated with the conservation area
 	 * that is the best match to the locale
 	 * @return
 	 */
@@ -115,19 +130,20 @@ public class ConservationAreaConfiguration {
 		}catch (Exception ex){
 			//eatme
 		}
-		for (ConservationArea ca : conservationAreas){
-			Language language = HibernateManager.findLanguage(session, l, ca);
-			if (language != null){
-				mainConservationArea = ca;
-				this.language = language;
-				break;
-			}
-		}
+		this.language = HibernateManager.findLanguage(session, l, conservationArea);
+		
+//		for (ConservationArea ca : conservationAreas){
+//			Language language = HibernateManager.findLanguage(session, l, ca);
+//			if (language != null){
+//				mainConservationArea = ca;
+////				this.displayLanguage = language;
+//				break;
+//			}
+//		}
 		if (mainConservationArea == null && conservationAreas.size() > 0){
 			mainConservationArea = conservationAreas.iterator().next();
-			this.language = mainConservationArea.getDefaultLanguage();
+//			this.displayLanguage = mainConservationArea.getDefaultLanguage();
 		}
-		//SmartDB.getCurrentConservationArea().setLanguages(mainConservationArea.getLanguages());
 		
 	}
 }

@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 public class PackageProduct {
 
 	public static final String VERSION = "4.0.0";
-	public static final String RC = "a2";
+	public static final String RC = "a13";
 	
 	public static final String GPS_BABEL = "C:\\data\\SMART\\Exports\\dependencies\\GPSBabel";
 	
@@ -38,7 +38,7 @@ public class PackageProduct {
 	
 	public static final String NETWORK = "L:\\Refractions\\SMART\\internal_demo\\";
 	
-	public static final String LOW_MEMORY_WIN = "L:\\Refractions\\SMART\\Delivery\\LowMemory_Shortcuts\\SMART.LowMemory.exe";
+	public static final String LOW_MEMORY_WIN = "L:\\Refractions\\SMART\\Delivery\\LowMemory_Shortcuts\\SMART.LowMemory.exe.lnk";
 	public static final String LOW_MEMORY_MAC = "L:\\Refractions\\SMART\\Delivery\\LowMemory_Shortcuts\\SMART.LowMemory.app";
 	public static final String LOW_MEMORY_LINUX = "L:\\Refractions\\SMART\\Delivery\\LowMemory_Shortcuts\\linux_SMART.LowMemory";
 	
@@ -138,7 +138,7 @@ public class PackageProduct {
 			f.delete();
 		}
 		FileUtils.copyFile(new File(LOW_MEMORY_WIN), f);
-				
+		
 		//install plugins
 	}
 	
@@ -345,7 +345,7 @@ public class PackageProduct {
 	public static void main(String[] args) throws Exception{
 
 //		packageUpdateSize();
-		
+//		
 //		processWindows();
 //		processWindows64();
 //		zipWindows();

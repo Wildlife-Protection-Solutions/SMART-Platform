@@ -125,7 +125,7 @@ public class ConservationAreaFilter implements IFilter {
 	public ConservationAreaFilter(boolean init, ConservationArea currentCa){
 		this();
 		if (init){
-			if (!(currentCa.getUuid().equals(ConservationArea.MULTIPLE_CA))){
+			if (!(currentCa.getIsCcaa())){
 				addConservationArea(currentCa);
 			}else{
 				setIncludeAll(true);

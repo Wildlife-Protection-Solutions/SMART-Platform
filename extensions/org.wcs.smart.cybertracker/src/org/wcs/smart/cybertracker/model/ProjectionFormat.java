@@ -19,44 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.internal.ca.export;
+package org.wcs.smart.cybertracker.model;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.ca.export.ICaDataExportEngine;
-import org.wcs.smart.ca.export.ICaDataExporter;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.internal.Messages;
+import org.wcs.smart.cybertracker.internal.Messages;
 
 /**
- * Exports the db_versions table in the CA Export 
- * 
+ * Projection format details for cybertracker profiles.
  * @author Emily
  *
  */
-public class PlugInConfigurationExporter implements ICaDataExporter {
-
-	public static final String CONFIG_TABLE_NAME = "db_versions"; //$NON-NLS-1$
-
-	@Override
-	public int getRunLevel() {
-		return 0;
+public enum ProjectionFormat {
+	DEGREE_MIN_SEC(Messages.CyberTrackerProperties_ProjectonFormat_DegreeMinSec, 0),
+	DECEMAL_DEGREE(Messages.CyberTrackerProperties_ProjectonFormat_DecemalDegree, 1),
+	UTM(Messages.CyberTrackerProperties_ProjectonFormat_UTM, 2);
+	private String guiName;
+	private int id;
+	ProjectionFormat(String guiName, int id) {
+		this.guiName = guiName;
+		this.id = id;
 	}
-
-	@Override
-	public void exportData(ICaDataExportEngine exportEngine,
-			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.PlugInConfigurationExporter_ExportingVersions, 1);
-		exportEngine.writeQuery(CONFIG_TABLE_NAME, "SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL); //$NON-NLS-1$
-		monitor.done();
-		
+	public String getGuiName() {
+		return this.guiName;
 	}
-	
-	/**
-	 * @returns true
-	 */
-	@Override
-	public boolean supportsCcaa() {
-		return true;
+	public int getId() {
+		return id;
 	}
-
+	public static Integer[] getIds() {
+		ProjectionFormat[] values = ProjectionFormat.values();
+		Integer[] ids = new Integer[values.length];
+		for (int i = 0; i < values.length; i++) {
+			ids[i] = values[i].getId();
+		}
+		return ids;
+	}
 }
