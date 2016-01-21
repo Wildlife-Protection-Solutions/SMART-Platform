@@ -51,7 +51,10 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.ReportViewerPerspective;
@@ -76,7 +79,25 @@ public class ReportManager {
 	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
 	public static final String SMART_DATASET_TABLE_TYPE = "org.wcs.smart.data.oda.smart.smartTableDataset"; //$NON-NLS-1$
 
-	
+	/**
+	 * Determines if the current user can modify the conservation area level
+	 * reports or only my reports.
+	 * @return
+	 */
+	public static boolean canModifyCaReports(){
+		if (SmartDB.getCurrentConservationArea().getIsCcaa()){
+			for (Employee e : SmartDB.getConservationAreaConfiguration().getEmployees()){
+				if (!(e.getSmartUserLevel() == SmartUserLevel.ADMIN 
+					|| e.getSmartUserLevel() == SmartUserLevel.MANAGER)){
+					return false;
+				}
+			}
+			return true;
+		}else{
+			return SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER 
+				|| SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN;
+		}
+	}
 	/**
 	 * Deletes a report folder from the database.
 	 * @param folder the folder to delete

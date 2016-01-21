@@ -65,7 +65,6 @@ import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
-import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -90,7 +89,6 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 	private Button btnShowReplication;
 	private TableViewer tblUsers;
 		
-//	private HashMap<Option, Label> optionCntrls;
 	private ServerOptionsPanel optionPnl;
 	private AutoOptionsPanel autoPnl;
 	/**

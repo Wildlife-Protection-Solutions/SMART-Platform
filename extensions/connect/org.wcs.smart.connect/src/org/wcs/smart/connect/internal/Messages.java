@@ -202,6 +202,13 @@ public class Messages extends NLS {
 	public static String DownloadConnectWizard_DownloadError;
 	public static String DownloadConnectWizard_LoadingTaskName;
 	public static String DownloadConnectWizard_Name;
+	public static String DownloadInstallCcaaHandler_DialogMessage;
+	public static String DownloadInstallCcaaHandler_DialogTitle;
+	public static String DownloadInstallCcaaHandler_ShellTitle;
+	public static String DownloadInstallCcaaHandler_SyncMessage;
+	public static String DownloadInstallCcaaHandler_SyncTitle;
+	public static String DownloadInstallCcaaHandler_Title;
+	public static String DownloadInstallCcaaHandler_Warning;
 	public static String EditConnectServerInfoDialog_autoError;
 	public static String EditConnectServerInfoDialog_AutoLabel;
 	public static String EditConnectServerInfoDialog_CertificationError;

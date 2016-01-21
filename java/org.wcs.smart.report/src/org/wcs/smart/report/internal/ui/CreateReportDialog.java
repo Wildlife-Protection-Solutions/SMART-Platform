@@ -57,13 +57,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.internal.Messages;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
@@ -115,7 +114,6 @@ public class CreateReportDialog extends TitleAreaDialog {
 	 * @param defaultName the initial name of the report; can be null
 	 * @param includeName <code>true</code> if name should be included in dialog box
 	 */
-	//TODO: rootFolder is not selected correctly
 	public CreateReportDialog(Shell parent, 
 			Object rootFolder,
 			String defaultName, boolean includeName) {
@@ -214,13 +212,9 @@ public class CreateReportDialog extends TitleAreaDialog {
 		reportList.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		reportList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		reportList.setContentProvider(new LazyReportContentProvider(
-				(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER || SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN) ? RootType.ALL : RootType.USER_ONLY));
-		reportList.setLabelProvider(new ReportLabelProvider());
-		
+		reportList.setContentProvider(new LazyReportContentProvider(ReportManager.canModifyCaReports() ? RootType.ALL : RootType.USER_ONLY));
+		reportList.setLabelProvider(new ReportLabelProvider());		
 		reportList.setInput(Messages.CreateReportDialog_LoadingLabel);
-
-		
 		reportList.setCellEditors(new CellEditor[] { new TextCellEditor(reportList.getTree()) });
 		reportList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
 		reportList.setCellModifier(new ReportItemNameCellEditor(true));
@@ -239,6 +233,7 @@ public class CreateReportDialog extends TitleAreaDialog {
 		TreeViewerEditor.create(reportList, actSupport, ColumnViewerEditor.DEFAULT);
 		
 		btnNewFolder = new Button(main, SWT.PUSH);
+		btnNewFolder.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
 		btnNewFolder.setText(Messages.CreateReportDialog_NewFolderButton);
 		btnNewFolder.setEnabled(false);
 		btnNewFolder.addSelectionListener(new SelectionAdapter(){

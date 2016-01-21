@@ -32,9 +32,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.internal.Messages;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.report.ui.LazyReportContentProvider;
@@ -84,8 +83,7 @@ public class ImportReportFolderPage extends WizardPage {
 		reportList.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		reportList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		reportList.setContentProvider(new LazyReportContentProvider(
-				(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER || SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN) ? RootType.ALL : RootType.USER_ONLY));
+		reportList.setContentProvider(new LazyReportContentProvider(ReportManager.canModifyCaReports() ? RootType.ALL : RootType.USER_ONLY));
 		reportList.setLabelProvider(new ReportLabelProvider());
 		reportList.setInput(Messages.CreateReportDialog_LoadingLabel);
 		((GridData)reportList.getTree().getLayoutData()).heightHint = 100;

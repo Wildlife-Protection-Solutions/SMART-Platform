@@ -160,7 +160,6 @@ public class FileStoreWatcher implements Runnable{
 
     	Session s = HibernateManager.openSession();
     	try{
-    		System.out.println("file modified:" + p.toString());
     		if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(caUuid, s)){
     			s.beginTransaction();
     			

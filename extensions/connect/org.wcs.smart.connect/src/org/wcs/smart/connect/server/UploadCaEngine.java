@@ -48,7 +48,6 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
-import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;

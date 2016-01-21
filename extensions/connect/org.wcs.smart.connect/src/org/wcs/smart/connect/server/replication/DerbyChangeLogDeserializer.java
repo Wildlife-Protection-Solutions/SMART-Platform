@@ -78,6 +78,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		super.processFile(session);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public boolean shouldProcess(ChangeLogItem it, Path changeLogPackage) throws ConflictException{
 		if (ChangeLogTableManager.INSTANCE.constains(session, it)){
 			//we already have this item

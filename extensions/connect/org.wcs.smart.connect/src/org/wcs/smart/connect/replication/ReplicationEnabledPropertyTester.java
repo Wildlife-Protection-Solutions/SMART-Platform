@@ -27,8 +27,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -49,7 +49,7 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 			//querying the database for the state causes session issues in other
 			//unless done in a job, and this is not necessary
 			final boolean[] isEnabled = new boolean[]{false};
-			Job j = new Job("replicationstatus") {
+			Job j = new Job("replicationstatus") { //$NON-NLS-1$
 				
 				@Override
 				public IStatus run(IProgressMonitor monitor) {
@@ -66,8 +66,7 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 			try {
 				j.join();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ConnectPlugIn.log(e.getMessage(), e);
 				return false;
 			}
 			return isEnabled[0];	

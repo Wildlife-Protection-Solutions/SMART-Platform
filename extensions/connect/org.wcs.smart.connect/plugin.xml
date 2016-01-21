@@ -81,6 +81,10 @@
             id="org.wcs.smart.connect.server.changelog.sync"
             name="%syncall.command.name">
       </command>
+      <command
+            id="org.wcs.smart.connect.server.downloadccaa"
+            name="%downloadca.command.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -103,6 +107,10 @@
       <image
             commandId="org.wcs.smart.connect.server.changelog.sync"
             icon="images/icons/obj16/server_sync.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.downloadccaa"
+            icon="images/icons/obj16/server_ca_download.png">
       </image>
    </extension>
    <extension
@@ -180,7 +188,32 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.connect.server.downloadccaa"
+                  commandId="org.wcs.smart.connect.server.exportca"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.connect.server.exportca"
+                  label="%downloadca.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -192,24 +225,21 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.connect.server.exportca"
+                  commandId="org.wcs.smart.connect.server.downloadccaa"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
+                  <not>
                      <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
+                           property="org.wcs.smart.caSingle">
                      </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
+                  </not>
                </visibleWhen>
             </command>
+            <separator
+                  name="org.wcs.smart.connect.separator3"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.connect.configuration.show"
                   style="push"
@@ -283,6 +313,10 @@
                   value="true">
             </test>
          </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.server.DownloadInstallCcaaHandler$DownloadInstallCcaaHandlerWrapper"
+            commandId="org.wcs.smart.connect.server.downloadccaa">
       </handler>
    </extension>
    <extension

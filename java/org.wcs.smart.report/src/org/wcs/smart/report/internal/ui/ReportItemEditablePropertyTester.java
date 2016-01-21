@@ -26,6 +26,7 @@ import java.text.Collator;
 import org.eclipse.core.expressions.PropertyTester;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
@@ -87,11 +88,7 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 			if (operator.equals(NEWFOLDER) || operator.equals(NEWREPORT)){
 				if (((RootReportFolder)receiver) == RootReportFolder.CA_ROOT_FOLDER){
 					//ca only modifiable by admin/managers
-					if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
-						SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER
-						){
-					return true;
-					}
+					return ReportManager.canModifyCaReports();
 				}else{
 					return true;
 				}
@@ -109,9 +106,7 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 			//rename/delete/newfolder
 			if (folder.getEmployee() == null){
 				//ca folder
-				if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
-						SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER
-						){
+				if (ReportManager.canModifyCaReports()){
 					return true;
 				}else{
 					return false;
@@ -135,9 +130,7 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 				return true;
 			}
 			if (r.getShared()){
-				if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
-						SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER
-						){
+				if (ReportManager.canModifyCaReports()){
 					return true;
 				}else{
 					return false;
