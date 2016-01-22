@@ -242,6 +242,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 					s.beginTransaction();
 					try {
 						profileList.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(s));
+						Collections.sort(profileList, new CtProfileDefaultNameComparator());
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(Messages.ManageProfilesDialog_LoadProfileList_Error, ex);
 					} finally {
