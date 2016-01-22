@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -177,6 +178,12 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
 		
 		return main;
+	}
+
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setEnabled(this.changesMade); //this will enable "Save" button when new model is just created
 	}
 
 	private void updateText(NamedItem item){
