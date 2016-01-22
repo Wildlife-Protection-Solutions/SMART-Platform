@@ -44,9 +44,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Dialog for creating new CyberTracker profile.
@@ -172,22 +174,25 @@ public class CreateNewProfileOpDialog extends TitleAreaDialog {
 	public CyberTrackerPropertiesProfile getProfile() throws Exception {
 		switch (option) {
 		case BLANK:
-		{
-			initProfile = new CyberTrackerPropertiesProfile();
-			initProfile.setConservationArea(SmartDB.getCurrentConservationArea());
-			initProfile.setName(name);
-			initProfile.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
-			return initProfile;
-		}
+			return CyberTrackerProfileFactory.createUsingDefaults(name);
 		case PROFILE:
 		{
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					//TODO: implement!!!!
-					initProfile = null;
-					
+					monitor.beginTask(Messages.CyberTrackerPropertiesDialog_LoadProfile_Task, 1);
+					Session s = HibernateManager.openSession();
+					s.beginTransaction();
+					try {
+						CyberTrackerPropertiesProfile fullProfile = (CyberTrackerPropertiesProfile) s.get(CyberTrackerPropertiesProfile.class, profileTemplate.getUuid());
+						initProfile = CyberTrackerProfileFactory.createProfileClone(fullProfile, name, monitor);
+					} catch (Exception ex) {
+						SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, ex);
+					} finally {
+						s.getTransaction().rollback();
+						s.close();
+					}
 				}
 			});
 			return initProfile;

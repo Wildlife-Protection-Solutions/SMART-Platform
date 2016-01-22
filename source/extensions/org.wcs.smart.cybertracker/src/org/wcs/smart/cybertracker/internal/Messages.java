@@ -149,6 +149,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerImporter_Task_Download;
 	public static String CyberTrackerImporter_Task_ExtractRawData;
 	public static String CyberTrackerPlugIn_InitJob_Title;
+	public static String CyberTrackerProfileFactory_CloneProfile_TaskName;
 	public static String CyberTrackerProperties_ProjectonFormat_DecemalDegree;
 	public static String CyberTrackerProperties_ProjectonFormat_DegreeMinSec;
 	public static String CyberTrackerProperties_ProjectonFormat_UTM;
@@ -259,6 +260,10 @@ public class Messages extends NLS {
 	public static String ManageProfilesDialog_Button_Edit;
 	public static String ManageProfilesDialog_CreateProfile_Erorr;
 	public static String ManageProfilesDialog_DefaultProfilePostfix;
+	public static String ManageProfilesDialog_DeleteConfirmDialog_Message;
+	public static String ManageProfilesDialog_DeleteConfirmDialog_Title;
+	public static String ManageProfilesDialog_DeleteTask_Error;
+	public static String ManageProfilesDialog_DeleteTask_Name;
 	public static String ManageProfilesDialog_LoadProfileList_Error;
 	public static String ManageProfilesDialog_LoadProfileList_Task;
 	public static String ManageProfilesDialog_Message;
