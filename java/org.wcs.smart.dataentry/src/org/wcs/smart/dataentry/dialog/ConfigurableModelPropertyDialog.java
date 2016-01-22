@@ -222,7 +222,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
 						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_ProgressDelete, 2);
-						Session session = getSession();
+						Session session = HibernateManager.openSession();
 						session.beginTransaction();
 						try {
 							monitor.worked(1);
