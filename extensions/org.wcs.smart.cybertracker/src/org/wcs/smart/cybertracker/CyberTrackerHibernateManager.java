@@ -128,6 +128,14 @@ public class CyberTrackerHibernateManager {
 	}
 
 	/**
+	 * Delete a profile and related records
+	 * @throws Exception 
+	 */
+	public static void deleteProfile(Session session, CyberTrackerPropertiesProfile profile) {
+		session.delete(profile);
+	}
+	
+	/**
 	 * Returns a profile associated with given {@link ConfigurableModel}
 	 * @param session
 	 * @param configurableModel

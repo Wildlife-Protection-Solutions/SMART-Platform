@@ -22,12 +22,14 @@
 package org.wcs.smart.cybertracker.properties;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -186,8 +188,40 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	protected void deleteCurrentProfile() {
-		// TODO Auto-generated method stub
+		final CyberTrackerPropertiesProfile p = getSelectedProfile();
+		if (p == null){
+			return;
+		}
+		if (!MessageDialog.openConfirm(getShell(), Messages.ManageProfilesDialog_DeleteConfirmDialog_Title, MessageFormat.format(Messages.ManageProfilesDialog_DeleteConfirmDialog_Message, p.getName()))){
+			return;
+		}
+
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask(Messages.ManageProfilesDialog_DeleteTask_Name, 1);
+					Session s = HibernateManager.openSession();
+					s.beginTransaction();
+					try {
+						CyberTrackerHibernateManager.deleteProfile(s, p);
+						s.getTransaction().commit();							
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+						SmartPlugIn.displayLog(Messages.ManageProfilesDialog_DeleteTask_Error, ex);
+					} finally {
+						s.close();
+						monitor.done();
+					}
+				}
+			});
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(Messages.ManageProfilesDialog_DeleteTask_Error, ex);
+		}
 		
+		reloadData();
 	}
 
 	protected void editCurrentProfile() {
