@@ -66,6 +66,7 @@ import org.wcs.smart.cybertracker.model.ProjectionFormat;
 public class CyberTrackerPropertiesComposite extends Composite {
 	
 	private List<IPropsChangeListener> listeners = new ArrayList<IPropsChangeListener>();
+	private boolean isPopulating = false;
 
 	private Button btnAutoNext;
 
@@ -883,12 +884,16 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	}
 
 	private void changesMade() {
+		if (isPopulating) {
+			return;
+		}
 		for (IPropsChangeListener pcl : listeners) {
 			pcl.changesMade();
 		}
 	}
 	
 	public void populateValuesFromObj(CyberTrackerPropertiesProfile ctProperties) {
+		isPopulating = true;
 		btnUseTitleBar.setSelection(ctProperties.isUseTitleBar());
 		btnLargeTitles.setSelection(ctProperties.isUseLargeTitles());
 		btnLargeScrollBars.setSelection(ctProperties.isLargeScrollBars());
@@ -921,6 +926,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnAllowSkipManual.setSelection(ctProperties.isAllowSkipManualGps());
 		txtFileName.setText(ctProperties.getFieldMapFilename());
 		btnLock100.setSelection(ctProperties.isLock100());
+		isPopulating = false;
 	}
 
 	public boolean recordValuesToObj(CyberTrackerPropertiesProfile ctProperties) {

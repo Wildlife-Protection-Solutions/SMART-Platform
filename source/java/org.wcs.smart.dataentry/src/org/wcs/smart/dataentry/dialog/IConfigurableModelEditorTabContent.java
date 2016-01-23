@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.dialog;
 
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
@@ -52,5 +53,11 @@ public interface IConfigurableModelEditorTabContent {
 	 * @return
 	 */
 	public Composite createTabContent(Composite parent);
+
+	/**
+	 * Method is responsible for saving any additional data (if needed) to database.
+	 * Configurable model will be saved by hosting dialog. 
+	 */
+	public void performSave(Session s);
 
 }

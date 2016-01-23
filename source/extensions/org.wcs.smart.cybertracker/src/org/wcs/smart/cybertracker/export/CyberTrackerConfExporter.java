@@ -173,7 +173,7 @@ public class CyberTrackerConfExporter {
 
 	private File performExport(File file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
-		CyberTrackerPropertiesProfile ctProperties = CyberTrackerHibernateManager.getAssociatedProfile(session, configurableModel);
+		CyberTrackerPropertiesProfile ctProperties = CyberTrackerHibernateManager.getAssociatedCmProfile(session, configurableModel).getProfile();
 		screensFactory = new ScreensObjectFactory(ctProperties);
 		ctUtil = new CyberTrackerUtil(screensFactory, currentLanguage);
 		monitor.worked(10);

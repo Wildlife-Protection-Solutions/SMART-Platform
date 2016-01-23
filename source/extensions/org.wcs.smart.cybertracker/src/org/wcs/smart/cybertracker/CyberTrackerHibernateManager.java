@@ -25,13 +25,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.Assert;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
@@ -132,6 +135,9 @@ public class CyberTrackerHibernateManager {
 	 * @throws Exception 
 	 */
 	public static void deleteProfile(Session session, CyberTrackerPropertiesProfile profile) {
+		Query q = session.createQuery("delete from ConfigurableModelCtPropertiesProfile where profile = :p"); //$NON-NLS-1$
+		q.setParameter("p", profile); //$NON-NLS-1$
+		q.executeUpdate();
 		session.delete(profile);
 	}
 	
@@ -141,14 +147,24 @@ public class CyberTrackerHibernateManager {
 	 * @param configurableModel
 	 * @return
 	 */
-	public static CyberTrackerPropertiesProfile getAssociatedProfile(Session session, ConfigurableModel configurableModel) {
-		if (configurableModel == null || configurableModel.getUuid() == null) {
-			return getDefaultProfile(session);
+	public static ConfigurableModelCtPropertiesProfile getAssociatedCmProfile(Session session, ConfigurableModel configurableModel) {
+		Assert.isNotNull(configurableModel, "Configurable model"); //$NON-NLS-1$
+		if (configurableModel.getUuid() == null) {
+			return createDefaultCmProfile(session, configurableModel);
 		}
-		//TODO: need associated profile!!!!
-		return getDefaultProfile(session);
+		Query q = session.createQuery("from ConfigurableModelCtPropertiesProfile where id.model = :cm"); //$NON-NLS-1$
+		q.setParameter("cm", configurableModel); //$NON-NLS-1$
+		ConfigurableModelCtPropertiesProfile cm2ctp = (ConfigurableModelCtPropertiesProfile) q.uniqueResult();
+		return cm2ctp != null ? cm2ctp : createDefaultCmProfile(session, configurableModel);
 	}
 
+	private static ConfigurableModelCtPropertiesProfile createDefaultCmProfile(Session session, ConfigurableModel configurableModel) {
+		ConfigurableModelCtPropertiesProfile cm2ctp = new ConfigurableModelCtPropertiesProfile();
+		cm2ctp.setModel(configurableModel);
+		cm2ctp.setProfile(getDefaultProfile(session));
+		return cm2ctp;
+	}
+	
 	private static CyberTrackerPropertiesProfile getDefaultProfile(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		Criteria query = session.createCriteria(CyberTrackerPropertiesProfile.class)

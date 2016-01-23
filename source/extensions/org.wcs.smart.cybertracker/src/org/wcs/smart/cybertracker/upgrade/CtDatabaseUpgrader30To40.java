@@ -67,7 +67,15 @@ public class CtDatabaseUpgrader30To40 {
 			"GRANT ALL PRIVILEGES ON smart.ct_properties_profile_option to data_entry",
 			"GRANT ALL PRIVILEGES ON smart.ct_properties_profile_option to manager",
 			"GRANT ALL PRIVILEGES ON smart.ct_properties_profile_option to analyst",
-			"GRANT SELECT ON smart.ct_properties_profile_option to login"
+			"GRANT SELECT ON smart.ct_properties_profile_option to login",
+			
+			"CREATE TABLE smart.cm_ct_properties_profile (cm_uuid CHAR(16) for bit data NOT NULL, profile_uuid CHAR(16) for bit data NOT NULL, PRIMARY KEY (cm_uuid))",
+			"ALTER TABLE smart.cm_ct_properties_profile ADD CONSTRAINT CM_CT_PROPERTIES_PROFILE_CM_UUID_FK FOREIGN KEY (CM_UUID) REFERENCES SMART.CONFIGURABLE_MODEL(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+			"ALTER TABLE smart.cm_ct_properties_profile ADD CONSTRAINT CM_CT_PROPERTIES_PROFILE_PROFILE_UUID_FK FOREIGN KEY (PROFILE_UUID) REFERENCES SMART.CT_PROPERTIES_PROFILE(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+			"GRANT ALL PRIVILEGES ON smart.cm_ct_properties_profile to data_entry",
+			"GRANT ALL PRIVILEGES ON smart.cm_ct_properties_profile to manager",
+			"GRANT ALL PRIVILEGES ON smart.cm_ct_properties_profile to analyst",
+			"GRANT SELECT ON smart.cm_ct_properties_profile to login"
 		};
 		for (String s : sql){
 			session.createSQLQuery(s).executeUpdate();
