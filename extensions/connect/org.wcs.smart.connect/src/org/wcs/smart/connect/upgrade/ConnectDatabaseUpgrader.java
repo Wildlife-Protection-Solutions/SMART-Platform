@@ -21,69 +21,47 @@
  */
 package org.wcs.smart.connect.upgrade;
 
-import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
-import org.wcs.smart.connect.updatesite.OnInstallAction;
+import org.wcs.smart.connect.updatesite.AddConnectJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
- * Entity upgrade operations while upgrade/restore backup.
+ * Connect upgrade operations while upgrade/restore backup.
  * 
  * @author elitvin
  * @since 3.0.0
  */
 public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
-
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.upgrade.IDatabaseUpgrader#upgrade(org.hibernate.Session, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	
 	@Override
-	public void upgrade(IProgressMonitor monitor) {
-		String currentPluginVersion = null;
-		
-		Session s = HibernateManager.openSession();
-		try{
-			Map<String, String> versions = UpgradeEngine.getVersions(s);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			currentPluginVersion = versions.get(ConnectPlugIn.PLUGIN_ID);
-		}finally{
-			s.close();
-		}
-		
-		if (currentPluginVersion == null) {
-			//Entity doesn't present in this configuration
-			//we need to perform install database support for the plug-in
-			monitor.subTask(Messages.ConnectDatabaseUpgrader_TaskName);
-			OnInstallAction install = new OnInstallAction();
-			install.execute(null);
-		
-		}else{
-			s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				upgrade(currentPluginVersion, s);
-				s.getTransaction().commit();
-			}catch (final Throwable t){
-				if (s.getTransaction().isActive()) s.getTransaction().rollback();
-				final String msg = MessageFormat.format(Messages.ConnectDatabaseUpgrader_UpgradeError, new Object[]{currentPluginVersion, ConnectPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
-				Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					ConnectPlugIn.displayLog(msg, t);
-					}
-				});
-			}finally{
-				s.close();
+	public void upgrade(IProgressMonitor monitor) throws Exception {
+		monitor.beginTask(Messages.ConnectDatabaseUpgrader_TaskName, 1);
+		Session session = HibernateManager.openSession();
+		try {
+			session.beginTransaction();
+			Map<String, String> versions = UpgradeEngine.getVersions(session);
+			if (versions == null)
+				throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+			String currentPluginVersion = versions.get(ConnectPlugIn.PLUGIN_ID);
+
+			if (currentPluginVersion == null) {
+				(new AddConnectJob()).installPlugin(session, false);
+			} else {
+				upgrade(currentPluginVersion, session);
 			}
+			session.getTransaction().commit();
+		} catch (Exception ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
+		monitor.done();
 	}
 	
 	/**

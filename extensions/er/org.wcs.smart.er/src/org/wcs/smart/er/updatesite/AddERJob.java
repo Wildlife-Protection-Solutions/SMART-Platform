@@ -57,16 +57,10 @@ public class AddERJob extends Job {
 						
 		Session session = HibernateManager.openSession();
 		try{
-			String currentVersion = HibernateManager.getPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, session);
+			
 			session.beginTransaction();
 			try{
-				if (currentVersion == null){
-					createTables(session);
-					HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_1, session);
-					currentVersion = EcologicalRecordsPlugIn.DB_VERSION_1;
-				}
-				//run the upgrader to upgrade to the current version
-				ERDatabaseUpgrader.upgrade(currentVersion, session);
+				installPlugin(session);
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -88,6 +82,16 @@ public class AddERJob extends Job {
 		return Status.OK_STATUS;
 	}	
 	
+	public void installPlugin(Session session){
+		String currentVersion = HibernateManager.getPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, session);
+		if (currentVersion == null){
+			createTables(session);
+			HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_1, session);
+			currentVersion = EcologicalRecordsPlugIn.DB_VERSION_1;
+		}
+		//run the upgrader to upgrade to the current version
+		ERDatabaseUpgrader.upgrade(currentVersion, session);
+	}
 	
 	private void createTables(Session session){
 		final String[] sql = new String[]{

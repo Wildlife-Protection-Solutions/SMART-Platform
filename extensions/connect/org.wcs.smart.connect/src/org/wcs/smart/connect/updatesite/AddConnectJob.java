@@ -63,9 +63,7 @@ public class AddConnectJob extends Job {
 			if (currentVersion == null){
 				session.beginTransaction();
 				try{
-					createTables(session);
-					ChangeLogInstaller.INSTANCE.setEnabled(true);
-					ChangeLogInstaller.INSTANCE.installChangeLogTracking(session);
+					installPlugin(session, true);
 					HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, ConnectPlugIn.DB_VERSION_1, session);
 					session.getTransaction().commit();
 				}catch(Exception ex){
@@ -91,6 +89,23 @@ public class AddConnectJob extends Job {
 		}
 		return Status.OK_STATUS;
 	}	
+	
+	/**
+	 * Creates the tables and enables change logging in core of SMART. 
+	 * 
+	 * @param session
+	 * @param installChangeTracking if true this attempts to install change log tracking
+	 * for required plugins (this install for plugins that are up-to-date).  Otherwise it will not
+	 * attempt to do install tracking (this case is used for upgrades where tracking is installed
+	 * after all updates/install are completed).
+	 * @throws Exception
+	 */
+	public void installPlugin(Session session, boolean installChangeTracking) throws Exception{
+		createTables(session);
+		ChangeLogInstaller.INSTANCE.setEnabled(true);
+		if  (installChangeTracking) ChangeLogInstaller.INSTANCE.installChangeLogTracking(session);;
+		HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, ConnectPlugIn.DB_VERSION_1, session);
+	}
 	
 	private void createTables(Session session){
 		final String[] sql = new String[]{

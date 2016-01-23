@@ -16,11 +16,13 @@ import org.apache.derby.tools.ij;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -76,10 +78,10 @@ public class UpgradeEngine {
 	 * @param currentVersions map from plugin id to database version for the existing database
 	 * @throws Exception
 	 */
-	public void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
-		monitor.setTaskName(Messages.UpgradeEngine_UpgradeTask);
+	public void upgradeSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
+		monitor.beginTask(Messages.UpgradeEngine_UpgradeTask, 5);
 		
-		
+		monitor.subTask(Messages.UpgradeEngine_subprogress1);
 		final boolean[] isOk = {false};
 		String lnewDbVersion = null;
 		String lexpectedDbVersion = null;
@@ -142,16 +144,20 @@ public class UpgradeEngine {
 					break;
 				}
 			}
+			monitor.worked(1);
+			
+			monitor.subTask(Messages.UpgradeEngine_subprogress2);
 			for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++){
 				UpgradeFromVersion v = UpgradeFromVersion.values()[i];
 				IDatabaseUpgrader upgrader = v.upgradeEngine.newInstance();
-				upgrader.upgrade(monitor);
+				upgrader.upgrade(new SubProgressMonitor(monitor, 0));
 				upgradersRun.add(upgrader);
 			}
-				
+			monitor.worked(1);
 		}
 		
 		/* --- validate & update plugins ---*/
+		monitor.subTask(Messages.UpgradeEngine_subprogress3);
 		if (currentVersions != null) {
 			Map<String, String> backupVersions;
 			s = HibernateManager.openSession();
@@ -186,14 +192,52 @@ public class UpgradeEngine {
 				
 			}
 		}
-			
+		monitor.worked(1);
+		
+		
 		/* --- additional upgrade options --- */
-		List<IDatabaseUpgrader> extensions = getExtensions();
-		for (IDatabaseUpgrader upgrader : extensions) {
-			upgrader.upgrade(monitor);
+		monitor.subTask(Messages.UpgradeEngine_subprogress4);
+		Map<String, String> versions;
+		s = HibernateManager.openSession();
+		try {
+			versions = getVersions(s);
+		} finally {
+			s.close();
+		}
+		if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+		
+		
+		//uninstall all change log tracking
+		monitor.subTask(Messages.UpgradeEngine_subprogress5);
+		s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
+			s.getTransaction().commit();
+		}finally{
+			s.close();
 		}
 
-		monitor.subTask(""); //$NON-NLS-1$
+		//run all installers/upgraders
+		List<IDatabaseUpgrader> extensions = getExtensions();
+		for (IDatabaseUpgrader upgrader : extensions) {
+			//execute install/upgrade
+			upgrader.upgrade(new SubProgressMonitor(monitor, 0));
+		}
+		
+		//install change log tracking (if necessary)
+		monitor.subTask(Messages.UpgradeEngine_subprogress6);
+		s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
+			s.getTransaction().commit();
+		}finally{
+			s.close();
+		}
+		monitor.worked(1);
+		
+		monitor.done();
 	}
 
 	/**
@@ -209,7 +253,7 @@ public class UpgradeEngine {
 		//to check delete are installed
 		for (IDatabaseUpgrader up : upgradersRun){
 			if (up instanceof Upgrader310To320){
-				((Upgrader310To320) up).postProcess(monitor);
+				((Upgrader310To320) up).postProcess(new SubProgressMonitor(monitor, 0));
 			}
 		}
 	}

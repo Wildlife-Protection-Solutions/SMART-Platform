@@ -352,8 +352,8 @@ public class SmartHibernateManager {
 		hibernateClassMetadata = new HashMap<Class<?>, Object[]>();
 		for (IConfigurationElement e : config) {
 			Class<?> clzz = Class.forName(e.getAttribute("class")); //$NON-NLS-1$
-			String caProp = e.getAttribute("ca_property");
-			Boolean containsCcaa = Boolean.valueOf(e.getAttribute("supportsCcaa"));
+			String caProp = e.getAttribute("ca_property"); //$NON-NLS-1$
+			Boolean containsCcaa = Boolean.valueOf(e.getAttribute("supportsCcaa")); //$NON-NLS-1$
 			hibernateClassMetadata.put(clzz, new Object[]{caProp, containsCcaa});
 		}
 	}

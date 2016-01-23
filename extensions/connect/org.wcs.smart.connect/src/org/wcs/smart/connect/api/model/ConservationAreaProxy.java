@@ -34,7 +34,8 @@ public class ConservationAreaProxy {
 	public enum Status{
 		UPLOADING,
 		DATA,
-		NODATA
+		NODATA,
+		CCAA
 	}
 	
 	private UUID caUuid;

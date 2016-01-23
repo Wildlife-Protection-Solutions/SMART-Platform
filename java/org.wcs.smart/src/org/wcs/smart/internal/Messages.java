@@ -991,6 +991,7 @@ public class Messages extends NLS {
 	public static String SmartUtils_ValidationMessage_1;
 	public static String SmartUtils_ValidationMessage_2;
 	public static String SmartUtils_ValidationMessage_3a;
+	public static String SmartWorkbenchWindowAdvisor_WindowTitle;
 	public static String StartUpAdvancedDialog_DialogContent_Label;
 	public static String StartUpAdvancedDialog_DialogHeader;
 	public static String StartUpAdvancedDialog_DialogTitle;
@@ -1071,6 +1072,12 @@ public class Messages extends NLS {
 	public static String UpgradeEngine_Plugin_Missing;
 	public static String UpgradeEngine_Plugin_UpgradeMessage;
 	public static String UpgradeEngine_Plugin_WrongVersion;
+	public static String UpgradeEngine_subprogress1;
+	public static String UpgradeEngine_subprogress2;
+	public static String UpgradeEngine_subprogress3;
+	public static String UpgradeEngine_subprogress4;
+	public static String UpgradeEngine_subprogress5;
+	public static String UpgradeEngine_subprogress6;
 	public static String UpgradeEngine_UpgradeTask;
 	public static String Upgrader112To200_Error;
 	public static String Upgrader112To200_SubTask_Name;

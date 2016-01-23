@@ -26,17 +26,25 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Upgrades from database version 330 to 400.
@@ -48,9 +56,12 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
 public class Upgrader330To400 implements IDatabaseUpgrader {
 	
 	private String dbUrl = null;
+	private Exception thrownException = null;
 	
-	public void upgrade(final IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader330To400_ProcessMessage);
+	@Override
+	public void upgrade(IProgressMonitor monitor) throws Exception{
+		monitor.beginTask(Messages.Upgrader330To400_ProcessMessage,1);
+		thrownException = null;
 		final Session s = HibernateManager.openSession();
 		try{
 			s.doWork(new Work() {
@@ -60,15 +71,9 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 						dbUrl = c.getMetaData().getURL();
 						c.setAutoCommit(false);
 						upgrade(c, s, monitor);
-					} catch (final Exception e) {
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(Messages.Upgrader330To400_Error, e);
-							}
-						});
-					}finally {
 						c.setAutoCommit(true);
+					} catch (final Exception e) {
+						thrownException = new Exception(Messages.Upgrader330To400_Error,e);
 					}
 				}
 			});
@@ -76,6 +81,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 		}finally{
 			s.close();
 		}
+		if (thrownException != null) throw thrownException;
 		
 		/* do a hard derby upgrade to version 10.12.1.1 */ 
 		try{
@@ -85,8 +91,9 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 			DriverManager.getConnection(dbUrl + ";create=false;upgrade=true;user=" + DbUser.ADMIN.getUserName() + ";password=" + DbUser.ADMIN.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$ 
 			DerbyHibernateExtensions.shutDown(true);
 		}catch(Exception ex){
-			SmartPlugIn.log("Could not perform hard derby upgrade.", ex); //$NON-NLS-1$
+			throw new Exception("Could not perform hard derby upgrade.", ex); //$NON-NLS-1$
 		}
+		monitor.done();
 	}
 
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
@@ -423,7 +430,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 				ps.executeUpdate();
 			}
 		}
-				
+		upgradeCcaaQueriesAndReports(session, c);
 		/* VERSION UDATE */ 
 		String ssql = "update smart.db_version set version = '4.0.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
 		c.createStatement().execute(ssql);
@@ -431,4 +438,121 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 		c.commit();
 	}
 	
+	@SuppressWarnings("unchecked")
+	private static void upgradeCcaaQueriesAndReports(Session s, Connection c)
+			throws SQLException {
+		HashMap<String, Employee> ccaaUsers = new HashMap<String, Employee>();
+
+		ConservationArea ccaa = (ConservationArea) s.get(
+				ConservationArea.class, ConservationArea.MULTIPLE_CA);
+
+		List<Employee> existingUsers = (List<Employee>) s
+				.createCriteria(Employee.class)
+				.add(Restrictions.eq("conservationArea", ccaa)) //$NON-NLS-1$
+				.add(Restrictions.ne("uuid", Employee.SHARED_UUID)) //$NON-NLS-1$
+				.list();
+		for (Employee e : existingUsers) {
+			if (e.getSmartUserId() != null) {
+				ccaaUsers.put(e.getSmartUserId(), e);
+			}
+		}
+		upgradeCCAAQueryUser("smart.report", //$NON-NLS-1$
+				"creator_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
+		upgradeCCAAQueryUser("smart.report_folder", //$NON-NLS-1$
+				"employee_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
+		upgradeCCAAQueryUser("smart.query_folder", //$NON-NLS-1$
+				"employee_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
+		
+		// --- Queries ---
+		// we only worry about the query tables we know about; plugins are
+		// responsible for their query tables
+		String[] queryTables = new String[] { 
+				"smart.OBS_OBSERVATION_QUERY", //$NON-NLS-1$
+				"smart.OBS_SUMMARY_QUERY", //$NON-NLS-1$
+				"smart.OBS_WAYPOINT_QUERY", //$NON-NLS-1$
+				"smart.OBS_GRIDDED_QUERY", //$NON-NLS-1$
+				"smart.OBSERVATION_QUERY", //$NON-NLS-1$
+				"smart.WAYPOINT_QUERY", //$NON-NLS-1$
+				"smart.SUMMARY_QUERY", //$NON-NLS-1$
+				"smart.GRIDDED_QUERY", //$NON-NLS-1$
+				"smart.PATROL_QUERY" //$NON-NLS-1$
+		};
+		for (String table : queryTables) {
+			upgradeCCAAQueryUser(table,
+					"creator_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
+		}
+	}
+	
+	/**
+	 * Upgrades the owner of ccaa queries in the provided query tables.  Assumes each
+	 * query table has a "creator_uuid" column that identifies the creator.  This will change
+	 * the creator from referencing a CA user to referencing a CCAA user (a new CCAA user will be
+	 * created if necessary).
+	 * 
+	 * @param s
+	 * @param c
+	 * @param tableNames
+	 * @throws SQLException
+	 */
+	@SuppressWarnings("unchecked")
+	public static void updateCCAAQueryTables(Session s, Connection c, String[] tableNames) throws SQLException{
+		ConservationArea ccaa = (ConservationArea) s.get(
+				ConservationArea.class, ConservationArea.MULTIPLE_CA);
+		HashMap<String, Employee> ccaaUsers = new HashMap<String, Employee>();
+
+		List<Employee> existingUsers = (List<Employee>) s
+				.createCriteria(Employee.class)
+				.add(Restrictions.eq("conservationArea", ccaa)) //$NON-NLS-1$
+				.add(Restrictions.ne("uuid", Employee.SHARED_UUID)) //$NON-NLS-1$
+				.list();
+		for (Employee e : existingUsers) {
+			if (e.getSmartUserId() != null) {
+				ccaaUsers.put(e.getSmartUserId(), e);
+			}
+		}
+		for (String table : tableNames) {
+			upgradeCCAAQueryUser(table,
+					"creator_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
+		}
+	}
+	
+	private static void upgradeCCAAQueryUser(String tableName, String employeeName, Session session, Connection c,HashMap<String, Employee> ccaaUsers, ConservationArea ccaa) throws SQLException{
+		String sql = "SELECT uuid, " + employeeName + " FROM " + tableName + " WHERE ca_uuid = ? AND " + employeeName + " != ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		PreparedStatement ps = c.prepareStatement(sql);
+		ps.setBytes(1, UuidUtils.uuidToByte(ConservationArea.MULTIPLE_CA));
+		ps.setBytes(2, UuidUtils.uuidToByte(Employee.SHARED_UUID));
+		
+		sql = "UPDATE " + tableName + " SET " + employeeName + " = ?  WHERE uuid = ? ";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		PreparedStatement updateps = c.prepareStatement(sql);
+		
+		try(ResultSet rs = ps.executeQuery()){
+			while(rs.next()){
+				byte[] uuid = rs.getBytes(1);
+				UUID employee = UuidUtils.byteToUUID(rs.getBytes(2));
+				
+				Employee e = (Employee)session.get(Employee.class, employee);
+				if (e.getConservationArea().getIsCcaa()) continue;
+				
+				Employee newe = ccaaUsers.get(e.getSmartUserId());
+				if (newe == null){
+					newe = new Employee();
+					newe = new Employee();
+					newe.setGender(Employee.DB_MALE);
+					newe.setSmartUserId(e.getSmartUserId());
+					newe.setGivenName(newe.getSmartUserId());
+					newe.setFamilyName(""); //$NON-NLS-1$
+					newe.setStartEmploymentDate(new Date());
+					newe.setId(newe.getSmartUserId());
+					newe.setConservationArea(ccaa);
+					newe.setSmartUserLevel(SmartUserLevel.ADMIN);
+					session.save(newe);
+					session.flush();
+					ccaaUsers.put(newe.getSmartUserId(), newe);
+				}
+				updateps.setBytes(1, UuidUtils.uuidToByte(newe.getUuid()));
+				updateps.setBytes(2, uuid);
+				updateps.executeUpdate();
+			}
+		}
+	}
 }

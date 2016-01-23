@@ -89,14 +89,8 @@ public class AddEntityQueryJob extends Job {
 		Session session = HibernateManager.openSession();	
 		
 		try{
-			String currentVersion = HibernateManager.getPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, session);
 			session.beginTransaction();
-			if (currentVersion == null){
-				createDatabaseTables(session);
-				currentVersion = EntityQueryPlugIn.DB_VERSION_1;
-			}
-			//run the upgrader to upgrade to the current version
-			EntityQueryDatabaseUpgrader.upgrade(currentVersion, session);
+			installPlugin(session);
 			session.getTransaction().commit();
 		}catch(final Throwable e){
 			if (session.getTransaction().isActive()){
@@ -121,6 +115,16 @@ public class AddEntityQueryJob extends Job {
 		monitor.done();
 		return Status.OK_STATUS;
 		
+	}
+	
+	public void installPlugin(Session session){
+		String currentVersion = HibernateManager.getPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, session);
+		if (currentVersion == null){
+			createDatabaseTables(session);
+			currentVersion = EntityQueryPlugIn.DB_VERSION_1;
+		}
+		//run the upgrader to upgrade to the current version
+		EntityQueryDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	private void createDatabaseTables(Session session){

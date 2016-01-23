@@ -22,6 +22,7 @@
 package org.wcs.smart.changetracking;
 
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Abstract change log tracker that creates and drop triggers provided.
@@ -32,16 +33,19 @@ import org.hibernate.Session;
 public abstract class AbstractChangeTrackerInstaller implements IChangeTrackerInstaller {
 
 	@Override
-	public void installChangeTracking(Session session) throws Exception {
-		for (String[] trigger : getTriggers()){
+	public boolean installChangeTracking(Session session) throws Exception {
+		if (!canInstall(getPluginId(), getLastestVersion(), session)) return false;
+		
+		for (String[] trigger : getCurrentTriggers()){
 			DerbyTriggerManager.INSTANCE.createTriggerIfNotExists(trigger[0], trigger[1], session);
 		}
+		return true;
 	}
 
 	@Override
 	public void removeChangeTracking(Session session) throws Exception {
-		for (String[] trigger : getTriggers()){
-			DerbyTriggerManager.INSTANCE.dropIfExists(trigger[0], session);
+		for (String trigger : getAllTriggersToDrop()){
+			DerbyTriggerManager.INSTANCE.dropIfExists(trigger, session);
 		}
 	}
 	
@@ -50,6 +54,36 @@ public abstract class AbstractChangeTrackerInstaller implements IChangeTrackerIn
 	 * changes. { {triggername, sqldefinition} {triggername, sqldefinition} ...}
 	 * @return
 	 */
-	public abstract String[][] getTriggers();
+	public abstract String[][] getCurrentTriggers();
+	
+	/**
+	 * Return a list of triggers to drop to remove change
+	 * track.  This are only dropped if they exist, so you can provide
+	 * triggers that do not exist in the current version (they may have existed
+	 * in a previous version and need to be dropped if we are upgrading 
+	 * from that previous version).
+	 *  
+	 * @return
+	 */
+	public abstract String[] getAllTriggersToDrop();
 
+	/**
+	 * The plugin id string represented in the database.  Used
+	 * to determine state of current plugin.
+	 * @return
+	 */
+	public abstract String getPluginId();
+	
+	/**
+	 * 
+	 * @return The most recent database version for the plugin.
+	 */
+	public abstract String getLastestVersion();
+	
+	private boolean canInstall(String pluginId, String lastestVersion, Session session){
+		String version = HibernateManager.getPlugInVersion(pluginId, session);
+		//plugin not installed 
+		if(version == null) return false;
+		return version.equals(lastestVersion);
+	}
 }

@@ -33,10 +33,16 @@ import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Action that is called when some plug-in is being installed. 
+ * 
  * All plugins should extend to ensure change log tracking is installed
  * if necessary.
  * 
+ * When installing a plugin, this class will uninstall any existing change log
+ * tracking for the given plugin (to ensure that any upgrades will not fail due to 
+ * triggers), install/upgrade the plugin then reinstall and change log tracking. 
+ * 
  * @author elitvin
+ * @author egouge
  * @since 3.0.0
  */
 public abstract class InstallProvisioningAction extends ProvisioningAction {
@@ -44,6 +50,7 @@ public abstract class InstallProvisioningAction extends ProvisioningAction {
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
 		SmartPlugIn.log("Installing PlugIn: " + getPluginId(), null); //$NON-NLS-1$
+		
 		try{
 			//remove any existing change log tracking
 			//this is done so any alter table statements are not
@@ -57,6 +64,7 @@ public abstract class InstallProvisioningAction extends ProvisioningAction {
 				s.close();
 			}
 			
+			
 			//execute install/upgrade
 			IStatus temp = executeInternal(parameters);
 			
@@ -69,6 +77,7 @@ public abstract class InstallProvisioningAction extends ProvisioningAction {
 			}finally{
 				s.close();
 			}
+			
 			return temp;
 		}catch (Exception ex){
 			return new Status(Status.ERROR, SmartPlugIn.PLUGIN_ID, "Could not install plugin.", ex); //$NON-NLS-1$

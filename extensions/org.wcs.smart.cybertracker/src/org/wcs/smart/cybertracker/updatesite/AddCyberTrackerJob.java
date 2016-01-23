@@ -59,14 +59,8 @@ public class AddCyberTrackerJob extends Job {
 		Session session = HibernateManager.openSession();	
 				
 		try{
-			String currentVersion = HibernateManager.getPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, session);
 			session.beginTransaction();
-			if (currentVersion == null){
-				buildTables(session);
-				currentVersion = CyberTrackerPlugIn.DB_VERSION_3_0;
-			}
-			//run the upgrader to upgrade to the current version
-			CtDatabaseUpgrader.upgrade(currentVersion, session);
+			installPlugin(session);
 			session.getTransaction().commit();
 		}catch(final Throwable e){
 			if (session.getTransaction().isActive()){
@@ -88,6 +82,16 @@ public class AddCyberTrackerJob extends Job {
 		monitor.worked(1);
 		monitor.done();
 		return Status.OK_STATUS;
+	}
+	
+	public void installPlugin(Session session){
+		String currentVersion = HibernateManager.getPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, session);
+		if (currentVersion == null){
+			buildTables(session);
+			currentVersion = CyberTrackerPlugIn.DB_VERSION_3_0;
+		}
+		//run the upgrader to upgrade to the current version
+		CtDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	/**

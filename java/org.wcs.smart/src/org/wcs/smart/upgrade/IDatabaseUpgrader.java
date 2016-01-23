@@ -24,7 +24,7 @@ package org.wcs.smart.upgrade;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * Interface that can be implemented to perform upgrade operations
+ * Interface that can be implemented to perform upgrade/install operations
  * while upgrade/restore backup.
  * 
  * @author elitvin
@@ -32,6 +32,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public interface IDatabaseUpgrader {
 
-	public void upgrade(IProgressMonitor monitor);
+	/**
+	 * Installs or upgrades the plugin.
+	 * 
+	 * @param monitor
+	 */
+	public void upgrade(IProgressMonitor monitor) throws Exception;
 	
 }

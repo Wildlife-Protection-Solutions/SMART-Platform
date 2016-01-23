@@ -37,7 +37,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -57,9 +56,12 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
 public class Upgrader310To320 implements IDatabaseUpgrader {
 	
 	private String dbUrl = null;
+	private Exception throwEx = null;
 	
-	public void upgrade(final IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
+	@Override
+	public void upgrade(IProgressMonitor monitor) throws Exception{
+		throwEx = null;
+		monitor.beginTask(Messages.Upgrader310To320_ProgressMessage,1);
 		final Session s = HibernateManager.openSession();
 		try{
 			s.doWork(new Work() {
@@ -69,21 +71,16 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 						dbUrl = c.getMetaData().getURL();
 						c.setAutoCommit(false);
 						upgrade(c, s, monitor);
-					} catch (final Exception e) {
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(Messages.Upgrader310To320_ErrorMessage, e);
-							}
-						});
-					} finally {
 						c.setAutoCommit(true);
+					} catch (final Exception e) {
+						throwEx = new Exception(Messages.Upgrader310To320_ErrorMessage, e);
 					}
 				}
 			});
 		}finally{
 			s.close();
 		}
+		if (throwEx != null) throw throwEx;
 		
 		/* do a hard derby upgrade */ 
 		try{
@@ -93,8 +90,9 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 			DriverManager.getConnection(dbUrl + ";create=false;upgrade=true;user=" + DbUser.ADMIN.getUserName() + ";password=" + DbUser.ADMIN.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$ 
 			DerbyHibernateExtensions.shutDown(true);
 		}catch(Exception ex){
-			SmartPlugIn.log("Could not perform hard derby upgrade.", ex); //$NON-NLS-1$
+			throw new Exception("Could not perform hard derby upgrade.", ex); //$NON-NLS-1$
 		}
+		monitor.done();
 	}
 
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
@@ -164,7 +162,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	 * @param monitor
 	 */
 	public void postProcess(IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
+		monitor.beginTask(Messages.Upgrader310To320_ProgressMessage, 1);
 		final Session s = HibernateManager.openSession();
 		try{
 			/* Species Cleanup - ticket #1118 */
@@ -180,6 +178,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		}finally{
 			s.close();
 		}
+		monitor.done();
 	}
 	public static void cleanUpSpecies(Session session, IProgressMonitor monitor){
 		List<?> data = session.createCriteria(Attribute.class)

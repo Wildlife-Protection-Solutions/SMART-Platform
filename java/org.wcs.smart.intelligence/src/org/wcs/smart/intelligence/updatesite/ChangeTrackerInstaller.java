@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.updatesite;
 
 import org.wcs.smart.changetracking.AbstractChangeTrackerInstaller;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 /**
  * Class for installing change log triggers for intelligence plugin.
  * @author Emily
@@ -52,8 +53,26 @@ public class ChangeTrackerInstaller extends AbstractChangeTrackerInstaller {
 	};
 	
 	@Override
-	public String[][] getTriggers() {
+	public String[][] getCurrentTriggers() {
 		return triggers;
 	}
 
+	@Override
+	public String[] getAllTriggersToDrop(){
+		String[] t = new String[triggers.length];
+		for (int i = 0; i < triggers.length; i ++){
+			t[i] = triggers[i][0];
+		}
+		return t;
+	}
+	
+	@Override
+	public String getPluginId() {
+		return IntelligencePlugIn.PLUGIN_ID;
+	}
+
+	@Override
+	public String getLastestVersion() {
+		return IntelligencePlugIn.DB_VERSION;
+	}
 }
