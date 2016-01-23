@@ -23,6 +23,12 @@ package org.wcs.smart.changetracking;
 
 import org.hibernate.Session;
 
+/**
+ * Installs change tracking for a given plugin.
+ * 
+ * @author Emily
+ *
+ */
 public interface IChangeTrackerInstaller {
 
 	/**
@@ -31,16 +37,32 @@ public interface IChangeTrackerInstaller {
 	public static final String EXTENSION_ID = "org.wcs.smart.changelog.installer"; //$NON-NLS-1$
 	
 	/**
-	 * Should create triggers for all tables for the current version of
-	 * the plugin.
+	 * Should create triggers for all tables for the CURRENT version of
+	 * the plugin.  IF the database version is not the current version
+	 * this should exit immediately and return false.
 	 * 
+	 * <p>When plugins are installed/upgraded all existing change log
+	 * tracking is disabled (by calling removeChangeTracking), then the
+	 * plugin updates/installations are made, then change log tracking is
+	 * reinstalled. This ensures that the plugins don't have to worry about
+	 * triggers or other table requirements causing upgrade scripts to fail.
+	 * As a result this function should ONLY install change tracking if the
+	 * database state is current.  If its not current it should do nothing as
+	 * when it is made current the change tracking will be installed.
+	 * </p>
+	 * 
+	 * @return true if installed false if database is not up-to-date and could
+	 * not be installed
 	 * @param session with active transaction
 	 */
-	public void installChangeTracking(Session session) throws Exception;
+	public boolean installChangeTracking(Session session) throws Exception;
 	
 	/**
 	 * Should remove all triggers ever created.  This will be called before
-	 * any upgrade scripts to ensure triggers don't cause issues with upgrade scripts
+	 * any upgrade scripts to ensure triggers don't cause issues with upgrade scripts.
+	 * <p>This must be able to deal with previous versions of the database for a given plugin.
+	 * For example if Version 1 has Table A and Version 2 has Table A & B this function
+	 * must be able to handle removing change tracking for both Version 1 and Version 2.</p>
 	 * 
 	 * @param session with active transaction
 	 */

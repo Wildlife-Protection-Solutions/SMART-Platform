@@ -21,15 +21,13 @@
  */
 package org.wcs.smart.er.upgrade;
 
-import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.updatesite.OnInstallAction;
+import org.wcs.smart.er.updatesite.AddERJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -43,44 +41,26 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
-	public void upgrade(IProgressMonitor monitor) {
-		String currentPluginVersion = null;
-		
-		Session s = HibernateManager.openSession();
+	public void upgrade(IProgressMonitor monitor) throws Exception {
+		monitor.beginTask(Messages.ERDatabaseUpgrader_UpgradeTask, 1);
+		Session session = HibernateManager.openSession();
 		try{
-			Map<String, String> versions = UpgradeEngine.getVersions(s);
+			session.beginTransaction();
+			Map<String, String> versions = UpgradeEngine.getVersions(session);
 			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			currentPluginVersion = versions.get(EcologicalRecordsPlugIn.PLUGIN_ID);
-		}finally{
-			s.close();
-		}
-		
-		if (currentPluginVersion == null) {
-			//Entity doesn't present in this configuration
-			//we need to perform install database support for the plug-in
-			monitor.subTask(Messages.ERDatabaseUpgrader_UpgradeTask);
-			OnInstallAction install = new OnInstallAction();
-			install.execute(null);
-		
-		}else{
-			s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				upgrade(currentPluginVersion, s);
-				s.getTransaction().commit();
-			}catch (final Throwable t){
-				if (s.getTransaction().isActive()) s.getTransaction().rollback();
-				final String msg = MessageFormat.format(Messages.ERDatabaseUpgrader_UpgradeError, new Object[]{currentPluginVersion, EcologicalRecordsPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
-				Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					EcologicalRecordsPlugIn.displayLog(msg, t);
-					}
-				});
-			}finally{
-				s.close();
+			String currentPluginVersion = versions.get(EcologicalRecordsPlugIn.PLUGIN_ID);
+			
+			if (currentPluginVersion == null) {
+				(new AddERJob()).installPlugin(session);
+			}else{
+				upgrade(currentPluginVersion, session);
 			}
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			session.getTransaction().rollback();
+			throw ex;
 		}
+		monitor.done();
 	}
 	
 	/**

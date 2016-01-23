@@ -150,7 +150,7 @@ public class MapView implements IDropTargetProvider, MapPart, IAdaptable {
 		
 		new MapInfoAreaComposite(parent, SWT.NONE, mapviewer);
 
-        setTool("org.locationtech.udig.tools.Zoom");
+        setTool("org.locationtech.udig.tools.Zoom"); //$NON-NLS-1$
         
         UDIGDragDropUtilities.addDropSupport(mapviewer.getViewport().getControl(), this);
         

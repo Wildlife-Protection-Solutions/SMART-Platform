@@ -56,7 +56,17 @@ public enum ChangeLogInstaller {
 	public void setEnabled(boolean enabled){
 		this.enabled = enabled;
 	}
-	
+	/**
+	 * The state of the change log.  This determines if plugins install triggers
+	 * on database tables for tracking changes or not.  
+	 * <br>
+	 * As per setEnabled, this assumes only ONE plugin is managing this variable. Changes
+	 * are required if multiple plugins are going to manager this variable.
+	 * @return 
+	 */
+	public boolean isChangeLoggingEnabled(){
+		return this.enabled;
+	}
 	/**
 	 * Installed change log tracking for a given plugin.
 	 * 
@@ -107,12 +117,20 @@ public enum ChangeLogInstaller {
 		//extension) but the plan tables do not exist yet.
 		//The current workaround for this issue is to check to ensure the plugin
 		//is registered in the database first.
+		//
+		//this doesn't work because we may be installing all but still have an old
+		//version of the plugin
+		//Consider the case when a user asks for an update to CT plugin and
+		//install the connect plugin at the same time.  If the connect plugin is installed first
+		//after it is installed we try to install change tracking for
+		//all plugins; however the ct plugin has not yet been updated to
+		//this may fail if the ct plugin installs some new tables
+		//we cannot just ignore exceptions because this will cause the transaction
+		//to fail.
+		if (!enabled) return;
 		SmartPlugIn.log("Installing ALL change logging. ", null); //$NON-NLS-1$
 		for (ChangeTrackerWrapper tracker : getTrackers(null)){
-			String exists = HibernateManager.getPlugInVersion(tracker.pluginId, session);
-			if (exists != null){
-				tracker.installer.installChangeTracking(session);
-			}
+			tracker.installer.installChangeTracking(session);
 		}
 	}
 	

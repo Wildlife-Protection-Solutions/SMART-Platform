@@ -50,14 +50,12 @@ public class CmUpgrader310To320 {
 		this.session = s;
 		uuidGenerator = null;
 
-		s.beginTransaction();
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				upgrade(c);
 			}
 		});
-		s.getTransaction().commit();
 	}
 	
 	private void upgrade(Connection c) throws SQLException {

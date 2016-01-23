@@ -23,14 +23,11 @@ package org.wcs.smart.upgrade.v200;
 
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -43,32 +40,32 @@ import org.wcs.smart.upgrade.UpgradeEngine;
  * @since 3.0.0
  */
 public class Upgrader112To200 implements IDatabaseUpgrader {
-
-	public void upgrade(IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader112To200_SubTask_Name);
+	
+	private Exception throwEx = null;
+	
+	@Override
+	public void upgrade(IProgressMonitor monitor) throws Exception{
+		throwEx = null;
+		monitor.beginTask(Messages.Upgrader112To200_SubTask_Name, 1);
 		Session s = HibernateManager.openSession();
 		try{
-		s.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				try {
-					c.setAutoCommit(false);
-					upgrade112To200(c);
-				} catch (final Exception e) {
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(Messages.Upgrader112To200_Error, e);
-						}
-					});
-				} finally {
-					c.setAutoCommit(true);
+			s.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+					try {
+						c.setAutoCommit(false);
+						upgrade112To200(c);
+						c.setAutoCommit(true);
+					} catch (final Exception e) {
+						throwEx = new Exception(Messages.Upgrader112To200_Error, e);
+					}
 				}
-			}
-		});
+			});
 		}finally{
 			s.close();
 		}
+		if (throwEx != null) throw throwEx;
+		monitor.done();
 	}
 
 	private static void upgrade112To200(Connection c) throws Exception {
@@ -88,20 +85,18 @@ public class Upgrader112To200 implements IDatabaseUpgrader {
 		c.commit();
 	}
 
-	private static void upgradeCt111to200(Connection c) throws Exception{
-		
-		String sql = "select count(*) from sys.SYSTABLES a join sys.SYSSCHEMAS b on a.schemaid = b.schemaid WHERE a.tablename='CYBERTRACKER_PROPERTIES' and b.schemaname='SMART'"; //$NON-NLS-1$
-		ResultSet rs = c.createStatement().executeQuery(sql);
-		rs.next();
-		int cnt = rs.getInt(1);
-		rs.close();
-		
-		if (cnt > 0) {
-			// ct is installed and needs to be updated
-			InputStream in = Upgrader112To200.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v200/ct_11x_200.sql"); //$NON-NLS-1$
-			UpgradeEngine.runScript(c, in);
-		}
-		
-	}
-	
+//	private static void upgradeCt111to200(Connection c) throws Exception{
+//		String sql = "select count(*) from sys.SYSTABLES a join sys.SYSSCHEMAS b on a.schemaid = b.schemaid WHERE a.tablename='CYBERTRACKER_PROPERTIES' and b.schemaname='SMART'"; //$NON-NLS-1$
+//		ResultSet rs = c.createStatement().executeQuery(sql);
+//		rs.next();
+//		int cnt = rs.getInt(1);
+//		rs.close();
+//		
+//		if (cnt > 0) {
+//			// ct is installed and needs to be updated
+//			InputStream in = Upgrader112To200.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v200/ct_11x_200.sql"); //$NON-NLS-1$
+//			UpgradeEngine.runScript(c, in);
+//		}
+//		
+//	}
 }

@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.updatesite;
 
 import org.wcs.smart.changetracking.AbstractChangeTrackerInstaller;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 
 /**
  * Installs change log tracking triggers for ct plugin.
@@ -46,8 +47,26 @@ public class ChangeTrackerInstaller extends AbstractChangeTrackerInstaller {
 	};
 
 	@Override
-	public String[][] getTriggers() {
+	public String[][] getCurrentTriggers() {
 		return triggers;
 	}
 
+	@Override
+	public String[] getAllTriggersToDrop(){
+		String[] t = new String[triggers.length];
+		for (int i = 0; i < triggers.length; i ++){
+			t[i] = triggers[i][0];
+		}
+		return t;
+	}
+	
+	@Override
+	public String getPluginId() {
+		return CyberTrackerPlugIn.PLUGIN_ID;
+	}
+
+	@Override
+	public String getLastestVersion() {
+		return CyberTrackerPlugIn.DB_VERSION;
+	}
 }

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,7 +33,6 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
-import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.preference.IPreferenceNode;
@@ -50,13 +51,13 @@ import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.internal.LayersView;
 import org.locationtech.udig.project.ui.internal.MapPart;
-import org.locationtech.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import org.locationtech.udig.tool.info.internal.InfoView2;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.wcs.smart.backup.AutoBackupEngine;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Smart Workbench Window Advisor.
@@ -263,7 +264,8 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 				try{
 					ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
 					
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setText("SMART: " + ca.getNameLabel());
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setText(
+							MessageFormat.format(Messages.SmartWorkbenchWindowAdvisor_WindowTitle, ca.getNameLabel())); 
 				}catch (Exception ex){
 					SmartPlugIn.log(ex.getMessage(), ex);
 				}finally{

@@ -58,13 +58,7 @@ public class AddPlanJob extends Job {
 		Session session = HibernateManager.openSession();
 		try{
 			session.beginTransaction();
-			String currentVersion = HibernateManager.getPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, session);
-			if (currentVersion == null){
-				createTables(session);
-				currentVersion = SmartPlanPlugIn.DB_VERSION_1;
-			}
-			
-			PlanDatabaseUpgrader.upgrade(SmartPlanPlugIn.DB_VERSION_1, session);
+			installPlugin(session);
 			session.getTransaction().commit();
 		} catch (final Exception ex) {
 			if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -82,6 +76,16 @@ public class AddPlanJob extends Job {
 		return Status.OK_STATUS;
 	}
 
+	public void installPlugin(Session session){
+		String currentVersion = HibernateManager.getPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, session);
+		if (currentVersion == null){
+			createTables(session);
+			currentVersion = SmartPlanPlugIn.DB_VERSION_1;
+		}
+		
+		PlanDatabaseUpgrader.upgrade(SmartPlanPlugIn.DB_VERSION_1, session);
+	}
+	
 	private void createTables(Session session){
 		if (!DerbyHibernateExtensions.tableExists(session, "PLAN")){ //$NON-NLS-1$
 			createPlanTable(session);

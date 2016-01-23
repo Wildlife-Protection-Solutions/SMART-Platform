@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.updatesite.AddEntityJob;
 import org.wcs.smart.entity.updatesite.OnInstallAction;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -43,44 +44,27 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class EntityDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
-	public void upgrade(IProgressMonitor monitor) {
-		
-		String currentPluginVersion = null;
-		Session s = HibernateManager.openSession();
+	public void upgrade(IProgressMonitor monitor) throws Exception {
+		monitor.beginTask(Messages.EntityDatabaseUpgrader_UpgradeTask, 1);
+		Session session = HibernateManager.openSession();
 		try{
-			Map<String, String> versions = UpgradeEngine.getVersions(s);
+			session.beginTransaction();
+			Map<String, String> versions = UpgradeEngine.getVersions(session);
 			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			currentPluginVersion = versions.get(EntityPlugIn.PLUGIN_ID);
-		}finally{
-			s.close();
-		}
-		
-		if (currentPluginVersion == null) {
-			//Entity doesn't present in this configuration
-			//we need to perform install database support for the plug-in
-			monitor.subTask(Messages.EntityDatabaseUpgrader_UpgradeTask);
-			OnInstallAction install = new OnInstallAction();
-			install.execute(null);
-		
-		}else{
-			s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				upgrade(currentPluginVersion, s);
-				s.getTransaction().commit();
-			}catch (final Throwable t){
-				if (s.getTransaction().isActive()) s.getTransaction().rollback();
-				final String msg = MessageFormat.format(Messages.EntityDatabaseUpgrader_UpgradeError, new Object[]{currentPluginVersion, EntityPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						EntityPlugIn.displayLog(msg, t);
-					}
-				});
-			}finally{
-				s.close();
+			String currentPluginVersion = versions.get(EntityPlugIn.PLUGIN_ID);
+			
+			if (currentPluginVersion == null) {
+				(new AddEntityJob()).installPlugin(session);
+				
+			}else{
+				upgrade(currentPluginVersion, session);
 			}
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			session.getTransaction().rollback();
+			throw ex;
 		}
+		monitor.done();
 	}
 	
 	/**

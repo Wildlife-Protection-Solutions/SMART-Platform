@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
@@ -157,7 +158,7 @@ public class DerbyRestoreEngine {
 	 */
 	public static void restoreSystem(File backupFile, IProgressMonitor monitor)
 			throws Exception {
-		monitor.beginTask(Messages.DerbyRestoreEngine_Progress_RestoringFile, 5);
+		monitor.beginTask(Messages.DerbyRestoreEngine_Progress_RestoringFile, 7);
 		if (!backupFile.exists()) {
 			throw new Exception(Messages.DerbyRestoreEngine_Error_NoBackupFile + " '" + backupFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -243,9 +244,9 @@ public class DerbyRestoreEngine {
 		
 		try{
 			UpgradeEngine upgrader = new UpgradeEngine();
-			upgrader.upgrageSystem(monitor, versions);
+			upgrader.upgradeSystem(new SubProgressMonitor(monitor, 1), versions);
 			validateConfiguration(versions);
-			upgrader.postProcess(monitor);
+			upgrader.postProcess(new SubProgressMonitor(monitor, 1));
 		}catch (Exception ex){
 			HibernateManager.endSessionFactory(true);
 			String cleanUpErr = cleanUp(new File[] { temp });

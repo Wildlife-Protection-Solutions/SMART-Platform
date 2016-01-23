@@ -25,10 +25,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -41,8 +39,12 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  */
 public class Upgrader320To321 implements IDatabaseUpgrader {
 	
-	public void upgrade(final IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader320To321_ProcessMessage);
+	private Exception throwEx = null;
+	
+	@Override
+	public void upgrade(IProgressMonitor monitor) throws Exception{
+		throwEx = null;
+		monitor.beginTask(Messages.Upgrader320To321_ProcessMessage,1);
 		final Session s = HibernateManager.openSession();
 		try{
 			s.doWork(new Work() {
@@ -51,18 +53,13 @@ public class Upgrader320To321 implements IDatabaseUpgrader {
 					try {
 						c.setAutoCommit(false);
 						upgrade(c, s, monitor);
-					} catch (final Exception e) {
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(Messages.Upgrader320To321_Error, e);
-							}
-						});
-					} finally {
 						c.setAutoCommit(true);
+					} catch (final Exception e) {
+						throwEx = new Exception(Messages.Upgrader320To321_Error, e);
 					}
 				}
 			});
+			if (throwEx != null) throw throwEx;
 			
 			monitor.subTask(Messages.Upgrader320To321_ProcessMessage + ": " + Messages.Upgrader320To321_UpdateDbStructure); //$NON-NLS-1$
 			CmUpgrader320To321 cmUpgrader = new CmUpgrader320To321();
@@ -71,6 +68,8 @@ public class Upgrader320To321 implements IDatabaseUpgrader {
 		}finally{
 			s.close();
 		}
+		
+		monitor.done();
 	}
 
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {

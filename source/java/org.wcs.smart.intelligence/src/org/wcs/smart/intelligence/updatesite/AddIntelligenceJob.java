@@ -73,14 +73,7 @@ public class AddIntelligenceJob extends Job {
 		Session session = HibernateManager.openSession();
 		try{
 			session.beginTransaction();		
-			String currentVersion = HibernateManager.getPlugInVersion(IntelligencePlugIn.PLUGIN_ID, session);
-			if (currentVersion == null){
-				createTables(session);
-				HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_31, session);
-				currentVersion = IntelligencePlugIn.DB_VERSION_31;
-			}
-			//run the upgrader to upgrade to the current version
-			IntelligenceDatabaseUpgrader.upgrade(currentVersion, session);
+			installPlugin(session);
 			session.getTransaction().commit();
 		}catch(Exception ex){
 			if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -100,7 +93,17 @@ public class AddIntelligenceJob extends Job {
 		monitor.done();
 		return Status.OK_STATUS;
 	}
-	
+
+	public void installPlugin(Session session) throws Exception{
+		String currentVersion = HibernateManager.getPlugInVersion(IntelligencePlugIn.PLUGIN_ID, session);
+		if (currentVersion == null){
+			createTables(session);
+			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_31, session);
+			currentVersion = IntelligencePlugIn.DB_VERSION_31;
+		}
+		//run the upgrader to upgrade to the current version
+		IntelligenceDatabaseUpgrader.upgrade(currentVersion, session);
+	}
 	
 	private void createTables(Session session) throws Exception {
 		//check is required table exists & create

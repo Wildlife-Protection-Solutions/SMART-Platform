@@ -57,16 +57,9 @@ public class AddEntityJob extends Job {
 				
 		Session session = HibernateManager.openSession();
 		try{
-			String currentVersion = HibernateManager.getPlugInVersion(EntityPlugIn.PLUGIN_ID, session);
 			try{
 				session.beginTransaction();
-				if (currentVersion == null){
-					createTables(session);
-					HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, EntityPlugIn.DB_VERSION_1, session);
-					currentVersion = EntityPlugIn.DB_VERSION_1;
-				}
-					//run the upgrader to upgrade to the current version
-				EntityDatabaseUpgrader.upgrade(currentVersion, session);
+				installPlugin(session);
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -88,6 +81,17 @@ public class AddEntityJob extends Job {
 		return Status.OK_STATUS;
 	}
 
+	public void installPlugin(Session session){
+		String currentVersion = HibernateManager.getPlugInVersion(EntityPlugIn.PLUGIN_ID, session);
+		if (currentVersion == null){
+			createTables(session);
+			HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, EntityPlugIn.DB_VERSION_1, session);
+			currentVersion = EntityPlugIn.DB_VERSION_1;
+		}
+			//run the upgrader to upgrade to the current version
+		EntityDatabaseUpgrader.upgrade(currentVersion, session);
+	}
+	
 	private void createTables(Session session){
 		final String[] sql = new String[]{
 				"CREATE TABLE SMART.ENTITY ( UUID CHAR(16) FOR BIT DATA NOT NULL, ENTITY_TYPE_UUID CHAR(16) FOR BIT DATA NOT NULL, ID VARCHAR(32) NOT NULL, STATUS VARCHAR(16) NOT NULL, ATTRIBUTE_LIST_ITEM_UUID CHAR(16) FOR BIT DATA NOT NULL, X DOUBLE, Y DOUBLE, PRIMARY KEY (UUID))", //$NON-NLS-1$

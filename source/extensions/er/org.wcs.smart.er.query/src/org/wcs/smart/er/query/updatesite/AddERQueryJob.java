@@ -58,14 +58,7 @@ public class AddERQueryJob extends Job {
 		Session session = HibernateManager.openSession();
 		try{
 			session.beginTransaction();
-			String currentVersion = HibernateManager.getPlugInVersion(ERQueryPlugIn.PLUGIN_ID, session);
-			
-			if (currentVersion == null){
-				createTables(session);
-				HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_1, session);
-				currentVersion = ERQueryPlugIn.DB_VERSION_1;
-			}
-			ERQueryDatabaseUpgrader.upgrade(currentVersion, session);
+			installPlugin(session);
 			session.getTransaction().commit();
 		}catch(Exception ex){
 			if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -86,6 +79,16 @@ public class AddERQueryJob extends Job {
 		return Status.OK_STATUS;
 	}
 
+	public void installPlugin(Session session){
+		String currentVersion = HibernateManager.getPlugInVersion(ERQueryPlugIn.PLUGIN_ID, session);
+		if (currentVersion == null){
+			createTables(session);
+			HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_1, session);
+			currentVersion = ERQueryPlugIn.DB_VERSION_1;
+		}
+		ERQueryDatabaseUpgrader.upgrade(currentVersion, session);
+	}
+	
 	private void createTables(Session session){
 		final String[] sql = new String[]{
 				"CREATE TABLE SMART.SURVEY_OBSERVATION_QUERY(UUID CHAR(16) FOR BIT DATA NOT NULL,CREATOR_UUID CHAR(16) FOR BIT DATA NOT NULL,QUERY_FILTER VARCHAR(32672),CA_FILTER VARCHAR(32672),CA_UUID CHAR(16) FOR BIT DATA NOT NULL,FOLDER_UUID CHAR(16) FOR BIT DATA ,COLUMN_FILTER VARCHAR(32672),SURVEYDESIGN_KEY VARCHAR(128),SHARED BOOLEAN NOT NULL,ID VARCHAR(6) NOT NULL,PRIMARY KEY (UUID))", //$NON-NLS-1$

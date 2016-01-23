@@ -21,15 +21,13 @@
  */
 package org.wcs.smart.cybertracker.upgrade;
 
-import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.updatesite.OnInstallAction;
+import org.wcs.smart.cybertracker.updatesite.AddCyberTrackerJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -43,56 +41,42 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
-	public void upgrade(IProgressMonitor monitor) {
-		String currentPluginVersion = null;
-		
-		Session s = HibernateManager.openSession();
-		try{
-			Map<String, String> versions = UpgradeEngine.getVersions(s);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happen //$NON-NLS-1$
-			currentPluginVersion = versions.get(CyberTrackerPlugIn.PLUGIN_ID);
-		}finally{
-			s.close();
+	public void upgrade(IProgressMonitor monitor) throws Exception {
+		monitor.beginTask(Messages.CtDatabaseUpgrader_UpgradeTask, 1);
+		Session session = HibernateManager.openSession();
+		try {
+			session.beginTransaction();
+			Map<String, String> versions = UpgradeEngine.getVersions(session);
+			if (versions == null)
+				throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+			String currentPluginVersion = versions
+					.get(CyberTrackerPlugIn.PLUGIN_ID);
+
+			if (currentPluginVersion == null) {
+				(new AddCyberTrackerJob()).installPlugin(session);
+			} else {
+				upgrade(currentPluginVersion, session);
+			}
+			session.getTransaction().commit();
+		} catch (Exception ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
-		
-		if (currentPluginVersion == null) {
-			//Entity doesn't present in this configuration
-			//we need to perform install database support for the plug-in
-			monitor.subTask(Messages.CtDatabaseUpgrader_UpgradeTask);
-			OnInstallAction install = new OnInstallAction();
-			install.execute(null);
-		
-		}else{
-			s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				upgrade(currentPluginVersion, s);
-				s.getTransaction().commit();
-			}catch (final Throwable t){
-				if (s.getTransaction().isActive()) s.getTransaction().rollback();
-				final String msg = MessageFormat.format(Messages.CtDatabaseUpgrader_UpgradeError, new Object[]{currentPluginVersion, CyberTrackerPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						CyberTrackerPlugIn.displayError(Messages.CtDatabaseUpgrader_ErrorTitle, msg, t);
-					}
-				});
-			}finally{
-				s.close();
-			}		
-		}
+		monitor.done();
 	}
 
 	/**
 	 * Upgrades from the currentVersion to the most recent version.
+	 * 
 	 * @param currentVersion
-	 * @param session in current transaction
+	 * @param session
+	 *            in current transaction
 	 */
-	public static final void upgrade(String currentVersion, Session session){
-		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_3_0)){
+	public static final void upgrade(String currentVersion, Session session) {
+		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_3_0)) {
 			CtDatabaseUpgrader30To40 upgrader30To40 = new CtDatabaseUpgrader30To40();
 			upgrader30To40.upgrade(session);
 		}
 	}
-	
+
 }

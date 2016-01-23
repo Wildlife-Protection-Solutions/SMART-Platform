@@ -81,14 +81,7 @@ public class AddIntelligenceQueriesJob extends Job {
 		
 		try{
 			session.beginTransaction();
-			String currentVersion = HibernateManager.getPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, session);
-			
-			if (currentVersion == null){
-				createDatabaseTables(session);
-				currentVersion = IntelligenceQueryPlugIn.DB_VERSION_1;
-			}
-			//run the upgrader to upgrade to the current version
-			IntelligenceQueryDatabaseUpgrader.upgrade(currentVersion, session);
+			installPlugin(session);
 			session.getTransaction().commit();
 		}catch(final Exception ex){
 			if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -106,6 +99,17 @@ public class AddIntelligenceQueriesJob extends Job {
 		}
 		monitor.done();
 		return Status.OK_STATUS;
+	}
+	
+	public void installPlugin(Session session){
+		String currentVersion = HibernateManager.getPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, session);
+		
+		if (currentVersion == null){
+			createDatabaseTables(session);
+			currentVersion = IntelligenceQueryPlugIn.DB_VERSION_1;
+		}
+		//run the upgrader to upgrade to the current version
+		IntelligenceQueryDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	private void createDatabaseTables(Session session){

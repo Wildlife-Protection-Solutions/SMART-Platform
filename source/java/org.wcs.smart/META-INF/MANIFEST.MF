@@ -52,6 +52,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.wcs.smart.ui.map.tool,
  org.wcs.smart.ui.properties,
  org.wcs.smart.upgrade,
+ org.wcs.smart.upgrade.v400,
  org.wcs.smart.util
 Require-Bundle: javax.inject;bundle-version="1.0.0",
  org.wcs.smart.hibernate.libs;visibility:=reexport,

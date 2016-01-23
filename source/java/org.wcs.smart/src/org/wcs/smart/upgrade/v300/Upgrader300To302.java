@@ -25,10 +25,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -43,31 +41,31 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  */
 public class Upgrader300To302 implements IDatabaseUpgrader{
 	
-	public void upgrade(IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader300To302_ProgressMessage);
+	private Exception throwEx = null;
+	
+	@Override
+	public void upgrade(IProgressMonitor monitor) throws Exception{
+		throwEx = null;
+		monitor.beginTask(Messages.Upgrader300To302_ProgressMessage,1);
 		Session s = HibernateManager.openSession();
 		try{
-		s.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				try {
-					c.setAutoCommit(false);
-					upgrade300To301(c);
-				} catch (final Exception e) {
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(Messages.Upgrader200To300_Error, e);
-						}
-					});
-				} finally {
-					c.setAutoCommit(true);
+			s.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+					try {
+						c.setAutoCommit(false);
+						upgrade300To301(c);
+						c.setAutoCommit(true);
+					} catch (final Exception e) {
+						throwEx = new Exception(Messages.Upgrader200To300_Error, e);
+					}
 				}
-			}
-		});
+			});
 		}finally{
 			s.close();
 		}
+		if (throwEx != null) throw throwEx;
+		monitor.done();
 	}
 
 	private static void upgrade300To301(Connection c) throws Exception {
