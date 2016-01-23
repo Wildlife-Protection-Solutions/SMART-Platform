@@ -32,14 +32,17 @@ public class QueryProxy {
 	private String conservationAreaName;
 	private String id;
 	private Boolean isShared;
+	private Boolean isCcaa;
 	
-	public QueryProxy(UUID uuid, String name, String type, String caName, String id, Boolean isShared, UUID caUuid){
+	public QueryProxy(UUID uuid, String name, String type, String caName, String id, 
+			Boolean isShared, UUID caUuid, Boolean isCcaa){
 		this.uuid = uuid;
 		this.name = name;
 		this.type = type;
 		this.conservationAreaName = caName;
 		this.id = id;
 		this.setCaUuid(caUuid);
+		setIsCcaa(isCcaa);
 	}
 	
 	
@@ -89,5 +92,10 @@ public class QueryProxy {
 		this.caUuid = caUuid;
 	}
 	
-	
+	public boolean getIsCcaa(){
+		return this.isCcaa;
+	}
+	public void setIsCcaa(boolean isCcaa){
+		this.isCcaa = isCcaa;
+	}
 }

@@ -456,19 +456,12 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @return
 	 */
 	public static ConservationAreaFilter parseConservationAreaFilter(Query query){
-//		ConservationArea caTemp = new ConservationArea();
-//		caTemp.setUuid(ConservationArea.MULTIPLE_CA);
-//		query.setConservationArea(caTemp);
-		
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			//TODO: get all valid cas from the database
-			//and pass as second argument
-//			return ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(),
-//					Collections.singleton(query.getConservationArea()));
-			
 			ConservationAreaFilter caFilter = new ConservationAreaFilter();
-			caFilter.addConservationArea(UuidUtils.stringToUuid("8f7fbe1b-201a-4ef4-bda8-14f5581e65ce"));
-			caFilter.addConservationArea(UuidUtils.stringToUuid("6719323e-97a4-490e-8a3d-3c629059edd4"));
+			String uuids[] = query.getConservationAreaFilter().split(ConservationAreaFilter.CA_SPLITTER);
+			for (String uuid : uuids){
+				caFilter.addConservationArea(UuidUtils.stringToUuid(uuid));
+			}
 			return caFilter;
 			
 		}else{
@@ -476,8 +469,6 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			ConservationAreaFilter caFilter = new ConservationAreaFilter();
 			caFilter.addConservationArea(query.getConservationArea());
 			return caFilter;
-//			return ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(),
-//					Collections.singleton(query.getConservationArea()));
 		}
 		
 	}

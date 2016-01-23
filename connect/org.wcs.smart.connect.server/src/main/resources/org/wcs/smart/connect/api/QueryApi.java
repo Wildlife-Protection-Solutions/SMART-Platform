@@ -54,7 +54,9 @@ import org.apache.commons.io.FileUtils;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
@@ -71,6 +73,7 @@ import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -104,6 +107,7 @@ public class QueryApi extends HttpServlet{
 	 * @param end
 	 * @param filter
 	 * @param delimiter
+	 * @param cafilter
 	 * @return
 	 */
 	@GET
@@ -113,10 +117,10 @@ public class QueryApi extends HttpServlet{
 			@QueryParam("start_date") String start,
 			@QueryParam("end_date") String end,
 			@QueryParam("date_filter") String filter,
-			@QueryParam("delimiter") String delimiter){
+			@QueryParam("delimiter") String delimiter,
+			@QueryParam("cafilter") String cafilter){
 
 		UUID uuid = UuidUtils.stringToUuid(queryUuid);
-		
 		
 		Date startDate = null;
 		Date endDate = null;
@@ -172,7 +176,10 @@ public class QueryApi extends HttpServlet{
 				return Response.status(Status.NOT_FOUND).build();
 			}
 			query = query.clone(query.getOwner());
-
+			if (query.getConservationArea().getIsCcaa()){
+				//we use the ccaafilter; otherwise we ignore it
+				query.setConservationAreaFilter(parseCaFilter(cafilter, s));
+			}
 			
 			//check for permission to this query for this user.
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid)){
@@ -223,7 +230,7 @@ public class QueryApi extends HttpServlet{
 					((AbstractQueryEngine)engine).cleanUp(s);
 				}
 			}
-			//TODO: if file not found then fail; do not attemp to write output
+			//TODO: if file not found then fail; do not attempt to write output
 			StreamingOutput stream = new StreamingOutput() {
 			      @Override
 			      public void write(OutputStream output) throws IOException {
@@ -253,6 +260,28 @@ public class QueryApi extends HttpServlet{
 		
 	}
 	
+	private String parseCaFilter(String caFilter, Session session){
+		String bits[] = caFilter.split(ConservationAreaFilter.CA_SPLITTER);
+		StringBuilder validCas = new StringBuilder();
+		
+		for (String cafilter : bits){
+			try{
+				UUID cauuid = UuidUtils.stringToUuid(cafilter);
+				ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, cauuid);
+				if (ca != null && !ca.getIsCcaa()){
+					validCas.append(",");
+					validCas.append(ca.getUuid().toString());
+				}
+			}catch (Exception ex){
+				//cannot parse UUID for any reason
+			}
+		}
+		if (validCas.length() == 0){
+			throw new SmartConnectException(Status.BAD_REQUEST, "Invalid conservation area filter.  At least one valid conservation area uuid must be provided.");
+		}
+		validCas.deleteCharAt(0);
+		return validCas.toString();
+	}
 	
 	/*
 	 * returns all Queries the user is able to view 

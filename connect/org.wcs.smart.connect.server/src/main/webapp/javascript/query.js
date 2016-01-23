@@ -4,7 +4,10 @@ var queries;
 var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
 
+var definedDates = ["Last 30 Days", "Last 60 Days", "Month to Date", "Last Month", "Year to Date", "Last Year", "All Dates", "Custom..."];
+var definedDateKeys = ["last30days", "last60days", "monthtodate", "lastmonth", "yeartodate", "lastyear", "alldates", "custom"];
 
+var startDatePicker, endDatePicker;
 /* configure events on html elements */
 window.onload = function(){
 	document.getElementById('textsearch').value = search;
@@ -23,23 +26,90 @@ window.onload = function(){
 	
 	//setup date picker for alert filters
 
-	var picker = new Pikaday({
+	startDatePicker = new Pikaday({
 		field: document.getElementById('startdate'),
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
         yearRange: [2000,2050]
 	});
 
-	var picker2 = new Pikaday({
+	endDatePicker = new Pikaday({
 		field: document.getElementById('enddate'),
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
         yearRange: [2000,2050]
 	});
 
-
+	//populate predefined dates
+	var selectdiv = document.getElementById("defineddates");
+	selectdiv.onchange = updateDates;
+	for (var i = 0; i < definedDates.length; i ++){
+		var object = document.createElement("option");
+		object.value = definedDateKeys[i];
+		object.innerHTML = definedDates[i];
+		selectdiv.appendChild(object);
+		if (definedDateKeys[i] == "alldates"){
+			selectdiv.selectedIndex = i;
+			updateDates();
+		}
+	}
+	
 }
 
+function updateDates(){
+	var dd = document.getElementById("defineddates");
+	var datekey = dd.options[dd.selectedIndex].value;
+	
+	var startdate = document.getElementById("startdate");
+	var enddate = document.getElementById("enddate");
+
+		if (datekey== "last30days"){
+			var startYear = new Date();
+			startYear.setDate(startYear.getDate() - 30);
+			endDatePicker.setDate(new Date(), false);
+			startDatePicker.setDate(startYear, false);
+		}else if (datekey== "last60days"){
+			var startYear = new Date();
+			startYear.setDate(startYear.getDate() - 60);
+			endDatePicker.setDate(new Date(), false);
+			startDatePicker.setDate(startYear, false);
+		}else if (datekey== "monthtodate"){
+			var today = new Date();
+			var startYear = new Date(today.getFullYear(), today.getMonth(), 1,0,0,0);
+			endDatePicker.setDate(today, false);
+			startDatePicker.setDate(startYear, false);
+		}else if (datekey== "lastmonth"){
+			var startYear = new Date();
+			startYear.setMonth(startYear.getMonth() - 1);
+			startYear.setDate(1);
+			
+			var endYear = new Date();
+			endYear.setMonth(endYear.getMonth());
+			endYear.setDate(0);
+			
+			endDatePicker.setDate(endYear, false);
+			startDatePicker.setDate(startYear, false);
+			
+		}else if (datekey== "yeartodate"){
+			var today = new Date();
+			var startYear = new Date(today.getFullYear(), 0, 1,0,0,0);
+			endDatePicker.setDate(today, false);
+			startDatePicker.setDate(startYear, false);
+		}else if (datekey== "lastyear"){
+			var today = new Date();
+			var startYear = new Date(today.getFullYear() - 1, 0, 1,0,0,0);
+			var endYear = new Date(today.getFullYear() - 1, 11, 31, 23,59,59);
+			endDatePicker.setDate(endYear, false);
+			startDatePicker.setDate(startYear, false);
+			
+		}else if (datekey== "alldates"){
+			startdate.value = "";
+			enddate.value = "";
+		}else if (datekey== "custom"){
+			
+		}
+
+}
 function getQueryList(){
 	//clear current table
 	var objects = document.querySelectorAll("div.queryrow");
@@ -115,7 +185,7 @@ function createQueryTable(){
 	 		
 	 		row.dataset.queryuuid = queries[i].uuid;
 	 		row.dataset.queryname = queries[i].name;
-	 		
+	 		row.dataset.isccaa = queries[i].isCcaa;
 	 		
 	 		var runicon = document.createElement("a");
 	 		runicon.className="run-icon";
@@ -133,8 +203,8 @@ function createQueryTable(){
  	
  	if(queries.length == 0 || drawnRowCount == 0){ //no results or they were all filtered out
  		var row = document.createElement("div");
- 		row.style.backgroundColor = "#F00";
- 		row.className = "queryrow";
+ 		row.style.display = "default";
+ 		row.className = "queryrow errorsection";
  	    row.innerHTML = i18n("query.noqueriesfound");
  		parent.appendChild(row);
  	}
@@ -143,12 +213,19 @@ function createQueryTable(){
 function showQueryOptions(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-queryuuid');
 	var name = this.parentElement.parentElement.getAttribute('data-queryname');
+	var isccaa = this.parentElement.parentElement.getAttribute('data-isccaa');
+	
 	document.querySelector("#dialogerror").style.display = "none";
-	displayDialog('queryOptionsDialog', 'querytable');
 	
 	document.getElementById("runqueryform").uuid.value = uuid;
 	document.getElementById("runqueryform").name.value = name;
+	if (isccaa === "true"){
+		document.getElementById("cafilter").style.display="block";
+	}else{
+		document.getElementById("cafilter").style.display="none";
+	}
 	
+	displayDialog('queryOptionsDialog', 'querytable');
 }
 
 function isFoundInRow(row){
@@ -245,14 +322,30 @@ function populateCaList(){
 		return;
 	}
 	var parent = document.getElementById('caselect')
+	var filterparent = document.getElementById("cafilteroptions");
+	
 	var cas = JSON.parse(this.responseText);
 	for (var i = 0; i < cas.length; i ++){
 		var opt = document.createElement('option');
 		var label = cas[i].label;
-		value = label.substring(label.indexOf("[")+1, label.indexOf("]"));
+		value = cas[i].uuid;
 	    opt.value = value;
 	    opt.innerHTML = label;
 	    parent.appendChild(opt);
+	    
+	    if (cas[i].status.toUpperCase() == "DATA"){
+	    	var lbl = document.createElement("label");
+	    	var span = document.createElement("span");
+	    	var chk = document.createElement("input");
+	    	chk.type = "checkbox";
+	    	chk.value=cas[i].uuid
+	    	chk.name="ccaafilter";
+	    	lbl.appendChild(chk);
+	    	lbl.style.display="block";
+	    	span.innerHTML=cas[i].label;
+	    	lbl.appendChild(span);
+	    	filterparent.appendChild(lbl);
+	    }
 	}			
 }
 

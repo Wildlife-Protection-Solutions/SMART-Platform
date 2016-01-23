@@ -404,8 +404,8 @@ function createAlertTable(){
 	 	var alerts = geojson.features;
 	 	if(typeof alerts === "undefined" || alerts.length == 0){
 		 	var newRow = parent.insertRow(-1);
-	 		newRow.style.backgroundColor = "#F00";
-	 		newRow.className = "alertrow";
+	 		newRow.style.display = "table-row";
+	 		newRow.className = "alertrow errorsection";
 	 	    var oCell = newRow.insertCell(0);
 	 	    oCell.colSpan = 10;
 	 	    oCell.innerHTML = i18n("alert.noalertsfound");

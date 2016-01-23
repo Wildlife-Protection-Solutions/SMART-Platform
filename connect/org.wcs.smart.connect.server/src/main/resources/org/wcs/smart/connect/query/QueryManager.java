@@ -188,10 +188,14 @@ public enum QueryManager {
 		for (Class<? extends Query> q : queryClasses){
 			List<Query> queries = session.createCriteria(q).list();
 			for (Query qq : queries){
-				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName(), q.getSimpleName(), qq.getConservationArea().getId(), qq.getId(), qq.getIsShared(), qq.getConservationArea().getUuid());
+				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName(), q.getSimpleName(), 
+						qq.getConservationArea().getId(), qq.getId(), qq.getIsShared(), 
+						qq.getConservationArea().getUuid(),
+						qq.getConservationArea().getIsCcaa());
 				if(qq.getIsShared() || includeMyQueries){
 					proxies.add(proxy);
 				}
+				
 			}
 		}
 		Collections.sort(proxies, new Comparator<QueryProxy>() {
