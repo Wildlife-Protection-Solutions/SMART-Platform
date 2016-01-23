@@ -21,14 +21,16 @@
  */
 package org.wcs.smart.cybertracker.properties;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,7 +39,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
@@ -54,6 +60,9 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	private ConfigurableModelEditDialog dialog;
 	
 	private ComboViewer cbProfile;
+	private CyberTrackerPropertiesComposite ctPropCmp;
+	private ConfigurableModelCtPropertiesProfile cmProfile;
+	private List<CyberTrackerPropertiesProfile> profileList;
 
 	@Override
 	public void setDialog(ConfigurableModelEditDialog dialog) {
@@ -62,11 +71,13 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	
 	@Override
 	public String getTabName() {
-		return "CyberTracker";
+		return Messages.ConfigurableModelEditorCyberTrackerTab_TabName;
 	}
 
 	@Override
 	public Composite createTabContent(Composite parent) {
+		cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(dialog.getSession(), dialog.getModel());
+
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout mainLayout = new GridLayout(1, false);
 		mainLayout.marginBottom=0;
@@ -83,15 +94,16 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		controlCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lblProfile = new Label(controlCmp, SWT.NONE);
-		lblProfile.setText("Properties profile:");
-		lblProfile.setToolTipText("Properties profile that will be used when this Configurable model is exported to CyberTracker.");
+		lblProfile.setText(Messages.ConfigurableModelEditorCyberTrackerTab_Profile);
+		lblProfile.setToolTipText(Messages.ConfigurableModelEditorCyberTrackerTab_Profile_Tooltip);
 
 		cbProfile = new ComboViewer(controlCmp, SWT.READ_ONLY);
-		cbProfile.getControl().setToolTipText("Properties profile that will be used when this Configurable model is exported to CyberTracker.");
+		cbProfile.getControl().setToolTipText(Messages.ConfigurableModelEditorCyberTrackerTab_Profile_Tooltip);
 		cbProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cbProfile.setContentProvider(ArrayContentProvider.getInstance());
-		cbProfile.setLabelProvider(new CyberTrackerProfileLabelProvider());
- 		cbProfile.setInput(getAvailableProfiles());
+		cbProfile.setLabelProvider(new CtProfileLabelProvider());
+ 		cbProfile.setInput(getProfilesList());
+ 		cbProfile.setSelection(new StructuredSelection(cmProfile.getProfile()));
 		cbProfile.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -104,7 +116,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		buttonsCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnManage = new Button(buttonsCmp, SWT.PUSH);
-		btnManage.setText("Manage profiles...");
+		btnManage.setText(Messages.ConfigurableModelEditorCyberTrackerTab_Button_ManageProfiles);
 		btnManage.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -113,7 +125,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		});
 		
 		Button btnEdit = new Button(buttonsCmp, SWT.PUSH);
-		btnEdit.setText("Edit profile");
+		btnEdit.setText(Messages.ConfigurableModelEditorCyberTrackerTab_Button_EditProfile);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -121,51 +133,69 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 			}
 		});
 		
-		CyberTrackerPropertiesComposite ctPropCmp = new CyberTrackerPropertiesComposite(main);
+		ctPropCmp = new CyberTrackerPropertiesComposite(main);
 		ctPropCmp.setReadOnly(true);
-		ctPropCmp.populateValuesFromObj(new CyberTrackerPropertiesProfile()); //TODO: need real data
 		ctPropCmp.addPropsChangeListener(new IPropsChangeListener(){
 			@Override
 			public void changesMade() {
 				//we should appear here only in case of error in implementation for read-only mode!
-				SmartPlugIn.displayLog("Changes to profile are not allowed here. Edit the profile to make changes.", null);
+				SmartPlugIn.displayLog("Changes to profile are not allowed here. Edit the profile to make changes.", null); //$NON-NLS-1$
 			}
 		});
+		ctPropCmp.populateValuesFromObj(cmProfile.getProfile());
 		
 		return main;
 	}
 
-	private List<String> getAvailableProfiles() {
-		// TODO: need real data
-		return Arrays.asList("Profile 1", "Profile 2", "Profile 3");
+	private List<CyberTrackerPropertiesProfile> getProfilesList() {
+		if (profileList != null) {
+			for (CyberTrackerPropertiesProfile p : profileList) {
+				dialog.getSession().evict(p); //we need fresh objects, not cached ones
+			}
+		}
+		profileList = CyberTrackerHibernateManager.getPropertiesProfiles(dialog.getSession());
+		Collections.sort(profileList, new CtProfileDefaultNameComparator());
+		return profileList;
+	}
+
+	private void reloadData() {
+		cbProfile.setInput(getProfilesList());
+		cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(dialog.getSession(), dialog.getModel());
+ 		cbProfile.setSelection(new StructuredSelection(cmProfile.getProfile())); //this will trigger profileChanged() call
+	}
+	
+	protected CyberTrackerPropertiesProfile getSelectedProfile() {
+		IStructuredSelection selection = (IStructuredSelection) cbProfile.getSelection();
+		return (!selection.isEmpty() && selection.getFirstElement() instanceof CyberTrackerPropertiesProfile) ?
+				(CyberTrackerPropertiesProfile) selection.getFirstElement() : null;
 	}
 
 	protected void profileChanged() {
-		// TODO Auto-generated method stub
-		
+		CyberTrackerPropertiesProfile p = getSelectedProfile();
+		if (p != null) {
+			cmProfile.setProfile(p);
+			ctPropCmp.populateValuesFromObj(p);
+		}
+		dialog.notifyChangesMade();
 	}
 
 	protected void manageProfiles() {
-		// TODO Auto-generated method stub
-		
+		Dialog d = new ManageProfilesDialog(dialog.getShell());
+		d.open();
+		reloadData();
 	}
 
 	protected void editProfile() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	private class CyberTrackerProfileLabelProvider extends LabelProvider {
-		@Override
-		public String getText(Object element) {
-			//TODO: display profile names
-//			if (element instanceof Integer) {
-//				String name = id2Name.get((Integer) element);
-//				if (name != null)
-//					return name;
-//			}
-			return super.getText(element);
+		CyberTrackerPropertiesProfile p = getSelectedProfile();
+		if (p != null) {
+			Dialog d = new CyberTrackerPropertiesDialog(dialog.getShell(), p);
+			d.open();
+			reloadData();
 		}
 	}
 
+	@Override
+	public void performSave(Session s) {
+		s.saveOrUpdate(cmProfile);
+	}
 }

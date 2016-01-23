@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -54,6 +55,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	private static final int DIALOG_HEIGHT = 725;
 
 	private ConfigurableModel model;
+	
+	private List<IConfigurableModelEditorTabContent> tabs;
 	
 	public ConfigurableModelEditDialog(ConfigurableModel model) {
 		super(Display.getDefault().getActiveShell(), Messages.ConfigurableModelEditDialog_Title);
@@ -81,16 +84,16 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		
 		setChangesMade(model.getUuid() == null);
 		
-		List<IConfigurableModelEditorTabContent> extraTabs = getExtraTabs();
+		tabs = getExtraTabs();
 		
 		ConfigurableModelEditorDefaultTab defaultTab = new ConfigurableModelEditorDefaultTab(this);
-		if (!extraTabs.isEmpty()) {
+		if (!tabs.isEmpty()) {
 			//we have some extra tabs and need to create tab panel
 			final TabFolder tabFolder = new TabFolder (main, SWT.BORDER);
 			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			extraTabs.add(0, defaultTab);
-			for (IConfigurableModelEditorTabContent tabContent : extraTabs) {
+			tabs.add(0, defaultTab);
+			for (IConfigurableModelEditorTabContent tabContent : tabs) {
 				TabItem tabItem = new TabItem (tabFolder, SWT.NONE);
 				tabItem.setText(tabContent.getTabName());
 
@@ -153,17 +156,22 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	
 	@Override
 	protected boolean performSave() {
-
+		Session s = getSession();
 		try{
 			//commit transaction
-			session.saveOrUpdate(model);
-			session.getTransaction().commit();
+			s.saveOrUpdate(model);
+			s.flush();
+			for (IConfigurableModelEditorTabContent tab : tabs) {
+				tab.performSave(s);
+				s.flush();
+			}
+			s.getTransaction().commit();
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.ConfigurableModelEditDialog_SaveError  + ex.getMessage(), ex);
 		}
 		
 		//start a new transaction
-		session.getTransaction().begin();
+		s.getTransaction().begin();
 		setChangesMade(false);
 		return true;
 	}

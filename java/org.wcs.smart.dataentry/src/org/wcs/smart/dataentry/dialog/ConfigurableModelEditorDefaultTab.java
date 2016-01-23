@@ -312,4 +312,9 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		}
 	}
 
+	@Override
+	public void performSave(Session s) {
+		//nothing; configurable model will be saved by dialog
+	}
+
 }
