@@ -168,6 +168,9 @@
          <require
                id="org.wcs.smart.conservationAreaCloner">
          </require>
+         <require
+               id="org.wcs.smart.dataentry.cmTemplateCloner">
+         </require>
       </templateCloner>
    </extension>
    <extension
