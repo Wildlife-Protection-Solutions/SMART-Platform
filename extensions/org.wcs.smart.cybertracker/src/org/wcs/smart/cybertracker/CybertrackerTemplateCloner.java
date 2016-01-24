@@ -29,9 +29,11 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 /**
  * Clones the cybertracker properties when creating
  * a new conservation area from a template.
@@ -59,6 +61,7 @@ public class CybertrackerTemplateCloner implements
 			clone.setDefault(p.isDefault());
 			engine.getSession().save(clone);
 			engine.getSession().flush();
+			engine.addConservationItemMapping(p, clone);
 			
 			for (CyberTrackerPropertiesProfileOption templateOption : p.getOptions().values()) {
 				CyberTrackerPropertiesProfileOption newOption = new CyberTrackerPropertiesProfileOption();
@@ -71,6 +74,8 @@ public class CybertrackerTemplateCloner implements
 				engine.getSession().save(newOption);
 				engine.getSession().flush();
 			}
+			
+			cloneCmProfileMappings(engine, p, clone);
 			
 			monitor.worked(1);
 		}
@@ -93,4 +98,16 @@ public class CybertrackerTemplateCloner implements
 		monitor.done();
 	}
 	
+	private void cloneCmProfileMappings(ConservationAreaClonerEngine engine, CyberTrackerPropertiesProfile sourceProfile, CyberTrackerPropertiesProfile clonedProfile) throws Exception {
+		@SuppressWarnings("unchecked")
+		List<ConfigurableModelCtPropertiesProfile> toClone = engine.getSession().createCriteria(ConfigurableModelCtPropertiesProfile.class).add(Restrictions.eq("profile", sourceProfile)).list(); //$NON-NLS-1$
+		for (ConfigurableModelCtPropertiesProfile cmctp : toClone) {
+			ConfigurableModelCtPropertiesProfile clone = new ConfigurableModelCtPropertiesProfile();
+			clone.setModel((ConfigurableModel)engine.getNewConservationItem(cmctp.getModel()));
+			clone.setProfile(clonedProfile);
+			engine.getSession().saveOrUpdate(clone);
+		}
+		engine.getSession().flush();
+	}
+
 }
