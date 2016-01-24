@@ -29,7 +29,6 @@ import org.apache.commons.io.FileUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
