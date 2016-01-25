@@ -66,7 +66,10 @@ public class Messages extends NLS {
 	public static String CyberTrackerConfExporter_SaveWithoutGps;
 	public static String CyberTrackerConfExporter_SingleGps;
 	public static String CyberTrackerConfExporter_SingleGpsMessage;
+	public static String CyberTrackerConfExporter_WarnDialog_CtProfileMissing;
+	public static String CyberTrackerConfExporter_WarnDialog_Title;
 	public static String CyberTrackerExportDialog_AllFiles;
+	public static String CyberTrackerExportDialog_AssociatedProfile_Postfix;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;
 	public static String CyberTrackerExportDialog_ConfirmCreateDir_Message;
@@ -93,6 +96,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_Language;
 	public static String CyberTrackerExportDialog_LaunchInCyberTracker;
 	public static String CyberTrackerExportDialog_Message;
+	public static String CyberTrackerExportDialog_Profile;
+	public static String CyberTrackerExportDialog_Profile_Tooltip;
 	public static String CyberTrackerExportDialog_Task_Copy;
 	public static String CyberTrackerExportDialog_Task_Upload;
 	public static String CyberTrackerExportDialog_Title;

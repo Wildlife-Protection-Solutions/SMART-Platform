@@ -38,14 +38,17 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
 import org.wcs.smart.cybertracker.export.IConfigurableModelProvider;
+import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Dialog for exporting Survey Designs to CyberTracker application.
@@ -84,20 +87,38 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 		((GridData)designsViewer.getControl().getLayoutData()).widthHint = 100;
 		designsViewer.setContentProvider(ArrayContentProvider.getInstance());
 		designsViewer.setLabelProvider(new SurveyDesignLabelProvider());
-		designsViewer.setInput(getDesignsList().toArray());
+		designsViewer.setInput(getDesignsList());
 		designsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				selectedDesign = ((IStructuredSelection)designsViewer.getSelection()).getFirstElement();
+				updateAssociatedProfile(getAssciatedProfile(selectedDesign));
 				updateExportButtonState();
 			}
 		});
 	}
 	
+	private CyberTrackerPropertiesProfile getAssciatedProfile(Object src) {
+		Session s = getSession();
+		try {
+			if (src instanceof SurveyDesignEditorInput) {
+				SurveyDesignEditorInput input = (SurveyDesignEditorInput) src;
+				SurveyDesign sd = SurveyHibernateManager.getInstance().getSurveyDesign(input.getSurveyDesignKey(), s);
+				if (sd.getConfigurableModel() != null) {
+					ConfigurableModelCtPropertiesProfile cmctp = CyberTrackerHibernateManager.getAssociatedCmProfile(s, sd.getConfigurableModel());
+					return cmctp.getProfile();
+				}
+			}
+			return CyberTrackerHibernateManager.getDefaultProfile(s);
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(Messages.SurveyCTExportDialog_AssociatedProfileLoad_Error, ex);
+			return null;
+		}
+	}
+
 	private List<SurveyDesignEditorInput> getDesignsList() {
 		List<SurveyDesignEditorInput> modelList = new ArrayList<>();
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
+		Session s = getSession();
 		try {
 			modelList.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null));
 			Collections.sort(modelList, new Comparator<SurveyDesignEditorInput>() {
@@ -108,9 +129,6 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.SurveyCTExportDialog_LoadSurveyDesigns_Error, ex);
-		} finally {
-			s.getTransaction().rollback();
-			s.close();
 		}
 		return modelList;
 	}

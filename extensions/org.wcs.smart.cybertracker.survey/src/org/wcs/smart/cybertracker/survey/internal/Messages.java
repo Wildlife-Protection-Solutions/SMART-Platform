@@ -39,6 +39,7 @@ public class Messages extends NLS {
 	public static String MissionSelectorDialog_Title;
 	public static String SurveyConfigurableModelProvider_Task_FetchConfigurableModel;
 	public static String SurveyCTDataBuilder_Error_DefaultValue;
+	public static String SurveyCTExportDialog_AssociatedProfileLoad_Error;
 	public static String SurveyCTExportDialog_LoadSurveyDesigns_Error;
 	public static String SurveyCTExportDialog_SurveyDesign;
 	public static String SurveyCTImportEditorContent_AboartErrorMessage;

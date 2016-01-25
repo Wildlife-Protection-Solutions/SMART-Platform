@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,6 +42,10 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -58,11 +64,17 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
+import org.wcs.smart.cybertracker.properties.CtProfileDefaultNameComparator;
+import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.cybertracker.util.WinRegistry;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
@@ -94,9 +106,17 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 	private File selectedFile;
 
     private LanguageViewer languageViewer;
+    private ComboViewer profileViewer;
+    private CyberTrackerPropertiesProfile associatedProfile;
+    private Session session;
 	
 	public CyberTrackerExportDialog(Shell parentShell) {
 		super(parentShell);
+		session = HibernateManager.openSession();
+	}
+	
+	protected Session getSession() {
+		return session;
 	}
 	
 	/**
@@ -151,6 +171,26 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 		languageLabel.setText(Messages.CyberTrackerExportDialog_Language);
 		languageViewer = new LanguageViewer(modelSelector, SWT.DROP_DOWN | SWT.READ_ONLY, SmartDB.getCurrentConservationArea());
 		languageViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lblProfile = new Label(modelSelector, SWT.NONE);
+		lblProfile.setText(Messages.CyberTrackerExportDialog_Profile);
+		lblProfile.setToolTipText(Messages.CyberTrackerExportDialog_Profile_Tooltip);
+
+		profileViewer = new ComboViewer(modelSelector, SWT.READ_ONLY);
+		profileViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		profileViewer.getControl().setToolTipText(Messages.CyberTrackerExportDialog_Profile_Tooltip);
+		profileViewer.setContentProvider(ArrayContentProvider.getInstance());
+		profileViewer.setLabelProvider(new CtProfileLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				String txt = super.getText(element);
+				if (associatedProfile != null && associatedProfile.equals(element)) {
+					txt += Messages.CyberTrackerExportDialog_AssociatedProfile_Postfix;
+				}
+				return txt;
+			}
+		});
+		profileViewer.setInput(getProfilesList());
 		
 		Label lblOp = new Label(modelSelector, SWT.NONE);
 		lblOp.setText(Messages.CyberTrackerExportDialog_ExportOptionsLabel);
@@ -258,9 +298,15 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 		updateExportButtonState();
 	}
 
+	protected void updateAssociatedProfile(CyberTrackerPropertiesProfile associatedProfile) {
+		this.associatedProfile = associatedProfile;
+		profileViewer.setSelection(new StructuredSelection(associatedProfile));
+		profileViewer.refresh(true);
+	}
+	
 	protected void updateExportButtonState() {
 		boolean enabled = false;
-		if (isValidExportSource()) {
+		if (isValidExportSource() && getSelectedProfile() != null) {
 			enabled = btnToDevice.getSelection() || (btnToFile.getSelection() && txtFile.getText() != null && !txtFile.getText().isEmpty());
 		}
 		if (getButton(IDialogConstants.OK_ID) != null) {
@@ -298,6 +344,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 			handleExport(btnToDevice.getSelection());
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}
+		session.close();
 		close();
 	}
 
@@ -329,6 +376,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 		final boolean launch = !toDevice && btnLaunchCT.getSelection();
 		final CyberTrackerConfExporter exporter = getExporter();
 		exporter.setCurrentLanguage(languageViewer.getCurrentSelection());
+		exporter.setCtPropertiesProfile(getSelectedProfile());
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -468,6 +516,19 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 		return "true".equals(name); //$NON-NLS-1$
 	}
 
+	protected CyberTrackerPropertiesProfile getSelectedProfile() {
+		IStructuredSelection selection = (IStructuredSelection) profileViewer.getSelection();
+		return (!selection.isEmpty() && selection.getFirstElement() instanceof CyberTrackerPropertiesProfile) ?
+				(CyberTrackerPropertiesProfile) selection.getFirstElement() : null;
+	}
+
+	private List<CyberTrackerPropertiesProfile> getProfilesList() {
+		Session s = getSession();
+		final List<CyberTrackerPropertiesProfile> profileList = CyberTrackerHibernateManager.getPropertiesProfiles(s);
+		Collections.sort(profileList, new CtProfileDefaultNameComparator());
+		return profileList;
+	}
+	
 	private class LaunchCTJob extends Job {
 
 		private File file;
