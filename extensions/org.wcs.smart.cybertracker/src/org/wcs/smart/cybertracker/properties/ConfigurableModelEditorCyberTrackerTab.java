@@ -169,9 +169,17 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	}
 
 	private void reloadData() {
-		cbProfile.setInput(getProfilesList());
-		cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(dialog.getSession(), dialog.getModel());
- 		cbProfile.setSelection(new StructuredSelection(cmProfile.getProfile())); //this will trigger profileChanged() call
+		CyberTrackerPropertiesProfile prevSelection = getSelectedProfile();
+		List<CyberTrackerPropertiesProfile> list = getProfilesList();
+		cbProfile.setInput(list);
+		//try to restore previous selection, otherwise select associated profile
+		if (list.contains(prevSelection)) {
+	 		cbProfile.setSelection(new StructuredSelection(prevSelection)); //this will trigger profileChanged() call
+		} else {
+			dialog.getSession().evict(cmProfile); //required as cmProfile contains reference to removed profile and is still attached to session
+			cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(dialog.getSession(), dialog.getModel());
+	 		cbProfile.setSelection(new StructuredSelection(cmProfile.getProfile())); //this will trigger profileChanged() call
+		}
 	}
 	
 	protected CyberTrackerPropertiesProfile getSelectedProfile() {
