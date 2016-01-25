@@ -12,6 +12,7 @@ public class Messages extends NLS {
 	public static String AbstractSmartImporter_Observer_NotFound;
 	public static String AddCyberTrackerJob_InstallCtJobName;
 	public static String AddCyberTrackerJob_Progress1;
+	public static String ConfigurableModelEditorCyberTrackerTab_Button_CreateProfile;
 	public static String ConfigurableModelEditorCyberTrackerTab_Button_EditProfile;
 	public static String ConfigurableModelEditorCyberTrackerTab_Button_ManageProfiles;
 	public static String ConfigurableModelEditorCyberTrackerTab_Profile;

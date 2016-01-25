@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -112,7 +113,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		});
 
 		Composite buttonsCmp = new Composite(main, SWT.NONE);
-		buttonsCmp.setLayout(new GridLayout(2, false));
+		buttonsCmp.setLayout(new GridLayout(3, false));
 		buttonsCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnManage = new Button(buttonsCmp, SWT.PUSH);
@@ -124,6 +125,15 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 			}
 		});
 		
+		Button btnCreate = new Button(buttonsCmp, SWT.PUSH);
+		btnCreate.setText(Messages.ConfigurableModelEditorCyberTrackerTab_Button_CreateProfile);
+		btnCreate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				createProfile();
+			}
+		});
+
 		Button btnEdit = new Button(buttonsCmp, SWT.PUSH);
 		btnEdit.setText(Messages.ConfigurableModelEditorCyberTrackerTab_Button_EditProfile);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -183,6 +193,29 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		Dialog d = new ManageProfilesDialog(dialog.getShell());
 		d.open();
 		reloadData();
+	}
+
+	protected void createProfile() {
+		CreateNewProfileOpDialog opDialog = new CreateNewProfileOpDialog(dialog.getShell(), profileList);
+		if (opDialog.open() == Window.OK) {
+			CyberTrackerPropertiesProfile initProfile  = null;
+		
+			try{
+				initProfile = opDialog.getProfile();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(Messages.ManageProfilesDialog_CreateProfile_Erorr + ex.getLocalizedMessage(), ex);
+				return;
+			}
+			if (initProfile == null){
+				//cancelled or invalid model
+				return;
+			}
+			Dialog d = new CyberTrackerPropertiesDialog(dialog.getShell(), initProfile);
+			d.open();
+			
+			//refresh list
+			reloadData();
+		}
 	}
 
 	protected void editProfile() {
