@@ -165,7 +165,7 @@ public class CyberTrackerHibernateManager {
 		return cm2ctp;
 	}
 	
-	private static CyberTrackerPropertiesProfile getDefaultProfile(Session session) {
+	public static CyberTrackerPropertiesProfile getDefaultProfile(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		Criteria query = session.createCriteria(CyberTrackerPropertiesProfile.class)
 				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$

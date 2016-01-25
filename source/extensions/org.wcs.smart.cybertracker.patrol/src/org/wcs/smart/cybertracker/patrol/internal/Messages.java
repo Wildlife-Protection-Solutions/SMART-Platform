@@ -66,6 +66,7 @@ public class Messages extends NLS {
 	public static String EmployeeSelectorDialog_LeaderType;
 	public static String EmployeeSelectorDialog_PilotType;
 	public static String PatrolCTDataBuilder_Error_DefaultValue;
+	public static String PatrolCTExportDialog_AssociatedProfileLoad_Error;
 	public static String PatrolCTExportDialog_ConfigurableModel;
 	public static String PatrolCTExportDialog_LoadConfModels_Error;
 	public static String PatrolCTExportDialog_Task_FetchConfigurableModel;

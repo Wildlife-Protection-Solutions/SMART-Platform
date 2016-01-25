@@ -38,10 +38,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
 import org.wcs.smart.cybertracker.export.IConfigurableModelProvider;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
+import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
@@ -116,24 +119,37 @@ public class PatrolCTExportDialog extends CyberTrackerExportDialog {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				selectedModel = ((IStructuredSelection)modelViewer.getSelection()).getFirstElement();
+				updateAssociatedProfile(getAssciatedProfile(selectedModel));
 				updateExportButtonState();
 			}
 		});
+	}
+
+	private CyberTrackerPropertiesProfile getAssciatedProfile(Object src) {
+		Session s = getSession();
+		try {
+			if (src instanceof ConfigurableModel) {
+				ConfigurableModel cm = (ConfigurableModel) src;
+				ConfigurableModelCtPropertiesProfile cmctp = CyberTrackerHibernateManager.getAssociatedCmProfile(s, cm);
+				return cmctp.getProfile();
+			} else {
+				return CyberTrackerHibernateManager.getDefaultProfile(s);
+			}
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog(Messages.PatrolCTExportDialog_AssociatedProfileLoad_Error, ex);
+			return null;
+		}
 	}
 	
 	private List<?> getModelsList() {
 		List<Object> modelList = new ArrayList<Object>();
 		DataModel dataModel = null;
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
+		Session s = getSession();
 		try {
 			modelList.addAll(DataentryHibernateManager.getConfigurableModels(s));
 			dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.PatrolCTExportDialog_LoadConfModels_Error, ex);
-		} finally {
-			s.getTransaction().rollback();
-			s.close();
 		}
 		
 		if (dataModel != null) {

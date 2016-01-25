@@ -40,6 +40,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -108,9 +110,14 @@ public class CyberTrackerConfExporter {
 	private ConfigurableModel configurableModel;
 	
 	private Language currentLanguage;
+	private CyberTrackerPropertiesProfile ctProperties;
 	
 	public void setCurrentLanguage(Language currentLanguage) {
 		this.currentLanguage = currentLanguage;
+	}
+	
+	public void setCtPropertiesProfile(CyberTrackerPropertiesProfile ctProfile) {
+		this.ctProperties = ctProfile;
 	}
 
 	public File export(File destFolder, IConfigurableModelProvider cmProvider, IProgressMonitor monitor) throws Exception {
@@ -173,7 +180,18 @@ public class CyberTrackerConfExporter {
 
 	private File performExport(File file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
-		CyberTrackerPropertiesProfile ctProperties = CyberTrackerHibernateManager.getAssociatedCmProfile(session, configurableModel).getProfile();
+		if (ctProperties != null) {
+			ctProperties = (CyberTrackerPropertiesProfile) session.merge(ctProperties);
+		} else {
+			//we should not be here unless setter for ctProperties was not called
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.CyberTrackerConfExporter_WarnDialog_Title, Messages.CyberTrackerConfExporter_WarnDialog_CtProfileMissing);
+				}
+			});
+			ctProperties = CyberTrackerHibernateManager.getAssociatedCmProfile(session, configurableModel).getProfile();
+		}
 		screensFactory = new ScreensObjectFactory(ctProperties);
 		ctUtil = new CyberTrackerUtil(screensFactory, currentLanguage);
 		monitor.worked(10);
