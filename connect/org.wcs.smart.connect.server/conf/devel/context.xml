@@ -16,7 +16,7 @@
 		<Realm className="org.apache.catalina.realm.DataSourceRealm"
 			dataSourceName="jdbc/smart"
           	userTable="connect.users" userNameCol="username" 
-          	userCredCol="password" userRoleTable="connect.user_roles" roleNameCol="role"
+          	userCredCol="password" userRoleTable="connect.user_roles" roleNameCol="role_id"
           	localDataSource="true">
 			<CredentialHandler className="org.wcs.smart.connect.apache.BcryptCredentialHandler"/>
 		</Realm>

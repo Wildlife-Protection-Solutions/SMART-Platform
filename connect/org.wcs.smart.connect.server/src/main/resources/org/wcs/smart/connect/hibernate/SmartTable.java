@@ -48,7 +48,10 @@ import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -172,6 +175,9 @@ public enum SmartTable {
 	CONNECTUSER(ConnectUser.class, ".server.conservationArea"),
 	CONSERVATIONAREA(ConservationArea.class,".uuid"),
 	CYBERTRACKERPROPERTIESOPTION(CyberTrackerPropertiesOption.class, null),
+	CYBERTRACKERPROPERTIESPROFILE(CyberTrackerPropertiesProfile.class, null),
+	CYBERTRACKERPROPERTIESPROFILEOPTION(CyberTrackerPropertiesProfileOption.class, ".profile.conservationArea"),
+	CMPTPROPPROFILE(ConfigurableModelCtPropertiesProfile.class, ".id.model.conservationArea"),
 	DMOBJECT(DmObject.class,null),
 	ENTITY(Entity.class,".entityType.conservationArea"),
 	ENTITYATTRIBUTE(EntityAttribute.class,".entityType.conservationArea"),

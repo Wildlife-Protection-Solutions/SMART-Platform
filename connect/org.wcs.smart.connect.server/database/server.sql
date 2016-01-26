@@ -340,7 +340,7 @@ COMMENT ON COLUMN connect.user_actions.resource IS 'Unique identifier to the res
 COMMENT ON COLUMN connect.user_actions.uuid IS 'A unqiue identifier for hibernate.';
 COMMENT ON TABLE connect.user_roles IS 'A list of webserver roles supported by each user.';
 COMMENT ON COLUMN connect.user_roles.username IS 'The unique username.';
-COMMENT ON COLUMN connect.user_roles.role IS 'The webserver role.';
+COMMENT ON COLUMN connect.user_roles.role_id IS 'The webserver role.';
 
 CREATE TABLE connect.change_log(
 	uuid UUID,
