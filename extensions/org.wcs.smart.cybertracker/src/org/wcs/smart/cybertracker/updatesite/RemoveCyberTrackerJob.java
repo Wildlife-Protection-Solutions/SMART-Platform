@@ -34,6 +34,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -50,11 +51,26 @@ public class RemoveCyberTrackerJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		String[] tables = new String[] {
+			"CM_CT_PROPERTIES_PROFILE",  //$NON-NLS-1$
+			"CT_PROPERTIES_OPTION",  //$NON-NLS-1$
+			"CT_PROPERTIES_PROFILE_OPTION",  //$NON-NLS-1$
+			"CT_PROPERTIES_PROFILE" }; //$NON-NLS-1$
+		
 		final Session session = HibernateManager.openSession();
 		final List<ConservationArea> caList = HibernateManager.getConservationAreas(session);
 		session.beginTransaction();
 		try {
-			session.createSQLQuery("DROP TABLE smart.ct_properties_option").executeUpdate(); //$NON-NLS-1$
+			//delete labels
+			if (DerbyHibernateExtensions.tableExists(session, "CT_PROPERTIES_PROFILE")){ //$NON-NLS-1$
+				session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.CT_PROPERTIES_PROFILE)").executeUpdate(); //$NON-NLS-1$
+			}
+			//delete tables
+			for (String table : tables){
+				if (DerbyHibernateExtensions.tableExists(session, table)){
+					session.createSQLQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+				}
+			}		
 			//clean filestore
 			for (ConservationArea ca : caList) {
 				FileUtils.deleteDirectory(PdaUtil.getDowloadFolder(ca));
