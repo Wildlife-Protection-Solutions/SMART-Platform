@@ -138,7 +138,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".model.conservationArea"
+            ca_property=".id.model.conservationArea"
             class="org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile"
             supportsCcaa="false">
       </class>
