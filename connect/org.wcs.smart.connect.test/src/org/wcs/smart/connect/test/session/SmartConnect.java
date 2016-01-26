@@ -20,7 +20,8 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 public class SmartConnect {
 
-	public static final String BASE_URL = "https://localhost:8443/server/";
+	public static final String HOST_NAME = "192.168.50.131";
+	public static final String BASE_URL = "https://" + HOST_NAME + ":8443/server/";
 	public static final String USER_API_URL = SmartConnect.BASE_URL + "api/connectuser";
 	public static final String ALERT_API_URL = SmartConnect.BASE_URL + "api/connectalert";
 	public static final String LAYER_API_URL = SmartConnect.BASE_URL + "api/maplayer";
@@ -57,10 +58,11 @@ public class SmartConnect {
                 	 
         	        public boolean verify(String hostname,
         	                javax.net.ssl.SSLSession sslSession) {
-        	            if (hostname.equals("localhost")) {
-        	                return true;
-        	            }
-        	            return false;
+        	        	return true;
+//        	            if (hostname.equals(HOST_NAME)) {
+//        	                return true;
+//        	            }
+//        	            return false;
         	        }
         	    });
         CloseableHttpClient httpClient = HttpClients.custom()

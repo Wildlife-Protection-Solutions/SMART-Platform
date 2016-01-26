@@ -34,7 +34,7 @@
   <div id="message" class="msgsection"></div>
 </div>
 
-<div> 
+<div class="top-spacer"> 
 <!-- Search Parameters -->
 	<label><fmt:message key="query.search" /></label>
 	<input type=text name="textsearch" id="textsearch" maxlength=30 oninput="searchChanged()"/>
@@ -101,25 +101,22 @@
      		</fieldset>
      		
      		<fieldset>
-     		<legend><fmt:message key="query.format" /></legend>
-     		<select id="queryformat" name="format" style="width:100%">
+	     		<legend><fmt:message key="query.format" /></legend>
+	     		<select id="queryformat" name="format" style="width:100%">
      		 		<option value="csv"><fmt:message key="query.csv" /></option>
      			</select>
      		</fieldset>
      		
      		<fieldset id="cafilter">
-     		<legend>Conservation Area Filters</legend>
-     		<div id="cafilteroptions">
-     		</div>
+	     		<legend>Conservation Area Filters</legend>
+	     		<div id="cafilteroptions"></div>
      		</fieldset>
-     		
-     		
-     			<input id="runQueryButton" class="button top-spacer" type="button" value="  Run Query  "/>
-   				<input id="cancel" class="button" type="button" value="Cancel" />
-   			<p class="small"><a href="javascript:getUrlOnly()"><fmt:message key="query.geturl" /></a></p>
+     		<div style="text-align: right">
+	     		<input id="runQueryButton" class="button top-spacer" type="button" value="  Run Query  "/>
+	   			<input id="cancel" class="button" type="button" value="Cancel" />
    			</div>
+   			<p class="small"><a href="javascript:getUrlOnly()"><fmt:message key="query.geturl" /></a></p>
     	</form>
   </div>
-
 </body>
 </html>

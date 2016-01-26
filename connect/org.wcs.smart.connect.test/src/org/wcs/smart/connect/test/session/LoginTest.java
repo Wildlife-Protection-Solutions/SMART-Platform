@@ -100,7 +100,7 @@ public class LoginTest {
 		HttpGet get = new HttpGet(builder.build());
 		BasicCookieStore cookieStore = new BasicCookieStore();
 	    BasicClientCookie cookie = new BasicClientCookie("JSESSIONID", jsessionid);
-	    cookie.setDomain("localhost");
+	    cookie.setDomain(SmartConnect.HOST_NAME);
 	    cookie.setPath("/server/");
 	    cookie.setSecure(true);
 	    cookieStore.addCookie(cookie);

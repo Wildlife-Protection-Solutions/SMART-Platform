@@ -175,6 +175,9 @@ public class QueryApi extends HttpServlet{
 				//query not found
 				return Response.status(Status.NOT_FOUND).build();
 			}
+			if (!QueryManager.INSTANCE.supportsDateField(query.getTypeKey(), df.getDateFieldOption())){
+				return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format("The date filter field {0} is not supported for the query type {1}", query.getTypeKey(), df.getDateFieldOption().getGuiName(request.getLocale())));
+			}
 			query = query.clone(query.getOwner());
 			if (query.getConservationArea().getIsCcaa()){
 				//we use the ccaafilter; otherwise we ignore it
@@ -261,6 +264,7 @@ public class QueryApi extends HttpServlet{
 	}
 	
 	private String parseCaFilter(String caFilter, Session session){
+		if (caFilter == null) throw new SmartConnectException(Status.BAD_REQUEST, "Invalid conservation area filter.  At least one valid conservation area uuid must be provided."); 
 		String bits[] = caFilter.split(ConservationAreaFilter.CA_SPLITTER);
 		StringBuilder validCas = new StringBuilder();
 		

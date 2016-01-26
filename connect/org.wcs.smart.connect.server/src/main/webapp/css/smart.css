@@ -410,6 +410,18 @@ div.scrollable {
 	border-radius: 3px;
 }
 
+#runqueryform p {
+	padding-top: 4px;
+	margin: 0px;
+}
+#runqueryform fieldset{
+	border: 1px solid #CCCCCC;
+	border-radius: 3px; 
+}
+#runqueryform legend{
+	font-weight:bold;
+}
+
 /* SMART Tabs */
 
 .tabheader{

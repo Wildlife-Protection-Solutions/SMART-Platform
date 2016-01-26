@@ -203,9 +203,9 @@ function createQueryTable(){
  	
  	if(queries.length == 0 || drawnRowCount == 0){ //no results or they were all filtered out
  		var row = document.createElement("div");
- 		row.style.display = "default";
  		row.className = "queryrow errorsection";
  	    row.innerHTML = i18n("query.noqueriesfound");
+ 	    row.style.display = "block";
  		parent.appendChild(row);
  	}
 }
@@ -225,7 +225,11 @@ function showQueryOptions(){
 		document.getElementById("cafilter").style.display="none";
 	}
 	
-	displayDialog('queryOptionsDialog', 'querytable');
+	var poselement = document.querySelector("#querytable");
+	var pos = getPosition(poselement);
+	
+	displayDialogLocation('queryOptionsDialog', pos.x, window.pageYOffset + 20);
+
 }
 
 function isFoundInRow(row){
@@ -293,6 +297,20 @@ function generateUrl(){
 	
 		url = url + "&end_date=" + endDateString; 
 	}
+	
+	if (document.getElementById('cafilter').style.display.toUpperCase() != "NONE"){
+		var elements = document.getElementsByName('ccaafilter');
+		var cafilter = "";
+		for (var i = 0; i < elements.length; i ++){
+			if (elements[i].checked){
+				cafilter = cafilter + "," + elements[i].value;
+			}
+		}
+		if (cafilter.length > 0){
+			url = url + "&cafilter=" + cafilter.substring(1);
+		}
+	}
+
 	return resolve(url);
 }
 

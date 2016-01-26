@@ -26,7 +26,7 @@ import java.util.Locale;
 import org.wcs.smart.intelligence.query.IIntelligenceQueryLabelProvider;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
-import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
+import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 
 /**
  * Implementation of query label provider.
@@ -56,7 +56,7 @@ public class IntelligenceQueryLabelProvider implements
 		if (item == IntelligenceFilterOption.DESCRIPTION) return "Description";
 		if (item == IntelligenceFilterOption.INFORMANTID) return "Informant ID";
 		
-		if (item instanceof RecievedDateFilter) return "Received Date";
+		if (item instanceof ReceivedDateFilter) return "Received Date";
 		return null;
 	}
 }

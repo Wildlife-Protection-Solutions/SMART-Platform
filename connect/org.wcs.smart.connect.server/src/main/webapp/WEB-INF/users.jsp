@@ -37,11 +37,13 @@
 				<div class="table-cell smart-table-cell">User</div>
 				<div class="table-cell smart-table-cell">Email</div>
 				<div class="table-cell smart-table-cell"></div>
+				<div class="table-cell smart-table-cell"></div>
 			</div>
 			<c:forEach var="user" items="${users}" varStatus="count">
 			<div data-username ="${user.getUsername()}" class="smartuser userrow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
 				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
+				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="edit user" class="edituser update-icon"></a></div>
 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="delete user" class="deleteuser delete-icon"></a></div>
 			</div>
 			</c:forEach>  

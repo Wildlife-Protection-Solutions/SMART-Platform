@@ -27,6 +27,12 @@ window.onload = function(){
 		elements[i].onclick=deleteUser;
 	}
 	
+	//edit user
+	elements = document.querySelectorAll(".edituser");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].onclick=editUser;
+	}
+	
 	//new user dialog
 	document.querySelector("#btnNewUser").onclick=clearAndShowNewUserDialog;
 	document.querySelector("#cancelnewuser").onclick = function(){closeDialog('newUserDialog');};
@@ -450,18 +456,26 @@ function createUserTable(){
  	var users = JSON.parse(this.responseText);
  	for (var i = 0; i < users.length; i ++){
  		var row = tableCreateRow(parent, 
- 				[users[i].username, users[i].email, null], 
+ 				[users[i].username, users[i].email, null, null], 
  				"userrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.username = users[i].username;
  		row.onclick = showUserInfo;
  	
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="update-icon";
+ 		deleteicon.title="edit user";
+ 		deleteicon.dataset.username = users[i].username;
+ 		deleteicon.onclick = editUser;
+ 		deleteicon.href="";
+ 		row.childNodes[2].appendChild(deleteicon);
+ 		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
  		deleteicon.title="delete user";
  		deleteicon.dataset.username = users[i].username;
  		deleteicon.onclick = deleteUser;
  		deleteicon.href="";
- 		row.childNodes[2].appendChild(deleteicon);
+ 		row.childNodes[3].appendChild(deleteicon);
  	}
 }
 
@@ -535,6 +549,15 @@ function clearAndShowNewRoleDialog(){
 		
  	displayDialog('newRoleDialog', 'main');
 }
+
+/* delete user */
+function editUser(){
+	var username = this.dataset.username;
+	var ok = window.confirm("confirm edit");
+	if (!ok) return false;
+	return false;
+}
+
 
 /* delete user */
 function deleteUser(){

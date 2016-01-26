@@ -1,16 +1,28 @@
-
-function displayDialog(divId, posId){
+/*
+ * Displays the dialog represented by divId at
+ * the x, y position
+ */
+function displayDialogLocation(divId, x, y){
 	var dialog = document.querySelector("#" + divId);
 	dialog.style.display = "table";
 	dialog.style.position = "absolute";
-	var poselement = document.querySelector("#" + posId);
-	var pos = getPosition(poselement);
-	dialog.style.top = pos.y + "px";
-	dialog.style.left = pos.x + "px";
+	
+	dialog.style.top = y + "px";
+	dialog.style.left = x + "px";
 	
 	var overlaydiv = document.createElement('div');
 	overlaydiv.setAttribute("class", "overlay-widget");
 	document.body.appendChild(overlaydiv);
+}
+
+/*
+ * Displays the dialog represented by divId as a position
+ * relative to the element represented by posId
+ */
+function displayDialog(divId, posId){
+	var poselement = document.querySelector("#" + posId);
+	var pos = getPosition(poselement);
+	displayDialogLocation(divId, pos.x, pos.y);
 }
 
 function closeDialog(divId){

@@ -67,7 +67,7 @@ import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
-import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
+import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
@@ -80,6 +80,7 @@ import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -155,7 +156,7 @@ public enum QueryManager {
 		PatrolEndDateField.INSTANCE, 
 		PatrolStartDateField.INSTANCE, 
 		WaypointDateField.INSTANCE, 
-		RecievedDateFilter.INSTANCE
+		ReceivedDateFilter.INSTANCE
 	};
 	
 	/**
@@ -289,5 +290,74 @@ public enum QueryManager {
 			delete.setParameter("ca", caUuid);
 			delete.executeUpdate();
 		}
+	}
+	
+	/**
+	 * Determines if a given query type can support a given date field.
+	 * 
+	 * @param queryTypeKey
+	 * @param field
+	 * @return
+	 */
+	public boolean supportsDateField(String queryTypeKey, IDateFieldFilter field){
+		
+		if (stringIn(queryTypeKey, PatrolGriddedQuery.KEY, PatrolObservationQuery.KEY, PatrolSummaryQuery.KEY, PatrolWaypointQuery.KEY)){
+			return stringIn(field.getKey(),
+					WaypointDateField.INSTANCE.getKey(),
+					PatrolStartDateField.INSTANCE.getKey(),
+					PatrolEndDateField.INSTANCE.getKey());
+		}
+		if (stringIn(queryTypeKey, PatrolQuery.KEY)){
+			return stringIn(field.getKey(),
+					PatrolStartDateField.INSTANCE.getKey(),
+					PatrolEndDateField.INSTANCE.getKey());
+		}
+		
+		if (stringIn(queryTypeKey, SurveyGriddedQuery.KEY, SurveyObservationQuery.KEY,
+				SurveySummaryQuery.KEY, SurveyWaypointQuery.KEY)){
+			return stringIn(field.getKey(),
+					WaypointDateField.INSTANCE.getKey(),
+					MissionStartDateField.INSTANCE.getKey(),
+					MissionEndDateField.INSTANCE.getKey());		
+		}
+		if (stringIn(queryTypeKey, MissionQuery.KEY)){
+			return stringIn(field.getKey(),
+					MissionStartDateField.INSTANCE.getKey(),
+					MissionEndDateField.INSTANCE.getKey());		
+		}
+		if (stringIn(queryTypeKey, MissionTrackQuery.KEY)){
+			return stringIn(field.getKey(),
+					MissionTrackDateField.INSTANCE.getKey(),
+					MissionStartDateField.INSTANCE.getKey(),
+					MissionEndDateField.INSTANCE.getKey());		
+		}
+		
+		if (stringIn(queryTypeKey, ObservationGriddedQuery.KEY, ObsObservationQuery.KEY, ObservationSummaryQuery.KEY, 
+				ObservationWaypointQuery.KEY)){
+			return stringIn(field.getKey(),
+					WaypointDateField.INSTANCE.getKey());
+		}
+		
+		if (stringIn(queryTypeKey, EntityGriddedQuery.KEY, EntityObservationQuery.KEY, EntitySummaryQuery.KEY, 
+				EntityWaypointQuery.KEY)){
+			return stringIn(field.getKey(),
+					WaypointDateField.INSTANCE.getKey());
+		}
+		
+		if (stringIn(queryTypeKey, IntelligenceRecordQuery.KEY, IntelligenceSummaryQuery.KEY)){
+			return stringIn(field.getKey(),
+					ReceivedDateFilter.INSTANCE.getKey());
+		}
+		
+		return false;
+	}
+	
+	private boolean stringIn(String key, String... in1){
+		for (String item : in1){
+			if (item.equalsIgnoreCase(key)){
+				return true;
+			}
+		}
+		return false;
 	}
 }
