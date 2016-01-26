@@ -241,6 +241,12 @@ public abstract class AbstractSmartImporter {
 			}
 			attrList.add(aList);
 		}
+		if (attrList.isEmpty() && defaultValue != null) { //note that attrList.isEmpty() only if attributes.keySet().isEmpty() 
+			//case with no visible attributes, but default values (see ticket #1610)
+			List<A> aList = new ArrayList<A>(1);
+			aList.add(defaultValue);
+			attrList.add(aList);
+		}
 		return new ObservationSplitResult(categories, attrList, observer);
 	}
 	
