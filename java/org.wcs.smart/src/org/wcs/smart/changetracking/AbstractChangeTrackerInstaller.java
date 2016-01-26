@@ -22,6 +22,7 @@
 package org.wcs.smart.changetracking;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -34,8 +35,11 @@ public abstract class AbstractChangeTrackerInstaller implements IChangeTrackerIn
 
 	@Override
 	public boolean installChangeTracking(Session session) throws Exception {
-		if (!canInstall(getPluginId(), getLastestVersion(), session)) return false;
-		
+		if (!canInstall(getPluginId(), getLastestVersion(), session)){
+			SmartPlugIn.log("Cannot install change tracking for plugin: " + getPluginId() + ".  Plugin not up to date.", null);
+			return false;
+		}
+		SmartPlugIn.log("Adding triggers for : " + getPluginId() + ".", null);
 		for (String[] trigger : getCurrentTriggers()){
 			DerbyTriggerManager.INSTANCE.createTriggerIfNotExists(trigger[0], trigger[1], session);
 		}

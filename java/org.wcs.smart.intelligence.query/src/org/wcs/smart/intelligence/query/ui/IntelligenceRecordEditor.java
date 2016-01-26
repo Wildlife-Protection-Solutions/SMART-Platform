@@ -27,7 +27,7 @@ import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
 import org.wcs.smart.intelligence.query.map.udig.QueryService;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
-import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
+import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
@@ -60,7 +60,7 @@ public class IntelligenceRecordEditor extends QueryResultsEditor {
 
 	@Override
 	protected IDateFieldFilter[] getDateFilterOptions() {
-		return new IDateFieldFilter[]{RecievedDateFilter.INSTANCE};
+		return new IDateFieldFilter[]{ReceivedDateFilter.INSTANCE};
 	}
 
 	@Override

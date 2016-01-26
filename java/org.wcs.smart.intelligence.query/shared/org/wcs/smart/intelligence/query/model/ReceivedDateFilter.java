@@ -33,11 +33,11 @@ import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
  * @author Emily
  *
  */
-public class RecievedDateFilter implements IDateFieldFilter {
+public class ReceivedDateFilter implements IDateFieldFilter {
 
-	public static RecievedDateFilter INSTANCE = new RecievedDateFilter();
+	public static ReceivedDateFilter INSTANCE = new ReceivedDateFilter();
 	
-	private RecievedDateFilter(){}
+	private ReceivedDateFilter(){}
 	
 	@Override
 	public String getGuiName(Locale l) {

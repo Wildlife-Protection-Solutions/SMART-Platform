@@ -28,7 +28,7 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.query.IIntelligenceQueryLabelProvider;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
-import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
+import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 /**
@@ -60,7 +60,7 @@ public class IntelligenceQueryLabelProvider implements
 		if (item == IntelligenceFilterOption.DESCRIPTION) return Messages.IntelligenceFilterOption_DescriptionOption;
 		if (item == IntelligenceFilterOption.INFORMANTID) return Messages.IntelligenceFilterOption_InformationIdOption;
 		
-		if (item instanceof RecievedDateFilter) return Messages.RecievedDateFilter_ReceivedDateFilterName;
+		if (item instanceof ReceivedDateFilter) return Messages.RecievedDateFilter_ReceivedDateFilterName;
 		return null;
 	}
 

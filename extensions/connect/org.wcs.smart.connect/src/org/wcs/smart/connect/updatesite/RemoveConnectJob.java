@@ -47,8 +47,8 @@ public class RemoveConnectJob extends Job {
 		"CONNECT_ACCOUNT", //$NON-NLS-1$
 		"CONNECT_STATUS", //$NON-NLS-1$
 		"CONNECT_SYNC_HISTORY", //$NON-NLS-1$
-		"CONNECT_SERVER", //$NON-NLS-1$
 		"CONNECT_SERVER_OPTION", //$NON-NLS-1$
+		"CONNECT_SERVER", //$NON-NLS-1$
 		"CONNECT_CHANGE_LOG", //$NON-NLS-1$
 	};
 	

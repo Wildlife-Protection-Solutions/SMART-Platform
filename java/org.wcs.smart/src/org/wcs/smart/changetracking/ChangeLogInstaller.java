@@ -130,6 +130,7 @@ public enum ChangeLogInstaller {
 		if (!enabled) return;
 		SmartPlugIn.log("Installing ALL change logging. ", null); //$NON-NLS-1$
 		for (ChangeTrackerWrapper tracker : getTrackers(null)){
+			SmartPlugIn.log("Installing change logging: " + tracker.pluginId, null);
 			tracker.installer.installChangeTracking(session);
 		}
 	}
