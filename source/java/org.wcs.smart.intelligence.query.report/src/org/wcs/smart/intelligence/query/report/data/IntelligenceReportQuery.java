@@ -38,7 +38,7 @@ import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
-import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
+import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -89,7 +89,7 @@ public class IntelligenceReportQuery implements ISmartQuery {
 		CustomDateFilter cd = new CustomDateFilter();
 		cd.setDates(startDate, endDate);
 		DateFilter dateFilter = new DateFilter(
-				RecievedDateFilter.INSTANCE,cd);
+				ReceivedDateFilter.INSTANCE,cd);
 
 		smartQuery.getQuery().setDateFilter(dateFilter);
 		
