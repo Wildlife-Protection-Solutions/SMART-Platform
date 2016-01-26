@@ -68,5 +68,6 @@ labels_en= {
 "query.refreshingqueries": "Refreshing Queries Table...",
 "query.runquery":"Run Query",
 "query.noqueriesfound":"No queries found. Try a different search or contact your adminsitrator to give you permissions to queries you are looking for.",
+"users.errorupdatinguser" : " Error updating user information.",
 "":""
 }

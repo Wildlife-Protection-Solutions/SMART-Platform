@@ -30,8 +30,12 @@ window.onload = function(){
 	//edit user
 	elements = document.querySelectorAll(".edituser");
 	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=editUser;
+		elements[i].onclick=showEditUserDialog;
 	}
+	
+	//update user dialog
+	document.querySelector("#canceledituser").onclick = function(){closeDialog('editUserDialog');};
+	document.querySelector("#edituserform").onsubmit = editUser;
 	
 	//new user dialog
 	document.querySelector("#btnNewUser").onclick=clearAndShowNewUserDialog;
@@ -465,7 +469,8 @@ function createUserTable(){
  		deleteicon.className="update-icon";
  		deleteicon.title="edit user";
  		deleteicon.dataset.username = users[i].username;
- 		deleteicon.onclick = editUser;
+ 		deleteicon.dataset.email = users[i].email;
+ 		deleteicon.onclick = showEditUserDialog;
  		deleteicon.href="";
  		row.childNodes[2].appendChild(deleteicon);
  		
@@ -534,7 +539,7 @@ function clearAndShowNewUserDialog(){
  	document.querySelector("input[name=password2]").value = "";
  	document.querySelector("input[name=username]").value = "";
  	document.querySelector("input[name=email]").value = "";
- 	document.querySelector("#dialogerror").style.display = "none";
+ 	document.querySelector("#newUserDialog > #dialogerror").style.display = "none";
  	displayDialog('newUserDialog', 'main');
 }
 
@@ -550,14 +555,50 @@ function clearAndShowNewRoleDialog(){
  	displayDialog('newRoleDialog', 'main');
 }
 
-/* delete user */
-function editUser(){
+/* show edit user dialog user */
+function showEditUserDialog(){
 	var username = this.dataset.username;
-	var ok = window.confirm("confirm edit");
-	if (!ok) return false;
+	
+	document.querySelector("input[name=edit_username_orig]").value = this.dataset.username
+ 	document.querySelector("input[name=edit_username]").value = this.dataset.username;
+ 	document.querySelector("input[name=edit_email]").value = this.dataset.email;
+ 	document.querySelector("#editUserDialog > #dialogerror").style.display = "none";
+ 	
+ 	displayDialog('editUserDialog', 'main');
+	
+ 	return false;
+}
+/* edit user */
+function editUser(){
+	var username = document.querySelector("input[name=edit_username]").value;
+	var email = document.querySelector("input[name=edit_email]").value;
+	var usernameorig = document.querySelector("input[name=edit_username_orig]").value;
+	
+	var jsonData = {
+			"username" : username,
+			"email" : email,
+		};
+	
+	hideInfo();
+
+	closeDialog('editUserDialog');
+	var oReq = new XMLHttpRequest();
+	oReq.onload = userEdited;
+	oReq.smartuser=usernameorig;
+	oReq.open("PUT", USER_URL + encodeURIComponent(usernameorig), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
 	return false;
 }
 
+function userEdited(){
+	if (this.status == 200) {
+		displayInfo(this.smartuser + " updated");
+	} else {
+		displayError(parseError(i18n("users.errorupdatinguser") + this.smartuser, this.responseText));
+	}
+	refreshUsers();
+}
 
 /* delete user */
 function deleteUser(){
@@ -910,7 +951,6 @@ function createNewUser() {
 
 	//make ajax call
 	hideInfo();
-	document.querySelector("#message").style.display = "none";
 
 	closeDialog('newUserDialog');
 	var oReq = new XMLHttpRequest();

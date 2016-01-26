@@ -43,7 +43,7 @@
 			<div data-username ="${user.getUsername()}" class="smartuser userrow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
 				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
-				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="edit user" class="edituser update-icon"></a></div>
+				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" data-email="${user.getEmail()}" title="edit user" class="edituser update-icon"></a></div>
 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="delete user" class="deleteuser delete-icon"></a></div>
 			</div>
 			</c:forEach>  
@@ -112,7 +112,22 @@
 </div>
 <%@include file="footer.jsp" %>
 
-
+<div id="editUserDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Update Smart User</div>
+  <div id="dialogerror" class="errorsection"></div>
+  <div id="msg"></div>
+  <form id="edituserform" >
+  	<input type="hidden" name="edit_username_orig"  />
+    <label class="block top-spacer">Username:</label>
+    <input type="text" name="edit_username" class="formtext block" />
+    <label class="block top-spacer">Email:</label>
+    <input type="text" name="edit_email" class="formtext block" />
+    <div class="block top-spacer" style="text-align:right">
+     <input class="button" type="submit" value="Update User" />
+     <input class="button" type="button" id="canceledituser" value="Cancel" />
+    </div>
+  </form>
+  </div>
 <div id="newUserDialog" style="display: none;" class="dialog">
   <div class="dialog-title">Create New Smart User</div>
   <div id="dialogerror" class="errorsection"></div>

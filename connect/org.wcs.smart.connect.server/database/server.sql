@@ -288,19 +288,10 @@ INSERT INTO connect.roles (role_id, rolename, is_system) values ('smart', 'SYSTE
 CREATE OR REPLACE FUNCTION manage_user_roles() RETURNS TRIGGER AS $$
     BEGIN
         --
-        -- Create a row in emp_audit to reflect the operation performed on emp,
-        -- make use of the special variable TG_OP to work out the operation.
+        -- should only be called on insert; adds necessary smart role
+        -- for web access
         --
-        IF (TG_OP = 'DELETE') THEN
-        	DELETE FROM connect.user_roles WHERE username = OLD.username;
-        	RETURN OLD;
-        ELSIF (TG_OP = 'UPDATE') THEN
-         	IF (OLD.username != NEW.username) THEN
-        		DELETE FROM connect.user_roles WHERE username = OLD.username;
-        		INSERT INTO connect.user_roles (username, role_id) values (NEW.username, 'smart');
-        	END IF;
-            RETURN NEW;
-        ELSIF (TG_OP = 'INSERT') THEN
+        IF (TG_OP = 'INSERT') THEN
             INSERT INTO connect.user_roles (username, role_id) VALUES (NEW.username, 'smart');
             RETURN NEW;
         END IF;
@@ -308,8 +299,10 @@ CREATE OR REPLACE FUNCTION manage_user_roles() RETURNS TRIGGER AS $$
     END;
 $$ LANGUAGE plpgsql;
 
+
+--AFTER INSERT OR UPDATE OR DELETE ON connect.users
 CREATE TRIGGER web_roles_mgr
-AFTER INSERT OR UPDATE OR DELETE ON connect.users
+AFTER INSERT ON connect.users
     FOR EACH ROW EXECUTE PROCEDURE manage_user_roles();
 
 
