@@ -11,7 +11,18 @@
             factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
             validationQuery="SELECT 1"
             testOnBorrow="true"/>
-           
+         
+  <Resource name="mail/Session" 
+		auth="Container" 
+		type="javax.mail.Session"
+		mail.transport.protocol="smtps"
+		mail.smtp.ssl.enable="true"
+		mail.smtp.auth="true"
+		mail.smtp.from="noreply@smartconnect.com"
+		mail.smtp.host="smtp.googlemail.com"
+		mail.smtp.user="******"
+		password="******"/>
+		  
 	<Realm className="org.apache.catalina.realm.LockOutRealm">
 		<Realm className="org.apache.catalina.realm.DataSourceRealm"
 			dataSourceName="jdbc/smart"
