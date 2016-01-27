@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS connect.work_item;
 DROP TABLE IF EXISTS connect.map_layers;
 
 DROP TABLE IF EXISTS connect.change_log;
+DROP TABLE IF EXISTS connect.data_queue;
 
 /* Create Tables */
 CREATE TABLE connect.work_item
@@ -42,7 +43,7 @@ ALTER TABLE connect.work_item ADD CONSTRAINT status_chk
 CHECK (status IN ('UPLOADING', 'PROCESSING', 'COMPLETE', 'ERROR'));
 
 ALTER TABLE connect.work_item ADD CONSTRAINT type_chk 
-CHECK (type IN ('UP_CA', 'UP_SYNC', 'DOWN_CA', 'DOWN_SYNC'));
+CHECK (type IN ('UP_CA', 'UP_SYNC', 'DOWN_CA', 'DOWN_SYNC', 'UP_DATAQUEUE'));
 
 	
 CREATE TABLE connect.ca_plugin_version
@@ -385,3 +386,27 @@ ALTER TABLE connect.change_log_history ADD CONSTRAINT connect_changelog_history_
 COMMENT ON TABLE connect.change_log_history IS 'Tracks history infor about the change log table, in particular the last removed records for each conservation area';
 COMMENT ON COLUMN connect.change_log_history.ca_uuid IS 'The conservation area unique identifier.';
 COMMENT ON COLUMN connect.change_log_history.last_delete_revision IS 'The last deleted revision number.';
+
+-- DATA PROCESSING QUEUE TABLES
+CREATE TABLE connect.data_queue(
+	uuid UUID,
+	type VARCHAR(32) NOT NULL,
+	ca_uuid UUID NOT NULL,
+	filename VARCHAR,
+	uploaded_date timestamp not null,
+	uploaded_by varchar not null,
+	file varchar,
+	status varchar(32) NOT NULL,
+	status_message varchar,
+	work_item_uuid UUID,
+	PRIMARY KEY (uuid)
+);
+ALTER TABLE connect.data_queue ADD CONSTRAINT 
+data_queue_ca_uuid_fk foreign key (ca_uuid) 
+REFERENCES connect.ca_info(ca_uuid) ON UPDATE restrict ON DELETE cascade;
+
+ALTER TABLE connect.data_queue ADD CONSTRAINT status_chk 
+CHECK (status IN ('UPLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'ERROR'));
+
+ALTER TABLE connect.data_queue ADD CONSTRAINT type_chk 
+CHECK (type IN ('PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML'));

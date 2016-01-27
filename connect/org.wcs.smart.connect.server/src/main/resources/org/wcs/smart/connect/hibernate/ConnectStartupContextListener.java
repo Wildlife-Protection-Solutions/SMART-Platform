@@ -39,6 +39,7 @@ import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
+import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
@@ -111,6 +112,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(SmartRole.class);
 		config.addAnnotatedClass(SmartRoleAction.class);
 		config.addAnnotatedClass(SmartUserRole.class);
+		config.addAnnotatedClass(ServerDataQueueItem.class);
 
 		for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
 			config.addAnnotatedClass(c);

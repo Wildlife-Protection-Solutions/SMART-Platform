@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.dataqueue.DataQueueProcessor;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.uploader.ca.LoadCaProcessor;
@@ -45,6 +46,7 @@ public enum ItemProcessManager {
 	static{
 		processors.add(new LoadCaProcessor());
 		processors.add(new SyncUploadCaProcessor());
+		processors.add(new DataQueueProcessor());
 	};
 	
 	

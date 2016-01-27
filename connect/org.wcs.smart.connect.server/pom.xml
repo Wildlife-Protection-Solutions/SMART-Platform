@@ -272,6 +272,11 @@
 		</dependency>	
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.connect.dataqueue</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>	
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.cybertracker</artifactId>
     			<version>${smart.version}</version>
 		</dependency>	

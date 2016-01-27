@@ -24,6 +24,8 @@ package org.wcs.smart.connect.security;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wcs.smart.connect.dataqueue.DataQueueAction;
+
 /**
  * Manages the various SMART Connect actions.
  * 
@@ -41,6 +43,7 @@ public enum ActionManager {
 		actions.add(new CaAction());
 		actions.add(new AlertAction());
 		actions.add(new QueryAction());
+		actions.add(new DataQueueAction());
 	}
 	
 	public ISmartConnectAction findAction(String key){
