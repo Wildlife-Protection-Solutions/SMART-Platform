@@ -470,7 +470,9 @@ public class MapSettings {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		currentMap.getRenderManager().refresh(null);
+		if (currentMap.getRenderManager() != null){
+			currentMap.getRenderManager().refresh(null);
+		}
 	}
 
 	/**
