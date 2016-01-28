@@ -36,6 +36,7 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
@@ -111,6 +112,8 @@ public class LoadDefaultLayersJob extends Job{
     			if (mapDef != null){
     				MapSettings settings = MapSettings.getInstance(mapDef);
     				settings.applyTo((Map) map);
+    				
+    				map.sendCommandASync(new ZoomExtentCommand());
     			}else{
 					@SuppressWarnings("unchecked")
 					List<IGeoResource> layers = (List<IGeoResource>) ss.resources(null);
