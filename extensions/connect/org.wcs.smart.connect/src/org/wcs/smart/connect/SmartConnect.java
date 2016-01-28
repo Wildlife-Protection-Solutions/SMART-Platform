@@ -179,6 +179,15 @@ public class SmartConnect {
 		this.password = password;
 	}
 	
+	/**
+	 * Creates and returns the resteasy client
+	 * @return
+	 */
+	public ResteasyClient getClient(){
+		createClient();
+		return client;
+	}
+	
 	private void createClient(){
 		if (client != null) return;
 		// load the keystore that includes self-signed cert as a "trusted" entry
