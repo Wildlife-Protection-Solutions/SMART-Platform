@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.connect.menu">
+         <command
+               commandId="org.wcs.smart.connect.dataqueue.process"
+               label="Process Data Queue"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.connect.dataqueue.process"
+            name="Process Data Queue">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.connect.dataqueue.ui.ProcessDataQueueHandler$ProcessDataQueueHandlerWrapper"
+            commandId="org.wcs.smart.connect.dataqueue.process">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.connect.dataqueue.ui.DataQueueView$DataQueueViewWrapper"
+            id="org.wcs.smart.connect.dataqueue.queueview"
+            name="Data Processing Queue"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

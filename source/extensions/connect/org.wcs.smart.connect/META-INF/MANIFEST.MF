@@ -11,7 +11,14 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.p2;bundle-version="3.2.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: org.wcs.smart.connect.model,
+Export-Package: javax.ws.rs,
+ javax.ws.rs.core,
+ org.jboss.resteasy.client,
+ org.jboss.resteasy.client.core,
+ org.jboss.resteasy.client.jaxrs,
+ org.wcs.smart.connect,
+ org.wcs.smart.connect.model,
+ org.wcs.smart.connect.ui.server,
  org.wcs.smart.connect.util
 Bundle-ClassPath: lib/activation-1.1.jar,
  lib/commons-codec-1.6.jar,
@@ -32,3 +39,4 @@ Bundle-ClassPath: lib/activation-1.1.jar,
  lib/resteasy-jackson2-provider-3.0.9.Final.jar,
  lib/httpclient-4.2.6.jar,
  lib/httpcore-4.2.5.jar
+Eclipse-BuddyPolicy: global
