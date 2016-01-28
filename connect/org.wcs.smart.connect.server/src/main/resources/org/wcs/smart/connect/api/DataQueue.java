@@ -25,6 +25,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -34,6 +35,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -52,7 +54,7 @@ import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.util.UuidUtils;
 
-@Path(ConnectRESTApplication.PATH_SEPERATOR + ConservationAreas.PATH)
+@Path(ConnectRESTApplication.PATH_SEPERATOR + DataQueue.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
 public class DataQueue {
@@ -122,25 +124,64 @@ public class DataQueue {
 	/**
 	 * This will only return items that the user has permission to see.
 	 * 
+	 * @param caFilter a comma delimited list of ca uuids (or null for all)
+	 * @param status comma delimited list of status values to filter on or null for all
 	 * @return a list of all data queue items sorted by date added
 	 */
 	@GET
-    @Path("/items/")
-	public List<ServerDataQueueItemProxy> getItems(){
+    @Path("/items")
+	public List<DataQueueItem> getItems(@QueryParam("cafilter") String caFilter ,
+			@QueryParam("status") String status){
+		
+		List<ServerDataQueueItem.Status> statusFilter = null;
+		if (status != null){
+			statusFilter = new ArrayList<ServerDataQueueItem.Status>();
+			for (String stat: status.split(",")){
+				try{
+					statusFilter.add(ServerDataQueueItem.Status.valueOf(stat));
+				}catch (Exception ex){
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Status filter " + stat + " not supported.");
+				}
+			}
+		}
+		
 		Session s = HibernateManager.getSession(context);
-		List<ServerDataQueueItemProxy> proxyitems = new ArrayList<ServerDataQueueItemProxy>();
+		List<DataQueueItem> proxyitems = new ArrayList<DataQueueItem>();
 		try{
 			s.beginTransaction();
-			List<ConservationAreaInfo> cas = s.createCriteria(ConservationAreaInfo.class).list();
+			
+			List<ConservationAreaInfo> cas = null;
+			if (caFilter == null ){
+				cas = s.createCriteria(ConservationAreaInfo.class).list();
+			}else{
+				cas = new ArrayList<ConservationAreaInfo>();
+				for (String x : caFilter.split(",")){
+					try{
+						UUID  cauuid = parseUuid(x);
+						ConservationAreaInfo i = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, cauuid);
+						if (i != null){
+							cas.add(i);
+						}
+					}catch (Exception ex){
+						//failed to parse
+						throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid ca filter.  Could not parse uuid");
+					}
+				}
+			}
 			for (ConservationAreaInfo ca : cas){
 				try{
 					validateRead(ca.getUuid(), s);
 					
-					List<ServerDataQueueItem> items = s.createCriteria(ServerDataQueueItem.class)
-							.add(Restrictions.eq("conservationArea", ca.getUuid())).list();
+					Criteria c = s.createCriteria(ServerDataQueueItem.class)
+							.add(Restrictions.eq("conservationArea", ca.getUuid()));
+					if (statusFilter != null){
+						c.add(Restrictions.in("status", statusFilter));
+					}
+					
+					List<ServerDataQueueItem> items = c.list();
 					for (ServerDataQueueItem item : items){
 						ServerDataQueueItemProxy proxy = new ServerDataQueueItemProxy(
-								item.getUuid(), item.getFilename(), ca.getLabel(), item.getType(), item.getStatus(), item.getUploadedDate(), item.getUploadedBy());
+								item.getUuid(), item.getName(), ca.getLabel(), item.getType(), item.getStatus(), item.getUploadedDate(), item.getUploadedBy());
 						proxyitems.add(proxy);
 					}
 				}catch (SmartConnectException ex){
@@ -173,7 +214,7 @@ public class DataQueue {
 			
 			validateDelete(item.getConservationArea(), s);
 			
-			File toDelete = DataStoreManager.INSTANCE.getFile(item.getFilename());
+			File toDelete = DataStoreManager.INSTANCE.getFile(item.getName());
 			if (toDelete.exists()){
 				if (!toDelete.delete()){
 					logger.log(Level.WARNING, "Could not delete data queue file: " + toDelete.toString());
@@ -266,7 +307,7 @@ public class DataQueue {
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName("dataqueue" 
 					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip"));
 			item.setFile(up.getLocalFilename());
-			item.setFile(request.getHeader("content-disposition"));
+			item.setName(request.getHeader("content-disposition"));
 			item.setWorkItem(up.getUuid());
 			s.saveOrUpdate(item);
 			s.saveOrUpdate(up);

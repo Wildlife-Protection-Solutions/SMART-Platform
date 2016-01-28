@@ -5,41 +5,28 @@ import java.util.UUID;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 
-public class ServerDataQueueItemProxy {
+public class ServerDataQueueItemProxy extends DataQueueItem{
 
-	public UUID uuid;
-	private String name;
 	private String caName;
-	private DataQueueItem.Type type;
 	private ServerDataQueueItem.Status status;
 	
 	private Date uploadedDate;
 	private String uploadedBy;
 	
 	public ServerDataQueueItemProxy(UUID uuid, String name, String caName, DataQueueItem.Type type, ServerDataQueueItem.Status status, Date uploadDate, String uploadBy){
-		this.uuid = uuid;
-		this.name = name;
+		setUuid(uuid);
+		setName(name);
+		setType(type);
 		this.caName = caName;
-		this.type = type;
 		this.status = status;
 		this.uploadedDate = uploadDate;
 		this.uploadedBy = uploadBy;
 	}
 	
-	public UUID getUuid(){
-		return this.uuid;
-	}
-	
-	public String getName(){
-		return this.name;
-	}
-	
 	public String getCaName(){
 		return this.caName;
 	}
-	public DataQueueItem.Type getType(){
-		return this.type;
-	}
+	
 	public ServerDataQueueItem.Status getStatus(){
 		return this.status;
 	}

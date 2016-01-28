@@ -392,7 +392,7 @@ CREATE TABLE connect.data_queue(
 	uuid UUID,
 	type VARCHAR(32) NOT NULL,
 	ca_uuid UUID NOT NULL,
-	filename VARCHAR,
+	name VARCHAR,
 	uploaded_date timestamp not null,
 	uploaded_by varchar not null,
 	file varchar,
