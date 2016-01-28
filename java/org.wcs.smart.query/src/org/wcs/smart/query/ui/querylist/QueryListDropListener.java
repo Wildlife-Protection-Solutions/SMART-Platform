@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -53,7 +56,6 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @since 1.0.0
  */
 public class QueryListDropListener extends ViewerDropAdapter {
-
 	
 	/**
 	 * @param viewer
@@ -84,74 +86,82 @@ public class QueryListDropListener extends ViewerDropAdapter {
 		
 		final QueryFolder targetFolder = (QueryFolder) x;
 		
+		
+		//close any editors associated with the input
+		final List<QueryEditorInput> toUpdate = new ArrayList<QueryEditorInput>();
+		final HashMap<QueryEditorInput, String> toOpen = new HashMap<QueryEditorInput, String>();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object select = (Object) iterator.next();
 			if (select instanceof QueryEditorInput){
-				final QueryEditorInput query = (QueryEditorInput) select;
+				QueryEditorInput query = (QueryEditorInput) select;
+				
 				//want to close any editors associated with given input
 				final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(query);
 				if (editor != null){
 					if (!PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditor(editor, true)){
 						continue;
 					}
+					toOpen.put(query, editor.getSite().getId());
 				}
-				//run job to update query folder
-				Job internalUpdate = new Job("Update Query Folder"){ //$NON-NLS-1$
-
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						Session s = HibernateManager.openSession();
-						Query q = null;
-						boolean isChanged = false;
-						try{
-							s.beginTransaction();
-							q = (Query) s.load(query.getType().getHibernateClass(), query.getUuid());
-							if (!((targetFolder == null && q.getFolder() == null) ||
-									(targetFolder != null && targetFolder.equals(q.getFolder())))){
-								isChanged = true;
-								//folder was changed; update it
-								q.setIsShared(targetFolder.getEmployee() == null);
-								if (targetFolder.isRootFolder()){	
-									q.setFolder(null);
-								}else{
-									q.setFolder(targetFolder);
-								}
-							}
-							s.getTransaction().commit();
-						}catch (Exception ex){
-							if (s.getTransaction().isActive()) s.getTransaction().rollback();
-							QueryPlugIn.log(ex.getMessage(), ex);
-							return Status.OK_STATUS;
-						}finally{
-							s.close();
-						}
-						// fire changed event if folder was changed
-						if (isChanged){
-							final Query lq = q;
-							Display.getDefault().syncExec(new Runnable(){
-								@Override
-								public void run() {
-									QueryEventManager.getInstance().fireQuerySaved(lq);
-									if (editor != null){
-										//reopen the editor
-										try {
-											PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editor.getEditorInput(), editor.getSite().getId());
-										} catch (PartInitException e) {
-											QueryPlugIn.log(e.getMessage(), e);
-										}
-									}
-								}
-							});
-						}
-						return Status.OK_STATUS;
-					}
-					
-				};
-				internalUpdate.setSystem(true);
-				internalUpdate.schedule();
+				toUpdate.add(query);
 			}
 		}
 		
+		//run job to update query folder
+		Job internalUpdate = new Job("Update Query Folder"){ //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				Query q = null;
+				for (final QueryEditorInput query : toUpdate){
+					Session s = HibernateManager.openSession();
+					boolean isChanged = false;
+					try{
+						q = (Query) s.load(query.getType().getHibernateClass(), query.getUuid());
+						if (!((targetFolder == null && q.getFolder() == null) ||
+							(targetFolder != null && targetFolder.equals(q.getFolder())))){
+							//folder was changed; update it
+							s.beginTransaction();
+							q.setIsShared(targetFolder.getEmployee() == null);
+							if (targetFolder.isRootFolder()){	
+								q.setFolder(null);
+							}else{
+								q.setFolder(targetFolder);
+							}
+							
+							s.getTransaction().commit();
+							isChanged = true;
+						}
+					}catch (Exception ex){
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						QueryPlugIn.log(ex.getMessage(), ex);		
+					}finally{
+						s.close();
+					}
+					//fire and events and update the ui (outside of session)
+					if (isChanged){
+						final Query lq = q;
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								QueryEventManager.getInstance().fireQuerySaved(lq);
+								if (toOpen.containsKey(lq)){
+									try {
+										PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(query, toOpen.get(query));
+										} catch (PartInitException e) {
+										QueryPlugIn.log(e.getMessage(), e);
+									}
+								}
+							}
+						});
+					}	
+				}
+				return Status.OK_STATUS;
+			}
+					
+		};
+		internalUpdate.setSystem(true);	
+		internalUpdate.schedule();		
 		return true;
 	}
 
