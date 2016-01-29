@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.export;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +154,13 @@ public class CyberTrackerUtil {
 		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement);
 	}
 	
+	public Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, Collection<CyberTrackerId> childToLinkToNodeIds, String resultElement) {
+		List<String> values = listItemIds(childIds);
+		String trElements = translateElements(childIds);
+		String trLinks = translateLinks(childIds, childToLinkToNodeIds);
+		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement);
+	}
+
 	public List<CyberTrackerId> getChildrenIds(List<?> objects, Map<?, CyberTrackerId> keyMap) {
 		List<CyberTrackerId> result = new ArrayList<CyberTrackerId>();
 		if (objects == null)
@@ -184,6 +192,19 @@ public class CyberTrackerUtil {
 		for (CyberTrackerId id : ids) {
 			links.append(id.getItemTranslatedId());
 			if (linkToNode) {
+				links.append(id.getNodeTranslatedId());
+			} else {
+				links.append("00000000000000000000000000000000"); //$NON-NLS-1$
+			}
+		}
+		return links.toString();
+	}
+
+	public String translateLinks(List<CyberTrackerId> ids, Collection<CyberTrackerId> childToLinkToNodeIds) {
+		StringBuilder links = new StringBuilder(); 
+		for (CyberTrackerId id : ids) {
+			links.append(id.getItemTranslatedId());
+			if (childToLinkToNodeIds.contains(id)) {
 				links.append(id.getNodeTranslatedId());
 			} else {
 				links.append("00000000000000000000000000000000"); //$NON-NLS-1$

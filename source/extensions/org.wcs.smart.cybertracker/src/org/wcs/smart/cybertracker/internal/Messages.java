@@ -7,7 +7,12 @@ public class Messages extends NLS {
 	public static String AddCyberTrackerJob_ErrorMsg;
 	public static String AddCyberTrackerJob_ErrorTitle;
 	public static String AbstractSmartImporter_ElementMissing;
+	public static String AbstractSmartImporter_MissingTreeItemDetails;
+	public static String AbstractSmartImporter_MultipleDefaultAttributesRecords;
+	public static String AbstractSmartImporter_MultipleValuesForAttribute;
 	public static String AbstractSmartImporter_NonstaticDataBeforeStart;
+	public static String AbstractSmartImporter_NoTreeAttrItemInDatamodel_Replace;
+	public static String AbstractSmartImporter_NoTreeAttrItemInDatamodel_Skip;
 	public static String AbstractSmartImporter_Observer_InvalidData;
 	public static String AbstractSmartImporter_Observer_NotFound;
 	public static String AddCyberTrackerJob_InstallCtJobName;
@@ -303,7 +308,6 @@ public class Messages extends NLS {
 	public static String SmartImporter_Warn_NoAttributeInDatamodel;
 	public static String SmartImporter_Warn_NoCategoryInDatamodel;
 	public static String SmartImporter_Warn_NoListAttrItemInDatamodel;
-	public static String SmartImporter_Warn_NoTreeAttrItemInDatamodel;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

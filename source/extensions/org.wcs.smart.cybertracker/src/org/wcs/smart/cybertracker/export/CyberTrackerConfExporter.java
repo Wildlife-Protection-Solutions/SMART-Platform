@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -807,7 +808,7 @@ public class CyberTrackerConfExporter {
 		
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
-		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, null);
+		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, resultElementId, true);
 		if (!treeCmAttribute.getAttribute().getIsRequired() && navId != null) {
 			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
 			navControl.setTranslateNextScreenId(navId.getNodeId());
@@ -832,49 +833,20 @@ public class CyberTrackerConfExporter {
 	
 	private List<Node> buildAttributeTreeNodes(IAttributeTreeNodeProxy treeNode, Map<IAttributeTreeNodeProxy, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, String label) {
 		List<Node> result = new ArrayList<Node>();
-		if (treeNode == null)
-			return result;
-		
-		if (treeNode.getActiveChildren() == null || treeNode.getActiveChildren().isEmpty()) {
-			//if we are here that means that it was a screen with leaf and non-leaf elements above and treeNode is a leaf element
-			//adding fake screen that contains only this element
-			CyberTrackerId id = map.get(treeNode);
-			List<CyberTrackerId> childIds = new ArrayList<CyberTrackerId>();
-			childIds.add(id);
-			Node node = ctUtil.createRadioNode(id.getNodeId(), treeNode.getName() + label, childIds, resultElementId);
-			if (navId != null) {
-				Control control2 = ScreensObjectFactory.getNavigationControl(node);
-				control2.setTranslateNextScreenId(navId.getNodeId());
-			}
-			result.add(node);
+		if (treeNode == null || treeNode.getActiveChildren() == null || treeNode.getActiveChildren().isEmpty()) {
 			return result;
 		}
-
-		boolean isEndScreen = true;
-		//NOTE: there might be issues if at the save depth level leaf and non-leaf elements are present
-		for (IAttributeTreeNodeProxy child : treeNode.getActiveChildren()) {
-			if (child.getActiveChildren() != null && !child.getActiveChildren().isEmpty()) {
-				isEndScreen = false;
-				break;
-			}
-		}		
 		
 		String id = map.get(treeNode).getNodeId();
-		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(treeNode.getActiveChildren(), map);
-		if (isEndScreen) {
-			Node node = ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, resultElementId);
-			if (navId != null) {
-				Control control2 = ScreensObjectFactory.getNavigationControl(node);
-				control2.setTranslateNextScreenId(navId.getNodeId());
-			}
-			result.add(node);
-			return result;
-		}
+		List<IAttributeTreeNodeProxy> activeChildren = treeNode.getActiveChildren();
+		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeChildren, map);
+		List<IAttributeTreeNodeProxy> childWithKids = activeChildren.stream().filter(x -> x != null && x.getActiveChildren() != null && !x.getActiveChildren().isEmpty()).collect(Collectors.toList());
+		List<CyberTrackerId> childWithKidsIds = ctUtil.getChildrenIds(childWithKids, map);
+
+		//we want to link to node only elements that have active children
+		result.add(ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, childWithKidsIds, resultElementId));
 		
-		//this is NOT an end screen, proceed recursively till the end
-		result.add(ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, null));
-		
-		for (IAttributeTreeNodeProxy child : treeNode.getActiveChildren()) {
+		for (IAttributeTreeNodeProxy child : childWithKids) {
 			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, label));
 		}		
 		return result;
