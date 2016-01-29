@@ -40,8 +40,6 @@ public class SmartConnectExceptionMapper implements ExceptionMapper<SmartConnect
 
 	@Override
 	public Response toResponse(SmartConnectException ex) {
-		
-		
 		Response.ResponseBuilder builder = Response.status(ex.getResponseCode());
 		builder.type(MediaType.APPLICATION_JSON);
 		

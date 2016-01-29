@@ -15,6 +15,7 @@ import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItemProxy;
+import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.security.SecurityManager;
 
@@ -44,7 +45,7 @@ public class DataQueueServlet extends HttpServlet {
 		DataQueue dqapi = new DataQueue();
 		dqapi.configure(request.getServletContext(), null, response, request);
 		
-		List<ServerDataQueueItemProxy> info = dqapi.getItems();
+		List<DataQueueItem> info = dqapi.getItems(null, null);
 		
 		request.setAttribute("items", info); //$NON-NLS-1$
 		

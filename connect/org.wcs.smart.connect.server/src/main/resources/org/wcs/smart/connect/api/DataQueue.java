@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +38,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
@@ -130,7 +130,7 @@ public class DataQueue {
 	 */
 	@GET
     @Path("/items")
-	public List<DataQueueItem> getItems(@QueryParam("cafilter") String caFilter ,
+	public List<DataQueueItem> getItems(@QueryParam("cafilter") String caFilter,
 			@QueryParam("status") String status){
 		
 		List<ServerDataQueueItem.Status> statusFilter = null;
@@ -181,7 +181,7 @@ public class DataQueue {
 					List<ServerDataQueueItem> items = c.list();
 					for (ServerDataQueueItem item : items){
 						ServerDataQueueItemProxy proxy = new ServerDataQueueItemProxy(
-								item.getUuid(), item.getName(), ca.getLabel(), item.getType(), item.getStatus(), item.getUploadedDate(), item.getUploadedBy());
+								item.getUuid(), item.getName(), ca.getUuid(), ca.getLabel(), item.getType(), item.getStatus(), item.getUploadedDate(), item.getUploadedBy());
 						proxyitems.add(proxy);
 					}
 				}catch (SmartConnectException ex){
@@ -355,38 +355,7 @@ public class DataQueue {
 			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Could not get data queue item: " + uuid, ex);	
 		}
 	}
-	
-	/**
-	 * Gets the next item for processing for the given conservation area.
-	 * 
-	 * @param newItem
-	 * @return
-	 */
-	@PUT
-	@Path("/nextitem/{cauuid}")
-	public DataQueueItem getNextItem(@PathParam("cauuid") String caUuid){
-		UUID ca = parseUuid(caUuid);
-		Session s = HibernateManager.getSession(context);
-		try{
-			validateProcess(ca, s);
-			
-			ServerDataQueueItem item = (ServerDataQueueItem)s.createCriteria(ServerDataQueueItem.class)
-			.add(Restrictions.eq("conservationArea", ca))
-			.add(Restrictions.eq("status", ServerDataQueueItem.Status.QUEUED))
-			.addOrder(Order.asc("uploadedDate"))
-			.uniqueResult();
-			
-			if (item == null){
-				return null;
-			}
-			return item;
-		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Could not find next item for processing from data queue (ca: " + caUuid + "). ", ex);
-			if (ex instanceof SmartConnectException) throw ex;
-			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex);
-		}
-	}
-	
+		
 	/**
 	 * Updates a given data queue item status.
 	 * 
@@ -394,19 +363,33 @@ public class DataQueue {
 	 * @return
 	 */
 	@PUT
-	@Path("/items/{uuid}/status")
-	public void updateItemStatus(@PathParam("uuid") String itemUuid, ServerDataQueueItem.Status newStatus){
+	@Path("/items/{uuid}/{status}")
+	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, 
+			@PathParam("status") String newStatus){
+		ServerDataQueueItem.Status serverStatus = null;
+		try{
+			serverStatus = ServerDataQueueItem.Status.valueOf(newStatus.toUpperCase());
+		}catch (Exception ex){
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format("Status value {0} not supported.", newStatus));
+		}
 		UUID uuid = parseUuid(itemUuid);
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
 			ServerDataQueueItem item = (ServerDataQueueItem) s.get(ServerDataQueueItem.class, uuid);
 			if (item == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "Data queue item ont found.");
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "Data queue item not found.");
 			}
 			validateProcess(item.getConservationArea(), s);
-			item.setStatus(newStatus);
+			
+			if (serverStatus == ServerDataQueueItem.Status.PROCESSING 
+					&& item.getStatus() != ServerDataQueueItem.Status.QUEUED){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Item is not queued and cannot be configured for processing.");
+			}
+			
+			item.setStatus(serverStatus);
 			s.getTransaction().commit();
+			return item;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, "Could not update status. ", ex);
@@ -414,6 +397,8 @@ public class DataQueue {
 			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex);
 		}
 	}
+	
+	
 	
 	@GET
     @Path("/items/{uuid}/file")
@@ -440,6 +425,9 @@ public class DataQueue {
 		}
 	
 		//item.getStatus()
+		if (item.getFile() == null){
+			throw new SmartConnectException(Response.Status.NOT_FOUND, "Data queue item server not found.");
+		}
 		
 		final File toReturn = DataStoreManager.INSTANCE.getFile(item.getFile());
 		if (!toReturn.exists()){

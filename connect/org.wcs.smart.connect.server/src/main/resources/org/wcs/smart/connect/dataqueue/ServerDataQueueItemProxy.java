@@ -13,10 +13,11 @@ public class ServerDataQueueItemProxy extends DataQueueItem{
 	private Date uploadedDate;
 	private String uploadedBy;
 	
-	public ServerDataQueueItemProxy(UUID uuid, String name, String caName, DataQueueItem.Type type, ServerDataQueueItem.Status status, Date uploadDate, String uploadBy){
+	public ServerDataQueueItemProxy(UUID uuid, String name, UUID caUuid, String caName, DataQueueItem.Type type, ServerDataQueueItem.Status status, Date uploadDate, String uploadBy){
 		setUuid(uuid);
 		setName(name);
 		setType(type);
+		setConservationArea(caUuid);
 		this.caName = caName;
 		this.status = status;
 		this.uploadedDate = uploadDate;
