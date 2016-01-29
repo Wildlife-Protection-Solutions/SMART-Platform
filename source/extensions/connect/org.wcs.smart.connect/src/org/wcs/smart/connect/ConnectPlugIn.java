@@ -28,6 +28,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
@@ -112,13 +113,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	 */
 	public static void displayLog(final String message, Throwable t){
 		log(message, t);
-		Display.getDefault().syncExec(new Runnable(){
-			@Override
-			public void run() {
-				MessageDialog.openError(Display.getDefault().getActiveShell(),
-						Messages.ConnectPlugIn_ErrorDialogTitle, message);
-			}
-		});
+		SmartPlugIn.displayError(message, t);
 	}
 	
 	public static void log(int status, String message, Throwable t){

@@ -19,12 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue;
+package org.wcs.smart.connect.dataqueue.server;
 
 import java.util.List;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
@@ -39,11 +41,20 @@ public interface DataQueueApi {
 	
 	public static final String DATAQUEUE_PATH = "dataqueue"; //$NON-NLS-1$
 
-	public static final String SERVER_STATUS_PROCESSING = "PROCESSING";
+	public enum ServerStatus{
+		QUEUED,
+		PROCESSING,
+		COMPLETE,
+		ERROR
+	}
 	
 	@GET
     @Path("/" + DATAQUEUE_PATH + "/items")
 	public List<DataQueueItem> getItems(@QueryParam("cafilter") String caFilter,
 			@QueryParam("status") String status);
+
+	@PUT
+    @Path("/" + DATAQUEUE_PATH + "/items/{uuid}/{status}")
+	public void updateStatus(@PathParam("uuid") String itemUuid, @PathParam("status") String newStatus);
 
 }

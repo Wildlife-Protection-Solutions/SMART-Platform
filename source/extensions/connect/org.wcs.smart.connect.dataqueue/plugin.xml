@@ -36,5 +36,13 @@
             restorable="true">
       </view>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            ca_property=".conservationArea"
+            class="org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem"
+            supportsCcaa="false">
+      </class>
+   </extension>
 
 </plugin>
