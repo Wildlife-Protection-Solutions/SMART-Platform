@@ -25,6 +25,7 @@ public class DataQueueItem extends UuidItem{
 	private Type type;
 	private UUID caUuid;
 	private String name;
+
 	
 	@Column(name="type")
 	@Enumerated(EnumType.STRING)
@@ -53,6 +54,6 @@ public class DataQueueItem extends UuidItem{
 	public void setName(String name){
 		this.name = name;
 	}
-	
+
 	
 }

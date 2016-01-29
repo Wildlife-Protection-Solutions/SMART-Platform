@@ -485,7 +485,7 @@ public class SmartConnect {
 				createClient();
 				ResteasyWebTarget target = client.target(url);
 				r = target.request().get();
-			
+
 				if (r.getStatus() == HttpURLConnection.HTTP_OK){
 					size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
 					copyMonitor = new CopyProgressMonitor(monitor, size);

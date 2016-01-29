@@ -11,4 +11,5 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.connect;bundle-version="4.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: org.wcs.smart.connect.dataqueue
+Export-Package: org.wcs.smart.connect.dataqueue.model,
+ org.wcs.smart.connect.dataqueue.server

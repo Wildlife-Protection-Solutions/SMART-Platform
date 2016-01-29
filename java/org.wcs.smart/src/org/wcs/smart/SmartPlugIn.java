@@ -402,6 +402,16 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static void displayLog(final String message, Throwable t){
 		log(message, t);
+		displayError(message, t);
+	}
+	
+	/**
+	 * Displays an error message to the user without logging.
+	 * 
+	 * @param message
+	 * @param t
+	 */
+	public static void displayError(final String message, Throwable t){
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
@@ -409,7 +419,6 @@ public class SmartPlugIn extends AbstractUIPlugin {
 			}
 		});
 	}
-	
 	/**
 	 * Displays an error message to the user, logs the error and
 	 * exits the program with an error code of 1.
