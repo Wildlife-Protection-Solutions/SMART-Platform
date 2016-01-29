@@ -28,6 +28,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,6 +40,7 @@ import java.util.Map;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -252,18 +254,38 @@ public abstract class AbstractSmartImporter {
 	
 	private List<WaypointObservationAttribute> fetchAttributes(WaypointObservation obs, List<A> aList, Map<String, E> eMap, Session session) {
 		List<WaypointObservationAttribute> result = new ArrayList<WaypointObservationAttribute>();
+		
+		//filtering <A>
+		List<String> iList = new ArrayList<>(aList.size()); //the list of unique "I" values in <A> that have "V"
+		Map<String, List<String>> i2a = new HashMap<>();
 		for (A a : aList) {
 			if (a.getV() == null)
 				continue;
 			
-			E e = eMap.get(a.getI());
+			String i = a.getI();
+			List<String> avList = i2a.get(i);
+			if (avList == null) {
+				iList.add(i);
+				avList = new ArrayList<>();
+				i2a.put(i, avList);
+			}
+			avList.add(a.getV());
+		}
+		
+		for (String i : iList) {
+			E e = eMap.get(i);
+			List<String> avList = i2a.get(i); //must have at least one record (see filtering code above)
 
 			if (ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG.equals(e.getTag1())) {
 				//handling default values
-				String[] ctIdArray = a.getV().split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
+				if (avList.size() > 1) {
+					addWarning(MessageFormat.format(Messages.AbstractSmartImporter_MultipleDefaultAttributesRecords, avList.size()));
+				}
+				String[] ctIdArray = avList.get(avList.size()-1).split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
 				for (String ctid : ctIdArray) {
 					E de = eMap.get(ctid);
-					WaypointObservationAttribute wpoa = createWaypointObservationAttribute(de, de.getTag2(), eMap, session);
+					String tag2 = de.getTag2();
+					WaypointObservationAttribute wpoa = createWaypointObservationAttribute(de, Arrays.asList(tag2), eMap, session);
 					if (wpoa == null)
 						continue;
 					wpoa.setObservation(obs);
@@ -275,7 +297,7 @@ public abstract class AbstractSmartImporter {
 			if (!ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
 				continue;
 
-			WaypointObservationAttribute wpoa = createWaypointObservationAttribute(e, a.getV(), eMap, session);
+			WaypointObservationAttribute wpoa = createWaypointObservationAttribute(e, avList, eMap, session);
 			if (wpoa == null)
 				continue;
 			wpoa.setObservation(obs);
@@ -284,7 +306,7 @@ public abstract class AbstractSmartImporter {
 		return result;
 	}
 
-	private WaypointObservationAttribute createWaypointObservationAttribute(E e, String av, Map<String, E> eMap, Session session) {
+	private WaypointObservationAttribute createWaypointObservationAttribute(E e, List<String> avList, Map<String, E> eMap, Session session) {
 		String tag0 = e.getTag0();
 		if (tag0 == null || tag0.isEmpty()) {
 			addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AttributeTag0_Missing, e.getN()));
@@ -296,6 +318,13 @@ public abstract class AbstractSmartImporter {
 			addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoAttributeInDatamodel, e.getN(), tag0));
 			return null;
 		}
+		
+		if (avList.size() > 1 && !AttributeType.TREE.equals(attr.getType())) {
+			//only tree attributes might have multiple recorded values - one per level in hierarchy (by design)
+			addWarning(MessageFormat.format(Messages.AbstractSmartImporter_MultipleValuesForAttribute, e.getN()));
+		}
+		//NOTE: avList must have at least one record by design!!!
+		String av = avList.get(avList.size()-1); //used everywhere except trees
 
 		WaypointObservationAttribute wpoa = new WaypointObservationAttribute();
 		wpoa.setAttribute(attr);
@@ -319,11 +348,33 @@ public abstract class AbstractSmartImporter {
 		}
 		case TREE:
 		{
-			E eTr = eMap.get(av);
-			AttributeTreeNode item = CyberTrackerHibernateManager.fetchByUuid(AttributeTreeNode.class, eTr.getTag0(), session);
-			if (item == null && !CyberTrackerHibernateManager.isEmptyTag0(eTr.getTag0())) {
-				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_NoTreeAttrItemInDatamodel, e.getN(), eTr.getN(), eTr.getTag0()));
+			//tree may have multiple values - one for each hierarchy level, ideally the last level should match, otherwise try to use next to last
+			AttributeTreeNode item = null;
+			E eTr = null;
+			StringBuilder warnSb = new StringBuilder();
+			int i = avList.size()-1;
+			for (; i >= 0; i--) {
+				eTr = eMap.get(avList.get(i));
+				item = CyberTrackerHibernateManager.fetchByUuid(AttributeTreeNode.class, eTr.getTag0(), session);
+				if (item == null) {
+					if (warnSb.length() > 0) {
+						warnSb.append(", "); //$NON-NLS-1$
+					}
+					warnSb.append(MessageFormat.format(Messages.AbstractSmartImporter_MissingTreeItemDetails, eTr.getN(), eTr.getTag0(), i+1));
+				} else {
+					break; //we found good item that exists in database
+				}
+			}
+			
+			if (item == null) {
+				//no items found
+				addWarning(MessageFormat.format(Messages.AbstractSmartImporter_NoTreeAttrItemInDatamodel_Skip, e.getN(), warnSb));
 				return null;
+				
+			}
+			
+			if (warnSb.length() > 0) { //same as i != avList.size()-1 (leaf node was not found)
+				addWarning(MessageFormat.format(Messages.AbstractSmartImporter_NoTreeAttrItemInDatamodel_Replace, e.getN(), warnSb, eTr.getN(), i+1));
 			}
 			wpoa.setAttributeTreeNode(item);
 			break;
