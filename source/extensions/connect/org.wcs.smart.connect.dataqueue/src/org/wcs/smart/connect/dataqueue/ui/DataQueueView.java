@@ -12,49 +12,51 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 
-import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.core.runtime.jobs.ProgressProvider;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
+import org.hibernate.mapping.Array;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
-import org.wcs.smart.connect.dataqueue.process.DataQueueItemProcessor;
 import org.wcs.smart.connect.dataqueue.process.DataQueueManager;
+import org.wcs.smart.connect.dataqueue.process.ProcessorManager;
 import org.wcs.smart.connect.dataqueue.server.ConnectDataQueue;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.hibernate.SmartDB;
@@ -66,15 +68,20 @@ public class DataQueueView{
 	private FormToolkit toolkit = null;
 	
 	private TableViewer tblHistory;
-
+	private CheckboxTableViewer tblServer;
 	
-	@Inject private Shell shell;
+	private SashForm sash;
 	
 	private SmartConnect connect;
-	private Composite content;
+	private Composite localDataQueue;
+	
+	private ScrolledForm  dataQueueScrollForm;
+	
+	@Inject private Shell shell;
 	@Inject private UISynchronize ui;
 	
 	private enum Column{
+		CHECK(""),
 		NAME("Name"),
 		TYPE("Type"),
 		STATUS("Status"),
@@ -111,9 +118,90 @@ public class DataQueueView{
 			return "";
 		}
 	}
+	Job refreshLocalJob = new Job("Refresh Local Data Queue Table"){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try{
+				monitor.beginTask("Refreshing Data Queue Items", 2);
+				
+				monitor.worked(1);
+				monitor.subTask("Loading Local Items ...");
+				List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems(LocalDataQueueItem.Status.QUEUED,
+						LocalDataQueueItem.Status.PROCESSING, 
+						LocalDataQueueItem.Status.DOWNLOADING,
+						LocalDataQueueItem.Status.ERROR);
+				Collections.sort(localItems, new Comparator<LocalDataQueueItem>() {
 
+					@Override
+					public int compare(LocalDataQueueItem o1,
+							LocalDataQueueItem o2) {
+						if (o1.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+							if (o2.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+								return o1.getDateProcessed().compareTo(o2.getDateProcessed());
+							}
+							return -1;
+						}
+						if (o2.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+							if (o2.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+								return o2.getDateProcessed().compareTo(o1.getDateProcessed());
+							}
+							return 1;
+						}
+						if (o1.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+							if (o2.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+								return o1.getDateProcessed().compareTo(o2.getDateProcessed());
+							}
+							return -1;
+						}
+						if (o2.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+							if (o1.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+								return o2.getDateProcessed().compareTo(o1.getDateProcessed());
+							}
+							return 1;
+						}	
+						
+						if (o1.getStatus() == LocalDataQueueItem.Status.QUEUED){
+							if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
+								return o1.getOrder().compareTo(o2.getOrder());
+							}
+							return -1;
+						}
+						if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
+							if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
+								return o2.getOrder().compareTo(o1.getOrder());
+							}
+							return 1;
+						}	
+						return o1.getDateProcessed().compareTo(o2.getDateProcessed());
+						
+					}
+				});
+				
+				ui.syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						if (localDataQueue == null || localDataQueue.isDisposed()) return;
+						buildLocalContent(localItems);
+						
+					}
+				});
+				monitor.done();
+			}catch (Exception ex){
+				final String message = "Error loading active local data queue items." + ex.getMessage();
+				ConnectDataQueuePlugin.log(message, ex);
+				ui.syncExec(new Runnable() {					
+					@Override
+					public void run() {
+						buildLocalErrorContent(message);
+					}
+				});
+			}
+			return Status.OK_STATUS;
+		}
+	};
 	
-	Job refreshJob = new Job("refresh data queue table"){
+	Job refreshServerItemsJob = new Job("refresh server items table"){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -137,31 +225,26 @@ public class DataQueueView{
 					}
 				}
 				
-				List<DataQueueItem> allItems = new ArrayList<DataQueueItem>();
-				allItems.addAll(serverItems);
-				allItems.addAll(localItems);
-				
 				ui.syncExec(new Runnable() {
 					
 					@Override
 					public void run() {
-						if (content == null || content.isDisposed()) return;
-						buildContent(allItems);
-						
+						if (tblServer == null || tblServer.getTable().isDisposed()) return;
+						tblServer.setInput(serverItems);
+						tblServer.refresh();
 					}
 				});
 				monitor.done();
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.log("Error loading items from server", ex);
-				String message = ex.getMessage();
-				if (ex instanceof ProcessingException && ex.getCause() != null){
-					message = ex.getCause().getMessage();
-				}
+				String message = "Error loading items from Connect. " + ex.getMessage();
+				ConnectDataQueuePlugin.log(message, ex);
+				
 				final String error = message;
 				ui.syncExec(new Runnable() {
 					@Override
 					public void run() {
-						buildContentError(error);		
+						tblServer.setInput(new String[]{error});
+						tblServer.refresh();
 					}
 				});
 				
@@ -234,41 +317,180 @@ public class DataQueueView{
 		
 		toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.adapt(parent);
-		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED);
-		dataQueueSection.setText("Data Queue - Active");
+		
+		sash= new SashForm(parent, SWT.VERTICAL);
+		sash.setLayout(new GridLayout());
+		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(sash);
+		
+//		Composite sashForm = new Composite(parent, SWT.VERTICAL);
+//		sashForm.setLayout(new GridLayout());
+//		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		toolkit.adapt(sashForm);
+		
+		createLocalSection(sash);
+		createServerSection(sash);
+		createLocalHistorySection(sash);
+		
+		refreshLocalTable();
+		refreshServerTable();
+		refreshHistory();
+	}
+
+	private void createLocalSection(Composite parent){
+		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+		dataQueueSection.setText("Local Data Queue [Active Items]");
 		dataQueueSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dataQueueSection.setLayout(new GridLayout());
+		addExpansionHandler(dataQueueSection);
+		
+		Composite main = toolkit.createComposite(dataQueueSection);
+		main.setLayout(new GridLayout());
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
+		dataQueueSection.setClient(main);
+		
+		dataQueueScrollForm = toolkit.createScrolledForm(main);
+		dataQueueScrollForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		dataQueueScrollForm.getBody().setLayout(new GridLayout());
+		((GridLayout)dataQueueScrollForm.getBody().getLayout()).marginWidth = 0;
+		((GridLayout)dataQueueScrollForm.getBody().getLayout()).marginHeight = 0;
+		
+//		Composite innerSc = toolkit.createComposite(sc, SWT.NONE);
+//		innerSc.setLayout(new GridLayout());
+//		sc.setContent(innerSc);
+//		sc.setExpandHorizontal(true);
+//		sc.setExpandVertical(true);
+//		sc.setMinSize(innerSc.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		this.localDataQueue = toolkit.createComposite(dataQueueScrollForm.getBody());
+		localDataQueue.setLayout(new GridLayout());
+		((GridLayout)localDataQueue.getLayout()).marginWidth = 0;
+		((GridLayout)localDataQueue.getLayout()).marginHeight = 0;
+		localDataQueue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Hyperlink link = toolkit.createHyperlink(main, "Refresh", SWT.NONE);
+		link.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				refreshLocalTable();
+			}
+		});
+	}
+	
+	private void createServerSection(Composite parent){
+		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+		dataQueueSection.setText("SMART Connect Server - Data Queue Items");
+		dataQueueSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		dataQueueSection.setLayout(new GridLayout());
+		addExpansionHandler(dataQueueSection);
 		
 		Composite main = toolkit.createComposite(dataQueueSection);
 		main.setLayout(new GridLayout());
 		dataQueueSection.setClient(main);
-//		
-		this.content = toolkit.createComposite(main);
-		content.setLayout(new GridLayout());
-		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Button btnRefresh = new Button(main, SWT.PUSH);
-		btnRefresh.setText("Refresh");
-		btnRefresh.addSelectionListener(new SelectionAdapter() {
+
+		tblServer = CheckboxTableViewer.newCheckList(main, SWT.FULL_SELECTION | SWT.BORDER);
+		tblServer.getTable().setLinesVisible(true);
+		tblServer.getTable().setHeaderVisible(true);
+		tblServer.setContentProvider(ArrayContentProvider.getInstance());
+		tblServer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		for (final Column c : new Column[]{Column.CHECK, Column.NAME, Column.TYPE, Column.STATUS}){
+			TableViewerColumn tc = new TableViewerColumn(tblServer, SWT.DEFAULT);
+			tc.getColumn().setWidth(100);
+			tc.getColumn().setText(c.name);
+			tc.setLabelProvider(new ColumnLabelProvider(){
+				@Override
+				public String getText(Object element){
+					if (element instanceof DataQueueItem){
+						return c.getLabel((DataQueueItem)element);
+					}
+					return super.getText(element);
+				}
+			});
+		}
+		Hyperlink link = toolkit.createHyperlink(main, "Refresh", SWT.NONE);
+		link.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				refreshTable();
+			public void linkActivated(HyperlinkEvent e) {
+				refreshServerTable();
 			}
 		});
-		
-		Button btnProcess = new Button(main, SWT.PUSH);
-		btnProcess.setText("Process Selected Item");
-		btnProcess.addSelectionListener(new SelectionAdapter() {
+		Composite c = toolkit.createComposite(main, SWT.NONE);
+		c.setLayout(new GridLayout(2, false));
+		Button btn = toolkit.createButton(c, "Process All", SWT.PUSH);
+		btn.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				processAll();
+			}
+		});
+		Button btn2 = toolkit.createButton(c, "Process Selected", SWT.PUSH);
+		btn2.addSelectionListener(new SelectionAdapter() {
+			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				processSelected();
 			}
 		});
-		
-		Section dataQueueHistory = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED);
+	}
+	
+	private void addExpansionHandler(final Section section){
+		section.addExpansionListener(new ExpansionAdapter() {
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				int initHeight = 0;
+				if (section.isExpanded()){
+					
+//					((SashForm)section.getParent()).setWeights(new int[]{2,50,50});
+//					((SashFormData)section.getLayoutData()).heightHint = 200;
+					section.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+					initHeight = 200;
+				}else{
+//					((SashForm)section.getParent()).setWeights(new int[]{20,40,40});
+//					((GridData)section.getLayoutData()).heightHint = 0;
+					section.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					Point p = section.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+					initHeight = p.y;
+				}
+				
+				Point sashsize = sash.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				int[] weights = sash.getWeights();
+				int index = 0;
+				int total = 0;
+				
+				for (Control c : sash.getChildren()){
+					if (c == section){
+					break;	
+					}
+					index++;
+				}
+				for (int i = 0; i < weights.length; i ++){
+					if(i==index) continue;
+					total+=weights[i];
+				}
+				int value =initHeight;
+				
+				for (int i = 0; i < weights.length; i ++){
+					if (i == index){
+						weights[i] = value;
+					}else{
+						weights[i] = (int)((weights[i] / (1.0*total)) * (sashsize.y - value)); 
+					}
+				}
+				sash.setWeights(weights);
+				section.getParent().layout(true, true);
+			}
+		});
+	}
+	private void createLocalHistorySection(Composite parent){
+		Section dataQueueHistory = toolkit.createSection(parent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
 		dataQueueHistory.setText("Data Queue - History");
 		dataQueueHistory.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dataQueueHistory.setLayout(new GridLayout());
+		addExpansionHandler(dataQueueHistory);
 		
 		Composite historyMain = toolkit.createComposite(dataQueueHistory);
 		historyMain.setLayout(new GridLayout());
@@ -281,7 +503,7 @@ public class DataQueueView{
 		tblHistory.getTable().setHeaderVisible(true);
 		tblHistory.getTable().setLinesVisible(true);
 		for (final Column c : Column.values()){
-			
+			if (c == Column.CHECK) continue;
 			TableViewerColumn column = new TableViewerColumn(tblHistory, SWT.LEFT);
 			column.getColumn().setText(c.name);
 			column.setLabelProvider(new ColumnLabelProvider(){
@@ -295,35 +517,47 @@ public class DataQueueView{
 			});
 			column.getColumn().setWidth(100);
 		}
-		Composite linkComp = toolkit.createComposite(parent);
-		linkComp.setLayout(new GridLayout(4, false));
+		
+		Composite linkComp = toolkit.createComposite(historyMain);
+		linkComp.setLayout(new GridLayout(6, false));
 		((GridLayout)linkComp.getLayout()).marginHeight = 0;
-		Hyperlink deleteSel = toolkit.createHyperlink(linkComp, "Remove Selected", SWT.NONE);
+		
+		Hyperlink deleteRefresh = toolkit.createHyperlink(linkComp, "Refresh", SWT.NONE);
 		Label sep = toolkit.createLabel(linkComp, "", SWT.SEPARATOR | SWT.VERTICAL);
 		sep.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 		((GridData)sep.getLayoutData()).heightHint = 10;
+		
+		Hyperlink deleteSel = toolkit.createHyperlink(linkComp, "Remove Selected", SWT.NONE);
+		sep = toolkit.createLabel(linkComp, "", SWT.SEPARATOR | SWT.VERTICAL);
+		sep.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+		((GridData)sep.getLayoutData()).heightHint = 10;
+		
 		Hyperlink deleteAll = toolkit.createHyperlink(linkComp, "Remove All" , SWT.NONE);
 		Label spacer = toolkit.createLabel(linkComp, "");
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		deleteRefresh.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				refreshHistory();
+			}
+		});
 		deleteSel.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				deleteSelected();
-				refreshTable();
+				refreshHistory();
 			}
 		});
 		deleteAll.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				deleteAll();
-				refreshTable();
+				refreshHistory();
 			}
 		});
-		
-		refreshTable();
 	}
-
+	
 	private void deleteSelected(){
 		List<LocalDataQueueItem> items = new ArrayList<LocalDataQueueItem>();
 		IStructuredSelection sel = (IStructuredSelection) tblHistory.getSelection();
@@ -338,14 +572,17 @@ public class DataQueueView{
 	private void deleteAll(){
 		DataQueueManager.INSTANCE.deleteAllHistory();
 	}
-	private void refreshTable(){
+	
+	private void refreshHistory(){
 		if (shell == null || shell.isDisposed()) return;
-		
 		//local history
 		tblHistory.setInput(new String[]{"Loading..."});
+		tblHistory.refresh();
 		refreshHistory.schedule();
-		
-		//connect info
+	}
+	private void refreshServerTable(){
+		tblServer.setInput(new String[]{"Loading..."});
+		tblServer.refresh();
 		if(connect == null){
 			ConnectDialog cd = new ConnectDialog(shell);
 			if (cd.open() != Window.OK){
@@ -353,115 +590,126 @@ public class DataQueueView{
 			}
 			connect = cd.getConnection();
 		}
-		for (Control x : content.getChildren()){
-			x.dispose();
-		}
-		toolkit.createLabel(content, "Refreshing . . .");
-		content.getParent().layout(true);
-		refreshJob.schedule();
+		
+		refreshServerItemsJob.schedule();
 	}
 	
-	private List<Button> serveritems = new ArrayList<Button>();
-	
-	private void buildContentError(String error){
-		for (Control x : content.getChildren()){
+	private void refreshLocalTable(){
+		if (shell == null || shell.isDisposed()) return;
+		
+		//local history
+		tblHistory.setInput(new String[]{"Loading..."});
+		refreshHistory.schedule();
+
+		for (Control x : localDataQueue.getChildren()){
 			x.dispose();
 		}
-		serveritems.clear();
+		toolkit.createLabel(localDataQueue, "Refreshing . . .");
+		localDataQueue.getParent().layout(true);
+		refreshLocalJob.schedule();
+	}
+	
+	private void buildLocalErrorContent(String message){
+		for (Control x : localDataQueue.getChildren()){
+			x.dispose();
+		}
 		
-		Composite part = toolkit.createComposite(content, SWT.BORDER);
-		part.setLayout(new GridLayout(3, false));
-		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Label lblError = toolkit.createLabel(part, "");
+		Composite info = toolkit.createComposite(localDataQueue, SWT.BORDER);
+		info.setLayout(new GridLayout(2, false));
+		((GridLayout)info.getLayout()).marginHeight= 0;
+		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label lblError = toolkit.createLabel(info, "");
 		lblError.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
-		toolkit.createLabel(part, "ERROR:");
-		toolkit.createLabel(part, error);
+		toolkit.createLabel(info, message);
 		
-		content.getParent().layout(true);
+		
 	}
-	
-	private void buildContent(List<DataQueueItem> items){
-		for (Control x : content.getChildren()){
+	private void buildLocalContent(List<LocalDataQueueItem> items){
+		for (Control x : localDataQueue.getChildren()){
 			x.dispose();
 		}
-		serveritems.clear();
-		for (DataQueueItem i : items){
-			Composite part = toolkit.createComposite(content, SWT.BORDER);
+		if (items.isEmpty()){
+			Composite part = toolkit.createComposite(localDataQueue, SWT.BORDER);
 			part.setLayout(new GridLayout(2, false));
 			part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			Button btnCheck = toolkit.createButton(part, "", SWT.CHECK);
-			btnCheck.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-			btnCheck.setData(i);
-			if (i instanceof LocalDataQueueItem){
-				btnCheck.setVisible(false);
-			}else{
-				serveritems.add(btnCheck);
-			}
+			Label lblimage = toolkit.createLabel(part, "");
+			lblimage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+			toolkit.createLabel(part, "No local items in the queue.");
+		}
+		
+		for (DataQueueItem i : items){
+			Composite part = toolkit.createComposite(localDataQueue, SWT.BORDER);
+			part.setLayout(new GridLayout(4, true));
+//			((GridLayout)part.getLayout()).marginWidth= 0;
+			((GridLayout)part.getLayout()).marginHeight= 2;
+			part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Label lblStatusImage = toolkit.createLabel(part, "");
 			
 			Composite info = toolkit.createComposite(part);
 			info.setLayout(new GridLayout(2, false));
 			((GridLayout)info.getLayout()).marginHeight= 0;
+			((GridLayout)info.getLayout()).marginWidth= 0;
 			info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			Label lblName = toolkit.createLabel(info, "Name:");
 			toolkit.createLabel(info, Column.NAME.getLabel(i));
-			Label lblType = toolkit.createLabel(info, "Type:");
-			toolkit.createLabel(info, Column.TYPE.getLabel(i));
-			Label lblStatus = toolkit.createLabel(info, "Status:");
-			toolkit.createLabel(info, Column.STATUS.getLabel(i));
 			
-			toolkit.createLabel(info, "Progress:");
-			ProgressBar pbar = new ProgressBar(info, SWT.HORIZONTAL | SWT.SMOOTH);
-			pbar.setMinimum(0);
-			pbar.setMinimum(100);
-			pbar.setSelection(50);
+			Composite info2 = toolkit.createComposite(part);
+			info2.setLayout(new GridLayout(2, false));
+			((GridLayout)info2.getLayout()).marginWidth= 0;
+			((GridLayout)info2.getLayout()).marginHeight= 0;
+			info2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			Label lblType = toolkit.createLabel(info2, "Type:");
+			toolkit.createLabel(info2, Column.TYPE.getLabel(i));
+			
+			Composite info3 = toolkit.createComposite(part);
+			info3.setLayout(new GridLayout(2, false));
+			((GridLayout)info3.getLayout()).marginWidth= 0;
+			((GridLayout)info3.getLayout()).marginHeight= 0;
+			info3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			Label lblStatus = toolkit.createLabel(info3, "Status:");
+			Label sLabel = toolkit.createLabel(info3, Column.STATUS.getLabel(i));
+			sLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			ProgressWidget widget = new ProgressWidget(part, sLabel, lblStatusImage);
+			widget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+			widget.initStatus(((LocalDataQueueItem)i).getStatus());
+			toolkit.adapt(widget);
+			
+			ProcessorManager.INSTANCE.register(widget, i);
 		}
-		content.getParent().layout(true);
+		localDataQueue.getParent().getParent().layout(true);	
+		localDataQueue.getParent().layout(true);	
+		dataQueueScrollForm.reflow(true);
 	}
 	
+	private void processAll(){
+		List<DataQueueItem> items = (List<DataQueueItem>) tblServer.getInput();
+		processItems(items);
+	}
 	
-//	private void configureProgress(){
-//		Job.getJobManager().setProgressProvider(new ProgressProvider() {
-//			
-//			@Override
-//			public IProgressMonitor createMonitor(Job job) {
-//				// TODO Auto-generated method stub
-//				return null;
-//			}
-//		});;
-//		Job.getJobManager().setPaddJobChangeListener(new JobChangeAdapter() {
-//			
-//			@Override
-//			public void scheduled(IJobChangeEvent event) {
-//				if (event.getJob() instanceof DataQueueItemProcessor){
-//					event.getJob().
-//				}
-//			}
-//			
-//			@Override
-//			public void done(IJobChangeEvent event) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
-//		
-//		
-//	}
 	private void processSelected(){
-		for (Button b : serveritems){
-			if (b.isDisposed()) continue;
-			if (b.getSelection()){
-				try{
-					DataQueueManager.INSTANCE.addItemToQueue((DataQueueItem)b.getData());
-				}catch (Exception ex){
-					ConnectDataQueuePlugin.displayLog("Error adding item to data queue.", ex);
-				}
+		List<DataQueueItem> items = new ArrayList<DataQueueItem>();
+		for (Object x : tblServer.getCheckedElements()){
+			if (x instanceof DataQueueItem){
+				items.add((DataQueueItem)x);
 			}
 		}
-		//TODO: this will start a new one; we want only one ever
-		DataQueueItemProcessor.start(connect);
-		refreshTable();
+		processItems(items);
+	}
+	
+	private void processItems(List<DataQueueItem> items){
+		for (DataQueueItem i : items){
+			try{
+				DataQueueManager.INSTANCE.addItemToQueue(i);
+			}catch (Exception ex){
+				ConnectDataQueuePlugin.displayLog("Error adding item to data queue.", ex);
+			}
+		}
+		ProcessorManager.INSTANCE.startProcessing(connect);
+		refreshLocalTable();
+		refreshServerTable();
 	}
 	
 	@Focus

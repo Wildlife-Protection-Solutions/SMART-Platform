@@ -30,29 +30,36 @@ public class DataQueueItemProcessor extends Job {
 	private SmartConnect connect;
 	private LocalDataQueueItem item;
 	
-	public static void start(SmartConnect connect){
-		(new DataQueueItemProcessor(connect)).schedule();
-	}
+	private ProgressMonitorWatcher progressWrapper;
 	
 	
-	private DataQueueItemProcessor(SmartConnect connect) {
+	DataQueueItemProcessor(SmartConnect connect, ProgressMonitorWatcher progressWrapper) {
 		super("Data Queue Processor");
 		this.connect = connect;
+		this.progressWrapper = progressWrapper;
 	}
-
+	
+	public ProgressMonitorWatcher getWatcher(){
+		return this.progressWrapper;
+	}
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		monitor = progressWrapper.setProgressMonitor(monitor);
+		
 		boolean reschedule = true;
 		try{
 		
 			item = DataQueueManager.INSTANCE.checkOutNextQueueItem();
+			progressWrapper.setDataQueueItem(item);
 			
 			if (item == null){
 				//nothing to do
 				reschedule = false;
 				return Status.OK_STATUS;
 			}
+			
 			monitor.beginTask("Processing Item: " + item.getName(), 40);
+			
 			//go to the server and update the status on the server to processing
 			//if this fails then we skip this item as it is likely processed by someone else
 			try{
@@ -72,6 +79,7 @@ public class DataQueueItemProcessor extends Job {
 				return Status.OK_STATUS;
 			}
 			monitor.worked(10);
+			
 			try{
 				updateLocalStatus(LocalDataQueueItem.Status.DOWNLOADING, null);
 				downloadFile(new SubProgressMonitor(monitor, 10));
@@ -100,7 +108,7 @@ public class DataQueueItemProcessor extends Job {
 			monitor.worked(10);
 		}finally{
 			if (reschedule){
-				(new DataQueueItemProcessor(connect)).schedule();
+				ProcessorManager.INSTANCE.startProcessing(connect);
 			}
 			monitor.done();
 		}
@@ -109,9 +117,13 @@ public class DataQueueItemProcessor extends Job {
 
 	private void downloadFile(IProgressMonitor monitor) throws Exception{
 //		if (true) throw new Exception("download failes");
+		monitor.beginTask("dome",1);
+		monitor.worked(1);
+		monitor.done();
+		if (true) return;
 		//download the file
 		String down = ConnectDataQueue.INSTANCE.getFileDownloadUrl(connect, item);
-		Path localFile = connect.downloadFileFromUrl(down, null, new SubProgressMonitor(monitor, 1));
+		Path localFile = connect.downloadFileFromUrl(down, null, monitor);
 		
 		Path moveTo = FileSystems.getDefault()
 				.getPath(SmartContext.INSTANCE.getFilestoreLocation())
@@ -134,7 +146,7 @@ public class DataQueueItemProcessor extends Job {
 	
 	private void processItem(IProgressMonitor monitor) throws Exception{
 		IItemProcessor processor = getItemProcessor();
-		processor.process(item, new SubProgressMonitor(monitor, 1));
+		processor.process(item, monitor);
 	}
 	
 	
@@ -144,10 +156,13 @@ public class DataQueueItemProcessor extends Job {
 			@Override
 			public void process(DataQueueItem item, IProgressMonitor monitor)
 					throws Exception {
+				monitor.beginTask("Something", 5);
 				// delay 10 seconds
-				for (int i = 0; i < 10; i ++){
+				for (int i = 0; i < 5; i ++){
 					Thread.sleep(1000);
+					monitor.worked(1);
 				}
+				monitor.done();
 			}
 			
 			@Override
