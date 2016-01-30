@@ -9,6 +9,9 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
+
 @Entity
 @Table(name="smart.connect_data_queue")
 public class LocalDataQueueItem extends DataQueueItem{
@@ -18,7 +21,14 @@ public class LocalDataQueueItem extends DataQueueItem{
 		DOWNLOADING,
 		PROCESSING,
 		COMPLETE,
-		ERROR
+		ERROR;
+		
+		public Image getImage(){
+			if (this == ERROR){
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON);
+			}
+			return null;
+		}
 	}
 	
 	private Status localStatus;
