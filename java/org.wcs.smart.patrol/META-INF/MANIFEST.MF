@@ -19,5 +19,6 @@ Export-Package: org.wcs.smart.patrol,
  org.wcs.smart.patrol.model,
  org.wcs.smart.patrol.ui,
  org.wcs.smart.patrol.xml.external,
+ org.wcs.smart.patrol.xml.in,
  org.wcs.smart.patrol.xml.model
 Bundle-Vendor: org.wcs.smart

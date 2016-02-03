@@ -94,7 +94,7 @@ public class PatrolListView implements IPatrolFilteringView {
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView"; //$NON-NLS-1$
 	private TableViewer patrolListViewer;
-	private PatrolViewFilter filter = new PatrolViewFilter();
+	private PatrolViewFilter filter = PatrolViewFilter.newInstance();
 	private Object[] loadingInput = new Object[]{Messages.PatrolListView_LoadingLabel};
 	
 	@Inject private IMenuService menuService;

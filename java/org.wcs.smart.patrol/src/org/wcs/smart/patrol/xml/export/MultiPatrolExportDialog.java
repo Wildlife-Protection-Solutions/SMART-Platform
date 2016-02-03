@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.XmlMultiExportDialog;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -72,7 +71,7 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 		dialogSettings.put(INCLUDE_ATTACHMENT, true);
 	}
 
-	private PatrolViewFilter currentFilter = new PatrolViewFilter();
+	private PatrolViewFilter currentFilter = PatrolViewFilter.newInstance();
 	
 	/**
 	 * Creates a new dialog.
@@ -82,7 +81,6 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 	 */
 	public MultiPatrolExportDialog(Shell parentShell) {
 		super(parentShell, Messages.MultiPatrolExportDialog_ChangeFilter);
-		this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
 	}
 
 	@Override
