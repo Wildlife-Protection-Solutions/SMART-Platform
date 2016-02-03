@@ -69,7 +69,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
     private ComboViewer viewer;
     private Button btnFilter;
 
-    private PatrolViewFilter filter = new PatrolViewFilter();
+    private PatrolViewFilter filter = PatrolViewFilter.newInstance();
 	private LoadPatrolIdJob loadPatrolIdJob = new LoadPatrolIdJob();
 
 	private boolean stopSelectionPropogation = false;

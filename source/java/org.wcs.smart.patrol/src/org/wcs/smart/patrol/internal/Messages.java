@@ -244,6 +244,9 @@ public class Messages extends NLS {
 	public static String PatrolFilterDialog_PatrolIdGroupLabel;
 	public static String PatrolFilterDialog_PatrolIdLabel;
 	public static String PatrolFilterDialog_PatrolTypesGroupLabel;
+	public static String PatrolFilterDialog_SaveDefault;
+	public static String PatrolFilterDialog_SaveDefaultTooltip;
+	public static String PatrolFilterDialog_SortByOption;
 	public static String PatrolFilteredComboViewerComposite_Filter_Tooltip;
 	public static String PatrolGpsImportEngine_NotracksFound;
 	public static String PatrolGpxImportEngine_NotracksFound;
@@ -537,6 +540,11 @@ public class Messages extends NLS {
 	public static String PatrolTypeWizardPage_PageMessage;
 	public static String PatrolTypeWizardPage_SelectType_Label;
 	public static String PatrolTypeWizardPage_Title;
+	public static String PatrolViewFilter_AscOp;
+	public static String PatrolViewFilter_DescOp;
+	public static String PatrolViewFilter_EndDateSort;
+	public static String PatrolViewFilter_PatrolIdSort;
+	public static String PatrolViewFilter_StartDateSort;
 	public static String PatrolWaypointSource_PatrolWaypointSourceName;
 	public static String PatrolWaypointSource_WaypointNotFoundError;
 	public static String PatrolXmlImportDialog_AutoGenerateIdsTooltip;

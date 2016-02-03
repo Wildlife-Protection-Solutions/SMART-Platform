@@ -25,7 +25,10 @@ import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -34,6 +37,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite;
@@ -64,6 +68,10 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	private Button btnIncludeAllTypes;
 	private CheckboxTableViewer patrolTypeTableViewer;
 	
+	//sort by option
+	private ComboViewer sortBy;
+	private ComboViewer sortByDir;
+	
 	/**
 	 * Create the dialog.
 	 * @param parent parent shell
@@ -85,7 +93,14 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	 */
 	@Override
 	protected void updateFilterModel(){
-		this.currentFilter.setDateFilter(dateFilterCmp.getDateFilterForModel(),
+		updateFilterModel(currentFilter);
+		
+	}
+	/*
+	 * Updates the filter with the values from the user
+	 */
+	private void updateFilterModel(PatrolViewFilter toUpdate){
+		toUpdate.setDateFilter(dateFilterCmp.getDateFilterForModel(),
 				dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
 		
 		if (btnFilterTypes.getSelection()){
@@ -94,13 +109,17 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 			for (int i = 0; i < values.length; i ++){
 				types[i] = ((PatrolType.Type) values[i]);
 			}
-			this.currentFilter.setPatrolTypes(types);
+			toUpdate.setPatrolTypes(types);
 		}else{
-			this.currentFilter.setPatrolTypes(null);
+			toUpdate.setPatrolTypes(null);
 		}
 		
-		currentFilter.setPatrolIdFilter(patrolIdFilterCmp.getComparisonForModel(), 
+		toUpdate.setPatrolIdFilter(patrolIdFilterCmp.getComparisonForModel(), 
 				patrolIdFilterCmp.getFilterValueForModel());
+		
+		PatrolViewFilter.SortBy sb = (PatrolViewFilter.SortBy) ((IStructuredSelection)sortBy.getSelection()).getFirstElement();
+		PatrolViewFilter.SortByDir dir = (PatrolViewFilter.SortByDir) ((IStructuredSelection)sortByDir.getSelection()).getFirstElement();
+		toUpdate.setSortBy(sb, dir);
 	}
 
 	/**
@@ -124,7 +143,11 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		
 		//patrol id
 		patrolIdFilterCmp.applyState(currentFilter.getPatrolIdComparator(), currentFilter.getPatrolIdFilter(), null);
+		
+		sortBy.setSelection(new StructuredSelection(currentFilter.getSortBy()));
+		sortByDir.setSelection(new StructuredSelection(currentFilter.getSortByDir()));
 	}
+	
 	/**
 	 * Create contents of the dialog.
 	 */
@@ -152,16 +175,71 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 			patrolIdFilterCmp.setIncludeAllRadioLabel(Messages.PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel);
 			patrolIdFilterCmp.setFilterRadioLabel(Messages.PatrolFilterDialog_OpFilterPatrolIdLabel);
 			
+			
+			Composite sortDirection = createGroupComposite(Messages.PatrolFilterDialog_SortByOption, composite);
+			createSortBy(sortDirection);
+			
+			Link linkSave = new Link(composite, SWT.NONE);
+			linkSave.setText("<a>" + Messages.PatrolFilterDialog_SaveDefault + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			linkSave.setToolTipText(Messages.PatrolFilterDialog_SaveDefaultTooltip);
+			linkSave.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+			linkSave.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					PatrolViewFilter temp = currentFilter.clone();
+					updateFilterModel(temp);
+					temp.saveAsPreference();
+				}
+			});
+			
 			updateControlsValues();
 		} finally {
 			session.getTransaction().rollback();
 			session.close();
 		}
 		
+		
 		return filter;
 
 	}
 
+	/*
+	 * Creates the patrol type filter section
+	 */
+	private void createSortBy(Composite parent) {
+		
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout(2, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		sortBy = new ComboViewer(main, SWT.READ_ONLY);
+		sortBy.setContentProvider(ArrayContentProvider.getInstance());
+		sortBy.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof PatrolViewFilter.SortBy){
+					return ((PatrolViewFilter.SortBy) element).guiName;
+				}
+				return super.getText(element);
+			}
+		});
+		sortBy.setInput(PatrolViewFilter.SortBy.values());
+		
+		sortByDir = new ComboViewer(main, SWT.READ_ONLY);
+		sortByDir.setContentProvider(ArrayContentProvider.getInstance());
+		sortByDir.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof PatrolViewFilter.SortByDir){
+					return ((PatrolViewFilter.SortByDir) element).guiName;
+				}
+				return super.getText(element);
+			}
+		});
+		sortByDir.setInput(PatrolViewFilter.SortByDir.values());
+	}
+	
+	
 	/*
 	 * Creates the patrol type filter section
 	 */
