@@ -132,6 +132,21 @@ public class HibernateManager {
 	/**
 	 * 
 	 * @param session
+	 * @return a list of conservation areas in the system
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<ConservationAreaInfo> getConservationAreaInfosWithoutCCAA(Session session) {
+		UUID CCAAUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+		return (List<ConservationAreaInfo>)session
+				.createCriteria(ConservationAreaInfo.class)
+				.add(Restrictions.ne("uuid", CCAAUuid)) //$NON-NLS-1$
+				.list();
+	}
+
+	
+	/**
+	 * 
+	 * @param session
 	 * @param caUuid
 	 * @return a specific conservation area 
 	 */

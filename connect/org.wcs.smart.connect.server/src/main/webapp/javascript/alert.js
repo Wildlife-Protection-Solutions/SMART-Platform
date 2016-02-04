@@ -1,4 +1,5 @@
 var ALERT_URL = "../api/connectalert/";
+//var ALERT_URL = "https://office.refractions.net:8443/server/api/echoapi/";
 var FILTER_URL = "../api/connectalertfilterdefault/";
 var interval = 7000; //# of milli-seconds between map refresh on the alert layer,
 					//overridden by the defaults once they load
@@ -193,19 +194,29 @@ function createNewAlert() {
 	usergenid = Math.round(usergenid);
 	
 	
-	var jsonData = {
-		"userGeneratedId" : usergenid,
-		"caUuid" : cauuid,
-		"description" : desc,
-		"typeUuid" : alerttypeuuid,
-		"x" : long,
-		"y" : lat,
-		"level" : level
-	};
-
+	var jsonData = { "type": "FeatureCollection", "features": [
+	{ "type": "Feature",
+	  "geometry": 
+	  	{ "type": "Point", "coordinates": [ long , lat] 
+	    },
+	  "properties": {
+	    "deviceId": "0",
+	    "id": "0",
+	    "latitude": 0,
+	    "longitude": 0,
+	    "altitude": 0,
+	    "accuracy": 0,
+	    "caUuid": cauuid,
+	    "level": level,
+	    "description": desc,
+	    "typeUuid": alerttypeuuid,
+	    "sighting": {}
+	  }
+	}
+	]};
+	
 	//make ajax call
 	hideInfo();
-
 	var oReq = new XMLHttpRequest();
 	oReq.onload = alertCreated;
 	oReq.open("POST", ALERT_URL  + encodeURIComponent(usergenid), true);

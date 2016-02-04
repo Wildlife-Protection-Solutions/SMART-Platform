@@ -10,10 +10,18 @@
 <body>
 <%@include file="header.jsp" %>
 <%@include file="menu.jsp" %>
-<div id= "main"><div class="pageheader">Welcome to SMART</div></div>
+<div id= "main"><div class="pageheader">Welcome to SMART</div>
 
 
+<iframe style="width:100%; height:600px;" src="https://smartconservationsoftware.org/connecthome"></iframe>
 
+<!-- <a href="http://smartconservationsoftware.org/connecthome"> -->
+<!-- <h2> -->
+<!-- Click Here for the Latest News and Information on SMART Connect</h2><br> -->
+<!-- </a> -->
+
+
+</div>
 <%@include file="footer.jsp" %>
 </body>
 </html>

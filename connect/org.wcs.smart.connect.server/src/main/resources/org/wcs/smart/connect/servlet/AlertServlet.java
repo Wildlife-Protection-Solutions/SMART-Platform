@@ -71,7 +71,7 @@ public class AlertServlet extends HttpServlet{
 		session.beginTransaction();
 		try{
 			users = HibernateManager.getUsers(session);
-			cas = HibernateManager.getConservationAreaInfos(session);
+			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(session);
 			alertTypes = HibernateManager.getAlertTypes(session);
 			mapLayers = HibernateManager.getMapLayers(session);
 			defaults = HibernateManager.getAlertFilterDefaults(session);

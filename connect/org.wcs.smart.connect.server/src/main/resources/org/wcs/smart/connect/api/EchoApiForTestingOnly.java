@@ -25,6 +25,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -58,6 +59,7 @@ public class EchoApiForTestingOnly extends HttpServlet{
 	 * echos back the JSON passed in  
 	 */
 	
+
 	@POST
     @Path("{id}")
 	@Consumes({ MediaType.APPLICATION_JSON})
@@ -65,5 +67,13 @@ public class EchoApiForTestingOnly extends HttpServlet{
     public String echoBack(@PathParam("id") String id, String json){
 		return json; 
 	}
-	
+
+	@GET
+    @Path("{id}")
+	@Consumes({ MediaType.APPLICATION_JSON})
+	@Produces({ MediaType.APPLICATION_JSON })
+    public String echoBackget(@PathParam("id") String id, String json){
+		return json; 
+	}
+
 }

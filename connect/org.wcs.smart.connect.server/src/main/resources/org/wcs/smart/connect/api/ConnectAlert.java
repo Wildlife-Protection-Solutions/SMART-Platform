@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.connect.api;
 
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -60,6 +63,7 @@ import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.GeoJsonAlert;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
@@ -346,7 +350,7 @@ public class ConnectAlert extends HttpServlet {
 	
 	@POST
     @Path("/{usergenid}")
-    public Alert addAlert(@PathParam("usergenid") String userGenId, Alert newAlert) {
+    public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newAlert) {
 		validateUser(AlertAction.CREATE_ALERTS_KEY);
 			
 		//validate usergenid, is it unique?
@@ -355,30 +359,28 @@ public class ConnectAlert extends HttpServlet {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
 		}
 		
+		
 		validateAlertValues(newAlert);
 		
 		Alert a = new Alert();
+		
+		a.setUserGeneratedId(userGenId);
 
 		//default to now if no date given 
-		if(newAlert.getDate() == null){
+		if(newAlert.getDateTime() == null){
 			a.setDate(new Date());
 		}else{
-			a.setDate(newAlert.getDate());
+			a.setDate(newAlert.getDateTime());
 		}
 		
 		//default to Active for new alerts 
-		if(newAlert.getStatus() == null){
-			a.setStatus(AlertStatusEnum.ACTIVE);
-		}else{
-			a.setStatus(newAlert.getStatus());
-		}
-		
+		a.setStatus(AlertStatusEnum.ACTIVE);
 		a.setDescription(newAlert.getDescription());
 		a.setLevel(newAlert.getLevel());
 
 		a.setUserGeneratedId(userGenId);
-		a.setX(newAlert.getX());
-		a.setY(newAlert.getY());
+		a.setX(newAlert.getLongitude());
+		a.setY(newAlert.getLatitude());
 		a.setCaUuid(newAlert.getCaUuid());
 		a.setTypeUuid(newAlert.getTypeUuid());
 		
@@ -574,6 +576,15 @@ public class ConnectAlert extends HttpServlet {
 		return user.getUuid();
 	}
 
+    private void validateAlertValues(GeoJsonAlert newAlert) {
+    	Alert a = new Alert();
+    	a.setCaUuid(newAlert.getCaUuid());
+    	a.setX(newAlert.getLongitude());
+    	a.setY(newAlert.getLatitude());
+    	a.setTypeUuid(newAlert.getTypeUuid());
+    	a.setLevel(newAlert.getLevel());
+    	validateAlertValues(a); 
+    }
     private void validateAlertValues(Alert newAlert) {
 		//validate type
 		String err = validateAlertType(newAlert.getTypeUuid());
@@ -596,7 +607,6 @@ public class ConnectAlert extends HttpServlet {
 		if (newAlert.getLevel() == null || newAlert.getLevel() < -32768 || newAlert.getLevel() > 32767){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid Level (must be a an integer between -32768 and 32767):" + newAlert.getLevel());
 		}
-		
 	}
     
     private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
