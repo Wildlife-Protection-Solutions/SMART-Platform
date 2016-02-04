@@ -79,11 +79,11 @@ public class DownloadChangeLogJob extends Job {
 			monitor.subTask(Messages.DownloadChangeLogJob_WaitTaskName);
 			Long start = System.nanoTime();
 			WorkItemStatus status = null ;
-			int waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
+			int waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
 			while(status == null || (status.getStatus() == WorkItemStatus.Status.PROCESSING || 
 					status.getStatus() == WorkItemStatus.Status.PROCESSING)){
 				Long current = System.nanoTime();
-				if ( current - start > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception(Messages.DownloadChangeLogJob_Timeout);
+				if ( current - start > ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) * 1000000l) throw new Exception(Messages.DownloadChangeLogJob_Timeout);
 				Thread.sleep(waitTime);
 				try{
 					status = connect.getWorkItemStatus(statusUrl);
@@ -105,8 +105,8 @@ public class DownloadChangeLogJob extends Job {
 				String downloadUrl = nd.get("file_url").asText(); //$NON-NLS-1$
 				if (monitor.isCanceled()) return cancelled();
 				Integer promptSize = null;
-				if (connect.getServer().getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT)){
-					promptSize = connect.getServer().getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE);
+				if (ConnectServerOption.ConnectionOption.PACKAGE_PROMPT.getBooleanValue(connect.getServer())){
+					promptSize = ConnectServerOption.ConnectionOption.PACKAGE_PROMPT_SIZE.getIntegerValue(connect.getServer());
 				}
 				downloadFile = connect.downloadFileFromUrl(downloadUrl, promptSize, new SubProgressMonitor(monitor, 1));
 			}

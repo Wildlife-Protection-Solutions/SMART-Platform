@@ -39,12 +39,11 @@ import org.wcs.smart.connect.model.ConnectServer;
  */
 public class ServerOptionsWizardPage extends WizardPage  {
 
-	public static final String NAME = "SERVER_OPTIONS"; //$NON-NLS-1$
+	private IServerOptionsPanel panel;
 	
-	private ServerOptionsPanel pnl;
-	
-	public ServerOptionsWizardPage(){
-		super(NAME);
+	public ServerOptionsWizardPage(IServerOptionsPanel panel){
+		super(panel.getClass().getCanonicalName());
+		this.panel = panel;
 	}
 	@Override
 	public void createControl(Composite parent) {
@@ -56,7 +55,7 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
-		pnl = new ServerOptionsPanel(inner);
+		panel.createComposite(inner, true);
 		
 		setTitle(Messages.ServerOptionsWizardPage_Title);
 		setMessage(Messages.ServerOptionsWizardPage_Message);
@@ -64,8 +63,8 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		setControl(outer);
 	
 		ConnectServer tmp = new ConnectServer();
-		pnl.initValues(tmp);
-		pnl.addChangeListener(new ModifyListener() {
+		panel.initValues(tmp);
+		panel.addChangeListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				getWizard().getContainer().updateButtons();
@@ -77,11 +76,11 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		if (!super.isPageComplete()){
 			return false;
 		}
-		return pnl.isValid();
+		return panel.isValid();
 	}
 	
 	public void updateServer(ConnectServer server){
-		pnl.updateServer(server);
+		panel.updateServer(server);
 	}
 	
 }

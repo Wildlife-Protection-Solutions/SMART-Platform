@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.connect.dataqueue.processor" name="Data Queue Item Processor" schema="schema/org.wcs.smart.connect.dataqueue.processor.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -23,14 +24,15 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.connect.dataqueue.ui.ProcessDataQueueHandler$ProcessDataQueueHandlerWrapper"
+            class="org.wcs.smart.connect.dataqueue.internal.ui.ProcessDataQueueHandler$ProcessDataQueueHandlerWrapper"
             commandId="org.wcs.smart.connect.dataqueue.process">
       </handler>
    </extension>
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.wcs.smart.connect.dataqueue.ui.DataQueueView$DataQueueViewWrapper"
+            allowMultiple="false"
+            class="org.wcs.smart.connect.dataqueue.internal.ui.DataQueueView$DataQueueViewWrapper"
             id="org.wcs.smart.connect.dataqueue.queueview"
             name="Data Processing Queue"
             restorable="true">
@@ -43,6 +45,24 @@
             class="org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem"
             supportsCcaa="false">
       </class>
+   </extension>
+   <extension
+         point="org.wcs.smart.connect.configure.optionpanel">
+      <Panel
+            class="org.wcs.smart.connect.dataqueue.internal.ui.config.DataQueueOptionPanel">
+      </Panel>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.login">
+      <loginHandler
+            clazz="org.wcs.smart.connect.dataqueue.LoginHandler">
+      </loginHandler>
+   </extension>
+   <extension
+         point="org.wcs.smart.connect.status.contribution">
+      <contribution
+            class="org.wcs.smart.connect.dataqueue.internal.ui.StatusLineContribution">
+      </contribution>
    </extension>
 
 </plugin>

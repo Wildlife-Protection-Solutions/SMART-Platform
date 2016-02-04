@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.ui.server.configure;
 
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -53,10 +54,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class EditConnectServerInfoDialog extends TitleAreaDialog{
 
 	private ServerPanel serverpnl;
-	private AutoOptionsPanel autoPnl;
-	private ServerOptionsPanel optionsPnl;
+	
 	private ConnectServer server;
 	private boolean changesMade = false;
+	private IServerOptionsPanel[]  optionPanels = OptionPanelManager.createOptionPanels();
 	
 	public EditConnectServerInfoDialog(Shell parentShell, ConnectServer server) {
 		super(parentShell);
@@ -65,7 +66,6 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 	}
 
 	protected void okPressed() {
-		boolean isAutoReplicationPrev = server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY);
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
@@ -86,18 +86,16 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 				}
 			}
 			
-			
-			optionsPnl.updateServer(server);
-			autoPnl.updateServer(server);
+			for (IServerOptionsPanel pnl : optionPanels){
+				pnl.updateServer(server);
+			}
 			
 			s.getTransaction().commit();
 			
-			boolean isAutoReplication = server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY);
-			if (!isAutoReplicationPrev && isAutoReplication){
-				//auto replication state has been updated; we need to intiaite auto replication
-				int delay = server.getOptionAsInt(ConnectServerOption.Option.SYNC_MINUTE);
-				AutoReplicationStartUp.INSTANCE.enableAutoReplication(delay);
+			for (IServerOptionsPanel pnl : optionPanels){
+				pnl.afterSave(server);
 			}
+			
 		}catch (Exception ex){
 			ConnectPlugIn.displayLog(Messages.EditConnectServerInfoDialog_ServerError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return;
@@ -138,21 +136,17 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		TabFolder tabConfig = new TabFolder(g, SWT.NONE);
 		tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText(Messages.EditConnectServerInfoDialog_AutoLabel);
-		ti.setControl(autoPnl = new AutoOptionsPanel(tabConfig));
-		
-		ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText(Messages.EditConnectServerInfoDialog_ConnectLabel);
-		ti.setControl(optionsPnl = new ServerOptionsPanel(tabConfig));
+		for(IServerOptionsPanel pnl : optionPanels){
+			TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
+			ti.setText(pnl.getName());
+			ti.setControl(pnl.createComposite(tabConfig, true));
+			
+			pnl.initValues(server);
+			pnl.addChangeListener(validateListener);
+		}
 		
 		serverpnl.initValues(server);
-		optionsPnl.initValues(server);
-		autoPnl.initValues(server);
-		
 		serverpnl.addChangeListener(validateListener);
-		optionsPnl.addChangeListener(validateListener);
-		autoPnl.addChangeListener(validateListener);
 		
 		validate();
 		
@@ -175,15 +169,12 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 	
 	private void validate(){
 		setErrorMessage(null);
-		if (!optionsPnl.isValid()){
-			setErrorMessage(Messages.EditConnectServerInfoDialog_connectError);
-			enableOk(false);
-			return;
-		}
-		if (!autoPnl.isValid()){
-			setErrorMessage(Messages.EditConnectServerInfoDialog_autoError);
-			enableOk(false);
-			return;
+		for (IServerOptionsPanel pnl : optionPanels){
+			if (!pnl.isValid()){
+				setErrorMessage(MessageFormat.format("{0} configuration contains an error.", pnl.getName()));
+				enableOk(false);
+				return;
+			}
 		}
 		
 		if (!serverpnl.isValid()){

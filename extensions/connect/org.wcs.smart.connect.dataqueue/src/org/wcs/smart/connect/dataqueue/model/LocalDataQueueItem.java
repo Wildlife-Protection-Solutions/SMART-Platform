@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.dataqueue.model;
 
 import java.util.Date;
@@ -10,22 +31,47 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 
+/**
+ * Local data queue item.  Extends the shared data queue item adding
+ * additional fields specific to processing the local datastore.
+ * @author Emily
+ *
+ */
 @Entity
 @Table(name="smart.connect_data_queue")
 public class LocalDataQueueItem extends DataQueueItem{
 
 	public enum Status{
-		QUEUED,
-		DOWNLOADING,
-		PROCESSING,
-		COMPLETE,
-		ERROR;
+		QUEUED ("QUEUED"),
+		DOWNLOADING ("DOWNLOADING"),
+		PROCESSING ("PROCESSING"),
+		COMPLETE ("COMPLETE"),
+		COMPLETE_WARN ("COMPLETE WARNING"),
+		ERROR ("ERROR");
+		
+		String guiName;
+		
+		Status(String guiName){
+			this.guiName = guiName;
+		}
+		
+		public String getGuiName(){
+			return this.guiName;
+		}
 		
 		public Image getImage(){
 			if (this == ERROR){
-				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON);
+				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.ERROR_ICON);
+			}else if (this == DOWNLOADING || this == PROCESSING){
+				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.PROCESSING_ICON);
+			}else if (this == QUEUED){
+				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.QUEUED_ICON);
+			}else if (this == COMPLETE){
+				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.COMPLETE_ICON);
+			}else if (this == COMPLETE_WARN){
+				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.COMPLETE_WARN_ICON);
 			}
 			return null;
 		}

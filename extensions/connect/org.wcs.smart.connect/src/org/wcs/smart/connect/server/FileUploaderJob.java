@@ -73,12 +73,12 @@ public abstract class FileUploaderJob extends Job {
 				return ;
 			}
 			int cnt = 0;			
-			long waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
+			long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
 			
 			monitor.subTask(Messages.FileUploaderJob_subTaskName);
 			CopyProgressMonitor copyMonitor = new CopyProgressMonitor(new SubProgressMonitor(monitor,3), Files.size(file));
 			
-			while(cnt < connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)){
+			while(cnt < ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer())){
 				//upload file
 				try{
 					cnt++;
@@ -97,7 +97,7 @@ public abstract class FileUploaderJob extends Job {
 				if (monitor.isCanceled()) throw new Exception(Messages.FileUploaderJob_Cancelled);
 			}
 			//if we are here we have tried max_retry times and the file has still not been uploaded
-			throw new Exception(MessageFormat.format(Messages.FileUploaderJob_ToManyTried, connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)));
+			throw new Exception(MessageFormat.format(Messages.FileUploaderJob_ToManyTried, ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer())));
 		}catch(Exception ex){
 			serverStatus.setMessage(ex.getMessage());
 			onError(serverStatus.getMessage());
@@ -141,7 +141,7 @@ public abstract class FileUploaderJob extends Job {
 				//we waited 5 minutes and we do not know how to proceed
 				throw new Exception(
 						MessageFormat.format(
-								Messages.FileUploaderJob_ToLong, connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) / (1000 *60.0) ));
+								Messages.FileUploaderJob_ToLong, ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) / (1000 *60.0) ));
 			}
 			return true;
 			
@@ -164,8 +164,8 @@ public abstract class FileUploaderJob extends Job {
 		
 		Long startTime = System.nanoTime();
 		Long currentTime = System.nanoTime();
-		long waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
-		while( (currentTime - startTime)  < connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l){
+		long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
+		while( (currentTime - startTime)  < ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) * 1000000l){
 			Thread.sleep(waitTime);
 			try{
 				WorkItemStatus serverStatus = connect.getWorkItemStatus(url);

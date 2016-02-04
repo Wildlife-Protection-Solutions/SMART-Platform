@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue.server;
+package org.wcs.smart.connect.dataqueue.internal.server;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ import javax.ws.rs.QueryParam;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 
 /**
- * JAX-RS REST client api for SMART Connect requests 
+ * JAX-RS REST client api for SMART Connect dataqueue requests 
  * 
  * @author Emily
  *

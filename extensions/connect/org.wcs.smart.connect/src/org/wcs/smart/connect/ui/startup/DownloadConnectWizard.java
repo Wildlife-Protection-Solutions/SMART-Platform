@@ -41,6 +41,7 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.server.DownloadCaEngine;
 import org.wcs.smart.connect.ui.server.configure.ConnectServerWizard;
+import org.wcs.smart.connect.ui.server.configure.ServerOptionsPanel;
 import org.wcs.smart.connect.ui.server.configure.ServerOptionsWizardPage;
 import org.wcs.smart.connect.ui.server.configure.ServerWizardPage;
 import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
@@ -78,8 +79,8 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 			}
 		};
 		server.setServerUrl(url);
-		server.setOptions(new HashMap<ConnectServerOption.Option, ConnectServerOption>());
-		((ServerOptionsWizardPage)getPage(ServerOptionsWizardPage.NAME)).updateServer(server);
+		server.setOptions(new HashMap<String, ConnectServerOption>());
+		((ServerOptionsWizardPage)getPage(ServerOptionsPanel.class.getCanonicalName())).updateServer(server);
 		if (!certificateFile.trim().isEmpty()){
 			server.setCertificateFileName(certificateFile);
 		}

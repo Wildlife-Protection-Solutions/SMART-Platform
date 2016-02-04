@@ -94,11 +94,11 @@ public class DownloadCaEngine {
 		monitor.subTask(Messages.DownloadCaEngine_WaitSubTaskName);
 		Long start = System.nanoTime();
 		WorkItemStatus status = null ;
-		int waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
+		int waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
 		while(status == null || status.getStatus() == WorkItemStatus.Status.PROCESSING){
 			Long current = System.nanoTime();
 			
-			if ( (current - start) > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception(Messages.DownloadCaEngine_Timeout);
+			if ( (current - start) > ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) * 1000000l) throw new Exception(Messages.DownloadCaEngine_Timeout);
 			Thread.sleep(waitTime);
 			try{
 				status = connect.getWorkItemStatus(statusUrl);

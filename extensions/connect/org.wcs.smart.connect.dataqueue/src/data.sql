@@ -20,7 +20,7 @@ data_queue_ca_uuid_fk foreign key (ca_uuid)
 REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE smart.connect_data_queue ADD CONSTRAINT status_chk 
-CHECK (status IN ('DOWNLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'ERROR'));
+CHECK (status IN ('DOWNLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR'));
 
 		
 ALTER TABLE smart.connect_data_queue ADD CONSTRAINT type_chk 

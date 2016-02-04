@@ -45,9 +45,9 @@ public enum AutoReplicationStartUp {
 			ConnectServer cs = ConnectHibernateManager.getConnectServer(s);
 			if (cs == null) return;
 			
-			if (cs.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY)){
+			if (ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(cs)){
 				//start auto sync job
-				int delay = cs.getOptionAsInt(ConnectServerOption.Option.SYNC_MINUTE);
+				int delay = ConnectServerOption.ConnectionOption.SYNC_MINUTE.getIntegerValue(cs);
 				enableAutoReplication(delay);
 			}
 		}finally{

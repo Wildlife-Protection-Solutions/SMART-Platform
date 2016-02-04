@@ -105,10 +105,10 @@ public class SyncOnStartupProcessor {
 		}
 		if (cs == null) return;
 		
-		if (!cs.getOptionAsBoolean(ConnectServerOption.Option.DOWNLOAD_ON_STARTUP)){
+		if (!ConnectServerOption.ConnectionOption.DOWNLOAD_ON_STARTUP.getBooleanValue(cs)){
 			return;
 		}
-		boolean upload = cs.getOptionAsBoolean(ConnectServerOption.Option.UPLOAD_ON_STARTUP);
+		boolean upload = ConnectServerOption.ConnectionOption.UPLOAD_ON_STARTUP.getBooleanValue(cs);
 	
 		Shell activeShell = Display.getDefault().getActiveShell();
 		if (promptSync(upload, activeShell)){
@@ -152,12 +152,12 @@ public class SyncOnStartupProcessor {
 		}
 		if (cs == null) return;
 		
-		if (!cs.getOptionAsBoolean(ConnectServerOption.Option.DOWNLOAD_ON_SHUTDOWN)){
+		if (!ConnectServerOption.ConnectionOption.DOWNLOAD_ON_SHUTDOWN.getBooleanValue(cs)){
 			//no longer check on shutdown
 			return;
 		}
 		
-		boolean upload = cs.getOptionAsBoolean(ConnectServerOption.Option.UPLOAD_ON_SHUTDOWN);
+		boolean upload = ConnectServerOption.ConnectionOption.UPLOAD_ON_SHUTDOWN.getBooleanValue(cs);
 		Shell activeShell = Display.getDefault().getActiveShell();
 		if (promptSync(upload, activeShell)){
 			runDownloadSync(upload, SmartDB.getCurrentConservationArea(), activeShell);

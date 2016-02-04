@@ -449,11 +449,32 @@ public class SmartConnect {
 		return cont[0];
 	}
 	
+	private String parseFilenameFromContent(String content){
+		if (content == null) return null;
+		int index = content.indexOf("filename=");
+		if (index > 0){
+			int index2 = content.indexOf(";", index);
+			if (index2 < 0) index2 = content.length();
+			String filename = content.substring(index+"filename=".length(), index2);
+			if(filename.startsWith("\"")){
+				filename = filename.substring(1);
+			}
+			if (filename.endsWith("\"")){
+				filename = filename.substring(0, filename.length() - 1);
+			}
+			if (filename.length() > 0){
+				return filename;
+			}
+		}
+		return null;
+	}
 	/**
 	 * Downloads a file from a given URL.  This will try multiple
 	 * times to download.
 	 * Provides the option for prompting before continuing with download if
 	 * download package size is large.
+	 *  
+	 *  //TODO: DOES NOT DOWNLOAD CHUNKS - ALL OR NOTHING; CANNOT RESUME*
 	 *  
 	 * @param url the URL to download from
 	 * @param promptDownloadSizeMb prompt the user to continue if the download
@@ -467,19 +488,18 @@ public class SmartConnect {
 		int tryCount = 0;
 		
 		//download file name
-		Path filestore = FileSystems.getDefault()
+		Path filestorea = FileSystems.getDefault()
 			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
-			.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR)
-			.resolve(System.nanoTime() + ".temp"); //$NON-NLS-1$
+			.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR);
 		//create necessary dirs
-		Files.createDirectories(filestore.getParent());
-		
+		Files.createDirectories(filestorea.getParent());
+		Path filestore = null;
 		Long size = null;
 		
-		long waitTime = server.getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
+		long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(server);
 		CopyProgressMonitor copyMonitor = null;
 		//first request; this one gives us the requested size
-		while(size == null && tryCount < server.getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_DOWNLOAD )){
+		while(size == null && tryCount < ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD.getIntegerValue(server)){
 			Response r = null;
 			try{
 				createClient();
@@ -488,6 +508,15 @@ public class SmartConnect {
 
 				if (r.getStatus() == HttpURLConnection.HTTP_OK){
 					size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+					if (filestore == null){
+						String filename = parseFilenameFromContent(r.getHeaderString(HttpHeaders.CONTENT_DISPOSITION));
+						if (filename != null){
+							filestore = filestorea.resolve(System.nanoTime() + "." + filename);
+						}else{
+							filestorea = filestorea.resolve(System.nanoTime() + ".temp");
+						}
+					}
+					
 					copyMonitor = new CopyProgressMonitor(monitor, size);
 					if (promptDownloadSizeMb != null &&
 							size > promptDownloadSizeMb * 1000000 ){
@@ -525,7 +554,7 @@ public class SmartConnect {
 		}
 		
 		//try a maximum of 10 times
-		while(tryCount < server.getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_DOWNLOAD)){
+		while(tryCount < ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD.getIntegerValue(server)){
 			downloadRequest(filestore, url, size, copyMonitor);
 			
 			if (Files.size(filestore) > size){

@@ -32,7 +32,6 @@ import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
-import org.wcs.smart.connect.model.ConnectServerOption.Option;
 
 /**
  * Clones connect data when cloning a conservation area.  This clones:
@@ -60,9 +59,9 @@ public class CloneConnect implements IConservationAreaTemplateCloner {
 					clone.setCertificateFile(server.getLocalCertificateFile());
 				}
 				//clone options
-				Map<Option, ConnectServerOption> options = server.getOptions();
-				clone.setOptions(new HashMap<Option, ConnectServerOption>());
-				for (Entry<Option, ConnectServerOption> op : options.entrySet()){
+				Map<String, ConnectServerOption> options = server.getOptions();
+				clone.setOptions(new HashMap<String, ConnectServerOption>());
+				for (Entry<String, ConnectServerOption> op : options.entrySet()){
 					clone.setOption(op.getKey(), op.getValue().getValue());
 				}
 				s.save(clone);

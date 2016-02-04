@@ -156,9 +156,9 @@ public class UploadChangeLogEngine {
 					}
 					
 					//check package size
-					if (connect.getServer().getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT)){
+					if (ConnectServerOption.ConnectionOption.PACKAGE_PROMPT.getBooleanValue(connect.getServer())){
 						long sizeInBytes = Files.size(Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile()));
-						long maxSizeInBytes = connect.getServer().getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE) * 1000000l;
+						long maxSizeInBytes = ConnectServerOption.ConnectionOption.PACKAGE_PROMPT_SIZE.getIntegerValue(connect.getServer()) * 1000000l;
 						
 						if (sizeInBytes > maxSizeInBytes){
 							//prompt to continue
@@ -167,7 +167,6 @@ public class UploadChangeLogEngine {
 
 								@Override
 								public void run() {
-									// TODO Auto-generated method stub
 									cont[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
 											Messages.UploadChangeLogEngine_UploadSizeDialogTitle, 
 											MessageFormat.format(Messages.UploadChangeLogEngine_UploadSizeDialogMessage, sizeInBytes / 1000000.0, maxSizeInBytes/1000000.0));		
