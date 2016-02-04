@@ -64,7 +64,7 @@ public class ConnectServer extends UuidItem{
 	private ConservationArea ca;
 	private String serverUrl;
 	private String certificate;
-	private Map<ConnectServerOption.Option, ConnectServerOption> options;
+	private Map<String, ConnectServerOption> options;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -99,12 +99,12 @@ public class ConnectServer extends UuidItem{
 	
 	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy="id.server")
-	@MapKey(name="id.option")
-	public Map<ConnectServerOption.Option, ConnectServerOption> getOptions(){
+	@MapKey(name="id.optionKey")
+	public Map<String, ConnectServerOption> getOptions(){
 		return this.options;
 	}
 	
-	public void setOptions(Map<ConnectServerOption.Option, ConnectServerOption> options){
+	public void setOptions(Map<String, ConnectServerOption> options){
 		this.options = options;
 	}
 	
@@ -149,37 +149,49 @@ public class ConnectServer extends UuidItem{
 	public Path getLocalCertificateFile(){
 		return Paths.get(ca.getFileDataStoreLocation(),
 				getCertificateFileName());
-	}
-
+	}	
 	
+	/**
+	 * Gets the option represented by the option key as a 
+	 * integer value.  Will return null if option not found.
+	 * @param optionKey
+	 * @return
+	 */
 	@Transient
-	public int getOptionAsInt(ConnectServerOption.Option option){
-		if (options == null || options.get(option) == null 
-				|| options.get(option).getValue() == null){
-			return (Integer)option.defaultValue;
+	public Integer getOptionAsInt(String optionKey){
+		if (options == null || options.get(optionKey) == null 
+				|| options.get(optionKey).getValue() == null){
+			return null;
 		}
-		String x = options.get(option).getValue();
+		String x = options.get(optionKey).getValue();
 		return Integer.valueOf(x);
 	}
 	
+	
+	/**
+	 * Gets the option represented by the option key as a 
+	 * boolean value.  Will return null if option not found.
+	 * @param optionKey
+	 * @return
+	 */
 	@Transient
-	public boolean getOptionAsBoolean(ConnectServerOption.Option option){
-		if (options == null || options.get(option) == null 
-				|| options.get(option).getValue() == null){
-			return (Boolean)option.defaultValue;	
+	public Boolean getOptionAsBoolean(String optionKey){
+		if (options == null || options.get(optionKey) == null 
+				|| options.get(optionKey).getValue() == null){
+			return null;	
 		}
-		String x = options.get(option).getValue();
+		String x = options.get(optionKey).getValue();
 		return Boolean.valueOf(x);
 	}
 	
 	@Transient
-	public void setOption(ConnectServerOption.Option option, String value){
-		ConnectServerOption op = options.get(option);
+	public void setOption(String optionKey, String value){
+		ConnectServerOption op = options.get(optionKey);
 		if (op == null){
 			op = new ConnectServerOption();
 			op.setServer(this);
-			op.setOption(option);
-			options.put(option, op);	
+			op.setOptionKey(optionKey);
+			options.put(optionKey, op);	
 		}
 		op.setValue(value);
 		

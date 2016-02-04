@@ -40,7 +40,7 @@ public enum ServerOptionLabelProvider {
 	 * @param option
 	 * @return
 	 */
-	public String getOptionLabel(ConnectServerOption.Option option){
+	public String getOptionLabel(ConnectServerOption.ConnectionOption option){
 		switch(option){
 		case MAX_PROCESSING_WAIT_TIME:
 			return Messages.ServerOptionLabelProvider_ServerWaitTimeLabel;
@@ -82,7 +82,7 @@ public enum ServerOptionLabelProvider {
 	 * @param option
 	 * @return
 	 */
-	public String getOptionTooltip(ConnectServerOption.Option option){
+	public String getOptionTooltip(ConnectServerOption.ConnectionOption option){
 		switch(option){
 		case MAX_PROCESSING_WAIT_TIME:
 			return Messages.ServerOptionLabelProvider_ServerWaitTimeTooltip;
@@ -127,7 +127,7 @@ public enum ServerOptionLabelProvider {
 	 * @param server
 	 * @return
 	 */
-	public String getValueInDisplayUnits(ConnectServerOption.Option option, ConnectServer server){
+	public String getValueInDisplayUnits(ConnectServerOption.ConnectionOption option, ConnectServer server){
 		String value = null;
 		if (server.getOptions() == null || server.getOptions().get(option) == null){
 			value = option.getDefaultValueAsString();
@@ -135,7 +135,7 @@ public enum ServerOptionLabelProvider {
 			value = server.getOptions().get(option).getValue();
 		}
 		
-		if (option == ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME){
+		if (option == ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME){
 			value = String.valueOf(Long.parseLong(value) / 1000);
 		}
 		return value;

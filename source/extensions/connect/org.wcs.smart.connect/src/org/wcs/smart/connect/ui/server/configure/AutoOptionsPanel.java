@@ -43,7 +43,8 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
-import org.wcs.smart.connect.model.ConnectServerOption.Option;
+import org.wcs.smart.connect.model.ConnectServerOption.ConnectionOption;
+import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 
 /**
  * Composite that contains all the options
@@ -52,7 +53,7 @@ import org.wcs.smart.connect.model.ConnectServerOption.Option;
  * @author Emily
  *
  */
-public class AutoOptionsPanel extends Composite {
+public class AutoOptionsPanel implements IServerOptionsPanel {
 
 	private Collection<ModifyListener> listeners;
 	
@@ -71,58 +72,58 @@ public class AutoOptionsPanel extends Composite {
 	private Text txtMinutes, txtPackageSize;
 	private ControlDecoration cdMinutes, cdPackageSize;
 	
-	public AutoOptionsPanel(Composite parent) {
-		this(parent, true);
+	private boolean isAutoReplicationPrev;
+	
+	@Override
+	public String getName(){
+		return "Automatic Sync Options";
 	}
 	
-	public AutoOptionsPanel(Composite parent, boolean isEditable) {
-		super(parent, SWT.NONE);
-		this.isEditable = isEditable;
+	@Override
+	public Composite createComposite(Composite parent, boolean isEditable){
 		listeners = new ArrayList<ModifyListener>();
-		createControl();
-	}
-	
-	protected void createControl(){
-		setLayout(new GridLayout());
 		
-		Group g1 = new Group(this, SWT.DEFAULT);
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout());
+		
+		Group g1 = new Group(main, SWT.DEFAULT);
 		g1.setText(Messages.AutoOptionsPanel_StartUpOptionLabel);
 		g1.setLayout(new GridLayout());
 		g1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnDownStartUp = new Button(g1, SWT.CHECK);
-		btnDownStartUp.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.DOWNLOAD_ON_STARTUP));
-		btnDownStartUp.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.DOWNLOAD_ON_STARTUP));
+		btnDownStartUp.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.DOWNLOAD_ON_STARTUP));
+		btnDownStartUp.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.DOWNLOAD_ON_STARTUP));
 		
 		btnUploadStartUp = new Button(g1, SWT.CHECK);
-		btnUploadStartUp.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.UPLOAD_ON_STARTUP));
-		btnUploadStartUp.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.UPLOAD_ON_STARTUP));
+		btnUploadStartUp.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.UPLOAD_ON_STARTUP));
+		btnUploadStartUp.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.UPLOAD_ON_STARTUP));
 		btnUploadStartUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnUploadStartUp.getLayoutData()).horizontalIndent = 10;
 		
-		Group g2 = new Group(this, SWT.DEFAULT);
+		Group g2 = new Group(main, SWT.DEFAULT);
 		g2.setText(Messages.AutoOptionsPanel_ShutdownOpLabel);
 		g2.setLayout(new GridLayout());
 		g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnDownShutDown = new Button(g2, SWT.CHECK);
-		btnDownShutDown.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.DOWNLOAD_ON_SHUTDOWN));
-		btnDownShutDown.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.DOWNLOAD_ON_SHUTDOWN));
+		btnDownShutDown.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.DOWNLOAD_ON_SHUTDOWN));
+		btnDownShutDown.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.DOWNLOAD_ON_SHUTDOWN));
 		
 		btnUploadShutDown = new Button(g2, SWT.CHECK);
-		btnUploadShutDown.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.UPLOAD_ON_SHUTDOWN));
-		btnUploadShutDown.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.UPLOAD_ON_SHUTDOWN));
+		btnUploadShutDown.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.UPLOAD_ON_SHUTDOWN));
+		btnUploadShutDown.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.UPLOAD_ON_SHUTDOWN));
 		btnUploadShutDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnUploadShutDown.getLayoutData()).horizontalIndent = 10;
 		
-		Group g3 = new Group(this, SWT.DEFAULT);
+		Group g3 = new Group(main, SWT.DEFAULT);
 		g3.setText(Messages.AutoOptionsPanel_AutoOpLabel);
 		g3.setLayout(new GridLayout());
 		g3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnAutoCheck = new Button(g3, SWT.CHECK);
-		btnAutoCheck.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.SYNC_AUTOMATICALLY));
-		btnAutoCheck.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.SYNC_AUTOMATICALLY));
+		btnAutoCheck.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.SYNC_AUTOMATICALLY));
+		btnAutoCheck.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.SYNC_AUTOMATICALLY));
 		
 		Composite minComp = new Composite(g3, SWT.NONE);
 		minComp.setLayout(new GridLayout(3, false));
@@ -156,31 +157,31 @@ public class AutoOptionsPanel extends Composite {
 		});
 
 		btnPrompt = new Button(g3, SWT.CHECK);
-		btnPrompt.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.SYNC_PROMPT_PASSWORD));
-		btnPrompt.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.SYNC_PROMPT_PASSWORD));
+		btnPrompt.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.SYNC_PROMPT_PASSWORD));
+		btnPrompt.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.SYNC_PROMPT_PASSWORD));
 		btnPrompt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnPrompt.getLayoutData()).horizontalIndent = 10;
 				
 		btnDownload = new Button(g3, SWT.CHECK);
-		btnDownload.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.SYNC_DOWNLOAD));
-		btnDownload.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.SYNC_DOWNLOAD));
+		btnDownload.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.SYNC_DOWNLOAD));
+		btnDownload.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.SYNC_DOWNLOAD));
 		btnDownload.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnDownload.getLayoutData()).horizontalIndent = 10;
 		
 		btnUpload = new Button(g3, SWT.CHECK);
-		btnUpload.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.SYNC_AUTO_UPLOAD));
-		btnUpload.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.SYNC_AUTO_UPLOAD));
+		btnUpload.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.SYNC_AUTO_UPLOAD));
+		btnUpload.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.SYNC_AUTO_UPLOAD));
 		btnUpload.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnUpload.getLayoutData()).horizontalIndent = 20;
 		
-		Group g4 = new Group(this, SWT.DEFAULT);
+		Group g4 = new Group(main, SWT.DEFAULT);
 		g4.setText(Messages.AutoOptionsPanel_PackageOpLable);
 		g4.setLayout(new GridLayout(3, false));
 		g4.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnPackageSize = new Button(g4, SWT.CHECK);
-		btnPackageSize.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.PACKAGE_PROMPT));
-		btnPackageSize.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.PACKAGE_PROMPT));
+		btnPackageSize.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.PACKAGE_PROMPT));
+		btnPackageSize.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.PACKAGE_PROMPT));
 		btnPackageSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnPackageSize.getLayoutData()).horizontalIndent = 0;
 		
@@ -207,8 +208,8 @@ public class AutoOptionsPanel extends Composite {
 		});
 		
 		lblPackageSize = new Label(g4, SWT.NONE);
-		lblPackageSize.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.PACKAGE_PROMPT_SIZE));
-		lblPackageSize.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.PACKAGE_PROMPT_SIZE));
+		lblPackageSize.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.PACKAGE_PROMPT_SIZE));
+		lblPackageSize.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(ConnectionOption.PACKAGE_PROMPT_SIZE));
 		
 		if (isEditable){
 			SelectionListener ml = new SelectionAdapter() {
@@ -250,6 +251,8 @@ public class AutoOptionsPanel extends Composite {
 			txtPackageSize.setEnabled(false);
 			btnPackageSize.setEnabled(false);
 		}
+		
+		return main;
 	}
 	
 	public boolean isValid(){
@@ -262,6 +265,7 @@ public class AutoOptionsPanel extends Composite {
 		}
 	}
 	
+	@Override
 	public void addChangeListener(ModifyListener listener){
 		listeners.add(listener);
 	}
@@ -310,62 +314,65 @@ public class AutoOptionsPanel extends Composite {
 		txtPackageSize.setEnabled(btnPackageSize.getSelection());
 	}
 	
-
+	@Override
 	public void initValues(ConnectServer server){
 		if (server == null){
-			btnDownShutDown.setSelection(ConnectServerOption.Option.DOWNLOAD_ON_SHUTDOWN.getDefaultValueAsBoolean());
-			btnDownStartUp.setSelection(ConnectServerOption.Option.DOWNLOAD_ON_STARTUP.getDefaultValueAsBoolean());
-			btnUploadShutDown.setSelection(ConnectServerOption.Option.UPLOAD_ON_SHUTDOWN.getDefaultValueAsBoolean());
-			btnUploadStartUp.setSelection(ConnectServerOption.Option.UPLOAD_ON_STARTUP.getDefaultValueAsBoolean());
-			btnAutoCheck.setSelection(ConnectServerOption.Option.SYNC_AUTOMATICALLY.getDefaultValueAsBoolean());
-			btnDownload.setSelection(ConnectServerOption.Option.SYNC_DOWNLOAD.getDefaultValueAsBoolean());
-			btnUpload.setSelection(ConnectServerOption.Option.SYNC_AUTO_UPLOAD.getDefaultValueAsBoolean());
-			btnPrompt.setSelection(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD.getDefaultValueAsBoolean());
-			txtMinutes.setText(ConnectServerOption.Option.SYNC_MINUTE.getDefaultValueAsString());
+			btnDownShutDown.setSelection(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_SHUTDOWN.getDefaultValueAsBoolean());
+			btnDownStartUp.setSelection(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_STARTUP.getDefaultValueAsBoolean());
+			btnUploadShutDown.setSelection(ConnectServerOption.ConnectionOption.UPLOAD_ON_SHUTDOWN.getDefaultValueAsBoolean());
+			btnUploadStartUp.setSelection(ConnectServerOption.ConnectionOption.UPLOAD_ON_STARTUP.getDefaultValueAsBoolean());
+			btnAutoCheck.setSelection(ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getDefaultValueAsBoolean());
+			btnDownload.setSelection(ConnectServerOption.ConnectionOption.SYNC_DOWNLOAD.getDefaultValueAsBoolean());
+			btnUpload.setSelection(ConnectServerOption.ConnectionOption.SYNC_AUTO_UPLOAD.getDefaultValueAsBoolean());
+			btnPrompt.setSelection(ConnectServerOption.ConnectionOption.SYNC_PROMPT_PASSWORD.getDefaultValueAsBoolean());
+			txtMinutes.setText(ConnectServerOption.ConnectionOption.SYNC_MINUTE.getDefaultValueAsString());
 			
-			btnPackageSize.setSelection(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD.getDefaultValueAsBoolean());
-			txtPackageSize.setText(String.valueOf(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE.getDefaultValueAsInt()));
+			btnPackageSize.setSelection(ConnectServerOption.ConnectionOption.SYNC_PROMPT_PASSWORD.getDefaultValueAsBoolean());
+			txtPackageSize.setText(String.valueOf(ConnectServerOption.ConnectionOption.PACKAGE_PROMPT_SIZE.getDefaultValueAsInt()));
 
 			updateEnabled();
 			return;
 		}
 		
-		btnDownShutDown.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.DOWNLOAD_ON_SHUTDOWN));
-		btnDownStartUp.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.DOWNLOAD_ON_STARTUP));
-		btnUploadShutDown.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.UPLOAD_ON_SHUTDOWN));
-		btnUploadStartUp.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.UPLOAD_ON_STARTUP));
-		btnAutoCheck.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY));
-		btnDownload.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_DOWNLOAD));
-		btnUpload.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTO_UPLOAD));
-		btnPrompt.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD));
-		txtMinutes.setText(String.valueOf(server.getOptionAsInt(ConnectServerOption.Option.SYNC_MINUTE)));
-		btnPackageSize.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT));
-		txtPackageSize.setText(String.valueOf(server.getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE)));
+		btnDownShutDown.setSelection(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_SHUTDOWN.getBooleanValue(server));
+		btnDownStartUp.setSelection(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_STARTUP.getBooleanValue(server));
+		btnUploadShutDown.setSelection(ConnectServerOption.ConnectionOption.UPLOAD_ON_SHUTDOWN.getBooleanValue(server));
+		btnUploadStartUp.setSelection(ConnectServerOption.ConnectionOption.UPLOAD_ON_STARTUP.getBooleanValue(server));
+		btnAutoCheck.setSelection(ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(server));
+		btnDownload.setSelection(ConnectServerOption.ConnectionOption.SYNC_DOWNLOAD.getBooleanValue(server));
+		btnUpload.setSelection(ConnectServerOption.ConnectionOption.SYNC_AUTO_UPLOAD.getBooleanValue(server));
+		btnPrompt.setSelection(ConnectServerOption.ConnectionOption.SYNC_PROMPT_PASSWORD.getBooleanValue(server));
+		txtMinutes.setText(String.valueOf(ConnectServerOption.ConnectionOption.SYNC_MINUTE.getIntegerValue(server)));
+		btnPackageSize.setSelection(ConnectServerOption.ConnectionOption.PACKAGE_PROMPT.getBooleanValue(server));
+		txtPackageSize.setText(String.valueOf(ConnectServerOption.ConnectionOption.PACKAGE_PROMPT_SIZE.getIntegerValue(server)));
 		
 		updateEnabled();
 	}
 	
+	@Override
 	public void updateServer(ConnectServer server){
-		server.setOption(ConnectServerOption.Option.DOWNLOAD_ON_SHUTDOWN, ((Boolean)btnDownShutDown.getSelection()).toString());
-		server.setOption(ConnectServerOption.Option.DOWNLOAD_ON_STARTUP, ((Boolean)btnDownStartUp.getSelection()).toString());
-		server.setOption(ConnectServerOption.Option.UPLOAD_ON_SHUTDOWN, ((Boolean)btnUploadShutDown.getSelection()).toString());
-		server.setOption(ConnectServerOption.Option.UPLOAD_ON_STARTUP, ((Boolean)btnUploadStartUp.getSelection()).toString());
-		server.setOption(ConnectServerOption.Option.SYNC_AUTOMATICALLY, ((Boolean)btnAutoCheck.getSelection()).toString());
-		server.setOption(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD, ((Boolean)btnPrompt.getSelection()).toString());
-		server.setOption(ConnectServerOption.Option.SYNC_DOWNLOAD, ((Boolean)btnDownload.getSelection()).toString());
-		server.setOption(ConnectServerOption.Option.SYNC_AUTO_UPLOAD, ((Boolean)btnUpload.getSelection()).toString());
-		server.setOption(ConnectServerOption.Option.PACKAGE_PROMPT, ((Boolean)btnPackageSize.getSelection()).toString());
+		isAutoReplicationPrev = ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(server);
+		
+		server.setOption(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_SHUTDOWN.name(), ((Boolean)btnDownShutDown.getSelection()).toString());
+		server.setOption(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_STARTUP.name(), ((Boolean)btnDownStartUp.getSelection()).toString());
+		server.setOption(ConnectServerOption.ConnectionOption.UPLOAD_ON_SHUTDOWN.name(), ((Boolean)btnUploadShutDown.getSelection()).toString());
+		server.setOption(ConnectServerOption.ConnectionOption.UPLOAD_ON_STARTUP.name(), ((Boolean)btnUploadStartUp.getSelection()).toString());
+		server.setOption(ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.name(), ((Boolean)btnAutoCheck.getSelection()).toString());
+		server.setOption(ConnectServerOption.ConnectionOption.SYNC_PROMPT_PASSWORD.name(), ((Boolean)btnPrompt.getSelection()).toString());
+		server.setOption(ConnectServerOption.ConnectionOption.SYNC_DOWNLOAD.name(), ((Boolean)btnDownload.getSelection()).toString());
+		server.setOption(ConnectServerOption.ConnectionOption.SYNC_AUTO_UPLOAD.name(), ((Boolean)btnUpload.getSelection()).toString());
+		server.setOption(ConnectServerOption.ConnectionOption.PACKAGE_PROMPT.name(), ((Boolean)btnPackageSize.getSelection()).toString());
 
-		int packageSize = ConnectServerOption.Option.PACKAGE_PROMPT_SIZE.getDefaultValueAsInt();
+		int packageSize = ConnectServerOption.ConnectionOption.PACKAGE_PROMPT_SIZE.getDefaultValueAsInt();
 		try{
 			int tmp = Integer.parseInt(txtPackageSize.getText());
 			if (tmp >= 0) packageSize = tmp;
 		}catch(Exception ex){
 			
 		}
-		server.setOption(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE, String.valueOf(packageSize));
+		server.setOption(ConnectServerOption.ConnectionOption.PACKAGE_PROMPT_SIZE.name(), String.valueOf(packageSize));
 		
-		String minutes = ConnectServerOption.Option.SYNC_MINUTE.getDefaultValueAsString();
+		String minutes = ConnectServerOption.ConnectionOption.SYNC_MINUTE.getDefaultValueAsString();
 		try{
 			int tmp = Integer.parseInt(txtMinutes.getText());
 			if (tmp >= 0){
@@ -374,8 +381,17 @@ public class AutoOptionsPanel extends Composite {
 		}catch(Exception ex){
 			
 		}
-		server.setOption(ConnectServerOption.Option.SYNC_MINUTE, minutes);	
+		server.setOption(ConnectServerOption.ConnectionOption.SYNC_MINUTE.name(), minutes);	
 	}
 
+	@Override
+	public void afterSave(ConnectServer server){
+		boolean isAutoReplication = ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(server);
+		if (!isAutoReplicationPrev && isAutoReplication){
+			//auto replication state has been updated; we need to initiate auto replication
+			int delay = ConnectServerOption.ConnectionOption.SYNC_MINUTE.getIntegerValue(server);
+			AutoReplicationStartUp.INSTANCE.enableAutoReplication(delay);
+		}
+	}
 }
 

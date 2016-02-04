@@ -26,7 +26,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.export.IntelligenceSummaryCsvExporter;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
-import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
+import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -161,7 +161,7 @@ public class QueryTester {
 			dateField = PatrolStartDateField.INSTANCE;
 		}else if (queryType.getKey().equals(IntelligenceSummaryQuery.KEY) 
 				|| queryType.getKey().equals(IntelligenceRecordQuery.KEY)){
-			dateField = RecievedDateFilter.INSTANCE;
+			dateField = ReceivedDateFilter.INSTANCE;
 		}else if (queryType.getKey().equals(MissionTrackQuery.KEY)){
 			dateField = MissionTrackDateField.INSTANCE;
 		}else if (queryType.getKey().equals(MissionQuery.KEY)){

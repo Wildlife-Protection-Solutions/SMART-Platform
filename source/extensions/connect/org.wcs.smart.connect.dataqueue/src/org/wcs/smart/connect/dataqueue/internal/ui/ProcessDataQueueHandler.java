@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue.ui;
+package org.wcs.smart.connect.dataqueue.internal.ui;
 
 import javax.inject.Named;
 
@@ -29,15 +29,9 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.progress.IProgressConstants;
-import org.eclipse.ui.views.IViewDescriptor;
 
 /**
- * Handler for downloading and installing CCAA analysis from Server
+ * Handler for displaying the data queue view.
  * @author Emily
  *
  */

@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
+import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 
 /**
  * Composite for inputting server options.
@@ -46,36 +47,34 @@ import org.wcs.smart.connect.model.ConnectServerOption;
  * @author Emily
  *
  */
-public class ServerOptionsPanel extends Composite {
+public class ServerOptionsPanel implements IServerOptionsPanel {
 
-	private static ConnectServerOption.Option[] OPTION_KEYS = new ConnectServerOption.Option[]{
-		ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME,
-		ConnectServerOption.Option.MAX_RETRY_DOWNLOAD,
-		ConnectServerOption.Option.MAX_RETRY_UPLOAD,
-		ConnectServerOption.Option.RETY_WAIT_TIME,
+	private static ConnectServerOption.ConnectionOption[] OPTION_KEYS = new ConnectServerOption.ConnectionOption[]{
+		ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME,
+		ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD,
+		ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD,
+		ConnectServerOption.ConnectionOption.RETY_WAIT_TIME,
 	};
 	
 	private static final String CD_KEY = "cd"; //$NON-NLS-1$
 	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
 	
-	private HashMap<ConnectServerOption.Option, Text> optionCntrls;
+	private HashMap<ConnectServerOption.ConnectionOption, Text> optionCntrls;
 	private Collection<ModifyListener> listeners;
 	
-	private boolean isEditable = true;
-	
-	public ServerOptionsPanel(Composite parent) {
-		this(parent, true);
+	public ServerOptionsPanel() {
 	}
 	
-	public ServerOptionsPanel(Composite parent, boolean isEditable) {
-		super(parent, SWT.NONE);
-		this.isEditable = isEditable;
+	@Override
+	public String getName(){
+		return "Connection Options";
+	}
+	
+	@Override
+	public Composite createComposite(Composite parent, boolean isEditable){
 		listeners = new ArrayList<ModifyListener>();
-		createControl();
-	}
-	
-	private void createControl(){
-		setLayout(new GridLayout(2, false));
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout(2, false));
 		
 		ModifyListener ml = new ModifyListener() {
 			@Override
@@ -94,13 +93,13 @@ public class ServerOptionsPanel extends Composite {
 				fireChange(e);
 			}
 		};
-		optionCntrls = new HashMap<ConnectServerOption.Option, Text>();
-		for (ConnectServerOption.Option op : OPTION_KEYS){
-			Label l = new Label(this, SWT.NONE);
+		optionCntrls = new HashMap<ConnectServerOption.ConnectionOption, Text>();
+		for (ConnectServerOption.ConnectionOption op : OPTION_KEYS){
+			Label l = new Label(main, SWT.NONE);
 			l.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(op) +":"); //$NON-NLS-1$
 			l.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(op));
 			
-			Text txt = new Text(this, SWT.BORDER);
+			Text txt = new Text(main, SWT.BORDER);
 			txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)txt.getLayoutData()).widthHint = 60;
 			txt.setData(VALID_KEY, false);
@@ -114,6 +113,7 @@ public class ServerOptionsPanel extends Composite {
 			txt.addModifyListener(ml);
 			optionCntrls.put(op, txt);
 		}
+		return main;
 	}
 	
 	protected ControlDecoration createControlDecoration(Control widget){
@@ -142,6 +142,7 @@ public class ServerOptionsPanel extends Composite {
 		listeners.add(listener);
 	}
 	
+	@Override
 	public void initValues(ConnectServer server){
 		if (server == null){
 			for (Text l : optionCntrls.values()){
@@ -150,23 +151,28 @@ public class ServerOptionsPanel extends Composite {
 			}
 			return;
 		}
-		for (ConnectServerOption.Option op : OPTION_KEYS){
+		for (ConnectServerOption.ConnectionOption op : OPTION_KEYS){
 			String value = ServerOptionLabelProvider.INSTANCE.getValueInDisplayUnits(op, server);
 			optionCntrls.get(op).setText(value);
 		}
 	}
 	
+	@Override
 	public void updateServer(ConnectServer server){
-		for (ConnectServerOption.Option op : OPTION_KEYS){
+		for (ConnectServerOption.ConnectionOption op : OPTION_KEYS){
 			Text ctr = optionCntrls.get(op);
 			
 			Long l = Long.parseLong(ctr.getText());
-			if (op == ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME){
+			if (op == ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME){
 				//convert seconds to milliseconds
 				l = l * 1000;
 			}
-			server.setOption(op, String.valueOf(l));
+			server.setOption(op.name(), String.valueOf(l));
 		}
 	}
 
+	@Override
+	public void afterSave(ConnectServer server){
+
+	}
 }

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.connect.configure.optionpanel" name="Connect Server Options Configuration Panel" schema="schema/org.wcs.smart.connect.configure.optionpanel.exsd"/>
+   <extension-point id="org.wcs.smart.connect.status.contribution" name="Connect Status Contribution" schema="schema/org.wcs.smart.connect.status.contribution.exsd"/>
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
@@ -334,6 +336,21 @@
       <dbUpgrader
             upgrader="org.wcs.smart.connect.upgrade.ConnectDatabaseUpgrader">
       </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.connect.configure.optionpanel">
+      <Panel
+            class="org.wcs.smart.connect.ui.server.configure.AutoOptionsPanel">
+      </Panel>
+      <Panel
+            class="org.wcs.smart.connect.ui.server.configure.ServerOptionsPanel">
+      </Panel>
+   </extension>
+   <extension
+         point="org.wcs.smart.connect.status.contribution">
+      <contribution
+            class="org.wcs.smart.connect.ui.ReplicationStatusContribution">
+      </contribution>
    </extension>
 
 </plugin>

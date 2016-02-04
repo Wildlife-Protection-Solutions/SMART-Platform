@@ -30,8 +30,6 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -56,7 +54,7 @@ public class ConnectServerOption {
 	/*
 	 * server connection options
 	 */
-	public enum Option{
+	public enum ConnectionOption{
 		MAX_RETRY_DOWNLOAD (10),
 		MAX_RETRY_UPLOAD(100),
 		RETY_WAIT_TIME(500),
@@ -75,7 +73,7 @@ public class ConnectServerOption {
 		
 		Object defaultValue;
 		
-		private Option(Object defaultValue){
+		private ConnectionOption(Object defaultValue){
 			this.defaultValue = defaultValue;
 		}
 		
@@ -94,6 +92,21 @@ public class ConnectServerOption {
 				return (Integer) this.defaultValue;
 			}
 			return null;
+		}
+		public Boolean getBooleanValue(ConnectServer server){
+			Boolean x = server.getOptionAsBoolean(this.name());
+			if (x == null){
+				return this.getDefaultValueAsBoolean();
+			}
+			return x;
+		}
+		
+		public Integer getIntegerValue(ConnectServer server){
+			Integer x = server.getOptionAsInt(this.name());
+			if (x == null){
+				return getDefaultValueAsInt();
+			}
+			return x;
 		}
 	}
 	
@@ -148,12 +161,12 @@ public class ConnectServerOption {
 	 * @return the server option
 	 */
 	@Transient 
-	public Option getOption(){
-		return id.getOption();
+	public String getOptionKey(){
+		return id.getOptionKey();
 	}
 	
-	public void setOption(Option option){
-		id.setOption(option);
+	public void setOptionKey(String optionKey){
+		id.setOptionKey(optionKey);
 	}
 	
 	@Override
@@ -181,7 +194,7 @@ public class ConnectServerOption {
 		private static final long serialVersionUID = 1L;
 		
 		private ConnectServer server;
-		private Option option;
+		private String optionKey;
 		
 
 		public ConnectServerOptionPk(){
@@ -189,8 +202,6 @@ public class ConnectServerOption {
 		}
 		
 		@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
-		//@JoinColumn(name="server_uuid")
-		//@Column(name="server_uuid")
 		public ConnectServer getServer() {
 			return server;
 		}
@@ -200,13 +211,12 @@ public class ConnectServerOption {
 		}
 		
 		@Column(name="option_key")
-		@Enumerated(EnumType.STRING)
-		public Option getOption() {
-			return option;
+		public String getOptionKey() {
+			return optionKey;
 		}
 
-		public void setOption(Option option) {
-			this.option = option;
+		public void setOptionKey(String optionKey) {
+			this.optionKey = optionKey;
 		}
 		
 		@Override
@@ -217,24 +227,24 @@ public class ConnectServerOption {
 			ConnectServerOptionPk p = (ConnectServerOptionPk)key;
 			
 			if (p.server == null || this.server == null ||
-				p.option == null || this.option == null ){
+				p.optionKey == null || this.optionKey == null ){
 				
 				if (p.server == null && this.server == null && 
-					p.option == null && this.option == null){
+					p.optionKey == null && this.optionKey == null){
 						return true;
 				}
 				return false;
 			}
 			
 			return p.server.equals(this.server) &&
-					p.option.equals(this.option);
+					p.optionKey.equals(this.optionKey);
 		}
 		@Override
 		public int hashCode() {
 		    int code = 0;
 		    if (server != null) {code += server.hashCode();}
 		    code *= 31;
-		    if (option != null) {code += option.hashCode(); }
+		    if (optionKey != null) {code += optionKey.hashCode(); }
 		    return code;
 		  }
 	} 

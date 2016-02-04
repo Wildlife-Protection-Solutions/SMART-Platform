@@ -38,7 +38,7 @@ import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
-import org.wcs.smart.connect.model.ConnectServerOption.Option;
+import org.wcs.smart.connect.model.ConnectServerOption.ConnectionOption;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
@@ -119,20 +119,20 @@ public class AutoReplicationJob extends Job {
 		}finally{
 			s.close();
 		}
-		if (server != null) millisecondsToRepeat = server.getOptionAsInt(Option.SYNC_MINUTE) * 60 * 1000l;
+		if (server != null) millisecondsToRepeat = ConnectionOption.SYNC_MINUTE.getIntegerValue(server) * 60 * 1000l;
 		if (server == null || serverStatus == null){
 			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_ServerError);
 			return Status.OK_STATUS;
 		}
 		
-		if (!statusOnly && !server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY)){
+		if (!statusOnly && !ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(server)){
 			reschedule = false;
 			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_AutoConfigError);
 			return Status.OK_STATUS;
 		}
 		
 		if (!statusOnly && (user == null || user.getConnectPassword() == null || user.getConnectUsername() == null)){
-			if (!server.getOptionAsBoolean(Option.SYNC_PROMPT_PASSWORD)){
+			if (!ConnectionOption.SYNC_PROMPT_PASSWORD.getBooleanValue(server)){
 				setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_NoCredentialsError);
 				return Status.OK_STATUS;
 			}
@@ -192,11 +192,11 @@ public class AutoReplicationJob extends Job {
 		if (statusOnly) return Status.OK_STATUS;
 		
 		//if auto download then lets start that process if not already started
-		if (!server.getOptionAsBoolean(Option.SYNC_DOWNLOAD)){
+		if (!ConnectionOption.SYNC_DOWNLOAD.getBooleanValue(server)){
 			return Status.OK_STATUS;
 		}
 		
-		final boolean upload = server.getOptionAsBoolean(Option.SYNC_AUTO_UPLOAD);
+		final boolean upload = ConnectionOption.SYNC_AUTO_UPLOAD.getBooleanValue(server);
 		if (needsToDownload){
 			monitor.subTask(Messages.AutoReplicationJob_downloadSubTaskName);
 			downloadChangeLog(upload);

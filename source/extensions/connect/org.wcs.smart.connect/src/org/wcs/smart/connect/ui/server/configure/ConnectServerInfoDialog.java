@@ -89,8 +89,8 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 	private Button btnShowReplication;
 	private TableViewer tblUsers;
 		
-	private ServerOptionsPanel optionPnl;
-	private AutoOptionsPanel autoPnl;
+	private IServerOptionsPanel[]  optionPanels = OptionPanelManager.createOptionPanels();
+	
 	/**
 	 * Default constructor
 	 */
@@ -164,14 +164,11 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		ti.setText(Messages.ConnectServerInfoDialog_UserAccountTab);
 		ti.setControl(createUserAccountsTab(tabConfig));
 		
-		ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText(Messages.ConnectServerInfoDialog_AutoTab);
-		ti.setControl(autoPnl = new AutoOptionsPanel(tabConfig, false));
-		
-		ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText(Messages.ConnectServerInfoDialog_ConnectTab);
-		ti.setControl(optionPnl = new ServerOptionsPanel(tabConfig, false));
-		
+		for (IServerOptionsPanel p : optionPanels){
+			ti = new TabItem(tabConfig, SWT.DEFAULT);
+			ti.setText(p.getName());
+			ti.setControl(p.createComposite(tabConfig, false));
+		}
 		
 		btnShowReplication = new Button(main, SWT.PUSH);
 		btnShowReplication.setText(Messages.ConnectServerInfoDialog_ReplicationBtn);
@@ -208,9 +205,10 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				btnAdd.setEnabled(false);
 				tblUsers.setInput(new Object[]{});
 				tblUsers.getTable().setEnabled(false);
-				
-				optionPnl.initValues(null);
-				autoPnl.initValues(null);
+		
+				for (IServerOptionsPanel pnl :optionPanels){
+					pnl.initValues(null);
+				}
 			}else{
 				toUpdate = server;
 				txtServer.setText(server.getServerUrl());
@@ -225,8 +223,9 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				tblUsers.setInput(users);
 				tblUsers.getTable().setEnabled(true);
 				
-				optionPnl.initValues(server);
-				autoPnl.initValues(server);
+				for (IServerOptionsPanel pnl :optionPanels){
+					pnl.initValues(toUpdate);
+				}
 			}
 		}finally{
 			session.getTransaction().rollback();

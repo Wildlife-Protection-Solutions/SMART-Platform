@@ -1,0 +1,540 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.connect.dataqueue.internal.ui;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UISynchronize;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.Section;
+import org.hibernate.Session;
+import org.wcs.smart.connect.ConnectHibernateManager;
+import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
+import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
+import org.wcs.smart.connect.dataqueue.internal.server.ConnectDataQueue;
+import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
+import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
+import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+
+/**
+ * View for displaying data queue processing information and allowing users to manually
+ * control the data queue.
+ * 
+ * @author Emily
+ *
+ */
+public class DataQueueView{ 
+	
+	public static final String ID = "org.wcs.smart.connect.dataqueue.queueview"; //$NON-NLS-1$
+	
+	private FormToolkit toolkit = null;
+
+	private CheckboxTableViewer tblServer;
+	private SashForm sash;
+	private DataQueueTable dataQueueTable;
+	
+	private SmartConnect connect;
+
+	@Inject private Shell shell;
+	@Inject private UISynchronize ui;
+	
+	private enum ServerColumn{
+		CHECK("", 30),
+		NAME("Name", 150),
+		TYPE("Type", 100),
+		STATUS("Status", 100);
+		
+		String guiName;
+		int width;
+		
+		ServerColumn(String name, int width){
+			this.guiName = name;
+			this.width = width;
+		}
+		
+		public String getLabel(DataQueueItem item){
+			if (this == NAME){
+				return item.getName();
+			}else if (this == TYPE){
+				return item.getType().toString();
+			}else if (this == STATUS){
+				if (item instanceof LocalDataQueueItem){
+					return ((LocalDataQueueItem) item).getStatus().toString();
+				}else{
+					return "ON SERVER";
+				}
+			}
+			return "";
+		}
+	}
+	Job refreshLocalJob = new Job("Refresh Local Data Queue Table"){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try{
+				monitor.beginTask("Refreshing Data Queue Items", 2);
+				
+				monitor.worked(1);
+				monitor.subTask("Loading Local Items ...");
+				List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems();
+				sort(localItems);				
+				
+				ui.syncExec(new Runnable() {
+					@Override
+					public void run() {
+						if (dataQueueTable == null || dataQueueTable.isDisposed()) return;
+						buildLocalContent(localItems);
+					}
+				});
+				monitor.done();
+			}catch (Exception ex){
+				final String message = "Error loading active local data queue items." + ex.getMessage();
+				ConnectDataQueuePlugin.log(message, ex);
+				ui.syncExec(new Runnable() {					
+					@Override
+					public void run() {
+						buildLocalErrorContent(message);
+					}
+				});
+			}
+			return Status.OK_STATUS;
+		}
+	};
+	
+	Job refreshServerItemsJob = new Job("refresh server items table"){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try{
+				monitor.beginTask("Refreshing Data Queue Items", 2);
+				monitor.subTask("Loading Items From Connect...");
+				
+				if(connect == null){
+					ConnectServer server = null;
+					ConnectServerStatus serverStatus = null;
+					ConnectUser user = null;
+					
+					Session s = HibernateManager.openSession();
+					try{
+						server = ConnectHibernateManager.getConnectServer(s);
+						serverStatus = ConnectHibernateManager.getConnectServerStatus(s);
+						user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);
+					}finally{
+						s.close();
+					}
+					
+					if (server != null && serverStatus != null && user != null){
+						if (serverStatus.getStatus() == ConnectServerStatus.Status.DONE){
+							if (user.getConnectUsername() != null && user.getConnectPassword() != null){
+								connect = SmartConnect.findInstance(server, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
+							}
+						}
+					}
+					if (connect == null){
+						ui.syncExec(new Runnable(){
+							@Override
+							public void run() {
+								DataQueueServerDialog cd = new DataQueueServerDialog(shell);
+								if (cd.open() != Window.OK){
+									tblServer.setInput(new String[]{"Connect Not Configured"});
+									return;
+								}
+								connect = cd.getConnection();		
+							}	
+						});
+					}
+					
+				}
+				if (connect == null){
+					return Status.OK_STATUS;
+				}
+				
+				List<DataQueueItem> serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(connect, SmartDB.getCurrentConservationArea());
+				
+				monitor.worked(1);
+				monitor.subTask("Loading Local Items ...");
+				List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems(LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.PROCESSING, LocalDataQueueItem.Status.DOWNLOADING);
+
+				//remove any items from the serverItems that are in the local Items
+				//these have been queued and we do not need to display them twice
+				for (LocalDataQueueItem i : localItems){
+					for (DataQueueItem server : serverItems){
+						if (server.getUuid().equals(i.getServerItemUuid())){
+							serverItems.remove(server);
+							break;
+						}
+					}
+				}
+				
+				ui.syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						if (tblServer == null || tblServer.getTable().isDisposed()) return;
+						tblServer.setInput(serverItems);
+						tblServer.refresh();
+					}
+				});
+				monitor.done();
+			}catch (Exception ex){
+				String message = "Error loading items from Connect. " + ex.getMessage();
+				ConnectDataQueuePlugin.log(message, ex);
+				
+				final String error = message;
+				ui.syncExec(new Runnable() {
+					@Override
+					public void run() {
+						tblServer.setInput(new String[]{error});
+						tblServer.refresh();
+					}
+				});
+				
+			}
+			return Status.OK_STATUS;
+		}
+		
+	};
+	
+	/**
+	 * Creates new view
+	 */
+	public DataQueueView() {
+}
+
+	/**
+	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
+	 */
+	@PreDestroy
+	public void dispose(){
+		toolkit.dispose();
+		
+	}
+
+	/**
+	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	 */
+	@PostConstruct
+	public void createPartControl(Composite parent) {
+		parent.setLayout(new GridLayout());
+		
+		toolkit = new FormToolkit(parent.getDisplay());
+		toolkit.adapt(parent);
+		
+		sash= new SashForm(parent, SWT.VERTICAL);
+		sash.setLayout(new GridLayout());
+		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(sash);
+		
+		createServerSection(sash);
+		createLocalSection(sash);
+	
+		sash.setWeights(new int[]{40, 60});
+		
+		refreshLocalTable();
+		refreshServerTable();
+	}
+
+	private void sort(List<LocalDataQueueItem> items){
+		Collections.sort(items, new Comparator<LocalDataQueueItem>() {
+
+			@Override
+			public int compare(LocalDataQueueItem o1,
+					LocalDataQueueItem o2) {
+				if (o1.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+					if (o2.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+						return o1.getDateProcessed().compareTo(o2.getDateProcessed());
+					}
+					return -1;
+				}
+				if (o2.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+					if (o2.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+						return o2.getDateProcessed().compareTo(o1.getDateProcessed());
+					}
+					return 1;
+				}
+				if (o1.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+					if (o2.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+						return o1.getDateProcessed().compareTo(o2.getDateProcessed());
+					}
+					return -1;
+				}
+				if (o2.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+					if (o1.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+						return o2.getDateProcessed().compareTo(o1.getDateProcessed());
+					}
+					return 1;
+				}	
+				
+				if (o1.getStatus() == LocalDataQueueItem.Status.QUEUED){
+					if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
+						return o1.getOrder().compareTo(o2.getOrder());
+					}
+					return -1;
+				}
+				if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
+					if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
+						return o2.getOrder().compareTo(o1.getOrder());
+					}
+					return 1;
+				}	
+				return  o2.getDateProcessed().compareTo(o1.getDateProcessed());
+				
+			}
+		});
+	}
+	private void createLocalSection(Composite parent){
+		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED);
+		dataQueueSection.setText("Local Data Queue");
+		dataQueueSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		dataQueueSection.setLayout(new GridLayout());
+	
+		Composite main = toolkit.createComposite(dataQueueSection);
+		main.setLayout(new GridLayout());
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
+		dataQueueSection.setClient(main);
+		
+		dataQueueTable = new DataQueueTable(main);
+		dataQueueTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+
+		
+		Composite linkComp = toolkit.createComposite(main);
+		linkComp.setLayout(new GridLayout(5, false));
+		((GridLayout)linkComp.getLayout()).marginHeight = 0;
+		
+		Hyperlink link = toolkit.createHyperlink(linkComp, "Refresh", SWT.NONE);
+		link.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				refreshLocalTable();
+			}
+		});
+		
+		Hyperlink deleteSel = toolkit.createHyperlink(linkComp, "Remove Selected", SWT.NONE);
+
+		Hyperlink deleteAll = toolkit.createHyperlink(linkComp, "Remove All" , SWT.NONE);
+		Label spacer = toolkit.createLabel(linkComp, "");
+		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+			deleteSel.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				deleteSelected();
+				refreshLocalTable();
+			}
+		});
+		deleteAll.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				deleteAll();
+				refreshLocalTable();
+			}
+		});
+	}
+	
+	private void createServerSection(Composite parent){
+		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED );
+		dataQueueSection.setText("SMART Connect Server - Queued Items");
+		dataQueueSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		dataQueueSection.setLayout(new GridLayout());
+	
+		
+		Composite main = toolkit.createComposite(dataQueueSection);
+		main.setLayout(new GridLayout());
+		dataQueueSection.setClient(main);
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite buttonComp = toolkit.createComposite(main, SWT.NONE);
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginWidth = 0;
+		gl.marginHeight = 0;
+		buttonComp.setLayout(gl);
+		Button btn = toolkit.createButton(buttonComp, "Process All", SWT.PUSH);
+		btn.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				processAll();
+			}
+		});
+		Button btn2 = toolkit.createButton(buttonComp, "Process Checked", SWT.PUSH);
+		btn2.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				processSelected();
+			}
+		});
+		
+		tblServer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.NO_FOCUS);
+		tblServer.getTable().setLinesVisible(true);
+		tblServer.getTable().setHeaderVisible(true);
+		tblServer.setContentProvider(ArrayContentProvider.getInstance());
+		tblServer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		for (final ServerColumn c : ServerColumn.values()){
+			TableViewerColumn tc = new TableViewerColumn(tblServer, SWT.DEFAULT);
+			tc.getColumn().setWidth(c.width);
+			tc.getColumn().setText(c.guiName);
+			tc.setLabelProvider(new ColumnLabelProvider(){
+				@Override
+				public String getText(Object element){
+					if (element instanceof DataQueueItem){
+						return c.getLabel((DataQueueItem)element);
+					}
+					return super.getText(element);
+				}
+			});
+		}
+		Hyperlink link = toolkit.createHyperlink(main, "Refresh", SWT.NONE);
+		link.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				refreshServerTable();
+			}
+		});
+		
+	}
+	
+	
+	private void deleteSelected(){
+		List<LocalDataQueueItem> items = new ArrayList<LocalDataQueueItem>();
+		IStructuredSelection sel = (IStructuredSelection) dataQueueTable.getSelection();
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object item = iterator.next();
+			if (item instanceof LocalDataQueueItem){
+				items.add((LocalDataQueueItem)item);
+			}
+		}
+		DataQueueManager.INSTANCE.deleteItems(items);
+	}
+	private void deleteAll(){
+		DataQueueManager.INSTANCE.deleteAllHistory();
+	}
+	
+
+	private void refreshServerTable(){
+		tblServer.setInput(new String[]{"Loading..."});
+		tblServer.refresh();
+		
+		
+		refreshServerItemsJob.schedule();
+	}
+	
+	private void refreshLocalTable(){
+		if (shell == null || shell.isDisposed()) return;
+		
+		//local history
+		dataQueueTable.setInput(new String[]{"Loading..."});
+		refreshLocalJob.schedule();
+	}
+	
+	private void buildLocalErrorContent(String message){
+		MessageDialog.openWarning(shell,  "ERROR", message);	
+	}
+	
+	private void buildLocalContent(List<LocalDataQueueItem> items){
+		dataQueueTable.setInput(items);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void processAll(){
+		if (!(tblServer.getInput() instanceof List)) return;
+		List<DataQueueItem> items = (List<DataQueueItem>) tblServer.getInput();
+		processItems(items);
+	}
+	
+	private void processSelected(){
+		List<DataQueueItem> items = new ArrayList<DataQueueItem>();
+		for (Object x : tblServer.getCheckedElements()){
+			if (x instanceof DataQueueItem){
+				items.add((DataQueueItem)x);
+			}
+		}
+		if (items.isEmpty()) return;
+		processItems(items);
+	}
+	
+	private void processItems(List<DataQueueItem> items){
+		for (DataQueueItem i : items){
+			try{
+				DataQueueManager.INSTANCE.addItemToQueue(i);
+			}catch (Exception ex){
+				ConnectDataQueuePlugin.displayLog("Error adding item to data queue.", ex);
+			}
+		}
+		ProcessorManager.INSTANCE.processDataQueue(connect);
+		refreshLocalTable();
+		refreshServerTable();
+	}
+	
+	@Focus
+	public void setFocus() {
+		tblServer.getTable().setFocus();
+	}
+
+	public static class DataQueueViewWrapper extends DIViewPart<DataQueueView>{
+		public DataQueueViewWrapper(){
+			super(DataQueueView.class);
+		}
+	}
+}

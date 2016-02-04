@@ -46,25 +46,33 @@ import org.wcs.smart.hibernate.SmartDB;
 public class ConnectServerWizard extends Wizard {
 
 	protected ServerWizardPage page1 = null;
-	protected ServerOptionsWizardPage page2 = null;
-	protected AutoOptionsWizardPage page3 = null;
 	protected UserWizardPage page4 = null; 
 	
+	protected ServerOptionsWizardPage[] opPages = null;
 	
 	public ConnectServerWizard(){
 		this(true);
 	}
 	
-	public ConnectServerWizard(boolean includeAutoOptionsPage){
+	public ConnectServerWizard(boolean includeOptionalConfigurations){
 		super();
 		
 		setWindowTitle(Messages.ConnectServerWizard_WizardTitle);
 		
 		addPage(page1 = new ServerWizardPage());
-		addPage(page2 = new ServerOptionsWizardPage());
-		if (includeAutoOptionsPage){
-			addPage(page3 = new AutoOptionsWizardPage());
+		
+		IServerOptionsPanel[] panels = null;
+		if (includeOptionalConfigurations){
+			panels = OptionPanelManager.createOptionPanels();
+		}else{
+			panels = new IServerOptionsPanel[]{new ServerOptionsPanel()};
 		}
+		opPages = new ServerOptionsWizardPage[panels.length];
+		for (int i = 0; i < panels.length; i ++){
+			opPages[i] = new ServerOptionsWizardPage(panels[i]);
+			addPage(opPages[i]);
+		}
+		
 		addPage(page4 = new UserWizardPage());
 	}
 	
@@ -81,11 +89,10 @@ public class ConnectServerWizard extends Wizard {
 		ConnectServer server = new ConnectServer();
 		server.setConservationArea(SmartDB.getCurrentConservationArea());
 		server.setServerUrl(url);
-		server.setOptions(new HashMap<ConnectServerOption.Option, ConnectServerOption>());
+		server.setOptions(new HashMap<String, ConnectServerOption>());
 		
-		page2.updateServer(server);
-		if (page3 != null){
-			page3.updateServer(server);
+		for (ServerOptionsWizardPage p : opPages){
+			p.updateServer(server);
 		}
 		
 		if (!certificateFile.trim().isEmpty()){

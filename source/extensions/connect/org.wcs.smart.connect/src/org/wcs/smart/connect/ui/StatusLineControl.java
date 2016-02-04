@@ -21,35 +21,21 @@
  */
 package org.wcs.smart.connect.ui;
 
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.util.Date;
+import java.util.ArrayList;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
-import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
-import org.wcs.smart.connect.ConnectStatusManager;
-import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
-import org.wcs.smart.connect.IConnectStatusListener;
 import org.wcs.smart.connect.internal.Messages;
-import org.wcs.smart.connect.replication.DerbyReplicationManager;
-import org.wcs.smart.connect.server.replication.AutoReplicationJob;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Status control that is displayed in the status bar
@@ -59,172 +45,67 @@ import org.wcs.smart.hibernate.SmartDB;
  *
  */
 public class StatusLineControl extends WorkbenchWindowControlContribution {
+	
+	private IConnectStatusContribution[] contribs;
 
-	private Label localStatus;
-	private Label serverStatus;
-	private AutoReplicationJob updateServerNowJob = new AutoReplicationJob(true);
-	private IConnectStatusListener serverListener = new IConnectStatusListener() {
-		
-		@Override
-		public void statusModified(ServerStatus status, String message) {
-			updateServerStatus(status, message);
-		}
-	};
-	
-	private IConnectStatusListener localListener = new IConnectStatusListener() {
-		
-		@Override
-		public void statusModified(ServerStatus status, String message) {
-			updateLocalStatus(status, message);
-		}
-	};
-	
 	public StatusLineControl() {	
-		ConnectStatusManager.INSTANCE.addServerStatusListener(serverListener);
-		ConnectStatusManager.INSTANCE.addLocalStatusListener(localListener);
 	}
 
 	@Override
 	protected Control createControl(Composite parent) {
-		Composite status = new Composite(parent, SWT.NONE);
-		status.setLayout(new GridLayout(2, true));
+		contribs = getStatusContributions();
 		
-		serverStatus = new Label(status, SWT.NONE);
-		serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
+		Composite main = new Composite(parent, SWT.NONE);
+		GridLayout gl = new GridLayout(contribs.length, false);
+		gl.marginWidth = 0;
+		gl.marginHeight = 0;
+		main.setLayout(gl);
 		
-		localStatus = new Label(status, SWT.NONE);
-		localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
-
 		//refresh now menu
 		Menu refreshMenu = new Menu(parent.getShell(), SWT.POP_UP);
 		MenuItem refreshNow = new MenuItem(refreshMenu, SWT.PUSH);
 		refreshNow.setText(Messages.StatusLineControl_RefreshNowMneuItem);
-		refreshNow.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.REFRESH_ICON));
+		refreshNow.setImage(ConnectPlugIn.getDefault().getImageRegistry()
+				.get(ConnectPlugIn.REFRESH_ICON));
 		refreshNow.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				updateLocalChanges.cancel();
-				updateServerNowJob.cancel();
-				updateLocalChanges.schedule();
-				updateServerNowJob.schedule();
+				refreshNow();
 			}
 		});
-		status.setMenu(refreshMenu);
-		serverStatus.setMenu(refreshMenu);
-		localStatus.setMenu(refreshMenu);
-		
-		updateServerStatus(ServerStatus.ERROR, Messages.StatusLineControl_UnknownState);
-		updateLocalStatus(ServerStatus.ERROR, Messages.StatusLineControl_UnknownState);
-		
-		updateLocalChanges.setSystem(true);
-		updateLocalChanges.schedule();
-		return status;
-	}
 
-	private void updateServerStatus(ConnectStatusManager.ServerStatus status, String message){
-		Display.getDefault().asyncExec(new Runnable(){
-			@Override
-			public void run() {
-				if (serverStatus.isDisposed()) return;
-				if (status == ServerStatus.CHANGES){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_CHANGES_ICON));
-				}else if (status == ServerStatus.UPTODATE){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_OK_ICON));
-				}else if (status == ServerStatus.CONNECTING){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_PROCESSING_ICON));
-				}else if (status == ServerStatus.DOWNLOADING){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_PROCESSING_ICON));
-				}else if (status == ServerStatus.ERROR){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
-				}
-				if (message == null){
-					serverStatus.setToolTipText(""); //$NON-NLS-1$
-				}else{
-					serverStatus.setToolTipText(formatMessage(message));
-				}
-			}
-		});
-	}
-	
-	private String formatMessage(String message){
-		if (message != null) message = MessageFormat.format( Messages.StatusLineControl_MessageFormatDateString, DateFormat.getTimeInstance().format(new Date()), message);
-		return message;
-	}
-	
-	private String formatLocalMessage(ConnectStatusManager.ServerStatus status, String message){
-		if (message == null){
-			if (status == ServerStatus.CHANGES){
-				message = Messages.StatusLineControl_LocalChanges;	
-			}else if (status == ServerStatus.UPTODATE){
-				message = Messages.StatusLineControl_NoLocalChanges;	
-			}else{
-				message = Messages.StatusLineControl_LocalError;
-			}
-		}
-		return formatMessage(message);
-	}
-	
-	private void updateLocalStatus(ConnectStatusManager.ServerStatus status, String message){
-		if (status == null){
-			updateLocalChanges.schedule(0);
-			return;
-		}
-		
-		Display.getDefault().asyncExec(new Runnable(){
-			@Override
-			public void run() {
-				if (localStatus.isDisposed()) return;
-				if (status == ServerStatus.CHANGES){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_CHANGES_ICON));
-				}else if (status == ServerStatus.UPTODATE){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_OK_ICON));
-				}else if (status == ServerStatus.CONNECTING){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_PROCESSING_ICON));
-				}else if (status == ServerStatus.DOWNLOADING){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_PROCESSING_ICON));
-				}else if (status == ServerStatus.ERROR){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
-				}
-				String tooltip = formatLocalMessage(status, message);
-				if (tooltip == null) tooltip = ""; //$NON-NLS-1$
-				localStatus.setToolTipText(tooltip);
-			}
-		});
-	}
-	
-	private Job updateLocalChanges = new Job(Messages.StatusLineControl_jobName){
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			
-			String message = null;
-			ServerStatus status = ServerStatus.ERROR;
-			
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), session)){
-					Boolean hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
-					if (hasChanges != null){
-						if (hasChanges){
-							status = ServerStatus.CHANGES;
-						}else{
-							status = ServerStatus.UPTODATE;
-						}
-					}
-				}else{
-					message = Messages.StatusLineControl_ServernotFound;
-				}
+		main.setMenu(refreshMenu);
 				
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
-			}
-			updateLocalStatus(status, message);
+		for (IConnectStatusContribution c : contribs){
+			Control ctr = c.createControl(main);
+			ctr.setMenu(refreshMenu);
+		}
+		
+		
+//		serverStatus.setMenu(refreshMenu);
+//		localStatus.setMenu(refreshMenu);
+		
+		return main;
+	}
 
-			//schedule every 30 seconds
-			schedule(ConnectStatusManager.CHECK_LOCAL_STATUS);
-			return Status.OK_STATUS;
-		}	
-	};
+	private void refreshNow(){
+		for (IConnectStatusContribution c : contribs){
+			c.refresh();
+		}
+		
+	}
+	
+	private IConnectStatusContribution[] getStatusContributions(){	
+		if (Platform.getExtensionRegistry() == null) return new IConnectStatusContribution[0];
+		ArrayList<IConnectStatusContribution> items = new ArrayList<IConnectStatusContribution>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IConnectStatusContribution.EXTENSION_ID);
+		for (IConfigurationElement e : config) {
+			try{
+				items.add((IConnectStatusContribution)e.createExecutableExtension("class")); //$NON-NLS-1$
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
+			}
+		}
+		return items.toArray(new IConnectStatusContribution[items.size()]);
+	}
 }
