@@ -25,8 +25,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.connect.ConnectServerManager;
+import org.wcs.smart.connect.ConnectServerManager.IConnectServerEventHandler;
+import org.wcs.smart.connect.dataqueue.internal.CaDataQueueDeleteHandler;
+import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * The activator class controls the plug-in life cycle for the
@@ -34,8 +42,11 @@ import org.wcs.smart.SmartPlugIn;
  */
 public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 
+	public static final String DATA_QUEUE_DIR = ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR + "/dataqueue/";
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.connect.dataqueue"; //$NON-NLS-1$
+	public static final String DB_VERSION_1 = "1.0";
+	public static final String DB_VERSION = DB_VERSION_1;
 
 	public static final String ERROR_ICON = "org.wcs.smart.connect.dataqueue.icon.error"; //$NON-NLS-1$
 	public static final String QUEUED_ICON = "org.wcs.smart.connect.dataqueue.icon.queued"; //$NON-NLS-1$
@@ -65,6 +76,14 @@ public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		ConservationAreaManager.getInstance().addDeleteHandler(new CaDataQueueDeleteHandler(), CaDataQueueDeleteHandler.EXECUTE_ORDER);
+		ConnectServerManager.INSTANCE.addHandler(new IConnectServerEventHandler() {
+			@Override
+			public void beforeDelete(Session session) throws Exception{
+				DataQueueManager.INSTANCE.deleteDataQueue(SmartDB.getCurrentConservationArea(), session);
+			}
+		});
 	}
 
 	/*

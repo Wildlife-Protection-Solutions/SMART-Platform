@@ -61,6 +61,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.ConnectServerManager;
 import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -371,7 +372,10 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 					s.beginTransaction();
 
 					ConservationArea ca = SmartDB.getCurrentConservationArea();
+					//delete items
 					(new CaConnectDeleteHandler()).beforeDelete(ca, s, new SubProgressMonitor(monitor, 6));
+					//run any delete handlers
+					ConnectServerManager.INSTANCE.runAfterDeleteHandlers(s);
 					
 					s.getTransaction().commit();
 					toUpdate = null;

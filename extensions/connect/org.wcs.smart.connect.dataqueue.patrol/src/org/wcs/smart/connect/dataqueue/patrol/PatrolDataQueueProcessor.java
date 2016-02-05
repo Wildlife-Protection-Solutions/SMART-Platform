@@ -31,9 +31,7 @@ public class PatrolDataQueueProcessor implements IItemProcessor {
 			throws Exception {
 		LocalDataQueueItem lItem = (LocalDataQueueItem)item;
 		
-		Path file = FileSystems.getDefault()
-				.getPath(SmartContext.INSTANCE.getFilestoreLocation())
-				.resolve(lItem.getFile());
+		Path file = lItem.getFullFilePath();
 
 		ImportConfig config = new ImportConfig();
 		config.setIgnoreWarnings(false);

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.dataqueue.model;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.UUID;
 
@@ -29,8 +31,10 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 
 /**
@@ -102,6 +106,14 @@ public class LocalDataQueueItem extends DataQueueItem{
 		this.localStatus = localStatus;
 	}
 		
+	@Transient
+	public Path getFullFilePath(){
+		if (getFile() == null) return null;
+		return FileSystems.getDefault()
+				.getPath(SmartContext.INSTANCE.getFilestoreLocation())
+				.resolve(getFile());
+	}
+	
 	@Column(name="local_file")
 	public String getFile(){
 		return this.file;

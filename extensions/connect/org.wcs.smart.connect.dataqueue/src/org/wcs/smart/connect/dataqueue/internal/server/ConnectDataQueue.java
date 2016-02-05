@@ -25,6 +25,8 @@ import java.net.MalformedURLException;
 import java.text.MessageFormat;
 import java.util.List;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.wcs.smart.ca.ConservationArea;
@@ -67,7 +69,7 @@ public enum ConnectDataQueue {
 	 */
 	public void updateStatus(SmartConnect connect, LocalDataQueueItem item, DataQueueApi.ServerStatus newStatus) throws Exception{
 
-		int numRetry = ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer());
+		int numRetry = ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD.getIntegerValue(connect.getServer());
 		long delay = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
 		int retryCnt = 0;
 		Exception lastException = null;
@@ -78,7 +80,10 @@ public enum ConnectDataQueue {
 				DataQueueApi simple = target.proxy(DataQueueApi.class);
 				simple.updateStatus(item.getServerItemUuid().toString(), newStatus.name());
 				return;
+			}catch (WebApplicationException ex){
+				throw ex;
 			}catch (Exception ex){
+				//try again; server may be down temporarily
 				lastException = ex;
 			}
 			retryCnt ++;

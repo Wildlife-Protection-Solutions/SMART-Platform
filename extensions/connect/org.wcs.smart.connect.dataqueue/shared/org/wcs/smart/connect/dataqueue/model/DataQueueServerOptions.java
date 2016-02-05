@@ -37,7 +37,8 @@ public enum DataQueueServerOptions {
 	AUTO_AUTOPROCESS(Boolean.FALSE),
 	AUTO_PROMPT(Boolean.TRUE),
 	AUTO_MINUTES(30),
-	PROMPT_USER(Boolean.TRUE);
+	PROMPT_USER(Boolean.TRUE),
+	CLEANUP_DAYS(30);
 		
 	Object defaultValue;
 		

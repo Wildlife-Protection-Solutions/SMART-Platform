@@ -29,10 +29,12 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
 
 /**
- * Manages data queue item processing jobs.
+ * Manages data queue item processing jobs and associated
+ * status.
  * 
  * @author Emily
  *
@@ -41,8 +43,10 @@ public enum ProcessorManager {
 	
 	INSTANCE;
 	
+	// static list of available processors
 	private List<IItemProcessor> processors = null;
-	
+	//list of progress listeners
+	private List<IDataQueueProgressListener> listeners = new ArrayList<IDataQueueProgressListener>();
 	
 	public synchronized List<IItemProcessor> getProcessors(){
 		if (processors != null) return processors;
@@ -61,17 +65,68 @@ public enum ProcessorManager {
 		return processors;
 	}
 	
-
 	/**
 	 * Schedules a job to process the data queue.
+	 * 
 	 * @param connect
 	 */
 	public void processDataQueue(SmartConnect connect){
-		DataQueueItemProcessor job = new DataQueueItemProcessor(connect, DataQueueProcessMonitor.INSTANCE);
+		DataQueueItemProcessor job = new DataQueueItemProcessor(connect, new DataQueueProcessMonitor());
 		job.setRule(DataQueueItemProcessor.MUTEX);
 		job.schedule();
 	}
 	
+	/**
+	 * Adds a queue item processor listener for listening to the state
+	 * of the processing of data queue items.
+	 * @param listener
+	 */
+	public void addListener(IDataQueueProgressListener listener){
+		listeners.add(listener);
+	}
+	/**
+	 * Removes a processing listener
+	 * @param listener
+	 */
+	public void removeListener(IDataQueueProgressListener listener){
+		listeners.remove(listener);
+	}
 	
+	/**
+	 * Process listeners, calling progress updated event for given queue item 
+	 * @param item
+	 * @param taskName
+	 * @param subTask
+	 * @param totalWork
+	 * @param currentWork
+	 */
+	void progressUpdated(final LocalDataQueueItem item, String taskName, 
+			String subTask, int totalWork, int currentWork) {
+		for (IDataQueueProgressListener l : listeners){
+			l.progressUpdated(item, taskName, subTask, totalWork, currentWork);
+		}
+	}
+
+	/**
+	 * Process listeners, calling done event for given
+	 * queue item
+	 * @param item
+	 */
+	void done(final LocalDataQueueItem item) {
+		for (IDataQueueProgressListener l : listeners){
+			l.done(item);
+		}
+	}
+
+	/**
+	 * Process listeners, calling cancelled event for given
+	 * queue item
+	 * @param item
+	 */
+	void cancel(final LocalDataQueueItem item) {
+		for (IDataQueueProgressListener l : listeners){
+			l.cancel(item);
+		}
+	}
 	
 }

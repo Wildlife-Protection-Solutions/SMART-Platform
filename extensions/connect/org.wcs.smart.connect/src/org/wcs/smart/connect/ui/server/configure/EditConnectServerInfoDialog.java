@@ -41,8 +41,6 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.connect.model.ConnectServerOption;
-import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**

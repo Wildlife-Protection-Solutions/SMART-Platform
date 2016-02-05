@@ -64,5 +64,29 @@
             class="org.wcs.smart.connect.dataqueue.internal.ui.StatusLineContribution">
       </contribution>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.connect.dataqueue.installer.ConnectDataQueueDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.updatesite.OnUninstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.dataqueue.installer.OnUninstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
 
 </plugin>

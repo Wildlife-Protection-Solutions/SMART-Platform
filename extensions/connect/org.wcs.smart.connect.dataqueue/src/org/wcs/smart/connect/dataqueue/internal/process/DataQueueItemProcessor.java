@@ -26,8 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,8 +42,8 @@ import org.wcs.smart.connect.dataqueue.internal.server.ConnectDataQueue;
 import org.wcs.smart.connect.dataqueue.internal.server.DataQueueApi;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
-import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Processes and item from the data queue.
@@ -115,17 +114,14 @@ public class DataQueueItemProcessor extends Job {
 			try{
 				ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.PROCESSING);
 			}catch (Exception ex){
-				Exception toLog = ex;
-				if (ex instanceof NotFoundException){
-					toLog = new NotFoundException("Failed to find data queue item on Connect. " + ex.getMessage(), ex);
+				String message = null;
+				if (ex instanceof WebApplicationException){
+					message = "Error processing item: " + SmartConnect.parseErrorMessage(((WebApplicationException) ex).getResponse().readEntity(String.class));
+				}else{
+					message = "Error processing item: unable to confirm status with Connect server";
 				}
-				if (ex instanceof BadRequestException){
-					toLog = new BadRequestException("Data queue item is being processed by another user." + ex.getMessage(), ex);
-				}
-				toLog = new Exception("Error processing item; unable to confirm status with Connect server. " + ex.getMessage(), ex);
-				
-				ConnectDataQueuePlugin.log(toLog.getMessage(), toLog);
-				updateLocalStatus(LocalDataQueueItem.Status.ERROR, toLog.getMessage());
+				ConnectDataQueuePlugin.log(message + ":" + ex.getMessage(), ex);
+				updateLocalStatus(LocalDataQueueItem.Status.ERROR, message);
 				return Status.OK_STATUS;
 			}
 			monitor.worked(10);
@@ -133,8 +129,11 @@ public class DataQueueItemProcessor extends Job {
 			IItemProcessor.ProcessingStatus processingStatus = null;
 			try{
 				monitor.subTask("downloading file...");
-				updateLocalStatus(LocalDataQueueItem.Status.DOWNLOADING, null);
-				downloadFile(new SubProgressMonitor(monitor, 10));
+				if (item.getFullFilePath() == null  || !Files.exists(item.getFullFilePath())){
+					//it may have been already downloaded if we are reprocessing
+					updateLocalStatus(LocalDataQueueItem.Status.DOWNLOADING, null);
+					downloadFile(new SubProgressMonitor(monitor, 10));
+				}
 				
 				monitor.subTask("processing file...");
 				updateLocalStatus(LocalDataQueueItem.Status.PROCESSING, null);
@@ -178,10 +177,10 @@ public class DataQueueItemProcessor extends Job {
 		String down = ConnectDataQueue.INSTANCE.getFileDownloadUrl(connect, item);
 		Path localFile = connect.downloadFileFromUrl(down, null, monitor);
 		
+		
 		Path moveTo = FileSystems.getDefault()
-				.getPath(SmartContext.INSTANCE.getFilestoreLocation())
-				.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR)
-				.resolve("dataqueue/")
+				.getPath(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+				.resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR)
 				.resolve(localFile.getFileName());
 		if (!Files.exists(moveTo.getParent())){
 			Files.createDirectories(moveTo.getParent());

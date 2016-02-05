@@ -21,8 +21,18 @@
  */
 package org.wcs.smart.connect.dataqueue.internal.process;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import javax.transaction.Synchronization;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -30,6 +40,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
@@ -46,6 +57,33 @@ import org.wcs.smart.hibernate.SmartDB;
 public enum DataQueueManager {
 	
 	INSTANCE;
+	
+	private List<IDataQueueListener> listeners = new ArrayList<IDataQueueListener>();
+	
+	/**
+	 * Adds a data queue listener
+	 * @param listener
+	 */
+	public void addListener(IDataQueueListener listener){
+		listeners.add(listener);
+	}
+	
+	/**
+	 * Removes a data queue listener
+	 * @param listener
+	 */
+	public void removeListener(IDataQueueListener listener){
+		listeners.remove(listener);
+	}
+	
+	/**
+	 * Fires listeners to notifiy the queue has been modified
+	 */
+	public void fireModified(){
+		for(IDataQueueListener l : listeners){
+			l.dataQueueModified();
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
 	public LocalDataQueueItem addItemToQueue(DataQueueItem item) throws Exception{
@@ -94,6 +132,12 @@ public enum DataQueueManager {
 			s.save(local);
 			
 			s.getTransaction().commit();
+			
+			try{
+				fireModified();
+			}catch (Exception ex){
+				ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+			}
 			return local;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -165,18 +209,19 @@ public enum DataQueueManager {
 	
 	/**
 	 * Deletes all items from the data queue table for the current conservation area
-	 * with a status of complete or error.
 	 */
-	public void deleteAllHistory(){
+	public synchronized void deleteAllHistory(){
 		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
-			
-			Query q = s.createQuery("DELETE FROM LocalDataQueueItem WHERE conservationArea = :ca and status in (:status)");
-			q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
-			q.setParameterList("status", new LocalDataQueueItem.Status[]{LocalDataQueueItem.Status.COMPLETE, LocalDataQueueItem.Status.ERROR});
-			q.executeUpdate();
+			s.beginTransaction();		
+			deleteDataQueue(SmartDB.getCurrentConservationArea(), s);
 			s.getTransaction().commit();
+			
+			try{
+				fireModified();
+			}catch (Exception ex){
+				ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+			}
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			ConnectDataQueuePlugin.displayLog("Error clearning data queue history. " + ex.getMessage(), ex);
@@ -190,19 +235,150 @@ public enum DataQueueManager {
 	 * conservation area).
 	 * @param toDelete
 	 */
-	public void deleteItems(List<LocalDataQueueItem> toDelete){
+	public synchronized void deleteItems(List<LocalDataQueueItem> toDelete){
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
+			final List<Path> filesToDelete = new ArrayList<Path>();
+			
 			for (LocalDataQueueItem i : toDelete){
 				s.delete(i);
+				if (i.getFile() != null){
+					filesToDelete.add(i.getFullFilePath());
+				}
 			}
 			s.getTransaction().commit();
+			
+			for (Path p : filesToDelete){
+				try{
+					Files.deleteIfExists(p);
+				}catch(Exception ex){
+					ConnectDataQueuePlugin.displayLog(MessageFormat.format("Unable to delete data queue item file {0}.", p.toString()), ex);	
+				}
+			}
+			try{
+				fireModified();
+			}catch (Exception ex){
+				ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+			}
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			ConnectDataQueuePlugin.displayLog("Error clearning data queue history. " + ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}
+	}
+	
+	/**
+	 * Deletes all items from the data queue for the current conservation
+	 * area that are older than
+	 * x days and not queued, downloading, or processing
+	 *  
+	 * @param toDelete
+	 */
+	public synchronized void deleteOldItems(int numDays){
+		if (numDays < 0) return;
+		
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			Calendar c = Calendar.getInstance();
+			c.add(Calendar.DATE, -numDays);
+			Date compareDate = c.getTime();
+			
+			List<LocalDataQueueItem> toDelete = s.createCriteria(LocalDataQueueItem.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid()))
+				.add(Restrictions.in("status", new LocalDataQueueItem.Status[]{
+						LocalDataQueueItem.Status.COMPLETE,
+						LocalDataQueueItem.Status.COMPLETE_WARN,
+						LocalDataQueueItem.Status.ERROR,
+				}))
+				.add(Restrictions.and(Restrictions.isNotNull("dateProcessed"),
+						Restrictions.lt("dateProcessed", compareDate)))
+				.list();
+			final List<Path> filesToDelete = new ArrayList<Path>();
+			
+			for (LocalDataQueueItem i : toDelete){
+				s.delete(i);
+				if (i.getFile() != null){
+					filesToDelete.add(i.getFullFilePath());
+				}
+			}
+			s.getTransaction().commit();
+			
+			for (Path p : filesToDelete){
+				try{
+					Files.deleteIfExists(p);
+				}catch(Exception ex){
+					ConnectDataQueuePlugin.displayLog(MessageFormat.format("Unable to delete data queue item file {0}.", p.toString()), ex);	
+				}
+			}
+			if (!toDelete.isEmpty()){
+				try{	
+					fireModified();
+				}catch (Exception ex){
+					ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+				}
+			}
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			ConnectDataQueuePlugin.displayLog("Error clearning data queue history. " + ex.getMessage(), ex);
+		}finally{
+			s.close();
+		}
+	}
+	
+	/**
+	 * Removes all items in the data queue for a given conservation area.
+	 * The session provided should be in an open active transaction.
+	 * Data files are deleted once the transaction is complete.
+	 * @param ca
+	 * @param session
+	 */
+	public void deleteDataQueue(ConservationArea ca, Session session) {
+		// delete all data queue items
+		Query q = session
+				.createQuery("DELETE FROM LocalDataQueueItem WHERE conservationArea = :ca");
+		q.setParameter("ca", ca.getUuid());
+		q.executeUpdate();
+
+		// delete associated files
+		session.getTransaction().registerSynchronization(new Synchronization() {
+			@Override
+			public void beforeCompletion() {
+			}
+
+			@Override
+			public void afterCompletion(int status) {
+				if (status == javax.transaction.Status.STATUS_COMMITTED) {
+					// if the transaction was successful we also want to delete
+					// the associated files
+					Path dataQueueFiles = FileSystems.getDefault()
+							.getPath(ca.getFileDataStoreLocation())
+							.resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR);
+					if (Files.exists(dataQueueFiles)) {
+						try (DirectoryStream<Path> toDelete = Files
+								.newDirectoryStream(dataQueueFiles)) {
+							for (Path p : toDelete) {
+								try {
+									Files.delete(p);
+								} catch (Exception ex) {
+									ConnectDataQueuePlugin.log(
+											MessageFormat
+													.format("Failed to delete data queue file {0}",
+															p.toString()), ex);
+								}
+							}
+						} catch (IOException ex) {
+							ConnectDataQueuePlugin.log(
+									"Failed to delete data queue files.", ex);
+						}
+					}
+
+					DataQueueManager.INSTANCE.fireModified();
+				}
+
+			}
+		});
 	}
 }

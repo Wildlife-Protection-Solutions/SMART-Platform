@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
-import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 
 /**
  * Composite for inputting server options.

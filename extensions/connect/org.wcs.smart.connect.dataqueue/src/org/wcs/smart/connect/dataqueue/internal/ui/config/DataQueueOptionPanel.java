@@ -67,10 +67,11 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 	private Button opAutoAutoStart;
 	private Button opAutoPrompt;
 	private Button btnPromptUser;
-	
-	private Label lblMinutes, lblMinutes2;
+	private Button lblCleanUp;
+	private Label lblMinutes, lblMinutes2, lblCleanUp2;
 	private Text txtMinutes;
-	private ControlDecoration cdMinutes;
+	private Text txtCleanUp;
+	private ControlDecoration cdMinutes, cdCleanUp;
 	
 	public DataQueueOptionPanel() {
 	}
@@ -180,6 +181,43 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		btnPromptUser.setText("Prompt for SMART Connect username/password if credentials not saved");
 		btnPromptUser.setToolTipText("if not selected and credentials are not saved all processing will be cancelled");
 		
+		Composite cleanUpComp = new Composite(g3, SWT.NONE);
+		gl = new GridLayout(3, false);
+		gl.marginHeight = 0;
+		gl.marginWidth = 0;
+		cleanUpComp.setLayout(gl);
+		cleanUpComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		lblCleanUp = new Button(cleanUpComp, SWT.RADIO);
+		lblCleanUp.setText("Delete items from processing queue older than");
+		lblCleanUp.setToolTipText("set to -1 to never delete items (not recommended");
+		lblCleanUp.setSelection(true);
+		txtCleanUp = new Text(cleanUpComp, SWT.BORDER);
+		txtCleanUp.setText("0000"); //$NON-NLS-1$
+		txtCleanUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)txtCleanUp.getLayoutData()).widthHint = 50;
+		
+		lblCleanUp2 = new Label(cleanUpComp, SWT.NONE);
+		lblCleanUp2.setText("days");
+		
+		cdCleanUp = createControlDecoration(txtCleanUp);
+		cdCleanUp.setDescriptionText("Invalid days values");
+		txtCleanUp.addModifyListener(new ModifyListener(){
+			@Override
+			public void modifyText(ModifyEvent e) {
+				try{
+					int x = Integer.parseInt(txtCleanUp.getText());
+					if (x < -1){
+						throw new Exception("Days must be a valid integer greater than -1");
+					}
+					cdCleanUp.hide();
+				}catch (Exception ex){
+					cdCleanUp.show();
+				}
+				fireChange(e);
+			}	
+		});
+			
 		if (isEditable){
 			SelectionListener ml = new SelectionAdapter() {
 				@Override
@@ -214,12 +252,15 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 			opStartUpAutoStart.setEnabled(false);
 			opStartUpPrompt.setEnabled(false);
 			btnPromptUser.setEnabled(false);
+			txtCleanUp.setEnabled(false);
+			lblCleanUp.setEnabled(false);
+			lblCleanUp2.setEnabled(false);
 		}
 		return main;
 	}
 	
 	public boolean isValid(){
-		return !cdMinutes.isVisible();
+		return !cdMinutes.isVisible() && !cdCleanUp.isVisible();
 	}
 	
 	private void fireChange(ModifyEvent e){
@@ -271,7 +312,7 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 			btnPromptUser.setSelection(DataQueueServerOptions.PROMPT_USER.getDefaultValueAsBoolean());
 			
 			txtMinutes.setText(DataQueueServerOptions.AUTO_MINUTES.getDefaultValueAsString());
-
+			txtCleanUp.setText(DataQueueServerOptions.CLEANUP_DAYS.getDefaultValueAsString());
 			updateEnabled();
 			return;
 		}
@@ -285,7 +326,7 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		btnPromptUser.setSelection(DataQueueServerOptions.PROMPT_USER.getBooleanValue(server));
 		
 		txtMinutes.setText(String.valueOf(DataQueueServerOptions.AUTO_MINUTES.getIntegerValue(server)));
-		
+		txtCleanUp.setText(String.valueOf(DataQueueServerOptions.CLEANUP_DAYS.getIntegerValue(server)));
 		updateEnabled();
 	}
 	
@@ -297,7 +338,7 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		server.setOption(DataQueueServerOptions.AUTO_CHECK.name(), ((Boolean)btnAutoCheck.getSelection()).toString());
 		server.setOption(DataQueueServerOptions.AUTO_AUTOPROCESS.name(), ((Boolean)opAutoAutoStart.getSelection()).toString());
 		server.setOption(DataQueueServerOptions.AUTO_PROMPT.name(), ((Boolean)opAutoPrompt.getSelection()).toString());
-		
+		server.setOption(DataQueueServerOptions.PROMPT_USER.name(), ((Boolean)btnPromptUser.getSelection()).toString());
 		
 		String minutes = DataQueueServerOptions.AUTO_MINUTES.getDefaultValueAsString();
 		try{
@@ -309,6 +350,17 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 			
 		}
 		server.setOption(DataQueueServerOptions.AUTO_MINUTES.name(), minutes);
+		
+		String days = DataQueueServerOptions.CLEANUP_DAYS.getDefaultValueAsString();
+		try{
+			int tmp = Integer.parseInt(txtCleanUp.getText());
+			if (tmp >= 0){
+				days = String.valueOf(tmp);
+			}
+		}catch(Exception ex){
+			
+		}
+		server.setOption(DataQueueServerOptions.CLEANUP_DAYS.name(), days);
 	}
 
 	@Override

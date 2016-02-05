@@ -142,6 +142,10 @@ public class ConnectServerWizard extends Wizard {
 		}finally{
 			s.close();
 		}
+		
+		for (ServerOptionsWizardPage p : opPages){
+			p.getPanel().afterSave(server);
+		}
 		return true;
 	}
 }
