@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.dataqueue.internal.ui;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,6 +31,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.transaction.Synchronization;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -53,6 +55,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -63,15 +66,16 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.ConnectServerManager;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
+import org.wcs.smart.connect.dataqueue.internal.process.IDataQueueListener;
 import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
 import org.wcs.smart.connect.dataqueue.internal.server.ConnectDataQueue;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -97,6 +101,44 @@ public class DataQueueView{
 
 	@Inject private Shell shell;
 	@Inject private UISynchronize ui;
+	
+	private IDataQueueListener listener = new IDataQueueListener() {
+		@Override
+		public void dataQueueModified() {
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					refreshLocalTable();		
+				}});
+		}
+	};
+	
+	private ConnectServerManager.IConnectServerEventHandler handler = new ConnectServerManager.IConnectServerEventHandler() {
+		
+		@Override
+		public void beforeDelete(Session session) throws Exception {
+			session.getTransaction().registerSynchronization(new Synchronization() {
+				@Override
+				public void beforeCompletion() {
+				}
+				
+				@Override
+				public void afterCompletion(int status) {
+					if (status == javax.transaction.Status.STATUS_COMMITTED){
+						connect = null;
+						Display.getDefault().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								tblServer.setInput(new Object[]{});
+								dataQueueTable.setInput(new Object[]{});
+							}
+						});
+					}
+				}
+			});
+			connect = null;
+		}
+	};
 	
 	private enum ServerColumn{
 		CHECK("", 30),
@@ -170,24 +212,21 @@ public class DataQueueView{
 				
 				if(connect == null){
 					ConnectServer server = null;
-					ConnectServerStatus serverStatus = null;
 					ConnectUser user = null;
 					
 					Session s = HibernateManager.openSession();
 					try{
 						server = ConnectHibernateManager.getConnectServer(s);
-						serverStatus = ConnectHibernateManager.getConnectServerStatus(s);
 						user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);
 					}finally{
 						s.close();
 					}
 					
-					if (server != null && serverStatus != null && user != null){
-						if (serverStatus.getStatus() == ConnectServerStatus.Status.DONE){
-							if (user.getConnectUsername() != null && user.getConnectPassword() != null){
-								connect = SmartConnect.findInstance(server, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
-							}
+					if (server != null && user != null){
+						if (user.getConnectUsername() != null && user.getConnectPassword() != null){
+							connect = SmartConnect.findInstance(server, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
 						}
+						
 					}
 					if (connect == null){
 						ui.syncExec(new Runnable(){
@@ -243,6 +282,7 @@ public class DataQueueView{
 				ui.syncExec(new Runnable() {
 					@Override
 					public void run() {
+						if (tblServer.getTable().isDisposed()) return;
 						tblServer.setInput(new String[]{error});
 						tblServer.refresh();
 					}
@@ -267,6 +307,8 @@ public class DataQueueView{
 	public void dispose(){
 		toolkit.dispose();
 		
+		DataQueueManager.INSTANCE.removeListener(listener);
+		ConnectServerManager.INSTANCE.removeHandler(handler);
 	}
 
 	/**
@@ -274,6 +316,7 @@ public class DataQueueView{
 	 */
 	@PostConstruct
 	public void createPartControl(Composite parent) {
+		
 		parent.setLayout(new GridLayout());
 		
 		toolkit = new FormToolkit(parent.getDisplay());
@@ -291,6 +334,9 @@ public class DataQueueView{
 		
 		refreshLocalTable();
 		refreshServerTable();
+		
+		DataQueueManager.INSTANCE.addListener(listener);
+		ConnectServerManager.INSTANCE.addHandler(handler);
 	}
 
 	private void sort(List<LocalDataQueueItem> items){
@@ -306,7 +352,7 @@ public class DataQueueView{
 					return -1;
 				}
 				if (o2.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
-					if (o2.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+					if (o1.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
 						return o2.getDateProcessed().compareTo(o1.getDateProcessed());
 					}
 					return 1;
@@ -465,25 +511,31 @@ public class DataQueueView{
 				items.add((LocalDataQueueItem)item);
 			}
 		}
+		
+		if (items.isEmpty()) return;
+		if (!MessageDialog.openQuestion(shell, "Delete Items", MessageFormat.format("Are you sure you to delete the {0} selected items?", items.size()))){
+			return;
+		}
+
 		DataQueueManager.INSTANCE.deleteItems(items);
 	}
+
 	private void deleteAll(){
+		if (!MessageDialog.openQuestion(shell, "Clear Data Queue", "Clearning the data queue will remove all items and associated files and is not undoable." + "\n\n" + "Are you sure you want to continue?")){
+			return;
+		}
 		DataQueueManager.INSTANCE.deleteAllHistory();
 	}
 	
 
-	private void refreshServerTable(){
+	private synchronized void refreshServerTable(){
 		tblServer.setInput(new String[]{"Loading..."});
 		tblServer.refresh();
-		
-		
 		refreshServerItemsJob.schedule();
 	}
 	
-	private void refreshLocalTable(){
+	private synchronized void refreshLocalTable(){
 		if (shell == null || shell.isDisposed()) return;
-		
-		//local history
 		dataQueueTable.setInput(new String[]{"Loading..."});
 		refreshLocalJob.schedule();
 	}
@@ -500,6 +552,10 @@ public class DataQueueView{
 	private void processAll(){
 		if (!(tblServer.getInput() instanceof List)) return;
 		List<DataQueueItem> items = (List<DataQueueItem>) tblServer.getInput();
+		if (items.isEmpty()){
+			MessageDialog.openInformation(shell, "Data Queue Processor", "Nothing to process.");
+			return;
+		}
 		processItems(items);
 	}
 	

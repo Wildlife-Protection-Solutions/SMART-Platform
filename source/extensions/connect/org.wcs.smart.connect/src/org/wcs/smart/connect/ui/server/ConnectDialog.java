@@ -308,7 +308,7 @@ public class ConnectDialog extends TitleAreaDialog {
 						if (savePass){
 							newPassword = ConnectPlugIn.encryptPassword(pass);
 						}
-						if (ConnectDialog.this.user != null || savePass){
+						if (ConnectDialog.this.user == null || savePass){
 							if (!strequals(existingPassword, newPassword == null ? null : pass)){
 								Session s = HibernateManager.openSession();
 								try{

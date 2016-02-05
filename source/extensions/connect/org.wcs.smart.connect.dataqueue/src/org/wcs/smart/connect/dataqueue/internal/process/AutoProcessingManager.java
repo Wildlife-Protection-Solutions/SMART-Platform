@@ -24,6 +24,10 @@ package org.wcs.smart.connect.dataqueue.internal.process;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.dataqueue.model.DataQueueServerOptions;
@@ -54,9 +58,20 @@ public enum AutoProcessingManager {
 			if (DataQueueServerOptions.AUTO_CHECK.getBooleanValue(cs)){
 				int delay = DataQueueServerOptions.AUTO_MINUTES.getIntegerValue(cs);
 				enableAutoProcessing(delay);
+			}else{
+				lastStatus.updateStatus(AutoProcessingStatus.Status.INACTIVE, "auto data queue processing not enabled");
 			}
+
 			if (DataQueueServerOptions.CHECK_ONSTARTUP.getBooleanValue(cs)){
-				runOnce();
+				WorkbenchJob wj = new WorkbenchJob("data queue startup check") {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						runOnce();
+						return Status.OK_STATUS;
+					}
+				};
+				wj.schedule();
+				
 			}
 		}finally{
 			s.close();
@@ -78,6 +93,8 @@ public enum AutoProcessingManager {
 	 * @param delayMinutes delay in mintues
 	 */
 	public void enableAutoProcessing(int delayMinutes){
+		lastStatus.updateStatus(AutoProcessingStatus.Status.OK, null);
+		statusModified();
 		long delaysec = delayMinutes * 60 * 1000l;
 		autoReplication.schedule(delaysec);
 	}

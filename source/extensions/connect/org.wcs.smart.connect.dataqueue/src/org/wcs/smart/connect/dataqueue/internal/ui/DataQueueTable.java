@@ -24,6 +24,7 @@ package org.wcs.smart.connect.dataqueue.internal.ui;
 import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -35,12 +36,18 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.wcs.smart.connect.dataqueue.internal.process.IDataQueueProgressListener;
+import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
+import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 
 /**
@@ -50,6 +57,30 @@ import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
  */
 public class DataQueueTable extends Composite{
 
+	private HashMap<UUID, TableProgressWidget> widgets = new HashMap<UUID, TableProgressWidget>();
+	
+
+	private Map<Object, TableProgressWidget> progressWidgets = new HashMap<Object, TableProgressWidget>();
+	 
+	private TableViewer viewer;
+	private IDataQueueProgressListener progressListener = new IDataQueueProgressListener() {
+		@Override
+		public void progressUpdated(LocalDataQueueItem item, String taskName,
+				String subTask, int totalWork, int currentWork) {
+			DataQueueTable.this.progressUpdated(item, taskName, subTask, totalWork, currentWork);
+		}
+		
+		@Override
+		public void done(LocalDataQueueItem item) {
+			DataQueueTable.this.done(item);
+		}
+		
+		@Override
+		public void cancel(LocalDataQueueItem item) {
+			DataQueueTable.this.cancel(item);
+		}
+	};
+	
 	private enum Column{
 		STATUS(""),
 		NAME ("Name"),
@@ -87,11 +118,15 @@ public class DataQueueTable extends Composite{
 	public DataQueueTable(Composite parent) {
 		super(parent, SWT.BORDER);
 		createTable();
+		
+		ProcessorManager.INSTANCE.addListener(progressListener);
+		addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				ProcessorManager.INSTANCE.removeListener(progressListener);
+			}
+		});
 	}
-	
-	private Map<Object, TableProgressWidget> progressWidgets = new HashMap<Object, TableProgressWidget>();
-	 
-	private TableViewer viewer;
 	
 	public void setInput(Object input){
 		viewer.setInput(input);
@@ -180,6 +215,7 @@ public class DataQueueTable extends Composite{
 		                    	 progressWidget.setBackground(cell.getBackground());
 		                    	 
 		                    	 progressWidgets.put(cell.getElement(), progressWidget);
+		                    	 widgets.put(i.getUuid(), progressWidget);
 		                    	 
 		                    	 TableEditor editor = new TableEditor(item.getParent());
 			                     editor.grabHorizontal  = true;
@@ -196,5 +232,46 @@ public class DataQueueTable extends Composite{
 	             });
 	        }
 		}
+	}
+	
+	
+	private TableProgressWidget getProgressWidget(DataQueueItem item){
+		return widgets.get(item.getUuid());
+	}
+	
+	public void progressUpdated(final LocalDataQueueItem item, String taskName, String subTask, int totalWork,
+			int currentWork) {
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				TableProgressWidget w = getProgressWidget(item);
+				if (w == null || w.isDisposed()) return;
+				w.setProgress(item, taskName, subTask, totalWork, currentWork);		
+			}});
+		
+	}
+
+	public void done(final LocalDataQueueItem item) {
+		
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				TableProgressWidget w = getProgressWidget(item);
+				if (w == null || w.isDisposed()) return;
+				w.setProgressDone(item);		
+			}});
+		
+	}
+
+	public void cancel(final LocalDataQueueItem item) {
+		
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				TableProgressWidget w = getProgressWidget(item);
+				if (w == null || w.isDisposed()) return;
+				w.setProgressCancel(item );		
+			}});
+		
 	}
 }

@@ -19,16 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect;
+package org.wcs.smart.connect.dataqueue.internal.process;
 
-public interface IConnectStatusListener {
+import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
+
+/**
+ * Listeners for listening to the state of processing of data queue 
+ * items.  Listeners should be registered with the ProcessorManager
+ * @author Emily
+ *
+ */
+public interface IDataQueueProgressListener {
+	
+	/**
+	 * Fired with the progress of an item is updated
+	 * @param item  the item updated
+	 * @param taskName current task name
+	 * @param subTask current sub task
+	 * @param totalWork total amount of work
+	 * @param currentWork current amount of work completed
+	 */
+	public void progressUpdated(final LocalDataQueueItem item, String taskName, String subTask, int totalWork, int currentWork);
 
 	/**
-	 * Fired when the server status had been modified.
-	 * 
-	 * @param status current status
-	 * @param message current status message or null if no message
+	 * Fired with the progress of an item is done.  This does not mean it
+	 * was successful, it just means it's finished processing.
+	 * @param item the item completed
 	 */
-	public void statusModified(ConnectStatusManager.ServerStatus status, String message);
-	
+	public void done(final LocalDataQueueItem item);
+
+	/**
+	 * Fired with the progress of an item is cancelled.
+	 * @param item the item completed
+	 */
+	public void cancel(final LocalDataQueueItem item);
 }

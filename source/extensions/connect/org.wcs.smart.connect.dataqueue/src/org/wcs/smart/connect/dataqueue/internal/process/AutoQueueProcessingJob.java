@@ -115,19 +115,24 @@ public class AutoQueueProcessingJob extends Job {
 		}
 		
 		if (server == null){
-			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, "No SMART Connect Server configured.");
+			reschedule = false;
+			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, "no SMART Connect server configured");
 			return Status.OK_STATUS;
 		}
 		Boolean opSchedule = DataQueueServerOptions.AUTO_CHECK.getBooleanValue(server);
 		if (!opSchedule){
 			reschedule = false;
+			if (!runOnce){
+				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.INACTIVE, "auto data queue processing not enabled");
+				return Status.OK_STATUS;
+			}
 		}else{
 			millisecondsToReschedule = DataQueueServerOptions.AUTO_MINUTES.getIntegerValue(server) * 60 * 1000l;
 		}
 		
 		if (user == null || user.getConnectPassword() == null || user.getConnectUsername() == null){
 			if (!DataQueueServerOptions.PROMPT_USER.getBooleanValue(server)){
-				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.WARNING, "No SMART Connect Server user configured and prompt for user option not enabled.");
+				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.WARNING, "no SMART Connect server user configured and prompt for user option not enabled");
 				return Status.OK_STATUS;
 			}
 			//prompt user
@@ -142,7 +147,7 @@ public class AutoQueueProcessingJob extends Job {
 				}	
 			});
 			if (smartConnect == null){
-				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.WARNING, "User cancelled.");
+				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.WARNING, "user cancelled");
 				return Status.OK_STATUS;
 			}
 		}else{
@@ -150,7 +155,7 @@ public class AutoQueueProcessingJob extends Job {
 				smartConnect = SmartConnect.findInstance(server, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
 			} catch (Exception e) {
 				ConnectDataQueuePlugin.log("Could not configure SMART Connect Server connection", e);
-				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, "Could not configure SMART Connect Server connection.");
+				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, "could not configure SMART Connect Server connection");
 				return Status.OK_STATUS;
 			}
 		}
@@ -164,7 +169,7 @@ public class AutoQueueProcessingJob extends Job {
 			serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(smartConnect, SmartDB.getCurrentConservationArea());
 		}catch (Exception ex){
 			ConnectDataQueuePlugin.log("Could not download data queue items from SMART Connect Server.", ex);
-			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, "Could not download processing data queue items from SMART Connect Server.");
+			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, "could not download processing data queue items from SMART Connect server.");
 			return Status.OK_STATUS;
 		}
 		try{
@@ -228,6 +233,7 @@ public class AutoQueueProcessingJob extends Job {
 			
 		//reschedule - or only reschedule when processing done??
 		monitor.done();
+		AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.OK, null);
 		return Status.OK_STATUS;
 	}
 	

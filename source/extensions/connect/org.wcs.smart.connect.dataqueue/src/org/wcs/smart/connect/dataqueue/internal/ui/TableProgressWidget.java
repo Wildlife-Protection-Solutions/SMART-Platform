@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
-import org.wcs.smart.connect.dataqueue.internal.process.DataQueueProcessMonitor;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 
 /**
@@ -46,11 +45,12 @@ public class TableProgressWidget extends Composite{
 	private LocalDataQueueItem item;
 	private TableViewer viewer;
 	
+	
+	
 	public TableProgressWidget(Composite parent, LocalDataQueueItem item, TableViewer viewer) {
 		super(parent, SWT.TRANSPARENT);
 		this.item = item;
 		this.viewer = viewer;
-		DataQueueProcessMonitor.INSTANCE.register(this, item);
 		createControl();
 	}
 	
@@ -62,7 +62,7 @@ public class TableProgressWidget extends Composite{
 	}
 	private void createControl(){
 		setLayout(new GridLayout(2, false));
-		((GridLayout)getLayout()).marginHeight = 0;
+		((GridLayout)getLayout()).marginHeight = 2;
 		((GridLayout)getLayout()).marginWidth = 0;
 		
 		pbar = new ProgressBar(this, SWT.SMOOTH | SWT.HORIZONTAL);
@@ -70,9 +70,8 @@ public class TableProgressWidget extends Composite{
 		gd.widthHint = 100;
 		pbar.setLayoutData(gd);
 		
-		
 		lblProgress = new Label(this,  SWT.NONE);
-		lblProgress.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		lblProgress.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		initStatus();
 	}
 
@@ -82,7 +81,6 @@ public class TableProgressWidget extends Composite{
 	}
 	
 	private void initStatus(){
-		
 		lblProgress.setText(item.getStatus().name());
 		if (item.getStatus() == LocalDataQueueItem.Status.COMPLETE ||
 			item.getStatus() == LocalDataQueueItem.Status.COMPLETE_WARN ||
@@ -113,10 +111,11 @@ public class TableProgressWidget extends Composite{
 		this.item.setErrorMessage(update.getErrorMessage());
 		this.item.setDateProcessed(update.getDateProcessed());
 		viewer.refresh(item);
-		
-		pbar.setMinimum(0);
-		pbar.setMaximum(totalWork);
-		pbar.setSelection(initWork);
+		if (pbar != null && !pbar.isDisposed()){
+			pbar.setMinimum(0);
+			pbar.setMaximum(totalWork);
+			pbar.setSelection(initWork);
+		}
 		StringBuilder sb = new StringBuilder();
 		if (taskName != null){
 			sb.append(taskName);

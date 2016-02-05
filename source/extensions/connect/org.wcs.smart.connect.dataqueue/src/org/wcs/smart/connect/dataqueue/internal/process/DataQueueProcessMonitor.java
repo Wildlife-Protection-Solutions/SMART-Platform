@@ -21,15 +21,7 @@
  */
 package org.wcs.smart.connect.dataqueue.internal.process;
 
-import java.util.HashMap;
-import java.util.UUID;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.connect.dataqueue.internal.ui.TableProgressWidget;
-import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 
 /**
@@ -41,8 +33,6 @@ import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
  */
 public class DataQueueProcessMonitor implements IProgressMonitor{
 
-	public static final DataQueueProcessMonitor INSTANCE = new DataQueueProcessMonitor();
-	
 	private int total;
 	private int work;
 	private String taskName;
@@ -53,9 +43,8 @@ public class DataQueueProcessMonitor implements IProgressMonitor{
 	private boolean done = false;
 	private LocalDataQueueItem item;
 
-	private HashMap<UUID, TableProgressWidget> widgets = new HashMap<UUID, TableProgressWidget>();
 	
-	private DataQueueProcessMonitor(){
+	DataQueueProcessMonitor(){
 	}
 	
 	public void setDataQueueItem(LocalDataQueueItem item){
@@ -68,19 +57,20 @@ public class DataQueueProcessMonitor implements IProgressMonitor{
 		if (done) fireDone();
 		fireUpdate();
 	}
+	
 	private void fireUpdate(){
 		if (item == null) return;
-		progressUpdated(item, taskName, subTaskName, total, work);
+		ProcessorManager.INSTANCE.progressUpdated(item, taskName, subTaskName, total, work);
 	}
 	
 	private void fireDone(){
 		if (item == null) return;
-		done(item);
+		ProcessorManager.INSTANCE.done(item);
 	}
 	
 	private void fireCancelled(){
 		if (item == null) return;
-		cancel(item);
+		ProcessorManager.INSTANCE.cancel(item);
 	}
 	
 	public IProgressMonitor setProgressMonitor(IProgressMonitor wrapper){
@@ -147,69 +137,6 @@ public class DataQueueProcessMonitor implements IProgressMonitor{
 		fireUpdate();
 	}
 	
-	/**
-	 * Registers a widget for displaying progress.  Widgets are automatically
-	 * deregistered when disposed.
-	 * 
-	 * @param newwidgets progress widget
-	 * @param item item represented by progress widget
-	 */
-	public void register(final TableProgressWidget newwidgets, DataQueueItem item){
-		newwidgets.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				widgets.remove(item.getUuid());
-			}
-		});
-		this.widgets.put(item.getUuid(), newwidgets);
-		fireStatusUpdate();
-	}
-	
-	/**
-	 * Updates the progress for a given item to the current state.
-	 * 
-	 * @param item
-	 * @param currentState
-	 */
-	private TableProgressWidget getProgressWidget(DataQueueItem item){
-		TableProgressWidget w = widgets.get(item.getUuid());
-		return w;
-	}
-	
-	public void progressUpdated(final LocalDataQueueItem item, String taskName, String subTask, int totalWork,
-			int currentWork) {
-		Display.getDefault().asyncExec(new Runnable(){
-			@Override
-			public void run() {
-				TableProgressWidget w = getProgressWidget(item);
-				if (w == null || w.isDisposed()) return;
-				w.setProgress(item, taskName, subTask, totalWork, currentWork);		
-			}});
-		
-	}
 
-	public void done(final LocalDataQueueItem item) {
-		
-		Display.getDefault().asyncExec(new Runnable(){
-			@Override
-			public void run() {
-				TableProgressWidget w = getProgressWidget(item);
-				if (w == null || w.isDisposed()) return;
-				w.setProgressDone(item);		
-			}});
-		
-	}
-
-	public void cancel(final LocalDataQueueItem item) {
-		
-		Display.getDefault().asyncExec(new Runnable(){
-			@Override
-			public void run() {
-				TableProgressWidget w = getProgressWidget(item);
-				if (w == null || w.isDisposed()) return;
-				w.setProgressCancel(item );		
-			}});
-		
-	}
 		
 }

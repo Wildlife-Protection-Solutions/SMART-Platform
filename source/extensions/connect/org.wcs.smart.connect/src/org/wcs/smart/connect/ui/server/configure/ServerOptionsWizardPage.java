@@ -83,4 +83,7 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		panel.updateServer(server);
 	}
 	
+	public IServerOptionsPanel getPanel(){
+		return this.panel;
+	}
 }

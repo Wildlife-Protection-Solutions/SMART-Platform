@@ -19,16 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect;
+package org.wcs.smart.connect.dataqueue.internal;
 
-public interface IConnectStatusListener {
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.DeleteConservationAreaHandler;
+import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
+
+/**
+ * Delete handler for deleting smart connect information attached to
+ * conservation area.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class CaDataQueueDeleteHandler implements ICaDeleteHandler {
 
 	/**
-	 * Fired when the server status had been modified.
-	 * 
-	 * @param status current status
-	 * @param message current status message or null if no message
+	 * To be executed before the conservation area and patrol is deleted
 	 */
-	public void statusModified(ConnectStatusManager.ServerStatus status, String message);
+	public static final int EXECUTE_ORDER = DeleteConservationAreaHandler.EXECUTE_ORDER + 1;
+
+	public CaDataQueueDeleteHandler() {
+	}
+
+	@Override
+	public void beforeDelete(ConservationArea ca, Session session,
+			IProgressMonitor monitor) throws Exception {
+		monitor.subTask("Removing SMART Connect Data Queue Items");
+		DataQueueManager.INSTANCE.deleteDataQueue(ca, session);
+	}
+
 	
+
 }

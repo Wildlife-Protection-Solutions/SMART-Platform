@@ -48,20 +48,18 @@ public class StatusLineConfigProcessor {
 	@Inject IEventBroker broker;
 	
 	@Execute
-	public void execute(){
-		
+	public void execute() {
 		broker.subscribe(UIEvents.UILifeCycle.APP_STARTUP_COMPLETE,
-		        new EventHandler() {
-					
+				new EventHandler() {
 					@Override
 					public void handleEvent(Event event) {
-						try{
+						try {
 							configure();
-						}finally{
+						} finally {
 							broker.unsubscribe(this);
 						}
 					}
-		});
+				});
 	}
 	
 	private void configure(){
