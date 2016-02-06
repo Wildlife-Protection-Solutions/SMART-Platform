@@ -80,7 +80,8 @@ public class PostgresqlCaLoader {
 	public static final String[] TABLES_TO_IGNORE = new String[]{
 		"smart.connect_status", 
 		"smart.connect_change_log", 
-		"smart.connect_sync_history"};
+		"smart.connect_sync_history",
+		"smart.connect_data_queue"};
 	
 	private Session session;
 	
@@ -140,7 +141,7 @@ public class PostgresqlCaLoader {
 		Set<String> allTables = new HashSet<String>();
 		allTables.addAll(tables.keySet());
 		
-		HashMap<String, List<String>> keys = getTableConstraints(session);
+		HashMap<String, HashSet<String>> keys = getTableConstraints(session);
 		Set<String> processed = new HashSet<String>();
 		
 		//To support CCAA if the table is not provided we assume we already loaded it
@@ -159,7 +160,7 @@ public class PostgresqlCaLoader {
 			if (last.equals(tableName)){
 				throw new Exception("Circular table dependencies");
 			}
-			List<String> requires = keys.get(tableName);
+			HashSet<String> requires = keys.get(tableName);
 			boolean exportTable = false;
 			if (requires == null || requires.size() == 0){
 				exportTable = true;
@@ -383,7 +384,7 @@ public class PostgresqlCaLoader {
 	 * @return a map from a table name to a list of other 
 	 * tables with foreign keys related to it
 	 */
-	private HashMap<String, List<String>> getTableConstraints(Session session){
+	private HashMap<String, HashSet<String>> getTableConstraints(Session session){
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT tc.table_schema || '.' || tc.table_name as sourcetable, "); //$NON-NLS-1$
 		sql.append("ccu.table_schema || '.' || ccu.table_name as requiredtable "); //$NON-NLS-1$
@@ -395,16 +396,16 @@ public class PostgresqlCaLoader {
 		sql.append(" ON ccu.constraint_name = tc.constraint_name "); //$NON-NLS-1$
 		sql.append(" WHERE tc.table_schema = 'smart'"); //$NON-NLS-1$
 		
-		HashMap<String, List<String>> results = new HashMap<String, List<String>>();
+		HashMap<String, HashSet<String>> results = new HashMap<String, HashSet<String>>();
 		@SuppressWarnings("unchecked")
 		List<Object[]> data = session.createSQLQuery(sql.toString()).list();
 		for (Object[] d : data){
 			String source = ((String) d[0]).toUpperCase();
 			String req = ((String)d[1]).toUpperCase();
 			if (source.equals(req)) continue;
-			List<String> requires = results.get(source);
+			HashSet<String> requires = results.get(source);
 			if (requires == null){
-				requires = new ArrayList<String>();
+				requires = new HashSet<String>();
 				results.put(source, requires);
 			}
 			requires.add(req);

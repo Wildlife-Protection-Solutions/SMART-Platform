@@ -2403,3 +2403,28 @@ primary key(employee_uuid, connect_uuid));
 
 alter table smart.connect_account add constraint connect_employee_uuid_fk foreign key (employee_uuid) 
 references smart.employee (uuid) on update restrict on delete cascade DEFERRABLE;
+
+-- DATA PROCESSING QUEUE TABLES
+CREATE TABLE smart.connect_data_queue(
+	uuid UUID NOT NULL,
+	type VARCHAR(32) NOT NULL,
+	ca_uuid UUID,
+	name VARCHAR(4096),
+	status varchar(32) NOT NULL,
+	queue_order integer,
+	error_message VARCHAR(8192),
+	local_file varchar(4096),
+	date_processed timestamp,
+	server_item_uuid UUID,
+	PRIMARY KEY (uuid)
+);
+		
+ALTER TABLE smart.connect_data_queue ADD CONSTRAINT 
+connect_data_queue_ca_uuid_fk foreign key (ca_uuid) 
+REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE;
+
+ALTER TABLE smart.connect_data_queue ADD CONSTRAINT status_chk 
+CHECK (status IN ('DOWNLOADING', 'REQUEUED', 'QUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR'));
+		
+ALTER TABLE smart.connect_data_queue ADD CONSTRAINT type_chk 
+CHECK (type IN ('PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML'));
