@@ -49,6 +49,7 @@ public class LocalDataQueueItem extends DataQueueItem{
 
 	public enum Status{
 		QUEUED ("QUEUED"),
+		REQUEUED ("REQUEUED"),
 		DOWNLOADING ("DOWNLOADING"),
 		PROCESSING ("PROCESSING"),
 		COMPLETE ("COMPLETE"),
@@ -70,7 +71,7 @@ public class LocalDataQueueItem extends DataQueueItem{
 				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.ERROR_ICON);
 			}else if (this == DOWNLOADING || this == PROCESSING){
 				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.PROCESSING_ICON);
-			}else if (this == QUEUED){
+			}else if (this == QUEUED || this == REQUEUED){
 				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.QUEUED_ICON);
 			}else if (this == COMPLETE){
 				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.COMPLETE_ICON);

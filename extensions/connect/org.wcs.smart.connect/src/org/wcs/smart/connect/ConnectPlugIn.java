@@ -23,9 +23,7 @@ package org.wcs.smart.connect;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartPlugIn;
@@ -34,7 +32,6 @@ import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
 import org.wcs.smart.connect.internal.CaReplicationDeleteHandler;
 import org.wcs.smart.connect.internal.EmployeeDeleteHandler;
-import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.model.PasswordAesManager;
 import org.wcs.smart.hibernate.SmartDB;

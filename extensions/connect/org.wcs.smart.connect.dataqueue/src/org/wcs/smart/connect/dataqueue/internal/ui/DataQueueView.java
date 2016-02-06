@@ -57,6 +57,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -64,6 +66,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectServerManager;
@@ -251,7 +254,11 @@ public class DataQueueView{
 				
 				monitor.worked(1);
 				monitor.subTask("Loading Local Items ...");
-				List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems(LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.PROCESSING, LocalDataQueueItem.Status.DOWNLOADING);
+				List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems(
+						LocalDataQueueItem.Status.QUEUED, 
+						LocalDataQueueItem.Status.REQUEUED,
+						LocalDataQueueItem.Status.PROCESSING, 
+						LocalDataQueueItem.Status.DOWNLOADING);
 
 				//remove any items from the serverItems that are in the local Items
 				//these have been queued and we do not need to display them twice
@@ -370,14 +377,14 @@ public class DataQueueView{
 					return 1;
 				}	
 				
-				if (o1.getStatus() == LocalDataQueueItem.Status.QUEUED){
-					if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
+				if (o1.getStatus() == LocalDataQueueItem.Status.QUEUED || o1.getStatus() == LocalDataQueueItem.Status.REQUEUED){
+					if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED || o2.getStatus() == LocalDataQueueItem.Status.REQUEUED){
 						return o1.getOrder().compareTo(o2.getOrder());
 					}
 					return -1;
 				}
-				if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
-					if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED){
+				if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED || o1.getStatus() == LocalDataQueueItem.Status.REQUEUED){
+					if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED|| o2.getStatus() == LocalDataQueueItem.Status.REQUEUED){
 						return o2.getOrder().compareTo(o1.getOrder());
 					}
 					return 1;
@@ -403,6 +410,34 @@ public class DataQueueView{
 		dataQueueTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 
+		Menu dataQueueMenu = new Menu(dataQueueTable.getViewer().getControl());
+		dataQueueTable.getViewer().getTable().setMenu(dataQueueMenu);
+		
+		MenuItem menuDelete = new MenuItem(dataQueueMenu, SWT.NONE);
+		menuDelete.setText("Delete");
+		menuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		menuDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteSelected();
+			}
+		});
+		MenuItem menuReprocess = new MenuItem(dataQueueMenu, SWT.NONE);
+		menuReprocess.setText("Reprocess");
+		menuReprocess.setImage(ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.PROCESSING_ICON));
+		menuReprocess.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				List<LocalDataQueueItem> items = getDataQueueSelection();
+				if (!MessageDialog.openQuestion(shell, "Reprocessing", 
+						MessageFormat.format("Reprocessing files may duplicate date.  Are you sure you want to attempt to reprocess the {0} selected items?", items.size()))){
+					return;
+				}
+				DataQueueManager.INSTANCE.reprocessItems(items);
+				ProcessorManager.INSTANCE.processDataQueue(connect);
+			}
+		});
+		
 		
 		Composite linkComp = toolkit.createComposite(main);
 		linkComp.setLayout(new GridLayout(5, false));
@@ -417,8 +452,18 @@ public class DataQueueView{
 		});
 		
 		Hyperlink deleteSel = toolkit.createHyperlink(linkComp, "Remove Selected", SWT.NONE);
-
 		Hyperlink deleteAll = toolkit.createHyperlink(linkComp, "Remove All" , SWT.NONE);
+		
+		Hyperlink restart = toolkit.createHyperlink(linkComp, "Restart Processing" , SWT.NONE);
+		restart.setToolTipText("If the data queue processor is not running, this will initiate data queue processing.");
+		restart.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				ProcessorManager.INSTANCE.processDataQueue(connect);		
+			}
+		});
+		
+		
 		Label spacer = toolkit.createLabel(linkComp, "");
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -426,7 +471,6 @@ public class DataQueueView{
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				deleteSelected();
-				refreshLocalTable();
 			}
 		});
 		deleteAll.addHyperlinkListener(new HyperlinkAdapter() {
@@ -471,7 +515,13 @@ public class DataQueueView{
 				processSelected();
 			}
 		});
-		
+		Hyperlink link = toolkit.createHyperlink(main, "Refresh", SWT.NONE);
+		link.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				refreshServerTable();
+			}
+		});
 		tblServer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.NO_FOCUS);
 		tblServer.getTable().setLinesVisible(true);
 		tblServer.getTable().setHeaderVisible(true);
@@ -491,18 +541,9 @@ public class DataQueueView{
 				}
 			});
 		}
-		Hyperlink link = toolkit.createHyperlink(main, "Refresh", SWT.NONE);
-		link.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				refreshServerTable();
-			}
-		});
-		
 	}
 	
-	
-	private void deleteSelected(){
+	private List<LocalDataQueueItem> getDataQueueSelection(){
 		List<LocalDataQueueItem> items = new ArrayList<LocalDataQueueItem>();
 		IStructuredSelection sel = (IStructuredSelection) dataQueueTable.getSelection();
 		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
@@ -511,9 +552,35 @@ public class DataQueueView{
 				items.add((LocalDataQueueItem)item);
 			}
 		}
+		return items;
 		
-		if (items.isEmpty()) return;
-		if (!MessageDialog.openQuestion(shell, "Delete Items", MessageFormat.format("Are you sure you to delete the {0} selected items?", items.size()))){
+	}
+	private void deleteSelected(){
+		List<LocalDataQueueItem> items = getDataQueueSelection();
+		boolean isProcessing = false;
+		for (Iterator<LocalDataQueueItem> iterator = items.iterator(); iterator.hasNext();) {
+			LocalDataQueueItem localDataQueueItem = (LocalDataQueueItem) iterator.next();
+			if (localDataQueueItem.getStatus() == LocalDataQueueItem.Status.PROCESSING || 
+					localDataQueueItem.getStatus() == LocalDataQueueItem.Status.DOWNLOADING ){
+					//cannot delete processing or downloading items
+					isProcessing = true;
+					iterator.remove();
+			}
+		}
+
+		if (items.isEmpty()){
+			if (isProcessing){
+				MessageDialog.openWarning(shell,"Delete Items", "Cannot remove items currently processing.");
+			}
+			return;
+		}
+		
+		String message = MessageFormat.format("Are you sure you to delete the {0} selected items?", items.size());
+		if (isProcessing){
+			message = MessageFormat.format("Processing items cannot be removed.  Are you sure you to delete the remaining {0} selected items?", items.size());
+		}
+			
+		if (!MessageDialog.openQuestion(shell, "Delete Items", message)){
 			return;
 		}
 

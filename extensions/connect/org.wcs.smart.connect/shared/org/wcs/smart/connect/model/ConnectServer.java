@@ -39,6 +39,7 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.ConnectDatastore;
 
 /**
  * Smart connect server information
@@ -56,7 +57,7 @@ public class ConnectServer extends UuidItem{
 	 */
 	public static final Path getDefaultCertificateFileName(ConservationArea ca){
 		return Paths.get(ca.getFileDataStoreLocation(),
-				ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR, SSH_CERTIFICATE_FILENAME);
+				ConnectDatastore.CONNECT_FILESTORE_DIR, SSH_CERTIFICATE_FILENAME);
 	}
 	
 	private static final String SSH_CERTIFICATE_FILENAME = "certificate.crt"; //$NON-NLS-1$

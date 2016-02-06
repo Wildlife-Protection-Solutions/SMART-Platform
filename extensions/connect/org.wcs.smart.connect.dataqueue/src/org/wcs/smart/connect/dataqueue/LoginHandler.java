@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.dataqueue;
 
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -33,8 +35,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ILoginHandler;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
@@ -66,23 +70,23 @@ public class LoginHandler implements ILoginHandler {
 		resetDataQueue();
 
 		//cleanup history 
-		cleanUpDataQueue();
+		cleanUpDataQueueAndFilestore();
 
 		//configure auto startup
 		AutoProcessingManager.INSTANCE.onStartUp();
 	}
 
-	/*
+	/**
 	 * checks for items that are current processing, queued, or downloading
 	 * if there are any it resets them to queued and starts the processing again
 	 */
-	//TODO: this is not working yet
 	private void resetDataQueue(){
 		
 		List<LocalDataQueueItem> itemsToReset = DataQueueManager.INSTANCE.getLocalItems(new LocalDataQueueItem.Status[]{
 				LocalDataQueueItem.Status.DOWNLOADING,
 				LocalDataQueueItem.Status.PROCESSING,
-				LocalDataQueueItem.Status.QUEUED
+				LocalDataQueueItem.Status.QUEUED,
+				LocalDataQueueItem.Status.REQUEUED
 		});
 		if (itemsToReset.isEmpty()) return;
 
@@ -94,11 +98,16 @@ public class LoginHandler implements ILoginHandler {
 			int order = 0;
 			for (LocalDataQueueItem i : itemsToReset){
 				if (i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+					//downloading was not complete so clear file
 					if (i.getFullFilePath() != null){
 						toDelete.add(i.getFullFilePath());
 					}
+					i.setFile(null);
 				}
-				i.setStatus(LocalDataQueueItem.Status.QUEUED);
+				if(i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING ||
+						i.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+					i.setStatus(LocalDataQueueItem.Status.REQUEUED);
+				}
 				i.setOrder(order++);
 				s.saveOrUpdate(i);
 			}
@@ -133,7 +142,10 @@ public class LoginHandler implements ILoginHandler {
 		}
 		if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
 				"Data Queue Processor", 
-				"There are unfinished items in the data processing queue from previous application launch.  Do you want to process these now?")){
+				"There are unfinished items in the data processing queue from previous "
+				+ "application launch.  Do you want to process these now?")){
+			//if not these will stay in the queue and get processed during the next
+			//processing cycle
 			return ;
 		}
 		
@@ -158,7 +170,7 @@ public class LoginHandler implements ILoginHandler {
 	/*
 	 * cleansup data queue items that are old
 	 */
-	private void cleanUpDataQueue(){
+	private void cleanUpDataQueueAndFilestore(){
 		
 		int olderThan = -1;
 		Session s = HibernateManager.openSession();
@@ -176,11 +188,48 @@ public class LoginHandler implements ILoginHandler {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					DataQueueManager.INSTANCE.deleteOldItems(days);
+					cleanUpFilestore();
 					return Status.OK_STATUS;
 				}
 			};
 			j.schedule();
+		}		
+	}
+	
+
+	/*
+	 * Removes any items in the <CAUUID>/smart_connect/dataqueue folder that
+	 * are not associated with a localdataqueue item for the given conservation
+	 * area.
+	 */
+	private void cleanUpFilestore(){
+		List<String> files = null;
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			Query q = s.createQuery("SELECT file FROM LocalDataQueueItem WHERE conservationArea = :ca and file is not null");
+			q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
+			files = q.list();
+			s.getTransaction().commit();
+		}finally{
+			s.close();
 		}
-			
+		if (files == null) return;
+		
+		Path p = FileSystems.getDefault().getPath(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), ConnectDataQueuePlugin.DATA_QUEUE_DIR);
+		Path root = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation());
+		try(DirectoryStream<Path> systemfiles = Files.newDirectoryStream(p)){
+			for (Path temp : systemfiles){
+				if (!files.contains(root.relativize(temp).toString())){
+					try{
+						Files.deleteIfExists(temp);
+					}catch (Exception ex){
+						ConnectDataQueuePlugin.log(ex.getMessage(), ex);
+					}
+				}
+			}
+		}catch(Exception ex){
+			ConnectDataQueuePlugin.log(ex.getMessage(), ex);
+		}
 	}
 }
