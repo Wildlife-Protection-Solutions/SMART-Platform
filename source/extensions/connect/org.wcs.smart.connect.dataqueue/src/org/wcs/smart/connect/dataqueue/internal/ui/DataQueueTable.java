@@ -150,6 +150,7 @@ public class DataQueueTable extends Composite{
 					p.dispose();
 				}
 				progressWidgets.clear();
+				widgets.clear();
 		        super.inputChanged(viewer, oldInput, newInput);
 		    }
 		});
@@ -234,6 +235,9 @@ public class DataQueueTable extends Composite{
 		}
 	}
 	
+	public TableViewer getViewer(){
+		return this.viewer;
+	}
 	
 	private TableProgressWidget getProgressWidget(DataQueueItem item){
 		return widgets.get(item.getUuid());

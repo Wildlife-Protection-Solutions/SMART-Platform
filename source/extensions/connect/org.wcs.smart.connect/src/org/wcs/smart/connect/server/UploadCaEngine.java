@@ -41,13 +41,13 @@ import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.CaExporter;
+import org.wcs.smart.connect.ConnectDatastore;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
-import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -267,7 +267,11 @@ public class UploadCaEngine {
 	 * @return
 	 */
 	private String getExportFilename(ConservationArea ca){
-		return ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR + File.separator + "sc_" +UuidUtils.uuidToString(ca.getUuid())+ "_" + System.nanoTime() + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return ConnectDatastore.CONNECT_FILESTORE_DIR 
+				+ File.separator
+				+ ConnectDatastore.REPLICATION_FILESTORE_DIR
+				+ File.separator
+				+ "sc_" +UuidUtils.uuidToString(ca.getUuid())+ "_" + System.nanoTime() + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**

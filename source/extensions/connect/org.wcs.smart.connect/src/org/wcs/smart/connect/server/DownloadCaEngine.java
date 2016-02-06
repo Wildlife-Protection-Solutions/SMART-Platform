@@ -119,6 +119,7 @@ public class DownloadCaEngine {
 		JsonNode nd = (new ObjectMapper()).readTree(message);
 		String downloadUrl = nd.get("file_url").asText(); //$NON-NLS-1$
 		if (monitor.isCanceled()) return false;
+		
 		Path p = connect.downloadFileFromUrl(downloadUrl, null, new SubProgressMonitor(monitor, 1));
 		
 		/* import file */

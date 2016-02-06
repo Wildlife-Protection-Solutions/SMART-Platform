@@ -39,11 +39,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.WorkbenchJob;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.ConnectDatastore;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.internal.Messages;
@@ -90,6 +92,7 @@ public class LoginHandler implements ILoginHandler {
 		}
 
 		if (status == null){
+			cleanUpFilestore();
 			return;
 		}
 		
@@ -196,13 +199,35 @@ public class LoginHandler implements ILoginHandler {
 	 */
 	@SuppressWarnings("unchecked")
 	private void cleanUpFilestore(){
-		final List<Path> filesToKeep = new ArrayList<Path>();
+		//delete all files in the download temp directory
+		Path smartConnect = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), ConnectDatastore.CONNECT_FILESTORE_DIR)
+				.resolve(ConnectDatastore.DOWNLOAD_FILESTORE_DIR);
+		if(Files.exists(smartConnect)){
+			try(DirectoryStream<Path> stream = Files.newDirectoryStream(smartConnect)){
+				for (Path p : stream){
+					try{
+						Files.deleteIfExists(p);
+					}catch (Exception ex){
+						ConnectPlugIn.log(ex.getMessage(), ex);
+					}
+				}
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
+			}
+		}
 		
+		//in the replication directory 
+		//we want to delete any files not associated with
+		//1. an active CA upload form any CA 
+		//2. an active download sync from any ca
+
+		final List<Path> filesToKeep = new ArrayList<Path>();
 		Session s = HibernateManager.openSession();
 		
 		try{
 			List<ConnectServerStatus> toKeep = s.createCriteria(ConnectServerStatus.class)
 					.add(Restrictions.eq("status", ConnectServerStatus.Status.UPLOAD)) //$NON-NLS-1$
+					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
 					.list();
 			for(ConnectServerStatus server : toKeep){
 				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), server.getLocalFile());
@@ -212,6 +237,7 @@ public class LoginHandler implements ILoginHandler {
 			List<ConnectSyncHistoryRecord> upToKeep = s.createCriteria(ConnectSyncHistoryRecord.class)
 					.add(Restrictions.eq("status", ConnectSyncHistoryRecord.Status.ACTIVE)) //$NON-NLS-1$
 					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.UPLOAD)) //$NON-NLS-1$
+					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
 					.list();
 			for (ConnectSyncHistoryRecord syn : upToKeep){
 				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), syn.getChangeLogZipFile());
@@ -223,28 +249,30 @@ public class LoginHandler implements ILoginHandler {
 		}
 		
 		//delete all files that are not in the filesToKeep Array
-		Path smartConnect = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR);
-		
-		try(DirectoryStream<Path> stream = Files.newDirectoryStream(smartConnect, new DirectoryStream.Filter<Path>(){
-			@Override
-			public boolean accept(Path entry) throws IOException {
-				return !filesToKeep.contains(entry);
-			}})){
-			
-			for (Path p : stream){
-				try{
-					if (Files.isDirectory(p)){
-						FileUtils.deleteDirectory(p.toFile());
-					}else if (Files.exists(p)){
-						Files.delete(p);
+		Path replicationDir = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), ConnectDatastore.CONNECT_FILESTORE_DIR)
+				.resolve(ConnectDatastore.REPLICATION_FILESTORE_DIR);
+		if (Files.exists(replicationDir)){
+			try(DirectoryStream<Path> stream = Files.newDirectoryStream(replicationDir, new DirectoryStream.Filter<Path>(){
+				@Override
+				public boolean accept(Path entry) throws IOException {
+					return !filesToKeep.contains(entry);
+				}})){
+				
+				for (Path p : stream){
+					try{
+						if (Files.isDirectory(p)){
+							FileUtils.deleteDirectory(p.toFile());
+						}else if (Files.exists(p)){
+							Files.delete(p);
+						}
+					}catch (Exception ex){
+						ConnectPlugIn.log(Messages.LoginHandler_FileDeleteError + p.toString(), ex);
 					}
-				}catch (Exception ex){
-					ConnectPlugIn.log(Messages.LoginHandler_FileDeleteError + p.toString(), ex);
 				}
+				
+			}catch (Exception ex){
+				ConnectPlugIn.log(Messages.LoginHandler_FilesDeleteError, ex);
 			}
-			
-		}catch (Exception ex){
-			ConnectPlugIn.log(Messages.LoginHandler_FilesDeleteError, ex);
 		}
 		
 	}
@@ -293,6 +321,7 @@ public class LoginHandler implements ILoginHandler {
 					s.beginTransaction();
 					try{
 						record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+						s.saveOrUpdate(record);
 						s.getTransaction().commit();
 					}finally{
 						s.close();
@@ -308,7 +337,15 @@ public class LoginHandler implements ILoginHandler {
 						try{
 							e.createUpload(new NullProgressMonitor());
 						}catch (NothingToUpdateException ex){
-							//consume this exception
+							s = HibernateManager.openSession();
+							s.beginTransaction();
+							try{
+								record.setStatus(ConnectSyncHistoryRecord.Status.NODATA);
+								s.saveOrUpdate(record);
+								s.getTransaction().commit();
+							}finally{
+								s.close();
+							}
 						}
 					}else{
 						s = HibernateManager.openSession();

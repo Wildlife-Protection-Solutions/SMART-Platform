@@ -36,6 +36,7 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.ConnectDatastore;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -50,7 +51,7 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 
 	public static final String PACKAGE_FILESTORE_DIR = "filestore"; //$NON-NLS-1$
 	
-	public static final String CONNECT_FILESTORE_DIR = "smart_connect"; //$NON-NLS-1$
+	
 
 	public static final String METADATA_FILE_SUFFIX = ".changelog.metadata"; //$NON-NLS-1$
 	public static final String CHANGELOG_FILE_SUFFIX = ".changelog"; //$NON-NLS-1$
@@ -163,20 +164,45 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	 */
 	@Transient
 	private String getChangeLogFilePrefix(){
-		return CONNECT_FILESTORE_DIR + FileSystems.getDefault().getSeparator() + UuidUtils.uuidToString(getUuid());
+		return ConnectDatastore.CONNECT_FILESTORE_DIR 
+				+ FileSystems.getDefault().getSeparator()
+				+ ConnectDatastore.REPLICATION_FILESTORE_DIR
+				+ FileSystems.getDefault().getSeparator()
+				+ UuidUtils.uuidToString(getUuid());
 	}
+	
+	/**
+	 * Within the package, this returns the filestore directory
+	 * @return
+	 */
 	@Transient
 	public String getFilestoreDirectory(){
-		return getChangeLogFilePrefix() + FileSystems.getDefault().getSeparator() + PACKAGE_FILESTORE_DIR;
+		return getChangeLogFilePrefix() 
+				+ FileSystems.getDefault().getSeparator() 
+				+ PACKAGE_FILESTORE_DIR;
 	}
+	
+	/**
+	 * The zip file name for the change log
+	 * @return
+	 */
 	@Transient
 	public String getChangeLogZipFile(){
 		return getChangeLogFilePrefix() + ".changelog.zip"; //$NON-NLS-1$
 	}
+	
+	/**
+	 * The changelog file name within the change log package
+	 * @return
+	 */
 	@Transient
 	public String getChangeLogFile(){
 		return getChangeLogFilePrefix() + CHANGELOG_FILE_SUFFIX;
 	}
+	/**
+	 * The metadata file name within the change log package
+	 * @return
+	 */
 	@Transient
 	public String getChangeLogMetadataFile(){
 		return getChangeLogFilePrefix() + METADATA_FILE_SUFFIX;

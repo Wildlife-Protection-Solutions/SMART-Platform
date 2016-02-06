@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.dataqueue;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -29,11 +31,11 @@ import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.connect.ConnectDatastore;
 import org.wcs.smart.connect.ConnectServerManager;
 import org.wcs.smart.connect.ConnectServerManager.IConnectServerEventHandler;
 import org.wcs.smart.connect.dataqueue.internal.CaDataQueueDeleteHandler;
 import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
-import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -42,7 +44,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 
-	public static final String DATA_QUEUE_DIR = ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR + "/dataqueue/";
+	public static final String DATA_QUEUE_DIR = ConnectDatastore.CONNECT_FILESTORE_DIR + File.separator + "dataqueue";
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.connect.dataqueue"; //$NON-NLS-1$
 	public static final String DB_VERSION_1 = "1.0";

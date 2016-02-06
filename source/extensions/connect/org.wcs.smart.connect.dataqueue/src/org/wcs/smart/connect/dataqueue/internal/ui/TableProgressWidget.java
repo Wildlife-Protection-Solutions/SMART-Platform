@@ -80,7 +80,7 @@ public class TableProgressWidget extends Composite{
 		layout(true);
 	}
 	
-	private void initStatus(){
+	public void initStatus(){
 		lblProgress.setText(item.getStatus().name());
 		if (item.getStatus() == LocalDataQueueItem.Status.COMPLETE ||
 			item.getStatus() == LocalDataQueueItem.Status.COMPLETE_WARN ||

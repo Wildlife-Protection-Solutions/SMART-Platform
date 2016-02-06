@@ -474,7 +474,11 @@ public class SmartConnect {
 	 * Provides the option for prompting before continuing with download if
 	 * download package size is large.
 	 *  
-	 *  //TODO: DOES NOT DOWNLOAD CHUNKS - ALL OR NOTHING; CANNOT RESUME*
+	 *  //TODO: DOES NOT DOWNLOAD CHUNKS - ALL OR NOTHING; CANNOT RESUME
+	 * 
+	 * Downloads to a temporary directory that is cleaned out on startup.  If users
+	 * want to keep there files, they must move them to a different location 
+	 * once the file has been downloaded.
 	 *  
 	 * @param url the URL to download from
 	 * @param promptDownloadSizeMb prompt the user to continue if the download
@@ -490,9 +494,11 @@ public class SmartConnect {
 		//download file name
 		Path filestorea = FileSystems.getDefault()
 			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
-			.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR);
+			.resolve(ConnectDatastore.CONNECT_FILESTORE_DIR)
+			.resolve(ConnectDatastore.DOWNLOAD_FILESTORE_DIR);
+		
 		//create necessary dirs
-		Files.createDirectories(filestorea.getParent());
+		Files.createDirectories(filestorea);
 		Path filestore = null;
 		Long size = null;
 		

@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.transaction.Synchronization;
+import javax.ws.rs.WebApplicationException;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -40,8 +41,12 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.server.ConnectDataQueue;
+import org.wcs.smart.connect.dataqueue.internal.server.DataQueueApi;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem.Status;
@@ -77,7 +82,7 @@ public enum DataQueueManager {
 	}
 	
 	/**
-	 * Fires listeners to notifiy the queue has been modified
+	 * Fires listeners to notify the queue has been modified
 	 */
 	public void fireModified(){
 		for(IDataQueueListener l : listeners){
@@ -106,19 +111,12 @@ public enum DataQueueManager {
 				//if complete or error we can add again
 				//as we may be duplicating data
 				if (i.getStatus() == Status.QUEUED ||
+						i.getStatus() == Status.REQUEUED ||
 						i.getStatus() == Status.DOWNLOADING ||
 						i.getStatus() == Status.PROCESSING){
 					return null;
 				}
 			}
-				
-			Integer nextorder = (Integer) s.createCriteria(LocalDataQueueItem.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid()))
-					.add(Restrictions.eq("status", LocalDataQueueItem.Status.QUEUED))
-					.setProjection(Projections.max("order"))
-					.uniqueResult();
-			if (nextorder == null) nextorder = 0;
-			nextorder++;
 			
 			LocalDataQueueItem local = new LocalDataQueueItem();
 			local.setConservationArea(item.getConservationArea());
@@ -127,7 +125,7 @@ public enum DataQueueManager {
 			local.setServerItemUuid(item.getUuid());
 			local.setStatus(LocalDataQueueItem.Status.QUEUED);
 			local.setType(item.getType());
-			local.setOrder(nextorder);
+			local.setOrder(getNextQueueOrder(s));
 			
 			s.save(local);
 			
@@ -148,6 +146,19 @@ public enum DataQueueManager {
 		
 	}
 
+	private Integer getNextQueueOrder(Session s){
+		Integer nextorder = (Integer) s.createCriteria(LocalDataQueueItem.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid()))
+				.add(Restrictions.in("status", 
+						new LocalDataQueueItem.Status[]{
+						LocalDataQueueItem.Status.QUEUED,
+						LocalDataQueueItem.Status.REQUEUED}))
+				.setProjection(Projections.max("order"))
+				.uniqueResult();
+		if (nextorder == null) nextorder = 0;
+		nextorder++;
+		return nextorder;
+	}
 	/**
 	 * Gets all items in the local datastore for the current conservation area
 	 * with one of the status value provided.
@@ -175,28 +186,102 @@ public enum DataQueueManager {
 	}
 	
 	/**
+	 * Reprocesses any of the data queue items.  This will reset the state to
+	 * reprocessing of any items currently not processing and not queued.  
+	 * REPROCESSING items are not checked out from the server when reprocessed. 
+	 * (It will try to download the file again if needed and will update the final status).
+	 * 
+	 * @return
+	 */
+	public synchronized void reprocessItems(List<LocalDataQueueItem> items){
+		Session s = HibernateManager.openSession();
+		s.getTransaction().begin();
+		try{
+			for (LocalDataQueueItem item : items){
+				LocalDataQueueItem i = (LocalDataQueueItem) s.get(LocalDataQueueItem.class, 
+						item.getUuid());
+						
+				if (i == null || i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING ||
+						i.getStatus() == LocalDataQueueItem.Status.QUEUED ||
+						i.getStatus() == LocalDataQueueItem.Status.REQUEUED ||
+						i.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+					//cannot requeue item
+					continue;
+				}
+			
+				LocalDataQueueItem clone = new LocalDataQueueItem();
+				clone.setConservationArea(i.getConservationArea());
+				clone.setName(i.getName());
+				clone.setServerItemUuid(i.getServerItemUuid());
+				clone.setType(i.getType());
+				clone.setStatus(LocalDataQueueItem.Status.REQUEUED);
+				clone.setDateProcessed(null);
+				clone.setErrorMessage("Re-queued by user");
+				clone.setOrder(getNextQueueOrder(s));
+			
+				if (i.getFullFilePath() != null && Files.exists(i.getFullFilePath())){
+					//copy 
+					Path copy = i.getFullFilePath().getParent().resolve(i.getFullFilePath().getFileName().toString() + ".copy" + System.nanoTime());
+					Files.copy(i.getFullFilePath(), copy);
+					clone.setFile(
+							FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation())
+							.relativize(copy).toString());
+					
+				}
+				s.save(clone);
+			}
+			s.getTransaction().commit();
+		}catch(Exception ex){
+			
+		}finally{
+			s.close();
+		}
+		fireModified();
+	}
+	/**
 	 * Checks out the next queue item for processing.
 	 * Updates the status of the item to processing before returning.
 	 * If no items to process, this returns null.
 	 * 
+	 * Synchronized so we don't check out the same item twice.
+	 * 
 	 * @return
 	 */
-	public synchronized LocalDataQueueItem checkOutNextQueueItem(){
+	public synchronized LocalDataQueueItem checkOutNextQueueItem(SmartConnect connect){
 		Session s = HibernateManager.openSession();
 		s.getTransaction().begin();
 		try{
 			
 			LocalDataQueueItem item = (LocalDataQueueItem) s.createCriteria(LocalDataQueueItem.class)
 			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid()))
-			.add(Restrictions.eq("status", LocalDataQueueItem.Status.QUEUED))
+			.add(Restrictions.in("status", new LocalDataQueueItem.Status[]{LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.REQUEUED}))
 			.addOrder(Order.asc("order"))
 			.setMaxResults(1)
 			.uniqueResult();
+		
+			if (item == null) return null;
 			
-			if (item != null){
+			//check status on server
+			if (item.getStatus() != LocalDataQueueItem.Status.REQUEUED){
+				try{
+					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.PROCESSING);
+					item.setDateProcessed(new Date());
+					item.setStatus(Status.PROCESSING);
+				}catch (Exception ex){
+					String message = null;
+					if (ex instanceof WebApplicationException){
+						message = "Error processing item: " + SmartConnect.parseErrorMessage(((WebApplicationException) ex).getResponse().readEntity(String.class));
+					}else{
+						message = "Error processing item: unable to confirm status with Connect server";
+					}
+					item.setStatus(LocalDataQueueItem.Status.ERROR);
+					item.setErrorMessage(message);
+				}
+			}else{
 				item.setDateProcessed(new Date());
 				item.setStatus(Status.PROCESSING);
 			}
+			
 			s.getTransaction().commit();
 			return item;
 		}catch (Exception ex){

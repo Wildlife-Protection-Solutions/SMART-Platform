@@ -32,7 +32,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
-import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.ConnectDatastore;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 
@@ -82,9 +83,13 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 		q.executeUpdate();
 		
 		//delete files from file store
-		Path fs = Paths.get(ca.getFileDataStoreLocation(), ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR);
+		Path fs = Paths.get(ca.getFileDataStoreLocation(), ConnectDatastore.CONNECT_FILESTORE_DIR);
 		if (Files.exists(fs)){
-			FileUtils.forceDelete(fs.toFile());
+			try{
+				FileUtils.forceDelete(fs.toFile());
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
+			}
 		}
 	}
 

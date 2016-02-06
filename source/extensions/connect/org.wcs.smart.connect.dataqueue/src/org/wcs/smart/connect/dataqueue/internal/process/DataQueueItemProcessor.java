@@ -26,8 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -97,8 +95,8 @@ public class DataQueueItemProcessor extends Job {
 		boolean reschedule = true;
 		try{
 		
-			item = DataQueueManager.INSTANCE.checkOutNextQueueItem();
-			progressWrapper.setDataQueueItem(item);
+			monitor.beginTask("Check out next processing item...", 30);
+			item = DataQueueManager.INSTANCE.checkOutNextQueueItem(connect);
 			
 			if (item == null){
 				//nothing to do
@@ -106,25 +104,16 @@ public class DataQueueItemProcessor extends Job {
 				return Status.OK_STATUS;
 			}
 			
-			monitor.beginTask("Processing Item: " + item.getName(), 40);
-			
-			monitor.subTask("confirming status with server....");
-			//go to the server and update the status on the server to processing
-			//if this fails then we skip this item as it is likely processed by someone else
-			try{
-				ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.PROCESSING);
-			}catch (Exception ex){
-				String message = null;
-				if (ex instanceof WebApplicationException){
-					message = "Error processing item: " + SmartConnect.parseErrorMessage(((WebApplicationException) ex).getResponse().readEntity(String.class));
-				}else{
-					message = "Error processing item: unable to confirm status with Connect server";
-				}
-				ConnectDataQueuePlugin.log(message + ":" + ex.getMessage(), ex);
-				updateLocalStatus(LocalDataQueueItem.Status.ERROR, message);
+			progressWrapper.setDataQueueItem(item);
+			monitor.worked(5);
+			if (item.getStatus() != LocalDataQueueItem.Status.PROCESSING){
+				//could not checkout next item for whatever reason
+				//do not process
 				return Status.OK_STATUS;
 			}
-			monitor.worked(10);
+			
+			
+			monitor.setTaskName("Processing Item: " + item.getName());
 			
 			IItemProcessor.ProcessingStatus processingStatus = null;
 			try{
@@ -162,7 +151,7 @@ public class DataQueueItemProcessor extends Job {
 			}catch (Exception ex){
 				ConnectDataQueuePlugin.displayLog("Processing completed but the state on the Connect Server not be updated.  Item status will need to be manually updated on server, otherwise data may be duplicated if items are reprocessed.", ex);
 			}
-			monitor.worked(10);
+			monitor.worked(5);
 		}finally{
 			if (reschedule){
 				ProcessorManager.INSTANCE.processDataQueue(connect);
@@ -186,15 +175,17 @@ public class DataQueueItemProcessor extends Job {
 			Files.createDirectories(moveTo.getParent());
 		}
 		
-		Files.move(localFile, moveTo);
-		
+		//configure file
 		String relativeFile =FileSystems.getDefault()
 				.getPath(SmartContext.INSTANCE.getFilestoreLocation())
 				.relativize(moveTo)
 				.toString();
-		
 		item.setFile(relativeFile);
 		saveItem();
+		
+		//move to expected location
+		Files.move(localFile, moveTo);
+		
 	}
 	
 	private IItemProcessor.ProcessingStatus processItem(IProgressMonitor monitor) throws Exception{

@@ -173,7 +173,9 @@ public class AutoQueueProcessingJob extends Job {
 			return Status.OK_STATUS;
 		}
 		try{
-			List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems(LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.PROCESSING, LocalDataQueueItem.Status.DOWNLOADING);
+			List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems(
+					LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.REQUEUED, 
+					LocalDataQueueItem.Status.PROCESSING, LocalDataQueueItem.Status.DOWNLOADING);
 	
 			//remove any items from the serverItems that are in the local Items
 			//these have been queued and we do not need to requeue them
