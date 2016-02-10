@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
@@ -38,6 +39,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -45,10 +47,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.tomcat.util.http.fileupload.MultipartStream;
 import org.hibernate.Session;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -124,29 +130,16 @@ public class Uploader extends HttpServlet {
 	 * @param uuid
 	 * @param data
 	 * @return
-	 * @throws IOException
+	 * @throws Exception 
 	 */
 	@PUT
 	@Path("/{uploaduuid}")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateFile(@PathParam("uploaduuid") String uuid, InputStream data) throws IOException{
+	public Response updateFile(@PathParam("uploaduuid") String uuid, InputStream data) throws Exception{
 		WorkItem item = null;
 		
-		//get upload item
-		Session s = HibernateManager.getSession(context);
-		s.beginTransaction();
-		try{
-			item = (WorkItem) s.get(WorkItem.class, UUID.fromString(uuid));
-			if (item == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND);
-			}
-		}finally{
-			s.getTransaction().commit();
-		}
-		if (item.getStatus() != Status.UPLOADING){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("Uploader.Duplicate", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
-		}
+		item = getWorkItem(uuid);
 		
 		// validate content-type
 		boolean octet = false;
@@ -172,6 +165,41 @@ public class Uploader extends HttpServlet {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("Uploader.InvalidLength", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
 		}
 		
+		try {
+			processInputStream(data, item);
+		} catch (Exception e) {
+			throw e;
+		}
+		
+		//return accepted
+		return Response.accepted().
+	            entity(item).
+	            build();
+		
+	}
+
+	private WorkItem getWorkItem(String uuid) {
+		WorkItem item;
+		//get upload item
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			item = (WorkItem) s.get(WorkItem.class, UUID.fromString(uuid));
+			if (item == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+		}finally{
+			s.getTransaction().commit();
+		}
+		
+		if (item.getStatus() != Status.UPLOADING){
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("Uploader.Duplicate", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
+		}
+		return item;
+	}
+
+	private void processInputStream(InputStream data, WorkItem item) throws IOException, Exception {
+		Session s;
 		File datastoreFile = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
 		try(OutputStream out = Files.newOutputStream(datastoreFile.toPath(), StandardOpenOption.APPEND, StandardOpenOption.CREATE)){
 			IOUtils.copy(data, out);
@@ -212,11 +240,45 @@ public class Uploader extends HttpServlet {
 				throw ex;
 			}
 		}
-		
-		//return accepted
-		return Response.accepted().
-	            entity(item).
-	            build();
-		
 	}
+	
+	/* same as above, through POST method
+	 * 
+	 * @throws Exception 
+	 * */
+	@POST
+	@Path("/{uploaduuid}")
+	@Consumes("multipart/form-data")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response updateFilePost(@PathParam("uploaduuid") String uuid, MultipartFormDataInput input) throws Exception{
+		WorkItem item;
+		item = getWorkItem(uuid);
+		
+		Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
+		List<InputPart> inputParts = uploadForm.get("upload_file");
+
+		for (InputPart inputPart : inputParts) {
+
+		 try {
+			InputStream inputStream = inputPart.getBody(InputStream.class,null);
+			
+			try {
+				processInputStream(inputStream, item);
+			} catch (Exception e) {
+				throw e;
+			}
+			
+			//return accepted
+			return Response.accepted().
+		            entity(item).
+		            build();
+			
+		  } catch (IOException e) {
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Upload file not found");
+		  }
+
+		}
+		throw new SmartConnectException(Response.Status.BAD_REQUEST, "Upload file not found");
+	}
+
 }

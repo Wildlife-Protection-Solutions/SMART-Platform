@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -121,6 +122,18 @@ public class DataQueue {
 		}
 	}
 	
+	
+	@GET
+    @Path("/detailedItems")
+	public List<ServerDataQueueItemProxy> getDetailedItems(@QueryParam("cafilter") String caFilter,
+			@QueryParam("status") String status){
+		List<ServerDataQueueItem.Status> statusFilter = null;
+		List<ServerDataQueueItemProxy> proxyitems = new ArrayList<ServerDataQueueItemProxy>();
+		getProxyItems(caFilter, status, statusFilter, proxyitems);
+		Collections.sort(proxyitems);
+		return proxyitems;
+	}
+		
 	/**
 	 * This will only return items that the user has permission to see.
 	 * 
@@ -134,6 +147,20 @@ public class DataQueue {
 			@QueryParam("status") String status){
 		
 		List<ServerDataQueueItem.Status> statusFilter = null;
+		List<ServerDataQueueItemProxy> proxyitems = new ArrayList<ServerDataQueueItemProxy>();
+		
+		
+		getProxyItems(caFilter, status, statusFilter, proxyitems);
+		
+		List<DataQueueItem> items = new ArrayList<DataQueueItem>();
+		for (ServerDataQueueItemProxy item : proxyitems){
+			items.add(item);
+		}
+		return items;
+	}
+
+	private void getProxyItems(String caFilter, String status, List<ServerDataQueueItem.Status> statusFilter,
+			List<ServerDataQueueItemProxy> proxyitems) {
 		if (status != null){
 			statusFilter = new ArrayList<ServerDataQueueItem.Status>();
 			for (String stat: status.split(",")){
@@ -146,7 +173,7 @@ public class DataQueue {
 		}
 		
 		Session s = HibernateManager.getSession(context);
-		List<DataQueueItem> proxyitems = new ArrayList<DataQueueItem>();
+
 		try{
 			s.beginTransaction();
 			
@@ -194,7 +221,6 @@ public class DataQueue {
 		}finally{
 			s.getTransaction().rollback();
 		}
-		return proxyitems;
 	}
 	
 	/**
@@ -203,7 +229,7 @@ public class DataQueue {
 	 */
 	@DELETE
     @Path("/items/{uuid}")
-	public void deleteItem(@PathParam("uuid") String uuid){
+	public ServerDataQueueItem deleteItem(@PathParam("uuid") String uuid){
 		
 		UUID itemUuid = parseUuid(uuid);
 		
@@ -214,7 +240,7 @@ public class DataQueue {
 			
 			validateDelete(item.getConservationArea(), s);
 			
-			File toDelete = DataStoreManager.INSTANCE.getFile(item.getName());
+			File toDelete = DataStoreManager.INSTANCE.getFile(item.getFile());
 			if (toDelete.exists()){
 				if (!toDelete.delete()){
 					logger.log(Level.WARNING, "Could not delete data queue file: " + toDelete.toString());
@@ -233,6 +259,7 @@ public class DataQueue {
 				}
 			}
 			s.getTransaction().commit();
+			return item;
 		}catch(Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, "Error deleting data queue item: " +ex.getMessage(), ex);

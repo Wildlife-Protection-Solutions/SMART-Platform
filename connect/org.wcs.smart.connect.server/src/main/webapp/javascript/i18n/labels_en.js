@@ -69,5 +69,14 @@ labels_en= {
 "query.runquery":"Run Query",
 "query.noqueriesfound":"No queries found. Try a different search or contact your adminsitrator to give you permissions to queries you are looking for.",
 "users.errorupdatinguser" : " Error updating user information.",
+"dataqueue.fileuploaded":"File Uploaded",
+"dataqueue.fileupdated":"File Status Updated",
+"dataqueue.erroruploadingfile":"Error Uploading File, try again.",
+"dataqueue.refreshing":"Refreshing Table...",
+"dataqueue.nofilesfound":"No Files Found",
+"dataqueue.areyousuredelete":"Are you sure you want to permanently delete this file from the data processing queue?",
+"dataqueue.deletefilewith": "Deleted data file with UUID: ",
+"dataqueue.deletefileterror":"Error deleting file: ",
+"dataqueue.errorupdatingfile":"Error updating file status: ",
 "":""
 }

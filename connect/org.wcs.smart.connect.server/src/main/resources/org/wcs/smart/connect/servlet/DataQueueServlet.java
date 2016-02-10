@@ -17,6 +17,11 @@ import org.wcs.smart.connect.dataqueue.DataQueueAction;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItemProxy;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.model.AlertFilterDefault;
+import org.wcs.smart.connect.model.AlertType;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.MapLayer;
+import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "dataqueue")
@@ -28,11 +33,12 @@ public class DataQueueServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
+		List<ConservationAreaInfo> cas = null;
+			
 		Session s = HibernateManager.getSession(request.getServletContext());
 		try{
 			s.beginTransaction();
-		
+			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(s);
 			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), DataQueueAction.VIEW_KEY)){
 				//do not allow
 				response.setStatus(Status.UNAUTHORIZED.getStatusCode());
@@ -47,6 +53,7 @@ public class DataQueueServlet extends HttpServlet {
 		
 		List<DataQueueItem> info = dqapi.getItems(null, null);
 		
+		request.setAttribute("cas", cas); //$NON-NLS-1$		
 		request.setAttribute("items", info); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/dataqueue.jsp").forward(request, response); //$NON-NLS-1$

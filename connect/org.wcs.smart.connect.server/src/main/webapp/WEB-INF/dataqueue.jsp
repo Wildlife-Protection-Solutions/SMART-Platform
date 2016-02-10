@@ -27,56 +27,71 @@
 <div>
   <div id="message" class="msgsection"></div>
 </div>
+
+<div>
+    <button class="block button top-spacer" id="btnNewFile">Upload New File</button>
+</div>
+
 <div class="top-spacer"  style="margin-left: -20px" >
-  <div class="catable table-cell smart-table">
+  <div id="fileTable" class="catable table-cell smart-table">
   	<div class="table-row smart-table-header">
-		<div class="table-cell smart-table-cell">Conservation Area</div>
-		<div class="table-cell smart-table-cell">Name</div>
-		<div class="table-cell smart-table-cell">Type</div>
-		<div class="table-cell smart-table-cell">Status</div>
-		<div class="table-cell smart-table-cell">Upload Date</div>
-		<div class="table-cell smart-table-cell">Upload User</div>
-		<div class="table-cell smart-table-cell"></div>
-		<div class="table-cell smart-table-cell"></div>
+	<div class="table-cell smart-table-cell">Conservation Area</div>
+	<div class="table-cell smart-table-cell">Name</div>
+	<div class="table-cell smart-table-cell">Type</div>
+	<div class="table-cell smart-table-cell">Status</div>
+	<div class="table-cell smart-table-cell">Upload Date</div>
+	<div class="table-cell smart-table-cell">Upload User</div>
+	<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
 	</div>
-	<c:forEach var="item" items="${items}" varStatus="count">
-		<div data-cauuid ="${item.getUuid()}" class="table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
-			<div class="table-cell smart-table-cell">${item.getCaName()}</div>
-			<div class="table-cell smart-table-cell">${item.getName()}</div>
-			<div class="table-cell smart-table-cell">${item.getType()}</div>
-			<div class="table-cell smart-table-cell">${item.getStatus()}</div>
-			<div class="table-cell smart-table-cell">${item.getUploadedDate()}</div>
-			<div class="table-cell smart-table-cell">${item.getUploadedBy()}</div>
-			<div class="table-cell smart-table-cell"></div>
-			<div class="table-cell smart-table-cell"></div>
-		</div>
-	</c:forEach>
-	</div>  
+  </div>  
 </div>
 
 
 </div>
-
-
 
 <%@include file="footer.jsp" %>
-
-<div id="deleteDialog" style="display: none;" class="dialog">
-  <div class="dialog-title">Delete Item</div>
+<div id="updateFileDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Update File Status</div>
   <div id="dialogerror" class="errorsection"></div>
-  
-  <form id="deleteform" onsubmit="return deleteca();" >
-    <input type="hidden" name="itemuuid"/>
-    <div id="confirmtype">
-    	<p>Are you sure you want to delete this item?.</p>
-    </div>    
+  <form id="updateFileForm" >
+	<input name="updateUuid" type="hidden"></input>
+    <select name="newStatus" class="formtext block">
+    	<option value="QUEUED">QUEUED</option>
+		<option value="PROCESSING">PROCESSING</option>
+		<option value="COMPLETE">COMPLETE</option>
+		<option value="ERROR">ERROR</option>
+    </select>
     <div class="block top-spacer" style="text-align:right">
-     <input class="button" type="submit" value="Delete" />
-     <input class="button" type="button" value="Cancel" onclick="closeDialog('deleteDialog')" />
+     <input id="btnUpdateFile" class="button" type="button" value="Update Status" />
+     <input class="button" type="button" id="cancelUpdateFile" value="Cancel" />
     </div>
   </form>
   </div>
-  
+ 
+  <div id="newFileDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Upload New File for Processing</div>
+  <div id="dialogerror" class="errorsection"></div>
+  <form id="newFileForm" >
+    <label class="block top-spacer">CA:</label>
+    <select name="conservationArea" class="block formtext alert-select">
+     		<c:forEach var="ca" items="${cas}" varStatus="count">
+     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
+			</c:forEach> 
+     		</select>
+    <label class="block top-spacer">File Type:</label>
+    <select name="type" class="formtext block">
+    	<option value="PATROL_XML">Patrol XML File</option>
+		<option value="INCIDENT_XML">Incident XML File</option>
+		<option value="MISSION_XML">Mission XML File</option>
+    </select>
+    <label class="block top-spacer">Select File:</label>
+    <input id="file" type="file" name="file" class="formtext block" />
+    <div class="block top-spacer" style="text-align:right">
+     <input id="btnUploadFile" class="button" type="button" value="Upload File" />
+     <input class="button" type="button" id="cancelNewFile" value="Cancel" />
+    </div>
+  </form>
+  </div>
   
 </body>
 </html>

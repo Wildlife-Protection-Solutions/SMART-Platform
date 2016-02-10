@@ -29,7 +29,7 @@ function resetPassword(){
 
 function resetcomplete(){
 	if (this.status == 200) {
-		document.querySelector("#error").innerHTML = "Password reset.";
+		document.querySelector("#error").innerHTML = "Password reset.  <a href='../connect/home/'>Connect Home</a> ";
 		document.querySelector("#error").className="msgsection";
 		document.querySelector("#error").style.display="block";
 	}else{
