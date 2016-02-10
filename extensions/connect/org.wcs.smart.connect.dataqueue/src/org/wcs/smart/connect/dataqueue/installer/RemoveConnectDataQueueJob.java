@@ -21,12 +21,19 @@
  */
 package org.wcs.smart.connect.dataqueue.installer;
 
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
@@ -65,8 +72,26 @@ public class RemoveConnectDataQueueJob extends Job {
 					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
 				}
 			}
-			//TODO: we also need to remove any data into the data queue associated
+			
+			//we need to remove any data into the data queue associated
 			//with this plugin (for each ca the /connect/dataqueue folder
+			Path filestore = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation());
+			try(DirectoryStream<Path> dirs = Files.newDirectoryStream(filestore)){
+				for (Path p : dirs){
+					Path dataqueue = p.resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR);
+					if (Files.exists(dataqueue) && Files.isDirectory(dataqueue)){
+						try{
+							FileUtils.deleteDirectory(dataqueue.toFile());
+						}catch (Exception ex){
+							ConnectDataQueuePlugin.log("Could not remove data queue folder from filestore when uninstalled Connect DataQueue Plugin", ex);
+						}
+					}
+				}
+			}catch (Exception ex){
+				ConnectDataQueuePlugin.log("Could not remove data queue folders from filestore when uninstalled Connect DataQueue Plugin", ex);
+			}
+			
+			
 			
 			//clear version
 			HibernateManager.setPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, null, session);
