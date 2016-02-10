@@ -56,7 +56,7 @@ public class LocalDataQueueItem extends DataQueueItem{
 		COMPLETE_WARN ("COMPLETE WARNING"),
 		ERROR ("ERROR");
 		
-		String guiName;
+		private String guiName;
 		
 		Status(String guiName){
 			this.guiName = guiName;

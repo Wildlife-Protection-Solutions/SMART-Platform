@@ -19,33 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.ui.server.configure;
+package org.wcs.smart.connect.dataqueue.patrol;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
-import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 
 /**
- * Manager for option panels
+ * Patrol processing options.
  * @author Emily
  *
  */
-public class OptionPanelManager {
+public enum PatrolDataQueueProcessorOption {
 
-	public synchronized static IServerOptionsPanel[] createOptionPanels(){
-		if (Platform.getExtensionRegistry() == null) return new IServerOptionsPanel[0];
-		ArrayList<IServerOptionsPanel> items = new ArrayList<IServerOptionsPanel>();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IServerOptionsPanel.EXTENSION_ID);
-		for (IConfigurationElement e : config) {
+	GENERATE_IDS(Boolean.TRUE);
+	
+	Object defaultValue;
+	
+	PatrolDataQueueProcessorOption(Object defaultValue){
+		this.defaultValue = defaultValue;
+	}
+	
+	public Boolean getValueAsBoolean(DataQueueProcessingOption value){
+		if (value == null){
+			return (Boolean)defaultValue;
+		}else{
 			try{
-				items.add((IServerOptionsPanel)e.createExecutableExtension("class")); //$NON-NLS-1$
+				return  Boolean.valueOf(value.getValue());
 			}catch (Exception ex){
-				ConnectPlugIn.log(ex.getMessage(), ex);
+				ex.printStackTrace();
+				return (Boolean)defaultValue;
 			}
 		}
-		return items.toArray(new IServerOptionsPanel[items.size()]);
+	}
+	public Boolean getValueAsBoolean(HashMap<String, DataQueueProcessingOption> options){
+		DataQueueProcessingOption value = options.get(this.name());
+		return getValueAsBoolean(value);
 	}
 	
 }

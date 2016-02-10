@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.wcs.smart.connect.dataqueue.processor" name="Data Queue Item Processor" schema="schema/org.wcs.smart.connect.dataqueue.processor.exsd"/>
+   <extension-point id="org.wcs.smart.connect.dataqueue.processor.option" name="Data Queue Processor Option Panel" schema="schema/org.wcs.smart.connect.dataqueue.processor.option.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -12,6 +13,11 @@
                label="Process Data Queue"
                style="push">
          </command>
+         <command
+               commandId="org.wcs.smart.connect.dataqueue.options.show"
+               label="Data Queue Processor Options..."
+               style="push">
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -20,12 +26,20 @@
             id="org.wcs.smart.connect.dataqueue.process"
             name="Process Data Queue">
       </command>
+      <command
+            id="org.wcs.smart.connect.dataqueue.options.show"
+            name="Show Data Queue Processing Options Dialog">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="org.wcs.smart.connect.dataqueue.internal.ui.ProcessDataQueueHandler$ProcessDataQueueHandlerWrapper"
             commandId="org.wcs.smart.connect.dataqueue.process">
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.dataqueue.internal.ui.config.ShowDataQueueProcessingOptionHandler$ShowDataQueueProcessingOptionHandlerWrapper"
+            commandId="org.wcs.smart.connect.dataqueue.options.show">
       </handler>
    </extension>
    <extension
@@ -43,6 +57,11 @@
       <class
             ca_property=".conservationArea"
             class="org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".ca_uuid"
+            class="org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption"
             supportsCcaa="false">
       </class>
    </extension>

@@ -85,6 +85,7 @@ public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 			@Override
 			public void beforeDelete(Session session) throws Exception{
 				DataQueueManager.INSTANCE.deleteDataQueue(SmartDB.getCurrentConservationArea(), session);
+				DataQueueManager.INSTANCE.deleteDataQueueOptions(SmartDB.getCurrentConservationArea(), session);
 			}
 		});
 	}

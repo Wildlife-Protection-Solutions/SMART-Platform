@@ -7,5 +7,11 @@
             class="org.wcs.smart.connect.dataqueue.patrol.PatrolDataQueueProcessor">
       </processor>
    </extension>
+   <extension
+         point="org.wcs.smart.connect.dataqueue.processor.option">
+      <option_panel
+            class="org.wcs.smart.connect.dataqueue.patrol.ui.PatrolProcessorOptionPanel">
+      </option_panel>
+   </extension>
 
 </plugin>
