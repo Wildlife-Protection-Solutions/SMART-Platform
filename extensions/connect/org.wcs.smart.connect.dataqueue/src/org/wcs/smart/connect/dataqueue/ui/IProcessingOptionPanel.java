@@ -19,21 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.ui.server.configure;
+package org.wcs.smart.connect.dataqueue.ui;
 
-import org.eclipse.swt.events.ModifyListener;
+import java.util.HashMap;
+
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.connect.model.ConnectServer;
+import org.hibernate.Session;
+import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 
 /**
- * Interface for allowing plugins to add to the SMART Connect configuration options.
+ * Interface for allowing plugins to add to the SMART Connect DataQueue processing
+ * configuration options.
  * This page provides the ui for updating these options.
  * @author Emily
  *
  */
-public interface IServerOptionsPanel {
+public interface IProcessingOptionPanel {
 	
-	public static final String EXTENSION_ID = "org.wcs.smart.connect.configure.optionpanel"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.connect.dataqueue.processor.option"; //$NON-NLS-1$
 	
 	/**
 	 * The name of the panel
@@ -42,26 +45,18 @@ public interface IServerOptionsPanel {
 	public String getName();
 	
 	/**
-	 * Initializes widgets on the panel with information from the
-	 * connect server.
+	 * Initializes widgets on the panel.
 	 * 
 	 * @param server
 	 */
-	public void initValues(ConnectServer server);
+	public void initValues(HashMap<String, DataQueueProcessingOption> options);
 	
 	/**
-	 * Updates the connect server object with the items
-	 * from the panel
-	 * @param server
+	 * Updates the database options represented by this panel.
+	 * @param session database session in active transaction
 	 */
-	public void updateServer(ConnectServer server);
-	
-	/**
-	 * Function called after the server options are saved to the database.
-	 * This allows for events to be fired, or jobs started as required.
-	 */
-	public void afterSave(ConnectServer server);
-	
+	public void update(Session session);
+
 	/**
 	 * 
 	 * @return <code>true</code> if all fields are valid, false if an error exists
@@ -74,7 +69,7 @@ public interface IServerOptionsPanel {
 	 * @param isEditable
 	 * @return
 	 */
-	public Composite createComposite(Composite parent, boolean isEditable);
+	public Composite createComposite(Composite parent);
 	
 	/**
 	 * Adds a change listener that should be fired when an option on the panel
@@ -83,4 +78,9 @@ public interface IServerOptionsPanel {
 	 * @param listener
 	 */
 	public void addChangeListener(ModifyListener listener);
+	
+	
+	public static interface ModifyListener{
+		public void widgetChanged();
+	}
 }

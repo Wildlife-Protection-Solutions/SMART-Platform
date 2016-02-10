@@ -19,33 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.ui.server.configure;
+package org.wcs.smart.connect.dataqueue.internal.ui.config;
 
-import java.util.ArrayList;
+import javax.inject.Named;
 
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
-import org.wcs.smart.connect.ConnectPlugIn;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.swt.widgets.Shell;
 
-/**
- * Manager for option panels
- * @author Emily
- *
- */
-public class OptionPanelManager {
+public class ShowDataQueueProcessingOptionHandler {
 
-	public synchronized static IServerOptionsPanel[] createOptionPanels(){
-		if (Platform.getExtensionRegistry() == null) return new IServerOptionsPanel[0];
-		ArrayList<IServerOptionsPanel> items = new ArrayList<IServerOptionsPanel>();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IServerOptionsPanel.EXTENSION_ID);
-		for (IConfigurationElement e : config) {
-			try{
-				items.add((IServerOptionsPanel)e.createExecutableExtension("class")); //$NON-NLS-1$
-			}catch (Exception ex){
-				ConnectPlugIn.log(ex.getMessage(), ex);
-			}
-		}
-		return items.toArray(new IServerOptionsPanel[items.size()]);
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
+		DataQueueProcessingOptionDialog dialog = new DataQueueProcessingOptionDialog(activeShell);
+		dialog.open();
 	}
 	
+	// E3
+	public static class ShowDataQueueProcessingOptionHandlerWrapper extends DIHandler<ShowDataQueueProcessingOptionHandler> {
+		public ShowDataQueueProcessingOptionHandlerWrapper() {
+			super(ShowDataQueueProcessingOptionHandler.class);
+		}
+	}
 }

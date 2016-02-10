@@ -414,6 +414,20 @@ public enum DataQueueManager {
 	}
 	
 	/**
+	 * Removes all data queue processing options configured for the
+	 * Conservation Area.
+	 * @param ca
+	 * @param session
+	 */
+	public void deleteDataQueueOptions(ConservationArea ca, Session session) {
+		// delete all data queue items
+		Query q = session
+				.createQuery("DELETE FROM DataQueueProcessingOption WHERE id.conservationArea = :ca");
+		q.setParameter("ca", ca.getUuid());
+		q.executeUpdate();
+	}
+	
+	/**
 	 * Removes all items in the data queue for a given conservation area.
 	 * The session provided should be in an open active transaction.
 	 * Data files are deleted once the transaction is complete.

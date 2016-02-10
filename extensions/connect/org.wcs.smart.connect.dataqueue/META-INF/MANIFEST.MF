@@ -14,4 +14,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.connect.dataqueue.internal.server,
  org.wcs.smart.connect.dataqueue.model,
- org.wcs.smart.connect.dataqueue.process
+ org.wcs.smart.connect.dataqueue.process,
+ org.wcs.smart.connect.dataqueue.ui
