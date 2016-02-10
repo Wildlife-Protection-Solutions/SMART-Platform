@@ -365,31 +365,14 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				monitor.beginTask(Messages.ConnectServerInfoDialog_DeleteServerTaskName, 6);
-				
-				Session s = HibernateManager.openSession();
 				try{
-					s.beginTransaction();
-
-					ConservationArea ca = SmartDB.getCurrentConservationArea();
-					//delete items
-					(new CaConnectDeleteHandler()).beforeDelete(ca, s, new SubProgressMonitor(monitor, 6));
-					//run any delete handlers
-					ConnectServerManager.INSTANCE.runAfterDeleteHandlers(s);
-					
-					s.getTransaction().commit();
+					ConnectServerManager.INSTANCE.deleteConnectServerData(monitor);
 					toUpdate = null;
+					ret[0] = true;
 				}catch (Exception ex){
 					ret[0] = false;
 					ConnectPlugIn.displayLog(Messages.ConnectServerInfoDialog_DeleteError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-				}finally{
-					if (s.getTransaction().isActive()){
-						s.getTransaction().rollback();
-					}
-					s.close();
 				}
-					
-				monitor.done();
 			}
 		});
 		}catch(Exception ex){
