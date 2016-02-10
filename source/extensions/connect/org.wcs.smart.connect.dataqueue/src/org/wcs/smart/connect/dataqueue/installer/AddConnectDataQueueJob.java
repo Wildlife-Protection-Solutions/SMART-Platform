@@ -34,6 +34,7 @@ import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -45,7 +46,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class AddConnectDataQueueJob extends Job {
 
 	public AddConnectDataQueueJob() {
-		super("Adding Connect Data Queue Plugin Tables");
+		super(Messages.AddConnectDataQueueJob_JobName);
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class AddConnectDataQueueJob extends Job {
 						
 		Session session = HibernateManager.openSession();
 		try{
-			monitor.beginTask("Validating versions", 10);
+			monitor.beginTask(Messages.AddConnectDataQueueJob_ProgressTask, 10);
 			String currentVersion = HibernateManager.getPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, session);
 			if (currentVersion == null){
 				session.beginTransaction();
@@ -69,12 +70,12 @@ public class AddConnectDataQueueJob extends Job {
 						@Override
 						public void run() {
 							MessageDialog.openError(Display.getDefault().getActiveShell(),
-									"Error",
-									"An error occurred while installing the Connect Data Processing Queue module (failed to create required database tables). Please restart the system, uninstall the module, then try reinstalling the module.  If the problem persists contact your system administrator.");
+									Messages.AddConnectDataQueueJob_ErrorDialogTitle,
+									Messages.AddConnectDataQueueJob_DQInstallError);
 						}
 						
 					});
-					return new Status(Status.ERROR,ConnectDataQueuePlugin.PLUGIN_ID, "Error installing plugin tables.", ex);
+					return new Status(Status.ERROR,ConnectDataQueuePlugin.PLUGIN_ID, Messages.AddConnectDataQueueJob_InstallError, ex);
 				}	
 				currentVersion = ConnectDataQueuePlugin.DB_VERSION_1;
 			}
@@ -105,13 +106,13 @@ public class AddConnectDataQueueJob extends Job {
 	private void createTables(Session session){
 		final String[] sql = new String[]{
 			
-			"CREATE TABLE smart.connect_data_queue(uuid char(16) for bit data NOT NULL, type VARCHAR(32) NOT NULL, ca_uuid char(16) for bit data,name VARCHAR(4096),status varchar(32) NOT NULL,queue_order integer,error_message VARCHAR(8192),local_file varchar(4096),date_processed timestamp,server_item_uuid char(16) for bit data,PRIMARY KEY (uuid))",
-			"ALTER TABLE smart.connect_data_queue ADD CONSTRAINT data_queue_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE",
-			"ALTER TABLE smart.connect_data_queue ADD CONSTRAINT status_chk CHECK (status IN ('DOWNLOADING', 'QUEUED', 'REQUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR'))",
-			"ALTER TABLE smart.connect_data_queue ADD CONSTRAINT type_chk CHECK (type IN ('PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML'))",
+			"CREATE TABLE smart.connect_data_queue(uuid char(16) for bit data NOT NULL, type VARCHAR(32) NOT NULL, ca_uuid char(16) for bit data NOT NULL, name VARCHAR(4096),status varchar(32) NOT NULL,queue_order integer,error_message VARCHAR(8192),local_file varchar(4096), date_processed timestamp, server_item_uuid char(16) for bit data NOT NULL,PRIMARY KEY (uuid))", //$NON-NLS-1$
+			"ALTER TABLE smart.connect_data_queue ADD CONSTRAINT data_queue_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.connect_data_queue ADD CONSTRAINT status_chk CHECK (status IN ('DOWNLOADING', 'QUEUED', 'REQUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR'))", //$NON-NLS-1$
+			"ALTER TABLE smart.connect_data_queue ADD CONSTRAINT type_chk CHECK (type IN ('PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML'))", //$NON-NLS-1$
 			
-			"CREATE TABLE smart.data_queue_processing_op(ca_uuid  char(16) for bit data not null, keyid varchar(256) NOT NULL, value varchar(512), primary key (ca_uuid, keyid))",
-			"ALTER TABLE smart.data_queue_processing_op ADD CONSTRAINT data_queue_option_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE",
+			"CREATE TABLE smart.data_queue_processing_op(ca_uuid  char(16) for bit data not null, keyid varchar(256) NOT NULL, value varchar(512), primary key (ca_uuid, keyid))", //$NON-NLS-1$
+			"ALTER TABLE smart.data_queue_processing_op ADD CONSTRAINT data_queue_option_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
 			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue TO MANAGER", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue TO DATA_ENTRY", //$NON-NLS-1$

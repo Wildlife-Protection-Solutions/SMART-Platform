@@ -72,6 +72,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectServerManager;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
 import org.wcs.smart.connect.dataqueue.internal.process.IDataQueueListener;
 import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
@@ -82,6 +83,7 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * View for displaying data queue processing information and allowing users to manually
@@ -144,10 +146,10 @@ public class DataQueueView{
 	};
 	
 	private enum ServerColumn{
-		CHECK("", 30),
-		NAME("Name", 150),
-		TYPE("Type", 100),
-		STATUS("Status", 100);
+		CHECK("", 30), //$NON-NLS-1$
+		NAME(Messages.DataQueueView_NameColumnName, 150),
+		TYPE(Messages.DataQueueView_TypeColumName, 100),
+		STATUS(Messages.DataQueueView_StatusColumnName, 100);
 		
 		String guiName;
 		int width;
@@ -166,20 +168,20 @@ public class DataQueueView{
 				if (item instanceof LocalDataQueueItem){
 					return ((LocalDataQueueItem) item).getStatus().toString();
 				}else{
-					return "ON SERVER";
+					return Messages.DataQueueView_OnServerStatus;
 				}
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
-	Job refreshLocalJob = new Job("Refresh Local Data Queue Table"){
+	Job refreshLocalJob = new Job(Messages.DataQueueView_RefreshLocalJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
-				monitor.beginTask("Refreshing Data Queue Items", 2);
+				monitor.beginTask(Messages.DataQueueView_RefreshLocalTask1, 2);
 				
 				monitor.worked(1);
-				monitor.subTask("Loading Local Items ...");
+				monitor.subTask(Messages.DataQueueView_RefreshLocalTask2);
 				List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems();
 				sort(localItems);				
 				
@@ -192,7 +194,7 @@ public class DataQueueView{
 				});
 				monitor.done();
 			}catch (Exception ex){
-				final String message = "Error loading active local data queue items." + ex.getMessage();
+				final String message = Messages.DataQueueView_RefreshLocalError1 + ex.getMessage();
 				ConnectDataQueuePlugin.log(message, ex);
 				ui.syncExec(new Runnable() {					
 					@Override
@@ -205,13 +207,13 @@ public class DataQueueView{
 		}
 	};
 	
-	Job refreshServerItemsJob = new Job("refresh server items table"){
+	Job refreshServerItemsJob = new Job(Messages.DataQueueView_ServerRefreshJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
-				monitor.beginTask("Refreshing Data Queue Items", 2);
-				monitor.subTask("Loading Items From Connect...");
+				monitor.beginTask(Messages.DataQueueView_ServerRefreshTask1, 2);
+				monitor.subTask(Messages.DataQueueView_ServerRefreshTask2);
 				
 				if(connect == null){
 					ConnectServer server = null;
@@ -237,7 +239,7 @@ public class DataQueueView{
 							public void run() {
 								DataQueueServerDialog cd = new DataQueueServerDialog(shell);
 								if (cd.open() != Window.OK){
-									tblServer.setInput(new String[]{"Connect Not Configured"});
+									tblServer.setInput(new String[]{Messages.DataQueueView_ServerRefreshError1});
 									return;
 								}
 								connect = cd.getConnection();		
@@ -253,7 +255,7 @@ public class DataQueueView{
 				List<DataQueueItem> serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(connect, SmartDB.getCurrentConservationArea());
 				
 				monitor.worked(1);
-				monitor.subTask("Loading Local Items ...");
+				monitor.subTask(Messages.DataQueueView_ServerRefreshTask3);
 				List<LocalDataQueueItem> localItems = DataQueueManager.INSTANCE.getLocalItems(
 						LocalDataQueueItem.Status.QUEUED, 
 						LocalDataQueueItem.Status.REQUEUED,
@@ -282,7 +284,7 @@ public class DataQueueView{
 				});
 				monitor.done();
 			}catch (Exception ex){
-				String message = "Error loading items from Connect. " + ex.getMessage();
+				String message = Messages.DataQueueView_ServerRefreshError2 + ex.getMessage();
 				ConnectDataQueuePlugin.log(message, ex);
 				
 				final String error = message;
@@ -396,7 +398,7 @@ public class DataQueueView{
 	}
 	private void createLocalSection(Composite parent){
 		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED);
-		dataQueueSection.setText("Local Data Queue");
+		dataQueueSection.setText(Messages.DataQueueView_LocalDataQueueLabel);
 		dataQueueSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dataQueueSection.setLayout(new GridLayout());
 	
@@ -414,7 +416,7 @@ public class DataQueueView{
 		dataQueueTable.getViewer().getTable().setMenu(dataQueueMenu);
 		
 		MenuItem menuDelete = new MenuItem(dataQueueMenu, SWT.NONE);
-		menuDelete.setText("Delete");
+		menuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		menuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		menuDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -423,14 +425,14 @@ public class DataQueueView{
 			}
 		});
 		MenuItem menuReprocess = new MenuItem(dataQueueMenu, SWT.NONE);
-		menuReprocess.setText("Reprocess");
+		menuReprocess.setText(Messages.DataQueueView_ReprocessLabel);
 		menuReprocess.setImage(ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.PROCESSING_ICON));
 		menuReprocess.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				List<LocalDataQueueItem> items = getDataQueueSelection();
-				if (!MessageDialog.openQuestion(shell, "Reprocessing", 
-						MessageFormat.format("Reprocessing files may duplicate date.  Are you sure you want to attempt to reprocess the {0} selected items?", items.size()))){
+				if (!MessageDialog.openQuestion(shell, Messages.DataQueueView_ReprocessDialogTitle, 
+						MessageFormat.format(Messages.DataQueueView_ReprocessDialogMessage, items.size()))){
 					return;
 				}
 				DataQueueManager.INSTANCE.reprocessItems(items);
@@ -443,7 +445,7 @@ public class DataQueueView{
 		linkComp.setLayout(new GridLayout(5, false));
 		((GridLayout)linkComp.getLayout()).marginHeight = 0;
 		
-		Hyperlink link = toolkit.createHyperlink(linkComp, "Refresh", SWT.NONE);
+		Hyperlink link = toolkit.createHyperlink(linkComp, Messages.DataQueueView_RefreshLabel, SWT.NONE);
 		link.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -451,11 +453,11 @@ public class DataQueueView{
 			}
 		});
 		
-		Hyperlink deleteSel = toolkit.createHyperlink(linkComp, "Remove Selected", SWT.NONE);
-		Hyperlink deleteAll = toolkit.createHyperlink(linkComp, "Remove All" , SWT.NONE);
+		Hyperlink deleteSel = toolkit.createHyperlink(linkComp, Messages.DataQueueView_RemovedSelectedLabel, SWT.NONE);
+		Hyperlink deleteAll = toolkit.createHyperlink(linkComp, Messages.DataQueueView_RemoveAllLabel , SWT.NONE);
 		
-		Hyperlink restart = toolkit.createHyperlink(linkComp, "Restart Processing" , SWT.NONE);
-		restart.setToolTipText("If the data queue processor is not running, this will initiate data queue processing.");
+		Hyperlink restart = toolkit.createHyperlink(linkComp, Messages.DataQueueView_RestartLabel , SWT.NONE);
+		restart.setToolTipText(Messages.DataQueueView_RestartTooltip);
 		restart.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -464,7 +466,7 @@ public class DataQueueView{
 		});
 		
 		
-		Label spacer = toolkit.createLabel(linkComp, "");
+		Label spacer = toolkit.createLabel(linkComp, ""); //$NON-NLS-1$
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 			deleteSel.addHyperlinkListener(new HyperlinkAdapter() {
@@ -484,7 +486,7 @@ public class DataQueueView{
 	
 	private void createServerSection(Composite parent){
 		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED );
-		dataQueueSection.setText("SMART Connect Server - Queued Items");
+		dataQueueSection.setText(Messages.DataQueueView_ServerQueueSectionLabel);
 		dataQueueSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dataQueueSection.setLayout(new GridLayout());
 	
@@ -499,7 +501,7 @@ public class DataQueueView{
 		gl.marginWidth = 0;
 		gl.marginHeight = 0;
 		buttonComp.setLayout(gl);
-		Button btn = toolkit.createButton(buttonComp, "Process All", SWT.PUSH);
+		Button btn = toolkit.createButton(buttonComp, Messages.DataQueueView_ProcessAllLabel, SWT.PUSH);
 		btn.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -507,7 +509,7 @@ public class DataQueueView{
 				processAll();
 			}
 		});
-		Button btn2 = toolkit.createButton(buttonComp, "Process Checked", SWT.PUSH);
+		Button btn2 = toolkit.createButton(buttonComp, Messages.DataQueueView_ProcessCheckedLabel, SWT.PUSH);
 		btn2.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -515,7 +517,7 @@ public class DataQueueView{
 				processSelected();
 			}
 		});
-		Hyperlink link = toolkit.createHyperlink(main, "Refresh", SWT.NONE);
+		Hyperlink link = toolkit.createHyperlink(main, Messages.DataQueueView_RefreshLabel, SWT.NONE);
 		link.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -570,17 +572,17 @@ public class DataQueueView{
 
 		if (items.isEmpty()){
 			if (isProcessing){
-				MessageDialog.openWarning(shell,"Delete Items", "Cannot remove items currently processing.");
+				MessageDialog.openWarning(shell,Messages.DataQueueView_DeleteItemsTitle, Messages.DataQueueView_DeleteItemsInfoMessage);
 			}
 			return;
 		}
 		
-		String message = MessageFormat.format("Are you sure you to delete the {0} selected items?", items.size());
+		String message = MessageFormat.format(Messages.DataQueueView_DeleteItemsConfirmMessage, items.size());
 		if (isProcessing){
-			message = MessageFormat.format("Processing items cannot be removed.  Are you sure you to delete the remaining {0} selected items?", items.size());
+			message = MessageFormat.format(Messages.DataQueueView_DeleteItemsConfirmMessage2, items.size());
 		}
 			
-		if (!MessageDialog.openQuestion(shell, "Delete Items", message)){
+		if (!MessageDialog.openQuestion(shell, Messages.DataQueueView_DeleteItemsTitle, message)){
 			return;
 		}
 
@@ -588,7 +590,7 @@ public class DataQueueView{
 	}
 
 	private void deleteAll(){
-		if (!MessageDialog.openQuestion(shell, "Clear Data Queue", "Clearning the data queue will remove all items and associated files and is not undoable." + "\n\n" + "Are you sure you want to continue?")){
+		if (!MessageDialog.openQuestion(shell, Messages.DataQueueView_ClearQueueTitle, Messages.DataQueueView_ClearQueueMessage + "\n\n" + Messages.DataQueueView_ClearQueueMessage2)){ //$NON-NLS-1$
 			return;
 		}
 		DataQueueManager.INSTANCE.deleteAllHistory();
@@ -596,19 +598,19 @@ public class DataQueueView{
 	
 
 	private synchronized void refreshServerTable(){
-		tblServer.setInput(new String[]{"Loading..."});
+		tblServer.setInput(new String[]{Messages.DataQueueView_LoadingLabel});
 		tblServer.refresh();
 		refreshServerItemsJob.schedule();
 	}
 	
 	private synchronized void refreshLocalTable(){
 		if (shell == null || shell.isDisposed()) return;
-		dataQueueTable.setInput(new String[]{"Loading..."});
+		dataQueueTable.setInput(new String[]{Messages.DataQueueView_LoadingLabel});
 		refreshLocalJob.schedule();
 	}
 	
 	private void buildLocalErrorContent(String message){
-		MessageDialog.openWarning(shell,  "ERROR", message);	
+		MessageDialog.openWarning(shell,  Messages.DataQueueView_ErrorDialogTitle, message);	
 	}
 	
 	private void buildLocalContent(List<LocalDataQueueItem> items){
@@ -620,7 +622,7 @@ public class DataQueueView{
 		if (!(tblServer.getInput() instanceof List)) return;
 		List<DataQueueItem> items = (List<DataQueueItem>) tblServer.getInput();
 		if (items.isEmpty()){
-			MessageDialog.openInformation(shell, "Data Queue Processor", "Nothing to process.");
+			MessageDialog.openInformation(shell, Messages.DataQueueView_ProcessorDialogTitle, Messages.DataQueueView_ProcessorDialogMessage);
 			return;
 		}
 		processItems(items);
@@ -642,7 +644,7 @@ public class DataQueueView{
 			try{
 				DataQueueManager.INSTANCE.addItemToQueue(i);
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.displayLog("Error adding item to data queue.", ex);
+				ConnectDataQueuePlugin.displayLog(Messages.DataQueueView_AddItemError, ex);
 			}
 		}
 		ProcessorManager.INSTANCE.processDataQueue(connect);

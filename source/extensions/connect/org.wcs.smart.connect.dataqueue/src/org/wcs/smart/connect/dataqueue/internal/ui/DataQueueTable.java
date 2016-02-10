@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.process.IDataQueueProgressListener;
 import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
@@ -82,12 +83,12 @@ public class DataQueueTable extends Composite{
 	};
 	
 	private enum Column{
-		STATUS(""),
-		NAME ("Name"),
-		TYPE("Type"),
-		PROGRESS("Progress"),
-		DATE("Date Processed"),
-		MESSAGE("Messages");
+		STATUS(""), //$NON-NLS-1$
+		NAME (Messages.DataQueueTable_NameLabel),
+		TYPE(Messages.DataQueueTable_TypeLabel),
+		PROGRESS(Messages.DataQueueTable_ProgressLabel),
+		DATE(Messages.DataQueueTable_DateProcessedLabel),
+		MESSAGE(Messages.DataQueueTable_MessagesLabel);
 		
 		public String guiName;
 		
@@ -97,7 +98,7 @@ public class DataQueueTable extends Composite{
 		
 		public String getValue(LocalDataQueueItem item){
 			if (this == STATUS){
-				return "";
+				return ""; //$NON-NLS-1$
 			}else if (this == NAME){
 				return item.getName();
 			}else if (this == TYPE){
@@ -105,12 +106,12 @@ public class DataQueueTable extends Composite{
 			}else if (this == PROGRESS){
 				return item.getStatus().getGuiName();
 			}else if (this == DATE){
-				if (item.getDateProcessed() == null) return "";
+				if (item.getDateProcessed() == null) return ""; //$NON-NLS-1$
 				return DateFormat.getDateTimeInstance().format(item.getDateProcessed());
 			}else if (this == MESSAGE){
 				return item.getErrorMessage();
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 	
@@ -166,7 +167,7 @@ public class DataQueueTable extends Composite{
 	        	tvcolumn.setLabelProvider(new ColumnLabelProvider(){
 	        		@Override
 	        		public String getText(Object element) {
-	        			return "";
+	        			return ""; //$NON-NLS-1$
 	        		}
 	        		@Override
 	        		public Image getImage(Object element) {

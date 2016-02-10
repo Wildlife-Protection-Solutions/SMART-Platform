@@ -36,6 +36,7 @@ import javax.persistence.Transient;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 
 /**
  * Local data queue item.  Extends the shared data queue item adding
@@ -48,13 +49,13 @@ import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 public class LocalDataQueueItem extends DataQueueItem{
 
 	public enum Status{
-		QUEUED ("QUEUED"),
-		REQUEUED ("REQUEUED"),
-		DOWNLOADING ("DOWNLOADING"),
-		PROCESSING ("PROCESSING"),
-		COMPLETE ("COMPLETE"),
-		COMPLETE_WARN ("COMPLETE WARNING"),
-		ERROR ("ERROR");
+		QUEUED (Messages.LocalDataQueueItem_QueuedStatusLabel),
+		REQUEUED (Messages.LocalDataQueueItem_RequeuedStatusLabel),
+		DOWNLOADING (Messages.LocalDataQueueItem_DownloadingStatusLabel),
+		PROCESSING (Messages.LocalDataQueueItem_ProcessingStatusLabel),
+		COMPLETE (Messages.LocalDataQueueItem_CompleteStatusLabel),
+		COMPLETE_WARN (Messages.LocalDataQueueItem_WarningStatusLabel),
+		ERROR (Messages.LocalDataQueueItem_ErrorStatusLabel);
 		
 		private String guiName;
 		

@@ -121,7 +121,7 @@ public class TableProgressWidget extends Composite{
 			sb.append(taskName);
 		}
 		if (subTask != null){
-			sb.append(": " + subTask);
+			sb.append(": " + subTask); //$NON-NLS-1$
 		}
 		lblProgress.setText(sb.toString());
 		

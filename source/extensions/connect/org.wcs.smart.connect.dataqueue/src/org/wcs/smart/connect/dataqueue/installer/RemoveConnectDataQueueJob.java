@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -53,7 +54,7 @@ public class RemoveConnectDataQueueJob extends Job {
 	};
 	
 	public RemoveConnectDataQueueJob() {
-		super("Uninstall Connect Data Processing Queue Plugin");
+		super(Messages.RemoveConnectDataQueueJob_JobName);
 	}
 
 	@Override
@@ -84,12 +85,12 @@ public class RemoveConnectDataQueueJob extends Job {
 						try{
 							FileUtils.deleteDirectory(dataqueue.toFile());
 						}catch (Exception ex){
-							ConnectDataQueuePlugin.log("Could not remove data queue folder from filestore when uninstalled Connect DataQueue Plugin", ex);
+							ConnectDataQueuePlugin.log("Could not remove data queue folder from filestore when uninstalled Connect DataQueue Plugin", ex); //$NON-NLS-1$
 						}
 					}
 				}
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.log("Could not remove data queue folders from filestore when uninstalled Connect DataQueue Plugin", ex);
+				ConnectDataQueuePlugin.log("Could not remove data queue folders from filestore when uninstalled Connect DataQueue Plugin", ex); //$NON-NLS-1$
 			}
 			
 			
@@ -101,10 +102,10 @@ public class RemoveConnectDataQueueJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog("Error uninstalling SMART Connect module.  Could not remove database tables.  Please contact your system administrator.", e);
+					SmartPlugIn.displayLog(Messages.RemoveConnectDataQueueJob_UninstallError, e);
 				}
 			});
-			return new Status(IStatus.ERROR, ConnectDataQueuePlugin.PLUGIN_ID, 1, "Error uninstalling Connect data processing queue plugin." + e.getLocalizedMessage(), e); 
+			return new Status(IStatus.ERROR, ConnectDataQueuePlugin.PLUGIN_ID, 1, Messages.RemoveConnectDataQueueJob_UninstallError2 + e.getLocalizedMessage(), e); 
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();

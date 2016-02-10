@@ -24,6 +24,7 @@ package org.wcs.smart.connect.dataqueue.internal.ui;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 
 /**
@@ -39,9 +40,9 @@ public class DataQueueServerDialog extends ConnectDialog {
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		setTitle("SMART Connect - Data Processing Queue");
-		getShell().setText("SMART Connect - Data Processing Queue");
-		setMessage("Connect to data processing queue on SMART Connect");
+		setTitle(Messages.DataQueueServerDialog_Title);
+		getShell().setText(Messages.DataQueueServerDialog_Title);
+		setMessage(Messages.DataQueueServerDialog_Message);
 		
 		return super.createDialogArea(parent);	
 	}

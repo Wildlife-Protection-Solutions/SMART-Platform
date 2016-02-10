@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectHibernateManager;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueServerOptions;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -59,11 +60,11 @@ public enum AutoProcessingManager {
 				int delay = DataQueueServerOptions.AUTO_MINUTES.getIntegerValue(cs);
 				enableAutoProcessing(delay);
 			}else{
-				lastStatus.updateStatus(AutoProcessingStatus.Status.INACTIVE, "auto data queue processing not enabled");
+				lastStatus.updateStatus(AutoProcessingStatus.Status.INACTIVE, Messages.AutoProcessingManager_Status1);
 			}
 
 			if (DataQueueServerOptions.CHECK_ONSTARTUP.getBooleanValue(cs)){
-				WorkbenchJob wj = new WorkbenchJob("data queue startup check") {
+				WorkbenchJob wj = new WorkbenchJob(Messages.AutoProcessingManager_StartupJobName) {
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						runOnce();

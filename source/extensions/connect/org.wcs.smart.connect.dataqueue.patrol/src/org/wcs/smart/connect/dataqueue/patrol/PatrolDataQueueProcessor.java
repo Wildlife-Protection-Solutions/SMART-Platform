@@ -31,6 +31,7 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueItem.Type;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption.DataQueueProcessingOptionPk;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
+import org.wcs.smart.connect.dataqueue.patrol.internal.Messages;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -84,9 +85,9 @@ public class PatrolDataQueueProcessor implements IItemProcessor {
 			}catch (Exception ex){
 				
 			}
-			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE, MessageFormat.format("1 Patrol loaded: {0}", p.getId()));
+			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE, MessageFormat.format(Messages.PatrolDataQueueProcessor_Status1, p.getId()));
 		}else{
-			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, "0 Patrols loaded (user cancelled).");
+			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, Messages.PatrolDataQueueProcessor_Status2);
 		}
 		
 	}
