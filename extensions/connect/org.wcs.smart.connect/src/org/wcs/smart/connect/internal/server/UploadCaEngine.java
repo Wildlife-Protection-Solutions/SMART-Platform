@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.server;
+package org.wcs.smart.connect.internal.server;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -40,16 +40,15 @@ import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.connect.ConnectDatastore;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
+import org.wcs.smart.connect.internal.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
-import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
-import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -202,18 +201,6 @@ public class UploadCaEngine {
 				
 			});
 			
-			//not necessary; controlled by status table in database
-//			//enable replication so we catch any changes made while the ca is uploaded to server
-//			s = HibernateManager.openSession();
-//			s.beginTransaction();
-//			try{
-//				DerbyReplicationManager.INSTANCE.enableReplication(s);
-//				s.getTransaction().commit();
-//			}catch(Exception ex){
-//				//this should fail
-//				throw new Exception(Messages.UploadCaEngine_EnableFailed + ex.getMessage(), ex);
-//			}
-			
 			UploadCaJob job = new UploadCaJob(connect, localStatus);
 			job.addJobChangeListener(new JobChangeAdapter() {
 				@Override
@@ -327,7 +314,7 @@ public class UploadCaEngine {
 			SmartUtils.createDirectory(f.getParentFile());
 		}
 	
-		CaExporter exporter = new CaExporter();
+		ConnectCaExporter exporter = new ConnectCaExporter();
 		exporter.export(f, new SubProgressMonitor(monitor, 1));
 	}
 }

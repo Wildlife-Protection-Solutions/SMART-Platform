@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.server;
+package org.wcs.smart.connect.internal.server;
 
 import java.nio.file.FileSystems;
 
@@ -33,8 +33,8 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.model.ConnectServerStatus;
-import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**

@@ -36,7 +36,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.server.UploadCaEngine;
+import org.wcs.smart.connect.internal.server.UploadCaEngine;
 
 /**
  * Export conservation area to connect handler.

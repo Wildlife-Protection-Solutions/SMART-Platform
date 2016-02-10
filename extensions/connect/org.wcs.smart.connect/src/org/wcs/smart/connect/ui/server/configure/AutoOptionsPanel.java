@@ -41,10 +41,10 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.replication.AutoReplicationStartUp;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectServerOption.ConnectionOption;
-import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 
 /**
  * Composite that contains all the options
@@ -76,7 +76,7 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 	
 	@Override
 	public String getName(){
-		return "Automatic Sync Options";
+		return Messages.AutoOptionsPanel_AutoSyncOptionsPanelName;
 	}
 	
 	@Override

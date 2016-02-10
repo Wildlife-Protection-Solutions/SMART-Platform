@@ -43,8 +43,8 @@ import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.IConnectStatusListener;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.replication.AutoReplicationJob;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
-import org.wcs.smart.connect.server.replication.AutoReplicationJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 

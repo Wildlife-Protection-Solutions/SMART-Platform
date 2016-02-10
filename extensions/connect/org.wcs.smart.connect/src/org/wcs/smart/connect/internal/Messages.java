@@ -40,6 +40,7 @@ public class Messages extends NLS {
 	public static String ApplyChangeLogJob_validateSubTask;
 	public static String ApplyChangeLogJob_ValidateUserSubTask;
 	public static String AutoOptionsPanel_AutoOpLabel;
+	public static String AutoOptionsPanel_AutoSyncOptionsPanelName;
 	public static String AutoOptionsPanel_CheckChangesLabel;
 	public static String AutoOptionsPanel_InvalidMinutes;
 	public static String AutoOptionsPanel_InvalidMinutes2;
@@ -216,6 +217,7 @@ public class Messages extends NLS {
 	public static String EditConnectServerInfoDialog_connectError;
 	public static String EditConnectServerInfoDialog_ConnectLabel;
 	public static String EditConnectServerInfoDialog_Message;
+	public static String EditConnectServerInfoDialog_PanelErrorMessage;
 	public static String EditConnectServerInfoDialog_serverError;
 	public static String EditConnectServerInfoDialog_ServerError;
 	public static String EditConnectServerInfoDialog_Shell;
@@ -307,6 +309,7 @@ public class Messages extends NLS {
 	public static String ServerOptionLabelProvider_UploadRetryTooltip;
 	public static String ServerOptionLabelProvider_WaitTimeLabel;
 	public static String ServerOptionLabelProvider_WaitTimeTooltip;
+	public static String ServerOptionsPanel_ConnectOpPanelName;
 	public static String ServerOptionsPanel_InvalidNumber;
 	public static String ServerOptionsPanel_NotApplicable;
 	public static String ServerOptionsWizardPage_Message;

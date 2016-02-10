@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.server.replication;
+package org.wcs.smart.connect.internal.server.replication;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectHibernateManager;

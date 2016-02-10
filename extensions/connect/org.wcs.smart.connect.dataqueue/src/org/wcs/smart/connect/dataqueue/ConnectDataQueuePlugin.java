@@ -44,6 +44,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 
+	
 	public static final String DATA_QUEUE_DIR = ConnectDatastore.CONNECT_FILESTORE_DIR + File.separator + "dataqueue";
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.connect.dataqueue"; //$NON-NLS-1$
