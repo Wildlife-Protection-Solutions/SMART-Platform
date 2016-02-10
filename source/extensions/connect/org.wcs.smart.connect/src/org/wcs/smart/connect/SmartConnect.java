@@ -82,10 +82,9 @@ import org.wcs.smart.connect.api.io.ProgressInputStream;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.replication.PackageToLargeException;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
-import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
-import org.wcs.smart.connect.server.replication.PackageToLargeException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -449,17 +448,20 @@ public class SmartConnect {
 		return cont[0];
 	}
 	
+	/*
+	 * parse a filename from the content header string
+	 */
 	private String parseFilenameFromContent(String content){
 		if (content == null) return null;
-		int index = content.indexOf("filename=");
+		int index = content.indexOf("filename="); //$NON-NLS-1$
 		if (index > 0){
-			int index2 = content.indexOf(";", index);
+			int index2 = content.indexOf(";", index); //$NON-NLS-1$
 			if (index2 < 0) index2 = content.length();
-			String filename = content.substring(index+"filename=".length(), index2);
-			if(filename.startsWith("\"")){
+			String filename = content.substring(index+"filename=".length(), index2); //$NON-NLS-1$
+			if(filename.startsWith("\"")){ //$NON-NLS-1$
 				filename = filename.substring(1);
 			}
-			if (filename.endsWith("\"")){
+			if (filename.endsWith("\"")){ //$NON-NLS-1$
 				filename = filename.substring(0, filename.length() - 1);
 			}
 			if (filename.length() > 0){
@@ -517,9 +519,9 @@ public class SmartConnect {
 					if (filestore == null){
 						String filename = parseFilenameFromContent(r.getHeaderString(HttpHeaders.CONTENT_DISPOSITION));
 						if (filename != null){
-							filestore = filestorea.resolve(System.nanoTime() + "." + filename);
+							filestore = filestorea.resolve(System.nanoTime() + "." + filename); //$NON-NLS-1$
 						}else{
-							filestorea = filestorea.resolve(System.nanoTime() + ".temp");
+							filestorea = filestorea.resolve(System.nanoTime() + ".temp"); //$NON-NLS-1$
 						}
 					}
 					

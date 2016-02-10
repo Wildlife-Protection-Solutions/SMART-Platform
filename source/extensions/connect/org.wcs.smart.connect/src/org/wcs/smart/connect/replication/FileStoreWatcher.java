@@ -47,9 +47,9 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
-import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.UuidUtils;
 

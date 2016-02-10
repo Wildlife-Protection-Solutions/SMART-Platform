@@ -88,5 +88,10 @@
             version="4.0.0">
       </action>
    </extension>
+   <extension
+         point="org.wcs.smart.connect.ca.export">
+      <processor
+            class="org.wcs.smart.connect.dataqueue.internal.server.ConnectCaExportProcessor"></processor>
+   </extension>
 
 </plugin>

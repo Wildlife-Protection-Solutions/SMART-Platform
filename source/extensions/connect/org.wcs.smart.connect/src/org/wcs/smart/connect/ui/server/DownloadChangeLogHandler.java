@@ -34,9 +34,9 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.replication.DownloadChangeLogEngine;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
-import org.wcs.smart.connect.server.replication.DownloadChangeLogEngine;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**

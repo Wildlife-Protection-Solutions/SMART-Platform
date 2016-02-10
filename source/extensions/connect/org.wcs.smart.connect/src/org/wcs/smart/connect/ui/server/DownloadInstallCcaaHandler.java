@@ -45,9 +45,9 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.DownloadCaEngine;
+import org.wcs.smart.connect.internal.server.replication.SyncChangesRunnable;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
-import org.wcs.smart.connect.server.DownloadCaEngine;
-import org.wcs.smart.connect.server.replication.SyncChangesRunnable;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 

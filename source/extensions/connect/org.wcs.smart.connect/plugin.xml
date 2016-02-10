@@ -3,6 +3,7 @@
 <plugin>
    <extension-point id="org.wcs.smart.connect.configure.optionpanel" name="Connect Server Options Configuration Panel" schema="schema/org.wcs.smart.connect.configure.optionpanel.exsd"/>
    <extension-point id="org.wcs.smart.connect.status.contribution" name="Connect Status Contribution" schema="schema/org.wcs.smart.connect.status.contribution.exsd"/>
+   <extension-point id="org.wcs.smart.connect.ca.export" name="Connect Conservation Area Export Processor" schema="schema/org.wcs.smart.connect.ca.export.exsd"/>
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
@@ -126,7 +127,7 @@
       <processor
             apply="always"
             beforefragment="false"
-            class="org.wcs.smart.connect.server.replication.SyncOnStartupProcessor">
+            class="org.wcs.smart.connect.internal.server.replication.SyncOnStartupProcessor">
       </processor>
    </extension>
    <extension
@@ -351,6 +352,12 @@
       <contribution
             class="org.wcs.smart.connect.ui.ReplicationStatusContribution">
       </contribution>
+   </extension>
+   <extension
+         point="org.wcs.smart.connect.ca.export">
+      <processor
+            class="org.wcs.smart.connect.internal.server.ConnectCaExportProcessor">
+      </processor>
    </extension>
 
 </plugin>

@@ -19,21 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect;
+package org.wcs.smart.connect.internal.server.replication;
 
 /**
- * Connect datastore folder names.
+ * Exception thrown when user cancels the process because 
+ * the package is too large.
  * 
  * @author Emily
  *
  */
-public enum ConnectDatastore {
+public class PackageToLargeException extends Exception {
 
-	INSTANCE;
-	
-	public static final String DOWNLOAD_FILESTORE_DIR = "tempdownloads"; //$NON-NLS-1$
-	
-	public static final String REPLICATION_FILESTORE_DIR = "replication"; //$NON-NLS-1$
-	
-	public static final String CONNECT_FILESTORE_DIR = "smart_connect"; //$NON-NLS-1$
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public PackageToLargeException(String message){
+		super(message);
+	}
 }

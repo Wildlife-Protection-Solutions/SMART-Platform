@@ -19,23 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.server.replication;
+package org.wcs.smart.connect.server;
+
+import java.io.File;
 
 /**
- * Exception thrown when user cancels the process because 
- * the package is too large.
- * 
+ * A preprocessor for Conservation Area Exports that are going to
+ * be sent to SMART Connect.  This runs after the data has been exported
+ * to a temporary directory, but before the directory is zipped and 
+ * sent to connect.
+ *  
  * @author Emily
  *
  */
-public class PackageToLargeException extends Exception {
+public interface ICaExportPreprocessor {
 
+	public static final String EXTENSION_ID = "org.wcs.smart.connect.ca.export"; //$NON-NLS-1$
+	
 	/**
+	 * Makes modifications to the Conservation Area export before zipping 
+	 * and sending to Connect.  This is called after the standard
+	 * Conservation Area export has exported all data, but 
+	 * before the files are zipped.
 	 * 
+	 * @param tempDirectory the temporary location of the export
 	 */
-	private static final long serialVersionUID = 1L;
-
-	public PackageToLargeException(String message){
-		super(message);
-	}
+	public void processExport(File tempDirectory);
 }

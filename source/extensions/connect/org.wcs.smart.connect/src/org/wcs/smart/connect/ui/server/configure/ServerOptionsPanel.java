@@ -66,7 +66,7 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 	
 	@Override
 	public String getName(){
-		return "Connection Options";
+		return Messages.ServerOptionsPanel_ConnectOpPanelName;
 	}
 	
 	@Override

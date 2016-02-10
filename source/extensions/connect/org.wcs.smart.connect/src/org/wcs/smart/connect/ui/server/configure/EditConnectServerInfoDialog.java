@@ -169,7 +169,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		setErrorMessage(null);
 		for (IServerOptionsPanel pnl : optionPanels){
 			if (!pnl.isValid()){
-				setErrorMessage(MessageFormat.format("{0} configuration contains an error.", pnl.getName()));
+				setErrorMessage(MessageFormat.format(Messages.EditConnectServerInfoDialog_PanelErrorMessage, pnl.getName()));
 				enableOk(false);
 				return;
 			}
