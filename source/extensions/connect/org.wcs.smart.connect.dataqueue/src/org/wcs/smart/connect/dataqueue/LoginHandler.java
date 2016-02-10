@@ -217,19 +217,21 @@ public class LoginHandler implements ILoginHandler {
 		if (files == null) return;
 		
 		Path p = FileSystems.getDefault().getPath(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), ConnectDataQueuePlugin.DATA_QUEUE_DIR);
-		Path root = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation());
-		try(DirectoryStream<Path> systemfiles = Files.newDirectoryStream(p)){
-			for (Path temp : systemfiles){
-				if (!files.contains(root.relativize(temp).toString())){
-					try{
-						Files.deleteIfExists(temp);
-					}catch (Exception ex){
-						ConnectDataQueuePlugin.log(ex.getMessage(), ex);
+		if (Files.exists(p)){
+			Path root = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation());
+			try(DirectoryStream<Path> systemfiles = Files.newDirectoryStream(p)){
+				for (Path temp : systemfiles){
+					if (!files.contains(root.relativize(temp).toString())){
+						try{
+							Files.deleteIfExists(temp);
+						}catch (Exception ex){
+							ConnectDataQueuePlugin.log(ex.getMessage(), ex);
+						}
 					}
 				}
+			}catch(Exception ex){
+				ConnectDataQueuePlugin.log(ex.getMessage(), ex);
 			}
-		}catch(Exception ex){
-			ConnectDataQueuePlugin.log(ex.getMessage(), ex);
 		}
 	}
 }
