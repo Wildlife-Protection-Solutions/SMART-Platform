@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 import org.wcs.smart.connect.dataqueue.patrol.PatrolDataQueueProcessorOption;
+import org.wcs.smart.connect.dataqueue.patrol.internal.Messages;
 import org.wcs.smart.connect.dataqueue.ui.IProcessingOptionPanel;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -55,7 +56,7 @@ public class PatrolProcessorOptionPanel implements IProcessingOptionPanel {
 	
 	@Override
 	public String getName() {
-		return "Patrol Processing Options";
+		return Messages.PatrolProcessorOptionPanel_OptionPanel;
 	}
 
 	@Override
@@ -91,8 +92,8 @@ public class PatrolProcessorOptionPanel implements IProcessingOptionPanel {
 		main.setLayout(new GridLayout());
 		
 		btnIds = new Button(main, SWT.CHECK);
-		btnIds.setText("Generate new Patrol Ids on import");
-		btnIds.setToolTipText("Check to generate new ids for patrols when imported.  Uncheck to use patrol ids provided in file.");
+		btnIds.setText(Messages.PatrolProcessorOptionPanel_PidOptionLabel);
+		btnIds.setToolTipText(Messages.PatrolProcessorOptionPanel_PidOptionTooltip);
 		btnIds.setData(PatrolDataQueueProcessorOption.GENERATE_IDS);
 		
 		SelectionListener listener= new SelectionAdapter() {

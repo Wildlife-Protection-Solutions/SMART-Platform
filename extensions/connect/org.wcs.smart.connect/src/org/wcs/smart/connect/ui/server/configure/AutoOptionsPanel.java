@@ -81,6 +81,7 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 	
 	@Override
 	public Composite createComposite(Composite parent, boolean isEditable){
+		this.isEditable = isEditable;
 		listeners = new ArrayList<ModifyListener>();
 		
 		Composite main = new Composite(parent, SWT.NONE);

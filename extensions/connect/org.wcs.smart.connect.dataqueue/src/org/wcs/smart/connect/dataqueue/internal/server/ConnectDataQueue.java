@@ -31,6 +31,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.model.ConnectServerOption;
@@ -91,7 +92,7 @@ public enum ConnectDataQueue {
 				Thread.sleep(delay);
 			}
 		}
-		throw new Exception(MessageFormat.format("Unable to update server status after {0} attempts.",retryCnt) + lastException.getMessage(), lastException);
+		throw new Exception(MessageFormat.format(Messages.ConnectDataQueue_UpdateFailed,retryCnt) + lastException.getMessage(), lastException);
 		
 	}
 	
@@ -103,7 +104,7 @@ public enum ConnectDataQueue {
 	 * @throws MalformedURLException
 	 */
 	public String getFileDownloadUrl(SmartConnect connect, LocalDataQueueItem item) throws MalformedURLException{
-		String downloadUrl = connect.getServer().getServerUrl() + SmartConnect.API_URL + "/" + DataQueueApi.DATAQUEUE_PATH + "/items/" + item.getServerItemUuid().toString() + "/file";
+		String downloadUrl = connect.getServer().getServerUrl() + SmartConnect.API_URL + "/" + DataQueueApi.DATAQUEUE_PATH + "/items/" + item.getServerItemUuid().toString() + "/file";   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		return downloadUrl;
 	}
 }

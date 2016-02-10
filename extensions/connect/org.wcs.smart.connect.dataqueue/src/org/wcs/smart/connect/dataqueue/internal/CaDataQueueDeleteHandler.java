@@ -48,10 +48,12 @@ public class CaDataQueueDeleteHandler implements ICaDeleteHandler {
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session,
 			IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Removing SMART Connect Data Queue Items");
+		monitor.subTask(Messages.CaDataQueueDeleteHandler_taskMessage);
+		//delete data queue items
 		DataQueueManager.INSTANCE.deleteDataQueue(ca, session);
+		
+		//delete any data queue options
+		DataQueueManager.INSTANCE.deleteDataQueueOptions(ca, session);
 	}
-
-	
 
 }

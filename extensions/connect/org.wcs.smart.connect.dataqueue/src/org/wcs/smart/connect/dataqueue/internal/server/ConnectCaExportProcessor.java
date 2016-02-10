@@ -55,8 +55,8 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 			for (Class<?> c : classesToRemove){
 				String tableName = ((Joinable)s.getSessionFactory().getClassMetadata(c)).getTableName();
 				
-				String fileName1 = tableName + "." + c.getSimpleName() + ".def";
-				String fileName2 = tableName + "." + c.getSimpleName() + ".dat";
+				String fileName1 = tableName + "." + c.getSimpleName() + ".def"; //$NON-NLS-1$ //$NON-NLS-2$
+				String fileName2 = tableName + "." + c.getSimpleName() + ".dat"; //$NON-NLS-1$ //$NON-NLS-2$
 				
 				for (String filename : new String[]{fileName1, fileName2}){
 					File f = new File(new File(tempDirectory, ICaDataExportEngine.DATABASE_DIR), filename);
@@ -80,7 +80,7 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 			try{
 				FileUtils.deleteDirectory(dataqueue.toFile());
 			}catch(Exception ex){
-				ConnectDataQueuePlugin.log("Failed to remove data queue folder from Conservation Area export.", ex);			
+				ConnectDataQueuePlugin.log("Failed to remove data queue folder from Conservation Area export.", ex);			 //$NON-NLS-1$
 			}
 		}
 		

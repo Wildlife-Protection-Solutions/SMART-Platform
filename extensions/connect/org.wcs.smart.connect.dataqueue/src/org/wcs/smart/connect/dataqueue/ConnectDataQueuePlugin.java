@@ -45,10 +45,10 @@ import org.wcs.smart.hibernate.SmartDB;
 public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 
 	
-	public static final String DATA_QUEUE_DIR = ConnectDatastore.CONNECT_FILESTORE_DIR + File.separator + "dataqueue";
+	public static final String DATA_QUEUE_DIR = ConnectDatastore.CONNECT_FILESTORE_DIR + File.separator + "dataqueue"; //$NON-NLS-1$
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.connect.dataqueue"; //$NON-NLS-1$
-	public static final String DB_VERSION_1 = "1.0";
+	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
 	public static final String DB_VERSION = DB_VERSION_1;
 
 	public static final String ERROR_ICON = "org.wcs.smart.connect.dataqueue.icon.error"; //$NON-NLS-1$

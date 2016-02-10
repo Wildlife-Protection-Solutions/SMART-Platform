@@ -43,6 +43,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 import org.wcs.smart.connect.dataqueue.ui.IProcessingOptionPanel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -69,7 +70,7 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 			String error = null;
 			for (IProcessingOptionPanel p : optionPanels){
 				if (!p.isValid()){
-					error = MessageFormat.format("Error on option panel {0}.", p.getName());
+					error = MessageFormat.format(Messages.DataQueueProcessingOptionDialog_PanelError, p.getName());
 					break;
 				}
 			}
@@ -97,7 +98,7 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 			session.getTransaction().commit();
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 		}catch (Exception ex){
-			ConnectDataQueuePlugin.displayLog("Unable to save processing option changes. " + ex.getMessage(), ex);
+			ConnectDataQueuePlugin.displayLog(Messages.DataQueueProcessingOptionDialog_SaveError + ex.getMessage(), ex);
 			return;
 		}finally{
 			session.close();
@@ -116,7 +117,7 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 		if (optionPanels.length == 0){
 			
 			Label l = new Label(main, SWT.NONE);
-			l.setText("No data queue processors options are available.");
+			l.setText(Messages.DataQueueProcessingOptionDialog_NoOptions);
 		}else{
 			TabFolder tabConfig = new TabFolder(main, SWT.NONE);
 			tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,3,1));
@@ -128,9 +129,9 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 			}
 			initControls();
 		}
-		setTitle("Data Queue Processing Options");
-		getShell().setText("Data Queue Processing Options");
-		setMessage("Data Queue processor option configurations");
+		setTitle(Messages.DataQueueProcessingOptionDialog_Title);
+		getShell().setText(Messages.DataQueueProcessingOptionDialog_Title);
+		setMessage(Messages.DataQueueProcessingOptionDialog_Message);
 		
 		return main;
 	}
@@ -142,7 +143,7 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 		session.beginTransaction();
 		try{
 			List<DataQueueProcessingOption> options = session.createCriteria(DataQueueProcessingOption.class)
-			.add(Restrictions.eq("id.conservationArea", SmartDB.getCurrentConservationArea().getUuid()))
+			.add(Restrictions.eq("id.conservationArea", SmartDB.getCurrentConservationArea().getUuid())) //$NON-NLS-1$
 			.list();
 			
 			for (DataQueueProcessingOption op : options){

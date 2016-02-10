@@ -42,6 +42,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingManager;
 import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
 import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
@@ -122,7 +123,7 @@ public class LoginHandler implements ILoginHandler {
 			try{
 				Files.deleteIfExists(p);
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.log("Error deleting file " + p.toString(), ex);
+				ConnectDataQueuePlugin.log("Error deleting file " + p.toString(), ex); //$NON-NLS-1$
 			}
 		}
 			
@@ -141,9 +142,8 @@ public class LoginHandler implements ILoginHandler {
 			return ;
 		}
 		if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
-				"Data Queue Processor", 
-				"There are unfinished items in the data processing queue from previous "
-				+ "application launch.  Do you want to process these now?")){
+				Messages.LoginHandler_MessageTitle, 
+				Messages.LoginHandler_MessageInfo)){
 			//if not these will stay in the queue and get processed during the next
 			//processing cycle
 			return ;
@@ -184,7 +184,7 @@ public class LoginHandler implements ILoginHandler {
 		
 		if (olderThan >= 0){
 			final int days = olderThan;
-			Job j = new Job("data queue history cleaner"){
+			Job j = new Job(Messages.LoginHandler_JobName){
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					DataQueueManager.INSTANCE.deleteOldItems(days);
@@ -207,8 +207,8 @@ public class LoginHandler implements ILoginHandler {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			Query q = s.createQuery("SELECT file FROM LocalDataQueueItem WHERE conservationArea = :ca and file is not null");
-			q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
+			Query q = s.createQuery("SELECT file FROM LocalDataQueueItem WHERE conservationArea = :ca and file is not null"); //$NON-NLS-1$
+			q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
 			files = q.list();
 			s.getTransaction().commit();
 		}finally{

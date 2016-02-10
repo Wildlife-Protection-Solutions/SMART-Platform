@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.server.ConnectDataQueue;
 import org.wcs.smart.connect.dataqueue.internal.server.DataQueueApi;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
@@ -79,7 +80,7 @@ public class DataQueueItemProcessor extends Job {
 	 * @param progressWrapper
 	 */
 	DataQueueItemProcessor(SmartConnect connect, DataQueueProcessMonitor progressWrapper) {
-		super("Data Queue Processor");
+		super(Messages.DataQueueItemProcessor_JobName);
 		this.connect = connect;
 		this.progressWrapper = progressWrapper;
 	}
@@ -95,7 +96,7 @@ public class DataQueueItemProcessor extends Job {
 		boolean reschedule = true;
 		try{
 		
-			monitor.beginTask("Check out next processing item...", 30);
+			monitor.beginTask(Messages.DataQueueItemProcessor_Task1, 30);
 			item = DataQueueManager.INSTANCE.checkOutNextQueueItem(connect);
 			
 			if (item == null){
@@ -113,18 +114,18 @@ public class DataQueueItemProcessor extends Job {
 			}
 			
 			
-			monitor.setTaskName("Processing Item: " + item.getName());
+			monitor.setTaskName(Messages.DataQueueItemProcessor_Task2 + item.getName());
 			
 			IItemProcessor.ProcessingStatus processingStatus = null;
 			try{
-				monitor.subTask("downloading file...");
+				monitor.subTask(Messages.DataQueueItemProcessor_Task3);
 				if (item.getFullFilePath() == null  || !Files.exists(item.getFullFilePath())){
 					//it may have been already downloaded if we are reprocessing
 					updateLocalStatus(LocalDataQueueItem.Status.DOWNLOADING, null);
 					downloadFile(new SubProgressMonitor(monitor, 10));
 				}
 				
-				monitor.subTask("processing file...");
+				monitor.subTask(Messages.DataQueueItemProcessor_Task4);
 				updateLocalStatus(LocalDataQueueItem.Status.PROCESSING, null);
 				processingStatus = processItem(new SubProgressMonitor(monitor, 10));
 				
@@ -135,21 +136,21 @@ public class DataQueueItemProcessor extends Job {
 				try{
 					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.ERROR);
 				}catch (Exception ex2){
-					ConnectDataQueuePlugin.displayLog("Processing failed and statue could not be updated on CONNECT. This status will need to be manually reset on the server and processing restarted.", ex);	
+					ConnectDataQueuePlugin.displayLog(Messages.DataQueueItemProcessor_Error1, ex);	
 				}
 				return Status.OK_STATUS;
 			}
-			monitor.subTask("updating status...");
+			monitor.subTask(Messages.DataQueueItemProcessor_Task5);
 			try{
 				updateLocalStatus(processingStatus.getStatus(), processingStatus.getMessage());
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.displayLog("Processing completed local status is not updated.  Item should be removed from local queue and server queue manually, otherwise data may be duplicated if items are reprocessed.", ex);
+				ConnectDataQueuePlugin.displayLog(Messages.DataQueueItemProcessor_Error2, ex);
 			}
 			
 			try{
 				ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.COMPLETE);
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.displayLog("Processing completed but the state on the Connect Server not be updated.  Item status will need to be manually updated on server, otherwise data may be duplicated if items are reprocessed.", ex);
+				ConnectDataQueuePlugin.displayLog(Messages.DataQueueItemProcessor_Error3, ex);
 			}
 			monitor.worked(5);
 		}finally{
@@ -200,7 +201,7 @@ public class DataQueueItemProcessor extends Job {
 				return p;
 			}
 		}
-		throw new Exception(MessageFormat.format("Could not find a processor for file type {0}.", item.getType()));
+		throw new Exception(MessageFormat.format(Messages.DataQueueItemProcessor_Error4, item.getType()));
 	}
 	
 	private void updateLocalStatus(LocalDataQueueItem.Status newStatus, String errorMsg){

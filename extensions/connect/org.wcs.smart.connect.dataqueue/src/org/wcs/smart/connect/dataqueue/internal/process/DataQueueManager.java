@@ -45,6 +45,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.server.ConnectDataQueue;
 import org.wcs.smart.connect.dataqueue.internal.server.DataQueueApi;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
@@ -93,16 +94,16 @@ public enum DataQueueManager {
 	@SuppressWarnings("unchecked")
 	public LocalDataQueueItem addItemToQueue(DataQueueItem item) throws Exception{
 		if (!item.getConservationArea().equals(SmartDB.getCurrentConservationArea().getUuid())){
-			throw new IllegalStateException("Conservation area of the data queue item does not match the current conservation area.  Cannot process items outside of their conservation area.");
+			throw new IllegalStateException(Messages.DataQueueManager_CaError);
 		}
 		if (item instanceof LocalDataQueueItem){
-			throw new IllegalStateException("Cannot add items to the data queue that are already in the queue.");
+			throw new IllegalStateException(Messages.DataQueueManager_InQueueError);
 		}
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
 			List<LocalDataQueueItem> localItems = s.createCriteria(LocalDataQueueItem.class)
-					.add(Restrictions.eq("serverItemUuid", item.getUuid()))
+					.add(Restrictions.eq("serverItemUuid", item.getUuid())) //$NON-NLS-1$
 					.list();
 			
 			for (LocalDataQueueItem i : localItems){
@@ -148,12 +149,12 @@ public enum DataQueueManager {
 
 	private Integer getNextQueueOrder(Session s){
 		Integer nextorder = (Integer) s.createCriteria(LocalDataQueueItem.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid()))
-				.add(Restrictions.in("status", 
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid())) //$NON-NLS-1$
+				.add(Restrictions.in("status",  //$NON-NLS-1$
 						new LocalDataQueueItem.Status[]{
 						LocalDataQueueItem.Status.QUEUED,
 						LocalDataQueueItem.Status.REQUEUED}))
-				.setProjection(Projections.max("order"))
+				.setProjection(Projections.max("order")) //$NON-NLS-1$
 				.uniqueResult();
 		if (nextorder == null) nextorder = 0;
 		nextorder++;
@@ -172,10 +173,10 @@ public enum DataQueueManager {
 		s.beginTransaction();
 		try{
 			Criteria c = s.createCriteria(LocalDataQueueItem.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid()));
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid())); //$NON-NLS-1$
 			
 			if (validStatus != null && validStatus.length > 0){
-				c.add(Restrictions.in("status", validStatus));
+				c.add(Restrictions.in("status", validStatus)); //$NON-NLS-1$
 			}
 			List<LocalDataQueueItem> localItems = c.list();
 			return localItems;
@@ -216,12 +217,12 @@ public enum DataQueueManager {
 				clone.setType(i.getType());
 				clone.setStatus(LocalDataQueueItem.Status.REQUEUED);
 				clone.setDateProcessed(null);
-				clone.setErrorMessage("Re-queued by user");
+				clone.setErrorMessage(Messages.DataQueueManager_ReQueuedMessage);
 				clone.setOrder(getNextQueueOrder(s));
 			
 				if (i.getFullFilePath() != null && Files.exists(i.getFullFilePath())){
 					//copy 
-					Path copy = i.getFullFilePath().getParent().resolve(i.getFullFilePath().getFileName().toString() + ".copy" + System.nanoTime());
+					Path copy = i.getFullFilePath().getParent().resolve(i.getFullFilePath().getFileName().toString() + ".copy" + System.nanoTime()); //$NON-NLS-1$
 					Files.copy(i.getFullFilePath(), copy);
 					clone.setFile(
 							FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation())
@@ -253,9 +254,9 @@ public enum DataQueueManager {
 		try{
 			
 			LocalDataQueueItem item = (LocalDataQueueItem) s.createCriteria(LocalDataQueueItem.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid()))
-			.add(Restrictions.in("status", new LocalDataQueueItem.Status[]{LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.REQUEUED}))
-			.addOrder(Order.asc("order"))
+			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid())) //$NON-NLS-1$
+			.add(Restrictions.in("status", new LocalDataQueueItem.Status[]{LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.REQUEUED})) //$NON-NLS-1$
+			.addOrder(Order.asc("order")) //$NON-NLS-1$
 			.setMaxResults(1)
 			.uniqueResult();
 		
@@ -270,9 +271,9 @@ public enum DataQueueManager {
 				}catch (Exception ex){
 					String message = null;
 					if (ex instanceof WebApplicationException){
-						message = "Error processing item: " + SmartConnect.parseErrorMessage(((WebApplicationException) ex).getResponse().readEntity(String.class));
+						message = MessageFormat.format(Messages.DataQueueManager_ItemServerError, SmartConnect.parseErrorMessage(((WebApplicationException) ex).getResponse().readEntity(String.class)));
 					}else{
-						message = "Error processing item: unable to confirm status with Connect server";
+						message = Messages.DataQueueManager_Error3;
 					}
 					item.setStatus(LocalDataQueueItem.Status.ERROR);
 					item.setErrorMessage(message);
@@ -309,7 +310,7 @@ public enum DataQueueManager {
 			}
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			ConnectDataQueuePlugin.displayLog("Error clearning data queue history. " + ex.getMessage(), ex);
+			ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_Error4 + ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}
@@ -338,7 +339,7 @@ public enum DataQueueManager {
 				try{
 					Files.deleteIfExists(p);
 				}catch(Exception ex){
-					ConnectDataQueuePlugin.displayLog(MessageFormat.format("Unable to delete data queue item file {0}.", p.toString()), ex);	
+					ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_DeleteError, p.toString()), ex);	
 				}
 			}
 			try{
@@ -348,7 +349,7 @@ public enum DataQueueManager {
 			}
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			ConnectDataQueuePlugin.displayLog("Error clearning data queue history. " + ex.getMessage(), ex);
+			ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_CleanError + ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}
@@ -372,14 +373,14 @@ public enum DataQueueManager {
 			Date compareDate = c.getTime();
 			
 			List<LocalDataQueueItem> toDelete = s.createCriteria(LocalDataQueueItem.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid()))
-				.add(Restrictions.in("status", new LocalDataQueueItem.Status[]{
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid())) //$NON-NLS-1$
+				.add(Restrictions.in("status", new LocalDataQueueItem.Status[]{ //$NON-NLS-1$
 						LocalDataQueueItem.Status.COMPLETE,
 						LocalDataQueueItem.Status.COMPLETE_WARN,
 						LocalDataQueueItem.Status.ERROR,
 				}))
-				.add(Restrictions.and(Restrictions.isNotNull("dateProcessed"),
-						Restrictions.lt("dateProcessed", compareDate)))
+				.add(Restrictions.and(Restrictions.isNotNull("dateProcessed"), //$NON-NLS-1$
+						Restrictions.lt("dateProcessed", compareDate))) //$NON-NLS-1$
 				.list();
 			final List<Path> filesToDelete = new ArrayList<Path>();
 			
@@ -395,7 +396,7 @@ public enum DataQueueManager {
 				try{
 					Files.deleteIfExists(p);
 				}catch(Exception ex){
-					ConnectDataQueuePlugin.displayLog(MessageFormat.format("Unable to delete data queue item file {0}.", p.toString()), ex);	
+					ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_DeleteError, p.toString()), ex);	
 				}
 			}
 			if (!toDelete.isEmpty()){
@@ -407,7 +408,7 @@ public enum DataQueueManager {
 			}
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			ConnectDataQueuePlugin.displayLog("Error clearning data queue history. " + ex.getMessage(), ex);
+			ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_CleanError + ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}
@@ -422,8 +423,8 @@ public enum DataQueueManager {
 	public void deleteDataQueueOptions(ConservationArea ca, Session session) {
 		// delete all data queue items
 		Query q = session
-				.createQuery("DELETE FROM DataQueueProcessingOption WHERE id.conservationArea = :ca");
-		q.setParameter("ca", ca.getUuid());
+				.createQuery("DELETE FROM DataQueueProcessingOption WHERE id.conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
@@ -437,8 +438,8 @@ public enum DataQueueManager {
 	public void deleteDataQueue(ConservationArea ca, Session session) {
 		// delete all data queue items
 		Query q = session
-				.createQuery("DELETE FROM LocalDataQueueItem WHERE conservationArea = :ca");
-		q.setParameter("ca", ca.getUuid());
+				.createQuery("DELETE FROM LocalDataQueueItem WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 
 		// delete associated files
@@ -464,13 +465,13 @@ public enum DataQueueManager {
 								} catch (Exception ex) {
 									ConnectDataQueuePlugin.log(
 											MessageFormat
-													.format("Failed to delete data queue file {0}",
+													.format(Messages.DataQueueManager_DeleteError,
 															p.toString()), ex);
 								}
 							}
 						} catch (IOException ex) {
 							ConnectDataQueuePlugin.log(
-									"Failed to delete data queue files.", ex);
+									Messages.DataQueueManager_DeleteError2, ex);
 						}
 					}
 

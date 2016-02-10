@@ -112,5 +112,12 @@
       <processor
             class="org.wcs.smart.connect.dataqueue.internal.server.ConnectCaExportProcessor"></processor>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.connect.dataqueue.CaCloneDataQueueOptions"
+            id="org.wcs.smart.connect.dataqueue.ca.cloner">
+      </templateCloner>
+   </extension>
 
 </plugin>

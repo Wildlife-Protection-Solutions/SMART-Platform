@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingManager;
 import org.wcs.smart.connect.dataqueue.model.DataQueueServerOptions;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -78,7 +79,7 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 	
 	@Override
 	public String getName(){
-		return "Data Queue Options";
+		return Messages.DataQueueOptionPanel_PanelName;
 	}
 	
 	@Override
@@ -90,13 +91,13 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		main.setLayout(new GridLayout());
 		
 		Group g1 = new Group(main, SWT.DEFAULT);
-		g1.setText("Start Up Options");
+		g1.setText(Messages.DataQueueOptionPanel_StartUpLabel);
 		g1.setLayout(new GridLayout());
 		g1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnCheckStartUp = new Button(g1, SWT.CHECK);
-		btnCheckStartUp.setText("Check for new items on start up");
-		btnCheckStartUp.setToolTipText("communicates with connect on start up and checks for new items in the data queue.");
+		btnCheckStartUp.setText(Messages.DataQueueOptionPanel_CheckLabel);
+		btnCheckStartUp.setToolTipText(Messages.DataQueueOptionPanel_CheckTooltip);
 
 		Composite startupOp = new Composite(g1, SWT.NONE);
 		GridLayout gl = new GridLayout();
@@ -106,21 +107,21 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		startupOp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)startupOp.getLayoutData()).horizontalIndent = 10;
 		opStartUpAutoStart = new Button(startupOp, SWT.RADIO);
-		opStartUpAutoStart.setText("Automatically start downloading and processing new files.");
-		opStartUpAutoStart.setToolTipText("will automatically start downloading and processing any new files");
+		opStartUpAutoStart.setText(Messages.DataQueueOptionPanel_AuotStartLabel);
+		opStartUpAutoStart.setToolTipText(Messages.DataQueueOptionPanel_AutoStartTooltip);
 		
 		opStartUpPrompt = new Button(startupOp, SWT.RADIO);
-		opStartUpPrompt.setText("Prompt user to process new files");
-		opStartUpPrompt.setToolTipText("will prompt the user if new files are found");
+		opStartUpPrompt.setText(Messages.DataQueueOptionPanel_PromptUserLabel);
+		opStartUpPrompt.setToolTipText(Messages.DataQueueOptionPanel_PromptUserTooltip);
 		
 		Group g2 = new Group(main, SWT.DEFAULT);
-		g2.setText("Automatic Processing");
+		g2.setText(Messages.DataQueueOptionPanel_AutoGroupLabel);
 		g2.setLayout(new GridLayout());
 		g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnAutoCheck = new Button(g2, SWT.CHECK);
-		btnAutoCheck.setText("Periodically check SMART Connect for new files");
-		btnAutoCheck.setToolTipText("communitcates with connect at a fixed interval and checks for new files");
+		btnAutoCheck.setText(Messages.DataQueueOptionPanel_CheckPeriodLabel);
+		btnAutoCheck.setToolTipText(Messages.DataQueueOptionPanel_CheckPeriodTooltip);
 		
 		Composite autoOp = new Composite(g2, SWT.NONE);
 		gl = new GridLayout();
@@ -136,24 +137,24 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		gl.marginHeight = 0;
 		minComp.setLayout(gl);
 		lblMinutes = new Label(minComp, SWT.NONE);
-		lblMinutes.setText("Check for new files every");
+		lblMinutes.setText(Messages.DataQueueOptionPanel_CheckTimeLabel);
 		txtMinutes = new Text(minComp, SWT.BORDER);
 		txtMinutes.setText("0000"); //$NON-NLS-1$
 		txtMinutes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)txtMinutes.getLayoutData()).widthHint = 50;
 		lblMinutes2 = new Label(minComp, SWT.NONE);
-		lblMinutes2.setText("minutes");
+		lblMinutes2.setText(Messages.DataQueueOptionPanel_CheckTimeUnits);
 		minComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)minComp.getLayoutData()).horizontalIndent = 10;
 		cdMinutes = createControlDecoration(txtMinutes);
-		cdMinutes.setDescriptionText("Invalid minutes values");
+		cdMinutes.setDescriptionText(Messages.DataQueueOptionPanel_InvalidTimeUnits);
 		txtMinutes.addModifyListener(new ModifyListener(){
 			@Override
 			public void modifyText(ModifyEvent e) {
 				try{
 					int x = Integer.parseInt(txtMinutes.getText());
 					if (x < 0){
-						throw new Exception("Minutes must be a valid integer");
+						throw new Exception(Messages.DataQueueOptionPanel_InvalidTimeUnits2);
 					}
 					cdMinutes.hide();
 				}catch (Exception ex){
@@ -165,21 +166,21 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		});
 		
 		opAutoAutoStart = new Button(autoOp, SWT.RADIO);
-		opAutoAutoStart.setText("Automatically start downloading and processing new files.");
-		opAutoAutoStart.setToolTipText("will automatically start downloading and processing any new files");
+		opAutoAutoStart.setText(Messages.DataQueueOptionPanel_AutoStartProcessingLabel);
+		opAutoAutoStart.setToolTipText(Messages.DataQueueOptionPanel_AutoStartProcessingTooltip);
 		
 		opAutoPrompt = new Button(autoOp, SWT.RADIO);
-		opAutoPrompt.setText("Prompt user to process new files");
-		opAutoPrompt.setToolTipText("will prompt the user if new files are found");
+		opAutoPrompt.setText(Messages.DataQueueOptionPanel_AutoStartPromptLabel);
+		opAutoPrompt.setToolTipText(Messages.DataQueueOptionPanel_AutoStartPromptTooltip);
 		
 		Group g3 = new Group(main, SWT.DEFAULT);
-		g3.setText("General");
+		g3.setText(Messages.DataQueueOptionPanel_GeneralSectionLabel);
 		g3.setLayout(new GridLayout());
 		g3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnPromptUser = new Button(g3, SWT.CHECK);
-		btnPromptUser.setText("Prompt for SMART Connect username/password if credentials not saved");
-		btnPromptUser.setToolTipText("if not selected and credentials are not saved all processing will be cancelled");
+		btnPromptUser.setText(Messages.DataQueueOptionPanel_PromptConnectUserLabel);
+		btnPromptUser.setToolTipText(Messages.DataQueueOptionPanel_PromptConnectUserTooltip);
 		
 		Composite cleanUpComp = new Composite(g3, SWT.NONE);
 		gl = new GridLayout(3, false);
@@ -189,8 +190,8 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		cleanUpComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		lblCleanUp = new Button(cleanUpComp, SWT.RADIO);
-		lblCleanUp.setText("Delete items from processing queue older than");
-		lblCleanUp.setToolTipText("set to -1 to never delete items (not recommended");
+		lblCleanUp.setText(Messages.DataQueueOptionPanel_DeleteOptionLabel);
+		lblCleanUp.setToolTipText(Messages.DataQueueOptionPanel_DeleteOptionLabel2);
 		lblCleanUp.setSelection(true);
 		txtCleanUp = new Text(cleanUpComp, SWT.BORDER);
 		txtCleanUp.setText("0000"); //$NON-NLS-1$
@@ -198,17 +199,17 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		((GridData)txtCleanUp.getLayoutData()).widthHint = 50;
 		
 		lblCleanUp2 = new Label(cleanUpComp, SWT.NONE);
-		lblCleanUp2.setText("days");
+		lblCleanUp2.setText(Messages.DataQueueOptionPanel_DeleteOptionUnits);
 		
 		cdCleanUp = createControlDecoration(txtCleanUp);
-		cdCleanUp.setDescriptionText("Invalid days values");
+		cdCleanUp.setDescriptionText(Messages.DataQueueOptionPanel_InvalidDeleteUnits1);
 		txtCleanUp.addModifyListener(new ModifyListener(){
 			@Override
 			public void modifyText(ModifyEvent e) {
 				try{
 					int x = Integer.parseInt(txtCleanUp.getText());
 					if (x < -1){
-						throw new Exception("Days must be a valid integer greater than -1");
+						throw new Exception(Messages.DataQueueOptionPanel_InvalidDeleteUnits2);
 					}
 					cdCleanUp.hide();
 				}catch (Exception ex){
