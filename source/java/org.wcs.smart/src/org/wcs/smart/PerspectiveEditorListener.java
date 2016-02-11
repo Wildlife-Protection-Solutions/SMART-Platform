@@ -30,6 +30,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PerspectiveAdapter;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Perspective listener that hides editors not associated
@@ -67,7 +68,8 @@ public class PerspectiveEditorListener extends PerspectiveAdapter {
 			return;
 		}
 		for (MPart p : allParts){
-			if (p.getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){ //$NON-NLS-1$
+			if (E3Utils.isCompatibilityEditor(p) ||   
+					p.getTags().contains(PerspectiveEditorTracker.EDITOR_TAG)){
 				if (p.getTags().contains(perspectiveDescriptor.getId())){
 					//this is set to make the close others/close all/close menu work
 					p.setCloseable(true);	
@@ -87,7 +89,7 @@ public class PerspectiveEditorListener extends PerspectiveAdapter {
 		MStackElement ele = tracker.getActivePart();
 		if (ele == null){
 			lastActive.put(perspective.getId(), null);
-		}else{
+		}else if (ele instanceof MPart){
 			lastActive.put(perspective.getId(), (MPart)ele);
 		}
 	}

@@ -39,6 +39,8 @@ import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.advanced.MArea;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPlaceholder;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
@@ -49,6 +51,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.PerspectiveEditorTracker;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -57,7 +60,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
-import org.wcs.smart.report.internal.ui.ReportViewerPerspective;
 import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.model.Report;
@@ -313,8 +315,13 @@ public class ReportManager {
 		part.setCloseable(true);
 		part.setElementId(ReportView.ID + ":" + UuidUtils.uuidToString(report.getUuid())); //$NON-NLS-1$
 		part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
+		part.getTags().add(PerspectiveEditorTracker.EDITOR_TAG);
 		
-		MPartStack stack = (MPartStack) mService.find(ReportViewerPerspective.VIEWER_AREA_ID, app);
+		//find the editor stack and open up in editor stack
+		MPartStack stack = (MPartStack)((MArea) ((MPlaceholder) 
+				mService.find("org.eclipse.ui.editorss", app)).getRef()) //$NON-NLS-1$
+				.getChildren().get(0); 
+		
 		stack.getChildren().add(part);
 		partService.showPart(part, PartState.ACTIVATE);
 		return part;

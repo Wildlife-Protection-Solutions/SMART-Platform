@@ -53,6 +53,7 @@ import org.osgi.service.event.EventHandler;
 public class PerspectiveEditorTracker implements EventHandler {
 
 	private static final String PID_KEY = "smart.perspectiveid"; //$NON-NLS-1$
+	public static final String EDITOR_TAG = "Editor"; //$NON-NLS-1$
 	
 	@Inject private EModelService mService;
 
@@ -77,7 +78,8 @@ public class PerspectiveEditorTracker implements EventHandler {
 		
 		Object x = event.getProperty(UIEvents.EventTags.ELEMENT);
 		if (x instanceof MPart){
-			if (!((MPart) x).getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){ //$NON-NLS-1$
+			if (!((MPart) x).getTags().contains(EDITOR_TAG)){
+//			if (!((MPart) x).getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){ //$NON-NLS-1$
 				return;
 			}
 			MWindow window = ((MPart)x).getContext().get(MWindow.class);
