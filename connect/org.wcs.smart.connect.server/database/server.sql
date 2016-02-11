@@ -411,3 +411,13 @@ CHECK (status IN ('UPLOADING', 'QUEUED', 'PROCESSING', 'COMPLETE', 'ERROR'));
 
 ALTER TABLE connect.data_queue ADD CONSTRAINT type_chk 
 CHECK (type IN ('PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML'));
+
+CREATE OR REPLACE FUNCTION connect.dq_update_modified_column()	
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.lastmodified_date = now();
+    RETURN NEW;	
+END;
+$$ language 'plpgsql';
+CREATE TRIGGER dq_last_modified_trigger BEFORE UPDATE ON connect.data_queue FOR EACH ROW EXECUTE PROCEDURE connect.dq_update_modified_column();
+

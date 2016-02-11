@@ -10,11 +10,12 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 
 	private String caName;
 	private ServerDataQueueItem.Status status;
-	
+	private Date lastModifiedDate;
 	private Date uploadedDate;
 	private String uploadedBy;
 	
-	public ServerDataQueueItemProxy(UUID uuid, String name, UUID caUuid, String caName, DataQueueItem.Type type, ServerDataQueueItem.Status status, Date uploadDate, String uploadBy){
+	public ServerDataQueueItemProxy(UUID uuid, String name, UUID caUuid, String caName, 
+			DataQueueItem.Type type, ServerDataQueueItem.Status status, Date lastModifiedDate, Date uploadDate, String uploadBy){
 		setUuid(uuid);
 		setName(name);
 		setType(type);
@@ -23,6 +24,7 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 		this.status = status;
 		this.uploadedDate = uploadDate;
 		this.uploadedBy = uploadBy;
+		this.lastModifiedDate = lastModifiedDate;
 	}
 	
 	public String getCaName(){
@@ -34,6 +36,9 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 	}
 	public Date getUploadedDate(){
 		return this.uploadedDate;
+	}
+	public Date getLastModifiedDate(){
+		return this.lastModifiedDate;
 	}
 	public String getUploadedBy(){
 		return this.uploadedBy;

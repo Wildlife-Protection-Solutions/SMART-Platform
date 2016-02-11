@@ -208,7 +208,10 @@ public class DataQueue {
 					List<ServerDataQueueItem> items = c.list();
 					for (ServerDataQueueItem item : items){
 						ServerDataQueueItemProxy proxy = new ServerDataQueueItemProxy(
-								item.getUuid(), item.getName(), ca.getUuid(), ca.getLabel(), item.getType(), item.getStatus(), item.getUploadedDate(), item.getUploadedBy());
+								item.getUuid(), item.getName(), ca.getUuid(), ca.getLabel(),
+								item.getType(), item.getStatus(), 
+								item.getLastModified(), item.getUploadedDate(), 
+								item.getUploadedBy());
 						proxyitems.add(proxy);
 					}
 				}catch (SmartConnectException ex){
@@ -330,12 +333,12 @@ public class DataQueue {
 			if (!updir.exists()){
 				FileUtils.forceMkdir(updir);
 			}
-			//TODO: assuming zip - this is WRONG
+
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName("dataqueue" 
-					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip"));
+					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".file"));
 			item.setFile(up.getLocalFilename());
-			item.setName(request.getHeader("content-disposition"));
 			item.setWorkItem(up.getUuid());
+			
 			s.saveOrUpdate(item);
 			s.saveOrUpdate(up);
 			
@@ -411,7 +414,7 @@ public class DataQueue {
 			
 			if (serverStatus == ServerDataQueueItem.Status.PROCESSING 
 					&& item.getStatus() != ServerDataQueueItem.Status.QUEUED){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Item is not queued and cannot be configured for processing.");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Item on server has already been processed (by another client).");
 			}
 			
 			item.setStatus(serverStatus);

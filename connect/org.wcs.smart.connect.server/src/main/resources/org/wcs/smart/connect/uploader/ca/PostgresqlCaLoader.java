@@ -77,6 +77,11 @@ public class PostgresqlCaLoader {
 	 */
 	public static final String DATABASE_DIR = "database"; //$NON-NLS-1$
 	
+	/*
+	 * These tables should be removed by the desktop before uploading to SMART 
+	 * connect, but we leave this here in case they were not removed properly.  
+	 * These tables will be ignored by the loader and not loaded.
+	 */
 	public static final String[] TABLES_TO_IGNORE = new String[]{
 		"smart.connect_status", 
 		"smart.connect_change_log", 

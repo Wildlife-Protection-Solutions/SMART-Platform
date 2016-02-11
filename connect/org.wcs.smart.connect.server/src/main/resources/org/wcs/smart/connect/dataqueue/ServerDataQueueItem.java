@@ -1,6 +1,7 @@
 package org.wcs.smart.connect.dataqueue;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -10,20 +11,32 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
+import org.wcs.smart.connect.i18n.Messages;
 
 @Entity
 @Table(name="connect.data_queue")
 public class ServerDataQueueItem extends DataQueueItem{
 
 	public enum Status{
-		UPLOADING,
-		QUEUED,
-		PROCESSING,
-		COMPLETE,
-		ERROR
+		UPLOADING("ServerDataQueueItem.Uploading"),
+		QUEUED("ServerDataQueueItem.Queued"),
+		PROCESSING("ServerDataQueueItem.Processing"),
+		COMPLETE("ServerDataQueueItem.Complete"),
+		ERROR("ServerDataQueueItem.Error");
+		
+		private String guiName;
+		
+		private Status(String guiName){
+			this.guiName = guiName;
+		}
+		
+		public String getGuiName(Locale l){
+			return Messages.getString(guiName, l);
+		}
 	}
 	
 	private Date uploadedDate;
+	private Date lastModifiedDate;
 	private String uploadedBy;
 	
 	private String file;
@@ -38,6 +51,15 @@ public class ServerDataQueueItem extends DataQueueItem{
 	
 	public void setUploadedDate(Date date){
 		this.uploadedDate = date;
+	}
+	
+	@Column(name="lastmodified_date")
+	public Date getLastModified(){
+		return this.lastModifiedDate;
+	}
+	
+	public void setLastModified(Date date){
+		this.lastModifiedDate = date;
 	}
 	
 	@Column(name="uploaded_by")

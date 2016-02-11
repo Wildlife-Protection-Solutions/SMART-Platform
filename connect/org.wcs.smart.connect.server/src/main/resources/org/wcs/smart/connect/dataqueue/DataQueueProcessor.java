@@ -27,7 +27,7 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 			ServerDataQueueItem dqItem = (ServerDataQueueItem)session.createCriteria(ServerDataQueueItem.class)
 					.add(Restrictions.eq("workItem", item.getUuid()))
 					.uniqueResult();
-			dqItem.setStatus(ServerDataQueueItem.Status.QUEUED);
+			dqItem.setStatus(ServerDataQueueItem.Status.QUEUED);			
 			item.setStatus(Status.COMPLETE);
 			
 			//TODO: test throw an exception here and ensure

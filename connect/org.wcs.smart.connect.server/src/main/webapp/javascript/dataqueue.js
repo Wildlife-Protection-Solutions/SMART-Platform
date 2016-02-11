@@ -10,6 +10,8 @@ window.onload = function(){
 	document.querySelector("#cancelUpdateFile").onclick = function(){closeDialog('updateFileDialog');};
 	document.getElementById("btnUploadFile").onclick = createItemOnServer;
 	document.getElementById("btnUpdateFile").onclick = updateItemOnServer;
+	
+	document.getElementById("refreshnow").onclick = refreshFileList;
 
 	
 	refreshFileList();
@@ -21,9 +23,12 @@ function createItemOnServer(){
 	var cauuid = document.querySelector("select[name=conservationArea]").value;
 	var type = document.querySelector("select[name=type]").value;
 	var fileLength = getFilesize();
+	var filename = document.getElementById('file').files[0].name;
+	
 	var jsonData =  {
 			"conservationArea":cauuid,
-			"type":type
+			"type": type,
+			"name": filename
 			}
 	
 	//First request, Get Upload URL from API
@@ -129,6 +134,11 @@ function createFileTable(){
 		displayError(msg);
 		return;
 	}
+	
+	var now = new Date();
+	
+	document.querySelector("#lastUpdateTime").innerHTML = formatDate(new Date());
+	
 	//clear current table
 	var objects = document.querySelectorAll("div.filerow");
 	for (var i = 0; i < objects.length; i++){
@@ -158,27 +168,12 @@ function createFileTable(){
 		 		var type = files[i].type;
 		 		var uuid = files[i].uuid;
 		 		var status = files[i].status;
-		 		var uploadedDate = files[i].uploadedDate;
-		 		var d = new Date(uploadedDate);
-		 		
-		 		var hours = d.getHours(); 
-		 		if(d.getHours() < 10){
-		 			hours = "0" + hours;
-		 		}
-		 		var mins = d.getMinutes(); 
-		 		if(d.getMinutes() < 10){
-		 			mins = "0" + mins;
-		 		}
-		 		var secs = d.getSeconds();
-		 		if(d.getSeconds() < 10){
-		 			secs = "0" + secs;
-		 		}
-		 		
-		 		var date = d.getMonth() + "/" + d.getDate() + "/" + d.getFullYear() + "  " + hours + ":" +mins + ":" + secs;  
+		 		var uploadedDate = formatDate(new Date(files[i].uploadedDate));
+		 		var lastModified = formatDate(new Date(files[i].lastModifiedDate));
 		 		var uploadedBy = files[i].uploadedBy; 
 
 		 		var row = tableCreateRow(parent,
-		 				[ca, name, type , status, date , uploadedBy, null], 
+		 				[ca, name, type , status, lastModified, uploadedDate, uploadedBy, null], 
 		 				"filerow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "fileRow" + i;
 		 		row.dataset.uuid = uuid;
@@ -191,7 +186,7 @@ function createFileTable(){
 			 		updateicon.title="update status";
 			 		updateicon.onclick = updateFile;
 			 		updateicon.href="";
-			 		row.childNodes[6].appendChild(updateicon);
+			 		row.childNodes[7].appendChild(updateicon);
 //		 		}
 //		 		if(candelete){
 			 		var deleteicon = document.createElement("a");
@@ -199,7 +194,7 @@ function createFileTable(){
 			 		deleteicon.title="delete file";
 			 		deleteicon.onclick = deleteFile;
 			 		deleteicon.href="";
-			 		row.childNodes[6].appendChild(deleteicon);
+			 		row.childNodes[7].appendChild(deleteicon);
 //		 		}
 		 	}
 	 	}

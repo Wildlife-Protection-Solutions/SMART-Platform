@@ -32,13 +32,17 @@
     <button class="block button top-spacer" id="btnNewFile">Upload New File</button>
 </div>
 
-<div class="top-spacer"  style="margin-left: -20px" >
+<div class="top-spacer link_small" >
+	Last Updated:<span id="lastUpdateTime"></span><a id="refreshnow" style="padding-left:3px" href="#">refresh</a>
+</div>
+<div  style="margin-left: -20px" >
   <div id="fileTable" class="catable table-cell smart-table">
   	<div class="table-row smart-table-header">
 	<div class="table-cell smart-table-cell">Conservation Area</div>
 	<div class="table-cell smart-table-cell">Name</div>
 	<div class="table-cell smart-table-cell">Type</div>
 	<div class="table-cell smart-table-cell">Status</div>
+	<div class="table-cell smart-table-cell">Last Modified</div>
 	<div class="table-cell smart-table-cell">Upload Date</div>
 	<div class="table-cell smart-table-cell">Upload User</div>
 	<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
@@ -57,11 +61,11 @@
   <div>
   <fmt:message key="dataqueue.updatewarning" />
   </div>
-	<input name="updateUuid" type="hidden"></input>
-    <select name="newStatus" class="formtext block">
-    	<option value="QUEUED">QUEUED</option>
-		<option value="COMPLETE">COMPLETE</option>
-		<option value="ERROR">ERROR</option>
+  <input name="updateUuid" type="hidden"></input>
+   <select name="newStatus" class="formtext block top-spacer">
+   		<c:forEach var="status" items="${statusTypes}" varStatus="count">
+     		<option value="${status[1]}">${status[0]} </option> 
+		</c:forEach>
     </select>
     <div class="block top-spacer" style="text-align:right">
      <input id="btnUpdateFile" class="button" type="button" value="Update Status" />
@@ -79,12 +83,12 @@
      		<c:forEach var="ca" items="${cas}" varStatus="count">
      			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
 			</c:forEach> 
-     		</select>
+     </select>
     <label class="block top-spacer">File Type:</label>
     <select name="type" class="formtext block">
-    	<option value="PATROL_XML">Patrol XML File</option>
-		<option value="INCIDENT_XML">Incident XML File</option>
-		<option value="MISSION_XML">Mission XML File</option>
+    	<c:forEach var="type" items="${uploadtypes}" varStatus="count">
+     		<option value="${type[1]}">${type[0]} </option> 
+		</c:forEach>
     </select>
     <label class="block top-spacer">Select File:</label>
     <input id="file" type="file" name="file" class="formtext block" />

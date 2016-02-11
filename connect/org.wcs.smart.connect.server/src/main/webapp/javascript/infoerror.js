@@ -31,3 +31,17 @@ function parseError(msg, json){
 	}
 	return error;
 }
+
+function formatDate(date){
+	
+     var seconds = date.getSeconds();
+     var minutes = date.getMinutes();
+     var hours = date.getHours();
+     var month = date.getMonth() + 1;
+     
+     if ( minutes < 10 ) minutes = "0" + minutes;
+     if ( seconds < 10 ) seconds = "0" + seconds;
+     if ( hours < 10 ) hours = "0" + hours;
+     
+     return date.getDate() + "/" + month + "/" + date.getFullYear() + "  " + hours + ":" + minutes + ":" + seconds;
+}
