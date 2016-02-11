@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2011-12-09 11:11:09</creation_date>
-			<updated_date>2016-02-10 15:07:04</updated_date>
+			<updated_date>2016-02-10 15:35:52</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -313,9 +313,9 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
-			<description>char(16) for bit data</description>
-			<logical_name>UUID</logical_name>
-			<physical_name>UUID</physical_name>
+			<description></description>
+			<logical_name>uuid</logical_name>
+			<physical_name>uuid</physical_name>
 			<type>character(n)</type>
 		</word>
 		<word>
@@ -328,9 +328,9 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
-			<description></description>
-			<logical_name>uuid</logical_name>
-			<physical_name>uuid</physical_name>
+			<description>char(16) for bit data</description>
+			<logical_name>UUID</logical_name>
+			<physical_name>UUID</physical_name>
 			<type>character(n)</type>
 		</word>
 		<word>
@@ -375,7 +375,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>9</word_id>
+					<word_id>10</word_id>
 					<id>0</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -461,7 +461,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>10</word_id>
+					<word_id>9</word_id>
 					<id>1</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
