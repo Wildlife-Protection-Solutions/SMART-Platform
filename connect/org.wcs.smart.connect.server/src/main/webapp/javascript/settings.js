@@ -484,7 +484,7 @@ function showCurrentType() {
 		displayError(parseError(i18n("settings.errorgettingalert") + this.label));
 	}
 	
-	document.querySelector("#error").style.display = "none";
+	document.querySelector("#layerdialogerror").style.display = "none";
 	
 	var form = document.getElementById("alerttypesform");
 	

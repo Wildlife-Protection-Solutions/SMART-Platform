@@ -54,12 +54,12 @@
   <div class="dialog-title">Update File Status</div>
   <div id="dialogerror" class="errorsection"></div>
   <form id="updateFileForm" >
+  <div>
   <fmt:message key="dataqueue.updatewarning" />
   </div>
 	<input name="updateUuid" type="hidden"></input>
     <select name="newStatus" class="formtext block">
     	<option value="QUEUED">QUEUED</option>
-		<option value="PROCESSING">PROCESSING</option>
 		<option value="COMPLETE">COMPLETE</option>
 		<option value="ERROR">ERROR</option>
     </select>
