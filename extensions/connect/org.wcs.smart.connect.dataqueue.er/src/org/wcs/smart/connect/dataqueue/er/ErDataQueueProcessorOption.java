@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue.patrol;
+package org.wcs.smart.connect.dataqueue.er;
 
 import java.util.HashMap;
 
@@ -30,13 +30,13 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
  * @author Emily
  *
  */
-public enum PatrolDataQueueProcessorOption {
+public enum ErDataQueueProcessorOption {
 
-	PATROL_GENERATE_IDS(Boolean.TRUE);
+	ER_GENERATE_IDS(Boolean.TRUE);
 	
 	Object defaultValue;
 	
-	PatrolDataQueueProcessorOption(Object defaultValue){
+	ErDataQueueProcessorOption(Object defaultValue){
 		this.defaultValue = defaultValue;
 	}
 	

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue;
+package org.wcs.smart.connect.dataqueue.internal;
 
 import java.util.List;
 
@@ -28,7 +28,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
-import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 
 /**

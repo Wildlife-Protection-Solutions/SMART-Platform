@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name ="smart.data_queue_processing_op")
+@Table(name ="smart.connect_data_queue_option")
 public class DataQueueProcessingOption {
 
 	private String value;

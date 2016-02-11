@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue;
+package org.wcs.smart.connect.dataqueue.internal;
 
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
@@ -42,7 +42,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.dataqueue.internal.Messages;
+import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingManager;
 import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
 import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
