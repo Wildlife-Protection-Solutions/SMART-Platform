@@ -54,6 +54,8 @@
   <div class="dialog-title">Update File Status</div>
   <div id="dialogerror" class="errorsection"></div>
   <form id="updateFileForm" >
+  <fmt:message key="dataqueue.updatewarning" />
+  </div>
 	<input name="updateUuid" type="hidden"></input>
     <select name="newStatus" class="formtext block">
     	<option value="QUEUED">QUEUED</option>

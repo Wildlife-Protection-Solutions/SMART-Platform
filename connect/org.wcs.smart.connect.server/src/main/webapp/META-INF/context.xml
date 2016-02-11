@@ -4,7 +4,7 @@
 		type="javax.sql.DataSource"
 		username="smart" password="smart" 
 		driverClassName="org.postgresql.Driver"
-		url="jdbc:postgresql://192.168.50.131:5432/connectemily" 
+		url="jdbc:postgresql://192.168.50.131:5432/connectjeff" 
 		maxActive="20"
 		maxIdle="10" factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" />
 		
@@ -14,10 +14,10 @@
 		mail.transport.protocol="smtps"
 		mail.smtp.ssl.enable="true"
 		mail.smtp.auth="true"
-		mail.smtp.from="noreply@smartconnect.com"
+		mail.smtp.from="noreply@refractions.net"
 		mail.smtp.host="smtp.googlemail.com"
-		mail.smtp.user="******"
-		password="******"/>
+		mail.smtp.user="noreply@refractions.net"
+		password="dontrespondhere2"/>
 		
 	<Realm className="org.apache.catalina.realm.LockOutRealm">
 		<Realm className="org.apache.catalina.realm.DataSourceRealm"

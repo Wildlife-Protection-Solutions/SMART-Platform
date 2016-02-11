@@ -182,6 +182,7 @@ function createFileTable(){
 		 				"filerow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "fileRow" + i;
 		 		row.dataset.uuid = uuid;
+		 		row.dataset.status = status;
 	
 		 		//TODO - should we check for permissions for update/delete, or assume any data queue permission = all data queue permission
 //		 		if(canupdate){
@@ -215,7 +216,9 @@ function createFileTable(){
 
 function updateFile(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	var status = this.parentElement.parentElement.getAttribute('data-status');
 	document.querySelector("input[name=updateUuid]").value = uuid;
+	document.querySelector("select[name=newStatus]").value = status;
 	displayDialog('updateFileDialog', 'main');
 	return false;
 }
