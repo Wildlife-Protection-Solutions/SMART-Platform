@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue.patrol.ui;
+package org.wcs.smart.connect.dataqueue.er.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,48 +33,48 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.connect.dataqueue.er.ErDataQueueProcessorOption;
+import org.wcs.smart.connect.dataqueue.er.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
-import org.wcs.smart.connect.dataqueue.patrol.PatrolDataQueueProcessorOption;
-import org.wcs.smart.connect.dataqueue.patrol.internal.Messages;
 import org.wcs.smart.connect.dataqueue.ui.IProcessingOptionPanel;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
- * Option panel for patrol processing options.
+ * Option panel for ER (mission) processing options.
  * 
  * @author Emily
  *
  */
-public class PatrolProcessorOptionPanel implements IProcessingOptionPanel {
+public class ErProcessorOptionPanel implements IProcessingOptionPanel {
 
 	private Button btnIds;
 	
 	private List<IProcessingOptionPanel.ModifyListener> listeners = new ArrayList<ModifyListener>();
 	
-	public PatrolProcessorOptionPanel() {	
+	public ErProcessorOptionPanel() {	
 	}
 	
 	@Override
 	public String getName() {
-		return Messages.PatrolProcessorOptionPanel_OptionPanel;
+		return Messages.ErProcessorOptionPanel_PanelName;
 	}
 
 	@Override
 	public void initValues(HashMap<String, DataQueueProcessingOption> options) {
-		btnIds.setSelection(PatrolDataQueueProcessorOption.PATROL_GENERATE_IDS.getValueAsBoolean(options));
+		btnIds.setSelection(ErDataQueueProcessorOption.ER_GENERATE_IDS.getValueAsBoolean(options));
 	}
 
 	@Override
 	public void update(Session session) {
 		DataQueueProcessingOption.DataQueueProcessingOptionPk pk = new DataQueueProcessingOption.DataQueueProcessingOptionPk();
 		pk.setConservationArea(SmartDB.getCurrentConservationArea().getUuid());
-		pk.setOptionKey(((PatrolDataQueueProcessorOption)btnIds.getData()).name());
+		pk.setOptionKey(((ErDataQueueProcessorOption)btnIds.getData()).name());
 		
 		DataQueueProcessingOption op = (DataQueueProcessingOption) session.get(DataQueueProcessingOption.class, pk);
 		if (op == null){
 			op = new DataQueueProcessingOption();
 			op.setConservationArea(SmartDB.getCurrentConservationArea().getUuid());
-			op.setOptionKey(((PatrolDataQueueProcessorOption)btnIds.getData()).name());
+			op.setOptionKey(((ErDataQueueProcessorOption)btnIds.getData()).name());
 		}
 		op.setValue(String.valueOf(btnIds.getSelection()));
 		session.saveOrUpdate(op);
@@ -92,9 +92,9 @@ public class PatrolProcessorOptionPanel implements IProcessingOptionPanel {
 		main.setLayout(new GridLayout());
 		
 		btnIds = new Button(main, SWT.CHECK);
-		btnIds.setText(Messages.PatrolProcessorOptionPanel_PidOptionLabel);
-		btnIds.setToolTipText(Messages.PatrolProcessorOptionPanel_PidOptionTooltip);
-		btnIds.setData(PatrolDataQueueProcessorOption.PATROL_GENERATE_IDS);
+		btnIds.setText(Messages.ErProcessorOptionPanel_NewIdOp);
+		btnIds.setToolTipText(Messages.ErProcessorOptionPanel_NewIdTooltip);
+		btnIds.setData(ErDataQueueProcessorOption.ER_GENERATE_IDS);
 		
 		SelectionListener listener= new SelectionAdapter() {
 			@Override

@@ -19,40 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue.patrol;
+package org.wcs.smart.connect.dataqueue.er;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
+import org.wcs.smart.connect.dataqueue.er.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem.Type;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption.DataQueueProcessingOptionPk;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
-import org.wcs.smart.connect.dataqueue.patrol.internal.Messages;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.xml.MissionImporter;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.xml.in.ImportConfig;
-import org.wcs.smart.patrol.xml.in.PatrolImporter;
 
 /**
- * Data queue processor for processing patrol files.
+ * Mission data queue processor for importing
+ * missions from SMART Connect data queue.
+ * 
  * @author Emily
  *
  */
-public class PatrolDataQueueProcessor implements IItemProcessor {
+public class MissionProcessor implements IItemProcessor {
 
 
-	public PatrolDataQueueProcessor() {
+	public MissionProcessor() {
 	}
 
 	@Override
 	public boolean canProcess(Type type) {
-		return (type == Type.PATROL_XML);
+		return (type == Type.MISSION_XML);
 	}
 
 	@Override
@@ -67,28 +69,24 @@ public class PatrolDataQueueProcessor implements IItemProcessor {
 		try{
 			DataQueueProcessingOptionPk pk = new DataQueueProcessingOptionPk();
 			pk.setConservationArea(item.getConservationArea());
-			pk.setOptionKey(PatrolDataQueueProcessorOption.PATROL_GENERATE_IDS.name());
+			pk.setOptionKey(ErDataQueueProcessorOption.ER_GENERATE_IDS.name());
 			keepIdoption = (DataQueueProcessingOption)s.get(DataQueueProcessingOption.class, pk);
 		}finally{
 			s.close();
 		}
 		
-		ImportConfig config = new ImportConfig();
-		config.setIgnoreWarnings(false);
-		config.setKeepIDs(!PatrolDataQueueProcessorOption.PATROL_GENERATE_IDS.getValueAsBoolean(keepIdoption));
-		
 		//fire events
-		Patrol p = PatrolImporter.importPatrol(file.toFile(), config, monitor);
-		if (p != null){
+		Mission mission = MissionImporter.importMission(file.toFile(), !ErDataQueueProcessorOption.ER_GENERATE_IDS.getValueAsBoolean(keepIdoption), monitor);
+		if (mission != null){
 			try{
-				PatrolEventManager.getInstance().patrolAdded(p);
+				SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.MISSION_ADDED, mission);
 			}catch (Exception ex){
-				
+				ConnectDataQueuePlugin.log("Error firing mission added event after importing mission from connect data queue.", ex); //$NON-NLS-1$
 			}
-			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE, MessageFormat.format(Messages.PatrolDataQueueProcessor_Status1, p.getId()));
+			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE, MessageFormat.format(Messages.MissionProcessor_MissionImported, mission.getId()));
 		}else{
-			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, Messages.PatrolDataQueueProcessor_Status2);
-		}
+			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, Messages.MissionProcessor_NotImported);
+		}			
 		
 	}
 

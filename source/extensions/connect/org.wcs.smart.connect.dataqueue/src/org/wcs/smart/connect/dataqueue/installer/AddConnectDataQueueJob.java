@@ -111,14 +111,14 @@ public class AddConnectDataQueueJob extends Job {
 			"ALTER TABLE smart.connect_data_queue ADD CONSTRAINT status_chk CHECK (status IN ('DOWNLOADING', 'QUEUED', 'REQUEUED', 'PROCESSING', 'COMPLETE', 'COMPLETE_WARN', 'ERROR'))", //$NON-NLS-1$
 			"ALTER TABLE smart.connect_data_queue ADD CONSTRAINT type_chk CHECK (type IN ('PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML'))", //$NON-NLS-1$
 			
-			"CREATE TABLE smart.data_queue_processing_op(ca_uuid  char(16) for bit data not null, keyid varchar(256) NOT NULL, value varchar(512), primary key (ca_uuid, keyid))", //$NON-NLS-1$
-			"ALTER TABLE smart.data_queue_processing_op ADD CONSTRAINT data_queue_option_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"CREATE TABLE smart.connect_data_queue_option(ca_uuid  char(16) for bit data not null, keyid varchar(256) NOT NULL, value varchar(512), primary key (ca_uuid, keyid))", //$NON-NLS-1$
+			"ALTER TABLE smart.connect_data_queue_option ADD CONSTRAINT data_queue_option_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
 			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue TO MANAGER", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue TO DATA_ENTRY", //$NON-NLS-1$
 			
-			"GRANT ALL PRIVILEGES ON SMART.data_queue_processing_op TO MANAGER", //$NON-NLS-1$
-			"GRANT ALL PRIVILEGES ON SMART.data_queue_processing_op TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue_option TO MANAGER", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue_option TO DATA_ENTRY", //$NON-NLS-1$
 		};
 		
 		session.doWork(new Work() {

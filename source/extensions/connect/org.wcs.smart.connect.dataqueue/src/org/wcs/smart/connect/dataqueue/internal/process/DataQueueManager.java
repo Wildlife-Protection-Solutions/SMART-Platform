@@ -262,11 +262,11 @@ public enum DataQueueManager {
 		
 			if (item == null) return null;
 			
+			item.setDateProcessed(new Date());
 			//check status on server
 			if (item.getStatus() != LocalDataQueueItem.Status.REQUEUED){
 				try{
 					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.PROCESSING);
-					item.setDateProcessed(new Date());
 					item.setStatus(Status.PROCESSING);
 				}catch (Exception ex){
 					String message = null;
@@ -279,7 +279,6 @@ public enum DataQueueManager {
 					item.setErrorMessage(message);
 				}
 			}else{
-				item.setDateProcessed(new Date());
 				item.setStatus(Status.PROCESSING);
 			}
 			

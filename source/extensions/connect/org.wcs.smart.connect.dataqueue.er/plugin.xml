@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.connect.dataqueue.processor">
+      <processor
+            class="org.wcs.smart.connect.dataqueue.er.MissionProcessor">
+      </processor>
+   </extension>
+   <extension
+         point="org.wcs.smart.connect.dataqueue.processor.option">
+      <option_panel
+            class="org.wcs.smart.connect.dataqueue.er.ui.ErProcessorOptionPanel">
+      </option_panel>
+   </extension>
+
+</plugin>

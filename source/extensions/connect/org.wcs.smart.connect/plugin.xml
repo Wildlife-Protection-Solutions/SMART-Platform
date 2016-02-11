@@ -186,10 +186,6 @@
                   commandId="org.wcs.smart.connect.server.changelog.down"
                   style="push">
             </command>
-            <separator
-                  name="org.wcs.smart.connect.separator1"
-                  visible="true">
-            </separator>
             <command
                   commandId="org.wcs.smart.connect.server.exportca"
                   style="push">

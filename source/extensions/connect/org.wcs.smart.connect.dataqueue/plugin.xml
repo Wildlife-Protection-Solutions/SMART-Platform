@@ -96,7 +96,7 @@
    <extension
          point="org.wcs.smart.ca.login">
       <loginHandler
-            clazz="org.wcs.smart.connect.dataqueue.LoginHandler">
+            clazz="org.wcs.smart.connect.dataqueue.internal.LoginHandler">
       </loginHandler>
    </extension>
    <extension
@@ -137,7 +137,7 @@
    <extension
          point="org.wcs.smart.ca.templateCloner">
       <templateCloner
-            class="org.wcs.smart.connect.dataqueue.CaCloneDataQueueOptions"
+            class="org.wcs.smart.connect.dataqueue.internal.CaCloneDataQueueOptions"
             id="org.wcs.smart.connect.dataqueue.ca.cloner">
       </templateCloner>
    </extension>
