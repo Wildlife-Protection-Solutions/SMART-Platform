@@ -7,15 +7,36 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.connect.menu">
-         <command
-               commandId="org.wcs.smart.connect.dataqueue.process"
-               label="Process Data Queue"
-               style="push">
-         </command>
+            locationURI="menu:org.wcs.smart.connect.menu?after=org.wcs.smart.connect.configuration.show">
          <command
                commandId="org.wcs.smart.connect.dataqueue.options.show"
+               icon="images/icons/obj16/dq_options.png"
                label="Data Queue Processor Options..."
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.connect.menu?after=org.wcs.smart.connect.server.changelog.sync">
+         <command
+               commandId="org.wcs.smart.connect.dataqueue.process"
+               icon="images/icons/obj16/dq.png"
+               label="View Processing Data Queue"
                style="push">
          </command>
       </menuContribution>
@@ -47,6 +68,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.connect.dataqueue.internal.ui.DataQueueView$DataQueueViewWrapper"
+            icon="images/icons/obj16/dq.png"
             id="org.wcs.smart.connect.dataqueue.queueview"
             name="Data Processing Queue"
             restorable="true">
