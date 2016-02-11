@@ -6,9 +6,11 @@ Bundle-Version: 4.0.0
 Bundle-Activator: org.wcs.smart.incident.IncidentPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.wcs.smart,
- org.wcs.smart.observation,
+ org.wcs.smart.observation;visibility:=reexport,
  org.eclipse.ui.forms,
  org.locationtech.udig.style.sld,
  org.eclipse.help;bundle-version="3.5.100"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Export-Package: org.wcs.smart.incident.event,
+ org.wcs.smart.incident.xml
