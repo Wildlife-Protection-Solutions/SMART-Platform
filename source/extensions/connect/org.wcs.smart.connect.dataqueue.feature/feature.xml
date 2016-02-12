@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.connect.dataqueue.feature"
+      label="Core SMART Connect Data Queue Module (Required)"
+      version="4.0.0"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.smart.feature">
+
+   <description>
+      Adds support for SMART Connect Data Queue processing.
+   </description>
+
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <includes
+         id="org.wcs.smart.connect.dataqueue.core.feature"
+         version="0.0.0"
+         optional="true"/>
+
+</feature>

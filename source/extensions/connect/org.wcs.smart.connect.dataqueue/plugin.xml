@@ -114,7 +114,7 @@
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action
-            class="org.wcs.smart.connect.updatesite.OnUninstallAction"
+            class="org.wcs.smart.connect.dataqueue.installer.OnUninstallAction"
             name="onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
             version="4.0.0">
@@ -123,7 +123,7 @@
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action
-            class="org.wcs.smart.connect.dataqueue.installer.OnUninstallAction"
+            class="org.wcs.smart.connect.dataqueue.installer.OnInstallAction"
             name="onInstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
             version="4.0.0">
@@ -140,6 +140,22 @@
             class="org.wcs.smart.connect.dataqueue.internal.CaCloneDataQueueOptions"
             id="org.wcs.smart.connect.dataqueue.ca.cloner">
       </templateCloner>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="*">
+         <view
+               closeable="true"
+               id="org.wcs.smart.connect.dataqueue.queueview"
+               minimized="false"
+               moveable="true"
+               relationship="stack"
+               relative="org.eclipse.ui.editorss"
+               showTitle="true"
+               visible="false">
+         </view>
+      </perspectiveExtension>
    </extension>
 
 </plugin>

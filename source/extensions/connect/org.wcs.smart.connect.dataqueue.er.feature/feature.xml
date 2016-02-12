@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.connect.core.feature"
-      label="SMART Connect Module"
+      id="org.wcs.smart.connect.dataqueue.er.feature"
+      label="Core SMART Connect Ecological Records (Survey) Processor (Required)"
       version="4.0.0"
-      provider-name="org.wcs.smart"
-      plugin="org.wcs.smart.connect"
+      provider-name="org.wcs.smart.connect.dataqueue.er"
+      plugin="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 
    <description>
-      Adds support for SMART Connect for sharing data.
+      Allows for the processing of ecological records data (missions etc) in the Connect data queue.
    </description>
 
    <copyright>
@@ -20,7 +20,7 @@
    </license>
 
    <plugin
-         id="org.wcs.smart.connect"
+         id="org.wcs.smart.connect.dataqueue.er"
          download-size="0"
          install-size="0"
          version="0.0.0"
