@@ -103,20 +103,12 @@ public class DeleteConservationArea {
 				try{
 					ConservationAreaManager.getInstance().deleteConservationArea(ca, monitor, true);
 				}catch (final Exception ex){
-					activeShell.getDisplay().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(Messages.DeleteConservationArea_Error_DeleteError, ex);
-						}
-						
-					});
-					
-				}
-				
+					SmartPlugIn.displayLog(Messages.DeleteConservationArea_DeleteError + ex.getMessage(), ex);
+				}				
 			}
 		});
 		}catch (Exception ex){
-			SmartPlugIn.displayLog( Messages.DeleteConservationArea_Error_DeleteJobError, ex);
+			SmartPlugIn.displayLog(Messages.DeleteConservationArea_DeleteError + ex.getMessage(), ex);
 		}
 		return;
 	}

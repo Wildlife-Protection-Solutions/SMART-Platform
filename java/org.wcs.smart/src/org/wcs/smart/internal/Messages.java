@@ -514,6 +514,7 @@ public class Messages extends NLS {
 	public static String DateFilterComposite_IncludeAllDates_Label;
 	public static String DeleteConservationArea_Confirm_Delete;
 	public static String DeleteConservationArea_Delete_DialogTitle;
+	public static String DeleteConservationArea_DeleteError;
 	public static String DeleteConservationArea_Error_DeleteError;
 	public static String DeleteConservationArea_Error_DeleteJobError;
 	public static String DeleteConservationArea_Error_DialogTitle;
