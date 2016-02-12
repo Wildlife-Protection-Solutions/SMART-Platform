@@ -48,6 +48,8 @@ public enum ProcessorManager {
 	//list of progress listeners
 	private List<IDataQueueProgressListener> listeners = new ArrayList<IDataQueueProgressListener>();
 	
+	private boolean canProcess = true;
+	
 	public synchronized List<IItemProcessor> getProcessors(){
 		if (processors != null) return processors;
 		
@@ -66,11 +68,28 @@ public enum ProcessorManager {
 	}
 	
 	/**
+	 * Disables all processing of data queue items.
+	 * @return
+	 */
+	public void disableAllProcessing(){
+		this.canProcess = false;
+	}
+	
+	/**
+	 * 
+	 * @return the state of the processing
+	 */
+	public boolean isProcessingDisabled(){
+		return this.canProcess == false;
+	}
+	
+	/**
 	 * Schedules a job to process the data queue.
 	 * 
 	 * @param connect
 	 */
 	public void processDataQueue(SmartConnect connect){
+		if (!canProcess) return;
 		DataQueueItemProcessor job = new DataQueueItemProcessor(connect, new DataQueueProcessMonitor());
 		job.setRule(DataQueueItemProcessor.MUTEX);
 		job.schedule();
