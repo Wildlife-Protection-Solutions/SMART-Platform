@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.connect.core.feature"
-      label="SMART Connect Module"
+      id="org.wcs.smart.connect.dataqueue.core.feature"
+      label="SMART Connect Data Queue Module"
       version="4.0.0"
       provider-name="org.wcs.smart"
-      plugin="org.wcs.smart.connect"
+      plugin="org.wcs.smart.connect.dataqueue"
       license-feature="org.wcs.smart.smart.feature">
 
    <description>
-      Adds support for SMART Connect for sharing data.
+      Adds support for SMART Connect Data Queue processing.
    </description>
 
    <copyright>
@@ -20,7 +20,14 @@
    </license>
 
    <plugin
-         id="org.wcs.smart.connect"
+         id="org.wcs.smart.connect.dataqueue"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.connect.dataqueue.patrol"
          download-size="0"
          install-size="0"
          version="0.0.0"
