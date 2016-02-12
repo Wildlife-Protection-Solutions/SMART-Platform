@@ -42,7 +42,8 @@ public enum EnvironmentVariables {
 		WORK_HISTORY_ITEM_AVAILABLE("work_item_history_days_available"),
 		CA_EXPORT_AVAILABLE("ca_export_days_available"),
 		CHANGELOG_CLEAN_UP_DAYS("changelog_cleanup_days"),
-		SPATIAL_REF_SYS_TABLE("spatial_ref_sys_table");
+		SPATIAL_REF_SYS_TABLE("spatial_ref_sys_table"),
+		DATA_QUEUE_CLEAN_UP_DAYS("dataqueue_cleanup_days");
 		
 		public String key;
 		

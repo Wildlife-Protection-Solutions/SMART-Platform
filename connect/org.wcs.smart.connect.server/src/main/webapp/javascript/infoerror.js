@@ -32,8 +32,12 @@ function parseError(msg, json){
 	return error;
 }
 
-function formatDate(date){
+function formatDate(strdate){
 	
+	 if (strdate == null || strdate == "") return "";
+	 
+	 var date = new Date(strdate);
+	 
      var seconds = date.getSeconds();
      var minutes = date.getMinutes();
      var hours = date.getHours();

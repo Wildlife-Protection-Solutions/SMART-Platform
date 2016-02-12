@@ -12,16 +12,16 @@
             validationQuery="SELECT 1"
             testOnBorrow="true"/>
          
-  <Resource name="mail/Session" 
-		auth="Container" 
-		type="javax.mail.Session"
-		mail.transport.protocol="smtps"
-		mail.smtp.ssl.enable="true"
-		mail.smtp.auth="true"
-		mail.smtp.from="noreply@smartconnect.com"
-		mail.smtp.host="smtp.googlemail.com"
-		mail.smtp.user="******"
-		password="******"/>
+<Resource name="mail/Session"
+        auth="Container"
+        type="javax.mail.Session"
+        mail.transport.protocol="smtps"
+        mail.smtp.ssl.enable="true"
+        mail.smtp.auth="true"
+        mail.smtp.from=""
+        mail.smtp.host=""
+        mail.smtp.user=""
+        password=""/> 
 		  
 	<Realm className="org.apache.catalina.realm.LockOutRealm">
 		<Realm className="org.apache.catalina.realm.DataSourceRealm"
@@ -70,4 +70,10 @@
 	<!--  than how often clients will request changes. -->
 	<!--  default 180 days; set to -1 to keep forever -->
 	<Environment name="changelog_cleanup_days" value="180" type="java.lang.Integer" override="false"/>
+	
+	<!--  number of days to keep data queue items -->
+	<!--  after this number of days, items with a status of error  -->
+	<!--  or complete will be removed. Associated files will also be removed  -->
+	<!--  set to -1 to keep forever (not recommended) -->
+	<Environment name="dataqueue_cleanup_days" value="30" type="java.lang.Integer" override="false" />
 </Context>

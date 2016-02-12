@@ -21,11 +21,16 @@
  */
 package org.wcs.smart.connect.apache;
 
+import java.io.File;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +39,9 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.api.Uploader;
+import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
@@ -70,6 +77,7 @@ public class CleanUpJob implements Runnable {
 		syncDownloadAvailableHrs = getEnvironmentVariable(EnvironmentVariables.Variable.SYNC_DOWNLOAD_AVAILABLE);
 		caExportAvailableDays = getEnvironmentVariable(EnvironmentVariables.Variable.CA_EXPORT_AVAILABLE);
 		changeLogCleanUpDays = getEnvironmentVariable(EnvironmentVariables.Variable.CHANGELOG_CLEAN_UP_DAYS);
+		
 		
 		try{
 			cleanUp();
@@ -130,6 +138,9 @@ public class CleanUpJob implements Runnable {
 			
 			//clean up change log items
 			cleanUpChangeLog(s);
+			
+			//clean up data queue items
+			cleanUpDataQueue(s);
 		}finally{
 			s.close();
 		}
@@ -276,4 +287,81 @@ public class CleanUpJob implements Runnable {
 		}
 	}
 
+	/*
+	 * delete items from the data queue table and associated files
+	 */
+	private void cleanUpDataQueue(Session s){
+		Integer days = null;
+		try{
+			days = getEnvironmentVariable(EnvironmentVariables.Variable.DATA_QUEUE_CLEAN_UP_DAYS);
+		}catch (Exception ex){
+			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE.key, ex);
+		}
+		if (days != null && days > 0){
+			//remove all items
+			List<File> filesToDelete = new ArrayList<File>();
+			Date lastDate = new Date((new Date()).getTime() - days * 24l * 60 *60 *1000);
+			s.beginTransaction();
+			try{
+				List<ServerDataQueueItem> toDelete = s.createCriteria(ServerDataQueueItem.class)
+					.add(Restrictions.le("uploadedDate", lastDate))
+					.add(Restrictions.in("status", new ServerDataQueueItem.Status[]{
+							ServerDataQueueItem.Status.COMPLETE,
+							ServerDataQueueItem.Status.ERROR,
+					}))
+					.list();
+				
+				for (ServerDataQueueItem delete : toDelete){
+					File fToDelete = DataStoreManager.INSTANCE.getFile(delete.getFile());
+					filesToDelete.add(fToDelete);
+					s.delete(delete);
+				}
+		
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				logger.log(Level.WARNING, "Unable to clean up data queue items.", ex);
+			}
+			//delete associated files
+			for (File f : filesToDelete){
+				try{
+					Files.deleteIfExists(f.toPath());
+				}catch (Exception ex){
+					logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file: {0}.", f.toString()), ex);
+				}
+			}
+		}
+		//delete any files that are in the data queue folder that are not 
+		//the data queue table; there should never be any, but if something goes wrong this will
+		//clean up the files eventually
+		Set<String> allFiles = new HashSet<String>();
+		s.beginTransaction();
+		try{
+			List<String> files = s.createQuery("SELECT file FROM ServerDataQueueItem").list();
+			allFiles.addAll(files);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.WARNING, "Unable to clean up data queue items.", ex);
+		}
+		Path dataqueueDir = DataStoreManager.INSTANCE.getFile(DataQueue.FILE_STORE_LOCATION).toPath();
+		Path root = DataStoreManager.INSTANCE.getRootDirectory().toPath();
+		try(DirectoryStream<Path> files = Files.newDirectoryStream(dataqueueDir)){
+			for (Path f : files){
+				//find any matching item in the data queue
+				String check = root.relativize(f).toString();
+				if (!allFiles.contains(check)){
+					//delete
+					try{
+						Files.deleteIfExists(f);
+					}catch(Exception ex){
+						logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file that is not associated with any files: {0}.", f.toString()), ex);		
+					}
+				}
+			}
+		}catch (Exception ex){
+			logger.log(Level.WARNING, "Unable to delete data queue files that are not associated with any files.", ex);
+		}
+	}
+	
 }

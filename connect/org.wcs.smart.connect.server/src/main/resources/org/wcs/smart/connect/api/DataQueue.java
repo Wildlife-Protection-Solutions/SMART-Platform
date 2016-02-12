@@ -63,6 +63,7 @@ public class DataQueue {
 	private final Logger logger = Logger.getLogger(DataQueue.class.getName());
 	
 	public static final String PATH = "dataqueue"; //$NON-NLS-1$
+	public static final String FILE_STORE_LOCATION = "dataqueue"; //$NON-NLS-1$
 	
 	@Context private ServletContext context;
 	@Context private HttpHeaders headers;
@@ -329,12 +330,12 @@ public class DataQueue {
 			up.setLocalFilename("");
 			s.save(up);
 			
-			File updir = DataStoreManager.INSTANCE.getFile("dataqueue");
+			File updir = DataStoreManager.INSTANCE.getFile(FILE_STORE_LOCATION);
 			if (!updir.exists()){
 				FileUtils.forceMkdir(updir);
 			}
 
-			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName("dataqueue" 
+			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(FILE_STORE_LOCATION 
 					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".file"));
 			item.setFile(up.getLocalFilename());
 			item.setWorkItem(up.getUuid());

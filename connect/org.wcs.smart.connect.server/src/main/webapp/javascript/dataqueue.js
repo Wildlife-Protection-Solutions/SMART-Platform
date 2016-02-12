@@ -168,8 +168,8 @@ function createFileTable(){
 		 		var type = files[i].type;
 		 		var uuid = files[i].uuid;
 		 		var status = files[i].status;
-		 		var uploadedDate = formatDate(new Date(files[i].uploadedDate));
-		 		var lastModified = formatDate(new Date(files[i].lastModifiedDate));
+		 		var uploadedDate = formatDate(files[i].uploadedDate);
+		 		var lastModified = formatDate(files[i].lastModifiedDate);
 		 		var uploadedBy = files[i].uploadedBy; 
 
 		 		var row = tableCreateRow(parent,
