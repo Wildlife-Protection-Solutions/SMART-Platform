@@ -24,6 +24,15 @@
    <feature url="features/org.wcs.smart.cybertracker.survey.feature_4.0.0.jar" id="org.wcs.smart.cybertracker.survey.feature" version="4.0.0">
       <category name="cybertracker"/>
    </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.feature_4.0.0.jar" id="org.wcs.smart.connect.dataqueue.feature" version="4.0.0">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature_4.0.0.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature" version="4.0.0">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature_4.0.0.jar" id="org.wcs.smart.connect.dataqueue.er.feature" version="4.0.0">
+      <category name="connectdq"/>
+   </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
          The SMART Intelligence plug-in contains an intelligence module that allows users to organize, maintain and query intelligence information. Intelligence information may have been gathered by earlier patrols, or may have been received from external sources. Intelligence information may be useful to Conservation Area managers when they plan future patrols.
@@ -57,6 +66,11 @@
    <category-def name="cybertracker" label="SMART Cybertracker">
       <description>
          The SMART CyberTracker (SMART-CT) plug-in provides compatibility with the CyberTracker application - which itself runs on a GPS-enabled handheld device. Using this plug-in, SMART users are able to create and deploy CyberTracker applications based on the Data Model or a Configurable Model (a simplified data model for the CyberTracker application). The plug-in also provides the ability to work directly with handheld devices while exporting/importing data, doing all of the interaction with CyberTracker in the background.
+      </description>
+   </category-def>
+   <category-def name="connectdq" label="SMART Connect Data Queue">
+      <description>
+         The SMART Connect Data Queue plug-in allows SMART Desktop software to processes data files uploaded to a SMART Connect Server.
       </description>
    </category-def>
 </site>
