@@ -13,10 +13,10 @@ insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er.query', '3.0');
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.connect', '1.0');
 
-insert into connect.alert_types values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50', 'emergency', 'Emergency');
-insert into connect.alert_types values('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51', 'observation', 'Observation');
-insert into connect.alert_types values('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52', 'intelligence', 'Intelligence');
-insert into connect.alert_types values('e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a53', 'patrolposition', 'Patrol Position');
+insert into connect.alert_types values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50', 'emergency', 'Emergency','#80AEFF','#000000','.8','exclamation','orage','f');
+insert into connect.alert_types values('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51', 'observation', 'Observation','#a0AEFF','#000000','.8','fire','green','f');
+insert into connect.alert_types values('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52', 'intelligence', 'Intelligence','#20AE4F','#000000','.8','home','blue','f');
+insert into connect.alert_types values('e0eebc99-9c0b-4ef8-bb6d-91b9bd380a53', 'patrolposition', 'Patrol Position','#305E5F','#000000','.8','eye','red','f');
 
 insert into connect.alerts values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a21','mynewalert',to_date('05 Dec 2000', 'DD Mon YYYY'),'test description, some stuffsdfsdr drsdf','c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51',2,'a0eedf99-9c0c-4ef8-bb6d-6bb9bd340a36','ACTIVE',12,23,'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a36');
 

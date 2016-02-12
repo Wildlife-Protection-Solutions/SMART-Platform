@@ -6,7 +6,9 @@ var interval = 7000; //# of milli-seconds between map refresh on the alert layer
 var MAX_ALERTS = 1000; //override value to be sent to the api. The server by default also has a 1000 alert limit, so this is repetitive, but easily to modify than the server API limit. 
 var realtime;
 var map;
-var layerControl;  
+var layerControl;
+var redMarker;
+
 
 
 window.onload = function(){
@@ -68,7 +70,7 @@ window.onload = function(){
 	dataLayers = {
 	};
 	
-	var activeLayers = [osm];
+	var activeLayers = L.layerGroup([osm]);
 
 	//Load all saved, active layers
 	for (i = 0; i < mapLayers.length; ++i) {
@@ -135,10 +137,15 @@ window.onload = function(){
 			
 	//initialize the map
 	map = new L.Map('map', {center: new L.LatLng(startingLat, startingLong), zoom: startingZoom, layers: activeLayers});
-	
+
+//	redMarker  = L.AwesomeMarkers.icon({
+//	    icon: 'car',
+//	    markerColor: 'red'
+//	  });
+
  
 	getMapFilters();//get the map filter defaults and set them before we make the first call to get alerts/events
-	//also it add the realtime layer to map once the map filter defaults are setup.
+	//also it adds the realtime layer to map once the map filter defaults are setup.
 	
 	//add layer control to map
 	layerControl = L.control.layers(baseMaps, dataLayers, {position: 'topleft'});
@@ -164,7 +171,9 @@ window.onload = function(){
 	};
 
 	refreshAlerts();
-	
+
+
+
 }
 
 
@@ -424,8 +433,11 @@ function createAlertTable(){
 			document.getElementById("tab3text").innerHTML = str.substring(0, str.indexOf(':(') +1 ) + "(0)</a>";
 		}else{
 			var str = document.getElementById("tab3text").innerHTML;
-			document.getElementById("tab3text").innerHTML = str.substring(0, str.indexOf(':(') +1) + "(" + alerts.length + ")</a>";
+			document.getElementById("tab3text").innerHTML = str.substring(0, str.indexOf(':(') +1) + "(" + alerts.length/2 + ")</a>";
 		 	for (var i = 0; i < alerts.length; i ++){
+		 		if(alerts[i].geometry.type == "LineString"){
+		 			continue; //This is a track feature, ignore it for drawing the table of alerts.
+		 		}
 		 		var date = alerts[i].properties.date;
 		 		var d = date.substr(0, date.length -4);
 
@@ -498,6 +510,7 @@ function showCurrentAlert() {
 	document.getElementById("updatealertform").update_status.value = r.status;
 	document.getElementById("updatealertform").update_long.value = r.x;
 	document.getElementById("updatealertform").update_lat.value = r.y;
+	document.getElementById("updatealertform").update_track.value = r.track;
 	document.getElementById("updatealertform").update_alert_description.value = r.description;
 }
 
@@ -528,11 +541,12 @@ function submitUpdatedAlert(){
 		    "status": form.update_status.value,
 		    "x": form.update_long.value,
 		    "y": form.update_lat.value,
+		    "track": form.update_track.value,
 		    "description": form.update_alert_description.value
 		    };
 	var oReq = new XMLHttpRequest();
 	oReq.onload = AlertUpdated;
-	oReq.open("PUT", ALERT_URL  + encodeURIComponent(userId), true);
+	oReq.open("PUT", ALERT_URL + encodeURIComponent(userId), true);
 	oReq.setRequestHeader("Accept","application/json");
 	oReq.setRequestHeader("Content-Type","application/json");
 	oReq.send(JSON.stringify(data));
@@ -633,12 +647,7 @@ function updateRealtimeLayer(updatedUrl){
 //		layerControl.removeLayer(realtime);//doesn't quite work nicely, when you have it unselected it doesn't work.	
 	}
 	
-	
-	
 	var url = getFilteredUrl(ALERT_URL) + "&"; //the "&" stops any additional data from messing up the last filter parameter in the url.
-	
-	
-
 	
 	realtime = L.realtime({
     	url: url,
@@ -647,8 +656,10 @@ function updateRealtimeLayer(updatedUrl){
     }, {
         interval: interval,
 //        filter: eventFilter,   //client side-filtering, not using this for now.
-        pointToLayer: stylePoints
+        pointToLayer: stylePoints,
+        style: styleFunction
     });
+
    
     realtime.on('update', function(e) {
         var coordPart = function(v, dirs) {
@@ -725,28 +736,56 @@ function updateRealtimeLayer(updatedUrl){
 //----------------------------
 
 
-
+//styles for points
 function stylePoints(feature, latlng) {
+	
 	var color = styleColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
-	var fillColor = styleFillColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
+//	var fillColor = styleFillColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
 	var opacity = styleOpacity[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
+	var markerIcon = styleMarkerIcon[feature.properties.typeuuid]; 
+	var markerColor = styleMarkerColor[feature.properties.typeuuid];
+	var spinStr = styleSpin[feature.properties.typeuuid];
+	if(spinStr == "true"){
+		spin = true;
+	}else{
+		spin = false;
+	}
 	
-	var size = 11 - (feature.properties.level * 1.5);
-	
-	if(color == "")color="#000000";
-	if(fillColor == "")fillColor="#0000ff";
-	if(opacity == "")opacity="0.5";
-	var geojsonMarkerOptions = {
-		    radius: size,
-		    fillColor: fillColor,
-		    color: color,
-		    weight: 1,
-		    opacity: 1,
-		    fillOpacity: opacity
-		};
-    return L.circleMarker(latlng, geojsonMarkerOptions);
+	//various size circles, using icons now, maybe we want both options?
+//	var size = 11 - (feature.properties.level * 1.5);
+//	
+//	if(color == "")color="#000000";
+//	if(fillColor == "")fillColor="#0000ff";
+//	if(opacity == "")opacity="0.5";
+//	var geojsonMarkerOptions = {
+//		    radius: size,
+//		    fillColor: fillColor,
+//		    color: color,
+//		    weight: 1,
+//		    opacity: 1,
+//		    fillOpacity: opacity
+//		};
+//    return L.circleMarker(latlng, geojsonMarkerOptions);
+	marker  = L.AwesomeMarkers.icon({
+		prefix: 'fa',
+	    icon: markerIcon,
+	    iconColor: color,
+	    markerColor: markerColor,
+	    spin: spin
+	  });
+    return L.marker(latlng, {icon: marker});
 }
 
+//styles for lines
+function styleFunction(feature) {
+	var color = styleColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
+	var opacity = styleOpacity[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
+    return {"fillOpacity": opacity, 
+    	"color":color,
+    	"weight": 3,
+    	"opacity":opacity,
+    	};
+};
 
 function getMapFilters(){
  	var oReq = new XMLHttpRequest();
@@ -919,3 +958,5 @@ function sort(str){
 	
 	refreshAlerts();
 }
+
+

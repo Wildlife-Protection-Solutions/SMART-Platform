@@ -41,8 +41,11 @@ public class AlertType extends ConnectUuidItem{
 	private String key;
 	private String label;
 	private String color; 
-	private String fillColor;
+//	private String fillColor;
 	private String opacity;
+	private String markerIcon;
+	private String markerColor;
+	private boolean spin;
 	
 	
 	@Column(name="key")
@@ -63,19 +66,30 @@ public class AlertType extends ConnectUuidItem{
 	
 	@Column(name="color")
 	public String getColor() {
+		if(!color.substring(0,1).equals("#")){
+			color = "#" + color;
+		}
 		return color;
 	}
 	public void setColor(String color) {
-		this.color = color;
+		if(!color.substring(0,1).equals("#")){
+			color = "#" + color;
+		}		this.color = color;
 	}
-	
-	@Column(name="fillColor")
-	public String getFillColor() {
-		return fillColor;
-	}
-	public void setFillColor(String fillColor) {
-		this.fillColor = fillColor;
-	}
+//	
+
+//	public String getFillColor() {
+//		if(!fillColor.substring(0,1).equals("#")){
+//			fillColor = "#" + fillColor;
+//		}
+//		return fillColor;
+//	}
+//	public void setFillColor(String fillColor) {
+//		if(!fillColor.substring(0,1).equals("#")){
+//			fillColor = "#" + fillColor;
+//		}
+//		this.fillColor = fillColor;
+//	}
 	
 	@Column(name="opacity")
 	public String getOpacity() {
@@ -83,5 +97,29 @@ public class AlertType extends ConnectUuidItem{
 	}
 	public void setOpacity(String opacity) {
 		this.opacity = opacity;
+	}
+	
+	@Column(name="markerColor")
+	public String getMarkerColor() {
+		return markerColor;
+	}
+	public void setMarkerColor(String markerColor) {
+		this.markerColor = markerColor;
+	}
+	
+	@Column(name="markerIcon")
+	public String getMarkerIcon() {
+		return markerIcon;
+	}
+	public void setMarkerIcon(String markerIcon) {
+		this.markerIcon = markerIcon;
+	}
+	
+	@Column(name="spin")
+	public boolean getSpin() {
+		return spin;
+	}
+	public void setSpin(boolean spin) {
+		this.spin = spin;
 	}
 }

@@ -158,6 +158,8 @@ CREATE TABLE connect.alerts
 	x double precision NOT NULL,
 	-- the latitude of the alert location
 	y double precision NOT NULL,
+	-- The past points for this alert, as a line in json format:[[1, 1], [2, 2]]
+	track varchar,
 	-- A link to the user who created the alert.  The user will always be able to modify the alert.
 	creator_uuid uuid NOT NULL,
 	PRIMARY KEY (uuid)
@@ -173,6 +175,11 @@ CREATE TABLE connect.alert_types(
 	color varchar(16),
 	fillColor varchar(16),
 	opacity varchar(8),
+	--http://fortawesome.github.io/Font-Awesome/icons/   shows valid values
+	markerIcon varchar(16),
+	--possible values for color are 'red', 'darkred', 'orange', 'green', 'darkgreen', 'blue', 'purple', 'darkpuple', 'cadetblue'
+	markerColor varchar(16),
+	spin boolean,
 	PRIMARY KEY (uuid)
 ) WITHOUT OIDS;
 

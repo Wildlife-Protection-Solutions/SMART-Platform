@@ -60,6 +60,7 @@ public class Alert extends ConnectUuidItem{
 	private AlertStatusEnum status;
 	private Double x;
 	private Double y;
+	private String track;
 	public UUID typeUuid;
 	private UUID caUuid;
 	private UUID creatorUuid;
@@ -143,6 +144,14 @@ public class Alert extends ConnectUuidItem{
 	}
 	public void setUserGeneratedId(String userGeneratedId) {
 		this.userGeneratedId = userGeneratedId;
+	}
+	
+	@Column(name="track")
+	public String getTrack() {
+		return track;
+	}
+	public void setTrack(String track) {
+		this.track = track;
 	}
 	
 }

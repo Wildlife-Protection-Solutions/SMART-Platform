@@ -8,6 +8,8 @@
 <script type="text/javascript" >
 	var numStyles=${numstyles};
 </script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/leaflet.awesome-markers.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
@@ -28,6 +30,7 @@
 
 
 <div class="overflow settingsTable">
+
 	<div class="block" style="text-align:left"><b><fmt:message key="settings.layerheader" /></b> <button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
 	</div>
 	<table id="layertable">
@@ -42,7 +45,14 @@
 	</div>
 	<form name=styleform>
 	<table id="typetable">
-		<tr class="table-type-row smart-table-header"><th><fmt:message key="settings.alerttype" /></th><th><fmt:message key="settings.outlinecolor" /></th><th><fmt:message key="settings.fillcolor" /></th><th><fmt:message key="settings.opacity" /></th><th><fmt:message key="actions" /></th>
+		<tr class="table-type-row smart-table-header"><th><fmt:message key="settings.alerttype" /></th>
+				<th><fmt:message key="settings.outlinecolor" /></th>
+<%-- 				<th><fmt:message key="settings.fillcolor" /></th> --%>
+				<th><fmt:message key="settings.opacity" /></th>
+				<th><fmt:message key="settings.markerIcon" /></th>
+				<th><fmt:message key="settings.markerColor" /></th>
+				<th><fmt:message key="settings.iconSpin" /></th>
+				<th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
 	</form>
@@ -230,12 +240,37 @@
      		<label class="top-spacer block"><fmt:message key="settings.typeedit.outlinecolorlabel" /></label>
 			<input id="type_color" class="type_field jscolor" type=text name="type_color" value="" maxlength="16"/>
     
-      		<label class="top-spacer block"><fmt:message key="settings.typeedit.fillcolorlabel" /></label>
-			<input id="type_fillcolor" class="type_field jscolor" type=text name="type_fillcolor" value="" maxlength="16"/>
+<%--       		<label class="top-spacer block"><fmt:message key="settings.typeedit.fillcolorlabel" /></label> --%>
+<!-- 			<input id="type_fillcolor" class="type_field jscolor" type=text name="type_fillcolor" value="" maxlength="16"/> -->
     
       		<label class="top-spacer block"><fmt:message key="settings.typeedit.opactiylabel" /></label>
 			<input class="type_field" type=text name="type_opacity" value="" maxlength="8"/>
-     		
+
+      		<label class="top-spacer block"><fmt:message key="settings.markerIcon" />: <i id="exampleIcon" class=""></i></label> 
+			<select id="type_markerIcon" class="type_field" name="type_markerIcon" value="">
+<!-- selected from:		http://fortawesome.github.io/Font-Awesome/icons/ -->
+				
+			</select> or type one <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/icons/">(list)</a>:<input type="text" name="iconOveride" id="iconOveride" value=""/>
+
+
+      		<label class="top-spacer block"><fmt:message key="settings.markerColor"/>:</label>
+			<select class="type_field" name="type_markerColor" value="">
+				<option value="red">red</option>
+				<option value="darkred">dark red</option>
+				<option value="orange">orange</option>
+				<option value="green">green</option>
+				<option value="darkgreen">darkgreen</option>
+				<option value="blue">blue</option>
+				<option value="purple">purple</option>
+				<option value="darkpurple">darkpurple</option>
+				<option value="cadetblue">cadetblue</option>
+			</select>
+
+			<label class="top-spacer block"><fmt:message key="settings.iconSpin"/>:</label>
+     		<select class="type_field" name="type_spin" value="true">
+     			<option value="true">true</option>
+     			<option value="false">false</option>
+     		</select>
        		<div class="top-spacer block">
      			<input id="newTypeButton" class="button" type="button" value="Create Type" />
      			<input id="updateTypeButton" class="button" type="button" value="Update Type" />

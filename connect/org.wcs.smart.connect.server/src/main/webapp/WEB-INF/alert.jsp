@@ -7,14 +7,24 @@
 <%@include file="includes.jsp" %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/leaflet.css"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/leaflet.awesome-markers.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-src.js"></script>
+<script type="text/javascript" src='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js'></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet.awesome-markers.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/alert.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-src.js"></script>
-<script type="text/javascript" src='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js'></script>
 
+
+
+<!-- 	var styleFillColors = { -->
+<%-- 			<c:forEach var="type" items="${alertTypes}" varStatus="count"> --%>
+<%-- 	 			"${type.getUuid()}" : "${type.getFillColor()}",  --%>
+<%-- 			</c:forEach>  --%>
+<!-- 		}; -->
 <script type="text/javascript" >
 	var mobile="${mobile}";
 	var tab = ${tab};
@@ -23,16 +33,29 @@
  			"${type.getUuid()}" : "${type.getColor()}", 
 		</c:forEach> 
 	};
-	var styleFillColors = {
-			<c:forEach var="type" items="${alertTypes}" varStatus="count">
-	 			"${type.getUuid()}" : "${type.getFillColor()}", 
-			</c:forEach> 
-		};
+
 	var styleOpacity = {
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
 	 			"${type.getUuid()}" : "${type.getOpacity()}", 
 			</c:forEach> 
 		};
+	var styleMarkerColor = {
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	 			"${type.getUuid()}" : "${type.getMarkerColor()}", 
+			</c:forEach> 
+		};
+	var styleMarkerIcon = {
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	 			"${type.getUuid()}" : "${type.getMarkerIcon()}", 
+			</c:forEach> 
+		};
+	var styleSpin= {
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	 			"${type.getUuid()}" : "${type.getSpin()}", 
+			</c:forEach> 
+		};
+
+	
 	
 	var startingZoom = ${startingZoom};
 	var startingLong = ${startingLong};
@@ -225,6 +248,8 @@
 			
 			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label><input id="long" type="text" name="update_long">
 			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label><input id="lat" type="text" name="update_lat" >
+			
+			<label class="top-spacer block"><fmt:message key="alert.track" /></label><input size=50 id="track" type="text" name="update_track" >
 			
 			
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>

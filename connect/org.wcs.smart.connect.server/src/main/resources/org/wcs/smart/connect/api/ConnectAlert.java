@@ -21,15 +21,12 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -171,12 +168,20 @@ public class ConnectAlert extends HttpServlet {
 			if (newAlertType.getColor() != null){
 				toUpdate.setColor(newAlertType.getColor());
 			}
-			if (newAlertType.getFillColor() != null){
-				toUpdate.setFillColor(newAlertType.getFillColor());
-			}
+//			if (newAlertType.getFillColor() != null){
+//				toUpdate.setFillColor(newAlertType.getFillColor());
+//			}
 			if (newAlertType.getOpacity() != null){
 				toUpdate.setOpacity(newAlertType.getOpacity());
 			}
+			if (newAlertType.getMarkerColor() != null){
+				toUpdate.setMarkerColor(newAlertType.getMarkerColor());
+			}
+			if (newAlertType.getMarkerIcon()!= null){
+				toUpdate.setMarkerIcon(newAlertType.getMarkerIcon());
+			}
+			toUpdate.setSpin(newAlertType.getSpin());
+			
 			
 			s.update(toUpdate);
 			s.getTransaction().commit();
@@ -202,8 +207,11 @@ public class ConnectAlert extends HttpServlet {
 
 		a.setLabel(newAlertType.getLabel());
 		a.setColor(newAlertType.getColor());
-		a.setFillColor(newAlertType.getFillColor());
+//		a.setFillColor(newAlertType.getFillColor());
 		a.setOpacity(newAlertType.getOpacity());
+		a.setMarkerColor(newAlertType.getMarkerColor());
+		a.setMarkerIcon(newAlertType.getMarkerIcon());
+		a.setSpin(newAlertType.getSpin());
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -352,14 +360,7 @@ public class ConnectAlert extends HttpServlet {
     @Path("/{usergenid}")
     public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newAlert) {
 		validateUser(AlertAction.CREATE_ALERTS_KEY);
-			
-		//validate usergenid, is it unique?
-		String err = validateGeneratedId(userGenId);
-		if (err != null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
-		}
-		
-		
+
 		validateAlertValues(newAlert);
 		
 		Alert a = new Alert();
@@ -381,11 +382,25 @@ public class ConnectAlert extends HttpServlet {
 		a.setUserGeneratedId(userGenId);
 		a.setX(newAlert.getLongitude());
 		a.setY(newAlert.getLatitude());
+		String track = "[ [" +newAlert.getLongitude() + " , " + newAlert.getLatitude() + "]" + "]";
+		a.setTrack(track);
+		
 		a.setCaUuid(newAlert.getCaUuid());
 		a.setTypeUuid(newAlert.getTypeUuid());
-		
+	
 		a.setCreatorUuid(getCreatorUuid());
 		
+		//validate usergenid, is it unique? If so, update the existing one and return instead of saving a new one.
+		String err = validateGeneratedId(userGenId);
+		if (err != null){
+			//alert already exists, try updating the existing one. Since Cybetracker can't track whether it is the first or second+
+			//time they send off alerts, we can't enforce them to use our Update API...
+			a.setTrack(null); //We don't want the default track that was created above if this is actually an update.
+			updateAndEditAlert(userGenId, a, true);
+			return a;
+		}
+		
+		//confirmed this is a new request, save it.
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -408,80 +423,20 @@ public class ConnectAlert extends HttpServlet {
 		
 		return a;
 	}
- 
 
+	/* This updatewon't transfer the existing X,Y into the past track
+	 * Users like cybertracker can us the AddAlerts POST with an existing 
+	 * userGenId to update the X,Y while keeping the old one in the track
+	 * 
+	 * Setup this way since users won't always know whether they sent a create request yet, 
+	 * and if they sent two very quickly no matter what order they will both work where an update received first would fail. 
+	 */
 	@PUT
     @Path("/{usergenid}")
-    public Alert updateAlert(@PathParam("usergenid") String oldAlertId, Alert newAlert) {
-    	validateUser(AlertAction.UPDATE_ALL_KEY);
-    	validateAlertValues(newAlert);
-    	
-    	Alert toUpdate = null;
-    	Session s = HibernateManager.getSession(context);
-		s.beginTransaction();
-		try{
-			toUpdate = (Alert)s.createCriteria(Alert.class)
-					.add(Restrictions.eq("userGeneratedId", oldAlertId)) //$NON-NLS-1$
-					.uniqueResult();
-			
-			if (toUpdate == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, 
-						MessageFormat.format(Messages.getString("ConnectAlert.AlertNotFound", SmartUtils.getRequestLocale(request)), oldAlertId)); //$NON-NLS-1$
-			}
-			
-			if (newAlert.getUserGeneratedId() != null && !oldAlertId.equals(newAlert.getUserGeneratedId())){
-				//ensure new usergenID is unique
-				Alert existingAlert = HibernateManager.getAlertByUserId(s,newAlert.getUserGeneratedId());
-				if (existingAlert != null){
-					throw new SmartConnectException(
-							Response.Status.BAD_REQUEST,
-							MessageFormat.format(Messages.getString("ConnectAlert.AlertNotUnique", SmartUtils.getRequestLocale(request)), newAlert.getUserGeneratedId())); //$NON-NLS-1$
-				}
-				toUpdate.setUserGeneratedId(newAlert.getUserGeneratedId());
-			}
-			
-			if (newAlert.getCaUuid() != null){
-				toUpdate.setCaUuid(newAlert.getCaUuid());
-			}
-			if (newAlert.getCreatorUuid() != null){
-				toUpdate.setCreatorUuid(newAlert.getCreatorUuid());
-			}
-			if (newAlert.getDate() != null){
-				toUpdate.setDate(newAlert.getDate());
-			}
-			if (newAlert.getDescription()!= null){
-				toUpdate.setDescription(newAlert.getDescription());
-			}			
-			if (newAlert.getLevel() != null){
-				toUpdate.setLevel(newAlert.getLevel());
-			}
-			if (newAlert.getStatus() != null){
-				toUpdate.setStatus(newAlert.getStatus());
-			}			
-			if (newAlert.getTypeUuid() != null){
-				toUpdate.setTypeUuid(newAlert.getTypeUuid());
-			}
-			if (newAlert.getX() != null){
-				toUpdate.setX(newAlert.getX());
-			}			
-			if (newAlert.getY() != null){
-				toUpdate.setY(newAlert.getY());
-			}
-			
-			s.update(toUpdate);
-			s.getTransaction().commit();
-		}catch (SmartConnectException ex){
-			logger.log(Level.WARNING, ex.getMessage(), ex);
-			s.getTransaction().rollback();
-			throw ex;
-		}catch (Exception ex){
-			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			s.getTransaction().rollback();
-			throw new SmartConnectException(ex.getMessage(), ex);
-		}finally{
-		}
-		return toUpdate;
-    }
+    public Alert editAlert(@PathParam("usergenid") String oldAlertId, Alert newAlert) {
+		return updateAndEditAlert( oldAlertId,  newAlert, false);
+	}
+
  
     @DELETE
     @Path("/{alertUuid}")
@@ -643,9 +598,26 @@ public class ConnectAlert extends HttpServlet {
     	            properties.put("y", obj.getY());
 
     	            feature.put("properties", properties);
-    	            featureList.put(feature);
     	            feature.put("type", "Feature");
+    	            featureList.put(feature);
     	            
+    	            //the Track feature
+    	            JSONObject propertiesTrack = new JSONObject();
+    	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track");
+    	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups
+    	            propertiesTrack.put("date", obj.getDate());
+    	            propertiesTrack.put("desc", obj.getDescription());
+    	            propertiesTrack.put("level", obj.getLevel());
+    	            JSONObject line = new JSONObject();
+    	            JSONArray a = new JSONArray(obj.getTrack());
+    	            line.put("coordinates", a);
+    	            line.put("type", "LineString");
+    	            JSONObject featureTrack = new JSONObject();
+    	            featureTrack.put("geometry", line);
+    	            featureTrack.put("type", "Feature");
+    	            featureTrack.put("properties", propertiesTrack);
+    	            
+    	            featureList.put(featureTrack);
     	        }
     	        featureCollection.put("features", featureList);
     	        
@@ -653,5 +625,90 @@ public class ConnectAlert extends HttpServlet {
     	    	throw new SmartConnectException(Response.Status.BAD_REQUEST, "can't save json object: "+e.toString());
     	    }
     	 return featureCollection;
+    }
+    
+    private Alert updateAndEditAlert(String oldAlertId, Alert newAlert, boolean keepPoint){
+    	validateUser(AlertAction.UPDATE_ALL_KEY);
+    	validateAlertValues(newAlert);
+    	
+    	Alert toUpdate = null;
+    	Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			toUpdate = (Alert)s.createCriteria(Alert.class)
+					.add(Restrictions.eq("userGeneratedId", oldAlertId)) //$NON-NLS-1$
+					.uniqueResult();
+			
+			if (toUpdate == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
+						MessageFormat.format(Messages.getString("ConnectAlert.AlertNotFound", SmartUtils.getRequestLocale(request)), oldAlertId)); //$NON-NLS-1$
+			}
+			
+			if (newAlert.getUserGeneratedId() != null && !oldAlertId.equals(newAlert.getUserGeneratedId())){
+				//ensure new usergenID is unique
+				Alert existingAlert = HibernateManager.getAlertByUserId(s,newAlert.getUserGeneratedId());
+				if (existingAlert != null){
+					throw new SmartConnectException(
+							Response.Status.BAD_REQUEST,
+							MessageFormat.format(Messages.getString("ConnectAlert.AlertNotUnique", SmartUtils.getRequestLocale(request)), newAlert.getUserGeneratedId())); //$NON-NLS-1$
+				}
+				toUpdate.setUserGeneratedId(newAlert.getUserGeneratedId());
+			}
+			
+			if (newAlert.getCaUuid() != null){
+				toUpdate.setCaUuid(newAlert.getCaUuid());
+			}
+			if (newAlert.getCreatorUuid() != null){
+				toUpdate.setCreatorUuid(newAlert.getCreatorUuid());
+			}
+			if (newAlert.getDate() != null){
+				toUpdate.setDate(newAlert.getDate());
+			}
+			if (newAlert.getDescription()!= null){
+				toUpdate.setDescription(newAlert.getDescription());
+			}			
+			if (newAlert.getLevel() != null){
+				toUpdate.setLevel(newAlert.getLevel());
+			}
+			if (newAlert.getStatus() != null){
+				toUpdate.setStatus(newAlert.getStatus());
+			}			
+			if (newAlert.getTypeUuid() != null){
+				toUpdate.setTypeUuid(newAlert.getTypeUuid());
+			}
+			
+		
+			if(keepPoint){//put the existing point onto the end of the track.
+				if(newAlert.getX() != null && newAlert.getY() != null){  
+					String current = toUpdate.getTrack();
+					current = current.substring(0, current.length()-1);
+					current = current + ", [" +newAlert.getX() + " , " + newAlert.getY() + "]" + "]";
+					toUpdate.setTrack(current);
+				}
+			}
+			if(newAlert.getTrack() != null){
+				toUpdate.setTrack(newAlert.getTrack());
+			}
+			
+			if (newAlert.getX() != null){
+				toUpdate.setX(newAlert.getX());
+			}			
+			if (newAlert.getY() != null){
+				toUpdate.setY(newAlert.getY());
+			}
+			
+			s.update(toUpdate);
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(ex.getMessage(), ex);
+		}finally{
+		}
+		return toUpdate;
     }
 }

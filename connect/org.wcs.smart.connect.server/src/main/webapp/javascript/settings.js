@@ -5,6 +5,12 @@ var DEFAULTS_URL = "../api/connectalertfilterdefault/";
 var ACTION_URL = STYLE_URL + "actions/";
 var allActions = null;
 
+//A selection of icons, the full list, which you can type into the text box is at http://fortawesome.github.io/Font-Awesome/icons/
+
+var iconOptions = ["ambulance","asterisk","battery-quarter","binoculars","bomb","bug","bullseye","bus","bullseye","bullhorn","car","check","circle","cog",
+                   "clipboard","cloud","crosshairs","exclamation","eye","fire","flask","gavel","group","heartbeat","home","money","motorcycle","pause","plane","play","stop"];
+var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb","bug","bullseye","bus","bullseye","bullhorn","car","check","circle","cog",
+                         "clipboard","cloud","crosshairs","exclamation","eye","fire","flask/checmical","gavel","group of people", "heartbeat","home","money","motorcycle","pause","plane","play","stop"];
 
 
 /* configure events on html elements */
@@ -41,7 +47,8 @@ window.onload = function(){
 	};
 	document.getElementById("newLayerButton").addEventListener("click", createNewLayer);
 	document.getElementById("updateLayerButton").addEventListener("click", submitUpdateLayer);
-	
+	document.getElementById("type_markerIcon").addEventListener("change", updateExampleIcon);
+	document.getElementById("iconOveride").addEventListener("change", updateExampleIconCustom);
 	
 	document.getElementById("btnNewType").onclick = function(){
 	 	displayDialog('typeDialog', 'btnNewType');
@@ -62,7 +69,7 @@ window.onload = function(){
 	refreshLayers();
 	
 	refreshTypes();
-
+	loadIconOptions();
 	refreshDefaults();
 }
 
@@ -312,7 +319,7 @@ function showCurrentLayer() {
 		displayError(parseError(i18n("settings.errorcreatinglayer") + this.uuid));
 	}
 	
-	document.querySelector("#error").style.display = "none";
+	document.querySelector("#layerdialogerror").style.display = "none";
 	
 	var form = document.getElementById("maplayersform");
 	
@@ -430,37 +437,48 @@ function createTypeTable(){
  		var color = types[i].color;
  		var fillColor = types[i].fillColor;
  		var opacity = types[i].opacity;
+ 		var markerIcon = "<i class='fa fa-" + types[i].markerIcon + "'></i>";
+ 		var markerColor = types[i].markerColor;
+
+ 		var spin = types[i].spin;
  		
 
- 		
+ 		//not using fillColor for now, maybe we want more options in future.
  		var row = tableCreateRowTDs(parent,
- 				[label, color, fillColor, opacity, null], 
+ 				[label, color, opacity, markerIcon, markerColor, spin, null], 
  				"white typerow");
  		row.id = "typerow" + i;
  		row.dataset.uuid = types[i].uuid;
  	
- 		row.childNodes[1].style.backgroundColor = '#' + color;
- 		if(color == "000000"){
- 			row.childNodes[1].style.color = "ffffff";
+ 		row.childNodes[1].style.backgroundColor = color;
+ 		if(color == "000000" || color == "#000000" ){
+ 			row.childNodes[1].style.color = "#ffffff";
+ 			row.childNodes[2].style.color = "#ffffff";
  		}
- 		row.childNodes[2].style.backgroundColor = '#' + fillColor;
+// 		row.childNodes[2].style.backgroundColor = fillColor;
+// 		row.childNodes[2].style.opacity = opacity;
+// 		if(fillColor == "000000"){
+// 			row.childNodes[2].style.color = "#ffffff";
+// 			row.childNodes[3].style.color = "#ffffff";
+// 		}
+ 		row.childNodes[2].style.backgroundColor = color;
  		row.childNodes[2].style.opacity = opacity;
- 		row.childNodes[3].style.backgroundColor = '#' + fillColor;
- 		row.childNodes[3].style.opacity = opacity;
  		
+ 		row.childNodes[3].style.color = color;
+ 		 		
  		var updateicon = document.createElement("a");
  		updateicon.className="update-icon";
  		updateicon.title= i18n("settings.updatetype");
  		updateicon.onclick = updateType;
  		updateicon.href="";
- 		row.childNodes[4].appendChild(updateicon);
+ 		row.childNodes[6].appendChild(updateicon);
 
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
  		deleteicon.title= i18n("settings.deletetype");
  		deleteicon.onclick = deleteType;
  		deleteicon.href="";
- 		row.childNodes[4].appendChild(deleteicon);
+ 		row.childNodes[6].appendChild(deleteicon);
  	}
 }
 
@@ -490,11 +508,17 @@ function showCurrentType() {
 	
 	form.type_label.value = r.label;
 	form.type_color.value = r.color;
-	form.type_fillcolor.value = r.fillColor;
+//	form.type_fillcolor.value = r.fillColor;
 	form.type_opacity.value = r.opacity;
+	form.type_markerIcon.value = r.markerIcon;
+	form.type_markerColor.value = r.markerColor;
+	form.type_spin.value = r.spin;
+	form.iconOveride.value = r.markerIcon;
+	
+	document.getElementById("exampleIcon").className = "fa fa-" + r.markerIcon;
 	
 	document.getElementById("type_color").style.backgroundColor = '#' + r.color;
-	document.getElementById("type_fillcolor").style.backgroundColor ='#' + r.fillColor;
+//	document.getElementById("type_fillcolor").style.backgroundColor ='#' + r.fillColor;
 	
 	document.getElementById("updateTypeButton").classList.remove("hide");
 	document.getElementById("updateTypeButton").classList.add("show");
@@ -502,6 +526,8 @@ function showCurrentType() {
 	document.getElementById("newTypeButton").classList.remove("show");
 	document.getElementById("newTypeButton").classList.add("hide");
 	
+	//update the sample icon
+
 	displayDialog('typeDialog', 'btnNewType');
 }
 
@@ -524,7 +550,7 @@ function typeDeleted(){
 		var r = JSON.parse(this.response);
 		displayInfo(i18n("settings.deletedtype") + r.label);
 	} else {
-		displayError(parseError(i18n("settings.errordeletingtype") + this.label));
+		displayError(parseError(i18n("settings.errordeletingtype") + this.response));
 	}
 	refreshTypes();
 }
@@ -533,14 +559,20 @@ function createNewType(){
 	
 	var typeLabel = document.querySelector("input[name=type_label]").value;
 	var typeColor = document.querySelector("input[name=type_color]").value;
-	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
+//	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
 	var typeOpacity = document.querySelector("input[name=type_opacity]").value;
+	var markerIcon = document.querySelector("select[name=type_markerIcon]").value;
+	var markerColor = document.querySelector("select[name=type_markerColor]").value;
+	var spin = document.querySelector("select[name=type_spin]").value;
 	
 	var jsonData = {
 		"label" : typeLabel,
 		"color" : typeColor,
-		"fillColor" : typeFillColor,
-		"opacity" : typeOpacity
+//		"fillColor" : typeFillColor,
+		"opacity" : typeOpacity,
+		"markerIcon" : markerIcon,
+		"markerColor" : markerColor,
+		"spin" : spin
 	};
 
 	//make ajax call
@@ -560,9 +592,8 @@ function typeCreated(){
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo(i18n("settings.errordeletingtype"));
 	} else {
-		displayError(i18n("settings.errordeletingtype") + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.errorcreatingtype") + this.responseText + "; " + this.statusText);
 	}
 	refreshTypes();
 	closeDialog('typeDialog');
@@ -573,14 +604,26 @@ function submitUpdateType(){
 		
 	var typeLabel = document.querySelector("input[name=type_label]").value;
 	var typeColor = document.querySelector("input[name=type_color]").value;
-	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
+//	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
 	var typeOpacity = document.querySelector("input[name=type_opacity]").value;
+	var markerIcon = document.querySelector("select[name=type_markerIcon]").value;
+	var override = document.getElementById("iconOveride").value
+	if(override != ""){
+		markerIcon = override;
+	}
+	
+	var markerColor = document.querySelector("select[name=type_markerColor]").value;
+	var spin = document.querySelector("select[name=type_spin]").value
+	
 	
 	var jsonData = {
 		"label" : typeLabel,
 		"color" : typeColor,
-		"fillColor" : typeFillColor,
-		"opacity" : typeOpacity
+//		"fillColor" : typeFillColor,
+		"opacity" : typeOpacity,
+		"markerIcon" : markerIcon,
+		"markerColor" : markerColor,
+		"spin" : spin
 	};
 	//make ajax call
 	hideInfo();
@@ -598,9 +641,8 @@ function typeUpdated(){
 	if (this.status == 200) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo(i18n("settings.errordeletingtype"));
 	} else {
-		displayError(i18n("settings.errordeletingtype") + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.errorupdatingtype") + this.responseText + "; " + this.statusText);
 	}
 	refreshTypes();
 	closeDialog('typeDialog');
@@ -752,4 +794,24 @@ function getCommaSeparatedList(classname){
 		}
 	}
 	return str;
+}
+
+
+function updateExampleIcon(){
+	document.getElementById("exampleIcon").className = "fa fa-" + document.getElementById("type_markerIcon").value;
+	document.getElementById("iconOveride").value = document.getElementById("type_markerIcon").value
+	return false;
+}
+function updateExampleIconCustom(){
+	document.getElementById("exampleIcon").className = "fa fa-" + document.getElementById("iconOveride").value;	
+	document.getElementById("type_markerIcon").value = document.getElementById("iconOveride").value;
+}
+function loadIconOptions(){
+	var select = document.getElementById("type_markerIcon");
+	for (var i = 0; i<=iconOptions.length-1; i++){
+	    var opt = document.createElement('option');
+	    opt.value = iconOptions[i];
+	    opt.innerHTML = iconOptionsLabels[i];
+	    select.appendChild(opt);
+	}
 }
