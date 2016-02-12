@@ -91,6 +91,8 @@ public class DataQueueItemProcessor extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		if (ProcessorManager.INSTANCE.isProcessingDisabled()) return Status.CANCEL_STATUS;
+		
 		monitor = progressWrapper.setProgressMonitor(monitor);
 		
 		boolean reschedule = true;

@@ -46,8 +46,7 @@ public class DataQueueItem extends UuidItem{
 	public enum Type{
 		PATROL_XML,
 		INCIDENT_XML,
-		MISSION_XML,
-		INTELL_XML
+		MISSION_XML
 	}
 	
 	private Type type;

@@ -23,6 +23,7 @@ package org.wcs.smart.connect.dataqueue;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -30,12 +31,15 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.connect.ConnectDatastore;
 import org.wcs.smart.connect.ConnectServerManager;
 import org.wcs.smart.connect.ConnectServerManager.IConnectServerEventHandler;
 import org.wcs.smart.connect.dataqueue.internal.CaDataQueueDeleteHandler;
 import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
+import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -81,6 +85,20 @@ public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 		plugin = this;
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaDataQueueDeleteHandler(), CaDataQueueDeleteHandler.EXECUTE_ORDER);
+		ConservationAreaManager.getInstance().addDeleteHandler(new ICaDeleteHandler() {
+			@Override
+			public void beforeDelete(ConservationArea ca, Session session,
+					IProgressMonitor monitor) throws Exception {
+				//disable all processing before deleting
+				//if processing fails, this will still be disabled.  The user
+				//must restart, but I think that is ok because the user should restart
+				//anyways
+				ProcessorManager.INSTANCE.disableAllProcessing();
+				
+			}
+		}, 1000);
+		
+		
 		ConnectServerManager.INSTANCE.addHandler(new IConnectServerEventHandler() {
 			@Override
 			public void beforeDelete(Session session) throws Exception{

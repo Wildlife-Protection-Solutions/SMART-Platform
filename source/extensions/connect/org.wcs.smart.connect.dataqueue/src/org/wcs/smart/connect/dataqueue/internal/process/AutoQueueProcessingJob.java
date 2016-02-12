@@ -89,6 +89,7 @@ public class AutoQueueProcessingJob extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		if (ProcessorManager.INSTANCE.isProcessingDisabled()) return Status.CANCEL_STATUS;
 		try{
 			return runInternal(monitor);
 		}finally{
