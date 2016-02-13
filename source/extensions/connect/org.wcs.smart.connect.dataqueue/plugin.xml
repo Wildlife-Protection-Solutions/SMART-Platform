@@ -82,7 +82,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".ca_uuid"
+            ca_property=".id.conservationArea"
             class="org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption"
             supportsCcaa="false">
       </class>
