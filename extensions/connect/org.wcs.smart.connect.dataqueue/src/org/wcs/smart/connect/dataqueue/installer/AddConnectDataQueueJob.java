@@ -116,9 +116,11 @@ public class AddConnectDataQueueJob extends Job {
 				
 			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue TO MANAGER", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue TO ANALYST", //$NON-NLS-1$
 			
 			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue_option TO MANAGER", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue_option TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON SMART.connect_data_queue_option TO ANALYST", //$NON-NLS-1$
 		};
 		
 		session.doWork(new Work() {

@@ -211,7 +211,11 @@ public enum DerbyReplicationManager {
 		return session.doReturningWork(new ReturningWork<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
-				return DerbyUtil.isReplicationEnabled(UuidUtils.uuidToByte(cauuid), connection);
+				try{
+					return DerbyUtil.isReplicationEnabled(UuidUtils.uuidToByte(cauuid), connection);
+				}finally{
+					connection.commit();
+				}
 			}
 		});
 	}
