@@ -2428,3 +2428,14 @@ CHECK (status IN ('DOWNLOADING', 'REQUEUED', 'QUEUED', 'PROCESSING', 'COMPLETE',
 		
 ALTER TABLE smart.connect_data_queue ADD CONSTRAINT type_chk 
 CHECK (type IN ('PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML'));
+
+
+CREATE TABLE smart.connect_data_queue_option(
+	ca_uuid UUID not null, 
+	keyid varchar(256) NOT NULL, 
+	value varchar(512), 
+	primary key (ca_uuid, keyid)
+);
+ALTER TABLE smart.connect_data_queue_option 
+ADD CONSTRAINT data_queue_option_ca_uuid_fk foreign key (ca_uuid) 
+REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade DEFERRABLE;
