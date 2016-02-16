@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Query;
@@ -35,6 +36,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
+import org.wcs.smart.connect.uploader.ca.CaProcessorUtils;
 
 /**
  * A postgresql specific processor for processing a change
@@ -126,7 +128,9 @@ public class PostgresqlSyncProcessor {
 			
 			//apply change log
 			applyChangeLog(changeLogFile, filestoreDir);
-		
+
+			//update info label
+			CaProcessorUtils.updateCaLabel(session, info);
 		}finally{
 			FileUtils.deleteDirectory(tempDir.toFile());
 		}
@@ -136,4 +140,5 @@ public class PostgresqlSyncProcessor {
 		PostgresqlChangeLogDeserializer processor = new PostgresqlChangeLogDeserializer(changelogFile, changelogFilestore);
 		processor.processFile(session);
 	}
+
 }

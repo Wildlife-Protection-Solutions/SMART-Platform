@@ -22,12 +22,10 @@
 package org.wcs.smart.connect.uploader.ca;
 
 import java.nio.file.Files;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
-import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
@@ -75,9 +73,8 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			session.flush();
 			
 			//update ca item label
-			ConservationArea area = (ConservationArea) session.get(ConservationArea.class, info.getUuid());
+			ConservationArea area =CaProcessorUtils.updateCaLabel(session, info);
 			if (area != null){
-				info.setLabel( area.getName() + " [" + area.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				if (area.getIsCcaa()){
 					info.setStatus(ConservationAreaInfo.Status.CCAA);
 				}else{
