@@ -58,7 +58,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(contribs.length, false);
 		gl.marginWidth = 0;
-		gl.marginHeight = 0;
+		gl.marginHeight = 2;
 		main.setLayout(gl);
 		
 		//refresh now menu
@@ -79,12 +79,13 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		for (IConnectStatusContribution c : contribs){
 			Control ctr = c.createControl(main);
 			ctr.setMenu(refreshMenu);
+			if (ctr instanceof Composite){
+				for (Control kid : ((Composite)ctr).getChildren()){
+					kid.setMenu(refreshMenu);
+				}
+			}
 		}
-		
-		
-//		serverStatus.setMenu(refreshMenu);
-//		localStatus.setMenu(refreshMenu);
-		
+
 		return main;
 	}
 

@@ -93,7 +93,10 @@ public class ReplicationStatusContribution implements
 		ConnectStatusManager.INSTANCE.addLocalStatusListener(localListener);
 		
 		Composite status = new Composite(parent, SWT.NONE);
-		status.setLayout(new GridLayout(2, true));
+		GridLayout gl = new GridLayout(2, true);
+		gl.marginWidth = 0;
+		gl.marginHeight = 0;
+		status.setLayout(gl);
 		
 		status.addDisposeListener(new DisposeListener() {
 			@Override
