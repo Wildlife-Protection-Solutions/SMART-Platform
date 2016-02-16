@@ -174,9 +174,9 @@ function createQueryTable(){
 		ele.parentElement.removeChild(ele);
 	}
 	var drawnRowCount = 0;
+	var selectedCa = document.getElementById('caselect').value; 
  	for (var i = 0; i < queries.length; i ++){
- 		selectedCa = document.getElementById('caselect').value; 
- 		if(selectedCa == 'allcas' || selectedCa == queries[i].conservationArea){
+ 		if(selectedCa == 'allcas' || selectedCa == queries[i].caUuid){
  		 if(search == "" || isFoundInRow(queries[i]) ){
  			drawnRowCount++;
 	 		var row = tableCreateRow(parent, 
