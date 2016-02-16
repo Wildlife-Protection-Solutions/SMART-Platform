@@ -310,7 +310,7 @@ public class ConnectUser extends HttpServlet {
 		return toDelete;
     }
  
-    public String validateUserName(String username, Locale l){
+    public static String validateUserName(String username, Locale l){
     	if (username == null 
     			|| username.length() < SmartUser.MIN_USERNAME_LENGTH 
     			|| username.length() > SmartUser.MAX_USERNAME_LENGTH){
