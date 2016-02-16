@@ -62,9 +62,16 @@
   <fmt:message key="dataqueue.updatewarning" />
   </div>
   <input name="updateUuid" type="hidden"></input>
+  <label class="block top-spacer">File Status:</label>
    <select name="newStatus" class="formtext block top-spacer">
    		<c:forEach var="status" items="${statusTypes}" varStatus="count">
      		<option value="${status[1]}">${status[0]} </option> 
+		</c:forEach>
+    </select>
+    <label class="block top-spacer">File Type:</label>
+    <select name="updateType" class="formtext block">
+    	<c:forEach var="type" items="${uploadtypes}" varStatus="count">
+     		<option value="${type[1]}">${type[0]} </option> 
 		</c:forEach>
     </select>
     <div class="block top-spacer" style="text-align:right">

@@ -73,13 +73,21 @@ function uploadComplete(){
 
 function updateItemOnServer(){
 	var uuid = document.querySelector("input[name=updateUuid]").value;
-	var type = document.querySelector("select[name=newStatus]").value;
-	var url = DATAQUEUEURL + '/items/' + uuid + "/" + type;
-
+	var status = document.querySelector("select[name=newStatus]").value;
+	var type = document.querySelector("select[name=updateType]").value;
+	var url = DATAQUEUEURL + '/items/' + uuid ;
+	var jsonData =  {
+	
+			"type": type,
+			"status": status
+			}
 	oReq = new XMLHttpRequest();
 	oReq.onload = fileUpdated;
+
 	oReq.open("PUT", url, true);
-	oReq.send();
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+
 	closeDialog('updateFileDialog');
 }
 
@@ -178,6 +186,7 @@ function createFileTable(){
 		 		row.id = "fileRow" + i;
 		 		row.dataset.uuid = uuid;
 		 		row.dataset.status = status;
+		 		row.dataset.type = type;
 	
 		 		//TODO - should we check for permissions for update/delete, or assume any data queue permission = all data queue permission
 //		 		if(canupdate){
@@ -212,8 +221,10 @@ function createFileTable(){
 function updateFile(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
 	var status = this.parentElement.parentElement.getAttribute('data-status');
+	var fileType= this.parentElement.parentElement.getAttribute('data-type');
 	document.querySelector("input[name=updateUuid]").value = uuid;
 	document.querySelector("select[name=newStatus]").value = status;
+	document.querySelector("select[name=updateType]").value = fileType;
 	displayDialog('updateFileDialog', 'main');
 	return false;
 }

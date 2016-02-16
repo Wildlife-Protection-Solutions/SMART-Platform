@@ -393,16 +393,12 @@ public class DataQueue {
 	 * @param newItem
 	 * @return
 	 */
+	@Consumes({ MediaType.APPLICATION_JSON})
 	@PUT
-	@Path("/items/{uuid}/{status}")
+	@Path("/items/{uuid}/")
 	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, 
-			@PathParam("status") String newStatus){
-		ServerDataQueueItem.Status serverStatus = null;
-		try{
-			serverStatus = ServerDataQueueItem.Status.valueOf(newStatus.toUpperCase());
-		}catch (Exception ex){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format("Status value {0} not supported.", newStatus));
-		}
+			ServerDataQueueItem newItem){
+
 		UUID uuid = parseUuid(itemUuid);
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -413,12 +409,13 @@ public class DataQueue {
 			}
 			validateProcess(item.getConservationArea(), s);
 			
-			if (serverStatus == ServerDataQueueItem.Status.PROCESSING 
+			if (newItem.getStatus() == ServerDataQueueItem.Status.PROCESSING 
 					&& item.getStatus() != ServerDataQueueItem.Status.QUEUED){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Item on server has already been processed (by another client).");
 			}
 			
-			item.setStatus(serverStatus);
+			item.setStatus(newItem.getStatus());
+			item.setType(newItem.getType());
 			s.getTransaction().commit();
 			return item;
 		}catch (Exception ex){

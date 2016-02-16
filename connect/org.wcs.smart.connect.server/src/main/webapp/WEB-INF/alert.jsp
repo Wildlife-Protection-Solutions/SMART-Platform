@@ -76,7 +76,7 @@
 	  </c:forEach>
 	];
 </script>
-<script src="https://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+<script src="https://maps.google.com/maps/api/js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-realtime.js"></script>
 <link href='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css' rel='stylesheet' />
 

@@ -671,7 +671,8 @@ function updateRealtimeLayer(updatedUrl){
                     c = feature.geometry.coordinates;
                 var date = feature.properties.date;
             	date = date.substr(0, date.length-4);
-                return 'Event: ' + feature.properties.type +  
+                return 'Event: ' + feature.properties.type +
+                	"<br>Alert ID: " + feature.properties.id +
                 	"<br>Reported time: " + date +
                 	"<br>Location: " +
                     coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW') +

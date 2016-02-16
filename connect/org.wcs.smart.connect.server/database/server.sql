@@ -179,7 +179,7 @@ CREATE TABLE connect.alert_types(
 	markerIcon varchar(16),
 	--possible values for color are 'red', 'darkred', 'orange', 'green', 'darkgreen', 'blue', 'purple', 'darkpuple', 'cadetblue'
 	markerColor varchar(16),
-	spin boolean,
+	spin boolean not null,
 	PRIMARY KEY (uuid)
 ) WITHOUT OIDS;
 
