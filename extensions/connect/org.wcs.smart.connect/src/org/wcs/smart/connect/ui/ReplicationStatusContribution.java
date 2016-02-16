@@ -215,7 +215,8 @@ public class ReplicationStatusContribution implements
 				}else{
 					message = Messages.StatusLineControl_ServernotFound;
 				}
-				
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
 			}finally{
 				session.getTransaction().rollback();
 				session.close();
