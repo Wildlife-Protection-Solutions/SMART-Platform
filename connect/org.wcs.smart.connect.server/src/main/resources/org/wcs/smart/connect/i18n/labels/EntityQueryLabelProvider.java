@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 
@@ -36,18 +37,18 @@ public class EntityQueryLabelProvider implements IEntityQueryLabelProvider {
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item == FixedQueryColumn.FixedColumns.CA_ID) return "Conservation Area ID";
-		if (item == FixedQueryColumn.FixedColumns.CA_NAME) return "Conservation Area Name";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE) return "Source";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_ID) return "Waypoint ID";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE) return "Waypoint Date";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME) return "Waypoint Time";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X) return "X";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_Y) return "Y";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION) return "Direction";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) return "Distance";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT) return "Comment";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER) return "Observer";
+		if (item == FixedQueryColumn.FixedColumns.CA_ID) return Messages.getString("EntityQueryLabelProvider.CAId", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.CA_NAME) return Messages.getString("EntityQueryLabelProvider.CAName", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE) return Messages.getString("EntityQueryLabelProvider.Source", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_ID) return Messages.getString("EntityQueryLabelProvider.WpId", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE) return Messages.getString("EntityQueryLabelProvider.Date", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME) return Messages.getString("EntityQueryLabelProvider.Time", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X) return Messages.getString("EntityQueryLabelProvider.X", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_Y) return Messages.getString("EntityQueryLabelProvider.Y", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION) return Messages.getString("EntityQueryLabelProvider.Direction", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) return Messages.getString("EntityQueryLabelProvider.Distance", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT) return Messages.getString("EntityQueryLabelProvider.comment", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER) return Messages.getString("EntityQueryLabelProvider.Observer", l); //$NON-NLS-1$
 		
 		return null;
 	}

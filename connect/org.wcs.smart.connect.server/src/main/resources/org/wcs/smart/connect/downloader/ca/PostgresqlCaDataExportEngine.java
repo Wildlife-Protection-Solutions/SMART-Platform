@@ -75,12 +75,12 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	public String[] getTableColumns(String tableName)
 			throws Exception {
 		/* write column listing to file */
-		String sql = "select column_name " +
-				"FROM information_schema.columns " +
-				" WHERE table_schema || '.' || table_name = '" + tableName.toLowerCase() + "'  " +
-				" AND ( column_default is null or (column_default is not null and " +
-				" column_default not like 'nextval(%::regclass)')) " +
-				" ORDER BY ordinal_position"; 
+		String sql = "select column_name " + //$NON-NLS-1$
+				"FROM information_schema.columns " + //$NON-NLS-1$
+				" WHERE table_schema || '.' || table_name = '" + tableName.toLowerCase() + "'  " + //$NON-NLS-1$ //$NON-NLS-2$
+				" AND ( column_default is null or (column_default is not null and " + //$NON-NLS-1$
+				" column_default not like 'nextval(%::regclass)')) " + //$NON-NLS-1$
+				" ORDER BY ordinal_position";  //$NON-NLS-1$
 		
 		@SuppressWarnings("unchecked")
 		List<String> data = getSession().createSQLQuery(sql).list();
@@ -197,20 +197,20 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeQuery(String fileName, String query) throws IOException{
 		
-		final Path outputFile = createFileName(getExportLocation().toPath(), fileName + ".dat");
+		final Path outputFile = createFileName(getExportLocation().toPath(), fileName + ".dat"); //$NON-NLS-1$
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
 				
 				String mdquery = query;
-				if (mdquery.toUpperCase().contains(" WHERE ")){
-					mdquery += " AND false";
+				if (mdquery.toUpperCase().contains(" WHERE ")){ //$NON-NLS-1$
+					mdquery += " AND false"; //$NON-NLS-1$
 				}else{
-					mdquery += " WHERE false";
+					mdquery += " WHERE false"; //$NON-NLS-1$
 				}
 				ResultSet rs = connection.createStatement().executeQuery(mdquery);
 				ResultSetMetaData md = rs.getMetaData();
-				String[] parts = query.substring(query.toUpperCase().indexOf("SELECT") + "SELECT".length(), query.toUpperCase().indexOf(" FROM ")).split(",");
+				String[] parts = query.substring(query.toUpperCase().indexOf("SELECT") + "SELECT".length(), query.toUpperCase().indexOf(" FROM ")).split(","); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				
 				
 				for (int i = 0; i < md.getColumnCount(); i ++){
@@ -218,25 +218,25 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 					if (classname.equals(UUID.class.getName())){
 //					if (md.getColumnType(i) == -2){
 						//TODO: assume uuid type ?? probably not correct
-						parts[i] = " replace(cast(" + parts[i] + " as varchar), '-', '')";	
+						parts[i] = " replace(cast(" + parts[i] + " as varchar), '-', '')";	 //$NON-NLS-1$ //$NON-NLS-2$
 					}else if (classname.equals(Boolean.class.getName())){
-						parts[i] = " case when " + parts[i] + " then 'true' else 'false' end";
+						parts[i] = " case when " + parts[i] + " then 'true' else 'false' end"; //$NON-NLS-1$ //$NON-NLS-2$
 					}else if (classname.equals(byte[].class.getName())){
-						parts[i] = " encode (" + parts[i] + ", 'hex')";
+						parts[i] = " encode (" + parts[i] + ", 'hex')"; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
-				String newQuery = "SELECT ";
+				String newQuery = "SELECT "; //$NON-NLS-1$
 				for (String x : parts){
-					newQuery += x + ",";
+					newQuery += x + ","; //$NON-NLS-1$
 				}
 				newQuery = newQuery.substring(0, newQuery.length() - 1);
-				newQuery = newQuery + query.substring(query.toUpperCase().indexOf(" FROM "));
+				newQuery = newQuery + query.substring(query.toUpperCase().indexOf(" FROM ")); //$NON-NLS-1$
 				
-				String sql = ("COPY (" + newQuery + ") TO STDOUT WITH (FORMAT CSV, ENCODING 'utf-8', HEADER false, QUOTE '\"', FORCE_QUOTE *)");
+				String sql = ("COPY (" + newQuery + ") TO STDOUT WITH (FORMAT CSV, ENCODING 'utf-8', HEADER false, QUOTE '\"', FORCE_QUOTE *)"); //$NON-NLS-1$ //$NON-NLS-2$
 				CopyManager copy = new CopyManager((BaseConnection) ((javax.sql.PooledConnection)connection).getConnection());
 				
 				
-				try(BufferedWriter out = Files.newBufferedWriter(outputFile, Charset.forName("UTF-8"))){
+				try(BufferedWriter out = Files.newBufferedWriter(outputFile, Charset.forName("UTF-8"))){ //$NON-NLS-1$
 					copy.copyOut(sql, out);
 				}catch(IOException ex){
 					throw new SQLException(ex);

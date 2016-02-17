@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,6 +54,9 @@ import au.com.bytecode.opencsv.CSVWriter;
  *
  */
 public class CsvExporter {
+	
+	public static final String FORMAT_KEY = "csv"; //$NON-NLS-1$
+	
 	private final Logger logger = Logger.getLogger(CsvExporter.class.getName());
 	
 	private File f;
@@ -79,7 +83,7 @@ public class CsvExporter {
 				
 				try (CSVWriter writer = new CSVWriter(
 						new OutputStreamWriter(
-			              new FileOutputStream(f.getAbsolutePath()), "utf-8")
+			              new FileOutputStream(f.getAbsolutePath()), StandardCharsets.UTF_8)
 						,delimiter)) {
 					
 					List<QueryColumn> cols = query.getQueryColumns(l, session);
@@ -117,7 +121,7 @@ public class CsvExporter {
 	public void exportResults(GriddedQuery query, IMemoryTableResultSet<GridResultItem> results, Session session) throws Exception{
 	
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-				new FileOutputStream(f.getAbsolutePath()), "utf-8"), delimiter)) {
+				new FileOutputStream(f.getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
 
 			List<QueryColumn> cols = query.getQueryColumns(l, session);
 
@@ -153,7 +157,7 @@ public class CsvExporter {
 			Session session) throws SQLException{
 		
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-				new FileOutputStream(f.getAbsolutePath()), "utf-8"), delimiter)) {
+				new FileOutputStream(f.getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
 
 			List<QueryColumn> cols = query.getQueryColumns(l, session);
 
@@ -191,8 +195,8 @@ public class CsvExporter {
 			Session session) throws SQLException{
 		
 		try(CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(f.getAbsoluteFile()), "UTF-8"), //$NON-NLS-1$ 
-				delimiter, '"',"\n")){ 
+				new OutputStreamWriter(new FileOutputStream(f.getAbsoluteFile()), StandardCharsets.UTF_8),  
+				delimiter, '"',"\n")){  //$NON-NLS-1$
 		
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
 				String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];

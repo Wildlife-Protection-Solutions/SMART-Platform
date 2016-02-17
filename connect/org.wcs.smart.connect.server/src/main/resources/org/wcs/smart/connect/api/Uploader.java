@@ -47,11 +47,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.tomcat.util.http.fileupload.MultipartStream;
 import org.hibernate.Session;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -255,7 +253,7 @@ public class Uploader extends HttpServlet {
 		item = getWorkItem(uuid);
 		
 		Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
-		List<InputPart> inputParts = uploadForm.get("upload_file");
+		List<InputPart> inputParts = uploadForm.get("upload_file"); //$NON-NLS-1$
 
 		for (InputPart inputPart : inputParts) {
 
@@ -274,11 +272,11 @@ public class Uploader extends HttpServlet {
 		            build();
 			
 		  } catch (IOException e) {
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Upload file not found");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("Uploader.FileNotFound", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
 		  }
 
 		}
-		throw new SmartConnectException(Response.Status.BAD_REQUEST, "Upload file not found");
+		throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("Uploader.FileNotFound", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
 	}
 
 }

@@ -228,12 +228,12 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		}
 		
 		//ca information
-		populateCaDetails(c, queryDataTable,"p_ca_uuid", query);
+		populateCaDetails(c, queryDataTable,"p_ca_uuid", query); //$NON-NLS-1$
 				
 		//populating categories
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
-		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid");
-		populateAdditionalWpoaTable(c, queryDataTable + "_tree", "tree_node_uuid");		
+		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		populateAdditionalWpoaTable(c, queryDataTable + "_tree", "tree_node_uuid");		 //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void populateAdditionalWpoaTable(Connection c, String tableName, String obsAttUuidColumn) throws SQLException {
@@ -241,7 +241,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 
-		sql = "INSERT INTO " + tableName + " (uuid) SELECT DISTINCT wpoa." + obsAttUuidColumn //$NON-NLS-1$
+		sql = "INSERT INTO " + tableName + " (uuid) SELECT DISTINCT wpoa." + obsAttUuidColumn //$NON-NLS-1$ //$NON-NLS-2$
 				+" FROM "  //$NON-NLS-1$
 				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
 				+ queryDataTable + " r on " //$NON-NLS-1$
@@ -249,7 +249,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 		
-		updateLabel(c, tableName, "uuid", "value");
+		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override

@@ -49,6 +49,7 @@ import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.ConnectUser;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUser;
 
 /**
@@ -68,7 +69,7 @@ public class ResetPasswordServlet extends HttpServlet{
 	/**
 	 * Servlet path
 	 */
-	public static final String PATH = "reset";
+	public static final String PATH = "reset"; //$NON-NLS-1$
 	
 	private static final long serialVersionUID = 1L;
 	/*
@@ -96,13 +97,13 @@ public class ResetPasswordServlet extends HttpServlet{
 		if (resetlink != null && resetlink.length() > 1){
 			resetlink = resetlink.substring(1);
 			//ensure reset link is 64 alpha numeric characters
-			if (Pattern.matches("[0-9a-z]{" + RESET_LINK_SIZE + "}", resetlink)){
+			if (Pattern.matches("[0-9a-z]{" + RESET_LINK_SIZE + "}", resetlink)){ //$NON-NLS-1$ //$NON-NLS-2$
 				
 				Session s = HibernateManager.getSession(request.getServletContext());
 				s.beginTransaction();
 				try{
 					SmartUser su = (SmartUser) s.createCriteria(SmartUser.class)
-						.add(Restrictions.eq("resetId", resetlink))
+						.add(Restrictions.eq("resetId", resetlink)) //$NON-NLS-1$
 						.uniqueResult();
 					if (su != null){
 						found = true;
@@ -132,8 +133,8 @@ public class ResetPasswordServlet extends HttpServlet{
 	 * 
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String userName = request.getParameter("username");
-		String resetId = request.getParameter("resettoken");
+		String userName = request.getParameter("username"); //$NON-NLS-1$
+		String resetId = request.getParameter("resettoken"); //$NON-NLS-1$
 		if (userName != null && resetId == null){
 			//create token and send email
 			try{
@@ -145,13 +146,13 @@ public class ResetPasswordServlet extends HttpServlet{
 		}else if (userName == null && resetId != null){
 			//reset password
 			try{
-				String newPassword = request.getParameter("new");
+				String newPassword = request.getParameter("new"); //$NON-NLS-1$
 				resetUserPasswordToken(resetId, newPassword, request);
 				response.setStatus(Status.OK.getStatusCode()); 
 			}catch(SmartConnectException ex){
 				response.setStatus(ex.getResponseCode());
 				if (((SmartConnectException)ex).getMessage() != null){
-					response.getWriter().write("{\"error\": \"" + ex.getMessage() + "\"}");
+					response.getWriter().write("{\"error\": \"" + ex.getMessage() + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$
 					response.getWriter().flush();
 				}	
 			}
@@ -173,10 +174,10 @@ public class ResetPasswordServlet extends HttpServlet{
 		s.beginTransaction();
 		try {
 			su = (SmartUser) s.createCriteria(SmartUser.class)
-					.add(Restrictions.eq("username", username)).uniqueResult();
+					.add(Restrictions.eq("username", username)).uniqueResult(); //$NON-NLS-1$
 			if (su == null) {
 				throw new SmartConnectException(Response.Status.NOT_FOUND,
-						"Username not found.");
+						Messages.getString("ResetPasswordServlet.UserNameNotFound", request.getLocale())); //$NON-NLS-1$
 			}
 			su.setResetDatetime(new Date());
 
@@ -196,21 +197,21 @@ public class ResetPasswordServlet extends HttpServlet{
 		try {
 			javax.naming.Context initCtx = new InitialContext();
 			javax.naming.Context envCtx = (javax.naming.Context) initCtx
-					.lookup("java:comp/env");
+					.lookup("java:comp/env"); //$NON-NLS-1$
 			javax.mail.Session session = (javax.mail.Session) envCtx
-					.lookup("mail/Session");
+					.lookup("mail/Session"); //$NON-NLS-1$
 
 			Message message = new MimeMessage(session);
 			InternetAddress to[] = new InternetAddress[1];
 			to[0] = new InternetAddress(su.getEmail());			
 			message.setRecipients(Message.RecipientType.TO, to);
-			message.setSubject("SMART Connect");
+			message.setSubject("SMART Connect"); //$NON-NLS-1$
 			message.setContent(
-					MessageFormat.format("Use the link below to reset your password.  This link can only be used once and is only valid for {0} minutes.", RESET_VALID_MIN)
-					+ "\n\n" + resetLink, "text/plain");
+					MessageFormat.format(Messages.getString("ResetPasswordServlet.ResetMessage", request.getLocale()), RESET_VALID_MIN) //$NON-NLS-1$
+					+ "\n\n" + resetLink, "text/plain"); //$NON-NLS-1$ //$NON-NLS-2$
 			Transport.send(message);
 		} catch (Exception ex) {
-			logger.log(Level.SEVERE, "Error sending forgot password email."
+			logger.log(Level.SEVERE, Messages.getString("ResetPasswordServlet.EmailSendError", request.getLocale()) //$NON-NLS-1$
 					+ ex.getMessage(), ex);
 			throw new SmartConnectException(
 					Response.Status.INTERNAL_SERVER_ERROR);
@@ -231,7 +232,7 @@ public class ResetPasswordServlet extends HttpServlet{
 		s.beginTransaction();
 		try {
 			su = (SmartUser) s.createCriteria(SmartUser.class)
-					.add(Restrictions.eq("resetId", resetToken)).uniqueResult();
+					.add(Restrictions.eq("resetId", resetToken)).uniqueResult(); //$NON-NLS-1$
 			if (su == null) {
 				throw new SmartConnectException(Response.Status.BAD_REQUEST);
 			}
@@ -250,12 +251,12 @@ public class ResetPasswordServlet extends HttpServlet{
 				request.getLocale());
 		if (passValidation != null) {
 			throw new SmartConnectException(Status.BAD_REQUEST,
-					"Invalid password. " + passValidation);
+					Messages.getString("ResetPasswordServlet.InvalidPassword", request.getLocale()) + passValidation); //$NON-NLS-1$
 
 		}
 		// validate reset link time
 		if ((new Date()).getTime() - linkDateTime.getTime() > RESET_VALID_MIN * 60 * 1000) {
-			logger.log(Level.WARNING, "Reset password link expired.");
+			logger.log(Level.WARNING, Messages.getString("ResetPasswordServlet.LinkExpired", request.getLocale())); //$NON-NLS-1$
 			throw new SmartConnectException(Status.BAD_REQUEST);
 		}
 

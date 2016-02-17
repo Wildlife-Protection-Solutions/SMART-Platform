@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.incident.IIncidentLabelProvider;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 
@@ -36,7 +37,7 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item instanceof IndepedentIncidentSource){
-			return "Independent Incident";
+			return Messages.getString("IncidentLabelProvider.IncidentLabel", l); //$NON-NLS-1$
 		}
 		return null;
 	}

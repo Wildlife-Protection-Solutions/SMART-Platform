@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.api;
 
 import java.io.File;
@@ -55,6 +76,12 @@ import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Data Processing Queue API functions
+ * 
+ * @author Emily
+ *
+ */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + DataQueue.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
@@ -160,15 +187,16 @@ public class DataQueue {
 		return items;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getProxyItems(String caFilter, String status, List<ServerDataQueueItem.Status> statusFilter,
 			List<ServerDataQueueItemProxy> proxyitems) {
 		if (status != null){
 			statusFilter = new ArrayList<ServerDataQueueItem.Status>();
-			for (String stat: status.split(",")){
+			for (String stat: status.split(",")){ //$NON-NLS-1$
 				try{
 					statusFilter.add(ServerDataQueueItem.Status.valueOf(stat));
 				}catch (Exception ex){
-					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Status filter " + stat + " not supported.");
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataQueue.StatusfilterNotSupported", SmartUtils.getRequestLocale(request)), stat)); //$NON-NLS-1$
 				}
 			}
 		}
@@ -183,7 +211,7 @@ public class DataQueue {
 				cas = s.createCriteria(ConservationAreaInfo.class).list();
 			}else{
 				cas = new ArrayList<ConservationAreaInfo>();
-				for (String x : caFilter.split(",")){
+				for (String x : caFilter.split(",")){ //$NON-NLS-1$
 					try{
 						UUID  cauuid = parseUuid(x);
 						ConservationAreaInfo i = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, cauuid);
@@ -192,7 +220,7 @@ public class DataQueue {
 						}
 					}catch (Exception ex){
 						//failed to parse
-						throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid ca filter.  Could not parse uuid");
+						throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidCaInvalidUUID", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 					}
 				}
 			}
@@ -201,9 +229,9 @@ public class DataQueue {
 					validateRead(ca.getUuid(), s);
 					
 					Criteria c = s.createCriteria(ServerDataQueueItem.class)
-							.add(Restrictions.eq("conservationArea", ca.getUuid()));
+							.add(Restrictions.eq("conservationArea", ca.getUuid())); //$NON-NLS-1$
 					if (statusFilter != null){
-						c.add(Restrictions.in("status", statusFilter));
+						c.add(Restrictions.in("status", statusFilter)); //$NON-NLS-1$
 					}
 					
 					List<ServerDataQueueItem> items = c.list();
@@ -220,8 +248,8 @@ public class DataQueue {
 				}
 			}
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Error reading data queue items.", ex);
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Error reading data queue items.", ex);
+			logger.log(Level.SEVERE, "Error reading data queue items.", ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("DataQueue.ReadError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
 			s.getTransaction().rollback();
 		}
@@ -247,10 +275,10 @@ public class DataQueue {
 			File toDelete = DataStoreManager.INSTANCE.getFile(item.getFile());
 			if (toDelete.exists()){
 				if (!toDelete.delete()){
-					logger.log(Level.WARNING, "Could not delete data queue file: " + toDelete.toString());
+					logger.log(Level.WARNING, "Could not delete data queue file: " + toDelete.toString()); //$NON-NLS-1$
 				}
 			}else{
-				logger.log(Level.WARNING, "Could not delete data queue file does not exist to delete: " + toDelete.toString());
+				logger.log(Level.WARNING, "Data eue file does not exist to delete: " + toDelete.toString()); //$NON-NLS-1$
 			}
 			s.delete(item);
 			
@@ -266,9 +294,9 @@ public class DataQueue {
 			return item;
 		}catch(Exception ex){
 			s.getTransaction().rollback();
-			logger.log(Level.SEVERE, "Error deleting data queue item: " +ex.getMessage(), ex);
+			logger.log(Level.SEVERE, "Error deleting data queue item: " +ex.getMessage(), ex); //$NON-NLS-1$
 			if (ex instanceof SmartConnectException) throw ex;
-			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error removing data queue item", ex);
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, Messages.getString("DataQueue.DeleteError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	}
 	
@@ -284,10 +312,10 @@ public class DataQueue {
 	public String createItem(ServerDataQueueItem item){
 		
 		if (item.getConservationArea() == null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Conservation area not specified.");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.CaNotProvided", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		if (item.getType() == null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Type not specified.");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.TypeNotProvided", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		Session s = HibernateManager.getSession(context);
@@ -297,10 +325,10 @@ public class DataQueue {
 			
 			ConservationAreaInfo ca = (ConservationAreaInfo)s.get(ConservationAreaInfo.class, item.getConservationArea());
 			if (ca == null){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid conservation area.");	
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidCA", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
 			}
 			if (ca.getStatus() == ConservationAreaInfo.Status.CCAA){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid conservation area (ccaa configurations are invalid).");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidCaCCA", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
 			if (lengthHeader == null){
@@ -327,7 +355,7 @@ public class DataQueue {
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_DATAQUEUE);
 			up.setTotalBytes(totalBytes);
-			up.setLocalFilename("");
+			up.setLocalFilename(""); //$NON-NLS-1$
 			s.save(up);
 			
 			File updir = DataStoreManager.INSTANCE.getFile(FILE_STORE_LOCATION);
@@ -336,7 +364,7 @@ public class DataQueue {
 			}
 
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(FILE_STORE_LOCATION 
-					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".file"));
+					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".file")); //$NON-NLS-1$
 			item.setFile(up.getLocalFilename());
 			item.setWorkItem(up.getUuid());
 			
@@ -381,9 +409,9 @@ public class DataQueue {
 			validateRead(item.getConservationArea(), s);
 			return item;
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Could not get data queue item: " +uuid, ex);
+			logger.log(Level.SEVERE, "Could not get data queue item: " +uuid, ex); //$NON-NLS-1$
 			if (ex instanceof SmartConnectException) throw ex;
-			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Could not get data queue item: " + uuid, ex);	
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, MessageFormat.format(Messages.getString("DataQueue.ItemNotFound", SmartUtils.getRequestLocale(request)), uuid), ex);	 //$NON-NLS-1$
 		}
 	}
 		
@@ -396,8 +424,7 @@ public class DataQueue {
 	@Consumes({ MediaType.APPLICATION_JSON})
 	@PUT
 	@Path("/items/{uuid}/")
-	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, 
-			ServerDataQueueItem newItem){
+	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, ServerDataQueueItem newItem){ 
 
 		UUID uuid = parseUuid(itemUuid);
 		Session s = HibernateManager.getSession(context);
@@ -405,13 +432,13 @@ public class DataQueue {
 		try{
 			ServerDataQueueItem item = (ServerDataQueueItem) s.get(ServerDataQueueItem.class, uuid);
 			if (item == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "Data queue item not found.");
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataQueue.ItemNotFound1", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			validateProcess(item.getConservationArea(), s);
 			
 			if (newItem.getStatus() == ServerDataQueueItem.Status.PROCESSING 
 					&& item.getStatus() != ServerDataQueueItem.Status.QUEUED){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Item on server has already been processed (by another client).");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.ItemAlreadyProcessed", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			
 			item.setStatus(newItem.getStatus());
@@ -420,7 +447,7 @@ public class DataQueue {
 			return item;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			logger.log(Level.SEVERE, "Could not update status. ", ex);
+			logger.log(Level.SEVERE, "Could not update status. ", ex); //$NON-NLS-1$
 			if (ex instanceof SmartConnectException) throw ex;
 			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex);
 		}
@@ -439,7 +466,7 @@ public class DataQueue {
 		try{
 			item = (ServerDataQueueItem) s.get(ServerDataQueueItem.class, uuid);
 			if (item == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "File not found.");
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataQueue.ItemNotFound1", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			validateProcess(item.getConservationArea(), s);
 			s.getTransaction().commit();
@@ -448,21 +475,21 @@ public class DataQueue {
 			throw ex;
 		}catch (Exception ex){
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
-			logger.log(Level.SEVERE, "Unable to get download file." + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to get download file.", ex); 
+			logger.log(Level.SEVERE, "Unable to get download file." + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.DownloadFileNotFound", SmartUtils.getRequestLocale(request)), ex);  //$NON-NLS-1$
 		}
 	
 		//item.getStatus()
 		if (item.getFile() == null){
-			throw new SmartConnectException(Response.Status.NOT_FOUND, "Data queue item server not found.");
+			throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataQueue.DqFileNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		final File toReturn = DataStoreManager.INSTANCE.getFile(item.getFile());
 		if (!toReturn.exists()){
-			throw new SmartConnectException(Response.Status.NOT_FOUND, "Data queue item server not found.");
+			throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataQueue.DqFileNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
-		String range = request.getHeader("Range");
+		String range = request.getHeader("Range"); //$NON-NLS-1$
 		long start = 0;
 		long end = toReturn.length()-1;
 		boolean hasRange = false;
@@ -470,7 +497,7 @@ public class DataQueue {
 			hasRange = true;
 			//parse the range
 			try{
-				String regex = "^bytes=([0-9]*)-([0-9]*)$";
+				String regex = "^bytes=([0-9]*)-([0-9]*)$"; //$NON-NLS-1$
 				Pattern p = Pattern.compile(regex);
 				Matcher m = p.matcher(range);
 				
@@ -484,13 +511,13 @@ public class DataQueue {
 				}
 				
 				if (end > toReturn.length()-1){
-					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "Range exceeds the maximum file length.");	
+					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, Messages.getString("DataQueue.InvalidRange", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
 				}
 				if (start > end){
-					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "start byte is greater than end byte.");
+					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, Messages.getString("DataQueue.InvalidStart", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
 			}catch (Exception ex){
-				throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "Range could not be parsed.");
+				throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, Messages.getString("DataQueue.InvalidRange2", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 		}
 
@@ -501,15 +528,15 @@ public class DataQueue {
 					try {
 						Files.copy(toReturn.toPath(), output);
 					} catch (Exception e) {
-						logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e);
+						logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e); //$NON-NLS-1$
 					}
 				}
 		    };
 			    
 			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"")
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
 					.header(HttpHeaders.CONTENT_LENGTH, toReturn.length())
-					.header("Accept-Ranges", "bytes")
+					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
 					.build();
 		}else{
 			final long startat = start;
@@ -526,10 +553,10 @@ public class DataQueue {
 			return Response.status(Response.Status.PARTIAL_CONTENT)
 					.entity(stream)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"")
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
 					.header(HttpHeaders.CONTENT_LENGTH, end - start + 1)
-					.header("Accept-Ranges", "bytes")
-					.header("Content-Range", "bytes " + start + "-" + end + "/" + toReturn.length())
+					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
+					.header("Content-Range", "bytes " + start + "-" + end + "/" + toReturn.length()) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					.build();
 		}
 	}
@@ -539,8 +566,8 @@ public class DataQueue {
 		try{
 			itemUuid= UuidUtils.stringToUuid(uuid);
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Invalid uuid: " + uuid + ". " + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request", ex);
+			logger.log(Level.SEVERE, "Invalid uuid: " + uuid + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.BadRequest", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 		return itemUuid;
 	}

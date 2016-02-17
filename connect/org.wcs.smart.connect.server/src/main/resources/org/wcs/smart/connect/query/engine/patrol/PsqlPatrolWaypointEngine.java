@@ -169,10 +169,10 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 			logger.finest(sql);
 			c.createStatement().execute(sql);
 		}
-		updateLabel(c, queryDataTable, "p_station_uuid", "p_station");
-		updateLabel(c, queryDataTable, "p_team_uuid", "p_team");
-		updateLabel(c, queryDataTable, "p_mandate_uuid", "p_mandate");
-		updateLabel(c, queryDataTable, "pl_transport_uuid", "p_transporttype");
+		updateLabel(c, queryDataTable, "p_station_uuid", "p_station"); //$NON-NLS-1$ //$NON-NLS-2$
+		updateLabel(c, queryDataTable, "p_team_uuid", "p_team"); //$NON-NLS-1$ //$NON-NLS-2$
+		updateLabel(c, queryDataTable, "p_mandate_uuid", "p_mandate"); //$NON-NLS-1$ //$NON-NLS-2$
+		updateLabel(c, queryDataTable, "pl_transport_uuid", "p_transporttype"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//leader & pilot
 		StringBuilder sql = new StringBuilder();
@@ -215,7 +215,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 			leaderSt.executeBatch();
 		}
 
-		populateCaDetails(c, queryDataTable, "p_ca_uuid",query);
+		populateCaDetails(c, queryDataTable, "p_ca_uuid",query); //$NON-NLS-1$
 	
 	}
 

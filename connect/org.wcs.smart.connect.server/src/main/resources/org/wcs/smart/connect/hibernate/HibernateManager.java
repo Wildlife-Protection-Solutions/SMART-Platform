@@ -106,7 +106,7 @@ public class HibernateManager {
 	public static List<SmartUser> getUsers(Session session){
 		return (List<SmartUser>)session
 					.createCriteria(SmartUser.class)
-					.addOrder(Order.asc("username"))
+					.addOrder(Order.asc("username")) //$NON-NLS-1$
 					.list();
 	}
 
@@ -136,10 +136,9 @@ public class HibernateManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public static List<ConservationAreaInfo> getConservationAreaInfosWithoutCCAA(Session session) {
-		UUID CCAAUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 		return (List<ConservationAreaInfo>)session
 				.createCriteria(ConservationAreaInfo.class)
-				.add(Restrictions.ne("uuid", CCAAUuid)) //$NON-NLS-1$
+				.add(Restrictions.ne("uuid", ConservationAreaInfo.CCAA_UUID)) //$NON-NLS-1$
 				.list();
 	}
 
@@ -161,7 +160,7 @@ public class HibernateManager {
 	public static List<AlertType> getAlertTypes(Session session) {
 		return (List<AlertType>)session
 				.createCriteria(AlertType.class)
-				.addOrder(Order.asc("label"))
+				.addOrder(Order.asc("label")) //$NON-NLS-1$
 				.list();
 	}
 
@@ -200,7 +199,7 @@ public class HibernateManager {
 	public static List<Alert> getAlertsByCa(Session session, UUID caUuid) {
 		return (List<Alert>)session
 				.createCriteria(Alert.class)
-				.add(Restrictions.eq("caUuid", caUuid))
+				.add(Restrictions.eq("caUuid", caUuid)) //$NON-NLS-1$
 				.list();
 	}
 	
@@ -208,7 +207,7 @@ public class HibernateManager {
 	public static List<MapLayer> getMapLayers(Session session) {
 		return (List<MapLayer>)session
 				.createCriteria(MapLayer.class)
-				.addOrder(Order.asc("layerOrder"))
+				.addOrder(Order.asc("layerOrder")) //$NON-NLS-1$
 				.list();
 	}
 

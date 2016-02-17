@@ -18,6 +18,9 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
 
+<script src="https://maps.google.com/maps/api/js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-realtime.js"></script>
+<link href='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css' rel='stylesheet' />
 
 
 <!-- 	var styleFillColors = { -->
@@ -76,9 +79,6 @@
 	  </c:forEach>
 	];
 </script>
-<script src="https://maps.google.com/maps/api/js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-realtime.js"></script>
-<link href='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css' rel='stylesheet' />
 
 <title><fmt:message key="alert.maptitle" /></title>
 </head>
@@ -181,7 +181,7 @@
 			
 			<p><fmt:message key="alert.filters.status" /><br>
 			<c:forEach var="s" items="${status}" varStatus="count">
-				<input class='filterStatus updateChange' name="${s}" value="${s}" type="checkbox" checked>${s}</input><br>
+				<input class='filterStatus updateChange' name="${s[1]}" value="${s[0]}" type="checkbox" checked>${s}</input><br>
 			</c:forEach>
 			
 			<p><fmt:message key="alert.filters.importance" /><br>

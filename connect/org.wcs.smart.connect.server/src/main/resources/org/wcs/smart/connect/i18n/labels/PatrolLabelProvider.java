@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
@@ -41,12 +42,12 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			return getLabel(((PatrolType)item).getType(), l);
 		}else if (item instanceof PatrolType.Type){
 			switch((PatrolType.Type)item){
-				case AIR: return "Air";
-				case GROUND: return "Ground";
-				case MARINE: return "Water";
+				case AIR: return Messages.getString("PatrolLabelProvider.AirPatrol", l); //$NON-NLS-1$
+				case GROUND: return Messages.getString("PatrolLabelProvider.GroundPatrol", l); //$NON-NLS-1$
+				case MARINE: return Messages.getString("PatrolLabelProvider.WaterPatrol", l); //$NON-NLS-1$
 			}
 		}else if (item instanceof PatrolWaypointSource){
-			return "Patrol";
+			return Messages.getString("PatrolLabelProvider.WpSource", l); //$NON-NLS-1$
 		}
 		return null;
 	}

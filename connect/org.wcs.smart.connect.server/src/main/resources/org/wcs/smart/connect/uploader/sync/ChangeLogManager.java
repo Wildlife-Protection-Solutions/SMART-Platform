@@ -48,8 +48,8 @@ import org.wcs.smart.connect.model.ChangeLogItem.Action;
 public enum ChangeLogManager {
 	INSTANCE;
 	
-	private static final String CHANGE_LOG_TABLE = "connect.change_log";
-	private static final String CHANGE_LOG_INFO_TABLE = "connect.change_log_history";
+	private static final String CHANGE_LOG_TABLE = "connect.change_log"; //$NON-NLS-1$
+	private static final String CHANGE_LOG_INFO_TABLE = "connect.change_log_history"; //$NON-NLS-1$
 	
 	/**
 	 * Delete all change log items with a revision 
@@ -63,23 +63,23 @@ public enum ChangeLogManager {
 	 */
 	public void deleteItems(Session s, Long maxRevision, UUID caUuid){
 		if (maxRevision < 0) return;
-		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE revision <= :maxrevision and ca_uuid = :cauuid";
+		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE revision <= :maxrevision and ca_uuid = :cauuid"; //$NON-NLS-1$ //$NON-NLS-2$
 		SQLQuery q = s.createSQLQuery(sql);
-		q.setParameter("maxrevision", maxRevision);
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		q.setParameter("maxrevision", maxRevision); //$NON-NLS-1$
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = s.createSQLQuery("SELECT count(*) FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid");
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		q = s.createSQLQuery("SELECT count(*) FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		Long cnt = ((BigInteger) q.uniqueResult()).longValue();
 		
 		if (cnt == 0){
-			q = s.createSQLQuery("INSERT INTO " + CHANGE_LOG_INFO_TABLE + " (ca_uuid, last_delete_revision) VALUES (:cauuid, :revision)");
+			q = s.createSQLQuery("INSERT INTO " + CHANGE_LOG_INFO_TABLE + " (ca_uuid, last_delete_revision) VALUES (:cauuid, :revision)"); //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
-			q = s.createSQLQuery("UPDATE " + CHANGE_LOG_INFO_TABLE + " SET last_delete_revision = :revision WHERE ca_uuid = :cauuid");
+			q = s.createSQLQuery("UPDATE " + CHANGE_LOG_INFO_TABLE + " SET last_delete_revision = :revision WHERE ca_uuid = :cauuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
-		q.setParameter("revision", maxRevision);
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		q.setParameter("revision", maxRevision); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
@@ -91,8 +91,8 @@ public enum ChangeLogManager {
 	 * @return
 	 */
 	private Long getLastDeleteRevision(Session s, UUID caUuid){
-		SQLQuery q = s.createSQLQuery("SELECT last_delete_revision FROM " + CHANGE_LOG_INFO_TABLE + " where ca_uuid = :cauuid");
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		SQLQuery q = s.createSQLQuery("SELECT last_delete_revision FROM " + CHANGE_LOG_INFO_TABLE + " where ca_uuid = :cauuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		BigInteger value = (BigInteger)q.uniqueResult();
 		if (value == null){
 			return -1l;
@@ -107,14 +107,14 @@ public enum ChangeLogManager {
 	 * @return
 	 */
 	public void deleteItems(Session s, UUID caUuid){
-		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :cauuid";
+		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :cauuid";  //$NON-NLS-1$//$NON-NLS-2$
 		SQLQuery q = s.createSQLQuery(sql);
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		sql = "DELETE FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid";
+		sql = "DELETE FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid"; //$NON-NLS-1$ //$NON-NLS-2$
 		q = s.createSQLQuery(sql);
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	/**
@@ -126,10 +126,10 @@ public enum ChangeLogManager {
 	 * @return
 	 */
 	public long getLastRevision(Session s, Date maxDate, UUID caUuid){
-		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE datetime < :maxdate and ca_uuid = :cauuid";
+		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE datetime < :maxdate and ca_uuid = :cauuid"; //$NON-NLS-1$ //$NON-NLS-2$
 		SQLQuery q = s.createSQLQuery(sql);
-		q.setParameter("maxdate", maxDate);
-		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		q.setParameter("maxdate", maxDate); //$NON-NLS-1$
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		BigInteger revision = (BigInteger) q.uniqueResult();
 		if (revision == null){
 			return -1;
@@ -138,9 +138,9 @@ public enum ChangeLogManager {
 	}
 	
 	public long getLastRevision(Session s, UUID ca){
-		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :ca";
+		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :ca"; //$NON-NLS-1$ //$NON-NLS-2$
 		SQLQuery q = s.createSQLQuery(sql);
-		q.setParameter("ca", ca, PostgresUUIDType.INSTANCE);
+		q.setParameter("ca", ca, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		Object rev = q.uniqueResult();
 		if (rev == null){
 			//there is nothing in the change log; check the history
@@ -159,7 +159,7 @@ public enum ChangeLogManager {
 	 * @return <code>true</code> if item exists, <code>false</code> otherwise
 	 */
 	public boolean constains(Session s, ChangeLogItem item){
-		SQLQuery query = s.createSQLQuery("SELECT count(*) from " + CHANGE_LOG_TABLE + " WHERE uuid = ?");
+		SQLQuery query = s.createSQLQuery("SELECT count(*) from " + CHANGE_LOG_TABLE + " WHERE uuid = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		query.setParameter(0, item.getUuid(), PostgresUUIDType.INSTANCE);
 		
 		List<?> data = query.list();
@@ -175,10 +175,10 @@ public enum ChangeLogManager {
 	 */
 	public void insertItem(Session s, ChangeLogItem item){
 		StringBuilder sb = new StringBuilder();
-		sb.append(" INSERT INTO ");
+		sb.append(" INSERT INTO "); //$NON-NLS-1$
 		sb.append(CHANGE_LOG_TABLE);
-		sb.append(" (uuid, action, filename, tablename, ca_uuid, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid)");
-		sb.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		sb.append(" (uuid, action, filename, tablename, ca_uuid, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid)"); //$NON-NLS-1$
+		sb.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); //$NON-NLS-1$
 		
 		SQLQuery query = s.createSQLQuery(sb.toString());
 		
@@ -217,46 +217,46 @@ public enum ChangeLogManager {
 		}
 		
 		StringBuilder query = new StringBuilder();
-		query.append("SELECT a.uuid, a.revision, a.action, a.filename, a.tablename, ");
-		query.append("a.key1_fieldname, a.key1, a.key2_fieldname, a.key2_str, a.key2_uuid, a.ca_uuid "); 
-		query.append("FROM " + CHANGE_LOG_TABLE + " a,"); 
-		query.append("( SELECT max(revision) as maxrevision, ");
-		query.append("action, filename, tablename, key1_fieldname, key1,"); 
-		query.append("key2_fieldname, key2_str, key2_uuid  FROM ");
+		query.append("SELECT a.uuid, a.revision, a.action, a.filename, a.tablename, "); //$NON-NLS-1$
+		query.append("a.key1_fieldname, a.key1, a.key2_fieldname, a.key2_str, a.key2_uuid, a.ca_uuid ");  //$NON-NLS-1$
+		query.append("FROM " + CHANGE_LOG_TABLE + " a,");  //$NON-NLS-1$ //$NON-NLS-2$
+		query.append("( SELECT max(revision) as maxrevision, "); //$NON-NLS-1$
+		query.append("action, filename, tablename, key1_fieldname, key1,");  //$NON-NLS-1$
+		query.append("key2_fieldname, key2_str, key2_uuid  FROM "); //$NON-NLS-1$
 		query.append(CHANGE_LOG_TABLE);
-		query.append(" WHERE ca_uuid = :ca1 ");
-		query.append(" AND revision > :revision1 ");
-		query.append("GROUP BY action, filename, tablename, key1_fieldname, key1,"); 
-		query.append("key2_fieldname, key2_str, key2_uuid) c ");
-		query.append("where a.ca_uuid = :ca2 "); 
-		query.append("and a.action = c.action ");
-		query.append("and (a.filename = c.filename or (a.filename is null and c.filename is null)) ");
-		query.append("and (a.tablename = c.tablename or (a.tablename is null and c.tablename is null)) ");
-		query.append("and (a.key1_fieldname = c.key1_fieldname or (a.key1_fieldname is null and c.key1_fieldname is null)) ");
-		query.append("and (a.key1 = c.key1 or (a.key1 is null and c.key1 is null)) ");
-		query.append("and (a.key2_fieldname = c.key2_fieldname or (a.key2_fieldname is null and c.key2_fieldname is null)) ");
-		query.append("and (a.key2_uuid = c.key2_uuid or (a.key2_uuid is null and c.key2_uuid is null)) ");
-		query.append("and (a.key2_str = c.key2_str or (a.key2_str is null and c.key2_str is null)) ");
-		query.append("and c.maxrevision = a.revision ");
-		query.append("AND a.revision > :revision2 ORDER BY c.maxrevision ");
+		query.append(" WHERE ca_uuid = :ca1 "); //$NON-NLS-1$
+		query.append(" AND revision > :revision1 "); //$NON-NLS-1$
+		query.append("GROUP BY action, filename, tablename, key1_fieldname, key1,");  //$NON-NLS-1$
+		query.append("key2_fieldname, key2_str, key2_uuid) c "); //$NON-NLS-1$
+		query.append("where a.ca_uuid = :ca2 ");  //$NON-NLS-1$
+		query.append("and a.action = c.action "); //$NON-NLS-1$
+		query.append("and (a.filename = c.filename or (a.filename is null and c.filename is null)) "); //$NON-NLS-1$
+		query.append("and (a.tablename = c.tablename or (a.tablename is null and c.tablename is null)) "); //$NON-NLS-1$
+		query.append("and (a.key1_fieldname = c.key1_fieldname or (a.key1_fieldname is null and c.key1_fieldname is null)) "); //$NON-NLS-1$
+		query.append("and (a.key1 = c.key1 or (a.key1 is null and c.key1 is null)) "); //$NON-NLS-1$
+		query.append("and (a.key2_fieldname = c.key2_fieldname or (a.key2_fieldname is null and c.key2_fieldname is null)) "); //$NON-NLS-1$
+		query.append("and (a.key2_uuid = c.key2_uuid or (a.key2_uuid is null and c.key2_uuid is null)) "); //$NON-NLS-1$
+		query.append("and (a.key2_str = c.key2_str or (a.key2_str is null and c.key2_str is null)) "); //$NON-NLS-1$
+		query.append("and c.maxrevision = a.revision "); //$NON-NLS-1$
+		query.append("AND a.revision > :revision2 ORDER BY c.maxrevision "); //$NON-NLS-1$
 //		System.out.println(query.toString());
 		
 		SQLQuery hquery = session.createSQLQuery(query.toString());
-		hquery.setParameter("ca1", caUuid, PostgresUUIDType.INSTANCE);
-		hquery.setLong("revision1", startRevision);
-		hquery.setParameter("ca2", caUuid, PostgresUUIDType.INSTANCE);
-		hquery.setLong("revision2", startRevision);
-		hquery.addScalar("uuid", PostgresUUIDType.INSTANCE);
-		hquery.addScalar("revision");
-		hquery.addScalar("action");
-		hquery.addScalar("filename");
-		hquery.addScalar("tablename");
-		hquery.addScalar("key1_fieldname");
-		hquery.addScalar("key1", PostgresUUIDType.INSTANCE);
-		hquery.addScalar("key2_fieldname");
-		hquery.addScalar("key2_str");
-		hquery.addScalar("key2_uuid", PostgresUUIDType.INSTANCE);
-		hquery.addScalar("ca_uuid", PostgresUUIDType.INSTANCE);
+		hquery.setParameter("ca1", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.setLong("revision1", startRevision); //$NON-NLS-1$
+		hquery.setParameter("ca2", caUuid, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.setLong("revision2", startRevision); //$NON-NLS-1$
+		hquery.addScalar("uuid", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.addScalar("revision"); //$NON-NLS-1$
+		hquery.addScalar("action"); //$NON-NLS-1$
+		hquery.addScalar("filename"); //$NON-NLS-1$
+		hquery.addScalar("tablename"); //$NON-NLS-1$
+		hquery.addScalar("key1_fieldname"); //$NON-NLS-1$
+		hquery.addScalar("key1", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.addScalar("key2_fieldname"); //$NON-NLS-1$
+		hquery.addScalar("key2_str"); //$NON-NLS-1$
+		hquery.addScalar("key2_uuid", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		hquery.addScalar("ca_uuid", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		
 		ScrollableResults results = hquery.scroll(ScrollMode.FORWARD_ONLY);
 		List<ChangeLogItem> items = new ArrayList<ChangeLogItem>();

@@ -68,7 +68,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){
-			logger.log(Level.SEVERE, "Error determining query columns.", ex);
+			logger.log(Level.SEVERE, "Error determining query columns.", ex); //$NON-NLS-1$
 			return null;
 		}
 		return null;
@@ -90,7 +90,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = QueryColumnUtils.trackObserver(ops);
 			}
 			if (add){
-				keys.add(new FixedQueryColumn(item, Locale.getDefault()));
+				keys.add(new FixedQueryColumn(item, l));
 			}
 		}
 		
@@ -117,7 +117,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = false;
 			}
 			if (add){
-				keys.add(new FixedQueryColumn(item, Locale.getDefault()));
+				keys.add(new FixedQueryColumn(item, l));
 			}
 		}
 		return keys;

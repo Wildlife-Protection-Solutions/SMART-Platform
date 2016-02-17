@@ -153,7 +153,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 		//ca information
-		populateCaDetails(c, queryDataTable, "p_ca_uuid",query);
+		populateCaDetails(c, queryDataTable, "p_ca_uuid",query); //$NON-NLS-1$
 	}
 
 	@Override

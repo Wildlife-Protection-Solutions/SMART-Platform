@@ -52,7 +52,7 @@ public class ZipUtil {
 				return tempDir;
 			}
 		}
-		throw new IllegalStateException("Could not create temporary directory");
+		throw new IllegalStateException("Could not create temporary directory"); //$NON-NLS-1$
 		
 	}
 	
@@ -160,7 +160,7 @@ public class ZipUtil {
 					if (!destinationFile.isDirectory()
 							&& !destinationFile.mkdirs()) {
 						throw new Exception(
-								"Could not create temp directory:"
+								"Could not create temp directory:" //$NON-NLS-1$
 										+ destinationFile.getPath());
 					}
 					continue;
@@ -170,7 +170,7 @@ public class ZipUtil {
 					if (!parentFolder.isDirectory()) {
 						if (!parentFolder.mkdirs()) {
 							throw new Exception(
-								"Could not create temp directory:"
+								"Could not create temp directory:" //$NON-NLS-1$
 											+ parentFolder.getPath());
 						}
 					}
@@ -189,7 +189,7 @@ public class ZipUtil {
 				}
 			}
 		} catch (IOException e) {
-			throw new Exception("Unzip failed: " + e.getLocalizedMessage(), e);
+			throw new Exception("Unzip failed: " + e.getLocalizedMessage(), e); //$NON-NLS-1$
 		} finally {
 			try {
 				archiveFile.close();

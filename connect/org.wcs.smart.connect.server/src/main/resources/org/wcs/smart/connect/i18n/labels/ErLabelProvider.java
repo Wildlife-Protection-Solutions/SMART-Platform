@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -40,31 +41,31 @@ public class ErLabelProvider implements IErLabelProvider{
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item == SamplingUnit.GeometryType.PLOT){
-			return "Point";
+			return Messages.getString("ErLabelProvider.Point", l); //$NON-NLS-1$
 		}
 		if (item == SamplingUnit.GeometryType.TRANSECT){
-			return "Linear"; 
+			return Messages.getString("ErLabelProvider.Line", l);  //$NON-NLS-1$
 		} 
 		if (item == SamplingUnit.State.ACTIVE){
-			return "Active";
+			return Messages.getString("ErLabelProvider.Active", l); //$NON-NLS-1$
 		}
 		if (item == SamplingUnit.State.INACTIVE){
-			return "Inactive";
+			return Messages.getString("ErLabelProvider.InActive", l); //$NON-NLS-1$
 		}
 		if (item == SurveyDesign.State.ACTIVE){
-			return "Active";
+			return Messages.getString("ErLabelProvider.SDActive", l); //$NON-NLS-1$
 		}
 		if (item == SurveyDesign.State.INACTIVE){
-			return "Inactive";
+			return Messages.getString("ErLabelProvider.SDInactive", l); //$NON-NLS-1$
 		}
 		if (item == MissionTrack.TrackType.TRACK){
-			return "Unassociated";
+			return Messages.getString("ErLabelProvider.MissionTrackUnassociated", l); //$NON-NLS-1$
 		}
 		if (item == MissionTrack.TrackType.SAMPLING_UNIT){
-			return "Sampling Unit";
+			return Messages.getString("ErLabelProvider.MissionTrackSU", l); //$NON-NLS-1$
 		}
 		if (item instanceof SurveyWaypointSource){
-			return  "Survey";
+			return  Messages.getString("ErLabelProvider.MissionTrackSurvey", l); //$NON-NLS-1$
 		}
 		return null;
 	}

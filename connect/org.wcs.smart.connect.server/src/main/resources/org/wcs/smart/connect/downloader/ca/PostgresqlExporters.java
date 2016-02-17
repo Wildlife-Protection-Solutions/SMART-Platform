@@ -46,7 +46,7 @@ import org.wcs.smart.util.UuidUtils;
 public class PostgresqlExporters {
 
 	public static final String CONFIG_TABLE_NAME = "db_versions"; //$NON-NLS-1$
-	public static final String PLUGIN_VERSION_TBL = "connect.ca_plugin_version";
+	public static final String PLUGIN_VERSION_TBL = "connect.ca_plugin_version"; //$NON-NLS-1$
 	
 	public void exportAll(ICaDataExportEngine exportEngine) throws Exception{
 		exportConservationAreaInfo(exportEngine);
@@ -96,24 +96,24 @@ public class PostgresqlExporters {
 	}
 	
 	private void exportPlugInConfiguration(ICaDataExportEngine exportEngine) throws Exception {
-		exportEngine.writeQuery(CONFIG_TABLE_NAME, "SELECT plugin_id, version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "'"); //$NON-NLS-1$
+		exportEngine.writeQuery(CONFIG_TABLE_NAME, "SELECT plugin_id, version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	private void exportServerStatus(ICaDataExportEngine exportEngine) throws Exception {
 		
 		long lastRevision = ChangeLogManager.INSTANCE.getLastRevision(exportEngine.getSession(), exportEngine.getConservationArea().getUuid());
-		String tableName = "smart.connect_status";
-		exportEngine.writeTableDefinitionFile(tableName, ConnectServerStatus.class.getSimpleName(), new String[]{"CA_UUID", "CONNECT_UUID", "VERSION", "SERVER_REVISION", "STATUS", "UPLOADURL", "LOCALFILE"});
+		String tableName = "smart.connect_status"; //$NON-NLS-1$
+		exportEngine.writeTableDefinitionFile(tableName, ConnectServerStatus.class.getSimpleName(), new String[]{"CA_UUID", "CONNECT_UUID", "VERSION", "SERVER_REVISION", "STATUS", "UPLOADURL", "LOCALFILE"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 		
-		String filename = tableName + "." + ConnectServerStatus.class.getSimpleName();
+		String filename = tableName + "." + ConnectServerStatus.class.getSimpleName(); //$NON-NLS-1$
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT a.ca_uuid, b.uuid, a.version, ");
+		sb.append("SELECT a.ca_uuid, b.uuid, a.version, "); //$NON-NLS-1$
 		sb.append(lastRevision);
-		sb.append(" , 'DONE', null, null ");
-		sb.append("FROM connect.ca_info a, smart.connect_server b left join ");
-		sb.append(" (SELECT max(revision) as max_revision, ca_uuid as ca_uuid FROM connect.change_log WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' GROUP BY ca_uuid) c");
-		sb.append(" on b.ca_uuid = c.ca_uuid ");
-		sb.append("WHERE b.ca_uuid = a.ca_uuid and a.ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString()  + "'");
+		sb.append(" , 'DONE', null, null "); //$NON-NLS-1$
+		sb.append("FROM connect.ca_info a, smart.connect_server b left join "); //$NON-NLS-1$
+		sb.append(" (SELECT max(revision) as max_revision, ca_uuid as ca_uuid FROM connect.change_log WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' GROUP BY ca_uuid) c"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" on b.ca_uuid = c.ca_uuid "); //$NON-NLS-1$
+		sb.append("WHERE b.ca_uuid = a.ca_uuid and a.ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString()  + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		System.out.println(sb.toString());
 		exportEngine.writeQuery(filename, sb.toString());
@@ -184,7 +184,7 @@ public class PostgresqlExporters {
 		
 		String version = (String)exportEngine
 			.getSession()
-			.createSQLQuery("SELECT version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' AND plugin_id = 'org.wcs.smart'")
+			.createSQLQuery("SELECT version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' AND plugin_id = 'org.wcs.smart'") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			.uniqueResult();
 		
 		Path file = exportEngine.getExportLocation().toPath().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
@@ -211,7 +211,7 @@ public class PostgresqlExporters {
 			ClassMetadata metadata = x.get(st.hibernateClass.getName());
 			if (metadata == null || metadata.hasSubclasses()){
 				//this is not mapped to a db table
-				System.out.println("NOT MAPPED:" + st.hibernateClass.getName());
+				System.out.println("NOT MAPPED:" + st.hibernateClass.getName()); //$NON-NLS-1$
 				continue;
 			}
 			String tableName = ((AbstractEntityPersister)metadata).getTableName();

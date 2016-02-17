@@ -37,7 +37,9 @@ import javax.ws.rs.core.HttpHeaders;
  */
 public class SmartUtils {
 
-	private static final char[] ALPHACHARS = "0123456789abcdefghiljklmnopqrstuvwxyz".toCharArray();
+	private static final char[] ALPHACHARS = "0123456789abcdefghiljklmnopqrstuvwxyz".toCharArray(); //$NON-NLS-1$
+	public static final SimpleDateFormat DT_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s"); //$NON-NLS-1$
+	public static final SimpleDateFormat D_FORMAT = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
 	
 	/**
 	 * Finds the locale provided in the given headers.  Returns
@@ -79,27 +81,6 @@ public class SmartUtils {
 		return new String(buf);
 	}
 	
-//	/**
-//	 * Generates a new uuid for the given object.
-//	 * 
-//	 * @param session
-//	 * @param obj
-//	 * @return
-//	 */
-//	public static UUID generateUUID(Session session, Object obj){
-//		UUIDGenerator uuidGenerator = UUIDGenerator
-//				.buildSessionFactoryUniqueIdentifierGenerator();
-//		Properties prop = new Properties();
-//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY,
-//				StandardRandomStrategy.INSTANCE);
-//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
-//				UUIDGenerationStrategy.class.getName());
-//		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
-//		return (UUID)uuidGenerator.generate((SessionImplementor) session, obj);
-//	}
-	
-	public static final SimpleDateFormat DT_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s");
-	public static final SimpleDateFormat D_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	/**
 	 * Parses a date string.  Assumes the string is provided as either
 	 * DT_FORMAT or D_FORMAT.

@@ -80,7 +80,6 @@ import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryEngine;
-import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -149,7 +148,7 @@ public enum QueryManager {
 		new PsqlSummaryIntelligenceQueryEngine()
 	};
 	
-	private static IDateFieldFilter[] dateFields = new IDateFieldFilter[]{
+	public static IDateFieldFilter[] dateFields = new IDateFieldFilter[]{
 		MissionEndDateField.INSTANCE,
 		MissionStartDateField.INSTANCE, 
 		MissionTrackDateField.INSTANCE, 
@@ -268,9 +267,9 @@ public enum QueryManager {
 	 * @throws SQLException
 	 */
 	public int getCategoryDepth(Session session, ConservationAreaFilter caFilter) throws SQLException{
-		org.hibernate.Query q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc");
-		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
-		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size()));
+		org.hibernate.Query q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc"); //$NON-NLS-1$
+		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setMaxResults(1);
 		Object[] x = (Object[])q.uniqueResult();
 		return (Integer)x[1];
@@ -286,8 +285,8 @@ public enum QueryManager {
 	 */
 	public void removeAccessToQueriesFromCa(UUID caUuid, Session s) throws SQLException{
 		for (Class<? extends Query> q : queryClasses){
-			org.hibernate.Query delete = s.createQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT uuid FROM " + q.getSimpleName() + " WHERE conservationArea.uuid = :ca)");
-			delete.setParameter("ca", caUuid);
+			org.hibernate.Query delete = s.createQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT uuid FROM " + q.getSimpleName() + " WHERE conservationArea.uuid = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
+			delete.setParameter("ca", caUuid); //$NON-NLS-1$
 			delete.executeUpdate();
 		}
 	}

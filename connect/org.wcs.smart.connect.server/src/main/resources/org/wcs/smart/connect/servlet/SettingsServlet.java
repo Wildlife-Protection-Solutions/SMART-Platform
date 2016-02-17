@@ -42,6 +42,7 @@ import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.StyleConfiguration;
+
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "settings")
 @MultipartConfig(fileSizeThreshold=1024*1024,maxFileSize=1024*1024*5, maxRequestSize=1024*1024*5*5)
 public class SettingsServlet extends HttpServlet{
@@ -67,11 +68,11 @@ public class SettingsServlet extends HttpServlet{
 			session.getTransaction().rollback();
 		}
 		
-		List<String>status = new ArrayList<String>();
+		List<String[]>status = new ArrayList<String[]>();
 		for (Alert.AlertStatusEnum x : Alert.AlertStatusEnum.values()) {
-			status.add(x.getValue());
+			status.add(new String[]{x.name(), x.getGuiName(request.getLocale())});
 		}
-		request.setAttribute("status", status);
+		request.setAttribute("status", status); //$NON-NLS-1$
 		
 		request.setAttribute("styles", styles); //$NON-NLS-1$
 		request.setAttribute("numstyles", styles.size()); //$NON-NLS-1$
@@ -85,36 +86,28 @@ public class SettingsServlet extends HttpServlet{
 	 protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	     StyleConfiguration style = new StyleConfiguration();
 
-	     style.setStyleId(request.getParameter("style_id"));
-	     Part filePart = request.getPart("bg_image"); 
+	     style.setStyleId(request.getParameter("style_id")); //$NON-NLS-1$
+	     Part filePart = request.getPart("bg_image");  //$NON-NLS-1$
 	     byte[] bg_image_bytes = null;
 	     try(InputStream fileContent = filePart.getInputStream()){
 	    	 bg_image_bytes = IOUtils.toByteArray(fileContent);
 	     }
 	     style.setActive(true);
-	     style.setServerName("Server #1");
 	     style.setBackgroundImage(bg_image_bytes);
 	     style.setHeaderImage(bg_image_bytes);
 	     style.setLoginImage(bg_image_bytes);
 	     style.setUsersImage(bg_image_bytes);
-	     style.setFooterText("Footer Text");
 
-	     
 	     Session session = HibernateManager.getSession(request.getServletContext());
 	     session.beginTransaction();
 		 try{
 			 session.save(style);
-			 session.getTransaction().commit();
-			 
+			 session.getTransaction().commit();			 
 		 }finally{
 			 session.close();
 		 }
 		 
-		 
-		 
 		 request.getRequestDispatcher("/WEB-INF/settings.jsp").forward(request, response); //$NON-NLS-1$
-	
-	    
 	 }
 	 
 }

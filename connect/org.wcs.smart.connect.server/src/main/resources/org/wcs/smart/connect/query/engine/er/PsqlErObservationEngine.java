@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
@@ -105,7 +106,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 			public void execute(Connection c) throws SQLException {
 				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
-					throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErObservationEngine.QueryTypeNotsupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
 				}
 				
 				SurveyDesignFilter filter = null;
@@ -178,10 +179,10 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 			c.createStatement().execute(sql);
 		}
 		//survey design name
-		updateLabel(c, queryDataTable, "surveydesign_uuid", "surveydesign_name");
+		updateLabel(c, queryDataTable, "surveydesign_uuid", "surveydesign_name"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//ca information
-		populateCaDetails(c, queryDataTable, "ca_uuid", query);
+		populateCaDetails(c, queryDataTable, "ca_uuid", query); //$NON-NLS-1$
 
 		//add observers
 		StringBuilder sqla = new StringBuilder();
@@ -219,16 +220,16 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
 
 		//waypoint observation list attributes
-		populateAdditionalWpoaTable(c, session, queryDataTable, queryDataTable +"_list", "list_element_uuid");
+		populateAdditionalWpoaTable(c, session, queryDataTable, queryDataTable +"_list", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		//waypoint observation tree attributes
-		populateAdditionalWpoaTable(c, session, queryDataTable, queryDataTable+ "_tree", "tree_node_uuid");
+		populateAdditionalWpoaTable(c, session, queryDataTable, queryDataTable+ "_tree", "tree_node_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		//mission attributes
-		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_mlist", "list_element_uuid");
+		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_mlist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//sampling unit attributes
-		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_sulist", "list_element_uuid");
+		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_sulist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 

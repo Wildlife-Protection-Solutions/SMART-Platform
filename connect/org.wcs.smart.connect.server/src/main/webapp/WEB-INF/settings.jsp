@@ -98,7 +98,7 @@
 		<td>
 			<p><fmt:message key="alert.filters.status" /><br>
 			<c:forEach var="s" items="${status}" varStatus="count">
-				<input id="status_${s}" class='filterStatus updateChange' name="${s}" value="${s}" type="checkbox">${s}</input><br>
+				<input id="status_${s}" class='filterStatus updateChange' name="${s[1]}" value="${s[0]}" type="checkbox">${s}</input><br>
 			</c:forEach>
 		</td>
 		<td>

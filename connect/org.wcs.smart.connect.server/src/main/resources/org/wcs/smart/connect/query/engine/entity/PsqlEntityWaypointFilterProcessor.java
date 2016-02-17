@@ -33,6 +33,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
@@ -456,7 +457,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 					sql.append(engine.tablePrefix(AttributeTreeNode.class));
 					sql.append(".hkey");  //$NON-NLS-1$
 				}else{
-					throw new RuntimeException(MessageFormat.format("Attribute type {0} not supported.", new Object[]{ff.getAttributeType()}));
+					throw new RuntimeException(MessageFormat.format(Messages.getString("PsqlEntityWaypointFilterProcessor.AttributeTypeNotSupported", engine.getLocale()), new Object[]{ff.getAttributeType()})); //$NON-NLS-1$
 				}
 				sql.append(" as value FROM "); //$NON-NLS-1$
 				sql.append(engine.tableNamePrefix(EntityType.class));
@@ -549,13 +550,13 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 						sql.append( "( foo.value " + PsqlFilterToSqlGenerator.asSql(efilter.getOperator()) + " " + p1 + " )" );  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 					}
 				}else if (efilter.getAttributeType() == AttributeType.TREE){
-					String p1 = engine.addParameterValue((String)efilter.getValue()+ "%");
+					String p1 = engine.addParameterValue((String)efilter.getValue()+ "%"); //$NON-NLS-1$
 					sql.append( "( foo.value like " + p1 + " ) ");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 				}
 			}
 			if (catfilter != null){
 				String keyPart = catfilter.getCategoryKey();
-				String p1 = engine.addParameterValue(keyPart + "%");
+				String p1 = engine.addParameterValue(keyPart + "%"); //$NON-NLS-1$
 				
 				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
@@ -609,7 +610,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 					sql.append(") "); //$NON-NLS-1$
 					
 				}else if (attfilter.getAttributeType() == AttributeType.TREE){
-					String p1 = engine.addParameterValue(((String)attfilter.getValue())+ "%");
+					String p1 = engine.addParameterValue(((String)attfilter.getValue())+ "%"); //$NON-NLS-1$
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(AttributeTreeNode.class));
 					sql.append(".hkey like " + p1 + " ) " );  //$NON-NLS-1$ //$NON-NLS-2$

@@ -78,7 +78,7 @@ import org.wcs.smart.connect.security.SecurityManager;
 @Produces({ MediaType.APPLICATION_JSON })
 public class ConnectUserAction extends HttpServlet {
 	
-	public static final String PATH = "privileges";
+	public static final String PATH = "privileges"; //$NON-NLS-1$
 	
 	private static final long serialVersionUID = 1L;
 	private final Logger logger = Logger.getLogger(ConnectUserAction.class.getName());
@@ -155,7 +155,7 @@ public class ConnectUserAction extends HttpServlet {
 		s.beginTransaction();
 		try{
 			List<SmartRole> roles = s.createCriteria(SmartRole.class)
-					.add(Restrictions.eq("isSystem", false)).list();
+					.add(Restrictions.eq("isSystem", false)).list(); //$NON-NLS-1$
 			
 			List<SmartActionsProxy> actionResources = new ArrayList<SmartActionsProxy>();
 			for (SmartRole r : roles){
@@ -189,7 +189,7 @@ public class ConnectUserAction extends HttpServlet {
 		try{
 			@SuppressWarnings("unchecked")
 			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
-					.add(Restrictions.eq("username", username))
+					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
 					.list();
 			
 			List<SmartUserPermissionProxy> items = new ArrayList<SmartUserPermissionProxy>();
@@ -208,7 +208,7 @@ public class ConnectUserAction extends HttpServlet {
 			
 			@SuppressWarnings("unchecked")
 			List<SmartUserRole> roles = s.createCriteria(SmartUserRole.class)
-					.add(Restrictions.eq("id.username", username))
+					.add(Restrictions.eq("id.username", username)) //$NON-NLS-1$
 					.list();
 			
 			for (SmartUserRole r : roles){
@@ -307,7 +307,7 @@ public class ConnectUserAction extends HttpServlet {
 		s.beginTransaction();
 		try{
 			SmartRole role = new SmartRole();
-			role.setRoleId(UUID.randomUUID().toString().replaceAll("-",""));
+			role.setRoleId(UUID.randomUUID().toString().replaceAll("-","")); //$NON-NLS-1$ //$NON-NLS-2$
 			role.setIsSystem(false);
 			role.setRoleName(action.getName());
 			s.save(role);
@@ -319,7 +319,7 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-					"Error creating new role.", ex); //$NON-NLS-1$
+					Messages.getString("ConnectUserAction.CreateRoleError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	}
 	
@@ -353,7 +353,7 @@ public class ConnectUserAction extends HttpServlet {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			if (ex instanceof SmartConnectException) throw (SmartConnectException)ex;
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-					"Error creating new role.", ex); //$NON-NLS-1$
+					Messages.getString("ConnectUserAction.UpdateRoleError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	}
 	/**
@@ -389,7 +389,7 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-					"Error removing role.", ex); //$NON-NLS-1$
+					Messages.getString("ConnectUserAction.DeleteRoleError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}	
 	}
 	
@@ -431,8 +431,8 @@ public class ConnectUserAction extends HttpServlet {
 			
 			@SuppressWarnings("unchecked")
 			List<SmartRoleAction> actions = s.createCriteria(SmartRoleAction.class)
-					.add(Restrictions.eq("role", role))
-					.add(Restrictions.eq("action", action))
+					.add(Restrictions.eq("role", role)) //$NON-NLS-1$
+					.add(Restrictions.eq("action", action)) //$NON-NLS-1$
 					.list();
 			
 			for(SmartRoleAction a : actions){
@@ -455,7 +455,7 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-					"Error removing action from role.", ex); //$NON-NLS-1$
+					Messages.getString("ConnectUserAction.DeleteRoleActionError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}	
 	}
 	
@@ -526,7 +526,7 @@ public class ConnectUserAction extends HttpServlet {
 			List<SmartUserPermissionProxy> privis = new ArrayList<SmartUserPermissionProxy>();
 			
 			List<SmartRoleAction> actions = s.createCriteria(SmartRoleAction.class)
-					.add(Restrictions.eq("role", role))
+					.add(Restrictions.eq("role", role)) //$NON-NLS-1$
 					.list();
 			for (SmartRoleAction a : actions){
 				SmartUserPermissionProxy proxy = new SmartUserPermissionProxy(Type.ACTION);
@@ -581,7 +581,8 @@ public class ConnectUserAction extends HttpServlet {
 		try{
 			SmartRole role = (SmartRole) s.get(SmartRole.class, roleid);
 			if (role == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "Role not found.");
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
+						MessageFormat.format(Messages.getString("ConnectUserAction.RoleNotFound1", SmartUtils.getRequestLocale(request)), roleid)); //$NON-NLS-1$
 			}
 			
 			SmartRoleAction newaction = new SmartRoleAction();
@@ -597,10 +598,10 @@ public class ConnectUserAction extends HttpServlet {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			if(ex instanceof ConstraintViolationException){
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-						"Error adding new action to role: Contraint Violoation. This is most likely because the user already has the permission you are trying to add.", ex); //$NON-NLS-1$
+						Messages.getString("ConnectUserAction.AddActionError1", SmartUtils.getRequestLocale(request)), ex);  //$NON-NLS-1$
 			}else{
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-						":Error adding new action to role.", ex); //$NON-NLS-1$
+						Messages.getString("ConnectUserAction.AddActionError", SmartUtils.getRequestLocale(request)), ex);  //$NON-NLS-1$
 			}
 		}
 	}
@@ -623,9 +624,9 @@ public class ConnectUserAction extends HttpServlet {
 		s.beginTransaction();
 		try{
 			
-			Query q = s.createQuery("FROM SmartUserRole r WHERE r.id.username = :username and r.id.role.roleId = :roleId");
-			q.setParameter("username", username);
-			q.setParameter("roleId", role);
+			Query q = s.createQuery("FROM SmartUserRole r WHERE r.id.username = :username and r.id.role.roleId = :roleId"); //$NON-NLS-1$
+			q.setParameter("username", username); //$NON-NLS-1$
+			q.setParameter("roleId", role); //$NON-NLS-1$
 			
 			List<SmartUserRole> roles = q.list();
 			for(SmartUserRole a : roles){
@@ -645,7 +646,7 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-					"Error deleting role.", ex); //$NON-NLS-1$
+					Messages.getString("ConnectUserAction.DeleteUserRoleError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}	
 	}
 	
@@ -668,7 +669,7 @@ public class ConnectUserAction extends HttpServlet {
 			SmartRole role = (SmartRole) s.get(SmartRole.class, roleId);
 			if (role == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
-						MessageFormat.format("The role {0} does not exist.", roleId)); //$NON-NLS-1$ 
+						MessageFormat.format(Messages.getString("ConnectUserAction.RoleDoesNotExist", SmartUtils.getRequestLocale(request)), roleId));  //$NON-NLS-1$
 			}
 			
 			SmartUserRole newrole = new SmartUserRole();
@@ -685,10 +686,10 @@ public class ConnectUserAction extends HttpServlet {
 			}
 			if(ex instanceof ConstraintViolationException){
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR,
-						"Error adding new role: Contraint Violoation. This is most likely because the user already has this role applied to it.", ex);
+						Messages.getString("ConnectUserAction.RoleAddError1", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 			}
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-						"Error adding new role.", ex); //$NON-NLS-1$
+						Messages.getString("ConnectUserAction.RoleAddError", SmartUtils.getRequestLocale(request)), ex);  //$NON-NLS-1$
 			
 		}
 	}

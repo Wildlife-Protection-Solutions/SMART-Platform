@@ -55,11 +55,11 @@ public class MenuItemsFilter implements Filter {
 		HOME("MenuItemsFilter.HomePageLabel", ConnectRESTApplication.SERVLET_PATH + "home", null), //$NON-NLS-1$ //$NON-NLS-2$
 		ACCOUNT("MenuItemsFilter.MyAccountLabel", ConnectRESTApplication.SERVLET_PATH + "myaccount", null), //$NON-NLS-1$ //$NON-NLS-2$
 		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null), //$NON-NLS-1$ //$NON-NLS-2$
-		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$
 		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALL_KEY), //$NON-NLS-1$ //$NON-NLS-2$
-		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
 		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null), //$NON-NLS-1$ //$NON-NLS-2$
-		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY);  //$NON-NLS-2$
+		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$
+		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
+		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY);   //$NON-NLS-1$//$NON-NLS-2$
 		
 		String nameKey;
 		String url;

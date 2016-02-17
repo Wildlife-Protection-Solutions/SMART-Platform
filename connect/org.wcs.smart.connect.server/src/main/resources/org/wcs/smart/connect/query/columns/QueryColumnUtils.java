@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import java.util.Locale;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -99,7 +101,7 @@ public class QueryColumnUtils {
 			
 			if (sq.getVisibleColumns() != null){
 				HashSet<String> keys = new HashSet<String>();
-				String[] bits = sq.getVisibleColumns().split(",");
+				String[] bits = sq.getVisibleColumns().split(","); //$NON-NLS-1$
 				for (String key : bits){
 					keys.add(key);
 				}
@@ -127,7 +129,7 @@ public class QueryColumnUtils {
 		
 		int ccnt = QueryManager.INSTANCE.getCategoryDepth(session, caFilter);
 		for (int i = 0; i < ccnt; i ++){
-			keys.add(new CategoryQueryColumn("Observation Category " + i, i){
+			keys.add(new CategoryQueryColumn(MessageFormat.format(Messages.getString("QueryColumnUtils.ObservationCategoryColumnName", l), i), i){ //$NON-NLS-1$
 				@Override
 				public Object getValue(IResultItem item) {
 					return null;
@@ -141,13 +143,13 @@ public class QueryColumnUtils {
 		
 		//attributes
 		//I want all attributes that are shared across all conservationAreas
-		String query = "SELECT keyId, type  FROM Attribute WHERE conservationArea.uuid in (:cauuids) group by keyId, type HAVING count(*) = :cnt order by keyId asc";
+		String query = "SELECT keyId, type  FROM Attribute WHERE conservationArea.uuid in (:cauuids) group by keyId, type HAVING count(*) = :cnt order by keyId asc"; //$NON-NLS-1$
 		org.hibernate.Query attquery = session.createQuery(query);
-		attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
-		attquery.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size()));
+		attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+		attquery.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		
 		//this gets the attribute name based on the requested locale name query 
-		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) AND a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end ";
+		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) AND a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
 		String allLocal = l.toString().toUpperCase();
 		String local = l.getLanguage().toUpperCase();
 		org.hibernate.Query nameQuery = session.createQuery(nameQueryHql);
@@ -158,10 +160,10 @@ public class QueryColumnUtils {
 			String keyid = (String) attribute[0];
 			AttributeType atype = (AttributeType) attribute[1];
 			
-			nameQuery.setParameter("attributeKey", keyid);
-			nameQuery.setParameter("code1", allLocal);
-			nameQuery.setParameter("code2", local);
-			nameQuery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
+			nameQuery.setParameter("attributeKey", keyid); //$NON-NLS-1$
+			nameQuery.setParameter("code1", allLocal); //$NON-NLS-1$
+			nameQuery.setParameter("code2", local); //$NON-NLS-1$
+			nameQuery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			nameQuery.setMaxResults(1);
 			String name = (String) nameQuery.uniqueResult();
 			

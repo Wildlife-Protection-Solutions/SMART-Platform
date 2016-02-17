@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
@@ -100,7 +101,7 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 			public void execute(Connection c) throws SQLException {
 				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
-					throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErMissionTrackEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
 				}
 				
 				SurveyDesignFilter filter = null;
@@ -165,13 +166,13 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 			c.createStatement().execute(sql);
 		}
 		//survey design name
-		updateLabel(c, queryDataTable, "surveydesign_uuid", "surveydesign_name");
+		updateLabel(c, queryDataTable, "surveydesign_uuid", "surveydesign_name"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		//ca information
-		populateCaDetails(c, queryDataTable, "ca_uuid", query);
+		populateCaDetails(c, queryDataTable, "ca_uuid", query); //$NON-NLS-1$
 		
 		//mission attributes
-		populateAdditionalMissionTable(c,session, sdFilter, caFilter, queryDataTable, queryDataTable +"_mlist", "list_element_uuid");
+		populateAdditionalMissionTable(c,session, sdFilter, caFilter, queryDataTable, queryDataTable +"_mlist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override

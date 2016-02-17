@@ -56,42 +56,42 @@ public class PatrolQueryResult implements IDbTableResultSet {
 	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
 		String columnKey = column.getKey();	
 		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id");
+			return rs.getString("ca_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name");
+			return rs.getString("ca_name"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_ID.getKey())){
-			return rs.getString("r_p_id");
+			return rs.getString("r_p_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_TYPE.getKey())){
-			return org.wcs.smart.patrol.model.PatrolType.Type.valueOf(rs.getString("r_p_type")).getGuiName(engine.getLocale());
+			return org.wcs.smart.patrol.model.PatrolType.Type.valueOf(rs.getString("r_p_type")).getGuiName(engine.getLocale()); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_START_DATE.getKey())){
-			return rs.getDate("r_p_start_date");
+			return rs.getDate("r_p_start_date"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_END_DATE.getKey())){
-			return rs.getDate("r_p_end_date");
+			return rs.getDate("r_p_end_date"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_OBJETIVE.getKey())){
-			return rs.getString("r_p_objective");
+			return rs.getString("r_p_objective"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_ARMED.getKey())){
-			return rs.getBoolean("r_p_is_armed");
+			return rs.getBoolean("r_p_is_armed"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_ID.getKey())){
-			return rs.getString("r_pl_id");
+			return rs.getString("r_pl_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE.getKey())){
-			return rs.getDate("r_pl_start_date");
+			return rs.getDate("r_pl_start_date"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE.getKey())){
-			return rs.getDate("r_pl_end_date");
+			return rs.getDate("r_pl_end_date"); //$NON-NLS-1$
 			
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_STATION.getKey())){
-			return rs.getString("p_station");
+			return rs.getString("p_station"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_TEAM.getKey())){
-			return rs.getString("p_team");
+			return rs.getString("p_team"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_MANDATE.getKey())){
-			return rs.getString("p_mandate");
+			return rs.getString("p_mandate"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER.getKey())){
-			return rs.getString("p_leader");
+			return rs.getString("p_leader"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT.getKey())){
-			return rs.getString("p_pilot");
+			return rs.getString("p_pilot"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE.getKey())){
-			return rs.getString("p_transporttype");
-		}else if (columnKey.equals("track")){
-			return rs.getString("track");
+			return rs.getString("p_transporttype"); //$NON-NLS-1$
+		}else if (columnKey.equals("track")){ //$NON-NLS-1$
+			return rs.getString("track"); //$NON-NLS-1$
 		}
 		return null;
 	}

@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.intelligence.query.IIntelligenceQueryLabelProvider;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
@@ -39,24 +40,24 @@ public class IntelligenceQueryLabelProvider implements
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item == FixedQueryColumn.FixedColumns.CA_ID) return "Conservation Area ID";
-		if (item == FixedQueryColumn.FixedColumns.CA_NAME) return "Conservation Area Name";
-		if (item == FixedQueryColumn.FixedColumns.INTEL_NAME) return "Name";
-		if (item == FixedQueryColumn.FixedColumns.INTEL_DATE_RECIEVED) return "Recieved Date";
-		if (item == FixedQueryColumn.FixedColumns.INTEL_DATE_FROM) return "From Date";
-		if (item == FixedQueryColumn.FixedColumns.INTEL_DATE_TO) return "To Date";
-		if (item == FixedQueryColumn.FixedColumns.INTEL_SOURCE) return "Source";
-		if (item == FixedQueryColumn.FixedColumns.INTEL_PATROL_SOURCE) return "Source Patrol";
-		if (item == FixedQueryColumn.FixedColumns.INTEL_INFORMANT_ID) return "Informant ID";
-		if (item == FixedQueryColumn.FixedColumns.INTEL_DESCRIPTION) return "Description";
+		if (item == FixedQueryColumn.FixedColumns.CA_ID) return Messages.getString("IntelligenceQueryLabelProvider.IdLabel", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.CA_NAME) return Messages.getString("IntelligenceQueryLabelProvider.CaName", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.INTEL_NAME) return Messages.getString("IntelligenceQueryLabelProvider.IntelName", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.INTEL_DATE_RECIEVED) return Messages.getString("IntelligenceQueryLabelProvider.RecievedName", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.INTEL_DATE_FROM) return Messages.getString("IntelligenceQueryLabelProvider.FromName", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.INTEL_DATE_TO) return Messages.getString("IntelligenceQueryLabelProvider.ToName", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.INTEL_SOURCE) return Messages.getString("IntelligenceQueryLabelProvider.SourceName", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.INTEL_PATROL_SOURCE) return Messages.getString("IntelligenceQueryLabelProvider.PatrolName", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.INTEL_INFORMANT_ID) return Messages.getString("IntelligenceQueryLabelProvider.InformantId", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.INTEL_DESCRIPTION) return Messages.getString("IntelligenceQueryLabelProvider.DescriptionLabel", l); //$NON-NLS-1$
 		
-		if (item == IntelligenceFilterOption.NAME) return "Name";
-		if (item == IntelligenceFilterOption.SOURCE) return "Source";
-		if (item == IntelligenceFilterOption.PATROLID) return "Source Patrol ID";
-		if (item == IntelligenceFilterOption.DESCRIPTION) return "Description";
-		if (item == IntelligenceFilterOption.INFORMANTID) return "Informant ID";
+		if (item == IntelligenceFilterOption.NAME) return Messages.getString("IntelligenceQueryLabelProvider.NameLabel", l); //$NON-NLS-1$
+		if (item == IntelligenceFilterOption.SOURCE) return Messages.getString("IntelligenceQueryLabelProvider.SourceLabel", l); //$NON-NLS-1$
+		if (item == IntelligenceFilterOption.PATROLID) return Messages.getString("IntelligenceQueryLabelProvider.PIDLabel", l); //$NON-NLS-1$
+		if (item == IntelligenceFilterOption.DESCRIPTION) return Messages.getString("IntelligenceQueryLabelProvider.DescriptionLabel", l); //$NON-NLS-1$
+		if (item == IntelligenceFilterOption.INFORMANTID) return Messages.getString("IntelligenceQueryLabelProvider.IDLabel", l); //$NON-NLS-1$
 		
-		if (item instanceof ReceivedDateFilter) return "Received Date";
+		if (item instanceof ReceivedDateFilter) return Messages.getString("IntelligenceQueryLabelProvider.ReceievedDateFilterLabel", l); //$NON-NLS-1$
 		return null;
 	}
 }

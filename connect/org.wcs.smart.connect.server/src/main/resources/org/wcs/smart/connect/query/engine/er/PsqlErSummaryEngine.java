@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ListItem;
@@ -183,7 +184,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 				try {
 					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 					if (caFilter.getConservationAreaFilterIds().size() > 1){
-						throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+						throw new SQLException(MessageFormat.format(Messages.getString("PsqlErSummaryEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
 					}
 					
 					SurveyDesignFilter surveyFilter = null;
@@ -683,8 +684,8 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			if (attributeItem.getCategoryKey() != null) {
-				p1 = addParameterValue(attributeItem.getCategoryKey() + "%");
-				sql.append(" AND ( foo.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(attributeItem.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append(" AND ( foo.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			if (groupBySql.length() > 0) {
 				sql.append(" GROUP BY "); //$NON-NLS-1$
@@ -769,8 +770,8 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			 
 			if (attributeItem.getCategoryKey() != null){
-				p1 = addParameterValue(attributeItem.getCategoryKey() + "%");
-				sql.append(" AND ( temp.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(attributeItem.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append(" AND ( temp.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -847,7 +848,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(AttributeTreeNode.class));
 			sql.append(".uuid and ("); //$NON-NLS-1$
 			
-			String p1 = addParameterValue(attributeItem.getItemKey()  + "%");
+			String p1 = addParameterValue(attributeItem.getItemKey()  + "%"); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeTreeNode.class));
 			sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 			
@@ -856,8 +857,8 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			 
 			if (attributeItem.getCategoryKey() != null){
-				p1 = addParameterValue(attributeItem.getCategoryKey() + "%");
-				sql.append(" AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$				
+				p1 = addParameterValue(attributeItem.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append(" AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -892,19 +893,19 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			for (int i = 0; i < groupBy.getGroupBys().size(); i ++){
 				IGroupBy gb = groupBy.getGroupBys().get(i);
 				
-				String key = gb.getKeyPart() + ":"; ;
+				String key = gb.getKeyPart() + ":"; ; //$NON-NLS-1$
 				switch (gb.getType()) {
 					case STRING:
-						key +=  rs.getString(rsindex++); //$NON-NLS-1$
+						key +=  rs.getString(rsindex++); 
 						break;
 					case BYTE:
 						key +=  UuidUtils.uuidToString((UUID)rs.getObject(rsindex++));
 						break;
 					case DATE:
-						key +=  rs.getDate(rsindex++).toString(); //$NON-NLS-1$
+						key +=  rs.getDate(rsindex++).toString(); 
 						break;
 					case KEY:
-						key +=  rs.getString(rsindex++); //$NON-NLS-1$
+						key +=  rs.getString(rsindex++); 
 						break;
 					case TIME:
 						int mins = rs.getInt(rsindex++);
@@ -950,7 +951,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 		if (!needsGroupBy){
 			HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
 			if (values2.values().size() != 1){
-				throw new SQLException("Invalid rate filter value");
+				throw new SQLException(Messages.getString("PsqlErSummaryEngine.InvalidRateFilter", getLocale())); //$NON-NLS-1$
 			}
 			Double denominator = values2.values().iterator().next();
 			
@@ -1053,9 +1054,9 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 		if (hkey == null){
 			sql.append(" cat_hkey is not null "); //$NON-NLS-1$
 		}else{
-			String p1 = addParameterValue(categoryItem.getCategoryHKey() + "%");
+			String p1 = addParameterValue(categoryItem.getCategoryHKey() + "%"); //$NON-NLS-1$
 			sql.append(" ("); //$NON-NLS-1$
-			sql.append("cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sql.append("cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		}
 		sql.append(") foo"); //$NON-NLS-1$
 		
@@ -1388,8 +1389,8 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
-					String p1 = addParameterValue(catkey + "%");
-					fromSql.append(" and (temp.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					String p1 = addParameterValue(catkey + "%"); //$NON-NLS-1$
+					fromSql.append(" and (temp.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ 
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$

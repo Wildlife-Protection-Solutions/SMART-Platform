@@ -155,7 +155,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 
-		populateCaDetails(c, queryDataTable,"p_ca_uuid", query);
+		populateCaDetails(c, queryDataTable,"p_ca_uuid", query); //$NON-NLS-1$
 	}
 
 	@Override

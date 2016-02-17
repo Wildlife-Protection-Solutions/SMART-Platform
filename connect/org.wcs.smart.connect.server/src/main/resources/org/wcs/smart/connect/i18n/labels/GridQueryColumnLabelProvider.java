@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
 
@@ -38,13 +39,13 @@ public class GridQueryColumnLabelProvider implements IGridQueryColumnLabelProvid
 	public String getLabel(Object key, Locale l) {
 		if (key instanceof GridQueryColumn.GridColumns){
 			switch((GridQueryColumn.GridColumns)key){
-				case TILE_X:return "Tile X ID";
-				case TILE_Y:return "Tile Y ID";
-				case VALUE:return "Value";
+				case TILE_X:return Messages.getString("GridQueryColumnLabelProvider.XId", l); //$NON-NLS-1$
+				case TILE_Y:return Messages.getString("GridQueryColumnLabelProvider.YId", l); //$NON-NLS-1$
+				case VALUE:return Messages.getString("GridQueryColumnLabelProvider.Value", l); //$NON-NLS-1$
 			}
 		}
 		if (key.equals(GRID_TO_BIG_KEY)){
-			return "Grid too large.  Increase the grid size."	;
+			return Messages.getString("GridQueryColumnLabelProvider.GridTooBig", l); //$NON-NLS-1$
 		}
 		return null;
 	}

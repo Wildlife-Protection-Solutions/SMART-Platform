@@ -47,7 +47,7 @@ public class PatrolObservationQueryResult implements IDbTableResultSet {
 	}
 	
 	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable());
+		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
 	}
 
 	@Override
@@ -59,69 +59,69 @@ public class PatrolObservationQueryResult implements IDbTableResultSet {
 	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
 		String columnKey = column.getKey();
 		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id");
+			return rs.getString("ca_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name");
+			return rs.getString("ca_name"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_ID.getKey())){
-			return rs.getString("p_id");
+			return rs.getString("p_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_TYPE.getKey())){
-			return org.wcs.smart.patrol.model.PatrolType.Type.valueOf(rs.getString("p_type")).getGuiName(engine.getLocale());
+			return org.wcs.smart.patrol.model.PatrolType.Type.valueOf(rs.getString("p_type")).getGuiName(engine.getLocale()); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_START_DATE.getKey())){
-			return rs.getDate("p_startdate");
+			return rs.getDate("p_startdate"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_END_DATE.getKey())){
-			return rs.getDate("p_enddate");
+			return rs.getDate("p_enddate"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_STATION.getKey())){
-			return rs.getString("p_station");
+			return rs.getString("p_station"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_TEAM.getKey())){
-			return rs.getString("p_team");
+			return rs.getString("p_team"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_OBJETIVE.getKey())){
-			return rs.getString("p_objective");
+			return rs.getString("p_objective"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_MANDATE.getKey())){
-			return rs.getString("p_mandate");
+			return rs.getString("p_mandate"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_ARMED.getKey())){
-			return rs.getBoolean("p_armed");
+			return rs.getBoolean("p_armed"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_ID.getKey())){
-			return rs.getString("p_legid");
+			return rs.getString("p_legid"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER.getKey())){
-			return rs.getString("p_leader");
+			return rs.getString("p_leader"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT.getKey())){
-			return rs.getString("p_pilot");
+			return rs.getString("p_pilot"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE.getKey())){
-			return rs.getString("p_transporttype");
+			return rs.getString("p_transporttype"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
-			return rs.getInt("wp_id");
+			return rs.getInt("wp_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())){
-			return rs.getDate("wp_date");
+			return rs.getDate("wp_date"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
-			return rs.getTime("wp_time");
+			return rs.getTime("wp_time"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-			return rs.getDouble("wp_x");
+			return rs.getDouble("wp_x"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-			return rs.getDouble("wp_y");
+			return rs.getDouble("wp_y"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
-			Object x = rs.getObject("wp_direction");
+			Object x = rs.getObject("wp_direction"); //$NON-NLS-1$
 			if (x == null) return null;
 			return (Double)x;
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
-			Object x = rs.getObject("wp_distance");
+			Object x = rs.getObject("wp_distance"); //$NON-NLS-1$
 			if (x == null) return null;
 			return (Double)x;
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
-			return rs.getString("wp_comment");
+			return rs.getString("wp_comment"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
-			return rs.getString("ob_observer");
-		}else if (columnKey.startsWith("category:")){
-			String level = columnKey.split(":")[1];
-			return rs.getString("category_"+level);
-		}else if (columnKey.startsWith("attribute:")){
-			UUID obuuid = (UUID) rs.getObject("ob_uuid");
+			return rs.getString("ob_observer"); //$NON-NLS-1$
+		}else if (columnKey.startsWith("category:")){ //$NON-NLS-1$
+			String level = columnKey.split(":")[1]; //$NON-NLS-1$
+			return rs.getString("category_"+level); //$NON-NLS-1$
+		}else if (columnKey.startsWith("attribute:")){ //$NON-NLS-1$
+			UUID obuuid = (UUID) rs.getObject("ob_uuid"); //$NON-NLS-1$
 			if (obuuid == null) return null;
 			if (!obuuid.equals(obUuid)){
 				attributeToValue = new HashMap<String, Object>();
 				obUuid = obuuid;
 				attachObservations(obuuid, c);
 			}
-			String key = columnKey.split(":")[1];
+			String key = columnKey.split(":")[1]; //$NON-NLS-1$
 			return attributeToValue.get(key);
 		}
 			

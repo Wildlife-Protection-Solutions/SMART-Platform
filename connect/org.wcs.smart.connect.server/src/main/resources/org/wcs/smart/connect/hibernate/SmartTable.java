@@ -149,6 +149,7 @@ import org.wcs.smart.report.model.ReportQuery;
  * @author Emily
  *
  */
+@SuppressWarnings("nls")
 public enum SmartTable {
 
 	EMPLOYEE(Employee.class, null),

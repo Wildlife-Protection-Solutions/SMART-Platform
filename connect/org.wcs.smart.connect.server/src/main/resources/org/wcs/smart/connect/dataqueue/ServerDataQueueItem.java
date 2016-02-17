@@ -18,11 +18,11 @@ import org.wcs.smart.connect.i18n.Messages;
 public class ServerDataQueueItem extends DataQueueItem{
 
 	public enum Status{
-		UPLOADING("ServerDataQueueItem.Uploading"),
-		QUEUED("ServerDataQueueItem.Queued"),
-		PROCESSING("ServerDataQueueItem.Processing"),
-		COMPLETE("ServerDataQueueItem.Complete"),
-		ERROR("ServerDataQueueItem.Error");
+		UPLOADING("ServerDataQueueItem.Uploading"), //$NON-NLS-1$
+		QUEUED("ServerDataQueueItem.Queued"), //$NON-NLS-1$
+		PROCESSING("ServerDataQueueItem.Processing"), //$NON-NLS-1$
+		COMPLETE("ServerDataQueueItem.Complete"), //$NON-NLS-1$
+		ERROR("ServerDataQueueItem.Error"); //$NON-NLS-1$
 		
 		private String guiName;
 		

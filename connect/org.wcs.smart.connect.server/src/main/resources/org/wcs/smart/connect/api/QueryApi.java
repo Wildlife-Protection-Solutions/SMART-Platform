@@ -58,6 +58,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
@@ -110,6 +111,7 @@ public class QueryApi extends HttpServlet{
 	 * @param cafilter
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	@GET
     @Path("/{queryuuid}")
 	public Response getQueryResults(@PathParam("queryuuid") String queryUuid, 
@@ -128,7 +130,7 @@ public class QueryApi extends HttpServlet{
 			try{
 				startDate = SmartUtils.parseDate(start);
 			}catch (Exception ex){
-				return createErrorResponse(Status.BAD_REQUEST, "Could not parse start date.  Must be of form yyyy-MM-dd H:m:s");
+				return createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.StartDateError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 		}
 		
@@ -136,17 +138,17 @@ public class QueryApi extends HttpServlet{
 			try{
 				endDate = SmartUtils.parseDate(end);
 			}catch (Exception ex){
-				return createErrorResponse(Status.BAD_REQUEST, "Could not parse end date.  Must be of form yyyy-MM-dd H:m:s");
+				return createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.EndDateError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 		}
 		
 		IDateFieldFilter dateField = QueryManager.INSTANCE.findDateField(filter);
 		if (dateField == null){
-			return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format("Invalid date field field.  {0} not supported.", filter));
+			return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateField", SmartUtils.getRequestLocale(request)), filter)); //$NON-NLS-1$
 		}
 		
 		if (delimiter == null){
-			delimiter = ",";
+			delimiter = ","; //$NON-NLS-1$
 		}
 		
 		IDateFilter dfilter = null;
@@ -176,7 +178,7 @@ public class QueryApi extends HttpServlet{
 				return Response.status(Status.NOT_FOUND).build();
 			}
 			if (!QueryManager.INSTANCE.supportsDateField(query.getTypeKey(), df.getDateFieldOption())){
-				return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format("The date filter field {0} is not supported for the query type {1}", query.getTypeKey(), df.getDateFieldOption().getGuiName(request.getLocale())));
+				return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateFilterForQueryType", SmartUtils.getRequestLocale(request)), query.getTypeKey(), df.getDateFieldOption().getGuiName(request.getLocale()))); //$NON-NLS-1$
 			}
 			query = query.clone(query.getOwner());
 			if (query.getConservationArea().getIsCcaa()){
@@ -189,14 +191,14 @@ public class QueryApi extends HttpServlet{
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
 					//access is OK since they have access to All Queries in this CA.
 				}else{
-					return createErrorResponse(Status.BAD_REQUEST, "You do not have permissions to access this Query.");
+					return createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
 			}
 	
 									
 			IQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 			if(engine == null){
-				String error = MessageFormat.format("No query engine for query type {1}.", query.getTypeKey());
+				String error = MessageFormat.format(Messages.getString("QueryApi.NoQueryEngine", SmartUtils.getRequestLocale(request)), query.getTypeKey()); //$NON-NLS-1$
 				return createErrorResponse(Status.NOT_IMPLEMENTED, error);
 			}
 		
@@ -208,12 +210,12 @@ public class QueryApi extends HttpServlet{
 			params.put(Session.class.getName(), s);
 			params.put(Locale.class.getName(), request.getLocale());
 			
-			File f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.tmp");
+			File f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
 			
 			try{
 				IQueryResult result = engine.executeQuery(query, params);
 			
-				if (format.equalsIgnoreCase("csv")){
+				if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
 					CsvExporter exporter = new CsvExporter(f, delimiter.charAt(0),request.getLocale());
 				
 					if (result instanceof IDbTableResultSet
@@ -226,7 +228,7 @@ public class QueryApi extends HttpServlet{
 						exporter.exportResults(query, (SummaryQueryResult)result, s);
 					}
 				}else{
-					return createErrorResponse(Status.NOT_IMPLEMENTED, "Query export not implemented for select query type and format.");
+					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
 			}finally{
 				if (engine instanceof AbstractQueryEngine){
@@ -247,7 +249,7 @@ public class QueryApi extends HttpServlet{
 			    };
 			
 			//return accepted
-			Response rs = Response.ok(stream, MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name())
+			Response rs = Response.ok(stream, MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name()) //$NON-NLS-1$
 		            .build();
 			return rs;
 		}catch (Exception ex){
@@ -256,7 +258,7 @@ public class QueryApi extends HttpServlet{
 				error = ex.getCause().getMessage();
 			}
 			logger.log(Level.SEVERE, error, ex);
-			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, MessageFormat.format("Error executing query: {0}", error));
+			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, MessageFormat.format(Messages.getString("QueryApi.ExecuteError", SmartUtils.getRequestLocale(request)), error)); //$NON-NLS-1$
 		}finally{
 			s.getTransaction().commit();
 		}
@@ -264,7 +266,7 @@ public class QueryApi extends HttpServlet{
 	}
 	
 	private String parseCaFilter(String caFilter, Session session){
-		if (caFilter == null) throw new SmartConnectException(Status.BAD_REQUEST, "Invalid conservation area filter.  At least one valid conservation area uuid must be provided."); 
+		if (caFilter == null) throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("QueryApi.InvalidCAFilter", SmartUtils.getRequestLocale(request)));  //$NON-NLS-1$
 		String bits[] = caFilter.split(ConservationAreaFilter.CA_SPLITTER);
 		StringBuilder validCas = new StringBuilder();
 		
@@ -273,7 +275,7 @@ public class QueryApi extends HttpServlet{
 				UUID cauuid = UuidUtils.stringToUuid(cafilter);
 				ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, cauuid);
 				if (ca != null && !ca.getIsCcaa()){
-					validCas.append(",");
+					validCas.append(","); //$NON-NLS-1$
 					validCas.append(ca.getUuid().toString());
 				}
 			}catch (Exception ex){
@@ -281,7 +283,7 @@ public class QueryApi extends HttpServlet{
 			}
 		}
 		if (validCas.length() == 0){
-			throw new SmartConnectException(Status.BAD_REQUEST, "Invalid conservation area filter.  At least one valid conservation area uuid must be provided.");
+			throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("QueryApi.InvalidCAFilter", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		validCas.deleteCharAt(0);
 		return validCas.toString();
@@ -333,11 +335,11 @@ public class QueryApi extends HttpServlet{
 	
 	
 	private Response createErrorResponse(Status code, String message){
-		String error = MessageFormat.format("\"status\": {0}, \"error:\": \"" + message + "\"", code.getStatusCode(), message);
+		String error = MessageFormat.format("\"status\": {0}, \"error:\": \"" + message + "\"", code.getStatusCode(), message); //$NON-NLS-1$ //$NON-NLS-2$
 		return Response
 				.status(code)
-				.header("Content-Type", MediaType.APPLICATION_JSON)
-				.entity("{" + error +"}")
+				.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
+				.entity("{" + error +"}") //$NON-NLS-1$ //$NON-NLS-2$
 				.build();
 	}
 }

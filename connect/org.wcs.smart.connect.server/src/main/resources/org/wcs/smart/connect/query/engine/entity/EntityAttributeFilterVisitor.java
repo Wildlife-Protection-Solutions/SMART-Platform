@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.entity.model.Entity;
@@ -113,7 +114,7 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 						ff.getAttributeType() == AttributeType.TREE){
 					tmp.append("varchar(128)"); //$NON-NLS-1$
 				}else{
-					throw new RuntimeException(MessageFormat.format("Attribute type {0} not supported.", new Object[]{ff.getAttributeType()}));
+					throw new RuntimeException(MessageFormat.format(Messages.getString("EntityAttributeFilterVisitor.AttribteTypeNotSupported", engine.getLocale()), new Object[]{ff.getAttributeType()})); //$NON-NLS-1$
 				}
 				tmp.append(")"); //$NON-NLS-1$
 				logger.finest(tmp.toString());

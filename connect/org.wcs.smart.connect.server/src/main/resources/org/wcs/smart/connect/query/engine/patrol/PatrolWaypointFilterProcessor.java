@@ -474,7 +474,7 @@ public class PatrolWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" WHERE "); //$NON-NLS-1$
 			if (catfilter != null){
 				String keyPart = catfilter.getCategoryKey();
-				String p1 = engine.addParameterValue(keyPart + "%") ;
+				String p1 = engine.addParameterValue(keyPart + "%") ; //$NON-NLS-1$
 				
 				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
@@ -525,7 +525,7 @@ public class PatrolWaypointFilterProcessor implements IFilterProcessor{
 					}
 					sql.append(") "); //$NON-NLS-1$
 				}else if (attfilter.getAttributeType() == AttributeType.TREE){
-					String p2 = engine.addParameterValue(((String)attfilter.getValue())+ "%");
+					String p2 = engine.addParameterValue(((String)attfilter.getValue())+ "%"); //$NON-NLS-1$
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(AttributeTreeNode.class));
 					sql.append(".hkey like " + p2 + " ) " );  //$NON-NLS-1$ //$NON-NLS-2$ 

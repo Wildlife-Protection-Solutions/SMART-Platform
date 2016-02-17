@@ -413,7 +413,7 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" WHERE "); //$NON-NLS-1$
 			if (catfilter != null){
 				String keyPart = catfilter.getCategoryKey();
-				String p1 = engine.addParameterValue(keyPart+ "%");
+				String p1 = engine.addParameterValue(keyPart+ "%"); //$NON-NLS-1$
 				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
 				sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -464,7 +464,7 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 				}else if (attfilter.getAttributeType() == AttributeType.TREE){
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(AttributeTreeNode.class));
-					String p1 = engine.addParameterValue(((String)attfilter.getValue()) + "%");
+					String p1 = engine.addParameterValue(((String)attfilter.getValue()) + "%"); //$NON-NLS-1$
 					sql.append(".hkey like " + p1 + " ) " );  //$NON-NLS-1$ //$NON-NLS-2$ 
 				}else if (attfilter.getAttributeType() == AttributeType.DATE){
 
@@ -476,8 +476,8 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 					//so here we check the attribute type before parsing the string value.
 
 					sql.append("("); //$NON-NLS-1$
-					sql.append(" CASE WHEN ");
-					sql.append(prefix(Attribute.class) + ".att_type = 'DATE' THEN");
+					sql.append(" CASE WHEN "); //$NON-NLS-1$
+					sql.append(prefix(Attribute.class) + ".att_type = 'DATE' THEN"); //$NON-NLS-1$
 					sql.append(" DATE ("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
 					sql.append(".string_value ) "); //$NON-NLS-1$

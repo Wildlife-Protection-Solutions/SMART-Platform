@@ -68,20 +68,20 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	
 	public String getDataQuery(){
 		StringBuilder fields = new StringBuilder();
-		fields.append("ca_id,ca_name, r_p_ca_uuid, r_p_uuid,");
-		fields.append("r_p_id,r_p_start_date,r_p_end_date,r_p_station_uuid,");
-		fields.append("r_p_team_uuid,r_p_objective,r_p_mandate_uuid,r_p_type,");
-		fields.append("r_p_is_armed,r_pl_transport_uuid,r_pl_id,r_pl_start_date,");
-		fields.append("r_pl_end_date,r_plm_leader,r_plm_pilot,r_pl_uuid,");
-		fields.append("p_station,p_team,p_mandate,p_transporttype,p_leader,p_pilot");
+		fields.append("ca_id,ca_name, r_p_ca_uuid, r_p_uuid,"); //$NON-NLS-1$
+		fields.append("r_p_id,r_p_start_date,r_p_end_date,r_p_station_uuid,"); //$NON-NLS-1$
+		fields.append("r_p_team_uuid,r_p_objective,r_p_mandate_uuid,r_p_type,"); //$NON-NLS-1$
+		fields.append("r_p_is_armed,r_pl_transport_uuid,r_pl_id,r_pl_start_date,"); //$NON-NLS-1$
+		fields.append("r_pl_end_date,r_plm_leader,r_plm_pilot,r_pl_uuid,"); //$NON-NLS-1$
+		fields.append("p_station,p_team,p_mandate,p_transporttype,p_leader,p_pilot"); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT ");
+		sb.append("SELECT "); //$NON-NLS-1$
 		sb.append(fields.toString());
-		sb.append(",st_astext(st_collect(st_geomfromwkb(r_track))) as track ");
-		sb.append("FROM ");
+		sb.append(",st_astext(st_collect(st_geomfromwkb(r_track))) as track "); //$NON-NLS-1$
+		sb.append("FROM "); //$NON-NLS-1$
 		sb.append(queryDataTable);
-		sb.append(" GROUP BY ");
+		sb.append(" GROUP BY "); //$NON-NLS-1$
 		sb.append(fields.toString());
 		 
 		return sb.toString();
@@ -170,7 +170,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		
 		StringBuilder sql = new StringBuilder();
 		
-		sql.append("CREATE TABLE " + queryDataTable + " AS ");
+		sql.append("CREATE TABLE " + queryDataTable + " AS "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append(buildSelectClause());
 		sql.append(" FROM "); //$NON-NLS-1$

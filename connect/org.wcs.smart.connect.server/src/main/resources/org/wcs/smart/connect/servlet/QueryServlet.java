@@ -22,6 +22,8 @@
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -30,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
+import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
  * Query servlet.
@@ -47,7 +51,12 @@ public class QueryServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		request.setAttribute("search", request.getParameter("search")); //$NON-NLS-1$
+		List<String[]> dateFilters = new ArrayList<String[]>();
+		for (IDateFieldFilter dateFilter : QueryManager.dateFields){
+			dateFilters.add(new String[]{dateFilter.getKey(), dateFilter.getGuiName(request.getLocale())});
+		}
+		request.setAttribute("datefilters", dateFilters); //$NON-NLS-1$
+		request.setAttribute("search", request.getParameter("search")); //$NON-NLS-1$ //$NON-NLS-2$
 		request.getRequestDispatcher("/WEB-INF/query.jsp").forward(request, response); //$NON-NLS-1$
 	}
 

@@ -37,12 +37,12 @@ public enum LockManager {
 	
 	public void lockDatabase(Session session, ConservationAreaInfo info) throws Exception{
 		Integer lockKey = info.getLockKey();
-		session.createSQLQuery("SELECT cast(pg_advisory_lock(" + lockKey + ") as varchar)").list();
+		session.createSQLQuery("SELECT cast(pg_advisory_lock(" + lockKey + ") as varchar)").list(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public void releaseDatabase(Session session, ConservationAreaInfo info ) throws Exception{
 		Integer lockKey = info.getLockKey();
-		session.createSQLQuery("SELECT cast(pg_advisory_unlock(" + lockKey + ") as varchar)").list();
+		session.createSQLQuery("SELECT cast(pg_advisory_unlock(" + lockKey + ") as varchar)").list(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
 

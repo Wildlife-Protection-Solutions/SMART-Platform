@@ -679,8 +679,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 			sql.append(".keyid = " + p1); //$NON-NLS-1$
 			
 			if (attributeItem.getCategoryKey() != null) {
-				String p2 = addParameterValue(attributeItem.getCategoryKey() + "%");
-				sql.append(" AND ( foo.cat_hkey like " + p2 + ") "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String p2 = addParameterValue(attributeItem.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append(" AND ( foo.cat_hkey like " + p2 + ") "); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			if (groupBySql.length() > 0) {
 				sql.append(" GROUP BY "); //$NON-NLS-1$
@@ -764,8 +764,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 			
 			
 			if (attributeItem.getCategoryKey() != null){
-				p1 = addParameterValue(attributeItem.getCategoryKey() + "%");
-				sql.append(" AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(attributeItem.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append(" AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -841,7 +841,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(AttributeTreeNode.class));
 			sql.append(".uuid and ("); //$NON-NLS-1$
 			
-			String p1 = addParameterValue(attributeItem.getItemKey() + "%");
+			String p1 = addParameterValue(attributeItem.getItemKey() + "%"); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeTreeNode.class));
 			sql.append(".hkey like " + p1 ); //$NON-NLS-1$
 			sql.append(") and "); //$NON-NLS-1$
@@ -851,8 +851,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 			sql.append(".keyid = " + p1); //$NON-NLS-1$
 			
 			if (attributeItem.getCategoryKey() != null){
-				p1 = addParameterValue(attributeItem.getCategoryKey() + "%");
-				sql.append(" AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(attributeItem.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append(" AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -947,7 +947,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 		if (!filterValue2){
 			values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, false);
 			if (values2.values().size() != 1){
-				throw new SQLException("Invalid filter computation");
+				throw new SQLException("Invalid filter computation"); //$NON-NLS-1$
 			}
 			
 			Double denominator = values2.values().iterator().next();
@@ -1050,7 +1050,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 		if (hkey == null){
 			sql.append(" cat_hkey is not null "); //$NON-NLS-1$
 		}else{
-			String p1 = addParameterValue(categoryItem.getCategoryHKey() + "%");
+			String p1 = addParameterValue(categoryItem.getCategoryHKey() + "%"); //$NON-NLS-1$
 			
 			sql.append(" ("); //$NON-NLS-1$
 			sql.append("cat_hkey like " + p1); //$NON-NLS-1$
@@ -1247,7 +1247,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
-					String p1 = addParameterValue(catkey + "%");					
+					String p1 = addParameterValue(catkey + "%");					 //$NON-NLS-1$
 					fromSql.append(" and (temp.cat_hkey like " + p1); //$NON-NLS-1$
 					fromSql.append(") "); //$NON-NLS-1$
 				}

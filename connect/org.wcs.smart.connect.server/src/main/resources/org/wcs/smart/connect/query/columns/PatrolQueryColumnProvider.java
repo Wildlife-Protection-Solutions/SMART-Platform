@@ -70,7 +70,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){
-			logger.log(Level.SEVERE, "Error determining query columns.", ex);
+			logger.log(Level.SEVERE, "Error determining query columns.", ex); //$NON-NLS-1$
 			return null;
 		}
 		return null;

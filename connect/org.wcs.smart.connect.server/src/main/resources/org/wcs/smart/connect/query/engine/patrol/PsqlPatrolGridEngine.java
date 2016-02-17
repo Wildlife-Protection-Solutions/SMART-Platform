@@ -52,6 +52,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -143,7 +144,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			throw new SQLException(ex);
 		}
 		if (pgSrid == null){
-			throw new SQLException("Projection not supported on connect.  You must add the projection to the connect database.");
+			throw new SQLException(Messages.getString("PsqlPatrolGridEngine.ProjectionNotSupported", locale)); //$NON-NLS-1$
 		}
 		 
 		session.doWork(new Work() {
@@ -399,7 +400,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 					sql.append(".category_uuid = "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(Category.class));
 					sql.append( ".uuid" ); //$NON-NLS-1$
-					p1 = addParameterValue(tmp.getCategoryKey() + "%");
+					p1 = addParameterValue(tmp.getCategoryKey() + "%"); //$NON-NLS-1$
 					sql.append(" AND Hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
@@ -428,8 +429,8 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 					sql.append(".tree_node_uuid "); //$NON-NLS-1$
 					sql.append(" and ("); //$NON-NLS-1$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					p1 = addParameterValue(tmp.getItemKey() + "%");
-					sql.append(".hkey like " + p1 + ")"); //$NON-NLS-1$
+					p1 = addParameterValue(tmp.getItemKey() + "%"); //$NON-NLS-1$
+					sql.append(".hkey like " + p1 + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 					
 				}
 
@@ -473,8 +474,8 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 						+ ".uuid" //$NON-NLS-1$
 						+ " AND "); //$NON-NLS-1$
 				if (tmp.getCategoryHKey() != null){
-					p1 = addParameterValue(tmp.getCategoryHKey() + "%");
-					sql.append("hkey like " + p1 + " "); //$NON-NLS-1$
+					p1 = addParameterValue(tmp.getCategoryHKey() + "%"); //$NON-NLS-1$
+					sql.append("hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 				}else{
 					sql.append(" hkey is not null "); //$NON-NLS-1$
 				}
@@ -492,7 +493,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 				rs = parseQueryString(c, sql.toString()).executeQuery();
 				
 			}else{
-				throw new SQLException("Grid value not supported");	
+				throw new SQLException(Messages.getString("PsqlPatrolGridEngine.GridValueNotSupported", locale));	 //$NON-NLS-1$
 			}
 		
 			try {
@@ -553,7 +554,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			
 		}else{
 			throw new UnsupportedOperationException(
-					MessageFormat.format("Patrol value {0} not supported.", new Object[]{option.getGuiName(Locale.getDefault())}));
+					MessageFormat.format(Messages.getString("PsqlPatrolGridEngine.PatrolValueNotsupported", locale), new Object[]{option.getGuiName(Locale.getDefault())})); //$NON-NLS-1$
 		}
 		return computePatrolTrack(c, engine, dataField);
 	}

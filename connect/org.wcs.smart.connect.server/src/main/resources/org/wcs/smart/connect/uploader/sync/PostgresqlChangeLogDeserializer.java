@@ -53,7 +53,7 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 
 	@Override
 	public void processFile(final Session session) throws Exception{
-		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate();
+		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
 		super.processFile(session);
 	}
 	
@@ -122,10 +122,10 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 	@Override
 	protected void processDataDelete(ChangeLogItem item, Connection c) throws Exception{
 		StringBuilder sb = new StringBuilder();
-		sb.append("DELETE FROM " + item.getTableName());
-		sb.append(" WHERE " + item.getFieldName1() + " = ?");
+		sb.append("DELETE FROM " + item.getTableName()); //$NON-NLS-1$
+		sb.append(" WHERE " + item.getFieldName1() + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (item.getFieldName2() != null){
-			sb.append(" AND " + item.getFieldName2()  + " = ?");
+			sb.append(" AND " + item.getFieldName2()  + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		ps.setObject(1, item.getKey1());
@@ -140,22 +140,22 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 	@Override
 	protected void processDataUpdate(ChangeLogItem item, HashMap<String, Object> data, Connection c) throws Exception{
 		StringBuilder sb = new StringBuilder();
-		sb.append("UPDATE " + item.getTableName());
-		sb.append(" SET ");
+		sb.append("UPDATE " + item.getTableName()); //$NON-NLS-1$
+		sb.append(" SET "); //$NON-NLS-1$
 		
 		List<Object> params = new ArrayList<Object>();
 		for(Entry<String, Object> dataitem : data.entrySet()){
 			String colName = dataitem.getKey();
 			Object obj = dataitem.getValue();	
-			sb.append(colName + " = ?, ");
+			sb.append(colName + " = ?, "); //$NON-NLS-1$
 			params.add(obj);
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		sb.append(" WHERE " + item.getFieldName1() + " = ?");
+		sb.append(" WHERE " + item.getFieldName1() + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (item.getFieldName2() != null){
-			sb.append(" AND " + item.getFieldName2()  + " = ?");
+			sb.append(" AND " + item.getFieldName2()  + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		PreparedStatement ps = c.prepareStatement(sb.toString());
@@ -170,39 +170,39 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		}
 		int cnt = ps.executeUpdate();
 		if (cnt != 1){
-			throw new SQLException("Invalid number of rows updated.");
+			throw new SQLException("Invalid number of rows updated."); //$NON-NLS-1$
 		}
 	}
 	
 	@Override
 	protected void processDataInsert(ChangeLogItem item, HashMap<String, Object> data,Connection c) throws Exception{
 		StringBuilder sb = new StringBuilder();
-		sb.append("INSERT INTO " + item.getTableName() + "(");
+		sb.append("INSERT INTO " + item.getTableName() + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		StringBuilder values = new StringBuilder();
-		values.append("VALUES(");
+		values.append("VALUES("); //$NON-NLS-1$
 		
 		List<Object> params = new ArrayList<Object>();
 		for(Entry<String, Object> dataitem : data.entrySet()){
 			String colName = dataitem.getKey();
 			Object obj = dataitem.getValue();	
-			sb.append(colName + ",");
-			values.append("?,");
+			sb.append(colName + ","); //$NON-NLS-1$
+			values.append("?,"); //$NON-NLS-1$
 			params.add(obj);
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		values.deleteCharAt(values.length() - 1);
 		
-		sb.append(") ");
+		sb.append(") "); //$NON-NLS-1$
 		sb.append(values.toString());
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		PreparedStatement ps = c.prepareStatement(sb.toString() );
 		for (int i = 1; i <= params.size(); i ++){
 			ps.setObject(i, params.get(i-1));
 		}
 		int cnt = ps.executeUpdate();
 		if (cnt != 1){
-			throw new SQLException("Invalid number of rows updated.");
+			throw new SQLException("Invalid number of rows updated."); //$NON-NLS-1$
 		}
 	}
 }

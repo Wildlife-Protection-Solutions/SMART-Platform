@@ -97,9 +97,9 @@ import org.wcs.smart.util.UuidUtils;
 @Produces({ MediaType.APPLICATION_JSON })
 public class ConservationAreas extends HttpServlet{
 	
-	private static final String DATA_PARAM_CHANGELOG_VALUE = "changelog";
-	private static final String DATA_PARAM_ALL_VALUE = "all";
-	private static final String DATA_PARAM_PACKAGE_VALUE = "package";
+	private static final String DATA_PARAM_CHANGELOG_VALUE = "changelog"; //$NON-NLS-1$
+	private static final String DATA_PARAM_ALL_VALUE = "all"; //$NON-NLS-1$
+	private static final String DATA_PARAM_PACKAGE_VALUE = "package"; //$NON-NLS-1$
 
 	public static final String PATH = "conservationarea"; //$NON-NLS-1$
 	
@@ -246,14 +246,14 @@ public class ConservationAreas extends HttpServlet{
 				if (version != null && revision != null){
 					return buildChangeLog(caUuid, version, revision);
 				}else{
-					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request.  Version and revision are required for change log request.");			
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.MissingEelement", SmartUtils.getRequestLocale(request)));			 //$NON-NLS-1$
 				}
 			}else if (data.equalsIgnoreCase(DATA_PARAM_ALL_VALUE)){
 				return buildConservationAreaExport(caUuid);
 			}else if (data.equalsIgnoreCase(DATA_PARAM_PACKAGE_VALUE)){
 				return getExportFile(version);
 			}else{
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format("Bad request.  '{0}' not a valid value for data parameter.  Must be one of {{1} or {2}}.", data, DATA_PARAM_ALL_VALUE, DATA_PARAM_CHANGELOG_VALUE));			
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConservationAreas.InvalidDataParameter", SmartUtils.getRequestLocale(request)), data, DATA_PARAM_ALL_VALUE, DATA_PARAM_CHANGELOG_VALUE));			 //$NON-NLS-1$
 			}
 		}
 	}
@@ -268,8 +268,8 @@ public class ConservationAreas extends HttpServlet{
 		try{
 			uuid= UuidUtils.stringToUuid(statusUuid);
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Invalid uuid: " + statusUuid + ". " + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request", ex);
+			logger.log(Level.SEVERE, "Invalid uuid: " + statusUuid + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.BadRequest", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	
 		WorkItem item = null;
@@ -278,7 +278,7 @@ public class ConservationAreas extends HttpServlet{
 		try{
 			item = (WorkItem) s.get(WorkItem.class, uuid);
 			if (item == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "Download package not found.");
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DownloadPackageNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			validateRead(item.getConservationAreaInfo().getUuid(), s);
 			s.getTransaction().commit();
@@ -287,24 +287,24 @@ public class ConservationAreas extends HttpServlet{
 			throw ex;
 		}catch (Exception ex){
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
-			logger.log(Level.SEVERE, "Unable to get download file." + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to get download file.", ex); 
+			logger.log(Level.SEVERE, Messages.getString("ConservationAreas.DownloadError", SmartUtils.getRequestLocale(request)) + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.DownloadError", SmartUtils.getRequestLocale(request)), ex);  //$NON-NLS-1$
 		}
 	
 		if (item.getType() != WorkItem.Type.DOWN_CA &&
 				item.getType() != WorkItem.Type.DOWN_SYNC){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid request.");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.BadRequest", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		if (item.getStatus() != WorkItem.Status.COMPLETE){
-			throw new SmartConnectException(Response.Status.NOT_FOUND, "Package not created.");
+			throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.PackageNotCreated", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		final File toReturn = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
 		if (!toReturn.exists()){
-			throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area export file not found.");
+			throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.CaExportNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
-		String range = request.getHeader("Range");
+		String range = request.getHeader("Range"); //$NON-NLS-1$
 		long start = 0;
 		long end = toReturn.length()-1;
 		boolean hasRange = false;
@@ -312,7 +312,7 @@ public class ConservationAreas extends HttpServlet{
 			hasRange = true;
 			//parse the range
 			try{
-				String regex = "^bytes=([0-9]*)-([0-9]*)$";
+				String regex = "^bytes=([0-9]*)-([0-9]*)$"; //$NON-NLS-1$
 				Pattern p = Pattern.compile(regex);
 				Matcher m = p.matcher(range);
 				
@@ -326,13 +326,13 @@ public class ConservationAreas extends HttpServlet{
 				}
 				
 				if (end > toReturn.length()-1){
-					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "Range exceeds the maximum file length.");	
+					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, Messages.getString("ConservationAreas.InvalidRange", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
 				}
 				if (start > end){
-					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "start byte is greater than end byte.");
+					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, Messages.getString("ConservationAreas.InvalidRange2", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
 			}catch (Exception ex){
-				throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "Range could not be parsed.");
+				throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, Messages.getString("ConservationAreas.InvalidRange3", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 		}
 
@@ -343,15 +343,15 @@ public class ConservationAreas extends HttpServlet{
 					try {
 						Files.copy(toReturn.toPath(), output);
 					} catch (Exception e) {
-						logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e);
+						logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e); //$NON-NLS-1$
 					}
 				}
 		    };
 			    
 			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"")
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
 					.header(HttpHeaders.CONTENT_LENGTH, toReturn.length())
-					.header("Accept-Ranges", "bytes")
+					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
 					.build();
 		}else{
 			final long startat = start;
@@ -368,10 +368,10 @@ public class ConservationAreas extends HttpServlet{
 			return Response.status(Response.Status.PARTIAL_CONTENT)
 					.entity(stream)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"")
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
 					.header(HttpHeaders.CONTENT_LENGTH, end - start + 1)
-					.header("Accept-Ranges", "bytes")
-					.header("Content-Range", "bytes " + start + "-" + end + "/" + toReturn.length())
+					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
+					.header("Content-Range", "bytes " + start + "-" + end + "/" + toReturn.length()) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					.build();
 		}
 	}
@@ -389,8 +389,8 @@ public class ConservationAreas extends HttpServlet{
 		try{
 			uca = UuidUtils.stringToUuid(caUuid);
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Invalid uuid: " + caUuid + ". " + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request", ex);
+			logger.log(Level.SEVERE, "Invalid uuid: " + caUuid + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.BadRequest", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 		WorkItem item = null;
 		ConservationAreaInfo info = null;
@@ -401,13 +401,13 @@ public class ConservationAreas extends HttpServlet{
 			validateRead(uca, s);
 			info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uca);
 			if (info == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found.");	
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.CANotFound", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
 			}
 
 			//create a new download item
 			item = new WorkItem();
 			item.setConservationAreaInfo(info);
-			item.setLocalFilename("");
+			item.setLocalFilename(""); //$NON-NLS-1$
 			item.setMessage(null);
 			item.setStartTime(new Date());
 			item.setStatus(WorkItem.Status.PROCESSING);
@@ -422,8 +422,8 @@ public class ConservationAreas extends HttpServlet{
 			throw ex;
 		}catch (Exception ex){
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
-			logger.log(Level.SEVERE, "Unable to start download conservation area process. " + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to create package", ex);
+			logger.log(Level.SEVERE, "Unable to start download Conservation Area process. " + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.CaExportError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 		
 		try{
@@ -433,7 +433,7 @@ public class ConservationAreas extends HttpServlet{
 					+ ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH + ConnectRESTApplication.PATH_SEPERATOR
 					+ ConservationAreas.PATH + "/" //$NON-NLS-1$
 					+ URLEncoder.encode(uca.toString(), ConnectRESTApplication.UTF8)
-					+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString();
+					+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	
 			ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
 			executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context)));
@@ -442,10 +442,10 @@ public class ConservationAreas extends HttpServlet{
 			return Response
 					.status(Response.Status.ACCEPTED)
 					.header(HttpHeaders.LOCATION, url)
-					.entity("{\"location\": \"" + url + "\"}").build();
+					.entity("{\"location\": \"" + url + "\"}").build(); //$NON-NLS-1$ //$NON-NLS-2$
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Unable to start download conservation area process. " + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Unable to create package", ex);
+			logger.log(Level.SEVERE, "Unable to start download conservation area process. " + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("ConservationAreas.CaExportError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	}
 	
@@ -468,8 +468,8 @@ public class ConservationAreas extends HttpServlet{
 			lrevision = Long.valueOf(revision);
 			uca = UuidUtils.stringToUuid(caUuid);
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Invalid parameters.  Cannot parse one of the conservation area uuid, version uuid or revision number. " + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request", ex);
+			logger.log(Level.SEVERE, "Invalid parameters.  Cannot parse one of the conservation area uuid, version uuid or revision number. " + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.BadRequest", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 		WorkItem item = null;
 		ConservationAreaInfo info = null;
@@ -480,17 +480,17 @@ public class ConservationAreas extends HttpServlet{
 			validateRead(uca, s);
 			info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uca);
 			if (info == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found.");	
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.CANotFound", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
 			}
 
 			if (!info.getVersion().equals(uversion)){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area versions do not match.");
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionsDoNotMatch", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			
 			//create a new download item
 			item = new WorkItem();
 			item.setConservationAreaInfo(info);
-			item.setLocalFilename("");
+			item.setLocalFilename(""); //$NON-NLS-1$
 			item.setMessage(null);
 			item.setStartTime(new Date());
 			item.setStatus(WorkItem.Status.PROCESSING);
@@ -504,8 +504,8 @@ public class ConservationAreas extends HttpServlet{
 			throw ex;
 		}catch (Exception ex){
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
-			logger.log(Level.SEVERE, "Unable to start conservation area change log download. " + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to create package", ex);
+			logger.log(Level.SEVERE, "Unable to start Conservation Area change log download. " + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.CaChangeLogError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 		
 		try{
@@ -515,7 +515,7 @@ public class ConservationAreas extends HttpServlet{
 				+ ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH + ConnectRESTApplication.PATH_SEPERATOR
 				+ ConservationAreas.PATH + "/" //$NON-NLS-1$
 				+ URLEncoder.encode(uca.toString(), ConnectRESTApplication.UTF8)
-				+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString();
+				+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 
 			CaChangeLogPackageJob job = new CaChangeLogPackageJob(info, item, finishurl, lrevision, s.getSessionFactory());
 			ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
@@ -525,11 +525,11 @@ public class ConservationAreas extends HttpServlet{
 			return Response
 				.status(Response.Status.ACCEPTED)
 				.header(HttpHeaders.LOCATION, url)
-				.entity("{\"location\": \"" + url + "\"}").build();
+				.entity("{\"location\": \"" + url + "\"}").build(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Unable to start conservation area change log package process. " + ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Unable to create package", ex);
+			logger.log(Level.SEVERE, "Unable to start Conservation Area change log package process. " + ex.getMessage(), ex); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("ConservationAreas.CaChangeLogError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	}
 	
@@ -583,7 +583,7 @@ public class ConservationAreas extends HttpServlet{
     		@QueryParam("password") String password){
 		
 		if (username == null || password == null || username.length() == 0 || password.length() == 0){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Must resupply username and password and query parameter");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.UserAndPasswordRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		if (request.getSession(false) != null){
@@ -594,12 +594,12 @@ public class ConservationAreas extends HttpServlet{
 		}
 		boolean deleteAll = false;
 		if (dataonly == null || dataonly.length() == 0){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid value for query parameter dataonly");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.InvalidDataOnlyParameter", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		try{
 			deleteAll = !Boolean.valueOf(dataonly);
 		}catch (Exception ex){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid value for query parameter dataonly");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.InvalidDataOnlyParameter", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		UUID caUuidToDelete = null;
@@ -633,14 +633,14 @@ public class ConservationAreas extends HttpServlet{
 			}
 			
 			//delete desktop data
-			String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid";
+			String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid"; //$NON-NLS-1$
 			Query q = s.createSQLQuery(query);
-			q.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE);
+			q.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 			q.executeUpdate();
 			
 			//delete plugin data
-			q = s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca");
-			q.setParameter("ca", serverDelete.getUuid());
+			q = s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca"); //$NON-NLS-1$
+			q.setParameter("ca", serverDelete.getUuid()); //$NON-NLS-1$
 			q.executeUpdate();
 
 			//delete change log data
@@ -650,8 +650,8 @@ public class ConservationAreas extends HttpServlet{
 			if (deleteAll){
 				
 				//delete actions associated with resource
-				q = s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca");
-				q.setParameter("ca", serverDelete.getUuid());
+				q = s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca"); //$NON-NLS-1$
+				q.setParameter("ca", serverDelete.getUuid()); //$NON-NLS-1$
 				q.executeUpdate();
 				
 				//delete server only data
@@ -696,14 +696,14 @@ public class ConservationAreas extends HttpServlet{
 			try{
 				uuid = UuidUtils.stringToUuid(caUuid);
 			}catch (Exception ex){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format("Invalid Conservation Area uuid {0} provided.", caUuid));	
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConservationAreas.InvalidCaUuid", SmartUtils.getRequestLocale(request)), caUuid));	 //$NON-NLS-1$
 			}
 		}else{
 			uuid = UUID.randomUUID();
 		}
 		
 		if (name == null || name.trim().isEmpty()){
-			name = "Unknown";
+			name = Messages.getString("ConservationAreas.UnknownLabel", SmartUtils.getRequestLocale(request)); //$NON-NLS-1$
 		}
 		
 		Session s = HibernateManager.getSession(context);
@@ -714,7 +714,7 @@ public class ConservationAreas extends HttpServlet{
 			ConservationAreaInfo ca = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
 					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
 			if (ca != null){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Conservation Area with given uuid already exists on the server.");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.CaExistsError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			ca = new ConservationAreaInfo();
 			ca.setLabel(name);
@@ -727,7 +727,7 @@ public class ConservationAreas extends HttpServlet{
 		}catch (Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Conservation Area could not be created.");
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("ConservationAreas.CaNotCreated", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 	}
@@ -743,13 +743,13 @@ public class ConservationAreas extends HttpServlet{
 	@Path("/{cauuid}")
 	public String createAndUploadConservationArea(@PathParam("cauuid") String caUuid, @QueryParam("version") String versionUuid){
 		if (versionUuid == null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "A version must be supplied");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.VersionNotSupplied", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		UUID version = null;
 		try{
 			version = UUID.fromString(versionUuid);
 		}catch (Exception ex){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "A version must be a valid uuid.");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.InvalidVersion", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		Session s = HibernateManager.getSession(context);
@@ -825,7 +825,7 @@ public class ConservationAreas extends HttpServlet{
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_CA);
 			up.setTotalBytes(totalBytes);
-			up.setLocalFilename("");
+			up.setLocalFilename(""); //$NON-NLS-1$
 			s.save(up);
 			
 			File updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
@@ -833,7 +833,7 @@ public class ConservationAreas extends HttpServlet{
 				FileUtils.forceMkdir(updir);
 			}
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(Uploader.DATASTORE_DIR 
-					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip"));
+					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip")); //$NON-NLS-1$
 			
 			s.save(up);
 			
@@ -873,7 +873,7 @@ public class ConservationAreas extends HttpServlet{
 			ConservationAreaInfo ca = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
 					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
 			if (ca == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found on server.");
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.CaNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			validateUpdate(ca.getUuid(), s);
 			
@@ -897,7 +897,7 @@ public class ConservationAreas extends HttpServlet{
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_SYNC);
 			up.setTotalBytes(totalBytes);
-			up.setLocalFilename("");
+			up.setLocalFilename(""); //$NON-NLS-1$
 			s.save(up);
 			
 			File updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
@@ -905,7 +905,7 @@ public class ConservationAreas extends HttpServlet{
 				FileUtils.forceMkdir(updir);
 			}
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(Uploader.DATASTORE_DIR 
-					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip"));
+					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip")); //$NON-NLS-1$
 		
 			s.saveOrUpdate(up);
 			

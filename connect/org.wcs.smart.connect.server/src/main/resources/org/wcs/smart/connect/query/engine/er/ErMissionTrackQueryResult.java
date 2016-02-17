@@ -47,7 +47,7 @@ public class ErMissionTrackQueryResult implements IDbTableResultSet {
 	}
 	
 	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable());
+		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
 	}
 
 	
@@ -60,41 +60,41 @@ public class ErMissionTrackQueryResult implements IDbTableResultSet {
 		String columnKey = column.getKey();
 		
 		if (columnKey.equals(SurveyQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id");
+			return rs.getString("ca_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name");
+			return rs.getString("ca_name"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION.getKey())){
-			return rs.getString("mission_id");
+			return rs.getString("mission_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_START.getKey())){
-			return rs.getDate("mission_startdate");
+			return rs.getDate("mission_startdate"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_END.getKey())){
-			return rs.getDate("mission_enddate");
+			return rs.getDate("mission_enddate"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_LEADER.getKey())){
-			return rs.getString("mission_leader");
+			return rs.getString("mission_leader"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN.getKey())){
-			return rs.getString("surveydesign_name");
+			return rs.getString("surveydesign_name"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END.getKey())){
-			return rs.getDate("surveydesign_enddate");
+			return rs.getDate("surveydesign_enddate"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START.getKey())){
-			return rs.getDate("surveydesign_startdate");
+			return rs.getDate("surveydesign_startdate"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY.getKey())){
-			return rs.getString("survey_id");
+			return rs.getString("survey_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_START.getKey())){
-			return rs.getDate("survey_startdate");
+			return rs.getDate("survey_startdate"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_END.getKey())){
-			return rs.getDate("survey_enddate");
+			return rs.getDate("survey_enddate"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_TRACKTYPE.getKey())){
-			return TrackType.valueOf(rs.getString("mission_tracktype")).getGuiName(engine.getLocale());
+			return TrackType.valueOf(rs.getString("mission_tracktype")).getGuiName(engine.getLocale()); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE.getKey())){
-			return rs.getDate("missionday_date");
+			return rs.getDate("missionday_date"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_TRACKID.getKey())){
-			return rs.getString("mission_trackid");
+			return rs.getString("mission_trackid"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_TRACKLENGTH.getKey())){
-			return rs.getDouble("mission_tracklength");
+			return rs.getDouble("mission_tracklength"); //$NON-NLS-1$
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())){
-			return rs.getString("samplingunit_id");
+			return rs.getString("samplingunit_id"); //$NON-NLS-1$
 		}else if (columnKey.startsWith(MissionPropertyQueryColumn.KEY_PREFIX)){
-			String key = columnKey.split(":")[1];
+			String key = columnKey.split(":")[1]; //$NON-NLS-1$
 			String columnName = engine.getMissionAttributeColumnName(key);
 			if (rs.getMetaData().getColumnType(rs.findColumn(columnName)) == Types.VARCHAR){
 				return rs.getString(columnName);

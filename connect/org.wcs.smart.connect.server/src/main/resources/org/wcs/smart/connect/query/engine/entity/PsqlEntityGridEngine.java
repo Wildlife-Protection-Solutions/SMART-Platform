@@ -40,6 +40,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -118,7 +119,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 			throw new SQLException(ex);
 		}
 		if (pgSrid == null){
-			throw new SQLException("Projection not supported on connect.  You must add the projection to the connect database.");
+			throw new SQLException(Messages.getString("PsqlEntityGridEngine.ProjectionNotSupported", locale)); //$NON-NLS-1$
 		}
 		session.doWork(new Work() {
 			@Override
@@ -318,8 +319,8 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 					sql.append(".category_uuid = "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(Category.class));
 					sql.append( ".uuid" ); //$NON-NLS-1$
-					String p2 = addParameterValue(tmp.getCategoryKey() + "%") ;
-					sql.append(" AND Hkey like " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					String p2 = addParameterValue(tmp.getCategoryKey() + "%") ; //$NON-NLS-1$
+					sql.append(" AND Hkey like " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ 
 				}
 				
 				if (tmp.getAttributeType() == AttributeType.LIST){
@@ -346,7 +347,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 					sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 					sql.append(".tree_node_uuid "); //$NON-NLS-1$
 					sql.append(" and ("); //$NON-NLS-1$
-					String p2 = addParameterValue(tmp.getItemKey() + "%") ;
+					String p2 = addParameterValue(tmp.getItemKey() + "%") ; //$NON-NLS-1$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
 					sql.append(".hkey like " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -392,8 +393,8 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 						+ ".uuid" //$NON-NLS-1$
 						+ " AND "); //$NON-NLS-1$
 				if (tmp.getCategoryHKey() != null){
-					p1 = addParameterValue(tmp.getCategoryHKey()+ "%");
-					sql.append("hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					p1 = addParameterValue(tmp.getCategoryHKey()+ "%"); //$NON-NLS-1$
+					sql.append("hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 					
 				}else{
 					sql.append(" hkey is not null "); //$NON-NLS-1$
@@ -411,7 +412,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 				logger.finest(sql.toString());
 				rs = parseQueryString(c, sql.toString()).executeQuery();
 			}else{
-				throw new SQLException("Grid value not supported");	
+				throw new SQLException(Messages.getString("PsqlEntityGridEngine.GridValueNotSupported", locale));	 //$NON-NLS-1$
 			}
 		
 			try {

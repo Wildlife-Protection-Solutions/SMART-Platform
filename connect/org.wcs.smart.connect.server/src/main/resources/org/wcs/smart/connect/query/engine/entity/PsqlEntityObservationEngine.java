@@ -187,7 +187,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 		//ca information
-		populateCaDetails(c, queryDataTable, "p_ca_uuid", query);
+		populateCaDetails(c, queryDataTable, "p_ca_uuid", query); //$NON-NLS-1$
 		
 		// add observers
 		StringBuilder sql = new StringBuilder();
@@ -223,8 +223,8 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		}
 
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
-		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid", caFilter);
-		populateAdditionalWpoaTable(c, queryDataTable + "_tree", "tree_node_uuid", caFilter);
+		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid", caFilter); //$NON-NLS-1$ //$NON-NLS-2$
+		populateAdditionalWpoaTable(c, queryDataTable + "_tree", "tree_node_uuid", caFilter); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		
 	}
@@ -234,7 +234,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 	
-		sql = "INSERT INTO " + tableName + " (uuid) SELECT DISTINCT wpoa." + obsAttUuidColumn //$NON-NLS-1$
+		sql = "INSERT INTO " + tableName + " (uuid) SELECT DISTINCT wpoa." + obsAttUuidColumn //$NON-NLS-1$ //$NON-NLS-2$
 				+" FROM "  //$NON-NLS-1$
 				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
 				+ queryDataTable + " r on " //$NON-NLS-1$
@@ -246,7 +246,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		if (entityTypes.size() > 0){
     		StringBuilder s = new StringBuilder();
 	        clearParameters();
-	        s.append("INSERT INTO " + tableName + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$
+	        s.append("INSERT INTO " + tableName + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
 	        s.append(tablePrefix(EntityAttributeValue.class) + "." + obsAttUuidColumn); //$NON-NLS-1$
 	        s.append(" FROM "); //$NON-NLS-1$
 	        s.append(tableNamePrefix(EntityAttributeValue.class ));
@@ -260,8 +260,8 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 	        s.append(" on "); //$NON-NLS-1$
 	        s.append(tablePrefix(EntityType.class ) + ".uuid = "); //$NON-NLS-1$
 	        s.append(tablePrefix(Entity.class ) + ".entity_type_uuid "); //$NON-NLS-1$
-	        s.append(" WHERE ");
-	        s.append(tablePrefix(EntityAttributeValue.class) + "." + obsAttUuidColumn + " is not null and "); //$NON-NLS-1$
+	        s.append(" WHERE "); //$NON-NLS-1$
+	        s.append(tablePrefix(EntityAttributeValue.class) + "." + obsAttUuidColumn + " is not null and "); //$NON-NLS-1$ //$NON-NLS-2$
 	        s.append("keyid IN ("); //$NON-NLS-1$
 	        for (String et : entityTypes){
 	            String p1 = addParameterValue(et);
@@ -275,12 +275,12 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
                 s.append(p1 + ",");     //$NON-NLS-1$
             }
             s.deleteCharAt(s.length()-1);
-            s.append(")");
+            s.append(")"); //$NON-NLS-1$
         
             logger.finest(s.toString());
             parseQueryString(c, s.toString()).executeUpdate();
 		}
-		updateLabel(c, tableName, "uuid", "value");
+		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 

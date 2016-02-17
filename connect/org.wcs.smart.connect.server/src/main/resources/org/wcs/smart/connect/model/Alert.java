@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.model;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -29,6 +30,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
+import org.wcs.smart.connect.i18n.Messages;
 
 /*
  * An Alert entity
@@ -40,16 +42,17 @@ import org.hibernate.annotations.Type;
 public class Alert extends ConnectUuidItem{
 	
 	public enum AlertStatusEnum {
-		ACTIVE("ACTIVE"),
-		DISABLED("DISABLED");
+		ACTIVE("Alert.ActiveAlertStatusLabel"), //$NON-NLS-1$
+		DISABLED("Alert.DisabledAlertStatusLabel"); //$NON-NLS-1$
 	 
-		protected String value;
+		protected String guiKey;
 			
-		private AlertStatusEnum(String value) {
-			this.value = value;
+		private AlertStatusEnum(String guiKey) {
+			this.guiKey = guiKey;
 		}
-		public String getValue() {
-			return value;
+
+		public String getGuiName(Locale l){
+			return Messages.getString(this.guiKey, l);
 		}
 	}
 	

@@ -35,15 +35,15 @@ public enum EnvironmentVariables {
 	INSTANCE;
 	
 	public enum Variable{
-		DATASTORE_LOCATION("filestorelocation"),
-		NUM_BACK_THREADS("number_background_threads"),
-		CLEANUP_TASK_INTERVAL("cleanup_task_interval_hours"),
-		SYNC_DOWNLOAD_AVAILABLE("sync_download_hours_available"),
-		WORK_HISTORY_ITEM_AVAILABLE("work_item_history_days_available"),
-		CA_EXPORT_AVAILABLE("ca_export_days_available"),
-		CHANGELOG_CLEAN_UP_DAYS("changelog_cleanup_days"),
-		SPATIAL_REF_SYS_TABLE("spatial_ref_sys_table"),
-		DATA_QUEUE_CLEAN_UP_DAYS("dataqueue_cleanup_days");
+		DATASTORE_LOCATION("filestorelocation"), //$NON-NLS-1$
+		NUM_BACK_THREADS("number_background_threads"), //$NON-NLS-1$
+		CLEANUP_TASK_INTERVAL("cleanup_task_interval_hours"), //$NON-NLS-1$
+		SYNC_DOWNLOAD_AVAILABLE("sync_download_hours_available"), //$NON-NLS-1$
+		WORK_HISTORY_ITEM_AVAILABLE("work_item_history_days_available"), //$NON-NLS-1$
+		CA_EXPORT_AVAILABLE("ca_export_days_available"), //$NON-NLS-1$
+		CHANGELOG_CLEAN_UP_DAYS("changelog_cleanup_days"), //$NON-NLS-1$
+		SPATIAL_REF_SYS_TABLE("spatial_ref_sys_table"), //$NON-NLS-1$
+		DATA_QUEUE_CLEAN_UP_DAYS("dataqueue_cleanup_days"); //$NON-NLS-1$
 		
 		public String key;
 		
@@ -60,7 +60,7 @@ public enum EnvironmentVariables {
 	
 	private Context getContext() throws NamingException{
 		if (ctx == null){
-			ctx = (Context)(new InitialContext()).lookup("java:comp/env");
+			ctx = (Context)(new InitialContext()).lookup("java:comp/env"); //$NON-NLS-1$
 		}
 		return ctx;
 	}

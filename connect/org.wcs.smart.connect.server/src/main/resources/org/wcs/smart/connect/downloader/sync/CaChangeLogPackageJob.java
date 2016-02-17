@@ -70,7 +70,7 @@ public class CaChangeLogPackageJob implements Runnable {
 			//lock database for conservation area
 			LockManager.INSTANCE.lockDatabase(s, item.getConservationAreaInfo());
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Could not lock database to create conservation change log package. " + item.getUuid());
+			logger.log(Level.SEVERE, "Could not lock database to create conservation change log package. " + item.getUuid()); //$NON-NLS-1$
 			
 			//set error status
 			s.beginTransaction();
@@ -87,13 +87,13 @@ public class CaChangeLogPackageJob implements Runnable {
 		
 			s.beginTransaction();
 			item.setStatus(Status.COMPLETE);
-			item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}");
+			item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			item.setLocalFilename(file.toString());
 			s.saveOrUpdate(item);
 			s.getTransaction().commit();
 			
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Error creating change package for conservation area. " + ex.getMessage(), ex);
+			logger.log(Level.SEVERE, "Error creating change package for conservation area. " + ex.getMessage(), ex); //$NON-NLS-1$
 			
 			//TODO: do we want to close and reopen this session here?
 			try{
@@ -103,14 +103,14 @@ public class CaChangeLogPackageJob implements Runnable {
 				s.saveOrUpdate(item);
 				s.getTransaction().commit();
 			}catch (Exception ex2){
-				logger.log(Level.SEVERE, "Error updating change log status. " + ex2.getMessage(), ex2);
+				logger.log(Level.SEVERE, "Error updating change log status. " + ex2.getMessage(), ex2); //$NON-NLS-1$
 			}
 		}finally{
 			
 			try{
 				LockManager.INSTANCE.releaseDatabase(s, item.getConservationAreaInfo());
 			}catch (Exception ex){
-				logger.log(Level.SEVERE, "Could not release database lock after creating conservation area download package. " + item.getUuid());
+				logger.log(Level.SEVERE, "Could not release database lock after creating conservation area download package. " + item.getUuid()); //$NON-NLS-1$
 			}
 			if (s.isOpen())	s.close();
 		}

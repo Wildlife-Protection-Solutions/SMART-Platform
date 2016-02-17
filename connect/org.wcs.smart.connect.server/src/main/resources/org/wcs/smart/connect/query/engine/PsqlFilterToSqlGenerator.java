@@ -204,7 +204,7 @@ public enum PsqlFilterToSqlGenerator {
 			CmCategoryAttributeFilter afilter = (CmCategoryAttributeFilter)filter;
 			return asSql(new CategoryAttributeFilter(afilter.getCategoryFilter(), afilter.getAttributeFilter()), engine);
 		}
-		throw new SQLException(MessageFormat.format("Filter not supported '{0}'.", filter.asString()));
+		throw new SQLException(MessageFormat.format("Filter not supported '{0}'.", filter.asString())); //$NON-NLS-1$
 		
 	}
 	
@@ -276,11 +276,11 @@ public enum PsqlFilterToSqlGenerator {
 		
 		String attprefix = engine.tablePrefix(Attribute.class);
 		if (attprefix == null){
-			throw new IllegalStateException("Invalid attribute filter.");
+			throw new IllegalStateException("Invalid attribute filter."); //$NON-NLS-1$
 		}
 		String attObprefix = engine.tablePrefix(WaypointObservationAttribute.class);
 		if (attObprefix == null){
-			throw new IllegalStateException("Invalid attribute filter.");
+			throw new IllegalStateException("Invalid attribute filter."); //$NON-NLS-1$
 		}
 
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
@@ -313,8 +313,8 @@ public enum PsqlFilterToSqlGenerator {
 				return "( qa."+ filter.getAttributeKey()  + " " + asSql(filter.getOperator()) + " " + p + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 		}else if (filter.getAttributeType() == AttributeType.TREE){
-			String p1 = engine.addParameterValue(filter.getValue() + "%");  
-			return "( qa." + filter.getAttributeKey() + " like " + p1 + " ) "; 
+			String p1 = engine.addParameterValue(filter.getValue() + "%");   //$NON-NLS-1$
+			return "( qa." + filter.getAttributeKey() + " like " + p1 + " ) ";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		}
 		return ""; //$NON-NLS-1$
@@ -348,10 +348,10 @@ public enum PsqlFilterToSqlGenerator {
 		String keyPart = filter.getCategoryKey();
 		String prefix = engine.tablePrefix(Category.class);
 		if (prefix == null){
-			throw new IllegalStateException("Invalid category filter.");
+			throw new IllegalStateException("Invalid category filter."); //$NON-NLS-1$
 		}
 		
-		String p1 = engine.addParameterValue(keyPart + "%"); 
+		String p1 = engine.addParameterValue(keyPart + "%");  //$NON-NLS-1$
 		return "( " + prefix + ".hkey like " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$	
 	}
 	
@@ -363,7 +363,7 @@ public enum PsqlFilterToSqlGenerator {
 		if (col != null){
 			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}
-		return "( " + toSql(filter.getCategoryFilter(), engine) + " " + asSql(Operator.AND) + " " + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$	
+		return "( " + toSql(filter.getCategoryFilter(), engine) + " " + asSql(Operator.AND) + " " + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
 	}
 	
 	/*
@@ -388,7 +388,7 @@ public enum PsqlFilterToSqlGenerator {
 			//this may include conservation areas this user does not have access to view
 			
 			//for now we force the user to provide the conservation areas
-			throw new SQLException("Conservation Area filter not populated.  At least one conservation area must be provided in the Conservation Area filter.");
+			throw new SQLException("Conservation Area filter not populated.  At least one conservation area must be provided in the Conservation Area filter."); //$NON-NLS-1$
 		}else{
 			//TODO: this may include ca's the user does not have access to view
 			//include only selected conservation areas
@@ -447,7 +447,7 @@ public enum PsqlFilterToSqlGenerator {
 			table = engine.tablePrefix(MissionDay.class);
 			field = "mission_day"; //$NON-NLS-1$
 		}else{
-			throw new SQLException("Date format not supported");
+			throw new SQLException("Date format not supported"); //$NON-NLS-1$
 		}
 		
 		
@@ -509,7 +509,7 @@ public enum PsqlFilterToSqlGenerator {
 		}else if (op == Operator.NOT_BETWEEN){
 			return "not between"; //$NON-NLS-1$
 		}
-		throw new SQLException(MessageFormat.format("Operator {0} not supported.", new Object[]{op.getGuiValue()}));
+		throw new SQLException(MessageFormat.format("Operator {0} not supported.", new Object[]{op.getGuiValue()})); //$NON-NLS-1$
 	}
 		
 	/*
@@ -522,10 +522,10 @@ public enum PsqlFilterToSqlGenerator {
 			String v = SharedUtils.stripQuotes((String)qFilter.getValue());
 			//if v is empty this means that this is "Any Plan" case
 			
-			String intelPart = "";
+			String intelPart = ""; //$NON-NLS-1$
 			if (!qFilter.isAnyIntelligence()){
 				String param = engine.addParameterValue(UuidUtils.stringToUuid(v));
-				intelPart = !qFilter.isAnyIntelligence() ? " AND p2i.intelligence_uuid = " + param  : "";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				intelPart = !qFilter.isAnyIntelligence() ? " AND p2i.intelligence_uuid = " + param  : "";  //$NON-NLS-1$//$NON-NLS-2$ 
 			}
 			String sql = "EXISTS (SELECT * FROM smart.patrol_intelligence p2i WHERE p2i.patrol_uuid = " + prefix + ".uuid" + intelPart + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return sql;
@@ -537,19 +537,19 @@ public enum PsqlFilterToSqlGenerator {
 			String planSqlPart = ""; //$NON-NLS-1$
 			if (!qfilter.isAnyPlan()) {
 				StringBuilder sb = new StringBuilder();
-				sb.append("AND pa2pl.plan_uuid IN (");
-				sb.append("WITH RECURSIVE childpatrols(uuid) AS (");
-				sb.append("SELECT uuid FROM smart.plan WHERE uuid = ");
+				sb.append("AND pa2pl.plan_uuid IN ("); //$NON-NLS-1$
+				sb.append("WITH RECURSIVE childpatrols(uuid) AS ("); //$NON-NLS-1$
+				sb.append("SELECT uuid FROM smart.plan WHERE uuid = "); //$NON-NLS-1$
 				String p = engine.addParameterValue(UuidUtils.stringToUuid(v));
 				sb.append(p);
-				sb.append("	UNION ALL SELECT p.uuid FROM childpatrols cp, smart.plan p WHERE cp.uuid = p.parent_uuid )");
-				sb.append(" SELECT uuid FROM childpatrols )");
+				sb.append("	UNION ALL SELECT p.uuid FROM childpatrols cp, smart.plan p WHERE cp.uuid = p.parent_uuid )"); //$NON-NLS-1$
+				sb.append(" SELECT uuid FROM childpatrols )"); //$NON-NLS-1$
 				planSqlPart = sb.toString();
 			}
 			String sql = "EXISTS (SELECT * FROM smart.patrol_plan pa2pl WHERE pa2pl.patrol_uuid = "+prefix+".uuid "+planSqlPart+")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return sql;
 		}
-		throw new IllegalStateException(MessageFormat.format("Filter {0} not supported.", filter.asString()));	
+		throw new IllegalStateException(MessageFormat.format("Filter {0} not supported.", filter.asString()));	 //$NON-NLS-1$
 	}
 	/*
 	 * Patrol Filter
@@ -601,7 +601,7 @@ public enum PsqlFilterToSqlGenerator {
 		String prefix = engine.tablePrefix(option.getPatrolAttributeClass());
 		if (prefix == null){
 			throw new SQLException(MessageFormat.format(
-					"Invalid patrol option {0}", new Object[]{ option.getKey()}));
+					"Invalid patrol option {0}", new Object[]{ option.getKey()})); //$NON-NLS-1$
 		}
 		
 		if (option.getType() == PatrolQueryOptionType.STRING){
@@ -724,8 +724,8 @@ public enum PsqlFilterToSqlGenerator {
 				return "( " + tableName + ".value " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 		}else if (filter.getAttributeType() == AttributeType.TREE){
-			String p1 = engine.addParameterValue((String)filter.getValue() + "%");
-			return "( " + tableName + ".value like " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			String p1 = engine.addParameterValue((String)filter.getValue() + "%"); //$NON-NLS-1$
+			return "( " + tableName + ".value like " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 		}
 		return "";  //$NON-NLS-1$
 	}
@@ -796,7 +796,7 @@ public enum PsqlFilterToSqlGenerator {
 	 */
 	protected String asSql(SamplingUnitFilter filter, IQueryEngine engine) throws SQLException{		
 		if (filter.getSource() == null){
-			throw new SQLException("Not source for sampling unit filter.");
+			throw new SQLException("Not source for sampling unit filter."); //$NON-NLS-1$
 		}
 		
 		try{

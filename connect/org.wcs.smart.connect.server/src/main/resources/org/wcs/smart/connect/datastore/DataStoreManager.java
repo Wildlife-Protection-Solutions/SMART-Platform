@@ -41,10 +41,9 @@ import org.wcs.smart.util.UuidUtils;
 public enum DataStoreManager {
 	INSTANCE;
 	
-	//TODO: this cannot be hard coded.  Should be configurable in web.xml???
 	private static String datastoreLocation;
 	
-	public static final String CA_EXPORT_LOCATION = "caexport";
+	public static final String CA_EXPORT_LOCATION = "caexport"; //$NON-NLS-1$
 	
 	/**
 	 * Initialize the location of the datastore;  This should be called
@@ -90,7 +89,7 @@ public enum DataStoreManager {
 	 * @return
 	 */
 	public String getConservationAreaFolder(ConservationAreaInfo info){
-		return UuidUtils.uuidToString(info.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		return UuidUtils.uuidToString(info.getUuid()); 
 	}
 	
 	/**

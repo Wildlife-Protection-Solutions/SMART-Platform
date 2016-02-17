@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
@@ -36,6 +37,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 
@@ -60,17 +62,20 @@ public class AlertFilter {
 	private boolean sortAscending; 
 	
 	
-	public AlertFilter(String levelFilter, String typeUuidFilter, String statusFilter, String caUuidFilter, String startDateFilter, String endDateFilter, String textSearchFilter, String sortBy, Boolean sortAscending){
+	public AlertFilter(String levelFilter, String typeUuidFilter, 
+			String statusFilter, String caUuidFilter, String startDateFilter, 
+			String endDateFilter, String textSearchFilter, String sortBy, 
+			Boolean sortAscending, Locale l){
 		//level
 		if(levelFilter != null){
 			this.levelFilter = new ArrayList<Integer>();
-			if(!levelFilter.equals("")){
-				List<String> items = Arrays.asList(levelFilter.split("\\s*,\\s*"));
+			if(!levelFilter.equals("")){ //$NON-NLS-1$
+				List<String> items = Arrays.asList(levelFilter.split("\\s*,\\s*")); //$NON-NLS-1$
 				for(int x=0; x<items.size(); x++){
 					try{
 						this.levelFilter.add(Integer.parseInt(items.get(x)) );
 					}catch(Exception e){
-						throw new SmartConnectException(Response.Status.BAD_REQUEST + "; Invalid level/importance filter");
+						throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidLevel",l)); //$NON-NLS-1$
 					}
 				}
 			}
@@ -78,13 +83,13 @@ public class AlertFilter {
 		//type
 		if(typeUuidFilter != null){
 			this.typeUuidFilter = new ArrayList<UUID>();
-			if(!typeUuidFilter.equals("")){
-				List<String> items = Arrays.asList(typeUuidFilter.split("\\s*,\\s*"));
+			if(!typeUuidFilter.equals("")){ //$NON-NLS-1$
+				List<String> items = Arrays.asList(typeUuidFilter.split("\\s*,\\s*")); //$NON-NLS-1$
 				for(int x=0; x<items.size(); x++){
 					try{
 						this.typeUuidFilter.add(UUID.fromString(items.get(x)) );
 					}catch(Exception e){
-						throw new SmartConnectException(Response.Status.BAD_REQUEST + "; Invalid UUID format in filter");
+						throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidUuid",l)); //$NON-NLS-1$
 					}
 				}
 			}
@@ -93,17 +98,13 @@ public class AlertFilter {
 		//status
 		if(statusFilter != null){
 			this.statusFilter = new ArrayList<AlertStatusEnum>();
-			if(!statusFilter.equals("")){
-				List<String> items = Arrays.asList(statusFilter.split("\\s*,\\s*"));
+			if(!statusFilter.equals("")){ //$NON-NLS-1$
+				List<String> items = Arrays.asList(statusFilter.split("\\s*,\\s*")); //$NON-NLS-1$
 				for(int x=0; x<items.size(); x++){
 					try{
-						if(items.get(x).compareTo(AlertStatusEnum.ACTIVE.getValue()) == 0){
-							this.statusFilter.add(AlertStatusEnum.ACTIVE);
-						}else if(items.get(x).compareTo(AlertStatusEnum.DISABLED.getValue()) == 0){
-							this.statusFilter.add(AlertStatusEnum.DISABLED);
-						}
+						this.statusFilter.add(AlertStatusEnum.valueOf(items.get(x)));
 					}catch(Exception e){
-						throw new SmartConnectException(Response.Status.BAD_REQUEST + "; Invalid status filter value");
+						throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidStatus",l)); //$NON-NLS-1$
 					}
 				}
 			}
@@ -112,26 +113,26 @@ public class AlertFilter {
 		//CA filter
 		if(caUuidFilter != null){
 			this.caUuidFilter = new ArrayList<UUID>();
-			if(!caUuidFilter.equals("")){
-				List<String> items = Arrays.asList(caUuidFilter.split("\\s*,\\s*"));
+			if(!caUuidFilter.equals("")){ //$NON-NLS-1$
+				List<String> items = Arrays.asList(caUuidFilter.split("\\s*,\\s*")); //$NON-NLS-1$
 				for(int x=0; x<items.size(); x++){
 					try{
 						this.caUuidFilter.add(UUID.fromString(items.get(x)) );
 					}catch(Exception e){
-						throw new SmartConnectException(Response.Status.BAD_REQUEST + "; Invalid UUID format in filter");
+						throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidUuid",l)); //$NON-NLS-1$
 					}
 				}
 			}
 		}
 		
 		//date filters
-		if(startDateFilter != null && !startDateFilter.equals("")			
-			&& endDateFilter != null && !endDateFilter.equals("") ){
+		if(startDateFilter != null && !startDateFilter.equals("")			 //$NON-NLS-1$
+			&& endDateFilter != null && !endDateFilter.equals("") ){ //$NON-NLS-1$
 			try {		
 				this.startDateFilter = new Date(Long.parseLong(startDateFilter));
 				this.endDateFilter = new Date(Long.parseLong(endDateFilter));
 			} catch (Exception e) {
-				throw new SmartConnectException(Response.Status.BAD_REQUEST + "; Invalid Date format in filters, should be a valid unix-timestamp");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidDate",l)); //$NON-NLS-1$
 			}
 		}
 		
@@ -156,7 +157,7 @@ public class AlertFilter {
 				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
 			for(int x=0; x < levelFilter.size();x++){
-				or.add(Restrictions.eq("level", levelFilter.get(x)));
+				or.add(Restrictions.eq("level", levelFilter.get(x))); //$NON-NLS-1$
 			}
 			c.add(or);
 			
@@ -170,7 +171,7 @@ public class AlertFilter {
 
 			}
 			for(int x=0; x < typeUuidFilter.size();x++){
-				or.add(Restrictions.eq("typeUuid", typeUuidFilter.get(x) ));
+				or.add(Restrictions.eq("typeUuid", typeUuidFilter.get(x) )); //$NON-NLS-1$
 			}
 			c.add(or);
 		}
@@ -181,7 +182,7 @@ public class AlertFilter {
 				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
 			for(int x=0; x < statusFilter.size();x++){
-				or.add(Restrictions.eq("status", statusFilter.get(x) ));
+				or.add(Restrictions.eq("status", statusFilter.get(x) )); //$NON-NLS-1$
 			}
 			c.add(or);
 		}
@@ -193,19 +194,19 @@ public class AlertFilter {
 				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
 			for(int x=0; x < caUuidFilter.size();x++){
-				or.add(Restrictions.eq("caUuid", caUuidFilter.get(x) ));
+				or.add(Restrictions.eq("caUuid", caUuidFilter.get(x) )); //$NON-NLS-1$
 			}
 			c.add(or);
 		}
 
 		if(startDateFilter != null){
-			c.add(Restrictions.gt("date", startDateFilter));
+			c.add(Restrictions.gt("date", startDateFilter)); //$NON-NLS-1$
 		}
 		if(endDateFilter != null){
-			c.add(Restrictions.lt("date", endDateFilter));
+			c.add(Restrictions.lt("date", endDateFilter)); //$NON-NLS-1$
 		}
 		if(textSearchFilter != null){
-			c.add(Restrictions.or(Restrictions.ilike("userGeneratedId", textSearchFilter, MatchMode.ANYWHERE), Restrictions.ilike("description", textSearchFilter, MatchMode.ANYWHERE)) );
+			c.add(Restrictions.or(Restrictions.ilike("userGeneratedId", textSearchFilter, MatchMode.ANYWHERE), Restrictions.ilike("description", textSearchFilter, MatchMode.ANYWHERE)) ); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		if(sortAscending){

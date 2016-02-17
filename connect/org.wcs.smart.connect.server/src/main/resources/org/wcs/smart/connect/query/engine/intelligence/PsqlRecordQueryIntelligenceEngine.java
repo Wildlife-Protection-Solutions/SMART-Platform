@@ -226,13 +226,13 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					
 					//match language and country
 					String key1 = locale.toString().toUpperCase();
-					String query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "'";
+					String query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					logger.finest(query);
 					c.createStatement().executeUpdate(query);
 					
 					//match language
 					key1 = locale.getLanguage().toUpperCase();
-					query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "' AND intel_name is null";
+					query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "' AND intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					logger.finest(query);
 					c.createStatement().executeUpdate(query);
 

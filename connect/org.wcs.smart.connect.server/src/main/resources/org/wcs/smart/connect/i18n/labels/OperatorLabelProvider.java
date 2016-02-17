@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
 import org.wcs.smart.query.model.filter.Operator;
 
@@ -37,20 +38,20 @@ public class OperatorLabelProvider implements IOperatorLabelProvider {
 	public String getLabel(Object item, Locale l) {
 		if (item instanceof Operator){
 			switch((Operator)item){
-				case EQUALS:{ return "=";}
-				case LESSTHAN:{ return "<";}
-				case LESSTHANEQUALS:{ return "<=";}
-				case GREATERTHAN:{ return ">";}
-				case GREATERTHANEQUALS:{ return ">=";}
-				case NOTEQUALS:{ return "!=";}
-				case STR_EQUALS:{ return "equals";}
-				case STR_CONTAINS:{ return "contains";}
-				case STR_NOTCONTAINS:{ return "not contains";}
-				case BETWEEN:{ return "Between";}
-				case NOT_BETWEEN:{ return "Not Between";}
-				case AND:{ return "AND";}
-				case OR:{ return "OR";}
-				case NOT:{ return "NOT";}
+				case EQUALS:{ return "=";} //$NON-NLS-1$
+				case LESSTHAN:{ return "<";} //$NON-NLS-1$
+				case LESSTHANEQUALS:{ return "<=";} //$NON-NLS-1$
+				case GREATERTHAN:{ return ">";} //$NON-NLS-1$
+				case GREATERTHANEQUALS:{ return ">=";} //$NON-NLS-1$
+				case NOTEQUALS:{ return "!=";} //$NON-NLS-1$
+				case STR_EQUALS:{ return Messages.getString("OperatorLabelProvider.equalsLabel", l);} //$NON-NLS-1$
+				case STR_CONTAINS:{ return Messages.getString("OperatorLabelProvider.containsLabel", l);} //$NON-NLS-1$
+				case STR_NOTCONTAINS:{ return Messages.getString("OperatorLabelProvider.notContains", l);} //$NON-NLS-1$
+				case BETWEEN:{ return Messages.getString("OperatorLabelProvider.BetweenLabel", l);} //$NON-NLS-1$
+				case NOT_BETWEEN:{ return Messages.getString("OperatorLabelProvider.notBetweenLabel", l);} //$NON-NLS-1$
+				case AND:{ return Messages.getString("OperatorLabelProvider.AndLabel", l);} //$NON-NLS-1$
+				case OR:{ return Messages.getString("OperatorLabelProvider.OrLabel", l);} //$NON-NLS-1$
+				case NOT:{ return Messages.getString("OperatorLabelProvider.NotLabel", l);} //$NON-NLS-1$
 				case BRACKETS:{ return "( )"; } //$NON-NLS-1$
 			}
 		}

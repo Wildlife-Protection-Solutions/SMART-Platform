@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.entity.IEntityLabelProvider;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.Status;
@@ -35,18 +36,12 @@ import org.wcs.smart.entity.model.Status;
  */
 public class EntityLabelProvider implements IEntityLabelProvider{
 
-	public static final String ID_FIELD_NAME = "ID";
-	public static final String STATUS_FIELD_NAME = "Status";
-	public static final String X_FIELD_NAME = "X";
-	public static final String Y_FIELD_NAME = "Y";
-	public static final String CA_FIELD_NAME = "Conservation Area ID";
-	
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item == Status.ACTIVE) return "Active";
-		if (item == Status.INACTIVE) return "Inactive";
-		if (item == EntityType.Type.FIXED) return "Fixed";
-		if (item == EntityType.Type.TRANSIENT) return "Transient";
+		if (item == Status.ACTIVE) return Messages.getString("EntityLabelProvider.ActiveLabel", l); //$NON-NLS-1$
+		if (item == Status.INACTIVE) return Messages.getString("EntityLabelProvider.InActiveLabel", l); //$NON-NLS-1$
+		if (item == EntityType.Type.FIXED) return Messages.getString("EntityLabelProvider.FixedLabel", l); //$NON-NLS-1$
+		if (item == EntityType.Type.TRANSIENT) return Messages.getString("EntityLabelProvider.TransientLabel", l); //$NON-NLS-1$
 
 		return null;
 	}

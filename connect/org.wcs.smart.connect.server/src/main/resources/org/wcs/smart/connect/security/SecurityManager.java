@@ -32,7 +32,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUserAction;
@@ -50,21 +49,21 @@ public enum SecurityManager {
 	public boolean canAccess(Session s, String username, String action, UUID resource){
 		
 		//check roles for permission
-		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  ";
-		queryString += "WHERE a.role = role AND r.id.username = :username AND ( a.action = :adminAction OR ";
+		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
+		queryString += "WHERE a.role = role AND r.id.username = :username AND ( a.action = :adminAction OR "; //$NON-NLS-1$
 		if (resource == null){
-			queryString += " (a.action = :action and a.resource is null)";
+			queryString += " (a.action = :action and a.resource is null)"; //$NON-NLS-1$
 		}else {
-			queryString += " (a.action = :action and (a.resource is null OR a.resource = :resource))";
+			queryString += " (a.action = :action and (a.resource is null OR a.resource = :resource))"; //$NON-NLS-1$
 		}
-		queryString += "  )";
+		queryString += "  )"; //$NON-NLS-1$
 
 		Query query = s.createQuery(queryString);
-		query.setParameter("username",  username);
-		query.setParameter("adminAction", AdminAccountAction.KEY);
-		query.setParameter("action", action);
+		query.setParameter("username",  username); //$NON-NLS-1$
+		query.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
+		query.setParameter("action", action); //$NON-NLS-1$
 		if (resource != null){
-			query.setParameter("resource", resource);
+			query.setParameter("resource", resource); //$NON-NLS-1$
 		}
 		Long cnt = (Long)query.uniqueResult();
 		if (cnt >  0){
@@ -141,10 +140,10 @@ public enum SecurityManager {
 		
 		//a user with a role with admin action
 		//check roles for permission
-		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  ";
-		queryString += "WHERE a.role = role AND a.action = :adminAction ";
+		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
+		queryString += "WHERE a.role = role AND a.action = :adminAction "; //$NON-NLS-1$
 		Query q= s.createQuery(queryString);
-		q.setParameter("adminAction", AdminAccountAction.KEY);
+		q.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
 		Long adminRoleCnt = (Long) q.uniqueResult();
 		if (adminRoleCnt > 0){
 			return;

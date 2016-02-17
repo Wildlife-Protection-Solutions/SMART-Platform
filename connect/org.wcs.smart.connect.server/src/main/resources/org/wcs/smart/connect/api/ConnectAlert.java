@@ -289,7 +289,9 @@ public class ConnectAlert extends HttpServlet {
 		
 		AlertFilter af;
 		try{
-			af = new AlertFilter(levelFilter, typeUuidFilter, statusFilter, caUuidFilter, startDateFilter, endDateFilter, textSearchFilter, sortBy, sortAscending);
+			af = new AlertFilter(levelFilter, typeUuidFilter, statusFilter, 
+					caUuidFilter, startDateFilter, endDateFilter, textSearchFilter, 
+					sortBy, sortAscending, SmartUtils.getRequestLocale(request));
 		}catch (Exception e){
 			throw e;
 		}
@@ -309,7 +311,7 @@ public class ConnectAlert extends HttpServlet {
 			}
 			return convertToGeoJson(s, list).toString();
 		} catch (NumberFormatException e) {
-			throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("ConnectAlert.InvalidMaxAlerts",SmartUtils.getRequestLocale(request)));
+			throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("ConnectAlert.InvalidMaxAlerts",SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}catch (Exception e){
 			throw e;
 		}finally{
@@ -346,7 +348,7 @@ public class ConnectAlert extends HttpServlet {
 		try{
 			List<Alert> a = HibernateManager.getAlertsByCa(s, caUuid);
 			if (a == null){
-				logger.info("Not alerts found for CA ID: " + caUuid ); //$NON-NLS-1$ //$NON-NLS-2$
+				logger.info("Not alerts found for CA ID: " + caUuid ); //$NON-NLS-1$
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			return a;
@@ -382,7 +384,7 @@ public class ConnectAlert extends HttpServlet {
 		a.setUserGeneratedId(userGenId);
 		a.setX(newAlert.getLongitude());
 		a.setY(newAlert.getLatitude());
-		String track = "[ [" +newAlert.getLongitude() + " , " + newAlert.getLatitude() + "]" + "]";
+		String track = "[ [" +newAlert.getLongitude() + " , " + newAlert.getLatitude() + "]" + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		a.setTrack(track);
 		
 		a.setCaUuid(newAlert.getCaUuid());
@@ -466,10 +468,7 @@ public class ConnectAlert extends HttpServlet {
 		}
 		return toDelete;
     }
-    
-    
  
-    
     private String validateAlertType(UUID typeUuid) {
 		Session s = HibernateManager.getSession(context);
 		AlertType at = new AlertType();
@@ -481,7 +480,7 @@ public class ConnectAlert extends HttpServlet {
 		}
 
     	if(at == null){
-    		return "Alert Type Not Found";
+    		return Messages.getString("ConnectAlert.AlertTypeNotFound1", SmartUtils.getRequestLocale(request)); //$NON-NLS-1$
     	}
 		return null;
 	}
@@ -497,7 +496,7 @@ public class ConnectAlert extends HttpServlet {
 		}
 
     	if(a != null){
-    		return "Alert with this User Generated ID already exist, cannot create duplicate";
+    		return Messages.getString("ConnectAlert.AlertExists", SmartUtils.getRequestLocale(request)); //$NON-NLS-1$
     	}
 		return null; 
 	}
@@ -513,7 +512,7 @@ public class ConnectAlert extends HttpServlet {
 		}
 
     	if(ca == null){
-    		return "Not a valid Conservation Area ID";
+    		return Messages.getString("ConnectAlert.InvalidCa", SmartUtils.getRequestLocale(request)); //$NON-NLS-1$
     	}
 		return null;
 	}
@@ -540,6 +539,7 @@ public class ConnectAlert extends HttpServlet {
     	a.setLevel(newAlert.getLevel());
     	validateAlertValues(a); 
     }
+    
     private void validateAlertValues(Alert newAlert) {
 		//validate type
 		String err = validateAlertType(newAlert.getTypeUuid());
@@ -555,74 +555,74 @@ public class ConnectAlert extends HttpServlet {
 		
 		//validate x,y are valid Lat-Long values
 		if (newAlert.getX() > 180 || newAlert.getX() < -180 || newAlert.getY() > 90 || newAlert.getY() < -90 || newAlert.getY() == null || newAlert.getX() == null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid Longitude or Latitude :" + newAlert.getX() + "," + newAlert.getY() );
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConnectAlert.InvalidLatLon", SmartUtils.getRequestLocale(request)), newAlert.getX(), newAlert.getY()) ); //$NON-NLS-1$
 		}
 		
 		//validate Level
 		if (newAlert.getLevel() == null || newAlert.getLevel() < -32768 || newAlert.getLevel() > 32767){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid Level (must be a an integer between -32768 and 32767):" + newAlert.getLevel());
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConnectAlert.InvalidLevel", SmartUtils.getRequestLocale(request)), newAlert.getLevel())); //$NON-NLS-1$
 		}
 	}
     
     private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
     	 JSONObject featureCollection = new JSONObject();
     	    try {
-    	        featureCollection.put("type", "FeatureCollection");
+    	        featureCollection.put("type", "FeatureCollection"); //$NON-NLS-1$ //$NON-NLS-2$
     	        JSONArray featureList = new JSONArray();
 
     	        for (Alert obj : list) {
     	            // {"geometry": {"type": "Point", "coordinates": [-94.149, 36.33]}
     	            JSONObject point = new JSONObject();
-    	            point.put("type", "Point");
+    	            point.put("type", "Point"); //$NON-NLS-1$ //$NON-NLS-2$
     	            // construct a JSONArray from a string; can also use an array or list
-    	            JSONArray coord = new JSONArray("["+obj.getX()+","+obj.getY()+"]");
-    	            point.put("coordinates", coord);
+    	            JSONArray coord = new JSONArray("["+obj.getX()+","+obj.getY()+"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    	            point.put("coordinates", coord); //$NON-NLS-1$
     	            JSONObject feature = new JSONObject();
-    	            feature.put("geometry", point);
+    	            feature.put("geometry", point); //$NON-NLS-1$
     	            
     	            JSONObject properties = new JSONObject();
-    	            properties.put("uuid", obj.getUuid());
-    	            properties.put("cauuid", obj.getCaUuid());
-    	            properties.put("creatoruuid", obj.getCreatorUuid());
-    	            properties.put("date", obj.getDate());
-    	            properties.put("desc", obj.getDescription());
-    	            properties.put("level", obj.getLevel());
-    	            properties.put("status", obj.getStatus());
-    	            properties.put("typeuuid", obj.getTypeUuid());
+    	            properties.put("uuid", obj.getUuid()); //$NON-NLS-1$
+    	            properties.put("cauuid", obj.getCaUuid()); //$NON-NLS-1$
+    	            properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
+    	            properties.put("date", obj.getDate()); //$NON-NLS-1$
+    	            properties.put("desc", obj.getDescription()); //$NON-NLS-1$
+    	            properties.put("level", obj.getLevel()); //$NON-NLS-1$
+    	            properties.put("status", obj.getStatus()); //$NON-NLS-1$
+    	            properties.put("typeuuid", obj.getTypeUuid()); //$NON-NLS-1$
 
     	            AlertType type = HibernateManager.getAlertType(s, obj.getTypeUuid());
-    	    		properties.put("type", type.getLabel());
+    	    		properties.put("type", type.getLabel()); //$NON-NLS-1$
     	            
-    	            properties.put("id", obj.getUserGeneratedId());
-    	            properties.put("x", obj.getX());
-    	            properties.put("y", obj.getY());
+    	            properties.put("id", obj.getUserGeneratedId()); //$NON-NLS-1$
+    	            properties.put("x", obj.getX()); //$NON-NLS-1$
+    	            properties.put("y", obj.getY()); //$NON-NLS-1$
 
-    	            feature.put("properties", properties);
-    	            feature.put("type", "Feature");
+    	            feature.put("properties", properties); //$NON-NLS-1$
+    	            feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
     	            featureList.put(feature);
     	            
     	            //the Track feature
     	            JSONObject propertiesTrack = new JSONObject();
-    	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track");
-    	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups
-    	            propertiesTrack.put("date", obj.getDate());
-    	            propertiesTrack.put("desc", obj.getDescription());
-    	            propertiesTrack.put("level", obj.getLevel());
+    	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
+    	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups //$NON-NLS-1$
+    	            propertiesTrack.put("date", obj.getDate()); //$NON-NLS-1$
+    	            propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
+    	            propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
     	            JSONObject line = new JSONObject();
     	            JSONArray a = new JSONArray(obj.getTrack());
-    	            line.put("coordinates", a);
-    	            line.put("type", "LineString");
+    	            line.put("coordinates", a); //$NON-NLS-1$
+    	            line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
     	            JSONObject featureTrack = new JSONObject();
-    	            featureTrack.put("geometry", line);
-    	            featureTrack.put("type", "Feature");
-    	            featureTrack.put("properties", propertiesTrack);
+    	            featureTrack.put("geometry", line); //$NON-NLS-1$
+    	            featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
+    	            featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
     	            
     	            featureList.put(featureTrack);
     	        }
-    	        featureCollection.put("features", featureList);
+    	        featureCollection.put("features", featureList); //$NON-NLS-1$
     	        
     	    } catch (JSONException e) {
-    	    	throw new SmartConnectException(Response.Status.BAD_REQUEST, "can't save json object: "+e.toString());
+    	    	throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectAlert.ConvertError", SmartUtils.getRequestLocale(request))+e.toString()); //$NON-NLS-1$
     	    }
     	 return featureCollection;
     }
@@ -682,7 +682,7 @@ public class ConnectAlert extends HttpServlet {
 				if(newAlert.getX() != null && newAlert.getY() != null){  
 					String current = toUpdate.getTrack();
 					current = current.substring(0, current.length()-1);
-					current = current + ", [" +newAlert.getX() + " , " + newAlert.getY() + "]" + "]";
+					current = current + ", [" +newAlert.getX() + " , " + newAlert.getY() + "]" + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					toUpdate.setTrack(current);
 				}
 			}

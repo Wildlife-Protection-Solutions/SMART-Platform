@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
@@ -82,7 +83,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){
-			logger.log(Level.SEVERE, "Error determining query columns.", ex);
+			logger.log(Level.SEVERE, "Error determining query columns.", ex); //$NON-NLS-1$
 			return null;
 		}
 		return null;
@@ -104,11 +105,11 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
 				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())).list(); //$NON-NLS-1$
 			for (MissionAttribute ma : all){
-				columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
+				columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma, l), ma));
 			}
 		}else{
 			for (MissionProperty mp : sd.getMissionProperties()){
-				columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
+				columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute(), l), mp.getAttribute()));
 			}
 		}
 		QueryColumnUtils.sortByName(columns, l);
@@ -123,14 +124,14 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 				.list();
 			for (SamplingUnitAttribute sua : su){
-				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua), sua));
+				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua, l), sua));
 			}
 		}else{
 			List<SurveyDesignSamplingUnitAttribute> atts = session.createCriteria(SurveyDesignSamplingUnitAttribute.class)
 				.add(Restrictions.eq("id.surveyDesign", sd)) //$NON-NLS-1$
 				.list();
 			for (SurveyDesignSamplingUnitAttribute a : atts){
-				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute()), a.getSamplingUnitAttribute()));
+				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute(), l), a.getSamplingUnitAttribute()));
 			}
 		}
 		QueryColumnUtils.sortByName(columns, l);
@@ -144,25 +145,25 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 
 		// survey columns 
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, Locale.getDefault()));
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, l));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, l));
 		}
 
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER, l));
 		
 		//mission property columns
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
 		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, l));
 		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, l));
 	
 		
 		return cols;
@@ -175,33 +176,33 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 
 		// survey columns 
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, Locale.getDefault()));
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, l));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, l));
 		}
 		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
 		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKID, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKLENGTH, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKID, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKLENGTH, l));
 		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKTYPE, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKTYPE, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE, l));
 		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT, l));
 		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));
 		
 		//mission property columns
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
 				
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, l));
 		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, l));
 		
 		return cols;
 	}
@@ -213,33 +214,33 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 
 		// survey columns 
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, Locale.getDefault()));
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, l));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, l));
 		}
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_X, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_Y, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_X, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_Y, l));
 		if (sd == null || sd.getTrackDistanceDirection()){
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION, Locale.getDefault()));
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION, l));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE, l));
 		}
 		if (sd == null || sd.getTrackObserver()){
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER, l));
 		}
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, l));
 				
 		//mission property columns
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
@@ -260,29 +261,29 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		
 		// survey columns 
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, Locale.getDefault()));
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, l));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, l));
 		}
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_X, Locale.getDefault()));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_Y, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_X, l));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_Y, l));
 		if (sd == null || sd.getTrackDistanceDirection()){
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION, Locale.getDefault()));
-			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION, l));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE, l));
 		}
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, l));
 						
 		//mission property columns
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
@@ -294,19 +295,18 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 	public static SurveyDesign getSurveyDesign(String key, Session s, ConservationAreaFilter caFilter){
 		if (key == null) return null;
 		SurveyDesign sd = (SurveyDesign)s.createCriteria(SurveyDesign.class)
-			.add(Restrictions.eq("keyId", key))
-			.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
+			.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
+			.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 			.uniqueResult();
 		return sd;
 		
 	}
 	
-	
-	private String getMissionPropertyColumnName(MissionAttribute ma){
-		return "Mission" + "|" + ma.getName();
+	private String getMissionPropertyColumnName(MissionAttribute ma, Locale l ){
+		return Messages.getString("SurveyQueryColumnProvider.MissionAttributecolumnPrefix", l) + "|" + ma.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
-	private String getSamplingUnitAttributeColumnName(SamplingUnitAttribute sua){
-		return "Sampling Unit" + "|" + sua.getName();
+	private String getSamplingUnitAttributeColumnName(SamplingUnitAttribute sua, Locale l ){
+		return Messages.getString("SurveyQueryColumnProvider.SUAttributeColumnPrefix", l) + "|" + sua.getName(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

@@ -24,10 +24,12 @@ package org.wcs.smart.connect.query.engine.intelligence;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.query.common.engine.IQueryEngine;
@@ -68,6 +70,7 @@ public class PsqlSummaryIntelligenceQueryEngine implements IQueryEngine {
 
 		final IntelligenceSummaryQuery query = (IntelligenceSummaryQuery) lquery;
 		final Session session = (Session) parameters.get(Session.class.getName());
+		final Locale l = (Locale) parameters.get(Locale.class.getName());
 		try{
 			
 			Date[] d = query.getDateFilter().getDateFilterOption().getDates();
@@ -103,7 +106,7 @@ public class PsqlSummaryIntelligenceQueryEngine implements IQueryEngine {
 			}
 			Long notFollowedUpOn = (Long) q.uniqueResult(); 
 		
-			SummaryQueryResult results = createResultTemplate();
+			SummaryQueryResult results = createResultTemplate(l);
 			
 			HashMap<SummaryResultKey, Double> data = new HashMap<SummaryResultKey, Double>();
 		
@@ -150,15 +153,15 @@ public class PsqlSummaryIntelligenceQueryEngine implements IQueryEngine {
 	 * 
 	 * @return
 	 */
-	public static SummaryQueryResult createResultTemplate(){
+	private static SummaryQueryResult createResultTemplate(Locale l){
 		SummaryQueryResult results = new SummaryQueryResult();
 		
 		results.addValueHeader(
-				new SummaryHeader("Number of Intelligence Records", "Number of Intelligence Records", IntelligenceSummaryQuery.NUMBER_KEY, true));
+				new SummaryHeader(Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l), Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l), IntelligenceSummaryQuery.NUMBER_KEY, true)); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		results.addRowHeader(
-				new SummaryHeader[]{new SummaryHeader("Followed Up", "Followed Up", IntelligenceSummaryQuery.FOLLOW_KEY, false), 
-				new SummaryHeader("Not Followed Up", "Not Followed Up", IntelligenceSummaryQuery.NOT_FOLLOW_KEY, false)}); 
+				new SummaryHeader[]{new SummaryHeader(Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l), Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l), IntelligenceSummaryQuery.FOLLOW_KEY, false),  //$NON-NLS-1$ //$NON-NLS-2$
+				new SummaryHeader(Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l), Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l), IntelligenceSummaryQuery.NOT_FOLLOW_KEY, false)});  //$NON-NLS-1$ //$NON-NLS-2$
 	
 		return results;
 	}

@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.plan.IPlanLabelProvider;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
@@ -39,41 +40,37 @@ import org.wcs.smart.plan.query.PlanPatrolQueryOption;
  */
 public class PlanLabelProvider implements IPlanLabelProvider {
 
-	public static final String ADMIN_TARGET_GUI_NAME = "Administrative";
-	
-	public static final String NUMERIC_TARGET_GUI_NAME = "Numeric";
-
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item == NumericPlanTarget.TargetType.DISTANCE) return "Distance Travelled";
-		if (item == NumericPlanTarget.TargetType.PATROL_HOURS) return "Patrol Hours";
-		if (item == NumericPlanTarget.TargetType.PATROL_DAYS) return "Patrol Days";
-		if (item == NumericPlanTarget.TargetType.PATROL_MANHOURS) return "Patrol Man-Hours";
+		if (item == NumericPlanTarget.TargetType.DISTANCE) return Messages.getString("PlanLabelProvider.DistanceTraveledTargetOp", l); //$NON-NLS-1$
+		if (item == NumericPlanTarget.TargetType.PATROL_HOURS) return Messages.getString("PlanLabelProvider.PatrolHoursTargetOp", l); //$NON-NLS-1$
+		if (item == NumericPlanTarget.TargetType.PATROL_DAYS) return Messages.getString("PlanLabelProvider.PatrolDaysTargetOp", l); //$NON-NLS-1$
+		if (item == NumericPlanTarget.TargetType.PATROL_MANHOURS) return Messages.getString("PlanLabelProvider.ManHoursTargetOp", l); //$NON-NLS-1$
 		
-		if (item == NumericPlanTarget.Unit.KM) return "km";
-		if (item == NumericPlanTarget.Unit.HOURS) return "hours";
-		if (item == NumericPlanTarget.Unit.DAYS) return "days";
+		if (item == NumericPlanTarget.Unit.KM) return Messages.getString("PlanLabelProvider.KMUnits", l); //$NON-NLS-1$
+		if (item == NumericPlanTarget.Unit.HOURS) return Messages.getString("PlanLabelProvider.HoursUnit", l); //$NON-NLS-1$
+		if (item == NumericPlanTarget.Unit.DAYS) return Messages.getString("PlanLabelProvider.DaysUnit", l); //$NON-NLS-1$
 		
-		if (item == Plan.PlanType.CA) return "Conservation Area Plan";
-		if (item == Plan.PlanType.STATION) return "Station Plan";
-		if (item == Plan.PlanType.TEAM) return "Team Plan";
-		if (item == Plan.PlanType.PATROL) return "Patrol Plan";
+		if (item == Plan.PlanType.CA) return Messages.getString("PlanLabelProvider.CaPlanType", l); //$NON-NLS-1$
+		if (item == Plan.PlanType.STATION) return Messages.getString("PlanLabelProvider.StationPlanType", l); //$NON-NLS-1$
+		if (item == Plan.PlanType.TEAM) return Messages.getString("PlanLabelProvider.TeamPlanType", l); //$NON-NLS-1$
+		if (item == Plan.PlanType.PATROL) return Messages.getString("PlanLabelProvider.PatorlPlanType", l); //$NON-NLS-1$
 				
-		if (item == PlanTargetStatus.Status.COMPLETE) return "Complete";
-		if (item == PlanTargetStatus.Status.INCOMPLETE) return  "Incomplete";
-		if (item == PlanTargetStatus.Status.UNKNOWN) return "Unknown"; 
+		if (item == PlanTargetStatus.Status.COMPLETE) return Messages.getString("PlanLabelProvider.CompleteStatus", l); //$NON-NLS-1$
+		if (item == PlanTargetStatus.Status.INCOMPLETE) return  Messages.getString("PlanLabelProvider.IncompleteStatus", l); //$NON-NLS-1$
+		if (item == PlanTargetStatus.Status.UNKNOWN) return Messages.getString("PlanLabelProvider.UnknownStatus", l);  //$NON-NLS-1$
 		
 		if (item == AdministrativePlanTarget.SUMMARY_KEY){
-			return "[Admin] {0}";
+			return Messages.getString("PlanLabelProvider.AdminTargetLabelStatus", l); //$NON-NLS-1$
 		}
 		if (item == NumericPlanTarget.SUMMARY_KEY){
-			return "[Numeric] {0}";
+			return Messages.getString("PlanLabelProvider.NumericTargetLabelStatus", l); //$NON-NLS-1$
 		}
 		if (item == SpatialPlanTarget.SUMMARY_KEY){
-			return "[Spatial] {0} ({1} point(s))";
+			return Messages.getString("PlanLabelProvider.SpatialTargetLabelStatus", l); //$NON-NLS-1$
 		}
 		if (item instanceof PlanPatrolQueryOption){
-			return  "Part of Plan";
+			return  Messages.getString("PlanLabelProvider.PartofPlanQueryOp", l); //$NON-NLS-1$
 		}
 		return null;
 	}

@@ -87,7 +87,7 @@ public class LoginServlet extends HttpServlet {
 			
 			request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response); //$NON-NLS-1$
 		}else{
-			request.setAttribute("logintarget", request.getRequestURI()); //$NON-NLS-1$ //$NON-NLS-2$
+			request.setAttribute("logintarget", request.getRequestURI()); //$NON-NLS-1$ 
 			request.getRequestDispatcher("WEB-INF/setup.jsp").forward(request, response); //$NON-NLS-1$
 		}
 		
@@ -98,25 +98,25 @@ public class LoginServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try{
-			String create = request.getParameter("createuser");
-			if (create!= null && create.equals("firstuser")){
-				String username = request.getParameter("username");
-				String email = request.getParameter("email");
-				String password1 = request.getParameter("password1");
-				String password2 = request.getParameter("password2");
+			String create = request.getParameter("createuser"); //$NON-NLS-1$
+			if (create!= null && create.equals("firstuser")){ //$NON-NLS-1$
+				String username = request.getParameter("username"); //$NON-NLS-1$
+				String email = request.getParameter("email"); //$NON-NLS-1$
+				String password1 = request.getParameter("password1"); //$NON-NLS-1$
+				String password2 = request.getParameter("password2"); //$NON-NLS-1$
 				
 				if (!password1.equals(password2)){
-					request.setAttribute("loginerror", "Passwords do not match." );
+					request.setAttribute("loginerror", Messages.getString("LoginServlet.PasswordError1", request.getLocale()) ); //$NON-NLS-1$ //$NON-NLS-2$
 					return;
 				}
 				String validate = ConnectUser.validatePassword(password1, SmartUtils.getRequestLocale(request));
 				if (validate != null){
-					request.setAttribute("loginerror", validate);
+					request.setAttribute("loginerror", validate); //$NON-NLS-1$
 					return;
 				}
 				validate = ConnectUser.validateUserName(username, SmartUtils.getRequestLocale(request));
 				if (validate != null){
-					request.setAttribute("loginerror", validate);
+					request.setAttribute("loginerror", validate); //$NON-NLS-1$
 					return;
 				}
 				createInitialAdminUser(username, email, password1, request);
@@ -150,12 +150,12 @@ public class LoginServlet extends HttpServlet {
 				s.save(sa);
 				
 			}else{
-				request.setAttribute("loginerror", "An administrator user already exists.  You cannot create another administrator user without logging in." );	
+				request.setAttribute("loginerror", Messages.getString("LoginServlet.UserAlreadyExists", request.getLocale()) );	 //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			request.setAttribute("loginerror", "Could not create user. " + ex.getMessage());
+			request.setAttribute("loginerror", Messages.getString("LoginServlet.CreateUserError", request.getLocale()) + ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 	}

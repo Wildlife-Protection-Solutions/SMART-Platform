@@ -81,7 +81,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){
-			logger.log(Level.SEVERE, "Error determining query columns.", ex);
+			logger.log(Level.SEVERE, "Error determining query columns.", ex); //$NON-NLS-1$
 			return null;
 		}
 		return null;
@@ -104,7 +104,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 				add = QueryColumnUtils.trackObserver(ops);
 			}
 			if (add) {
-				cols.add(new FixedQueryColumn(item, Locale.getDefault()));
+				cols.add(new FixedQueryColumn(item, l));
 			}
 		}
 
@@ -127,11 +127,11 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 			});
 			
 			if (entityTypes.size() > 0){
-				String hql = "SELECT a.keyId as att_key, b.keyId as entity_key, c.type FROM EntityAttribute a join a.entityType b join a.dmAttribute c "
-						+ "WHERE b.conservationArea.uuid IN (:cauuids) and b.keyId in (:entitytypes)";
+				String hql = "SELECT a.keyId as att_key, b.keyId as entity_key, c.type FROM EntityAttribute a join a.entityType b join a.dmAttribute c " //$NON-NLS-1$
+						+ "WHERE b.conservationArea.uuid IN (:cauuids) and b.keyId in (:entitytypes)"; //$NON-NLS-1$
 				org.hibernate.Query hq = s.createQuery(hql);
-				hq.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
-				hq.setParameterList("entitytypes", entityTypes);
+				hq.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+				hq.setParameterList("entitytypes", entityTypes); //$NON-NLS-1$
 				
 				List<Object[]> attributes = hq.list();
 				List<EntityAttributeQueryColumn> entityAttributeColumns = new ArrayList<EntityAttributeQueryColumn>();
@@ -142,11 +142,11 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 					
 					//find attribute name for entity attribute; this is complicated as it may be defined or it may be the attribute
 					//we also need to support cross-ca 
-					EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class).add(Restrictions.eq("keyId", attributeKey))
-							.createCriteria("entityType", "et")
-							.add(Restrictions.eq("et.keyId", entityType))
+					EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class).add(Restrictions.eq("keyId", attributeKey)) //$NON-NLS-1$
+							.createCriteria("entityType", "et") //$NON-NLS-1$ //$NON-NLS-2$
+							.add(Restrictions.eq("et.keyId", entityType)) //$NON-NLS-1$
 							.uniqueResult();
-					entityAttributeColumns.add(new EntityAttributeQueryColumn("[" + ea.getEntityType().getName() + "]" + ea.getName(), entityType, attributeKey, type));
+					entityAttributeColumns.add(new EntityAttributeQueryColumn("[" + ea.getEntityType().getName() + "]" + ea.getName(), entityType, attributeKey, type)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				QueryColumnUtils.sortByName(entityAttributeColumns, l);
 				
@@ -185,7 +185,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 				add = false;
 			}
 			if (add) {
-				cols.add(new FixedQueryColumn(item, Locale.getDefault()));
+				cols.add(new FixedQueryColumn(item, l));
 			}
 		}
 		return cols;

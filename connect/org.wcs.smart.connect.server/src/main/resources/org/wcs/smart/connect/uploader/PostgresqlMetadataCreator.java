@@ -56,7 +56,7 @@ public class PostgresqlMetadataCreator {
 		
 		ConservationAreaInfo ca = (ConservationAreaInfo) session.load(ConservationAreaInfo.class, caUuid);
 		if (ca == null){
-			throw new Exception("Could not determine conservation area info.");
+			throw new Exception("Could not find Conservation Area.");
 		}
 		
 		PackageMetadata metadata = new PackageMetadata();
@@ -66,8 +66,8 @@ public class PostgresqlMetadataCreator {
 		metadata.setServerRevision(revision);
 		
 		//plugin versions
-		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM connect.ca_plugin_version WHERE ca_uuid = :ca ");
-		q.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE);
+		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM connect.ca_plugin_version WHERE ca_uuid = :ca "); //$NON-NLS-1$
+		q.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		List<Object[]> plugins = q.list();
 		for (Object[] version : plugins){
 			metadata.setPluginVersion((String)version[1], (String)version[0]);

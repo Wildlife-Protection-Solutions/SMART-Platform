@@ -52,6 +52,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -150,7 +151,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			throw new SQLException(ex);
 		}
 		if (pgSrid == null){
-			throw new SQLException("Projection not supported on connect.  You must add the projection to the connect database.");
+			throw new SQLException(Messages.getString("PsqlErGridEngine.ProjectionNotSupported", getLocale())); //$NON-NLS-1$
 		}
 		
 		session.doWork(new Work() {
@@ -158,7 +159,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			public void execute(Connection c) throws SQLException {
 				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
-					throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErGridEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
 				}
 				
 				SurveyDesignFilter dsFilter = null;
@@ -434,8 +435,8 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 				sql.append( tablePrefix.get(Category.class));
 				sql.append( ".uuid" ); //$NON-NLS-1$
 				
-				p1 = addParameterValue(tmp.getCategoryKey() + "%");
-				sql.append(" AND Hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(tmp.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append(" AND Hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			
 			if (tmp.getAttributeType() == AttributeType.LIST){
@@ -462,7 +463,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 				sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 				sql.append(".tree_node_uuid "); //$NON-NLS-1$
 				sql.append(" and ("); //$NON-NLS-1$
-				p1 = addParameterValue(tmp.getItemKey() + "%");
+				p1 = addParameterValue(tmp.getItemKey() + "%"); //$NON-NLS-1$
 				sql.append(tablePrefix.get(AttributeTreeNode.class));
 				sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -505,8 +506,8 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 					+ ".uuid" //$NON-NLS-1$
 					+ " AND "); //$NON-NLS-1$
 			if (tmp.getCategoryHKey() != null){
-				p1 = addParameterValue(tmp.getCategoryHKey() + "%");
-				sql.append(" hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(tmp.getCategoryHKey() + "%"); //$NON-NLS-1$
+				sql.append(" hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}else{
 				sql.append(" hkey is not null "); //$NON-NLS-1$
 			}
@@ -523,7 +524,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			logger.finest(sql.toString());
 			rs = parseQueryString(c, sql.toString()).executeQuery();
 		}else{
-			throw new SQLException(MessageFormat.format("Value not supported {0}.", new Object[]{value.asString()}));	
+			throw new SQLException(MessageFormat.format(Messages.getString("PsqlErGridEngine.ValueNotSupported", getLocale()), new Object[]{value.asString()}));	 //$NON-NLS-1$
 		}
 		
 		try {
@@ -769,7 +770,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 			return computeMissionTrack(c, engine, dataField);
 		}else{
-			throw new Exception(MessageFormat.format("Value not supported {0}.", new Object[]{item.getValueItem().getGuiName(Locale.getDefault())}));
+			throw new Exception(MessageFormat.format(Messages.getString("PsqlErGridEngine.ValueNotSupported", getLocale()), new Object[]{item.getValueItem().getGuiName(Locale.getDefault())})); //$NON-NLS-1$
 		}
 	}
 	

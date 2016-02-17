@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
@@ -92,11 +93,11 @@ public class AlertServlet extends HttpServlet{
 		request.setAttribute("canupdate", canUpdate); //$NON-NLS-1$
 		request.setAttribute("candelete", canDelete); //$NON-NLS-1$
 		
-		List<String>status = new ArrayList<String>();
+		List<String[]>status = new ArrayList<String[]>();
 		for (Alert.AlertStatusEnum x : Alert.AlertStatusEnum.values()) {
-			status.add(x.getValue());
+			status.add(new String[]{x.name(), x.getGuiName(SmartUtils.getRequestLocale(request))});
 		}
-		request.setAttribute("status", status);
+		request.setAttribute("status", status); //$NON-NLS-1$
 
 		
 		//allow using "...alert?tab=2#tab2" on the url to specify whether to start on a tab other than the default
@@ -109,8 +110,6 @@ public class AlertServlet extends HttpServlet{
 		
 		request.setAttribute("mobile", mobile); //$NON-NLS-1$
 		request.setAttribute("tab", tab); //$NON-NLS-1$
-		
-		
 		
 		request.getRequestDispatcher("/WEB-INF/alert.jsp").forward(request, response); //$NON-NLS-1$
 

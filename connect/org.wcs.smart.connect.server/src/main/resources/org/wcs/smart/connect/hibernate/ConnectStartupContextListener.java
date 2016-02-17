@@ -130,7 +130,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		try{
 			numthreads = (Integer) EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.NUM_BACK_THREADS);
 		}catch(Exception ex){
-			logger.log(Level.WARNING, "Could not read variable " + EnvironmentVariables.Variable.NUM_BACK_THREADS.key + " from context.xml.", ex);
+			logger.log(Level.WARNING, "Could not read variable " + EnvironmentVariables.Variable.NUM_BACK_THREADS.key + " from context.xml.", ex); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(numthreads);
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, scheduler);
@@ -143,7 +143,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		try{
 			cleanUpSchedule = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL);
 		}catch (Exception ex){
-			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL.key, ex);
+			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL.key, ex); //$NON-NLS-1$
 		}
 		if (cleanUpSchedule >= 0){
 			CleanUpJob job = new CleanUpJob(sf);

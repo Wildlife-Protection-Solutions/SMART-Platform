@@ -580,7 +580,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 				}
 				sql.append(") "); //$NON-NLS-1$
 			}else if (attfilter.getAttributeType() == AttributeType.TREE){
-				String p1 = engine.addParameterValue(((String)attfilter.getValue()) + "%");
+				String p1 = engine.addParameterValue(((String)attfilter.getValue()) + "%"); //$NON-NLS-1$
 				sql.append("("); //$NON-NLS-1$
 				sql.append(prefix(AttributeTreeNode.class));
 				sql.append(".hkey like " + p1 + " ) " );  //$NON-NLS-1$ //$NON-NLS-2$

@@ -81,15 +81,13 @@
      		<legend>Date Filter</legend>
 
      		<p><fmt:message key="query.datefield" />
+     		
+     		
+     		
 	     		<select id="datefield" name="datefield" style="width:100%">
-	     		 	<option value="waypointdate"><fmt:message key="query.waypointdate" /></option>
-	     		 	<option value="patrolstart"><fmt:message key="query.patrolstartdate" /></option>
-	     		 	<option value="missionstartdate"><fmt:message key="query.missionstartdate" /></option>
-	     		 	<option value="missionenddate"><fmt:message key="query.missionenddate" /></option>
-	     		 	<option value="missiontrackdate"><fmt:message key="query.missiontrackdate" /></option>
-	     		 	<option value="patrolenddate"><fmt:message key="query.patrolenddate" /></option>
-	     		 	<option value="patrolstartdate"><fmt:message key="query.patrolstartdate" /></option>
-	     		 	<option value="recieveddate"><fmt:message key="query.receiveddate" /></option>
+	     		<c:forEach var="df" items="${datefilters}" varStatus="count">
+     				<option value="${df[0]}">${df[1]}</option> 
+				</c:forEach> 
 	     		</select>
 	     		</p>
 	     		<p>Date Filter: <select style="width:100%" id="defineddates"></select></p>

@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.observation.query.view.IObservationQueryLabelProvider;
 
@@ -39,18 +40,18 @@ public class ObservationQueryLabelProvider implements
 	public String getLabel(Object key, Locale l) {
 		if (key instanceof FixedQueryColumn.FixedColumns){
 			switch((FixedQueryColumn.FixedColumns)key){
-				case CA_ID:return "Conservation Area ID";
-				case CA_NAME: return "Conservation Area Name";
-				case WAYPOINT_SOURCE: return "Source";
-				case WAYPOINT_ID: return "Waypoint ID";
-				case WAYPOINT_DATE: return "Waypoint Date";
-				case WAYPOINT_TIME: return "Waypoint Time";
-				case WAYPOINT_X: return "X";
-				case WAYPOINT_Y: return "Y";
-				case WAYPOINT_DIRECTION: return "Direction";
-				case WAYPOINT_DISTANCE: return "Distance";
-				case WAYPOINT_COMMENT: return "Comment";
-				case WAYPOINT_OBSERVER: return "Observer";
+				case CA_ID:return Messages.getString("ObservationQueryLabelProvider.IDLabel", l); //$NON-NLS-1$
+				case CA_NAME: return Messages.getString("ObservationQueryLabelProvider.CANameLabel", l); //$NON-NLS-1$
+				case WAYPOINT_SOURCE: return Messages.getString("ObservationQueryLabelProvider.SourceLabel", l); //$NON-NLS-1$
+				case WAYPOINT_ID: return Messages.getString("ObservationQueryLabelProvider.WPidLabel", l); //$NON-NLS-1$
+				case WAYPOINT_DATE: return Messages.getString("ObservationQueryLabelProvider.DateLabel", l); //$NON-NLS-1$
+				case WAYPOINT_TIME: return Messages.getString("ObservationQueryLabelProvider.TimeLabel", l); //$NON-NLS-1$
+				case WAYPOINT_X: return Messages.getString("ObservationQueryLabelProvider.xLabel", l); //$NON-NLS-1$
+				case WAYPOINT_Y: return Messages.getString("ObservationQueryLabelProvider.yLabel", l); //$NON-NLS-1$
+				case WAYPOINT_DIRECTION: return Messages.getString("ObservationQueryLabelProvider.DirectionLabel", l); //$NON-NLS-1$
+				case WAYPOINT_DISTANCE: return Messages.getString("ObservationQueryLabelProvider.DistanceLabel", l); //$NON-NLS-1$
+				case WAYPOINT_COMMENT: return Messages.getString("ObservationQueryLabelProvider.CommentLabel", l); //$NON-NLS-1$
+				case WAYPOINT_OBSERVER: return Messages.getString("ObservationQueryLabelProvider.ObserverLabel", l); //$NON-NLS-1$
 			}
 		}
 		return null;

@@ -43,7 +43,7 @@ public class RecordIntelligenceQueryResult implements IDbTableResultSet {
 	}
 	
 	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable());
+		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
 	}
 
 	@Override
@@ -55,25 +55,25 @@ public class RecordIntelligenceQueryResult implements IDbTableResultSet {
 	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
 		String columnKey = column.getKey();
 		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id");
+			return rs.getString("ca_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name");
+			return rs.getString("ca_name"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_NAME.getKey())){
-			return rs.getString("intel_name");
+			return rs.getString("intel_name"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_DATE_RECIEVED.getKey())){
-			return rs.getDate("intel_datereceived");
+			return rs.getDate("intel_datereceived"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_DATE_FROM.getKey())){
-			return rs.getDate("intel_fromdate");
+			return rs.getDate("intel_fromdate"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_DATE_TO.getKey())){
-			return rs.getDate("intel_todate");
+			return rs.getDate("intel_todate"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_SOURCE.getKey())){
-			return rs.getString("intel_source");
+			return rs.getString("intel_source"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_PATROL_SOURCE.getKey())){
-			return rs.getString("intel_patrolid");
+			return rs.getString("intel_patrolid"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_INFORMANT_ID.getKey())){
-			return rs.getString("intel_informantid");
+			return rs.getString("intel_informantid"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_DESCRIPTION.getKey())){
-			return rs.getString("intel_description");
+			return rs.getString("intel_description"); //$NON-NLS-1$
 		}
 		return null;
 	}

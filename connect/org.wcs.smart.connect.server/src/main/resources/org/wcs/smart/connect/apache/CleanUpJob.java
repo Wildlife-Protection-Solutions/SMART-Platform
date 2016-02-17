@@ -72,7 +72,7 @@ public class CleanUpJob implements Runnable {
 	
 	@Override
 	public void run() {
-		logger.log(Level.FINEST, "Running cleanup job: " + (new Date()).toString());
+		logger.log(Level.FINEST, "Running cleanup job: " + (new Date()).toString()); //$NON-NLS-1$
 		
 		syncDownloadAvailableHrs = getEnvironmentVariable(EnvironmentVariables.Variable.SYNC_DOWNLOAD_AVAILABLE);
 		caExportAvailableDays = getEnvironmentVariable(EnvironmentVariables.Variable.CA_EXPORT_AVAILABLE);
@@ -82,7 +82,7 @@ public class CleanUpJob implements Runnable {
 		try{
 			cleanUp();
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Error running cleanup task:" + ex.getMessage(), ex);
+			logger.log(Level.SEVERE, "Error running cleanup task:" + ex.getMessage(), ex); //$NON-NLS-1$
 		}		
 	}
 	
@@ -91,7 +91,7 @@ public class CleanUpJob implements Runnable {
 		try{
 			value = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVariable(variable);
 		}catch (Exception ex){
-			logger.log(Level.WARNING, "Value not found for environment variable:" + variable, ex);
+			logger.log(Level.WARNING, "Value not found for environment variable:" + variable, ex); //$NON-NLS-1$
 		}
 		return value;
 	}
@@ -106,7 +106,7 @@ public class CleanUpJob implements Runnable {
 					checkAndDelete(s, path);
 				}
 			}catch (Exception ex){
-				logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex);
+				logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex); //$NON-NLS-1$
 			}
 			
 			//ca export directory
@@ -116,7 +116,7 @@ public class CleanUpJob implements Runnable {
 					checkAndDelete(s, path);
 				}
 			}catch (Exception ex){
-				logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex);
+				logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex); //$NON-NLS-1$
 			}
 			
 			//tempDir
@@ -130,7 +130,7 @@ public class CleanUpJob implements Runnable {
 					}
 				}
 			}catch (Exception ex){
-				logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex);
+				logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex); //$NON-NLS-1$
 			}
 			
 			//delete any work items
@@ -154,22 +154,22 @@ public class CleanUpJob implements Runnable {
 		try{
 			days = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE);
 		}catch (Exception ex){
-			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE.key, ex);
+			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE.key, ex); //$NON-NLS-1$
 		}
 		if (days == null || days <= 0) return;
 		
 		s.beginTransaction();
 		try{
-			Query q = s.createQuery("DELETE FROM WorkItem where startTime < :starttime");
+			Query q = s.createQuery("DELETE FROM WorkItem where startTime < :starttime"); //$NON-NLS-1$
 			
 			Date d = new Date((new Date()).getTime() - days * 24l * 60 * 60 *1000);
-			q.setParameter("starttime", d);
+			q.setParameter("starttime", d); //$NON-NLS-1$
 			q.executeUpdate();
 			
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			logger.log(Level.WARNING, "Unable to clean up work item table.", ex);
+			logger.log(Level.WARNING, "Unable to clean up work item table.", ex); //$NON-NLS-1$
 		}
 	}
 	
@@ -181,7 +181,7 @@ public class CleanUpJob implements Runnable {
 	private void checkAndDelete(Session s, Path p){
 		String localFilename = DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(p).toString();
 		List<WorkItem> items = s.createCriteria(WorkItem.class)
-				.add(Restrictions.eq("localFilename", localFilename))
+				.add(Restrictions.eq("localFilename", localFilename)) //$NON-NLS-1$
 				.list();
 		
 		boolean delete = true;
@@ -200,7 +200,7 @@ public class CleanUpJob implements Runnable {
 					Files.delete(p);
 				}
 			}catch (Exception ex){
-				logger.log(Level.WARNING, "Unable to cleanup file: " + p.toString(), ex);
+				logger.log(Level.WARNING, "Unable to cleanup file: " + p.toString(), ex); //$NON-NLS-1$
 			}
 		}
 	}
@@ -282,7 +282,7 @@ public class CleanUpJob implements Runnable {
 			}
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Could not clean up change log.", ex.getMessage());
+			logger.log(Level.SEVERE, "Could not clean up change log.", ex.getMessage()); //$NON-NLS-1$
 			session.getTransaction().rollback();
 		}
 	}
@@ -290,12 +290,13 @@ public class CleanUpJob implements Runnable {
 	/*
 	 * delete items from the data queue table and associated files
 	 */
+	@SuppressWarnings("unchecked")
 	private void cleanUpDataQueue(Session s){
 		Integer days = null;
 		try{
 			days = getEnvironmentVariable(EnvironmentVariables.Variable.DATA_QUEUE_CLEAN_UP_DAYS);
 		}catch (Exception ex){
-			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE.key, ex);
+			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE.key, ex); //$NON-NLS-1$
 		}
 		if (days != null && days > 0){
 			//remove all items
@@ -304,8 +305,8 @@ public class CleanUpJob implements Runnable {
 			s.beginTransaction();
 			try{
 				List<ServerDataQueueItem> toDelete = s.createCriteria(ServerDataQueueItem.class)
-					.add(Restrictions.le("uploadedDate", lastDate))
-					.add(Restrictions.in("status", new ServerDataQueueItem.Status[]{
+					.add(Restrictions.le("uploadedDate", lastDate)) //$NON-NLS-1$
+					.add(Restrictions.in("status", new ServerDataQueueItem.Status[]{ //$NON-NLS-1$
 							ServerDataQueueItem.Status.COMPLETE,
 							ServerDataQueueItem.Status.ERROR,
 					}))
@@ -320,14 +321,14 @@ public class CleanUpJob implements Runnable {
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
-				logger.log(Level.WARNING, "Unable to clean up data queue items.", ex);
+				logger.log(Level.WARNING, "Unable to clean up data queue items.", ex); //$NON-NLS-1$
 			}
 			//delete associated files
 			for (File f : filesToDelete){
 				try{
 					Files.deleteIfExists(f.toPath());
 				}catch (Exception ex){
-					logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file: {0}.", f.toString()), ex);
+					logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file: {0}.", f.toString()), ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -337,12 +338,12 @@ public class CleanUpJob implements Runnable {
 		Set<String> allFiles = new HashSet<String>();
 		s.beginTransaction();
 		try{
-			List<String> files = s.createQuery("SELECT file FROM ServerDataQueueItem").list();
+			List<String> files = s.createQuery("SELECT file FROM ServerDataQueueItem").list(); //$NON-NLS-1$
 			allFiles.addAll(files);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			logger.log(Level.WARNING, "Unable to clean up data queue items.", ex);
+			logger.log(Level.WARNING, "Unable to clean up data queue items.", ex); //$NON-NLS-1$
 		}
 		Path dataqueueDir = DataStoreManager.INSTANCE.getFile(DataQueue.FILE_STORE_LOCATION).toPath();
 		Path root = DataStoreManager.INSTANCE.getRootDirectory().toPath();
@@ -355,12 +356,12 @@ public class CleanUpJob implements Runnable {
 					try{
 						Files.deleteIfExists(f);
 					}catch(Exception ex){
-						logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file that is not associated with any files: {0}.", f.toString()), ex);		
+						logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file that is not associated with any files: {0}.", f.toString()), ex);		 //$NON-NLS-1$
 					}
 				}
 			}
 		}catch (Exception ex){
-			logger.log(Level.WARNING, "Unable to delete data queue files that are not associated with any files.", ex);
+			logger.log(Level.WARNING, "Unable to delete data queue files that are not associated with any files.", ex); //$NON-NLS-1$
 		}
 	}
 	

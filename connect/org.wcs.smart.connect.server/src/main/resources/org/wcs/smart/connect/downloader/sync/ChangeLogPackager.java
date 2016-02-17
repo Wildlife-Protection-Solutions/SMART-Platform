@@ -76,9 +76,9 @@ public class ChangeLogPackager {
 		
 		tempDir = ZipUtil.createTemporaryDirectory();
 		filestorePath = tempDir.toPath().resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
-		metadataFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.metadata");
-		changelogFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog");
-		zipFile = tempDir.toPath().getParent().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.zip");
+		metadataFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.metadata"); //$NON-NLS-1$ //$NON-NLS-2$
+		changelogFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog"); //$NON-NLS-1$ //$NON-NLS-2$
+		zipFile = tempDir.toPath().getParent().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.zip"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	
@@ -86,7 +86,7 @@ public class ChangeLogPackager {
 		try{
 			FileUtils.forceDelete(tempDir);
 		}catch (Exception ex){
-			logger.log(Level.WARNING, "could not delete directory " + tempDir.toString(), ex);
+			logger.log(Level.WARNING, "could not delete directory " + tempDir.toString(), ex); //$NON-NLS-1$
 		}
 	}
 	

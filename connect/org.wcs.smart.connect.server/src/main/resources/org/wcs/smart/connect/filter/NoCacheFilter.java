@@ -52,9 +52,9 @@ public class NoCacheFilter implements Filter {
 		 
 		HttpServletResponse response = (HttpServletResponse) res;
 
-	    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
-	    response.setHeader("Pragma", "no-cache"); // HTTP 1.0.
-	    response.setDateHeader("Expires", 0); // Proxies.
+	    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1. //$NON-NLS-1$ //$NON-NLS-2$
+	    response.setHeader("Pragma", "no-cache"); // HTTP 1.0. //$NON-NLS-1$ //$NON-NLS-2$
+	    response.setDateHeader("Expires", 0); // Proxies. //$NON-NLS-1$
 
 	    chain.doFilter(req, res);
 	}

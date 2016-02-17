@@ -58,7 +58,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 		try{
 			LockManager.INSTANCE.lockDatabase(session, item.getConservationAreaInfo());
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Could not lock database to apply upload changelog. " + item.getUuid());
+			logger.log(Level.SEVERE, "Could not lock database to apply upload changelog. " + item.getUuid()); //$NON-NLS-1$
 			
 			//set error status
 			session.beginTransaction();
@@ -90,7 +90,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 				session.flush();
 	
 				long revision = ChangeLogManager.INSTANCE.getLastRevision(session, info.getUuid());
-				item.setMessage("{\"server_revision\": " + revision + "}");
+				item.setMessage("{\"server_revision\": " + revision + "}"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.COMPLETE);
 				
@@ -108,7 +108,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 			try{
 				LockManager.INSTANCE.releaseDatabase(session, item.getConservationAreaInfo());
 			}catch (Exception ex){
-				logger.log(Level.SEVERE, "Could not release database lock after applying upload changes. " + item.getUuid());
+				logger.log(Level.SEVERE, "Could not release database lock after applying upload changes. " + item.getUuid()); //$NON-NLS-1$
 			}
 			cleanUp(item);
 		}
@@ -118,7 +118,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 		try{
 			Files.deleteIfExists(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()).toPath());
 		}catch (Exception ex){
-			logger.log(Level.WARNING, "Could not delete ca upload file.", ex);
+			logger.log(Level.WARNING, "Could not delete ca upload file.", ex); //$NON-NLS-1$
 		}
 	}
 

@@ -109,7 +109,7 @@ public class ConnectUser extends HttpServlet {
 			try{
 				validate = Boolean.valueOf(validateOnly);
 			}catch (Exception ex){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid validate parameter.");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid validate parameter."); //$NON-NLS-1$
 			}
 		}
 		if (validate){

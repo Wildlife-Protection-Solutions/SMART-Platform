@@ -489,19 +489,19 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sql.append(".keyid = '" + entityKey + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" AND "); //$NON-NLS-1$
 		sql.append(tablePrefix(EntityType.class));
-		sql.append(".ca_uuid IN (");
+		sql.append(".ca_uuid IN ("); //$NON-NLS-1$
 		for (UUID uuid : caFilter.getConservationAreaFilterIds()){
-			sql.append("'" + uuid.toString() + "',");
+			sql.append("'" + uuid.toString() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		sql.deleteCharAt(sql.length() - 1);
-		sql.append(")");
+		sql.append(")"); //$NON-NLS-1$
 		try{
 			logger.finest(sql.toString());
 			ResultSet rs = c.createStatement().executeQuery(sql.toString());
 			if (rs.next()){
 				dmEntityTypeAttributeKey = rs.getString(1);
 			}else{
-				throw new RuntimeException(MessageFormat.format("Entity not found for entity attribute key {0}.", new Object[]{entityKey}));
+				throw new RuntimeException(MessageFormat.format("Entity not found for entity attribute key {0}.", new Object[]{entityKey})); //$NON-NLS-1$
 			}
 			rs.close();
 		}catch (Exception ex){
@@ -524,13 +524,13 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		String spatialRefSys = (String) EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.SPATIAL_REF_SYS_TABLE);
 		try{
 			String crsid = CRS.lookupIdentifier(crs,  true );
-			if (crsid.contains(":")){
-				String auth = crsid.split(":")[0];
-				int code = Integer.parseInt(crsid.split(":")[1]);
+			if (crsid.contains(":")){ //$NON-NLS-1$
+				String auth = crsid.split(":")[0]; //$NON-NLS-1$
+				int code = Integer.parseInt(crsid.split(":")[1]); //$NON-NLS-1$
 				
-				org.hibernate.Query q = session.createSQLQuery("SELECT srid, srtext FROM " + spatialRefSys + " WHERE auth_name = :auth and auth_srid = :srid");
-				q.setString("auth", auth);
-				q.setInteger("srid", code);
+				org.hibernate.Query q = session.createSQLQuery("SELECT srid, srtext FROM " + spatialRefSys + " WHERE auth_name = :auth and auth_srid = :srid"); //$NON-NLS-1$ //$NON-NLS-2$
+				q.setString("auth", auth); //$NON-NLS-1$
+				q.setInteger("srid", code); //$NON-NLS-1$
 				Object[] data = (Object[]) q.uniqueResult();
 				if (data != null){
 					CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);
@@ -544,7 +544,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		}
 		//if above fails, lets search entire list for match
 		@SuppressWarnings("unchecked")
-		List<Object[]> choices = session.createSQLQuery("SELECT srid, srtext from " + spatialRefSys).list();
+		List<Object[]> choices = session.createSQLQuery("SELECT srid, srtext from " + spatialRefSys).list(); //$NON-NLS-1$
 		for (Object[] data : choices){
 			try{
 				CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);
@@ -574,26 +574,26 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 */
 	protected void updateLabel(Connection c, String tableName, String uuid, String value) throws SQLException{
 		StringBuilder sb = new StringBuilder();
-		sb.append( "UPDATE ");
+		sb.append( "UPDATE "); //$NON-NLS-1$
 		sb.append(tableName);
-		sb.append(" SET ");
+		sb.append(" SET "); //$NON-NLS-1$
 		sb.append( value );
-		sb.append(" = (SELECT ");
+		sb.append(" = (SELECT "); //$NON-NLS-1$
 		sb.append(tablePrefix(Label.class));
-		sb.append(".value FROM ");
+		sb.append(".value FROM "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(Label.class));
-		sb.append(",");
+		sb.append(","); //$NON-NLS-1$
 		sb.append(tableNamePrefix(Language.class));
-		sb.append(" WHERE ");
-		sb.append(tablePrefix(Label.class) + ".language_uuid = ");
-		sb.append(tablePrefix(Language.class) + ".uuid ");
-		sb.append(" AND ");
-		sb.append(tableName + "." + uuid);
-		sb.append(" = ");
-		sb.append(tablePrefix(Label.class) + ".element_uuid");
-		sb.append(" ORDER BY CASE WHEN upper(code) = '" + locale.toString().toUpperCase() + "' THEN 1 ELSE ");
-		sb.append(" CASE WHEN upper(code) = '" + locale.getLanguage().toUpperCase() + "' THEN 2 ELSE ");
-		sb.append(" CASE WHEN isdefault THEN 3 ELSE 4 END END END LIMIT 1)");
+		sb.append(" WHERE "); //$NON-NLS-1$
+		sb.append(tablePrefix(Label.class) + ".language_uuid = "); //$NON-NLS-1$
+		sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
+		sb.append(" AND "); //$NON-NLS-1$
+		sb.append(tableName + "." + uuid); //$NON-NLS-1$
+		sb.append(" = "); //$NON-NLS-1$
+		sb.append(tablePrefix(Label.class) + ".element_uuid"); //$NON-NLS-1$
+		sb.append(" ORDER BY CASE WHEN upper(code) = '" + locale.toString().toUpperCase() + "' THEN 1 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" CASE WHEN upper(code) = '" + locale.getLanguage().toUpperCase() + "' THEN 2 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" CASE WHEN isdefault THEN 3 ELSE 4 END END END LIMIT 1)"); //$NON-NLS-1$
 
 		logger.finest(sb.toString());
 		c.createStatement().execute(sb.toString());
@@ -630,74 +630,74 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		//create a table that lists the uuid for each category level for each
 		//category used in an observation
 		// category_uuid | uuid mashup | uuid level 0 | uuid level 1 | etc.
-		String categoryTable = queryDataTable + "_categories";
+		String categoryTable = queryDataTable + "_categories"; //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE ");
+		sb.append("CREATE TABLE "); //$NON-NLS-1$
 		sb.append(categoryTable);
-		sb.append(" AS ");
-		sb.append(" SELECT c.uuid, b.mashup ");
+		sb.append(" AS "); //$NON-NLS-1$
+		sb.append(" SELECT c.uuid, b.mashup "); //$NON-NLS-1$
 		for (int i = 0; i < categoryCount; i ++){
-			sb.append(", cast(case when length(split_part(b.mashup, '.', " + (i+1) + ")) = 0 then null else split_part(b.mashup, '.', " + (i+1) + ") end as uuid )  as mashup_" + (i+1));
+			sb.append(", cast(case when length(split_part(b.mashup, '.', " + (i+1) + ")) = 0 then null else split_part(b.mashup, '.', " + (i+1) + ") end as uuid )  as mashup_" + (i+1)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-		sb.append(" FROM " + tableNamePrefix(Category.class));
-		sb.append(", ( WITH RECURSIVE allparts(uuid, srcuuid, mashup) AS (");
-		sb.append(" SELECT distinct ob_category_uuid, ob_category_uuid, ob_category_uuid || '' FROM ");
+		sb.append(" FROM " + tableNamePrefix(Category.class)); //$NON-NLS-1$
+		sb.append(", ( WITH RECURSIVE allparts(uuid, srcuuid, mashup) AS ("); //$NON-NLS-1$
+		sb.append(" SELECT distinct ob_category_uuid, ob_category_uuid, ob_category_uuid || '' FROM "); //$NON-NLS-1$
 		sb.append(queryDataTable);
-		sb.append(" UNION ALL ");
-		sb.append(" SELECT " + tablePrefix(Category.class) );
-		sb.append(".parent_category_uuid, d.srcuuid, " + tablePrefix(Category.class) + ".parent_category_uuid || '.' || d.mashup ");
-		sb.append(" FROM " + tableNamePrefix(Category.class) + ", allparts d WHERE c.uuid = d.uuid )");
-		sb.append(" SELECT y.srcuuid, y.mashup FROM (SELECT srcuuid, max(length(mashup)) as mashupcnt from allparts group by srcuuid) x, allparts y where x.srcuuid = y.srcuuid and x.mashupcnt = length(y.mashup)");
-		sb.append(") b WHERE b.srcuuid = c.uuid");
+		sb.append(" UNION ALL "); //$NON-NLS-1$
+		sb.append(" SELECT " + tablePrefix(Category.class) ); //$NON-NLS-1$
+		sb.append(".parent_category_uuid, d.srcuuid, " + tablePrefix(Category.class) + ".parent_category_uuid || '.' || d.mashup "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" FROM " + tableNamePrefix(Category.class) + ", allparts d WHERE c.uuid = d.uuid )"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" SELECT y.srcuuid, y.mashup FROM (SELECT srcuuid, max(length(mashup)) as mashupcnt from allparts group by srcuuid) x, allparts y where x.srcuuid = y.srcuuid and x.mashupcnt = length(y.mashup)"); //$NON-NLS-1$
+		sb.append(") b WHERE b.srcuuid = c.uuid"); //$NON-NLS-1$
 		logger.finest(sb.toString());
 		c.createStatement().execute(sb.toString());
 		
 		//create some indexes and analyze
 		//analyze is important here for performance
-		String sql = "create index " + queryDataTable + "_categories_uuid_idx on " + queryDataTable + "_categories(uuid)";
+		String sql = "create index " + queryDataTable + "_categories_uuid_idx on " + queryDataTable + "_categories(uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logger.finest(sql);
 		c.createStatement().execute(sql);
 		
-		sql = "analyze " + queryDataTable + "_categories";
+		sql = "analyze " + queryDataTable + "_categories"; //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql);
 		c.createStatement().execute(sql);
-		sql = "analyze " + queryDataTable ;
+		sql = "analyze " + queryDataTable ; //$NON-NLS-1$
 		logger.finest(sql);
 		c.createStatement().execute(sql);
 		
 		//populate labels
 		for (int i = 0; i <categoryCount; i ++){
 			sb = new StringBuilder();
-			sb.append("UPDATE " + queryDataTable + " SET category_" + i + " = ");
-			sb.append(" (SELECT ");
+			sb.append("UPDATE " + queryDataTable + " SET category_" + i + " = "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sb.append(" (SELECT "); //$NON-NLS-1$
 			sb.append(tablePrefix(Label.class));
-			sb.append(".value FROM ");
+			sb.append(".value FROM "); //$NON-NLS-1$
 			sb.append(tableNamePrefix(Label.class));
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 			sb.append(tableNamePrefix(Language.class));
-			sb.append(",");
-			sb.append(categoryTable + " mash");
-			sb.append(" WHERE ");
-			sb.append(tablePrefix(Label.class) + ".language_uuid = ");
-			sb.append(tablePrefix(Language.class) + ".uuid ");
-			sb.append(" AND ");
-			sb.append(queryDataTable + ".OB_CATEGORY_UUID "  );
-			sb.append(" = ");
-			sb.append("mash.uuid ");
-			sb.append(" AND ");
-			sb.append("mash.mashup_" + (i+1) + " = " );
-			sb.append(tablePrefix(Label.class) + ".element_uuid");
-			sb.append(" ORDER BY CASE WHEN upper(code) = '" + locale.toString().toUpperCase() + "' THEN 1 ELSE ");
-			sb.append(" CASE WHEN upper(code) = '" + locale.getLanguage().toUpperCase() + "' THEN 2 ELSE ");
-			sb.append(" CASE WHEN isdefault THEN 3 ELSE 4 END END END LIMIT 1)");
+			sb.append(","); //$NON-NLS-1$
+			sb.append(categoryTable + " mash"); //$NON-NLS-1$
+			sb.append(" WHERE "); //$NON-NLS-1$
+			sb.append(tablePrefix(Label.class) + ".language_uuid = "); //$NON-NLS-1$
+			sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
+			sb.append(" AND "); //$NON-NLS-1$
+			sb.append(queryDataTable + ".OB_CATEGORY_UUID "  ); //$NON-NLS-1$
+			sb.append(" = "); //$NON-NLS-1$
+			sb.append("mash.uuid "); //$NON-NLS-1$
+			sb.append(" AND "); //$NON-NLS-1$
+			sb.append("mash.mashup_" + (i+1) + " = " ); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(tablePrefix(Label.class) + ".element_uuid"); //$NON-NLS-1$
+			sb.append(" ORDER BY CASE WHEN upper(code) = '" + locale.toString().toUpperCase() + "' THEN 1 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" CASE WHEN upper(code) = '" + locale.getLanguage().toUpperCase() + "' THEN 2 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" CASE WHEN isdefault THEN 3 ELSE 4 END END END LIMIT 1)"); //$NON-NLS-1$
 			
 			logger.finest(sb.toString());
 			c.createStatement().execute(sb.toString());
 		}
 		
 		//drop temporary table
-		sql = "DROP TABLE " +categoryTable;
+		sql = "DROP TABLE " +categoryTable; //$NON-NLS-1$
 		logger.finest(sql);
 		c.createStatement().execute(sql);
 
@@ -719,7 +719,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
 			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + "." + caUuidColumn +")"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + "." + caUuidColumn +")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logger.finest(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -728,7 +728,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + "." + caUuidColumn + ")");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + "." + caUuidColumn + ")");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 			logger.finest(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}

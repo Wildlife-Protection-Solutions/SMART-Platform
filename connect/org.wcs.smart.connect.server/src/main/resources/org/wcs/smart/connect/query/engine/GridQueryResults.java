@@ -56,12 +56,12 @@ public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 			throws SQLException {
 		if (column instanceof GridQueryColumn){
 			Object v = ((GridQueryColumn)column).getValue(item);
-			if (v == null) return "";
+			if (v == null) return ""; //$NON-NLS-1$
 			if (v instanceof Number){
 				return ((Number)v).toString();
 			}
 			return v.toString();
 		}
-		throw new SQLException("Invalid column for gridded query." + column.getKey());
+		throw new SQLException("Invalid column for gridded query." + column.getKey()); //$NON-NLS-1$
 	}
 }

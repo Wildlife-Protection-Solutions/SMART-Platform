@@ -78,7 +78,7 @@ class UUIDTypeInsertingMetadataProvider implements MetadataProvider {
 
             @Override
             public String type() {
-                return "pg-uuid";
+                return "pg-uuid"; //$NON-NLS-1$
             }
 
             @Override

@@ -35,6 +35,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
@@ -234,7 +235,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 		if (dateFilter != null && dateFilter.getDateFieldOption() != MissionStartDateField.INSTANCE 
 				&& dateFilter.getDateFieldOption() != MissionEndDateField.INSTANCE
 				&& dateFilter.getDateFieldOption() != WaypointDateField.INSTANCE){
-			throw new SQLException(MessageFormat.format("Date filter not supported {0}", new Object[]{dateFilter.getDateFilterOption().getGuiName(Locale.getDefault())}));
+			throw new SQLException(MessageFormat.format(Messages.getString("ErFilterProcessor.DateFilteRNotSupported", engine.getLocale()), new Object[]{dateFilter.getDateFilterOption().getGuiName(Locale.getDefault())})); //$NON-NLS-1$
 		}
 		
 		engine.clearParameters();
@@ -388,7 +389,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 		queryFilter.accept(missionTracks);
 		if (needstracks[0]){
 			if (populateObservation){
-				throw new SQLException("Invalid query.  Cannot filter on tracks and observations");
+				throw new SQLException(Messages.getString("ErFilterProcessor.InvalidQuery", engine.getLocale())); //$NON-NLS-1$
 			}
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(MissionTrack.class));

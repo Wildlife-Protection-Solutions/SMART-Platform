@@ -43,7 +43,7 @@ public class ObsWaypointQueryResult implements IDbTableResultSet {
 	}
 	
 	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable());
+		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -55,33 +55,33 @@ public class ObsWaypointQueryResult implements IDbTableResultSet {
 	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
 		String columnKey = column.getKey();
 		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id");
+			return rs.getString("ca_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name");
+			return rs.getString("ca_name"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
-			return rs.getInt("wp_id");
+			return rs.getInt("wp_id"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())){
-			return rs.getDate("wp_time");
+			return rs.getDate("wp_time"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
-			return rs.getTime("wp_time");
+			return rs.getTime("wp_time"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-			return rs.getDouble("wp_x");
+			return rs.getDouble("wp_x"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-			return rs.getDouble("wp_y");
+			return rs.getDouble("wp_y"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
-			Object x = rs.getObject("wp_direction");
+			Object x = rs.getObject("wp_direction"); //$NON-NLS-1$
 			if (x == null) return null;
 			return (Double)x;
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE.getKey())){
-			return rs.getString("wp_source");
+			return rs.getString("wp_source"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
-			Object x = rs.getObject("wp_distance");
+			Object x = rs.getObject("wp_distance"); //$NON-NLS-1$
 			if (x == null) return null;
 			return (Double)x;
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
-			return rs.getString("wp_comment");
+			return rs.getString("wp_comment"); //$NON-NLS-1$
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
-			return rs.getString("ob_observer");
+			return rs.getString("ob_observer"); //$NON-NLS-1$
 		}
 		return null;
 	}

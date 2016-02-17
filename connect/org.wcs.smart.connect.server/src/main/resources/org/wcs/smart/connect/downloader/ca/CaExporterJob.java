@@ -37,6 +37,7 @@ import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.database.LockManager;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
@@ -77,12 +78,12 @@ public class CaExporterJob implements Runnable {
 			//lock database for conservation area
 			LockManager.INSTANCE.lockDatabase(s, item.getConservationAreaInfo());
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Could not lock database to create conservation area download package. " + item.getUuid());
+			logger.log(Level.SEVERE, "Could not lock database to create Conservation Area download package. " + item.getUuid()); //$NON-NLS-1$
 			
 			//set error status
 			s.beginTransaction();
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
-			item.setMessage(MessageFormat.format("Error processing item {0}: {1}.", item.getUuid().toString(), ex.getMessage()));
+			item.setMessage(MessageFormat.format("Error processing item {0}: {1}.", item.getUuid().toString(), ex.getMessage())); //$NON-NLS-1$
 			s.getTransaction().commit();
 			
 			return;
@@ -94,9 +95,9 @@ public class CaExporterJob implements Runnable {
 				long revision = ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid());
 			
 				String filename = UuidUtils.uuidToString(info.getUuid())
-					 +"." + UuidUtils.uuidToString(info.getVersion()) 
-					 + "." + String.valueOf(revision)
-					 + ".zip";
+					 +"." + UuidUtils.uuidToString(info.getVersion())  //$NON-NLS-1$
+					 + "." + String.valueOf(revision) //$NON-NLS-1$
+					 + ".zip"; //$NON-NLS-1$
 			
 				destFile = DataStoreManager.INSTANCE
 					.getRootDirectory().toPath()
@@ -111,36 +112,36 @@ public class CaExporterJob implements Runnable {
 				if (Files.exists(destFile)){
 					
 					item.setStatus(Status.COMPLETE);
-					item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}");
+					item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					s.saveOrUpdate(item);
 					s.getTransaction().commit();
 				}else{
 					try{
 						export(s, info.getUuid(), destFile);
 						item.setStatus(Status.COMPLETE);
-						item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}");
+						item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						s.saveOrUpdate(item);
 						s.getTransaction().commit();
 					}catch (Exception ex){
-						logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
+						logger.log(Level.SEVERE, "Error exporting Conservation Area data. " + ex.getMessage(), ex); //$NON-NLS-1$
 						
 						//open a new transaction to update db state
 						s.getTransaction().rollback();
 						s.beginTransaction();
 						s.saveOrUpdate(item);
 						item.setStatus(Status.ERROR);
-						item.setMessage("{\"error\": " + "\"Error packaging conservation area for export. " + ex.getMessage() + "\"}");
+						item.setMessage("{\"error\": " + "Error packaging Conservation Area for export. " + ex.getMessage() + "\"}"); //$NON-NLS-1$
 						s.getTransaction().commit();
 					}
 				}
 			}catch (Exception ex){
-				logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
+				logger.log(Level.SEVERE, "Error exporting Conservation Area data. " + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 		}finally{
 			try{
 				LockManager.INSTANCE.releaseDatabase(s, item.getConservationAreaInfo());
 			}catch (Exception ex){
-				logger.log(Level.SEVERE, "Could not release database lock after creating conservation area download package. " + item.getUuid());
+				logger.log(Level.SEVERE, "Could not release database lock after creating Conservation Area download package. " + item.getUuid()); //$NON-NLS-1$
 			}
 			if (s.isOpen())	s.close();
 		}
@@ -158,7 +159,7 @@ public class CaExporterJob implements Runnable {
 	
 		ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, caUuid);
 		
-		Path tempDir = new File(DataStoreManager.INSTANCE.getTemporaryDirectory().getAbsoluteFile(), System.nanoTime()+"").toPath();
+		Path tempDir = new File(DataStoreManager.INSTANCE.getTemporaryDirectory().getAbsoluteFile(), System.nanoTime()+"").toPath(); //$NON-NLS-1$
 		if (!Files.exists(tempDir)){
 			Files.createDirectories(tempDir);
 		}

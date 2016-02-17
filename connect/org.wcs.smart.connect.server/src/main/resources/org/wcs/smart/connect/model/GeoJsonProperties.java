@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class GeoJsonProperties{
+	
 	private String deviceId; 
 	private String id;
 	private String dateTime;

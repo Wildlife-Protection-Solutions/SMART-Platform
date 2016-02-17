@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.connect.i18n.Messages;
 
 /**
  * The SMART label provide must provide implementations for:
@@ -41,17 +42,17 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	public String getLabel(Object value, Locale l) {
 		if (value instanceof Boolean){
 			if ((Boolean)value){
-				return "Yes";
+				return Messages.getString("SmartLabelProvider.BooleanYesOp",l); //$NON-NLS-1$
 			}else{
-				return "No";
+				return Messages.getString("SmartLabelProvider.BooleanNoOp",l); //$NON-NLS-1$
 			}
 		}else if (value instanceof Employee){
-			return getFullName((Employee) value);
+			return getFullName((Employee) value, l);
 		}
 		return null;
 	}
 	
-	public static String getFullName(Employee e){
-		return MessageFormat.format("{0} {1}", e.getGivenName(), e.getFamilyName());
+	public static String getFullName(Employee e, Locale l){
+		return MessageFormat.format(Messages.getString("SmartLabelProvider.EmployeeNameFormat_0Give_1Family",l), e.getGivenName(), e.getFamilyName()); //$NON-NLS-1$
 	}
 }

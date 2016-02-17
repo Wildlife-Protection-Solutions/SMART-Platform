@@ -56,9 +56,8 @@ public class GeoJsonAlert{
 	}
 	public Date getDateTime() {
 		String dateString = features.get(0).getProperties().getDateTime();
-		if (dateString == null || dateString == "")return null;
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-		//String ISO_8601_24H_FULL_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+		if (dateString == null || dateString == "") return null; //$NON-NLS-1$
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"); //$NON-NLS-1$
 		Date date=null;
 		try {
 			date = formatter.parse(dateString);

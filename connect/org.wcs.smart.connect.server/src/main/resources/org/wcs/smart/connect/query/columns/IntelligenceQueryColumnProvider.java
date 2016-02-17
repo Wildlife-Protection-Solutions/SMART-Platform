@@ -56,7 +56,7 @@ public class IntelligenceQueryColumnProvider implements
 				return getRecordColumns(query, l, session);
 			}
 		}catch (SQLException ex){
-			logger.log(Level.SEVERE, "Error determining query columns.", ex);
+			logger.log(Level.SEVERE, "Error determining query columns.", ex); //$NON-NLS-1$
 			return null;
 		}
 		return null;

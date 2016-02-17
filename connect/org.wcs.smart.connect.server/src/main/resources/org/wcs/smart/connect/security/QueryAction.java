@@ -74,7 +74,7 @@ public class QueryAction implements ISmartConnectAction{
 		
 		List<QueryProxy> info = QueryManager.INSTANCE.getQueries(s, l);
 		for (QueryProxy i : info){
-			ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid());
+			ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 			ops.add(ro);
 		}
 		
@@ -89,11 +89,11 @@ public class QueryAction implements ISmartConnectAction{
 		//Check if the resource is a CA UUIID
 		ConservationAreaInfo cainfo = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, resource);
 		if(cainfo != null){
-			return Messages.getString("QueryAction.AllQueriesfromCA",l) + cainfo.getLabel();
+			return Messages.getString("QueryAction.AllQueriesfromCA",l) + cainfo.getLabel(); //$NON-NLS-1$
 		}
 		Query q = QueryManager.INSTANCE.findQuery(resource, s); 
 		if (q == null) return resource.toString();
-		return q.getName() + "[" + q.getConservationArea().getId() +"]";
+		return q.getName() + "[" + q.getConservationArea().getId() +"]";  //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 }

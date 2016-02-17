@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Query;
@@ -72,9 +71,9 @@ public class PostgresqlSyncProcessor {
 			Path filestoreDir = tempDir.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 			try(DirectoryStream<Path> files = Files.newDirectoryStream(tempDir)){
 				for (Path file : files){
-					if (file.getFileName().toString().endsWith(".changelog.metadata")){
+					if (file.getFileName().toString().endsWith(".changelog.metadata")){ //$NON-NLS-1$
 						metadataFile = file;
-					}else if (file.getFileName().toString().endsWith(".changelog")){
+					}else if (file.getFileName().toString().endsWith(".changelog")){ //$NON-NLS-1$
 						changeLogFile = file;
 					}
 				}
@@ -107,7 +106,7 @@ public class PostgresqlSyncProcessor {
 			
 			
 			//check plugin version
-			Query q = session.createSQLQuery("SELECT plugin_id, version FROM connect.connect_plugin_version");
+			Query q = session.createSQLQuery("SELECT plugin_id, version FROM connect.connect_plugin_version"); //$NON-NLS-1$
 			List<Object[]> plugins = q.list();
 			HashMap<String, String> dbVersions = new HashMap<String, String>();
 			for (Object[] plugin : plugins){

@@ -41,7 +41,7 @@ public class AlertStatusType extends GenericEnumType<String, AlertStatusEnum> {
  
 	public AlertStatusType() throws NoSuchMethodException,
 			InvocationTargetException, IllegalAccessException {
-		super(AlertStatusEnum.class, AlertStatusEnum.values(), "getValue", Types.OTHER);
+		super(AlertStatusEnum.class, AlertStatusEnum.values(), "name", Types.OTHER); //$NON-NLS-1$
 	}
  
 	@Override

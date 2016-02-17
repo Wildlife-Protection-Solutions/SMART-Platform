@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -83,10 +84,10 @@ public class PostgresqlCaLoader {
 	 * These tables will be ignored by the loader and not loaded.
 	 */
 	public static final String[] TABLES_TO_IGNORE = new String[]{
-		"smart.connect_status", 
-		"smart.connect_change_log", 
-		"smart.connect_sync_history",
-		"smart.connect_data_queue"};
+		"smart.connect_status",  //$NON-NLS-1$
+		"smart.connect_change_log", //$NON-NLS-1$
+		"smart.connect_sync_history", //$NON-NLS-1$
+		"smart.connect_data_queue"}; //$NON-NLS-1$
 	
 	private Session session;
 	
@@ -106,7 +107,7 @@ public class PostgresqlCaLoader {
 			try{
 				FileUtils.forceDelete(tempDir);
 			}catch (Exception ex){
-				logger.log(Level.WARNING, "Unable to delete temporary directory.", ex);
+				logger.log(Level.WARNING, "Unable to delete temporary directory.", ex); //$NON-NLS-1$
 			}
 		}
 	}
@@ -117,7 +118,7 @@ public class PostgresqlCaLoader {
 			FileUtils.forceMkdir(toDir);
 		}
 		
-		File filestore = new File(dir, "filestore");
+		File filestore = new File(dir, "filestore"); //$NON-NLS-1$
 		
 		for (File f: filestore.listFiles()){
 			if (f.isDirectory()){
@@ -203,7 +204,7 @@ public class PostgresqlCaLoader {
 	}
 
 	private void inportPlugInVersionFile(File dir, ConservationAreaInfo info) throws Exception{
-		File f = new File(new File(dir, DATABASE_DIR), "db_versions.dat");
+		File f = new File(new File(dir, DATABASE_DIR), "db_versions.dat"); //$NON-NLS-1$
 		
 		try(CSVReader reader = new CSVReader(new FileReader(f))){
 			String[] data = null;
@@ -229,7 +230,7 @@ public class PostgresqlCaLoader {
 	@SuppressWarnings("unchecked")
 	private void validatePluginVersions(ConservationAreaInfo info) throws Exception{
 		List<CaPluginVersion> caPlugins = session.createCriteria(CaPluginVersion.class)
-				.add(Restrictions.eq("id.conservationAreaUuid", info.getUuid())).list();
+				.add(Restrictions.eq("id.conservationAreaUuid", info.getUuid())).list(); //$NON-NLS-1$
 		
 		List<ConnectPluginVersion>  connectVersions = (List<ConnectPluginVersion>)session
 				.createCriteria(ConnectPluginVersion.class)
@@ -329,14 +330,14 @@ public class PostgresqlCaLoader {
 			@Override
 			public void execute(Connection connection) throws SQLException {
 		
-				String metadataqueryquery = "SELECT " + columns + "  FROM " + tableName + " WHERE false";
+				String metadataqueryquery = "SELECT " + columns + "  FROM " + tableName + " WHERE false"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				ResultSet rs = connection.createStatement().executeQuery(metadataqueryquery);
 				ResultSetMetaData md = rs.getMetaData();
 				List<Integer> colsToModified = new ArrayList<Integer>();
 				for (int i = 0; i < md.getColumnCount(); i ++){
 					String x = md.getColumnTypeName(i+1);
 					String y = md.getColumnClassName(i+1);
-					if (x.equals("bytea") && y.equals(byte[].class.getName())){
+					if (x.equals("bytea") && y.equals(byte[].class.getName())){ //$NON-NLS-1$
 						colsToModified.add(i);
 					}
 				}
@@ -346,7 +347,7 @@ public class PostgresqlCaLoader {
 					if (colsToModified.size() > 0){
 						fixHexData(dataFile, colsToModified);
 					}
-					try(InputStreamReader reader = new InputStreamReader(new FileInputStream(dataFile), "UTF-8")){
+					try(InputStreamReader reader = new InputStreamReader(new FileInputStream(dataFile), StandardCharsets.UTF_8)){
 						copy.copyIn(query.toString(), reader);
 					}
 				}catch(Exception ex){
@@ -361,7 +362,7 @@ public class PostgresqlCaLoader {
 	 * converts derby hex values to postgresql hex values
 	 */
 	private void fixHexData(File dataFile, List<Integer> colsToModify ) throws Exception{
-		Path tempFile = FileSystems.getDefault().getPath(dataFile.getAbsolutePath() + ".temp");
+		Path tempFile = FileSystems.getDefault().getPath(dataFile.getAbsolutePath() + ".temp"); //$NON-NLS-1$
 		
 		try(CSVReader reader = new CSVReader(Files.newBufferedReader(dataFile.toPath()));
 				CSVWriter writer = new CSVWriter(Files.newBufferedWriter(tempFile)) ){
@@ -369,7 +370,7 @@ public class PostgresqlCaLoader {
 			String[] line = null;
 			while( (line = reader.readNext()) != null){
 				for (int i : colsToModify){
-					line[i] = "\\x" + line[i];
+					line[i] = "\\x" + line[i]; //$NON-NLS-1$
 				}
 				for (int i = 0; i < line.length; i ++){
 					if (line[i].length() == 0) line[i]=null;

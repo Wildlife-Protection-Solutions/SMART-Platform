@@ -40,6 +40,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ListItem;
@@ -439,8 +440,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			if (attributeItem.getCategoryKey() != null) {
-				p1 = addParameterValue(attributeItem.getCategoryKey() + "%");
-				sql.append(" AND ( foo.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(attributeItem.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append(" AND ( foo.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			if (groupBySql.length() > 0) {
 				sql.append(" GROUP BY "); //$NON-NLS-1$
@@ -523,8 +524,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			 
 			if (attributeItem.getCategoryKey() != null){	
-				p1 = addParameterValue(attributeItem.getCategoryKey() + "%");
-				sql.append("AND ( temp.cat_hkey like " + p1 + ") "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(attributeItem.getCategoryKey() + "%"); //$NON-NLS-1$
+				sql.append("AND ( temp.cat_hkey like " + p1 + ") "); //$NON-NLS-1$ //$NON-NLS-2$ 
 
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
@@ -602,7 +603,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(AttributeTreeNode.class));
 			sql.append(".uuid and ("); //$NON-NLS-1$
 			
-			String p1 = addParameterValue(attributeItem.getItemKey()+ "%");
+			String p1 = addParameterValue(attributeItem.getItemKey()+ "%"); //$NON-NLS-1$
 			
 			sql.append(tablePrefix(AttributeTreeNode.class));
 			sql.append(".hkey like " + p1); //$NON-NLS-1$
@@ -612,8 +613,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 			p1 = addParameterValue(attributeItem.getAttributeKey());
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			if (attributeItem.getCategoryKey() != null){
-				p1 = addParameterValue(attributeItem.getCategoryKey()+ "%");
-				sql.append("AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(attributeItem.getCategoryKey()+ "%"); //$NON-NLS-1$
+				sql.append("AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -737,8 +738,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 		if (hkey == null){
 			sql.append(" cat_hkey is not null "); //$NON-NLS-1$
 		}else{
-			String p1 = addParameterValue(categoryItem.getCategoryHKey()+ "%");
-			sql.append(" ( cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = addParameterValue(categoryItem.getCategoryHKey()+ "%"); //$NON-NLS-1$
+			sql.append(" ( cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		}
 		sql.append(") foo"); //$NON-NLS-1$
 		
@@ -885,8 +886,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
-					String p1 = addParameterValue(catkey + "%");
-					fromSql.append(" and (temp.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					String p1 = addParameterValue(catkey + "%"); //$NON-NLS-1$
+					fromSql.append(" and (temp.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ 
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$
@@ -1007,7 +1008,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 				}
 			}else{
 				//throw new exception; 
-				throw new RuntimeException(MessageFormat.format("Invalid group by option {0}", new Object[]{gb.getClass().getName()}));
+				throw new RuntimeException(MessageFormat.format(Messages.getString("PsqlEntitySummaryEngine.InvalidGroupByOp", locale), new Object[]{gb.getClass().getName()})); //$NON-NLS-1$
 			}
 			itemcnt++;
 			

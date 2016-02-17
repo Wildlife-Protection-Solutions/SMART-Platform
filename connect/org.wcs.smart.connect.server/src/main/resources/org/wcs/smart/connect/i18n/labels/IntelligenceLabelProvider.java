@@ -23,6 +23,7 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.intelligence.IIntelligenceLabelProvider;
 import org.wcs.smart.intelligence.query.IntelligencePatrolQueryOption;
 
@@ -38,7 +39,7 @@ public class IntelligenceLabelProvider implements
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item instanceof IntelligencePatrolQueryOption){
-			return "Motivated by Intelligence";
+			return Messages.getString("IntelligenceLabelProvider.IntelLabel", l); //$NON-NLS-1$
 		}
 		return null;
 	}

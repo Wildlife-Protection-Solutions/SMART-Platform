@@ -24,6 +24,7 @@ package org.wcs.smart.connect.i18n.labels;
 import java.util.HashMap;
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.CurrentQuarterDateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -51,32 +52,33 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 	private HashMap<Class<?>, String> labels = new HashMap<Class<?>, String>();
 	
 	public QueryDateLabelProvider(){
-		labels.put(AllDatesFilter.class, "All Dates");
-		labels.put(CurrentQuarterDateFilter.class, "Current Quarter");
-		labels.put(CustomDateFilter.class, "Custom...");
-		labels.put(Last30DaysDateFilter.class, "Last 30 Days");
-		labels.put(Last60DaysDateFilter.class, "Last 60 Days");
-		labels.put(LastMonthFilter.class, "Last Month");
-		labels.put(LastQuarterDateFilter.class, "Last Quarter");
-		labels.put(LastYearDateFilter.class, "Last Year");
-		labels.put(MonthToDateDateFilter.class, "Month To Date");
-		labels.put(YearToDateDateFilter.class, "Year To Date");
-		labels.put(DayDateGroupBy.class, "Day");
-		labels.put(MonthDateGroupBy.class, "Month");
-		labels.put(YearDateGroupBy.class, "Year");
-		labels.put(WaypointDateField.class,"Waypoint Date");
+		labels.put(AllDatesFilter.class, "QueryDateLabelProvider.AllDatesFilterOp"); //$NON-NLS-1$
+		labels.put(CurrentQuarterDateFilter.class, "QueryDateLabelProvider.CurrentQuarterFilterOp"); //$NON-NLS-1$
+		labels.put(CustomDateFilter.class, "QueryDateLabelProvider.CustomDateFilterOp"); //$NON-NLS-1$
+		labels.put(Last30DaysDateFilter.class, "QueryDateLabelProvider.Last30DatesFilterOp"); //$NON-NLS-1$
+		labels.put(Last60DaysDateFilter.class, "QueryDateLabelProvider.Last60DatesFilterOp"); //$NON-NLS-1$
+		labels.put(LastMonthFilter.class, "QueryDateLabelProvider.LasTMonthDatesFilterOp"); //$NON-NLS-1$
+		labels.put(LastQuarterDateFilter.class, "QueryDateLabelProvider.LastQuarterDatesFilterOp"); //$NON-NLS-1$
+		labels.put(LastYearDateFilter.class, "QueryDateLabelProvider.LastYEarDatesFilterOp"); //$NON-NLS-1$
+		labels.put(MonthToDateDateFilter.class, "QueryDateLabelProvider.MonthToDateDatesFilterOp"); //$NON-NLS-1$
+		labels.put(YearToDateDateFilter.class, "QueryDateLabelProvider.YeartoDateDatesFilterOp"); //$NON-NLS-1$
+		labels.put(DayDateGroupBy.class, "QueryDateLabelProvider.DayDatesFilterOp"); //$NON-NLS-1$
+		labels.put(MonthDateGroupBy.class, "QueryDateLabelProvider.MonthDatesFilterOp"); //$NON-NLS-1$
+		labels.put(YearDateGroupBy.class, "QueryDateLabelProvider.YearDatesFilterOp"); //$NON-NLS-1$
+		labels.put(WaypointDateField.class,"QueryDateLabelProvider.WpDateDatesFilterOp"); //$NON-NLS-1$
 		
 	}
 	
-	private String getStartEndDateErrorStr(){
-		return "End date must be after start date.";
+	private String getStartEndDateErrorStr(Locale l){
+		return Messages.getString("QueryDateLabelProvider.InvalidDateError", l); //$NON-NLS-1$
 	}
 	
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item.equals(START_BEFORE_END_ERR)){
-			return getStartEndDateErrorStr();
+			return getStartEndDateErrorStr(l);
 		}
-		return labels.get(item.getClass());
+		
+		return Messages.getString(labels.get(item.getClass()), l);
 	}
 }

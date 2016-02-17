@@ -133,7 +133,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		c.createStatement().execute(sql.toString());
 
 		sql = new StringBuilder();
-		sql.append("INSERT INTO " + tableName + " SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append("INSERT INTO " + tableName + " SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(tablePrefix(MissionPropertyValue.class));
 		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
 		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
@@ -149,14 +149,14 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
-		updateLabel(c, tableName, "uuid", "value");
+		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//TODO: add support of CCAA queries
 		List<MissionAttribute> attributes = new ArrayList<MissionAttribute>();
 		if (sdFilter == null || sdFilter.getKey() == null){
 			//get all mission properties
 			attributes = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds()))
+				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 				.list();
 		}else{
 			//get mission properties for survey design only
@@ -169,17 +169,17 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		int cnt = 0;
 		for (MissionAttribute ma : attributes){
 			cnt++;
-			String columnName = "ma_" + cnt;
+			String columnName = "ma_" + cnt; //$NON-NLS-1$
 			missionColumnMap.put(ma.getKeyId(), columnName);
 			
 			sql = new StringBuilder();
-			sql.append("ALTER TABLE ");
+			sql.append("ALTER TABLE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
-			sql.append(" ADD " + columnName);
+			sql.append(" ADD " + columnName); //$NON-NLS-1$
 			if (ma.getType() == AttributeType.NUMERIC){
-				sql.append(" double precision");
+				sql.append(" double precision"); //$NON-NLS-1$
 			}else{
-				sql.append(" varchar ");
+				sql.append(" varchar "); //$NON-NLS-1$
 			}
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
@@ -187,40 +187,40 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 			if (ma.getType() == AttributeType.TEXT ||
 					ma.getType() == AttributeType.NUMERIC){
 				StringBuilder attrSql = new StringBuilder();
-				attrSql.append("UPDATE ");
+				attrSql.append("UPDATE "); //$NON-NLS-1$
 				attrSql.append(queryDataTable);
-				attrSql.append(" SET " + columnName );
-				attrSql.append(" = ");
+				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
+				attrSql.append(" = "); //$NON-NLS-1$
 				if (ma.getType() == AttributeType.TEXT){
-					attrSql.append(" mpv.string_value ");	
+					attrSql.append(" mpv.string_value ");	 //$NON-NLS-1$
 				}else if (ma.getType() == AttributeType.NUMERIC){
-					attrSql.append(" mpv.number_value");
+					attrSql.append(" mpv.number_value"); //$NON-NLS-1$
 				}
-				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class));
-				attrSql.append(" WHERE ");
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'");
-				attrSql.append(" AND ");
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = ");
-				attrSql.append(queryDataTable + ".mission_uuid");
+				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class)); //$NON-NLS-1$
+				attrSql.append(" WHERE "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append(" AND "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = "); //$NON-NLS-1$
+				attrSql.append(queryDataTable + ".mission_uuid"); //$NON-NLS-1$
 				logger.finest(attrSql.toString());
 				c.createStatement().execute(attrSql.toString());
 				
 			}else if (ma.getType() == AttributeType.LIST){
 				StringBuilder attrSql = new StringBuilder();
-				attrSql.append("UPDATE ");
+				attrSql.append("UPDATE "); //$NON-NLS-1$
 				attrSql.append(queryDataTable);
-				attrSql.append(" SET  " + columnName );
-				attrSql.append(" = tmp.value");
-				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class));
-				attrSql.append(", " + tableName + " tmp ");
-				attrSql.append(" WHERE ");
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'");
-				attrSql.append(" AND ");
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = ");
-				attrSql.append(queryDataTable + ".mission_uuid");
-				attrSql.append(" AND ");
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + "." + obsAttUuidColumn + " = ");
-				attrSql.append(" tmp.uuid");
+				attrSql.append(" SET  " + columnName ); //$NON-NLS-1$
+				attrSql.append(" = tmp.value"); //$NON-NLS-1$
+				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class)); //$NON-NLS-1$
+				attrSql.append(", " + tableName + " tmp "); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append(" WHERE "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append(" AND "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = "); //$NON-NLS-1$
+				attrSql.append(queryDataTable + ".mission_uuid"); //$NON-NLS-1$
+				attrSql.append(" AND "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + "." + obsAttUuidColumn + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append(" tmp.uuid"); //$NON-NLS-1$
 				
 				logger.finest(attrSql.toString());
 				c.createStatement().execute(attrSql.toString());
@@ -244,7 +244,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		c.createStatement().execute(sql.toString());
 
 		sql = new StringBuilder();
-		sql.append("INSERT INTO " + tableName + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append("INSERT INTO " + tableName + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
 		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
@@ -260,13 +260,13 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
-		updateLabel(c, tableName, "uuid", "value");
+		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//TODO: add support of CCAA queries
 		List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
 		if (sdFilter == null || sdFilter.getKey() == null){
 			attributes = session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds()))
+				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 				.list();
 		}else{
 			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
@@ -277,17 +277,17 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		int cnt = 0;
 		for (SamplingUnitAttribute su : attributes){
 			cnt++;
-			String columnName = "su_" + cnt;
+			String columnName = "su_" + cnt; //$NON-NLS-1$
 			suColumnMap.put(su.getKeyId(), columnName);
 			
 			sql = new StringBuilder();
-			sql.append("ALTER TABLE ");
+			sql.append("ALTER TABLE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
-			sql.append(" ADD " + columnName );
+			sql.append(" ADD " + columnName ); //$NON-NLS-1$
 			if (su.getType() == AttributeType.NUMERIC){
-				sql.append(" double precision");
+				sql.append(" double precision"); //$NON-NLS-1$
 			}else{
-				sql.append(" varchar ");
+				sql.append(" varchar "); //$NON-NLS-1$
 			}
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
@@ -295,40 +295,40 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 			if (su.getType() == AttributeType.TEXT ||
 					su.getType() == AttributeType.NUMERIC){
 				StringBuilder attrSql = new StringBuilder();
-				attrSql.append("UPDATE ");
+				attrSql.append("UPDATE "); //$NON-NLS-1$
 				attrSql.append(queryDataTable);
-				attrSql.append(" SET " + columnName );
-				attrSql.append(" = ");
+				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
+				attrSql.append(" = "); //$NON-NLS-1$
 				if (su.getType() == AttributeType.TEXT){
-					attrSql.append(" suav.string_value ");	
+					attrSql.append(" suav.string_value ");	 //$NON-NLS-1$
 				}else if (su.getType() == AttributeType.NUMERIC){
-					attrSql.append(" suav.number_value");
+					attrSql.append(" suav.number_value"); //$NON-NLS-1$
 				}
-				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class));
-				attrSql.append(" WHERE ");
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'");
-				attrSql.append(" AND ");
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = ");
-				attrSql.append(queryDataTable + ".samplingunit_uuid");
+				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class)); //$NON-NLS-1$
+				attrSql.append(" WHERE "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append(" AND "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = "); //$NON-NLS-1$
+				attrSql.append(queryDataTable + ".samplingunit_uuid"); //$NON-NLS-1$
 				logger.finest(attrSql.toString());
 				c.createStatement().execute(attrSql.toString());
 				
 			}else if (su.getType() == AttributeType.LIST){
 				StringBuilder attrSql = new StringBuilder();
-				attrSql.append("UPDATE ");
+				attrSql.append("UPDATE "); //$NON-NLS-1$
 				attrSql.append(queryDataTable);
-				attrSql.append(" SET " + columnName );
-				attrSql.append(" = tmp.value");
-				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class));
-				attrSql.append(", " + tableName + " tmp ");
-				attrSql.append(" WHERE ");
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'");
-				attrSql.append(" AND ");
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = ");
-				attrSql.append(queryDataTable + ".samplingunit_uuid");
-				attrSql.append(" AND ");
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "." + obsAttUuidColumn + " = ");
-				attrSql.append(" tmp.uuid");
+				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
+				attrSql.append(" = tmp.value"); //$NON-NLS-1$
+				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class)); //$NON-NLS-1$
+				attrSql.append(", " + tableName + " tmp "); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append(" WHERE "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append(" AND "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = "); //$NON-NLS-1$
+				attrSql.append(queryDataTable + ".samplingunit_uuid"); //$NON-NLS-1$
+				attrSql.append(" AND "); //$NON-NLS-1$
+				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "." + obsAttUuidColumn + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append(" tmp.uuid"); //$NON-NLS-1$
 				
 				logger.finest(attrSql.toString());
 				c.createStatement().execute(attrSql.toString());
@@ -344,13 +344,13 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 
-		sql = "INSERT INTO " + tableName + "(uuid) SELECT DISTINCT wpoa."+obsAttUuidColumn
-				+" FROM smart.wp_observation_attributes wpoa inner join "
+		sql = "INSERT INTO " + tableName + "(uuid) SELECT DISTINCT wpoa."+obsAttUuidColumn //$NON-NLS-1$ //$NON-NLS-2$
+				+" FROM smart.wp_observation_attributes wpoa inner join " //$NON-NLS-1$
 				+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
-		updateLabel(c, tableName, "uuid", "value");
+		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 	}
 }
