@@ -77,7 +77,6 @@ function updateItemOnServer(){
 	var type = document.querySelector("select[name=updateType]").value;
 	var url = DATAQUEUEURL + '/items/' + uuid ;
 	var jsonData =  {
-	
 			"type": type,
 			"status": status
 			}

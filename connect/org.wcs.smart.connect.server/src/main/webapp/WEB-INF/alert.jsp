@@ -181,7 +181,7 @@
 			
 			<p><fmt:message key="alert.filters.status" /><br>
 			<c:forEach var="s" items="${status}" varStatus="count">
-				<input class='filterStatus updateChange' name="${s[1]}" value="${s[0]}" type="checkbox" checked>${s}</input><br>
+				<input class='filterStatus updateChange' name="${s[1]}" value="${s[0]}" type="checkbox" checked>${s[1]}</input><br>
 			</c:forEach>
 			
 			<p><fmt:message key="alert.filters.importance" /><br>
@@ -242,8 +242,9 @@
 			
 			<label class="top-spacer block"><fmt:message key="alert.statuslabel" /></label>
 			<select name="update_status" class="block formtext alert-select">
-			<option value="ACTIVE">ACTIVE</option>
-			<option value="DISABLED">DISABLED</option>
+			<c:forEach var="s" items="${status}" varStatus="count">
+				<option value="${s[0]}">${s[1]}</option>
+			</c:forEach>
 			</select>
 			
 			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label><input id="long" type="text" name="update_long">

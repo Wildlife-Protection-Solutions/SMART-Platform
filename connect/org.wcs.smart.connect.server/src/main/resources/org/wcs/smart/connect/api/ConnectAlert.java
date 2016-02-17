@@ -587,7 +587,7 @@ public class ConnectAlert extends HttpServlet {
     	            properties.put("date", obj.getDate()); //$NON-NLS-1$
     	            properties.put("desc", obj.getDescription()); //$NON-NLS-1$
     	            properties.put("level", obj.getLevel()); //$NON-NLS-1$
-    	            properties.put("status", obj.getStatus()); //$NON-NLS-1$
+    	            properties.put("status", obj.getStatus().getGuiName(SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
     	            properties.put("typeuuid", obj.getTypeUuid()); //$NON-NLS-1$
 
     	            AlertType type = HibernateManager.getAlertType(s, obj.getTypeUuid());

@@ -180,7 +180,7 @@ function deleteca(){
 
 function caDeleted(){
 	if (this.status == 204) {
-		displayInfo("Conservation area (" + this.cauuid + ") data deleted");
+		displayInfo(i18n("ca.cadeleted") + "(" + this.cauuid + ")");
 	} else if (this.status == 401){
 		displayError(parseError(i18n("ca.errordeletingca") + this.cauuid + ". Unauthorized.", this.responseText));
 	}else{
@@ -212,9 +212,9 @@ function refreshCaList(){
 
 function createCaTable(){
 	if (this.status != 200) {
-		var msg = "Error: ";
+		var msg = i18n("ca.error") + ": ";
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("ca.unauthorized");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error

@@ -78,5 +78,8 @@ labels_en= {
 "dataqueue.deletefilewith": "Deleted data file with UUID: ",
 "dataqueue.deletefileterror":"Error deleting file: ",
 "dataqueue.errorupdatingfile":"Error updating file status: ",
+"ca.cadeleted":"Conservation Area data deleted.",
+"ca.error":"Error",
+"ca.unauthorized":"Unauthorized",
 "":""
 }
