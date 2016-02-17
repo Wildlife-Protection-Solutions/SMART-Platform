@@ -14,6 +14,7 @@ body {
 
 p{
   font-size: 1em;
+    margin: 0px;
 }
 h2{
 	font-size: 1.1em;
@@ -87,6 +88,10 @@ h2{
 
 .table-cell{
 	display:table-cell;
+}
+
+.td-align-top{
+	vertical-align:top;
 }
 
 .table{
@@ -323,7 +328,6 @@ h2{
 #filter-form{
 	margin-right: 5px;
 	margin-left: 5px;
-	display: none;
 	clear:both;
 }
 
@@ -386,7 +390,6 @@ div.scrollable {
 .defaultLabel{
 	width: 10em;
 	display:inline-block;
-	text-align: right;
 }
 
 .small{
