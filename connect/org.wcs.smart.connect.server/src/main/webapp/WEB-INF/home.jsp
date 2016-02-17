@@ -3,25 +3,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-<%@include file="includes.jsp" %>
-<title>SMART Connect - Home</title>
+	<%@include file="includes.jsp" %>
+	<title><fmt:message key="home.pagetitle"/></title>
 </head>
 
 <body>
-<%@include file="header.jsp" %>
-<%@include file="menu.jsp" %>
-<div id= "main"><div class="pageheader">Welcome to SMART</div>
-
+	<%@include file="header.jsp" %>
+	<%@include file="menu.jsp" %>
+	<div id= "main"><div class="pageheader"><fmt:message key="home.welcome"/></div>
 <!-- <iframe style="width:100%; height:600px;" src="https://smartconservationsoftware.org/connecthome"></iframe>-->
-
-
-<a href="http://smartconservationsoftware.org/connecthome">
-<h2>
-Click Here for the Latest News and Information on SMART Connect</h2><br>
-</a>
-
-
-</div>
+	<h2>
+		<a href="http://smartconservationsoftware.org/connecthome"><fmt:message key="home.news"/></a>
+	</h2>
+	</div>
 <%@include file="footer.jsp" %>
 </body>
 </html>

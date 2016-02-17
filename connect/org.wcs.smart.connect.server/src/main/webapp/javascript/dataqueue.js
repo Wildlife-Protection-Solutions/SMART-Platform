@@ -102,8 +102,6 @@ function fileUpdated(){
 
 /* clears and displays new File upload dialog */
 function clearAndShowNewFileDialog(){
-// 	document.querySelector("input[name=conservationArea]").value = "";
-// 	document.querySelector("input[name=type]").value = "";
  	displayDialog('newFileDialog', 'main');
 }
 
@@ -133,7 +131,7 @@ function refreshFileList(){
 function createFileTable(){
 	
 	if (this.status != 200 && this.status != 201 ) {
-		var msg = "Error: ";
+		var msg = i18n("dataqueue.error");
 		try {
 			msg += JSON.parse(this.responseText).error
 		} catch (err) {
@@ -161,12 +159,9 @@ function createFileTable(){
 	 	if(typeof files === "undefined" || files.length == 0){
 		 	var newRow = document.createElement("div");
 		 	parent.appendChild(newRow);
-	 		newRow.style.display = "table-row";
+		 	newRow.style.display = "block";
 	 		newRow.className = "filerow errorsection";
-	 	    var oCell = document.createElement("div");
-	 	    newRow.appendChild(oCell);
-	 	    oCell.colSpan = 10;
-	 	    oCell.innerHTML = i18n("dataqueue.nofilesfound");
+	 		newRow.innerHTML = i18n("dataqueue.nofilesfound");
 		}else{
 		 	for (var i = 0; i < files.length; i ++){
 		 		var caUuid = files[i].conservationArea;

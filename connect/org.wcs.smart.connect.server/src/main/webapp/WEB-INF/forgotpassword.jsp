@@ -4,7 +4,7 @@
 <html>
 <head>
 <%@include file="includes.jsp" %>
-<title>SMART Connect - Password Reset</title>
+<title><fmt:message key="forgotpassword.pagetitle"/></title>
 <script type="text/javascript">
 
 function resetPassword(){
@@ -14,7 +14,7 @@ function resetPassword(){
 	var user = document.querySelector("input[name=username]").value;
 	var url = CAURL + "?username=" + encodeURIComponent(user);
 	
-	document.querySelector("#error").innerHTML = "Processing...";
+	document.querySelector("#error").innerHTML = "<fmt:message key="forgotpassword.processing"/>";
 	document.querySelector("#error").className="msgsection";
 	document.querySelector("#error").style.display="block";
 	
@@ -28,11 +28,11 @@ function resetPassword(){
 
 function resetcomplete(){
 	if (this.status == 200) {
-		document.querySelector("#error").innerHTML = "An email has been sent with further instructions.";
+		document.querySelector("#error").innerHTML = "<fmt:message key="forgotpassword.emailsent"/>";
 		document.querySelector("#error").className="msgsection";
 		document.querySelector("#error").style.display="block";
 	}else{
-		document.querySelector("#error").innerHTML = "Error occurred.  Contact your Connect adminstrator.";
+		document.querySelector("#error").innerHTML = "<fmt:message key="forgotpassword.emailerror"/>";
 		document.querySelector("#error").className="errorsection";
 		document.querySelector("#error").style.display="block";
 	}
@@ -51,16 +51,14 @@ function resetcomplete(){
   <div style="min-width: 150px;" class="verticalmenu"></div>
   
   <div id="main">
-  <div class="pageheader">Forgot Password</div>
-  <p>To reset your password you must provide your Connect username. If you supplied an email with your account you will be emailed a link
-  where you can use to reset your Connect password.  If you have not supplied an email with your Connect account you will
-  have to contact your Connect administrator to reset your password.
+  <div class="pageheader"><fmt:message key="forgotpassword.sectiontitle"/></div>
+  <p><fmt:message key="forgotpassword.message"/>
   </p>
   <div id="error" class="errorsection" style="display: none"></div>
    <form  style="width:200px;" id="resetform" onsubmit="return resetPassword();">
-   <label class="top-spacer block">Username:</label>
-   <input type="text" name="username" class="block formtext" value="smart" tabindex="1"/>
-   <input class="button block top-spacer" type="submit" name="reset" value="Reset" style="width: 100px" tabindex="3"/>
+   <label class="top-spacer block"><fmt:message key="forgotpassword.username"/></label>
+   <input type="text" name="username" class="block formtext" value="" tabindex="1"/>
+   <input class="button block top-spacer" type="submit" name="reset" value="<fmt:message key="forgotpassword.resetbutton"/>" style="width: 100px" tabindex="3"/>
   </form>
 </div>
 </div>

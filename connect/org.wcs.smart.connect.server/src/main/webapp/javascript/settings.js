@@ -196,9 +196,9 @@ function createLayerTable(){
  		}else if (type==3){
  			typeText = "WMS";
  		}
- 		var active = "False";
+ 		var active = i18n("settings.false")
  		if (layers[i].active){
- 			active = "True";
+ 			active = i18n("settings.true")
  		}
  		var row = tableCreateRowTDs(parent,
  				[layers[i].layerOrder, layers[i].layerName, typeText , active, layers[i].mapboxId, layers[i].wmsLayerList, null, null], 

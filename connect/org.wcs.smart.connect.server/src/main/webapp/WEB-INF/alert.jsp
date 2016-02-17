@@ -17,17 +17,10 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
-
 <script src="https://maps.google.com/maps/api/js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-realtime.js"></script>
 <link href='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css' rel='stylesheet' />
 
-
-<!-- 	var styleFillColors = { -->
-<%-- 			<c:forEach var="type" items="${alertTypes}" varStatus="count"> --%>
-<%-- 	 			"${type.getUuid()}" : "${type.getFillColor()}",  --%>
-<%-- 			</c:forEach>  --%>
-<!-- 		}; -->
 <script type="text/javascript" >
 	var mobile="${mobile}";
 	var tab = ${tab};
@@ -94,8 +87,7 @@
   <article id="tabs" class="tabs">
 	<section id="tab1" class="">
 		<h2 id="tab1text" class=""><a onclick="settab(1)"><fmt:message key="alert.shortmaptitle" /></a></h2>
-		<div id="map">
-		</div>
+		<div id="map"></div>
 	</section>
 	
 	<section id="tab2" class="">
@@ -105,30 +97,29 @@
      		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
      		<label class="top-spacer block"><fmt:message key="alert.calabel" /></label>
      		<select name="alert_ca" class="block formtext alert-select">
-     		<c:forEach var="ca" items="${cas}" varStatus="count">
-     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
-			</c:forEach> 
+	     		<c:forEach var="ca" items="${cas}" varStatus="count">
+	     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
+				</c:forEach> 
      		</select>
      		
      		<label class="top-spacer block"><fmt:message key="alert.typelabel" /></label>
      		<select name="alert_type" class="block formtext alert-select">
-     		<c:forEach var="type" items="${alertTypes}" varStatus="count">
-     			<option value="${type.getUuid()}"> ${type.getLabel()} </option> 
-			</c:forEach> 
+	     		<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	     			<option value="${type.getUuid()}"> ${type.getLabel()} </option> 
+				</c:forEach> 
      		</select>
 
 			<label class="top-spacer block"><fmt:message key="alert.eventimportancelabel" /></label>
 			<select name="level" class="block formtext alert-select">
-			<option value=1><fmt:message key="alert.eventimportance1" /></option>
-			<option value=2><fmt:message key="alert.eventimportance2" /></option>
-			<option value=3><fmt:message key="alert.eventimportance3" /></option>
-			<option value=4><fmt:message key="alert.eventimportance4" /></option>
-			<option value=5><fmt:message key="alert.eventimportance5" /></option>
+				<option value=1><fmt:message key="alert.eventimportance1" /></option>
+				<option value=2><fmt:message key="alert.eventimportance2" /></option>
+				<option value=3><fmt:message key="alert.eventimportance3" /></option>
+				<option value=4><fmt:message key="alert.eventimportance4" /></option>
+				<option value=5><fmt:message key="alert.eventimportance5" /></option>
 			</select>
 			
 			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label><input id="long" type="text" name="long">
 			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label><input id="lat" type="text" name="lat" >
-			
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
 			<textarea name="alert_description" rows="5" cols="72"></textarea>
    			<input class="button block top-spacer" type="submit" value="   Submit    "/>
@@ -146,32 +137,32 @@
 	</section>
 	
 	<div id="map-info-box">
-		Last updated 0/0/0000 00:00:00 <a href='javascript:refreshAlerts()'>update now</a>
+		<fmt:message key="alert.lastupdated"/><a href='javascript:refreshAlerts()'><fmt:message key="alert.udpatenow"/></a>
 	</div>
 	
 	<div id="filter-controls">
-			<a id="filter-link" onClick="hideShowFilters()"><img id="filter-button"/><fmt:message key="alert.showfilters" /></a>
+		<a id="filter-link" onClick="hideShowFilters()"><img id="filter-button"/><fmt:message key="alert.showfilters" /></a>
 
-			<form id="filter-form" name="filter-form" onsubmit="return false;">
+		<form id="filter-form" name="filter-form" onsubmit="return false;">
 			<input id="sortBy" type="hidden" name="sortBy" value="userGeneratedId"/>
 			<input id="sortAscending" type="hidden" name="sortAscending"  value="true"/>
 
 			<select id='filterDate' class='updateChange' name="time_filter">
-			<option value=1><fmt:message key="alert.within1" /></option>
-			<option value=2><fmt:message key="alert.within2" /></option>
-			<option value=4><fmt:message key="alert.within4" /></option>
-			<option value=8><fmt:message key="alert.within8" /></option>
-			<option value=12><fmt:message key="alert.within12" /></option>
-			<option value=24><fmt:message key="alert.within24" /></option>
-			<option value=48><fmt:message key="alert.within48" /></option>
-			<option value=168><fmt:message key="alert.withinweek" /></option>
-			<option value=744><fmt:message key="alert.withinmonth" /></option>
-			<option value=-99><fmt:message key="alert.alldates" /></option>
-			<option value=-1><fmt:message key="alert.customdates" /></option>
+				<option value=1><fmt:message key="alert.within1" /></option>
+				<option value=2><fmt:message key="alert.within2" /></option>
+				<option value=4><fmt:message key="alert.within4" /></option>
+				<option value=8><fmt:message key="alert.within8" /></option>
+				<option value=12><fmt:message key="alert.within12" /></option>
+				<option value=24><fmt:message key="alert.within24" /></option>
+				<option value=48><fmt:message key="alert.within48" /></option>
+				<option value=168><fmt:message key="alert.withinweek" /></option>
+				<option value=744><fmt:message key="alert.withinmonth" /></option>
+				<option value=-99><fmt:message key="alert.alldates" /></option>
+				<option value=-1><fmt:message key="alert.customdates" /></option>
 			</select>
 
 			<br><input type="text" id="datePickerFrom" class="date-input">
-			<font class="date-text">to </font><input type="text" id="datePickerTo" class="date-input">
+			<font class="date-text"><fmt:message key="alert.dateto"/> </font><input type="text" id="datePickerTo" class="date-input">
 
 			<p><fmt:message key="alert.filters.types" /><br>
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
@@ -200,7 +191,7 @@
 			<fmt:message key="alert.filters.text" /><br>
 			<input id='filterText' class='updateChange' name="textFilter" type="text"></input>
 			</p> 
-			</form>
+		</form>
 
 	</div>
   </article>
@@ -233,11 +224,11 @@
 
 			<label class="top-spacer block"><fmt:message key="alert.eventimportancelabel" /></label>
 			<select name="update_level" class="block formtext alert-select">
-			<option value=1>1(Highest)</option>
-			<option value=2>2</option>
-			<option value=3>3</option>
-			<option value=4>4</option>
-			<option value=5>5(Lowest)</option>
+			<option value=1><fmt:message key="alert.alertlevel1"/></option>
+			<option value=2><fmt:message key="alert.alertlevel2"/></option>
+			<option value=3><fmt:message key="alert.alertlevel3"/></option>
+			<option value=4><fmt:message key="alert.alertlevel4"/></option>
+			<option value=5><fmt:message key="alert.alertlevel5"/></option>
 			</select>
 			
 			<label class="top-spacer block"><fmt:message key="alert.statuslabel" /></label>

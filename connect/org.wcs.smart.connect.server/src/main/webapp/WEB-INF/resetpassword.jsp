@@ -4,7 +4,7 @@
 <html>
 <head>
 <%@include file="includes.jsp" %>
-<title>SMART Connect - Password Reset</title>
+<title><fmt:message key="resetpassword.pagetitle"/></title>
 <script type="text/javascript">
 
 function resetPassword(){
@@ -14,7 +14,7 @@ function resetPassword(){
 	var token = document.querySelector("input[name=resettoken]").value;
 	if (password1 != password2){
 		//error
-		var msg = "Passwords do not match."
+		var msg = "<fmt:message key="resetpassword.passdontmatch"/>"
 		document.querySelector("#error").innerHTML = msg;
 		document.querySelector("#error").style.display="block";
 		return false;
@@ -29,16 +29,16 @@ function resetPassword(){
 
 function resetcomplete(){
 	if (this.status == 200) {
-		document.querySelector("#error").innerHTML = "Password reset.  <a href='../connect/home/'>Connect Home</a> ";
+		document.querySelector("#error").innerHTML = "<fmt:message key="resetpassword.passreset"/>  <a href='../connect'><fmt:message key="resetpassword.home"/></a> ";
 		document.querySelector("#error").className="msgsection";
 		document.querySelector("#error").style.display="block";
 	}else{
-		var msg = "Error occurred resetting password. "
+		var msg = "<fmt:message key="resetpassword.reseterror"/> "
 		try {
 			msg += JSON.parse(this.responseText).error
 		} catch (err) {
 		}
-		msg += "  For further help contact your Connect administrator.";
+		msg += "  <fmt:message key="resetpassword.reseterror2"/>";
 		
 		document.querySelector("#error").innerHTML = msg;
 		document.querySelector("#error").style.display="block";
@@ -59,21 +59,21 @@ function resetcomplete(){
 	<div id="main">
 		<c:choose>
 			<c:when test="${resettoken != null}">
-		  		<div class="pageheader">Password Reset</div>
-		  		<p>To reset your password, enter a new password and press Submit.</p>
+		  		<div class="pageheader"><fmt:message key="resetpassword.title"/></div>
+		  		<p><fmt:message key="resetpassword.info"/></p>
 		  		<div id="error" class="errorsection" style="display: none"></div>
 		  
 		   		<form  style="width:200px;" id="resetform" onsubmit="return resetPassword();">
 		   			<input type="hidden" name="resettoken" class="block formtext" value="${resettoken}"/>
-		   			<label class="top-spacer block">New Password:</label>
+		   			<label class="top-spacer block"><fmt:message key="resetpassword.newpass1"/></label>
 		   			<input type="password" name="password1" class="block formtext" value="" tabindex="1"/>
-		   			<label class="top-spacer block">Re-enter Password:</label>
+		   			<label class="top-spacer block"><fmt:message key="resetpassword.newpass2"/></label>
 		   			<input type="password" name="password2" class="block formtext" value="" tabindex="1"/>
-		   			<input class="button block top-spacer" type="submit" value="Submit" style="width: 100px" tabindex="3"/>
+		   			<input class="button block top-spacer" type="submit" value="<fmt:message key="resetpassword.submit"/>" style="width: 100px" tabindex="3"/>
 		  		</form>
 			</c:when>
 			<c:when test="${resettoken == null}">
-				<p>Page Not Found.</p>
+				<p><fmt:message key="resetpassword.pagenotfound"/></p>
 			</c:when>
 		</c:choose>
 	</div>

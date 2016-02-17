@@ -4,7 +4,7 @@
 <html>
 <head>
 <%@include file="includes.jsp" %>
-<title>SMART Connect - Login</title>
+<title><fmt:message key="login.pagetitle"/></title>
 <script type="text/javascript">
 
 function login(){
@@ -12,11 +12,11 @@ function login(){
 	var pass = document.querySelector("input[name=j_password]").value;
 
 	if (user.length == 0 ){
-		document.querySelector("#error").innerHTML = "Username is required";
+		document.querySelector("#error").innerHTML = "<fmt:message key="login.userrequired"/>";
 		document.querySelector("#error").style.display="block";
 		return false;
 	}else if (pass.length == 0){
-		document.querySelector("#error").innerHTML = "Password is required";
+		document.querySelector("#error").innerHTML = "<fmt:message key="login.passwordrequired"/>";
 		document.querySelector("#error").style.display="block";
 		return false;
 	}
@@ -36,13 +36,12 @@ function login(){
   <div id="main">
   <div id="error" class="errorsection" style="display: ${loginerror == null ? "none" : "block"}">${loginerror}</div>
    <form  style="width:200px;" action="${logintarget}" method="POST" id="loginform" onsubmit="return login();">
-   
-   <label class="top-spacer block">Username:</label>
-   <input type="text" name="j_username" class="block formtext" value="smart" tabindex="1"/>
-   <label class="top-spacer block">Password:</label>
-   <input type="password" name="j_password" class="formtext" value="smart" tabindex="2"/>
-   <a href="${pageContext.request.contextPath}/forgot" class="block link_small" tabindex="4">Forgot Password?</a>
-   <input class="button block top-spacer" type="submit" value="Login" style="width: 100px" tabindex="3"/>
+	   <label class="top-spacer block"><fmt:message key="login.usernamelabel"/></label>
+	   <input type="text" name="j_username" class="block formtext" value="smart" tabindex="1"/>
+	   <label class="top-spacer block"><fmt:message key="login.passwordlabel"/></label>
+	   <input type="password" name="j_password" class="formtext" value="smart" tabindex="2"/>
+	   <a href="${pageContext.request.contextPath}/forgot" class="block link_small" tabindex="4"><fmt:message key="login.forgot"/></a>
+	   <input class="button block top-spacer" type="submit" value="<fmt:message key="login.login"/>" style="width: 100px" tabindex="3"/>
   </form>
 </div>
 </div>

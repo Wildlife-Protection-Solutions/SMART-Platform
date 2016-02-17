@@ -92,7 +92,7 @@ function loadRoles(){
 /* callback from loadActions to cache user actions */
 function setActions(){
 	if (this.status != 200){
-		//TODO: do something with error
+		displayError(parseError(i18n("users.errorloadingactions"), this.responseText));
 	}else{
 		allActions = JSON.parse(this.responseText);
 		updateActionsDropDown();
@@ -101,7 +101,7 @@ function setActions(){
 /* callback from loadRoles to cache user actions */
 function setRoles(){
 	if (this.status != 200){
-		//TODO: do something with error
+		displayError(parseError(i18n("users.errorloadingroles"), this.responseText));
 	}else{
 		allRoles = JSON.parse(this.responseText);
 		updateRolesDropDown();
@@ -146,7 +146,7 @@ function setUserDetails(){
 	
 	var html = "<div style='margin-top: 5px'><span class='label-header'>" + i18n("users.usernamelabel") + "</span><span>" + user.username + "</span></div>";
 	html +="<div style='margin-top: 5px; margin-bottom: 5px'><span class='label-header'>" + i18n("users.emaillabel") + "</span><span>" + user.email + "</span></div>";
-	html += "<p>Premissions can be provided through either roles or actions.  Roles are groups of actions and can be reused between users.  Actions are specific to this user.</p>";
+	html += "<p>" + i18n("users.permission") + "</p>";
 	ele.innerHTML = html;
 	
 	var oReq = new XMLHttpRequest();
@@ -243,7 +243,7 @@ function showRoleInfo(){
 function setRoleDetails(){
 	document.querySelector("#roledetailinner").style.display = "block";
 	if (this.status != 200){
-		displayError(parseError("Error loading role details.", this.responseText));
+		displayError(parseError(i18n("users.roleerror"), this.responseText));
 		return;
 	}
 	
@@ -265,7 +265,7 @@ function setRoleDetails(){
 			rolename = allRoles[i].name;
 		}
 	}
-	var html = "<div style='margin-top: 5px'><span class='label-header'>Rolename: </span><span>" + rolename + "</span></div>";
+	var html = "<div style='margin-top: 5px'><span class='label-header'>" + i18n("users.rolename") + " </span><span>" + rolename + "</span></div>";
 	document.querySelector("#roleinfodefaults").innerHTML = html;
 	
 	var privis = JSON.parse(this.responseText);
@@ -404,7 +404,7 @@ function refreshRolesTable(){
 	var parent = document.querySelector("#allroletable");
 	var row = document.createElement("div");
 	row.className="rolerow";
-	row.innerHTML="Loading...";
+	row.innerHTML= i18n("users.loading");
 	parent.appendChild(row);
 		
  	var oReq = new XMLHttpRequest();
@@ -438,9 +438,9 @@ function refreshUsers(){
 function createUserTable(){
 	clearUserInfo();
 	if (this.status != 200) {
-		var msg = i18n("alert.errorlabel");
+		var msg = i18n("users.errorlabel");
 		if (this.status == 401){
-			msg += i18n("alert.unathorized");
+			msg += i18n("users.unathorized");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -489,9 +489,9 @@ function createUserTable(){
 function createRoleTable(){
 	clearUserInfo();
 	if (this.status != 200) {
-		var msg = i18n("alert.errorlabel");
+		var msg = i18n("users.errorlabel");
 		if (this.status == 401){
-			msg += i18n("alert.unathorized");
+			msg += i18n("users.unathorized");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -603,7 +603,7 @@ function userEdited(){
 /* delete user */
 function deleteUser(){
 	var username = this.dataset.username;
-	var ok = window.confirm(i18n("alert.confirmdeleteuser") + username + "?");
+	var ok = window.confirm(i18n("users.confirmdeleteuser") + username + "?");
 	if (!ok) return false;
 	
 	hideInfo();
@@ -759,9 +759,9 @@ function addRoleToUser(username){
 //callback for delete user  
 function userDeleted() {
 	if (this.status == 200) {
-		displayInfo(this.smartuser + " deleted");
+		displayInfo(this.smartuser + i18n("users.userdeleted"));
 	} else {
-		displayError(parseError(i18n("alert.errordeletingaccount") + this.smartuser, this.responseText));
+		displayError(parseError(i18n("users.errordeletingaccount") + this.smartuser, this.responseText));
 	}
 	refreshUsers();
 	
@@ -775,18 +775,18 @@ function userDeleted() {
 //callback for delete action 
 function actionDeleted() {
 	if (this.status == 204) {
-		displayInfo(this.smartuser + " updated");
+		displayInfo(this.smartuser + i18n("users.userupdated"));
 	} else {
-		displayError(parseError(i18n("alert.errordeletingaction") + this.smartuser, this.responseText));
+		displayError(parseError(i18n("users.errordeletingaction") + this.smartuser, this.responseText));
 	}
 	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
 }
 //callback for delete action 
 function actionDeletedFromRole() {
 	if (this.status == 204) {
-		displayInfo("Role updated");
+		displayInfo(i18n("users.roleupdated"));
 	} else {
-		displayError(parseError("Error deleting action from role", this.responseText));
+		displayError(parseError(i18n("users.deleteactionrole"), this.responseText));
 	}
 	showRoleInfo.call(document.querySelector("#allroletable > .smart-table-selectedrow"));
 }
@@ -794,9 +794,9 @@ function actionDeletedFromRole() {
 //callback for delete role 
 function roleDeletedUser() {
 	if (this.status == 204) {
-		displayInfo(this.smartuser + " updated");
+		displayInfo(this.smartuser + i18n("users.userupdated"));
 	} else {
-		displayError(parseError("Error deleting role for " + this.smartuser, this.responseText));
+		displayError(parseError(i18n("users.deleteroleuser") + this.smartuser, this.responseText));
 	}
 	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
 }
@@ -805,9 +805,9 @@ function roleDeletedUser() {
 function roleDeleted() {
 	allRoles = null;
 	if (this.status == 204) {
-		displayInfo("Role deleted");
+		displayInfo(i18n("users.roledeleted"));
 	} else {
-		displayError(parseError("Error deleting role.", this.responseText));
+		displayError(parseError(i18n("users.errordeletingrole"), this.responseText));
 	}
 	refreshRolesTable();
 }
@@ -815,27 +815,27 @@ function roleDeleted() {
 //callback for add action
 function actionAdded(){
 	if (this.status == 204) {
-		displayInfo(this.smartuser + " updated");
+		displayInfo(this.smartuser + i18n("users.userupdated"));
 	} else {
-		displayError(parseError(i18n("alert.erroraddingaction")+ this.smartuser, this.responseText));
+		displayError(parseError(i18n("users.erroraddingaction")+ this.smartuser, this.responseText));
 	}
 	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
 }
 //callback for add action
 function actionAddedToRole(){
 	if (this.status == 204) {
-		displayInfo("Role updated");
+		displayInfo(i18n("users.roleupdated"));
 	} else {
-		displayError(parseError("Error adding action to role.", this.responseText));
+		displayError(parseError(i18n("users.erroraddactionrole"), this.responseText));
 	}
 	showRoleInfo.call(document.querySelector("#allroletable > .smart-table-selectedrow"));
 }
 //callback for add action
 function roleAddedToUser(){
 	if (this.status == 204) {
-		displayInfo(this.smartuser + " updated");
+		displayInfo(this.smartuser + i18n("users.userupdated"));
 	} else {
-		displayError(parseError("Error adding role for user " + this.smartuser, this.responseText));
+		displayError(parseError(i18n("users.erroraddroleuser") + this.smartuser, this.responseText));
 	}
 	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
 }
@@ -896,7 +896,7 @@ function createNewRole() {
 	
 	var error = "";
 	if (rolename.length == 0 ) {
-		error = "A name is required for the role.";
+		error = i18n("users.namerequired");
 	}
 
 	if (error.length > 0){
@@ -978,9 +978,9 @@ function roleCreated() {
 	allRoles = null;
 	
 	if (this.status == 201) {
-		displayInfo("New role created");
+		displayInfo(i18n("users.newrole"));
 	} else {
-		displayError(parseError("Error creating new role.", this.responseText));
+		displayError(parseError(i18n("users.newroleerror"), this.responseText));
 	}
 	refreshRolesTable();
 }
@@ -988,7 +988,7 @@ function roleUpdated() {
 	allRoles = null;
 	
 	if (this.status == 201) {
-		displayInfo("Role Updated");
+		displayInfo(i18n("users.roleupdated"));
 	} else {
 		displayError(parseError("", this.responseText));
 	}

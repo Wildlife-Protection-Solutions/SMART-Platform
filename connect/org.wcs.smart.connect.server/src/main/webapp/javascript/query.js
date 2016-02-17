@@ -273,7 +273,7 @@ function searchChanged(){
 
 }
 function getUrlOnly(){
-	  window.prompt("Copy to clipboard: Ctrl+C, Enter", generateUrl());
+	  window.prompt(i18n("query.copytoclipboard"), generateUrl());
 }
 
 
@@ -328,9 +328,9 @@ function getCaList(){
 //only runs once, need to update it to clear list if this gets called more than one in the future. 
 function populateCaList(){
 	if (this.status != 200) {
-		var msg = "Error: ";
+		var msg = i18n("query.error");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("query.unauthorized");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error

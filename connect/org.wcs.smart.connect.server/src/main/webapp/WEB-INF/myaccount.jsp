@@ -7,7 +7,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 
-<title>SMART Connect - User Account</title>
+<title><fmt:message key="myaccount.pagetitle"/></title>
 
 <script>
 	// Updates user information.  This will update the username

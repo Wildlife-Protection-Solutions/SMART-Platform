@@ -13,7 +13,11 @@
 		<servlet-name>home</servlet-name>
 		<url-pattern>/connect/home</url-pattern>
 	</servlet-mapping>
-
+	<servlet-mapping>
+		<servlet-name>home</servlet-name>
+		<url-pattern>/connect</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>forgotpassword</servlet-name>
 		<jsp-file>/WEB-INF/forgotpassword.jsp</jsp-file>
