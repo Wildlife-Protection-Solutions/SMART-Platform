@@ -122,7 +122,7 @@
 			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label><input id="lat" type="text" name="lat" >
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
 			<textarea name="alert_description" rows="5" cols="72"></textarea>
-   			<input class="button block top-spacer" type="submit" value="   Submit    "/>
+   			<input class="button block top-spacer" type="submit" value="   <fmt:message key="alert.submit" />    "/>
     	</form>
 		</p>
 	</section>
@@ -172,15 +172,15 @@
 			
 			<p><fmt:message key="alert.filters.status" /><br>
 			<c:forEach var="s" items="${status}" varStatus="count">
-				<input class='filterStatus updateChange' name="${s[1]}" value="${s[0]}" type="checkbox" checked>${s[1]}</input><br>
+				<label><input class='filterStatus updateChange' value="${s[0]}" type="checkbox" checked/>${s[1]}</label><br>
 			</c:forEach>
 			
 			<p><fmt:message key="alert.filters.importance" /><br>
-			<input class='filterImportance updateChange' type="checkbox" name="level1" value=1 checked>1(Highest)</input><br>
-			<input class='filterImportance updateChange' type="checkbox" name="level2" value=2 checked>2</input><br>
-			<input class='filterImportance updateChange' type="checkbox" name="level3" value=3 checked>3</input><br>
-			<input class='filterImportance updateChange' type="checkbox" name="level4" value=4 checked>4</input><br>
-			<input class='filterImportance updateChange' type="checkbox" name="level5" value=5 checked>5(Lowest)</input><br>
+			<label><input class='filterImportance updateChange' type="checkbox" value=1 checked/><fmt:message key="alert.eventimportance1" /></label><br>
+			<label><input class='filterImportance updateChange' type="checkbox" value=2 checked/><fmt:message key="alert.eventimportance2" /></label><br>
+			<label><input class='filterImportance updateChange' type="checkbox" value=3 checked/><fmt:message key="alert.eventimportance3" /></label><br>
+			<label><input class='filterImportance updateChange' type="checkbox" value=4 checked/><fmt:message key="alert.eventimportance4" /></label><br>
+			<label><input class='filterImportance updateChange' type="checkbox" value=5 checked/><fmt:message key="alert.eventimportance5" /></label><br>
 			</p>
 			<p><fmt:message key="alert.filters.ca" /><br>
 			<c:forEach var="ca" items="${cas}" varStatus="count">

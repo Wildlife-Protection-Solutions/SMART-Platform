@@ -441,7 +441,7 @@ function createTypeTable(){
  		var fillColor = types[i].fillColor;
  		var opacity = types[i].opacity;
  		var markerIcon = "<i class='fa fa-" + types[i].markerIcon + "'></i>";
- 		var markerColor = types[i].markerColor;
+ 		var markerColor = i18n("settings." + types[i].markerColor);
 
  		var spin = types[i].spin;
  		

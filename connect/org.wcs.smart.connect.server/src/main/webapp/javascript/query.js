@@ -4,10 +4,12 @@ var queries;
 var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
 
-var definedDates = ["Last 30 Days", "Last 60 Days", "Month to Date", "Last Month", "Year to Date", "Last Year", "All Dates", "Custom..."];
+var definedDates = ["query.last30days","query.last60days","query.monthtodate","query.lastmonth","query.yeartodate","query.lastyear","query.alldates","query.custom"];
 var definedDateKeys = ["last30days", "last60days", "monthtodate", "lastmonth", "yeartodate", "lastyear", "alldates", "custom"];
 
 var startDatePicker, endDatePicker;
+
+
 /* configure events on html elements */
 window.onload = function(){
 	document.getElementById('textsearch').value = search;
@@ -27,17 +29,21 @@ window.onload = function(){
 	//setup date picker for alert filters
 
 	startDatePicker = new Pikaday({
+		format: 'YYYY-MM-DD',
 		field: document.getElementById('startdate'),
 		firstDay: 1,
-        minDate: new Date('2000-01-01'),
-        yearRange: [2000,2050]
+        minDate: new Date('1950-01-01'),
+        yearRange: [1950,2050],
+        i18n: pickaday_i18n,
+        
 	});
 
 	endDatePicker = new Pikaday({
 		field: document.getElementById('enddate'),
 		firstDay: 1,
-        minDate: new Date('2000-01-01'),
-        yearRange: [2000,2050]
+        minDate: new Date('1950-01-01'),
+        yearRange: [1950,2050],
+        i18n: pickaday_i18n
 	});
 
 	//populate predefined dates
@@ -46,7 +52,7 @@ window.onload = function(){
 	for (var i = 0; i < definedDates.length; i ++){
 		var object = document.createElement("option");
 		object.value = definedDateKeys[i];
-		object.innerHTML = definedDates[i];
+		object.innerHTML = i18n(definedDates[i]);
 		selectdiv.appendChild(object);
 		if (definedDateKeys[i] == "alldates"){
 			selectdiv.selectedIndex = i;

@@ -938,8 +938,8 @@ function createNewUser() {
 	}
 
 	if (error.length > 0){
-		document.querySelector("#dialogerror").innerHTML = error;
-		document.querySelector("#dialogerror").style.display = "block";
+		document.querySelector("#newUserDialog > #dialogerror").innerHTML = error;
+		document.querySelector("#newUserDialog > #dialogerror").style.display = "block";
 		return false;
 	}
 	
@@ -966,7 +966,7 @@ function userCreated() {
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo(user.username + " account created");
+		displayInfo(user.username + i18n("users.accountcreated"));
 	} else {
 		displayError(parseError(i18n("users.errorcreatinguser"), this.responseText));
 	}

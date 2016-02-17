@@ -8,7 +8,7 @@
 <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
 <link href="//fonts.googleapis.com/css?family=Crimson+Text" rel="stylesheet" type="text/css">
 <link href="//fonts.googleapis.com/css?family=Allerta" rel="stylesheet" type="text/css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n.js"></script>
+
 <!--  always include english as this is the fallback language -->
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n/labels_en.js"></script>
 
@@ -19,3 +19,4 @@
     <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n/labels_${pageContext.request.locale.language}.js"></script>
   </c:if>
 </c:forEach>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n.js"></script>

@@ -40,14 +40,16 @@ window.onload = function(){
 		field: document.getElementById('datePickerFrom'),
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
-        yearRange: [2000,2050]
+        yearRange: [2000,2050],
+        i18n: pickaday_i18n
 	});
 
 	var picker = new Pikaday({
 		field: document.getElementById('datePickerTo'),
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
-        yearRange: [2000,2050]
+        yearRange: [2000,2050],
+        i18n: pickaday_i18n
 	});
 
 

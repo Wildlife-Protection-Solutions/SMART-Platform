@@ -33,7 +33,7 @@
 
 	<div class="block" style="text-align:left"><b><fmt:message key="settings.layerheader" /></b> <button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
 	</div>
-	<table id="layertable">
+	<table id="layertable"  style="width:100%">
 		<tr class="table-row smart-table-header"><th><fmt:message key="settings.layerorder" /></th><th><fmt:message key="settings.layername" /></th><th><fmt:message key="settings.type" /></th><th><fmt:message key="settings.onbydefault" /></th><th><fmt:message key="settings.mapboxid" /></th><th><fmt:message key="settings.layerlist" /></th><th><fmt:message key="settings.token" /></th><th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
@@ -61,7 +61,7 @@
 	<div class="block" style="text-align:left"><b><fmt:message key="settings.defaultsheader" /></b>
 	</div>
 	<form id="filter-form" name="filter-form" onsubmit="return false;">
-	<table id="defaultstable">
+	<table id="defaultstable" style="width:100%">
 		<tr class="table-defaults-row smart-table-header">
 			<th>
 				
@@ -76,7 +76,7 @@
 			<th style="width:14em"><fmt:message key="actions" /></th>
 		</tr>
 		<tr class="smart-table-rowon">
-		<td>
+		<td class="td-align-top">
 			<select id='filterDate' class='updateChange' name="time_filter">
 				<option value=1><fmt:message key="alert.within1" /></option>
 				<option value=2><fmt:message key="alert.within2" /></option>
@@ -90,20 +90,20 @@
 				<option value=-99><fmt:message key="alert.alldates" /></option>
 			</select>
 		</td>
-		<td>
+		<td class="td-align-top">
 			<p><fmt:message key="alert.filters.types" /><br>
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
      			<label><input id= "${type.getUuid()}" class='filterType updateChange' value="${type.getUuid()}" type="checkbox"/>${type.getLabel()}</label><br> 
 			</c:forEach> 
 			</p>
 		</td>
-		<td>
+		<td class="td-align-top" >
 			<p><fmt:message key="alert.filters.status" /><br>
 			<c:forEach var="s" items="${status}" varStatus="count">
 				<label><input id="status_${s[0]}" class='filterStatus updateChange' value="${s[0]}" type="checkbox"/>${s[1]}</label><br>
 			</c:forEach>
 		</td>
-		<td>
+		<td class="td-align-top">
 			<p><fmt:message key="alert.filters.importance" /><br>
 				<label><input id="level1" class='filterImportance updateChange' type="checkbox" value=1/><fmt:message key="alert.eventimportance1"/></label><br>
 				<label><input id="level2" class='filterImportance updateChange' type="checkbox" value=2/><fmt:message key="alert.eventimportance2"/></label><br>
@@ -113,7 +113,7 @@
 			</p>
 			
 		</td>
-		<td>
+		<td class="td-align-top">
 			<p><fmt:message key="alert.filters.ca" /><br>
 			<c:forEach var="ca" items="${cas}" varStatus="count">
 				<label><input id="${ca.getUuid()}" class='filterCa updateChange' value="${ca.getUuid()}" type="checkbox"/>${ca.getLabel()}</label><br>
@@ -121,11 +121,11 @@
 			</p>
 			<p>
 		</td>
-		<td>
+		<td class="td-align-top">
 			<fmt:message key="alert.filters.text" /><br>
 			<input id='filterText' class='updateChange' style='width:7em' name="textFilter" type="text"></input>
 		</td>
-		<td>
+		<td class="td-align-top">
 			<font class="defaultLabel"><fmt:message key="settings.refresh" /> </font> <input id='secondsRefresh' class='updateChange' style='width:3.5em' name="secondsRefresh" type="number" min=5/><br>
 			<font class="defaultLabel"><fmt:message key="settings.startingzoom" /></font> <input id='startingZoom' class='updateChange' style='width:3.5em' name="startingZoom" type="number" min=1 max=12/> <br>
 			<font class="defaultLabel"><fmt:message key="settings.startinglong" /></font> <input id='startingLong' class='updateChange' style='width:3.5em' name="startingLat" type="text" /> <br>
@@ -208,7 +208,7 @@
       		<label class="top-spacer block"><fmt:message key="settings.markerIcon" />: <i id="exampleIcon" class=""></i></label> 
 			<select id="type_markerIcon" class="type_field" name="type_markerIcon">
 <!-- selected from:		http://fortawesome.github.io/Font-Awesome/icons/ -->				
-			</select> <fmt:message key="settings.oroneof"/> <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/icons/">(list)</a>:<input type="text" name="iconOveride" id="iconOveride" value=""/>
+			</select> <fmt:message key="settings.oroneof"/> <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/icons/">(<fmt:message key="settings.list" />)</a>:<input type="text" name="iconOveride" id="iconOveride" value=""/>
 
 
       		<label class="top-spacer block"><fmt:message key="settings.markerColor"/>:</label>
