@@ -70,7 +70,7 @@ window.onload = function(){
 	dataLayers = {
 	};
 	
-	var activeLayers = L.layerGroup([osm]);
+	var activeLayers = [osm];
 
 	//Load all saved, active layers
 	for (i = 0; i < mapLayers.length; ++i) {
