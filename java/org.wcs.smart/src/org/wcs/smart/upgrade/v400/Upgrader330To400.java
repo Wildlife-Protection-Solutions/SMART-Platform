@@ -386,27 +386,27 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 			
 			"GRANT SELECT ON SMART.AGENCY to analyst",
 			"GRANT SELECT ON SMART.RANK to analyst",
-			"GRANT SELECT ON SMART.AGENCY to dataentry",
-			"GRANT SELECT ON SMART.RANK to dataentry",
+			"GRANT SELECT ON SMART.AGENCY to data_entry",
+			"GRANT SELECT ON SMART.RANK to data_entry",
 			"GRANT SELECT ON SMART.AGENCY to manager",
 			"GRANT SELECT ON SMART.RANK to manager",
 			
 			"GRANT INSERT ON  SMART.STATION TO analyst",
-			"GRANT INSERT ON  SMART.STATION TO dataentry",
+			"GRANT INSERT ON  SMART.STATION TO data_entry",
 			"GRANT INSERT ON  SMART.STATION TO manager",
 			"GRANT UPDATE ON  SMART.STATION TO analyst",
-			"GRANT UPDATE ON  SMART.STATION TO dataentry",
+			"GRANT UPDATE ON  SMART.STATION TO data_entry",
 			"GRANT UPDATE ON  SMART.STATION TO manager",
 			
 			"GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO analyst",
-			"GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO dataentry",
+			"GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO data_entry",
 			"GRANT USAGE ON SEQUENCE smart.smart_user_id_seq TO manager",
 			
 			"GRANT INSERT ON  SMART.EMPLOYEE TO analyst",
-			"GRANT INSERT ON  SMART.EMPLOYEE TO dataentry",
+			"GRANT INSERT ON  SMART.EMPLOYEE TO data_entry",
 			"GRANT INSERT ON  SMART.EMPLOYEE TO manager",
 			"GRANT UPDATE ON  SMART.EMPLOYEE TO analyst",
-			"GRANT UPDATE ON  SMART.EMPLOYEE TO dataentry",
+			"GRANT UPDATE ON  SMART.EMPLOYEE TO data_entry",
 			"GRANT UPDATE ON  SMART.EMPLOYEE TO manager",
 		};
 		
