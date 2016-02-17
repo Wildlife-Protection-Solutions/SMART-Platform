@@ -46,7 +46,7 @@ public class ReceivedDateFilter implements IDateFieldFilter {
 
 	@Override
 	public String getKey() {
-		return "intellrecieveddate"; //$NON-NLS-1$
+		return "intellreceiveddate"; //$NON-NLS-1$
 	}
 
 }
