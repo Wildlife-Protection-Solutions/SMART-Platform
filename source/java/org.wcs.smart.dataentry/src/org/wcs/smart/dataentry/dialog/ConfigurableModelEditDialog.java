@@ -89,7 +89,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		ConfigurableModelEditorDefaultTab defaultTab = new ConfigurableModelEditorDefaultTab(this);
 		if (!tabs.isEmpty()) {
 			//we have some extra tabs and need to create tab panel
-			final TabFolder tabFolder = new TabFolder (main, SWT.BORDER);
+			final TabFolder tabFolder = new TabFolder (main, SWT.NONE);
 			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			tabs.add(0, defaultTab);
