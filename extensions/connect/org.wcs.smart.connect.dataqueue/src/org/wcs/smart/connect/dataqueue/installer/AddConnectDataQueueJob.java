@@ -127,6 +127,7 @@ public class AddConnectDataQueueJob extends Job {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				for (int i = 0; i < sql.length; i ++){
+					ConnectDataQueuePlugin.log(sql[i], null);
 					c.createStatement().execute(sql[i]);
 				}				
 			}
