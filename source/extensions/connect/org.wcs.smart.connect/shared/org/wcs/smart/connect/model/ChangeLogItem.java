@@ -45,6 +45,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.connect_change_log")
 public class ChangeLogItem extends UuidItem implements Externalizable{
 
+	public static final String TABLENAME="smart.connect_change_log"; //$NON-NLS-1$
+	
 	private static final long serialVersionUID = 01L;
 	
 	public enum Action{
