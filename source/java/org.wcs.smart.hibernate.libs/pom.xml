@@ -46,6 +46,12 @@
 <!--        	<artifactId>slf4j-log4j12</artifactId> -->
 <!--        	<version>1.7.10</version> -->
 <!--        </dependency> -->		
+	<!-- Hibernate c3p0 connection pool -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>3.6.3.Final</version>
+		</dependency>
 	</dependencies>
 
 </project>
