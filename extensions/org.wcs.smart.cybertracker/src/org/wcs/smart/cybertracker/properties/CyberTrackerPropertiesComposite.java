@@ -138,7 +138,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 
 	private void createContent(Composite parent) {
 		
-		final TabFolder tabFolder = new TabFolder (parent, SWT.BORDER);
+		final TabFolder tabFolder = new TabFolder (parent, SWT.NONE);
 		Rectangle clientArea = parent.getClientArea ();
 		tabFolder.setLocation (clientArea.x, clientArea.y);
 		
