@@ -170,7 +170,7 @@ public enum DerbyReplicationManager {
 	}
 	
 	/**
-	 * 
+	 * MUST be in active transaction that is committed
 	 * @param session
 	 * @return the state of the LOGGING_DB_PROPERTY database value
 	 */
@@ -179,7 +179,6 @@ public enum DerbyReplicationManager {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
 				String sql = "values syscs_util.syscs_get_database_property( '" + LOGGING_DB_PROPERTY + "' )"; //$NON-NLS-1$ //$NON-NLS-2$
-				
 				ResultSet rs = connection.createStatement().executeQuery(sql);
 				if (rs.next()){
 					try{
