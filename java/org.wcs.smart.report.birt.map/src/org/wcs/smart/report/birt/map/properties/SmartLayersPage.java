@@ -32,6 +32,10 @@ import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -411,51 +415,71 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	}
 	
 	private synchronized void loadBasemaps(){
-		basemapListenerEnabled = false;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		List<BasemapDefinition> maps = null;
-		try {
-			maps = HibernateManager.getBasemaps(session);
-			
-			BasemapDefinition defaultdef = new BasemapDefinition();
-			defaultdef.setName(Messages.SmartLayersPage_DefaultBasemapLabel);
-			defaultdef.setUuid( DEFAULT_BASEMAP );
-			
-			
-			BasemapDefinition nonedef = new BasemapDefinition();
-			nonedef.setName(Messages.SmartLayersPage_NoBasemapLabel);
-			
-			
-			Object selection = defaultdef;
-			if (mapItem != null){
-				String uuid = mapItem.getBasemapName();
-				
-				if (uuid == null){
-					selection = nonedef;
-				}else if (uuid != null && uuid.equals(SmartMapItem.DEFAULT_BASEMAP_KEY)){
-					selection = defaultdef;
-				}else if (uuid != null){
-					for (BasemapDefinition def : maps){
-						if (UuidUtils.uuidToString(def.getUuid()).equals(uuid)){
-							selection = def;
-							break;
+		Job j = new Job("loading basemapes"){ //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				basemapListenerEnabled = false;
+				List<BasemapDefinition> maps = null;
+				try{
+					Session session = HibernateManager.openSession();
+					session.beginTransaction();
+					try {
+						maps = HibernateManager.getBasemaps(session);
+					} finally {
+						if (session.getTransaction().isActive()) {
+							session.getTransaction().commit();
+						}
+						session.close();
+					}
+					
+					BasemapDefinition defaultdef = new BasemapDefinition();
+					defaultdef.setName(Messages.SmartLayersPage_DefaultBasemapLabel);
+					defaultdef.setUuid( DEFAULT_BASEMAP );
+					
+					BasemapDefinition nonedef = new BasemapDefinition();
+					nonedef.setName(Messages.SmartLayersPage_NoBasemapLabel);
+					
+					Object selection = defaultdef;
+					if (mapItem != null){
+						String uuid = mapItem.getBasemapName();
+						if (uuid == null){
+							selection = nonedef;
+						}else if (uuid != null && uuid.equals(SmartMapItem.DEFAULT_BASEMAP_KEY)){
+							selection = defaultdef;
+						}else if (uuid != null){
+							for (BasemapDefinition def : maps){
+								if (UuidUtils.uuidToString(def.getUuid()).equals(uuid)){
+									selection = def;
+									break;
+								}
+							}
 						}
 					}
+					maps.add(defaultdef);
+					maps.add(nonedef);
+					
+					final List<BasemapDefinition> mymaps = maps;
+					final Object myselection = selection;
+					Display.getDefault().syncExec(new Runnable(){
+	
+						@Override
+						public void run() {
+							basemapCombo.setInput(mymaps.toArray());
+							basemapCombo.setSelection(new StructuredSelection(myselection));		
+						}
+						
+					});
+					
+					return Status.OK_STATUS;
+				}finally{
+					basemapListenerEnabled = true;
 				}
 			}
-			maps.add(defaultdef);
-			maps.add(nonedef);
-			basemapCombo.setInput(maps.toArray());
-			basemapCombo.setSelection(new StructuredSelection(selection));
 			
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().commit();
-			}
-			session.close();
-		}
-		basemapListenerEnabled = true;
+		};
+		j.setSystem(true);
+		j.schedule();
 	}
 	private List<LayerDefinition> getSelectedLayers(){
 		List<LayerDefinition> selections = new ArrayList<LayerDefinition>();
