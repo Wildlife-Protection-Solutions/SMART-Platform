@@ -4,7 +4,10 @@ var DOWNLOADCA = false;
 /* configure events on html elements */
 window.onload = function(){
 	//add new ca
-	document.querySelector("#btnNewCa").onclick=clearAndShowNewCaDialog;
+	var newbtn =document.querySelector("#btnNewCa");
+	if (newbtn != null){
+		newbtn.onclick=clearAndShowNewCaDialog;
+	}
 	
 	//delete user
 	elements = document.querySelectorAll(".deleteca");

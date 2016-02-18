@@ -27,7 +27,18 @@
 		<url-pattern>/forgot</url-pattern>
 	</servlet-mapping>
 	
-		
+	<error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/errorpages/404.jsp</location>
+	</error-page>
+	<error-page>
+        <error-code>401</error-code>
+        <location>/WEB-INF/errorpages/401.jsp</location>
+	</error-page>
+	<error-page>
+        <location>/WEB-INF/errorpages/unknown.html</location>
+	</error-page>
+	
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>connect</web-resource-name>
@@ -41,19 +52,6 @@
 		</user-data-constraint>
 	</security-constraint>
 
-
-	<!-- <security-constraint> -->
-	<!-- <web-resource-collection> -->
-	<!-- <web-resource-name>api</web-resource-name> -->
-	<!-- <url-pattern>/api/*</url-pattern> -->
-	<!-- </web-resource-collection> -->
-	<!-- <auth-constraint> -->
-	<!-- <role-name>smart</role-name> -->
-	<!-- </auth-constraint> -->
-	<!-- <user-data-constraint> -->
-	<!-- <transport-guarantee>CONFIDENTIAL</transport-guarantee> -->
-	<!-- </user-data-constraint> -->
-	<!-- </security-constraint> -->
 	<login-config>
 		<auth-method>FORM</auth-method>
 		<realm-name>BCryptRealm</realm-name>

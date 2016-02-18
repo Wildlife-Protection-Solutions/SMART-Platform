@@ -46,7 +46,9 @@
 				</c:forEach>
 			</div>  
 		</div>
-		<div><button id="btnNewCa" class="block button top-spacer"><fmt:message key="ca.createnew"/></button></div>
+		<c:if test="${canadd}">
+			<div><button id="btnNewCa" class="block button top-spacer"><fmt:message key="ca.createnew"/></button></div>
+		</c:if>
 	</div>
 	
 	<%@include file="footer.jsp" %>

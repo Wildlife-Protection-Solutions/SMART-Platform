@@ -71,6 +71,11 @@ public class AlertServlet extends HttpServlet{
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		try{
+			if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AlertAction.VIEW_ALL_KEY)){
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
+			
 			users = HibernateManager.getUsers(session);
 			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(session);
 			alertTypes = HibernateManager.getAlertTypes(session);

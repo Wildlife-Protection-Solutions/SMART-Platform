@@ -19,8 +19,9 @@
 		<p class="infomessage"><fmt:message key="dataqueue.info"/></p>
 		<div><div id="message" class="msgsection"></div></div>
 		
-		<div><button class="block button top-spacer" id="btnNewFile"><fmt:message key="dataqueue.newfilebutton"/></button></div>
-
+		<c:if test="${canupload}">
+			<div><button class="block button top-spacer" id="btnNewFile"><fmt:message key="dataqueue.newfilebutton"/></button></div>
+		</c:if>
 		<div class="top-spacer link_small" >
 			<fmt:message key="dataqueue.lastupdated"/><span id="lastUpdateTime"></span><a id="refreshnow" style="padding-left:3px" href="#"><fmt:message key="dataqueue.refresh"/></a>
 		</div>

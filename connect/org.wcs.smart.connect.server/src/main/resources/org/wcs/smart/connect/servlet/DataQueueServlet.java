@@ -2,6 +2,7 @@ package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,14 +35,23 @@ public class DataQueueServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		List<ConservationAreaInfo> cas = null;
 			
+		boolean canUpload = false;
 		Session s = HibernateManager.getSession(request.getServletContext());
 		try{
 			s.beginTransaction();
-			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(s);
 			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), DataQueueAction.VIEW_KEY)){
 				//do not allow
-				response.setStatus(Status.UNAUTHORIZED.getStatusCode());
+				response.sendError(Status.UNAUTHORIZED.getStatusCode());
 				return;
+			}
+			canUpload = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), DataQueueAction.ADD_KEY);
+			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(s);
+			for (Iterator<ConservationAreaInfo> iterator = cas.iterator(); iterator.hasNext();) {
+				ConservationAreaInfo conservationAreaInfo = (ConservationAreaInfo) iterator.next();
+				if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), DataQueueAction.ADD_KEY, conservationAreaInfo.getUuid())){
+					iterator.remove();
+				}
+				
 			}
 		}finally{
 			s.getTransaction().rollback();
@@ -78,6 +88,7 @@ public class DataQueueServlet extends HttpServlet {
 		request.setAttribute("cas", cas); //$NON-NLS-1$		
 		request.setAttribute("uploadtypes", uploadTypes); //$NON-NLS-1$
 		request.setAttribute("statusTypes", statusTypes); //$NON-NLS-1$
+		request.setAttribute("canupload", canUpload); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/dataqueue.jsp").forward(request, response); //$NON-NLS-1$
 		

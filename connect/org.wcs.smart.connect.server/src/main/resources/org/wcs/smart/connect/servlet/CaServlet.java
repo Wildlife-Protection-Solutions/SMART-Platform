@@ -30,9 +30,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.ConservationAreas;
+import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.ConservationAreaProxy;
+import org.wcs.smart.connect.security.CaAction;
+import org.wcs.smart.connect.security.SecurityManager;
 
 /**
  * Conservation area servlet.
@@ -54,8 +58,18 @@ public class CaServlet extends HttpServlet {
 		cas.configure(request.getServletContext(), null, response, request);
 		
 		List<ConservationAreaProxy> info = cas.getConservationAreas();
-		
 		request.setAttribute("cas", info); //$NON-NLS-1$
+		
+		boolean canAdd = false;
+		Session s = HibernateManager.getSession(request.getServletContext());
+		try{
+			s.beginTransaction();
+			canAdd = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAction.ADDCA_KEY);
+		}finally{
+			s.getTransaction().rollback();
+		}
+		request.setAttribute("canadd", canAdd);
+		
 		
 		request.getRequestDispatcher("/WEB-INF/ca.jsp").forward(request, response); //$NON-NLS-1$
 		

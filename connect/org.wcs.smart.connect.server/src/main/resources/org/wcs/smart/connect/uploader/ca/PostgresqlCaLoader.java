@@ -244,7 +244,7 @@ public class PostgresqlCaLoader {
 		for (CaPluginVersion v : caPlugins){
 			String sv = connect.get(v.getPluginId());
 			if (sv == null){
-				sb.append(v.getPluginId() + ": Not supported on connect.");
+				sb.append(v.getPluginId() + ": Not supported on connect, ");
 			}else if (!sv.equals(v.getVersion())){
 				sb.append(v.getPluginId() + " [Desktop: " + v.getVersion() + "; Server:" + sv + "], ");
 			}

@@ -42,6 +42,8 @@ import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.StyleConfiguration;
+import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.SecurityManager;
 
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "settings")
 @MultipartConfig(fileSizeThreshold=1024*1024,maxFileSize=1024*1024*5, maxRequestSize=1024*1024*5*5)
@@ -61,6 +63,11 @@ public class SettingsServlet extends HttpServlet{
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		try{
+			if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
+			
 			styles = HibernateManager.getStyleConfigurations(session);
 			cas = HibernateManager.getConservationAreaInfos(session);
 			alertTypes = HibernateManager.getAlertTypes(session);

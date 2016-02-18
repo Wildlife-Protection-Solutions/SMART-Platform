@@ -34,6 +34,8 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.SecurityManager;
 
 /**
  * Connect users servlet.
@@ -55,6 +57,10 @@ public class UsersServlet extends HttpServlet{
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		try{
+			if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
 			users = HibernateManager.getUsers(session);
 		}finally{
 			session.getTransaction().rollback();

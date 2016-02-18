@@ -5,7 +5,10 @@ var oReq;
 /* configure events on html elements */
 window.onload = function(){
 	//new user dialog
-	document.querySelector("#btnNewFile").onclick=clearAndShowNewFileDialog;
+	var newbtn = document.querySelector("#btnNewFile");
+	if (newbtn != null){
+		newbtn.onclick=clearAndShowNewFileDialog;
+	}
 	document.querySelector("#cancelNewFile").onclick = function(){closeDialog('newFileDialog');};
 	document.querySelector("#cancelUpdateFile").onclick = function(){closeDialog('updateFileDialog');};
 	document.getElementById("btnUploadFile").onclick = createItemOnServer;
@@ -55,14 +58,13 @@ function uploadFile(){
     fd.append("upload_file", file);
     xhr.onload = uploadComplete;
     xhr.send(fd);
-
 }
 
 function uploadComplete(){
+	closeDialog('newFileDialog');
 	if(this.status == 202) {
    		var user = JSON.parse(this.responseText);
   		displayInfo(i18n("dataqueue.fileuploaded"));
-  		closeDialog('newFileDialog');
    	} else {
    		displayError(parseError(i18n("dataqueue.erroruploadingfile"), this.responseText));
    		
