@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 
@@ -55,7 +56,7 @@ public class DerbyUtil {
 	public static Long getNextRevisionId(byte[] cauuid) throws SQLException{
 		if (cauuid == null) return -1l;
 		String sql = "select (case when max(revision) is null then -1 else max(revision) end) + 1 "  //$NON-NLS-1$
-				+ " from smart.connect_change_log where ca_uuid = ?"; //$NON-NLS-1$
+				+ " from " + ChangeLogItem.TABLENAME + " where ca_uuid = ?"; //$NON-NLS-1$ //$NON-NLS-2$
 		Connection c = DriverManager.getConnection("jdbc:default:connection"); //$NON-NLS-1$
 		PreparedStatement ps = c.prepareStatement(sql);
 		ps.setBytes(1, cauuid);

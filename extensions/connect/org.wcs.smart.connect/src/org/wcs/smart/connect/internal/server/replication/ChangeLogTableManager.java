@@ -21,13 +21,16 @@
  */
 package org.wcs.smart.connect.internal.server.replication;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ChangeLogItem;
@@ -136,13 +139,32 @@ public enum ChangeLogTableManager {
 	 * if there is nothing in the change log table for the conservation area
 	 */
 	public Long getMaxLocalRevision(Session s, ConservationArea ca){
-		Long x = (Long)s.createCriteria(ChangeLogItem.class)
-				.add(Restrictions.eq("conservationArea", ca.getUuid())) //$NON-NLS-1$
-				.add(Restrictions.eq("source", ChangeLogItem.Source.LOCAL)) //$NON-NLS-1$
-				.setProjection(Projections.max("revision")) //$NON-NLS-1$
-				.uniqueResult();
-		if (x == null) return null;
-		return x;
+		return s.doReturningWork(new ReturningWork<Long>() {
+			
+			@Override
+			public Long execute(Connection connection) throws SQLException {
+				int iso = connection.getTransactionIsolation();
+				try{
+					//prevents database locking with long save transactions
+					connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+					String sql = "SELECT max(revision) FROM " //$NON-NLS-1$
+							+ ChangeLogItem.TABLENAME 
+							+  " WHERE source = 'LOCAL' and ca_uuid = ? ";  //$NON-NLS-1$
+					PreparedStatement ps = connection.prepareStatement(sql);
+					ps.setBytes(1, UuidUtils.uuidToByte(ca.getUuid()));
+					try(ResultSet rs = ps.executeQuery()){
+						if (rs.next()){
+							return rs.getLong(1);
+						}
+					}
+					return null;
+				}finally{
+					connection.commit();
+					connection.setTransactionIsolation(iso);
+				}
+			}
+		});
+
 	}
 	
 	/**
