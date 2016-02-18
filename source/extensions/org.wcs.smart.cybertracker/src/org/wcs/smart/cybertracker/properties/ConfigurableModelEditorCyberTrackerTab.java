@@ -143,6 +143,9 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 			}
 		});
 		
+		Label l = new Label(main, SWT.NONE);
+		l.setText(Messages.ConfigurableModelEditorCyberTrackerTab_ProfileDetails);
+		
 		ctPropCmp = new CyberTrackerPropertiesComposite(main);
 		ctPropCmp.setReadOnly(true);
 		ctPropCmp.addPropsChangeListener(new IPropsChangeListener(){
