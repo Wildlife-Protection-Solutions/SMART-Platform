@@ -47,10 +47,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeItem;
@@ -67,7 +67,7 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 
 	protected CmAttribute attribute;
 	protected ConfigurableModel editModel;
-	protected Session currentSession;
+	protected ChangeTracker tracker;
 	
 	private Viewer itemViewer;
 	private TableViewer nameTable ;
@@ -77,10 +77,10 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	
 	private Button btnEnable;
 	
-	public AbstractRenameDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, Session currentSession) {
+	public AbstractRenameDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, ChangeTracker tracker) {
 		super(parentShell);
 		this.attribute = attribute;
-		this.currentSession = currentSession;
+		this.tracker = tracker;
 		this.editModel = editModel;
 	}
 
@@ -129,9 +129,7 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 						enableItem((NamedItem)type, enable);
 					}
 					
-				}
-				currentSession.flush();
-				
+				}				
 				itemViewer.refresh();
 				updateEnableButtonText();
 			}
@@ -227,8 +225,7 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 					}
 				}
 				if (cmNode != null){
-					currentSession.saveOrUpdate(cmNode);
-					currentSession.flush();
+					tracker.saveOrUpdate(cmNode);
 				}
 				
 				nameTable.refresh();

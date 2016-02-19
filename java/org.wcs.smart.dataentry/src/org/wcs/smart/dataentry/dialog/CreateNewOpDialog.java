@@ -50,6 +50,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Dialog for creating new configurable model.
@@ -68,15 +69,13 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 	private CreateCmOption option = CreateCmOption.BLANK;
 	private Button opBlank, opCm, opDm;
 	private ComboViewer cbCm;
-	private Session currentSession;
 	private ConfigurableModel initModel;
 	private String name = null;
 	private ConfigurableModel cmTemplate = null;
 	private Text txtName;
 	
-	protected CreateNewOpDialog(Shell parentShell, Session currentSession) {
+	protected CreateNewOpDialog(Shell parentShell) {
 		super(parentShell);
-		this.currentSession = currentSession;
 	}
 
 	protected void okPressed() {
@@ -186,10 +185,13 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 
 	private List<ConfigurableModel> getCmList() {
 		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
+		Session s = HibernateManager.openSession();
 		try {
-			modelList = DataentryHibernateManager.getConfigurableModels(currentSession);
+			modelList = DataentryHibernateManager.getConfigurableModels(s);
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
+		}finally{
+			s.close();
 		}
 		return modelList;
 	}
@@ -209,7 +211,13 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					initModel = ConfigurableModelFactory.createConfigurableModelClone(cmTemplate, name, monitor);
+					Session s = HibernateManager.openSession();
+					try{
+						ConfigurableModel m = (ConfigurableModel) s.get(ConfigurableModel.class, cmTemplate.getUuid());
+						initModel = ConfigurableModelFactory.createConfigurableModelClone(m, name, monitor);
+					}finally{
+						s.close();
+					}
 					
 				}
 			});
@@ -223,7 +231,12 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					initModel = ConfigurableModelFactory.createModelFromDataModel(name, currentSession, monitor);
+					Session s = HibernateManager.openSession();
+					try{
+						initModel = ConfigurableModelFactory.createModelFromDataModel(name, s, monitor);
+					}finally{
+						s.close();
+					}
 					
 				}
 			});

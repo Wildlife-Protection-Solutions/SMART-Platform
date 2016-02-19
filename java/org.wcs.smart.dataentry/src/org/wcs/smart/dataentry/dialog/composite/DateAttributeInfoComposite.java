@@ -38,10 +38,10 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
@@ -61,8 +61,8 @@ public class DateAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public DateAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
-		super(parent, model, session);
+	public DateAttributeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
+		super(parent, model, tracker);
 	}
 
 	/* (non-Javadoc)
@@ -198,6 +198,7 @@ public class DateAttributeInfoComposite extends CmAttributeInfoComposite {
 			}
 			cd.hide();
 			fireModelChanged();
+			tracker.saveOrUpdate(getSourceObject());
 		}
 		
 	}

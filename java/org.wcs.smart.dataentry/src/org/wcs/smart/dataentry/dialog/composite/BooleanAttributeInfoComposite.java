@@ -32,8 +32,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -57,8 +57,8 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public BooleanAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
-		super(parent, model, session);
+	public BooleanAttributeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
+		super(parent, model, tracker);
 	}
 
 	/* (non-Javadoc)
@@ -124,7 +124,11 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 					getSourceObject().getCmAttributeOptions().remove(op.getOptionId());
 					op.setBooleanValue(null);
 				}
-				if (!initializingControl) fireModelChanged();
+				if (!initializingControl){
+					tracker.saveOrUpdate(op);
+					tracker.saveOrUpdate(getSourceObject());
+					fireModelChanged();
+				}
 			}
 		});
 		

@@ -32,6 +32,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
@@ -155,7 +157,7 @@ public class ConfigurableModelFactory {
 	private static void processCategory(Category c, CmNode parent, ConfigurableModel model, IProgressMonitor monitor){
 		monitor.subTask(MessageFormat.format(Messages.ConfigurableModelFactory_ProgressMessage, c.getName()));
 		monitor.worked(1);
-		
+		c.getFullCategoryName();
 		if (monitor.isCanceled()) return;
 		
 		if (c.getActiveChildren().size() > 0){
@@ -203,6 +205,8 @@ public class ConfigurableModelFactory {
 				cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 				node.getCmAttributes().add(cma);
 				addAttributeDefaultValues(model, a);
+				
+				loadAttributeInfo(a);
 			}
 			if (parent == null){
 				node.setNodeOrder(model.getNodes().size()+1);
@@ -240,6 +244,13 @@ public class ConfigurableModelFactory {
 		}
 	}
 
+	private static void loadCategoryInfo(Category c){
+		while(c != null){
+			c.getNames().size();
+			c = c.getParent();
+		}
+	}
+	
 	//this is adopted copy from CmTemplateCloner
 	private static void processNode(CmNode clonedParent, CmNode toCopy, ConfigurableModel clonedModel, IProgressMonitor monitor) {
 		monitor.subTask(MessageFormat.format(Messages.ConfigurableModelFactory_ProcessCmNode, toCopy.getName()));
@@ -257,7 +268,8 @@ public class ConfigurableModelFactory {
 		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
 		
 		if (toCopy.getCategory() != null){
-			clonedNode.setCategory(toCopy.getCategory());
+			clonedNode.setCategory(toCopy.getCategory());	
+			loadCategoryInfo(toCopy.getCategory());
 		}else{
 			clonedNode.setCategory(null);
 		}
@@ -286,6 +298,7 @@ public class ConfigurableModelFactory {
 		CmAttribute clone = new CmAttribute();
 		
 		clone.setAttribute(attributeToClone.getAttribute());
+		attributeToClone.getAttribute().getNames().size();
 		
 		//clone options
 		for (CmAttributeOption op : attributeToClone.getCmAttributeOptions().values()){
@@ -297,9 +310,28 @@ public class ConfigurableModelFactory {
 		clone.setOrder(attributeToClone.getOrder());
 		clone.setList(cloneCmAttributeList(attributeToClone.getList(), cm, clone));
 		clone.setTree(cloneCmAttributeTree(attributeToClone.getTree(), null, cm, clone));
+		
+		loadAttributeInfo(attributeToClone.getAttribute());
 		return clone;
 	}
 	
+	private static void loadAttributeInfo(Attribute attribute){
+		attribute.getNames().size();
+		
+		if (attribute.getActiveListItems() != null){
+			for (AttributeListItem i : attribute.getActiveListItems()){
+				i.getNames().size();
+			}
+		}
+		loadTreeNodes(attribute.getActiveTreeNodes());
+	}
+	private static void loadTreeNodes(List<AttributeTreeNode> nodes){
+		if (nodes == null) return;
+		for (AttributeTreeNode n : nodes){
+			n.getNames().size();
+			loadTreeNodes(n.getActiveChildren());
+		}
+	}
 	private static CmAttributeOption cloneOption(CmAttributeOption op) {
 		CmAttributeOption cloned = new CmAttributeOption();
 		cloned.setBooleanValue(op.getBooleanValue());

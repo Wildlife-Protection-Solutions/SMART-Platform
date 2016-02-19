@@ -21,18 +21,26 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -41,7 +49,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for editing Configurable Models.
@@ -49,7 +58,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  * @author elitvin
  * @since 2.0.0
  */
-public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
+public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	
 	private static final int DIALOG_WIDTH = 700;
 	private static final int DIALOG_HEIGHT = 725;
@@ -57,9 +66,10 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	private ConfigurableModel model;
 	
 	private List<IConfigurableModelEditorTabContent> tabs;
+	private boolean changesMade = false;
 	
 	public ConfigurableModelEditDialog(ConfigurableModel model) {
-		super(Display.getDefault().getActiveShell(), Messages.ConfigurableModelEditDialog_Title);
+		super(Display.getDefault().getActiveShell());
 		this.model = model;
 	}
 
@@ -69,6 +79,117 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	@Override
+	public Control createDialogArea(Composite parent){
+		getShell().setText( Messages.ConfigurableModelEditDialog_Title);
+		Composite composite = (Composite) super.createDialogArea(parent);
+
+		//Create an outer composite for spacing
+		ScrolledComposite scrolled = new ScrolledComposite(composite, SWT.V_SCROLL | SWT.H_SCROLL );
+		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		// always show the focus control
+		scrolled.setShowFocusedControl(true);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
+		Composite c = createContent(scrolled);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		scrolled.setContent(c);
+		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		return composite;
+	}
+
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CLOSE_LABEL, false);
+		
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		getButton(IDialogConstants.CLOSE_ID).setFocus();
+		
+		super.setReturnCode(IDialogConstants.CLOSE_ID);
+		
+		getButton(IDialogConstants.OK_ID).setEnabled(this.changesMade); //this will enable "Save" button when new model is just created
+	}
+	
+	@Override
+	protected void buttonPressed(int buttonId) {
+		if (IDialogConstants.OK_ID == buttonId) {
+			performSave();
+			super.setReturnCode(IDialogConstants.OK_ID);
+		} else if (IDialogConstants.CLOSE_ID == buttonId) {
+			close();
+		}
+	}
+	
+	/**
+	 * Updates the buttons of the dialog to reflect current
+	 * state.
+	 * 
+	 * @param ischanged if changes have occurred and dialog needs to be saved
+	 */
+	protected void setChangesMade(boolean ischanged){
+		this.changesMade = ischanged;
+		Button btn = getButton(IDialogConstants.OK_ID);
+		if (btn != null){
+			btn.setEnabled(ischanged);
+		}
+	}
+	
+	/**
+	 * If there are unsaved changes, the user is prompted to
+	 * save changes then the dialog is closed.
+	 */
+	@Override
+	public boolean close(){
+		//ensure all edits are finished
+		getButtonBar().setFocus();
+
+		if (changesMade){
+			if (!validateSave()){
+				return false;
+			}
+		}
+
+		return super.close();  
+	}
+	
+	/**
+	 * Validates if the current changes should be saved
+	 * 
+	 * @return <code>true</code> if users wishes to save and save was successful, <code>true</code> if user does not want to save, <code>false</code> if
+	 * cancel pressed or error occured while saving.
+	 */
+	protected boolean validateSave(){
+		if (getErrorMessage() != null){
+			if (!MessageDialog.openQuestion(getShell(), Messages.ConfigurableModelEditDialog_CloseTitle, Messages.ConfigurableModelEditDialog_CloseMessage)){
+				return false;
+			}
+		}else{
+			MessageDialog md = new MessageDialog(getShell(), Messages.ConfigurableModelEditDialog_SaveTitle, null, Messages.ConfigurableModelEditDialog_SaveMessage, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			int ret = md.open();
+			if (ret == 2){
+				//cancel
+				return false;
+			}else if (ret == 0){
+				//yes
+				if (!performSave()){
+					return false;
+				}else{
+					setReturnCode(IDialogConstants.OK_ID);
+				}
+			}
+		}
+		return true;
+	}
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+	
 	protected Composite createContent(Composite parent) {
 
 		Composite main = new Composite(parent, SWT.NONE);
@@ -87,12 +208,12 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		tabs = getExtraTabs();
 		
 		ConfigurableModelEditorDefaultTab defaultTab = new ConfigurableModelEditorDefaultTab(this);
-		if (!tabs.isEmpty()) {
+		tabs.add(0, defaultTab);
+		
+		if (tabs.size() > 1) {
 			//we have some extra tabs and need to create tab panel
 			final TabFolder tabFolder = new TabFolder (main, SWT.NONE);
 			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-			tabs.add(0, defaultTab);
 			for (IConfigurableModelEditorTabContent tabContent : tabs) {
 				TabItem tabItem = new TabItem (tabFolder, SWT.NONE);
 				tabItem.setText(tabContent.getTabName());
@@ -101,8 +222,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 				tabContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				tabContainer.setLayout(new GridLayout(1, false));
 				
-				tabItem.setControl(tabContainer);
-				
+				tabItem.setControl(tabContainer);	
 				tabContent.createTabContent(tabContainer);
 			}
 		} else {
@@ -148,32 +268,45 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		return model;
 	}
 	
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		super.createButtonsForButtonBar(parent);
-		getButton(IDialogConstants.OK_ID).setEnabled(this.changesMade); //this will enable "Save" button when new model is just created
-	}
 	
-	@Override
 	protected boolean performSave() {
-		Session s = getSession();
+		final boolean[] ret = new boolean[]{false};
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
-			//commit transaction
-			s.saveOrUpdate(model);
-			s.flush();
-			for (IConfigurableModelEditorTabContent tab : tabs) {
-				tab.performSave(s);
-				s.flush();
-			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
+			pmd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask(Messages.ConfigurableModelEditDialog_SaveCmProgress, IProgressMonitor.UNKNOWN);
+					Session s = HibernateManager.openSession();
+					try{
+						s.beginTransaction();
+						//commit transaction
+						for (IConfigurableModelEditorTabContent tab : tabs) {
+							tab.performSave(s);
+							s.flush();
+						}
+						s.getTransaction().commit();
+						
+						ret[0] = true;
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+						SmartPlugIn.displayLog(Messages.ConfigurableModelEditDialog_SaveError  + ex.getMessage(), ex);
+						ret[0] = false;
+					}finally{
+						s.close();
+						monitor.done();
+					}
+					
+				}
+			});
+		}catch(Exception ex){
 			SmartPlugIn.displayLog(Messages.ConfigurableModelEditDialog_SaveError  + ex.getMessage(), ex);
+			return false;
 		}
-		
-		//start a new transaction
-		s.getTransaction().begin();
-		setChangesMade(false);
-		return true;
+		if (ret[0]) setChangesMade(false);
+		return ret[0];		
 	}
 	
 }

@@ -47,12 +47,14 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider;
 import org.wcs.smart.dataentry.dialog.EditTreeDialog;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
@@ -73,8 +75,8 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public TreeAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
-		super(parent, model, session);
+	public TreeAttributeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
+		super(parent, model, tracker);
 	}
 
 	/* (non-Javadoc)
@@ -104,8 +106,13 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				defaultValueTreeField.setLanguage(language);
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 				if (option != null && option.getUuidValue() != null){
-					AttributeTreeNode defaultNode = (AttributeTreeNode) getSession().load(AttributeTreeNode.class, option.getUuidValue());
-					defaultValueTreeField.setValue(defaultNode);
+					Session s = HibernateManager.openSession();
+					try{
+						AttributeTreeNode defaultNode = (AttributeTreeNode) s.load(AttributeTreeNode.class, option.getUuidValue());
+						defaultValueTreeField.setValue(defaultNode);
+					}finally{
+						s.close();
+					}
 				}
 				
 				if (getSourceObject() != lastSelection){
@@ -140,7 +147,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (option == null) {
 					option = CmAttributeOptionFactory.createCustomCofigOption(getSourceObject());
 					getSourceObject().getCmAttributeOptions().put(option.getOptionId(), option);
-					getSession().saveOrUpdate(getSourceObject());
+					tracker.saveOrUpdate(getSourceObject());
 				}
 				option.setBooleanValue(btnIsCustomConfig.getSelection());
 				
@@ -169,7 +176,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void cleanupCustomTree(final CmAttribute cmAttribute) {
 		final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(getShell());
 		try {
-			pmdDialog.run(true, false, new TreeCustomConfigCleanupRunnable(cmAttribute, getSession()));
+			pmdDialog.run(true, false, new TreeCustomConfigCleanupRunnable(cmAttribute, tracker));
 		} catch (InvocationTargetException | InterruptedException e) {
 			SmartPlugIn.displayLog(Messages.TreeAttributeInfoComposite_Cleanup_Error + e.getLocalizedMessage(), e);
 		}
@@ -229,6 +236,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 			}
 			defaultValueTreeField.setValue(null);
 		}
+		tracker.saveOrUpdate(getSourceObject());
 		fireModelChanged();
 	}
 	private void createTreeControl(Composite container) {
@@ -236,7 +244,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		
 		attributeTreeViewer = new TreeViewer(container);
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider(getSession(), getModel()));
+		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider(getModel()));
 		attributeTreeViewer.setContentProvider(new CmAttributeTreeContentProvider(false, false));
 	}
 	
@@ -249,7 +257,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnMessage1)) {
-					EditTreeDialog dialog = new EditTreeDialog(getShell(), getSourceObject(), getModel(),getSession());
+					EditTreeDialog dialog = new EditTreeDialog(getShell(), getSourceObject(), getModel(),tracker);
 					dialog.open();
 					
 					attributeTreeViewer.refresh();
@@ -297,11 +305,11 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	 */
 	protected class TreeCustomConfigCleanupRunnable extends TreePreLoadRunnable {
 		
-		private final Session session;
+		private final ChangeTracker tracker;
 
-		protected TreeCustomConfigCleanupRunnable(CmAttribute cmAttribute, Session session) {
+		protected TreeCustomConfigCleanupRunnable(CmAttribute cmAttribute, ChangeTracker tracker) {
 			super(cmAttribute);
-			this.session = session;
+			this.tracker = tracker;
 		}
 
 		@Override
@@ -309,11 +317,10 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 			monitor.beginTask(Messages.TreeAttributeInfoComposite_Cleanup_Task, getCmAttribute().getTree().size()+1);
 			for (CmAttributeTreeNode toDelete : getCmAttribute().getTree()){
 				toDelete.setAttribute(null);
-				session.delete(toDelete);
+				tracker.deleteObject(toDelete);
 				monitor.worked(1);
 			}
 			getCmAttribute().getTree().clear();
-			session.flush();
 			monitor.worked(1);
 			super.run(monitor);
 		}

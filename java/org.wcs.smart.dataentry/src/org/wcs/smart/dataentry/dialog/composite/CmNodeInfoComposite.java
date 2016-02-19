@@ -21,14 +21,10 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,12 +33,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -67,8 +63,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Button btnSingleGpsPoint;
 	private boolean isGroup;
 	
-	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
-		super(parent, model, session);
+	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker,  boolean isGroup) {
+		super(parent, model, tracker);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		this.setLayout(layout);
@@ -126,6 +122,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoAllowed(btnPhoto.getSelection());
 				btnPhotoRequired.setEnabled(getSourceObject().isPhotoAllowed());
+				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -139,6 +136,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoRequired(btnPhotoRequired.getSelection());
+				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -153,6 +151,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setCollectMultipleObservations(btnCollectMultiple.getSelection());
 				btnSingleGpsPoint.setEnabled(getSourceObject().isCollectMultipleObservations());
+				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -166,6 +165,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setUseSingleGpsPoint(btnSingleGpsPoint.getSelection());
+				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -209,6 +209,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		}
 		
 		CmNode parentNode = node.getParent();
+		node.setParent(null);
 		if (parentNode == null) {
 			//this is the root node
 			getModel().getNodes().remove(node);
@@ -217,7 +218,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			for (CmNode n : getModel().getNodes()){
 				n.setNodeOrder(i++);
 			}
+			tracker.deleteObject(node);
 		} else {
+			tracker.saveOrUpdate(parentNode);
+			tracker.deleteObject(node);
 			//not a root node
 			parentNode.getChildren().remove(node);
 			
@@ -227,7 +231,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				n.setNodeOrder(i++);
 			}
 		}
-		node.setParent(null);
+		
 		//remove default tree mapping if present
 		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(getModel());
 		for (Attribute a : CmDefaultTreesUtil.getPresentedTreeAttributes(node)) {
@@ -244,26 +248,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				getModel().removeDefaultLists(a);
 			}
 		}
-		
-		//this can be slow for large trees; put it in a pmd
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try{
-		pmd.run(true , false, new IRunnableWithProgress() {
-			
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException,
-					InterruptedException {
-				monitor.beginTask(MessageFormat.format(Messages.CmNodeInfoComposite_DeletingNode, node.getName()), 1);
-				getSession().flush();
-				monitor.done();
-				
-			}
-		});
-		}catch (Exception ex){
-			throw new RuntimeException(ex);
-		}
+
 		fireModelChanged();
 	}
+	
 	
 	@Override
 	public CmNode getSourceObject() {
