@@ -33,6 +33,7 @@ import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider.CmTreeRootN
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
@@ -45,11 +46,9 @@ import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
  */
 public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 
-	private Session session = null;
 	private ConfigurableModel model;
 	
-	public CmTreeLabelProvider(Session currentSession, ConfigurableModel model) {
-		this.session = currentSession;
+	public CmTreeLabelProvider(ConfigurableModel model) {
 		this.model = model;
 	}
 		
@@ -86,12 +85,17 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 		}
 		
 		if (element instanceof AttributeTreeNode){
-			List<?> items = session.createCriteria(CmAttributeTreeNode.class)
-					.add(Restrictions.eq("dmTreeNode", ((AttributeTreeNode) element)))  //$NON-NLS-1$
-					.add(Restrictions.eq("configurableModel", model)).list();  //$NON-NLS-1$
-			if (items.size() > 0){
-				CmAttributeTreeNode node = (CmAttributeTreeNode) items.get(0);
-				return node;
+			Session session = HibernateManager.openSession();
+			try{
+				List<?> items = session.createCriteria(CmAttributeTreeNode.class)
+						.add(Restrictions.eq("dmTreeNode", ((AttributeTreeNode) element)))  //$NON-NLS-1$
+						.add(Restrictions.eq("configurableModel", model)).list();  //$NON-NLS-1$
+				if (items.size() > 0){
+					CmAttributeTreeNode node = (CmAttributeTreeNode) items.get(0);
+					return node;
+				}
+			}finally{
+				session.close();
 			}
 		}
 		return null;

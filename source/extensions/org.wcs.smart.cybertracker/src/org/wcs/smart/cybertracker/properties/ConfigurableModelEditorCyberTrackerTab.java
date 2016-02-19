@@ -24,6 +24,10 @@ package org.wcs.smart.cybertracker.properties;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -39,6 +43,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -49,6 +54,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.IConfigurableModelEditorTabContent;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Tab with CyberTracker properties content for configurable model.
@@ -64,7 +70,9 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	private CyberTrackerPropertiesComposite ctPropCmp;
 	private ConfigurableModelCtPropertiesProfile cmProfile;
 	private List<CyberTrackerPropertiesProfile> profileList;
+	private boolean fireEvent = true;
 
+	
 	@Override
 	public void setDialog(ConfigurableModelEditDialog dialog) {
 		this.dialog = dialog;
@@ -75,10 +83,42 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		return Messages.ConfigurableModelEditorCyberTrackerTab_TabName;
 	}
 
+	private void loadProfile(){
+		CyberTrackerPropertiesProfile prevSelection = getSelectedProfile();
+		
+		Session s = HibernateManager.openSession();
+		try{
+			cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(s, dialog.getModel());
+			
+			profileList = CyberTrackerHibernateManager.getPropertiesProfiles(s);
+			Collections.sort(profileList, new CtProfileDefaultNameComparator());
+			
+			cbProfile.setInput(profileList);
+			if (prevSelection != null){
+				if (profileList.contains(prevSelection)){
+					fireEvent = false;
+					try{
+						cbProfile.setSelection(new StructuredSelection(prevSelection));
+					}finally{
+						fireEvent = true;
+					}
+				}else{
+					cbProfile.setSelection(new StructuredSelection(profileList.get(0)));
+				}
+			}else{
+				fireEvent = false;
+				try{
+					cbProfile.setSelection(new StructuredSelection(cmProfile.getProfile()));
+				}finally{
+					fireEvent = true;
+				}
+			}
+		}finally{
+			s.close();
+		}
+	}
 	@Override
 	public Composite createTabContent(Composite parent) {
-		cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(dialog.getSession(), dialog.getModel());
-
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout mainLayout = new GridLayout(1, false);
 		mainLayout.marginBottom=0;
@@ -103,8 +143,8 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		cbProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cbProfile.setContentProvider(ArrayContentProvider.getInstance());
 		cbProfile.setLabelProvider(new CtProfileLabelProvider());
- 		cbProfile.setInput(getProfilesList());
- 		cbProfile.setSelection(new StructuredSelection(cmProfile.getProfile()));
+ 		cbProfile.setInput(Messages.ConfigurableModelEditorCyberTrackerTab_LoadingLabel);
+ 		
 		cbProfile.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -155,55 +195,64 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 				SmartPlugIn.displayLog("Changes to profile are not allowed here. Edit the profile to make changes.", null); //$NON-NLS-1$
 			}
 		});
-		ctPropCmp.populateValuesFromObj(cmProfile.getProfile());
 		
+		loadProfile();
 		return main;
 	}
 
-	private List<CyberTrackerPropertiesProfile> getProfilesList() {
-		if (profileList != null) {
-			for (CyberTrackerPropertiesProfile p : profileList) {
-				dialog.getSession().evict(p); //we need fresh objects, not cached ones
-			}
-		}
-		profileList = CyberTrackerHibernateManager.getPropertiesProfiles(dialog.getSession());
-		Collections.sort(profileList, new CtProfileDefaultNameComparator());
-		return profileList;
-	}
-
-	private void reloadData() {
-		CyberTrackerPropertiesProfile prevSelection = getSelectedProfile();
-		List<CyberTrackerPropertiesProfile> list = getProfilesList();
-		cbProfile.setInput(list);
-		//try to restore previous selection, otherwise select associated profile
-		if (list.contains(prevSelection)) {
-	 		cbProfile.setSelection(new StructuredSelection(prevSelection)); //this will trigger profileChanged() call
-		} else {
-			dialog.getSession().evict(cmProfile); //required as cmProfile contains reference to removed profile and is still attached to session
-			cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(dialog.getSession(), dialog.getModel());
-	 		cbProfile.setSelection(new StructuredSelection(cmProfile.getProfile())); //this will trigger profileChanged() call
-		}
-	}
-	
 	protected CyberTrackerPropertiesProfile getSelectedProfile() {
+		if (cbProfile == null) return null;
+		
 		IStructuredSelection selection = (IStructuredSelection) cbProfile.getSelection();
 		return (!selection.isEmpty() && selection.getFirstElement() instanceof CyberTrackerPropertiesProfile) ?
 				(CyberTrackerPropertiesProfile) selection.getFirstElement() : null;
 	}
 
 	protected void profileChanged() {
-		CyberTrackerPropertiesProfile p = getSelectedProfile();
-		if (p != null) {
+		final CyberTrackerPropertiesProfile p = getSelectedProfile();
+		Job j = new Job(Messages.ConfigurableModelEditorCyberTrackerTab_profileLoadJobname){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				if (p != null) {
+					CyberTrackerPropertiesProfile p2 = null;
+					Session s = HibernateManager.openSession();
+					try{
+						 p2 = (CyberTrackerPropertiesProfile) s.load(CyberTrackerPropertiesProfile.class, p.getUuid());
+						 p2.getOptions().size();
+					}finally{
+						s.close();
+					}
+					if (p2 != null){
+						final CyberTrackerPropertiesProfile p3 = p2;
+						Display.getDefault().syncExec(new Runnable(){
+
+							@Override
+							public void run() {
+								ctPropCmp.populateValuesFromObj(p3);		
+							}
+							
+						});
+					}
+				}
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.setSystem(true);
+		j.schedule();
+		
+		if (fireEvent){
 			cmProfile.setProfile(p);
-			ctPropCmp.populateValuesFromObj(p);
+			dialog.notifyChangesMade();
 		}
-		dialog.notifyChangesMade();
 	}
 
 	protected void manageProfiles() {
 		Dialog d = new ManageProfilesDialog(dialog.getShell());
 		d.open();
-		reloadData();
+		loadProfile();
 	}
 
 	protected void createProfile() {
@@ -225,7 +274,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 			d.open();
 			
 			//refresh list
-			reloadData();
+			loadProfile();
 		}
 	}
 
@@ -234,7 +283,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		if (p != null) {
 			Dialog d = new CyberTrackerPropertiesDialog(dialog.getShell(), p);
 			d.open();
-			reloadData();
+			loadProfile();
 		}
 	}
 

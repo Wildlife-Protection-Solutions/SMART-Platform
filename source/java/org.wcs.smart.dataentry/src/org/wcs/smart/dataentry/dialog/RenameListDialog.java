@@ -40,11 +40,13 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Rename dialog for providing aliases for configurable model list attribute
@@ -56,8 +58,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 public class RenameListDialog extends AbstractRenameDialog {
 
 	public RenameListDialog(Shell parentShell, CmAttribute attribute,
-			ConfigurableModel editModel, Session currentSession) {
-		super(parentShell, attribute, editModel, currentSession);
+			ConfigurableModel editModel, ChangeTracker tracker) {
+		super(parentShell, attribute, editModel, tracker);
 	}
 
 	protected Viewer createItemViewer(Composite parent) {
@@ -67,7 +69,7 @@ public class RenameListDialog extends AbstractRenameDialog {
 		
 		final TableViewer listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
-		listViewer.setLabelProvider(new CmListItemLabelProvider(currentSession, editModel));
+		listViewer.setLabelProvider(new CmListItemLabelProvider(editModel));
 		listViewer.setInput(attribute.getCurrentList());
 		
 		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -106,12 +108,17 @@ public class RenameListDialog extends AbstractRenameDialog {
 		}
 		
 		if (x instanceof AttributeListItem) {
-			AttributeListItem tmp = (AttributeListItem) x;
-			List<?> items = currentSession.createCriteria(CmAttributeListItem.class)
-				.add(Restrictions.eq("listItem", tmp))  //$NON-NLS-1$
-				.add(Restrictions.eq("configurableModel", editModel)).list(); //$NON-NLS-1$
-			if (items.size() > 0) {
-				return (CmAttributeListItem) items.get(0);
+			Session s = HibernateManager.openSession();
+			try{
+				AttributeListItem tmp = (AttributeListItem) x;
+				List<?> items = s.createCriteria(CmAttributeListItem.class)
+					.add(Restrictions.eq("listItem", tmp))  //$NON-NLS-1$
+					.add(Restrictions.eq("configurableModel", editModel)).list(); //$NON-NLS-1$
+				if (items.size() > 0) {
+					return (CmAttributeListItem) items.get(0);
+				}
+			}finally{
+				s.close();
 			}
 		}
 		return null;
@@ -122,7 +129,7 @@ public class RenameListDialog extends AbstractRenameDialog {
 		CmAttributeListItem item = getConfiguredNode(dmNode);
 		if (item != null){
 			item.setIsActive(enable);
-			currentSession.saveOrUpdate(item);
+			tracker.saveOrUpdate(item);
 		}
 	}
 }

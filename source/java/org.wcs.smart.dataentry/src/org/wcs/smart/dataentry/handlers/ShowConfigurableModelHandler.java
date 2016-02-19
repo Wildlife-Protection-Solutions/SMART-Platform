@@ -33,8 +33,10 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelPropertyDialog;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -67,34 +69,37 @@ public class ShowConfigurableModelHandler {
 	 */
 	private class DataModelProgressMonitorDialog extends ProgressMonitorDialog {
 
-		private DataModel dm;
+		private boolean hasDm = false;
 		
 		public DataModelProgressMonitorDialog(Shell shell) {
 			super(shell);
 		}
 
 		public void run() {
-			final Session session = HibernateManager.openSession();
 			try {
 				super.run(true, false, new IRunnableWithProgress() {
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						
 						monitor.beginTask(Messages.ShowConfigurableModelHandler_LoadDataModel, 0);
-						session.beginTransaction();
-						dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+						Session session = HibernateManager.openSession();
+						try{
+							Long catCnt = (Long)session.createCriteria(Category.class)
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+								.setProjection(Projections.rowCount())
+								.uniqueResult();
+							hasDm = catCnt > 0;
+						}finally{
+							session.close();
+						}
 					}});
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog(Messages.ShowConfigurableModelHandler_LoadDataModel_Error, ex);
-			} finally {
-				if (session.getTransaction().isActive()) {
-					session.getTransaction().rollback();
-				}
-				session.close();
-			}
+			} 
 		}
 		
 		public boolean isEmptyDataModel() {
-			return dm == null || dm.getCategories() == null || dm.getCategories().size() == 0;
+			return !hasDm ;
 		}
 	}
 	

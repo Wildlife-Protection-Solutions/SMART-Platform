@@ -40,11 +40,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.RenameListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -80,8 +80,8 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public ListAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
-		super(parent, model, session);
+	public ListAttributeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
+		super(parent, model, tracker);
 	}
 
 	@Override
@@ -121,6 +121,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT).setBooleanValue(btnMulti.getSelection());
+				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -193,7 +194,10 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 						option.setCmAttribute(null);
 					}
 				}
-				if (!initializingControl) fireModelChanged();
+				if (!initializingControl){
+					tracker.saveOrUpdate(getSourceObject());
+					fireModelChanged();
+				}
 			}
 		});
 	}
@@ -239,7 +243,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (option == null) {
 					option = CmAttributeOptionFactory.createCustomCofigOption(getSourceObject());
 					getSourceObject().getCmAttributeOptions().put(option.getOptionId(), option);
-					getSession().saveOrUpdate(getSourceObject());
+					tracker.saveOrUpdate(getSourceObject());
 				}
 				option.setBooleanValue(btnIsCustomConfig.getSelection());
 				
@@ -252,6 +256,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				
 				listViewer.setInput(getSourceObject().getCurrentList());
 				listViewer.refresh();
+				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -260,15 +265,14 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void clearCustomListConfiguration(CmAttribute a) {
 		for (CmAttributeListItem toDelete : a.getList()){
 			toDelete.setAttribute(null);
-			getSession().delete(toDelete);
+			tracker.deleteObject(toDelete);
 		}
 		getSourceObject().getList().clear();
-		getSession().flush();
 	}
 	
 	private void createListControl(Composite parent) {
 		listViewer = new TableViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-		listViewer.setLabelProvider(new CmListItemLabelProvider(getSession(), getModel()));
+		listViewer.setLabelProvider(new CmListItemLabelProvider(getModel()));
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
@@ -282,11 +286,12 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
-					RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject(), getModel(), getSession());
+					RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject(), getModel(), tracker);
 					dialog.open();
 							
 					updateListControl();
 					listViewer.refresh();
+					tracker.saveOrUpdate(getSourceObject());
 					fireModelChanged();
 				}
 			}

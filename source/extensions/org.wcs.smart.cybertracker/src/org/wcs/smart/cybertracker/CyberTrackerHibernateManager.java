@@ -120,7 +120,8 @@ public class CyberTrackerHibernateManager {
 	 */
 	public static List<CyberTrackerPropertiesProfile> getPropertiesProfiles(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Criteria query = session.createCriteria(CyberTrackerPropertiesProfile.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		Criteria query = session.createCriteria(CyberTrackerPropertiesProfile.class)
+				.add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<CyberTrackerPropertiesProfile> profiles = query.list();
 		if (profiles.isEmpty()) {

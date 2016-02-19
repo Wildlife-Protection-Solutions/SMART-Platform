@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -56,11 +57,15 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.DatamodelCategorySelectorDialog;
@@ -84,15 +89,15 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 public abstract class AbstractInfoComposite extends Composite {
 
 	private ConfigurableModel model;
-	private Session session;
+	protected ChangeTracker tracker;
 	
 	private List<IModelChangedListener> modelListeners = new ArrayList<IModelChangedListener>();
 	private List<ISourceObjectChangedListener> sourceListeners = new ArrayList<ISourceObjectChangedListener>();
 
-	public AbstractInfoComposite(Composite parent, ConfigurableModel model, Session session) {
+	public AbstractInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
 		super(parent, SWT.NONE);
 		this.model = model;
-		this.session = session;
+		this.tracker = tracker;
 	}
 
 	public abstract Object getSourceObject();
@@ -171,8 +176,8 @@ public abstract class AbstractInfoComposite extends Composite {
 		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
 		addToParent(node);
 		
-		session.saveOrUpdate(node);
-		session.flush();
+		tracker.saveOrUpdate(node);
+		if (node.getParent() != null) tracker.saveOrUpdate(node.getParent());
 	}
 	
 	/**
@@ -194,15 +199,43 @@ public abstract class AbstractInfoComposite extends Composite {
 					public void run(IProgressMonitor monitor)
 							throws InvocationTargetException,
 							InterruptedException {
-						HibernateManager.initContext();
 						monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, dialog.getCategories().size());
-						for (Category c : dialog.getCategories()){
-							monitor.subTask(c.getName());
-							addCategory(c);
-							monitor.worked(1);
+					
+						Session s = HibernateManager.openSession();
+						try{
+							for (Category c : dialog.getCategories()){
+								Category c2 = c;
+								monitor.subTask(c.getName());
+								s.saveOrUpdate(c);
+								while(c2 != null){
+									c2.getNames().size();
+									for (CategoryAttribute ca : c2.getAttributes(true)){
+										ca.getAttribute().getNames().size();
+										if (ca.getAttribute().getAggregations()!= null) ca.getAttribute().getAggregations().size();
+										if (ca.getAttribute().getActiveListItems() != null){
+											for (AttributeListItem li : ca.getAttribute().getActiveListItems()){
+												li.getNames().size();
+											}
+										}
+										visitTreeNodes(ca.getAttribute().getActiveTreeNodes());
+									}
+									c2 = c2.getParent();
+								}
+								addCategory(c);
+								monitor.worked(1);
+							}
+						}finally{
+							s.close();
 						}
 						monitor.done();
 						
+					}
+					private void visitTreeNodes(List<AttributeTreeNode> nodes){
+						if (nodes == null) return;
+						for (AttributeTreeNode n : nodes){
+							n.getNames().size();
+							visitTreeNodes(n.getActiveChildren());
+						}
 					}
 				});
 			}
@@ -248,8 +281,7 @@ public abstract class AbstractInfoComposite extends Composite {
 				addToParent(node);
 			}
 		});
-		session.saveOrUpdate(node);
-		session.flush();
+		tracker.saveOrUpdate(node);
 	}
 
 	private void ensureDefaultTreeExists(Attribute a) {
@@ -258,7 +290,7 @@ public abstract class AbstractInfoComposite extends Composite {
 		if (!existingTrees.contains(a)) {
 			List<CmAttributeTreeNode> defTree = CmDefaultTreesUtil.buildDefaultTree(m, a);
 			m.getDefaultTrees().addAll(defTree);
-			session.saveOrUpdate(m);
+			tracker.saveOrUpdate(m);
 		}
 	}
 
@@ -268,21 +300,65 @@ public abstract class AbstractInfoComposite extends Composite {
 		if (!existingLists.contains(a)) {
 			List<CmAttributeListItem> defList = CmDefaultListsUtil.buildDefaultList(m, a);
 			m.getDefaultLists().addAll(defList);
-			session.saveOrUpdate(m);
+			tracker.saveOrUpdate(m);
 		}
 	}
 
+	private DataModel cachedDataModel = null;
 	private DataModel getDataModel() {
-		DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), getSession());
-		return dataModel;
-	}
-
-	public ConfigurableModel getModel() {
-		return model;
+		if (cachedDataModel != null) return cachedDataModel;
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask(Messages.AbstractInfoComposite_DmLoadingTaskName, 2);
+					Session s = HibernateManager.openSession();
+					try{
+						DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
+						monitor.worked(1);
+						
+						//load categories into memory; no-lazy loading here.
+						//attributes are only loaded when needed (when added to the cm)
+						SubProgressMonitor sub = new SubProgressMonitor(monitor, 1);
+						sub.beginTask(Messages.AbstractInfoComposite_CategoriesSubTask, dataModel.getActiveCategories().size());
+						for (Category cat: dataModel.getActiveCategories()){
+							sub.subTask(cat.getName());
+							visitCategory(cat);
+							cat.getNames().size();
+							sub.worked(1);
+						}
+						sub.done();
+						
+						cachedDataModel = dataModel;
+						monitor.worked(1);
+					}finally{
+						monitor.done();
+						s.close();
+					}
+				}
+				
+				private void visitCategory(Category cat){
+					for (Category child : cat.getActiveChildren()){
+						visitCategory(child);
+						child.getName();
+						child.getNames().size();
+					}
+	
+				}
+			});
+		}catch (Exception ex){
+			SmartPlugIn.displayError(Messages.AbstractInfoComposite_CategoryError + ex.getMessage(), ex);
+		}
+		return cachedDataModel;
+		
 	}
 	
-	protected Session getSession() {
-		return session;
+	public ConfigurableModel getModel() {
+		return model;
 	}
 	
 	protected void fireModelChanged() {
@@ -398,6 +474,7 @@ public abstract class AbstractInfoComposite extends Composite {
 						if (changed){
 							//only fire if name actually changed
 							fireModelChanged();
+							tracker.saveOrUpdate(getSourceObject());
 						}
 					}
 					
@@ -418,6 +495,7 @@ public abstract class AbstractInfoComposite extends Composite {
 							cd.hide();
 						}
 						fireModelChanged();
+						tracker.saveOrUpdate(getSourceObject());
 						
 					}
 				}
@@ -433,6 +511,7 @@ public abstract class AbstractInfoComposite extends Composite {
 						if (translateDialog.open() == Window.OK){
 							updateText(item);
 							fireModelChanged();
+							tracker.saveOrUpdate(getSourceObject());
 						}
 						
 					}

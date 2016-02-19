@@ -25,9 +25,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -42,8 +42,8 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
 	private CmRootNode rootNode;
 	
-	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
-		super(parent, model, session);
+	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
+		super(parent, model, tracker);
 		createControls();
 	}
 	

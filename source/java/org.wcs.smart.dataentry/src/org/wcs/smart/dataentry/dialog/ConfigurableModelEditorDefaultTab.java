@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -101,6 +103,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	private Map<AttributeType, CmAttributeInfoComposite> attributeComposites;
 	
 	private HashMap<ControlButton, Button> controlButtons = new HashMap<ControlButton, Button>();
+	ChangeTracker tracker = new ChangeTracker();
 	
 	public ConfigurableModelEditorDefaultTab(ConfigurableModelEditDialog dialog) {
 		this.dialog = dialog;
@@ -215,51 +218,44 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		};
 
 		//NOTE: session is already opened and should not be closed until dialog is closed
-		Session session = dialog.getSession();
 		
-		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model, session);
+		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model, tracker);
 		rootNodeComposite.addModelChangedListener(modelChangeListener);
 
-		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, session, true);
+		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, tracker, true);
 		groupNodeComposite.addModelChangedListener(modelChangeListener);
 		
-		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, session, false);
+		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, tracker, false);
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
 
 		attributeComposites = new HashMap<AttributeType, CmAttributeInfoComposite>();
 		CmAttributeInfoComposite attrComposite;
 
-		attrComposite = new NumericAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite = new NumericAttributeInfoComposite(infoInnerPanel, model, tracker);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.NUMERIC, attrComposite);
 		
-		attrComposite = new TextAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite = new TextAttributeInfoComposite(infoInnerPanel, model, tracker);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TEXT, attrComposite);
 
-		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, model, tracker);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.LIST, attrComposite);
 
-		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, model, tracker);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);
 
-		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model, tracker);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.BOOLEAN, attrComposite);
 
-		attrComposite = new DateAttributeInfoComposite(infoInnerPanel, model, session);
+		attrComposite = new DateAttributeInfoComposite(infoInnerPanel, model, tracker);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.DATE, attrComposite);
 		
 		container.setWeights(new int[]{40,60});
-		
-		//initialize the session with the model being edited and 
-		//begin the transaction
-		session.beginTransaction();
-		session.saveOrUpdate(model); 
-		session.flush();
 		
 		//set  language
 		((ConfigurableModelLabelProvider)modelTreeViewer.getLabelProvider()).setLanguage(languageViewer.getCurrentSelection());
@@ -314,7 +310,46 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 
 	@Override
 	public void performSave(Session s) {
-		//nothing; configurable model will be saved by dialog
+		/*
+		 * it would be possible not to track changes
+		 * and just call saveofupdate(dialog.getModel())
+		 * however this is exceptionally slow, so 
+		 * and apply only the changes.
+		 */
+		//if new we need to save
+		if (dialog.getModel().getUuid() == null){
+			s.save(dialog.getModel());
+		}
+		s.flush();
+		//apply all changes
+		tracker.applyUpdates(s);
+		s.flush();
+		tracker.updates.clear();
 	}
 
+	/**
+	 * Change tracker for tracking changes to model items.  
+	 * 
+	 * @author Emily
+	 *
+	 */
+	public class ChangeTracker{
+		List<Object[]> updates = new ArrayList<Object[]>();
+		
+		public void deleteObject(Object x){
+			updates.add(new Object[]{0, x});
+		}
+		public void saveOrUpdate(Object x){
+			updates.add(new Object[]{1, x});
+		}
+		public void applyUpdates(Session session){
+			for (Object[] up: updates){
+				if ((Integer)up[0] == 0){
+					session.delete(up[1]);
+				}else if ((Integer)up[0] == 1){
+					session.saveOrUpdate(up[1]);
+				}
+			}
+		}
+	}
 }

@@ -59,11 +59,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -84,7 +84,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 
 	protected CmAttribute attribute;
 	protected ConfigurableModel editModel;
-	protected Session currentSession;
+	protected ChangeTracker tracker;
 	
 	private Viewer dmTreeViewer;
 	private TreeViewer itemViewer;
@@ -98,10 +98,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 	private Button btnAdd;
 	private Button btnRemove;
 	
-	public EditTreeDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, Session currentSession) {
+	public EditTreeDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, ChangeTracker tracker) {
 		super(parentShell);
 		this.attribute = attribute;
-		this.currentSession = currentSession;
+		this.tracker = tracker;
 		this.editModel = editModel;
 	}
 
@@ -196,7 +196,6 @@ public class EditTreeDialog extends TitleAreaDialog {
 					}
 					
 				}
-				currentSession.flush();
 				itemViewer.refresh();
 				updateEnableButtonText();
 			}
@@ -232,9 +231,12 @@ public class EditTreeDialog extends TitleAreaDialog {
 			children.remove(cmTreeNode);
 			updateNodeOrder(children);
 			cmTreeNode.setParent(null);
-			currentSession.delete(cmTreeNode);
+			if (parent != null) tracker.saveOrUpdate(parent);
+			tracker.deleteObject(cmTreeNode);
+//			for (CmAttributeTreeNode n : children){
+//				tracker.saveOrUpdate(n);
+//			}
 		}
-		currentSession.flush();
 		itemViewer.refresh();
 	}
 
@@ -253,8 +255,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		cmTreeNode.updateName(SmartDB.getCurrentLanguage(), Messages.EditTreeDialog_NewGroup);
 		cmTreeNode.setNodeOrder(children.size());
 		children.add(cmTreeNode);
-		currentSession.saveOrUpdate(cmTreeNode);
-		currentSession.flush();
+		tracker.saveOrUpdate(cmTreeNode);
 		itemViewer.refresh();
 		itemViewer.expandToLevel(cmTreeNode, 1);
 	}
@@ -265,7 +266,6 @@ public class EditTreeDialog extends TitleAreaDialog {
 			AttributeTreeNode dmTreeNode = (AttributeTreeNode) i.next();
 			addCmTreeNode(dmTreeNode, parent, btnAddSubNodes.getSelection());
 		}
-		currentSession.flush();
 		itemViewer.refresh();
 		itemViewer.expandToLevel(parent, 1);
 	}
@@ -284,7 +284,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		List<CmAttributeTreeNode> target = getTargetList(parent);
 		cmTreeNode.setNodeOrder(target.size());
 		target.add(cmTreeNode);
-		currentSession.saveOrUpdate(cmTreeNode);
+		tracker.saveOrUpdate(cmTreeNode);
 		if (addSubNodes && dmTreeNode.getActiveChildren() != null && !dmTreeNode.getActiveChildren().isEmpty()) {
 			for (AttributeTreeNode child : dmTreeNode.getActiveChildren()) {
 				addCmTreeNode(child, cmTreeNode, addSubNodes);
@@ -348,7 +348,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		((GridData)tree.getTree().getLayoutData()).heightHint = 300;
 		
 		tree.setContentProvider(new CmAttributeTreeContentProvider(false, true));
-		tree.setLabelProvider(new CmTreeLabelProvider(currentSession, editModel));
+		tree.setLabelProvider(new CmTreeLabelProvider(editModel));
 		tree.setInput(attribute);
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -452,8 +452,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 					cmNode.updateName(((Language)element), (String)value);
 				}
 				if (cmNode != null){
-					currentSession.saveOrUpdate(cmNode);
-					currentSession.flush();
+					tracker.saveOrUpdate(cmNode);
 				}
 				
 				nameTable.refresh();
@@ -542,7 +541,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 			setCurrentSelection(cmTreeNode.getDmTreeNode(), cmTreeNode);
 		}
 		cmTreeNode.setIsActive(enable);
-		currentSession.saveOrUpdate(cmTreeNode);
+		tracker.saveOrUpdate(cmTreeNode);
 	}
 	
 	protected void enableItem(CmAttributeTreeNode cmTreeNode, boolean enable){

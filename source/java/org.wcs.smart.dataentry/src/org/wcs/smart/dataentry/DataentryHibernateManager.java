@@ -93,7 +93,7 @@ public class DataentryHibernateManager extends HibernateManager {
 	}
 	
 	/**
-	 * Loads a configurale model and all nodes into memory using the provided
+	 * Loads a configurable model and all nodes into memory using the provided
 	 * session object.
 	 * 
 	 * @param uuid the uuid of the configurable model to load

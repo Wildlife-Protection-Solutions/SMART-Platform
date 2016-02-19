@@ -32,6 +32,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
@@ -43,11 +44,10 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  *
  */
 public class CmListItemLabelProvider extends NamedItemLabelProvider implements IColorProvider{
-	private Session session = null;
+	
 	private ConfigurableModel model;
 	
-	public CmListItemLabelProvider(Session currentSession, ConfigurableModel model) {
-		this.session = currentSession;
+	public CmListItemLabelProvider(ConfigurableModel model) {
 		this.model = model;
 	}
 	
@@ -77,12 +77,17 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 		}
 		
 		if (element instanceof AttributeListItem){
-			List<?> items = session.createCriteria(CmAttributeListItem.class)
-					.add(Restrictions.eq("listItem", ((AttributeListItem) element)))  //$NON-NLS-1$
-					.add(Restrictions.eq("configurableModel", model)).list();  //$NON-NLS-1$
-			if (items.size() > 0){
-				CmAttributeListItem node = (CmAttributeListItem) items.get(0);
-				return node;
+			Session session = HibernateManager.openSession();
+			try{
+				List<?> items = session.createCriteria(CmAttributeListItem.class)
+						.add(Restrictions.eq("listItem", ((AttributeListItem) element)))  //$NON-NLS-1$
+						.add(Restrictions.eq("configurableModel", model)).list();  //$NON-NLS-1$
+				if (items.size() > 0){
+					CmAttributeListItem node = (CmAttributeListItem) items.get(0);
+					return node;
+				}
+			}finally{
+				session.close();
 			}
 		}
 		return null;
