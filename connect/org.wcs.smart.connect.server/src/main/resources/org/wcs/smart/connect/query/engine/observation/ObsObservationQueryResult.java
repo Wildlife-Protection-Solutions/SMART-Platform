@@ -28,16 +28,20 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 /**
  * Result set of observation (all data) queries.
  * 
  * @author Emily
  *
  */
-public class ObsObservationQueryResult implements IDbTableResultSet {
+public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlObsObservationEngine engine;
 	
@@ -147,5 +151,20 @@ public class ObsObservationQueryResult implements IDbTableResultSet {
 			}
 		}
 
+	}
+	
+	@Override
+	public String getGeometryType() {
+		return POINT_GEOM_TYPE;
+	}
+
+	@Override
+	public Geometry createGeometry(ResultSet rs) throws Exception {
+		return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Override
+	public String createId(ResultSet rs) throws Exception {
+		return rs.getDouble("wp_id") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

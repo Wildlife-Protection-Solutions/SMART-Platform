@@ -44,6 +44,7 @@ import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 /**
@@ -192,5 +193,45 @@ public class QueryColumnUtils {
 				return Collator.getInstance(l).compare(o1.getName(), o2.getName());
 			}
 		});
+	}
+	
+	/**
+	 * Creates a feature definition string from the list of columns.
+	 * 
+	 * @param columns the columns to include in the query type
+	 * @param supportsTime if Time data type is supported in output type or not.
+	 * @return feature type definition string prefixed with "," 
+	 */
+	public static String createFeatureDefinitionString(List<QueryColumn> columns, boolean supportsTime){
+		StringBuilder sb = new StringBuilder();
+		HashSet<String> names = new HashSet<String>();
+		for (int i = 0; i < columns.size(); i++){
+			if (!columns.get(i).isVisible()) continue;	//skip non visible columns
+			sb.append(","); //$NON-NLS-1$
+			String name = columns.get(i).getName();
+			name = name.replaceAll(" ", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+			name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			String tempname = name;
+			int cnt = 1;
+			while(names.contains(tempname)){
+				tempname = name + "_" + cnt; //$NON-NLS-1$
+				cnt++;
+			}
+			//Name is not a valid attribute name
+			if (tempname.equalsIgnoreCase("Name")){ //$NON-NLS-1$
+				tempname = tempname +"_"; //$NON-NLS-1$
+			}
+			
+			sb.append(tempname);
+			sb.append(":"); //$NON-NLS-1$
+			if (columns.get(i).getType() == ColumnType.TIME && !supportsTime){
+				//time is not supported so convert to string
+				sb.append(ColumnType.TIME_STR.geotoolsType);
+			}else{
+				sb.append(columns.get(i).getType().geotoolsType);
+			}
+		}
+		return sb.toString();
 	}
 }

@@ -25,18 +25,24 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.WKBReader;
 /**
  * Result set of observation (all data) queries.
  * 
  * @author Emily
  *
  */
-public class RecordIntelligenceQueryResult implements IDbTableResultSet {
+public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlRecordQueryIntelligenceEngine engine;
+	private WKBReader reader = new WKBReader();
 	
 	public RecordIntelligenceQueryResult(PsqlRecordQueryIntelligenceEngine engine){
 		this.engine = engine;
@@ -78,4 +84,23 @@ public class RecordIntelligenceQueryResult implements IDbTableResultSet {
 		return null;
 	}
 	
+	@Override
+	public String getGeometryType() {
+		return MULTI_POINT_GEOM_TYPE;
+	}
+
+	@Override
+	public Geometry createGeometry(ResultSet rs) throws Exception {
+	//	return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
+		//TODO: get point
+		byte[] b = rs.getBytes("intel_locations");
+		if (b == null) return null;
+		
+		return reader.read(b);
+	}
+
+	@Override
+	public String createId(ResultSet rs) throws Exception {
+		return rs.getString("intel_name") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }

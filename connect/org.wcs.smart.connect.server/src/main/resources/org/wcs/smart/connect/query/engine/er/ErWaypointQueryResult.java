@@ -26,11 +26,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Survey waypoint query results.
@@ -38,7 +42,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public class ErWaypointQueryResult implements IDbTableResultSet {
+public class ErWaypointQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlErWaypointEngine engine;
 	
@@ -130,6 +134,21 @@ public class ErWaypointQueryResult implements IDbTableResultSet {
 			}
 		}
 		return null;
+	}
+	
+	@Override
+	public String getGeometryType() {
+		return POINT_GEOM_TYPE;
+	}
+
+	@Override
+	public Geometry createGeometry(ResultSet rs) throws Exception {
+		return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Override
+	public String createId(ResultSet rs) throws Exception {
+		return rs.getDouble("wp_id") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
 

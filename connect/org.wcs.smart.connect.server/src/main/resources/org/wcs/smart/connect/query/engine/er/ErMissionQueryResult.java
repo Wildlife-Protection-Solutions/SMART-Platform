@@ -26,17 +26,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Survey Mission Query Results
  * @author Emily
  *
  */
-public class ErMissionQueryResult implements IDbTableResultSet {
+public class ErMissionQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlErMissionEngine engine;
 	
@@ -92,6 +96,22 @@ public class ErMissionQueryResult implements IDbTableResultSet {
 		return null;
 	}
 	
+	@Override
+	public String getGeometryType() {
+		return LINESTRING_GEOM_TYPE;
+	}
+
+	@Override
+	public Geometry createGeometry(ResultSet rs) throws Exception {
+		//TODO: create linestring
+//		return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
+		return null;
+	}
+
+	@Override
+	public String createId(ResultSet rs) throws Exception {
+		return rs.getDouble("mission_id") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 	
 }
 

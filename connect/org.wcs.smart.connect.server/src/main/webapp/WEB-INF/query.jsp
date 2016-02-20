@@ -90,6 +90,7 @@
 	     		<legend><fmt:message key="query.format" /></legend>
 	     		<select id="queryformat" name="format" style="width:100%">
      		 		<option value="csv"><fmt:message key="query.csv" /></option>
+     		 		<option value="shp">shp</option>
      			</select>
      		</fieldset>
      		

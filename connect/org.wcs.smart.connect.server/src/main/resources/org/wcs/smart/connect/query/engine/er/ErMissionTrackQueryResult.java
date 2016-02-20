@@ -26,11 +26,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Survey mission track query results.
@@ -38,7 +42,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public class ErMissionTrackQueryResult implements IDbTableResultSet {
+public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlErMissionTrackEngine engine;
 	
@@ -105,6 +109,21 @@ public class ErMissionTrackQueryResult implements IDbTableResultSet {
 		}
 		return null;
 	}
+	@Override
+	public String getGeometryType() {
+		return LINESTRING_GEOM_TYPE;
+	}
 
+	@Override
+	public Geometry createGeometry(ResultSet rs) throws Exception {
+//		return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
+		//TODO:
+		return null;
+	}
+
+	@Override
+	public String createId(ResultSet rs) throws Exception {
+		return rs.getDouble("mission_trackid") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }
 

@@ -51,6 +51,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
+import org.geotools.data.shapefile.shp.ShapefileException;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
@@ -61,10 +62,12 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.CsvExporter;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
+import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.query.common.engine.IQueryEngine;
@@ -178,7 +181,7 @@ public class QueryApi extends HttpServlet{
 				return Response.status(Status.NOT_FOUND).build();
 			}
 			if (!QueryManager.INSTANCE.supportsDateField(query.getTypeKey(), df.getDateFieldOption())){
-				return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateFilterForQueryType", SmartUtils.getRequestLocale(request)), query.getTypeKey(), df.getDateFieldOption().getGuiName(request.getLocale()))); //$NON-NLS-1$
+				return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateFilterForQueryType", SmartUtils.getRequestLocale(request)), df.getDateFieldOption().getGuiName(request.getLocale()), query.getTypeKey())); //$NON-NLS-1$
 			}
 			query = query.clone(query.getOwner());
 			if (query.getConservationArea().getIsCcaa()){
@@ -210,12 +213,13 @@ public class QueryApi extends HttpServlet{
 			params.put(Session.class.getName(), s);
 			params.put(Locale.class.getName(), request.getLocale());
 			
-			File f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
+			File f = null;
 			
 			try{
 				IQueryResult result = engine.executeQuery(query, params);
 			
 				if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
+					f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
 					CsvExporter exporter = new CsvExporter(f, delimiter.charAt(0),request.getLocale());
 				
 					if (result instanceof IDbTableResultSet
@@ -226,6 +230,18 @@ public class QueryApi extends HttpServlet{
 						exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<GridResultItem>)result, s);
 					}else if (result instanceof SummaryQueryResult){
 						exporter.exportResults(query, (SummaryQueryResult)result, s);
+					}else{
+						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+					}
+				}else if (format.equalsIgnoreCase(ShpExporter.FORMAT_KEY)){
+					f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.shp"); //$NON-NLS-1$
+					ShpExporter exporter = new ShpExporter(f, request.getLocale());
+					
+					if (result instanceof AbstractDbFeatureResultSet &&
+							query instanceof SimpleQuery){
+						exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
+					}else{
+						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
 					}
 				}else{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -236,12 +252,15 @@ public class QueryApi extends HttpServlet{
 				}
 			}
 			//TODO: if file not found then fail; do not attempt to write output
+			final File thisfile = f;
 			StreamingOutput stream = new StreamingOutput() {
 			      @Override
 			      public void write(OutputStream output) throws IOException {
 			        try {
-			        	FileUtils.copyFile(f, output);
-			        	f.delete();
+			        	if (thisfile != null){
+			        		FileUtils.copyFile(thisfile, output);
+//			        		thisfile.delete();
+			        	}
 			        } catch (Exception e) {
 			           e.printStackTrace();
 			        }

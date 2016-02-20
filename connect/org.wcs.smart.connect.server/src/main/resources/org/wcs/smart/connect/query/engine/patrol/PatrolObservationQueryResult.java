@@ -28,9 +28,13 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Observation query result for patrol queries.
@@ -38,7 +42,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public class PatrolObservationQueryResult implements IDbTableResultSet {
+public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlPatrolObservationEngine engine;
 	
@@ -172,5 +176,20 @@ public class PatrolObservationQueryResult implements IDbTableResultSet {
 			}
 		}
 
+	}
+	
+	@Override
+	public String getGeometryType() {
+		return POINT_GEOM_TYPE;
+	}
+
+	@Override
+	public Geometry createGeometry(ResultSet rs) throws Exception {
+		return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Override
+	public String createId(ResultSet rs) throws Exception {
+		return rs.getDouble("wp_id") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

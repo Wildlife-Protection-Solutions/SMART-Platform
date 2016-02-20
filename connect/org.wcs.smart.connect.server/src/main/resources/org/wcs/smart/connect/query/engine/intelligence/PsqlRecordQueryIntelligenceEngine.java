@@ -40,6 +40,7 @@ import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilter;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
@@ -117,7 +118,7 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					sql.append(" intel_patrolid varchar(32), ");//$NON-NLS-1$
 					sql.append(" intel_informantid varchar(128), ");//$NON-NLS-1$
 					sql.append(" intel_description varchar(32672), ");//$NON-NLS-1$
-					sql.append(" intel_locations varchar(32672) ");//$NON-NLS-1$
+					sql.append(" intel_locations geometry ");//$NON-NLS-1$
 					sql.append(")"); //$NON-NLS-1$
 					
 					logger.finest(sql.toString());
@@ -140,9 +141,11 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					sql.append(tablePrefix(Patrol.class) + ".id,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Informant.class) + ".id,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".description,"); //$NON-NLS-1$
-					sql.append("null");	//locations //$NON-NLS-1$
+					sql.append("encode(st_asbinary(foo.geoms, 'XDR'), 'hex')");	//locations //$NON-NLS-1$
 					sql.append(" FROM ");//$NON-NLS-1$
 					sql.append(tableNamePrefix(Intelligence.class));
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(" (SELECT st_collect(st_makepoint(x, y)) as geoms, intelligence_uuid FROM " + tableName(IntelligencePoint.class) + " group by intelligence_uuid) foo ON foo.intelligence_uuid = " + tablePrefix(Intelligence.class) + ".uuid  "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					sql.append(" LEFT JOIN "); //$NON-NLS-1$
 					sql.append(tableNamePrefix(ConservationArea.class));
 					sql.append(" ON ");//$NON-NLS-1$
