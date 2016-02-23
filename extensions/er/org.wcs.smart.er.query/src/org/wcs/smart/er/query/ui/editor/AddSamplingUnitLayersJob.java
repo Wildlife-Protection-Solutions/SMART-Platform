@@ -68,29 +68,31 @@ public abstract class AddSamplingUnitLayersJob extends Job {
 					.add(Restrictions.eq("conservationArea", getQuery().getConservationArea())) //$NON-NLS-1$
 					.add(Restrictions.eq("keyId", sdkey)) //$NON-NLS-1$
 					.list();
-					if (items.size() != 1){
+					
+					if (items.size() > 1){
 						throw new SQLException(MessageFormat.format(Messages.AddSamplingUnitLayersJob_SdNotFound, sdkey));
-					}
-					SurveyDesign sd = (SurveyDesign)items.get(0);
-					service = new SamplingUnitService(sd);
-				
-					@SuppressWarnings("unchecked")
-					List<IGeoResource> layers = (List<IGeoResource>) service
-							.resources(null);
-					List<IGeoResource> layersToAdd = new ArrayList<IGeoResource>();
-					Set<SamplingUnit.GeometryType> types = SurveyHibernateManager
-							.getInstance().getSamplingUnitTypes(sd, s);
-					for (IGeoResource layer : layers) {
-						if (types.contains(SamplingUnit.GeometryType
-								.valueOf(((SamplingUnitGeoResource) layer)
-										.getDataType()))) {
-							layersToAdd.add(layer);
+					}else if (items.size() == 1){
+						SurveyDesign sd = (SurveyDesign)items.get(0);
+						service = new SamplingUnitService(sd);
+					
+						@SuppressWarnings("unchecked")
+						List<IGeoResource> layers = (List<IGeoResource>) service
+								.resources(null);
+						List<IGeoResource> layersToAdd = new ArrayList<IGeoResource>();
+						Set<SamplingUnit.GeometryType> types = SurveyHibernateManager
+								.getInstance().getSamplingUnitTypes(sd, s);
+						for (IGeoResource layer : layers) {
+							if (types.contains(SamplingUnit.GeometryType
+									.valueOf(((SamplingUnitGeoResource) layer)
+											.getDataType()))) {
+								layersToAdd.add(layer);
+							}
 						}
+						AddLayersCommand command = new AddLayersCommand(layersToAdd);
+						if (getMap() == null)
+							return Status.CANCEL_STATUS;
+						getMap().sendCommandASync(command);
 					}
-					AddLayersCommand command = new AddLayersCommand(layersToAdd);
-					if (getMap() == null)
-						return Status.CANCEL_STATUS;
-					getMap().sendCommandASync(command);
 				} catch (Exception ex) {
 					EcologicalRecordsPlugIn
 							.log("Error adding survey design sampling unit layers.", ex); //$NON-NLS-1$

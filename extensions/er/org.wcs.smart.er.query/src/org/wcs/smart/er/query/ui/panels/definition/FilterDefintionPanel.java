@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.query.ui.panels.definition;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -216,6 +218,7 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
+					if ( sq.getSurveyDesign() == null ) return Status.OK_STATUS;
 					Session s = HibernateManager.openSession();
 					List<?> results = s
 							.createCriteria(SurveyDesign.class)
@@ -231,6 +234,16 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 								refreshPanel(sd);
 							}
 						});
+					}else{
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								MessageDialog.openError(Display.getDefault().getActiveShell(),
+										"Survey Design Not Found",
+										MessageFormat.format("The survey design {0} not found.  Survey design filter will be reset.", sq.getSurveyDesign()));
+							}
+						});
+						
 					}
 
 					return Status.OK_STATUS;

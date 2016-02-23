@@ -33,6 +33,7 @@ import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.ui.DefinitionPanel;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -96,6 +97,8 @@ public class IntelligenceDropItemFactory implements IDropItemFactory{
 			DropItem di = IntelligenceDropItemFactory.INSTANCE.createDropItem(((IntelligenceFilter) filter).getFilterOption());
 			di.initializeData(new Object[]{((IntelligenceFilter) filter).getOperator(), ((IntelligenceFilter) filter).getValue()});
 			return new DropItem[]{di};
+		}else if (filter instanceof EmptyFilter){
+			return new DropItem[]{};
 		}
 		return null;
 	}
