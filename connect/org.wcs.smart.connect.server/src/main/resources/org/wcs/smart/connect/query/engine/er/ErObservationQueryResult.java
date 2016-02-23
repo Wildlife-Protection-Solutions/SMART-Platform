@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;

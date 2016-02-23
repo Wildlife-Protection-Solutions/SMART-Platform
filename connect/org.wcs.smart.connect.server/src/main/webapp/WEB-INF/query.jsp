@@ -13,6 +13,22 @@
 	
 	<script type="text/javascript" >
 		var search="${search}";
+				
+		var datefilters = {
+				<c:forEach var="df" items="${datefilters}">
+				    '${df[0]}': '${df[1]}',
+				</c:forEach>
+				};
+		
+		var qdatefilter = {
+				<c:forEach var="entry" items="${qdatefilters}">
+				    '${entry.key}': [
+				    	<c:forEach var="op" items="${entry.value}">
+				    		'${op}',
+				    	</c:forEach>
+				    ],
+				</c:forEach>
+				};
 	</script>
 		
 	<title><fmt:message key="query.pagetitle"/></title>	
@@ -89,8 +105,9 @@
      		<fieldset>
 	     		<legend><fmt:message key="query.format" /></legend>
 	     		<select id="queryformat" name="format" style="width:100%">
-     		 		<option value="csv"><fmt:message key="query.csv" /></option>
-     		 		<option value="shp">shp</option>
+					<c:forEach var="exp" items="${exporters}" varStatus="count">
+	     				<option value="${exp[0]}">${exp[1]}</option> 
+					</c:forEach> 
      			</select>
      		</fieldset>
      		

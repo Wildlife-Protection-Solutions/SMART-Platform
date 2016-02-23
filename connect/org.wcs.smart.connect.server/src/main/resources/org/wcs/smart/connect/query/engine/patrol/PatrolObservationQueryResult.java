@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 

@@ -26,12 +26,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.io.WKBReader;
 /**
  * Result set of observation (all data) queries.
@@ -49,7 +48,7 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 	}
 	
 	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+		return c.createStatement().executeQuery("SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
 	}
 
 	@Override
@@ -91,16 +90,17 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public Geometry createGeometry(ResultSet rs) throws Exception {
-	//	return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
-		//TODO: get point
-		byte[] b = rs.getBytes("intel_locations");
-		if (b == null) return null;
-		
+		byte[] b = rs.getBytes("intel_locations"); //$NON-NLS-1$
+		if (b == null){
+			return new GeometryCollection(new Geometry[]{}, gf);	
+		}
 		return reader.read(b);
 	}
 
 	@Override
 	public String createId(ResultSet rs) throws Exception {
-		return rs.getString("intel_name") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		String name=rs.getString("intel_name").toLowerCase(); //$NON-NLS-1$
+		name = name.replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		return name + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 }

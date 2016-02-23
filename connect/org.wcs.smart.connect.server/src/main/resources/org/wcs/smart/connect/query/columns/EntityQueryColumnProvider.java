@@ -140,9 +140,11 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 					String entityType = (String) att[1];
 					AttributeType type = (AttributeType) att[2];
 					
+					//TODO: fix this
 					//find attribute name for entity attribute; this is complicated as it may be defined or it may be the attribute
 					//we also need to support cross-ca 
-					EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class).add(Restrictions.eq("keyId", attributeKey)) //$NON-NLS-1$
+					EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class)
+							.add(Restrictions.eq("keyId", attributeKey)) //$NON-NLS-1$
 							.createCriteria("entityType", "et") //$NON-NLS-1$ //$NON-NLS-2$
 							.add(Restrictions.eq("et.keyId", entityType)) //$NON-NLS-1$
 							.uniqueResult();

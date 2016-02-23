@@ -36,7 +36,7 @@
         <location>/WEB-INF/errorpages/401.jsp</location>
 	</error-page>
 	<error-page>
-        <location>/WEB-INF/errorpages/unknown.html</location>
+        <location>/WEB-INF/errorpages/unknown.jsp</location>
 	</error-page>
 	
 	<security-constraint>

@@ -68,8 +68,7 @@ public class CaServlet extends HttpServlet {
 		}finally{
 			s.getTransaction().rollback();
 		}
-		request.setAttribute("canadd", canAdd);
-		
+		request.setAttribute("canadd", canAdd); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/ca.jsp").forward(request, response); //$NON-NLS-1$
 		

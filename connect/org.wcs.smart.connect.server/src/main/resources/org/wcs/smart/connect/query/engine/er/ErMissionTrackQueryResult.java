@@ -27,14 +27,15 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.connect.query.engine.IDbTableResultSet;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Survey mission track query results.
@@ -45,15 +46,30 @@ import com.vividsolutions.jts.geom.Geometry;
 public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlErMissionTrackEngine engine;
+	private WKBReader reader = new WKBReader();
 	
 	public ErMissionTrackQueryResult(PsqlErMissionTrackEngine engine){
 		this.engine = engine;
 	}
-	
-	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
-	}
 
+	public ResultSet getQueryResultSet(Connection c) throws SQLException{
+		StringBuilder sb = new StringBuilder();
+		try(ResultSet rs = c.getMetaData().getColumns(null, null, engine.getQueryDataTable(), null)){
+			while(rs.next()){
+				sb.append("foo." + rs.getString(4)); //$NON-NLS-1$
+				sb.append(","); //$NON-NLS-1$
+			}
+		}
+		//TODO: figure out 3d geometries
+		return c.createStatement().executeQuery("SELECT " + sb.toString() //$NON-NLS-1$
+				+ "st_asbinary(st_force2d(st_collect(st_geomfromwkb(bar.geometry)))) as trackgeom FROM "  //$NON-NLS-1$
+				+ engine.getQueryDataTable()
+				+ " foo, " + engine.tableName(MissionTrack.class) + " bar " //$NON-NLS-1$ //$NON-NLS-2$
+				+ " WHERE bar.mission_day_uuid = foo.missionday_uuid  " //$NON-NLS-1$
+				+ " GROUP BY " //$NON-NLS-1$
+				+ sb.toString().substring(0, sb.length() - 1)
+				);
+	}
 	
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
 		return column.getValueAsString(getValue(rs, column, c));
@@ -111,19 +127,21 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet {
 	}
 	@Override
 	public String getGeometryType() {
-		return LINESTRING_GEOM_TYPE;
+		return MULTI_LINESTRING_GEOM_TYPE;
 	}
 
 	@Override
 	public Geometry createGeometry(ResultSet rs) throws Exception {
-//		return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
-		//TODO:
-		return null;
+		byte[] b = rs.getBytes("trackgeom"); //$NON-NLS-1$
+		if (b == null){
+			return new GeometryCollection(new Geometry[]{}, gf);	
+		}
+		return reader.read(b);
 	}
 
 	@Override
 	public String createId(ResultSet rs) throws Exception {
-		return rs.getDouble("mission_trackid") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		return rs.getString("mission_trackid") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
 

@@ -141,7 +141,7 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					sql.append(tablePrefix(Patrol.class) + ".id,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Informant.class) + ".id,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".description,"); //$NON-NLS-1$
-					sql.append("encode(st_asbinary(foo.geoms, 'XDR'), 'hex')");	//locations //$NON-NLS-1$
+					sql.append("foo.geoms");	//locations //$NON-NLS-1$
 					sql.append(" FROM ");//$NON-NLS-1$
 					sql.append(tableNamePrefix(Intelligence.class));
 					sql.append(" LEFT JOIN "); //$NON-NLS-1$

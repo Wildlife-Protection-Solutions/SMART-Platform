@@ -96,4 +96,14 @@ public class SmartUtils {
 		}
 		return D_FORMAT.parse(dateString);
 	}
+	
+	/**
+	 * removes all non alphanumeric characters, 0_.from a string and replaces
+	 * them with _
+	 * @param filename
+	 * @return
+	 */
+	public static String cleanFileName(String filename){
+		return filename.replaceAll("[^a-zA-Z0-9-_\\.]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }

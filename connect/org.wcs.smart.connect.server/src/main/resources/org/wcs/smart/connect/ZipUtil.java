@@ -27,6 +27,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Path;
 import java.util.Enumeration;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -56,6 +58,18 @@ public class ZipUtil {
 		
 	}
 	
+	public static boolean createZip(DirectoryStream<Path> inputs, Path outputZipFile) throws IOException{
+		  try (FileOutputStream fOut = new FileOutputStream(outputZipFile.toFile());
+				  BufferedOutputStream bOut = new BufferedOutputStream(fOut);
+		       	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
+		       
+			  for (Path p : inputs){
+				  addFileToZip(tOut,p.toFile().getAbsoluteFile(), ""); //$NON-NLS-1$
+		        }
+		            
+		  }
+		   return true;
+	}
 	/**
 	 * Creates a zip file collecting together
 	 * all the data in the provided directories.

@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;

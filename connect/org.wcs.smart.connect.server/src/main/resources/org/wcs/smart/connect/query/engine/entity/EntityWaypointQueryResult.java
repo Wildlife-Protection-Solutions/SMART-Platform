@@ -26,7 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 

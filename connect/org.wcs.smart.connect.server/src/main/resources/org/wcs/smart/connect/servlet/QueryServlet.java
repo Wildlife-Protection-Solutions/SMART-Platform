@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.engine.CsvExporter;
+import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -55,7 +57,15 @@ public class QueryServlet extends HttpServlet {
 		for (IDateFieldFilter dateFilter : QueryManager.dateFields){
 			dateFilters.add(new String[]{dateFilter.getKey(), dateFilter.getGuiName(request.getLocale())});
 		}
+		String[][] exporters = new String[][]{
+				{CsvExporter.FORMAT_KEY, CsvExporter.getName(request.getLocale())},
+				{ShpExporter.FORMAT_KEY, ShpExporter.getName(request.getLocale())}};
+		
+		//date filters with name
 		request.setAttribute("datefilters", dateFilters); //$NON-NLS-1$
+		//date filters associated with query types
+		request.setAttribute("qdatefilters", QueryManager.DATE_FILTERS); //$NON-NLS-1$
+		request.setAttribute("exporters", exporters); //$NON-NLS-1$
 		request.setAttribute("search", request.getParameter("search")); //$NON-NLS-1$ //$NON-NLS-2$
 		request.getRequestDispatcher("/WEB-INF/query.jsp").forward(request, response); //$NON-NLS-1$
 	}

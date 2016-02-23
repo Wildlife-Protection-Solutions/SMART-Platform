@@ -9,6 +9,10 @@ var definedDateKeys = ["last30days", "last60days", "monthtodate", "lastmonth", "
 
 var startDatePicker, endDatePicker;
 
+var shpValues = ["entityobservation", "entitywaypoint","intelligencerecord",  "surveymission",
+                 "surveymissiontrack", "observationobservation", "observationwaypoint", 
+                 "patrolobservation", "patrolquery", "patrolwaypoint", 
+                 "surveyobservation", "surveywaypoint"];
 
 /* configure events on html elements */
 window.onload = function(){
@@ -18,6 +22,7 @@ window.onload = function(){
 
 	
 	document.getElementById("runQueryButton").onclick = function(){
+		closeDialog('queryOptionsDialog');
 		window.open(generateUrl());
 	};
 
@@ -61,6 +66,7 @@ window.onload = function(){
 	}
 	
 }
+
 
 function updateDates(){
 	var dd = document.getElementById("defineddates");
@@ -191,6 +197,7 @@ function createQueryTable(){
 	 		
 	 		row.dataset.queryuuid = queries[i].uuid;
 	 		row.dataset.queryname = queries[i].name;
+	 		row.dataset.querytype = queries[i].typeKey;
 	 		row.dataset.isccaa = queries[i].isCcaa;
 	 		
 	 		var runicon = document.createElement("a");
@@ -199,8 +206,9 @@ function createQueryTable(){
 	 		runicon.onclick = showQueryOptions;
 	 		row.childNodes[4].appendChild(runicon);
 	 		
+	 		var filter = qdatefilter[queries[i].typeKey][0];
 	 		var csvlink = document.createElement("a");
-	 		csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=waypointdate";
+	 		csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=" + filter;
 	 		csvlink.innerHTML = "csv";
 	 		row.childNodes[5].appendChild(csvlink);
  		 }
@@ -220,6 +228,7 @@ function showQueryOptions(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-queryuuid');
 	var name = this.parentElement.parentElement.getAttribute('data-queryname');
 	var isccaa = this.parentElement.parentElement.getAttribute('data-isccaa');
+	var querytype = this.parentElement.parentElement.getAttribute('data-querytype');
 	
 	document.querySelector("#dialogerror").style.display = "none";
 	
@@ -233,6 +242,42 @@ function showQueryOptions(){
 	
 	var poselement = document.querySelector("#querytable");
 	var pos = getPosition(poselement);
+	
+	//update shape option
+	var isShape = false;
+	for (var i = 0; i < shpValues.length; i ++){
+		if(shpValues[i] == querytype){
+			isShape = true;
+			break;
+		}
+	}
+	var item = document.querySelector("#queryformat option[value=shp]");
+	if (item != null){
+		if (isShape){
+			item.style.display = "block";
+		}else{
+			item.style.display = "none";
+		}
+	}
+	
+	//update datefilter options
+	//document.querySelector
+	var datefielddiv = document.getElementById("datefield");
+	while(datefielddiv.firstChild){
+		datefielddiv.removeChild(datefielddiv.firstChild);
+	}
+	
+	var ops = qdatefilter[querytype];
+	for (var i = 0; i < ops.length; i++){
+		var doption = ops[i];
+		var name = datefilters[doption];
+		
+		var object = document.createElement("option");
+		object.value = doption;
+		object.innerHTML = name;
+		datefielddiv.appendChild(object);
+	}
+	datefielddiv.selectedIndex = 0;
 	
 	displayDialogLocation('queryOptionsDialog', pos.x, window.pageYOffset + 20);
 

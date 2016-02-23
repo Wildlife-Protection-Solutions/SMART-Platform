@@ -96,7 +96,7 @@ public class ApiAuthorizationFilter implements Filter {
 			}
 			if (!isOk){
 				logger.finer("Basic authentication not found or invalid"); //$NON-NLS-1$
-				((HttpServletResponse)response).setStatus(HttpURLConnection.HTTP_UNAUTHORIZED);
+				((HttpServletResponse)response).sendError(HttpURLConnection.HTTP_UNAUTHORIZED);
 				return;
 			}
 		}else{

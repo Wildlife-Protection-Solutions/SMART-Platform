@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -161,6 +163,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		}else{
 			//get mission properties for survey design only
 			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
+			if (sd == null) throw new SQLException(MessageFormat.format(Messages.getString("PsqlErEngine.SdNotFound", locale), sdFilter.getKey())); //$NON-NLS-1$
 			for (MissionProperty mp : sd.getMissionProperties()){
 				attributes.add(mp.getAttribute());
 			}
@@ -346,7 +349,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 
 		sql = "INSERT INTO " + tableName + "(uuid) SELECT DISTINCT wpoa."+obsAttUuidColumn //$NON-NLS-1$ //$NON-NLS-2$
 				+" FROM smart.wp_observation_attributes wpoa inner join " //$NON-NLS-1$
-				+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
 		
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);

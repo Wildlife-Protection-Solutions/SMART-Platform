@@ -531,7 +531,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" WHERE "); //$NON-NLS-1$
 		if (catfilter != null){
 			String keyPart = catfilter.getCategoryKey();
-			String p1 = engine.addParameterValue(keyPart + "%");
+			String p1 = engine.addParameterValue(keyPart + "%"); //$NON-NLS-1$
 			sql.append(" ( "); //$NON-NLS-1$
 			sql.append(prefix(Category.class));
 			sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$

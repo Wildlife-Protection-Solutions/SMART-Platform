@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.connect.query.engine;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -57,14 +58,19 @@ public class CsvExporter {
 	
 	public static final String FORMAT_KEY = "csv"; //$NON-NLS-1$
 	
+	public static final String getName(Locale l){
+		return Messages.getString("CsvExporter.CsvName", l); //$NON-NLS-1$
+	}
+
+	
 	private final Logger logger = Logger.getLogger(CsvExporter.class.getName());
 	
-	private File f;
+	private Path csvFile;
 	private char delimiter;
 	private Locale l;
 	
-	public CsvExporter(File f, char delimiter, Locale l){
-		this.f = f;
+	public CsvExporter(Path csvFile, char delimiter, Locale l){
+		this.csvFile = csvFile;
 		this.delimiter = delimiter;
 		this.l = l;
 	}
@@ -83,7 +89,7 @@ public class CsvExporter {
 				
 				try (CSVWriter writer = new CSVWriter(
 						new OutputStreamWriter(
-			              new FileOutputStream(f.getAbsolutePath()), StandardCharsets.UTF_8)
+			              new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8)
 						,delimiter)) {
 					
 					List<QueryColumn> cols = query.getQueryColumns(l, session);
@@ -121,7 +127,7 @@ public class CsvExporter {
 	public void exportResults(GriddedQuery query, IMemoryTableResultSet<GridResultItem> results, Session session) throws Exception{
 	
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-				new FileOutputStream(f.getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
+				new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
 
 			List<QueryColumn> cols = query.getQueryColumns(l, session);
 
@@ -157,7 +163,7 @@ public class CsvExporter {
 			Session session) throws SQLException{
 		
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-				new FileOutputStream(f.getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
+				new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
 
 			List<QueryColumn> cols = query.getQueryColumns(l, session);
 
@@ -195,7 +201,7 @@ public class CsvExporter {
 			Session session) throws SQLException{
 		
 		try(CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(f.getAbsoluteFile()), StandardCharsets.UTF_8),  
+				new OutputStreamWriter(new FileOutputStream(csvFile.toFile().getAbsoluteFile()), StandardCharsets.UTF_8),  
 				delimiter, '"',"\n")){  //$NON-NLS-1$
 		
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){

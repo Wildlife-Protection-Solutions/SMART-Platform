@@ -551,7 +551,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 					}
 				}else if (efilter.getAttributeType() == AttributeType.TREE){
 					String p1 = engine.addParameterValue((String)efilter.getValue()+ "%"); //$NON-NLS-1$
-					sql.append( "( foo.value like " + p1 + " ) ");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+					sql.append( "( foo.value like " + p1 + " ) ");  //$NON-NLS-1$ //$NON-NLS-2$ 
 				}
 			}
 			if (catfilter != null){
@@ -561,7 +561,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
 				sql.append(".hkey like " + p1 ); //$NON-NLS-1$
-				sql.append(" )"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" )"); //$NON-NLS-1$ 
 				
 			}
 			if (attfilter != null){

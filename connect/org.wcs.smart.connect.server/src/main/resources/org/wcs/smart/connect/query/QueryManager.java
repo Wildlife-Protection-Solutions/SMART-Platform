@@ -26,6 +26,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -158,6 +159,37 @@ public enum QueryManager {
 		ReceivedDateFilter.INSTANCE
 	};
 	
+	public static HashMap<String, String[]> DATE_FILTERS = new HashMap<String, String[]>();
+	static{
+		DATE_FILTERS.put(PatrolGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolSummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(PatrolQuery.KEY, new String[]{PatrolStartDateField.INSTANCE.getKey(),PatrolEndDateField.INSTANCE.getKey()});
+		
+		DATE_FILTERS.put(SurveyGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(SurveyObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(SurveySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(SurveyWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
+		
+		DATE_FILTERS.put(MissionQuery.KEY, new String[]{MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
+		
+		DATE_FILTERS.put(MissionTrackQuery.KEY, new String[]{MissionTrackDateField.INSTANCE.getKey(),MissionStartDateField.INSTANCE.getKey(),MissionEndDateField.INSTANCE.getKey()});
+		
+		DATE_FILTERS.put(ObservationGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(ObsObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(ObservationSummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(ObservationWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		
+		DATE_FILTERS.put(EntityGriddedQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(EntityObservationQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(EntitySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(EntityWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
+		
+		DATE_FILTERS.put(IntelligenceRecordQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
+		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});			
+	}
+	
 	/**
 	 * Find a given query based on the uuid.
 	 * @param uuid
@@ -191,7 +223,8 @@ public enum QueryManager {
 				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName(), q.getSimpleName(), 
 						qq.getConservationArea().getId(), qq.getId(), qq.getIsShared(), 
 						qq.getConservationArea().getUuid(),
-						qq.getConservationArea().getIsCcaa());
+						qq.getConservationArea().getIsCcaa(),
+						qq.getTypeKey());
 				if(qq.getIsShared() || includeMyQueries){
 					proxies.add(proxy);
 				}
@@ -299,56 +332,9 @@ public enum QueryManager {
 	 * @return
 	 */
 	public boolean supportsDateField(String queryTypeKey, IDateFieldFilter field){
-		
-		if (stringIn(queryTypeKey, PatrolGriddedQuery.KEY, PatrolObservationQuery.KEY, PatrolSummaryQuery.KEY, PatrolWaypointQuery.KEY)){
-			return stringIn(field.getKey(),
-					WaypointDateField.INSTANCE.getKey(),
-					PatrolStartDateField.INSTANCE.getKey(),
-					PatrolEndDateField.INSTANCE.getKey());
-		}
-		if (stringIn(queryTypeKey, PatrolQuery.KEY)){
-			return stringIn(field.getKey(),
-					PatrolStartDateField.INSTANCE.getKey(),
-					PatrolEndDateField.INSTANCE.getKey());
-		}
-		
-		if (stringIn(queryTypeKey, SurveyGriddedQuery.KEY, SurveyObservationQuery.KEY,
-				SurveySummaryQuery.KEY, SurveyWaypointQuery.KEY)){
-			return stringIn(field.getKey(),
-					WaypointDateField.INSTANCE.getKey(),
-					MissionStartDateField.INSTANCE.getKey(),
-					MissionEndDateField.INSTANCE.getKey());		
-		}
-		if (stringIn(queryTypeKey, MissionQuery.KEY)){
-			return stringIn(field.getKey(),
-					MissionStartDateField.INSTANCE.getKey(),
-					MissionEndDateField.INSTANCE.getKey());		
-		}
-		if (stringIn(queryTypeKey, MissionTrackQuery.KEY)){
-			return stringIn(field.getKey(),
-					MissionTrackDateField.INSTANCE.getKey(),
-					MissionStartDateField.INSTANCE.getKey(),
-					MissionEndDateField.INSTANCE.getKey());		
-		}
-		
-		if (stringIn(queryTypeKey, ObservationGriddedQuery.KEY, ObsObservationQuery.KEY, ObservationSummaryQuery.KEY, 
-				ObservationWaypointQuery.KEY)){
-			return stringIn(field.getKey(),
-					WaypointDateField.INSTANCE.getKey());
-		}
-		
-		if (stringIn(queryTypeKey, EntityGriddedQuery.KEY, EntityObservationQuery.KEY, EntitySummaryQuery.KEY, 
-				EntityWaypointQuery.KEY)){
-			return stringIn(field.getKey(),
-					WaypointDateField.INSTANCE.getKey());
-		}
-		
-		if (stringIn(queryTypeKey, IntelligenceRecordQuery.KEY, IntelligenceSummaryQuery.KEY)){
-			return stringIn(field.getKey(),
-					ReceivedDateFilter.INSTANCE.getKey());
-		}
-		
-		return false;
+		String[] ops = DATE_FILTERS.get(queryTypeKey);
+		if (ops == null) return false;
+		return stringIn(field.getKey(), ops);
 	}
 	
 	private boolean stringIn(String key, String... in1){

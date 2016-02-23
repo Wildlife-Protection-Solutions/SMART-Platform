@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -51,7 +51,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
-import org.geotools.data.shapefile.shp.ShapefileException;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
@@ -175,7 +174,7 @@ public class QueryApi extends HttpServlet{
 		Query query = null;
 		try{
 			query = QueryManager.INSTANCE.findQuery(uuid, s);
-
+			
 			if (query == null){
 				//query not found
 				return Response.status(Status.NOT_FOUND).build();
@@ -183,7 +182,9 @@ public class QueryApi extends HttpServlet{
 			if (!QueryManager.INSTANCE.supportsDateField(query.getTypeKey(), df.getDateFieldOption())){
 				return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateFilterForQueryType", SmartUtils.getRequestLocale(request)), df.getDateFieldOption().getGuiName(request.getLocale()), query.getTypeKey())); //$NON-NLS-1$
 			}
+			String oldId = query.getId();
 			query = query.clone(query.getOwner());
+			query.setId(oldId);
 			if (query.getConservationArea().getIsCcaa()){
 				//we use the ccaafilter; otherwise we ignore it
 				query.setConservationAreaFilter(parseCaFilter(cafilter, s));
@@ -197,7 +198,6 @@ public class QueryApi extends HttpServlet{
 					return createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
 			}
-	
 									
 			IQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 			if(engine == null){
@@ -207,20 +207,17 @@ public class QueryApi extends HttpServlet{
 		
 			/* configure date filter */
 			query.setDateFilter(df);
-			
 
 			HashMap<String, Object> params = new HashMap<String, Object>();
 			params.put(Session.class.getName(), s);
 			params.put(Locale.class.getName(), request.getLocale());
 			
-			File f = null;
-			
 			try{
 				IQueryResult result = engine.executeQuery(query, params);
-			
+			 
 				if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
-					f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
-					CsvExporter exporter = new CsvExporter(f, delimiter.charAt(0),request.getLocale());
+					java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
+					CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
 				
 					if (result instanceof IDbTableResultSet
 						&& query instanceof SimpleQuery){
@@ -233,9 +230,13 @@ public class QueryApi extends HttpServlet{
 					}else{
 						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 					}
+					return writeText(outputFile);
+					
 				}else if (format.equalsIgnoreCase(ShpExporter.FORMAT_KEY)){
-					f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.shp"); //$NON-NLS-1$
-					ShpExporter exporter = new ShpExporter(f, request.getLocale());
+					String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
+					java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
+					
+					ShpExporter exporter = new ShpExporter(outputFile, request.getLocale());
 					
 					if (result instanceof AbstractDbFeatureResultSet &&
 							query instanceof SimpleQuery){
@@ -243,6 +244,8 @@ public class QueryApi extends HttpServlet{
 					}else{
 						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
 					}
+					return writeBinary(outputFile);
+
 				}else{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
@@ -251,26 +254,7 @@ public class QueryApi extends HttpServlet{
 					((AbstractQueryEngine)engine).cleanUp(s);
 				}
 			}
-			//TODO: if file not found then fail; do not attempt to write output
-			final File thisfile = f;
-			StreamingOutput stream = new StreamingOutput() {
-			      @Override
-			      public void write(OutputStream output) throws IOException {
-			        try {
-			        	if (thisfile != null){
-			        		FileUtils.copyFile(thisfile, output);
-//			        		thisfile.delete();
-			        	}
-			        } catch (Exception e) {
-			           e.printStackTrace();
-			        }
-			      }
-			    };
 			
-			//return accepted
-			Response rs = Response.ok(stream, MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name()) //$NON-NLS-1$
-		            .build();
-			return rs;
 		}catch (Exception ex){
 			String error = ex.getMessage();
 			if (ex instanceof JDBCException && ex.getCause() instanceof SQLException){
@@ -282,6 +266,38 @@ public class QueryApi extends HttpServlet{
 			s.getTransaction().commit();
 		}
 		
+	}
+	
+	private Response writeText(java.nio.file.Path thisfile){
+		Response rs = Response.ok(getStream(thisfile), MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name()) //$NON-NLS-1$
+	            .build();
+		return rs;
+	}
+	
+	private Response writeBinary(java.nio.file.Path thisfile){
+		Response rs = Response.ok(getStream(thisfile), MediaType.APPLICATION_OCTET_STREAM )
+				.header("Content-Disposition", "attachment; filename=" + thisfile.getFileName().toString()) //$NON-NLS-1$ //$NON-NLS-2$
+	            .build();
+		return rs;
+	}
+	
+	private StreamingOutput getStream(final java.nio.file.Path thisfile){
+		if (thisfile == null) throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error executing query request."); //$NON-NLS-1$
+		return new StreamingOutput() {
+		      @Override
+		      public void write(OutputStream output) throws IOException {
+		        try {
+		        	if (thisfile != null){
+		        		FileUtils.copyFile(thisfile.toFile(), output);
+		        	}
+		        } catch (Exception e) {
+		           e.printStackTrace();
+		        }finally{
+		        	Files.deleteIfExists(thisfile);
+		        	
+		        }
+		      }
+		    };
 	}
 	
 	private String parseCaFilter(String caFilter, Session session){
