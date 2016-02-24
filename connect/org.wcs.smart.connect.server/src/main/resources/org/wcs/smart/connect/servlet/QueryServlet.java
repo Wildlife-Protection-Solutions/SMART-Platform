@@ -35,6 +35,7 @@ import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.CsvExporter;
 import org.wcs.smart.connect.query.engine.ShpExporter;
+import org.wcs.smart.connect.query.engine.TiffRasterExporter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -59,7 +60,8 @@ public class QueryServlet extends HttpServlet {
 		}
 		String[][] exporters = new String[][]{
 				{CsvExporter.FORMAT_KEY, CsvExporter.getName(request.getLocale())},
-				{ShpExporter.FORMAT_KEY, ShpExporter.getName(request.getLocale())}};
+				{ShpExporter.FORMAT_KEY, ShpExporter.getName(request.getLocale())},
+				{TiffRasterExporter.FORMAT_KEY, TiffRasterExporter.getName(request.getLocale())}};
 		
 		//date filters with name
 		request.setAttribute("datefilters", dateFilters); //$NON-NLS-1$

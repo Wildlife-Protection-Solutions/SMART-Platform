@@ -37,11 +37,9 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 
-//	private AbstractQueryEngine engine;
 	private Collection<GridResultItem> items;
 	
 	public GridQueryResults(AbstractQueryEngine engine, Collection<GridResultItem> items){
-//		this.engine = engine;
 		this.items = items;
 	}
 
@@ -50,6 +48,29 @@ public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 		return items.iterator();
 	}
 
+	public GridMetadata getTileBounds(){
+		if (items == null || items.size() == 0) return null;
+		long xmax = Long.MIN_VALUE;
+		long xmin = Long.MAX_VALUE;
+		long ymax = Long.MIN_VALUE;
+		long ymin = Long.MAX_VALUE;
+		
+		for (GridResultItem it : items){
+			if (it.getTileX() < xmin){
+				xmin = it.getTileX();
+			}
+			if (it.getTileX() > xmax){
+				xmax = it.getTileX();
+			}
+			if (it.getTileY() < ymin){
+				ymin = it.getTileY();
+			}
+			if (it.getTileY() > ymax){
+				ymax = it.getTileY();
+			}
+		}
+		return new GridMetadata(xmin, ymin, xmax, ymax);
+	}
 
 	@Override
 	public String getValueAsString(GridResultItem item, QueryColumn column)
@@ -63,5 +84,22 @@ public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 			return v.toString();
 		}
 		throw new SQLException("Invalid column for gridded query." + column.getKey()); //$NON-NLS-1$
+	}
+	
+	/*
+	 * Class for tracking grid bounds
+	 */
+	public class GridMetadata{
+		public Long xmin;
+		public Long xmax;
+		public Long ymin;
+		public Long ymax;
+		
+		public GridMetadata(long xmin, long ymin, long xmax, long ymax){
+			this.xmin = xmin;
+			this.xmax = xmax;
+			this.ymin = ymin;
+			this.ymax = ymax;
+		}
 	}
 }

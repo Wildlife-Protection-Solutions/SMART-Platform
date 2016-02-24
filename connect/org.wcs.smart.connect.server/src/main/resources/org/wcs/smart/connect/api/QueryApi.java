@@ -64,9 +64,11 @@ import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.CsvExporter;
+import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.ShpExporter;
+import org.wcs.smart.connect.query.engine.TiffRasterExporter;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.query.common.engine.IQueryEngine;
@@ -245,7 +247,19 @@ public class QueryApi extends HttpServlet{
 						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
 					}
 					return writeBinary(outputFile);
-
+				}else if (format.equalsIgnoreCase(TiffRasterExporter.FORMAT_KEY)){
+					String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".tiff"; //$NON-NLS-1$ //$NON-NLS-2$
+					java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
+					
+					TiffRasterExporter exporter = new TiffRasterExporter(outputFile, request.getLocale());
+					
+					if (result instanceof GridQueryResults &&
+							query instanceof GriddedQuery){
+						exporter.exportResults((GriddedQuery)query, (GridQueryResults)result, s);
+					}else{
+						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
+					}
+					return writeBinary(outputFile);
 				}else{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}

@@ -14,6 +14,9 @@ var shpValues = ["entityobservation", "entitywaypoint","intelligencerecord",  "s
                  "patrolobservation", "patrolquery", "patrolwaypoint", 
                  "surveyobservation", "surveywaypoint"];
 
+var tifValues = ["entitygrid", "observationgrid","patrolgrid",  "surveygrid"];
+
+
 /* configure events on html elements */
 window.onload = function(){
 	document.getElementById('textsearch').value = search;
@@ -254,6 +257,23 @@ function showQueryOptions(){
 	var item = document.querySelector("#queryformat option[value=shp]");
 	if (item != null){
 		if (isShape){
+			item.style.display = "block";
+		}else{
+			item.style.display = "none";
+		}
+	}
+	
+	//update tiff option
+	var isTif = false;
+	for (var i = 0; i < tifValues.length; i ++){
+		if(tifValues[i] == querytype){
+			isTif = true;
+			break;
+		}
+	}
+	var item = document.querySelector("#queryformat option[value=tif]");
+	if (item != null){
+		if (isTif){
 			item.style.display = "block";
 		}else{
 			item.style.display = "none";
