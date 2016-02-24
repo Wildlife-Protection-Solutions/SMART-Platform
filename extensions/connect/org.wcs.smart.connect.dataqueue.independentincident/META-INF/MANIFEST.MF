@@ -8,3 +8,4 @@ Require-Bundle: org.wcs.smart.connect.dataqueue;bundle-version="4.0.0",
  org.wcs.smart.independentincident;bundle-version="4.0.0",
  org.wcs.smart;bundle-version="4.0.0"
 Import-Package: org.eclipse.core.runtime
+Bundle-Vendor: org.wcs.smart

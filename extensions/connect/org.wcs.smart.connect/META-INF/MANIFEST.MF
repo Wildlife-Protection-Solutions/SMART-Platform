@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SMART Connect Tools
+Bundle-Name: SMART CONNECT Tools
 Bundle-SymbolicName: org.wcs.smart.connect;singleton:=true
-Bundle-Version: 4.0.0
+Bundle-Version: 4.0.0.qualifier
 Bundle-Activator: org.wcs.smart.connect.ConnectPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -43,3 +43,4 @@ Bundle-ClassPath: lib/activation-1.1.jar,
  lib/httpclient-4.2.6.jar,
  lib/httpcore-4.2.5.jar
 Eclipse-BuddyPolicy: global
+Bundle-Vendor: org.wcs.smart

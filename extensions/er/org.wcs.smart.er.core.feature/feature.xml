@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.er.core.feature"
       label="SMART Ecological Records Module"
-      version="4.0.0"
+      version="4.0.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 

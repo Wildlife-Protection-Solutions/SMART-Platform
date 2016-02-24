@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Survey CyberTracker
 Bundle-SymbolicName: org.wcs.smart.cybertracker.survey;singleton:=true
-Bundle-Version: 4.0.0
+Bundle-Version: 4.0.0.qualifier
 Bundle-Activator: org.wcs.smart.cybertracker.survey.SurveyCyberTrackerPlugIn
 Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart,
