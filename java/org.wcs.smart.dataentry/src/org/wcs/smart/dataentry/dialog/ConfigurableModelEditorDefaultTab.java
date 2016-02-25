@@ -340,6 +340,9 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			updates.add(new Object[]{0, x});
 		}
 		public void saveOrUpdate(Object x){
+			if (x instanceof CmRootNode){
+				x = ((CmRootNode) x).model;
+			}
 			updates.add(new Object[]{1, x});
 		}
 		public void applyUpdates(Session session){
