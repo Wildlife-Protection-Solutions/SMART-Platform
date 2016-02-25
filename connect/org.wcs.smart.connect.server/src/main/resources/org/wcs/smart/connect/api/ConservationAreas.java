@@ -29,6 +29,8 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -208,6 +210,14 @@ public class ConservationAreas extends HttpServlet{
 				}
 				
 			}
+			
+			Collections.sort(conservationAreas, new Comparator<ConservationAreaProxy>() {
+				@Override
+				public int compare(ConservationAreaProxy o1,
+						ConservationAreaProxy o2) {
+					return o1.getLabel().toUpperCase().compareTo(o2.getLabel().toUpperCase());
+				}
+			});
 			return conservationAreas;
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
