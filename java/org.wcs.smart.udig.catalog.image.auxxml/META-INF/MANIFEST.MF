@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART uDig World Image Plugin
+Bundle-SymbolicName: org.wcs.smart.udig.catalog.image.auxxml;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: org.wcs.smart
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.locationtech.udig.catalog,
+ org.locationtech.udig.catalog.rasterings,
+ org.locationtech.udig.catalog.ui,
+ org.locationtech.udig.catalog.geotiff;bundle-version="2.0.0"
+Import-Package: javax.media.jai,
+ javax.media.jai.iterator,
+ javax.media.jai.operator,
+ javax.media.jai.registry,
+ javax.media.jai.remote,
+ javax.media.jai.tilecodec,
+ javax.media.jai.util

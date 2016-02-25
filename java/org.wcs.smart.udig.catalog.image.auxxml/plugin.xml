@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.locationtech.udig.catalog.ServiceExtension">
+      <service
+            class="org.wcs.smart.udig.catalog.image.auxxml.internal.worldimage.AuxMdImageServiceExtension"
+            id="auxworldimage"
+            name="XML MD World Plus Image">
+      </service>
+      <service
+            class="org.wcs.smart.udig.catalog.image.auxxml.internal.tif.AuxMdGeoTiffServiceExtension"
+            id="auxtif"
+            name="XML MD Tif">
+      </service>
+   </extension>
+
+</plugin>
