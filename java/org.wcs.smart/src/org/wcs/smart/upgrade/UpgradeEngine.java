@@ -157,6 +157,7 @@ public class UpgradeEngine {
 		}
 		
 		/* --- validate & update plugins ---*/
+		boolean requiresUpgrades = false;
 		monitor.subTask(Messages.UpgradeEngine_subprogress3);
 		if (currentVersions != null) {
 			Map<String, String> backupVersions;
@@ -179,6 +180,7 @@ public class UpgradeEngine {
 				}
 			}
 			if (!problems.isEmpty()) {
+				requiresUpgrades = true;
 				final String msg = problems;
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
@@ -194,46 +196,35 @@ public class UpgradeEngine {
 		}
 		monitor.worked(1);
 		
-		
-		/* --- additional upgrade options --- */
-		monitor.subTask(Messages.UpgradeEngine_subprogress4);
-		Map<String, String> versions;
-		s = HibernateManager.openSession();
-		try {
-			versions = getVersions(s);
-		} finally {
-			s.close();
-		}
-		if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-		
-		
-		//uninstall all change log tracking
-		monitor.subTask(Messages.UpgradeEngine_subprogress5);
-		s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
-		}
-
-		//run all installers/upgraders
-		List<IDatabaseUpgrader> extensions = getExtensions();
-		for (IDatabaseUpgrader upgrader : extensions) {
-			//execute install/upgrade
-			upgrader.upgrade(new SubProgressMonitor(monitor, 0));
-		}
-		
-		//install change log tracking (if necessary)
-		monitor.subTask(Messages.UpgradeEngine_subprogress6);
-		s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+		if (requiresUpgrades){
+			//uninstall all change log tracking
+			monitor.subTask(Messages.UpgradeEngine_subprogress5);
+			s = HibernateManager.openSession();
+			try{
+				s.beginTransaction();
+				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
+				s.getTransaction().commit();
+			}finally{
+				s.close();
+			}
+	
+			//run all installers/upgraders
+			List<IDatabaseUpgrader> extensions = getExtensions();
+			for (IDatabaseUpgrader upgrader : extensions) {
+				//execute install/upgrade
+				upgrader.upgrade(new SubProgressMonitor(monitor, 0));
+			}
+			
+			//install change log tracking (if necessary)
+			monitor.subTask(Messages.UpgradeEngine_subprogress6);
+			s = HibernateManager.openSession();
+			try{
+				s.beginTransaction();
+				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
+				s.getTransaction().commit();
+			}finally{
+				s.close();
+			}
 		}
 		monitor.worked(1);
 		
