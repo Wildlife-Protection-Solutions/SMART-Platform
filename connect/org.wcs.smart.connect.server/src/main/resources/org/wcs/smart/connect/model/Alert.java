@@ -54,7 +54,13 @@ public class Alert extends ConnectUuidItem{
 		public String getGuiName(Locale l){
 			return Messages.getString(this.guiKey, l);
 		}
+
+		public String getValue() {
+			return guiKey;
+		}
+
 	}
+
 	
 	private String userGeneratedId; 
 	private Date date;

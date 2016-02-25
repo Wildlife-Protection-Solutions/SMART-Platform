@@ -18,22 +18,22 @@ var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb
 
 /* configure events on html elements */
 window.onload = function(){
-	//add new style   ---  NOT USING STYLES NOW, might go back to it eventually...
-//	document.querySelector("btnNewStyle").onclick=clearAndShowNewStyleDialog;
-//	if(numStyles > 0){
-//		document.getElementById("btnNewStyle").style.display = "none";
-//	}
+	//add new style   ---  
+	document.getElementById("btnNewStyleConfiguration").onclick=clearAndShowNewStyleDialog;
+	if(numStyles > 0){
+		document.getElementById("btnNewStyleConfiguration").style.display = "none";
+	}
 	//delete style
-//	elements = document.querySelectorAll(".deleteStyle");
-//	for (var i = 0; i < elements.length; i ++){
-//		elements[i].onclick=deleteStyle;
-//	}
-//	
-//	//new style dialog
-//	document.getElementById("cancelNewStyle").onclick = function(){
-//		closeDialog('newStyleDialog');
-//	};
-//	document.getElementById("newstyleform").onsubmit = createNewStyle;
+	elements = document.querySelectorAll(".deleteStyle");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].onclick=deleteStyle;
+	}
+	
+	//new style dialog
+	document.getElementById("cancelNewStyle").onclick = function(){
+		closeDialog('newStyleDialog');
+	};
+	document.getElementById("newstyleform").onsubmit = createNewStyle;
 	
 	
 	
@@ -70,37 +70,27 @@ window.onload = function(){
 	
 	//Layer table and actions
 	refreshLayers();
-	
 	refreshTypes();
+	refreshStyleConfiguration();
 	loadIconOptions();
 	refreshDefaults();
 }
 
 
-//
-//function clearAndShowNewStyleDialog(){
-// 	document.querySelector("input[name=style_id]").value = "";
-// 	document.querySelector("#dialogerror").style.display = "none";
-// 	displayDialog('newStyleDialog', 'btnNewType');
-//}
+function clearAndShowNewStyleDialog(){
+ 	document.querySelector("input[name=style_id]").value = "";
+ 	document.querySelector("#dialogerror").style.display = "none";
+ 	displayDialog('newStyleDialog', 'btnNewType');
+}
 
 
 //creates a new Style
 function createNewStyle() {
-	var pass1 = document.querySelector("input[name=password1]").value;
-	var pass2 = document.querySelector("input[name=password2]").value;
-	var user = document.querySelector("input[name=username]").value;
-	var email = document.querySelector("input[name=email]").value;
+		
+	var style_id = document.getElementById("style_id").value;
+	var bg_image = document.getElementById("bg_image").value;
 	
 	var error = "";
-	if (user.length == 0 ) {
-		error = i18n("settings.usernamerequired");
-	}else if (pass1.length == 0){
-		error = i18n("settings.passwordrequired");
-	}else if (pass1 != pass2){
-		error = i18n("settings.passwordsdontmatch");
-	}
-
 	if (error.length > 0){
 		document.querySelector("#dialogerror").innerHTML = error;
 		document.querySelector("#dialogerror").style.display = "block";
@@ -108,23 +98,43 @@ function createNewStyle() {
 	}
 	
 	var jsonData = {
-		"username" : user,
-		"email" : email,
-		"password" : pass1
+		"styleId" : style_id
 	};
-
 	//make ajax call
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
-	closeDialog('newUserDialog');
+	var oData;
+	//option 1
+//	oData = new FormData();
+//	oData.append("json", jsonData);
+//	oData.append("bg_image", bg_image);
+		
+	//option 2
+	var form = document.getElementById("newstyleform");
+	oData = new FormData(form);
+	
+	closeDialog('newStyleDialog');
 	var oReq = new XMLHttpRequest();
-	oReq.onload = userCreated;
-	oReq.open("POST", USER_URL + encodeURIComponent(user), true);
-	oReq.setRequestHeader("Content-type", "application/json");
-	oReq.send(JSON.stringify(jsonData));
+	oReq.onload = styleCreated;
+	oReq.open("POST", STYLE_URL, true);
+	oReq.send(oData);
 	return false;
 }
+
+
+//callback for creating style 
+function styleCreated() {
+	if (this.status == 201) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo(user.username + i18n("settings.stylecreated"));
+	} else {
+		displayError(parseError(i18n("settings.errorcreatingstyle"), this.responseText));
+	}
+	refreshStyleConfiguration();
+}
+
 
 //callback for creating user 
 function userCreated() {
@@ -799,6 +809,123 @@ function getCommaSeparatedList(classname){
 	return str;
 }
 
+/* reload style configuration*/
+function refreshStyleConfiguration(){
+	//clear current table
+	var objects = document.querySelectorAll("tr.stylerow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.getElementById("styletable");
+	var row = document.createElement("tr");
+	row.className="stylerow";
+	row.innerHTML=i18n("settings.refreshtypes");
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createStyleConfigurationTable;
+ 	oReq.open("Get", STYLE_URL, true);
+ 	oReq.send();
+}
+
+/* callback that displays all style configuration info */
+function createStyleConfigurationTable(){
+	//clear current table of the "refreshing..." message, so this isn't a total duplication of effort.
+	var objects = document.querySelectorAll("tr.stylerow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	
+	if (this.status != 200 && this.status != 201 ) {
+		var msg = i18n("alert.errorlabel");
+		if (this.status == 401){
+			msg += i18n("alert.unathorized");
+			displayError(msg); 
+		}
+		return;
+	}
+	
+	
+	var parent = document.getElementById("styletable");
+ 	var style = JSON.parse(this.responseText);
+
+ 	var styleId = style.styleId;
+ 	var footerText = style.footerText;
+ 	var serverName = style.serverName;
+ 	var active = style.active;
+ 	
+ 	var row = tableCreateRowTDs(parent,
+ 				[styleId, active,serverName, footerText, null], 
+ 				"white stylerow");
+ 	row.id = "stylerow" + i;
+ 	row.dataset.uuid = style.uuid;
+	
+	var deleteicon = document.createElement("a");
+	deleteicon.className="delete-icon";
+	deleteicon.title= i18n("settings.deletetype");
+	deleteicon.onclick = deleteStyle;
+	deleteicon.href="";
+	row.childNodes[4].appendChild(deleteicon);
+
+}
+
+function updateStyle(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	document.getElementById("newstyleform").style_uuid.value = uuid;
+	
+	hideInfo();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = showCurrentStyle;
+	oReq.open("GET", STYLE_URL , true);
+	oReq.send();
+	return false;	
+}
+
+function showCurrentStyle(){
+	if (this.status == 200 ) {
+		var r = JSON.parse(this.response);
+	} else {
+		displayError(parseError(i18n("settings.errorgettingstyle") + this.label));
+	}
+	
+	document.querySelector("#dialogerror").style.display = "none";
+	
+	var form = document.getElementById("newstyleform");
+	
+	form.style_id.value = r.styleId;
+	
+	displayDialog('updateStyleDialog', 'btnNewStyleConfiguration');
+}
+
+function deleteStyle(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	var ok = window.confirm(i18n("settings.areyoursuredeletetype"));
+	if (!ok) return false;
+	
+	hideInfo();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = typeDeleted;
+	oReq.open("DELETE", STYLE_URL, true);
+	oReq.send();
+	return false;
+}
+
+function typeDeleted(){
+	if (this.status == 200  && this.status != 201 ) {
+		var r = JSON.parse(this.response);
+		displayInfo(i18n("settings.deletedstyle") + r.label);
+	} else {
+		displayError(parseError(i18n("settings.errordeletingstyle") + this.response));
+	}
+	refreshStyleConfiguration();
+	document.getElementById("btnNewStyleConfiguration").style.display = "block";
+}
 
 function updateExampleIcon(){
 	document.getElementById("exampleIcon").className = "fa fa-" + document.getElementById("type_markerIcon").value;

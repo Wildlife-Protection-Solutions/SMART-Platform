@@ -79,7 +79,7 @@ public class DataUtils {
 						processor.processFile(file, output);
 						processed++;
 						if (printInfo){
-							System.out.println("Processed file " + file.getName() + " - wrote results to " + output.toString());
+							System.out.println("Processed file " + file.getName() + " -\n wrote results to " + output.toString());
 						}
 					}catch (Exception ex){
 						ex.printStackTrace();

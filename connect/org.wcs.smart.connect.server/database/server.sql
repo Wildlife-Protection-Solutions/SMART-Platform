@@ -188,10 +188,9 @@ CREATE TABLE connect.style_configuration(
 	uuid uuid NOT NULL,
 	style_id varchar(64) NOT NULL,
 	active boolean NOT NULL,
-	header_image bytea NOT NULL,
-	background_image bytea NOT NULL,
-	login_image bytea NOT NULL,
-	users_image bytea NOT NULL,
+	header_image bytea,
+	background_image bytea ,
+	login_image bytea,
 	server_name varchar(64),
 	footer_text text,
 	PRIMARY KEY(style_id)

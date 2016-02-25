@@ -138,9 +138,60 @@
 	</table>
 	</form>
 </div>
+
+<!-- Style table -->
+<div class="top-spacer"  style="margin-left: -20px" >
+  <div class="settingsTable table-cell smart-table">
+	<div class="block" style="text-align:left"><b><fmt:message key="settings.styleconfigurationheader" /></b>
+	<button class="button top-spacer" id="btnNewStyleConfiguration"><fmt:message key="settings.addnewstyleconfiguration" /></button>
+	<table id="styletable">
+  	<tr class="table-row smart-table-header">
+			<th class="table-cell smart-table-cell">Style Id</th>
+			<th class="table-cell smart-table-cell">Active?</th>
+			<th class="table-cell smart-table-cell">Server Name</th>
+			<th class="table-cell smart-table-cell">Footer Text</th>
+			<th class="table-cell smart-table-cell">Actions</th>
+	</tr>
+	</table>
+  </div>
+
+
+
 </div>
 
 <%@include file="footer.jsp" %>
+
+<div id="newStyleDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Create a New Style</div>
+  <div id="dialogerror" class="errorsection"></div>
+  <form id="newstyleform" action="settings" method="POST" enctype="multipart/form-data">
+    <label class="block top-spacer">Style Id:</label>
+    <input id="style_id" type="text" name="style_id" class="formtext block" />
+    <label class="block top-spacer">Background Image:</label>
+    <input id="bg_image" type="file" name="bg_image" class="formtext block" />
+     <input class="button" type="submit" id="btnNewStyle" value="Create Style" />
+     <input class="button" type="button" id="cancelNewStyle" value="Cancel" />
+    </div>
+  </form>
+  </div>
+
+
+<div id="updateStyleDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Update Style</div>
+  <div id="dialogerror" class="errorsection"></div>
+  <form id="newstyleform" action="settings" method="POST" enctype="multipart/form-data">
+   	<input type="hidden" name="style_uuid">
+    <label class="block top-spacer">Style Id:</label>
+    <input id="style_id" type="text" name="style_id" class="formtext block" />
+    <label class="block top-spacer">Background Image:</label>
+    <input id="bg_image" type="file" name="bg_image" class="formtext block" />
+     <input class="button" type="submit" id="btnUpdateStyle" value="Update Style" />
+     <input class="button" type="button" id="cancelUpdateStyle" value="Cancel" />
+    </div>
+  </form>
+  </div>
+
+  
 
 <div id="layerDialog" style="display: none;" class="dialog">
   <div class="dialog-title"><fmt:message key="settings.layeredit.title" /></div>

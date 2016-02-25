@@ -110,13 +110,6 @@ public class HibernateManager {
 					.list();
 	}
 
-	@SuppressWarnings("unchecked")
-	public static List<StyleConfiguration> getStyleConfigurations(Session session) {
-		return (List<StyleConfiguration>)session
-				.createCriteria(StyleConfiguration.class)
-				.list();
-	}
-
 	/**
 	 * 
 	 * @param session
@@ -232,5 +225,19 @@ public class HibernateManager {
 		return (List<AlertFilterDefault>)session
 				.createCriteria(AlertFilterDefault.class)
 				.list();
-	}	
+	}
+	
+	public static StyleConfiguration getStyleConfiguration(Session session) {
+		StyleConfiguration m = (StyleConfiguration)session
+				.createCriteria(StyleConfiguration.class)
+				.uniqueResult();
+		return m;
+	}
+	@SuppressWarnings("unchecked")
+	public static List<StyleConfiguration> getStyleConfigurations(Session session) {
+		return (List<StyleConfiguration>)session
+				.createCriteria(StyleConfiguration.class)
+				.list();
+	}
+
 }

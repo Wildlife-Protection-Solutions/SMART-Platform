@@ -35,7 +35,6 @@ public class StyleConfiguration extends ConnectUuidItem {
 	private byte[] headerImage;
 	private byte[] backgroundImage;
 	private byte[] loginImage;
-	private byte[] usersImage;
 	private String serverName;
 	private String footerText;
 	
@@ -80,14 +79,6 @@ public class StyleConfiguration extends ConnectUuidItem {
 	public void setLoginImage(byte[] image){
 		this.loginImage = image;
 	}
-	@Column(name="users_image")
-	public byte[] getUsersImage(){
-		return this.usersImage;
-	}
-	public void setUsersImage(byte[] image){
-		this.usersImage = image;
-	}
-	
 	
 	@Column(name="server_name")
 	public String getServerName(){

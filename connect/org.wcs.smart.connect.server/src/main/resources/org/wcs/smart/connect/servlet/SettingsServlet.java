@@ -80,9 +80,8 @@ public class SettingsServlet extends HttpServlet{
 			status.add(new String[]{x.name(), x.getGuiName(request.getLocale())});
 		}
 		request.setAttribute("status", status); //$NON-NLS-1$
-		
-		request.setAttribute("styles", styles); //$NON-NLS-1$
 		request.setAttribute("numstyles", styles.size()); //$NON-NLS-1$
+
 		request.setAttribute("cas", cas); //$NON-NLS-1$
 		request.setAttribute("alertTypes", alertTypes); //$NON-NLS-1$
 		
@@ -90,31 +89,4 @@ public class SettingsServlet extends HttpServlet{
 		
 	}
 	
-	 protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	     StyleConfiguration style = new StyleConfiguration();
-
-	     style.setStyleId(request.getParameter("style_id")); //$NON-NLS-1$
-	     Part filePart = request.getPart("bg_image");  //$NON-NLS-1$
-	     byte[] bg_image_bytes = null;
-	     try(InputStream fileContent = filePart.getInputStream()){
-	    	 bg_image_bytes = IOUtils.toByteArray(fileContent);
-	     }
-	     style.setActive(true);
-	     style.setBackgroundImage(bg_image_bytes);
-	     style.setHeaderImage(bg_image_bytes);
-	     style.setLoginImage(bg_image_bytes);
-	     style.setUsersImage(bg_image_bytes);
-
-	     Session session = HibernateManager.getSession(request.getServletContext());
-	     session.beginTransaction();
-		 try{
-			 session.save(style);
-			 session.getTransaction().commit();			 
-		 }finally{
-			 session.close();
-		 }
-		 
-		 request.getRequestDispatcher("/WEB-INF/settings.jsp").forward(request, response); //$NON-NLS-1$
-	 }
-	 
 }
