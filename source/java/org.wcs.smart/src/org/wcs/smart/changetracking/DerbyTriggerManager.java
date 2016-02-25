@@ -36,12 +36,12 @@ public enum DerbyTriggerManager {
     /**
      * Determines if a given trigger exists by querying in the systriggers table.
      * 
-     * @param name trigger name
+     * @param name trigger name with schema (smart.trigger_abc)
      * @param s current session
      * @return true if trigger exists, false otherwise
      */
 	public boolean triggerExists(String name, Session s){
-		Query q = s.createSQLQuery("SELECT count(*) FROM SYS.SYSTRIGGERS WHERE UPPER(triggername) = ?"); //$NON-NLS-1$
+		Query q = s.createSQLQuery("SELECT count(*) FROM SYS.SYSTRIGGERS trj, SYS.SYSSCHEMAS sc WHERE trj.schemaid = sc.schemaid AND sc.schemaname || '.' || UPPER(triggername) = ?"); //$NON-NLS-1$
 		q.setString(0, name.toUpperCase());
 		Integer cnt = (Integer)q.uniqueResult();
 		if (cnt.longValue() == 0) return false;
