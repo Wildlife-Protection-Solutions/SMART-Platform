@@ -138,6 +138,7 @@ public class SyncOnStartupProcessor {
 	}
 	
 	private void onShutDown(){
+		if (SmartDB.getCurrentConservationArea() == null) return;
 		
 		ConnectServer cs = null;
 		Session s = HibernateManager.openSession();
