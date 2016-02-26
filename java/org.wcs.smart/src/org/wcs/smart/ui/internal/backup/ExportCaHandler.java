@@ -24,6 +24,7 @@ package org.wcs.smart.ui.internal.backup;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.HashMap;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -97,7 +98,7 @@ public class ExportCaHandler {
 
 					CaExporter exporter = new CaExporter();
 					try{
-						exporter.export(f, monitor);
+						exporter.export(f, new HashMap<String, String>(), monitor);
 						
 						String message =  Messages.ExportCaHandler_ExportComplete_DialogMessage;
 						if (monitor.isCanceled()){

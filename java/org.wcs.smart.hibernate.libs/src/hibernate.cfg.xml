@@ -9,11 +9,12 @@
 
 		<!--  (should not use built in connection pool; we use c3p0 here) -->
 		<!-- <property name="connection.pool_size">1</property> -->
-		<property name="hibernate.c3p0.min_size">1</property>
-		<property name="hibernate.c3p0.max_size">5</property>
-		<property name="hibernate.c3p0.timeout">300</property>
-		<property name="hibernate.c3p0.max_statements">50</property>
-		<property name="hibernate.c3p0.idle_test_period">3000</property>
+		<property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<property name="c3p0.min_size">1</property>
+		<property name="c3p0.max_size">5</property>
+		<property name="c3p0.timeout">300</property>
+		<property name="c3p0.max_statements">50</property>
+		<property name="c3p0.idle_test_period">3000</property>
 		
 		<!-- SQL dialect -->
 		<property name="dialect">org.hibernate.dialect.DerbyDialect</property>

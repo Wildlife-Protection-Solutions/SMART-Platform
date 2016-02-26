@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Class that will installs all change log tracking requirements for all
@@ -130,7 +129,7 @@ public enum ChangeLogInstaller {
 		if (!enabled) return;
 		SmartPlugIn.log("Installing ALL change logging. ", null); //$NON-NLS-1$
 		for (ChangeTrackerWrapper tracker : getTrackers(null)){
-			SmartPlugIn.log("Installing change logging: " + tracker.pluginId, null);
+			SmartPlugIn.log("Installing change logging: " + tracker.pluginId, null); //$NON-NLS-1$
 			tracker.installer.installChangeTracking(session);
 		}
 	}

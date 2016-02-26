@@ -24,6 +24,7 @@ package org.wcs.smart.internal.ca.export;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,11 +49,13 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	private File outputLocation;
 	private ConservationArea ca;
 	private Session session;
+	private HashMap<String, String> options;
 	
 	public DerbyCaDataExportEngine(File outputLocation, ConservationArea ca, Session session){
 		this.session = session;
 		this.ca = ca;
 		this.outputLocation = outputLocation;
+		this.options = new HashMap<String, String>();
 	}
 	
 	/**
@@ -217,6 +220,16 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public File getExportLocation() {
 		return this.outputLocation;
+	}
+
+	@Override
+	public HashMap<String, String> getExportOptions() {
+		return options;
+	}
+
+	@Override
+	public void setExportOptions(HashMap<String, String> options) {
+		this.options = options;
 	}
 
 }

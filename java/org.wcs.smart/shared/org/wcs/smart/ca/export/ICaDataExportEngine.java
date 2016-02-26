@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.export;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -127,4 +128,7 @@ public interface ICaDataExportEngine {
 	void writeQuery(String fileName,
 			String query) throws Exception;
 	
+	HashMap<String,String> getExportOptions();
+	
+	void setExportOptions(HashMap<String,String> options);
 }

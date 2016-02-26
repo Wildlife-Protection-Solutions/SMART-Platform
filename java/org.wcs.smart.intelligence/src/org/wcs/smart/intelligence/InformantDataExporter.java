@@ -40,6 +40,8 @@ import org.wcs.smart.intelligence.model.Informant;
  */
 public class InformantDataExporter implements ICaDataExporter {
 
+	public static final String DELETE_WITHOUT_PROMPT = "informant_delete_no_prompt"; //$NON-NLS-1$
+	
 	private static final String FILESTORE_DIR_NAME = "filestore"; //$NON-NLS-1$
 
 	@Override
@@ -53,13 +55,17 @@ public class InformantDataExporter implements ICaDataExporter {
 		String aesPath = Informant.getDatastoreFolderPath(exportEngine.getExportLocation() + File.separator + FILESTORE_DIR_NAME);
 		File aesFolder = new File(aesPath);
 		if (aesFolder.exists() && aesFolder.listFiles().length > 0) {
-			final boolean[] result = {false};
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					result[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.InformantDataExporter_Dialog_Title, Messages.InformantDataExporter_Dialog_Message);
-				}
-			});
+			
+			final boolean[] result = {true};
+			String deleteNoPrompt = exportEngine.getExportOptions().get(DELETE_WITHOUT_PROMPT);
+			if (deleteNoPrompt == null || !deleteNoPrompt.equals(Boolean.TRUE.toString())){
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						result[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.InformantDataExporter_Dialog_Title, Messages.InformantDataExporter_Dialog_Message);
+					}
+				});
+			}
 			if (result[0]) {
 				FileUtils.forceDelete(aesFolder);
 			}

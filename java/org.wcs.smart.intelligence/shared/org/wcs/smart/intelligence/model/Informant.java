@@ -48,7 +48,7 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.informant")
 public final class Informant extends UuidItem {
 	
-	private static final String DIR_NAME = "aes"; //$NON-NLS-1$
+	public static final String DIR_NAME = "aes"; //$NON-NLS-1$
 
     private ConservationArea conservationArea;
 	public boolean isActive;

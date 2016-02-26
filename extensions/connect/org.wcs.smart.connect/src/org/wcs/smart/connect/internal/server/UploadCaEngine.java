@@ -23,6 +23,7 @@ package org.wcs.smart.connect.internal.server;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -314,7 +315,10 @@ public class UploadCaEngine {
 			SmartUtils.createDirectory(f.getParentFile());
 		}
 	
+		HashMap<String, String> options = new HashMap<String, String>();
+		options.put("informant_delete_no_prompt", Boolean.TRUE.toString());
+		
 		ConnectCaExporter exporter = new ConnectCaExporter();
-		exporter.export(f, new SubProgressMonitor(monitor, 1));
+		exporter.export(f, options, new SubProgressMonitor(monitor, 1));
 	}
 }

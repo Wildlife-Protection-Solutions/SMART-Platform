@@ -25,13 +25,19 @@ import java.nio.file.FileSystems;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.changetracking.IReplicationEventHandler;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.internal.server.replication.SyncHistoryManager;
@@ -97,6 +103,10 @@ public enum DerbyReplicationManager {
 		watcher = new FileStoreWatcher();
 		//ignore certificate files
 		watcher.addIgnorePath(ConnectServer.getDefaultCertificateFileName(SmartDB.getCurrentConservationArea()));
+		for ( IReplicationEventHandler handler: getHandlers()){
+			handler.replicationEnabled(watcher, session);
+		}
+		
 		watcher.register( FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation()) );
 		//run filestore watcher in new thread (background)		
 		fileStoreReplication = new Thread(watcher);
@@ -110,6 +120,10 @@ public enum DerbyReplicationManager {
 	 */
 	public void disableReplication(Session session) throws Exception{
 		setSystemReplicationEnabled(session, false);
+		
+		for ( IReplicationEventHandler handler: getHandlers()){
+			handler.replicationDisabled(watcher, session);
+		}
 		
 		if (watcher != null){
 			watcher.deregister();
@@ -247,5 +261,16 @@ public enum DerbyReplicationManager {
 			}
 		}
 		return null;
+	}
+	
+	
+	private List<IReplicationEventHandler> getHandlers() throws CoreException{
+		List<IReplicationEventHandler> handlers = new ArrayList<IReplicationEventHandler>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IReplicationEventHandler.EXTENSION_ID);
+		for (IConfigurationElement e : config) {
+			IReplicationEventHandler handler = (IReplicationEventHandler) e.createExecutableExtension("class"); //$NON-NLS-1$
+			handlers.add(handler);
+		}
+		return handlers;
 	}
 }
