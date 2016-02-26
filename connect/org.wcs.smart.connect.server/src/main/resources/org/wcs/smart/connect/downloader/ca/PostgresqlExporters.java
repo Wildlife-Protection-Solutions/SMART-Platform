@@ -211,7 +211,7 @@ public class PostgresqlExporters {
 			ClassMetadata metadata = x.get(st.hibernateClass.getName());
 			if (metadata == null || metadata.hasSubclasses()){
 				//this is not mapped to a db table
-				System.out.println("NOT MAPPED:" + st.hibernateClass.getName()); //$NON-NLS-1$
+				//System.out.println("NOT MAPPED:" + st.hibernateClass.getName()); //$NON-NLS-1$
 				continue;
 			}
 			String tableName = ((AbstractEntityPersister)metadata).getTableName();

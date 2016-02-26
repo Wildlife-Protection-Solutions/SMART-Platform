@@ -33,6 +33,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -61,6 +62,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	private File outputLocation;
 	private ConservationArea ca;
 	private Session session;
+	private HashMap<String, String> options;
 	
 	public PostgresqlCaDataExportEngine(File outputLocation, ConservationArea ca, Session session){
 		this.session = session;
@@ -293,5 +295,15 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 			return translator.getSQLString();
 		}
 		return null;
+	}
+
+	@Override
+	public HashMap<String, String> getExportOptions() {
+		return this.options;
+	}
+
+	@Override
+	public void setExportOptions(HashMap<String, String> options) {
+		this.options = options;
 	}
 }
