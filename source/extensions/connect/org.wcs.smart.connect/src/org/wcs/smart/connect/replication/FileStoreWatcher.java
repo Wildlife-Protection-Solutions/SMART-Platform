@@ -45,6 +45,7 @@ import java.util.UUID;
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.changetracking.IFileStoreWatcher;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
@@ -60,7 +61,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class FileStoreWatcher implements Runnable{
+public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 
     private final WatchService watcher;
     private final Map<WatchKey,Path> keys;
@@ -78,6 +79,7 @@ public class FileStoreWatcher implements Runnable{
      * will not deregister directories, if added after.
      * 
      */
+    @Override
     public void addIgnorePath(Path ignorePath){
     	ignorePaths.add(ignorePath);
     }
@@ -95,6 +97,7 @@ public class FileStoreWatcher implements Runnable{
      * Register the given directory, and all its sub-directories, with the
      * WatchService.
      */
+    @Override
     public void register(final Path start) throws IOException {
         // register directory and sub-directories
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {

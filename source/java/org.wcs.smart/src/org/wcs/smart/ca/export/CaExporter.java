@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -82,11 +83,11 @@ public class CaExporter {
 	 * 
 	 * 
 	 */
-	public void export(File destFile, IProgressMonitor monitor) throws Exception{
+	public void export(File destFile,  HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
 		
 		File tempDir = SmartUtils.createTemporaryDirectory();
 		try{
-			exportToTempDirectory(tempDir, monitor);
+			exportToTempDirectory(tempDir, options, monitor);
 			zipTempDirectory(tempDir, destFile, monitor);
 			
 		}finally{
@@ -98,7 +99,7 @@ public class CaExporter {
 		}
 	}
 	
-	protected void exportToTempDirectory(File tempDir, IProgressMonitor monitor) throws Exception{
+	protected void exportToTempDirectory(File tempDir, HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
 
 		List<ICaDataExporter> exporters = getExportExtensions();
 		Collections.sort(exporters, new Comparator<ICaDataExporter>() {
@@ -123,6 +124,7 @@ public class CaExporter {
 			
 			/* run through the exporters exporting data */
 			ICaDataExportEngine engine = new DerbyCaDataExportEngine(tempDir, ca, session);
+			engine.setExportOptions(options);
 			for (ICaDataExporter exporter: exporters){
 				if (monitor.isCanceled()) return;
 				if (ca.getIsCcaa() && !exporter.supportsCcaa()) continue;

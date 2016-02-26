@@ -24,6 +24,7 @@ package org.wcs.smart.connect.internal.server;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -52,11 +53,11 @@ public class ConnectCaExporter extends CaExporter{
 	 * to perform some preprocessing on the export file before zipping it up.
 	 */
 	@Override
-	public void export(File destFile, IProgressMonitor monitor) throws Exception{
+	public void export(File destFile, HashMap<String, String> options, IProgressMonitor monitor) throws Exception{
 		
 		File tempDir = SmartUtils.createTemporaryDirectory();
 		try{
-			exportToTempDirectory(tempDir, monitor);
+			exportToTempDirectory(tempDir, options, monitor);
 			
 			//delete temporary unnecessary files
 			preprocess(tempDir);

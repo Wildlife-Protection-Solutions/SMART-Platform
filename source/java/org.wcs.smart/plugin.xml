@@ -14,6 +14,7 @@
  <extension-point id="org.wcs.smart.startupoption" name="Advanced Start Up Option" schema="schema/org.wcs.smart.startupoption.exsd"/>
  <extension-point id="org.wcs.smart.changelog.installer" name="ChangeLog Tracker" schema="schema/org.wcs.smart.changelog.installer.exsd"/>
  <extension-point id="org.wcs.smart.startup.db" name="org.wcs.smart.startup.db" schema="schema/org.wcs.smart.startup.db.exsd"/>
+ <extension-point id="org.wcs.smart.changelog.handler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"

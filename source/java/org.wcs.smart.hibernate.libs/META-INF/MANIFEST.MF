@@ -18,7 +18,9 @@ Bundle-ClassPath: .,
  lib/hibernate-commons-annotations-4.0.2.Final.jar,
  lib/derby-10.12.1.1.jar,
  lib/derbytools-10.12.1.1.jar,
- lib/hibernate-c3p0-3.6.3.Final.jar
+ lib/hibernate-c3p0-4.2.18.Final.jar,
+ lib/c3p0-0.9.5.2.jar,
+ lib/mchange-commons-java-0.2.11.jar
 Export-Package: antlr,
  antlr.ASdebug,
  antlr.actions.cpp,
