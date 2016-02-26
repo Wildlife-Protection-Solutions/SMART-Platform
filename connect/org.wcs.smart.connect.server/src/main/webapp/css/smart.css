@@ -3,13 +3,13 @@ see "article.tabs" below to change height of maps/tabs/etc on the alerts page.
 */
 
 html {
-  font-family: 'Crimson Text', Georgia, Times, serif;
-  font-size: 1em;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  font-size: 0.8em;
 }
 
 body {
-	background-image: url(../css/background.jpg);
 	margin: 0px;
+	background-color: aliceblue
 }
 
 p{
@@ -64,14 +64,11 @@ h2{
 	border: 0px solid black;
 	padding: 10px 5px 10px 5px;
 	text-align: center;
-	line-height: 130px;
+	line-height: 80px;
 	color: black;
-
-	background-image: url(../css/header.jpg);
-	
 	font-family: 'Allerta', Helvetica, Arial, sans-serif;
-	font-size: 60px;
-    height: 155px;
+	font-size: 40px;
+    height: 30px;
 }
 .pageheader{
 	border-bottom: 1px solid black;
@@ -182,6 +179,12 @@ h2{
 	display: table-cell;   
 }
 
+#login_right{
+	min-width:400px;
+	min-height:400px;
+	background-repeat:no-repeat;
+	background-position: center center;
+}
 
 
 .errorsection{

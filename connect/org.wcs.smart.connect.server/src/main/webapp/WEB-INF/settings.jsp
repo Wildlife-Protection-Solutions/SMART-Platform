@@ -139,36 +139,63 @@
 	</form>
 </div>
 
-<!-- Style table -->
-<div class="top-spacer"  style="margin-left: -20px" >
-  <div class="settingsTable table-cell smart-table">
+
+<div class="overflow settingsTable">
 	<div class="block" style="text-align:left"><b><fmt:message key="settings.styleconfigurationheader" /></b>
 	<button class="button top-spacer" id="btnNewStyleConfiguration"><fmt:message key="settings.addnewstyleconfiguration" /></button>
 	<table id="styletable">
   	<tr class="table-row smart-table-header">
-			<th class="table-cell smart-table-cell">Style Id</th>
-			<th class="table-cell smart-table-cell">Active?</th>
 			<th class="table-cell smart-table-cell">Server Name</th>
 			<th class="table-cell smart-table-cell">Footer Text</th>
+			<th class="table-cell smart-table-cell">Header Style/CSS</th>
+			<th class="table-cell smart-table-cell">Body CSS</th>
 			<th class="table-cell smart-table-cell">Actions</th>
 	</tr>
 	</table>
-  </div>
-
-
-
 </div>
 
-<%@include file="footer.jsp" %>
+
+<!-- dialogs                  -------------------              -->
 
 <div id="newStyleDialog" style="display: none;" class="dialog">
   <div class="dialog-title">Create a New Style</div>
   <div id="dialogerror" class="errorsection"></div>
-  <form id="newstyleform" action="settings" method="POST" enctype="multipart/form-data">
-    <label class="block top-spacer">Style Id:</label>
-    <input id="style_id" type="text" name="style_id" class="formtext block" />
+  <form id="newstyleform" method="POST" enctype="multipart/form-data">
+  
+    <label class="block top-spacer">Server Name / Title Text:</label>
+	<input id="server_name" name="server_name" type="text" value="SMART Connect <img src='https://smartconservationsoftware.org/photos/smart_logo_96.png'>"/>
+    
+    <label class="block top-spacer">Footer Text:</label>
+	<input id="footer_text" name="footer_text" type="text" value="<img src='../css/smart_logo.png'> Copyright 2015, 2016"/>
+  
+    <label class="block top-spacer">Header Style(use css syntax):</label>
+    <textarea id="header_style" name="header_style" class="formtext block" rows=5>border: 0px solid black;
+padding: 10px 5px 10px 5px;
+text-align: center;
+line-height: 80px;
+color: black;
+font-family: 'Allerta', Helvetica, Arial, sans-serif;
+font-size: 40px;
+height: 130px;
+    </textarea>
+    
+	<label class="block top-spacer">Body Style(use css syntax):</label>
+    <textarea id="body_style" name="body_style" class="formtext block" rows=5>margin: 0px;
+background-color: aliceblue;
+font-family: 'Crimson Text', Georgia, Times, serif;
+font-size: 1.2em;
+    </textarea>
+    
+    <label class="block top-spacer">Header Image:</label>
+    <input id="header_image" type="file" name="header_image" class="formtext block" />
+    
     <label class="block top-spacer">Background Image:</label>
     <input id="bg_image" type="file" name="bg_image" class="formtext block" />
+    
+    <label class="block top-spacer">Login Page Image:</label>
+    <input id="login_image" type="file" name="login_image" class="formtext block" />
+    
+    
      <input class="button" type="submit" id="btnNewStyle" value="Create Style" />
      <input class="button" type="button" id="cancelNewStyle" value="Cancel" />
     </div>
@@ -179,12 +206,31 @@
 <div id="updateStyleDialog" style="display: none;" class="dialog">
   <div class="dialog-title">Update Style</div>
   <div id="dialogerror" class="errorsection"></div>
-  <form id="newstyleform" action="settings" method="POST" enctype="multipart/form-data">
-   	<input type="hidden" name="style_uuid">
-    <label class="block top-spacer">Style Id:</label>
-    <input id="style_id" type="text" name="style_id" class="formtext block" />
-    <label class="block top-spacer">Background Image:</label>
+  <form id="updatestyleform" action="settings" method="POST" enctype="multipart/form-data">
+
+    <label class="block top-spacer">Server Name / Title Text:</label>
+	<input id="server_name" name="server_name" type="text" value="SMART Connect"/>
+    
+    <label class="block top-spacer">Footer Text:</label>
+	<input id="footer_text" name="footer_text" type="text" value="Copyright 2015, 2016"/>
+
+    <label class="block top-spacer">Header Style(use css syntax):</label>
+    <textarea id="header_style" name="header_style" class="formtext block" rows=5>
+    </textarea>
+
+    <label class="block top-spacer">Body Style(use css syntax):</label>
+    <textarea id="body_style" name="body_style" class="formtext block" rows=5>
+    </textarea>
+   
+    <label class="block top-spacer">Replacement Header Image:</label>
+    <input id="header_image" type="file" name="header_image" class="formtext block" />
+    
+    <label class="block top-spacer">Replacement Background Image:</label>
     <input id="bg_image" type="file" name="bg_image" class="formtext block" />
+    
+    <label class="block top-spacer">Replacement Login Page Image:</label>
+    <input id="login_image" type="file" name="login_image" class="formtext block" />
+    
      <input class="button" type="submit" id="btnUpdateStyle" value="Update Style" />
      <input class="button" type="button" id="cancelUpdateStyle" value="Cancel" />
     </div>
@@ -288,5 +334,6 @@
     	</form>
   </div>
 
+<%@include file="footer.jsp" %>
 </body>
 </html>

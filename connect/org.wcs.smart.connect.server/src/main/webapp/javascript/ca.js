@@ -3,6 +3,8 @@ var DOWNLOADCA = false;
 
 /* configure events on html elements */
 window.onload = function(){
+	setStyle(true);
+	
 	//add new ca
 	var newbtn =document.querySelector("#btnNewCa");
 	if (newbtn != null){

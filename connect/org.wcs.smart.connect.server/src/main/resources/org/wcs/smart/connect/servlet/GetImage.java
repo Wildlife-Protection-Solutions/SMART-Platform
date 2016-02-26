@@ -22,14 +22,10 @@
 
 package org.wcs.smart.connect.servlet;
 
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
 import javax.servlet.annotation.WebServlet;
@@ -38,9 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.StyleConfiguration;
-
 
 /**
  * servlet to serve images from the database
@@ -49,12 +45,19 @@ import org.wcs.smart.connect.model.StyleConfiguration;
  *
  */
 
-@WebServlet("/connect/getImage")
+@WebServlet("/getImage")
 public class GetImage extends HttpServlet {
 
+	/*
+	 * @ parameter locationID
+	 * value of this parameter picks the right styling image, 1=header, 2=background, 3-login image
+	 * 
+	 */
+	
 	private static final long serialVersionUID = 1L;
-
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String id = request.getParameter("locationId");
+		
 		StyleConfiguration style = null; 
 		
 		Session session = HibernateManager.getSession(request.getServletContext());
@@ -64,39 +67,35 @@ public class GetImage extends HttpServlet {
 		}finally{
 			session.getTransaction().rollback();
 		}
-		byte[] img = style.getBackgroundImage();
+		if(style == null ){
+			response.reset();
+			response.getOutputStream().flush();
+			return;
+		}
 		
-
+		byte[] img =null;
+		if(id.equals("1")){//header image
+			img = style.getHeaderImage();
+		}else if(id.equals("2")){//background image
+			img = style.getBackgroundImage();
+		}else if(id.equals("3")){//login image
+			img = style.getLoginImage();
+		}
+		
+		
+		
+		
 		response.reset();
 		response.setContentType("image/jpg");
 		
-//		ByteArrayInputStream bais = new ByteArrayInputStream(img);
-//		BufferedImage image = ImageIO.read(bais);
-//		
-//		ImageIO.write(image, "jpg", response.getOutputStream());
-////		response.getOutputStream().write(image,0,image.);
-//		response.getOutputStream().flush();  
-		
-		
-		//TESTING ONLY------------------------
-		byte[] imageInByte;
-		BufferedImage originalImage = ImageIO.read(new File("C:/Myfiles/Connect_Website/header.jpg"));
-
-		// convert BufferedImage to byte array
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(originalImage, "jpg", baos);
-		baos.flush();
-		imageInByte = baos.toByteArray();
-		baos.close();
-		//---------------------------
-		
-		
 		InputStream in = new ByteArrayInputStream(img);
 		BufferedImage bImageFromConvert = ImageIO.read(in);
-
+		if(img == null || bImageFromConvert == null){
+			response.reset();
+			response.getOutputStream().flush();
+			return;
+		}
 		ImageIO.write(bImageFromConvert, "jpg", response.getOutputStream());
 		response.getOutputStream().flush();
-
 	}
-
 }

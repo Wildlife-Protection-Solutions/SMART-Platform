@@ -4,6 +4,8 @@ var oReq;
 
 /* configure events on html elements */
 window.onload = function(){
+	setStyle(true);
+	
 	//new user dialog
 	var newbtn = document.querySelector("#btnNewFile");
 	if (newbtn != null){

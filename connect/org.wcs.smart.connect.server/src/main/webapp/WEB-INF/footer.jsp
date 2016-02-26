@@ -5,5 +5,6 @@
 </div> <!--  end core div -->
 <div id="footerid" class="float">
   <img class="float " src="../css/smart_logo.png">
-  <p class="float"> Copyright 2015</p>
+  <p class="float"> Copyright 2015-2016</p>
 </div>
+

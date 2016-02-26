@@ -25,7 +25,7 @@ function login(){
 </script>
 
 </head>
-<body>
+<body onload="setStyle(false)">
 
 
 <%@include file="header.jsp" %>
@@ -35,6 +35,7 @@ function login(){
   
   <div id="main">
   <div id="error" class="errorsection" style="display: ${loginerror == null ? "none" : "block"}">${loginerror}</div>
+  <div id="login_left">
    <form  style="width:200px;" action="${logintarget}" method="POST" id="loginform" onsubmit="return login();">
 	   <label class="top-spacer block"><fmt:message key="login.usernamelabel"/></label>
 	   <input type="text" name="j_username" class="block formtext" value="smart" tabindex="1"/>
@@ -43,6 +44,10 @@ function login(){
 	   <a href="${pageContext.request.contextPath}/forgot" class="block link_small" tabindex="4"><fmt:message key="login.forgot"/></a>
 	   <input class="button block top-spacer" type="submit" value="<fmt:message key="login.login"/>" style="width: 100px" tabindex="3"/>
   </form>
+  </div>
+  <div id="login_right">
+  </div>
+  
 </div>
 </div>
 

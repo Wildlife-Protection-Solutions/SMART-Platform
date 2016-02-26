@@ -12,7 +12,8 @@ var redMarker;
 
 
 window.onload = function(){
-
+	setStyle(true);
+	
 	//Hide header/footer and menu if mobile parameter is set:
 	if(mobile == "true"){
 		document.getElementById('mainheader').style.display = 'none';

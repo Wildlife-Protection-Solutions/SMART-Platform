@@ -5,9 +5,10 @@
 <head>
 	<%@include file="includes.jsp" %>
 	<title><fmt:message key="home.pagetitle"/></title>
+	
 </head>
 
-<body>
+<body onload="setStyle(true)">
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
 	<div id= "main"><div class="pageheader"><fmt:message key="home.welcome"/></div>

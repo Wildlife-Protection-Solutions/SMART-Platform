@@ -37,6 +37,8 @@ public class StyleConfiguration extends ConnectUuidItem {
 	private byte[] loginImage;
 	private String serverName;
 	private String footerText;
+	private String headerStyle;
+	private String bodyStyle;
 	
 	
 	@Column(name="style_id")
@@ -94,5 +96,21 @@ public class StyleConfiguration extends ConnectUuidItem {
 	}
 	public void setFooterText(String text){
 		this.footerText= text;
+	}
+	
+	@Column(name="body_style")
+	public String getBodyStyle() {
+		return bodyStyle;
+	}
+	public void setBodyStyle(String bodyStyle) {
+		this.bodyStyle = bodyStyle;
+	}
+	
+	@Column(name="header_style")
+	public String getHeaderStyle() {
+		return headerStyle;
+	}
+	public void setHeaderStyle(String headerStyle) {
+		this.headerStyle = headerStyle;
 	}
 }

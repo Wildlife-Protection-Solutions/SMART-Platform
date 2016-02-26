@@ -18,6 +18,8 @@ var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb
 
 /* configure events on html elements */
 window.onload = function(){
+	setStyle(true);
+	
 	//add new style   ---  
 	document.getElementById("btnNewStyleConfiguration").onclick=clearAndShowNewStyleDialog;
 	if(numStyles > 0){
@@ -34,6 +36,11 @@ window.onload = function(){
 		closeDialog('newStyleDialog');
 	};
 	document.getElementById("newstyleform").onsubmit = createNewStyle;
+	//update style
+	document.getElementById("cancelUpdateStyle").onclick = function(){
+		closeDialog('updateStyleDialog');
+	};
+	document.getElementById("updatestyleform").onsubmit = submitUpdateLayer;
 	
 	
 	
@@ -78,7 +85,6 @@ window.onload = function(){
 
 
 function clearAndShowNewStyleDialog(){
- 	document.querySelector("input[name=style_id]").value = "";
  	document.querySelector("#dialogerror").style.display = "none";
  	displayDialog('newStyleDialog', 'btnNewType');
 }
@@ -86,33 +92,11 @@ function clearAndShowNewStyleDialog(){
 
 //creates a new Style
 function createNewStyle() {
-		
-	var style_id = document.getElementById("style_id").value;
-	var bg_image = document.getElementById("bg_image").value;
-	
-	var error = "";
-	if (error.length > 0){
-		document.querySelector("#dialogerror").innerHTML = error;
-		document.querySelector("#dialogerror").style.display = "block";
-		return false;
-	}
-	
-	var jsonData = {
-		"styleId" : style_id
-	};
-	//make ajax call
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
-	var oData;
-	//option 1
-//	oData = new FormData();
-//	oData.append("json", jsonData);
-//	oData.append("bg_image", bg_image);
-		
-	//option 2
 	var form = document.getElementById("newstyleform");
-	oData = new FormData(form);
+	var oData = new FormData(form);
 	
 	closeDialog('newStyleDialog');
 	var oReq = new XMLHttpRequest();
@@ -128,11 +112,13 @@ function styleCreated() {
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo(user.username + i18n("settings.stylecreated"));
+		displayInfo(i18n("settings.stylecreated"));
 	} else {
 		displayError(parseError(i18n("settings.errorcreatingstyle"), this.responseText));
 	}
 	refreshStyleConfiguration();
+	document.getElementById("btnNewStyleConfiguration").style.display = "none";
+	setStyle();
 }
 
 
@@ -853,40 +839,71 @@ function createStyleConfigurationTable(){
 	var parent = document.getElementById("styletable");
  	var style = JSON.parse(this.responseText);
 
- 	var styleId = style.styleId;
+ 	var bodyStyle= style.bodyStyle;
  	var footerText = style.footerText;
  	var serverName = style.serverName;
- 	var active = style.active;
+ 	var headerStyle = style.headerStyle;
  	
  	var row = tableCreateRowTDs(parent,
- 				[styleId, active,serverName, footerText, null], 
+ 				[serverName, footerText, headerStyle, bodyStyle, null], 
  				"white stylerow");
  	row.id = "stylerow" + i;
  	row.dataset.uuid = style.uuid;
 	
+ 	var updateicon = document.createElement("a");
+	updateicon.className="update-icon";
+	updateicon.title= i18n("settings.updatestyle");
+	updateicon.onclick = updateStyle;
+	updateicon.href="";
+	row.childNodes[4].appendChild(updateicon); 	
+ 	
 	var deleteicon = document.createElement("a");
 	deleteicon.className="delete-icon";
-	deleteicon.title= i18n("settings.deletetype");
+	deleteicon.title= i18n("settings.deletestyle");
 	deleteicon.onclick = deleteStyle;
 	deleteicon.href="";
 	row.childNodes[4].appendChild(deleteicon);
 
 }
 
-function updateStyle(){
+function deleteStyle(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	document.getElementById("newstyleform").style_uuid.value = uuid;
+	var ok = window.confirm(i18n("settings.areyoursuredeletestyle"));
+	if (!ok) return false;
 	
 	hideInfo();
 	
 	var oReq = new XMLHttpRequest();
-	oReq.onload = showCurrentStyle;
-	oReq.open("GET", STYLE_URL , true);
+	oReq.onload = styleDeleted;
+	oReq.open("DELETE", STYLE_URL, true);
 	oReq.send();
-	return false;	
+	return false;
 }
 
-function showCurrentStyle(){
+function styleDeleted(){
+	if (this.status == 200  && this.status != 201 ) {
+		var r = JSON.parse(this.response);
+		displayInfo(i18n("settings.deletedstyle"));
+	} else {
+		displayError(parseError(i18n("settings.errordeletingstyle") + this.response));
+	}
+	refreshStyleConfiguration();
+	setStyle();
+	document.getElementById("btnNewStyleConfiguration").style.display = "block";
+}
+
+
+function updateStyle(){
+	hideInfo();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = showCurrentStyle;
+	oReq.open("GET", STYLE_URL, true);
+	oReq.send();
+	return false;
+}
+
+function showCurrentStyle() {
 	if (this.status == 200 ) {
 		var r = JSON.parse(this.response);
 	} else {
@@ -895,36 +912,30 @@ function showCurrentStyle(){
 	
 	document.querySelector("#dialogerror").style.display = "none";
 	
-	var form = document.getElementById("newstyleform");
+	var form = document.getElementById("updatestyleform");
 	
-	form.style_id.value = r.styleId;
-	
-	displayDialog('updateStyleDialog', 'btnNewStyleConfiguration');
+	form.header_style.value = r.headerStyle;
+	form.body_style.value = r.bodyStyle;
+	form.footer_text.value = r.footerText;
+	form.server_name.value = r.serverName;
+
+	displayDialog('updateStyleDialog', 'btnNewType');
 }
 
-function deleteStyle(){
-	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm(i18n("settings.areyoursuredeletetype"));
-	if (!ok) return false;
-	
+
+function submitUpdateLayer(){
 	hideInfo();
-	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = typeDeleted;
-	oReq.open("DELETE", STYLE_URL, true);
-	oReq.send();
-	return false;
-}
+	document.querySelector("#message").style.display = "none";
 
-function typeDeleted(){
-	if (this.status == 200  && this.status != 201 ) {
-		var r = JSON.parse(this.response);
-		displayInfo(i18n("settings.deletedstyle") + r.label);
-	} else {
-		displayError(parseError(i18n("settings.errordeletingstyle") + this.response));
-	}
-	refreshStyleConfiguration();
-	document.getElementById("btnNewStyleConfiguration").style.display = "block";
+	var form = document.getElementById("updatestyleform");
+	var oData = new FormData(form);
+	
+	closeDialog('updateStyleDialog');
+	var oReq = new XMLHttpRequest();
+	oReq.onload = styleCreated;
+	oReq.open("PUT", STYLE_URL, true);
+	oReq.send(oData);
+	return false;
 }
 
 function updateExampleIcon(){

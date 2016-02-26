@@ -189,9 +189,11 @@ CREATE TABLE connect.style_configuration(
 	style_id varchar(64) NOT NULL,
 	active boolean NOT NULL,
 	header_image bytea,
-	background_image bytea ,
+	header_style varchar(256),
+	background_image bytea,
+	body_style varchar(256),
 	login_image bytea,
-	server_name varchar(64),
+	server_name varchar(256),
 	footer_text text,
 	PRIMARY KEY(style_id)
 ) WITHOUT OIDS;

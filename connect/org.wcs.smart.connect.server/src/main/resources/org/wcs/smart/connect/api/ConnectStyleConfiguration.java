@@ -22,11 +22,6 @@
 package org.wcs.smart.connect.api;
 
 import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,43 +29,25 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
-import org.wcs.smart.connect.filter.AlertFilter;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.model.Alert;
-import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
-import org.wcs.smart.connect.model.AlertType;
-import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.model.GeoJsonAlert;
-import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.StyleConfiguration;
-import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
@@ -119,9 +96,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		
 	@GET
     @Path("")
-
     public StyleConfiguration getStyleConfiguration(){
-		validateUser(AlertAction.VIEW_ALL_KEY);
 		
 		StyleConfiguration style;
 		Session s = HibernateManager.getSession(context);
@@ -141,15 +116,27 @@ public class ConnectStyleConfiguration extends HttpServlet {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
     public StyleConfiguration addStyleConfiguration(MultipartFormDataInput input) {
 		validateUser(AlertAction.CREATE_ALERTS_KEY);
-		byte[] bg_image = null;
-		String id = "";
+		byte[] bg_image, header_image, login_image = null;
+		String body_style = "";
+		String header_style = "";
+		String footer_text= "";
+		String server_name ="";
 		
 		try{
 			InputStream in = input.getFormDataMap().get("bg_image").get(0).getBody(InputStream.class,null);
 			bg_image = IOUtils.toByteArray(in);
-					  
-		      //bg_image = input.getFormDataMap().get("bg_image").get(0).getStrig().getBytes();
-		      id = input.getFormDataMap().get("style_id").get(0).getBodyAsString();
+			
+			InputStream in2 = input.getFormDataMap().get("header_image").get(0).getBody(InputStream.class,null);
+			header_image = IOUtils.toByteArray(in2);
+			
+			InputStream in3 = input.getFormDataMap().get("login_image").get(0).getBody(InputStream.class,null);
+			login_image = IOUtils.toByteArray(in3);
+			
+			header_style = input.getFormDataMap().get("header_style").get(0).getBodyAsString();
+			body_style = input.getFormDataMap().get("body_style").get(0).getBodyAsString();
+			footer_text= input.getFormDataMap().get("footer_text").get(0).getBodyAsString();
+			server_name = input.getFormDataMap().get("server_name").get(0).getBodyAsString();
+
 
 	    }catch (Exception ex){
 	    	throw new SmartConnectException(ex.getMessage(), ex);
@@ -158,8 +145,15 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		StyleConfiguration  newStyle = new StyleConfiguration();
 
 		newStyle.setActive(true);
+		newStyle.setHeaderImage(header_image);
 		newStyle.setBackgroundImage(bg_image);
-		newStyle.setStyleId(id);
+		newStyle.setLoginImage(login_image);
+
+		newStyle.setStyleId("The Style");
+		newStyle.setBodyStyle(body_style);
+		newStyle.setHeaderStyle(header_style);
+		newStyle.setFooterText(footer_text);
+		newStyle.setServerName(server_name);
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -183,7 +177,88 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		
 		return newStyle;
 	}
+	
+	@PUT
+    @Path("")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+    public StyleConfiguration editStyleConfiguration(MultipartFormDataInput input) {
+		validateUser(AlertAction.CREATE_ALERTS_KEY);
+		byte[] bg_image, header_image, login_image = null;
+		String body_style = "";
+		String header_style = "";
+		String footer_text= "";
+		String server_name ="";
+		
+		StyleConfiguration style;
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			style = HibernateManager.getStyleConfiguration(s);
+		}catch (Exception e){
+			throw e;
+		}finally{
+			s.getTransaction().commit();
+		}
+		
+		try{
+			InputStream in = input.getFormDataMap().get("bg_image").get(0).getBody(InputStream.class,null);
+			bg_image = IOUtils.toByteArray(in);
+			
+			InputStream in2 = input.getFormDataMap().get("header_image").get(0).getBody(InputStream.class,null);
+			header_image = IOUtils.toByteArray(in2);
+			
+			InputStream in3 = input.getFormDataMap().get("login_image").get(0).getBody(InputStream.class,null);
+			login_image = IOUtils.toByteArray(in3);
+			
+			header_style = input.getFormDataMap().get("header_style").get(0).getBodyAsString();
+			body_style = input.getFormDataMap().get("body_style").get(0).getBodyAsString();
+			footer_text= input.getFormDataMap().get("footer_text").get(0).getBodyAsString();
+			server_name = input.getFormDataMap().get("server_name").get(0).getBodyAsString();
 
+	    }catch (Exception ex){
+	    	throw new SmartConnectException(ex.getMessage(), ex);
+		}
+
+		if(header_image.length > 0){
+			style.setHeaderImage(header_image);
+		}
+		if(bg_image.length > 0){
+			style.setBackgroundImage(bg_image);
+		}
+		if(login_image.length > 0){
+			style.setLoginImage(login_image);
+		}
+
+		style.setBodyStyle(body_style);
+		style.setHeaderStyle(header_style);
+		style.setFooterText(footer_text);
+		style.setServerName(server_name);
+
+		
+		s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			s.update(style);
+			s.getTransaction().commit();
+			response.setStatus(Response.Status.CREATED.getStatusCode());
+			response.flushBuffer();
+
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(ex.getMessage(), ex);
+		}finally{
+			
+		}
+		
+		return style;
+	}
+	
+	
 	
     @DELETE
     @Path("/")

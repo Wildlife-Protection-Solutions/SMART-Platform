@@ -19,6 +19,7 @@ var tifValues = ["entitygrid", "observationgrid","patrolgrid",  "surveygrid"];
 
 /* configure events on html elements */
 window.onload = function(){
+	setStyle(true);
 	document.getElementById('textsearch').value = search;
 	getCaList();
 	getQueryList();

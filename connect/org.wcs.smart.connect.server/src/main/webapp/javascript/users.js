@@ -6,7 +6,7 @@ var allRoles = null;
 
 /* configure events on html elements */
 window.onload = function(){
-	
+	setStyle(true);
 	document.querySelector("#roletab").onclick=function(){showTab("roletab");}
 	document.querySelector("#actiontab").onclick=function(){showTab("actiontab");}
 	showTab("roletab");
