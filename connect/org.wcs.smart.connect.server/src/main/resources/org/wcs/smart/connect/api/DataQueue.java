@@ -400,6 +400,7 @@ public class DataQueue {
 		UUID itemUuid = parseUuid(uuid);
 		
 		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
 		try{
 			
 			ServerDataQueueItem item = (ServerDataQueueItem) s.get(ServerDataQueueItem.class, itemUuid);
@@ -412,11 +413,57 @@ public class DataQueue {
 			logger.log(Level.SEVERE, "Could not get data queue item: " +uuid, ex); //$NON-NLS-1$
 			if (ex instanceof SmartConnectException) throw ex;
 			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, MessageFormat.format(Messages.getString("DataQueue.ItemNotFound", SmartUtils.getRequestLocale(request)), uuid), ex);	 //$NON-NLS-1$
+		}finally{
+			s.getTransaction().rollback();
 		}
 	}
 		
 	/**
-	 * Updates a given data queue item status.
+	 * Updates only the status associated with a data queue item
+	 * 
+	 * @param newItem
+	 * @return
+	 */
+	@PUT
+	@Path("/items/{uuid}/status/{status}")
+	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, 
+			@PathParam("status") String newStatus){
+		
+		ServerDataQueueItem.Status serverStatus = null;
+		try{
+			serverStatus = ServerDataQueueItem.Status.valueOf(newStatus.toUpperCase());
+		}catch (Exception ex){
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataQueue.StatusValueNotSupport", SmartUtils.getRequestLocale(request)), newStatus)); //$NON-NLS-1$
+		}
+		
+		UUID uuid = parseUuid(itemUuid);
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			ServerDataQueueItem item = (ServerDataQueueItem) s.get(ServerDataQueueItem.class, uuid);
+			if (item == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataQueue.ItemNotFound2", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			}
+			validateProcess(item.getConservationArea(), s);
+			
+			if (serverStatus == ServerDataQueueItem.Status.PROCESSING 
+					&& item.getStatus() != ServerDataQueueItem.Status.QUEUED){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.AlreadyProcessed", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			}
+			
+			item.setStatus(serverStatus);
+			s.getTransaction().commit();
+			return item;
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			logger.log(Level.SEVERE, Messages.getString("DataQueue.Error2", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+			if (ex instanceof SmartConnectException) throw ex;
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex);
+		}
+	}
+	
+	/**
+	 * Updates the type and status associated with a data queue item
 	 * 
 	 * @param newItem
 	 * @return
@@ -424,7 +471,7 @@ public class DataQueue {
 	@Consumes({ MediaType.APPLICATION_JSON})
 	@PUT
 	@Path("/items/{uuid}/")
-	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, ServerDataQueueItem newItem){ 
+	public DataQueueItem updateItem(@PathParam("uuid") String itemUuid, ServerDataQueueItem newItem){ 
 
 		UUID uuid = parseUuid(itemUuid);
 		Session s = HibernateManager.getSession(context);

@@ -46,7 +46,7 @@ public class GeneralExceptionMapper implements ExceptionMapper<Exception> {
 		if (ex.getMessage() != null) {
 			ObjectMapper mapper = new ObjectMapper();
 			StringBuilder sb = new StringBuilder();
-			sb.append("{ \"status\": " + Response.Status.INTERNAL_SERVER_ERROR); //$NON-NLS-1$
+			sb.append("{ \"status\": " + Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); //$NON-NLS-1$
 
 			sb.append(",\"error\": "); //$NON-NLS-1$
 			try {
