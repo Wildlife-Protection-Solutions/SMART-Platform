@@ -116,6 +116,7 @@
       <view
             allowMultiple="true"
             class="org.wcs.smart.ui.BrowserView$BrowserViewWrapper"
+            icon="images/icons/eview16/world.png"
             id="org.wcs.smart.view.browser"
             name="SMART Web Browser"
             restorable="true">
