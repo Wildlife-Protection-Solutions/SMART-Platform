@@ -1131,6 +1131,10 @@ public class Messages extends NLS {
 	public static String ZipUtil_Progress_ProcessingFile;
 	
 	public static String BooleanAttributeField_UnderfinedBooleanOption;
+	public static String BrowserView_hometooltip;
+	public static String BrowserView_nexttooltip;
+	public static String BrowserView_previoustooltip;
+	public static String BrowserView_refreshtooltip;
 	public static String NumericAttributeField_InvalidNumericAttribute;
 	public static String TreeAttributeField_InvalidTreeValue;
 	static {
