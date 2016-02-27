@@ -100,7 +100,6 @@ public class Messages extends NLS {
 	public static String PatrolScreens_Paused;
 	public static String PatrolScreens_PausePatrol;
 	public static String PatrolScreens_Pilot;
-	public static String PatrolScreens_ResumePatrol;
 	public static String PatrolScreens_StartPatrol;
 	public static String PatrolScreens_Station;
 	public static String PatrolScreens_Team;
@@ -114,6 +113,9 @@ public class Messages extends NLS {
 	public static String PatrolScreensUtil_Error_Meta_Type;
 	public static String PatrolScreensUtil_Error_TransportNotSet;
 	public static String PatrolScreensUtil_Error_TypesNotSet;
+	public static String PatrolScreensUtil_PauseScreen_Message;
+	public static String PatrolScreensUtil_PauseScreen_Title;
+	public static String PatrolScreensUtil_ResumeScreen_Message;
 	public static String PatrolSelectorDialog_AddAsLeg;
 	public static String PatrolSelectorDialog_AddAsPatrol;
 	public static String PatrolSelectorDialog_Message;

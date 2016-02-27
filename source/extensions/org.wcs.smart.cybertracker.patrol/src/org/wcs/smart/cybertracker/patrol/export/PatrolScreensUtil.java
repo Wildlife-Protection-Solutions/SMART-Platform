@@ -293,8 +293,10 @@ public class PatrolScreensUtil extends ScreensUtil {
 		if (ctProps.isCanPause()) {
 			nextTaskOptions.add(Messages.PatrolScreens_PausePatrol);
 			PauseNodesLabels labels = new PauseNodesLabels();
-			labels.resumeOption = Messages.PatrolScreens_ResumePatrol;
+			labels.pauseScreenTitle = Messages.PatrolScreensUtil_PauseScreen_Title;
+			labels.pauseScreenMessage = Messages.PatrolScreensUtil_PauseScreen_Message;
 			labels.resumeScreenTitle = Messages.PatrolScreens_Paused;
+			labels.resumeScreenMessage = Messages.PatrolScreensUtil_ResumeScreen_Message;
 			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
 		}
 		
