@@ -79,19 +79,24 @@ public class PatrolImporter extends AbstractPatrolImporter {
 				return null;
 			}
 			
-			if (patrol.getFirstLeg().getLeader() == null){
-				if (!fixLeaderError(patrol.getFirstLeg(), ctPatrol, session)){
+			PatrolLeg firstLeg = patrol.getFirstLeg();
+			if (firstLeg.getLeader() == null){
+				if (!fixLeaderError(firstLeg, ctPatrol, session)){
 					return null;
 				}
 			}
-			if (patrol.hasPilot() && patrol.getFirstLeg().getPilot() == null){
-				if (!fixPilotError(patrol.getFirstLeg(), ctPatrol, session)){
+			if (patrol.hasPilot() && firstLeg.getPilot() == null){
+				if (!fixPilotError(firstLeg, ctPatrol, session)){
 					return null;
 				}
 			}
 			List<S> sList = extractAndPreProcessSights(ctPatrol);
+			RestTimeMap restMap = extractRestTime(sList);
 			for (S s : sList) {
-				addObservations(patrol.getFirstLeg(), s, ctPatrol.getElementsMap(), session);
+				addObservations(firstLeg, s, ctPatrol.getElementsMap(), session);
+			}
+			for (PatrolLegDay pld : firstLeg.getPatrolLegDays()) {
+				pld.setRestMinutes(restMap.getRestMinutes(pld.getDate()));
 			}
 			
 			if (!displayWarnings(ctPatrol))

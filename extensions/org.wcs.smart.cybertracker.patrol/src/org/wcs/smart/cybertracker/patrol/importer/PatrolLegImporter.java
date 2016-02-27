@@ -137,8 +137,12 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 			}
 			
 			List<S> sList = extractAndPreProcessSights(ctPatrol);
+			RestTimeMap restMap = extractRestTime(sList);
 			for (S s : sList) {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
+			}
+			for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+				pld.setRestMinutes(restMap.getRestMinutes(pld.getDate()));
 			}
 
 			if (!displayWarnings(ctPatrol))

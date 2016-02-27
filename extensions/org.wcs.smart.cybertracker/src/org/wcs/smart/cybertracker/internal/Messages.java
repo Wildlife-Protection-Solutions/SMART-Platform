@@ -7,6 +7,8 @@ public class Messages extends NLS {
 	public static String AddCyberTrackerJob_ErrorMsg;
 	public static String AddCyberTrackerJob_ErrorTitle;
 	public static String AbstractSmartImporter_ElementMissing;
+	public static String AbstractSmartImporter_InvalidTimeFrame;
+	public static String AbstractSmartImporter_MissingMandatoryField;
 	public static String AbstractSmartImporter_MissingTreeItemDetails;
 	public static String AbstractSmartImporter_MultipleDefaultAttributesRecords;
 	public static String AbstractSmartImporter_MultipleValuesForAttribute;
@@ -15,6 +17,8 @@ public class Messages extends NLS {
 	public static String AbstractSmartImporter_NoTreeAttrItemInDatamodel_Skip;
 	public static String AbstractSmartImporter_Observer_InvalidData;
 	public static String AbstractSmartImporter_Observer_NotFound;
+	public static String AbstractSmartImporter_ParseDateError;
+	public static String AbstractSmartImporter_PauseRecordedSeveralTimes;
 	public static String AddCyberTrackerJob_InstallCtJobName;
 	public static String AddCyberTrackerJob_Progress1;
 	public static String ConfigurableModelEditorCyberTrackerTab_Button_CreateProfile;

@@ -71,6 +71,8 @@ public class ScreensUtil {
 	
 	public static final String RESULT_DATATYPE = "#DataType"; //$NON-NLS-1$
 
+	public static final String RESULT_PAUSED = "#Paused"; //$NON-NLS-1$
+
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
 	
@@ -187,17 +189,26 @@ public class ScreensUtil {
 		if (!ctProps.isCanPause()) {
 			return null;
 		}
+		
+		CyberTrackerId pauseId = new CyberTrackerId();
 		CyberTrackerId resumeId = new CyberTrackerId();
-		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, labels.resumeOption);
-		List<String> resScrValues = ctUtil.listItemIds(resScrIds);
-		String resScrTrElements = ctUtil.translateElements(resScrIds);
-		StringBuilder resScrLinks = new StringBuilder();
-		// "Resume" leads to "Next Task" screen
-		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(nextTaskId.getNodeTranslatedId());
-		Node resumeNode = screensFactory.createNodeRadio(resumeId.getNodeId(), labels.resumeScreenTitle, resScrValues, resScrTrElements, resScrLinks.toString(), null);
+		CyberTrackerId onHoldId = new CyberTrackerId();
+		ElementsUtil.addElementsItem(elements, RESULT_PAUSED, onHoldId.getItemId());
+
+		Node pauseNode = ctUtil.createSaveNode(pauseId, resumeId, labels.pauseScreenTitle, labels.pauseScreenMessage, false);
+		Control pausedAttr = screensFactory.createAttrubuteControl14(onHoldId.getItemId(), false, ICyberTrackerConstants.STR_TRUE);
+		ScreensObjectFactory.addControlToNode(pauseNode, pausedAttr);
+		container.screenNodes.add(pauseNode);
+		
+		Node resumeNode = ctUtil.createSaveNode(resumeId, nextTaskId, labels.resumeScreenTitle, labels.resumeScreenMessage, false);
+		Control control2 = ScreensObjectFactory.getNavigationControl(resumeNode);
+		control2.setShowBack("False"); //$NON-NLS-1$
 		addGpsConfiguration(resumeNode, ctProps, 0);
+		Control resumeAttr = screensFactory.createAttrubuteControl14(onHoldId.getItemId(), false, ICyberTrackerConstants.STR_FALSE);
+		ScreensObjectFactory.addControlToNode(resumeNode, resumeAttr);
 		container.screenNodes.add(resumeNode);
-		return resumeId;
+		
+		return pauseId;
 	}
 
 	/**
@@ -408,8 +419,10 @@ public class ScreensUtil {
 	}
 	
 	protected class PauseNodesLabels {
+		public String pauseScreenTitle = "Confirm pause"; //$NON-NLS-1$
+		public String pauseScreenMessage = "Press 'Save' to confirm pausing or use back button."; //$NON-NLS-1$
 		public String resumeScreenTitle = "Paused"; //$NON-NLS-1$
-		public String resumeOption = "Resume"; //$NON-NLS-1$
+		public String resumeScreenMessage = "Press 'Save' to resume."; //$NON-NLS-1$
 		public PauseNodesLabels() {}
 	}
 }

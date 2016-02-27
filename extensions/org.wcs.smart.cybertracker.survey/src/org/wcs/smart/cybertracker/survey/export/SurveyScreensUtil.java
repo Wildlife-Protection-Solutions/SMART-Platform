@@ -224,8 +224,11 @@ public class SurveyScreensUtil extends ScreensUtil {
 		if (ctProps.isCanPause()) {
 			nextTaskOptions.add(Messages.SurveyScreensUtil_PauseSurvey);
 			PauseNodesLabels labels = new PauseNodesLabels();
-			labels.resumeOption = Messages.SurveyScreensUtil_ResumeSurvey;
+			labels.pauseScreenTitle = Messages.SurveyScreensUtil_PauseScreen_Title;
+			labels.pauseScreenMessage = Messages.SurveyScreensUtil_PauseScreen_Message;
 			labels.resumeScreenTitle = Messages.SurveyScreensUtil_PausedSurveyTitle;
+			labels.resumeScreenMessage = Messages.SurveyScreensUtil_ResumeScreen_Message;
+
 			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
 		}
 		

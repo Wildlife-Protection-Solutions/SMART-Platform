@@ -36,6 +36,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
@@ -59,6 +62,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.util.SharedUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -75,6 +79,8 @@ public abstract class AbstractSmartImporter {
 	private DateFormat filenameDateFormat = new SimpleDateFormat("yyyy_MM_dd"); //$NON-NLS-1$
 
 	private List<String> warnings = new ArrayList<String>();
+
+	private DateFormat formatter = createCyberTrackerDateFormatter();
 
 	public static DateFormat createCyberTrackerDateFormatter() {
 		DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //will this always work or CT might provide different format depending on locale settings?
@@ -409,7 +415,6 @@ public abstract class AbstractSmartImporter {
 		case DATE:
 		{
 			try {
-				DateFormat formatter = createCyberTrackerDateFormatter();
 				wpoa.setDateValue(formatter.parse(av));
 			} catch (ParseException ex) {
 				CyberTrackerPlugIn.log(ex.getMessage(), ex);
@@ -478,7 +483,6 @@ public abstract class AbstractSmartImporter {
 	protected Date toDate(String strDate) {
 		if (strDate == null)
 			return null;
-		DateFormat formatter = createCyberTrackerDateFormatter();
 		try {
 			return formatter.parse(strDate);
 		} catch (ParseException e) {
@@ -526,15 +530,43 @@ public abstract class AbstractSmartImporter {
 	protected List<S> extractAndPreProcessSights(AbstractCyberTrackerData ctData) {
 		List<S> sData = validateData(ctData);
 		return SightsMultiObsUtil.convertMultiObs(sData, ctData.getElementsMap());
-		
 	}	
 	
 	private List<S> validateData(AbstractCyberTrackerData ctData) {
 		List<S> result = new ArrayList<S>(ctData.getSData().size());
 		for (S s : ctData.getSData()) {
+			if (!validateMandatoryData(s)) {
+				continue;
+			}
 			result.add(validateNoExtraData(s, ctData.getElementsMap()));
 		}
 		return result;
+	}
+
+	private boolean validateMandatoryData(S s) {
+		Set<String> mandatoryNames = new TreeSet<>(Arrays.asList("Date", "Time")); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		//currently this ensures that every <S> has date and time
+		for (A a : s.getA()) {
+			String i = a.getI();
+			if (ICyberTrackerConstants.DATE.equals(i)) {
+				try {
+					formatter.parse(a.getV());
+					mandatoryNames.remove("Date"); //$NON-NLS-1$
+				} catch (ParseException e) {
+					addWarning(MessageFormat.format(Messages.AbstractSmartImporter_ParseDateError, a.getV()));
+					CyberTrackerPlugIn.log(e.getMessage(), e);
+					return false;
+				}
+			} else if (ICyberTrackerConstants.TIME.equals(i)) {
+				mandatoryNames.remove("Time"); //$NON-NLS-1$
+			}
+			if (mandatoryNames.isEmpty()) {
+				return true;
+			}
+		}
+		addWarning(MessageFormat.format(Messages.AbstractSmartImporter_MissingMandatoryField, mandatoryNames.toString()));
+		return false;
 	}
 
 	/**
@@ -573,7 +605,6 @@ public abstract class AbstractSmartImporter {
 			String v = a.getV();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				try {
-					DateFormat formatter = createCyberTrackerDateFormatter();
 					date = formatter.parse(v);
 					if (time != null) {
 						return combine(date, time);
@@ -591,6 +622,95 @@ public abstract class AbstractSmartImporter {
 		return combine(date, time);
 	}
 
+	/**
+	 * Returns a mapping containing rest time in minutes for each day.
+	 * @param sList
+	 * @return
+	 */
+	protected RestTimeMap extractRestTime(List<S> sList) {
+		Comparator<Date> dateComparator = new Comparator<Date>() {
+			@Override
+			public int compare(Date d1, Date d2) {
+				if (d1 == null) return d2 == null ? 0 : -1;
+				if (d2 == null) return 1; //d1 is bigger
+				if (d1.equals(d2) || SharedUtils.isSameDate(d1, d2)) return 0;
+				return d1.compareTo(d2);
+			}
+		};
+		Map<Date, Long> restMap = new TreeMap<>(dateComparator);
+		Date pauseDate = null;
+		Time pauseTime = null;
+		
+		for (S s : sList) {
+			Date date = null;
+			Time time = null;
+			boolean paused = false;
+			for (A a : s.getA()) {
+				String i = a.getI();
+				String n = a.getN();
+				String v = a.getV();
+				if (ICyberTrackerConstants.DATE.equals(i)) {
+					date = toDate(v);
+				} else if (ICyberTrackerConstants.TIME.equals(i)) {
+					time = Time.valueOf(v);
+				} else if (ScreensUtil.RESULT_PAUSED.equals(n)) {
+					paused = ICyberTrackerConstants.STR_TRUE.equals(v);
+				}
+			}
+			
+			if (paused) {
+				//<S> contains info that patrol/mission was paused
+				if (pauseDate == null && pauseTime == null) {
+					pauseDate = date;
+					pauseTime = time;
+				} else {
+					addWarning(MessageFormat.format(Messages.AbstractSmartImporter_PauseRecordedSeveralTimes, combine(pauseDate, pauseTime), combine(date, time)));
+				}
+			} else if (pauseDate != null || pauseTime != null) {
+				//record rest time
+				if (SharedUtils.isSameDate(pauseDate, date)) {
+					//patrol was paused during the day
+					Long rest = restMap.get(date);
+					if (rest == null) rest = 0L;
+					if (time.after(pauseTime)) {
+						rest += time.getTime() - pauseTime.getTime();
+					} else {
+						addWarning(MessageFormat.format(Messages.AbstractSmartImporter_InvalidTimeFrame, combine(pauseDate, pauseTime), combine(date, time)));
+					}
+					restMap.put(date, rest);
+				} else {
+					//patrol was paused overnight day
+					if (date.after(pauseDate)) {
+						//record for day it was paused
+						Long rest = restMap.get(pauseDate);
+						if (rest == null) rest = 0L;
+						rest += (1000*60*60*24 - pauseTime.getTime()); //milliseconds in a day minus current time in milliseconds
+						restMap.put(pauseDate, rest);
+						//record for intermediate days
+						Calendar c = Calendar.getInstance(); 
+						c.setTime(pauseDate); 
+						c.add(Calendar.DATE, 1);
+						Date intermediateDate = c.getTime();
+						while (!SharedUtils.isSameDate(date, intermediateDate)) {
+							restMap.put(intermediateDate, 1000*60*60*24L); //rest all day
+							c.add(Calendar.DATE, 1);
+							intermediateDate = c.getTime();
+						}
+						//record for day it was resumed
+						restMap.put(date, time.getTime()); //it must be a first rest time during this day
+					} else {
+						addWarning(MessageFormat.format(Messages.AbstractSmartImporter_InvalidTimeFrame, combine(pauseDate, pauseTime), combine(date, time)));
+					}
+				}
+				//reset pause date/time
+				pauseDate = null;
+				pauseTime = null;
+			}
+		}
+		
+		return new RestTimeMap(restMap);
+	}
+	
 	private S cloneExcluding(S s, List<A> toExclude) {
 		S sClone = new S();
 		sClone.getA().addAll(s.getA());
@@ -629,4 +749,23 @@ public abstract class AbstractSmartImporter {
 		}
 	}
 
+	/**
+	 * Represents a mapping containing rest time in minutes for each day.
+	 * 
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	public static class RestTimeMap {
+		
+		private Map<Date, Long> restMap;
+
+		private RestTimeMap(Map<Date, Long> restMap) {
+			this.restMap = restMap;
+		}
+		
+		public Integer getRestMinutes(Date date) {
+			Long rest = restMap.get(date);
+			return (int) (rest != null ? rest/(60*1000) : 0);
+		}
+	}
 }
