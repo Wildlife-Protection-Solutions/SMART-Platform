@@ -19,7 +19,7 @@
         	<geotools.version>11.2</geotools.version>
         	<jts.version>1.13</jts.version>
         	<hibernate.version>4.2.18.Final</hibernate.version>
-        	<resteasy.version>3.0.9.Final</resteasy.version>
+		<resteasy.version>3.0.13.Final</resteasy.version>
     	</properties>
 	
 	<repositories>
