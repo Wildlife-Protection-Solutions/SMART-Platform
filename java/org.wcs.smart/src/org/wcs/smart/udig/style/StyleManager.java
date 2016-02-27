@@ -53,9 +53,6 @@ import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.ProjectPlugin;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.StyleEntry;
-import org.locationtech.udig.style.advanced.editorpages.SimpleLineEditorPage;
-import org.locationtech.udig.style.advanced.editorpages.SimplePointEditorPage;
-import org.locationtech.udig.style.advanced.editorpages.SimplePolygonEditorPage;
 import org.locationtech.udig.style.sld.SLD;
 import org.locationtech.udig.style.sld.editor.EditorNode;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
@@ -330,11 +327,11 @@ public class StyleManager {
 		String pageId = "simple"; //$NON-NLS-1$
 		try {
 			if (SLD.POINT.supports(selectedLayer)) {
-				pageId = SimplePointEditorPage.ID;
+				pageId = "org.locationtech.udig.style.advanced.editorpages.SimplePointEditorPage"; //SimplePointEditorPage.ID; //$NON-NLS-1$
 			} else if (SLD.LINE.supports(selectedLayer)) {
-				pageId = SimpleLineEditorPage.ID;
+				pageId = "org.locationtech.udig.style.advanced.editorpages.SimpleLineEditorPage"; //SimpleLineEditorPage.ID; //$NON-NLS-1$
 			} else if (SLD.POLYGON.supports(selectedLayer)) {
-				pageId = SimplePolygonEditorPage.ID;
+				pageId = "org.locationtech.udig.style.advanced.editorpages.SimplePolygonEditorPage"; //SimplePolygonEditorPage.ID; //$NON-NLS-1$
 			} else if (selectedLayer.getGeoResource().canResolve(
 					GridCoverage.class)) {
 				pageId = "org.locationtech.udig.style.raster.SingleBandRasterPage"; //$NON-NLS-1$

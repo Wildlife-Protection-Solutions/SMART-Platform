@@ -14,43 +14,37 @@
 	<name>SMART Hibernate Libraries Module</name>
 	<packaging>pom</packaging>
 	
+	<properties>
+		<hibernate.version>4.2.18.Final</hibernate.version>
+		<derby.version>10.12.1.1</derby.version>
+    </properties>
+    
 	<dependencies>
 		<dependency>
         	<groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
-            <version>10.12.1.1</version>
+            <version>${derby.version}</version>
         </dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbytools</artifactId>
-			<version>10.12.1.1</version>
+			<version>${derby.version}</version>
 		</dependency>
-        
-<!--         <dependency> -->
-<!--             <groupId>net.sourceforge.hatbox</groupId> -->
-<!--             <artifactId>hatbox</artifactId> -->
-<!--             <version>1.0.b9</version> -->
-<!--         </dependency>		 -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>4.2.18.Final</version>
+			<version>${hibernate.version}</version>
         </dependency>
         <dependency>
         	<groupId>org.hibernate</groupId>
             <artifactId>hibernate-ehcache</artifactId>
-            <version>4.2.18.Final</version>
-        </dependency>
-<!--        <dependency> -->
-<!--        	<groupId>org.slf4j</groupId> -->
-<!--        	<artifactId>slf4j-log4j12</artifactId> -->
-<!--        	<version>1.7.10</version> -->
-<!--        </dependency> -->		
-	<!-- Hibernate c3p0 connection pool -->
+            <version>${hibernate.version}</version>
+        </dependency>	
+		<!-- Hibernate c3p0 connection pool -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
-			<version>4.2.18.Final</version>
+			<version>${hibernate.version}</version>
 		</dependency>
 		<dependency>
     		<groupId>com.mchange</groupId>

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.ui;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
@@ -38,10 +40,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
-import org.wcs.smart.connect.IConnectStatusListener;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
+import org.wcs.smart.connect.IConnectStatusListener;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.replication.AutoReplicationJob;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
@@ -194,6 +197,7 @@ public class ReplicationStatusContribution implements
 	
 	private Job updateLocalChanges = new Job(Messages.StatusLineControl_jobName){
 
+		private int iso;
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
@@ -201,10 +205,36 @@ public class ReplicationStatusContribution implements
 			ServerStatus status = ServerStatus.ERROR;
 			
 			Session session = HibernateManager.openSession();
-			session.beginTransaction();
+			
 			try{
 				if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), session)){
-					Boolean hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
+					
+					//set the transaction level so it doesn't interfere with other actions
+					//we don't care if other action changes; this is just a status
+					session.doWork(new Work(){
+						@Override
+						public void execute(Connection connection)
+								throws SQLException {
+							iso = connection.getTransactionIsolation();
+							connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+						}
+					});
+					Boolean hasChanges = null;
+					try{
+						hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
+					}catch (Exception ex){
+						
+					}
+					//reset transaction level
+					session.doWork(new Work(){
+						@Override
+						public void execute(Connection connection)
+								throws SQLException {
+							connection.setTransactionIsolation(iso);
+							connection.commit();
+						}
+					});
+					
 					if (hasChanges != null){
 						if (hasChanges){
 							status = ServerStatus.CHANGES;
@@ -218,7 +248,6 @@ public class ReplicationStatusContribution implements
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(), ex);
 			}finally{
-				session.getTransaction().rollback();
 				session.close();
 			}
 			updateLocalStatus(status, message);

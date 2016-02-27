@@ -215,6 +215,8 @@ public enum DerbyReplicationManager {
 	 * status.
 	 * This calls the same function used by the database triggers
 	 * to determine if a change should be logged.
+	 * 
+	 * Commits the database after executing
 	 * @param cauuid 
 	 * @param session
 	 * @return

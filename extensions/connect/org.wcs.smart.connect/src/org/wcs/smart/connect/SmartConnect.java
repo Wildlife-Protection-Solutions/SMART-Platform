@@ -59,14 +59,13 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.AbstractHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -132,7 +131,7 @@ public class SmartConnect {
 			//create a new instance
 			if (lastConnect.server.equals(server) 
 					&& lastConnect.username.equals(username) 
-					&& lastConnect.password.equals(password)){
+					&& (lastConnect.password != null && lastConnect.password.equals(password))){
 				//compare certifications; cannot simply compare the filename
 				//as the same filename is used for all certificates
 				if (lastConnect.server.getCertificateFileName() == null && server.getCertificateFileName() == null){
@@ -196,12 +195,18 @@ public class SmartConnect {
 			SSLContext ctx = SSLContext.getInstance("TLS"); //$NON-NLS-1$
 			ctx.init(null, new TrustManager[]{trustManager}, null);
 		
-			SchemeRegistry registry = new SchemeRegistry();
-			SSLSocketFactory factory = new SSLSocketFactory(ctx);
-			registry.register(new Scheme("https", 443, factory)); //$NON-NLS-1$
+			SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(ctx);
+			org.apache.http.config.Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+					.register("https", factory) //$NON-NLS-1$
+					.build();
+//			registry.register("https", 443, factory); //$NON-NLS-1$
 			
-			ClientConnectionManager cm = new PoolingClientConnectionManager(registry);
-			HttpClient httpClient = new DefaultHttpClient(cm);
+			HttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
+			HttpClient httpClient = HttpClientBuilder.create()
+					.setConnectionManager(cm)
+					.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false))
+					.build();
+			
 			ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
 		
 			client = new ResteasyClientBuilder()
@@ -654,11 +659,7 @@ public class SmartConnect {
 	public void uploadFile(String url, Path f, long startByte, CopyProgressMonitor monitor) throws Exception{
         createClient();
         
-		//ensure we do not retry, retrying is a problem as it
-        //ends up sending the same bytes multiple times
-		HttpClient lclient = ((ApacheHttpClient4Engine) client.httpEngine()).getHttpClient();
-        ((AbstractHttpClient )lclient).setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
-        
+		//retry handler set when creating client;
         ConnectClient service =  client.target(url).proxy(ConnectClient.class);
 		try(InputStream fis = new ProgressInputStream(Files.newInputStream(f), monitor)){
 			fis.skip(startByte);

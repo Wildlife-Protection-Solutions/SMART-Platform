@@ -175,6 +175,16 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String WIZBAN_EXPORT_IMAGE = "org.wsc.smart.WIZBAN_EXPORT_IMAGE"; //$NON-NLS-1$
 	
 	/**
+	 * Browser images
+	 */
+	public static final String BROWSER_FORWARD = "org.wsc.smart.browser.forward"; //$NON-NLS-1$
+	public static final String BROWSER_BACKWARD = "org.wsc.smart.browser.backward"; //$NON-NLS-1$
+	public static final String BROWSER_GO = "org.wsc.smart.browser.refersh"; //$NON-NLS-1$
+	public static final String BROWSER_HOME = "org.wsc.smart.browser.home"; //$NON-NLS-1$
+	public static final String BROWSER_STOP = "org.wsc.smart.browser.stop"; //$NON-NLS-1$
+	
+	
+	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
 	 * might result in SQLException. This will ensure that jobs are running one by one.
 	 */
@@ -357,7 +367,12 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(STYLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style.png")); //$NON-NLS-1$
 	     reg.put(RENAME_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/pencil.png")); //$NON-NLS-1$
 	     
-	     
+	     reg.put(BROWSER_FORWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
+	     reg.put(BROWSER_BACKWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_left.png")); //$NON-NLS-1$
+	     reg.put(BROWSER_GO, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_refresh.png")); //$NON-NLS-1$
+	     reg.put(BROWSER_HOME, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/home.png")); //$NON-NLS-1$
+	     reg.put(BROWSER_STOP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/stop.png")); //$NON-NLS-1$
+	 
 	}
 	
 	/**
