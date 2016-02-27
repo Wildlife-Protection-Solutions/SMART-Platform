@@ -11,7 +11,7 @@
          <command
                commandId="org.wcs.smart.connect.dataqueue.options.show"
                icon="images/icons/obj16/dq_options.png"
-               label="Data Queue Processor Options..."
+               label="%options.menu.label"
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -36,7 +36,7 @@
          <command
                commandId="org.wcs.smart.connect.dataqueue.process"
                icon="images/icons/obj16/dq.png"
-               label="View Processing Data Queue"
+               label="%queue.menu.label"
                style="push">
          </command>
       </menuContribution>
@@ -45,11 +45,11 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.connect.dataqueue.process"
-            name="Process Data Queue">
+            name="%queue.command.name">
       </command>
       <command
             id="org.wcs.smart.connect.dataqueue.options.show"
-            name="Show Data Queue Processing Options Dialog">
+            name="%options.command.name">
       </command>
    </extension>
    <extension
@@ -70,7 +70,7 @@
             class="org.wcs.smart.connect.dataqueue.internal.ui.DataQueueView$DataQueueViewWrapper"
             icon="images/icons/obj16/dq.png"
             id="org.wcs.smart.connect.dataqueue.queueview"
-            name="Data Processing Queue"
+            name="%queue.view.name"
             restorable="true">
       </view>
    </extension>

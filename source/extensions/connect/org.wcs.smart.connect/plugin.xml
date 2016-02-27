@@ -90,7 +90,7 @@
       </command>
       <command
             id="org.wcs.smart.connect.server.web"
-            name="Open Connect Browser">
+            name="%OpenBrowser">
       </command>
    </extension>
    <extension
@@ -118,6 +118,10 @@
       <image
             commandId="org.wcs.smart.connect.server.downloadccaa"
             icon="images/icons/obj16/server_ca_download.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.web"
+            icon="images/icons/obj16/world.png">
       </image>
    </extension>
    <extension
