@@ -88,6 +88,10 @@
             id="org.wcs.smart.connect.server.downloadccaa"
             name="%downloadca.command.name">
       </command>
+      <command
+            id="org.wcs.smart.connect.server.web"
+            name="Open Connect Browser">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -235,6 +239,10 @@
                   </not>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.connect.server.web"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.connect.separator3"
                   visible="true">
@@ -316,6 +324,10 @@
       <handler
             class="org.wcs.smart.connect.ui.server.DownloadInstallCcaaHandler$DownloadInstallCcaaHandlerWrapper"
             commandId="org.wcs.smart.connect.server.downloadccaa">
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.ShowConnectWebHandler$ShowConnectWebHandlerWrapper"
+            commandId="org.wcs.smart.connect.server.web">
       </handler>
    </extension>
    <extension

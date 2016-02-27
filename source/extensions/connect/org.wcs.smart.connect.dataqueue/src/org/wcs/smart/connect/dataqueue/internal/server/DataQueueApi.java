@@ -54,7 +54,7 @@ public interface DataQueueApi {
 			@QueryParam("status") String status);
 
 	@PUT
-    @Path("/" + DATAQUEUE_PATH + "/items/{uuid}/{status}")
+    @Path("/" + DATAQUEUE_PATH + "/items/{uuid}/status/{status}")
 	public void updateStatus(@PathParam("uuid") String itemUuid, @PathParam("status") String newStatus);
 
 }

@@ -143,25 +143,19 @@ public enum ChangeLogTableManager {
 			
 			@Override
 			public Long execute(Connection connection) throws SQLException {
-				int iso = connection.getTransactionIsolation();
-				try{
-					//prevents database locking with long save transactions
-					connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-					String sql = "SELECT max(revision) FROM " //$NON-NLS-1$
-							+ ChangeLogItem.TABLENAME 
-							+  " WHERE source = 'LOCAL' and ca_uuid = ? ";  //$NON-NLS-1$
-					PreparedStatement ps = connection.prepareStatement(sql);
-					ps.setBytes(1, UuidUtils.uuidToByte(ca.getUuid()));
-					try(ResultSet rs = ps.executeQuery()){
-						if (rs.next()){
-							return rs.getLong(1);
-						}
+				//prevents database locking with long save transactions
+				String sql = "SELECT max(revision) FROM " //$NON-NLS-1$
+						+ ChangeLogItem.TABLENAME 
+						+  " WHERE source = 'LOCAL' and ca_uuid = ? ";  //$NON-NLS-1$
+				PreparedStatement ps = connection.prepareStatement(sql);
+				ps.setBytes(1, UuidUtils.uuidToByte(ca.getUuid()));
+				try(ResultSet rs = ps.executeQuery()){
+					if (rs.next()){
+						return rs.getLong(1);
 					}
-					return null;
-				}finally{
-					connection.commit();
-					connection.setTransactionIsolation(iso);
 				}
+				return null;
+				
 			}
 		});
 

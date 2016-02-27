@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 	
 	<properties>
-		<resteasy.version>3.0.9.Final</resteasy.version>
+		<resteasy.version>3.0.13.Final</resteasy.version>
     </properties>
     	
 	<dependencies>
