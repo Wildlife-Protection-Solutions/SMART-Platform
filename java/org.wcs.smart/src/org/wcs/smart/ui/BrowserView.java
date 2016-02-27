@@ -36,7 +36,6 @@ import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
-import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -49,6 +48,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Very basic web browser.
@@ -72,7 +72,7 @@ public class BrowserView {
 	
 	private Browser browser ;
 	private Text txt;
-	private ToolItem btnBack , btnForward, btnSmartHome, btnRefresh, btnStop, btnOpen;
+	private ToolItem btnBack , btnForward, btnSmartHome, btnRefresh;
 	
 	public BrowserView() {
 	}
@@ -109,7 +109,7 @@ public class BrowserView {
 		
 		btnBack = new ToolItem(toolBar2, SWT.NONE);
 		btnBack.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_BACKWARD));
-		btnBack.setToolTipText("go to previous page");
+		btnBack.setToolTipText(Messages.BrowserView_previoustooltip);
 		btnBack.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -118,7 +118,7 @@ public class BrowserView {
 		});
 		btnForward = new ToolItem(toolBar2, SWT.NONE);
 		btnForward.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_FORWARD));
-		btnForward.setToolTipText("go to next page");
+		btnForward.setToolTipText(Messages.BrowserView_nexttooltip);
 		btnForward.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -130,35 +130,20 @@ public class BrowserView {
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		ToolBar toolBar3 = new ToolBar(buttons, SWT.FLAT);
-//		btnStop = new ToolItem(toolBar3, SWT.NONE);
-//		btnStop.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_STOP));
-//		btnStop.setToolTipText("stop rendering page");
-//		btnStop.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				browser.stop();
-//				System.out.println("stop done.");
-//			}	
-//		});
 		
 		btnRefresh = new ToolItem(toolBar3, SWT.NONE);
 		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_GO));
-		btnRefresh.setToolTipText("refresh web page");
-		btnRefresh.setData(1);
+		btnRefresh.setToolTipText(Messages.BrowserView_refreshtooltip);
 		btnRefresh.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if ((Integer)btnRefresh.getData() == 0){
-					browser.stop();
-					return;
-				}
 				browser.refresh();
 			}	
 		});
 		
 		btnSmartHome = new ToolItem(toolBar3, SWT.PUSH);
 		btnSmartHome.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_HOME));
-		btnSmartHome.setToolTipText("load home page");
+		btnSmartHome.setToolTipText(Messages.BrowserView_hometooltip);
 		btnSmartHome.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -186,25 +171,20 @@ public class BrowserView {
 			
 			@Override
 			public void completed(ProgressEvent event) {
-				btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_GO));
-				btnRefresh.setToolTipText("refresh web page");
-				btnRefresh.setData(1);
+				btnRefresh.setEnabled(true);
 			}
 			
 			@Override
 			public void changed(ProgressEvent event) {
 				if (event.total == 0) return;
 				if (event.total == event.current) return;
-				btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_STOP));
-				btnRefresh.setToolTipText("cancel loading");
-				btnRefresh.setData(2);
+				btnRefresh.setEnabled(false);
 			}
 		});
 		browser.addLocationListener(new LocationListener() {
 			@Override
 			public void changing(LocationEvent event) {
 				changed(event);
-				
 			}
 			
 			@Override
@@ -212,7 +192,6 @@ public class BrowserView {
 				txt.setText(browser.getUrl());
 				btnBack.setEnabled(browser.isBackEnabled());
 				btnForward.setEnabled(browser.isForwardEnabled());
-//				btnStop.setEnabled(false);
 			}
 		});
 		
@@ -225,7 +204,7 @@ public class BrowserView {
 		if (home != null){
 			browser.setUrl(home);
 		}else{
-			browser.setUrl("");
+			browser.setUrl(""); //$NON-NLS-1$
 		}
 	}
 	@Focus
