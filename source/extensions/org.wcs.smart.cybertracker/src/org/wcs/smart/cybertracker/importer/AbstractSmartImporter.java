@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.cybertracker.util.SightsUtil;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -527,6 +529,9 @@ public abstract class AbstractSmartImporter {
 		}
 	}
 
+	/**
+	 * NOTE: This method must never return original list as this list can be changed in future.
+	 */
 	protected List<S> extractAndPreProcessSights(AbstractCyberTrackerData ctData) {
 		List<S> sData = validateData(ctData);
 		return SightsMultiObsUtil.convertMultiObs(sData, ctData.getElementsMap());
@@ -625,9 +630,10 @@ public abstract class AbstractSmartImporter {
 	/**
 	 * Returns a mapping containing rest time in minutes for each day.
 	 * @param sList
+	 * @param eMap
 	 * @return
 	 */
-	protected RestTimeMap extractRestTime(List<S> sList) {
+	protected RestTimeMap extractRestTime(List<S> sList, Map<String, E> eMap) {
 		Comparator<Date> dateComparator = new Comparator<Date>() {
 			@Override
 			public int compare(Date d1, Date d2) {
@@ -638,6 +644,7 @@ public abstract class AbstractSmartImporter {
 			}
 		};
 		Map<Date, Long> restMap = new TreeMap<>(dateComparator);
+		Set<S> pauseSet = new HashSet<>();
 		Date pauseDate = null;
 		Time pauseTime = null;
 		
@@ -655,6 +662,9 @@ public abstract class AbstractSmartImporter {
 					time = Time.valueOf(v);
 				} else if (ScreensUtil.RESULT_PAUSED.equals(n)) {
 					paused = ICyberTrackerConstants.STR_TRUE.equals(v);
+					if (!pauseSet.contains(s) && !SightsUtil.hasWaypointData(s, eMap)) {
+						pauseSet.add(s);
+					}
 				}
 			}
 			
@@ -707,7 +717,7 @@ public abstract class AbstractSmartImporter {
 				pauseTime = null;
 			}
 		}
-		return new RestTimeMap(restMap);
+		return new RestTimeMap(restMap, pauseSet);
 	}
 	
 	private S cloneExcluding(S s, List<A> toExclude) {
@@ -757,14 +767,22 @@ public abstract class AbstractSmartImporter {
 	public static class RestTimeMap {
 		
 		private Map<Date, Long> restMap;
+		private Set<S> pauseSet;
 
-		private RestTimeMap(Map<Date, Long> restMap) {
+		private RestTimeMap(Map<Date, Long> restMap, Set<S> pauseSet) {
 			this.restMap = restMap;
+			this.pauseSet = pauseSet;
 		}
 		
 		public Integer getRestMinutes(Date date) {
 			Long rest = restMap.get(date);
 			return (int) (rest != null ? rest/(60*1000) : 0);
+		}
+		
+		public List<S> excludePauseS(List<S> sList) {
+			List<S> result = new ArrayList<>(sList);
+			result.removeAll(pauseSet);
+			return result;
 		}
 	}
 }
