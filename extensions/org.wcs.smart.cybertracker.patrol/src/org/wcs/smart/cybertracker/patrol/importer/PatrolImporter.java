@@ -91,7 +91,8 @@ public class PatrolImporter extends AbstractPatrolImporter {
 				}
 			}
 			List<S> sList = extractAndPreProcessSights(ctPatrol);
-			RestTimeMap restMap = extractRestTime(sList);
+			RestTimeMap restMap = extractRestTime(sList, ctPatrol.getElementsMap());
+			sList = restMap.excludePauseS(sList);
 			for (S s : sList) {
 				addObservations(firstLeg, s, ctPatrol.getElementsMap(), session);
 			}

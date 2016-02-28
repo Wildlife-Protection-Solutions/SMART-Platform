@@ -143,12 +143,17 @@ public class MissionImporter extends AbstractSmartImporter {
 			
 			//import observations
 			List<S> sList = extractAndPreProcessSights(ctSurvey);
+			RestTimeMap restMap = extractRestTime(sList, ctSurvey.getElementsMap());
+			sList = restMap.excludePauseS(sList);
 			for (S s : sList) {
 				MissionDay mday = findOrAddMissionDay(mission, s);
 				Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap(), session);
 				if (wp != null) {
 					addObservations(wp, s, ctSurvey.getElementsMap(), session);
 				}
+			}
+			for (MissionDay mday : mission.getMissionDays()) {
+				mday.setRestMinutes(restMap.getRestMinutes(mday.getDate()));
 			}
 
 			//import tracks

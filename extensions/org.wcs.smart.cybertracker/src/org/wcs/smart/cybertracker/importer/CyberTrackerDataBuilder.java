@@ -34,12 +34,12 @@ import java.util.Map;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.model.CyberTrackerRawData;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.util.SightsUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -65,7 +65,7 @@ public abstract class CyberTrackerDataBuilder {
 				List<Coordinate> trackPoints = AbstractSmartImporter.listPart(rawData.getTimerTrackList(), ctTripData.getStartDate(), ctTripData.getEndDate());
 				
 				S lastS = !ctTripData.getSData().isEmpty() ? ctTripData.getSData().get(ctTripData.getSData().size()-1) : null;
-				if (lastS != null && !hasWaypointData(lastS, rawData.getElementsMap())) {
+				if (lastS != null && !SightsUtil.hasWaypointData(lastS, rawData.getElementsMap())) {
 					//lastS is last point recorded when "End Patrol" was selected
 					//do not record it as a separate waypoint but add to end of the track
 					ctTripData.getSData().remove(ctTripData.getSData().size()-1);
@@ -104,18 +104,6 @@ public abstract class CyberTrackerDataBuilder {
 			return CyberTrackerHibernateManager.fetchByUuid(clazz, tag0, session);
 		}
 		return null;
-	}
-
-	private boolean hasWaypointData(S s, Map<String, E> eMap) {
-		//true if at least one category or attribute was selected
-		for (S.A a : s.getA()) {
-			E e = eMap.get(a.getI());
-			if (e != null) {
-				if (ElementsUtil.isCategoryResultElement(e) || ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
-					return true;
-			}
-		}
-		return false;
 	}
 
 	private Coordinate toCoordinate(S s) {
