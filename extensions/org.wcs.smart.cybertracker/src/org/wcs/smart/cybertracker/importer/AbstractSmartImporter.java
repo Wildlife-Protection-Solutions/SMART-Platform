@@ -684,7 +684,7 @@ public abstract class AbstractSmartImporter {
 						//record for day it was paused
 						Long rest = restMap.get(pauseDate);
 						if (rest == null) rest = 0L;
-						rest += (1000*60*60*24 - pauseTime.getTime()); //milliseconds in a day minus current time in milliseconds
+						rest += SharedUtils.getDatePart(pauseDate, true).getTime() - combine(pauseDate, pauseTime).getTime(); //time at the end of the day minus current time in milliseconds
 						restMap.put(pauseDate, rest);
 						//record for intermediate days
 						Calendar c = Calendar.getInstance(); 
@@ -697,7 +697,7 @@ public abstract class AbstractSmartImporter {
 							intermediateDate = c.getTime();
 						}
 						//record for day it was resumed
-						restMap.put(date, time.getTime()); //it must be a first rest time during this day
+						restMap.put(date, time.getTime() - SharedUtils.getDatePart(time, false).getTime()); //it must be a first rest time during this day; need to subtract as time zone is taken into account
 					} else {
 						addWarning(MessageFormat.format(Messages.AbstractSmartImporter_InvalidTimeFrame, combine(pauseDate, pauseTime), combine(date, time)));
 					}
@@ -707,7 +707,6 @@ public abstract class AbstractSmartImporter {
 				pauseTime = null;
 			}
 		}
-		
 		return new RestTimeMap(restMap);
 	}
 	
