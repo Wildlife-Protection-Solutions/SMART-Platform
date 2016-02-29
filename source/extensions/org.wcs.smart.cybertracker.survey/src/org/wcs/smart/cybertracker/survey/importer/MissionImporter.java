@@ -122,6 +122,7 @@ public class MissionImporter extends AbstractSmartImporter {
 				//this mean that user wants a new mission to be created
 				mission = createNewMission(ctSurvey, survey, session);
 				fireMissionAdded = true;
+				createMissingMissionDays(mission);
 
 				//import mission properties
 				for (MissionPropertyValue mpv : ctSurvey.getMissionProperties()) {
@@ -328,8 +329,8 @@ public class MissionImporter extends AbstractSmartImporter {
 			if (!existingDays.contains(calStart)) {
 				MissionDay md = new MissionDay();
 				md.setDate(SmartUtils.getDatePart(calStart.getTime(), false));
-				md.setStartTime(createTime(0, 0, 0));
-				md.setEndTime(createTime(23, 59, 59));
+				md.setStartTime(SmartUtils.isSameDate(m.getStartDate(), calStart.getTime()) ? convertDateToTime(m.getStartDate()) : createTime(0, 0, 0));
+				md.setEndTime(SmartUtils.isSameDate(m.getEndDate(), calStart.getTime()) ? convertDateToTime(m.getEndDate()) : createTime(23, 59, 59));
 				md.setRestMinutes(0);
 				md.setTracks(new ArrayList<MissionTrack>());
 				md.setWaypoints(new ArrayList<SurveyWaypoint>());
@@ -392,11 +393,13 @@ public class MissionImporter extends AbstractSmartImporter {
 				return pld;
 			}
 		}
+		//NOTE: Ideally this point in code should never be reached because all mission day must already be created. The only possible way is if date is not between mission start and end date
+		addWarning(MessageFormat.format(Messages.MissionImporter_TimeRangeError, date));
 		MissionDay mday = new MissionDay();
 		mday.setMission(mission);
 		mday.setDate(date);
-		mday.setStartTime(createTime(0, 0, 0));
-		mday.setEndTime(createTime(23, 59, 59));
+		mday.setStartTime(SmartUtils.isSameDate(mission.getStartDate(), date) ? convertDateToTime(mission.getStartDate()) : createTime(0, 0, 0));
+		mday.setEndTime(SmartUtils.isSameDate(mission.getEndDate(), date) ? convertDateToTime(mission.getEndDate()) : createTime(23, 59, 59));
 		mday.setRestMinutes(0);
 		mday.setTracks(new ArrayList<MissionTrack>());
 		mday.setWaypoints(new ArrayList<SurveyWaypoint>());
@@ -513,6 +516,12 @@ public class MissionImporter extends AbstractSmartImporter {
 		cForProcessing.set(Calendar.SECOND, second);
 		cForProcessing.set(Calendar.MILLISECOND, 0);
 		return new Time(cForProcessing.getTime().getTime());
+	}
+
+	private Time convertDateToTime(Date d) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(d);		
+		return createTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));		
 	}
 	
 	/**
