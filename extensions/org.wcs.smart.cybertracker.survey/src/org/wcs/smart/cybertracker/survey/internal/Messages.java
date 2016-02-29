@@ -23,6 +23,7 @@ public class Messages extends NLS {
 	public static String MissionImporter_LeaderDialog_Message;
 	public static String MissionImporter_LeaderDialog_Ttitle;
 	public static String MissionImporter_SaveError;
+	public static String MissionImporter_TimeRangeError;
 	public static String MissionImporter_TrackPrefix;
 	public static String MissionImporter_Warn_FirstWaypoint;
 	public static String MissionImporter_Warn_Member;
