@@ -170,20 +170,15 @@
   
     <label class="block top-spacer">Header Style(use css syntax):</label>
     <textarea id="header_style" name="header_style" class="formtext block" rows=5>border: 0px solid black;
-padding: 10px 5px 10px 5px;
-text-align: center;
-line-height: 80px;
-color: black;
-font-family: 'Allerta', Helvetica, Arial, sans-serif;
-font-size: 40px;
-height: 130px;
-    </textarea>
+	padding: 10px 5px 10px 5px;
+	text-align: center;
+	color: black;
+	font-family: 'Allerta', Helvetica, Arial, sans-serif;
+	font-size: 40px;</textarea>
     
 	<label class="block top-spacer">Body Style(use css syntax):</label>
     <textarea id="body_style" name="body_style" class="formtext block" rows=5>margin: 0px;
-background-color: aliceblue;
-font-family: 'Crimson Text', Georgia, Times, serif;
-font-size: 1.2em;
+background-color: lightsteelblue
     </textarea>
     
     <label class="block top-spacer">Header Image:</label>

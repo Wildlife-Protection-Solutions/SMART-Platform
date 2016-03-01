@@ -40,7 +40,7 @@ window.onload = function(){
 	document.getElementById("cancelUpdateStyle").onclick = function(){
 		closeDialog('updateStyleDialog');
 	};
-	document.getElementById("updatestyleform").onsubmit = submitUpdateLayer;
+	document.getElementById("updatestyleform").onsubmit = submitUpdateStyle;
 	
 	
 	
@@ -923,7 +923,7 @@ function showCurrentStyle() {
 }
 
 
-function submitUpdateLayer(){
+function submitUpdateStyle(){
 	hideInfo();
 	document.querySelector("#message").style.display = "none";
 
