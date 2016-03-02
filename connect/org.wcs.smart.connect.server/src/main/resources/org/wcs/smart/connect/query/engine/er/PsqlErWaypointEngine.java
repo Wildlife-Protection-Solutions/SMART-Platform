@@ -34,6 +34,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -286,5 +287,15 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		}else{
 			return new ErWaypointFilterProcessor(queryDataTable, this, sdFilter);
 		}
+	}
+	
+	@Override
+	public String getDateFilterTable() throws SQLException{
+		return tablePrefix(MissionDay.class);
+	}
+	
+	@Override
+	public String getDateFilterField() throws SQLException{
+		return "mission_day"; //$NON-NLS-1$
 	}
 }

@@ -95,7 +95,9 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -732,5 +734,28 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			logger.finest(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
+	}
+	
+	/**
+	 * For waypoint date filter fields return the field name for filtering. Can return null
+	 * if should use datetime from waypoint table.
+	 * @param field
+	 * @return
+	 * @throws SQLException
+	 */
+	public String getDateFilterTable() throws SQLException{
+		return null;
+	}
+	
+	
+	/**
+	 * For waypoint date filter fields return the table name for filtering.  Can return null
+	 * if should use datetime from waypoint table
+	 * @param field
+	 * @return
+	 * @throws SQLException
+	 */
+	public String getDateFilterField() throws SQLException{
+		return null;
 	}
 }

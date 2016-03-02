@@ -38,6 +38,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
@@ -355,5 +356,15 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		c.createStatement().execute(sql);
 		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 		
+	}
+	
+	@Override
+	public String getDateFilterTable() throws SQLException{
+		return tablePrefix(MissionDay.class);
+	}
+	
+	@Override
+	public String getDateFilterField() throws SQLException{
+		return "mission_day"; //$NON-NLS-1$
 	}
 }

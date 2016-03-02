@@ -1622,4 +1622,14 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			return new ErWaypointFilterProcessor(queryDataTable, this, sdFilter);
 		}
 	}
+	
+	@Override
+	public String getDateFilterTable() throws SQLException{
+		return tablePrefix(MissionDay.class);
+	}
+	
+	@Override
+	public String getDateFilterField() throws SQLException{
+		return "mission_day"; //$NON-NLS-1$
+	}
 }

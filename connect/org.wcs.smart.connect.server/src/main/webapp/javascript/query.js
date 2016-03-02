@@ -16,6 +16,7 @@ var shpValues = ["entityobservation", "entitywaypoint","intelligencerecord",  "s
 
 var tifValues = ["entitygrid", "observationgrid","patrolgrid",  "surveygrid"];
 
+var isDateChanging = false;
 
 /* configure events on html elements */
 window.onload = function(){
@@ -44,7 +45,7 @@ window.onload = function(){
         minDate: new Date('1950-01-01'),
         yearRange: [1950,2050],
         i18n: pickaday_i18n,
-        
+        onSelect: selectCustom
 	});
 
 	endDatePicker = new Pikaday({
@@ -52,7 +53,8 @@ window.onload = function(){
 		firstDay: 1,
         minDate: new Date('1950-01-01'),
         yearRange: [1950,2050],
-        i18n: pickaday_i18n
+        i18n: pickaday_i18n,
+        onSelect: selectCustom
 	});
 
 	//populate predefined dates
@@ -71,6 +73,16 @@ window.onload = function(){
 	
 }
 
+function selectCustom(){
+	if (isDateChanging) return;
+	var selectdiv = document.getElementById("defineddates");
+	for (var i = 0; i < definedDateKeys.length; i ++){
+		if (definedDateKeys[i] == "custom"){
+			selectdiv.selectedIndex = i;
+			return;
+		}
+	}
+}
 
 function updateDates(){
 	var dd = document.getElementById("defineddates");
@@ -79,6 +91,7 @@ function updateDates(){
 	var startdate = document.getElementById("startdate");
 	var enddate = document.getElementById("enddate");
 
+	isDateChanging = true;
 		if (datekey== "last30days"){
 			var startYear = new Date();
 			startYear.setDate(startYear.getDate() - 30);
@@ -124,6 +137,7 @@ function updateDates(){
 		}else if (datekey== "custom"){
 			
 		}
+		isDateChanging = false;
 
 }
 function getQueryList(){

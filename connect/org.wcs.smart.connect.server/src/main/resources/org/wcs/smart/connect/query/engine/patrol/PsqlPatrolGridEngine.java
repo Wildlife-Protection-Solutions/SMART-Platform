@@ -812,4 +812,14 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			return new PatrolWaypointFilterProcessor(queryDataTable, this);
 		}
 	}
+	
+	@Override
+	public String getDateFilterTable() throws SQLException{
+		return tablePrefix(PatrolLegDay.class);
+	}
+	
+	@Override
+	public String getDateFilterField() throws SQLException{
+		return "patrol_day"; //$NON-NLS-1$
+	}
 }

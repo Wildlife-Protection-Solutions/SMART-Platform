@@ -882,4 +882,15 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		}
 	}
 	
+
+	@Override
+	public String getDateFilterTable() throws SQLException{
+		return tablePrefix(MissionDay.class);
+	}
+	
+	@Override
+	public String getDateFilterField() throws SQLException{
+		return "mission_day"; //$NON-NLS-1$
+	}
+	
 }

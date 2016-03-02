@@ -262,4 +262,13 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 		return "missiontrack_uuid"; //$NON-NLS-1$
 	}
 
+	@Override
+	public String getDateFilterTable() throws SQLException{
+		return tablePrefix(MissionDay.class);
+	}
+	
+	@Override
+	public String getDateFilterField() throws SQLException{
+		return "mission_day"; //$NON-NLS-1$
+	}
 }
