@@ -572,7 +572,7 @@ function hideShowFilters(){
 
 
 	var current = document.getElementById('filter-form').style.display;
-	if(current == "none" || current == ""){
+	if(current == "none"){
 		document.getElementById('filter-form').style.display = "block";
 		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>' + i18n("alert.hidefilters");
 	}else{

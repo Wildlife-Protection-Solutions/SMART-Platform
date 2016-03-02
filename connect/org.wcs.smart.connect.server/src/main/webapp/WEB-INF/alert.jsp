@@ -143,7 +143,7 @@
 	</div>
 	
 	<div id="filter-controls">
-		<a id="filter-link" onClick="hideShowFilters()" style="cursor: pointer;"><img id="filter-button" style="cursor: pointer;"/><fmt:message key="alert.showfilters" /></a>
+		<a id="filter-link" onClick="hideShowFilters()" style="cursor: pointer;"><img id="filter-button" style="cursor: pointer;"/><fmt:message key="alert.hidefilters" /></a>
 
 		<form id="filter-form" name="filter-form" onsubmit="return false;">
 			<input id="sortBy" type="hidden" name="sortBy" value="userGeneratedId"/>
