@@ -39,6 +39,7 @@ import org.hibernate.criterion.Projections;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.apache.BcryptCredentialHandler;
 import org.wcs.smart.connect.api.ConnectUser;
+import org.wcs.smart.connect.filter.StyleFilter;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUser;
@@ -59,6 +60,9 @@ public class LoginServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		(new StyleFilter()).configureStyle(request, response);
+		
 		if (request.getRequestURI().contains("loginerror")){ //$NON-NLS-1$
 			request.setAttribute("loginerror",  //$NON-NLS-1$
 					Messages.getString("LoginServlet.LoginFail", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$ 

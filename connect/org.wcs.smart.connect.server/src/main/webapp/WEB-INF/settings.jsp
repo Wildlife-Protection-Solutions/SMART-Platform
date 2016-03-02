@@ -17,7 +17,7 @@
 
 <title><fmt:message key="settings.title" /></title>
 </head>
-<body>
+<body style="${style_bodycss}">
 <%@include file="header.jsp" %>
 
 
@@ -31,9 +31,10 @@
 
 <div class="overflow settingsTable">
 
-	<div class="block" style="text-align:left"><b><fmt:message key="settings.layerheader" /></b> <button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
-	</div>
-	<table id="layertable"  style="width:100%">
+	<div class="block settings-header"><fmt:message key="settings.layerheader" /></div>
+	<button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
+	
+	<table id="layertable"  class="top-spacer" style="width:100%">
 		<tr class="table-row smart-table-header"><th><fmt:message key="settings.layerorder" /></th><th><fmt:message key="settings.layername" /></th><th><fmt:message key="settings.type" /></th><th><fmt:message key="settings.onbydefault" /></th><th><fmt:message key="settings.mapboxid" /></th><th><fmt:message key="settings.layerlist" /></th><th><fmt:message key="settings.token" /></th><th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
@@ -41,10 +42,10 @@
 
 
 <div class="overflow settingsTable">
-	<div class="block" style="text-align:left"><b><fmt:message key="settings.styleheader" /></b> <button class="button top-spacer" id="btnNewType"><fmt:message key="settings.addnewstyle" /></button>
-	</div>
-	<form name=styleform>
-	<table id="typetable">
+	<div class="block settings-header"><fmt:message key="settings.styleheader" /></div> 
+	<button class="button top-spacer" id="btnNewType"><fmt:message key="settings.addnewstyle" /></button>
+	
+	<table id="typetable" class="top-spacer">
 		<tr class="table-type-row smart-table-header"><th><fmt:message key="settings.alerttype" /></th>
 				<th><fmt:message key="settings.outlinecolor" /></th>
 				<th><fmt:message key="settings.opacity" /></th>
@@ -54,14 +55,14 @@
 				<th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
-	</form>
 </div>
 
 <div class="overflow settingsTable">
-	<div class="block" style="text-align:left"><b><fmt:message key="settings.defaultsheader" /></b>
+	<div class="block settings-header"><fmt:message key="settings.defaultsheader" />
 	</div>
-	<form id="filter-form" name="filter-form" onsubmit="return false;">
-	<table id="defaultstable" style="width:100%">
+	<form class="top-spacer" id="filter-form" name="filter-form" onsubmit="return false;">
+	<button class="button " id="btnUpdateDefaults"><fmt:message key="settings.savedefaults" /></button>
+	<table id="defaultstable" class="top-spacer" style="width:100%">
 		<tr class="table-defaults-row smart-table-header">
 			<th>
 				
@@ -130,20 +131,18 @@
 			<font class="defaultLabel"><fmt:message key="settings.startingzoom" /></font> <input id='startingZoom' class='updateChange' style='width:3.5em' name="startingZoom" type="number" min=1 max=12/> <br>
 			<font class="defaultLabel"><fmt:message key="settings.startinglong" /></font> <input id='startingLong' class='updateChange' style='width:3.5em' name="startingLat" type="text" /> <br>
 			<font class="defaultLabel"><fmt:message key="settings.startinglat" /></font> <input id='startingLat' class='updateChange' style='width:3.5em' name="startingLong" type="text" /> <br>
-
-		<button class="button top-spacer" id="btnUpdateDefaults"><fmt:message key="settings.savedefaults" /></button>
-		
 		</td>
 		</tr>
 	</table>
+
 	</form>
 </div>
 
 
 <div class="overflow settingsTable">
-	<div class="block" style="text-align:left"><b><fmt:message key="settings.styleconfigurationheader" /></b>
+	<div class="block settings-header"><fmt:message key="settings.styleconfigurationheader" /></div>
 	<button class="button top-spacer" id="btnNewStyleConfiguration"><fmt:message key="settings.addnewstyleconfiguration" /></button>
-	<table id="styletable">
+	<table id="styletable" class="top-spacer">
   	<tr class="table-row smart-table-header">
 			<th class="table-cell smart-table-cell">Server Name</th>
 			<th class="table-cell smart-table-cell">Footer Text</th>
@@ -152,29 +151,31 @@
 			<th class="table-cell smart-table-cell">Actions</th>
 	</tr>
 	</table>
-</div>
 
+</div>
+</div>
+<%@include file="footer.jsp" %>
 
 <!-- dialogs                  -------------------              -->
 
-<div id="newStyleDialog" style="display: none;" class="dialog">
+<div id="newStyleDialog" style="display: none; width:400px;" class="dialog">
   <div class="dialog-title">Create a New Style</div>
   <div id="dialogerror" class="errorsection"></div>
   <form id="newstyleform" method="POST" enctype="multipart/form-data">
   
     <label class="block top-spacer">Server Name / Title Text:</label>
-	<input id="server_name" name="server_name" type="text" value="SMART Connect <img src='https://smartconservationsoftware.org/photos/smart_logo_96.png'>"/>
-    
+	<input class="formtext" id="server_name" name="server_name" type="text" value="SMART Connect <img src='https://smartconservationsoftware.org/photos/smart_logo_96.png'>"/>
+	
     <label class="block top-spacer">Footer Text:</label>
-	<input id="footer_text" name="footer_text" type="text" value="<img src='../css/smart_logo.png'> Copyright 2015, 2016"/>
+	<input class="formtext" id="footer_text" name="footer_text" type="text" value="<img src='../css/smart_logo.png'> Copyright 2015, 2016"/>
   
     <label class="block top-spacer">Header Style(use css syntax):</label>
     <textarea id="header_style" name="header_style" class="formtext block" rows=5>border: 0px solid black;
-	padding: 10px 5px 10px 5px;
-	text-align: center;
-	color: black;
-	font-family: 'Allerta', Helvetica, Arial, sans-serif;
-	font-size: 40px;</textarea>
+padding: 10px 5px 10px 5px;
+text-align: center;
+color: black;
+font-family: 'Allerta', Helvetica, Arial, sans-serif;
+font-size: 40px;</textarea>
     
 	<label class="block top-spacer">Body Style(use css syntax):</label>
     <textarea id="body_style" name="body_style" class="formtext block" rows=5>margin: 0px;
@@ -190,24 +191,22 @@ background-color: lightsteelblue
     <label class="block top-spacer">Login Page Image:</label>
     <input id="login_image" type="file" name="login_image" class="formtext block" />
     
-    
-     <input class="button" type="submit" id="btnNewStyle" value="Create Style" />
-     <input class="button" type="button" id="cancelNewStyle" value="Cancel" />
-    </div>
+     <input class="button top-spacer" type="submit" id="btnNewStyle" value="Create Style" />
+     <input class="button top-spacer" type="button" id="cancelNewStyle" value="Cancel" />
   </form>
   </div>
 
 
-<div id="updateStyleDialog" style="display: none;" class="dialog">
+<div id="updateStyleDialog" style="display: none;width:400px;" class="dialog">
   <div class="dialog-title">Update Style</div>
   <div id="dialogerror" class="errorsection"></div>
   <form id="updatestyleform" action="settings" method="POST" enctype="multipart/form-data">
 
     <label class="block top-spacer">Server Name / Title Text:</label>
-	<input id="server_name" name="server_name" type="text" value="SMART Connect"/>
+	<input class="formtext" id="server_name" name="server_name" type="text" value="SMART Connect"/>
     
     <label class="block top-spacer">Footer Text:</label>
-	<input id="footer_text" name="footer_text" type="text" value="Copyright 2015, 2016"/>
+	<input class="formtext" id="footer_text" name="footer_text" type="text" value="Copyright 2015, 2016"/>
 
     <label class="block top-spacer">Header Style(use css syntax):</label>
     <textarea id="header_style" name="header_style" class="formtext block" rows=5>
@@ -226,9 +225,9 @@ background-color: lightsteelblue
     <label class="block top-spacer">Replacement Login Page Image:</label>
     <input id="login_image" type="file" name="login_image" class="formtext block" />
     
-     <input class="button" type="submit" id="btnUpdateStyle" value="Update Style" />
-     <input class="button" type="button" id="cancelUpdateStyle" value="Cancel" />
-    </div>
+     <input class="button top-spacer" type="submit" id="btnUpdateStyle" value="Update Style" />
+     <input class="button top-spacer" type="button" id="cancelUpdateStyle" value="Cancel" />
+   
   </form>
   </div>
 
@@ -329,6 +328,5 @@ background-color: lightsteelblue
     	</form>
   </div>
 
-<%@include file="footer.jsp" %>
 </body>
 </html>

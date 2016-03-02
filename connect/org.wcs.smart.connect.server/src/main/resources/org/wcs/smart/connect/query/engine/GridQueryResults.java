@@ -49,7 +49,9 @@ public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 	}
 
 	public GridMetadata getTileBounds(){
-		if (items == null || items.size() == 0) return null;
+		if (items == null || items.size() == 0){
+			return new GridMetadata(0,0,0,0);
+		}
 		long xmax = Long.MIN_VALUE;
 		long xmin = Long.MAX_VALUE;
 		long ymax = Long.MIN_VALUE;

@@ -42,7 +42,7 @@ function resetcomplete(){
 </script>
 
 </head>
-<body>
+<body style="${style_bodycss}">
 
 
 <%@include file="header.jsp" %>

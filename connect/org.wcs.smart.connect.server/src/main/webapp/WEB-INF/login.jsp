@@ -25,7 +25,7 @@ function login(){
 </script>
 
 </head>
-<body onload="setStyle(false)">
+<body style="${style_bodycss}">
 
 
 <%@include file="header.jsp" %>
@@ -45,7 +45,7 @@ function login(){
 	   <input class="button block top-spacer" type="submit" value="<fmt:message key="login.login"/>" style="width: 100px" tabindex="3"/>
   </form>
   </div>
-  <div id="login_right">
+  <div id="login_right" style="background-image:url('../getImage?locationId=3')">
   </div>
   
 </div>

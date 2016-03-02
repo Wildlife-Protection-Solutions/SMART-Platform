@@ -49,7 +49,7 @@ function resetcomplete(){
 
 </script>
 </head>
-<body>
+<body style="${style_bodycss}">
 
 <%@include file="header.jsp" %>
 <div style="display: table-row; height:20px"></div>

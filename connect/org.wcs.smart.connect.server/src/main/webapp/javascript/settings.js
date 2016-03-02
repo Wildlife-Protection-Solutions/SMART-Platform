@@ -18,7 +18,6 @@ var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb
 
 /* configure events on html elements */
 window.onload = function(){
-	setStyle(true);
 	
 	//add new style   ---  
 	document.getElementById("btnNewStyleConfiguration").onclick=clearAndShowNewStyleDialog;
@@ -118,7 +117,6 @@ function styleCreated() {
 	}
 	refreshStyleConfiguration();
 	document.getElementById("btnNewStyleConfiguration").style.display = "none";
-	setStyle();
 }
 
 
@@ -695,9 +693,11 @@ function createDefaultsTable(){
 		
 	var types = list[0].defaultTypeUuids.split(',');
 	for(x=0 ; x < types.length; x++){
-		var type = document.getElementById(types[x])
-		if(type != null){
-			type.checked = true;
+		if (types[x]){
+			var type = document.getElementById(types[x])
+			if(type != null){
+				type.checked = true;
+			}
 		}
 	}
 	document.getElementById('status_ACTIVE').checked = list[0].defaultActive;
@@ -711,9 +711,11 @@ function createDefaultsTable(){
 
 	var cas = list[0].defaultCaUuids.split(',');
 	for(x=0 ; x < cas.length; x++){
-		var ca = document.getElementById(cas[x])
-		if(ca != null){
-			ca.checked = true;
+		if (cas[x]){
+			var ca = document.getElementById(cas[x])
+			if(ca != null){
+				ca.checked = true;
+			}
 		}
 	}
 
@@ -888,7 +890,6 @@ function styleDeleted(){
 		displayError(parseError(i18n("settings.errordeletingstyle") + this.response));
 	}
 	refreshStyleConfiguration();
-	setStyle();
 	document.getElementById("btnNewStyleConfiguration").style.display = "block";
 }
 

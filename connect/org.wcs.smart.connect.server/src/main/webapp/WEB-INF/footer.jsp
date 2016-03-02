@@ -3,8 +3,14 @@
 
 
 </div> <!--  end core div -->
+
 <div id="footerid" class="float">
-  <img class="float " src="../css/smart_logo.png">
-  <p class="float"> Copyright 2015-2016</p>
+	<c:if test="${empty style_footername }">
+  		<img class="float " src="../css/smart_logo.png">
+  		<p class="float"> Copyright 2015-2016</p>
+	</c:if>
+	<c:if test="${not empty style_footername }">
+  		${style_footername}
+	</c:if>
 </div>
 

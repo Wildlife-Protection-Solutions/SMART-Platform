@@ -11,7 +11,7 @@
 
 <title><fmt:message key="users.pagetitle"/></title>
 </head>
-<body>
+<body style="${style_bodycss}">
 <%@include file="header.jsp" %>
 
 

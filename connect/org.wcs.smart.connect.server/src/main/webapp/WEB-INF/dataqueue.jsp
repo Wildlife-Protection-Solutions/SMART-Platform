@@ -11,7 +11,7 @@
 	<title><fmt:message key="dataqueue.pagetitle"/></title>
 </head>
 
-<body>
+<body style="${style_bodycss}">
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
 	<div id="main">

@@ -1,5 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<div id="mainheader">SMART Connect</div>
+<div id="mainheader" style="${style_headercss}">
+
+<c:choose>
+ <c:when test="${empty style_headername}"> 
+  SMART Connect
+ </c:when>
+ <c:otherwise>
+	${style_headername}
+ </c:otherwise>
+</c:choose> 
+
+</div>
 <c:if test="${not empty pageContext.request.userPrincipal}">
 	<div id="userheader">
 	<form action="${pageContext.request.contextPath}/logout" method="post">

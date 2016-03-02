@@ -20,4 +20,4 @@
   </c:if>
 </c:forEach>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/styler.js"></script>
+

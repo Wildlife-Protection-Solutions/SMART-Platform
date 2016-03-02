@@ -34,7 +34,7 @@ function login(){
 </script>
 
 </head>
-<body>
+<body style="${style_bodycss}">
 <%@include file="header.jsp" %>
 
 <div style="display: table-row;">

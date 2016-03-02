@@ -96,6 +96,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		
 	@GET
     @Path("")
+	@Produces({ MediaType.APPLICATION_JSON })
     public StyleConfiguration getStyleConfiguration(){
 		
 		StyleConfiguration style;

@@ -8,7 +8,10 @@
 </head>
 
 <body>
-<div id="mainheader">SMART Connect</div>
+<div id="mainheader" <c:if test="${not empty style_headercss}"> style="${style_headercss}" </c:if>  >
+<c:out value="${empty style_headername ? 'SMART Connect' : style_headername}"/>
+</div>
+
 <div style="display:block; padding:20px">
 <div class="pageheader"><fmt:message key="unknownerror.title"/></div>
 <p><fmt:message key="unknownerror.message"/></p>

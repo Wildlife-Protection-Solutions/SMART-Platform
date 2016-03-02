@@ -75,7 +75,7 @@
 
 <title><fmt:message key="alert.maptitle" /></title>
 </head>
-<body>
+<body style="${style_bodycss}">
 <%@include file="header.jsp" %>
 <%@include file="menu.jsp" %>
 
@@ -93,10 +93,10 @@
 	<section id="tab2" class="">
 		<h2 id="tab2text" class=""><a onclick="settab(2)"><fmt:message key="alert.createnewalert" /></a></h2>
 		<p>
-		<form id="newalertform">
+		<form id="newalertform" style="padding-left:10px">
      		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
      		<label class="top-spacer block"><fmt:message key="alert.calabel" /></label>
-     		<select name="alert_ca" class="block formtext alert-select">
+     		<select name="alert_ca" class="block  formtext alert-select">
 	     		<c:forEach var="ca" items="${cas}" varStatus="count">
 	     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
 				</c:forEach> 
@@ -118,8 +118,10 @@
 				<option value=5><fmt:message key="alert.eventimportance5" /></option>
 			</select>
 			
-			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label><input id="long" type="text" name="long">
-			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label><input id="lat" type="text" name="lat" >
+			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label>
+			<input id="long" type="text" name="long" class="formtext" style="width: 20em">
+			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label>
+			<input id="lat" type="text" name="lat" class="formtext" style="width: 20em">
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
 			<textarea name="alert_description" rows="5" cols="72"></textarea>
    			<input class="button block top-spacer" type="submit" value="   <fmt:message key="alert.submit" />    "/>
@@ -136,18 +138,18 @@
 		</div> 
 	</section>
 	
-	<div id="map-info-box">
+	<div id="map-info-box" class="link_small">
 		<fmt:message key="alert.lastupdated"/><a href='javascript:refreshAlerts()'><fmt:message key="alert.udpatenow"/></a>
 	</div>
 	
 	<div id="filter-controls">
-		<a id="filter-link" onClick="hideShowFilters()"><img id="filter-button"/><fmt:message key="alert.showfilters" /></a>
+		<a id="filter-link" onClick="hideShowFilters()" style="cursor: pointer;"><img id="filter-button" style="cursor: pointer;"/><fmt:message key="alert.showfilters" /></a>
 
 		<form id="filter-form" name="filter-form" onsubmit="return false;">
 			<input id="sortBy" type="hidden" name="sortBy" value="userGeneratedId"/>
 			<input id="sortAscending" type="hidden" name="sortAscending"  value="true"/>
 
-			<select id='filterDate' class='updateChange' name="time_filter">
+			<select id='filterDate' class='updateChange' name="time_filter" style="margin-bottom:3px">
 				<option value=1><fmt:message key="alert.within1" /></option>
 				<option value=2><fmt:message key="alert.within2" /></option>
 				<option value=4><fmt:message key="alert.within4" /></option>
@@ -189,7 +191,7 @@
 			</p>
 			<p>
 			<fmt:message key="alert.filters.text" /><br>
-			<input id='filterText' class='updateChange' name="textFilter" type="text"></input>
+			<input id='filterText' class='updateChange' name="textFilter" type="text" style="margin-bottom:3px"></input>
 			</p> 
 		</form>
 
@@ -238,10 +240,13 @@
 			</c:forEach>
 			</select>
 			
-			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label><input id="long" type="text" name="update_long">
-			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label><input id="lat" type="text" name="update_lat" >
+			<label class="top-spacer block "><fmt:message key="alert.longitudelabel" />
+			</label><input id="long" type="text" name="update_long" class="formtext" style="width: 20em">
+			<label class="top-spacer block "><fmt:message key="alert.latitudelabel" /></label>
+			<input id="lat" type="text" name="update_lat" class="formtext" style="width: 20em">
 			
-			<label class="top-spacer block"><fmt:message key="alert.track" /></label><input size=50 id="track" type="text" name="update_track" >
+			<label class="top-spacer block"><fmt:message key="alert.track" /></label>
+			<input size=50 id="track" type="text" name="update_track" class="formtext" style="width: 20em">
 			
 			
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>

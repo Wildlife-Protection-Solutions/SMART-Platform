@@ -34,7 +34,7 @@
 	<title><fmt:message key="query.pagetitle"/></title>	
 </head>
 
-<body>
+<body style="${style_bodycss}">
 <%@include file="header.jsp" %>
 <%@include file="menu.jsp" %>
 

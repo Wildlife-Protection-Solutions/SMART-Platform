@@ -94,7 +94,7 @@
 </script>
 
 </head>
-<body onload="setStyle(true)">
+<body style="${style_bodycss}">
 <%@include file="header.jsp" %>
 
 

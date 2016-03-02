@@ -8,7 +8,7 @@
 	
 </head>
 
-<body onload="setStyle(true)">
+<body style="${style_bodycss}">
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
 	<div id= "main"><div class="pageheader"><fmt:message key="home.welcome"/></div>
