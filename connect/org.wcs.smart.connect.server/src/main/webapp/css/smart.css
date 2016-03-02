@@ -378,15 +378,15 @@ div.scrollable {
 }
 
 .settings-header{
-	border-bottom: 1px solid black;
+	
 	padding: 0px 0px 5px 0px;
 	font-size: 1em;
 	font-weight: bold;
 }
 .settingsTable{
-
+	border: 1px solid #4F5F88;
     margin: 10px 5px 0px 0px;
-    padding: 40px 3px;
+    padding: 5px 5px;
 }
 
 .defaultLabel{
