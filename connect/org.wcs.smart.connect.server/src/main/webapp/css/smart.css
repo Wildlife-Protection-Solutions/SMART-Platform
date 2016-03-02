@@ -382,8 +382,8 @@ div.scrollable {
 }
 
 .settingsTable{
-    border-style: outset;
-    border-color: cornsilk;
+	border: 2px solid cornsilk;
+	border-radius: 3px;
     margin: 10px 5px 0px 0px;
     padding: 3px 3px;
 }
@@ -429,7 +429,6 @@ div.scrollable {
 /* SMART Tabs */
 
 .tabheader{
-	border-bottom: 1px solid #CCCCCC;
 	border-radius: 3px;
 	padding-top: 5px;
 	padding-bottom: 5px;
@@ -440,7 +439,7 @@ div.scrollable {
 	
 }
 .tab{
-	border-left: 1px solid #CCCCCC;
+	border-left: 1px solid black;
 	color: #3A4469;
 	padding-left: 5px;
 	padding-right: 5px;
