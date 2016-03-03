@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -67,7 +68,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	
 	private String queryTempTable;
 	private int wpCount = 0;
-	private ResultSet lastResultSet;
 	private Envelope bounds = null;
 
 	//next sort column
@@ -78,7 +78,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	
 	private DerbyPatrolQueryEngine engine;
 
-	
 	public DerbyPagedObservationResult(String queryTempTable, DerbyPatrolQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
@@ -104,49 +103,16 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	
 	@Override
 	public void destroy() {
-		//simply closing result set and deleting temporary table
-		dropResultSet();
 		super.destroy();
 	}
 	
-	@Override
-	public List<IResultItem> getData(final int offset, final int pageSize) {
-		final Session session = HibernateManager.openSession();
-		//NOTE: session will not be closed on purpose!!!!
-		//as we want related ResultSet to remain opened for performance reasons
-		List<IResultItem> result = getNextData(session, offset, pageSize);
-		if (result == null) {
-			result = getData(session, offset, pageSize);
-		}
-		return result;
-	}
-	
-	private List<IResultItem> getNextData(final Session session, final int offset, final int pageSize) {
-		if (lastResultSet == null)
-			return null;
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		try {
-			result.addAll(getResults(lastResultSet, offset, pageSize));
-		} catch (SQLException e) {
-			//most likely someone closed our old session/connection and old ResultSet is not working
-			lastResultSet = null;
-			return null;
-		}
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				attachObservations(result, c, session);
-			}
-		});
-		return result;
-	}
-	
+
 	
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
-			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+			try{final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
 			s.doWork(new Work(){
 
 				@Override
@@ -162,6 +128,9 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 					}
 				}	
 			});
+			}finally{
+				s.close();
+			}
 		}
 		return bounds;
 		
@@ -282,32 +251,26 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		c.commit();
 	}
 		
-	
-	private List<IResultItem> getData(final Session session, final int offset, final int pageSize) {
-		final List<IResultItem> result = new ArrayList<IResultItem>();
+	/**
+	 *Opens a result set in the given session that accessed the query results
+	 */
+	public ResultSet getResultSet(Session session) {
 		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
 		
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+		
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public ResultSet execute(Connection c) throws SQLException {
 				if ((lastSortColumn == null && sortColumn != null) 
 						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn.equals(sortColumn)) ){
 					updateSortColumn(sortColumn, session, c);
 				}
-				lastResultSet = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-				//this forces garbage collection; without this the program
-				//will fail with out of memory error when sorting
-				//on columns multiple times.
-				System.gc();
-				
-				result.addAll(getResults(lastResultSet, offset, pageSize));
-				attachObservations(result, c, session);
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);	
 			}
 		});
-		return result;
 	}
 
-	private void attachObservations(List<IResultItem> result, Connection c, Session session) throws SQLException {
+	private void attachObservations(List<? extends IResultItem> result, Connection c, Session session) throws SQLException {
 		boolean hasObservations = false;
 		StringBuilder attrSql = new StringBuilder();
 		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$
@@ -403,27 +366,21 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		this.lastSortColumn = this.sortColumn;
 		this.sortColumn = sortColumn;
 		this.direction = direction;
-		dropResultSet();
 	}
 
-	private void dropResultSet() {
-		
-		if (lastResultSet != null) {
-			try {
-				if (!lastResultSet.isClosed()){
-					lastResultSet.getStatement().close();
-					lastResultSet.close();
-				}
-			} catch (SQLException e) {
-				//nothing
-				e.printStackTrace();
-			}
-			lastResultSet = null;
-		}
-	}
 	
-	protected List<PatrolQueryResultItem> getResults(ResultSet rs, int from, int pageSize) throws SQLException {
-		List<PatrolQueryResultItem> items = new ArrayList<PatrolQueryResultItem>();
+	/**
+	 * Gets results from the given result get.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<IResultItem> items = new ArrayList<IResultItem>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
@@ -434,6 +391,15 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 			PatrolQueryResultItem it = engine.asQueryResultItem(rs, null);
 			items.add(it);
 		}
+		
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				attachObservations(items, c, session);		
+			}
+			
+		});
+		
 		return items;
 	}
 

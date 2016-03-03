@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -85,97 +86,86 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 		return super.equals(obj);
 	}
 	
-
-	protected List<IResultItem> getNextData(final Session session, final int offset, final int pageSize) {
-		if (lastResultSet == null)
-			return null;
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		try {
-			result.addAll(getResults(lastResultSet, offset, pageSize, session));
-		} catch (SQLException e) {
-			//most likely someone closed our old session/connection and old ResultSet is not working
-			lastResultSet = null;
-			return null;
+	@Override
+	public List<IResultItem> getResults(final Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		final List<IResultItem> items = new ArrayList<IResultItem>();
+		rs.absolute(from);
+		int to = from + pageSize;
+		if (to >= itemCount) {
+			to = itemCount;
+		}
+		for(int x = from; x < to; x++) {
+			rs.next();
+			IResultItem it = engine.asQueryResultItem(rs, session);
+			items.add(it);
 		}
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				attachMissionProperties(result, c, session);
+				attachMissionProperties(items, c, session);
 			}
 		});
-		return result;
+		return items;
 	}
-	
-	protected List<IResultItem> getData(final Session session, final int offset, final int pageSize) {
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		session.doWork(new Work() {
+
+	/**
+	 * Opens a result set in the given session that accessed the query results
+	 */
+	@Override
+	public ResultSet getResultSet(final Session session) {
+		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
+
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+
 			@Override
-			public void execute(Connection c) throws SQLException {
-				if ((lastSortColumn == null && sortColumn != null) 
-						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn.equals(sortColumn)) ){
+			public ResultSet execute(Connection c) throws SQLException {
+				if ((lastSortColumn == null && sortColumn != null)
+						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn
+								.equals(sortColumn))) {
 					updateSortColumn(sortColumn, session, c);
 				}
-				lastResultSet = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-				//this forces garbage collection; without this the program
-				//will fail with out of memory error when sorting
-				//on columns multiple times.
-				System.gc();
-				
-				result.addAll(getResults(lastResultSet, offset, pageSize, session));
-				attachMissionProperties(result, c, session);
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
 			}
 		});
-		return result;
 	}
+
 	
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
-			final String sql = "SELECT geometry FROM smart.mission_track where mission_day_uuid in (SELECT mission_day_uuid FROM " + queryTempTable + " )"; //$NON-NLS-1$ //$NON-NLS-2$
-			s.doWork(new Work(){
-
-				@Override
-				public void execute(Connection c) throws SQLException {
-					WKBReader reader = new WKBReader();
-					Envelope results = null;
-					try(ResultSet q = c.createStatement().executeQuery(sql)){
-						while(q.next()){
-							byte[] ob = q.getBytes(1);
-							if (ob != null && ob.length > 0){
-								LineString ls = (LineString)reader.read(ob);
-								if (results == null){
-									results = ls.getEnvelopeInternal();
-								}else{
-									results.expandToInclude(ls.getEnvelopeInternal());
+			try{
+				final String sql = "SELECT geometry FROM smart.mission_track where mission_day_uuid in (SELECT mission_day_uuid FROM " + queryTempTable + " )"; //$NON-NLS-1$ //$NON-NLS-2$
+				s.doWork(new Work(){
+	
+					@Override
+					public void execute(Connection c) throws SQLException {
+						WKBReader reader = new WKBReader();
+						Envelope results = null;
+						try(ResultSet q = c.createStatement().executeQuery(sql)){
+							while(q.next()){
+								byte[] ob = q.getBytes(1);
+								if (ob != null && ob.length > 0){
+									LineString ls = (LineString)reader.read(ob);
+									if (results == null){
+										results = ls.getEnvelopeInternal();
+									}else{
+										results.expandToInclude(ls.getEnvelopeInternal());
+									}
 								}
 							}
+						}catch (Exception ex){
+							ERQueryPlugIn.log(ex.getMessage(), ex);
 						}
-					}catch (Exception ex){
-						ERQueryPlugIn.log(ex.getMessage(), ex);
-					}
-					bounds = results;
-				}	
-			});
+						bounds = results;
+					}	
+				});
+			}finally{
+				s.close();
+			}
 		}
 		return bounds;	
-	}
-	
-	protected void dropResultSet() {
-		if (lastResultSet != null) {
-			try {
-				if (!lastResultSet.isClosed()){
-					lastResultSet.getStatement().close();
-					lastResultSet.close();
-				}
-			} catch (SQLException e) {
-				//nothing
-				e.printStackTrace();
-			}
-			lastResultSet = null;
-		}
 	}
 	
 	@Override

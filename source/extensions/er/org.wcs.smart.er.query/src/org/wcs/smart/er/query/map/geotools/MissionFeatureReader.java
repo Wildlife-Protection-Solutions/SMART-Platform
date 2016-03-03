@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.query.map.geotools;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Locale;
@@ -37,6 +38,8 @@ import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.QueryResultSetIterator;
 import org.wcs.smart.query.common.model.SimpleQuery;
 
 /**
@@ -51,7 +54,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	private SimpleFeatureType ftype;
 	private Iterator<?> fIterator;
 	private SimpleQuery query;
-	private Session session;
+	private Session session = null;
 	
 	private boolean isWaypointMissionTrack= false;
 	/**
@@ -66,8 +69,6 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 		this.ftype = ftype;
 		this.fIterator = null;
 		this.query = query;
-		
-		session = HibernateManager.openSession();
 		
 		Object cachedResults;
 		try {
@@ -91,7 +92,12 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	 */
 	@Override
 	public void close() throws IOException {
-		session.close();
+		if (fIterator instanceof Closeable){
+			((Closeable) fIterator).close();
+		}
+		if (session != null){
+			session.close();
+		}
 	}
 
 	/**
@@ -113,6 +119,11 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 		return fIterator.hasNext();
 	}
 
+	private Session getSession(){
+		if (session == null) session = HibernateManager.openSession();
+		return session;
+	}
+	
 	/**
 	 * @see org.geotools.data.FeatureReader#next()
 	 */
@@ -120,7 +131,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		if (isWaypointMissionTrack){
 			byte[] next = (byte[]) this.fIterator.next();
-			Mission mission = (Mission) session.load(Mission.class, next);
+			Mission mission = (Mission) getSession().load(Mission.class, next);
 			SimpleFeature f = SurveyResultItemFeature.createObservationFeature(mission, ftype);
 			return f;
 		}else{
@@ -131,7 +142,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 				return f;
 			}else if (n instanceof MissionTrackResultItem){
 				MissionTrackResultItem next = (MissionTrackResultItem) n;
-				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, session, query.getQueryColumns(Locale.getDefault(), null), ftype);
+				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, getSession(), query.getQueryColumns(Locale.getDefault(), null), ftype);
 				return f;
 			}
 		}

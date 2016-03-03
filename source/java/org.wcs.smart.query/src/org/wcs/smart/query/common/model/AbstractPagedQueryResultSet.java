@@ -22,10 +22,9 @@
 package org.wcs.smart.query.common.model;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -39,6 +38,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.QueryResultSetIterator;
 import org.wcs.smart.query.internal.Messages;
 
 /**
@@ -51,14 +51,44 @@ public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSe
 
 	protected int itemCount = 0;
 
+	
 	/**
-	 * Gets a set of data
+	 * Opens a session, creates a result set and loads the data from 
+	 * the given offset, pagesize.
+	 */
+	@Override
+	public List<IResultItem> getData(final int offset, final int pageSize) {
+		List<IResultItem> result = null;
+		
+		Session session = HibernateManager.openSession();
+		try{
+			try(ResultSet rs = getResultSet(session)){
+				result = getResults(session, rs, offset, pageSize);
+			}
+		}catch (SQLException ex){
+			QueryPlugIn.displayLog("Error loading query results from database.", ex);
+		}finally{
+			session.close();
+		}
+		return result;
+	}
+
+	
+	/**
+	 * Gets results from the given result get.
 	 * 
-	 * @param itOffset
+	 * @param rs
+	 * @param from
 	 * @param pageSize
 	 * @return
+	 * @throws SQLException
 	 */
-	public abstract List<IResultItem> getData(int itOffset, int pageSize);
+	public abstract List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
+	
+	/**
+	 * Opens a result set in the given session that accessed the query results
+	 */
+	public abstract ResultSet getResultSet(Session session);
 
 	/**
 	 * Get all temporary tables used to support the result set
@@ -79,8 +109,14 @@ public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSe
 		cleanUpJob.schedule();
 	}
 
-	public Iterator<IResultItem> iterator(int pageSize) {
-		return new LazyQueryIterator(pageSize);
+	/**
+	 * Creates a new feature iterator that intrates over all
+	 * features in the result set using the given page size.  This
+	 * iterator MUST BE CLOSED when you are done with it to properly
+	 * close the session.
+	 */
+	public QueryResultSetIterator<IResultItem> iterator(int pageSize) {
+		return new QueryResultSetIterator<IResultItem>(this, pageSize);
 	}
 
 	public int getItemCount() {
@@ -91,56 +127,6 @@ public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSe
 		this.itemCount = itemCount;
 	}
 
-	/**
-	 * Iterator that uses lazy approach
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private class LazyQueryIterator implements Iterator<IResultItem> {
-
-		private int itOffset = -1; // offset of element at which list begins
-		private int itIndex = 0;
-		private List<IResultItem> data;
-		private int pageSize = 0;
-
-		public LazyQueryIterator(int pageSize) {
-			this.pageSize = pageSize;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return itOffset + itIndex + 1 < itemCount;
-		}
-
-		@Override
-		public IResultItem next() {
-			if (!hasNext())
-				throw new NoSuchElementException();
-			if (data == null) {
-				itOffset = 0;
-				itIndex = 0;
-				data = getData(itOffset, pageSize);
-				return data.get(itIndex);
-			}
-			itIndex++;
-			if (itIndex < data.size()) {
-				return data.get(itIndex);
-			}
-			// we need to load new portion of data
-			itOffset += data.size();
-			itIndex = 0;
-			data = getData(itOffset, pageSize);
-			return data.get(itIndex);
-		}
-
-		@Override
-		public void remove() {
-			throw new IllegalStateException(
-					"Remove operation is not supported."); //$NON-NLS-1$
-		}
-
-	}
 
 	private class CleanUpJob extends Job {
 

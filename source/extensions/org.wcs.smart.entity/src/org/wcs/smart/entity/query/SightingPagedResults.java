@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -44,7 +45,6 @@ import com.vividsolutions.jts.geom.Envelope;
 public class SightingPagedResults extends AbstractPagedQueryResultSet {
 	
 	private String queryTempTable;
-	private ResultSet lastResultSet;
 	private Envelope bounds = null;
 
 	private boolean isDestoryed = false;
@@ -91,53 +91,11 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 		}
 	}
 
-	
-	public synchronized  List<IResultItem> getData(final int offset, final int pageSize) {
-		isLoading = true;
-		try{
-			if (isDestoryed){
-				return null;
-			}
-		
-			final Session session = HibernateManager.openSession();
-			// NOTE: session will not be closed on purpose!!!!
-			// as we want related ResultSet to remain opened for performance reasons
-			List<IResultItem> result = getNextData(session, offset, pageSize);
-			if (result == null) {
-				result = getData(session, offset, pageSize);
-			}
-			return result;
-			
-		}finally{
-			isLoading = false;
-			//check to see if we need to cleanup
-			cleanUp();
-		}
-	}
-
-	private List<IResultItem> getNextData(final Session session,
-			final int offset, final int pageSize) {
-		if (lastResultSet == null){
-			return null;
-		}
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		try {
-			result.addAll(getResults(lastResultSet, offset, pageSize));
-		} catch (SQLException e) {
-			// most likely someone closed our old session/connection and old
-			// ResultSet is not working
-			lastResultSet = null;
-			return null;
-		}
-		return result;
-	}
-	
 	/*
 	 * performs the clean up tasks
 	 */
 	private void cleanUp(){
 		if (isDestoryed){
-			dropResultSet();
 			super.destroy();
 		}
 	}
@@ -170,33 +128,27 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 				});
 			} finally {
 				s.getTransaction().rollback();
+				s.close();
 			}
 		}
 		return bounds;
 
 	}
 
-	private List<IResultItem> getData(final Session session,
-			final int offset, final int pageSize) {
-		
-		final List<IResultItem> result = new ArrayList<IResultItem>();
+	
+	/**
+	 * Opens a result set in the given session that accessed the query results
+	 */
+	@Override
+	public ResultSet getResultSet(Session session) {
 		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
-
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
-				c.commit();
-				lastResultSet = c.createStatement(
-						ResultSet.TYPE_SCROLL_INSENSITIVE,
+			public ResultSet execute(Connection c) throws SQLException {
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-				// this forces garbage collection; without this the program
-				// will fail with out of memory error when sorting
-				// on columns multiple times.
-				System.gc();
-				result.addAll(getResults(lastResultSet, offset, pageSize));
 			}
 		});
-		return result;
 	}
 
 	
@@ -221,38 +173,31 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 	public void setSorting(final QueryColumn sortColumn, int direction) {
 		this.sortColumn = sortColumn;
 		this.sortDirection = direction;
-		dropResultSet();
 	}
 
-	private void dropResultSet() {
-
-		if (lastResultSet != null) {
-			try {
-				if (!lastResultSet.isClosed()) {
-					lastResultSet.getStatement().close();
-					lastResultSet.close();
-				}
-			} catch (SQLException e) {
-				// nothing
-				e.printStackTrace();
-			}
-			lastResultSet = null;
-		}
-	}
-
-	protected List<SightingResultItem> getResults(ResultSet rs,
-			int from, int pageSize) throws SQLException {
-		List<SightingResultItem> items = new ArrayList<SightingResultItem>();
+	/**
+	 * Gets results from the given result set.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	 */
+	 @Override
+	 public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<IResultItem> items = new ArrayList<IResultItem>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
 			to = itemCount;
 		}
-		for (int x = from; x < to; x++) {
+		for(int x = from; x < to; x++) {
 			rs.next();
 			SightingResultItem it = engine.asQueryResultItem(rs, null);
 			items.add(it);
 		}
+		
 		return items;
 	}
 

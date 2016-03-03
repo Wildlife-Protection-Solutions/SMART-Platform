@@ -33,6 +33,7 @@ import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.QueryResultSetIterator;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
 
@@ -45,7 +46,7 @@ import org.wcs.smart.query.model.IPagedQuery;
 public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
-	private Iterator<? extends IResultItem> fIterator;
+	private QueryResultSetIterator<? extends IResultItem> fIterator;
 	private SimpleQuery query;
 		
 	/**
@@ -80,6 +81,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public void close() throws IOException {
+		fIterator.close();
 	}
 
 	/**

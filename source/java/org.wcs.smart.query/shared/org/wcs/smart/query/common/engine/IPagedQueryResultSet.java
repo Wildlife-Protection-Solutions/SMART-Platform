@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.common.engine;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.wcs.smart.query.model.QueryColumn;
@@ -81,7 +80,7 @@ public interface IPagedQueryResultSet extends IQueryResult{
 	 * @param pageSize
 	 * @return
 	 */
-	public Iterator<? extends IResultItem> iterator(int pageSize);
+	public QueryResultSetIterator<? extends IResultItem> iterator(int pageSize);
 
 	/**
 	 * Sets the current sorting column.

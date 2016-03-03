@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
@@ -48,7 +49,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet{
 	};
 	
 	private String queryTempTable;
-	private ResultSet lastResultSet;
 	private Envelope bounds = null;
 
 	//next sort column
@@ -80,81 +80,36 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet{
 	
 	@Override
 	public void destroy() {
-		//simply closing result set and deleting temporary table
-		dropResultSet();
 		super.destroy();
 	}
-	
-	@Override
-	public List<IResultItem> getData(final int offset, final int pageSize) {
-		final Session session = HibernateManager.openSession();
-		//NOTE: session will not be closed on purpose!!!!
-		//as we want related ResultSet to remain opened for performance reasons
-		List<IResultItem> result = getNextData(session, offset, pageSize);
-		if (result == null) {
-			result = getData(session, offset, pageSize);
-		}
-		return result;
-	}
-	
-	private List<IResultItem> getNextData(final Session session, final int offset, final int pageSize) {
-		if (lastResultSet == null)
-			return null;
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		try {
-			result.addAll(getResults(lastResultSet, offset, pageSize));
-		} catch (SQLException e) {
-			//most likely someone closed our old session/connection and old ResultSet is not working
-			lastResultSet = null;
-			return null;
-		}
-		return result;
-	}
-	
 	
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
-			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
-			s.doWork(new Work(){
-				@Override
-				public void execute(Connection c) throws SQLException {
-					try(ResultSet q = c.createStatement().executeQuery(sql)){
-						q.next();
-						double minx = q.getDouble(1);
-						double maxx = q.getDouble(2);
-						double miny = q.getDouble(3);
-						double maxy = q.getDouble(4);
-						bounds = new Envelope(minx, maxx, miny, maxy);
+			try{
+				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+				s.doWork(new Work(){
+					@Override
+					public void execute(Connection c) throws SQLException {
+						try(ResultSet q = c.createStatement().executeQuery(sql)){
+							q.next();
+							double minx = q.getDouble(1);
+							double maxx = q.getDouble(2);
+							double miny = q.getDouble(3);
+							double maxy = q.getDouble(4);
+							bounds = new Envelope(minx, maxx, miny, maxy);
+						}
 					}
-				}
-			});
+				});
+			}finally{
+				s.close();
+			}
 		}
 		return bounds;
 		
 	}
-	
-	private List<IResultItem> getData(final Session session, final int offset, final int pageSize) {
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				lastResultSet = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-				//this forces garbage collection; without this the program
-				//will fail with out of memory error when sorting
-				//on columns multiple times.
-				System.gc();
-				
-				result.addAll(getResults(lastResultSet, offset, pageSize));
-			}
-		});
-		return result;
-	}
 
-	
 	private String buildSortSql() {
 		if (sortColumn == null || direction == SWT.NONE)
 			return ""; //$NON-NLS-1$
@@ -191,44 +146,51 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet{
 	public void setSorting(final QueryColumn sortColumn, int direction) {
 		this.sortColumn = sortColumn;
 		this.direction = direction;
-		dropResultSet();
 	}
 
-	private void dropResultSet() {
-		if (lastResultSet != null) {
-			
-			try {
-				if (!lastResultSet.isClosed()){
-					lastResultSet.getStatement().close();
-					lastResultSet.close();
-				}
-			} catch (SQLException e) {
-				//nothing
-				e.printStackTrace();
-			}
-			lastResultSet = null;
-		}
+	@Override
+	public String[] getTemporaryTableNames() {
+		return new String[]{queryTempTable};
 	}
 	
-	protected List<ObservationQueryResultItem> getResults(ResultSet rs, int from, int pageSize) throws SQLException {
-		List<ObservationQueryResultItem> items = new ArrayList<ObservationQueryResultItem>();
-		
+	/**
+	 * Gets results from the given result set.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public List<IResultItem> getResults(Session session, ResultSet rs,
+			int from, int pageSize) throws SQLException {
+		List<IResultItem> items = new ArrayList<IResultItem>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
 			to = itemCount;
 		}
-		for(int x = from; x < to; x++) {
+		for (int x = from; x < to; x++) {
 			rs.next();
 			ObservationQueryResultItem it = engine.asQueryResultItem(rs, null);
 			items.add(it);
 		}
 		return items;
 	}
-
-
+	
+	/**
+	 * Opens a result set in the given session that accessed the query results
+	 */
 	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable};
+	public ResultSet getResultSet(Session session) {
+		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+			@Override
+			public ResultSet execute(Connection c) throws SQLException {
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
+			}
+		});
 	}
 }

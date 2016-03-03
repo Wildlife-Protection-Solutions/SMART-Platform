@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.map;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -36,6 +35,7 @@ import org.wcs.smart.entity.query.SightingResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.QueryResultSetIterator;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -51,7 +51,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
-	private Iterator<IResultItem> fIterator;
+	private QueryResultSetIterator<? extends IResultItem> fIterator;
 	private EntitySightingQuery  query;
 	
 	/**
@@ -84,6 +84,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 	 */
 	@Override
 	public void close() throws IOException {
+		fIterator.close();
 	}
 
 	/**
