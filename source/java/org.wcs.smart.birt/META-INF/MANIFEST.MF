@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART BIRT Extensions
 Bundle-SymbolicName: org.wcs.smart.birt;singleton:=true
-Bundle-Version: 4.0.0
+Bundle-Version: 4.0.0.qualifier
 Bundle-Activator: org.wcs.smart.birt.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.birt.report.designer.ui.lib.explorer;bundle-version="3.7.2",
