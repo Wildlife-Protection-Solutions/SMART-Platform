@@ -24,6 +24,7 @@ package org.wcs.smart.incident.ui;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -165,7 +166,14 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			featureCollection.clear();
 			featureCollection.add(createIncidentFeature(featureType));
 			store.removeFeatures(Filter.INCLUDE);
-			store.addFeatures(featureCollection);
+			try{
+				store.addFeatures(featureCollection);
+			}catch (ConcurrentModificationException ex){
+				//try again - this should only happen once (udig removes listener)
+				//see SMART bug 1672
+				store.removeFeatures(Filter.INCLUDE);
+				store.addFeatures(featureCollection);
+			}
 			
 			
 		} catch (IOException e) {

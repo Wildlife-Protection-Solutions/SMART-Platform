@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -467,9 +468,11 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 				deleted.add(oldc[i]);
 			}
 		}
-		if (deleted.size() > 0){
-			undo.add(deleted);
-			if (btnUndo != null) btnUndo.setEnabled(true);
+		if (newc.length == 0 || newc.length > 1){
+			if (deleted.size() > 0){
+				undo.add(deleted);
+				if (btnUndo != null) btnUndo.setEnabled(true);
+			}
 		}
 		
 		if (newc.length == 0){
@@ -500,9 +503,15 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		
 		//update track and point layers
 		try {
-			trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
+			try{
+				trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
 					ls, Filter.INCLUDE);
+			}catch (ConcurrentModificationException ex){
+				trackStore.modifyFeatures(trackStore.getSchema().getDescriptor(GEOM_FIELD).getName(),
+						ls, Filter.INCLUDE);
+			}
 			trackLayer.refresh(null);
+		
 		} catch (IOException e1) {
 			SmartPlugIn.displayLog(Messages.TrackPointDialog_UpdateTrackLayerError + "\n\n" + e1.getMessage(), e1);  //$NON-NLS-1$
 		}
@@ -661,6 +670,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 			final IGeoResource trackResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
 			
 			trackStore = trackResource.resolve(FeatureStore.class, null);
+			
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
 			layers.add(trackResource);
 			
@@ -683,6 +693,8 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 					ReferencedEnvelope bounds = trackLayer.getBounds(monitor, mapViewer.getMap().getViewportModel().getCRS());
 					bounds.expandBy(Math.max(bounds.getWidth(), bounds.getHeight()) * 0.1);
 					mapViewer.getMap().sendCommandASync(new SetViewportBBoxCommand(bounds));
+					
+
 				}
 			};
 			getMap().sendCommandASync(command);
@@ -766,6 +778,13 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 					pointLayer.getStyleBlackboard().put(SLDContent.ID, style);
 					pointLayer.refresh(null);
 
+					try{
+						pointStore.modifyFeatures(pointStore.getSchema().getDescriptor(SELECTED_FIELD).getName(), false, org.opengis.filter.Filter.INCLUDE);
+						
+					}catch(ConcurrentModificationException ex){
+						//try again - this should only happen once (udig removes listener)
+						//see SMART bug 1672
+					}
 				}
 			};
 			getMap().sendCommandASync(command);

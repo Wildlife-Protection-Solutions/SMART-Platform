@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,6 +43,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.XMLMemento;
+import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
@@ -237,7 +239,7 @@ public class MapComposite extends Composite implements MapPart {
 				}
 			});
 	        store = pointResource.resolve(FeatureStore.class, null);
-
+	        pointResource.resolve(DataStore.class, null);
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
 			layers.add(pointResource);
 			
@@ -269,7 +271,14 @@ public class MapComposite extends Composite implements MapPart {
 			featureCollection.clear();
 			featureCollection.addAll(getSmartPointAsFeatures(featureType));
 			store.removeFeatures(Filter.INCLUDE);
-			store.addFeatures(featureCollection);
+			try{
+				store.addFeatures(featureCollection);
+			}catch (ConcurrentModificationException ex){
+				//try again - this should only happen once (udig removes listener)
+				//see SMART bug 1672
+				store.removeFeatures(Filter.INCLUDE);
+				store.addFeatures(featureCollection);
+			}
 			
 			
 		} catch (IOException e) {
