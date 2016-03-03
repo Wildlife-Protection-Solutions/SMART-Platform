@@ -302,6 +302,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 				params.put(IProgressMonitor.class.getName(), lblProgressMonitor);
 				params.put(Session.class.getName(), s);
 				final SightingPagedResults results = (SightingPagedResults)(new DerbyEntitySightingEngine()).executeQuery(query, params);
+				query.setCachedResults(results);
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
