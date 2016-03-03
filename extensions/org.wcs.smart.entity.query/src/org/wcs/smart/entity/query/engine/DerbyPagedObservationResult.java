@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
@@ -53,30 +54,29 @@ import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-
 /**
  * Wrapper for resulted temporary table which was build for particular query.
- * Provides ability to lazy load items from this table and sorting  functionality.
- *  
+ * Provides ability to lazy load items from this table and sorting
+ * functionality.
+ * 
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet implements IObservationPagedQueryResultSet{
-	
-	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
-		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
+public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet
+		implements IObservationPagedQueryResultSet {
+
+	private static String[][] FIXED_COLUMN_KEY_TO_ROW = {
+	// NOTE: order is important as we don't want to change "patrolleg" to "pleg"
+	{ "waypoint", "wp" } //$NON-NLS-1$ //$NON-NLS-2$
 	};
-	
+
 	private String queryTempTable;
 
 	private int wpCount = 0;
 
-	private ResultSet lastResultSet;
-	
 	private Envelope bounds = null;
 
-	//next sort column
+	// next sort column
 	private QueryColumn sortColumn = null;
 	private QueryColumn lastSortColumn = null;
 	private int direction = SWT.UP;
@@ -84,39 +84,44 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 
 	private DerbyEntityQueryEngine engine;
 	private List<String> entityTypes;
-	
-	public DerbyPagedObservationResult(String queryTempTable, DerbyEntityQueryEngine engine, SimpleQuery query) throws Exception {
+
+	public DerbyPagedObservationResult(String queryTempTable,
+			DerbyEntityQueryEngine engine, SimpleQuery query) throws Exception {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
-		
+
 		entityTypes = new ArrayList<String>();
-		query.getFilter().getFilter().accept(new IFilterVisitor() {			
+		query.getFilter().getFilter().accept(new IFilterVisitor() {
 			@Override
 			public void visit(IFilter filter) {
-				if (filter instanceof EntityAttributeFilter){
-					entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+				if (filter instanceof EntityAttributeFilter) {
+					entityTypes.add(((EntityAttributeFilter) filter)
+							.getEntityKey());
 				}
 			}
 		});
 	}
 
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyEntityQueryEngine engine, SimpleQuery query) throws Exception {
+	public DerbyPagedObservationResult(String queryTempTable, int itemCount,
+			int wpCount, DerbyEntityQueryEngine engine, SimpleQuery query)
+			throws Exception {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.wpCount = wpCount;
 		this.engine = engine;
 
 		entityTypes = new ArrayList<String>();
-		query.getFilter().getFilter().accept(new IFilterVisitor() {			
+		query.getFilter().getFilter().accept(new IFilterVisitor() {
 			@Override
 			public void visit(IFilter filter) {
-				if (filter instanceof EntityAttributeFilter){
-					entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+				if (filter instanceof EntityAttributeFilter) {
+					entityTypes.add(((EntityAttributeFilter) filter)
+							.getEntityKey());
 				}
 			}
 		});
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DerbyPagedObservationResult) {
@@ -127,92 +132,68 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		}
 		return super.equals(obj);
 	}
-	
+
 	@Override
 	public void destroy() {
-		//simply closing result set and deleting temporary table
-		dropResultSet();
 		super.destroy();
 	}
-	
-	@Override
-	public List<IResultItem> getData(final int offset, final int pageSize) {
-		final Session session = HibernateManager.openSession();
-		//NOTE: session will not be closed on purpose!!!!
-		//as we want related ResultSet to remain opened for performance reasons
-		List<IResultItem> result = getNextData(session, offset, pageSize);
-		if (result == null) {
-			result = getData(session, offset, pageSize);
-		}
-		return result;
-	}
-	
-	private List<IResultItem> getNextData(final Session session, final int offset, final int pageSize) {
-		if (lastResultSet == null)
-			return null;
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		try {
-			result.addAll(getResults(lastResultSet, offset, pageSize));
-		} catch (SQLException e) {
-			//most likely someone closed our old session/connection and old ResultSet is not working
-			lastResultSet = null;
-			return null;
-		}
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				attachObservations(result, c, session);
-			}
-		});
-		return result;
-	}
-	
-	
-	@Override
-	public Envelope getEnvelope(){
-		if (this.bounds == null){
-			Session s = HibernateManager.openSession();
-			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
-			s.doWork(new Work(){
 
-				@Override
-				public void execute(Connection c) throws SQLException {
-					try(ResultSet q = c.createStatement().executeQuery(sql)){
-						q.next();
-						double minx = q.getDouble(1);
-						double maxx = q.getDouble(2);
-						double miny = q.getDouble(3);
-						double maxy = q.getDouble(4);
-					
-						bounds = new Envelope(minx, maxx, miny, maxy);
+	@Override
+	public Envelope getEnvelope() {
+		if (this.bounds == null) {
+			Session s = HibernateManager.openSession();
+			try {
+				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+				s.doWork(new Work() {
+
+					@Override
+					public void execute(Connection c) throws SQLException {
+						try (ResultSet q = c.createStatement()
+								.executeQuery(sql)) {
+							q.next();
+							double minx = q.getDouble(1);
+							double maxx = q.getDouble(2);
+							double miny = q.getDouble(3);
+							double maxy = q.getDouble(4);
+
+							bounds = new Envelope(minx, maxx, miny, maxy);
+						}
 					}
-				}	
-			});
+				});
+			} finally {
+				s.close();
+			}
 		}
 		return bounds;
-		
+
 	}
-	
-	private void updateSortColumn(QueryColumn sortColumn, Session session, Connection c) throws SQLException{
-		if (sortColumn instanceof EtAttributeQueryColumn){
-			if (!hasSortColumns){
-				//add the sort columns
-				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyDbl double"); //$NON-NLS-1$ //$NON-NLS-2$
-				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyTxt varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	private void updateSortColumn(QueryColumn sortColumn, Session session,
+			Connection c) throws SQLException {
+		if (sortColumn instanceof EtAttributeQueryColumn) {
+			if (!hasSortColumns) {
+				// add the sort columns
+				c.createStatement()
+						.execute(
+								"ALTER TABLE " + queryTempTable + " add column sortKeyDbl double"); //$NON-NLS-1$ //$NON-NLS-2$
+				c.createStatement()
+						.execute(
+								"ALTER TABLE " + queryTempTable + " add column sortKeyTxt varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
 				c.commit();
 				hasSortColumns = true;
 			}
 			String key = sortColumn.getKey();
 			key = key.split(":")[1]; //$NON-NLS-1$
 			Attribute attribute = null;
-			
+
 			session.beginTransaction();
-			try{
-				attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
-			}finally{
+			try {
+				attribute = QueryDataModelManager.getInstance().getAttribute(
+						session, key); // session will not be closed on purpose
+			} finally {
 				session.getTransaction().rollback();
 			}
-			
+
 			switch (attribute.getType()) {
 			case BOOLEAN:
 			case NUMERIC:
@@ -234,7 +215,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				c.createStatement().execute(sql.toString());
 				break;
 			}
-			
+
 			switch (attribute.getType()) {
 			case BOOLEAN:
 			case NUMERIC:
@@ -248,7 +229,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable );
+				sql.append(queryTempTable);
 				sql.append(".ob_uuid)"); //$NON-NLS-1$
 				c.createStatement().execute(sql.toString());
 				break;
@@ -261,10 +242,10 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				sql.append("(SELECT wpoa.STRING_VALUE FROM "); //$NON-NLS-1$
 				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
 				sql.append("and a.keyid = '"); //$NON-NLS-1$
-				sql.append( key );
+				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable );
+				sql.append(queryTempTable);
 				sql.append(".ob_uuid)"); //$NON-NLS-1$
 				c.createStatement().execute(sql.toString());
 				break;
@@ -275,16 +256,16 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
 				sql.append("(SELECT rl.value FROM "); //$NON-NLS-1$
 				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
-				sql.append( queryTempTable );
-				sql.append( "_LIST rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append("_LIST rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
-				sql.append( key );
+				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable); 
+				sql.append(queryTempTable);
 				sql.append(".ob_uuid)"); //$NON-NLS-1$
 				c.createStatement().execute(sql.toString());
-				
+
 				break;
 			case TREE:
 				sql = new StringBuilder();
@@ -292,56 +273,34 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				sql.append(queryTempTable);
 				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
 				sql.append("(SELECT rl.value FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
-				sql.append( queryTempTable );
+				sql.append(queryTempTable);
 				sql.append("_TREE rl on rl.uuid = wpoa.tree_node_uuid "); //$NON-NLS-1$
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
-				sql.append( key );
+				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable );
-				sql.append( ".ob_uuid)"); //$NON-NLS-1$
+				sql.append(queryTempTable);
+				sql.append(".ob_uuid)"); //$NON-NLS-1$
 				c.createStatement().execute(sql.toString());
-				
+
 				break;
 			}
 		}
 		c.commit();
 	}
-		
-		
-	
-	private List<IResultItem> getData(final Session session, final int offset, final int pageSize) {
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				if ((lastSortColumn == null && sortColumn != null) || (lastSortColumn != null && sortColumn != null && !lastSortColumn.equals(sortColumn)) ){
-					updateSortColumn(sortColumn, session, c);
-				}
-				lastResultSet = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-				//this forces garbage collection; without this the program
-				//will fail with out of memory error when sorting
-				//on columns multiple times.
-				System.gc();
-				
-				result.addAll(getResults(lastResultSet, offset, pageSize));
-				attachObservations(result, c, session);
-			}
-		});
-		return result;
-	}
 
-	private void attachObservations(List<IResultItem> result, Connection c, Session session) throws SQLException {
+	private void attachObservations(List<IResultItem> result, Connection c,
+			Session session) throws SQLException {
 		boolean hasObservations = false;
 		StringBuilder attrSql = new StringBuilder();
 		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$
 		attrSql.append(queryTempTable);
 		attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
-		attrSql.append(queryTempTable).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
-		attrSql.append(queryTempTable).append("_tree rt on wpoa.tree_node_uuid = rt.UUID WHERE r.ob_uuid in ("); //$NON-NLS-1$
-		for (IResultItem rii: result){
+		attrSql.append(queryTempTable).append(
+				"_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
+		attrSql.append(queryTempTable)
+				.append("_tree rt on wpoa.tree_node_uuid = rt.UUID WHERE r.ob_uuid in ("); //$NON-NLS-1$
+		for (IResultItem rii : result) {
 			EntityQueryResultItem it = (EntityQueryResultItem) rii;
 			if (it.getObservationUuid() != null) {
 				if (hasObservations) {
@@ -351,30 +310,32 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				attrSql.append("x'").append(UuidUtils.uuidToString(it.getObservationUuid())).append('\''); //$NON-NLS-1$
 			}
 		}
-		
-		
+
 		if (!hasObservations) {
-			//no observations in current data fragment, so no need to select attributes as they will be empty
+			// no observations in current data fragment, so no need to select
+			// attributes as they will be empty
 			return;
 		}
 		attrSql.append(')');
 
-		try (ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
-			HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
-			for (IResultItem rii: result){
+		try (ResultSet rs = c.createStatement()
+				.executeQuery(attrSql.toString())) {
+			HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(
+					rs, session);
+			for (IResultItem rii : result) {
 				EntityQueryResultItem it = (EntityQueryResultItem) rii;
 				if (it.getObservationUuid() != null) {
-					HashMap<String, Object> attributes = attrMap.get(it.getObservationUuid());
+					HashMap<String, Object> attributes = attrMap.get(it
+							.getObservationUuid());
 					if (attributes != null) {
 						it.setAttributes(attributes);
 					}
 				}
 			}
 		}
-		
-		
-		if (entityTypes.size() > 0){
-		//attach entities
+
+		if (entityTypes.size() > 0) {
+			// attach entities
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT r.ob_uuid, a.keyid as entitykey, ea.keyid as entityattributekey, eav.number_value, eav.string_value, rl.value as list_value, rt.value as tree_value "); //$NON-NLS-1$
 			sql.append(" FROM "); //$NON-NLS-1$
@@ -383,11 +344,13 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 			sql.append(" join smart.entity e on e.attribute_list_item_uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
 			sql.append(" join smart.entity_attribute_value eav on eav.entity_uuid = e.uuid "); //$NON-NLS-1$
 			sql.append(" join smart.entity_attribute ea on ea.uuid = eav.entity_attribute_uuid left join "); //$NON-NLS-1$
-			sql.append(queryTempTable).append("_list rl on eav.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
-			sql.append(queryTempTable).append("_tree rt on eav.tree_node_uuid = rt.UUID "); //$NON-NLS-1$	
-		
+			sql.append(queryTempTable).append(
+					"_list rl on eav.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
+			sql.append(queryTempTable).append(
+					"_tree rt on eav.tree_node_uuid = rt.UUID "); //$NON-NLS-1$	
+
 			sql.append("WHERE r.ob_uuid in ("); //$NON-NLS-1$
-			for (IResultItem rii : result){
+			for (IResultItem rii : result) {
 				EntityQueryResultItem it = (EntityQueryResultItem) rii;
 				if (it.getObservationUuid() != null) {
 					sql.append("x'").append(UuidUtils.uuidToString(it.getObservationUuid())).append('\''); //$NON-NLS-1$
@@ -395,88 +358,93 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				}
 			}
 			sql.deleteCharAt(sql.length() - 1);
-			
+
 			sql.append(") AND "); //$NON-NLS-1$
 			sql.append("a.keyid in ("); //$NON-NLS-1$
-			for (String et : entityTypes){
-				sql.append("'" + et + "',");  //$NON-NLS-1$//$NON-NLS-2$
+			for (String et : entityTypes) {
+				sql.append("'" + et + "',"); //$NON-NLS-1$//$NON-NLS-2$
 			}
 			sql.deleteCharAt(sql.length() - 1);
 			sql.append(")"); //$NON-NLS-1$
 			QueryPlugIn.logSql(sql.toString());
-			
-			try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
-				while(rs.next()){
+
+			try (ResultSet rs = c.createStatement()
+					.executeQuery(sql.toString())) {
+				while (rs.next()) {
 					byte[] obuuid = rs.getBytes(1);
 					String entityKey = rs.getString(2);
 					String entityAttributeKey = rs.getString(3);
 					Object value = null;
-					if (rs.getObject(4) != null){
+					if (rs.getObject(4) != null) {
 						value = rs.getDouble(4);
-					}else if (rs.getObject(5) != null){
+					} else if (rs.getObject(5) != null) {
 						value = rs.getString(5);
-					}else if (rs.getObject(6) != null){
+					} else if (rs.getObject(6) != null) {
 						value = rs.getString(6);
-					}else if (rs.getObject(7) != null){
+					} else if (rs.getObject(7) != null) {
 						value = rs.getString(7);
 					}
-				
-					for (IResultItem rii : result){
+
+					for (IResultItem rii : result) {
 						EntityQueryResultItem it = (EntityQueryResultItem) rii;
-						if (it.getObservationUuid() != null &&
-							it.getObservationUuid().equals(UuidUtils.byteToUUID(obuuid ))) {
-							it.addEntityAttribute(entityKey, entityAttributeKey, value);
+						if (it.getObservationUuid() != null
+								&& it.getObservationUuid().equals(
+										UuidUtils.byteToUUID(obuuid))) {
+							it.addEntityAttribute(entityKey,
+									entityAttributeKey, value);
 						}
 					}
 				}
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	private String buildSortSql() {
 		if (sortColumn == null || direction == SWT.NONE)
 			return ""; //$NON-NLS-1$
-		
+
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
-			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey() )){
+			if (sortColumn.getKey().equals(
+					FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())) {
 				key = FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey();
 			}
 			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
 				key = key.replace(data[0], data[1]);
 			}
-			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
+			if (sortColumn.getKey().equals(
+					FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())) {
 				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
-			}else if (sortColumn.getType() == ColumnType.STRING){
-				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-			}else{
-				result = "order by r."+key; //$NON-NLS-1$
+			} else if (sortColumn.getType() == ColumnType.STRING) {
+				result = "order by UPPER(r." + key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				result = "order by r." + key; //$NON-NLS-1$
 			}
 		}
 		if (sortColumn instanceof EtCategoryQueryColumn) {
 			String key = sortColumn.getKey();
 			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-			result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			result = "order by UPPER(r." + key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (sortColumn instanceof EtAttributeQueryColumn) {
 			String key = sortColumn.getKey();
 			key = key.split(":")[1]; //$NON-NLS-1$
 			switch (sortColumn.getType()) {
-				case BOOLEAN:
-				case NUMBER:
-				case INTEGER:
-					result = "order by sortKeyDbl"; //$NON-NLS-1$
-					break;
-				case DATE:
-					result = "order by DATE(sortKeyTxt)"; //$NON-NLS-1$
-					break;
-				default:
-					result = "order by UPPER(sortKeyTxt)"; //$NON-NLS-1$
-					break;
+			case BOOLEAN:
+			case NUMBER:
+			case INTEGER:
+				result = "order by sortKeyDbl"; //$NON-NLS-1$
+				break;
+			case DATE:
+				result = "order by DATE(sortKeyTxt)"; //$NON-NLS-1$
+				break;
+			default:
+				result = "order by UPPER(sortKeyTxt)"; //$NON-NLS-1$
+				break;
 			}
 		}
 		if (!result.isEmpty()) {
@@ -484,60 +452,84 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		}
 		return result;
 	}
-	
-	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.model.IPagedQueryResultSet#setSorting(org.wcs.smart.query.model.observation.QueryColumn, int)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.wcs.smart.query.model.IPagedQueryResultSet#setSorting(org.wcs.smart
+	 * .query.model.observation.QueryColumn, int)
 	 */
 	public void setSorting(final QueryColumn sortColumn, int direction) {
 		this.lastSortColumn = this.sortColumn;
 		this.sortColumn = sortColumn;
 		this.direction = direction;
-		dropResultSet();
 	}
 
-	private void dropResultSet() {
-		
-		if (lastResultSet != null) {
-			try {
-				if (!lastResultSet.isClosed()){
-					lastResultSet.getStatement().close();
-					lastResultSet.close();
-				}
-			} catch (SQLException e) {
-				//nothing
-				e.printStackTrace();
-			}
-			lastResultSet = null;
-		}
-	}
-	
-	protected List<EntityQueryResultItem> getResults(ResultSet rs, int from, int pageSize) throws SQLException {
-		List<EntityQueryResultItem> items = new ArrayList<EntityQueryResultItem>();
+	/**
+	 * Gets results from the given result set.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public List<IResultItem> getResults(final Session session, ResultSet rs,
+			int from, int pageSize) throws SQLException {
+		final List<IResultItem> items = new ArrayList<IResultItem>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
 			to = itemCount;
 		}
-		for(int x = from; x < to; x++) {
+		for (int x = from; x < to; x++) {
 			rs.next();
 			EntityQueryResultItem it = engine.asQueryResultItem(rs, null);
 			items.add(it);
 		}
+
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				attachObservations(items, c, session);
+			}
+
+		});
+
 		return items;
 	}
 
-	protected HashMap<UUID, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
+	/**
+	 * Opens a result set in the given session that accessed the query results
+	 */
+	@Override
+	public ResultSet getResultSet(final Session session) {
+		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
+
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+
+			@Override
+			public ResultSet execute(Connection c) throws SQLException {
+				if ((lastSortColumn == null && sortColumn != null)
+						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn
+								.equals(sortColumn))) {
+					updateSortColumn(sortColumn, session, c);
+				}
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
+			}
+		});
+	}
+
+	protected HashMap<UUID, HashMap<String, Object>> getResultsAttributes(
+			ResultSet rs, Session s) throws SQLException {
 		HashMap<UUID, HashMap<String, Object>> attrMap = new HashMap<UUID, HashMap<String, Object>>();
 		/*
-		1	OB_UUID
-		2	KEYID
-		3	NUMBER_VALUE
-		4	STRING_VALUE
-		5	LIST_VALUE
-		6	TREE_VALUE
-		7	P_CA_UUID
-		*/
+		 * 1 OB_UUID 2 KEYID 3 NUMBER_VALUE 4 STRING_VALUE 5 LIST_VALUE 6
+		 * TREE_VALUE 7 P_CA_UUID
+		 */
 		while (rs.next()) {
 			byte[] obUuid = rs.getBytes(1);
 			if (obUuid == null)
@@ -566,28 +558,24 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getAttributeValue(ResultSet rs, Session session) throws SQLException {
+	protected Object getAttributeValue(ResultSet rs, Session session)
+			throws SQLException {
 		/*
-		1	OB_UUID
-		2	KEYID
-		3	NUMBER_VALUE
-		4	STRING_VALUE
-		5	LIST_VALUE
-		6	TREE_VALUE
-		7	P_CA_UUID
-		*/
+		 * 1 OB_UUID 2 KEYID 3 NUMBER_VALUE 4 STRING_VALUE 5 LIST_VALUE 6
+		 * TREE_VALUE 7 P_CA_UUID
+		 */
 		if (rs.getObject(3) != null) {
 			return rs.getDouble(3);
 		}
-		String result = rs.getString(4); //string
+		String result = rs.getString(4); // string
 		if (result != null) {
 			return result;
 		}
-		result = rs.getString(5); //list
+		result = rs.getString(5); // list
 		if (result != null) {
 			return result;
 		}
-		result = rs.getString(6); //tree
+		result = rs.getString(6); // tree
 		if (result != null) {
 			return result;
 		}
@@ -601,12 +589,11 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	protected void setWpCount(int wpCount) {
 		this.wpCount = wpCount;
 	}
-					
+
 	@Override
 	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable,
-				queryTempTable + "_LIST", //$NON-NLS-1$
-				queryTempTable + "_TREE"}; //$NON-NLS-1$
+		return new String[] { queryTempTable, queryTempTable + "_LIST", //$NON-NLS-1$
+				queryTempTable + "_TREE" }; //$NON-NLS-1$
 	}
-	
+
 }

@@ -70,8 +70,6 @@ import com.vividsolutions.jts.geom.Envelope;
 public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResultSet{
 
 	protected String queryTempTable;
-
-	protected ResultSet lastResultSet;
 	
 	protected Envelope bounds = null;
 
@@ -83,52 +81,12 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 
 	protected DerbySurveyQueryEngine engine;
 
-	/**
-	 * Drops active result set
-	 */
-	protected abstract void dropResultSet();
-	
-	/**
-	 * Loads the next set of data given the offset and page size from
-	 * the current open result set.
-	 * 
-	 * @param session
-	 * @param offset
-	 * @param pageSize
-	 * @return
-	 */
-	protected abstract List<IResultItem> getNextData(final Session session, final int offset, final int pageSize);
-	
-	/**
-	 * Opens a new result set and loads the next 
-	 * set of data given the offset and page size
-	 * @param session
-	 * @param offset
-	 * @param pageSize
-	 * @return
-	 */
-	protected abstract List<IResultItem> getData(final Session session, final int offset, final int pageSize);
 	
 	@Override
 	public void destroy() {
-		//simply closing result set and deleting temporary table
-		dropResultSet();
 		super.destroy();
 	}
-	
-	
-	@Override
-	public List<IResultItem> getData(final int offset, final int pageSize) {
-		final Session session = HibernateManager.openSession();
-		//NOTE: session will not be closed on purpose!!!!
-		//as we want related ResultSet to remain opened for performance reasons
-		List<IResultItem> result = getNextData(session, offset, pageSize);
-		if (result == null) {
-			result = getData(session, offset, pageSize);
-		}
-		return result;
-	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.model.IPagedQueryResultSet#setSorting(org.wcs.smart.query.model.observation.QueryColumn, int)
 	 */
@@ -136,7 +94,6 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		this.lastSortColumn = this.sortColumn;
 		this.sortColumn = sortColumn;
 		this.direction = direction;
-		dropResultSet();
 	}
 	
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
@@ -201,22 +158,26 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
-			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
-			s.doWork(new Work(){
-
-				@Override
-				public void execute(Connection c) throws SQLException {
-					try(ResultSet q = c.createStatement().executeQuery(sql)){
-						q.next();
-						double minx = q.getDouble(1);
-						double maxx = q.getDouble(2);
-						double miny = q.getDouble(3);
-						double maxy = q.getDouble(4);
-				
-						bounds = new Envelope(minx, maxx, miny, maxy);
-					}
-				}	
-			});
+			try{
+				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+				s.doWork(new Work(){
+	
+					@Override
+					public void execute(Connection c) throws SQLException {
+						try(ResultSet q = c.createStatement().executeQuery(sql)){
+							q.next();
+							double minx = q.getDouble(1);
+							double maxx = q.getDouble(2);
+							double miny = q.getDouble(3);
+							double maxy = q.getDouble(4);
+					
+							bounds = new Envelope(minx, maxx, miny, maxy);
+						}
+					}	
+				});
+			}finally{
+				s.close();
+			}
 		}
 		return bounds;	
 	}
@@ -713,20 +674,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		return null;
 	}
 	
-	protected List<IResultItem> getResults(ResultSet rs, int from, int pageSize, Session session) throws SQLException {
-		List<IResultItem> items = new ArrayList<IResultItem>();
-		rs.absolute(from);
-		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
-		}
-		for(int x = from; x < to; x++) {
-			rs.next();
-			IResultItem it = engine.asQueryResultItem(rs, session);
-			items.add(it);
-		}
-		return items;
-	}
+
 	
 	public List<byte[]> getMissionUuids() {
 		final Session session = HibernateManager.openSession();

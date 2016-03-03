@@ -56,7 +56,6 @@ import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;

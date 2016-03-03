@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.common.importexport;
 
+import java.io.Closeable;
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
@@ -83,6 +84,10 @@ public abstract class SimpleQueryExporter {
 			return true;
 		} catch (Exception ex) {
 			throw new Exception(Messages.SimpleQueryExporter_Error_ExportFailed + ex.getLocalizedMessage(), ex);
+		}finally{
+			if (data instanceof Closeable){
+				((Closeable) data).close();
+			}
 		}
 	}
 	

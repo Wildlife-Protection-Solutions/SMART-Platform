@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.query.common.engine.IResultItem;
 
@@ -61,69 +62,61 @@ public class DerbyPagedWaypointResult extends AbstractSurveyPagedResult implemen
 		}
 		return super.equals(obj);
 	}
-	
 
-	protected List<IResultItem> getData(final Session session, final int offset, final int pageSize) {
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		session.doWork(new Work() {
+	/**
+	 * Opens a result set in the given session that accessed the query results
+	 */
+	@Override
+	public ResultSet getResultSet(final Session session) {
+		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
+
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+
 			@Override
-			public void execute(Connection c) throws SQLException {
-				if ((lastSortColumn == null && sortColumn != null) 
-						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn.equals(sortColumn)) ){
+			public ResultSet execute(Connection c) throws SQLException {
+				if ((lastSortColumn == null && sortColumn != null)
+						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn
+								.equals(sortColumn))) {
 					updateSortColumn(sortColumn, session, c);
 				}
-				lastResultSet = c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-				//this forces garbage collection; without this the program
-				//will fail with out of memory error when sorting
-				//on columns multiple times.
-				System.gc();
-				
-				result.addAll(getResults(lastResultSet, offset, pageSize, session));
-				attachMissionProperties(result, c, session);
-				attachSamplingUnitAttributes(result, c, session);
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
 			}
 		});
-		return result;
 	}
-	
+
+	/**
+	 * Gets results from the given result set.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	*/
 	@Override
-	protected List<IResultItem> getNextData(final Session session, final int offset, final int pageSize) {
-		if (lastResultSet == null)
-			return null;
-		final List<IResultItem> result = new ArrayList<IResultItem>();
-		try {
-			result.addAll(getResults(lastResultSet, offset, pageSize, session));
-		} catch (SQLException e) {
-			//most likely someone closed our old session/connection and old ResultSet is not working
-			lastResultSet = null;
-			return null;
+	public List<IResultItem> getResults(final Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		final List<IResultItem> items = new ArrayList<IResultItem>();
+		rs.absolute(from);
+		int to = from + pageSize;
+		if (to >= itemCount) {
+			to = itemCount;
 		}
-		session.doWork(new Work() {
+		for(int x = from; x < to; x++) {
+			rs.next();
+			IResultItem it = engine.asQueryResultItem(rs, null);
+			items.add(it);
+		}
+		
+		session.doWork(new Work(){
 			@Override
 			public void execute(Connection c) throws SQLException {
-				attachMissionProperties(result, c, session);
-				attachSamplingUnitAttributes(result, c, session);
+				attachMissionProperties(items, c, session);
+				attachSamplingUnitAttributes(items, c, session);	
 			}
+			
 		});
-		return result;
-	}
-	
-	@Override
-	protected void dropResultSet() {
-		if (lastResultSet != null) {
-			try {
-				if (!lastResultSet.isClosed()){
-					lastResultSet.getStatement().close();
-					lastResultSet.close();
-				}
-			} catch (SQLException e) {
-				//nothing
-				e.printStackTrace();
-			}
-			lastResultSet = null;
-		}
+		return items;
 	}
 	
 	

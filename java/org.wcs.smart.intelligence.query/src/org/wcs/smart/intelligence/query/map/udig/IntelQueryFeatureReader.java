@@ -34,16 +34,14 @@ import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
-import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
-import org.wcs.smart.intelligence.query.model.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.QueryResultSetIterator;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
@@ -63,7 +61,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	private static GeometryFactory gf = new GeometryFactory();
 	
 	private SimpleFeatureType ftype;
-	private Iterator<? extends IResultItem> fIterator;
+	private QueryResultSetIterator<? extends IResultItem> fIterator;
 	
 	private IntelligenceRecordResultItem currentIntel = null;
 	private Iterator<IntelligencePoint> subInterator;
@@ -139,6 +137,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	 */
 	@Override
 	public void close() throws IOException {
+		fIterator.close();
 	}
 
 	/**
