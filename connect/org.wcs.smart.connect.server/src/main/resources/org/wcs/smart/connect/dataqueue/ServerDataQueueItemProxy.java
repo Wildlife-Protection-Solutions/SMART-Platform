@@ -47,6 +47,6 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 	//sort by Date 
 	public int compareTo(ServerDataQueueItemProxy compare) {
 		Date compareDate = ((ServerDataQueueItemProxy) compare).getUploadedDate(); 
-		return this.uploadedDate.compareTo(compareDate);
+		return -this.uploadedDate.compareTo(compareDate);
 	}
 }

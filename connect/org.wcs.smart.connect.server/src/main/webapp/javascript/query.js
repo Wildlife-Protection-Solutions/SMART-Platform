@@ -313,7 +313,7 @@ function showQueryOptions(){
 		datefielddiv.appendChild(object);
 	}
 	datefielddiv.selectedIndex = 0;
-	
+	 document.querySelector("#queryformat").selectedIndex = 0;
 	displayDialogLocation('queryOptionsDialog', pos.x, window.pageYOffset + 20);
 
 }

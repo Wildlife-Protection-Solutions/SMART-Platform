@@ -61,7 +61,6 @@
 	<div class="block settings-header"><fmt:message key="settings.defaultsheader" />
 	</div>
 	<form class="top-spacer" id="filter-form" name="filter-form" onsubmit="return false;">
-	<button class="button " id="btnUpdateDefaults"><fmt:message key="settings.savedefaults" /></button>
 	<table id="defaultstable" class="top-spacer" style="width:100%">
 		<tr class="table-defaults-row smart-table-header">
 			<th>
@@ -134,7 +133,7 @@
 		</td>
 		</tr>
 	</table>
-
+	<button class="button " id="btnUpdateDefaults"><fmt:message key="settings.savedefaults" /></button>
 	</form>
 </div>
 
