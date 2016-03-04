@@ -316,7 +316,7 @@ public class UploadCaEngine {
 		}
 	
 		HashMap<String, String> options = new HashMap<String, String>();
-		options.put("informant_delete_no_prompt", Boolean.TRUE.toString());
+		options.put("informant_delete_no_prompt", Boolean.TRUE.toString()); //$NON-NLS-1$
 		
 		ConnectCaExporter exporter = new ConnectCaExporter();
 		exporter.export(f, options, new SubProgressMonitor(monitor, 1));
