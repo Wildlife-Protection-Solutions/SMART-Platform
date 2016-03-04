@@ -45,7 +45,7 @@ function login(){
 	   <input class="button block top-spacer" type="submit" value="<fmt:message key="login.login"/>" style="width: 100px" tabindex="3"/>
   </form>
   </div>
-  <div id="login_right" style="background-image:url('../getImage?locationId=3')">
+  <div id="login_right" style="background-image:url('${pageContext.request.contextPath}/getImage?locationId=3')">
   </div>
   
 </div>

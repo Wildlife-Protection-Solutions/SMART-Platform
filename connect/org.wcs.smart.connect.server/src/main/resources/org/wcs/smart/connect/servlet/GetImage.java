@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
-import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.StyleConfiguration;
 
@@ -56,7 +55,7 @@ public class GetImage extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String id = request.getParameter("locationId");
+		String id = request.getParameter("locationId"); //$NON-NLS-1$
 		
 		StyleConfiguration style = null; 
 		
@@ -74,19 +73,16 @@ public class GetImage extends HttpServlet {
 		}
 		
 		byte[] img =null;
-		if(id.equals("1")){//header image
+		if(id.equals("1")){//header image //$NON-NLS-1$
 			img = style.getHeaderImage();
-		}else if(id.equals("2")){//background image
+		}else if(id.equals("2")){//background image //$NON-NLS-1$
 			img = style.getBackgroundImage();
-		}else if(id.equals("3")){//login image
+		}else if(id.equals("3")){//login image //$NON-NLS-1$
 			img = style.getLoginImage();
 		}
 		
-		
-		
-		
 		response.reset();
-		response.setContentType("image/jpg");
+		response.setContentType("image/jpg"); //$NON-NLS-1$
 		
 		InputStream in = new ByteArrayInputStream(img);
 		BufferedImage bImageFromConvert = ImageIO.read(in);
@@ -95,7 +91,7 @@ public class GetImage extends HttpServlet {
 			response.getOutputStream().flush();
 			return;
 		}
-		ImageIO.write(bImageFromConvert, "jpg", response.getOutputStream());
+		ImageIO.write(bImageFromConvert, "jpg", response.getOutputStream()); //$NON-NLS-1$
 		response.getOutputStream().flush();
 	}
 }

@@ -1,5 +1,3 @@
-var QUERYURL = "../api/query/";
-var CAURL = "../api/conservationarea/";
 var queries;
 var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
@@ -28,7 +26,7 @@ window.onload = function(){
 	
 	document.getElementById("runQueryButton").onclick = function(){
 		closeDialog('queryOptionsDialog');
-		window.open(generateUrl());
+		window.open(generateUrl(QUERYLINKURL));
 	};
 
 	document.getElementById("cancel").onclick = function(){
@@ -359,17 +357,17 @@ function searchChanged(){
 
 }
 function getUrlOnly(){
-	  window.prompt(i18n("query.copytoclipboard"), generateUrl());
+	  window.prompt(i18n("query.copytoclipboard"), generateUrl(QUERYLINKURL));
 }
 
 
 
-function generateUrl(){
+function generateUrl(root){
 	var uuid = document.getElementById('queryuuid').value;
 	var format = document.getElementById('queryformat').value;
 	var dateField = document.getElementById('datefield').value;
 	
-	var url = QUERYURL + uuid +"?format=" + format + "&date_filter=" + dateField
+	var url = root + uuid +"?format=" + format + "&date_filter=" + dateField
 	
 	if(document.getElementById('startdate').value != ""){
 		var startDate = new Date(document.getElementById('startdate').value.substring(4));//substring(4) drops the "Wed " from the field, which isnt' a valid date string.

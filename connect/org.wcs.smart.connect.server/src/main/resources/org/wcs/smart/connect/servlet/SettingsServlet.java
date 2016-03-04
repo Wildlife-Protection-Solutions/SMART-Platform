@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +31,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 
-import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;

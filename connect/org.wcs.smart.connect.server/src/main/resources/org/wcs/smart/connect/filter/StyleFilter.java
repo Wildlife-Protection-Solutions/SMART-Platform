@@ -66,15 +66,16 @@ public class StyleFilter implements Filter{
 			if (style.getServerName()  != null && !style.getServerName().isEmpty()){
 				request.setAttribute("style_headername", style.getServerName()); //$NON-NLS-1$
 			}
+			String contextPath = request.getServletContext().getContextPath();
 			if (style.getHeaderStyle()  != null && !style.getHeaderStyle().isEmpty()){
-				request.setAttribute("style_headercss", style.getHeaderStyle() + "; background-image:url('../getImage?locationId=1')"); //$NON-NLS-1$ //$NON-NLS-2$
+				request.setAttribute("style_headercss", style.getHeaderStyle().replaceAll("\\n\\r|\\n|\\r", "") + "; background-image:url('" + contextPath + "/getImage?locationId=1')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}else{
-				request.setAttribute("style_headercss", "background-image:url('../getImage?locationId=1')"); //$NON-NLS-1$ //$NON-NLS-2$
+				request.setAttribute("style_headercss", "background-image:url('" + contextPath + "/getImage?locationId=1')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			if (style.getBodyStyle() != null && !style.getBodyStyle().isEmpty()){
-				request.setAttribute("style_bodycss", style.getBodyStyle() + "; background-image:url('../getImage?locationId=2')"); //$NON-NLS-1$ //$NON-NLS-2$
+				request.setAttribute("style_bodycss", style.getBodyStyle().replaceAll("\\n\\r|\\n|\\r", "") + "; background-image:url('" + contextPath + "/getImage?locationId=2')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}else{
-				request.setAttribute("style_bodycss", "background-image:url('../getImage?locationId=2')"); //$NON-NLS-1$ //$NON-NLS-2$
+				request.setAttribute("style_bodycss", "background-image:url('" + contextPath + "/getImage?locationId=2')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			if (style.getFooterText()  != null && !style.getFooterText().isEmpty()){
 				request.setAttribute("style_footername", style.getFooterText()); //$NON-NLS-1$

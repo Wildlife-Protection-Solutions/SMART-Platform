@@ -60,7 +60,6 @@ public class LoginServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
 		(new StyleFilter()).configureStyle(request, response);
 		
 		if (request.getRequestURI().contains("loginerror")){ //$NON-NLS-1$

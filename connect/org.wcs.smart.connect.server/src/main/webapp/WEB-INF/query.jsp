@@ -13,7 +13,11 @@
 	
 	<script type="text/javascript" >
 		var search="${search}";
-				
+		
+		var QUERYURL = "${pageContext.request.contextPath}/api/query/";
+		var QUERYLINKURL = "${pageContext.request.contextPath}/connect/query/api/";
+		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/";
+		
 		var datefilters = {
 				<c:forEach var="df" items="${datefilters}">
 				    '${df[0]}': '${df[1]}',

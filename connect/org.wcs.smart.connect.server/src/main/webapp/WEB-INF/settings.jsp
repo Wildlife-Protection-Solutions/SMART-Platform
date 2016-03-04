@@ -166,7 +166,7 @@
 	<input class="formtext" id="server_name" name="server_name" type="text" value="SMART Connect <img src='https://smartconservationsoftware.org/photos/smart_logo_96.png'>"/>
 	
     <label class="block top-spacer">Footer Text:</label>
-	<input class="formtext" id="footer_text" name="footer_text" type="text" value="<img src='../css/smart_logo.png'> Copyright 2015, 2016"/>
+	<input class="formtext" id="footer_text" name="footer_text" type="text" value="<img src='${pageContext.request.contextPath}/css/smart_logo.png'> Copyright 2015, 2016"/>
   
     <label class="block top-spacer">Header Style(use css syntax):</label>
     <textarea id="header_style" name="header_style" class="formtext block" rows=5>border: 0px solid black;

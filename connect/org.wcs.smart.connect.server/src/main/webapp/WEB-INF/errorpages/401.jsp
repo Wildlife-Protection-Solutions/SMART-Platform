@@ -7,7 +7,7 @@
 	<title><fmt:message key="401.pagetitle"/></title>
 </head>
 
-<body>
+<body style="${style_bodycss}">
 
 <div id="mainheader" <c:if test="${not empty style_headercss}"> style="${style_headercss}" </c:if>  >
 <c:out value="${empty style_headername ? 'SMART Connect' : style_headername}"/>
