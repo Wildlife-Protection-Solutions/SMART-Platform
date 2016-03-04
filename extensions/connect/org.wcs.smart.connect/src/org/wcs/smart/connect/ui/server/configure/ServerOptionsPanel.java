@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
@@ -173,5 +174,10 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 	@Override
 	public void afterSave(ConnectServer server){
 
+	}
+	
+	@Override
+	public boolean isSupported(ConservationArea ca) {
+		return true;
 	}
 }

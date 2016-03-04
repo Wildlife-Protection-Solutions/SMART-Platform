@@ -168,7 +168,6 @@ public class SyncMultipleCaWizard extends Wizard {
 	
 	private List<CaUserDetails> validateCaUsers(Shell activeShell, List<ConservationArea> allCas, 
 			String username, String password){
-
 		
 		final List<CaUserDetails> details = new ArrayList<CaUserDetails>();
 		

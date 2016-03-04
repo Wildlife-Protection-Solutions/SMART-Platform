@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingManager;
 import org.wcs.smart.connect.dataqueue.model.DataQueueServerOptions;
@@ -369,6 +370,11 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		if (DataQueueServerOptions.AUTO_CHECK.getBooleanValue(server)){
 			AutoProcessingManager.INSTANCE.enableAutoProcessing(DataQueueServerOptions.AUTO_MINUTES.getIntegerValue(server));
 		}
+	}
+	
+	@Override
+	public boolean isSupported(ConservationArea ca) {
+		return !ca.getIsCcaa();
 	}
 }
 

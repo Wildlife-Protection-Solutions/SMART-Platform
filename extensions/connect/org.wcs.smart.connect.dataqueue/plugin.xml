@@ -15,18 +15,24 @@
                style="push">
             <visibleWhen
                   checkEnabled="false">
-               <or>
+               <and>
                   <test
                         forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
+                        property="org.wcs.smart.caSingle">
                   </test>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -38,6 +44,13 @@
                icon="images/icons/obj16/dq.png"
                label="%queue.menu.label"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>

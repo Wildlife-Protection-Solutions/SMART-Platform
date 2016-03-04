@@ -392,8 +392,12 @@ public class HibernateManager extends SmartHibernateManager{
 	public static String generatePassword(String password){
 		return BCrypt.hashpw(password, BCrypt.gensalt(13));
 	}
+	
 	/**
 	 * Validates the username and password for a given conservation area.
+	 * If the given conservation area is the CCAA, it checks for a matching username
+	 * password in any other non-ccaa but returns the user associated with ccaa and the same username.
+	 * The Employee must still be active.
 	 * 
 	 * @param userName user name
 	 * @param password password
@@ -401,28 +405,43 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return the Employee associated with the username and password; null if nobody found
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public static Employee validateUser(String userName, String password, ConservationArea ca) throws Exception{
+		
 		Session x = HibernateManager.openSession();
 		Transaction tx = x.beginTransaction();
 		try{
 			
 			Criteria employee = x.createCriteria(Employee.class);
 			employee.add( Restrictions.eq("smartUserId", userName).ignoreCase()); //$NON-NLS-1$
-			employee.add( Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
 			employee.add(Restrictions.isNull("endEmploymentDate")); //$NON-NLS-1$
+			employee.add( Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
 			
 			@SuppressWarnings("unchecked")
 			List<Employee> people = employee.list();
 			if (people.size() == 1){
 				Employee user = people.get(0);
-				if (validatePassword(password, user)){
-					return user;
+				
+				if (!ca.getIsCcaa()){
+					if (validatePassword(password, user)){
+						return user;
+					}
+					return null;
+				}else{
+					//check passwords for all users with matching userids
+					List<Employee> otherUsers = x.createCriteria(Employee.class)
+						.add( Restrictions.eq("smartUserId", userName).ignoreCase()) //$NON-NLS-1$
+						.add(Restrictions.isNull("endEmploymentDate")) //$NON-NLS-1$
+						.list();
+					for (Employee o : otherUsers){
+						if (validatePassword(password, o)){
+							return user;
+						}
+					}
+					return null;
 				}
-				return null;
-			}else{
-				return null;
 			}
-			
+			return null;
 		}catch (Exception ex){
 			throw ex;
 		}finally{
