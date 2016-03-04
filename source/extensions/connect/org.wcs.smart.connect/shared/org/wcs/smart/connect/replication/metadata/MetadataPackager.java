@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -48,6 +49,11 @@ public enum MetadataPackager {
 	public static final String PLUGIN_KEY_PREFIX = "pluginid."; //$NON-NLS-1$
 	
 	public void writeMetadata(Path output, PackageMetadata metadata) throws Exception{
+		
+		if (!Files.exists(output.getParent())){
+			Files.createDirectories(output.getParent());
+		}
+		
 		Properties prop = new Properties();
 		prop.setProperty(CA_UUID_KEY, UuidUtils.uuidToString(metadata.getConservationArea()));
 		prop.setProperty(VERSION_KEY, UuidUtils.uuidToString(metadata.getVersion()));
