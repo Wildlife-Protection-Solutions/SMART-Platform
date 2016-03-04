@@ -64,6 +64,7 @@ import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -86,7 +87,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 	private Button btnShowReplication;
 	private TableViewer tblUsers;
 		
-	private IServerOptionsPanel[]  optionPanels = OptionPanelManager.createOptionPanels();
+	private IServerOptionsPanel[]  optionPanels = OptionPanelManager.createOptionPanels(SmartDB.getCurrentConservationArea());
 	
 	/**
 	 * Default constructor

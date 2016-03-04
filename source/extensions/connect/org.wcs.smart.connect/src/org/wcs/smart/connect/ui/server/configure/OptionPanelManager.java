@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 
 /**
@@ -34,13 +35,16 @@ import org.wcs.smart.connect.ConnectPlugIn;
  */
 public class OptionPanelManager {
 
-	public synchronized static IServerOptionsPanel[] createOptionPanels(){
+	public synchronized static IServerOptionsPanel[] createOptionPanels(ConservationArea ca){
 		if (Platform.getExtensionRegistry() == null) return new IServerOptionsPanel[0];
 		ArrayList<IServerOptionsPanel> items = new ArrayList<IServerOptionsPanel>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IServerOptionsPanel.EXTENSION_ID);
 		for (IConfigurationElement e : config) {
-			try{
-				items.add((IServerOptionsPanel)e.createExecutableExtension("class")); //$NON-NLS-1$
+			try{ 
+				IServerOptionsPanel pnl = (IServerOptionsPanel)e.createExecutableExtension("class"); //$NON-NLS-1$
+				if (pnl.isSupported(ca)){
+					items.add(pnl); 
+				}
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(), ex);
 			}

@@ -42,6 +42,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Dialog for modifying connect server account details.
@@ -55,7 +56,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 	
 	private ConnectServer server;
 	private boolean changesMade = false;
-	private IServerOptionsPanel[]  optionPanels = OptionPanelManager.createOptionPanels();
+	private IServerOptionsPanel[]  optionPanels = OptionPanelManager.createOptionPanels(SmartDB.getCurrentConservationArea());
 	
 	public EditConnectServerInfoDialog(Shell parentShell, ConnectServer server) {
 		super(parentShell);

@@ -68,12 +68,14 @@ public class ConnectHibernateManager {
 	 * @return
 	 */
 	public static ConnectUser getConnectUser(Employee e, Session session){
-		return (ConnectUser)session.createCriteria(ConnectUser.class, "u") //$NON-NLS-1$
+		ConnectUser user = (ConnectUser)session.createCriteria(ConnectUser.class, "u") //$NON-NLS-1$
 				.createAlias("u.server", "s") //$NON-NLS-1$ //$NON-NLS-2$
 				.add(Restrictions.eq("u.uuid", e.getUuid())) //$NON-NLS-1$
-				.add(Restrictions.eq("s.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				
 				.uniqueResult();
+		if (SmartDB.getCurrentConservationArea() != null && !SmartDB.getCurrentConservationArea().equals(e.getConservationArea())){
+			return null;
+		}
+		return user;
 	}
 	
 	/**

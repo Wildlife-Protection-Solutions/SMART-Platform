@@ -78,7 +78,7 @@ public class BrowserView {
 	}
 
 	@Inject
-	public void setSelection (@ Named (DEFAULT_URL) @ Optional String home) {
+	public void setSelection (@Named(DEFAULT_URL) @Optional String home) {
 		if (home == null) return;
 		goHome();
 	}
@@ -207,8 +207,10 @@ public class BrowserView {
 			browser.setUrl(""); //$NON-NLS-1$
 		}
 	}
+	
 	@Focus
 	public void setFocus() {
+		browser.setFocus();
 	}
 
 	

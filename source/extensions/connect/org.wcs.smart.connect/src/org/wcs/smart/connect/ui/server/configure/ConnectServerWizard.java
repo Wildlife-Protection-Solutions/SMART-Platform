@@ -63,7 +63,7 @@ public class ConnectServerWizard extends Wizard {
 		
 		IServerOptionsPanel[] panels = null;
 		if (includeOptionalConfigurations){
-			panels = OptionPanelManager.createOptionPanels();
+			panels = OptionPanelManager.createOptionPanels(SmartDB.getCurrentConservationArea());
 		}else{
 			panels = new IServerOptionsPanel[]{new ServerOptionsPanel()};
 		}

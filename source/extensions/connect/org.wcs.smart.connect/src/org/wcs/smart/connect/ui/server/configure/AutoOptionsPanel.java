@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.replication.AutoReplicationStartUp;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -393,6 +394,11 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 			int delay = ConnectServerOption.ConnectionOption.SYNC_MINUTE.getIntegerValue(server);
 			AutoReplicationStartUp.INSTANCE.enableAutoReplication(delay);
 		}
+	}
+
+	@Override
+	public boolean isSupported(ConservationArea ca) {
+		return true;
 	}
 }
 

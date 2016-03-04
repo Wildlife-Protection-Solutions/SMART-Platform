@@ -23,6 +23,7 @@ package org.wcs.smart.connect.ui.server.configure;
 
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ConnectServer;
 
 /**
@@ -34,6 +35,14 @@ import org.wcs.smart.connect.model.ConnectServer;
 public interface IServerOptionsPanel {
 	
 	public static final String EXTENSION_ID = "org.wcs.smart.connect.configure.optionpanel"; //$NON-NLS-1$
+	
+	/**
+	 * If the panel is supported for a given 
+	 * Conservation Area.
+	 * @param ca
+	 * @return
+	 */
+	public boolean isSupported(ConservationArea ca);
 	
 	/**
 	 * The name of the panel

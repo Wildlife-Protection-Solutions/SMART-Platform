@@ -114,7 +114,7 @@
             restorable="true">
       </view>
       <view
-            allowMultiple="true"
+            allowMultiple="false"
             class="org.wcs.smart.ui.BrowserView$BrowserViewWrapper"
             icon="images/icons/eview16/world.png"
             id="org.wcs.smart.view.browser"
@@ -186,6 +186,19 @@
                showTitle="true"
                standalone="true"
                visible="true">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="*">
+         <view
+               closeable="true"
+               id="org.wcs.smart.view.browser"
+               minimized="false"
+               moveable="true"
+               relationship="stack"
+               relative="org.eclipse.ui.editorss"
+               showTitle="true"
+               visible="false">
          </view>
       </perspectiveExtension>
    </extension>
@@ -1448,22 +1461,6 @@
       <ChangeLogTracker
             clazz="org.wcs.smart.upgrade.SmartChangeLogTracker">
       </ChangeLogTracker>
-   </extension>
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="*">
-         <view
-               closeable="true"
-               id="org.wcs.smart.view.browser"
-               minimized="false"
-               moveable="true"
-               relationship="stack"
-               relative="org.eclipse.ui.editorss"
-               showTitle="true"
-               visible="false">
-         </view>
-      </perspectiveExtension>
    </extension>
 
 </plugin>
