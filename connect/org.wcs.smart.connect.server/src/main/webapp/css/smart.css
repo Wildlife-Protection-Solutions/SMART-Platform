@@ -271,6 +271,7 @@ h2{
 	height: 16px;
 	background-repeat: no-repeat;
 	display: block;
+	cursor: pointer;
 }
 
 .delete-icon{
