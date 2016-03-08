@@ -303,15 +303,24 @@ background-color: lightsteelblue
 
       		<label class="top-spacer block"><fmt:message key="settings.markerColor"/>:</label>
 			<select class="type_field" name="type_markerColor">
+				<option value="white"><fmt:message key="settings.colorwhite"/></option>
+				<option value="black"><fmt:message key="settings.colorblack"/></option>
+				<option value="grey"><fmt:message key="settings.colorgrey"/></option>
+				<option value="lightgrey"><fmt:message key="settings.colorlightgrey"/></option>
 				<option value="red"><fmt:message key="settings.colorred"/></option>
 				<option value="darkred"><fmt:message key="settings.colordarkred"/></option>
 				<option value="orange"><fmt:message key="settings.colororange"/></option>
+				<option value="lightgreen"><fmt:message key="settings.colorlightgreen"/></option>
 				<option value="green"><fmt:message key="settings.colorgreen"/></option>
 				<option value="darkgreen"><fmt:message key="settings.colordarkgreen"/></option>
+				<option value="lightblue"><fmt:message key="settings.colorlightblue"/></option>
 				<option value="blue"><fmt:message key="settings.colorblue"/></option>
+				<option value="darkblue"><fmt:message key="settings.colordarkblue"/></option>
+				<option value="cadetblue"><fmt:message key="settings.colorcadetblue"/></option>
 				<option value="purple"><fmt:message key="settings.colorpurple"/></option>
 				<option value="darkpurple"><fmt:message key="settings.colordarkpurple"/></option>
-				<option value="cadetblue"><fmt:message key="settings.colorcadetblue"/></option>
+				<option value="pink"><fmt:message key="settings.colorpink"/></option>
+				
 			</select>
 
 			<label class="top-spacer block"><fmt:message key="settings.iconSpin"/>:</label>

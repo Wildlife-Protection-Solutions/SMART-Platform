@@ -59,10 +59,10 @@ window.onload = function(){
     // The real-time layer that auto-refreshes to show alert
 
     
-    //OSM Basemap Layer - the only Hardcoded basemap
+    //OSM Basemap Layer - the Hardcoded basemaps
     var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 	var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});		
+	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});
 	
 	var baseMaps = {
 			"Basemap Off": L.tileLayer(''),
@@ -669,9 +669,15 @@ function updateRealtimeLayer(updatedUrl){
                     (Math.round(Math.abs(v) * 100) / 100).toString();
             },
 	            popupContent = function(fId) {
-                var feature = e.features[fId],
-                    c = feature.geometry.coordinates;
+            	
+                var feature = e.features[fId];
+                var c = feature.geometry.coordinates;
                 var date = feature.properties.date;
+                
+                if(feature.properties.type == undefined){
+                	return "Track Selected - Please click an alert for alert details.";
+            	}
+                
             	date = date.substr(0, date.length-4);
                 return 'Event: ' + feature.properties.type +
                 	"<br>Alert ID: " + feature.properties.id +
