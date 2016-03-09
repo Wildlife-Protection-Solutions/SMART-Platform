@@ -50,6 +50,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
+import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 /**
@@ -84,11 +85,16 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 	 * The CanAccess function automatically returns yes for users that have Admin rights
 	 * You can also pass in AdminAccountAction.KEY to this function, even though it is a bit redundant  
 	 */
-	private void validateUser(String key){
+	private void validateUser(String key, UUID resource){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), key)){
+			if(resource == null){ //check if they can see >0 CAs
+				if(!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), key)){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have alert management permissions."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+			}else if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), key, resource)){
 				logger.info("User " + request.getUserPrincipal().getName() + " does not have alert management permissions."); //$NON-NLS-1$ //$NON-NLS-2$
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
@@ -96,15 +102,24 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 			s.getTransaction().commit();
 		}
 	}
+	private void validateUser(String key){
+		validateUser(key, null);
+	}
 	
 	@GET
     @Path("")
     public List<AlertFilterDefault> getAlertFilterDefaults(){
-		validateUser(AlertAction.VIEW_ALL_KEY);
+		validateUser(AlertAction.VIEW_ALERTS_KEY, null);
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return HibernateManager.getAlertFilterDefaults(s);
+			List<AlertFilterDefault> defaults = HibernateManager.getAlertFilterDefaults(s);
+//			String castring = defaults.get(0).getDefaultCaUuids();
+//			List<String> ca_list= Arrays.asList(castring.split("\\s*,\\s*")); 
+//			for (String x : ca_list){
+//				if()
+//			}
+			return defaults; 
 		}finally{
 			s.getTransaction().commit();
 		}

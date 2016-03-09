@@ -264,7 +264,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
     @DELETE
     @Path("/")
     public StyleConfiguration removeStyleConfiguration() {
-    	validateUser(AlertAction.DELETE_ALL_KEY);
+    	validateUser(AlertAction.DELETE_ALERTS_KEY);
     	StyleConfiguration toDelete = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();

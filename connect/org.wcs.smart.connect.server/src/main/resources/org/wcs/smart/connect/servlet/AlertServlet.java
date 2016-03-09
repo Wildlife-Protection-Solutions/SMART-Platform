@@ -62,6 +62,7 @@ public class AlertServlet extends HttpServlet{
 		
 		List<SmartUser> users = null;
 		List<ConservationAreaInfo> cas = null;
+		List<ConservationAreaInfo> authorizedCas = new ArrayList<ConservationAreaInfo>();
 		List<AlertType> alertTypes = null;
 		List<MapLayer> mapLayers = null;
 		List<AlertFilterDefault> defaults = null;
@@ -71,24 +72,25 @@ public class AlertServlet extends HttpServlet{
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		try{
-			if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AlertAction.VIEW_ALL_KEY)){
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-				return;
-			}
-			
 			users = HibernateManager.getUsers(session);
 			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(session);
+			for(ConservationAreaInfo c: cas){
+				if(SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AlertAction.VIEW_ALERTS_KEY, c.getUuid())){
+					authorizedCas.add(c);
+				}
+			}
+			
 			alertTypes = HibernateManager.getAlertTypes(session);
 			mapLayers = HibernateManager.getMapLayers(session);
 			defaults = HibernateManager.getAlertFilterDefaults(session);
-			canUpdate = SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AlertAction.UPDATE_ALL_KEY);
-			canDelete = SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AlertAction.DELETE_ALL_KEY);
+			canUpdate = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(session, request.getUserPrincipal().getName(), AlertAction.UPDATE_ALERTS_KEY);
+			canDelete = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(session, request.getUserPrincipal().getName(), AlertAction.DELETE_ALERTS_KEY);
 		}finally{
 			session.getTransaction().rollback();
 		}
 		
 		request.setAttribute("users", users); //$NON-NLS-1$
-		request.setAttribute("cas", cas); //$NON-NLS-1$
+		request.setAttribute("cas", authorizedCas); //$NON-NLS-1$
 		request.setAttribute("alertTypes", alertTypes); //$NON-NLS-1$
 		request.setAttribute("mapLayers", mapLayers); //$NON-NLS-1$
 		request.setAttribute("startingZoom", defaults.get(0).getStartingZoomLevel()); //$NON-NLS-1$

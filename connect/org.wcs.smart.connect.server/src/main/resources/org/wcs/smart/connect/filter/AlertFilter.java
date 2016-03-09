@@ -40,6 +40,8 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
+import org.wcs.smart.connect.security.AlertAction;
+import org.wcs.smart.connect.security.SecurityManager;
 
 
 /*
@@ -145,10 +147,9 @@ public class AlertFilter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Alert> getAlerts(Session session){
-		Criteria c = session.createCriteria(Alert.class);
+	public List<Alert> getAlerts(Session s, String username){
+		Criteria c = s.createCriteria(Alert.class);
 		List<Alert> emptyList = new ArrayList<Alert>();
-		
 		
 		//level
 		if(levelFilter != null){
@@ -194,7 +195,9 @@ public class AlertFilter {
 				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
 			for(int x=0; x < caUuidFilter.size();x++){
-				or.add(Restrictions.eq("caUuid", caUuidFilter.get(x) )); //$NON-NLS-1$
+				if(SecurityManager.INSTANCE.canAccess(s, username , AlertAction.VIEW_ALERTS_KEY, caUuidFilter.get(x)) ){;
+					or.add(Restrictions.eq("caUuid", caUuidFilter.get(x) )); //$NON-NLS-1$
+				}
 			}
 			c.add(or);
 		}

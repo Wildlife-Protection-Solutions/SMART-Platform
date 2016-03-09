@@ -123,7 +123,7 @@
 	     		<input id="runQueryButton" class="button top-spacer" type="button" value="  <fmt:message key="query.runbutton"/>  "/>
 	   			<input id="cancel" class="button" type="button" value="<fmt:message key="query.cancelbutton"/>" />
    			</div>
-   			<p class="small"><a href="javascript:getUrlOnly()"><fmt:message key="query.geturl" /></a></p>
+   			<p class="small"><a title="The link provided is for use in browsers. To call the API programmitcally using HTTP authentication directly, use .../server/api/query/ instead." href="javascript:getUrlOnly()"><fmt:message key="query.geturl" /></a></p>
     	</form>
   </div>
 </body>
