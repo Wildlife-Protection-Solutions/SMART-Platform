@@ -706,7 +706,11 @@ public class ConnectAlert extends HttpServlet {
 				}
 			}
 			if(newAlert.getTrack() != null){
-				toUpdate.setTrack(newAlert.getTrack());
+				if(validateTrack(newAlert.getTrack()) ){
+					toUpdate.setTrack(newAlert.getTrack());
+				}else{
+					throw new SmartConnectException("Invalid Track Provided");
+				}
 			}
 			
 			if (newAlert.getX() != null){
@@ -730,4 +734,41 @@ public class ConnectAlert extends HttpServlet {
 		}
 		return toUpdate;
     }
+
+	private boolean validateTrack(String string) {
+		string = string.replaceAll("\\s",""); //strip whitespace
+		
+		if(!string.substring(0,1).equals("[") || !string.substring(string.length() - 1, string.length()).equals("]")){
+			return false;
+		}
+		string = string.substring(1, string.length() - 1); // Get rid of braces.
+		String[] parts = string.split(",");
+		int x = 0;
+		boolean odd = true;
+		for (String part : parts) {
+			if ( (x & 1) == 0 ){ 
+				odd = false;
+			}else { 
+				odd = true;
+			}
+			if(odd){
+				if(!part.substring(part.length() - 1, part.length()).equals("]")){
+					return false;
+				}
+				part = part.substring(0,part.length()-1);
+			}else{ //even, the first character should be a bracket
+				if(!part.substring(0,1).equals("[")) {
+					return false;
+				}
+				part = part.substring(1,part.length());
+			}
+		    try{
+		    	Double.parseDouble(part);
+		    }catch(NumberFormatException ex){
+		    	return false;
+		    }
+		    x++;
+		}
+		return true;
+	}
 }
