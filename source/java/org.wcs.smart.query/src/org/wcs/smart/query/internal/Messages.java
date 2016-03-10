@@ -6,6 +6,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.query.internal.messages"; //$NON-NLS-1$
 	public static String DerbyFilterToSqlGenerator_FilterTypeNotSupported;
 	public static String AbstractPagedQueryResultSet_CleanupTablesJobName;
+	public static String AbstractPagedQueryResultSet_ErrorLoadingQueryResults;
 	public static String AbstractValueDropItem_ChangeRate;
 	public static String AbstractValueDropItem_ComputeRate;
 	public static String AbstractValueDropItem_EncounterRatePerRatio;
@@ -287,6 +288,7 @@ public class Messages extends NLS {
 	public static String QueryDateLabelProvider_EndHourLabel;
 	public static String QueryDateLabelProvider_StartEndDateError;
 	public static String QueryDateLabelProvider_StartHourLabel;
+	public static String QueryDateLabelProvider_SummaryDateGroupByError;
 	public static String QueryDefinitionValidator_AggregationNotSupported;
 	public static String QueryDefPanel_QueryTypeNotSupported;
 	public static String QueryEditorUtils_BlankNameError;

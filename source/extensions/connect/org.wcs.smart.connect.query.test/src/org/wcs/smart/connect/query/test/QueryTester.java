@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,9 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.Response;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.model.PasswordAesManager;
@@ -45,13 +53,16 @@ import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.util.UuidUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
 public class QueryTester {
 
 	private Session session;
-	private SmartConnectQuery connect;
+//	private SmartConnectQuery connect;
+	
+	private SmartConnect connect;
 	
 	private IStatusRecorder status;
 	private boolean cancelRequested = false;
@@ -70,7 +81,8 @@ public class QueryTester {
 					.uniqueResult();
 			ConnectUser user = (ConnectUser)session.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
 			
-			connect = new SmartConnectQuery(cs, user.getConnectUsername(), PasswordAesManager.getInstance().decryptPassword(user.getConnectPassword(), SmartDB.getPlainTextPassword()));
+//			connect = new SmartConnectQuery(cs, user.getConnectUsername(), PasswordAesManager.getInstance().decryptPassword(user.getConnectPassword(), SmartDB.getPlainTextPassword()));
+			connect = SmartConnect.findInstance(cs, user.getConnectUsername(), PasswordAesManager.getInstance().decryptPassword(user.getConnectPassword(), SmartDB.getPlainTextPassword()));
 		}
 	}
 	
@@ -363,10 +375,35 @@ public class QueryTester {
 		
 	}
 	private List<String[]> runQueryConnect(Query query, DateFilter dFilter) throws Exception{
-		return connect.executeQuery(query.getUuid(), dFilter);
+		return executeQuery(query.getUuid(), dFilter);
 	}
 	
 	public static interface IStatusRecorder{
 		void updateStatus(String newInfo);
 	}
+	
+	/**
+	 * Gets a list of Conservation Areas on a connect
+	 * server.
+	 * 
+	 * @return List of ConservationAreaInfo 
+	 */
+	public List<String[]> executeQuery(UUID queryUuid, DateFilter dFilter) throws Exception{
+		
+		ResteasyWebTarget target = connect.getClient().target(connect.getServer().getServerUrl() + SmartConnect.API_URL);
+		
+		QueryConnectClient simple = target.proxy(QueryConnectClient.class);
+		Response r = null;
+		try{
+			r = simple.getQueryResults(UuidUtils.uuidToString(queryUuid), "csv", null, null, dFilter.getDateFieldOption().getKey(), ",");
+			try(CSVReader reader = new CSVReader(new InputStreamReader(r.readEntity(InputStream.class)))){
+				return reader.readAll();
+			}
+		}catch (NotFoundException ex){
+			return null;
+		}finally{
+			if (r != null) r.close();
+		}
+	}
+	
 }

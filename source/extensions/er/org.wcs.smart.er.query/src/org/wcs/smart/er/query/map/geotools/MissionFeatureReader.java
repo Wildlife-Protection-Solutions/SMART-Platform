@@ -39,7 +39,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.QueryResultSetIterator;
+import org.wcs.smart.query.common.model.QueryResultSetIterator;
 import org.wcs.smart.query.common.model.SimpleQuery;
 
 /**

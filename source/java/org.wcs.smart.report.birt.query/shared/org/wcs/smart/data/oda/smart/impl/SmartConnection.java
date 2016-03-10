@@ -1,0 +1,196 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.data.oda.smart.impl;
+
+import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+
+import org.eclipse.datatools.connectivity.oda.IConnection;
+import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
+import org.eclipse.datatools.connectivity.oda.IQuery;
+import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.eclipse.datatools.connectivity.oda.util.manifest.DataTypeMapping;
+import org.eclipse.datatools.connectivity.oda.util.manifest.ExtensionManifest;
+import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
+import org.hibernate.Session;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.model.Query;
+
+import com.ibm.icu.util.ULocale;
+
+/**
+ * Implementation class of IConnection for SMART ODA runtime driver.
+ */
+public abstract class SmartConnection implements IConnection {
+	
+	/**
+	 * App context local variable
+	 */
+	public static final String LOCAL_CONTEXT_VAR = "org.wcs.smart.report.locale"; //$NON-NLS-1$
+	public static final String ODA_DATA_SOURCE_ID = "org.wcs.smart.data.oda.smart"; //$NON-NLS-1$
+	
+	protected boolean m_isOpen = false;
+	protected Session localSession;
+	protected Map<?,?> appContext;
+	
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#open(java.util.Properties)
+	 */
+	public void open(Properties connProperties) throws OdaException{
+		openSession();
+		m_isOpen = true;
+	}
+
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#close()
+	 */
+	public void close() throws OdaException {
+		closeSession();
+		m_isOpen = false;
+	}
+
+	public abstract void openSession();
+	
+	public abstract void closeSession();
+	
+	public abstract IQueryResult executeQuery(Query query) throws Exception;
+	
+	@Override
+	public void setAppContext(Object context) throws OdaException {
+		if (context instanceof Map){
+			this.appContext = (Map<?,?>)context;
+		}
+	}
+	
+	/**
+	 * Gets the context locale from the appContext 
+	 * variable LOCAL_CONTEXT_VAR or the default 
+	 * context.
+	 * @return
+	 */
+	public Locale getCurrentLocale(){
+		if (appContext == null) return Locale.getDefault();
+		Locale l = (Locale) appContext.get(LOCAL_CONTEXT_VAR);
+		if (l == null) return Locale.getDefault();
+		return l;
+	}
+	
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#isOpen()
+	 */
+	public boolean isOpen() throws OdaException {
+		return m_isOpen;
+	}
+	
+	public Session getSession(){
+		return this.localSession;
+	}
+
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#getMetaData(java.lang.String)
+	 */
+	public IDataSetMetaData getMetaData(String dataSetType) throws OdaException {
+		return new SmartDatasetMetadata(this);
+	}
+
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#newQuery(java.lang.String)
+	 */
+	public IQuery newQuery(String dataSetType) throws OdaException {
+		try {
+			if (dataSetType.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)) {
+				return createQuery();
+//			}else if (dataSetType.equals(SmartTableQuery.SMART_DATASET_TYPE)){
+//				return createTableQuery();
+			}
+			throw new OdaException(
+					MessageFormat.format("Dataset {0} not supported by SMART",
+							new Object[]{dataSetType}));
+		} catch (Exception e) {
+			throw new OdaException(e);
+		}
+	}
+
+	public abstract AbstractSmartBirtQuery createQuery();
+	
+//	public abstract SmartTableQuery createTableQuery();
+	
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#getMaxQueries()
+	 */
+	public int getMaxQueries() throws OdaException {
+		return 0; // no limit
+	}
+
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#commit()
+	 */
+	public void commit() throws OdaException {
+		// do nothing; assumes no transaction support needed
+	}
+
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#rollback()
+	 */
+	public void rollback() throws OdaException {
+		// do nothing; assumes no transaction support needed
+	}
+
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IConnection#setLocale(com.ibm.icu.util.ULocale)
+	 */
+	public void setLocale(ULocale locale) throws OdaException {
+		// do nothing; assumes no locale support
+	}
+
+	/**
+	 * Returns the object that represents this extension's manifest.
+	 * 
+	 * @throws OdaException
+	 */
+	public static ExtensionManifest getManifest() throws OdaException {
+		return ManifestExplorer.getInstance().getExtensionManifest(
+				ODA_DATA_SOURCE_ID);
+	}
+
+	/**
+	 * Returns the native data type name of the specified code, as defined in
+	 * this data source extension's manifest.
+	 * 
+	 * @param nativeTypeCode
+	 *            the native data type code
+	 * @return corresponding native data type name
+	 * @throws OdaException
+	 *             if lookup fails
+	 */
+	public static String getNativeDataTypeName(int nativeDataTypeCode, String dataSetType)
+			throws OdaException {
+		DataTypeMapping typeMapping = SmartConnection.getManifest().getDataSetType(dataSetType)
+				.getDataTypeMapping(nativeDataTypeCode);
+		if (typeMapping != null)
+			return typeMapping.getNativeType();
+		return "Undefined mapping type";
+	}
+
+}

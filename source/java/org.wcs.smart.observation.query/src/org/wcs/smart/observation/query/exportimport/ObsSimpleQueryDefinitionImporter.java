@@ -28,7 +28,6 @@ import java.util.HashMap;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;

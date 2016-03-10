@@ -23,6 +23,7 @@
       </QueryTypeDataset>
       <QueryTypeDataset
             class="org.wcs.smart.report.query.data.oda.query.PatrolSmartQuery"
+            metadataProvider="org.wcs.smart.report.query.data.oda.query.PatrolSummaryMetadataProvider"
             queryTypeKey="patrolsummary">
       </QueryTypeDataset>
       <QueryTypeDataset

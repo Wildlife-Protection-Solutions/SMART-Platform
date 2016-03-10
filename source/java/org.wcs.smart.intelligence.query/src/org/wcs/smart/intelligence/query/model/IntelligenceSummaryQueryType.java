@@ -32,8 +32,6 @@ import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.intelligence.query.ui.IntelligenceSummaryEditor;
 import org.wcs.smart.intelligence.query.ui.dropitem.IntelligenceDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.model.SummaryHeader;
-import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -102,26 +100,5 @@ public class IntelligenceSummaryQueryType implements IQueryType {
 		IPath path = new Path("src/org/wcs/smart/intelligence/query/model/summary.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, IntelligenceQueryPlugIn.getDefault().getBundle());
 	}
-
-	/**
-	 * Creates the template for the results.  These queries
-	 * have on value (Number of Intelligence) grouped into either
-	 * Followed Up or Not Followed Up.
-	 * 
-	 * @return
-	 */
-	public static SummaryQueryResult createResultTemplate(){
-		SummaryQueryResult results = new SummaryQueryResult();
-		
-		results.addValueHeader(
-				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NumberRecordShortName, Messages.SummaryIntelligenceQueryEngine_NumberRecordLongName, IntelligenceSummaryQuery.NUMBER_KEY, true));
-		
-		results.addRowHeader(
-				new SummaryHeader[]{new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderShortName, IntelligenceSummaryQuery.FOLLOW_KEY, false), 
-				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NotFollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_NoFollowedUpHeaderShortName, IntelligenceSummaryQuery.NOT_FOLLOW_KEY, false)}); 
-	
-		return results;
-	}
-	
 
 }

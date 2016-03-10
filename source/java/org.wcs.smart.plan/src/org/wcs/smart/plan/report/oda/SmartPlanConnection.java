@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.DesktopSmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartDatasetMetadata;
 import org.wcs.smart.plan.internal.Messages;
@@ -38,7 +39,7 @@ import org.wcs.smart.plan.internal.Messages;
  * @since 2.0.0
  *
  */
-public class SmartPlanConnection extends SmartConnection {
+public class SmartPlanConnection extends DesktopSmartConnection {
 
 	
 	/**

@@ -9,6 +9,7 @@
       </QueryTypeDataset>
       <QueryTypeDataset
             class="org.wcs.smart.entity.query.report.data.EntityReportQuery"
+            metadataProvider="org.wcs.smart.entity.query.report.data.SummaryMetadataProvider"
             queryTypeKey="entitysummary">
       </QueryTypeDataset>
       <QueryTypeDataset

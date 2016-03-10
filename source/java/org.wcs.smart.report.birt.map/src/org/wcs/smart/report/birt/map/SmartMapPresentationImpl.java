@@ -38,6 +38,10 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 
 import org.eclipse.birt.core.exception.BirtException;
+import org.eclipse.birt.data.engine.api.DataEngine;
+import org.eclipse.birt.data.engine.api.IQueryDefinition;
+import org.eclipse.birt.report.engine.content.impl.ReportContent;
+import org.eclipse.birt.report.engine.data.IDataEngine;
 import org.eclipse.birt.report.engine.extension.IRowSet;
 import org.eclipse.birt.report.engine.extension.ReportItemPresentationBase;
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -109,7 +113,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 		if (mapItem == null) {
 			return null;
 		}
-
+//content.getResultSet()
+		
+		
 		int iwidth = BirtMapUtils.getWidthInPx(modelHandle, dpi);
 		int iheight = BirtMapUtils.getHeightInPx(modelHandle, dpi);
 		
@@ -123,6 +129,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			List<String> datasets = mapItem.getDatasets();
 
 			if (mapqueries != null){
+					
 				for (int i = 0; i < mapqueries.size(); i++) {
 					String dataSet = i < datasets.size() ? datasets.get(i) : null;			
 					DataSetHandle handle = null;
@@ -138,6 +145,20 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 							}
 						}
 					}
+					
+					
+//					IDataEngine de2 = ((ReportContent)content.getReportContent()).getExecutionContext().getDataEngine();
+//					//de2.
+//					System.out.println(de2.toString());
+//					de2.
+//					ArrayList<IQueryDefinition> allQueries = content.getReportContent().getDesign().getQueries();
+//					for (IQueryDefinition qdef: allQueries){
+//						if (qdef.getDataSetName().equals(handle.getName())){
+//						//	((ReportContent)content.getReportContent()).getExecutionContext().executeQuery(null, qdef, mapItem, false);		
+//						}
+//					}
+//					
+					
 					
 					GeoSmart layer = new GeoSmart();
 					layer.name = mapnames.get(i);

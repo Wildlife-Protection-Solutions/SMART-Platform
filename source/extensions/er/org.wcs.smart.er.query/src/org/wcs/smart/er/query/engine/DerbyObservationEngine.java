@@ -754,11 +754,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		}
 		
 		it.setCategory(categories.toArray(new String[categories.size()]));
-//		
-//		for (MissionAttribute ma : missionAttributes){
-//			it.addAttribute(ma.getKeyId(), rs.getObject("ma_" + ma.getKeyId())); //$NON-NLS-1$
-//		}
-//		
+
 		return it;
 	}
 

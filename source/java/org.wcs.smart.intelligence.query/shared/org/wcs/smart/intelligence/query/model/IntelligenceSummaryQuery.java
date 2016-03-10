@@ -21,11 +21,17 @@
  */
 package org.wcs.smart.intelligence.query.model;
 
+import java.util.Locale;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.intelligence.query.IIntelligenceQueryLabelProvider;
+import org.wcs.smart.query.common.model.SummaryHeader;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 
@@ -105,5 +111,37 @@ public class IntelligenceSummaryQuery extends Query {
 		q.setDateFilter(getDateFilter());
 		q.setOwner(newOwner);
 		return q;
+	}
+	
+	/**
+	 * Creates the template for the results.  These queries
+	 * have on value (Number of Intelligence) grouped into either
+	 * Followed Up or Not Followed Up.
+	 * 
+	 * @return
+	 */
+	public static SummaryQueryResult createResultTemplate(Locale l){
+		SummaryQueryResult results = new SummaryQueryResult();
+		
+		IIntelligenceQueryLabelProvider lblProvider = SmartContext.INSTANCE.getClass(IIntelligenceQueryLabelProvider.class);
+		
+		results.addValueHeader(
+				new SummaryHeader(
+						lblProvider.getLabel(IIntelligenceQueryLabelProvider.NUM_RECORD_SHORTNAME, l),
+						lblProvider.getLabel(IIntelligenceQueryLabelProvider.NUM_RECORD_LONGNAME, l),
+						IntelligenceSummaryQuery.NUMBER_KEY, true));
+		
+		results.addRowHeader(
+				new SummaryHeader[]{new SummaryHeader(
+						lblProvider.getLabel(IIntelligenceQueryLabelProvider.FOLLOWUP_LONGNAME, l),
+						lblProvider.getLabel(IIntelligenceQueryLabelProvider.FOLLOWUP_SHORTNAME, l),
+						IntelligenceSummaryQuery.FOLLOW_KEY, false), 
+				
+				new SummaryHeader(
+						lblProvider.getLabel(IIntelligenceQueryLabelProvider.NOFOLLOWUP_LONGNAME, l), 
+						lblProvider.getLabel(IIntelligenceQueryLabelProvider.NOFOLLOWUP_SHORTNAME, l),
+						IntelligenceSummaryQuery.NOT_FOLLOW_KEY, false)}); 
+	
+		return results;
 	}
 }

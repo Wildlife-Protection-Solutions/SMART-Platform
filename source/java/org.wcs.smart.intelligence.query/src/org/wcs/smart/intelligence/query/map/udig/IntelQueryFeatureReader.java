@@ -40,8 +40,8 @@ import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.QueryResultSetIterator;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
@@ -61,7 +61,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	private static GeometryFactory gf = new GeometryFactory();
 	
 	private SimpleFeatureType ftype;
-	private QueryResultSetIterator<? extends IResultItem> fIterator;
+	private IQueryResultSetIterator<? extends IResultItem> fIterator;
 	
 	private IntelligenceRecordResultItem currentIntel = null;
 	private Iterator<IntelligencePoint> subInterator;

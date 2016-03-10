@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;

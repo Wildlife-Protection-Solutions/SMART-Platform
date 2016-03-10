@@ -17,6 +17,7 @@
       </QueryTypeDataset>
       <QueryTypeDataset
             class="org.wcs.smart.er.query.report.query.SurveyReportQuery"
+            metadataProvider="org.wcs.smart.er.query.report.query.SummaryMetadataProvider"
             queryTypeKey="surveysummary">
       </QueryTypeDataset>
       <QueryTypeDataset

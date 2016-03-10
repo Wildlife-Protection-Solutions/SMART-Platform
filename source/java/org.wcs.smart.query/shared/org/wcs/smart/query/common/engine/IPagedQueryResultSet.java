@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.engine;
 
 import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -80,8 +81,18 @@ public interface IPagedQueryResultSet extends IQueryResult{
 	 * @param pageSize
 	 * @return
 	 */
-	public QueryResultSetIterator<? extends IResultItem> iterator(int pageSize);
+	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize);
 
+	/**
+	 * Creates an iterator that will iterator over all 
+	 * elements in the result set loading the given pagesize
+	 * each time.  Uses the provided session.
+	 * 
+	 * @param pageSize
+	 * @return
+	 */
+	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize, Session session);
+	
 	/**
 	 * Sets the current sorting column.
 	 * @param sortColumn

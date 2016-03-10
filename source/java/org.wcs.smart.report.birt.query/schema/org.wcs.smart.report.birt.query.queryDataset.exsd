@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="identifier" basedOn=""/>
+                  <meta.attribute kind="identifier"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -66,6 +66,16 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.data.oda.smart.impl.ISmartQuery"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="metadataProvider" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.data.oda.smart.query.common.IMetadataProvider"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -13,7 +13,7 @@
 	<artifactId>org.wcs.smart.observation.query</artifactId>
 	<name>Observation Query Module</name>
 	<version>${smart.version}</version>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>

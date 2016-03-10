@@ -89,7 +89,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine{
+public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 
 	private SummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
@@ -1103,5 +1103,4 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine{
 			throws SQLException {
 		return null;
 	}
-
 }

@@ -35,3 +35,4 @@ Bundle-ClassPath: lib/activation-1.1.jar,
  lib/resteasy-jackson2-provider-3.0.9.Final.jar,
  lib/resteasy-jaxrs-3.0.9.Final.jar,
  .
+Export-Package: org.wcs.smart.connect.query.test

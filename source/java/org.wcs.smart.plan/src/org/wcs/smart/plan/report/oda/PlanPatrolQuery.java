@@ -118,7 +118,7 @@ public class PlanPatrolQuery extends SmartQuery {
 		super.setObject(SmartParameterMetaData.Parameter.ENDDATE.guiName, 
 				new java.sql.Date((new Date()).getTime() + 86400000)); 
 		
-		this.wrapperObject.prepare(this);
+		this.wrapperObject.prepare(this, connection);
 		return wrapperObject.executeQuery(this, connection);
 	}
 	

@@ -35,4 +35,14 @@ import org.wcs.smart.ISharedLabelProvider;
  */
 public interface IIntelligenceQueryLabelProvider extends ISharedLabelProvider{
 
+	public static final String NUM_RECORD_SHORTNAME = "numberrecordshortname"; //$NON-NLS-1$
+	public static final String NUM_RECORD_LONGNAME = "numberrecordlongname"; //$NON-NLS-1$
+	
+	public static final String FOLLOWUP_SHORTNAME = "followshortname"; //$NON-NLS-1$
+	public static final String FOLLOWUP_LONGNAME = "followlongname"; //$NON-NLS-1$
+	
+	public static final String NOFOLLOWUP_SHORTNAME = "nofollowshortname"; //$NON-NLS-1$
+	public static final String NOFOLLOWUP_LONGNAME = "nofollowlongname"; //$NON-NLS-1$
+	
+	
 }

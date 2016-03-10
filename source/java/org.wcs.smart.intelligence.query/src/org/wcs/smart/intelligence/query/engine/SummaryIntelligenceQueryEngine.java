@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -103,7 +104,7 @@ public class SummaryIntelligenceQueryEngine implements IQueryEngine {
 			}
 			Long notFollowedUpOn = (Long) q.uniqueResult(); 
 		
-			SummaryQueryResult results = IntelligenceSummaryQueryType.createResultTemplate();
+			SummaryQueryResult results = IntelligenceSummaryQuery.createResultTemplate(Locale.getDefault());
 			
 			HashMap<SummaryResultKey, Double> data = new HashMap<SummaryResultKey, Double>();
 		

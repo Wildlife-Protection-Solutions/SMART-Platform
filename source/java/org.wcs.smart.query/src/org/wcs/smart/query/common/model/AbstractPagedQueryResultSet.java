@@ -36,9 +36,9 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.QueryResultSetIterator;
+import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
 import org.wcs.smart.query.internal.Messages;
 
 /**
@@ -47,7 +47,7 @@ import org.wcs.smart.query.internal.Messages;
  * @author Emily
  *
  */
-public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSet {
+public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryResultSet {
 
 	protected int itemCount = 0;
 
@@ -66,7 +66,7 @@ public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSe
 				result = getResults(session, rs, offset, pageSize);
 			}
 		}catch (SQLException ex){
-			QueryPlugIn.displayLog("Error loading query results from database.", ex);
+			QueryPlugIn.displayLog(Messages.AbstractPagedQueryResultSet_ErrorLoadingQueryResults, ex);
 		}finally{
 			session.close();
 		}
@@ -110,13 +110,22 @@ public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSe
 	}
 
 	/**
-	 * Creates a new feature iterator that intrates over all
+	 * Creates a new feature iterator that iterates over all
 	 * features in the result set using the given page size.  This
 	 * iterator MUST BE CLOSED when you are done with it to properly
 	 * close the session.
 	 */
-	public QueryResultSetIterator<IResultItem> iterator(int pageSize) {
+	public IQueryResultSetIterator<IResultItem> iterator(int pageSize) {
 		return new QueryResultSetIterator<IResultItem>(this, pageSize);
+	}
+	
+	/**
+	 * Creates a new feature iterator that iterates over all
+	 * features in the result set using the given page size and session.  The
+	 * session is not closed - the client is responsible for closing it.
+	 */
+	public IQueryResultSetIterator<IResultItem> iterator(int pageSize, Session session) {
+		return new QueryResultSetIterator<IResultItem>(this, pageSize, session);
 	}
 
 	public int getItemCount() {
