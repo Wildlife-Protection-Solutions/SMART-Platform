@@ -119,7 +119,7 @@
             icon="images/icons/eview16/world.png"
             id="org.wcs.smart.view.browser"
             name="SMART Web Browser"
-            restorable="true">
+            restorable="false">
       </view>
    </extension>
    <extension
@@ -193,11 +193,8 @@
          <view
                closeable="true"
                id="org.wcs.smart.view.browser"
-               minimized="false"
-               moveable="true"
                relationship="stack"
                relative="org.eclipse.ui.editorss"
-               showTitle="true"
                visible="false">
          </view>
       </perspectiveExtension>

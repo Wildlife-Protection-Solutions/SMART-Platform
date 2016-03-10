@@ -40,7 +40,9 @@ public class QueryTestHandler extends AbstractHandler {
 		}
 		UUID uuid1 = null;
 		try{
-			uuid1 = UuidUtils.stringToUuid(uuid);
+			if (uuid != null){
+				uuid1 = UuidUtils.stringToUuid(uuid);
+			}
 		}catch (Exception ex){
 			ex.printStackTrace();
 		}

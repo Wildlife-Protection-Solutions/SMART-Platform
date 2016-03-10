@@ -23,7 +23,7 @@ package org.wcs.smart.data.oda.smart.impl.table;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.data.oda.smart.impl.SmartDriver;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 
 /**
  * Metadata for a SmartBirtTable 
@@ -84,7 +84,7 @@ public class SmartTableResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return SmartDriver.getNativeDataTypeName( nativeTypeCode, SmartTableQuery.SMART_DATASET_TYPE );
+	     return SmartConnection.getNativeDataTypeName( nativeTypeCode, SmartTableQuery.SMART_DATASET_TYPE );
 	}
 
 	/**

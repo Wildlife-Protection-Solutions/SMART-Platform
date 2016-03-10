@@ -40,4 +40,5 @@ public interface IQueryDateLabelProvider extends ISharedLabelProvider{
 
 	public static final String START_BEFORE_END_ERR = "dateerror"; //$NON-NLS-1$
 
+	public static final String SUMMARY_DATE_GROUPBY_ERR = "summarydategroupbyerr"; //$NON-NLS-1$
 }

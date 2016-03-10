@@ -17,6 +17,7 @@
       </QueryItemPanel>
    </extension>
    <extension
+         id="org.wcs.smart.query.queryType"
          point="org.wcs.smart.query.queryType">
       <QueryCategory
             html_description="%querycategory.html_description"

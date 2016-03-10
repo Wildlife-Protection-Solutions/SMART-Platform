@@ -13,6 +13,7 @@
       </QueryTypeDataset>
       <QueryTypeDataset
             class="org.wcs.smart.observation.query.report.data.ObservationReportQuery"
+            metadataProvider="org.wcs.smart.observation.query.report.data.SummaryMetadataProvider"
             queryTypeKey="observationsummary">
       </QueryTypeDataset>
       <QueryTypeDataset

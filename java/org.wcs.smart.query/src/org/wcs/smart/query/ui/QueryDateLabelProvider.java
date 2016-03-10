@@ -80,6 +80,8 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 	public String getLabel(Object item, Locale l) {
 		if (item.equals(START_BEFORE_END_ERR)){
 			return getStartEndDateErrorStr();
+		}else if (item.equals(SUMMARY_DATE_GROUPBY_ERR)){
+			return Messages.QueryDateLabelProvider_SummaryDateGroupByError;
 		}
 		return labels.get(item.getClass());
 	}

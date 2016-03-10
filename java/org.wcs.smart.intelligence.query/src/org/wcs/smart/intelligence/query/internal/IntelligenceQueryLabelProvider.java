@@ -61,6 +61,13 @@ public class IntelligenceQueryLabelProvider implements
 		if (item == IntelligenceFilterOption.INFORMANTID) return Messages.IntelligenceFilterOption_InformationIdOption;
 		
 		if (item instanceof ReceivedDateFilter) return Messages.RecievedDateFilter_ReceivedDateFilterName;
+		
+		if (item.equals(NUM_RECORD_SHORTNAME)) return Messages.SummaryIntelligenceQueryEngine_NumberRecordShortName;
+		if (item.equals(NUM_RECORD_LONGNAME)) return Messages.SummaryIntelligenceQueryEngine_NumberRecordLongName;
+		if (item.equals(FOLLOWUP_SHORTNAME)) return Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderShortName;
+		if (item.equals(FOLLOWUP_LONGNAME)) return Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderLongName;
+		if (item.equals(NOFOLLOWUP_LONGNAME)) return Messages.SummaryIntelligenceQueryEngine_NotFollowedUpHeaderLongName;
+		if (item.equals(NOFOLLOWUP_SHORTNAME)) return Messages.SummaryIntelligenceQueryEngine_NoFollowedUpHeaderShortName;
 		return null;
 	}
 

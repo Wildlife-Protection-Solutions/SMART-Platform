@@ -417,7 +417,6 @@ public class HibernateManager extends SmartHibernateManager{
 			employee.add(Restrictions.isNull("endEmploymentDate")); //$NON-NLS-1$
 			employee.add( Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
 			
-			@SuppressWarnings("unchecked")
 			List<Employee> people = employee.list();
 			if (people.size() == 1){
 				Employee user = people.get(0);

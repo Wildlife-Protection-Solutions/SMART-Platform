@@ -28,27 +28,50 @@
 		<module>./org.wcs.smart.intelligence/pom-shared.xml</module>
 		<module>./org.wcs.smart.intelligence.query/pom-shared.xml</module>
 		<module>./org.wcs.smart.independentincident/pom-shared.xml</module>
+		<module>./org.wcs.smart.report.birt.query/pom-shared.xml</module>
+		<module>./org.wcs.smart.observation.query.report/pom-shared.xml</module>
+		<module>./org.wcs.smart.patrol.query.report/pom-shared.xml</module>
+		<module>./org.wcs.smart.intelligence.query.report/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.entity/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.entity.query/pom-shared.xml</module>
+		<module>../extensions/org.wcs.smart.entity.query.report/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er.query/pom-shared.xml</module>
+		<module>../extensions/er/org.wcs.smart.er.query.report/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect.dataqueue/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.cybertracker/pom-shared.xml</module>
 	</modules>
-  
+ 
 	<build>
 		<sourceDirectory>shared</sourceDirectory>
+		<resources>
+			<resource>
+        			<directory>.</directory>
+        			<includes>
+          				<include>plugin.xml</include>
+        			</includes>
+      			</resource>
+      			<resource>
+        			<directory>schema</directory>
+        		</resource>
+		</resources>
 		<plugins>
       			<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-compiler-plugin</artifactId>
-        		<version>3.3</version>
-        		<configuration>
-          			<source>1.7</source>
-          			<target>1.7</target>
-        		</configuration>
-      		</plugin>
+        			<groupId>org.apache.maven.plugins</groupId>
+        			<artifactId>maven-compiler-plugin</artifactId>
+        			<version>3.3</version>
+        			<configuration>
+          				<source>1.7</source>
+          				<target>1.7</target>
+        			</configuration>
+      			</plugin>
+      			<plugin>
+    				<groupId>org.apache.felix</groupId>
+    				<artifactId>maven-bundle-plugin</artifactId>
+    				<extensions>true</extensions>
+				<!--<configuration><manifestLocation>META-INF</manifestLocation></configuration>-->
+  			</plugin>
     		</plugins>
 	</build>
 	

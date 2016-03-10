@@ -21,12 +21,7 @@
  */
 package org.wcs.smart.observation.query.model.columns;
 
-import java.text.MessageFormat;
-import java.util.Locale;
-
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
-import org.wcs.smart.observation.query.view.IObservationQueryLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;

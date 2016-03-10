@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<parent>
+		<groupId>org.wcs.smart</groupId>
+		<artifactId>smart</artifactId>
+		<version>4.0</version>
+		<relativePath>../pom-shared.xml</relativePath>
+	</parent>
+	
+	<modelVersion>4.0.0</modelVersion>
+	
+	<artifactId>org.wcs.smart.observation.query.report</artifactId>
+	<name>SMART Observation Report Query Module</name>
+	<version>${smart.version}</version>
+	<packaging>bundle</packaging>
+	
+	<dependencies>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.core</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.report</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+				<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.report.birt.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+				<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.observation.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		
+	</dependencies>	
+</project>

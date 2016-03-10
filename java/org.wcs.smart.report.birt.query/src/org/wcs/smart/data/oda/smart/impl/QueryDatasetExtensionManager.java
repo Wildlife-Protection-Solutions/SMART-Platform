@@ -26,6 +26,7 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
 
 /**
  * Query dataset extension manager.
@@ -40,7 +41,7 @@ public class QueryDatasetExtensionManager {
 	/**
 	 * Mapping from query type key to smart dataset
 	 */
-	private HashMap<String, ISmartQuery> datasets;
+	private HashMap<String, AbstractSmartQuery> datasets;
 	
 	private QueryDatasetExtensionManager(){
 		
@@ -68,7 +69,7 @@ public class QueryDatasetExtensionManager {
 	 * @return
 	 * @throws Exception
 	 */
-	public ISmartQuery getDatasetHandler(String queryType) throws Exception{
+	public AbstractSmartQuery getDatasetHandler(String queryType) throws Exception{
 		if (datasets == null){
 			getDatasets();
 		}
@@ -82,11 +83,17 @@ public class QueryDatasetExtensionManager {
 		if (datasets != null){
 			return;
 		}
-		datasets = new HashMap<String, ISmartQuery>();
+		datasets = new HashMap<String, AbstractSmartQuery>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
-				.getConfigurationElementsFor(ISmartQuery.SMART_QUERY_EXTENSION_ID);
+				.getConfigurationElementsFor(AbstractSmartQuery.SMART_QUERY_EXTENSION_ID);
 		for (IConfigurationElement e : config) {
-			datasets.put(e.getAttribute("queryTypeKey"), (ISmartQuery) e.createExecutableExtension("class")); //$NON-NLS-1$ //$NON-NLS-2$
+			AbstractSmartQuery q = (AbstractSmartQuery) e.createExecutableExtension("class"); //$NON-NLS-1$
+			if (e.getAttribute("metadataProvider") != null){ //$NON-NLS-1$
+				q.setMetadataProvider((IMetadataProvider)e.createExecutableExtension("metadataProvider")); //$NON-NLS-1$
+			}else{
+				q.setMetadataProvider(QueryMetadataProvider.INSTANCE);
+			}
+			datasets.put(e.getAttribute("queryTypeKey"), q); //$NON-NLS-1$
 		}
 	}
 }

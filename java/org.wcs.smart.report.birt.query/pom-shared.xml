@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<parent>
+		<groupId>org.wcs.smart</groupId>
+		<artifactId>smart</artifactId>
+		<version>4.0</version>
+		<relativePath>../pom-shared.xml</relativePath>
+	</parent>
+	
+	<modelVersion>4.0.0</modelVersion>
+	
+	<artifactId>org.wcs.smart.report.birt.query</artifactId>
+	<name>BIRT Report Query Module</name>
+	<version>${smart.version}</version>
+	<packaging>bundle</packaging>
+	
+	<dependencies>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.core</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.report</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.report</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.eclipse.birt.runtime</groupId>
+    			<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
+    			<version>3.4.3.v201405301249</version>
+		</dependency>
+		<dependency>
+    			<groupId>com.ibm.icu</groupId>
+    			<artifactId>icu4j</artifactId>
+    			<version>50.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt.runtime</groupId>
+			<artifactId>org.eclipse.birt.runtime</artifactId>
+			<version>4.4.1</version>
+		</dependency>
+	</dependencies>	
+</project>

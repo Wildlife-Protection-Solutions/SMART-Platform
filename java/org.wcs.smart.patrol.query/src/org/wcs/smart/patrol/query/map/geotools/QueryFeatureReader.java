@@ -32,8 +32,8 @@ import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.QueryResultSetIterator;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
 
@@ -46,7 +46,7 @@ import org.wcs.smart.query.model.IPagedQuery;
 public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
-	private QueryResultSetIterator<? extends IResultItem> fIterator;
+	private IQueryResultSetIterator<? extends IResultItem> fIterator;
 	private SimpleQuery query;
 		
 	/**

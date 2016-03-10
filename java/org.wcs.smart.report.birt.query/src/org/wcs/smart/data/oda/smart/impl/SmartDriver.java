@@ -25,16 +25,12 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDriver;
 import org.eclipse.datatools.connectivity.oda.LogConfiguration;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.eclipse.datatools.connectivity.oda.util.manifest.DataTypeMapping;
-import org.eclipse.datatools.connectivity.oda.util.manifest.ExtensionManifest;
-import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
-import org.wcs.smart.data.oda.smart.internal.Messages;
 
 /**
  * Implementation class of IDriver for a SMART ODA runtime driver.
  */
 public class SmartDriver implements IDriver {
-	static String ODA_DATA_SOURCE_ID = "org.wcs.smart.data.oda.smart"; //$NON-NLS-1$
+	public static String ODA_DATA_SOURCE_ID = "org.wcs.smart.data.oda.smart"; //$NON-NLS-1$
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IDriver#getConnection(java.lang.String)
@@ -42,7 +38,7 @@ public class SmartDriver implements IDriver {
 	public IConnection getConnection(String dataSourceType) throws OdaException {
 		// assumes that this driver supports only one type of data source,
 		// ignores the specified dataSourceType
-		return new SmartConnection();
+		return new DesktopSmartConnection();
 	}
 
 	/**
@@ -65,35 +61,6 @@ public class SmartDriver implements IDriver {
 	 */
 	public void setAppContext(Object context) throws OdaException {
 		// do nothing; assumes no support for pass-through context
-	}
-
-	/**
-	 * Returns the object that represents this extension's manifest.
-	 * 
-	 * @throws OdaException
-	 */
-	static ExtensionManifest getManifest() throws OdaException {
-		return ManifestExplorer.getInstance().getExtensionManifest(
-				ODA_DATA_SOURCE_ID);
-	}
-
-	/**
-	 * Returns the native data type name of the specified code, as defined in
-	 * this data source extension's manifest.
-	 * 
-	 * @param nativeTypeCode
-	 *            the native data type code
-	 * @return corresponding native data type name
-	 * @throws OdaException
-	 *             if lookup fails
-	 */
-	public static String getNativeDataTypeName(int nativeDataTypeCode, String dataSetType)
-			throws OdaException {
-		DataTypeMapping typeMapping = getManifest().getDataSetType(dataSetType)
-				.getDataTypeMapping(nativeDataTypeCode);
-		if (typeMapping != null)
-			return typeMapping.getNativeType();
-		return Messages.SmartDriver_Underfined_MappingType;
 	}
 
 }
