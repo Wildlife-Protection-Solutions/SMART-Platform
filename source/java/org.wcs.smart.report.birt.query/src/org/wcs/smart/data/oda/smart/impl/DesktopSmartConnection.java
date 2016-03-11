@@ -34,6 +34,7 @@ public class DesktopSmartConnection extends SmartConnection {
 
 	@Override
 	public void openSession(){
+		System.out.println("report - open connection");
 		localSession = HibernateManager.openSession();
 		localSession.beginTransaction();
 	}
@@ -44,6 +45,7 @@ public class DesktopSmartConnection extends SmartConnection {
 			if (localSession.getTransaction().isActive()){
 				localSession.getTransaction().rollback();
 			}
+			System.out.println("report - close connection");
 			localSession.close();
 		}
 	}

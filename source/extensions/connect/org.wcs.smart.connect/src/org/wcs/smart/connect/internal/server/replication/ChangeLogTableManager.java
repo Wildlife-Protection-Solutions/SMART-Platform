@@ -147,11 +147,12 @@ public enum ChangeLogTableManager {
 				String sql = "SELECT max(revision) FROM " //$NON-NLS-1$
 						+ ChangeLogItem.TABLENAME 
 						+  " WHERE source = 'LOCAL' and ca_uuid = ? ";  //$NON-NLS-1$
-				PreparedStatement ps = connection.prepareStatement(sql);
-				ps.setBytes(1, UuidUtils.uuidToByte(ca.getUuid()));
-				try(ResultSet rs = ps.executeQuery()){
-					if (rs.next()){
-						return rs.getLong(1);
+				try(PreparedStatement ps = connection.prepareStatement(sql)){
+					ps.setBytes(1, UuidUtils.uuidToByte(ca.getUuid()));
+					try(ResultSet rs = ps.executeQuery()){
+						if (rs.next()){
+							return rs.getLong(1);
+						}
 					}
 				}
 				return null;

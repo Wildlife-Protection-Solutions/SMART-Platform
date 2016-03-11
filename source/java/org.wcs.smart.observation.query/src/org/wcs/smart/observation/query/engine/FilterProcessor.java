@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -327,7 +328,9 @@ public class FilterProcessor implements IFilterProcessor {
 		}
 		
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -446,7 +449,9 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append("'"); //$NON-NLS-1$
 
 				QueryPlugIn.logSql(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
+				try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();

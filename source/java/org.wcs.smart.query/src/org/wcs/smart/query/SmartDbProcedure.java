@@ -55,24 +55,23 @@ public class SmartDbProcedure {
 	public static void cleanUpTempData() throws SQLException {
 		Connection connection = DriverManager.getConnection("jdbc:default:connection"); //$NON-NLS-1$
 		String sql = "select tbl.TABLENAME, sch.SCHEMANAME from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME like 'QUERY_TEMP_%'"; //$NON-NLS-1$
-		Statement statement = connection.createStatement();
-		
+		try(Statement statement = connection.createStatement()){
 		List<String> toDrop = new ArrayList<String>();
-		try(ResultSet resultSet = statement.executeQuery(sql)) {
-			while (resultSet.next()) {
-				String tableName = resultSet.getString(1);
-				String schemaName = resultSet.getString(2);
-				toDrop.add(schemaName+"."+tableName); //$NON-NLS-1$
-			}			
-		}
-		
-		if (!toDrop.isEmpty()) {
-			for (String table : toDrop) {
-				try {
-					connection.createStatement().executeUpdate("DROP TABLE "+table); //$NON-NLS-1$
-				} catch (Exception e) {
-					// nothing
-					e.printStackTrace();
+			try(ResultSet resultSet = statement.executeQuery(sql)) {
+				while (resultSet.next()) {
+					String tableName = resultSet.getString(1);
+					String schemaName = resultSet.getString(2);
+					toDrop.add(schemaName+"."+tableName); //$NON-NLS-1$
+				}			
+			}
+			if (!toDrop.isEmpty()) {
+				for (String table : toDrop) {
+					try (Statement s = connection.createStatement()){
+						s.executeUpdate("DROP TABLE "+table); //$NON-NLS-1$
+					} catch (Exception e) {
+						// nothing
+						e.printStackTrace();
+					}
 				}
 			}
 		}

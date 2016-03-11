@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -224,7 +225,10 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				try{
 					tmp.append(EntityFilterToSqlGenerator.INSTANCE.asSql(catFilter, engine.tablePrefix(EntityType.class), tempEngine));
 					QueryPlugIn.logSql(tmp.toString());
-					tempEngine.parseQueryString(c, tmp.toString()).executeUpdate();
+					
+					try(PreparedStatement ps = tempEngine.parseQueryString(c, tmp.toString())){
+						ps.executeUpdate();
+					}
 				}catch (Exception ex){
 					throw new RuntimeException(ex);
 				}

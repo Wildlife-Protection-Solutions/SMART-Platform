@@ -193,14 +193,15 @@ public enum DerbyReplicationManager {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
 				String sql = "values syscs_util.syscs_get_database_property( '" + LOGGING_DB_PROPERTY + "' )"; //$NON-NLS-1$ //$NON-NLS-2$
-				ResultSet rs = connection.createStatement().executeQuery(sql);
-				if (rs.next()){
-					try{
-						Boolean x = rs.getBoolean(1);
-						return x;
-					}catch(Exception ex){
-						ConnectPlugIn.log(ex.getMessage(), ex);
-						return false;
+				try(ResultSet rs = connection.createStatement().executeQuery(sql)){
+					if (rs.next()){
+						try{
+							Boolean x = rs.getBoolean(1);
+							return x;
+						}catch(Exception ex){
+							ConnectPlugIn.log(ex.getMessage(), ex);
+							return false;
+						}
 					}
 				}
 				return false;

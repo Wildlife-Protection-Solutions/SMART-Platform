@@ -348,7 +348,9 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 	
 	
 		QueryPlugIn.logSql(sql.toString());
-		parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 		
 		//create index on entity_uuid
 		sql = new StringBuilder();
