@@ -24,6 +24,7 @@ package org.wcs.smart.query.common.model;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -161,7 +162,9 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 							try {
 								String sql = "DROP TABLE " + tableName; //$NON-NLS-1$
 								QueryPlugIn.logSql(sql);
-								c.createStatement().execute(sql);
+								try(Statement s = c.createStatement()){
+									s.execute(sql);
+								}
 							} catch (Exception ex) {
 								// eatme
 								ex.printStackTrace();
