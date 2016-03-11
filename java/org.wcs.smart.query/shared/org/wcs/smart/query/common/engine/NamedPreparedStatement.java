@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.common.engine;
 
+import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,7 +45,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class NamedPreparedStatement {
+public class NamedPreparedStatement implements AutoCloseable{
     
 	/** The statement this object is wrapping. */
     protected final PreparedStatement statement;
@@ -214,6 +215,7 @@ statement;
      * @throws SQLException if an error occurred
      * @see Statement#close()
      */
+    @Override
     public void close() throws SQLException {
         statement.close();
     }

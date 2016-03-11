@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashSet;
@@ -272,7 +273,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -338,8 +341,10 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		}
 
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
-
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
+		
 		IFilterVisitor attProcessor = new IFilterVisitor() {
 			@Override
 			public void visit(IFilter filter) {

@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
@@ -337,7 +338,9 @@ public class FilterProcessorMission implements IFilterProcessor {
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -446,7 +449,9 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append(" " + prefix(MissionAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				QueryPlugIn.logSql(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
+				try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();
@@ -610,11 +615,11 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append("WHERE "); //$NON-NLS-1$
 				String p1 = engine.addParameterValue(key.getKey());
 				sql.append(" " + prefix(SamplingUnitAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				
 
 				QueryPlugIn.logSql(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
+				try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();

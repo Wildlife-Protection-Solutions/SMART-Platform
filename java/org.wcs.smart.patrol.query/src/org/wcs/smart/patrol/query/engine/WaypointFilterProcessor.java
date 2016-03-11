@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -321,7 +322,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -396,7 +399,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		}
 
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 
 		IFilterVisitor attProcessor = new IFilterVisitor() {
 			@Override

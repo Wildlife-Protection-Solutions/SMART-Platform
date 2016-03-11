@@ -58,11 +58,12 @@ public class DerbyUtil {
 		String sql = "select (case when max(revision) is null then -1 else max(revision) end) + 1 "  //$NON-NLS-1$
 				+ " from " + ChangeLogItem.TABLENAME + " where ca_uuid = ?"; //$NON-NLS-1$ //$NON-NLS-2$
 		Connection c = DriverManager.getConnection("jdbc:default:connection"); //$NON-NLS-1$
-		PreparedStatement ps = c.prepareStatement(sql);
-		ps.setBytes(1, cauuid);
-		ResultSet rs = ps.executeQuery();
-		rs.next();
-		return rs.getLong(1);
+		try(PreparedStatement ps = c.prepareStatement(sql)){
+			ps.setBytes(1, cauuid);
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+			return rs.getLong(1);
+		}
 	}
 	
 	public static Boolean isReplicationEnabled(byte[] cauuid) throws SQLException{
@@ -83,9 +84,9 @@ public class DerbyUtil {
 		}
 		
 		sql = "SELECT status from smart.connect_status where ca_uuid = ?"; //$NON-NLS-1$
-		PreparedStatement ps = c.prepareStatement(sql);
-		ps.setBytes(1, cauuid);
-		try(ResultSet rs = ps.executeQuery()){
+		try(PreparedStatement ps = c.prepareStatement(sql)){
+			ps.setBytes(1, cauuid);
+			ResultSet rs = ps.executeQuery();
 			if (rs.next()){
 				ConnectServerStatus.Status status = ConnectServerStatus.Status.valueOf(rs.getString(1));
 				if (status == null) return false;

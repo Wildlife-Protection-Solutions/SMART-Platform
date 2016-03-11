@@ -81,6 +81,12 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 	@Override
 	public void close() throws OdaException {
 		super.close();
+		try{
+			this.iterator.close();
+			this.iterator = null;
+		}catch (Exception ex){
+			throw new OdaException(ex);
+		}
 		if (pagedQueryResults != null)
 			pagedQueryResults.destroy();
 		pagedQueryResults = null;

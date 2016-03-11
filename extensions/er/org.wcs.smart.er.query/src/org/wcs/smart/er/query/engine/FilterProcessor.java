@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -468,7 +469,9 @@ public class FilterProcessor implements IFilterProcessor {
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -619,8 +622,10 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" " + prefix(Attribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				QueryPlugIn.logSql(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();;
-
+				try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
+				
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$
@@ -777,8 +782,10 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" " + prefix(MissionAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				QueryPlugIn.logSql(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
-
+				try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
+				
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$
@@ -945,8 +952,10 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(prefix(SamplingUnitAttribute.class) + ".keyid = " + p1); //$NON-NLS-1$
 				
 				QueryPlugIn.logSql(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
-
+				try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
+				
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$

@@ -108,72 +108,73 @@ public abstract class ChangeLogItemSerializer {
 			sb.append(" AND "); //$NON-NLS-1$
 			sb.append(item.getFieldName2() + " = ? " ); //$NON-NLS-1$
 		}
-		PreparedStatement ps = c.prepareStatement(sb.toString());
-		UUID key1 = item.getKey1();
-		prepareUuid(ps, 1, key1);
-		
-		if (item.getKey2() != null){
-			UUID key2 = item.getKey2();
-			prepareUuid(ps, 2, key2);
-		}else if (item.getKey2String() != null){
-			ps.setString(2, item.getKey2String());
-		}
-		
-		ResultSet rs = ps.executeQuery();
-		if (!rs.next()){
-			//throw new SQLException("Not value found for object: " + item.getTableName() + " _ " + item.getFieldName1() + " _ " + item.getKey1().toString());
-			//not data was found for the object;
-			//this should be because it is deleted later in the change log history
-			//TODO: for validation purposes we could valid this is the case
-			item.setAction(Action.DELETE);
-			stream.writeObject(item);
-			return;
-		}
-		
-		//serialize change log item
-		stream.writeObject(item);
-		
-		//serialize data
-		ResultSetMetaData md = rs.getMetaData();
-		int colCnt = md.getColumnCount();
-		stream.writeInt(colCnt);
-		for (int i = 1; i <= colCnt; i ++){
-			stream.writeObject(md.getColumnName(i));
-			int type = convertType(md.getColumnType(i), md.getPrecision(i));
-			stream.writeInt(type);
+		try(PreparedStatement ps = c.prepareStatement(sb.toString())){
+			UUID key1 = item.getKey1();
+			prepareUuid(ps, 1, key1);
 			
-			if (type == Types.BLOB){
-				Blob b = rs.getBlob(i);
-				stream.writeLong(b.length());
-				IOUtils.copy(b.getBinaryStream(), stream);
-			}else if (type == Types.BINARY){
-					
-				byte[] parts = rs.getBytes(i);
-				stream.writeLong(parts.length);
-				try(ByteArrayInputStream bis = new ByteArrayInputStream(parts)){
-					IOUtils.copy(bis, stream);
-				}
-			}else if (type == Types.OTHER){
-				//uuid
-				Object data = rs.getObject(i);
-				if (data == null){
-					stream.writeObject((UUID)null);
-				}else if (data instanceof UUID){
-					stream.writeObject((UUID)data);
-				}else if (data instanceof byte[]){
-					stream.writeObject( UuidUtils.byteToUUID((byte[])data) );
+			if (item.getKey2() != null){
+				UUID key2 = item.getKey2();
+				prepareUuid(ps, 2, key2);
+			}else if (item.getKey2String() != null){
+				ps.setString(2, item.getKey2String());
+			}
+			
+			ResultSet rs = ps.executeQuery();
+			if (!rs.next()){
+				//throw new SQLException("Not value found for object: " + item.getTableName() + " _ " + item.getFieldName1() + " _ " + item.getKey1().toString());
+				//not data was found for the object;
+				//this should be because it is deleted later in the change log history
+				//TODO: for validation purposes we could valid this is the case
+				item.setAction(Action.DELETE);
+				stream.writeObject(item);
+				return;
+			}
+			//serialize change log item
+			stream.writeObject(item);
+			
+			//serialize data
+			ResultSetMetaData md = rs.getMetaData();
+			int colCnt = md.getColumnCount();
+			stream.writeInt(colCnt);
+			
+			for (int i = 1; i <= colCnt; i ++){
+				stream.writeObject(md.getColumnName(i));
+				int type = convertType(md.getColumnType(i), md.getPrecision(i));
+				stream.writeInt(type);
+				
+				if (type == Types.BLOB){
+					Blob b = rs.getBlob(i);
+					stream.writeLong(b.length());
+					IOUtils.copy(b.getBinaryStream(), stream);
+				}else if (type == Types.BINARY){
+						
+					byte[] parts = rs.getBytes(i);
+					stream.writeLong(parts.length);
+					try(ByteArrayInputStream bis = new ByteArrayInputStream(parts)){
+						IOUtils.copy(bis, stream);
+					}
+				}else if (type == Types.OTHER){
+					//uuid
+					Object data = rs.getObject(i);
+					if (data == null){
+						stream.writeObject((UUID)null);
+					}else if (data instanceof UUID){
+						stream.writeObject((UUID)data);
+					}else if (data instanceof byte[]){
+						stream.writeObject( UuidUtils.byteToUUID((byte[])data) );
+					}else{
+						throw new IllegalStateException("Invalid representation of UUID."); //$NON-NLS-1$
+					}
+				}else if (type == Types.CLOB){
+					Clob clob = rs.getClob(i);
+					stream.writeLong(clob.length());
+					try(Reader reader = clob.getCharacterStream() ){
+						IOUtils.copy(reader, stream);
+					}
 				}else{
-					throw new IllegalStateException("Invalid representation of UUID."); //$NON-NLS-1$
+					Object x = rs.getObject(i);
+					stream.writeObject(x);	
 				}
-			}else if (type == Types.CLOB){
-				Clob clob = rs.getClob(i);
-				stream.writeLong(clob.length());
-				try(Reader reader = clob.getCharacterStream() ){
-					IOUtils.copy(reader, stream);
-				}
-			}else{
-				Object x = rs.getObject(i);
-				stream.writeObject(x);	
 			}
 		}
 	}

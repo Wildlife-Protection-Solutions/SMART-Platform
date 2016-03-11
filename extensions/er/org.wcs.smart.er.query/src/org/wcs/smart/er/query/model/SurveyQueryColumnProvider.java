@@ -65,13 +65,17 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
-				List<?> results = s
+				try{
+					List<?> results = s
 						.createCriteria(SurveyDesign.class)
 						.add(Restrictions.eq("keyId", surveyDesignKey)) //$NON-NLS-1$
 						.add(Restrictions
 								.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-				if (results.size() > 0) {
-					surveyDesign[0] = (SurveyDesign) results.get(0);
+					if (results.size() > 0) {
+						surveyDesign[0] = (SurveyDesign) results.get(0);
+					}
+				}finally{
+					s.close();
 				}
 				return Status.OK_STATUS;
 			}

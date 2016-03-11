@@ -28,6 +28,7 @@ import java.util.NoSuchElementException;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
@@ -110,10 +111,23 @@ public class QueryResultSetIterator<T extends IResultItem> implements IQueryResu
 				"Remove operation is not supported."); //$NON-NLS-1$
 	}
 
+	private void closeResultSet(){
+		if (queryResults != null) {
+			try{
+				queryResults.getStatement().close();
+				queryResults.close();
+				queryResults = null;
+			}catch(Exception ex){
+				QueryPlugIn.log(ex.getMessage(), ex);
+			}
+		}
+	}
 	@Override
 	public void close() throws IOException {
-		if (sessionProvided){
+		closeResultSet();
+		if (!sessionProvided){
 			session.close();
+			session = null;
 		}
 	}
 

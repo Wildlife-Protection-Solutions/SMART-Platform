@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -357,7 +358,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -436,7 +439,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" on " + prefix(SurveyWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 
 		IFilterVisitor attProcessor = new IFilterVisitor() {
 			@Override
@@ -628,7 +633,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		}
 		
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	private void processMissionFilter(MissionPropertyFilter lfilter, String colName, Connection c) throws SQLException{
@@ -720,7 +727,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		}
 		
 		QueryPlugIn.logSql(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -826,7 +835,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}
 			
 			QueryPlugIn.logSql(sql.toString());
-			engine.parseQueryString(c, sql.toString()).executeUpdate();
+			try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+				ps.executeUpdate();
+			}
 			return;
 		}
 		
