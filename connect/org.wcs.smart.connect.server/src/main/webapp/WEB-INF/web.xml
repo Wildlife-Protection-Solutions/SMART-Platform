@@ -32,6 +32,11 @@
         <location>/WEB-INF/errorpages/404.jsp</location>
 	</error-page>
 	<error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/errorpages/403.jsp</location>
+	</error-page>
+
+	<error-page>
         <error-code>401</error-code>
         <location>/WEB-INF/errorpages/401.jsp</location>
 	</error-page>

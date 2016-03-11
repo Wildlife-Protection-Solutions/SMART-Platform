@@ -1,4 +1,6 @@
 var USER_URL = "../api/connectuser/";
+var INACTIVE_USER_URL = "../api/connectuser/getinactive/";
+var ACTIVATE_USER_URL  = "../api/connectuser/activate/";
 var PRIVILEGE_URL = "../api/privileges";
 
 var allActions = null;
@@ -31,6 +33,18 @@ window.onload = function(){
 	elements = document.querySelectorAll(".edituser");
 	for (var i = 0; i < elements.length; i ++){
 		elements[i].onclick=showEditUserDialog;
+	}
+	
+	//activate user
+	elements = document.querySelectorAll(".activateuser");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].onclick=activateUser;
+	}
+	
+	//Deactivate user
+	elements = document.querySelectorAll(".deactivateuser");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].onclick=deactivateUser;
 	}
 	
 	//update user dialog
@@ -476,13 +490,85 @@ function createUserTable(){
  		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
+ 		deleteicon.title="deactivate user";
+ 		deleteicon.dataset.username = users[i].username;
+ 		deleteicon.onclick = deactivateUser;
+ 		deleteicon.href="";
+ 		row.childNodes[3].appendChild(deleteicon);
+ 	}
+}
+
+/* reload users table */
+function refreshInactiveUsers(){
+	//clear current table
+	var objects = document.querySelectorAll("#inactiveusertable > .inactiveuserrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.querySelector("#inactiveusertable");
+	var row = document.createElement("div");
+	row.className="inactiveuserrow";
+	row.innerHTML=i18n("users.refreshusertable");
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createInactiveUserTable;
+ 	oReq.open("Get", INACTIVE_USER_URL, true);
+ 	oReq.send();
+}
+
+/* callback that displays all user info */
+function createInactiveUserTable(){
+	clearUserInfo();
+	if (this.status != 200) {
+		var msg = i18n("users.errorlabel");
+		if (this.status == 401){
+			msg += i18n("users.unathorized");
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table
+	var objects = document.querySelectorAll("div.inactiveuserrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.querySelector("#inactiveusertable");
+ 	var users = JSON.parse(this.responseText);
+ 	for (var i = 0; i < users.length; i ++){
+ 		var row = tableCreateRow(parent, 
+ 				[users[i].username, users[i].email, null, null], 
+ 				"inactiveuserrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		row.dataset.username = users[i].username;
+// 		row.onclick = showUserInfo; //not for inactive users
+ 	
+ 		var activateicon = document.createElement("a");
+ 		activateicon.className="activateuser run-icon";
+ 		activateicon.title="Activate User";
+ 		activateicon.dataset.username = users[i].username;
+ 		activateicon.onclick = activateUser;
+ 		activateicon.href="";
+ 		row.childNodes[2].appendChild(activateicon);
+ 		
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="delete-icon";
  		deleteicon.title="delete user";
  		deleteicon.dataset.username = users[i].username;
  		deleteicon.onclick = deleteUser;
  		deleteicon.href="";
  		row.childNodes[3].appendChild(deleteicon);
+ 		
  	}
 }
+
 
 
 /* callback that displays all user info */
@@ -598,6 +684,32 @@ function userEdited(){
 		displayError(parseError(i18n("users.errorupdatinguser") + this.smartuser, this.responseText));
 	}
 	refreshUsers();
+}
+
+/* activate user */
+function activateUser(){
+	var username = this.dataset.username;
+	hideInfo();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = userActivated;
+	oReq.smartuser=username;
+	oReq.open("PUT", ACTIVATE_USER_URL + encodeURIComponent(username), true);
+	oReq.send();
+	return false;	
+}
+
+/* Deactivate user */
+function deactivateUser(){
+	var username = this.dataset.username;
+	hideInfo();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = userDeactivated;
+	oReq.smartuser=username;
+	oReq.open("DELETE", ACTIVATE_USER_URL + encodeURIComponent(username), true);
+	oReq.send();
+	return false;	
 }
 
 /* delete user */
@@ -764,6 +876,7 @@ function userDeleted() {
 		displayError(parseError(i18n("users.errordeletingaccount") + this.smartuser, this.responseText));
 	}
 	refreshUsers();
+	refreshInactiveUsers();
 	
 	//if delete the logged in user; refresh page to auto logout
 	var currentUser = document.querySelector("#userlogin");
@@ -838,6 +951,34 @@ function roleAddedToUser(){
 		displayError(parseError(i18n("users.erroraddroleuser") + this.smartuser, this.responseText));
 	}
 	showUserInfo.call(document.querySelector("#usertable > .smart-table-selectedrow"));
+}
+
+//callback for activate user  
+function userActivated() {
+	if (this.status == 200) {
+		displayInfo(this.smartuser + i18n("users.useractivated"));
+	} else {
+		displayError(parseError(i18n("users.useractivationerror") + this.smartuser, this.responseText));
+	}
+	refreshUsers();
+	refreshInactiveUsers();
+}
+
+//callback for deactivate user  
+function userDeactivated() {
+	if (this.status == 200) {
+		displayInfo(this.smartuser + i18n("users.userdeactivated"));
+	} else {
+		displayError(parseError(i18n("users.userdeactivationerror") + this.smartuser, this.responseText));
+	}
+	refreshUsers();
+	refreshInactiveUsers();
+	
+	//if you deactivated the logged in user; refresh page to auto logout
+	var currentUser = document.querySelector("#userlogin");
+	if (currentUser != null && currentUser.dataset.username != null && this.smartuser === currentUser.dataset.username){
+		location.reload(true);
+	} 
 }
 
 function clearAndShowEditRoleDialog() {

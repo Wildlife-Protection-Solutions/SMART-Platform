@@ -430,6 +430,17 @@ div.scrollable {
 	font-weight:bold;
 }
 
+.user-tables-wrapper{
+	border-left: 10px;
+}
+.user-tables-float{
+	float: left;
+	padding: 10px;
+}
+.user-tables-clear{
+	clear: both;	
+}
+
 /* SMART Tabs */
 
 .tabheader{

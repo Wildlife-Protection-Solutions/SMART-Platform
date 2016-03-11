@@ -51,6 +51,7 @@ public class LogoutServlet extends HttpServlet{
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.logout();
+		response.sendRedirect(response.encodeURL(request.getContextPath()) + "/connect/home"); //$NON-NLS-1$
 	}
 	
     /**

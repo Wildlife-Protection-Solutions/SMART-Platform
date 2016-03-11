@@ -47,7 +47,6 @@ public enum SecurityManager {
 	INSTANCE;
 
 	public boolean canAccess(Session s, String username, String action, UUID resource){
-		
 		//check roles for permission
 		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
 		queryString += "WHERE a.role = role AND r.id.username = :username AND ( a.action = :adminAction OR "; //$NON-NLS-1$

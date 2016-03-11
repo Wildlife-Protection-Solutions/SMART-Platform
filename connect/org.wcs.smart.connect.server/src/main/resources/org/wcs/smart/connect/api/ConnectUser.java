@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.api;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -53,7 +54,9 @@ import org.wcs.smart.connect.apache.BcryptCredentialHandler;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.SmartRole;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
@@ -90,16 +93,30 @@ public class ConnectUser extends HttpServlet {
 	
 	@GET
     @Path("")
-    public List<SmartUser> getAllUsers(){
+    public List<SmartUser> getActiveUsers(){
 		validateUser();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return HibernateManager.getUsers(s);
+			return (ArrayList<SmartUser>) HibernateManager.getActiveUsers(s);
 		}finally{
 			s.getTransaction().commit();
 		}
 	}
+	
+	@GET
+    @Path("/getinactive/")
+    public List<SmartUser> getInactiveUsers(){
+		validateUser();
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			return (ArrayList<SmartUser>) HibernateManager.getInactiveUsers(s);
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+
 	
 	@GET
     @Path("/{username}")
@@ -273,6 +290,78 @@ public class ConnectUser extends HttpServlet {
 		return toUpdate;
     }
  
+    @PUT
+    @Path("/activate/{username}")
+    public SmartUser activateUser(
+    		@PathParam("username") String username) {
+    	validateUser();
+    	
+    	SmartUser user;
+    	
+    	Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			user = (SmartUser)s.createCriteria(SmartUser.class)
+					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
+					.list().get(0);
+
+			
+			SmartUserRole role = new SmartUserRole();
+			role.setUsername(username);
+			role.setRole(HibernateManager.getSmartRole(s));
+			
+			s.save(role);
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(ex.getMessage(), ex);
+		}finally{
+		}
+		return user;
+    }
+    
+    @DELETE
+    @Path("/activate/{username}")
+    public SmartUser deactivateUser(
+    		@PathParam("username") String username) {
+    	validateUser();
+    	
+    	SmartUser user;
+    	
+    	Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			user = (SmartUser)s.createCriteria(SmartUser.class)
+					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
+					.list().get(0);
+
+			List<SmartUserRole> roles = HibernateManager.getUserRoles(s, user.getUsername());
+			
+			
+			for(SmartUserRole role: roles){
+				s.delete(role);
+				s.flush();
+			}
+			
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(ex.getMessage(), ex);
+		}finally{
+		}
+		return user;
+    }
+    
     @DELETE
     @Path("/{username}")
     public SmartUser removeUser(@PathParam("username") String username) {

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.hibernate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -36,7 +37,9 @@ import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
+import org.wcs.smart.connect.model.SmartRole;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.util.I18nUtil;
 
@@ -94,6 +97,20 @@ public class HibernateManager {
 				.add(Restrictions.eq("username", username)) //$NON-NLS-1$
 				.uniqueResult();
 		return su;
+	}
+	
+	/**
+	 * Finds the smart user's role(s) from the given username.
+	 * 
+	 * @param session
+	 * @param username
+	 * @return
+	 */
+	public static List<SmartUserRole> getUserRoles(Session session, String username){
+		return (ArrayList<SmartUserRole>)session
+				.createCriteria(SmartUserRole.class)
+				.add(Restrictions.eq("id.username", username))//$NON-NLS-1$
+				.list(); 
 	}
 	
 	/**
@@ -240,4 +257,33 @@ public class HibernateManager {
 				.list();
 	}
 
+	public static Object getInactiveUsers(Session s) {
+		ArrayList<SmartUser> users = (ArrayList<SmartUser>) HibernateManager.getUsers(s);
+		List<SmartUser> inactiveUsers = new ArrayList<SmartUser>(); 
+		for(SmartUser user: users){
+			List<SmartUserRole> roles = HibernateManager.getUserRoles(s, user.getUsername());
+			if(roles.isEmpty()){
+				inactiveUsers.add(user);
+			}
+		}
+		return inactiveUsers;
+	}
+
+	public static ArrayList<SmartUser> getActiveUsers(Session s) {
+		ArrayList<SmartUser> users = (ArrayList<SmartUser>) HibernateManager.getUsers(s);
+		ArrayList<SmartUser> activeUsers = new ArrayList<SmartUser>(); 
+		for(SmartUser user: users){
+			List<SmartUserRole> roles = HibernateManager.getUserRoles(s, user.getUsername());
+			if(!roles.isEmpty()){
+				activeUsers.add(user);
+			}
+		}
+		return activeUsers;
+	}
+
+	public static SmartRole getSmartRole(Session s) {
+		return (SmartRole) s.createCriteria(SmartRole.class)
+		.add(Restrictions.eq("roleName", "SYSTEM ROLE")) //$NON-NLS-1$
+		.uniqueResult();
+	}
 }

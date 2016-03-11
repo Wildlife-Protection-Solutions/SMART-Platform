@@ -54,19 +54,23 @@ public class UsersServlet extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		List<SmartUser> users = null;
+		List<SmartUser> inactiveUsers = null;
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
+		
 		try{
 			if (!SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
-			users = HibernateManager.getUsers(session);
+			users = HibernateManager.getActiveUsers(session);
+			inactiveUsers = (List<SmartUser>) HibernateManager.getInactiveUsers(session);
 		}finally{
 			session.getTransaction().rollback();
 		}
 		
 		request.setAttribute("users", users); //$NON-NLS-1$
+		request.setAttribute("inactiveusers", inactiveUsers); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/users.jsp").forward(request, response); //$NON-NLS-1$
 		
