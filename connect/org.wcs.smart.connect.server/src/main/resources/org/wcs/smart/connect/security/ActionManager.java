@@ -44,6 +44,7 @@ public enum ActionManager {
 		actions.add(new AlertAction());
 		actions.add(new QueryAction());
 		actions.add(new DataQueueAction());
+		actions.add(new ReportAction());
 	}
 	
 	public ISmartConnectAction findAction(String key){

@@ -33,8 +33,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.observation.model.Waypoint;
@@ -43,8 +45,10 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -67,6 +71,10 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	}
 	
 	public String getDataQuery(){
+		return getDataQuery(true);
+	}
+
+	private String getDataQuery(boolean includetrack){
 		StringBuilder fields = new StringBuilder();
 		fields.append("ca_id,ca_name, r_p_ca_uuid, r_p_uuid,"); //$NON-NLS-1$
 		fields.append("r_p_id,r_p_start_date,r_p_end_date,r_p_station_uuid,"); //$NON-NLS-1$
@@ -79,15 +87,17 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		sb.append("SELECT "); //$NON-NLS-1$
 		sb.append(fields.toString());
 		//TODO: I cann't make the 3d geometries work here
-		sb.append(",st_asbinary(st_force2d(st_collect(st_geomfromwkb(r_track)))) as track "); //$NON-NLS-1$
-		sb.append("FROM "); //$NON-NLS-1$
+		if (includetrack){
+			sb.append(",st_asbinary(st_force2d(st_collect(st_geomfromwkb(r_track)))) as track "); //$NON-NLS-1$
+		}
+		sb.append(" FROM "); //$NON-NLS-1$
 		sb.append(queryDataTable);
 		sb.append(" GROUP BY "); //$NON-NLS-1$
 		sb.append(fields.toString());
 		 
 		return sb.toString();
 	}
-
+	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -112,9 +122,9 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		
 		queryDataTable = createTempTableName();
 		filterTable = createTempTableName();
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<PatrolQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public PatrolQueryResult execute(Connection c) throws SQLException {
 				
 				IFilterProcessor filterer = null;
 				try{
@@ -135,6 +145,17 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 					getResults(c, session);
 					
 					c.commit();
+					//item cnt
+					int itemcnt = 0;
+					String sql = getDataQuery();
+
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM (" + getDataQuery(false) + ") foo")){ //$NON-NLS-1$ //$NON-NLS-2$
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
+					c.commit();
+					
+					return new PatrolQueryResult(PsqlPatrolEngine.this, itemcnt);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					c.rollback();
@@ -153,7 +174,6 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				}
 			}
 		});
-		return new PatrolQueryResult(this);
 	}
 
 	/**
@@ -445,4 +465,5 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	public String getDateFilterField() throws SQLException{
 		return "patrol_day"; //$NON-NLS-1$
 	}
+
 }

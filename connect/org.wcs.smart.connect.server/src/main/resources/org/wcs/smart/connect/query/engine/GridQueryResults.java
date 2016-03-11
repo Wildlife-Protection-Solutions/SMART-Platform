@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
@@ -35,43 +37,23 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
+public class GridQueryResults extends GridQueryResult implements IMemoryTableResultSet<GridResultItem> {
 
-	private Collection<GridResultItem> items;
 	
-	public GridQueryResults(AbstractQueryEngine engine, Collection<GridResultItem> items){
-		this.items = items;
+	public GridQueryResults(Collection<GridResultItem> items){
+		super(items);
 	}
 
 	@Override
 	public Iterator<GridResultItem> getIterator() throws SQLException {
-		return items.iterator();
+		return getData().iterator();
 	}
 
-	public GridMetadata getTileBounds(){
-		if (items == null || items.size() == 0){
-			return new GridMetadata(0,0,0,0);
-		}
-		long xmax = Long.MIN_VALUE;
-		long xmin = Long.MAX_VALUE;
-		long ymax = Long.MIN_VALUE;
-		long ymin = Long.MAX_VALUE;
+	public GridQueryResultMetadata getTileBounds(){
+		if (resultMetadata != null) return resultMetadata;
 		
-		for (GridResultItem it : items){
-			if (it.getTileX() < xmin){
-				xmin = it.getTileX();
-			}
-			if (it.getTileX() > xmax){
-				xmax = it.getTileX();
-			}
-			if (it.getTileY() < ymin){
-				ymin = it.getTileY();
-			}
-			if (it.getTileY() > ymax){
-				ymax = it.getTileY();
-			}
-		}
-		return new GridMetadata(xmin, ymin, xmax, ymax);
+		resultMetadata = GridQueryResultMetadata.computeMetadata(getData());
+		return resultMetadata;
 	}
 
 	@Override
@@ -88,20 +70,4 @@ public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 		throw new SQLException("Invalid column for gridded query." + column.getKey()); //$NON-NLS-1$
 	}
 	
-	/*
-	 * Class for tracking grid bounds
-	 */
-	public class GridMetadata{
-		public Long xmin;
-		public Long xmax;
-		public Long ymin;
-		public Long ymax;
-		
-		public GridMetadata(long xmin, long ymin, long xmax, long ymax){
-			this.xmin = xmin;
-			this.xmax = xmax;
-			this.ymin = ymin;
-			this.ymax = ymax;
-		}
-	}
 }

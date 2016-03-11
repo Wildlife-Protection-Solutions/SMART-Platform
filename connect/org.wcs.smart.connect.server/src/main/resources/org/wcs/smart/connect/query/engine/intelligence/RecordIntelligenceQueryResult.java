@@ -24,9 +24,17 @@ package org.wcs.smart.connect.query.engine.intelligence;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
+import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -43,44 +51,48 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 	private PsqlRecordQueryIntelligenceEngine engine;
 	private WKBReader reader = new WKBReader();
 	
-	public RecordIntelligenceQueryResult(PsqlRecordQueryIntelligenceEngine engine){
+	public RecordIntelligenceQueryResult(PsqlRecordQueryIntelligenceEngine engine, int itemcnt){
 		this.engine = engine;
+		setItemCount(itemcnt);
 	}
 	
-	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+
+	/**
+	 * Gets results from the given result set.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<IResultItem> items = new ArrayList<IResultItem>();
+		rs.absolute(from);
+		int to = from + pageSize;
+		if (to >= itemCount) {
+			to = itemCount;
+		}
+		for(int x = from; x < to; x++) {
+			rs.next();
+			GeomIntelligenceRecordItem it = asQueryResultItem(rs);
+			items.add(it);
+		}
+		
+		return items;
 	}
 
 	@Override
-	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		return column.getValueAsString(getValue(rs, column, c));
-	}
-	
-	@Override
-	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		String columnKey = column.getKey();
-		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_NAME.getKey())){
-			return rs.getString("intel_name"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_DATE_RECIEVED.getKey())){
-			return rs.getDate("intel_datereceived"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_DATE_FROM.getKey())){
-			return rs.getDate("intel_fromdate"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_DATE_TO.getKey())){
-			return rs.getDate("intel_todate"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_SOURCE.getKey())){
-			return rs.getString("intel_source"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_PATROL_SOURCE.getKey())){
-			return rs.getString("intel_patrolid"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_INFORMANT_ID.getKey())){
-			return rs.getString("intel_informantid"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.INTEL_DESCRIPTION.getKey())){
-			return rs.getString("intel_description"); //$NON-NLS-1$
-		}
-		return null;
+	public ResultSet getResultSet(final Session session) {
+		final String dataQuery = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable();
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+			@Override
+			public ResultSet execute(Connection c) throws SQLException {
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery(dataQuery); //$NON-NLS-1$
+			}
+		});
 	}
 	
 	@Override
@@ -89,8 +101,8 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 	}
 
 	@Override
-	public Geometry createGeometry(ResultSet rs) throws Exception {
-		byte[] b = rs.getBytes("intel_locations"); //$NON-NLS-1$
+	public Geometry createGeometry(IResultItem rs) throws Exception {
+		byte[] b =  ((GeomIntelligenceRecordItem)rs).getGeometry();
 		if (b == null){
 			return new GeometryCollection(new Geometry[]{}, gf);	
 		}
@@ -98,9 +110,31 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 	}
 
 	@Override
-	public String createId(ResultSet rs) throws Exception {
-		String name=rs.getString("intel_name").toLowerCase(); //$NON-NLS-1$
+	public String createId(IResultItem rs) throws Exception {
+		String name = ((IntelligenceRecordResultItem)rs).getName();
 		name = name.replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		return name + "." + System.nanoTime(); //$NON-NLS-1$
+	}
+	
+	public GeomIntelligenceRecordItem asQueryResultItem(ResultSet rs) throws SQLException{
+		GeomIntelligenceRecordItem item = new GeomIntelligenceRecordItem();
+		item.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		item.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
+		item.setUuid((UUID)rs.getObject("intel_uuid")); //$NON-NLS-1$
+		item.setName(rs.getString("intel_name")); //$NON-NLS-1$
+		item.setReceivedDate(rs.getDate("intel_datereceived")); //$NON-NLS-1$
+		item.setFromDate(rs.getDate("intel_fromdate")); //$NON-NLS-1$
+		item.setToDate(rs.getDate("intel_todate")); //$NON-NLS-1$
+		
+		item.setSourceUuid((UUID)rs.getObject("intel_sourceuuid")); //$NON-NLS-1$
+		item.setSource(rs.getString("intel_source")); //$NON-NLS-1$
+		
+		item.setPatrolId(rs.getString("intel_patrolid")); //$NON-NLS-1$
+		item.setInformantId(rs.getString("intel_informantid")); //$NON-NLS-1$
+		item.setDescription(rs.getString("intel_description")); //$NON-NLS-1$
+		
+		item.setGeometry(rs.getBytes("intel_locations"));
+		return item;
+		
 	}
 }

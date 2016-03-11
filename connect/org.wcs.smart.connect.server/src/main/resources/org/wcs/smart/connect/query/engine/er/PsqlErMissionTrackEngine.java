@@ -22,14 +22,17 @@
 package org.wcs.smart.connect.query.engine.er;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
@@ -37,11 +40,13 @@ import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -96,9 +101,9 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 		}
 		queryDataTable = createTempTableName();
 
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<ErMissionTrackQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public ErMissionTrackQueryResult execute(Connection c) throws SQLException {
 				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
 					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErMissionTrackEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
@@ -121,6 +126,13 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 					
 					populateTemporaryTableExtra(c, session,filter, caFilter, query);
 					
+					c.commit();
+					int itemcnt;
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){ //$NON-NLS-1$
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
+					return new ErMissionTrackQueryResult(PsqlErMissionTrackEngine.this, itemcnt);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -128,12 +140,8 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 					filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, false);
 				}
-				c.commit();
 			}
-
 		});
-		ErMissionTrackQueryResult result = new ErMissionTrackQueryResult(this);
-		return result;
 	}
 
 	/**
@@ -271,4 +279,6 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 	public String getDateFilterField() throws SQLException{
 		return "mission_day"; //$NON-NLS-1$
 	}
+	
+
 }

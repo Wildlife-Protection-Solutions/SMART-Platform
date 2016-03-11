@@ -65,6 +65,8 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 	private HashMap<String, String> missionColumnMap = null;
 	private HashMap<String, String> suColumnMap = null;
 	
+	public abstract String getQueryDataTable();
+	
 	protected void populateMissionLeader(Connection c, Session session, String queryDataTable) throws SQLException{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT "); //$NON-NLS-1$

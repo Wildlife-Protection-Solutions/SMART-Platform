@@ -32,7 +32,7 @@ import org.geotools.geometry.Envelope2D;
 import org.hibernate.Session;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.query.engine.GridQueryResults.GridMetadata;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GriddedQuery;
 
 /**
@@ -73,10 +73,10 @@ public class TiffRasterExporter {
 			RasterBuilder rb = new RasterBuilder();
 			rb.setFileName(rasterFile);
 			
-			GridMetadata pnts = results.getTileBounds();
+			GridQueryResultMetadata pnts = results.getTileBounds();
 			
-			long width = pnts.xmax - pnts.xmin + 1;
-			long height = pnts.ymax - pnts.ymin + 1;
+			long width = pnts.getMaxXTile() - pnts.getMinXTile() + 1;
+			long height = pnts.getMaxYTile() - pnts.getMinYTile()+ 1;
 			
 			if (width > Integer.MAX_VALUE 
 					|| height > Integer.MAX_VALUE 
@@ -90,8 +90,8 @@ public class TiffRasterExporter {
 			rb.setEnvelope(
 					new Envelope2D(
 						query.getCoordinateReferenceSystem(), 
-						(pnts.xmin-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
-						(pnts.ymin-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
+						(pnts.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
+						(pnts.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
 						width * gridCellSize , height*gridCellSize)); 
 			
 			rb.setTable(results,pnts); 

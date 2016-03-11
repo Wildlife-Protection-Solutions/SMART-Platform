@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
@@ -81,6 +82,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
+import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
 import org.wcs.smart.query.model.Query;
@@ -116,7 +118,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class PsqlErSummaryEngine extends AbstractQueryEngine{
+public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummaryEngine{
 
 	private final Logger logger = Logger.getLogger(PsqlErSummaryEngine.class.getName());
 	
@@ -191,7 +193,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 					if (query.getSurveyDesign() != null){
 						surveyFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 					}
-					getHeaderInfo(query, sumResults, surveyFilter, locale, session);
+					getHeaderInfo(query, sumResults, locale, session);
 
 					boolean needsObservationValue = false;
 					boolean needsObservationRate = false;
@@ -1449,14 +1451,14 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 	 * @param session hibernate session
 	 * @throws Exception 
 	 */
-	public static void getHeaderInfo(SurveySummaryQuery query, 
+	@Override
+	public void getHeaderInfo(SummaryQuery query, 
 			SummaryQueryResult results, 
-			SurveyDesignFilter surveyDesignFilter,
 			Locale l,
 			Session session) throws Exception{
 		
 		ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
-		SurveyDesignFilter sdFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
+		SurveyDesignFilter sdFilter = SurveyDesignFilter.createStringFilter(((SurveySummaryQuery)query).getSurveyDesign());
 		
 		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter, sdFilter); 
 

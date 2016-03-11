@@ -217,7 +217,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 						}
 					}
 //					myResults = new GridQueryResult(items.values());
-					result = new GridQueryResults(PsqlPatrolGridEngine.this, items.values());
+					result = new GridQueryResults(items.values());
 					c.commit();
 				}catch (Exception ex){
 					c.rollback();

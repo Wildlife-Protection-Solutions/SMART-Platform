@@ -37,7 +37,9 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -82,39 +84,39 @@ public class CsvExporter {
 	 * @param results
 	 * @param session
 	 */
-	public void exportResults(SimpleQuery query, IDbTableResultSet results, Session session){
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
+	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws Exception{
+		try (CSVWriter writer = new CSVWriter(
+				new OutputStreamWriter(
+	              new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8)
+				,delimiter)) {
+					
+				List<QueryColumn> cols = query.getQueryColumns(l, session);
 				
-				try (CSVWriter writer = new CSVWriter(
-						new OutputStreamWriter(
-			              new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8)
-						,delimiter)) {
-					
-					List<QueryColumn> cols = query.getQueryColumns(l, session);
-					
-					try (ResultSet rs = results.getQueryResultSet(c)){
-						String[] data = new String[cols.size()];
-						for (int i = 0; i < cols.size(); i ++){
-							data[i] = cols.get(i).getName();
-						}
-						writer.writeNext(data);
-					
-						while(rs.next()){
-							data = new String[cols.size()];
-							for (int i = 0; i < cols.size(); i ++){
-								data[i] = results.getValueAsString(rs, cols.get(i), c);
-							}
-							writer.writeNext(data);
-						}
-					}
-				}catch (Exception ex){
-					logger.log(Level.SEVERE, ex.getMessage(), ex);
-					throw new SQLException(ex);
+				//headers
+				String[] data = new String[cols.size()];
+				for (int i = 0; i < cols.size(); i ++){
+					data[i] = cols.get(i).getName();
 				}
-			}			
-		});
+				writer.writeNext(data);
+				
+				//get data and write
+				IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
+				
+				for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
+					IResultItem resultItem = (IResultItem) iterator.next();
+				
+					data = new String[cols.size()];
+					for (int i = 0; i < cols.size(); i ++){
+						data[i] = results.getValueAsString(resultItem, cols.get(i), session);
+					}
+					writer.writeNext(data);
+					
+				}
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw ex;
+		}
+		
 	}
 	
 	/**

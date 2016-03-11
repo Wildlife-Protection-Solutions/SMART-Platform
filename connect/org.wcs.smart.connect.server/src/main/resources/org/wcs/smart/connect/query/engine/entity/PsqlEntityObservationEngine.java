@@ -28,12 +28,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -41,6 +43,7 @@ import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
+import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -112,11 +115,9 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		
 		queryDataTable = createTempTableName();
 
-
-        
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<EntityObservationQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public EntityObservationQueryResult execute(Connection c) throws SQLException {
 				IFilterProcessor filterer = null;
 				
 				//create a date filter that caches the dates so the same
@@ -143,6 +144,15 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 					
 					populateTemporaryTableExtra(c, caFilter, session);
 
+					//item cnt
+					int itemcnt;
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
+					c.commit();
+					
+					return new EntityObservationQueryResult(PsqlEntityObservationEngine.this, itemcnt);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -150,12 +160,9 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, false);
 				}
-				c.commit();
+				
 			}
-
 		});
-		EntityObservationQueryResult results = new EntityObservationQueryResult(this);
-		return results;
 	}
 
 	/**

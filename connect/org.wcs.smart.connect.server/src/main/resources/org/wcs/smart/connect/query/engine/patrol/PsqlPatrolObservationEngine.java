@@ -25,13 +25,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -42,7 +45,9 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -80,9 +85,9 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		session = (Session) params.get(Session.class.getName());
 		
 		queryDataTable = createTempTableName();
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<PatrolObservationQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public PatrolObservationQueryResult execute(Connection c) throws SQLException {
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
@@ -98,7 +103,16 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 							caFilter, true, true);
 					
 					populateTemporaryTableExtra(c, caFilter, session);
+					
+					//item cnt
+					int itemcnt = 0;
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){ //$NON-NLS-1$
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
 					c.commit();
+					
+					return new PatrolObservationQueryResult(PsqlPatrolObservationEngine.this, itemcnt);
 				}catch (Exception ex){
 					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -116,10 +130,8 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 				}	
 			}
 		});
-		
-		return new PatrolObservationQueryResult(this);
 	}
-
+	
 	@Override
 	public void cleanUp(Session session){
 		session.doWork(new Work(){

@@ -234,7 +234,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 							items.put(it.getTileId(), newitem); 
 						}
 					}
-					result = new GridQueryResults(PsqlErGridEngine.this, items.values());		
+					result = new GridQueryResults(items.values());		
 				}catch (Exception ex){
 					logger.log(Level.SEVERE,ex.getMessage(),ex);
 					throw new SQLException(ex.getMessage(), ex);

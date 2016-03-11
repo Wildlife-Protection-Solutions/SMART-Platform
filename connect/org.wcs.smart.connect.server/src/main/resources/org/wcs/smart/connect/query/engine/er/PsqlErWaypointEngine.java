@@ -22,13 +22,16 @@
 package org.wcs.smart.connect.query.engine.er;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
@@ -39,6 +42,7 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -68,6 +72,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		return SurveyWaypointQuery.KEY.equals(querytype);
 	}
 	
+	@Override
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
@@ -96,9 +101,9 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		
 		queryDataTable = createTempTableName();
 		
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<ErWaypointQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public ErWaypointQueryResult execute(Connection c) throws SQLException {
 				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
 					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErWaypointEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
@@ -123,7 +128,15 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 					populateTemporaryTableExtra(c, session, caFilter, filter);
 
 					//setting result size
+					//item cnt
+					int itemcnt;
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
 					
+					c.commit();
+					return new ErWaypointQueryResult(PsqlErWaypointEngine.this, itemcnt);
 					
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -132,12 +145,10 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 					filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, false);
 				}
-				c.commit();
+				
 			}
 
 		});
-		ErWaypointQueryResult results = new ErWaypointQueryResult(this);
-		return results;
 	}
 
 	/**

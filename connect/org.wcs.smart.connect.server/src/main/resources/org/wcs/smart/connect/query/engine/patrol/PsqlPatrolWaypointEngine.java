@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -40,6 +41,8 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -49,6 +52,7 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Patorl waypoint query engine.
@@ -96,9 +100,9 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 		
 		queryDataTable = createTempTableName();
 	
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<PatrolWaypointQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public PatrolWaypointQueryResult execute(Connection c) throws SQLException {
 				IFilterProcessor filterer = null;
 				try{
 					filterer = PsqlPatrolWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
@@ -119,7 +123,16 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 							false, true);
 					
 					populateTemporaryTableExtra(c, cafilter.getConservationAreaFilterIds().size() > 1, session);
+					
+					//item cnt
+					int itemcnt = 0;
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){ //$NON-NLS-1$
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
 					c.commit();
+					
+					return new PatrolWaypointQueryResult(PsqlPatrolWaypointEngine.this, itemcnt);
 				}catch (Exception ex){
 					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -138,8 +151,6 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 			}
 
 		});
-		PatrolWaypointQueryResult result = new PatrolWaypointQueryResult(this);
-		return result;
 	}
 
 	/**

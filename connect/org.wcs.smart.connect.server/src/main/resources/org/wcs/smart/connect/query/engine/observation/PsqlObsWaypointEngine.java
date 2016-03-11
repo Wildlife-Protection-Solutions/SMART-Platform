@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -93,10 +94,11 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 		}
 		
 		queryDataTable = createTempTableName();
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<ObsWaypointQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public ObsWaypointQueryResult execute(Connection c) throws SQLException {
 				IFilterProcessor filterer;
+				int itemcnt = 0;
 				try{
 					filterer = PsqlObsWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 				}catch (Exception ex){
@@ -113,6 +115,13 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 							cafilter, false, true);
 					
 					populateTemporaryTableExtra(c, session);
+					
+					//item cnt
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
+					
 				}catch (Exception ex){
 					throw new SQLException(ex);
 
@@ -121,11 +130,9 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 					dropTemporaryTables(c, false);
 				}
 				c.commit();
+				return new ObsWaypointQueryResult(PsqlObsWaypointEngine.this, itemcnt);
 			}
-
 		});
-		ObsWaypointQueryResult result = new ObsWaypointQueryResult(this);
-		return result;
 	}
 
 	/**
@@ -191,22 +198,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 		return sql.toString();
 	}
 
-	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		ObservationQueryResultItem it = new ObservationQueryResultItem();
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
-		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getTimestamp("wp_time")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
-		return it;
-	}
+
 	
 	
 	@Override

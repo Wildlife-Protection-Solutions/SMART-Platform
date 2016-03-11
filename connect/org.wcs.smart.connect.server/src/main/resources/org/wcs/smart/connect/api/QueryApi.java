@@ -65,7 +65,6 @@ import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.CsvExporter;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
-import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
@@ -96,7 +95,7 @@ import org.wcs.smart.util.UuidUtils;
 public class QueryApi extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(ConnectAlert.class.getName());
+	private final Logger logger = Logger.getLogger(QueryApi.class.getName());
 	
 	public static final String PATH = "query"; //$NON-NLS-1$
 
@@ -221,9 +220,9 @@ public class QueryApi extends HttpServlet{
 					java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
 					CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
 				
-					if (result instanceof IDbTableResultSet
+					if (result instanceof AbstractDbFeatureResultSet
 						&& query instanceof SimpleQuery){
-						exporter.exportResults((SimpleQuery)query, (IDbTableResultSet)result, s);
+						exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
 					}else if (result instanceof IMemoryTableResultSet
 						&& query instanceof GriddedQuery){
 						exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<GridResultItem>)result, s);
@@ -367,11 +366,11 @@ public class QueryApi extends HttpServlet{
 				//Do they have access to all queries from this CA? if yes then add it.
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, q.getCaUuid())){
 					allowed.add(q);
-				}
-				
-				//Do they have specific permission to this query? if yes then add it.
-				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, q.getUuid())){
-					allowed.add(q);
+				}else{
+					//Do they have specific permission to this query? if yes then add it.
+					if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, q.getUuid())){
+						allowed.add(q);
+					}
 				}
 			}
 		}finally{

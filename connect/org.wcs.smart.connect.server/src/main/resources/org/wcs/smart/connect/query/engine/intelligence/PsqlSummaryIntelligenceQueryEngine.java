@@ -106,7 +106,7 @@ public class PsqlSummaryIntelligenceQueryEngine implements IQueryEngine {
 			}
 			Long notFollowedUpOn = (Long) q.uniqueResult(); 
 		
-			SummaryQueryResult results = createResultTemplate(l);
+			SummaryQueryResult results = IntelligenceSummaryQuery.createResultTemplate(l);
 			
 			HashMap<SummaryResultKey, Double> data = new HashMap<SummaryResultKey, Double>();
 		
@@ -143,26 +143,5 @@ public class PsqlSummaryIntelligenceQueryEngine implements IQueryEngine {
 	@Override
 	public String addParameterValue(Object parameter) {
 		return null;
-	}
-	
-
-	/**
-	 * Creates the template for the results.  These queries
-	 * have on value (Number of Intelligence) grouped into either
-	 * Followed Up or Not Followed Up.
-	 * 
-	 * @return
-	 */
-	private static SummaryQueryResult createResultTemplate(Locale l){
-		SummaryQueryResult results = new SummaryQueryResult();
-		
-		results.addValueHeader(
-				new SummaryHeader(Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l), Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l), IntelligenceSummaryQuery.NUMBER_KEY, true)); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		results.addRowHeader(
-				new SummaryHeader[]{new SummaryHeader(Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l), Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l), IntelligenceSummaryQuery.FOLLOW_KEY, false),  //$NON-NLS-1$ //$NON-NLS-2$
-				new SummaryHeader(Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l), Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l), IntelligenceSummaryQuery.NOT_FOLLOW_KEY, false)});  //$NON-NLS-1$ //$NON-NLS-2$
-	
-		return results;
 	}
 }

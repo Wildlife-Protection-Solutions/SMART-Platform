@@ -24,9 +24,19 @@ package org.wcs.smart.connect.query.engine.patrol;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
+import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
+import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
+import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -44,77 +54,92 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 	private PsqlPatrolEngine engine;
 	private WKBReader reader = new WKBReader();
 	
-	public PatrolQueryResult(PsqlPatrolEngine engine){
+	public PatrolQueryResult(PsqlPatrolEngine engine, int itemCnt){
 		this.engine = engine;
-	}
-	
-	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery(engine.getDataQuery());
+		setItemCount(itemCnt);
 	}
 
-	@Override
-	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		return column.getValueAsString(getValue(rs, column, c));
-	}
-	
-	@Override
-	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		String columnKey = column.getKey();	
-		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_ID.getKey())){
-			return rs.getString("r_p_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_TYPE.getKey())){
-			return org.wcs.smart.patrol.model.PatrolType.Type.valueOf(rs.getString("r_p_type")).getGuiName(engine.getLocale()); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_START_DATE.getKey())){
-			return rs.getDate("r_p_start_date"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_END_DATE.getKey())){
-			return rs.getDate("r_p_end_date"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_OBJETIVE.getKey())){
-			return rs.getString("r_p_objective"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_ARMED.getKey())){
-			return rs.getBoolean("r_p_is_armed"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_ID.getKey())){
-			return rs.getString("r_pl_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE.getKey())){
-			return rs.getDate("r_pl_start_date"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE.getKey())){
-			return rs.getDate("r_pl_end_date"); //$NON-NLS-1$
-			
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_STATION.getKey())){
-			return rs.getString("p_station"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_TEAM.getKey())){
-			return rs.getString("p_team"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_MANDATE.getKey())){
-			return rs.getString("p_mandate"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER.getKey())){
-			return rs.getString("p_leader"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT.getKey())){
-			return rs.getString("p_pilot"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE.getKey())){
-			return rs.getString("p_transporttype"); //$NON-NLS-1$
-		}
-		return null;
-	}
-	
 	@Override
 	public String getGeometryType() {
 		return MULTI_LINESTRING_GEOM_TYPE;
 	}
 
 	@Override
-	public Geometry createGeometry(ResultSet rs) throws Exception {
-		byte[] b = rs.getBytes("track"); //$NON-NLS-1$
-		if (b == null){
+	public ResultSet getResultSet(final Session session) {
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+			@Override
+			public ResultSet execute(Connection c) throws SQLException {
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery()); 
+			}
+		});
+	}
+	
+	/**
+	 * Gets results from the given result set.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<IResultItem> items = new ArrayList<IResultItem>();
+		rs.absolute(from);
+		int to = from + pageSize;
+		if (to >= itemCount) {
+			to = itemCount;
+		}
+		for(int x = from; x < to; x++) {
+			rs.next();
+			PatrolQueryResultItem it = asQueryResultItem(rs, session);
+			items.add(it);
+		}
+		return items;
+	}
+	
+	@Override
+	public Geometry createGeometry(IResultItem rs) throws Exception {
+		List<byte[]> tracks = ((PatrolQueryResultItem)rs).getTrack();
+		if (tracks == null || tracks.size() <= 0){
 			return new GeometryCollection(new Geometry[]{}, gf);	
 		}
-		return reader.read(b);
+		return reader.read(tracks.get(0));
 	}
 
 	@Override
-	public String createId(ResultSet rs) throws Exception {
-		return rs.getString("r_p_id") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+	public String createId(IResultItem rs) throws Exception {
+		return ((PatrolQueryResultItem)rs).getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
+	
+	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
+			throws SQLException {
+		//TODO: fix this
+		PatrolQueryResultItem it = new PatrolQueryResultItem();
+		UUID cauuid = (UUID)rs.getObject("r_p_ca_uuid"); //$NON-NLS-1$
+		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
+		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setPatrolUuid((UUID)rs.getObject("r_p_uuid")); //$NON-NLS-1$
+		it.setPatrolId(rs.getString("r_p_id")); //$NON-NLS-1$
+		it.setPatrolStartDate(rs.getDate("r_p_start_date")); //$NON-NLS-1$
+		it.setPatrolEndDate(rs.getDate("r_p_end_date")); //$NON-NLS-1$
+		it.setStation(rs.getString("p_station"));				 //$NON-NLS-1$
+		it.setTeam(rs.getString("p_team"));				 //$NON-NLS-1$
+		it.setObjective(rs.getString("r_p_objective")); //$NON-NLS-1$
+		it.setMandate(rs.getString("p_mandate")); //$NON-NLS-1$
+		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("r_p_type"))); //$NON-NLS-1$
+		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
+		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
+		it.setPatrolLegId(rs.getString("r_pl_id")); //$NON-NLS-1$
+		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date")); //$NON-NLS-1$
+		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date")); //$NON-NLS-1$
+		it.setLeader(engine.getEmployeeName((UUID)rs.getObject("r_plm_leader"), session)); //$NON-NLS-1$
+		it.setPilot(engine.getEmployeeName((UUID)rs.getObject("r_plm_pilot"), session)); //$NON-NLS-1$
+		it.addTrack(rs.getBytes("track")); //$NON-NLS-1$
+	
+		return it;
+	}
+
 }

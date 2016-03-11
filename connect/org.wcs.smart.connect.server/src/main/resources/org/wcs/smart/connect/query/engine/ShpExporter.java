@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -51,6 +52,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -109,11 +112,13 @@ public class ShpExporter {
 					
 					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
 					
-					try (ResultSet rs = results.getQueryResultSet(c)){
-						while(rs.next()){
-							SimpleFeature sf = results.toFeature(rs, columns, c, type);
-							features.add(sf);
-						}
+					IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
+					
+					for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
+						IResultItem resultItem = (IResultItem) iterator.next();
+						
+						SimpleFeature sf = results.toFeature(resultItem, columns, session, type);
+						features.add(sf);
 					}
 					
 					shapefile.createSchema(type);

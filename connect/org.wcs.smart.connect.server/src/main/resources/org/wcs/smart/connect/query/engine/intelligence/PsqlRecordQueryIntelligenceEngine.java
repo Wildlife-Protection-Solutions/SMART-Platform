@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
@@ -45,6 +46,7 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilter;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
@@ -54,6 +56,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.NotExpression;
 import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Runs intelligence record queries, returning pages result set.
@@ -96,10 +99,9 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		}
 		queryDataTable = createTempTableName();
 		
-		session.doWork(new Work() {
-			
+		return session.doReturningWork(new ReturningWork<RecordIntelligenceQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public RecordIntelligenceQueryResult execute(Connection c) throws SQLException {
 				try{
 					//create temp table for holding reuslts
 					StringBuilder sql = new StringBuilder();
@@ -188,8 +190,8 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 						sql.append(tablePrefix(Intelligence.class) + ".received_date>= ? AND "); //$NON-NLS-1$ 
 						sql.append(tablePrefix(Intelligence.class) + ".received_date <= ? "); //$NON-NLS-1$ 
 						
-						parameterValues.add(d[0].toString());
-						parameterValues.add(d[1].toString());
+						parameterValues.add(d[0]);
+						parameterValues.add(d[1]);
 					}
 					
 					//query filter
@@ -245,12 +247,21 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					c.createStatement().executeUpdate(s);
 				
 					c.commit();
+					
+					
+					//item cnt
+					int itemcnt = 0;
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
+					return new RecordIntelligenceQueryResult(PsqlRecordQueryIntelligenceEngine.this, itemcnt);
 				}catch (Exception ex){
 					throw new SQLException (ex);
 				}
 			}
 		});
-		return new RecordIntelligenceQueryResult(this);
+		
 	
 	}
 	
@@ -379,3 +390,4 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		return null;
 	}
 }
+

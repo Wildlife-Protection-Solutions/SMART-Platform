@@ -23,17 +23,23 @@ package org.wcs.smart.connect.query.engine;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.connect.query.columns.QueryColumnUtils;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
@@ -44,7 +50,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * @author Emily
  *
  */
-public abstract class AbstractDbFeatureResultSet implements IDbTableResultSet {
+public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResultSet {
 	
 	public static final String POINT_GEOM_TYPE = "Point"; //$NON-NLS-1$
 	
@@ -53,8 +59,10 @@ public abstract class AbstractDbFeatureResultSet implements IDbTableResultSet {
 	public static final String LINESTRING_GEOM_TYPE = "LineString"; //$NON-NLS-1$
 	
 	public static final String MULTI_LINESTRING_GEOM_TYPE = "MultiLineString"; //$NON-NLS-1$
-	
+		
 	protected GeometryFactory gf = new GeometryFactory();
+	
+	protected int itemCount;
 	
 	/**
 	 * Creates the geometry for the given row in the results set.
@@ -62,7 +70,7 @@ public abstract class AbstractDbFeatureResultSet implements IDbTableResultSet {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract Geometry createGeometry(ResultSet rs) throws Exception;
+	public abstract Geometry createGeometry(IResultItem item) throws Exception;
 	
 	/**
 	 * Creates a feature id for the given row in the result set
@@ -70,7 +78,7 @@ public abstract class AbstractDbFeatureResultSet implements IDbTableResultSet {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract String createId(ResultSet rs) throws Exception; 
+	public abstract String createId(IResultItem item) throws Exception; 
 	
 	/**
 	 * 
@@ -78,6 +86,15 @@ public abstract class AbstractDbFeatureResultSet implements IDbTableResultSet {
 	 */
 	public abstract String getGeometryType();
 
+	
+	
+	public String getValueAsString(IResultItem item, QueryColumn qc, Session session){
+		return qc.getValueAsString(getValue(item, qc, session));
+	}
+	
+	public Object getValue(IResultItem item, QueryColumn column, Session session){
+		return column.getValue(item);
+	}
 	
 	/**
 	 * Converts a results set record to a feature
@@ -88,15 +105,15 @@ public abstract class AbstractDbFeatureResultSet implements IDbTableResultSet {
 	 * @return
 	 * @throws Exception
 	 */
-	public SimpleFeature toFeature(ResultSet rs, List<QueryColumn> columns, Connection c, SimpleFeatureType ftype)  throws Exception {
+	public SimpleFeature toFeature(IResultItem item, List<QueryColumn> columns, Session session, SimpleFeatureType ftype)  throws Exception {
 		List<Object> data = new ArrayList<Object>();
-		data.add(createGeometry(rs));
-		data.add(createId(rs));  
+		data.add(createGeometry(item));
+		data.add(createId(item));  
 		
 		int i = 0;
 		for (QueryColumn qc : columns){
 			if (qc.isVisible()){
-				Object x = getValue(rs, qc, c);
+				Object x = getValue(item, qc, session);
 				if (x instanceof Boolean){
 					if ((Boolean)x){
 						x = 0;
@@ -127,5 +144,50 @@ public abstract class AbstractDbFeatureResultSet implements IDbTableResultSet {
 		String colDef = QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, true);
 		sb.append(colDef);
 		return sb.toString();
+	}
+	
+
+	@Override
+	public Envelope getEnvelope() {
+		throw new UnsupportedOperationException("Gen envelope not supported for result set.");
+	}
+	
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		//DROP TABLE
+	}
+
+	@Override
+	public List<? extends IResultItem> getData(int offset, int pagesize) {
+		throw new UnsupportedOperationException("Can not load all results into memory in this environment");
+	}
+	
+	public abstract List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
+	
+
+	public int getItemCount() {
+		return itemCount;
+	}
+
+	public void setItemCount(int itemCount) {
+		this.itemCount = itemCount;
+	}
+
+	@Override
+	public IQueryResultSetIterator<? extends IResultItem> iterator(int pagesize) {
+		throw new UnsupportedOperationException("Can not create a result set without a session in this environment");
+	}
+
+	@Override
+	public IQueryResultSetIterator<? extends IResultItem> iterator(int pagesize,
+			Session session) {
+		return new QueryResultSetIterator<IResultItem>(this, pagesize, session);
+	}
+
+	@Override
+	public void setSorting(QueryColumn arg0, int arg1) {
+		// Does not support sorting
+		throw new UnsupportedOperationException("Resultset sorting not supported");
 	}
 }

@@ -24,13 +24,19 @@ package org.wcs.smart.connect.query.engine.observation;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
+import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+
 /**
  * Result set of observation (all data) queries.
  * 
@@ -41,52 +47,45 @@ public class ObsWaypointQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlObsWaypointEngine engine;
 	
-	public ObsWaypointQueryResult(PsqlObsWaypointEngine engine){
+	public ObsWaypointQueryResult(PsqlObsWaypointEngine engine, int itemCnt){
 		this.engine = engine;
-	}
-	
-	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+		setItemCount(itemCnt);
 	}
 	
 	@Override
-	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		return column.getValueAsString(getValue(rs, column, c));
+	public ResultSet getResultSet(final Session session) {
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+			@Override
+			public ResultSet execute(Connection c) throws SQLException {
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+			}
+		});
 	}
-	
+
+	/**
+	 * Gets results from the given result set.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	 */
 	@Override
-	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		String columnKey = column.getKey();
-		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
-			return rs.getInt("wp_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())){
-			return rs.getDate("wp_time"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
-			return rs.getTime("wp_time"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-			return rs.getDouble("wp_x"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-			return rs.getDouble("wp_y"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
-			Object x = rs.getObject("wp_direction"); //$NON-NLS-1$
-			if (x == null) return null;
-			return (Double)x;
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE.getKey())){
-			return rs.getString("wp_source"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
-			Object x = rs.getObject("wp_distance"); //$NON-NLS-1$
-			if (x == null) return null;
-			return (Double)x;
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
-			return rs.getString("wp_comment"); //$NON-NLS-1$
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
-			return rs.getString("ob_observer"); //$NON-NLS-1$
+	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<IResultItem> items = new ArrayList<IResultItem>();
+		rs.absolute(from);
+		int to = from + pageSize;
+		if (to >= itemCount) {
+			to = itemCount;
 		}
-		return null;
+		for(int x = from; x < to; x++) {
+			rs.next();
+			ObservationQueryResultItem it = asQueryResultItem(rs);
+			items.add(it);
+		}
+		return items;
 	}
 
 	@Override
@@ -95,12 +94,30 @@ public class ObsWaypointQueryResult extends AbstractDbFeatureResultSet {
 	}
 
 	@Override
-	public Geometry createGeometry(ResultSet rs) throws Exception {
-		return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
+	public Geometry createGeometry(IResultItem rs) throws Exception {
+		ObservationQueryResultItem i = ((ObservationQueryResultItem)rs);
+		return gf.createPoint(new Coordinate(i.getWaypointX(), i.getWaypointY())); 
 	}
 
 	@Override
-	public String createId(ResultSet rs) throws Exception {
-		return rs.getDouble("wp_id") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+	public String createId(IResultItem rs) throws Exception {
+		return ((ObservationQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
+	}
+	
+	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+		ObservationQueryResultItem it = new ObservationQueryResultItem();
+		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
+		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
+		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
+		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
+		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
+		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
+		it.setWpDateTime(rs.getTimestamp("wp_time")); //$NON-NLS-1$
+		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
+		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
+		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
+		
+		return it;
 	}
 }

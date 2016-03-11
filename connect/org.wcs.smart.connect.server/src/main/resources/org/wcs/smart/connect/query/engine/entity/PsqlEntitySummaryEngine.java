@@ -43,6 +43,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
@@ -61,6 +62,7 @@ import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
+import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
 import org.wcs.smart.query.model.Query;
@@ -96,7 +98,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
+public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISummaryEngine{
 
 	private final Logger logger = Logger.getLogger(PsqlEntitySummaryEngine.class.getName());
 	
@@ -1068,7 +1070,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 	 * @param results the summary query results to update
 	 * @param session hibernate session
 	 */
-	public static void getHeaderInfo(EntitySummaryQuery query, SummaryQueryResult results,Locale l, Session session) throws Exception{
+	public void getHeaderInfo(SummaryQuery query, SummaryQueryResult results,Locale l, Session session) throws Exception{
 		ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter); 
 

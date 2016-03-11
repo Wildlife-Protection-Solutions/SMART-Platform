@@ -137,7 +137,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 					for (GridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
 					}
-					result = new GridQueryResults(PsqlObsGridEngine.this, items.values());
+					result = new GridQueryResults(items.values());
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);

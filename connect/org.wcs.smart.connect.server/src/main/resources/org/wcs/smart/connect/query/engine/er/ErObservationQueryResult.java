@@ -22,18 +22,17 @@
 package org.wcs.smart.connect.query.engine.er;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.er.query.model.SurveyQueryColumn;
-import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
-import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
-import org.wcs.smart.query.model.QueryColumn;
+import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
+import org.hibernate.jdbc.Work;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -44,169 +43,125 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Emily
  *
  */
-public class ErObservationQueryResult extends AbstractDbFeatureResultSet {
-
-	private PsqlErObservationEngine engine;
-	private HashMap<String, Object> attributeToValue;
-	private UUID obUuid;
-	
-	public ErObservationQueryResult(PsqlErObservationEngine engine){
-		this.engine = engine;
-	}
-	
-	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
-	}
+public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 
 	
-	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		return column.getValueAsString(getValue(rs, column, c));
+	public ErObservationQueryResult(PsqlErObservationEngine engine, int itemcnt){
+		super(engine);
+		setItemCount(itemcnt);
 	}
 	
+
+	/**
+	 * Gets results from the given result set.
+	 * 
+	 * @param rs
+	 * @param from
+	 * @param pageSize
+	 * @return
+	 * @throws SQLException
+	 */
 	@Override
-	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		String columnKey = column.getKey();
-		if (columnKey.equals(SurveyQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION.getKey())){
-			return rs.getString("mission_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_START.getKey())){
-			return rs.getDate("mission_startdate"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_END.getKey())){
-			return rs.getDate("mission_enddate"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_LEADER.getKey())){
-			return rs.getString("mission_leader"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN.getKey())){
-			return rs.getString("surveydesign_name"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END.getKey())){
-			return rs.getDate("surveydesign_enddate"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START.getKey())){
-			return rs.getDate("surveydesign_startdate"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY.getKey())){
-			return rs.getString("survey_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_START.getKey())){
-			return rs.getDate("survey_startdate"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_END.getKey())){
-			return rs.getDate("survey_enddate"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())){
-			return rs.getString("samplingunit_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
-			return rs.getInt("wp_id"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-			return rs.getDouble("wp_x"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-			return rs.getDouble("wp_y"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())){
-			return rs.getDate("wp_date"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
-			return rs.getTime("wp_date"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
-			Object x = rs.getObject("wp_direction"); //$NON-NLS-1$
-			if (x == null) return null;
-			return (Double)x;
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
-			Object x = rs.getObject("wp_distance"); //$NON-NLS-1$
-			if (x == null) return null;
-			return (Double)x;
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
-			return rs.getString("wp_comment"); //$NON-NLS-1$
-		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
-			return rs.getString("ob_observer"); //$NON-NLS-1$
-		}else if (columnKey.startsWith("category:")){ //$NON-NLS-1$
-			String level = columnKey.split(":")[1]; //$NON-NLS-1$
-			return rs.getString("category_"+level); //$NON-NLS-1$
-		}else if (columnKey.startsWith("attribute:")){ //$NON-NLS-1$
-			UUID obuuid = (UUID) rs.getObject("ob_uuid"); //$NON-NLS-1$
-			if (obuuid == null) return null;
-			if (!obuuid.equals(obUuid)){
-				attributeToValue = new HashMap<String, Object>();
-				obUuid = obuuid;
-				attachObservations(obuuid, c);
-			}
-			String key = columnKey.split(":")[1]; //$NON-NLS-1$
-			return attributeToValue.get(key);
-		}else if (columnKey.startsWith(MissionPropertyQueryColumn.KEY_PREFIX)){
-			String key = columnKey.split(":")[1]; //$NON-NLS-1$
-			String columnName = engine.getMissionAttributeColumnName(key);
-			if (rs.getMetaData().getColumnType(rs.findColumn(columnName)) == Types.VARCHAR){
-				return rs.getString(columnName);
-			}else{
-				//assume double
-				Object x = rs.getObject(columnName);
-				if (x == null) return null;
-				return (Double)x;
-			}
-		}else if (columnKey.startsWith(SamplingUnitAttributeQueryColumn.KEY_PREFIX)){
-			String key = columnKey.split(":")[1]; //$NON-NLS-1$
-			String columnName = engine.getSamplingUnitAttributeColumnName(key);
-			if (rs.getMetaData().getColumnType(rs.findColumn(columnName)) == Types.VARCHAR){
-				return rs.getString(columnName);
-			}else{
-				//assume double
-				Object x = rs.getObject(columnName);
-				if (x == null) return null;
-				return (Double)x;
-			}
+	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<IResultItem> items = new ArrayList<IResultItem>();
+		rs.absolute(from);
+		int to = from + pageSize;
+		if (to >= itemCount) {
+			to = itemCount;
 		}
-		return null;
-	}
-	
-	private void attachObservations(UUID obUuid, Connection c) throws SQLException {
-		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.ca_uuid FROM "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable());
-		attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable()).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable()).append("_tree rt on wpoa.tree_node_uuid = rt.UUID WHERE r.ob_uuid = ? "); //$NON-NLS-1$
-		
-		PreparedStatement ps = c.prepareStatement(attrSql.toString());
-		ps.setObject(1, obUuid);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()){
-			String key = rs.getString(2);
+		for(int x = from; x < to; x++) {
+			rs.next();
+			SurveyQueryResultItem it = asQueryResultItem(rs);
+			items.add(it);
+		}
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				attachObservations(items, c, session);
+				attachMissionProperties(items, c, session);
+				attachSamplingUnitAttributes(items, c, session);
+			}
 			
-			//double
-			if (rs.getObject(3) != null){
-				attributeToValue.put(key,  rs.getDouble(3));
-				continue;
-			}
-			//string
-			String v = rs.getString(4);
-			if (v != null){
-				attributeToValue.put(key, v);
-				continue;
-			}
-			//list
-			v = rs.getString(5);
-			if (v != null){
-				attributeToValue.put(key, v);
-				continue;
-			}
-			//tree
-			v = rs.getString(6);
-			if (v != null){
-				attributeToValue.put(key,  v);
-				continue;
-			}
-		}
+		});
+		return items;
 	}
 	
-	
+
 	@Override
 	public String getGeometryType() {
 		return POINT_GEOM_TYPE;
 	}
 
 	@Override
-	public Geometry createGeometry(ResultSet rs) throws Exception {
-		return gf.createPoint(new Coordinate(rs.getDouble("wp_x"), rs.getDouble("wp_y"))); //$NON-NLS-1$ //$NON-NLS-2$
+	public Geometry createGeometry(IResultItem rs) throws Exception {
+		SurveyQueryResultItem i = ((SurveyQueryResultItem)rs);
+		return gf.createPoint(new Coordinate(i.getWaypointX(), i.getWaypointY())); 
 	}
 
 	@Override
-	public String createId(ResultSet rs) throws Exception {
-		return rs.getDouble("wp_id") + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+	public String createId(IResultItem rs) throws Exception {
+		return ((SurveyQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+
+	@Override
+	public ResultSet getResultSet(final Session session) {
+		return session.doReturningWork(new ReturningWork<ResultSet>() {
+			@Override
+			public ResultSet execute(Connection c) throws SQLException {
+				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+			}
+		});
+	}
+	
+	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+		SurveyQueryResultItem it = new SurveyQueryResultItem();
+		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
+		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		
+		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate")); //$NON-NLS-1$
+		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate")); //$NON-NLS-1$
+		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
+		
+		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
+		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate")); //$NON-NLS-1$
+		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate")); //$NON-NLS-1$
+		
+		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
+		it.setSurveyEnd(rs.getDate("survey_enddate")); //$NON-NLS-1$
+		it.setSurveyStart(rs.getDate("survey_startdate")); //$NON-NLS-1$
+		
+		it.setSamplingUnitUuid((UUID)rs.getObject("samplingunit_uuid")); //$NON-NLS-1$
+		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
+		
+		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
+		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
+		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
+		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_date")); //$NON-NLS-1$
+		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
+		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
+		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
+		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
+		it.setObservationUuid((UUID)rs.getObject("ob_uuid")); //$NON-NLS-1$
+		
+		//build categories
+		List<String> categories = new ArrayList<String>();
+		for (int i = 0; i < engine.getCategoryCnt(); i ++){
+			String category = rs.getString("category_"+i); //$NON-NLS-1$
+			if (category == null){
+				break;
+			}
+			categories.add(category);
+		}
+		
+		it.setCategory(categories.toArray(new String[categories.size()]));
+
+		return it;
 	}
 }
+
 

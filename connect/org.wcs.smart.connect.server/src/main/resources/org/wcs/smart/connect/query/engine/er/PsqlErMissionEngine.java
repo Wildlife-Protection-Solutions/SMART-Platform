@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.query.engine.er;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
@@ -97,9 +99,9 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 			return null;
 		}
 		queryDataTable = createTempTableName();
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<ErMissionQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public ErMissionQueryResult execute(Connection c) throws SQLException {
 				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
 					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErMissionEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
@@ -131,7 +133,14 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 							needsObservations, false);
 					
 					populateTemporaryTableExtra(c, session, query, sdFilter, caFilter);
-					
+				
+					c.commit();
+					int itemcnt;
+					try(ResultSet rs = c.createStatement().executeQuery("select count(*) FROM " + getQueryDataTable())){ //$NON-NLS-1$ //$NON-NLS-2$
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
+					return new ErMissionQueryResult(PsqlErMissionEngine.this, itemcnt);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -139,12 +148,10 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, false);
 				}
-				c.commit();
+				
 			}
 
 		});
-		ErMissionQueryResult result = new ErMissionQueryResult(this);
-		return result;
 	}
 
 	/**

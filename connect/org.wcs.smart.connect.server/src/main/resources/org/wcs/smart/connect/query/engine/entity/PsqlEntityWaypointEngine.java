@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -95,9 +96,9 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 		
 		queryDataTable = createTempTableName();
 
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<EntityWaypointQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public EntityWaypointQueryResult execute(Connection c) throws SQLException {
 
 				IFilterProcessor filterer = null;
 				//create a date filter that caches the dates so the same
@@ -114,6 +115,14 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 					
 					populateTemporaryTableExtra(c, session);
 
+					//item cnt
+					int itemcnt = 0;
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
+					c.commit();	
+					return new EntityWaypointQueryResult(PsqlEntityWaypointEngine.this, itemcnt);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -121,13 +130,9 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, false);
-				}
-				c.commit();
+				}	
 			}
-
 		});
-		EntityWaypointQueryResult result = new EntityWaypointQueryResult(this);
-		return result;
 	}
 
 	/**
@@ -193,23 +198,6 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 		return sql.toString();
 	}
 
-	protected EntityQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		EntityQueryResultItem it = new EntityQueryResultItem();
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
-		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getTimestamp("wp_time")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
-		return it;
-	}
-
 	@Override
 	public void cleanUp(Session session) {
 		session.doWork(new Work(){
@@ -237,5 +225,6 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 	public void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
 		//do not build any indexes
 	}
+	
 	
 }

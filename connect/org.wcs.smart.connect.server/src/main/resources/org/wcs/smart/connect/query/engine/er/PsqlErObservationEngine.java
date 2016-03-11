@@ -26,13 +26,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
@@ -44,6 +47,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -70,6 +74,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 	private String queryDataTable;
 	private SurveyObservationQuery query;
 	
+	@Override
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
@@ -102,9 +107,9 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		}
 		queryDataTable = createTempTableName();
 
-		session.doWork(new Work() {
+		return session.doReturningWork(new ReturningWork<ErObservationQueryResult>() {
 			@Override
-			public void execute(Connection c) throws SQLException {
+			public ErObservationQueryResult execute(Connection c) throws SQLException {
 				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
 					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErObservationEngine.QueryTypeNotsupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
@@ -129,6 +134,15 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 							true, true);
 					
 					populateTemporaryTableExtra(c, session,filter, caFilter,  query);
+					
+					//item cnt
+					int itemcnt;
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM " + getQueryDataTable())){
+						rs.next();
+						itemcnt = rs.getInt(1);
+					}
+					c.commit();
+					return new ErObservationQueryResult(PsqlErObservationEngine.this, itemcnt); 
 				}catch(Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -136,12 +150,9 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, false);
 				}
-				c.commit();
 			}
 
 		});
-		ErObservationQueryResult result = new ErObservationQueryResult(this);
-		return result;
 	}
 
 	/**

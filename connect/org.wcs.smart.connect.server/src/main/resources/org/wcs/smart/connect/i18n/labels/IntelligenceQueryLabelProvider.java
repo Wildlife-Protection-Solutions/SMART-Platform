@@ -58,6 +58,15 @@ public class IntelligenceQueryLabelProvider implements
 		if (item == IntelligenceFilterOption.INFORMANTID) return Messages.getString("IntelligenceQueryLabelProvider.IDLabel", l); //$NON-NLS-1$
 		
 		if (item instanceof ReceivedDateFilter) return Messages.getString("IntelligenceQueryLabelProvider.ReceievedDateFilterLabel", l); //$NON-NLS-1$
+		
+
+		if (item.equals(NUM_RECORD_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l);
+		if (item.equals(NUM_RECORD_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l);
+		if (item.equals(FOLLOWUP_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l);
+		if (item.equals(FOLLOWUP_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l);
+		if (item.equals(NOFOLLOWUP_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l);
+		if (item.equals(NOFOLLOWUP_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l);
+		
 		return null;
 	}
 }

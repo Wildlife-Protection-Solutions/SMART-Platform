@@ -41,7 +41,7 @@ import javax.media.jai.TiledImage;
 
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.connect.query.engine.GridQueryResults.GridMetadata;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.util.SharedUtils;
 
@@ -74,7 +74,7 @@ final class RasterBuilder {
 	
 	/** a table where x,y values are the position in the raster grid. (0,0) is the bottom left tile and (360 180) is the top right tile */
 	private GridQueryResults table; 
-	private GridMetadata metadata;
+	private GridQueryResultMetadata metadata;
 	
 	private Path file;
 	private Envelope2D envelope = null;
@@ -122,7 +122,7 @@ final class RasterBuilder {
 	 * @param table query result data
 	 * @param metadata query result metadata
 	 */
-	public void setTable(GridQueryResults data, GridMetadata metadata ) {
+	public void setTable(GridQueryResults data, GridQueryResultMetadata metadata ) {
 		this.table = data;
 		this.metadata = metadata;
 	}
@@ -238,11 +238,11 @@ final class RasterBuilder {
 			GridResultItem item = (GridResultItem) iterator.next();
 		
 			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
-			if (item.getTileX() >= metadata.xmin && item.getTileX() <= metadata.xmax 
-					&& item.getTileY() >= metadata.ymin
-					&& item.getTileY() <= metadata.ymax){
-				int x = (int)(item.getTileX() - metadata.xmin);
-				int y = (int)(height - (item.getTileY() - metadata.ymin +1));
+			if (item.getTileX() >= metadata.getMinXTile()&& item.getTileX() <= metadata.getMaxXTile() 
+					&& item.getTileY() >= metadata.getMinYTile()
+					&& item.getTileY() <= metadata.getMaxYTile()){
+				int x = (int)(item.getTileX() - metadata.getMinXTile());
+				int y = (int)(height - (item.getTileY() - metadata.getMinXTile() +1));
 				raster.setSample(x, y,BAND_0, item.getValue());
 			}
 		}			

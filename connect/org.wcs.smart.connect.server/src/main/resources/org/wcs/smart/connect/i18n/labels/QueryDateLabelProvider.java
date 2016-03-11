@@ -77,6 +77,8 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 	public String getLabel(Object item, Locale l) {
 		if (item.equals(START_BEFORE_END_ERR)){
 			return getStartEndDateErrorStr(l);
+		}else if (item.equals(SUMMARY_DATE_GROUPBY_ERR)){
+			return "You cannot add summary queries that have date group by column headers to reports.  Modify the query to put date group by's in the row headers.";
 		}
 		
 		return Messages.getString(labels.get(item.getClass()), l);

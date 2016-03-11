@@ -115,6 +115,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	public HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
 	protected Session session;
 	protected Locale locale = Locale.getDefault();
+	protected int categoryCount = -1;
+	
 	/**
 	 * Maps database tables to a prefix to use in the query.
 	 */
@@ -303,7 +305,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param session
 	 * @return
 	 */
-	protected String getEmployeeName(UUID uuid, Session session){
+	public String getEmployeeName(UUID uuid, Session session){
 		if (uuid != null){
 			Employee x = (Employee) session.load(Employee.class, uuid);
 			if (x != null) {
@@ -603,6 +605,14 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	}
 	
 	/**
+	 * The number of category levels in the data model.
+	 * @return
+	 */
+	public int getCategoryCnt(){
+		return this.categoryCount;
+	}
+	
+	/**
 	 * Adds category column labels to the given data table.  It will add one column
 	 * for each category level.  The column will be populated with the label value matching
 	 * country and language first, language only second, then the default third.
@@ -617,7 +627,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			ConservationAreaFilter caFilter, String queryDataTable) throws SQLException {
 		
 		// get number of levels
-		int categoryCount = QueryManager.INSTANCE.getCategoryDepth(session, caFilter);
+		categoryCount = QueryManager.INSTANCE.getCategoryDepth(session, caFilter);
 		if (categoryCount < 0){
 			return;
 		}

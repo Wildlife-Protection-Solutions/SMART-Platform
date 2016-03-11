@@ -137,7 +137,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 						items.put(it.getTileId(), it);
 					}
 
-					result = new GridQueryResults(PsqlEntityGridEngine.this, items.values());
+					result = new GridQueryResults(items.values());
 				}catch (Exception ex){
 					logger.log(Level.SEVERE,  ex.getMessage(), ex);
 					throw new SQLException(ex);
