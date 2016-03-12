@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>org.eclipse.birt.runtime</groupId>
 			<artifactId>org.eclipse.birt.runtime</artifactId>
-			<version>4.4.1</version>
+			<version>${birt.version}</version>
 		</dependency>
 	</dependencies>	
 </project>

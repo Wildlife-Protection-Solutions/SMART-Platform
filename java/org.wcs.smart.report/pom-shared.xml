@@ -13,7 +13,7 @@
 	<artifactId>org.wcs.smart.report</artifactId>
 	<name>Report Module</name>
 	<version>${smart.version}</version>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>
@@ -25,6 +25,11 @@
     			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.query</artifactId>
     			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt.runtime</groupId>
+			<artifactId>org.eclipse.birt.runtime</artifactId>
+			<version>${birt.version}</version>
 		</dependency>
 	</dependencies>
 </project>

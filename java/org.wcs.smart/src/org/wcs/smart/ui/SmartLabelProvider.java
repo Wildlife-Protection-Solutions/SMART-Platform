@@ -82,6 +82,34 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		}else if (value instanceof Employee){
 			return SmartLabelProvider.getFullLabel((Employee)value);
 		}
+		
+		if (value.equals(AGENCY_NAME_KEY)) return Messages.Agency_AgencyName;
+		if (value.equals(RANK_NAME_KEY)) return Messages.Rank_Label;
+		if (value.equals(EMP_AGENCY_KEY)) return Messages.Employee_Agency_Label;
+		if (value.equals(EMP_RANK_KEY)) return Messages.Employee_Rank_Label;
+		if (value.equals(EMP_GENDER_KEY)) return Messages.Employee_Gender_Label;
+		if (value.equals(EMP_ID_KEY)) return Messages.Employee_Id_Label;
+		if (value.equals(EMP_BIRTHDATE_KEY)) return Messages.Employee_Birthdate_Label;
+		if (value.equals(EMP_EMPLOYEMENT_DATE_KEY)) return Messages.Employee_CAStartDate_Label;
+		if (value.equals(EMP_EMPLOYEMENT_ENDDATE_KEY)) return Messages.Employee_EndDate_Label;
+		if (value.equals(EMP_SMART_USER_KEY)) return Messages.Employee_SmartUser_Label;
+		if (value.equals(EMP_SMART_USER_LEVEL_KEY)) return Messages.Employee_SmartUserLevel_Label;
+		if (value.equals(EMP_DATE_CREATED_KEY)) return Messages.Employee_DateCreated_Label;
+		if (value.equals(EMP_IS_ACTIVE_KEY)) return Messages.Employee_IsActive_Label;
+		if (value.equals(EMP_FAMILY_NAME_KEY)) return Messages.Employee_FamilyName_Label;
+		if (value.equals(EMP_GIVEN_NAME_KEY)) return Messages.Employee_GiveName_Label;
+		if (value.equals(STATION_ID_KEY)) return Messages.Station_Id_Label;
+		if (value.equals(STATION_NAME_KEY)) return Messages.Station_Name_Label;
+		if (value.equals(STATION_DESCRIPTION_KEY)) return Messages.Station_Description_Label;
+		if (value.equals(STATION_ACTIVE_KEY)) return "Active";
+		if (value.equals(CA_NAME_KEY)) return "Conservation Area";
+		if (value.equals(AGENCY_RANK_TABLENAME_KEY)) return "Agencies and Ranks";
+		if (value.equals(CA_ID_KEY)) return "ID";
+		if (value.equals(CA_DESCRIPTION_KEY)) return "Description";
+		if (value.equals(CA_DESIGNATION_KEY)) return "Designation";
+		if (value.equals(CA_TABLENAME_KEY)) return "Conservation Areas";
+		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return "Employees";
+		if (value.equals(STATION_TABLENAME_KEY)) return "Stations";
 		return null;
 	}
 

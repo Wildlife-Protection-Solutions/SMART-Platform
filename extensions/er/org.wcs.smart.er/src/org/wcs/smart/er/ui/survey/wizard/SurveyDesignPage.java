@@ -48,6 +48,7 @@ import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.handlers.NewSurveyDesignHandler;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Survey design wizard page.
@@ -108,7 +109,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 	}
 	
 	private void loadDesigns(Session session, SurveyDesign init){
-		SurveyDesignFilter filter = new SurveyDesignFilter();
+		SurveyDesignFilter filter = new SurveyDesignFilter(SmartDB.getCurrentConservationArea());
 		filter.setSurveyStates(new State[]{SurveyDesign.State.ACTIVE});
 		List<Object> items = new ArrayList<Object>();
 		items.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, filter));

@@ -917,7 +917,7 @@
          <Function
                desc="%smart.birt.functions.caname.desc"
                isConstructor="false"
-               isStatic="true"
+               isStatic="false"
                isVisible="true"
                name="ConservationAreaName"
                variableArguments="false">
@@ -925,7 +925,7 @@
          <Function
                desc="%smart.birt.functions.caid.desc"
                isConstructor="false"
-               isStatic="true"
+               isStatic="false"
                isVisible="true"
                name="ConservationAreaId"
                variableArguments="false">

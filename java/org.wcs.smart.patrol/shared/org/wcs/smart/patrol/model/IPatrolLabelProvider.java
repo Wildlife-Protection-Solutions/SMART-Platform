@@ -32,5 +32,17 @@ import org.wcs.smart.ISharedLabelProvider;
  */
 public interface IPatrolLabelProvider extends ISharedLabelProvider {
 
+	public static final String PATROLTEAM_TABLENAME_KEY = "patrolteamtablenamekey"; //$NON-NLS-1$
+	public static final String PATROLTT_TABLENAME_KEY = "patrolttablenamekey"; //$NON-NLS-1$
+	public static final String PATROLMANDATE_TABLENAME_KEY = "patrolmandatetablenamekey"; //$NON-NLS-1$
 
+	public static final String TEAMNAME_KEY = "teamnamekey"; //$NON-NLS-1$
+	public static final String TEAMDESCRIPTION_KEY = "teamdescriptionkey"; //$NON-NLS-1$
+	public static final String TEAMMANDATE_KEY = "teammandatekey"; //$NON-NLS-1$
+	public static final String TEAMACTIVE_KEY = "teamactivekey"; //$NON-NLS-1$
+	public static final String TRANSPORTNAME_KEY = "transportnamekey"; //$NON-NLS-1$
+	public static final String TRANSPORTACTIVE_KEY = "trasnportactivekey"; //$NON-NLS-1$
+	public static final String TRANSPORTTYPE_KEY = "transporttypekey"; //$NON-NLS-1$
+	public static final String MANDATENAME_KEY = "mandatenamekey"; //$NON-NLS-1$
+	public static final String MANDATEACTIVE_KEY = "mandateactivekey"; //$NON-NLS-1$
 }

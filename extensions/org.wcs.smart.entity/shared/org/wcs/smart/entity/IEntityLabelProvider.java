@@ -25,11 +25,19 @@ import org.wcs.smart.ISharedLabelProvider;
 
 /**
  * Label provider for entity items.  Must provide
- * values for Status items and EntityType.Type items.
+ * values for Status items and EntityType.Type items and
+ * the various constants in this file.
  * 
  * @author Emily
  *
  */
 public interface IEntityLabelProvider extends ISharedLabelProvider {
 
+	public static final String ENTITY_TYPE_REPORT_KEY = "entitytypereporttable"; //$NON-NLS-1$
+	
+	public static final String ID_FIELD_KEY = "idfieldnamekey"; //$NON-NLS-1$
+	public static final String STATUS_FIELD_KEY = "statusfieldnamekey"; //$NON-NLS-1$
+	public static final String X_FIELD_KEY = "xfieldnamekey"; //$NON-NLS-1$
+	public static final String Y_FIELD_KEY = "yfieldnamekey"; //$NON-NLS-1$
+	public static final String CA_FIELD_KEY = "cafieldnamekey"; //$NON-NLS-1$
 }

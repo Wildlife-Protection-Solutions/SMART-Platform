@@ -13,6 +13,7 @@
         	<geotools.version>11.2</geotools.version>
         	<jts.version>1.13</jts.version>
         	<hibernate.version>4.2.18.Final</hibernate.version>
+        	<birt.version>4.4.1</birt.version>
     	</properties>
     
 	<modules>
@@ -32,6 +33,7 @@
 		<module>./org.wcs.smart.observation.query.report/pom-shared.xml</module>
 		<module>./org.wcs.smart.patrol.query.report/pom-shared.xml</module>
 		<module>./org.wcs.smart.intelligence.query.report/pom-shared.xml</module>
+		<module>./org.wcs.smart.reporttable/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.entity/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.entity.query/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.entity.query.report/pom-shared.xml</module>

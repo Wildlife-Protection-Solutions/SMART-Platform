@@ -169,6 +169,10 @@ public class Messages extends NLS {
 	public static String ERDatabaseUpgrader_UpgradeError;
 
 	public static String ERDatabaseUpgrader_UpgradeTask;
+	public static String ErLabelProvider_sd_table_name;
+
+	public static String ErLabelProvider_su_table_name;
+
 	public static String ExportWizard_DirectoryMessage;
 	public static String ExportWizard_ExportDialogTitle;
 	public static String ExportWizard_ExportError;

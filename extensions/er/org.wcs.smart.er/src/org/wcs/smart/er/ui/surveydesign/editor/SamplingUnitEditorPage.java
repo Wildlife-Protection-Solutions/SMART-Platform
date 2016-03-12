@@ -91,6 +91,7 @@ import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.er.ui.ErLabelProvider;
 import org.wcs.smart.er.ui.samplingunit.EditSamplingUnitDialog;
 import org.wcs.smart.er.ui.samplingunit.SamplingUnitStateDialog;
 import org.wcs.smart.er.ui.samplingunit.export.wizard.ExportWizard;
@@ -638,7 +639,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		stateColumn.setLabelProvider(labelProvider);
 		stateColumn.getColumn().setResizable(true);
 		stateColumn.getColumn().setWidth(60);
-		stateColumn.getColumn().setText(Messages.SamplingUnitEditorPage_StateColumnName);
+		stateColumn.getColumn().setText(ErLabelProvider.STATE_COL_NAME);
 		stateColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, stateColumn));
 		
 		TableViewerColumn typeColumn = new TableViewerColumn(suTable, SWT.NONE);
@@ -654,7 +655,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		idColumn.setLabelProvider(labelProvider);
 		idColumn.getColumn().setResizable(true);
 		idColumn.getColumn().setWidth(60);
-		idColumn.getColumn().setText(Messages.SamplingUnitEditorPage_IdColumnName);
+		idColumn.getColumn().setText(ErLabelProvider.ID_COL_NAME);
 		idColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, idColumn));
 		
 		TableViewerColumn lengthColumn = new TableViewerColumn(suTable, SWT.NONE);
@@ -662,7 +663,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		lengthColumn.setLabelProvider(labelProvider);
 		lengthColumn.getColumn().setResizable(true);
 		lengthColumn.getColumn().setWidth(100);
-		lengthColumn.getColumn().setText(Messages.SamplingUnitEditorPage_LengthColumnName);
+		lengthColumn.getColumn().setText(ErLabelProvider.LENGTH_COL_NAME);
 		lengthColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, lengthColumn));
 		
 		GC gc = new GC(suTable.getTable());

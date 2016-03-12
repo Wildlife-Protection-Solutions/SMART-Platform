@@ -43,6 +43,9 @@
             class="org.wcs.smart.reporttable.ca.CaTable"
             supportsCcaa="true">
       </StaticTable>
+      <ImageProvider
+            class="org.wcs.smart.reporttable.TableImageProvider">
+      </ImageProvider>
    </extension>
 
 </plugin>

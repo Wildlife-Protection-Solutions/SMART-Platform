@@ -45,6 +45,7 @@ import org.wcs.smart.cybertracker.export.IConfigurableModelProvider;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
@@ -120,7 +121,10 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 		List<SurveyDesignEditorInput> modelList = new ArrayList<>();
 		Session s = getSession();
 		try {
-			modelList.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null));
+			for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null)){
+				modelList.add(new SurveyDesignEditorInput(proxy));	
+			}
+			
 			Collections.sort(modelList, new Comparator<SurveyDesignEditorInput>() {
 				@Override
 				public int compare(SurveyDesignEditorInput s1, SurveyDesignEditorInput s2) {
