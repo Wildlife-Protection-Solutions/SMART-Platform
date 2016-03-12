@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
@@ -118,7 +119,11 @@ public class SurveyDesignDialog extends TitleAreaDialog{
 		cmbViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		
-		List<SurveyDesignEditorInput> sds = SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, null);
+		List<SurveyDesignProxy> proxies = SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, null);
+		List<SurveyDesignEditorInput> sds = new ArrayList<SurveyDesignEditorInput>();
+		for (SurveyDesignProxy p : proxies){
+			sds.add(new SurveyDesignEditorInput(p));
+		}
 		Collections.sort(sds, new Comparator<SurveyDesignEditorInput>() {
 
 			@Override

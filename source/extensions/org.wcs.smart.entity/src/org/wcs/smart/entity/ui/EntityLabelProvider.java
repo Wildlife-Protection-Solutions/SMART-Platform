@@ -40,14 +40,20 @@ public class EntityLabelProvider implements IEntityLabelProvider{
 	public static final String X_FIELD_NAME = Messages.Entity_XFieldName;
 	public static final String Y_FIELD_NAME = Messages.Entity_YFieldName;
 	public static final String CA_FIELD_NAME = Messages.Entity_CaIdFieldName;
-	
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item == Status.ACTIVE) return Messages.Entity_ActiveStatusLabel;
 		if (item == Status.INACTIVE) return Messages.Entity_InActiveStatusLabel;
 		if (item == EntityType.Type.FIXED) return Messages.EntityType_FixedTypeLabel;
 		if (item == EntityType.Type.TRANSIENT) return Messages.EntityType_TransientTypeLabel;
-
+		
+		if (item.equals(ENTITY_TYPE_REPORT_KEY )) return Messages.EntityTable_LongName;
+		if (item.equals(ID_FIELD_KEY)) return Messages.Entity_IDFieldName;
+		if (item.equals(STATUS_FIELD_KEY)) return Messages.Entity_StatusFieldName;
+		if (item.equals(X_FIELD_KEY)) return Messages.Entity_XFieldName;
+		if (item.equals(Y_FIELD_KEY)) return Messages.Entity_YFieldName;
+		if (item.equals(CA_FIELD_KEY)) return Messages.Entity_CaIdFieldName;
+		
 		return null;
 	}
 

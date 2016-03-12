@@ -38,6 +38,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.hibernate.SurveyDesignFilter;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
@@ -58,6 +59,7 @@ import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -221,9 +223,12 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     	localPages = new ArrayList<MissionComposite>();
     	if (parentDesign == null){
     		//get active surveys
-    		SurveyDesignFilter f = new SurveyDesignFilter();
+    		SurveyDesignFilter f = new SurveyDesignFilter(SmartDB.getCurrentConservationArea());
     		f.setSurveyStates(new State[]{State.ACTIVE});
-    		List<SurveyDesignEditorInput> others = SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, f);
+    		List<SurveyDesignEditorInput> others = new ArrayList<SurveyDesignEditorInput>();
+    		for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, f)){
+				others.add(new SurveyDesignEditorInput(proxy));
+			}
     		localPages.add(new SurveyDesignComposite(others));
     	}
     	

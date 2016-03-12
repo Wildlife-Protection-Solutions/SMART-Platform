@@ -74,8 +74,10 @@ import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.hibernate.SurveyDesignFilter;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.hibernate.SurveyProxy;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
@@ -85,6 +87,7 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
@@ -159,7 +162,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		((FillLayout)parent.getLayout()).marginWidth = 0;
 		
 		filter = new SurveyFilter();
-		designFilter = new SurveyDesignFilter();
+		designFilter = new SurveyDesignFilter(SmartDB.getCurrentConservationArea());
 		
 		bar = new TabFolder(parent, SWT.NONE);
 
@@ -245,14 +248,18 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 			s.beginTransaction();
 			try{
 				//surveys
-				List<SurveyEditorInput> items = SurveyHibernateManager.getInstance().getSurveys(s, filter);
+				List<SurveyProxy> items = SurveyHibernateManager.getSurveys(s, filter);
 				
-				for (SurveyEditorInput sv : items){
+				for (SurveyProxy sp : items){
+					SurveyEditorInput sv = new SurveyEditorInput(sp);
 					ins.add(new SurveyListTreeNode(sv.getName(), sv.getUuid(), Type.SURVEY)); 
 				}
 				
 				//designs
-				designs.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, designFilter));
+				List<SurveyDesignProxy> objects =SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, designFilter);
+				for (SurveyDesignProxy p : objects){
+					designs.add(new SurveyDesignEditorInput(p));
+				}
 				Collections.sort(designs, new Comparator<SurveyDesignEditorInput>() {
 					@Override
 					public int compare(SurveyDesignEditorInput o1,

@@ -49,6 +49,7 @@ import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
@@ -277,7 +278,9 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 			final List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>(); 
 			Session s = HibernateManager.openSession();
 			try{
-				all.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null));
+				for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null)){
+					all.add(new SurveyDesignEditorInput(proxy));
+				}
 			}finally{
 				s.close();
 			}

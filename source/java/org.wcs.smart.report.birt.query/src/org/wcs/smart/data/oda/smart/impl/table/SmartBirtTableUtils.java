@@ -32,7 +32,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -53,6 +55,7 @@ public class SmartBirtTableUtils {
 	
 	private Map<TableCategory, List<SmartBirtTable>> cachedStatic = null;
 	private Map<TableCategory, IDynamicSmartTables> cachedDynamic = null;
+	private List<ITableImageProvider> imageProviders = null;
 	
 	public static SmartBirtTableUtils getInstance(){
 		if (instance == null){
@@ -64,7 +67,7 @@ public class SmartBirtTableUtils {
 	 * @return list of all SmartBirtTable extension point implementations
 	 * @throws Exception
 	 */
-	public Map<TableCategory, List<SmartBirtTable>> getBirtTables() throws Exception{
+	public Map<TableCategory, List<SmartBirtTable>> getBirtTables(SmartConnection connection) throws Exception{
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyMap();
 		if (cachedDynamic == null){
 			populateCache();
@@ -72,7 +75,7 @@ public class SmartBirtTableUtils {
 		
 		HashMap<TableCategory, List<SmartBirtTable>> items = new HashMap<TableCategory, List<SmartBirtTable>>();
 		for (Entry<TableCategory, IDynamicSmartTables> e : cachedDynamic.entrySet()){
-			items.put(e.getKey(), e.getValue().getTables());
+			items.put(e.getKey(), e.getValue().getTables(connection));
 		}
 		items.putAll(cachedStatic);
 		
@@ -86,7 +89,7 @@ public class SmartBirtTableUtils {
 	 * @return SmartBirtTable with given tablename
 	 * @throws Exception
 	 */
-	public SmartBirtTable findTable(String tableName) throws Exception{
+	public SmartBirtTable findTable(String tableName, SmartConnection connection) throws Exception{
 		if (cachedDynamic == null){
 			populateCache();
 		}
@@ -99,14 +102,13 @@ public class SmartBirtTableUtils {
 			}
 		}
 		for (IDynamicSmartTables dt : cachedDynamic.values()){
-			for (SmartBirtTable bt : dt.getTables()){
+			for (SmartBirtTable bt : dt.getTables(connection)){
 				if (bt.getTableKey().equals(tableName)){
 					return bt;
 				}
 			}
 		}
 		return null;
-		
 	}
 	
 	private void populateCache() throws CoreException{
@@ -129,9 +131,10 @@ public class SmartBirtTableUtils {
 			}
 		}
 
-		// read static and dynamic tables
+		// read static and dynamic tables and image providers
 		cachedDynamic = new HashMap<TableCategory, IDynamicSmartTables>();
 		cachedStatic = new HashMap<TableCategory, List<SmartBirtTable>>();
+		imageProviders = new ArrayList<ITableImageProvider>();
 		for (int i = 0; i < config.length; i++) {
 			boolean canAdd = true;
 			if (SmartDB.getCurrentConservationArea() != null && SmartDB.isMultipleAnalysis()){
@@ -155,8 +158,17 @@ public class SmartBirtTableUtils {
 				TableCategory tc = categories.get(config[i].getAttribute("category")); //$NON-NLS-1$
 				IDynamicSmartTables dtables = (IDynamicSmartTables) config[i].createExecutableExtension("class"); //$NON-NLS-1$
 				cachedDynamic.put(tc, dtables);
+			}else if (config[i].getName().equals("ImageProvider")){ //$NON-NLS-1$
+				imageProviders.add((ITableImageProvider)config[i].createExecutableExtension("class"));
 			}
 		}
 	}
-	
+
+	public Image getImage(SmartBirtTable t){
+		for (ITableImageProvider p : imageProviders){
+			Image x = p.getImage(t);
+			if (x != null) return x;
+		}
+		return null;
+	}
 }

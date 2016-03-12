@@ -22,6 +22,7 @@
 package org.wcs.smart.data.oda.smart.impl;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -34,6 +35,9 @@ import org.eclipse.datatools.connectivity.oda.util.manifest.DataTypeMapping;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ExtensionManifest;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
+import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 
@@ -52,7 +56,7 @@ public abstract class SmartConnection implements IConnection {
 	
 	protected boolean m_isOpen = false;
 	protected Session localSession;
-	protected Map<?,?> appContext;
+	protected Map<Object,Object> appContext;
 	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#open(java.util.Properties)
@@ -74,12 +78,19 @@ public abstract class SmartConnection implements IConnection {
 	
 	public abstract void closeSession();
 	
+	public abstract Collection<ConservationArea> getConservationAreas();
+	
 	public abstract IQueryResult executeQuery(Query query) throws Exception;
+	
+
+	protected abstract AbstractSmartBirtQuery createQuery();
+	
+	public abstract SmartBirtTable findSmartBirtTable(String queryText) throws OdaException;
 	
 	@Override
 	public void setAppContext(Object context) throws OdaException {
 		if (context instanceof Map){
-			this.appContext = (Map<?,?>)context;
+			this.appContext = (Map<Object,Object>)context;
 		}
 	}
 	
@@ -121,8 +132,8 @@ public abstract class SmartConnection implements IConnection {
 		try {
 			if (dataSetType.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)) {
 				return createQuery();
-//			}else if (dataSetType.equals(SmartTableQuery.SMART_DATASET_TYPE)){
-//				return createTableQuery();
+			}else if (dataSetType.equals(SmartTableQuery.SMART_DATASET_TYPE)){
+				return createTableQuery();
 			}
 			throw new OdaException(
 					MessageFormat.format("Dataset {0} not supported by SMART",
@@ -132,9 +143,10 @@ public abstract class SmartConnection implements IConnection {
 		}
 	}
 
-	public abstract AbstractSmartBirtQuery createQuery();
 	
-//	public abstract SmartTableQuery createTableQuery();
+	protected SmartTableQuery createTableQuery(){
+		return new SmartTableQuery(this);
+	}
 	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#getMaxQueries()

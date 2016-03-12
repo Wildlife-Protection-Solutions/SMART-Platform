@@ -24,12 +24,16 @@ package org.wcs.smart.er.hibernate;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -40,6 +44,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
@@ -61,7 +66,7 @@ public class SurveyHibernateManager {
 			if (SmartDB.isMultipleAnalysis()){
 				instance = new CcaaSurveyHibernateManager();
 			}else{
-				instance = new CaSurveyHibernateManager();
+				instance = new CaSurveyHibernateManager(SmartDB.getCurrentConservationArea());
 			}
 		}
 		return instance;
@@ -190,4 +195,38 @@ public class SurveyHibernateManager {
 		return options;
 	}
 	
+	
+	/**
+	 * Returns all surveys that match the given filter.  If the filter
+	 * is not provided all surveys are returned.
+	 * 
+	 * @param s
+	 * @param filter filter or null if not filter should be applied
+	 * @return
+	 */
+	public static List<SurveyProxy> getSurveys(Session s, SurveyFilter filter){
+		if (filter == null){
+			//get all
+			List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
+					.createAlias("surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+					.add(Restrictions.eq("sd.conservationArea",SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
+			
+			for (Survey d : ds){
+				SurveyProxy ii = new SurveyProxy(d.getId(), d.getUuid(), d.getStartDate(), d.getSurveyDesign().getName());
+				all.add(ii);
+			}
+			return all;
+				
+		}else{
+			Query q = filter.buildQuery(s);
+			List<Object[]> data = q.list();
+			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
+			for (Object[] x : data){
+				SurveyProxy ii = new SurveyProxy((String)x[1], (UUID)x[0], (Date)x[2], (String)x[3]);
+				all.add(ii);
+			}
+			return all;
+		}
+	}
 }

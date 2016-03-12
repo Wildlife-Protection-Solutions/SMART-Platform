@@ -60,6 +60,9 @@
             class="org.wcs.smart.er.query.report.table.SurveySamplingUnitTables"
             supportsCcaa="false">
       </DynamicTable>
+      <ImageProvider
+            class="org.wcs.smart.er.query.report.TableImageProvider">
+      </ImageProvider>
    </extension>
 
 </plugin>

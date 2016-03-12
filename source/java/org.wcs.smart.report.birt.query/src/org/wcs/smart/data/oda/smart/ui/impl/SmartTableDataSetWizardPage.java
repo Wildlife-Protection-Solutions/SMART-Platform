@@ -22,10 +22,12 @@
 package org.wcs.smart.data.oda.smart.ui.impl;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.datatools.connectivity.oda.IConnection;
@@ -57,11 +59,19 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTableUtils;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.data.oda.smart.impl.table.TableCategory;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.birt.query.Activator;
 
 import com.ibm.icu.text.Collator;
@@ -127,7 +137,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 			@Override
 			public String getText(Object element){
 				if (element instanceof SmartBirtTable){
-					return ((SmartBirtTable)element).getTableShortName();
+					return ((SmartBirtTable)element).getTableShortName(Locale.getDefault());
 				}else if (element instanceof TableCategory){
 					return ((TableCategory) element).getName();
 				}
@@ -140,7 +150,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 						return ((TableCategory) element).getImage().createImage();
 					}
 				}else if (element instanceof SmartBirtTable){
-					Image img = ((SmartBirtTable)element).getImage();
+					Image img = SmartBirtTableUtils.getInstance().getImage(((SmartBirtTable)element));
 					if (img == null){
 						return Activator.getDefault().getImageRegistry().get(Activator.TABLE_ICON);
 					}
@@ -203,7 +213,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 					Collections.sort(items, new Comparator<SmartBirtTable>() {
 						@Override
 						public int compare(SmartBirtTable o1, SmartBirtTable o2) {
-							return Collator.getInstance().compare(o1.getTableFullName(), o2.getTableFullName());
+							return Collator.getInstance().compare(o1.getTableFullName(Locale.getDefault()), o2.getTableFullName(Locale.getDefault()));
 						}
 					});
 					return items.toArray();
@@ -222,7 +232,8 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 			}
 		});
 		try{
-			Map<TableCategory, List<SmartBirtTable>> tables = SmartBirtTableUtils.getInstance().getBirtTables();
+			SmartConnection tempConnection = new TempConnection(HibernateManager.openSession());
+			Map<TableCategory, List<SmartBirtTable>> tables = SmartBirtTableUtils.getInstance().getBirtTables(tempConnection);
 			smartTables.setInput(tables);
 			smartTables.expandAll();
 		}catch (Exception ex){
@@ -421,7 +432,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		dataSetDesign.setDisplayName(reportTable.getTableFullName());
+		dataSetDesign.setDisplayName(reportTable.getTableFullName(Locale.getDefault()));
 		dataSetDesign.setName(reportTable.getTableKey());
 	}
 
@@ -500,4 +511,44 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		}
 	}
 
+	
+	private class TempConnection extends SmartConnection{
+		
+		public TempConnection(Session session){
+			this.localSession = session;
+			appContext = new HashMap<Object, Object>();
+			appContext.put(SmartConnection.LOCAL_CONTEXT_VAR, Locale.getDefault());
+		}
+			
+		@Override
+		public void openSession() {
+		}
+
+		@Override
+		public Collection<ConservationArea> getConservationAreas() {
+			return SmartDB.getConservationAreaConfiguration()
+					.getConservationAreas();
+		}
+
+		@Override
+		public SmartBirtTable findSmartBirtTable(String queryText)
+				throws OdaException {
+			return null;
+		}
+
+		@Override
+		public IQueryResult executeQuery(Query query) throws Exception {
+			return null;
+		}
+
+		@Override
+		protected AbstractSmartBirtQuery createQuery() {
+			return null;
+		}
+
+		@Override
+		public void closeSession() {
+			// closed by wizard
+		}
+	}
 }

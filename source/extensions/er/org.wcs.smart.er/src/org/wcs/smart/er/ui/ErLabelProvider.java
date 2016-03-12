@@ -40,6 +40,10 @@ import org.wcs.smart.er.model.SurveyWaypointSource;
  */
 public class ErLabelProvider implements IErLabelProvider{
 
+	public static final String ID_COL_NAME = Messages.SamplingUnitEditorPage_IdColumnName;
+	public static final String LENGTH_COL_NAME = Messages.SamplingUnitEditorPage_LengthColumnName;
+	public static final String STATE_COL_NAME = Messages.SamplingUnitEditorPage_StateColumnName;
+	
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item == SamplingUnit.GeometryType.PLOT){
@@ -69,6 +73,29 @@ public class ErLabelProvider implements IErLabelProvider{
 		if (item instanceof SurveyWaypointSource){
 			return  Messages.SurveyWaypointSource_Name;
 		}
+		
+		if (item.equals(ID_COLUMN_KEY)){
+			return ID_COL_NAME;
+		}
+		if (item.equals(LENGTH_COLUMN_KEY)){
+			return LENGTH_COL_NAME;
+		}
+		if (item.equals(STATE_COLUMN_KEY)){
+			return STATE_COL_NAME;
+		}
+		if (item.equals(SU_TABLE_LONGNAME_KEY)){
+			return Messages.ErLabelProvider_su_table_name;
+		}
+		if (item.equals(SD_TABLE_LONGNAME_KEY)){
+			return Messages.ErLabelProvider_sd_table_name;
+		}
+		
+		if (item.equals(SD_DESCRIPTION_COL_KEY)) return "Description";
+		if (item.equals(SD_ENDDATE_COL_KEY)) return "End Date";
+		if (item.equals(SD_STARTDATE_COL_KEY)) return "Start Date";
+		if (item.equals(SD_STATUS_COL_KEY)) return "Status";
+		if (item.equals(SD_KEY_COL_KEY)) return "Key";
+		if (item.equals(SD_NAME_COL_KEY)) return "Name";
 		return null;
 	}
 

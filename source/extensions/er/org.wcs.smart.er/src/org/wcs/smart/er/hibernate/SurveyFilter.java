@@ -25,11 +25,12 @@ import java.util.Date;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
+//import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartDB;
-
 /**
  * Filter for survey list.  Provides the ability to filter based on
  * survey design state, survey id, survey start date, and survey design.

@@ -27,6 +27,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesign.State;
 
@@ -42,6 +43,10 @@ public class SurveyDesignEditorInput implements IEditorInput {
 	private String name;
 	private SurveyDesign.State state;
 	private String key;
+	
+	public SurveyDesignEditorInput(SurveyDesignProxy proxy) {
+		this(proxy.getName(), proxy.getUuid(), proxy.getKey(), proxy.getState());
+	}
 	
 	/**
 	 * Constructor

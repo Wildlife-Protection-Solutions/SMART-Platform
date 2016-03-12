@@ -111,7 +111,7 @@ public class SamplingUnit extends UuidItem {
 	}
 	
 	@Column(name="geometry")
-	@Lob
+//	@Lob
 	@Basic(fetch = FetchType.LAZY)
 	public byte[] getGeom() {
 		return geom;

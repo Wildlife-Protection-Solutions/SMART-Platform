@@ -29,6 +29,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyProxy;
 import org.wcs.smart.er.internal.Messages;
 
 /**
@@ -42,6 +43,10 @@ public class SurveyEditorInput implements IEditorInput {
 	private String id;
 	private Date startDate;
 	private String designName;
+	
+	public SurveyEditorInput(SurveyProxy proxy){
+		this(proxy.getId(), proxy.getUuid(), proxy.getStartDate(), proxy.getDesignName());
+	}
 	/**
 	 * Constructor
 	 */

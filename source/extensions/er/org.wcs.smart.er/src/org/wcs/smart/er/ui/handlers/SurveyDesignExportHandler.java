@@ -74,6 +74,7 @@ import org.eclipse.ui.IEditorInput;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -341,7 +342,9 @@ public class SurveyDesignExportHandler {
 					Session s = HibernateManager.openSession();
 					s.beginTransaction();
 					try{
-						items.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null ) ); 
+						for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null)){
+							items.add(new SurveyDesignEditorInput(proxy));
+						} 
 						Collections.sort(items, new Comparator<SurveyDesignEditorInput>(){
 							@Override
 							public int compare(SurveyDesignEditorInput sd1, SurveyDesignEditorInput sd2) {

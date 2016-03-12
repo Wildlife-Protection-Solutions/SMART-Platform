@@ -21,8 +21,16 @@
  */
 package org.wcs.smart.data.oda.smart.impl;
 
+import java.text.MessageFormat;
+import java.util.Collection;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
+import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTableUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.model.Query;
@@ -34,7 +42,6 @@ public class DesktopSmartConnection extends SmartConnection {
 
 	@Override
 	public void openSession(){
-		System.out.println("report - open connection");
 		localSession = HibernateManager.openSession();
 		localSession.beginTransaction();
 	}
@@ -45,7 +52,6 @@ public class DesktopSmartConnection extends SmartConnection {
 			if (localSession.getTransaction().isActive()){
 				localSession.getTransaction().rollback();
 			}
-			System.out.println("report - close connection");
 			localSession.close();
 		}
 	}
@@ -60,11 +66,23 @@ public class DesktopSmartConnection extends SmartConnection {
 		return QueryExecutor.INSTANCE.executeQuery(query, getSession(), new NullProgressMonitor());
 	}
 
-	
-//	@Override
-//	public SmartTableQuery createTableQuery(){
-//		return new SmartTableQuery(this);
-//	}
-//	
+	@Override
+	public Collection<ConservationArea> getConservationAreas() {
+		return SmartDB.getConservationAreaConfiguration().getConservationAreas();
+	}
+
+	@Override
+	public SmartBirtTable findSmartBirtTable(String queryText) throws OdaException{
+		try{
+			SmartBirtTable table = SmartBirtTableUtils.getInstance().findTable(queryText, this);
+			if (table == null){
+				throw new OdaException(
+						MessageFormat.format("Could not find SMART data table {0}.", new Object[]{queryText}));
+			}
+			return table;
+		}catch (Exception ex){
+			throw new OdaException (ex);
+		}
+	}
 
 }

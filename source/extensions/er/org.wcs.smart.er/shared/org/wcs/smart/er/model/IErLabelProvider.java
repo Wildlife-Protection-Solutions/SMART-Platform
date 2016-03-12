@@ -32,5 +32,19 @@ import org.wcs.smart.ISharedLabelProvider;
  *
  */
 public interface IErLabelProvider extends ISharedLabelProvider{
+	public static final String ID_COLUMN_KEY = "idcolumnlabelkey"; //$NON-NLS-1$
+	public static final String LENGTH_COLUMN_KEY = "lengthcolumnlabelkey"; //$NON-NLS-1$
+	public static final String STATE_COLUMN_KEY = "statecolumnlabelkey"; //$NON-NLS-1$
+	
+	public static final String SU_TABLE_LONGNAME_KEY = "sutablelongnamekey"; //$NON-NLS-1$
+	public static final String SD_TABLE_LONGNAME_KEY = "surveydesigntablelongnamekey"; //$NON-NLS-1$
+	
+	public static final String SD_DESCRIPTION_COL_KEY = "sddescriptioncolumnkey";
+	public static final String SD_ENDDATE_COL_KEY = "sdenddatecolumnkey";
+	public static final String SD_STARTDATE_COL_KEY = "sdstartdatecolumnkey";
+	public static final String SD_STATUS_COL_KEY = "sdstatuecolumnkey";
+	public static final String SD_KEY_COL_KEY = "sdkeycolumnkey";
+	public static final String SD_NAME_COL_KEY = "sdnamecolumnkey";
+	
 	
 }
