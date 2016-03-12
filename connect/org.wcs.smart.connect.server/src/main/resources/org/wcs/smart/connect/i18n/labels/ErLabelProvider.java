@@ -67,6 +67,29 @@ public class ErLabelProvider implements IErLabelProvider{
 		if (item instanceof SurveyWaypointSource){
 			return  Messages.getString("ErLabelProvider.MissionTrackSurvey", l); //$NON-NLS-1$
 		}
+		
+		if (item.equals(ID_COLUMN_KEY)){
+			return "ID";
+		}
+		if (item.equals(LENGTH_COLUMN_KEY)){
+			return "Length (km)";
+		}
+		if (item.equals(STATE_COLUMN_KEY)){
+			return "State";
+		}
+		if (item.equals(SU_TABLE_LONGNAME_KEY)){
+			return "{0} [{1} - Sampling Units]";
+		}
+		if (item.equals(SD_TABLE_LONGNAME_KEY)){
+			return "{0} [Survey Design Properties]";
+		}
+		
+		if (item.equals(SD_DESCRIPTION_COL_KEY)) return "Description";
+		if (item.equals(SD_ENDDATE_COL_KEY)) return "End Date";
+		if (item.equals(SD_STARTDATE_COL_KEY)) return "Start Date";
+		if (item.equals(SD_STATUS_COL_KEY)) return "Status";
+		if (item.equals(SD_KEY_COL_KEY)) return "Key";
+		if (item.equals(SD_NAME_COL_KEY)) return "Name";
 		return null;
 	}
 

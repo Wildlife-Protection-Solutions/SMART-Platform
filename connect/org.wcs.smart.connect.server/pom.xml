@@ -317,7 +317,11 @@
     			<artifactId>org.wcs.smart.er.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-		
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.reporttable</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
 		<!-- JTS -->
 		<dependency>
     			<groupId>com.vividsolutions</groupId>

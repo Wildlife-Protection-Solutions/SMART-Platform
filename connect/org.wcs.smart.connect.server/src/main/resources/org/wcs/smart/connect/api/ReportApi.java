@@ -178,6 +178,7 @@ public class ReportApi extends HttpServlet{
 				Map items = task.getAppContext();
 				items.put(ServerSmartConnection.CONNECTION_KEY, HibernateManager.getSession(context));
 				items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
+				items.put("org.wcs.smart.report.ca", report.getConservationArea());
 				
 				try{
 					task.setRenderOption(options);

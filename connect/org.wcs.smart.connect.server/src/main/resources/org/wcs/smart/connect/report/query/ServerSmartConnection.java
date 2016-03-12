@@ -21,14 +21,20 @@
  */
 package org.wcs.smart.connect.report.query;
 
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
@@ -39,6 +45,8 @@ import org.wcs.smart.query.model.Query;
 public class ServerSmartConnection extends SmartConnection {
 
 	public static final String CONNECTION_KEY = "org.wcs.smart.session"; //$NON-NLS-1$
+	private SmartBirtTableUtils tableFinder = null;
+	
 	@Override
 	public void openSession(){
 		localSession = (Session) ((Map)appContext).get(CONNECTION_KEY);
@@ -71,11 +79,29 @@ public class ServerSmartConnection extends SmartConnection {
 		query.setCachedResults(results);
 		return results;
 	}
-	
-//	@Override
-//	public SmartTableQuery createTableQuery(){
-//		return new SmartTableQuery(this);
-//	}
-//	
+
+	@Override
+	public SmartBirtTable findSmartBirtTable(String queryText) throws OdaException {
+		try{
+			if (tableFinder == null){
+				tableFinder = new SmartBirtTableUtils();
+			}
+			SmartBirtTable table = tableFinder.findTable(queryText, this);
+			if (table == null){
+				throw new OdaException(
+						MessageFormat.format("Could not find SMART data table {0}.", new Object[]{queryText}));
+			}
+			return table;
+		}catch (Exception ex){
+			throw new OdaException (ex);
+		}
+	}
+
+	@Override
+	public Collection<ConservationArea> getConservationAreas() {
+		ConservationArea ca = (ConservationArea) appContext.get("org.wcs.smart.report.ca");
+		if (ca == null) return null;
+		return Collections.singleton(ca);
+	}
 
 }
