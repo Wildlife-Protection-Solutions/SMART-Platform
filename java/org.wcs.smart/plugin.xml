@@ -716,7 +716,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="popup:org.locationtech.udig.project.ui.layerManager?after=separator1">
+            locationURI="popup:org.locationtech.udig.project.ui.layerManager?before=additions">
          <command
                commandId="org.wcs.smart.command.map.style"
                icon="images/icons/obj16/style.png"
