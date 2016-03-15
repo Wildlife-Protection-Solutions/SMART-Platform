@@ -46,7 +46,7 @@ public class ZipUtil {
 
 	/**
 	 * Path seperator for directory paths. Cannot use
-	 * Path.sepeartor here or it will not work when export
+	 * File.separator here or it will not work when export
 	 * on Windows and importing on MAC.
 	 */
 	public static final String DIR_PATH_SEPERATOR = "/"; //$NON-NLS-1$

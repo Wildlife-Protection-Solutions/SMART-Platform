@@ -30,14 +30,14 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 @SuppressWarnings("nls")
 public class Mergei18n {
 
-    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\Version3.2.1\\source\\java",
-    	"C:\\data\\SMART\\Source\\Version3.2.1\\source\\extensions",
-		"C:\\data\\SMART\\Source\\Version3.2.1\\source\\extensions\\er"};
+    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\Version3.3.0\\source\\java",
+    	"C:\\data\\SMART\\Source\\Version3.3.0\\source\\extensions",
+		"C:\\data\\SMART\\Source\\Version3.3.0\\source\\extensions\\er"};
     
-    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\Version3.2.1\\source\\translations\\",
-    	"C:\\data\\SMART\\Source\\Version3.2.1\\source\\extensions",
-		"C:\\data\\SMART\\Source\\Version3.2.1\\source\\extensions\\er\\translations"};
-	
+    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\Version3.3.0\\source\\translations\\",
+    	"C:\\data\\SMART\\Source\\Version3.3.0\\source\\extensions",
+		"C:\\data\\SMART\\Source\\Version3.3.0\\source\\extensions\\er\\translations"};
+
     public static final String LINE_SEP = "\n";
 
     public static final String NATIVE2ASCII = "C:\\Java\\jdk1.6.0_38\\bin\\native2ascii.exe";
@@ -112,12 +112,15 @@ public class Mergei18n {
 
         List<File> filesList = new ArrayList<File>();
 
-        final String matchDir = pluginName + ".nl_es";  /*ADD _XX if you want to search for a specific language */
+        final String matchDir = pluginName + ".nl_th";  /*ADD _XX if you want to search for a specific language */
         for (File flangDir : transDir.listFiles()){
 
 
             if (!flangDir.isDirectory()){
                 continue;
+            }
+            if (flangDir.getName().startsWith(matchDir)){
+            	filesList.add(flangDir);
             }
             File[] transToMerge = flangDir.listFiles(new FilenameFilter(){
 
@@ -163,7 +166,7 @@ public class Mergei18n {
                 System.out.println("add: " + e.getKey());
 //                target.put(e.getKey(), e.getValue());
 //                target.put(e.getKey(), "**NEW**" + e.getValue());
-                changes = true;
+//                changes = true;
             }
         }
 

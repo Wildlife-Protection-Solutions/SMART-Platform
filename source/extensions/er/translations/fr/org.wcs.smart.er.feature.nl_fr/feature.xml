@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.er.feature.nl.fr"
       label="SMART Ecological Records French Language Pack"
-      version="3.2.0"
+      version="3.3.1"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 

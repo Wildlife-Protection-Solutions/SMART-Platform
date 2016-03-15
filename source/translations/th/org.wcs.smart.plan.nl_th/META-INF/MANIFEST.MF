@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Thai Plan Fragment
 Bundle-SymbolicName: org.wcs.smart.plan.nl_th
-Bundle-Version: 3.2.1
-Fragment-Host: org.wcs.smart.plan;bundle-version="3.2.0"
+Bundle-Version: 3.3.1
+Fragment-Host: org.wcs.smart.plan;bundle-version="3.3.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

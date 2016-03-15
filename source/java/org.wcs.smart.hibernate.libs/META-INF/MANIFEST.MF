@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Smart Hibernate Library PlugIn
 Bundle-SymbolicName: org.wcs.smart.hibernate.libs;singleton:=true
-Bundle-Version: 3.3.0
+Bundle-Version: 3.3.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: global
 Bundle-ClassPath: .,

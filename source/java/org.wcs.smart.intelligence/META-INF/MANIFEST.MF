@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Intelligence PlugIn
 Bundle-SymbolicName: org.wcs.smart.intelligence;singleton:=true
-Bundle-Version: 3.3.0
+Bundle-Version: 3.3.1
 Bundle-Activator: org.wcs.smart.intelligence.IntelligencePlugIn
 Require-Bundle: org.eclipse.ui.forms,
  org.locationtech.udig.style.sld,

@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart.report.birt.map French NLS Support
 Bundle-SymbolicName: org.wcs.smart.report.birt.map.nl_fr
-Bundle-Version: 3.2.0
-Fragment-Host: org.wcs.smart.report.birt.map;bundle-version="3.2.0"
+Bundle-Version: 3.2.1
+Fragment-Host: org.wcs.smart.report.birt.map;bundle-version="3.2.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: OSGI-INF/l10n/bundle
 Bundle-Vendor: org.wcs.smart

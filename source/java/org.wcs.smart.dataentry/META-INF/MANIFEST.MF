@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART DataModel Extensions
 Bundle-SymbolicName: org.wcs.smart.dataentry;singleton:=true
-Bundle-Version: 3.3.0
+Bundle-Version: 3.3.1
 Bundle-Activator: org.wcs.smart.dataentry.DataentryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

@@ -92,7 +92,8 @@ public class ZipUtil {
 	}
 	
 	/**
-     * Creates a zip entry for the path specified with a name built from the base passed in and the file/directory
+     * Creates a zip entry for the path specified with a name built 
+     * from the base passed in and the file/directory
      * name. If the path is a directory, a recursive call is made such that the full directory is added to the zip.
      *
      * @param zOut The zip file's output stream
@@ -109,6 +110,7 @@ public class ZipUtil {
     	String entryName = base + path.getName();
        
         if (path.isFile()) {
+        	
             ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
             zOut.putArchiveEntry(zipEntry);
             FileInputStream in = new FileInputStream(path);
@@ -120,7 +122,7 @@ public class ZipUtil {
             File[] children = path.listFiles();
             if (children != null) {
                 for (File child : children) {
-                    if (!addFileToZip(zOut, child, entryName + File.separator)){
+                    if (!addFileToZip(zOut, child, entryName +"/")){ // File.separator
                     	return false;
                     }
                 }

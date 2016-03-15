@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Thai Help Translation
 Bundle-SymbolicName: org.wcs.smart.help.nl_th
-Bundle-Version: 3.2.1
+Bundle-Version: 3.3.1
 Bundle-Vendor: org.wcs.smart
-Fragment-Host: org.wcs.smart.help;bundle-version="3.2.0"
+Fragment-Host: org.wcs.smart.help;bundle-version="3.3.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.core.feature"
       label="SMART CyberTracker Module"
-      version="3.3.0"
+      version="3.3.2"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.cybertracker"
       license-feature="org.wcs.smart.smart.feature">
