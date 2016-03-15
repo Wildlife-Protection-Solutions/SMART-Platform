@@ -45,6 +45,12 @@ import org.wcs.smart.internal.Messages;
 public class ZipUtil {
 
 	/**
+	 * Path seperator for directory paths. Cannot use
+	 * Path.sepeartor here or it will not work when export
+	 * on Windows and importing on MAC.
+	 */
+	public static final String DIR_PATH_SEPERATOR = "/"; //$NON-NLS-1$
+	/**
 	 * Creates a zip file collecting together
 	 * all the data in the provided directories.
 	 * 
@@ -113,14 +119,14 @@ public class ZipUtil {
             zOut.closeArchiveEntry();
         }else if (path.isDirectory() && path.list().length == 0){
         	//empty directory
-    		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + File.separator); 
+    		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + DIR_PATH_SEPERATOR);  
             zOut.putArchiveEntry(zipEntry);
             zOut.closeArchiveEntry();
         } else {
             File[] children = path.listFiles();
             if (children != null) {
                 for (File child : children) {
-                    if (!addFileToZip(zOut, child, entryName + File.separator, monitor)){
+                    if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, monitor)){
                     	return false;
                     }
                     if (monitor.isCanceled()){
