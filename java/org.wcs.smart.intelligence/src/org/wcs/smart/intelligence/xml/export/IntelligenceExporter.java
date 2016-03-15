@@ -49,6 +49,7 @@ import org.wcs.smart.intelligence.xml.IntelligenceToXmlConverter;
 import org.wcs.smart.intelligence.xml.model.IntelligenceType;
 import org.wcs.smart.intelligence.xml.model.ObjectFactory;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Class responsible for exporting
@@ -123,7 +124,7 @@ public class IntelligenceExporter {
 			/* add all attachments */
 			for (IntelligenceAttachment att : intelligence.getAttachments()) {
 				File attFile = att.getAttachmentFile();
-				zout.putNextEntry(new ZipEntry(IIntelligenceXmlDataConstants.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
+				zout.putNextEntry(new ZipEntry(IIntelligenceXmlDataConstants.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
 
 				try(FileInputStream inStream = new FileInputStream(attFile);) {
 					while ((bytesRead = inStream.read(buffer)) > 0) {

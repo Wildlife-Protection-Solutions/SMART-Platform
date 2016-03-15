@@ -50,6 +50,7 @@ import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.model.ExtraDataType;
 import org.wcs.smart.patrol.xml.model.PatrolType;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Class responsible for exporting
@@ -183,9 +184,7 @@ public class PatrolExporter {
 			}
 			for (ISmartAttachment att : allAttach){
 				File attFile = att.getAttachmentFile();
-				zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
-
-				
+				zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
 				try(FileInputStream inStream = new FileInputStream(attFile)) {
 					byte[] buffer = new byte[1024];
 					int bytesRead;
