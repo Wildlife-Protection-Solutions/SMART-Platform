@@ -44,6 +44,7 @@ import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Class responsible for exporting
@@ -161,7 +162,7 @@ public class MissionExporter {
 			}
 			for (ISmartAttachment att : allAttach){
 				File attFile = att.getFullFile();
-				zout.putNextEntry(new ZipEntry(MissionXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
+				zout.putNextEntry(new ZipEntry(MissionXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
 
 				
 				try(FileInputStream inStream = new FileInputStream(attFile)) {

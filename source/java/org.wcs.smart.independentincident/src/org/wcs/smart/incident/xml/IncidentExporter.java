@@ -41,6 +41,7 @@ import org.wcs.smart.incident.xml.model.WaypointType;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Class responsible for exporting
@@ -150,7 +151,7 @@ public class IncidentExporter {
 			}
 			for (ISmartAttachment att : all) {
 				File attFile = att.getFullFile();
-				zout.putNextEntry(new ZipEntry(IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
+				zout.putNextEntry(new ZipEntry(IncidentXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
 				try(FileInputStream inStream = new FileInputStream(attFile)){
 					while ((bytesRead = inStream.read(buffer)) > 0) {
 						zout.write(buffer, 0, bytesRead);
