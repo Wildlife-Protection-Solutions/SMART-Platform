@@ -34,7 +34,7 @@ import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
-import org.wcs.smart.upgrade.v400.Upgrader330To400;
+import org.wcs.smart.upgrade.v400.Upgrader331To400;
 
 /**
  * Entity query upgrade operations while upgrade/restore backup.
@@ -112,6 +112,6 @@ public class IntelligenceQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"smart.INTEL_RECORD_QUERY", //$NON-NLS-1$
 				"smart.INTEL_SUMMARY_QUERY" //$NON-NLS-1$
 		};
-		Upgrader330To400.updateCCAAQueryTables(s, c, queryTables);
+		Upgrader331To400.updateCCAAQueryTables(s, c, queryTables);
 	}
 }

@@ -34,7 +34,7 @@ import org.wcs.smart.er.query.updatesite.AddERQueryJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
-import org.wcs.smart.upgrade.v400.Upgrader330To400;
+import org.wcs.smart.upgrade.v400.Upgrader331To400;
 
 /**
  * Ecological Records Query upgrade operations while upgrade/restore backup.
@@ -91,7 +91,15 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.survey_waypoint_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.survey_mission_track_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.survey_mission_query add column style long varchar", //$NON-NLS-1$
-				"alter table smart.survey_gridded_query add column style long varchar" }; //$NON-NLS-1$
+				"alter table smart.survey_gridded_query add column style long varchar", //$NON-NLS-1$
+				
+				//fix the spelling error with the install
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_OBSERVATION_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_WAYPOINT_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_GRIDDED_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_SUMMARY_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_MISSION_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_MISSION_TRACK_QUERY TO analyst"}; //$NON-NLS-1$
 
 		for (String s : sql) {
 			ERQueryPlugIn.log(s, null);
@@ -165,6 +173,6 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"smart.SURVEY_WAYPOINT_QUERY", //$NON-NLS-1$
 				"smart.SURVEY_SUMMARY_QUERY" //$NON-NLS-1$
 		};
-		Upgrader330To400.updateCCAAQueryTables(s, c, queryTables);
+		Upgrader331To400.updateCCAAQueryTables(s, c, queryTables);
 	}
 }

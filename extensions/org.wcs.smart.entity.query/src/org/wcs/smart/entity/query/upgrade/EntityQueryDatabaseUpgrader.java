@@ -34,7 +34,7 @@ import org.wcs.smart.entity.query.updatesite.AddEntityQueryJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
-import org.wcs.smart.upgrade.v400.Upgrader330To400;
+import org.wcs.smart.upgrade.v400.Upgrader331To400;
 
 /**
  * Entity query upgrade operations while upgrade/restore backup.
@@ -147,7 +147,7 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"smart.ENTITY_OBSERVATION_QUERY", //$NON-NLS-1$
 				"smart.ENTITY_GRIDDED_QUERY" //$NON-NLS-1$
 		};
-		Upgrader330To400.updateCCAAQueryTables(s, c, queryTables);
+		Upgrader331To400.updateCCAAQueryTables(s, c, queryTables);
 		
 	}
 }
