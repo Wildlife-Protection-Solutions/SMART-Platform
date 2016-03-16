@@ -50,7 +50,7 @@ public class MandateDeleteAdvisor implements IDeleteAdvisor {
 		
 		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			MessageFormat.format(
+			return MessageFormat.format(
 					Messages.MandateDeleteAdvisor_DeleteError_Patrol,
 					new Object[]{cnt, ((PatrolMandate)object).getName()}
 					);
