@@ -22,9 +22,6 @@
 package org.wcs.smart.ca;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -44,9 +41,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.util.I18nUtil;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * 
@@ -161,14 +156,11 @@ public class Label  {
 			
 			return p.getLanguage().equals(this.getLanguage())
 					&& p.getElement().getUuid().equals(this.getElement().getUuid());
-					//Arrays.equals(p.getElement().getUuid(), this.getElement().getUuid());
 		}
 		
 		@Override
 		public int hashCode() {
 		    int code = 0;
-//		    if (getLanguage() != null) {code += Arrays.hashCode(getLanguage().getUuid());}
-//		    if (getElement() != null && getElement().getUuid() != null) {code += Arrays.hashCode(getElement().getUuid()); }
 		    if (getLanguage() != null) {code += getLanguage().getUuid().hashCode();}
 		    if (getElement() != null && getElement().getUuid() != null) {code += getElement().getUuid().hashCode(); }
 		    return code;
@@ -180,6 +172,7 @@ public class Label  {
 		
 		List<?> options = session.createCriteria(Label.class)
 				.add(Restrictions.eq("id.element.uuid",element)).list(); //$NON-NLS-1$
+
 		if (options.size() == 1){
 			return ((Label)options.get(0)).getValue();
 		}
@@ -209,14 +202,17 @@ public class Label  {
 		if (defaultvalue != null) return defaultvalue;
 		return null;
 	}
+	
 	@Transient
 	public static synchronized String getDescription(
 			UUID elementuuid,
 			Session session) {
+		
 		Object ltemp = I18nUtil.getLocale();
 		if (ltemp instanceof Locale){
-			return searchAll((Locale)ltemp, elementuuid, session);
+			return searchAll((Locale)ltemp, elementuuid, session);			
 		}
+		
 		UUID lang = (UUID)ltemp;
 		UUID ca = I18nUtil.getCa();
 		if (lang == null || ca == null){
@@ -235,80 +231,26 @@ public class Label  {
 		Language ltmp = (Language) session.get(Language.class, lang);
 		id.setLanguage(ltmp);
 
-		String description = ""; //$NON-NLS-1$
 		Label lbl = (Label) session.get(Label.class, id);
-		if (lbl == null ) {
-			// try for the default language
-			ConservationArea localca = (ConservationArea) session.load(ConservationArea.class, ca);
-			id.setLanguage(localca.getDefaultLanguage());
-			lbl = (Label) session.get(Label.class, id);
-			
-			//search for any label in one of the current ca languages
-			for(Language l : localca.getLanguages()){
-				id.setLanguage(l);
-				lbl = (Label)session.get(Label.class, id);
-				if (lbl != null){
-					break;
-				}
-			}
-			if (lbl == null){
-				final String elementuuidstr = UuidUtils.uuidToString(elementuuid);
-				final String[] temp = new String[]{null};
-				Language llang = (Language) session.load(Language.class, lang);
-				final String searchCode = llang.getCode();
-				//for whatever reason when i did this as hibernate queries
-				//i could not load entity tables in reports; I don't understand why
-				//but it would try to load additional objects that weren't needed and this causes
-				//all sorts of addition problems.
-				//TODO: the x'elementuuid' in the following statements is not going to work in postgresql
-				session.doWork(new Work(){
-					@Override
-					public void execute(Connection c) throws SQLException {
-						
-						//try to find with the same language/country code
-						String query = "SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
-								"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
-								"' and a.code = '" + searchCode + "'"; //$NON-NLS-1$ //$NON-NLS-2$
-						try(ResultSet rs = c.createStatement().executeQuery(query)){
-							if (rs.next()){
-								temp[0] = rs.getString(1);
-								return;
-							}
-						}
-						//try to find with the same language code
-						if (searchCode.contains("_")) { //$NON-NLS-1$
-							query = "SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
-									"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
-									"' and a.code = '" +  //$NON-NLS-1$
-									searchCode.split("_")[0] + "'"; //$NON-NLS-1$ //$NON-NLS-2$
-							try(ResultSet rs = c.createStatement().executeQuery(query)){
-								if (rs.next()){
-									temp[0] = rs.getString(1);
-									return;
-								}
-							}
-						}
-						//try to find any forcing default to be first
-						query = "SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
-								"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
-								"' order by a.ISDEFAULT desc"; //$NON-NLS-1$ 
-						try(ResultSet rs = c.createStatement().executeQuery(query)){
-							if (rs.next()){
-								temp[0] = rs.getString(1);
-								return;
-							}
-						}
-					}
-				});
-				if (temp[0] != null){
-					description = temp[0];
-				}
+		if (lbl != null) return lbl.getValue();
+		
+		// try for the default language
+		ConservationArea localca = (ConservationArea) session.load(ConservationArea.class, ca);
+		id.setLanguage(localca.getDefaultLanguage());
+		lbl = (Label) session.get(Label.class, id);
+		if (lbl != null) return lbl.getValue();
+		
+		//search for any label in one of the current ca languages
+		for(Language l : localca.getLanguages()){
+			id.setLanguage(l);
+			lbl = (Label)session.get(Label.class, id);
+			if (lbl != null){
+				return lbl.getValue();
 			}
 		}
-		if (lbl != null) {
-			description = lbl.getValue();
-		}
-		return description;
+		
+		//at this point search for anything
+		return searchAll(Locale.getDefault(), elementuuid, session);
 	}
 }
 

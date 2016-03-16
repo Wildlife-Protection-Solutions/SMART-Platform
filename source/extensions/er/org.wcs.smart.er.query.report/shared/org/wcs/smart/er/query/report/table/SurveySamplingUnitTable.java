@@ -158,7 +158,8 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		if (connection.getConservationAreas().size() == 1){
 			mgr = new CaSurveyHibernateManager(connection.getConservationAreas().iterator().next());
 		}else{
-			mgr = new CcaaSurveyHibernateManager();
+			//Not current supported.
+			return sus;
 		}
 		for (Object su : mgr.getSamplingUnits(sd, connection.getSession(), null)){
 			if (su instanceof SamplingUnit){

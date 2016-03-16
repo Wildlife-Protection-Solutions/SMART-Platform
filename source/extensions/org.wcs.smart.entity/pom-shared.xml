@@ -37,6 +37,12 @@
     			<artifactId>org.wcs.smart.report.birt.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.equinox</groupId>
+			<artifactId>org.eclipse.equinox.common</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+		
 	</dependencies>
 	
 </project>

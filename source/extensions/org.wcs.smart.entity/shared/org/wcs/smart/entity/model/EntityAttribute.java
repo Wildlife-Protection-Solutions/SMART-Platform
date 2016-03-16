@@ -62,7 +62,7 @@ public class EntityAttribute extends NamedKeyItem {
 	 * 
 	 * @return
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="dm_attribute_uuid", referencedColumnName="uuid")
 	public Attribute getDmAttribute() {
 		return dmAttribute;
@@ -144,8 +144,10 @@ public class EntityAttribute extends NamedKeyItem {
 	public String getName() {
 		String n = super.getName();
 		if (n == null || n.length() == 0){
+			if (getDmAttribute() == null) return null;
 			return getDmAttribute().getName();
 		}
 		return n;
 	}
+	
 }
