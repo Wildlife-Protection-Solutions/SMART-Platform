@@ -94,6 +94,15 @@ public class ConnectMapLayers extends HttpServlet {
 		}
 	}
 	
+	
+	/**
+	 * Get All Map Layers
+	 * URL: ../server/api/maplayer/
+	 * Call Type: GET
+	 * 
+	 * @return Returns a JSON list of MapLayer objects. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/MapLayer.java) 
+	 */
+	
 	@GET
     @Path("")
     public List<MapLayer> getAllLAyers(){
@@ -109,6 +118,15 @@ public class ConnectMapLayers extends HttpServlet {
 
 	}
 	
+	/**
+	 * Get a single Map Layer
+	 * URL: ../server/api/maplayer/{layerUuid}
+	 * Call Type: GET
+	 * 
+	 * @param	layerUuid	provided in the URL, the UUID of of the map layer.
+	 * @return Returns a JSON representation of the MapLayer object. 
+	 */
+
 	@GET
     @Path("/{layerUuid}")
     public MapLayer getLayer(@PathParam("layerUuid") UUID layerUuid){
@@ -127,6 +145,19 @@ public class ConnectMapLayers extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Create new Map Layer
+	 * URL: ../server/api/maplayer/{layername}
+	 * Call Type: POST
+	 * Payload: A JSON object of attributes that match the Java attributes you wish to create, EX:
+	 * 		{"layerOrder":"052","layerName":"newlayername","wmsLayerList":"layer1,layer2","layerType":"3","token":"tokenorwmsurl","mapboxId":"","active":"true"}
+	 * 
+	 * layertype: 1=mapbox.com 2=giscloud.com 3=WMS 
+	 * 
+	 * @param	layername	provided in the URL, a name for the created layer
+	 * @return Returns a JSON MapLayer object for the created layer.
+	 */
+
 	@POST
     @Path("/{layerName}")
     public MapLayer addLayer(@PathParam("layerName") String layerName, MapLayer newLayer) {
@@ -177,6 +208,18 @@ public class ConnectMapLayers extends HttpServlet {
 		return m;
 	}
 	
+	/**
+	 * Update Map Layers
+	 * URL: ../server/api/maplayer/{uuid}
+	 * Call Type: PUT
+	 * Payload: A JSON object of attributes that match the Java attributes you wish to update, EX:
+	 * {"layerOrder":"51","layerName":"newlayername2","wmsLayerList":"layer1,layer2,layer3","layerType":"3","token":"tokenorwmsurl","mapboxId":"","active":"true"} 		
+	 * 
+	 * attributes that are not going to be updated can be left out entirely if desired.
+	 * 
+	 * @param	uuid	provided in the URL, the uuid id of the layer to update.
+	 * @return Returns a JSON MapLayer object for the updated layer 
+	 */
 
 	@PUT
     @Path("/{uuid}")
@@ -244,18 +287,27 @@ public class ConnectMapLayers extends HttpServlet {
 		return toUpdate;
     }
 	
+	/**
+	 * Delete a Map Layers
+	 * URL: ../server/api/maplayer/{uuid}
+	 * Call Type: DELETE
+	 * 
+	 * @param	uuid	provided in the URL, the uuid of the layer to delete.
+	 * @return Returns a JSON MapLayer object for the deleted layer
+	 */
+
     @DELETE
-    @Path("/{layerUuid}")
-    public MapLayer removeUser(@PathParam("layerUuid") UUID layerUuid) {
+    @Path("/{uuid}")
+    public MapLayer removeUser(@PathParam("uuid") UUID uuid) {
     	validateUser();
     	MapLayer toDelete = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			toDelete = HibernateManager.getMapLayer(s, layerUuid);
+			toDelete = HibernateManager.getMapLayer(s, uuid);
 			if (toDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
-						MessageFormat.format(Messages.getString("MapLayer.LayerNotFound", SmartUtils.getRequestLocale(request)), layerUuid)); //$NON-NLS-1$
+						MessageFormat.format(Messages.getString("MapLayer.LayerNotFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
 			}
 			s.delete(toDelete);
 			s.flush();

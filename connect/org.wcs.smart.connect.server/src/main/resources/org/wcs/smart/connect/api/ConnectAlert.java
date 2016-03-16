@@ -121,6 +121,13 @@ public class ConnectAlert extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Get all Alert Types
+	 * URL: ../server/api/connectalert/alertTypes/
+	 * Call Type: GET
+	 * 
+	 * @return Returns a list of JSON AlertType objects. ( https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/AlertType.java )
+	 */
 	@GET
     @Path("/alertTypes/")
     public List<AlertType> getAlertTypes(){
@@ -134,6 +141,14 @@ public class ConnectAlert extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Get a single Alert Type 
+	 * URL: ../server/api/connectalert/alertTypes/{uuid}
+	 * Call Type: GET
+	 * 
+	 * @param	uuid	provided in the URL, the uuid of the type.
+	 * @return Returns a JSON representation of an AlertType object for the created user 
+	 */
 	@GET
     @Path("/alertTypes/{uuid}")
     public AlertType getAlertType(@PathParam("uuid") UUID uuid){
@@ -153,6 +168,18 @@ public class ConnectAlert extends HttpServlet {
 		}
 	}
 	
+	
+	/**
+	 * Update an Alert Type
+	 * URL: ../server/api/connectalert/alertTypes/{uuid}
+	 * Call Type: PUT
+	 * Payload: A JSON object of attributes that match the Java attributes, EX:
+	 * 		{"uuid":"d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52","key":"intelligence","label":"Intelligence","color":"#1929FF","opacity":".99","markerIcon":"birthday-cake","markerColor":"red","spin":false} 
+	 * 		Only attributes you want to change need to be included.
+	 *  
+	 * @param	uuid	provided in the URL, the uuid of the alert type you are updating.
+	 * @return Returns a JSON representation of an AlertType object for the created user 
+	 */
 	@PUT
     @Path("/alertTypes/{uuid}")
     public AlertType updateAlertType(@PathParam("uuid") UUID uuid, AlertType newAlertType) {
@@ -207,6 +234,17 @@ public class ConnectAlert extends HttpServlet {
 		return toUpdate;
     }
 	
+	
+	/**
+	 * Create a new Alert Type
+	 * URL: ../server/api/connectalert/alertTypes/{label}
+	 * Call Type: POST
+	 * Payload: A JSON object of attributes that match the Java attributes, EX:
+	 * 		{"label":"New Type Name","color":"5AFF54","opacity":".80","markerIcon":"cloud","markerColor":"blue","spin":"false"}
+	 * 
+	 * @param	label	provided in the URL, the label/name of the new type (the system automatically creates a uuid)
+	 * @return Returns a JSON representation of the new AlertType object created 
+	 */
 	@POST
     @Path("/alertTypes/{label}")
     public AlertType addAlertType(@PathParam("label") String label, AlertType newAlertType) {
@@ -245,6 +283,15 @@ public class ConnectAlert extends HttpServlet {
 		return a;
 	}
 	
+	
+	/**
+	 * Delete an alert type
+	 * URL: ../server/api/connectalert/alertTypes/{uuid}
+	 * Call Type: DELETE
+	 * 
+	 * @param	uuid	provided in the URL, the uuid of the alert type to be delete.
+	 * @return Returns a JSON AlertType object of the deleted type
+	 */
 	@DELETE
     @Path("/alertTypes/{uuid}")
     public AlertType removeAlertType(@PathParam("uuid") UUID uuid) {
@@ -279,6 +326,27 @@ public class ConnectAlert extends HttpServlet {
 	 * 
 	 * all the parameters are strings because it was easier to send all the values from a HTML form (tick boxes)that way since you can send multiple comma-separated values
 	 * they are converted in the AlertFilter Class into proper Lists
+	 */
+	
+	/**
+	 * Get a filtered Alert List as GeoJSON 
+	 * URL: ../server/api/connectalert/
+	 * Call Type: GET
+	 * 
+	 * Full Example:  https://office.refractions.net:8443/server/api/connectalert/?typeUuidFilter=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50,d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52,c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51,e0eebc99-9c0b-4ef8-bb6d-91b9bd380a53,&statusFilter=ACTIVE,DISABLED,&levelFilter=1,2,5,&caUuidFilter=8f7fbe1b-201a-4ef4-bda8-14f5581e65ce,2a304b75-5b83-4d0a-83cd-52d0b4742c14,&textSearchFilter=&startDateFilter=1455401895908&endDateFilter=1458076695908&sortBy=userGeneratedId&sortAscending=true&maxAlertOverride=1000&
+	 * 
+	 * @param levelFilter	A comma separated list of which levels to include, ex: levelFilter=1,2,5  
+	 * @param typeUuidFilter	A comma separated list of which types(uuids) to include. ex:typeUuidFilter=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50,d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52, 
+	 * @param statusFilter	A comma separated list of which status option to include, ex: statusFilter=ACTIVE,DISABLED 
+	 * @param caUuidFilter	A comma separated list of which CAs (uuids) to include, ex: caUuidFilter=8f7fbe1b-201a-4ef4-bda8-14f5581e65ce,2a304b75-5b83-4d0a-83cd-52d0b4742c14
+	 * @param startDateFilter	in the form of number of milliseconds since Jan 1, 1970, same as javascript's Date.getTime(), ex: startDateFilter=1455401895908
+	 * @param endDateFilter	in the form of number of milliseconds since Jan 1, 1970, same as javascript's Date.getTime() ex: endDateFilter=1458076695908
+	 * @param textSearchFilter	leave blanks to return all text results. Otherwise, any text in this filter must appears in the alert name or description, ex: textSearchFilter=abc123
+	 * @param sortBy	which column name to sort the data on (date, userGeneratedId, description, level, status, x, y) sortBy=userGeneratedId
+	 * @param sortAscending	sort ascending or descending, exs: &sortAscending=true  or   &sortAscending=false 
+	 * @param maxAlertOverride	the maximum number of alerts, if there is more than this number, an error response occurs.
+	 * 
+	 * @return Returns a GeoJSON List of Alerts that meet the filter requirements 
 	 */
 	@GET
     @Path("")
@@ -328,6 +396,14 @@ public class ConnectAlert extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Get a single Alert
+	 * URL: ../server/api/connectalert/{alertUuid}
+	 * Call Type: GET
+	 * 
+	 * @param	alertUuid	provided in the URL, the UUID of the alert you want.
+	 * @return Returns a JSON representation of an Alert object ( https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/Alert.java )
+	 */
 	@GET
     @Path("/{alertUuid}")
     public Alert getAlert(@PathParam("alertUuid") UUID alertUuid){
@@ -352,7 +428,14 @@ public class ConnectAlert extends HttpServlet {
 		}
 	}
 	
-	
+	/**
+	 * Gets a list of all alerts for a single CA
+	 * URL: ../server/api/connectalert/ca/{caUuid}
+	 * Call Type: GET
+	 * 
+	 * @param	caUuid	provided in the URL, the UUID of the CA.
+	 * @return Returns a JSON list of Alert objects in the specified CA 
+	 */
 	@GET
     @Path("/ca/{caUuid}")
     public List<Alert> getAlertsByCa(@PathParam("caUuid") UUID caUuid){
@@ -371,7 +454,30 @@ public class ConnectAlert extends HttpServlet {
 		}
 	}
 	
-	
+	/**
+	 * Create a new Alert
+	 * URL: ../server/api/connectalert/{usergenid}
+	 * Call Type: POST
+	 * Payload: A GeoJSON object that has properties that match the Java attributes of an Alert, EX:{"type":"FeatureCollection",
+	 * 		"features":[{"type":"Feature",
+	 * 		"geometry":{"type":"Point","coordinates":["-123.36296859999997","48.4307441"]},
+	 * 		"properties":{"deviceId":"0","id":"0","latitude":0,"longitude":0,"altitude":0,"accuracy":0,
+	 * 			"caUuid":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce",
+	 * 			"level":"1",
+	 * 			"description":"",
+	 * 			"typeUuid":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50",
+	 * 			"sighting":{}
+	 * 		}}]}
+	 *
+	 * you can also include a "date", but typically just leave it blank and the server generates the time of creation automatically
+	 * 
+	 *  Note on Tracks / Updates: If you call this API with the same usergenid more than once, the systems adds the past x,y coordinates 
+	 *  to a historical "track" of sorts and overwrites the other attributes with the latest data. This is the way users can send a repetative
+	 *  "ping" to keep a last-known location and past track of devices without creating a new alert everytime the location is updated. 
+	 * 
+	 * @param	usergenid	provided in the URL, the user generated ID of the alert. The system generates a UUID automatically.
+	 * @return Returns a JSON Alert object for the created alert 
+	 */
 	@POST
     @Path("/{usergenid}")
     public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newAlert) {
@@ -409,7 +515,7 @@ public class ConnectAlert extends HttpServlet {
 		//validate usergenid, is it unique? If so, update the existing one and return instead of saving a new one.
 		String err = validateGeneratedId(userGenId);
 		if (err != null){
-			//alert already exists, try updating the existing one. Since Cybetracker can't track whether it is the first or second+
+			//alert already exists, try updating the existing one. Since Cybertracker can't track whether it is the first or second+
 			//time they send off alerts, we can't enforce them to use our Update API...
 			a.setTrack(null); //We don't want the default track that was created above if this is actually an update.
 			updateAndEditAlert(userGenId, a, true);
@@ -447,6 +553,19 @@ public class ConnectAlert extends HttpServlet {
 	 * Setup this way since users won't always know whether they sent a create request yet, 
 	 * and if they sent two very quickly no matter what order they will both work where an update received first would fail. 
 	 */
+	
+	/**
+	 * Edit Alert details
+	 * URL: ../server/api/connectalert/{usergenid}
+	 * Call Type: PUT
+	 * Payload: A JSON object of attributes that match the Java attributes you wish to update, EX:
+	 * 		{"caUuid":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce","typeUuid":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50","level":"1","status":"DISABLED","x":"-123.362","y":"48.4","track":"[ [-123.36296859999997 , 48.4307441]]","description":""}
+	 * 
+	 * attributes that are not going to be updated can be left out entirely if desired.
+	 * 
+	 * @param	usergenid	provided in the URL, the user generated id of the alert.
+	 * @return Returns a JSON Alert object for the updated alert 
+	 */
 	@PUT
     @Path("/{usergenid}")
     public Alert editAlert(@PathParam("usergenid") String oldAlertId, Alert newAlert) {
@@ -454,6 +573,14 @@ public class ConnectAlert extends HttpServlet {
 	}
 
  
+	/**
+	 * Delete an Alert
+	 * URL: ../server/api/connectalert/{alertUuid}
+	 * Call Type: DELETE
+	 * 
+	 * @param	alertUuid	provided in the URL, the UUID of the alert to delete.
+	 * @return Returns a JSON Alert object for the deleted user 
+	 */
     @DELETE
     @Path("/{alertUuid}")
     public Alert removeAlert(@PathParam("alertUuid") UUID alertUuid) {

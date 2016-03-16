@@ -106,6 +106,14 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 		validateUser(key, null);
 	}
 	
+	
+	/**
+	 * Get the default filters for showing alerts 
+	 * URL: ../server/api/connectalertfilterdefault/
+	 * Call Type: GET
+	 * 
+	 * @return Returns a JSON list of AlertFilterDefault objects, there is only ever 1 object in the list currently. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/AlertFilterDefault.java) 
+	 */
 	@GET
     @Path("")
     public List<AlertFilterDefault> getAlertFilterDefaults(){
@@ -114,17 +122,25 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 		s.beginTransaction();
 		try{
 			List<AlertFilterDefault> defaults = HibernateManager.getAlertFilterDefaults(s);
-//			String castring = defaults.get(0).getDefaultCaUuids();
-//			List<String> ca_list= Arrays.asList(castring.split("\\s*,\\s*")); 
-//			for (String x : ca_list){
-//				if()
-//			}
 			return defaults; 
 		}finally{
 			s.getTransaction().commit();
 		}
 	}
 	
+	/**
+	 * update default filters for showing alerts 
+	 * URL: ../server/api/connectalertfilterdefault/{uuid}
+	 * Call Type: PUT
+	 * Payload: A JSON object of attributes that match the Java attributes you wish to update, EX:
+	 * 		{"defaultPastHours":"744","defaultTypeUuids":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50,d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52,c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51,e0eebc99-9c0b-4ef8-bb6d-91b9bd380a53,","defaultActive":true,"defaultDisabled":false,"defaultLevel1":true,"defaultLevel2":true,"defaultLevel3":true,"defaultLevel4":true,"defaultLevel5":true,"defaultCaUuids":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce,2a304b75-5b83-4d0a-83cd-52d0b4742c14,00000000-0000-0000-0000-000000000000,fb5938b9-3ecd-4972-819e-867ee42623bb,2c5dbf89-ee89-473e-93fc-cc816205dba7,","defaultText":"","secondsRefresh":"30","startingZoomLevel":"8","startingLong":"-123","startingLat":"48"}
+	 * 
+	 * attributes that are not going to be updated can be left out entirely if desired.
+	 * set defaultPastHours=-99 to select 'all dates' as the default
+	 * 
+	 * @param	uuid	provided in the URL, the uuid of the alert defaults to update.
+	 * @return Returns a JSON AlertFilterDefault object for the updated alert defaults
+	 */
 	@PUT
     @Path("/{uuid}")
     public AlertFilterDefault updateAlertFilterDefault(@PathParam("uuid") UUID uuid, AlertFilterDefault newDefault) {

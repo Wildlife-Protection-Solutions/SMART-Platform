@@ -151,6 +151,17 @@ public class DataQueue {
 	}
 	
 	
+	/**
+	 * Get Detailed Data Queue Items
+	 * URL: ../server/api/dataqueue/detailedItems/
+	 * Call Type: GET
+	 * 
+	 * @param	cafilter	only show items from these CAs. A comma separated string of UUIDs.
+	 * @param	status	comma separated list of status states to include.
+	 * 
+	 * @return Returns a list of JSON ServerDataQueueItemProxy objects. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/dataqueue/ServerDataQueueItemProxy.java) 
+	 */
+	
 	@GET
     @Path("/detailedItems")
 	public List<ServerDataQueueItemProxy> getDetailedItems(@QueryParam("cafilter") String caFilter,
@@ -163,11 +174,14 @@ public class DataQueue {
 	}
 		
 	/**
+	 * Get data Queue Items
 	 * This will only return items that the user has permission to see.
+	 * URL: ../server/api/dataqueue/items/
+	 * Call Type: GET
 	 * 
 	 * @param caFilter a comma delimited list of ca uuids (or null for all)
 	 * @param status comma delimited list of status values to filter on or null for all
-	 * @return a list of all data queue items sorted by date added
+	 * @return a list of all data queue items sorted by date added.  
 	 */
 	@GET
     @Path("/items")
@@ -257,6 +271,9 @@ public class DataQueue {
 	
 	/**
 	 * Deletes the given data queue item (and associated work item if applicable).
+	 * URL: ../server/api/dataqueue/items/{uuid}
+	 * Call Type: DELETE
+	 * 
 	 * @param uuid
 	 */
 	@DELETE
@@ -301,11 +318,15 @@ public class DataQueue {
 	}
 	
 	/**
-	 * Creates an item and associated work item for file uploading.  Returns the url that
+	 * Creates an item and associated work item for file uploading.  Returns the URL that
 	 * can be used for uploading the file.
+	 * URL: ../server/api/dataqueue/items/
+	 * Call Type: POST
+	 * 
 	 * 
 	 * @param item
-	 * @return
+	 * @return the location of where to upload the file in the "location" header, in javascript you can get it like: oReq.getResponseHeader("location");
+	 * where oReq is the XMLHttpRequest object used to post this request.
 	 */
 	@POST
     @Path("/items/")
@@ -371,7 +392,7 @@ public class DataQueue {
 			s.saveOrUpdate(item);
 			s.saveOrUpdate(up);
 			
-			//we have a file to uplodate and we expect more
+			//we have a file to upload and we expect more
 			
 			response.setHeader(HttpHeaders.LOCATION, up.getStatusURL(request));
 			response.setHeader(HttpHeaders.CONTENT_LENGTH, "0"); //$NON-NLS-1$
@@ -391,8 +412,11 @@ public class DataQueue {
 	
 	/**
 	 * Gets a particular data queue item.
-	 * @param uuid
-	 * @return
+	 * URL: ../server/api/dataqueue/items/{uuid}
+	 * Call Type: GET
+	 * 
+	 * @param uuid	provided in the URL, the uuid of the item requested.
+	 * @return JSON representation of a ServerDataQueueItem object. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/dataqueue/ServerDataQueueItem.java) 
 	 */
 	@GET
 	@Path("/items/{uuid}")
@@ -418,12 +442,10 @@ public class DataQueue {
 		}
 	}
 		
-	/**
-	 * Updates only the status associated with a data queue item
-	 * 
-	 * @param newItem
-	 * @return
-	 */
+//TODO Delete this method, the one below seems like it is a superset of the functionality. 
+//Need to check if the desktop and web applications use this still and move them over if they do.
+	
+	
 	@PUT
 	@Path("/items/{uuid}/status/{status}")
 	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, 
@@ -463,10 +485,18 @@ public class DataQueue {
 	}
 	
 	/**
-	 * Updates the type and status associated with a data queue item
+	 * Updates the type and status of a data queue item
+	 * URL: ../server/api/dataqueue/items/{uuid}
+	 * Call Type: PUT
 	 * 
-	 * @param newItem
-	 * @return
+	 * Payload: JSON of the attributes to update, ex:
+	 * 		{"type":"MISSION_XML","status":"QUEUED"}
+	 * 
+	 * type options: PATROL_XML, MISSION_XML, INCIDENT_XML
+	 * Status options: QUEUED, COMPLETE, ERROR
+	 * 
+	 * @param uuid	the uuid of the item to update, from the URL
+	 * @return a JSON representation of the modified DataQueueItem object.
 	 */
 	@Consumes({ MediaType.APPLICATION_JSON})
 	@PUT
@@ -501,7 +531,9 @@ public class DataQueue {
 	}
 	
 	
-	
+	/* Used by SMART Desktop Only
+	 */
+
 	@GET
     @Path("/items/{uuid}/file")
     public Response getDataQueueItemFile(@PathParam("uuid") String itemUuid){

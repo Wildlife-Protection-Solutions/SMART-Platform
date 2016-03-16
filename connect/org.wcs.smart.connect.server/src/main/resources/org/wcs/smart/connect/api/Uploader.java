@@ -123,11 +123,19 @@ public class Uploader extends HttpServlet {
 	//TODO: figure how to prevent concurrent calls to this method
 	//which would write the same data twice to the file and fail miserably
 	/**
-	 * Uploads data to server.
+	 * Uploads a file to the server's data Queue.
 	 * 
-	 * @param uuid
-	 * @param data
-	 * @return
+	 * Payload: Multipart data containing an "upload_file" item, Example:
+	 *  
+	 * ------WebKitFormBoundaryYhW4Zu5MYMA5orxj
+	 * Content-Disposition: form-data; name="upload_file"; filename="Demo_00001.xml"
+	 * Content-Type: text/xml
+	 * <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+	 * ....the rest of an XML file upload...
+	 * ------WebKitFormBoundaryYhW4Zu5MYMA5orxj--
+	 * 
+	 * @param uuid	the uuid of the workitem, you must first call the "create work item" API to generate this uuid: ../server/api/dataqueue/items/ , then you can upload the file. 
+	 * @return HTTP/1.1 202 Accepted, and JSON of WorkItem details.
 	 * @throws Exception 
 	 */
 	@PUT
@@ -244,6 +252,16 @@ public class Uploader extends HttpServlet {
 	 * 
 	 * @throws Exception 
 	 * */
+	
+	/**
+	 * Uploads data to server via POST
+	 * URL: .../server/uploader/{uploaduuid}
+	 * 
+	 * @param uploaduuid	provided in the URL, uuid of the workItem this file upload belongs to.
+	 * @param input	MultipartFormDataInput containing an "upload_file" component  
+	 * @return Response
+	 * @throws Exception FileNotFound is possible if the upload fails for some reason.
+	 */
 	@POST
 	@Path("/{uploaduuid}")
 	@Consumes("multipart/form-data")

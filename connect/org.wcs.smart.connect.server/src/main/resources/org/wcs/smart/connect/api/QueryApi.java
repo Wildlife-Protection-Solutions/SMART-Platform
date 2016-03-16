@@ -104,15 +104,17 @@ public class QueryApi extends HttpServlet{
 	
 	/**
 	 * Runs a query and returns the results.
+	 * URL: ../server/api/query/{queryuuid}
+	 * Call Type: GET
 	 * 
-	 * @param queryUuid
-	 * @param format
-	 * @param start
-	 * @param end
-	 * @param filter
-	 * @param delimiter
-	 * @param cafilter
-	 * @return
+	 * @param queryuuid	provided in the URL, the uuid of the query requested
+	 * @param format	requested format, not all options makes sense for all query types: csv, shp, tif
+	 * @param start_date	start date of query, number of milliseconds since the epoch
+	 * @param end_date	end date of query, number of milliseconds since the epoch
+	 * @param date_filter	date field type, not all make sense for all queries: waypointdate, patrolstart, patrolend, missiontrackdate, missionstartdate, missionenddate, intellreceiveddate
+	 * @param delimiter	delimiter override to use in CSV format
+	 * @param cafilter	comma separated list of CA uuids, only query these CAs.
+	 * @return the results of the query, format is whatever is selected using the format parameter.
 	 */
 	@SuppressWarnings("unchecked")
 	@GET
@@ -337,8 +339,12 @@ public class QueryApi extends HttpServlet{
 		return validCas.toString();
 	}
 	
-	/*
+	/**
 	 * returns all Queries the user is able to view 
+	 * URL: ../server/api/query/
+	 * Call Type: GET
+	 * 
+	 * @return A JSON list of QueryProxy objects. ( https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/query/QueryProxy.java )
 	 */
 	
 	@GET

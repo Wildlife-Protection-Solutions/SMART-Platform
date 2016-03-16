@@ -184,10 +184,11 @@ public class ConservationAreas extends HttpServlet{
 	}
 	
 	/**
-	 * Lists all conservation areas that the current user has access
-	 * to read.
+	 * List all Conservation Areas
+	 * URL: ../server/api/conservationarea/
+	 * Call Type: GET
 	 * 
-	 * @return
+	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
 	 */
 	@SuppressWarnings("unchecked")
 	@GET
@@ -232,7 +233,7 @@ public class ConservationAreas extends HttpServlet{
 	 * Gets a conservation area.  
 	 * This function returns different information depending on parameters
 	 * provided:
-	 *  If no paramaneters are provided it returns a json object
+	 *  If no parameters are provided it returns a JSON object
 	 * with information about the conservation area.  
 	 * If data, version, and revision
 	 * are provided with a value of "changelog" for data then a zip file is
@@ -240,7 +241,10 @@ public class ConservationAreas extends HttpServlet{
 	 * "all" then a url is returned that represents the status of the ca download
 	 * package process.
 	 * 
-	 * @param caUuid
+	 * URL: ../server/api/conservationarea/{cauuid}
+	 * Call Type: GET
+	 * 
+	 * @param	caUuid	provided in the URL; This is the CA's UUID you want information about.
 	 */
 	@GET
     @Path("/{cauuid}")
@@ -582,8 +586,11 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	/**
 	 * Deletes a given conservation area.
+	 * URL: ../server/api/conservationarea/{cauuid}
+	 * Call Type: DELETE
 	 * 
-	 * @param caUuid
+	 * @param	caUuid	provided in the URL, the ca UUID you wish to delete
+	 * @return	void
 	 */
 	@DELETE
     @Path("/{cauuid}")
@@ -695,7 +702,12 @@ public class ConservationAreas extends HttpServlet{
 	 * Creates a new conservation area with no data.  Both parameters are optional and generated
 	 * by the system if not provided.
 	 * 
-	 * @param caUuid
+	 * URL: ../server/api/conservationarea/
+	 * Call Type: POST
+	 * Payload: none
+	 * 
+	 * @param caUuid The CA UUID you wish to create, leave it blank if you want the system to create one for you.
+	 * @param name 	The CA Name
 	 * @return
 	 */
 	@POST
@@ -744,9 +756,10 @@ public class ConservationAreas extends HttpServlet{
 		
 	
 	/**
-	 * Initiates an upload CA session.
+	 * Initiates an upload CA session. Used when uploading a full CA from SMART Desktop
 	 * 
 	 * @param caUuid
+	 * @param version
 	 * @return
 	 */
 	@POST
@@ -847,7 +860,7 @@ public class ConservationAreas extends HttpServlet{
 			
 			s.save(up);
 			
-			//we have a file to uplodate and we expect more
+			//we have a file to uploade and we expect more
 			
 			response.setHeader(HttpHeaders.LOCATION, up.getStatusURL(request));
 			response.setHeader(HttpHeaders.CONTENT_LENGTH, "0"); //$NON-NLS-1$
