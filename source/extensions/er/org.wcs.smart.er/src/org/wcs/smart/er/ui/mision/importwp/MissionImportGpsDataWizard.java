@@ -86,7 +86,9 @@ public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 
 								@Override
 								public void run() {
-									MessageDialog.openWarning(getShell(), Messages.MissionImportGpsDataWizard_DialogTitle, MessageFormat.format(Messages.MissionImportGpsDataWizard_NoData, new  Object[]{getType().guiName, getType().guiName}));
+									MessageDialog.openWarning(getShell(), 
+											Messages.MissionImportGpsDataWizard_DialogTitle, 
+											MessageFormat.format(Messages.MissionImportGpsDataWizard_NoData, new  Object[]{getType().guiName, getType().guiName, getType().guiName}));
 								}});
 							return;
 						}
