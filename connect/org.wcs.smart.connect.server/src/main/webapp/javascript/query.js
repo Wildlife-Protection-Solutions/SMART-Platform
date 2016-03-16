@@ -208,7 +208,7 @@ function createQueryTable(){
  		 if(search == "" || isFoundInRow(queries[i]) ){
  			drawnRowCount++;
 	 		var row = tableCreateRow(parent, 
-	 				[queries[i].conservationArea, queries[i].id, queries[i].name, queries[i].type, null, null], 
+	 				[queries[i].conservationArea, queries[i].id, queries[i].name, queries[i].type,  null], 
 	 				"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 	 		
 	 		row.dataset.queryuuid = queries[i].uuid;
@@ -222,11 +222,11 @@ function createQueryTable(){
 	 		runicon.onclick = showQueryOptions;
 	 		row.childNodes[4].appendChild(runicon);
 	 		
-	 		var filter = qdatefilter[queries[i].typeKey][0];
-	 		var csvlink = document.createElement("a");
-	 		csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=" + filter;
-	 		csvlink.innerHTML = "csv";
-	 		row.childNodes[5].appendChild(csvlink);
+//	 		var filter = qdatefilter[queries[i].typeKey][0];
+//	 		var csvlink = document.createElement("a");
+//	 		csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=" + filter;
+//	 		csvlink.innerHTML = "csv";
+//	 		row.childNodes[5].appendChild(csvlink);
  		 }
  		}
  	}

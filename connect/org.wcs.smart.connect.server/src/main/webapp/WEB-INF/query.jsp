@@ -63,8 +63,6 @@
 		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('id')"><fmt:message key="query.id" /></a></div>
 		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('name')"><fmt:message key="query.name" /></a></div>
 		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('type')"><fmt:message key="query.type" /></a></div>
-
-		<div class="table-cell smart-table-cell"></div>
 		<div class="table-cell smart-table-cell"></div>
 	</div>
 	</div>  
