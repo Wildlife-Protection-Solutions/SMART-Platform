@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.independentincident.feature.nl.fr"
       label="Independent Incident French Language Pack"
-      version="3.2.1"
+      version="3.3.1"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 

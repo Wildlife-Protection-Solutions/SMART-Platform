@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.intelligence.feature_3.3.0.jar" id="org.wcs.smart.intelligence.feature" version="3.3.0">
-      <category name="intelligence"/>
-   </feature>
    <feature url="features/org.wcs.smart.intelligence.feature.nl.es_3.2.0.jar" id="org.wcs.smart.intelligence.feature.nl.es" version="3.2.0">
-      <category name="intelligence"/>
-   </feature>
-   <feature url="features/org.wcs.smart.intelligence.feature.nl.fr_3.2.0.jar" id="org.wcs.smart.intelligence.feature.nl.fr" version="3.2.0">
       <category name="intelligence"/>
    </feature>
    <feature url="features/org.wcs.smart.intelligence.feature.nl.in_3.2.0.jar" id="org.wcs.smart.intelligence.feature.nl.in" version="3.2.0">
@@ -27,13 +21,7 @@
    <feature url="features/org.wcs.smart.intelligence.feature.nl.zh_3.2.0.jar" id="org.wcs.smart.intelligence.feature.nl.zh" version="3.2.0">
       <category name="intelligence"/>
    </feature>
-   <feature url="features/org.wcs.smart.plan.feature_3.3.0.jar" id="org.wcs.smart.plan.feature" version="3.3.0">
-      <category name="planning"/>
-   </feature>
    <feature url="features/org.wcs.smart.plan.feature.nl.es_3.2.0.jar" id="org.wcs.smart.plan.feature.nl.es" version="3.2.0">
-      <category name="planning"/>
-   </feature>
-   <feature url="features/org.wcs.smart.plan.feature.nl.fr_3.2.0.jar" id="org.wcs.smart.plan.feature.nl.fr" version="3.2.0">
       <category name="planning"/>
    </feature>
    <feature url="features/org.wcs.smart.plan.feature.nl.in_3.2.0.jar" id="org.wcs.smart.plan.feature.nl.in" version="3.2.0">
@@ -57,9 +45,6 @@
    <feature url="features/org.wcs.smart.es_3.2.0.jar" id="org.wcs.smart.es" version="3.2.0">
       <category name="smart"/>
    </feature>
-   <feature url="features/org.wcs.smart.fr_3.2.0.jar" id="org.wcs.smart.fr" version="3.2.0">
-      <category name="smart"/>
-   </feature>
    <feature url="features/org.wcs.smart.in_3.2.0.jar" id="org.wcs.smart.in" version="3.2.0">
       <category name="smart"/>
    </feature>
@@ -78,13 +63,7 @@
    <feature url="features/org.wcs.smart.zh_3.2.0.jar" id="org.wcs.smart.zh" version="3.2.0">
       <category name="smart"/>
    </feature>
-   <feature url="features/org.wcs.smart.entity.feature_3.3.0.jar" id="org.wcs.smart.entity.feature" version="3.3.0">
-      <category name="entity"/>
-   </feature>
    <feature url="features/org.wcs.smart.entity.feature.nl.es_3.2.0.jar" id="org.wcs.smart.entity.feature.nl.es" version="3.2.0">
-      <category name="entity"/>
-   </feature>
-   <feature url="features/org.wcs.smart.entity.feature.nl.fr_3.2.0.jar" id="org.wcs.smart.entity.feature.nl.fr" version="3.2.0">
       <category name="entity"/>
    </feature>
    <feature url="features/org.wcs.smart.entity.feature.nl.in_3.2.0.jar" id="org.wcs.smart.entity.feature.nl.in" version="3.2.0">
@@ -93,16 +72,7 @@
    <feature url="features/org.wcs.smart.entity.feature.nl.vi_3.2.0.jar" id="org.wcs.smart.entity.feature.nl.vi" version="3.2.0">
       <category name="entity"/>
    </feature>
-   <feature url="features/org.wcs.smart.er.feature_3.3.0.jar" id="org.wcs.smart.er.feature" version="3.3.0">
-      <category name="ecologicalrecords"/>
-   </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature_3.3.0.jar" id="org.wcs.smart.independentincident.feature" version="3.3.0">
-      <category name="independentincident"/>
-   </feature>
    <feature url="features/org.wcs.smart.independentincident.feature.nl.es_3.2.0.jar" id="org.wcs.smart.independentincident.feature.nl.es" version="3.2.0">
-      <category name="independentincident"/>
-   </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature.nl.fr_3.2.0.jar" id="org.wcs.smart.independentincident.feature.nl.fr" version="3.2.0">
       <category name="independentincident"/>
    </feature>
    <feature url="features/org.wcs.smart.independentincident.feature.nl.in_3.2.0.jar" id="org.wcs.smart.independentincident.feature.nl.in" version="3.2.0">
@@ -123,34 +93,7 @@
    <feature url="features/org.wcs.smart.independentincident.feature.nl.zh_3.2.0.jar" id="org.wcs.smart.independentincident.feature.nl.zh" version="3.2.0">
       <category name="independentincident"/>
    </feature>
-   <feature url="features/org.wcs.smart.er.feature.nl.th_3.2.1.jar" id="org.wcs.smart.er.feature.nl.th" version="3.2.1">
-      <category name="ecologicalrecords"/>
-   </feature>
-   <feature url="features/org.wcs.smart.entity.feature.nl.th_3.2.1.jar" id="org.wcs.smart.entity.feature.nl.th" version="3.2.1">
-      <category name="entity"/>
-   </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature.nl.th_3.2.1.jar" id="org.wcs.smart.independentincident.feature.nl.th" version="3.2.1">
-      <category name="independentincident"/>
-   </feature>
-   <feature url="features/org.wcs.smart.th_3.2.1.jar" id="org.wcs.smart.th" version="3.2.1">
-      <category name="smart"/>
-   </feature>
-   <feature url="features/org.wcs.smart.plan.feature.nl.th_3.2.1.jar" id="org.wcs.smart.plan.feature.nl.th" version="3.2.1">
-      <category name="planning"/>
-   </feature>
-   <feature url="features/org.wcs.smart.intelligence.feature.nl.th_3.2.1.jar" id="org.wcs.smart.intelligence.feature.nl.th" version="3.2.1">
-      <category name="intelligence"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_3.3.0.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="3.3.0">
-      <category name="cybertracker"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature_3.3.0.jar" id="org.wcs.smart.cybertracker.survey.feature" version="3.3.0">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.es_3.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.es" version="3.2.0">
-      <category name="cybertracker"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.fr_3.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.fr" version="3.2.0">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.hi_3.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.hi" version="3.2.0">
@@ -165,16 +108,10 @@
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.lo_3.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.lo" version="3.2.0">
       <category name="cybertracker"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.mn_3.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.mn" version="3.2.0">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.ms_3.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.ms" version="3.2.0">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.ru_3.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.ru" version="3.2.0">
-      <category name="cybertracker"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.th_3.2.1.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.th" version="3.2.1">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.vi_3.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.vi" version="3.2.0">
@@ -184,9 +121,6 @@
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.es_3.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.es" version="3.2.0">
-      <category name="cybertracker"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.fr_3.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.fr" version="3.2.0">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.hi_3.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.hi" version="3.2.0">
@@ -201,16 +135,10 @@
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.lo_3.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.lo" version="3.2.0">
       <category name="cybertracker"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.mn_3.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.mn" version="3.2.0">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.ms_3.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.ms" version="3.2.0">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.ru_3.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.ru" version="3.2.0">
-      <category name="cybertracker"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.th_3.2.1.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.th" version="3.2.1">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.vi_3.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.vi" version="3.2.0">
@@ -240,14 +168,74 @@
    <feature url="features/org.wcs.smart.entity.feature.nl.mn_3.3.0.jar" id="org.wcs.smart.entity.feature.nl.mn" version="3.3.0">
       <category name="entity"/>
    </feature>
-   <feature url="features/org.wcs.smart.er.feature.nl.mn_3.3.0.jar" id="org.wcs.smart.er.feature.nl.mn" version="3.3.0">
+   <feature url="features/org.wcs.smart.intelligence.feature_3.3.1.jar" id="org.wcs.smart.intelligence.feature" version="3.3.1">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.fr_3.3.1.jar" id="org.wcs.smart.intelligence.feature.nl.fr" version="3.3.1">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.th_3.3.1.jar" id="org.wcs.smart.intelligence.feature.nl.th" version="3.3.1">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_3.3.2.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="3.3.2">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.fr_3.3.1.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.fr" version="3.3.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.th_3.3.1.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.th" version="3.3.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature_3.3.2.jar" id="org.wcs.smart.cybertracker.survey.feature" version="3.3.2">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.fr_3.2.1.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.fr" version="3.2.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.th_3.3.1.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.th" version="3.3.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature_3.3.1.jar" id="org.wcs.smart.plan.feature" version="3.3.1">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.th_3.3.1.jar" id="org.wcs.smart.plan.feature.nl.th" version="3.3.1">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.fr_3.3.1.jar" id="org.wcs.smart.plan.feature.nl.fr" version="3.3.1">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.fr_3.3.1.jar" id="org.wcs.smart.fr" version="3.3.1">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.th_3.3.1.jar" id="org.wcs.smart.th" version="3.3.1">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.independentincident.feature_3.3.1.jar" id="org.wcs.smart.independentincident.feature" version="3.3.1">
+      <category name="independentincident"/>
+   </feature>
+   <feature url="features/org.wcs.smart.independentincident.feature.nl.fr_3.3.1.jar" id="org.wcs.smart.independentincident.feature.nl.fr" version="3.3.1">
+      <category name="independentincident"/>
+   </feature>
+   <feature url="features/org.wcs.smart.independentincident.feature.nl.th_3.3.1.jar" id="org.wcs.smart.independentincident.feature.nl.th" version="3.3.1">
+      <category name="independentincident"/>
+   </feature>
+   <feature url="features/org.wcs.smart.entity.feature_3.3.1.jar" id="org.wcs.smart.entity.feature" version="3.3.1">
+      <category name="entity"/>
+   </feature>
+   <feature url="features/org.wcs.smart.entity.feature.nl.fr_3.3.1.jar" id="org.wcs.smart.entity.feature.nl.fr" version="3.3.1">
+      <category name="entity"/>
+   </feature>
+   <feature url="features/org.wcs.smart.entity.feature.nl.th_3.3.1.jar" id="org.wcs.smart.entity.feature.nl.th" version="3.3.1">
+      <category name="entity"/>
+   </feature>
+   <feature url="features/org.wcs.smart.er.feature_3.3.1.jar" id="org.wcs.smart.er.feature" version="3.3.1">
       <category name="ecologicalrecords"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_3.3.1.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="3.3.1">
-      <category name="cybertracker"/>
+   <feature url="features/org.wcs.smart.er.feature.nl.fr_3.3.1.jar" id="org.wcs.smart.er.feature.nl.fr" version="3.3.1">
+      <category name="ecologicalrecords"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature_3.3.1.jar" id="org.wcs.smart.cybertracker.survey.feature" version="3.3.1">
-      <category name="cybertracker"/>
+   <feature url="features/org.wcs.smart.er.feature.nl.th_3.3.1.jar" id="org.wcs.smart.er.feature.nl.th" version="3.3.1">
+      <category name="ecologicalrecords"/>
    </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>

@@ -98,7 +98,16 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.survey_waypoint_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.survey_mission_track_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.survey_mission_query add column style long varchar", //$NON-NLS-1$
-				"alter table smart.survey_gridded_query add column style long varchar"}; //$NON-NLS-1$
+				"alter table smart.survey_gridded_query add column style long varchar", //$NON-NLS-1$
+		
+				//fix the spelling error with the install
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_OBSERVATION_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_WAYPOINT_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_GRIDDED_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_SUMMARY_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_MISSION_QUERY TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON SMART.SURVEY_MISSION_TRACK_QUERY TO analyst"}; //$NON-NLS-1$
+
 		
 		session.beginTransaction();
 		try{
