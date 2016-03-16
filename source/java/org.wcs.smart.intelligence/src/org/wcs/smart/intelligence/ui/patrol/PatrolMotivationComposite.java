@@ -119,6 +119,7 @@ public class PatrolMotivationComposite extends Composite {
 		}
 		btnMotivated.setSelection(!selectedIntelligences.isEmpty());
 		applyCurrentState();
+		handleInputChanged();
 	}
 
 	public List<Intelligence> getCurrentIntelligences() {
