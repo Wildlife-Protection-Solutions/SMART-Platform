@@ -124,7 +124,7 @@ public class PatrolImportGpsDataWizard extends ImportGpsDataWizard {
 
 								@Override
 								public void run() {
-									MessageDialog.openWarning(getShell(), IMPORT_DIALOG_TITLE, MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{getType().guiName.toLowerCase(), getType().guiName.toLowerCase()}));
+									MessageDialog.openWarning(getShell(), IMPORT_DIALOG_TITLE, MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{getType().guiName.toLowerCase(), getType().guiName.toLowerCase(), getType().guiName.toLowerCase()}));
 								}});
 							return;
 						}

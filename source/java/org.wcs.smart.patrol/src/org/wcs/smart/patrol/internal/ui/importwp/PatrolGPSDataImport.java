@@ -132,7 +132,7 @@ public class PatrolGPSDataImport {
 			}
 			if (addedWaypoints.size() == 0){
 				//nothing imported; not date matched
-				message = MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{ImportType.WAYPOINT.guiName.toLowerCase(), ImportType.WAYPOINT.guiName.toLowerCase()});
+				message = MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{ImportType.WAYPOINT.guiName.toLowerCase(), ImportType.WAYPOINT.guiName.toLowerCase(), ImportType.WAYPOINT.guiName.toLowerCase()});
 			}else{
 				if (patrol.getLegs().size() == 1){
 					//only one leg; so this is the number of dates
