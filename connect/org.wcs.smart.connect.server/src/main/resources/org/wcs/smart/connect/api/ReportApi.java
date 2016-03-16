@@ -119,10 +119,12 @@ public class ReportApi extends HttpServlet{
 		UUID uuid = UuidUtils.stringToUuid(reportUuid);
 		
 		Report report = null;
-		Session s = HibernateManager.getSession(context);
+		Session s = HibernateManager.getSession(context, request.getLocale());
+		
+		List<ConservationArea> conservationAreas = new ArrayList<ConservationArea>();
 		try{
 			s.beginTransaction();
-			
+			s.clear();	
 			report = (Report) s.get(Report.class, uuid);
 			
 			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, "Report not found");
@@ -140,7 +142,9 @@ public class ReportApi extends HttpServlet{
 			String caFilter = null;
 			if (report.getConservationArea().getIsCcaa()){
 				//we use the ccaafilter; otherwise we ignore it
-				caFilter = parseCaFilter(cafilter, s);
+				conservationAreas.addAll(parseCaFilter(cafilter, s));
+			}else{
+				conservationAreas.add(report.getConservationArea());
 			}
 			
 		}finally{
@@ -178,7 +182,7 @@ public class ReportApi extends HttpServlet{
 				Map items = task.getAppContext();
 				items.put(ServerSmartConnection.CONNECTION_KEY, HibernateManager.getSession(context));
 				items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
-				items.put("org.wcs.smart.report.ca", report.getConservationArea());
+				items.put("org.wcs.smart.report.ca", conservationAreas);
 				
 				try{
 					task.setRenderOption(options);
@@ -247,28 +251,26 @@ public class ReportApi extends HttpServlet{
 		    };
 	}
 	
-	private String parseCaFilter(String caFilter, Session session){
+	private List<ConservationArea> parseCaFilter(String caFilter, Session session){
 		if (caFilter == null) throw new SmartConnectException(Status.BAD_REQUEST, "Invalid Conservation Area Filter.");  //$NON-NLS-1$
 		String bits[] = caFilter.split(ConservationAreaFilter.CA_SPLITTER);
-		StringBuilder validCas = new StringBuilder();
+		List<ConservationArea> cas = new ArrayList<ConservationArea>();
 		
 		for (String cafilter : bits){
 			try{
 				UUID cauuid = UuidUtils.stringToUuid(cafilter);
 				ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, cauuid);
 				if (ca != null && !ca.getIsCcaa()){
-					validCas.append(","); //$NON-NLS-1$
-					validCas.append(ca.getUuid().toString());
+					cas.add(ca);
 				}
 			}catch (Exception ex){
 				//cannot parse UUID for any reason
 			}
 		}
-		if (validCas.length() == 0){
+		if (cas.size() == 0){
 			throw new SmartConnectException(Status.BAD_REQUEST, "Invalid Conservation Area Filter"); //$NON-NLS-1$
 		}
-		validCas.deleteCharAt(0);
-		return validCas.toString();
+		return cas;
 	}
 	
 	/*

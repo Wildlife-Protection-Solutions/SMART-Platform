@@ -99,9 +99,12 @@ public class ServerSmartConnection extends SmartConnection {
 
 	@Override
 	public Collection<ConservationArea> getConservationAreas() {
-		ConservationArea ca = (ConservationArea) appContext.get("org.wcs.smart.report.ca");
-		if (ca == null) return null;
-		return Collections.singleton(ca);
+		Object x = appContext.get("org.wcs.smart.report.ca");
+		if (x == null) return null;
+		if (x instanceof ConservationArea){
+			return Collections.singleton((ConservationArea)x);
+		}
+		return (Collection<ConservationArea>)x;
 	}
 
 }
