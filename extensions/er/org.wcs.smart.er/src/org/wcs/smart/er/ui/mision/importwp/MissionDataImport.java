@@ -95,7 +95,7 @@ public class MissionDataImport {
 			}
 			if (addedWaypoints.size() == 0){
 				//nothing imported; not date matched
-				message = MessageFormat.format(Messages.MissionDataImport_NoWaypoints, new  Object[]{ImportType.WAYPOINT.guiName, ImportType.WAYPOINT.guiName});
+				message = MessageFormat.format(Messages.MissionDataImport_NoWaypoints, new  Object[]{ImportType.WAYPOINT.guiName, ImportType.WAYPOINT.guiName, ImportType.WAYPOINT.guiName});
 			}else{
 				//only one leg; so this is the number of dates
 				message = MessageFormat.format(Messages.MissionDataImport_NumberImported, new Object[]{cnt, modified.size()});
