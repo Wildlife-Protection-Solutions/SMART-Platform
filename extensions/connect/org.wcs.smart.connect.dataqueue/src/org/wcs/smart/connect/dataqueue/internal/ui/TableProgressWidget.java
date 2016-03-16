@@ -81,7 +81,7 @@ public class TableProgressWidget extends Composite{
 	}
 	
 	public void initStatus(){
-		lblProgress.setText(item.getStatus().name());
+		lblProgress.setText(item.getStatus().getGuiName());
 		if (item.getStatus() == LocalDataQueueItem.Status.COMPLETE ||
 			item.getStatus() == LocalDataQueueItem.Status.COMPLETE_WARN ||
 			item.getStatus() == LocalDataQueueItem.Status.ERROR){
@@ -97,7 +97,7 @@ public class TableProgressWidget extends Composite{
 		this.item.setDateProcessed(update.getDateProcessed());
 		
 		hideProgress();
-		lblProgress.setText(this.item.getStatus().name());
+		lblProgress.setText(this.item.getStatus().getGuiName());
 		viewer.refresh(item);
 		layout(true);
 	}
