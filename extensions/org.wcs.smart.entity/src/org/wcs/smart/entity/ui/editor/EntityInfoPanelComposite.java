@@ -136,7 +136,11 @@ public class EntityInfoPanelComposite extends Composite{
 			this.observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
 			this.entity = (Entity) s.load(Entity.class, entity.getUuid());
 			try{
-				this.crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+				if (observationOptions.getViewProjection() != null){
+					this.crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+				}else{
+					this.crs = SmartDB.DATABASE_CRS;
+				}
 			}catch (Exception ex){
 				EntityPlugIn.displayLog(ex.getMessage(), ex);
 			}

@@ -322,6 +322,9 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					att.getName().length();
 				}
 			}
+		}catch (Exception ex){
+			ex.printStackTrace();
+			throw ex;
 		}finally{
 			session.getTransaction().rollback();
 			session.close();

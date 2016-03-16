@@ -19,102 +19,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.ccca;
+package org.wcs.smart.entity;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.Status;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryDataModelManager;
 
 /**
- * Tools for merging entity types for cross conservation
- * area analysis and entity types.
+ * Merges entity types across Conservation Areas.
  * 
  * @author Emily
  *
  */
 public class EntityTypeMerger {
-
-	/**
-	 * Get all entity types
-	 * @return
-	 */
-	public static List<EntityType> getEntityTypes() {
-		
-		final List<EntityType> newTypes = new ArrayList<EntityType>();
-		
-		//ensure the data model is loaded here; outside the progress monitor 
-		//to prevent deadlocking
-		QueryDataModelManager.getInstance().getDataModel();
-		
-		Display.getDefault().syncExec(new Runnable(){
-
-			@Override
-			public void run() {
-				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-				try {
-					dialog.run(true, false, new IRunnableWithProgress() {
-						
-						@Override
-						public void run(IProgressMonitor monitor) throws InvocationTargetException,
-								InterruptedException {
-							Session s = HibernateManager.openSession();
-							try{
-								List<EntityType> tts = mergeEntityTypes(
-										SmartDB.getConservationAreaConfiguration().getConservationAreas().toArray(new ConservationArea[SmartDB.getConservationAreaConfiguration().getConservationAreas().size()]),
-										SmartDB.getConservationAreaConfiguration().getMainConservationArea(),
-										s, monitor);
-								newTypes.addAll(tts);
-							}finally{
-								s.close();
-								
-							}
-							
-						}
-					});
-				} catch (Exception e) {
-					EntityPlugIn.displayLog(Messages.EntityTypeMerger_ErrorMergingEntityTypes + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
-				}
-			}});
-		
-		
-		return newTypes;
-	}
 	
+	private Locale l;
+	
+	public EntityTypeMerger(Locale l){
+		this.l = l;
+	}
+
 	/**
+	 * Merges all entity types that occur in the list of cas.
 	 * 
-	 * @param cas
-	 * @param defaultCa
-	 * @param session
-	 * @param monitor
+	 * @param cas Conservation Areas to merge entity types
+	 * @param defaultCa  Main CA to use for labels
+	 * @param session database connection
+	 * @param monitor progress monitor, can be null
 	 * @return
 	 */
-	private static List<EntityType> mergeEntityTypes(ConservationArea[] cas, 
+	public List<EntityType> mergeEntityTypes(ConservationArea[] cas, 
 			ConservationArea defaultCa, 
 			Session session, IProgressMonitor monitor){
 		
-		monitor.beginTask(Messages.EntityTypeMerger_ProgressLabel, 100);
+		if (monitor != null ) monitor.beginTask(SmartContext.INSTANCE.getClass(IEntityLabelProvider.class).getLabel(IEntityLabelProvider.MERGE_PROGRESS1_KEY, l), 100);
 		
 		//entity types must have the same keyid, dm attribute keyid and type
 		String hql = "SELECT count(*), e.keyId, e.type, a.keyId FROM EntityType e, Attribute a WHERE e.dmAttribute.uuid = a.uuid and e.conservationArea in (:ca) GROUP BY e.keyId, e.type, a.keyId";//$NON-NLS-1$
@@ -135,10 +88,13 @@ public class EntityTypeMerger {
 		List<EntityType> clonedTypes = new ArrayList<EntityType>();
 		int i = 0;
 		for (String entityType : keys){
+			if (monitor != null ) monitor.setTaskName(SmartContext.INSTANCE.getClass(IEntityLabelProvider.class).getLabel(IEntityLabelProvider.MERGE_PROGRESS1_KEY, l));
 			
-			monitor.setTaskName(MessageFormat.format(Messages.EntityTypeMerger_ProgressLabelB, new Object[]{entityType}));
-			
-			EntityType shared = (EntityType) session.createCriteria(EntityType.class).add(Restrictions.eq("keyId", entityType)).add(Restrictions.eq("conservationArea", defaultCa)).list().get(0); //$NON-NLS-1$ //$NON-NLS-2$
+			EntityType shared = (EntityType) session
+					.createCriteria(EntityType.class)
+					.add(Restrictions.eq("keyId", entityType)) //$NON-NLS-1$
+					.add(Restrictions.eq("conservationArea", defaultCa)) //$NON-NLS-1$
+					.list().get(0);
 			
 			EntityType et = new EntityType();
 			et.setType(shared.getType());
@@ -146,7 +102,7 @@ public class EntityTypeMerger {
 			et.setKeyId(entityType);
 			et.setName(shared.getName());
 			et.setUuid(null);
-			et.setDmAttribute( QueryDataModelManager.getInstance().getAttribute(session, shared.getDmAttribute().getKeyId()));
+			et.setDmAttribute(  findAttribute(session,  shared.getDmAttribute().getKeyId(), cas, defaultCa) );
 
 			//merge all attributes
 			et.setAttributes(getAttributes(entityType, defaultCa, cas, session));
@@ -160,12 +116,44 @@ public class EntityTypeMerger {
 			clonedTypes.add(et);
 			
 			i++;
-			monitor.worked( (int) ((i/ ((float)keys.size())) * 100) );
+			if (monitor != null ) monitor.worked( (int) ((i/ ((float)keys.size())) * 100) );
 		}
 		return clonedTypes;
 	}
 	
-	private static List<EntityAttribute> getAttributes(String entityType, ConservationArea defaultCa, ConservationArea[] cas,  Session session){
+	private Attribute cloneAttribute(Attribute a, ConservationArea defaultCa){
+		Attribute copy = new Attribute();
+		copy.setAggregations(a.getAggregations());
+		copy.setConservationArea(defaultCa);
+		copy.setIsRequired(a.getIsRequired());
+		copy.setKeyId(a.getKeyId());
+		copy.setMaxValue(a.getMaxValue());
+		copy.setMinValue(a.getMinValue());
+		copy.setName(a.getName());
+		copy.setRegex(a.getRegex());
+		copy.setType(a.getType());
+		return copy;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Attribute findAttribute(Session session, String keyId, ConservationArea[] cas, ConservationArea defaultCa){
+		Attribute a = (Attribute) session.createCriteria(Attribute.class)
+				.add(Restrictions.eq("conservationArea", defaultCa)) //$NON-NLS-1$
+				.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
+				.uniqueResult();
+		if (a != null ) return cloneAttribute(a, defaultCa);
+		
+		List<Attribute> attributes = (List<Attribute>) session.createCriteria(Attribute.class)
+				.add(Restrictions.in("conservationArea", cas)) //$NON-NLS-1$
+				.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
+				.list();
+		if (attributes.size() > 0){
+			return cloneAttribute(attributes.get(0), defaultCa);
+		}
+		return null;
+	}
+	
+	private List<EntityAttribute> getAttributes(String entityType, ConservationArea defaultCa, ConservationArea[] cas,  Session session){
 		String hql = "SELECT count(*), e.keyId, a.keyId FROM EntityAttribute e, Attribute a " //$NON-NLS-1$
 			+ "WHERE e.dmAttribute.uuid = a.uuid and e.entityType.keyId = :entityType and e.entityType.conservationArea in (:cas) "  //$NON-NLS-1$
 			+ " GROUP BY e.keyId, a.keyId";//$NON-NLS-1$
@@ -183,7 +171,7 @@ public class EntityTypeMerger {
 				//we want to keep this attribute
 				EntityAttribute ea = new EntityAttribute();
 				ea.setKeyId((String)bits[1]);
-				ea.setDmAttribute( QueryDataModelManager.getInstance().getAttribute(session, (String)bits[2]) );
+				ea.setDmAttribute( findAttribute(session, (String)bits[2], cas, defaultCa) );
 				
 				attributes.add(ea);
 				
@@ -217,4 +205,5 @@ public class EntityTypeMerger {
 		});
 		return attributes;
 	}
+	
 }

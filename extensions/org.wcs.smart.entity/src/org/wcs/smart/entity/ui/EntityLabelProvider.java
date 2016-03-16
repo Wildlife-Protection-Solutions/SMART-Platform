@@ -40,6 +40,7 @@ public class EntityLabelProvider implements IEntityLabelProvider{
 	public static final String X_FIELD_NAME = Messages.Entity_XFieldName;
 	public static final String Y_FIELD_NAME = Messages.Entity_YFieldName;
 	public static final String CA_FIELD_NAME = Messages.Entity_CaIdFieldName;
+
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item == Status.ACTIVE) return Messages.Entity_ActiveStatusLabel;
@@ -54,6 +55,8 @@ public class EntityLabelProvider implements IEntityLabelProvider{
 		if (item.equals(Y_FIELD_KEY)) return Messages.Entity_YFieldName;
 		if (item.equals(CA_FIELD_KEY)) return Messages.Entity_CaIdFieldName;
 		
+		if (item.equals(MERGE_PROGRESS1_KEY))  return Messages.EntityTypeMerger_ProgressLabel;
+		if (item.equals(MERGE_PROGRESS2_KEY))  return Messages.EntityTypeMerger_ProgressLabelB;
 		return null;
 	}
 

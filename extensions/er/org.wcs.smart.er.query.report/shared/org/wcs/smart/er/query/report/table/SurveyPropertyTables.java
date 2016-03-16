@@ -50,14 +50,13 @@ public class SurveyPropertyTables implements IDynamicSmartTables {
 	public List<SmartBirtTable> getTables(SmartConnection connection) {
 		//find all entities
 		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>();
-		//do not close session; this will be done by the wizard 
-		//TODO: once ccaa implemented for surveys this will need to be updated
 		
 		ISurveyHibernateManager mgr = null;
 		if (connection.getConservationAreas().size() == 1){
 			mgr = new CaSurveyHibernateManager(connection.getConservationAreas().iterator().next());
 		}else{
-			mgr = new CcaaSurveyHibernateManager();
+			//TODO: NOT Currently Supported
+			return tables;
 		}
 		Session s = connection.getSession();
 		for (SurveyDesignProxy sdi : mgr.getSurveyDesignEditorInputs(s, null)){

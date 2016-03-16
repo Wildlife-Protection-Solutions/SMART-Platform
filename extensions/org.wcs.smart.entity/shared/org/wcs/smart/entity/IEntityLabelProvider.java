@@ -40,4 +40,7 @@ public interface IEntityLabelProvider extends ISharedLabelProvider {
 	public static final String X_FIELD_KEY = "xfieldnamekey"; //$NON-NLS-1$
 	public static final String Y_FIELD_KEY = "yfieldnamekey"; //$NON-NLS-1$
 	public static final String CA_FIELD_KEY = "cafieldnamekey"; //$NON-NLS-1$
+	
+	public static final String MERGE_PROGRESS1_KEY = "mergeprgress1key"; //$NON-NLS-1$
+	public static final String MERGE_PROGRESS2_KEY = "mergeprgress2key"; //$NON-NLS-1$
 }

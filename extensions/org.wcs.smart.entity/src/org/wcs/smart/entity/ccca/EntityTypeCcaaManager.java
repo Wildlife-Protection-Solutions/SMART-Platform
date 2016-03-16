@@ -21,21 +21,33 @@
  */
 package org.wcs.smart.entity.ccca;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IService;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
+import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.entity.EntityTypeMerger;
 import org.wcs.smart.entity.event.EntityEventManager;
+import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.map.FixedEntityService;
 import org.wcs.smart.entity.map.FixedEntityServiceExtension;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 /**
@@ -103,12 +115,58 @@ public class EntityTypeCcaaManager {
 		if (mergedTypes == null){
 			synchronized (instance) {
 				if (mergedTypes == null){
-					mergedTypes = EntityTypeMerger.getEntityTypes();
+					mergedTypes = getEntityTypes();
 				}
 			}
 			
 		}
 		return mergedTypes;
+	}
+	
+	/**
+	 * Get all entity types
+	 * @return
+	 */
+	private List<EntityType> getEntityTypes() {
+		
+		final List<EntityType> newTypes = new ArrayList<EntityType>();
+		
+		//ensure the data model is loaded here; outside the progress monitor 
+		//to prevent deadlocking
+		QueryDataModelManager.getInstance().getDataModel();
+		
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+				try {
+					dialog.run(true, false, new IRunnableWithProgress() {
+						
+						@Override
+						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+								InterruptedException {
+							Session s = HibernateManager.openSession();
+							try{
+								List<EntityType> tts = (new EntityTypeMerger(Locale.getDefault())).mergeEntityTypes(
+										SmartDB.getConservationAreaConfiguration().getConservationAreas().toArray(new ConservationArea[SmartDB.getConservationAreaConfiguration().getConservationAreas().size()]),
+										SmartDB.getConservationAreaConfiguration().getMainConservationArea(),
+										s, monitor);
+								newTypes.addAll(tts);
+							}finally{
+								s.close();
+								
+							}
+							
+						}
+					});
+				} catch (Exception e) {
+					EntityPlugIn.displayLog(Messages.EntityTypeMerger_ErrorMergingEntityTypes + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+				}
+			}});
+		
+		
+		return newTypes;
 	}
 	
 	/**

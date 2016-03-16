@@ -25,9 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.IDynamicSmartTables;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
+import org.wcs.smart.entity.EntityTypeMerger;
 import org.wcs.smart.entity.model.EntityType;
 
 /**
@@ -42,20 +44,23 @@ public class DynamicSmartTables implements IDynamicSmartTables {
 	public DynamicSmartTables() {
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<SmartBirtTable> getTables(SmartConnection connection) {
 		
-		//TODO: CCAA MERGE ENTITIES -> for connect so cannot use this code
-//		if (conservationArea.getIsCcaa()){
-//			return EntityTypeCcaaManager.getInstance().getAllEntityTypes();
-//		}
-		Query q = connection.getSession().createQuery("FROM EntityType WHERE conservationArea IN ( :ca )"); //$NON-NLS-1$
-		q.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<EntityType> items = q.list();
+		List<EntityType> types = null;
+		if (connection.getConservationAreas().size() > 0){
+			 types = (new EntityTypeMerger(connection.getCurrentLocale())).mergeEntityTypes(connection.getConservationAreas().toArray(new ConservationArea[connection.getConservationAreas().size()]),
+					connection.getConservationAreas().iterator().next(), connection.getSession(), null);		
+		}else{
+			Query q = connection.getSession().createQuery("FROM EntityType WHERE conservationArea IN ( :ca )"); //$NON-NLS-1$
+			q.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
+			types = (List<EntityType>)q.list();
+		}
 		
 		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>();
-		for (EntityType et : items){
+		for (EntityType et : types){
+			et.getAttributes().size();
 			SmartBirtTable table = new EntityTable(et);
 			tables.add(table);
 		}

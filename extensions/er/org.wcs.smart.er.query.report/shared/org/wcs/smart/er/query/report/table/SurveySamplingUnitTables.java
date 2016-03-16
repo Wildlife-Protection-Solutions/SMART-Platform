@@ -30,7 +30,6 @@ import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.IDynamicSmartTables;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.er.hibernate.CaSurveyHibernateManager;
-import org.wcs.smart.er.hibernate.CcaaSurveyHibernateManager;
 import org.wcs.smart.er.hibernate.ISurveyHibernateManager;
 import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -51,14 +50,14 @@ public class SurveySamplingUnitTables implements IDynamicSmartTables {
 	@Override
 	public List<SmartBirtTable> getTables(SmartConnection connection) {
 		//find all entities
-		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>();
-		//do not close session; this will be done by the wizard 
+		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>(); 
 		
 		ISurveyHibernateManager mgr = null;
 		if (connection.getConservationAreas().size() == 1){
 			mgr = new CaSurveyHibernateManager(connection.getConservationAreas().iterator().next());
 		}else{
-			mgr = new CcaaSurveyHibernateManager();
+			//not currently supported
+			return tables;
 		}
 
 		Session s = connection.getSession();
