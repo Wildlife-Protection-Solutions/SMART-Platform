@@ -54,7 +54,6 @@ import org.wcs.smart.connect.apache.BcryptCredentialHandler;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.model.SmartRole;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;
@@ -252,7 +251,12 @@ public class ConnectUser extends HttpServlet {
     public SmartUser updateUser(
     		@PathParam("username") String olduser,
     		SmartUser newUser) {
-    	validateUser();
+    	
+    	//if you are editing yourself, skip validation for admin-level user
+    	if( !request.getUserPrincipal().getName().equals(olduser)){
+    		validateUser();
+    	}
+    	
     	if (newUser.getUsername() != null){
     		newUser.setUsername(newUser.getUsername().trim());
     		String err = validateUserName(newUser.getUsername(), SmartUtils.getRequestLocale(request));
