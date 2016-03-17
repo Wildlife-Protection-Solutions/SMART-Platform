@@ -89,9 +89,6 @@
 	     		<legend><fmt:message key="query.datefilter"/></legend>
 	     		<p><fmt:message key="query.datefield" />
 		     		<select id="datefield" name="datefield" style="width:100%">
-			     		<c:forEach var="df" items="${datefilters}" varStatus="count">
-		     				<option value="${df[0]}">${df[1]}</option> 
-						</c:forEach> 
 		     		</select>
 		     	</p>
 		     	<p><fmt:message key="query.datefilterlabel"/>

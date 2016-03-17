@@ -259,14 +259,9 @@ function showQueryOptions(){
 	var poselement = document.querySelector("#querytable");
 	var pos = getPosition(poselement);
 	
+	//update output format options
 	//update shape option
-	var isShape = false;
-	for (var i = 0; i < shpValues.length; i ++){
-		if(shpValues[i] == querytype){
-			isShape = true;
-			break;
-		}
-	}
+	var isShape = shpValues.indexOf(querytype) >= 0;
 	var item = document.querySelector("#queryformat option[value=shp]");
 	if (item != null){
 		if (isShape){
@@ -275,15 +270,8 @@ function showQueryOptions(){
 			item.style.display = "none";
 		}
 	}
-	
 	//update tiff option
-	var isTif = false;
-	for (var i = 0; i < tifValues.length; i ++){
-		if(tifValues[i] == querytype){
-			isTif = true;
-			break;
-		}
-	}
+	var isTif = tifValues.indexOf(querytype) >= 0;
 	var item = document.querySelector("#queryformat option[value=tif]");
 	if (item != null){
 		if (isTif){
@@ -294,12 +282,15 @@ function showQueryOptions(){
 	}
 	
 	//update datefilter options
-	//document.querySelector
+	//remove all existing options
 	var datefielddiv = document.getElementById("datefield");
+	var currentselection = datefielddiv.value;
 	while(datefielddiv.firstChild){
 		datefielddiv.removeChild(datefielddiv.firstChild);
 	}
-	
+	//add correct options for query type; select the previously
+	//selected option if available
+	var selectedIndex = 0;
 	var ops = qdatefilter[querytype];
 	for (var i = 0; i < ops.length; i++){
 		var doption = ops[i];
@@ -309,9 +300,22 @@ function showQueryOptions(){
 		object.value = doption;
 		object.innerHTML = name;
 		datefielddiv.appendChild(object);
+		
+		if (currentselection == doption){
+			selectedIndex = i;
+		}
 	}
-	datefielddiv.selectedIndex = 0;
-	 document.querySelector("#queryformat").selectedIndex = 0;
+	datefielddiv.selectedIndex = selectedIndex;
+
+	// export format selection index
+	var formatIndex = 0;
+	var formatSelection = document.querySelector("#queryformat").value;
+	var titem = document.querySelector("#queryformat option[value=" + formatSelection + "]");
+	if (titem.style.display != "none"){
+		formatIndex = titem.index;
+	}
+	document.querySelector("#queryformat").selectedIndex = formatIndex;
+	 
 	displayDialogLocation('queryOptionsDialog', pos.x, window.pageYOffset + 20);
 
 }
