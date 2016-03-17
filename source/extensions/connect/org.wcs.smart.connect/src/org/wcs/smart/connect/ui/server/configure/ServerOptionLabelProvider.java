@@ -129,10 +129,10 @@ public enum ServerOptionLabelProvider {
 	 */
 	public String getValueInDisplayUnits(ConnectServerOption.ConnectionOption option, ConnectServer server){
 		String value = null;
-		if (server.getOptions() == null || server.getOptions().get(option) == null){
+		if (server.getOptions() == null || server.getOptions().get(option.name()) == null){
 			value = option.getDefaultValueAsString();
 		}else{
-			value = server.getOptions().get(option).getValue();
+			value = server.getOptions().get(option.name()).getValue();
 		}
 		
 		if (option == ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME){
