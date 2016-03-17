@@ -110,7 +110,7 @@
      			</select>
      		</fieldset>
      		
-     		<fieldset id="cafilter">
+     		<fieldset id="cafilter" style="height:150px; overflow:auto;">
 	     		<legend><fmt:message key="query.cafilters"/></legend>
 	     		<div id="cafilteroptions"></div>
      		</fieldset>
