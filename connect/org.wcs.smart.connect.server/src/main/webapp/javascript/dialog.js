@@ -80,7 +80,7 @@ function displayDialogLocation(divId, x, y){
 function displayDialog(divId, posId){
 	var poselement = document.querySelector("#" + posId);
 	var pos = getPosition(poselement);
-	displayDialogLocation(divId, pos.x, pos.y);
+	displayDialogLocation(divId, pos.x  + window.pageXOffset, pos.y + window.pageYOffset);
 }
 
 function closeDialog(divId){
