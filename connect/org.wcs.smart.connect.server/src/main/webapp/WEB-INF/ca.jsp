@@ -41,7 +41,7 @@
 								<a href=""  data-cauuid = "${ca.getUuid()}" title="downloadca" class="downloadca download-icon"></a>
 							</c:if>
 						</div>
-						<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" title="<fmt:message key="ca.deletetooltip"/>" class="deleteca delete-icon"></a></div>
+						<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="deleteca delete-icon"></a></div>
 					</div>
 				</c:forEach>
 			</div>  
@@ -59,6 +59,7 @@
 	  
 	  <form id="deleteform" onsubmit="return deleteca();" >
 	    <input type="hidden" name="cauuid"/>
+	    <input type="hidden" name="label"/>
 	    <div id="confirmtype">
 	    	<p><fmt:message key="ca.deleteconfirm"/></p>
 	    	<input type="radio" name="caoption" value="desktop" checked/><fmt:message key="ca.deletedesktop"/><br>

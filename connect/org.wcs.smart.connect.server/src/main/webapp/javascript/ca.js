@@ -121,6 +121,7 @@ function confirmdeleteca(){
 	
 	var cauuid = this.dataset.cauuid;
 	var status = this.dataset.status;
+	var label = this.dataset.label;
 	
 	if (status == 'DATA' || status == 'UPLOADING'){
 		document.querySelector("#deleteform > div#confirmtype").style.display = 'block';
@@ -132,7 +133,9 @@ function confirmdeleteca(){
 	}
 	var formUuidElement = document.querySelector("#deleteform > input[name=cauuid]");
 	formUuidElement.setAttribute("value", cauuid);
-
+	var formUuidElement = document.querySelector("#deleteform > input[name=label]");
+	formUuidElement.setAttribute("value", label);
+	
 	displayDialog('deleteDialog', 'main');
 
 	return false;	
@@ -143,6 +146,7 @@ function deleteca(){
 	document.querySelector("#deleteDialog > #dialogerror").style.display = "none";
 	
 	var cauuid = document.querySelector("#deleteform > input[name=cauuid]").value;
+	var label = document.querySelector("#deleteform > input[name=label]").value;
 	var username = document.querySelector("#deleteform > input[name=username]").value;
 	var password = document.querySelector("#deleteform > input[name=password]").value;
 	
@@ -166,29 +170,29 @@ function deleteca(){
 		return false;
 	}
 	
-	var ok = window.confirm(i18n("ca.confirmdeleteca") + cauuid + "?");
-	if (!ok) return false;
+	closeDialog('deleteDialog');	
 	
-	hideInfo();
+	displayConfirmDialog(label, i18n("ca.confirmdeleteca") + label + "?", function(){
+		hideInfo();
+		var oReq = new XMLHttpRequest();
+		oReq.onload = caDeleted;
+		oReq.cauuid=cauuid;
+		oReq.calabel=label;
+		oReq.open("DELETE", CAURL + '/' +encodeURIComponent(cauuid) + "?username=" + encodeURIComponent(username) + "&password="+encodeURIComponent(password)+"&dataonly="+encodeURIComponent(dataonly), true);
+		oReq.send();
+	});
 	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = caDeleted;
-	oReq.cauuid=cauuid;
-	oReq.open("DELETE", CAURL + '/' +encodeURIComponent(cauuid) + "?username=" + encodeURIComponent(username) + "&password="+encodeURIComponent(password)+"&dataonly="+encodeURIComponent(dataonly), true);
-	oReq.send();
-	
-	closeDialog('deleteDialog');
 	return false;
 }
 
 
 function caDeleted(){
 	if (this.status == 204) {
-		displayInfo(i18n("ca.cadeleted") + "(" + this.cauuid + ")");
+		displayInfo(i18n("ca.cadeleted") + "(" + this.calabel + ")");
 	} else if (this.status == 401){
-		displayError(parseError(i18n("ca.errordeletingca") + this.cauuid + ". Unauthorized.", this.responseText));
+		displayError(parseError(i18n("ca.errordeletingca") + this.calabel + ". Unauthorized.", this.responseText));
 	}else{
-		displayError(parseError(i18n("ca.errordeletingca") + this.cauuid, this.responseText));
+		displayError(parseError(i18n("ca.errordeletingca") + this.calabel, this.responseText));
 	}
 	refreshCaList();
 }
@@ -258,6 +262,7 @@ function createCaTable(){
  		deleteicon.title="delete conservation area";
  		deleteicon.dataset.cauuid = cas[i].uuid;
  		deleteicon.dataset.status = cas[i].status;
+ 		deleteicon.dataset.label = cas[i].label;
  		deleteicon.onclick = confirmdeleteca;
  		deleteicon.href="";
  		row.childNodes[5].appendChild(deleteicon);

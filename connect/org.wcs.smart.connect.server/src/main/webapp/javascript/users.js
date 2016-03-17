@@ -614,6 +614,7 @@ function createRoleTable(){
  		deleteicon.className="delete-icon";
  		deleteicon.title="delete role";
  		deleteicon.dataset.roleid = allRoles[i].key;
+ 		deleteicon.dataset.rolename = allRoles[i].name;
  		deleteicon.onclick = deleteRole;
  		deleteicon.href="";
  		row.childNodes[2].appendChild(deleteicon);
@@ -702,13 +703,16 @@ function activateUser(){
 /* Deactivate user */
 function deactivateUser(){
 	var username = this.dataset.username;
-	hideInfo();
 	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = userDeactivated;
-	oReq.smartuser=username;
-	oReq.open("DELETE", ACTIVATE_USER_URL + encodeURIComponent(username), true);
-	oReq.send();
+	displayConfirmDialog("De-active User", "Deactivating a user will prevent that user from logging into Connect.  Are you sure you want to dactivate the user " + username +"?  "  , function(){
+		hideInfo();
+	
+		var oReq = new XMLHttpRequest();
+		oReq.onload = userDeactivated;
+		oReq.smartuser=username;
+		oReq.open("DELETE", ACTIVATE_USER_URL + encodeURIComponent(username), true);
+		oReq.send();
+	});
 	return false;	
 }
 
@@ -731,15 +735,18 @@ function deleteUser(){
 /* deletes role */
 function deleteRole(){
 	var roleId = this.dataset.roleid;
+	var rolename = this.dataset.rolename;
 	
-	hideInfo();
+	displayConfirmDialog("Delete Role", "Are you sure you want to delete the role " + rolename + "?", function(){
+		hideInfo();
 	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = roleDeleted;
-	var loc = PRIVILEGE_URL + "/roles/";
-	loc += encodeURIComponent(roleId);
-	oReq.open("DELETE", loc, true);
-	oReq.send();
+		var oReq = new XMLHttpRequest();
+		oReq.onload = roleDeleted;
+		var loc = PRIVILEGE_URL + "/roles/";
+		loc += encodeURIComponent(roleId);
+		oReq.open("DELETE", loc, true);
+		oReq.send();
+	});
 	
 	return false;	
 }

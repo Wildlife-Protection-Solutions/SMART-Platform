@@ -1,4 +1,62 @@
 /*
+ * Displays a confirm dialog with cancel and ok buttons with
+ * the given title and messsage.
+ * 
+ * If ok pressed then the function onOkay is executed.
+ *  
+ */
+function displayConfirmDialog(title, message, onOkay){
+	var dialogDiv = document.createElement('div');
+	
+	dialogDiv.setAttribute("class", "dialog");
+	dialogDiv.style.display="none";
+	dialogDiv.id = "smartconfirmdialog";
+	
+	var titleDiv = document.createElement('div');
+	titleDiv.setAttribute("class", "dialog-title");
+	titleDiv.innerHTML = title;
+	dialogDiv.appendChild(titleDiv);
+	
+	var mainDiv = document.createElement('div');
+	mainDiv.innerHTML = message;
+	dialogDiv.appendChild(mainDiv);
+	
+	var buttonDiv = document.createElement('div');
+	buttonDiv.style.textAlign="center";
+	dialogDiv.appendChild(buttonDiv);
+	
+	var okButton = document.createElement('input')
+	okButton.type = "button";
+	okButton.setAttribute("class", "button top-spacer");
+	okButton.value = "OK";
+	okButton.style.paddingLeft = "20px";
+	okButton.style.paddingRight = "20px";
+	
+	var cancelButton = document.createElement('input')
+	cancelButton.style.marginLeft = "5px";
+	cancelButton.type = "button";
+	cancelButton.setAttribute("class", "button top-spacer");
+	cancelButton.value = "CANCEL";
+	
+	buttonDiv.appendChild(okButton);
+	buttonDiv.appendChild(cancelButton);
+	
+	
+	okButton.onclick = function(){
+		closeDialog(dialogDiv.id);
+		document.body.removeChild(dialogDiv);
+		onOkay();
+	}
+	cancelButton.onclick = function(){
+		closeDialog(dialogDiv.id);
+		document.body.removeChild(dialogDiv);
+	}
+	document.body.appendChild(dialogDiv);
+	
+	displayDialogLocation(dialogDiv.id, window.innerWidth / 2 - 150 + window.pageXOffset,   ((window.innerHeight / 2)) - 100 + window.pageYOffset);
+}
+
+/*
  * Displays the dialog represented by divId at
  * the x, y position
  */

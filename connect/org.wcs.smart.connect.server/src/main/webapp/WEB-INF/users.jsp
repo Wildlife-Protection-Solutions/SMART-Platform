@@ -77,7 +77,7 @@
 			<div class="pageheader"><fmt:message key="users.userdetails"/></div>
 			<div id="userinfo">
 				<div id="userinfodefaults"></div>
-				<div id="userinfobuttons"class="tabheader">
+				<div id="userinfobuttons"class="tabheader" style="background-color:#EFEFEF; margin-top:25px;">
 					<a id="roletab" class="tab"><fmt:message key="users.rolestab"/></a>
 					<a id="actiontab" class="tab"><fmt:message key="users.actionstab"/></a>
 				</div>

@@ -228,22 +228,22 @@ function updateFile(){
 
 function deleteFile(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm(i18n("dataqueue.areyousuredelete") );
-	if (!ok) return false;
 	
-	hideInfo();
-	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = fileDeleted;
-	oReq.open("DELETE", DATAQUEUEURL  + "/items/" + encodeURIComponent(uuid), true);
-	oReq.send();
+	displayConfirmDialog("Confirm Delete", i18n("dataqueue.areyousuredelete"), function(){
+		hideInfo();
+		
+		var oReq = new XMLHttpRequest();
+		oReq.onload = fileDeleted;
+		oReq.open("DELETE", DATAQUEUEURL  + "/items/" + encodeURIComponent(uuid), true);
+		oReq.send();
+	});
 	return false;	
 }
 
 function fileDeleted(){
 	if (this.status == 200  && this.status != 201 ) {
 		var r = JSON.parse(this.response);
-		displayInfo(i18n("dataqueue.deletefiletwith") + r.uuid);
+		displayInfo(i18n("dataqueue.deletefilewith") + r.name);
 		refreshFileList();
 	} else {
 		displayError(parseError(i18n("dataqueue.deletefileterror") + this.statusText));

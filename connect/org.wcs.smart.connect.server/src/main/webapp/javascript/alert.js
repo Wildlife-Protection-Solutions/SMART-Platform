@@ -334,27 +334,28 @@ function remove_class(id, classname){
 /* delete alert*/
 function deleteAlert(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm(i18n("alert.areyousuredeletealert") );
-	if (!ok) return false;
+	var id = this.parentElement.parentElement.getAttribute('data-alertid');
 	
-	hideInfo();
-	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = alertDeleted;
-//	oReq.smartuser=username;
-	oReq.open("DELETE", ALERT_URL  + encodeURIComponent(uuid), true);
-	oReq.send();
-	return false;	
+	displayConfirmDialog("Delete Alert", i18n("alert.areyousuredeletealert") + id + "?"  , function(){
+		hideInfo();
+		
+		var oReq = new XMLHttpRequest();
+		oReq.onload = alertDeleted;
+		oReq.open("DELETE", ALERT_URL  + encodeURIComponent(uuid), true);
+		oReq.send();
+		return false;	
+	});
+	return false;
 }
 
 //callback for delete alert  
 function alertDeleted() {
 	if (this.status == 200  && this.status != 201 ) {
 		var r = JSON.parse(this.response);
-		displayInfo(i18n("alert.deletealertwith") + r.uuid);
+		displayInfo(i18n("alert.alertdeleted") + r.userGeneratedId);
 		refreshAlerts();
 	} else {
-		displayError(parseError(i18n("alert.deletealertwith") + " : " + this.statusText));
+		displayError(parseError(i18n("alert.errordeletealert") + " : " + this.statusText));
 	}
 }
 
@@ -448,6 +449,7 @@ function createAlertTable(){
 		 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
+		 		row.dataset.alertid = alerts[i].properties.id;
 	
 		 		if(canupdate){
 		 			var updateicon = document.createElement("a");

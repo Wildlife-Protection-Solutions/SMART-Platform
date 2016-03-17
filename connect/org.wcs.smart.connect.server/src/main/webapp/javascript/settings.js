@@ -224,15 +224,14 @@ function createLayerTable(){
 /* delete layer*/
 function deleteLayer(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm(i18n("settings.suredeletelayer"));
-	if (!ok) return false;
-	
-	hideInfo();
-	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = layerDeleted;
-	oReq.open("DELETE", LAYER_URL + encodeURIComponent(uuid), true);
-	oReq.send();
+	displayConfirmDialog("Confirm Delete", i18n("settings.suredeletelayer"), function(){
+		hideInfo();
+		
+		var oReq = new XMLHttpRequest();
+		oReq.onload = layerDeleted;
+		oReq.open("DELETE", LAYER_URL + encodeURIComponent(uuid), true);
+		oReq.send();
+	});
 	return false;	
 }
 
@@ -530,15 +529,14 @@ function showCurrentType() {
 
 function deleteType(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm(i18n("settings.areyoursuredeletetype"));
-	if (!ok) return false;
+	displayConfirmDialog("Confirm Delete", i18n("settings.areyoursuredeletetype"), function(){
+		hideInfo();
 	
-	hideInfo();
-	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = typeDeleted;
-	oReq.open("DELETE", TYPE_URL + encodeURIComponent(uuid), true);
-	oReq.send();
+		var oReq = new XMLHttpRequest();
+		oReq.onload = typeDeleted;
+		oReq.open("DELETE", TYPE_URL + encodeURIComponent(uuid), true);
+		oReq.send();
+	});
 	return false;
 }
 
@@ -870,15 +868,14 @@ function createStyleConfigurationTable(){
 
 function deleteStyle(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm(i18n("settings.areyoursuredeletestyle"));
-	if (!ok) return false;
+	displayConfirmDialog("Confirm Delete", i18n("settings.areyoursuredeletestyle"), function(){
+		hideInfo();
 	
-	hideInfo();
-	
-	var oReq = new XMLHttpRequest();
-	oReq.onload = styleDeleted;
-	oReq.open("DELETE", STYLE_URL, true);
-	oReq.send();
+		var oReq = new XMLHttpRequest();
+		oReq.onload = styleDeleted;
+		oReq.open("DELETE", STYLE_URL, true);
+		oReq.send();
+	});
 	return false;
 }
 
