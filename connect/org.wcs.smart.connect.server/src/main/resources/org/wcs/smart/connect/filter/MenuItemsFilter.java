@@ -55,7 +55,7 @@ public class MenuItemsFilter implements Filter {
 		HOME("MenuItemsFilter.HomePageLabel", ConnectRESTApplication.SERVLET_PATH + "home", null), //$NON-NLS-1$ //$NON-NLS-2$
 		ACCOUNT("MenuItemsFilter.MyAccountLabel", ConnectRESTApplication.SERVLET_PATH + "myaccount", null), //$NON-NLS-1$ //$NON-NLS-2$
 		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null), //$NON-NLS-1$ //$NON-NLS-2$
-		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", null), //$NON-NLS-1$ //$NON-NLS-2$
+		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY), //$NON-NLS-1$ //$NON-NLS-2$
 		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null), //$NON-NLS-1$ //$NON-NLS-2$
 		REPORT("MenuItemsFilter.ReportLabel", ConnectRESTApplication.SERVLET_PATH + "report", null),  //$NON-NLS-1$ //$NON-NLS-2$
 		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$
@@ -98,7 +98,7 @@ public class MenuItemsFilter implements Filter {
 		try{
 			for (Page p : Page.values()){
 				if (p.actionKey != null){
-					if (!SecurityManager.INSTANCE.canAccess(s, ((HttpServletRequest)request).getUserPrincipal().getName(), p.actionKey)){
+					if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, ((HttpServletRequest)request).getUserPrincipal().getName(), p.actionKey)){
 						//do not add this menu item; user does not have permission to access
 						continue;
 					}

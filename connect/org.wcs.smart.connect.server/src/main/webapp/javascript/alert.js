@@ -813,12 +813,10 @@ function setMapFilters(){
 			msg += i18n("alert.unathorized");
 		}else if (this.status == 404){
 			msg += i18n("alert.invalidurl");
+		}else{
+			msg = JSON.parse(this.responseText).error
 		}
 		
-		try {
-			msg = JSON.parse(this.responseText).error
-		} catch (err) {
-		}
 		displayError(msg);
 		return false;
 	}

@@ -59,7 +59,9 @@ public class AccountServlet extends HttpServlet {
 			session.getTransaction().rollback();
 		}
 		if (su == null){
-			//TODO: fail here; maybe redirect to login?
+			//most likely your username has just been changed or deleted and you should not be logged in anymore.
+			request.getRequestDispatcher("/logout").forward(request, response); //$NON-NLS-1$
+			return;
 		}
 		request.setAttribute("username", su.getUsername()); //$NON-NLS-1$
 		request.setAttribute("email", su.getEmail()); //$NON-NLS-1$

@@ -50,11 +50,7 @@
 			//ok
 			displayInfo("<fmt:message key="myaccount.accountupdated" />");
 			
-			var user = JSON.parse(this.responseText);
-
-			document.querySelector("input[name=currentuser]").innerHTML = user.username;
-			document.querySelector("input[name=username]").innerHTML = user.username;
-			document.querySelector("input[name=email]").innerHTML = user.email;
+			location.reload() //this will log you out of your old username if it changed.
 		} else {
 			//fail
 			var msg = "<fmt:message key="myaccount.updateerror"/>";
