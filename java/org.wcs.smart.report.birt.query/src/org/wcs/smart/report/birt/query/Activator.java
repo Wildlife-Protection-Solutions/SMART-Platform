@@ -28,6 +28,9 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.data.oda.smart.impl.ConnectionFactory;
+import org.wcs.smart.data.oda.smart.impl.ISmartConnectionFactory;
 import org.wcs.smart.data.oda.smart.query.common.PatrolReportQueryListener;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 import org.wcs.smart.query.event.QueryEventManager;
@@ -59,6 +62,7 @@ public class Activator extends  AbstractUIPlugin{
 		Activator.context = bundleContext;
 		plugin = this;
 		QueryEventManager.getInstance().addListener(queryListener);
+		SmartContext.INSTANCE.setClass(ISmartConnectionFactory.class, new ConnectionFactory());
 	}
 
 	/*
