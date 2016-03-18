@@ -148,28 +148,10 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 					throw new SQLException(ex);
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, false);
 				}
 			}
 
 		});
-	}
-
-	/**
-	 * Drop the created temporary tables.
-	 * 
-	 * @param c connection 
-	 * @throws SQLException
-	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
-		//original table
-		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_SULIST"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_MLIST"); //$NON-NLS-1$
 	}
 
 	private void populateTemporaryTableExtra(Connection c, Session session,
@@ -340,12 +322,13 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 	}
 	
 	@Override
-	public void cleanUp(Session session) {
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				dropTemporaryTables(c, true);
-			}});
+	public void cleanUp(Session session) throws SQLException{
+		//original table
+		dropTable(session, queryDataTable);
+		dropTable(session, queryDataTable + "_LIST"); //$NON-NLS-1$
+		dropTable(session, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(session, queryDataTable + "_SULIST"); //$NON-NLS-1$
+		dropTable(session, queryDataTable + "_MLIST"); //$NON-NLS-1$
 	}
 
 	@Override

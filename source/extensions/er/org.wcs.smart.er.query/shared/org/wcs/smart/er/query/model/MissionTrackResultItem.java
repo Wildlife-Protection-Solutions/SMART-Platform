@@ -64,7 +64,8 @@ public class MissionTrackResultItem implements IResultItem{
 	private Double trackLength;
 	
 	private HashMap<String, Object> missionProperties = new HashMap<String, Object>();
-
+	private HashMap<String, Object> suAttributes = new HashMap<String, Object>();
+	
 	/**
 	 * Finds the mission property with the associated
 	 * attribute key.
@@ -83,6 +84,26 @@ public class MissionTrackResultItem implements IResultItem{
 	 */
 	public void addMissionPropertyValue(String key, Object value){
 		missionProperties.put(key, value);
+	}
+	
+	/**
+	 * Finds the properties value of the associated sampling
+	 * unit attribute key.
+	 * 
+	 * @param attributeKey sampling unit attribute key
+	 * @return the value associated with the given key
+	 */
+	public Object getSamplingUnitAttributeValue(String attributeKey){
+		return suAttributes.get(attributeKey);
+	}
+	
+	/**
+	 * Adds an sampling unit property value to the result 
+	 * @param key the attribute key
+	 * @param value the attribute value
+	 */
+	public void addSamplingUnitAttributeValue(String key, Object value){
+		suAttributes.put(key, value);
 	}
 	
 	/**

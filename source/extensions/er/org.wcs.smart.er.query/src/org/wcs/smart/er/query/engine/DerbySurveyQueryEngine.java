@@ -174,4 +174,11 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 			return new WaypointFilterProcessor(queryDataTable, this, designFilter);
 		}
 	}
+	
+	/**
+	 * Drops all tables generated to support result set
+	 * @param c
+	 * @throws SQLException
+	 */
+	public abstract void dropTables(Connection c) throws SQLException;
 }

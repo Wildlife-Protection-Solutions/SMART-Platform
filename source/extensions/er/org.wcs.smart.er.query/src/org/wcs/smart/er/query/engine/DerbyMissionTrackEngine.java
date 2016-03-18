@@ -141,7 +141,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 					throw new SQLException(ex);
 				} finally {
 					filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, monitor.isCanceled());
+					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
 				}
 				c.commit();
@@ -157,11 +157,12 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
+	@Override
+	public void dropTables(Connection c) throws SQLException {
 		//original table
 		dropTable(c, queryDataTable);
+		dropTable(c, queryDataTable + "_mlist"); //$NON-NLS-1$
+		dropTable(c, queryDataTable + "_sulist"); //$NON-NLS-1$
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
@@ -456,6 +457,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		it.setTrackLength(rs.getDouble("mission_tracklength")); //$NON-NLS-1$
 		
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
+		it.setSamplingUnitUuid(UuidUtils.byteToUUID(rs.getBytes("samplingunit_uuid"))); //$NON-NLS-1$
 		return it;
 	}
 

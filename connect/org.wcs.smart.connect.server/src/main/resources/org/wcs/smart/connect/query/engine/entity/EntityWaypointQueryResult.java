@@ -119,4 +119,9 @@ public class EntityWaypointQueryResult extends AbstractDbFeatureResultSet {
 		
 		return it;
 	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException{
+		engine.cleanUp(session);		
+	}
 }

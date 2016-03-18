@@ -137,4 +137,10 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 		return item;
 		
 	}
+
+
+	@Override
+	public void dispose(Session session) throws SQLException {
+		engine.cleanUp(session);
+	}
 }

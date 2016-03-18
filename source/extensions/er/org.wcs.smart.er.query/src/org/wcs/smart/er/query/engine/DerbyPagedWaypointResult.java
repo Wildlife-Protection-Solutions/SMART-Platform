@@ -118,14 +118,5 @@ public class DerbyPagedWaypointResult extends AbstractSurveyPagedResult implemen
 		});
 		return items;
 	}
-	
-	
-	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable, 
-				queryTempTable + "_mlist"}; //$NON-NLS-1$
-	}
-
-
 
 }

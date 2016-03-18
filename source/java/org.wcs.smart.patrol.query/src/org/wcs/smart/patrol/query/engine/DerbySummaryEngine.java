@@ -278,7 +278,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					monitor.worked(1);
 				} finally {
 					// ensure temporary tables get dropped
-					dropTemporaryTables(c);
+					dropTableInternal(c);
 					monitor.done();
 				}
 				c.commit();
@@ -288,18 +288,26 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		return sumResults ;
 	}
 
-	private void dropTemporaryTables(Connection c){
+	@Override
+	public void dropTables(Connection c){
+	}
+	
+	private void dropTableInternal(Connection c){
 		if (rateTrackTable != null){
 			dropTable(c, rateTrackTable);
+			rateTrackTable = null;
 		}
 		if (valueTrackTable != null){
 			dropTable(c, valueTrackTable);
+			valueTrackTable= null;
 		}
 		if (rateWaypointTable != null){
 			dropTable(c, rateWaypointTable);
+			rateWaypointTable = null;
 		}
 		if (valueWaypointTable != null){
 			dropTable(c, valueWaypointTable);
+			valueWaypointTable= null;
 		}
 	}
 	

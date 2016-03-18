@@ -196,6 +196,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		
 		//mission property columns
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
+		cols.addAll(getSamplingUnitAttributeColumns(session, l, caFilter, sd));
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));

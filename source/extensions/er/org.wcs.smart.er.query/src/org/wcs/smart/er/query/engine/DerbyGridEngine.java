@@ -646,6 +646,11 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		
 	}
 
+	@Override
+	public void dropTables(Connection c) throws SQLException{
+		
+	}
+	
 	/**
 	 * Drop the created temporary tables.
 	 * 

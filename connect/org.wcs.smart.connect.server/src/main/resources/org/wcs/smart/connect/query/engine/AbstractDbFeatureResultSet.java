@@ -151,12 +151,6 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	public Envelope getEnvelope() {
 		throw new UnsupportedOperationException("Gen envelope not supported for result set.");
 	}
-	
-	@Override
-	public void destroy() {
-		// TODO Auto-generated method stub
-		//DROP TABLE
-	}
 
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pagesize) {

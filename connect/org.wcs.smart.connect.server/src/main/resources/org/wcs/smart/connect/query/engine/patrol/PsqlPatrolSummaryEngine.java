@@ -1703,12 +1703,6 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 
 	@Override
 	public void cleanUp(Session session) {
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				dropTemporaryTables(c);
-				
-			}});
 	}
 
 	protected IFilterProcessor getFilterProcessor(FilterType filterType,

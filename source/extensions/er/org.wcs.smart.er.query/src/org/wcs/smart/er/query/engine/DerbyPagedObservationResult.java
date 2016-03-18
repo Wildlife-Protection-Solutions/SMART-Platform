@@ -124,13 +124,5 @@ public class DerbyPagedObservationResult extends AbstractSurveyPagedResult imple
 		this.wpCount = wpCount;
 	}
 
-	
-	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable, 
-				queryTempTable + "_LIST",  //$NON-NLS-1$
-				queryTempTable + "_TREE", //$NON-NLS-1$
-				queryTempTable + "_MLIST",}; //$NON-NLS-1$
-	}
 
 }

@@ -253,12 +253,18 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
+	public void dropTable(Session s, String tableName) throws SQLException  {
+		String sql = "DROP TABLE IF EXISTS " + tableName; //$NON-NLS-1$
+		logger.finest(sql);
+		s.createSQLQuery(sql).executeUpdate();
+	}
+
 	public void dropTable(Connection c, String tableName) throws SQLException  {
 		String sql = "DROP TABLE IF EXISTS " + tableName; //$NON-NLS-1$
 		logger.finest(sql);
 		c.createStatement().execute(sql);
 	}
-
+	
 	/**
 	 * Creates a temporary query table 
 	 * 
@@ -272,7 +278,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * Removes any temporary tables generated during
 	 * execution retrieval of results. 
 	 */
-	public abstract void cleanUp(Session session);
+	public abstract void cleanUp(Session session) throws SQLException;
 	
 	
 	/**

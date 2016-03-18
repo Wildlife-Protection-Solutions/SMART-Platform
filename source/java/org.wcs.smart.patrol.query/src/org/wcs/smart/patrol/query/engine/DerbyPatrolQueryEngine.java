@@ -154,4 +154,11 @@ public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine impleme
 			return new WaypointFilterProcessor(queryDataTable, this);
 		}
 	}
+	
+	/**
+	 * Drop all tables created to support query result set.
+	 * @param c
+	 * @throws SQLException
+	 */
+	public abstract void dropTables(Connection c) throws SQLException;
 }

@@ -158,7 +158,6 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 					throw new SQLException(ex);
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, false);
 				}
 				
 			}
@@ -171,13 +170,12 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
+	@Override
+	public void cleanUp(Session s) throws SQLException {
 		//original table
-		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(s, queryDataTable);
+		dropTable(s, queryDataTable + "_LIST"); //$NON-NLS-1$
+		dropTable(s, queryDataTable + "_TREE"); //$NON-NLS-1$
 	}
 
 	private void populateTemporaryTableExtra(Connection c, ConservationAreaFilter caFilter, Session session) throws Exception {
@@ -347,15 +345,6 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
-	}
-
-	@Override
-	public void cleanUp(Session session) {
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				dropTemporaryTables(c, true);		
-			}});
 	}
 
 	@Override

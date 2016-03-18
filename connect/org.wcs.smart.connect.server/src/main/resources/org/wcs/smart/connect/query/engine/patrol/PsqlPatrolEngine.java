@@ -432,14 +432,8 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	}
 
 	@Override
-	public void cleanUp(Session session) {
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				dropTable(c, queryDataTable);
-				c.commit();
-			}});
-		
+	public void cleanUp(Session session) throws SQLException {
+		dropTable(session, queryDataTable);
 	}
 
 	@Override

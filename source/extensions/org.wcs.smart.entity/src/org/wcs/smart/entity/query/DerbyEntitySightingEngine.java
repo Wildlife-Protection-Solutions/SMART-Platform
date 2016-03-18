@@ -157,7 +157,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				 }
 
 				if (monitor.isCanceled()){
-					dropTemporaryTables(c, monitor.isCanceled());
+					dropTables(c);
 					result.setItemCount(0);
 				}
 				
@@ -177,11 +177,8 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 	 *            connection
 	 * @throws SQLException
 	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop)
+	public void dropTables(Connection c)
 			throws SQLException {
-		if (!fullDrop)
-			return;
-		// original table
 		dropTable(c, queryDataTable);
 	}
 

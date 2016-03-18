@@ -1103,4 +1103,9 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			throws SQLException {
 		return null;
 	}
+	
+	@Override
+	public void dropTables(Connection c) throws SQLException{
+		
+	}
 }

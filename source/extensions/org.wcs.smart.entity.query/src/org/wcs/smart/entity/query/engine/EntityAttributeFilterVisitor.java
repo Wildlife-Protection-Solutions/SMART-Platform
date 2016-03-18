@@ -153,6 +153,11 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 					public boolean canExecute(String querytype) {
 						return false;
 					}
+
+					@Override
+					public void dropTables(Connection c) throws SQLException {
+						
+					}
 				};
 				tmp = new StringBuilder();
 				tmp.append("INSERT INTO "); //$NON-NLS-1$

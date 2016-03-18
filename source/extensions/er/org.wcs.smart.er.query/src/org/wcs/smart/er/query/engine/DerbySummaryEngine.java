@@ -320,6 +320,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		return sumResults ;
 	}
 
+	@Override
+	public void dropTables(Connection c){}
+	
 	private void dropTemporaryTables(Connection c){
 		dropTable(c, rateTable);
 		dropTable(c, valueTable);

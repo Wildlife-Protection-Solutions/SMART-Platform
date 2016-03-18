@@ -485,11 +485,6 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 
 	@Override
 	public void cleanUp(Session session) {
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				dropTemporaryGridTable(c);
-			}});
 	}
 
 	@Override

@@ -130,7 +130,6 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 					throw new SQLException(ex);
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, false);
 				}
 				c.commit();
 				
@@ -138,23 +137,6 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 			}
 		});
 	}
-
-	/**
-	 * Drop the created temporary tables.
-	 * 
-	 * @param c connection 
-	 * @throws SQLException
-	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
-		//original table
-		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
-	}
-	
-	
 	
 	private void populateTemporaryTableExtra(Connection c,ConservationAreaFilter caFilter, Session session) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
@@ -286,12 +268,10 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 	}
 	
 	@Override
-	public void cleanUp(Session session) {
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				dropTemporaryTables(c, true);		
-			}});	
+	public void cleanUp(Session session) throws SQLException {
+		dropTable(session, queryDataTable);
+		dropTable(session, queryDataTable + "_LIST"); //$NON-NLS-1$
+		dropTable(session, queryDataTable + "_TREE"); //$NON-NLS-1$
 	}
 
 	@Override

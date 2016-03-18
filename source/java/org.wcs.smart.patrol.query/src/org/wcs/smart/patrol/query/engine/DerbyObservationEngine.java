@@ -150,7 +150,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 					
 				} finally {
 					filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, monitor.isCanceled());
+					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
 				}
 				c.commit();
@@ -166,9 +166,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
+	public void dropTables(Connection c) throws SQLException {
 		//original table
 		dropTable(c, queryDataTable);
 		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.data.oda.smart.impl;
 
+import java.sql.SQLException;
+
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
@@ -50,6 +52,7 @@ public abstract class AbstractSmartQuery {
 	public static final String SMART_QUERY_EXTENSION_ID = "org.wcs.smart.report.birt.query.queryDataset"; //$NON-NLS-1$
 	
 	protected IMetadataProvider metadataProvider;
+	protected IQueryResult result;
 	
 	/**
 	 * Sets a metadata provider
@@ -97,13 +100,16 @@ public abstract class AbstractSmartQuery {
 		return metadataProvider.createMetadata(smartQuery.getQuery(), connection);
 	}
 	
+	public void dispose(SmartConnection connection) throws SQLException{
+		if (result != null) result.dispose(connection.getSession());
+	}
 	/*
 	 * executes the connect query using the connection.executequery options
 	 */
 	protected IResultSet executeQueryInternal(AbstractSmartBirtQuery query,
 			SmartConnection connection) throws OdaException {
 		// the result set
-		IQueryResult result = query.getQuery().getCachedResults();
+		result = query.getQuery().getCachedResults();
 		if (result == null) {
 			try {
 				result = connection.executeQuery(query.getQuery());

@@ -141,7 +141,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 
 				} finally {
 					filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, monitor.isCanceled());
+					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
 				}
 				c.commit();
@@ -157,10 +157,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
-
+	@Override
+	public void dropTables(Connection c) throws SQLException {
 		dropTable(c, queryDataTable);
 	}
 

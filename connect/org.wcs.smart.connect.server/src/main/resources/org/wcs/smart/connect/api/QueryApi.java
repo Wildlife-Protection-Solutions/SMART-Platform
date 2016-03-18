@@ -215,8 +215,9 @@ public class QueryApi extends HttpServlet{
 			params.put(Session.class.getName(), s);
 			params.put(Locale.class.getName(), request.getLocale());
 			
+			IQueryResult result = null;
 			try{
-				IQueryResult result = engine.executeQuery(query, params);
+				result = engine.executeQuery(query, params);
 			 
 				if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
 					java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
@@ -265,9 +266,7 @@ public class QueryApi extends HttpServlet{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
 			}finally{
-				if (engine instanceof AbstractQueryEngine){
-					((AbstractQueryEngine)engine).cleanUp(s);
-				}
+				if (result != null) result.dispose(s);
 			}
 			
 		}catch (Exception ex){

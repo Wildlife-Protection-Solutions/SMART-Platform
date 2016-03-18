@@ -138,23 +138,9 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 					throw new SQLException(ex);
 				} finally {
 					filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, false);
 				}
 			}
 		});
-	}
-
-	/**
-	 * Drop the created temporary tables.
-	 * 
-	 * @param c connection 
-	 * @throws SQLException
-	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
-		//original table
-		dropTable(c, queryDataTable);
 	}
 
 
@@ -181,6 +167,9 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 		
 		//mission attributes
 		populateAdditionalMissionTable(c,session, sdFilter, caFilter, queryDataTable, queryDataTable +"_mlist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		//sampling unit attributes
+		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_sulist", "list_element_uuid");
 	}
 
 	@Override
@@ -257,12 +246,10 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 	}
 	
 	@Override
-	public void cleanUp(Session session) {
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				dropTemporaryTables(c, true);
-			}});
+	public void cleanUp(Session session) throws SQLException{
+		dropTable(session, queryDataTable);
+		dropTable(session, queryDataTable + "_mlist"); //$NON-NLS-1$
+		dropTable(session, queryDataTable + "_sulist"); //$NON-NLS-1$
 	}
 
 	@Override

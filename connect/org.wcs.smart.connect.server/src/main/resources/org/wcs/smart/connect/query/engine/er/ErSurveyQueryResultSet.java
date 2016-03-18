@@ -217,12 +217,16 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 		boolean hasItem = false;
 		List<UUID> uuids = new ArrayList<UUID>();
 		for (IResultItem irt : result) {
-			SurveyQueryResultItem it = (SurveyQueryResultItem) irt;
-			if (it.getSamplingUnitUuid() != null) {
+			UUID uuid = null;
+			if (irt instanceof SurveyQueryResultItem){
+				uuid = ((SurveyQueryResultItem) irt).getSamplingUnitUuid();
+			}else if (irt instanceof MissionTrackResultItem){
+				uuid = ((MissionTrackResultItem) irt).getSamplingUnitUuid();
+			}
+			if (uuid != null){
 				if (hasItem)
 					attrSql.append(","); //$NON-NLS-1$
-				
-				uuids.add(it.getSamplingUnitUuid());
+				uuids.add(uuid);
 				attrSql.append("?"); //$NON-NLS-1$
 				hasItem = true;
 			}
@@ -246,19 +250,35 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 				String svalue = rs.getString(4);
 
 				for (IResultItem irt : result) {
-
-					SurveyQueryResultItem it = (SurveyQueryResultItem) irt;
-					if (muuid.equals(it.getSamplingUnitUuid())) {
-						if (rs.getObject(3) != null) {
-							it.addSamplingUnitAttributeValue(key, dvalue);
-						} else if (svalue != null) {
-							it.addSamplingUnitAttributeValue(key, svalue);
-						} else if (rs.getObject(5) != null) {
-							String value = ((SamplingUnitAttributeListItem) session
-									.load(SamplingUnitAttributeListItem.class,
-											(UUID)rs.getObject(5)))
-									.getName();
-							it.addSamplingUnitAttributeValue(key, value);
+					if (irt instanceof SurveyQueryResultItem){
+						SurveyQueryResultItem it = (SurveyQueryResultItem) irt;
+						if (muuid.equals(it.getSamplingUnitUuid())) {
+							if (rs.getObject(3) != null) {
+								it.addSamplingUnitAttributeValue(key, dvalue);
+							} else if (svalue != null) {
+								it.addSamplingUnitAttributeValue(key, svalue);
+							} else if (rs.getObject(5) != null) {
+								String value = ((SamplingUnitAttributeListItem) session
+										.load(SamplingUnitAttributeListItem.class,
+												(UUID)rs.getObject(5)))
+										.getName();
+								it.addSamplingUnitAttributeValue(key, value);
+							}
+						}
+					}else if (irt instanceof MissionTrackResultItem){
+						MissionTrackResultItem it = (MissionTrackResultItem) irt;
+						if (muuid.equals(it.getSamplingUnitUuid())) {
+							if (rs.getObject(3) != null) {
+								it.addSamplingUnitAttributeValue(key, dvalue);
+							} else if (svalue != null) {
+								it.addSamplingUnitAttributeValue(key, svalue);
+							} else if (rs.getObject(5) != null) {
+								String value = ((SamplingUnitAttributeListItem) session
+										.load(SamplingUnitAttributeListItem.class,
+												(UUID)rs.getObject(5)))
+										.getName();
+								it.addSamplingUnitAttributeValue(key, value);
+							}
 						}
 					}
 				}

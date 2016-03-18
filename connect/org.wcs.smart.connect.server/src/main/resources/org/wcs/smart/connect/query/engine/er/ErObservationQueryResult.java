@@ -162,6 +162,12 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 
 		return it;
 	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException {
+		engine.cleanUp(session);
+	}
+
 }
 
 

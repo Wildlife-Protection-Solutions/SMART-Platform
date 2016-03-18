@@ -60,6 +60,7 @@ import org.wcs.smart.entity.query.SightingQueryColumn;
 import org.wcs.smart.entity.ui.editor.sightings.EntityFilterComposite;
 import org.wcs.smart.entity.ui.editor.sightings.SightingTable;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.common.engine.CleanUpQueryJob;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.importexport.ExportQueryWizard;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -120,6 +121,14 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 	public EntitySightingQuery getCurrentQuery(){
 		return this.currentQuery;
 	}
+	
+	@Override
+	public void dispose() {
+		if (getCurrentQuery() != null && getCurrentQuery().getCachedResults() != null){
+			CleanUpQueryJob.schedule(getCurrentQuery().getCachedResults());
+		}
+	}
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		FormToolkit toolkit = new FormToolkit(Display.getCurrent());

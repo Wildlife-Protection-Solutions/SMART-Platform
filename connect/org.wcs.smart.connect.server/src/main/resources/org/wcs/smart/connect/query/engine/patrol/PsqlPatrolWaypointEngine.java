@@ -152,17 +152,6 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 
 		});
 	}
-
-	/**
-	 * Drop the created temporary tables.
-	 * 
-	 * @param c connection 
-	 * @throws SQLException
-	 */
-	private void dropTemporaryTables(Connection c) throws SQLException {
-		dropTable(c, queryDataTable);
-	}
-
 	
 	private void populateTemporaryTableExtra(Connection c, boolean isMultipleCa, Session session) throws SQLException {
 		String[][] columnsToAdd = new String[][]{
@@ -314,13 +303,8 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	}
 
 	@Override
-	public void cleanUp(Session session) {
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				dropTemporaryTables(c);
-				c.commit();
-			}});	
+	public void cleanUp(Session session) throws SQLException {
+		dropTable(session, queryDataTable);
 	}
 
 	protected IFilterProcessor getFilterProcessor(FilterType filterType,

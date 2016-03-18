@@ -82,6 +82,7 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				attachMissionProperties(items, c, session);
+				attachSamplingUnitAttributes(items, c, session);
 			}
 			
 		});
@@ -161,9 +162,16 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 		it.setTrackLength(rs.getDouble("mission_tracklength")); //$NON-NLS-1$
 		
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
+		it.setSamplingUnitUuid((UUID)rs.getObject("samplingunit_uuid")); //$NON-NLS-1$
 		
 		it.addMissionPropertyValue("org.wcs.smart.track",rs.getBytes("trackgeom")); //$NON-NLS-1$
 		return it;
 	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException {
+		engine.cleanUp(session);
+	}
+
 }
 

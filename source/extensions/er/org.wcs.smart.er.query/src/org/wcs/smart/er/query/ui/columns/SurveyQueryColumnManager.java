@@ -372,14 +372,33 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, Locale.getDefault()));
 		
 		//mission property columns
-		LoadMissionPropertiesJob j = new LoadMissionPropertiesJob(sd);
+		
+		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session s = HibernateManager.openSession();
+				try{
+					SurveyDesign sd2 = null;
+					if (sd != null){
+						sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
+					}
+					cols.addAll(getMissionPropertyColumns(s, sd2));
+					cols.addAll(getSamplingUnitAttributeColumns(s, sd2));
+				}finally{
+					s.close();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		
+//		LoadMissionPropertiesJob j = new LoadMissionPropertiesJob(sd);
 		j.schedule();
 		try {
 			j.join();
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
-		cols.addAll(j.getColumns());
+//		cols.addAll(j.getColumns());
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, Locale.getDefault()));

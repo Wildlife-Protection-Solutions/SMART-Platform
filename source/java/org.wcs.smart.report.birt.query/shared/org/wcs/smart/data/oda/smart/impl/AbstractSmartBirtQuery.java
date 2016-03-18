@@ -23,6 +23,7 @@ package org.wcs.smart.data.oda.smart.impl;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -103,6 +104,11 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#close()
 	 */
 	public void close() throws OdaException {
+		try{
+			if (wrapperObject != null) wrapperObject.dispose(connection);
+		}catch(SQLException ex){
+			throw new OdaException(ex);
+		}
 	}
 
 	/**

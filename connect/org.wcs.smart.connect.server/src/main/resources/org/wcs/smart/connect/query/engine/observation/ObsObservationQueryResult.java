@@ -248,4 +248,10 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		it.setCategory(categories.toArray(new String[categories.size()]));
 		return it;
 	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException {
+		engine.cleanUp(session);
+	}
+
 }

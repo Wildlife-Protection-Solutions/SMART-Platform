@@ -437,6 +437,11 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 		
 	}
 
+	@Override
+	public void dropTables(Connection c) throws SQLException{
+		
+	}
+	
 	/**
 	 * Drop the created temporary tables.
 	 * 

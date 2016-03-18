@@ -117,4 +117,11 @@ public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryE
 			return new WaypointFilterProcessor(queryDataTable, this);
 		}
 	}
+	
+	/**
+	 * Drop all temporary tables used to support query results
+	 * @param c
+	 * @throws SQLException
+	 */
+	public abstract void dropTables(Connection c) throws SQLException;
 }
