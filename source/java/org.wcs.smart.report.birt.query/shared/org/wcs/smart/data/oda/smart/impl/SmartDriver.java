@@ -19,12 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.report.query;
+package org.wcs.smart.data.oda.smart.impl;
 
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDriver;
 import org.eclipse.datatools.connectivity.oda.LogConfiguration;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
 
 /**
  * Implementation class of IDriver for a SMART ODA runtime driver.
@@ -38,7 +39,7 @@ public class SmartDriver implements IDriver {
 	public IConnection getConnection(String dataSourceType) throws OdaException {
 		// assumes that this driver supports only one type of data source,
 		// ignores the specified dataSourceType
-		return new ServerSmartConnection();
+		return ((ISmartConnectionFactory) SmartContext.INSTANCE.getClass(ISmartConnectionFactory.class)).createConnection();
 	}
 
 	/**

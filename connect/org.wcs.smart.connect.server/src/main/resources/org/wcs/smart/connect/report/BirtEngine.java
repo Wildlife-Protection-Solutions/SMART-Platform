@@ -34,6 +34,8 @@ import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.data.oda.smart.impl.ISmartConnectionFactory;
 
 /**
  * BIRT Report Engine;
@@ -49,6 +51,7 @@ public class BirtEngine {
 
 	public static synchronized IReportEngine getBirtEngine(ServletContext sc) {
 		if (birtEngine == null) {
+			SmartContext.INSTANCE.setClass(ISmartConnectionFactory.class, new ConnectionFactory());
 			EngineConfig config = new EngineConfig();
 			if (configProps != null) {
 				String logLevel = configProps.getProperty("logLevel");
