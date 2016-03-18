@@ -46,18 +46,18 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		}else if (item instanceof PatrolWaypointSource){
 			return Messages.PatrolWaypointSource_PatrolWaypointSourceName;
 		}
-		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return "Patrol Team";
-		if (item.equals(PATROLTT_TABLENAME_KEY)) return "Patrol Transport Types";
-		if (item.equals(PATROLMANDATE_TABLENAME_KEY)) return "Patrol Mandate";
-		if (item.equals(TEAMNAME_KEY)) return "Team Name";
-		if (item.equals(TEAMDESCRIPTION_KEY)) return "Description";
-		if (item.equals(TEAMMANDATE_KEY)) return "Mandate";
-		if (item.equals(TEAMACTIVE_KEY)) return "Active";
-		if (item.equals(TRANSPORTNAME_KEY)) return "Transport Type";
-		if (item.equals(TRANSPORTACTIVE_KEY)) return "Active";
-		if (item.equals(TRANSPORTTYPE_KEY)) return "Patrol Type";
-		if (item.equals(MANDATENAME_KEY)) return "Patrol Mandate";
-		if (item.equals(MANDATEACTIVE_KEY)) return "Active";
+		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolTeamColumnNameKey;
+		if (item.equals(PATROLTT_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolTransportTypeColumnName;
+		if (item.equals(PATROLMANDATE_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName;
+		if (item.equals(TEAMNAME_KEY)) return Messages.PatrolLabelProvider_TeamColumnName;
+		if (item.equals(TEAMDESCRIPTION_KEY)) return Messages.PatrolLabelProvider_DescriptionColumnName;
+		if (item.equals(TEAMMANDATE_KEY)) return Messages.PatrolLabelProvider_MandateColumnName;
+		if (item.equals(TEAMACTIVE_KEY)) return Messages.PatrolLabelProvider_TeamActiveColumnName;
+		if (item.equals(TRANSPORTNAME_KEY)) return Messages.PatrolLabelProvider_TransportTypeColumnName;
+		if (item.equals(TRANSPORTACTIVE_KEY)) return Messages.PatrolLabelProvider_TransportActiveColumnName;
+		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.PatrolLabelProvider_PatrolTypeColumnName;
+		if (item.equals(MANDATENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName;
+		if (item.equals(MANDATEACTIVE_KEY)) return Messages.PatrolLabelProvider_MandateActiveColumnName;
 		return null;
 	}
 
