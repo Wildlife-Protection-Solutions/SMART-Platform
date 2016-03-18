@@ -30,6 +30,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 
@@ -39,7 +41,10 @@ import javax.media.jai.RasterFactory;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.TiledImage;
 
+import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
+import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GridResultItem;
@@ -151,13 +156,16 @@ final class RasterBuilder {
 		try {
 			raster = createRaster();
 
-			RenderedOp op = JAI.create("filestore",raster,file.toFile().getCanonicalPath(),"TIFF"); //$NON-NLS-1$ //$NON-NLS-2$
-			op.dispose();
-
-			String baseFile = file.toFile().getCanonicalPath().substring(0,  file.toFile().getCanonicalPath().lastIndexOf('.'));
-			createProjectionFile(baseFile, envelope.getCoordinateReferenceSystem());
-			createWorldFile(baseFile, gridCellSize, envelope.getMinX(), envelope.getMaxY());
-			
+			try(OutputStream fout = Files.newOutputStream(file)){
+				GeoTiffWriter writer = new GeoTiffWriter(fout);
+				writer.write((new GridCoverageFactory()).create("smartraster", raster, envelope),null);// new GeneralParameterValue[]{params});
+			}
+			 
+//			RenderedOp op = JAI.create("filestore",raster,file.toFile().getCanonicalPath(),"TIFF"); //$NON-NLS-1$ //$NON-NLS-2$
+//			op.dispose();
+//			String baseFile = file.toFile().getCanonicalPath().substring(0,  file.toFile().getCanonicalPath().lastIndexOf('.'));
+//			createProjectionFile(baseFile, envelope.getCoordinateReferenceSystem());
+//			createWorldFile(baseFile, gridCellSize, envelope.getMinX(), envelope.getMaxY());
 			
 		}catch (Exception ex){
 			throw ex;
@@ -242,7 +250,7 @@ final class RasterBuilder {
 					&& item.getTileY() >= metadata.getMinYTile()
 					&& item.getTileY() <= metadata.getMaxYTile()){
 				int x = (int)(item.getTileX() - metadata.getMinXTile());
-				int y = (int)(height - (item.getTileY() - metadata.getMinXTile() +1));
+				int y = (int)(height - (item.getTileY() - metadata.getMinYTile() +1));
 				raster.setSample(x, y,BAND_0, item.getValue());
 			}
 		}			
