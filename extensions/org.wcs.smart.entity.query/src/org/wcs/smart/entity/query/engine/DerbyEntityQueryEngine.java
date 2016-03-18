@@ -184,4 +184,11 @@ public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
 		return dmEntityTypeAttributeKey;
 		
 	}
+	
+	/**
+	 * Drops any tables created to support result test
+	 * @param c
+	 * @throws SQLException
+	 */
+	public abstract void dropTables(Connection c) throws SQLException;
 }

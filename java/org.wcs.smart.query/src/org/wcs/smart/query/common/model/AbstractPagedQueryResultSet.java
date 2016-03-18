@@ -91,24 +91,18 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 	 */
 	public abstract ResultSet getResultSet(Session session);
 
-	/**
-	 * Get all temporary tables used to support the result set
-	 * 
-	 * @return
-	 */
-	public abstract String[] getTemporaryTableNames();
-
-	/**
-	 * destroys the result set and removes any temporary tables
-	 */
-	public void destroy() {
-		// simply closing result set and deleting temporary table
-		Job cleanUpJob = new CleanUpJob();
-		
-		// we don't want this job to be displayed to user
-		cleanUpJob.setSystem(true); 
-		cleanUpJob.schedule();
-	}
+//	/**
+//	 * destroys the result set and removes any temporary tables
+//	 */
+//	@Override
+//	public void dispose(Session session){
+//		// simply closing result set and deleting temporary table
+//		Job cleanUpJob = new CleanUpJob();
+//				
+//		// we don't want this job to be displayed to user
+//		cleanUpJob.setSystem(true); 
+//		cleanUpJob.schedule();
+//	}
 
 	/**
 	 * Creates a new feature iterator that iterates over all
@@ -138,57 +132,31 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 	}
 
 
-	private class CleanUpJob extends Job {
-
-		public CleanUpJob() {
-			super(Messages.AbstractPagedQueryResultSet_CleanupTablesJobName);
-		}
-
-		@Override
-		public boolean belongsTo(Object family) {
-			return family == SmartWorkbenchWindowAdvisor.SHUTDOWN_JOB_FAMILY;
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			final Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try {
-				session.doWork(new Work() {
-					@Override
-					public void execute(Connection c) throws SQLException {
-						// original table
-						for (String tableName: getTemporaryTableNames()){
-							try {
-								String sql = "DROP TABLE " + tableName; //$NON-NLS-1$
-								QueryPlugIn.logSql(sql);
-								try(Statement s = c.createStatement()){
-									s.execute(sql);
-								}
-							} catch (Exception ex) {
-								// eatme
-								ex.printStackTrace();
-							}
-						}
-					}
-				});
-			} catch (Exception ex) {
-				QueryPlugIn.log("Failed to cleanup temp query tables", ex); //$NON-NLS-1$
-			} finally {
-
-				try {
-					session.getTransaction().commit();
-				} catch (Exception ex) {
-					SmartPlugIn.log(ex.getMessage(), ex);
-				}
-				try {
-					session.close();
-				} catch (Exception ex) {
-					SmartPlugIn.log(ex.getMessage(), ex);
-				}
-			}
-			return Status.OK_STATUS;
-		}
-	}
+//	private class CleanUpJob extends Job {
+//
+//		public CleanUpJob() {
+//			super(Messages.AbstractPagedQueryResultSet_CleanupTablesJobName);
+//		}
+//
+//		@Override
+//		public boolean belongsTo(Object family) {
+//			return family == SmartWorkbenchWindowAdvisor.SHUTDOWN_JOB_FAMILY;
+//		}
+//
+//		@Override
+//		protected IStatus run(IProgressMonitor monitor) {
+//			final Session session = HibernateManager.openSession();
+//			session.beginTransaction();
+//			try {
+//				destory(session);
+//				session.getTransaction().commit();
+//			} catch (Exception ex) {
+//				QueryPlugIn.log("Failed to cleanup temp query tables", ex); //$NON-NLS-1$
+//			} finally {
+//				session.close();
+//			}
+//			return Status.OK_STATUS;
+//		}
+//	}
 
 }

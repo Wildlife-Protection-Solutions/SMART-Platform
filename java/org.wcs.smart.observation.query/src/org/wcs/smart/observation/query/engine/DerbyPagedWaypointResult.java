@@ -79,11 +79,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet{
 	}
 	
 	@Override
-	public void destroy() {
-		super.destroy();
-	}
-	
-	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
@@ -148,10 +143,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet{
 		this.direction = direction;
 	}
 
-	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable};
-	}
 	
 	/**
 	 * Gets results from the given result set.
@@ -190,6 +181,16 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet{
 			public ResultSet execute(Connection c) throws SQLException {
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
+			}
+		});
+	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException {
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				engine.dropTables(c);
 			}
 		});
 	}

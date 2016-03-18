@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.wcs.smart.query.common.engine.CleanUpQueryJob;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.internal.Messages;
@@ -75,7 +76,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 	@Override
 	public void dispose() {
 		if (input != null) {
-			input.destroy();
+			CleanUpQueryJob.schedule(input);
 			input = null;
 		}
 	}
@@ -85,7 +86,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		if (newInput == null || newInput instanceof IPagedQueryResultSet) {
 			if (input != null && !input.equals(newInput)) {
 				loadingIndexes.clear();
-				input.destroy();
+				CleanUpQueryJob.schedule(input);
 			}
 			input = (IPagedQueryResultSet) newInput;
 		}

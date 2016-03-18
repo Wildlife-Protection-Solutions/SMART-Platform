@@ -285,6 +285,10 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 		return sumResults ;
 	}
 
+
+	@Override
+	public void dropTables(Connection c) throws SQLException{}
+	
 	private void dropTemporaryTables(Connection c){
 		dropTable(c, rateTable);
 		dropTable(c, valueTable);

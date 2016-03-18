@@ -85,6 +85,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	}
 	
 	private DerbyPagedIntellResults results;
+	private String queryDataTable;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -111,7 +112,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		if (query.getDateFilter() == null){
 			return null;
 		}
-		final String queryDataTable = createTempTableName();
+		queryDataTable = createTempTableName();
 		
 		session.doWork(new Work() {
 			
@@ -285,6 +286,10 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		});
 		return results;
 	
+	}
+	
+	public void dropTables(Connection c){
+		dropTable(c, queryDataTable);
 	}
 	
 	private void filterToSql(IFilter filter, StringBuilder sql, List<Object> parameterValues) throws SQLException{

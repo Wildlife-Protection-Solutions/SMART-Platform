@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.query.common.model;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.query.common.engine.IQueryResult;
 
 /**
@@ -337,5 +339,9 @@ public class SummaryQueryResult implements IQueryResult{
 			num = num * h.length;
 		}
 		return num;
+	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException{
 	}
 }

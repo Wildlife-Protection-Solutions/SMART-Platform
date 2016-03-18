@@ -134,6 +134,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 					
 					monitor.worked(1);
 				} finally {
+					dropTable(c, queryDataTable);
 					// ensure temporary tables get dropped
 					filterer.dropTemporaryTables(c);
 					monitor.done();
@@ -144,7 +145,10 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		return myResults;
 
 	}
-
+	
+	public void dropTables(Connection c) throws SQLException {
+		
+	}
 	/**
 	 * Reads the results from the temporary query table
 	 * and loads them into internal memory store

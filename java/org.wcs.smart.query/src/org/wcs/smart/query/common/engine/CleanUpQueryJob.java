@@ -19,62 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.model;
+package org.wcs.smart.query.common.engine;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.sql.SQLException;
-import java.util.Collection;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
- * Result set for gridded queries.
+ * Job of cleaning up query results.  Opens db connection,
+ * cleans up tables, then closes connection.
  * 
  * @author Emily
  *
  */
-public class GridQueryResult implements IQueryResult {
-	
-	protected Collection<GridResultItem> data;
-	private File lastFile;
-	 
-	protected GridQueryResultMetadata resultMetadata;
-	
-		
-	 public GridQueryResult(Collection<GridResultItem> data){
-		 this.data = data;
-	 }
-	 
-	 public  Collection<GridResultItem> getData(){
-		 return this.data;
-	 }
-	 
-	 public void setResultsMetadata(GridQueryResultMetadata metadata){
-		 this.resultMetadata = metadata;
-	 }
-	 
-	 public GridQueryResultMetadata getMetadata(){
-		 return this.resultMetadata;
-	 }
-	 
-	 public void setLastRasterFile(File f){
-		 this.lastFile = f;
-	 }
-	 public File getRasterFile(){
-		 return this.lastFile;
-	 }
+public class CleanUpQueryJob extends Job{
 
+	public static void schedule(IQueryResult results){
+		CleanUpQueryJob job = new CleanUpQueryJob(results);
+		job.setSystem(true);
+		job.schedule();
+	}
+	
+	private IQueryResult results;
+	
+	public CleanUpQueryJob(IQueryResult results){
+		super("Remove Query"); //$NON-NLS-1$
+		this.results = results;
+	}
+	
 	@Override
-	public void dispose(Session session) throws SQLException {
-		data = null;
-		if (lastFile != null){
-			try{
-				lastFile.delete();
-			}catch (Exception ex){
-		
-			}
+	protected IStatus run(IProgressMonitor monitor) {
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			results.dispose(s);
+			s.getTransaction().commit();
+		}catch(SQLException ex){
+			ex.printStackTrace();
+			s.getTransaction().rollback();
+		}finally{
+			s.close();
 		}
+		return Status.OK_STATUS;
 	}
 }

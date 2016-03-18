@@ -81,7 +81,6 @@ public abstract class SmartConnection implements IConnection {
 	public abstract Collection<ConservationArea> getConservationAreas();
 	
 	public abstract IQueryResult executeQuery(Query query) throws Exception;
-	
 
 	protected abstract AbstractSmartBirtQuery createQuery();
 	

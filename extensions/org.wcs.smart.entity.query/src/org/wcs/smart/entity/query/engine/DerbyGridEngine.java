@@ -443,6 +443,8 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 		
 	}
 
+	@Override
+	public void dropTables(Connection c) throws SQLException{}
 	/**
 	 * Drop the created temporary tables.
 	 * 

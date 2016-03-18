@@ -103,6 +103,7 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				attachMissionProperties(items, c, session);
+				attachSamplingUnitAttributes(items, c, session);
 			}
 		});
 		return items;
@@ -167,10 +168,4 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 		}
 		return bounds;	
 	}
-	
-	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable};
-	}
-
 }

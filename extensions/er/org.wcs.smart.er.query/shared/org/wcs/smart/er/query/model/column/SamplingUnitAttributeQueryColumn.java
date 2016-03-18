@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.model.column;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
@@ -70,10 +71,10 @@ public class SamplingUnitAttributeQueryColumn  extends QueryColumn {
 			SurveyQueryResultItem i = (SurveyQueryResultItem) item;			
 			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
 			return i.getSamplingUnitAttributeValue(attributeKey);
-//		}else if (item instanceof MissionTrackResultItem){
-//			MissionTrackResultItem i = (MissionTrackResultItem) item;			
-//			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
-//			return i.getSamplingUnitAttributeValue(attributeKey);
+		}else if (item instanceof MissionTrackResultItem){
+			MissionTrackResultItem i = (MissionTrackResultItem) item;			
+			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
+			return i.getSamplingUnitAttributeValue(attributeKey);
 		}
 		return null;
 	}

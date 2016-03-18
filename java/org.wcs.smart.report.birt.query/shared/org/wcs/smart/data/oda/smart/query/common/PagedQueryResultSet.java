@@ -87,9 +87,6 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 		}catch (Exception ex){
 			throw new OdaException(ex);
 		}
-		if (pagedQueryResults != null)
-			pagedQueryResults.destroy();
-		pagedQueryResults = null;
 	}
 	
 }

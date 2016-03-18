@@ -102,11 +102,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		}
 		return super.equals(obj);
 	}
-	
-	@Override
-	public void destroy() {
-		super.destroy();
-	}
+
 	
 	@Override
 	public Envelope getEnvelope(){
@@ -483,6 +479,16 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		return new String[]{ queryTempTable,
 				queryTempTable + "_LIST", //$NON-NLS-1$
 				queryTempTable + "_TREE"}; //$NON-NLS-1$
+	}
+
+	@Override
+	public void dispose(Session session) throws SQLException{
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				engine.dropTables(c);
+			}
+		});
 	}
 				
 }

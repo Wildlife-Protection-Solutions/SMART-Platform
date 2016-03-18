@@ -49,11 +49,6 @@ public interface IPagedQueryResultSet extends IQueryResult{
 	public static final int MAP_PAGE_SIZE = 1000;
 	
 	/**
-	 * Close and destroy the paged results set
-	 */
-	public void destroy();
-	
-	/**
 	 * Gets all data starting from the given offset
 	 * for the given page size.
 	 * 

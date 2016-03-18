@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.common.engine.CleanUpQueryJob;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
@@ -47,7 +48,6 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 	private String queryTempTable;
 	private Envelope bounds = null;
 
-	private boolean isDestoryed = false;
 	private boolean isLoading = false;
 	
 	private QueryColumn sortColumn = null;
@@ -77,29 +77,20 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 	public int hashCode(){
 		return queryTempTable.hashCode();
 	}
-	/**
-	 * Destroys the results
-	 */
+	
 	@Override
-	public void destroy() {
-		// we cannot destory until we are finished loading
-		isDestoryed = true;
-		if (isLoading){
-			return;
-		}else{
-			cleanUp();
-		}
+	public void dispose(Session session) throws SQLException {
+		if (isLoading) return;
+		
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				engine.dropTables(c);
+				
+			}
+		});
 	}
-
-	/*
-	 * performs the clean up tasks
-	 */
-	private void cleanUp(){
-		if (isDestoryed){
-			super.destroy();
-		}
-	}
-
+	
 	@Override
 	public Envelope getEnvelope() {
 		if (this.bounds == null) {
@@ -123,7 +114,6 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 						}finally{
 							isLoading = false;
 						}
-						cleanUp();
 					}
 				});
 			} finally {
@@ -199,12 +189,6 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 		}
 		
 		return items;
-	}
-
-
-	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable};
 	}
 
 }

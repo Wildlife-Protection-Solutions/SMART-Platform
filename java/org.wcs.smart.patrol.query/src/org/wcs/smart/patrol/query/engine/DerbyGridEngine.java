@@ -793,4 +793,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	public Session getCurrentConnection() {
 		return session;
 	}
+
+	@Override
+	public void dropTables(Connection c) throws SQLException {
+	}
 }

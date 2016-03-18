@@ -79,11 +79,6 @@ public class DerbyPagedIntellResults extends AbstractPagedQueryResultSet impleme
 	}
 	
 	@Override
-	public void destroy() {
-		super.destroy();
-	}
-	
-	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
@@ -187,7 +182,11 @@ public class DerbyPagedIntellResults extends AbstractPagedQueryResultSet impleme
 	}
 	
 	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable};
-	}	
+	public void dispose(Session session) throws SQLException{
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				engine.dropTables(c);
+			}});
+	}
 }

@@ -81,9 +81,13 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet {
 	}
 	
 	@Override
-	public void destroy() {
-		//simply closing result set and deleting temporary table
-		super.destroy();
+	public void dispose(Session session)throws SQLException {
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				engine.dropTables(c);
+			}
+		});
 	}
 
 	
@@ -186,11 +190,5 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet {
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);	
 			}
 		});
-	}
-
-
-	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable};
 	}
 }

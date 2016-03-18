@@ -81,12 +81,6 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 
 	protected DerbySurveyQueryEngine engine;
 
-	
-	@Override
-	public void destroy() {
-		super.destroy();
-	}
-
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.model.IPagedQueryResultSet#setSorting(org.wcs.smart.query.model.observation.QueryColumn, int)
 	 */
@@ -567,14 +561,18 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 
 		boolean hasItem = false;
 		for (IResultItem irt : result) {
-			SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
-			if (it.getSamplingUnitUuid() != null){
+			UUID muuid = null;
+			if (irt instanceof SurveyQueryResultItem){
+				muuid = ((SurveyQueryResultItem) irt).getSamplingUnitUuid();
+			}else if (irt instanceof MissionTrackResultItem){
+				muuid = ((MissionTrackResultItem) irt).getSamplingUnitUuid();
+			}
+			if (muuid != null){
 				if (hasItem) attrSql.append(","); //$NON-NLS-1$
-				attrSql.append("x'").append(UuidUtils.uuidToString(it.getSamplingUnitUuid())).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append("x'").append(UuidUtils.uuidToString(muuid)).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
 				hasItem = true;
 			}
-		}
-		
+		}		
 		
 		if (!hasItem) {
 			//no missions
@@ -590,16 +588,29 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 				String svalue = rs.getString(4);
 				
 				for (IResultItem irt : result) {
-				
-					SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
-					if (muuid.equals(it.getSamplingUnitUuid())){
-						if (rs.getObject(3) != null){
-							it.addSamplingUnitAttributeValue(key, dvalue);
-						}else if (svalue != null){
-							it.addSamplingUnitAttributeValue(key,  svalue);
-						}else if (rs.getObject(5) != null){
-							String value = ((SamplingUnitAttributeListItem)session.load(SamplingUnitAttributeListItem.class,  UuidUtils.byteToUUID(rs.getBytes(5)))).getName();
-							it.addSamplingUnitAttributeValue(key, value);
+					if (irt instanceof SurveyQueryResultItem){
+						SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
+						if (muuid.equals(it.getSamplingUnitUuid())){
+							if (rs.getObject(3) != null){
+								it.addSamplingUnitAttributeValue(key, dvalue);
+							}else if (svalue != null){
+								it.addSamplingUnitAttributeValue(key,  svalue);
+							}else if (rs.getObject(5) != null){
+								String value = ((SamplingUnitAttributeListItem)session.load(SamplingUnitAttributeListItem.class,  UuidUtils.byteToUUID(rs.getBytes(5)))).getName();
+								it.addSamplingUnitAttributeValue(key, value);
+							}
+						}
+					}else if (irt instanceof MissionTrackResultItem){
+						MissionTrackResultItem it = (MissionTrackResultItem)irt;
+						if (muuid.equals(it.getSamplingUnitUuid())){
+							if (rs.getObject(3) != null){
+								it.addSamplingUnitAttributeValue(key, dvalue);
+							}else if (svalue != null){
+								it.addSamplingUnitAttributeValue(key,  svalue);
+							}else if (rs.getObject(5) != null){
+								String value = ((SamplingUnitAttributeListItem)session.load(SamplingUnitAttributeListItem.class,  UuidUtils.byteToUUID(rs.getBytes(5)))).getName();
+								it.addSamplingUnitAttributeValue(key, value);
+							}
 						}
 					}
 				}				
@@ -691,6 +702,15 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			}});
 		
 		return uuids;
+	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException{
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				engine.dropTables(c);
+			}});
 	}
 	
 }

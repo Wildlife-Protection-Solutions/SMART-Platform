@@ -102,13 +102,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	}
 	
 	@Override
-	public void destroy() {
-		super.destroy();
-	}
-	
-
-	
-	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
@@ -477,11 +470,16 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	protected void setWpCount(int wpCount) {
 		this.wpCount = wpCount;
 	}
-
+	
 	@Override
-	public String[] getTemporaryTableNames() {
-		return new String[]{queryTempTable,
-				queryTempTable + "_LIST", //$NON-NLS-1$
-				queryTempTable + "_TREE"}; //$NON-NLS-1$
+	public void dispose(Session session) throws SQLException{
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				engine.dropTables(c);
+			}
+		});
 	}
+
+
 }

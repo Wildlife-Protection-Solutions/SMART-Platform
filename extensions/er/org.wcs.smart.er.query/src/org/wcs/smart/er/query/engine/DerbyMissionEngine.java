@@ -145,7 +145,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 					throw new SQLException(ex);
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, monitor.isCanceled());
+					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
 				}
 				c.commit();
@@ -161,11 +161,10 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
-		//original table
+	@Override
+	public void dropTables(Connection c) throws SQLException {
 		dropTable(c, queryDataTable);
+		dropTable(c, queryDataTable + "_mlist"); //$NON-NLS-1$
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
