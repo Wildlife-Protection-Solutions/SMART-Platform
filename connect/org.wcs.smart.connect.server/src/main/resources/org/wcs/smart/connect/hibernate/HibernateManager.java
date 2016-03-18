@@ -53,7 +53,11 @@ public class HibernateManager {
 	public static final String CONTEXT_KEY = "SessionFactory"; //$NON-NLS-1$
 	
 	/**
-	 * Creates a new session from the given context.
+	 * Creates a new session from the given context.  If you are
+	 * accessing SMART Objects (data model etc.) you should use the
+	 * getSession(ServletContext, Locale) function to ensure the
+	 * names are displayed in the corret locale.
+	 * 
 	 * @param context
 	 * @return
 	 */

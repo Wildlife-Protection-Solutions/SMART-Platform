@@ -180,7 +180,7 @@ public class ReportApi extends HttpServlet{
 
 				//add items to app context
 				Map items = task.getAppContext();
-				items.put(ServerSmartConnection.CONNECTION_KEY, HibernateManager.getSession(context));
+				items.put(ServerSmartConnection.CONNECTION_KEY, HibernateManager.getSession(context, request.getLocale()));
 				items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
 				items.put("org.wcs.smart.report.ca", conservationAreas);
 				
