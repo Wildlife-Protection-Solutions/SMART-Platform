@@ -101,15 +101,15 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(STATION_ID_KEY)) return Messages.Station_Id_Label;
 		if (value.equals(STATION_NAME_KEY)) return Messages.Station_Name_Label;
 		if (value.equals(STATION_DESCRIPTION_KEY)) return Messages.Station_Description_Label;
-		if (value.equals(STATION_ACTIVE_KEY)) return "Active";
-		if (value.equals(CA_NAME_KEY)) return "Conservation Area";
-		if (value.equals(AGENCY_RANK_TABLENAME_KEY)) return "Agencies and Ranks";
-		if (value.equals(CA_ID_KEY)) return "ID";
-		if (value.equals(CA_DESCRIPTION_KEY)) return "Description";
-		if (value.equals(CA_DESIGNATION_KEY)) return "Designation";
-		if (value.equals(CA_TABLENAME_KEY)) return "Conservation Areas";
-		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return "Employees";
-		if (value.equals(STATION_TABLENAME_KEY)) return "Stations";
+		if (value.equals(STATION_ACTIVE_KEY)) return Messages.SmartLabelProvider_StationActiveColumnName;
+		if (value.equals(CA_NAME_KEY)) return Messages.SmartLabelProvider_CaColumnName;
+		if (value.equals(AGENCY_RANK_TABLENAME_KEY)) return Messages.SmartLabelProvider_AgencyRankColumnName;
+		if (value.equals(CA_ID_KEY)) return Messages.SmartLabelProvider_CaIdColumnName;
+		if (value.equals(CA_DESCRIPTION_KEY)) return Messages.SmartLabelProvider_DescriptionColumnName;
+		if (value.equals(CA_DESIGNATION_KEY)) return Messages.SmartLabelProvider_DesignationColumnName;
+		if (value.equals(CA_TABLENAME_KEY)) return Messages.SmartLabelProvider_CaTableName;
+		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return Messages.SmartLabelProvider_EmployeeTableName;
+		if (value.equals(STATION_TABLENAME_KEY)) return Messages.SmartLabelProvider_StationsTableName;
 		return null;
 	}
 

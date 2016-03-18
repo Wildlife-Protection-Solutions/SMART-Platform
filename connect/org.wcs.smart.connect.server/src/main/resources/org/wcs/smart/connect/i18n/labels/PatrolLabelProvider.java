@@ -49,18 +49,18 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		}else if (item instanceof PatrolWaypointSource){
 			return Messages.getString("PatrolLabelProvider.WpSource", l); //$NON-NLS-1$
 		}
-		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return "Patrol Team";
-		if (item.equals(PATROLTT_TABLENAME_KEY)) return "Patrol Transport Types";
-		if (item.equals(PATROLMANDATE_TABLENAME_KEY)) return "Patrol Mandate";
-		if (item.equals(TEAMNAME_KEY)) return "Team Name";
-		if (item.equals(TEAMDESCRIPTION_KEY)) return "Description";
-		if (item.equals(TEAMMANDATE_KEY)) return "Mandate";
-		if (item.equals(TEAMACTIVE_KEY)) return "Active";
-		if (item.equals(TRANSPORTNAME_KEY)) return "Transport Type";
-		if (item.equals(TRANSPORTACTIVE_KEY)) return "Active";
-		if (item.equals(TRANSPORTTYPE_KEY)) return "Patrol Type";
-		if (item.equals(MANDATENAME_KEY)) return "Patrol Mandate";
-		if (item.equals(MANDATEACTIVE_KEY)) return "Active";
+		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.TeamTableName", l); //$NON-NLS-1$
+		if (item.equals(PATROLTT_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.TransportTypeTableName", l); //$NON-NLS-1$
+		if (item.equals(PATROLMANDATE_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateTableName", l); //$NON-NLS-1$
+		if (item.equals(TEAMNAME_KEY)) return Messages.getString("PatrolLabelProvider.TeamNameColumn", l); //$NON-NLS-1$
+		if (item.equals(TEAMDESCRIPTION_KEY)) return Messages.getString("PatrolLabelProvider.TeamDescriptionColumn", l); //$NON-NLS-1$
+		if (item.equals(TEAMMANDATE_KEY)) return Messages.getString("PatrolLabelProvider.TeamMandateColumn", l); //$NON-NLS-1$
+		if (item.equals(TEAMACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.TeamActiveColumn", l); //$NON-NLS-1$
+		if (item.equals(TRANSPORTNAME_KEY)) return Messages.getString("PatrolLabelProvider.TransportTypeColumn", l); //$NON-NLS-1$
+		if (item.equals(TRANSPORTACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.TransportActiveColumn", l); //$NON-NLS-1$
+		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.getString("PatrolLabelProvider.TransportPatrolColumn", l); //$NON-NLS-1$
+		if (item.equals(MANDATENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateColumn", l); //$NON-NLS-1$
+		if (item.equals(MANDATEACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.MandateActiveColumn", l); //$NON-NLS-1$
 		return null;
 	}
 

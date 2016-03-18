@@ -50,33 +50,33 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 			return getFullName((Employee) value, l);
 		}
 		
-		if (value.equals(AGENCY_NAME_KEY)) return "Agency";
-		if (value.equals(RANK_NAME_KEY)) return "Rank";
-		if (value.equals(EMP_AGENCY_KEY)) return "Agency";
-		if (value.equals(EMP_RANK_KEY)) return "Rank";
-		if (value.equals(EMP_GENDER_KEY)) return "Gender";
-		if (value.equals(EMP_ID_KEY)) return "ID";
-		if (value.equals(EMP_BIRTHDATE_KEY)) return "Birth Date";
-		if (value.equals(EMP_EMPLOYEMENT_DATE_KEY)) return "Conservation Area Start";
-		if (value.equals(EMP_EMPLOYEMENT_ENDDATE_KEY)) return "Employment End";
-		if (value.equals(EMP_SMART_USER_KEY)) return "SMART Username";
-		if (value.equals(EMP_SMART_USER_LEVEL_KEY)) return "SMART User Level";
-		if (value.equals(EMP_DATE_CREATED_KEY)) return "Date Created";
-		if (value.equals(EMP_IS_ACTIVE_KEY)) return "Active";
-		if (value.equals(EMP_FAMILY_NAME_KEY)) return "Family Name(s)";
-		if (value.equals(EMP_GIVEN_NAME_KEY)) return "Given Name(s)";
-		if (value.equals(STATION_ID_KEY)) return "ID";
-		if (value.equals(STATION_NAME_KEY)) return "Name";
-		if (value.equals(STATION_ACTIVE_KEY)) return "Active";
-		if (value.equals(STATION_DESCRIPTION_KEY)) return "Description";
-		if (value.equals(CA_NAME_KEY)) return "Conservation Area";	
-		if (value.equals(AGENCY_RANK_TABLENAME_KEY)) return "Agencies and Ranks";
-		if (value.equals(CA_ID_KEY)) return "ID";
-		if (value.equals(CA_DESCRIPTION_KEY)) return "Description";
-		if (value.equals(CA_DESIGNATION_KEY)) return "Designation";
-		if (value.equals(CA_TABLENAME_KEY)) return "Conservation Areas";
-		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return "Employees";
-		if (value.equals(STATION_TABLENAME_KEY)) return "Stations";
+		if (value.equals(AGENCY_NAME_KEY)) return Messages.getString("SmartLabelProvider.AgencyName", l); //$NON-NLS-1$
+		if (value.equals(RANK_NAME_KEY)) return Messages.getString("SmartLabelProvider.RankName", l); //$NON-NLS-1$
+		if (value.equals(EMP_AGENCY_KEY)) return Messages.getString("SmartLabelProvider.EmployeeAgencyName", l); //$NON-NLS-1$
+		if (value.equals(EMP_RANK_KEY)) return Messages.getString("SmartLabelProvider.EmployeeRankName", l); //$NON-NLS-1$
+		if (value.equals(EMP_GENDER_KEY)) return Messages.getString("SmartLabelProvider.EmployeeGender", l); //$NON-NLS-1$
+		if (value.equals(EMP_ID_KEY)) return Messages.getString("SmartLabelProvider.EmployeeId", l); //$NON-NLS-1$
+		if (value.equals(EMP_BIRTHDATE_KEY)) return Messages.getString("SmartLabelProvider.EmployeeBirthdate", l); //$NON-NLS-1$
+		if (value.equals(EMP_EMPLOYEMENT_DATE_KEY)) return Messages.getString("SmartLabelProvider.EmployeeCaStart", l); //$NON-NLS-1$
+		if (value.equals(EMP_EMPLOYEMENT_ENDDATE_KEY)) return Messages.getString("SmartLabelProvider.EmployeeCaEnd", l); //$NON-NLS-1$
+		if (value.equals(EMP_SMART_USER_KEY)) return Messages.getString("SmartLabelProvider.Employeeusername", l); //$NON-NLS-1$
+		if (value.equals(EMP_SMART_USER_LEVEL_KEY)) return Messages.getString("SmartLabelProvider.EmployeeUserlevel", l); //$NON-NLS-1$
+		if (value.equals(EMP_DATE_CREATED_KEY)) return Messages.getString("SmartLabelProvider.EmployeeDateCreated", l); //$NON-NLS-1$
+		if (value.equals(EMP_IS_ACTIVE_KEY)) return Messages.getString("SmartLabelProvider.EmployeeActive", l); //$NON-NLS-1$
+		if (value.equals(EMP_FAMILY_NAME_KEY)) return Messages.getString("SmartLabelProvider.EmployeeFamily", l); //$NON-NLS-1$
+		if (value.equals(EMP_GIVEN_NAME_KEY)) return Messages.getString("SmartLabelProvider.EmployeeGiven", l); //$NON-NLS-1$
+		if (value.equals(STATION_ID_KEY)) return Messages.getString("SmartLabelProvider.StationId", l); //$NON-NLS-1$
+		if (value.equals(STATION_NAME_KEY)) return Messages.getString("SmartLabelProvider.StationName", l); //$NON-NLS-1$
+		if (value.equals(STATION_ACTIVE_KEY)) return Messages.getString("SmartLabelProvider.StationActive", l); //$NON-NLS-1$
+		if (value.equals(STATION_DESCRIPTION_KEY)) return Messages.getString("SmartLabelProvider.StationDescription", l); //$NON-NLS-1$
+		if (value.equals(CA_NAME_KEY)) return Messages.getString("SmartLabelProvider.CaName", l);	 //$NON-NLS-1$
+		if (value.equals(AGENCY_RANK_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.AgenciesAndRanksTable", l); //$NON-NLS-1$
+		if (value.equals(CA_ID_KEY)) return Messages.getString("SmartLabelProvider.CaId", l); //$NON-NLS-1$
+		if (value.equals(CA_DESCRIPTION_KEY)) return Messages.getString("SmartLabelProvider.CaDescription", l); //$NON-NLS-1$
+		if (value.equals(CA_DESIGNATION_KEY)) return Messages.getString("SmartLabelProvider.CaDesignation", l); //$NON-NLS-1$
+		if (value.equals(CA_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.CaTableName", l); //$NON-NLS-1$
+		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.EmployeeTableName", l); //$NON-NLS-1$
+		if (value.equals(STATION_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.StationsTableName", l); //$NON-NLS-1$
 		return null;
 	}
 	

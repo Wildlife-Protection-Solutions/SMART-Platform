@@ -280,6 +280,17 @@ public class Messages extends NLS {
 	public static String PatrolImporter_Progress_Validating;
 	public static String PatrolImporter_Warn_DataDuplicate;
 	public static String PatrolImporter_Warn_SameId;
+	public static String PatrolLabelProvider_DescriptionColumnName;
+	public static String PatrolLabelProvider_MandateActiveColumnName;
+	public static String PatrolLabelProvider_MandateColumnName;
+	public static String PatrolLabelProvider_PatrolMandateColumnName;
+	public static String PatrolLabelProvider_PatrolTeamColumnNameKey;
+	public static String PatrolLabelProvider_PatrolTransportTypeColumnName;
+	public static String PatrolLabelProvider_PatrolTypeColumnName;
+	public static String PatrolLabelProvider_TeamActiveColumnName;
+	public static String PatrolLabelProvider_TeamColumnName;
+	public static String PatrolLabelProvider_TransportActiveColumnName;
+	public static String PatrolLabelProvider_TransportTypeColumnName;
 	public static String PatrolLeaderWizardPage_LeaderPilotTitle;
 	public static String PatrolLeaderWizardPage_LeaderTitle;
 	public static String PatrolLeaderWizardPage_PageMessage_Leader;

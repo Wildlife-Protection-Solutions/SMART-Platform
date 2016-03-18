@@ -926,6 +926,15 @@ public class Messages extends NLS {
 	public static String SmartInstallationInfoPage_FilestoreLocation_Label;
 	public static String SmartInstallationInfoPage_GPSBabel_LocationLabel;
 	public static String SmartInstallationInfoPage_SystemLang_Label;
+	public static String SmartLabelProvider_AgencyRankColumnName;
+	public static String SmartLabelProvider_CaColumnName;
+	public static String SmartLabelProvider_CaIdColumnName;
+	public static String SmartLabelProvider_CaTableName;
+	public static String SmartLabelProvider_DescriptionColumnName;
+	public static String SmartLabelProvider_DesignationColumnName;
+	public static String SmartLabelProvider_EmployeeTableName;
+	public static String SmartLabelProvider_StationActiveColumnName;
+	public static String SmartLabelProvider_StationsTableName;
 	public static String SmartLayerStyleInterceptor_StyleError;
 	public static String SmartPlugIn_Error_Dialog_Title;
 	public static String SmartPlugIn_UnknownVersion;
