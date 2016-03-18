@@ -67,7 +67,7 @@ public class BrowserView {
 	 * context variable to set to change the home button
 	 */
 	public static final String DEFAULT_URL = "org.wcs.smart.browser.home"; //$NON-NLS-1$
-	
+		
 	@Inject private MPart part;
 	
 	private Browser browser ;
@@ -128,6 +128,7 @@ public class BrowserView {
 		
 		txt = new Text(buttons, SWT.BORDER);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txt.setEditable(false);
 		
 		ToolBar toolBar3 = new ToolBar(buttons, SWT.FLAT);
 		
