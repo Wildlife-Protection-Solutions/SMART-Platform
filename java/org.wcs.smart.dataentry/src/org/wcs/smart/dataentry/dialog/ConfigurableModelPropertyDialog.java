@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -59,6 +60,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -67,6 +69,7 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
@@ -313,6 +316,10 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_ListsSubTask);
 						fetchTreeData(thiscm[0].getDefaultTrees());
 						monitor.worked(1);
+
+						monitor.subTask("fetching attributes configuration...");
+						fetchAttributeSettings(thiscm[0].getAttributeSettings());
+						monitor.worked(1);
 					} finally {
 						monitor.done();
 						session.close();
@@ -384,6 +391,10 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			n.getNames().size();
 			fetchAttributeTree(n.getActiveChildren());
 		}
+	}
+	private void fetchAttributeSettings(Map<Attribute, CmDmAttributeSettings> settings){
+		if (settings == null) return;
+		settings.size();
 	}
 
 	@Override

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.Set;
 
@@ -40,6 +41,7 @@ import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
+import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -93,9 +95,29 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
 	private void createGroupControls() {
 		Composite container = createContentContainer(this);
-		createDisplayNameControls(container);		
+		createDisplayNameControls(container);
+		createDisplayModeControls(container);
+		
+		addImageRow(container);
 	}
-
+	
+	private void addImageRow(Composite container) {
+		Label label = new Label(container, SWT.NONE);
+		label.setText("Image:");
+		
+		new ImageSelectionControl(container, new IImageContentProvider() {
+			@Override
+			public File getImageFile() {
+				return getSourceObject().getImageFile();
+			}
+			
+			@Override
+			public void setImageFile(File file) {
+				// TODO Auto-generated method stub
+			}
+		});
+	}
+	
 	private void createCategoryControls() {
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
@@ -169,6 +191,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				fireModelChanged();
 			}
 		});
+		
+		addImageRow(container);
 
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override

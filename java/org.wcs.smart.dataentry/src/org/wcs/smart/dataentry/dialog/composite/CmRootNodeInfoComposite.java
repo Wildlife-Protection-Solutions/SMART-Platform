@@ -55,6 +55,7 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
+		createDisplayModeControls(container);
 	}
 
 	public boolean isButtonValid(ConfigurableModelEditorDefaultTab.ControlButton button){

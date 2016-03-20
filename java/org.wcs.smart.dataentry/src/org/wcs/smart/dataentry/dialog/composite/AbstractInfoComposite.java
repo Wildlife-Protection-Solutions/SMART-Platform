@@ -35,6 +35,9 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
@@ -76,6 +79,7 @@ import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
@@ -145,6 +149,61 @@ public abstract class AbstractInfoComposite extends Composite {
 		return tnc;
 	}
 	
+	protected DisplayModeComboViewer createDisplayModeControls(Composite parent) {
+		Label label = new Label(parent, SWT.NONE);
+		label.setText("Display Mode:");
+		final DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(parent);
+		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				boolean fire = true;
+				DisplayMode mode = modeViewer.getSelectedDisplayMode();
+				Object obj = getSourceObject();
+				if (obj instanceof CmRootNode) {
+					CmRootNode r = (CmRootNode) obj;
+					fire = mode != r.model.getDisplayMode();
+					r.model.setDisplayMode(mode);
+				} else if (obj instanceof CmNode) {
+					CmNode m = (CmNode) obj;
+					fire = mode != m.getDisplayMode();
+					m.setDisplayMode(mode);
+				} else {
+					SmartPlugIn.log("Unexpected class in display mode combo viewer: " + obj.getClass(), null); //$NON-NLS-1$
+				}
+				if (fire) {
+					fireModelChanged();
+					tracker.saveOrUpdate(obj);
+				}
+			}
+		});
+		
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject, Language language) {
+				DisplayMode mode = getSourceDisplayMode();
+				modeViewer.setSelection(new StructuredSelection(mode != null ? mode : DisplayMode.DEFAULT_DISPLAY_MODE));
+			}
+			
+			private DisplayMode getSourceDisplayMode() {
+				Object obj = getSourceObject();
+				if (obj instanceof CmRootNode) {
+					CmRootNode r = (CmRootNode) obj;
+					return r.model.getDisplayMode();
+				} else if (obj instanceof CmNode) {
+					CmNode m = (CmNode) obj;
+					return m.getDisplayMode();
+				} else if (obj instanceof CmAttribute) {
+					CmAttribute a = (CmAttribute) obj;
+					return a.getDisplayMode();
+				}
+				return null; //we should never be here
+			}
+		});
+
+		return modeViewer;
+	}
+
 	private void addToParent(CmNode node) {
 		Object obj = getSourceObject();
 		if (obj instanceof CmNode) {

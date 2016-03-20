@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -65,10 +66,16 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
+import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
+import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
+import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
@@ -89,6 +96,9 @@ public class EditTreeDialog extends TitleAreaDialog {
 	private Viewer dmTreeViewer;
 	private TreeViewer itemViewer;
 	private TableViewer nameTable;
+	
+	private DisplayModeComboViewer modeViewer;
+	private ImageSelectionControl imageControl;
 
 	private NamedItem dmNode;
 	private CmAttributeTreeNode cmNode;
@@ -210,9 +220,15 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnPanel.setLayout(gla);
 		btnPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-		createNameTable(comp);
+		Group right = new Group(comp, SWT.NONE);
+		right.setLayout( new GridLayout());
+		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		right.setText("Tree Node Properties");
+
+		createNameTable(right);
+		createNodeConfigControls(right);
 		
-		comp.setWeights(new int[]{28,41,31});
+		comp.setWeights(new int[]{28,37,35});
 		itemViewer.refresh();		
 		return parent;
 	}
@@ -220,7 +236,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 	@Override
 	public Point getInitialSize(){
 		Point size = super.getInitialSize();
-		return new Point(Math.min(size.x, 800), size.y);
+		return new Point(Math.min(size.x, 900), size.y);
 	}
 
 	protected void deleteItems() {
@@ -505,6 +521,56 @@ public class EditTreeDialog extends TitleAreaDialog {
 		nameTable.getTable().setEnabled(false);
 	}
 
+	private void createNodeConfigControls(Composite parent) {
+		Composite containerCmp = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(2, false);
+		layout.marginHeight = layout.marginWidth = 0;
+		containerCmp.setLayout(layout);
+		containerCmp.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+		
+		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
+		label.setText("Display Mode:");
+		modeViewer = new DisplayModeComboViewer(containerCmp);
+		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		modeViewer.setSelection(new StructuredSelection(attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
+		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (cmNode == null) {
+					//we are configuring a root of the tree; its configuration is stored as a part of attribute
+					attribute.setCurrentDisplayMode(modeViewer.getSelectedDisplayMode());
+					//we need to save either configurable model global setting (for default configuration)
+					//or attribute option (for custom configuration), this is way we try to save both below
+					CmAttributeOption op = attribute.getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
+					if (op != null) {
+						tracker.saveOrUpdate(op);
+					}
+					CmDmAttributeSettings settings = editModel.getAttributeSettings().get(attribute.getAttribute());
+					if (settings != null) {
+						tracker.saveOrUpdate(settings);
+					}
+				} else {
+					cmNode.setDisplayMode(modeViewer.getSelectedDisplayMode());
+					tracker.saveOrUpdate(cmNode);
+				}
+			}
+		});
+		
+		org.eclipse.swt.widgets.Label imgLbl = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
+		imgLbl.setText("Image:");
+		imageControl = new ImageSelectionControl(containerCmp, new IImageContentProvider() {
+			@Override
+			public File getImageFile() {
+				return cmNode != null ? cmNode.getImageFile() : null;
+			}
+
+			@Override
+			public void setImageFile(File file) {
+				// TODO Auto-generated method stub
+			}
+		});
+	}
+	
 	/**
 	 * Sets the current selection from the item viewer.  If null
 	 * the name table will be disabled.
@@ -521,8 +587,21 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnEnable.setEnabled(cmNode != null);
 		btnRemove.setEnabled(cmNode != null);
 		updateEnableButtonText();
+		updateDisplayModeControl();
+		imageControl.setVisible(cmNode != null);
+		imageControl.redrawCanvas();
 	}
 
+	private void updateDisplayModeControl() {
+		if (cmNode == null) {
+			//value for root
+			modeViewer.setSelection(new StructuredSelection(attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
+		} else {
+			modeViewer.setSelection(new StructuredSelection(cmNode.getDisplayMode() != null ? cmNode.getDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
+		}
+		
+	}
+	
 	private void updateEnableButtonText(){
 
 		if (this.cmNode == null || this.cmNode.getIsActive()){

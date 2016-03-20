@@ -42,6 +42,11 @@
             class="org.wcs.smart.dataentry.model.ScreenOptionUuid"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".id.model.conservationArea"
+            class="org.wcs.smart.dataentry.model.CmDmAttributeSettings"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.menus">

@@ -45,7 +45,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
-import org.wcs.smart.dataentry.dialog.RenameListDialog;
+import org.wcs.smart.dataentry.dialog.EditListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -286,7 +286,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
-					RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject(), getModel(), tracker);
+					EditListDialog dialog = new EditListDialog(getShell(), getSourceObject(), getModel(), tracker);
 					dialog.open();
 							
 					updateListControl();

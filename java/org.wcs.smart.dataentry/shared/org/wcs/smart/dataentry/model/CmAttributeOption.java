@@ -49,6 +49,7 @@ public class CmAttributeOption extends UuidItem {
 	public static final String ID_NUMERIC = "NUMERIC"; //$NON-NLS-1$
 	public static final String ID_CUSTOM_CONFIG = "CUSTOM_CONFIG"; //$NON-NLS-1$
 	public static final String ID_ENTER_ONCES = "ENTER_ONCE"; //$NON-NLS-1$
+	public static final String ID_DISPLAY_MODE = "DISPLAY_MODE"; //$NON-NLS-1$
 	
 	public static enum EnterOnceType {
 		NONE,//Messages.CmAttributeOption_EnterOnceType_NONE),

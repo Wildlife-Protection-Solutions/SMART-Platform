@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.io.File;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -83,4 +86,9 @@ public class CmAttributeListItem extends CmAttributeItem {
 		this.listOrder = listOrder;
 	}
 	
+	@Transient
+	public File getImageFile() {
+		//TODO: implement real logic
+		return new File("D:\\SMART\\_test_img\\shark1.jpg");
+	}
 }
