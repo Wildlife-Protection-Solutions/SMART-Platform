@@ -21,15 +21,22 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.io.File;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -47,23 +54,38 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
+import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
+import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
+import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
+import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeItem;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
+import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.DisplayMode;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Rename dialog for providing aliases for configurable model tree and list attribute items 
+ * Rename dialog for providing aliases for configurable model list attribute items.
+ * 
  * @author Emily
+ * @author Evgeniy
  *
  */
-public abstract class AbstractRenameDialog extends TitleAreaDialog{
+public class EditListDialog extends TitleAreaDialog{
 
 	protected CmAttribute attribute;
 	protected ConfigurableModel editModel;
@@ -76,8 +98,9 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	private CmAttributeItem cmNode;
 	
 	private Button btnEnable;
+	private ImageSelectionControl imageControl;
 	
-	public AbstractRenameDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, ChangeTracker tracker) {
+	public EditListDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, ChangeTracker tracker) {
 		super(parentShell);
 		this.attribute = attribute;
 		this.tracker = tracker;
@@ -85,13 +108,50 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		parent = (Composite) super.createDialogArea(parent);
+		Composite main = (Composite) super.createDialogArea(parent);
 		
 		setTitle(attribute.getName());
-		setMessage(getDialogMessage());
+		setMessage(Messages.RenameListDialog_DialogMessage);
 		getShell().setText(Messages.ConfigurableModelEditDialog_Title);
 		
-		SashForm comp = new SashForm(parent, SWT.HORIZONTAL);
+		Composite container = new Composite(main, SWT.NONE);
+		GridLayout cgd = new GridLayout(1, false);
+		cgd.marginBottom=0;
+		cgd.marginHeight = 0;
+		cgd.marginLeft = 0;
+		cgd.marginRight = 0;
+		cgd.marginTop = 0;
+		cgd.marginWidth = 0;
+		container.setLayout(cgd);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite upperConlrolsCmp = new Composite(container, SWT.NONE);
+		upperConlrolsCmp.setLayout(new GridLayout(2, false));
+		upperConlrolsCmp.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
+
+		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(upperConlrolsCmp, SWT.NONE);
+		label.setText("Display Mode:");
+		final DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(upperConlrolsCmp);
+		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		modeViewer.setSelection(new StructuredSelection(attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
+		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				attribute.setCurrentDisplayMode(modeViewer.getSelectedDisplayMode());
+				//we need to save either configurable model global setting (for default configuration)
+				//or attribute option (for custom configuration), this is way we try to save both below
+				CmAttributeOption op = attribute.getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
+				if (op != null) {
+					tracker.saveOrUpdate(op);
+				}
+				CmDmAttributeSettings settings = editModel.getAttributeSettings().get(attribute.getAttribute());
+				if (settings != null) {
+					tracker.saveOrUpdate(settings);
+				}
+			}
+		});
+		
+		SashForm comp = new SashForm(container, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 		
 		Composite left = new Composite(comp, SWT.NONE);
@@ -135,14 +195,21 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 			}
 		});
 		super.setButtonLayoutData(btnEnable);
+
+		Composite right = new Composite(comp, SWT.NONE);
+		GridLayout gr = new GridLayout();
+		gr.marginHeight = gr.marginWidth = 0;
+		right.setLayout(gr);
+		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		createNameTable(comp);
+		createNameTable(right);
+		createListItemConfigControls(right);
 		
 		comp.setWeights(new int[]{35,65});
 		itemViewer.refresh();
 		
 		
-		return parent;
+		return main;
 	}
 	
 	/**
@@ -278,6 +345,30 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 		nameTable.getTable().setEnabled(false);
 	}
 	
+	private void createListItemConfigControls(Composite parent) {
+		Composite imgCmp = new Composite(parent, SWT.NONE);
+		GridLayout imgLayout = new GridLayout(2, false);
+		imgLayout.marginHeight = imgLayout.marginWidth = 0;
+		imgCmp.setLayout(imgLayout);
+		imgCmp.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+		org.eclipse.swt.widgets.Label imgLbl = new org.eclipse.swt.widgets.Label(imgCmp, SWT.NONE);
+		imgLbl.setText("Image:");
+		imageControl = new ImageSelectionControl(imgCmp, new IImageContentProvider() {
+			@Override
+			public File getImageFile() {
+				// TODO Auto-generated method stub
+				if (cmNode != null) {
+					return ((CmAttributeListItem)cmNode).getImageFile();
+				}
+				return null;
+			}
+
+			@Override
+			public void setImageFile(File file) {
+				// TODO Auto-generated method stub
+			}
+		});
+	}
 	
 	
 
@@ -318,6 +409,7 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 		nameTable.getTable().setEnabled(dmNode != null);
 		btnEnable.setEnabled(dmNode != null);
 		updateEnableButtonText();
+		imageControl.redrawCanvas();
 	}
 	
 	private void updateEnableButtonText(){
@@ -330,17 +422,66 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	}
 	
 	/**
-	 * Creates the viewer for the tree or list.
+	 * Creates the viewer for the list.
 	 * @param parent
 	 * @return
 	 */
-	protected abstract Viewer createItemViewer(Composite parent);
-	
-	/**
-	 * The dialog message
-	 * @return
-	 */
-	protected abstract String getDialogMessage();
+	protected Viewer createItemViewer(Composite parent) {
+		Composite tableComp = new Composite(parent, SWT.NONE);
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)tableComp.getLayoutData()).heightHint = 300;
+		
+		final TableViewer listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		listViewer.setContentProvider(ArrayContentProvider.getInstance());
+		listViewer.setLabelProvider(new CmListItemLabelProvider(editModel));
+		listViewer.setInput(attribute.getCurrentList());
+		
+		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((StructuredSelection) listViewer.getSelection()).getFirstElement();
+				AttributeListItem currentNode = null;
+				CmAttributeListItem currentCmNode = null;
+				if (x instanceof AttributeListItem) {
+					currentNode = (AttributeListItem) x;
+					currentCmNode = getConfiguredNode(x);
+				}
+				if (x instanceof CmAttributeListItem) {
+					currentCmNode = (CmAttributeListItem) x;
+					currentNode = currentCmNode.getListItem();
+				}
+				EditListDialog.this.setCurrentSelection(currentNode, currentCmNode);
+			}
+		});
+		
+		TableColumnLayout ll = new TableColumnLayout();
+		ll.setColumnData(new TableColumn(listViewer.getTable(),SWT.NONE), new ColumnWeightData(100));
+		tableComp.setLayout(ll);
+		
+		return listViewer;
+	}
+
+	private CmAttributeListItem getConfiguredNode(Object x){
+		if (x instanceof CmAttributeListItem) {
+			return (CmAttributeListItem) x;
+		}
+		
+		if (x instanceof AttributeListItem) {
+			Session s = HibernateManager.openSession();
+			try{
+				AttributeListItem tmp = (AttributeListItem) x;
+				List<?> items = s.createCriteria(CmAttributeListItem.class)
+					.add(Restrictions.eq("listItem", tmp))  //$NON-NLS-1$
+					.add(Restrictions.eq("configurableModel", editModel)).list(); //$NON-NLS-1$
+				if (items.size() > 0) {
+					return (CmAttributeListItem) items.get(0);
+				}
+			}finally{
+				s.close();
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * Enable or disable the configured node associated with the given data model node.
@@ -348,6 +489,12 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	 * @param dmNode
 	 * @param enable
 	 */
-	protected abstract void enableItem(NamedItem dmNode, boolean enable);
+	protected void enableItem(NamedItem dmNode, boolean enable){
+		CmAttributeListItem item = getConfiguredNode(dmNode);
+		if (item != null){
+			item.setIsActive(enable);
+			tracker.saveOrUpdate(item);
+		}
+	}
 	
 }

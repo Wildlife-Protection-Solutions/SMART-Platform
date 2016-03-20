@@ -27,10 +27,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -55,6 +59,7 @@ import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 public class ConfigurableModel extends NamedItem {
 
     private ConservationArea conservationArea;
+	private DisplayMode displayMode; //display mode for the root nodes
     private List<CmNode> nodes; //the root nodes for the data model
 
 	private List<CmAttributeTreeNode> defaultRootTreeNodes = null;
@@ -62,6 +67,8 @@ public class ConfigurableModel extends NamedItem {
 
 	private List<CmAttributeListItem> defaultListItems = null;
 	private Map<Attribute, List<CmAttributeListItem>> attr2ListMap = null;
+	
+	private Map<Attribute, CmDmAttributeSettings> attributeSettings;
     
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -85,6 +92,14 @@ public class ConfigurableModel extends NamedItem {
 		this.nodes = nodes;
 	}
 
+	@Column(name="display_mode")
+	@Enumerated(EnumType.STRING)
+	public DisplayMode getDisplayMode() {
+		return displayMode;
+	}
+	public void setDisplayMode(DisplayMode displayMode) {
+		this.displayMode = displayMode;
+	}
 	
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "parent_uuid is null and dm_attribute_uuid is not null")
@@ -206,7 +221,7 @@ public class ConfigurableModel extends NamedItem {
 	@Transient
 	public void removeDefaultLists(final Attribute attribute) {
 		List<CmAttributeListItem> list = getDefaultLists(attribute);
-		list.clear(); //NOTE: as this is FilteredSubList is will remove given items from original defaultRootListItems list
+		list.clear(); //NOTE: as this is FilteredSubList it will remove given items from original defaultRootListItems list
 		attr2ListMap.remove(attribute);
 	}
 	
@@ -268,4 +283,38 @@ public class ConfigurableModel extends NamedItem {
 		}
 	}
 
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.model", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@MapKey(name="id.dmAttribute")
+	public Map<Attribute, CmDmAttributeSettings> getAttributeSettings() {
+		if (attributeSettings == null)
+			attributeSettings = new HashMap<>();
+		return attributeSettings;
+	}
+	public void setAttributeSettings(Map<Attribute, CmDmAttributeSettings> attributeSettings) {
+		this.attributeSettings = attributeSettings;
+	}
+	
+	/**
+	 * 
+	 * @param attribute
+	 * @return {@link DisplayMode} that is set for this attribute in default configuration
+	 */
+	@Transient
+	public DisplayMode getAttributeDisplayMode(Attribute attribute) {
+		CmDmAttributeSettings settings = getAttributeSettings().get(attribute);
+		return (settings != null && settings.getDisplayMode() != null) ? settings.getDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE;
+	}
+
+	@Transient
+	public void setAttributeDisplayMode(Attribute attribute, DisplayMode mode) {
+		CmDmAttributeSettings settings = getAttributeSettings().get(attribute);
+		if (settings == null) {
+			settings = CmDmAttributeSettings.createDefaultSettings(this, attribute);
+			getAttributeSettings().put(attribute, settings);
+		}
+		if (mode != null) {
+			settings.setDisplayMode(mode);
+		}
+	}
+	
 }

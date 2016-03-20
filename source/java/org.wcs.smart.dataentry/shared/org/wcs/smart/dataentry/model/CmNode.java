@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -56,6 +59,7 @@ public class CmNode extends NamedItem {
 	private boolean photoRequired = true;
 	private boolean collectMultipleObservations = false;
 	private boolean useSingleGpsPoint = false;
+	private DisplayMode displayMode;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -153,6 +157,24 @@ public class CmNode extends NamedItem {
 		this.useSingleGpsPoint = Boolean.TRUE.equals(useSingleGpsPoint); //null <==> false
 	}
 
+	/**
+	 * {@link DisplayMode} makes sense only for Groups
+	 */
+	@Column(name="display_mode")
+	@Enumerated(EnumType.STRING)
+	public DisplayMode getDisplayMode() {
+		return displayMode;
+	}
+	public void setDisplayMode(DisplayMode displayMode) {
+		this.displayMode = displayMode;
+	}
+
+	@Transient
+	public File getImageFile() {
+		//TODO: implement real logic
+		return new File("D:\\SMART\\_test_img\\fish4.jpg");
+	}
+	
 	@Transient
 	public boolean isGroup() {
 		return category == null;

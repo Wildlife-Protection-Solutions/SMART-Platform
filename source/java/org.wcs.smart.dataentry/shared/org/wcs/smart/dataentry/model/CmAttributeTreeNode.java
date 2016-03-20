@@ -21,17 +21,21 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -59,6 +63,7 @@ public class CmAttributeTreeNode extends NamedItem {
 	private int nodeOrder;
 	private List<CmAttributeTreeNode> children = new ArrayList<CmAttributeTreeNode>();
 	private CmAttributeTreeNode parent = null;
+	private DisplayMode displayMode;
 	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -140,4 +145,21 @@ public class CmAttributeTreeNode extends NamedItem {
 		this.isActive = isActive;
 	}
 	
+	/**
+	 * {@link DisplayMode} indicates how children will be displayed for this node
+	 */
+	@Column(name="display_mode")
+	@Enumerated(EnumType.STRING)
+	public DisplayMode getDisplayMode() {
+		return displayMode;
+	}
+	public void setDisplayMode(DisplayMode displayMode) {
+		this.displayMode = displayMode;
+	}
+	
+	@Transient
+	public File getImageFile() {
+		//TODO: implement real logic
+		return new File("D:\\SMART\\_test_img\\shark2.jpeg");
+	}
 }

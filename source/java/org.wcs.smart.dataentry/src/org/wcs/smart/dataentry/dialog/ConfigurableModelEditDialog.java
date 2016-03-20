@@ -60,7 +60,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	
-	private static final int DIALOG_WIDTH = 700;
+	private static final int DIALOG_WIDTH = 750;
 	private static final int DIALOG_HEIGHT = 725;
 
 	private ConfigurableModel model;

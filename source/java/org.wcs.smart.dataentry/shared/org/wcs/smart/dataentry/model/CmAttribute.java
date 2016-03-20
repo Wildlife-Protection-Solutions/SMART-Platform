@@ -215,4 +215,55 @@ public class CmAttribute extends NamedItem {
 		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_ENTER_ONCES);
 		return option != null && option.getStringValue() != null ? EnterOnceType.valueOf(option.getStringValue()) : EnterOnceType.NONE;
 	}
+	
+	/**
+	 * Only valid for list and tree attributes.
+	 * Option is responsible for display mode of custom list attributes configurations (or tree nodes at root level configuration)
+	 * when custom configuration is used for the attribute.
+	 */
+	@Transient
+	public DisplayMode getDisplayMode() {
+		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
+		return option != null && option.getStringValue() != null ? DisplayMode.valueOf(option.getStringValue()) : DisplayMode.DEFAULT_DISPLAY_MODE;
+	}
+
+	/**
+	 * @return the default {@link DisplayMode} (defined for the entire cm) for this attribute
+	 */
+	@Transient
+	public DisplayMode getDefaultDisplayMode() {
+		return node.getModel().getAttributeDisplayMode(attribute);
+	}
+
+	/**
+	 * 
+	 * @return the {@link DisplayMode} for the custom list or the default {@link DisplayMode} depending on
+	 * if a custom flag is configured for this attribute or not
+	 */
+	@Transient
+	public DisplayMode getCurrentDisplayMode() {
+		return isUseCustomConfig() ? getDisplayMode() : getDefaultDisplayMode();
+	}
+	@Transient
+	public void setCurrentDisplayMode(DisplayMode mode) {
+		if (isUseCustomConfig()) {
+			CmAttributeOption op = getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
+			if (op == null) {
+				op = new CmAttributeOption();
+				op.setCmAttribute(this);
+				op.setOptionId(CmAttributeOption.ID_DISPLAY_MODE);
+				op.setStringValue(DisplayMode.DEFAULT_DISPLAY_MODE.toString());
+				getCmAttributeOptions().put(op.getOptionId(), op);
+			}
+			if (mode != null) {
+				op.setStringValue(mode.toString());
+			} else {
+				getCmAttributeOptions().remove(op.getOptionId());
+				op.setStringValue(null);
+			}
+		} else {
+			node.getModel().setAttributeDisplayMode(attribute, mode);
+		}
+	}
+	
 }
