@@ -16,7 +16,7 @@
 		
 		var QUERYURL = "${pageContext.request.contextPath}/api/query/";
 		var QUERYLINKURL = "${pageContext.request.contextPath}/connect/query/api/";
-		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/";
+		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/withdataonly/";
 		
 		var datefilters = {
 				<c:forEach var="df" items="${datefilters}">

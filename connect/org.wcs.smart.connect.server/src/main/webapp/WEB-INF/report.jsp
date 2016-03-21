@@ -17,7 +17,7 @@
 		var REPORTURL = "${pageContext.request.contextPath}/api/report/";
 // 		var REPORTLINKURL = "${pageContext.request.contextPath}/connect/report/api/";
 		var REPORTLINKURL = "${pageContext.request.contextPath}/api/report/";
-		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/";
+		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/withdataonly";
 		
 // 		var datefilters = {
 // 				<c:forEach var="df" items="${datefilters}">

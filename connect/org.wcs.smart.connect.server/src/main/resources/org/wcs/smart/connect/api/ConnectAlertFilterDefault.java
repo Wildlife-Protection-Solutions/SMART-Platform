@@ -50,7 +50,6 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
-import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 /**

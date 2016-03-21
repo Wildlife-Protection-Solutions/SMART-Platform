@@ -119,6 +119,7 @@ public class ConnectUser extends HttpServlet {
 	 * 
 	 * @return Returns a JSON Array of SmartUser objects for all inactive users 
 	 */
+	@SuppressWarnings("unchecked")
 	@GET
     @Path("/getinactive/")
     public List<SmartUser> getInactiveUsers(){

@@ -147,12 +147,15 @@ public class HibernateManager {
 	 * 
 	 * @param session
 	 * @return a list of conservation areas in the system
+	 * 
+	 * Only Include actual Desktop CAs with DATA (exclude 'CCAA', 'NO DATA' and 'Uploading')
 	 */
 	@SuppressWarnings("unchecked")
 	public static List<ConservationAreaInfo> getConservationAreaInfosWithoutCCAA(Session session) {
 		return (List<ConservationAreaInfo>)session
 				.createCriteria(ConservationAreaInfo.class)
 				.add(Restrictions.ne("uuid", ConservationAreaInfo.CCAA_UUID)) //$NON-NLS-1$
+				.add(Restrictions.eq("status", ConservationAreaInfo.Status.DATA)) //$NON-NLS-1$
 				.list();
 	}
 

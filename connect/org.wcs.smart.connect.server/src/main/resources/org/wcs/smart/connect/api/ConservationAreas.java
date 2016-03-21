@@ -228,6 +228,28 @@ public class ConservationAreas extends HttpServlet{
 			s.getTransaction().commit();
 		}
 	}
+	
+	/**
+	 * List all Conservation Areas that have SMART data
+	 * URL: ../server/api/conservationarea/withdataonly/
+	 * Call Type: GET
+	 * 
+	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. Only returns the CAs with Desktop Data associated.
+	 * (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
+	 */
+	@GET
+    @Path("/withdataonly/")
+    public List<ConservationAreaProxy> getConservationAreasWithData(){
+		
+		List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
+		List<ConservationAreaProxy> allConservationAreas = getConservationAreas();
+		for (ConservationAreaProxy ca : allConservationAreas){
+			if(ca.getStatus().equals(ConservationAreaInfo.Status.CCAA) || ca.getStatus().equals(ConservationAreaInfo.Status.DATA)){
+				conservationAreas.add(ca);
+			}
+		}
+		return conservationAreas;
+	}
 
 	/**
 	 * Gets a conservation area.  
