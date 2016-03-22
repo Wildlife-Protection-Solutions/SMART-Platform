@@ -40,6 +40,7 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * @author elitvin
@@ -47,7 +48,7 @@ import org.wcs.smart.ca.datamodel.Category;
  */
 @Entity
 @Table(name = "smart.cm_node")
-public class CmNode extends NamedItem {
+public class CmNode extends NamedItem implements IImageAssociatedObject {
 
 	private ConfigurableModel model; 
 	private Category category; 
@@ -60,6 +61,7 @@ public class CmNode extends NamedItem {
 	private boolean collectMultipleObservations = false;
 	private boolean useSingleGpsPoint = false;
 	private DisplayMode displayMode;
+	private File imageFile;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -170,13 +172,23 @@ public class CmNode extends NamedItem {
 	}
 
 	@Transient
-	public File getImageFile() {
-		//TODO: implement real logic
-		return new File("D:\\SMART\\_test_img\\fish4.jpg");
-	}
-	
-	@Transient
 	public boolean isGroup() {
 		return category == null;
+	}
+
+	@Transient
+	@Override
+	public File getImageFile() {
+		return imageFile != null ? imageFile : new File(getImagePersistenceLocation());
+	}
+	@Transient
+	@Override
+	public void setImageFile(File file) {
+		imageFile = file;
+	}
+	@Transient
+	@Override
+	public String getImagePersistenceLocation() {
+		return getModel().getFileDataStoreLocation() + File.separator + "cn_img1_" + UuidUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
 	}
 }

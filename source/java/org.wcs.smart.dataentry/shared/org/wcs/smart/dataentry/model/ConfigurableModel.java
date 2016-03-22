@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,11 +44,13 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
+import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -315,6 +318,14 @@ public class ConfigurableModel extends NamedItem {
 		if (mode != null) {
 			settings.setDisplayMode(mode);
 		}
+	}
+
+	/**
+	 * @return the filestore location for the given configurable model
+	 */
+	@Transient
+	public String getFileDataStoreLocation() {
+		return getConservationArea().getFileDataStoreLocation() + File.separator + "dataentry" + File.separator + UuidUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
 	}
 	
 }

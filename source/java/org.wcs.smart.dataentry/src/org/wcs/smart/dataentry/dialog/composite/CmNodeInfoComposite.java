@@ -65,6 +65,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Button btnSingleGpsPoint;
 	private boolean isGroup;
 	
+	private ImageSelectionControl imageControl;
+	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker,  boolean isGroup) {
 		super(parent, model, tracker);
 		GridLayout layout = new GridLayout(1, false);
@@ -99,13 +101,20 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		createDisplayModeControls(container);
 		
 		addImageRow(container);
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject, Language language) {
+				imageControl.redrawCanvas();
+			}
+		});
+		
 	}
 	
 	private void addImageRow(Composite container) {
 		Label label = new Label(container, SWT.NONE);
 		label.setText("Image:");
 		
-		new ImageSelectionControl(container, new IImageContentProvider() {
+		imageControl = new ImageSelectionControl(container, new IImageContentProvider() {
 			@Override
 			public File getImageFile() {
 				return getSourceObject().getImageFile();
@@ -113,7 +122,9 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			
 			@Override
 			public void setImageFile(File file) {
-				// TODO Auto-generated method stub
+				getSourceObject().setImageFile(file);
+				tracker.saveOrUpdate(getSourceObject());
+				fireModelChanged();
 			}
 		});
 	}
@@ -216,6 +227,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 						btnSingleGpsPoint.setSelection(n.isUseSingleGpsPoint());
 						btnSingleGpsPoint.setEnabled(n.isCollectMultipleObservations());
 					}
+					imageControl.redrawCanvas();
 					CmNodeInfoComposite.this.layout(true, true);
 				}
 			}

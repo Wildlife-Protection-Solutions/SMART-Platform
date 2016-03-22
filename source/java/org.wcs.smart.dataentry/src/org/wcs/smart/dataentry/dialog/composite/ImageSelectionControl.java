@@ -35,6 +35,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 
 /**
  * Control that allows to select a single image for provided object.
@@ -77,7 +79,7 @@ public class ImageSelectionControl extends Composite {
 			@Override
 			public void paintControl(PaintEvent e) {
 				File file = contentProvider.getImageFile();
-				if (file != null) {
+				if (file != null && file.exists() && file.isFile()) {
 					Image image = new Image(Display.getDefault(), file.getAbsolutePath());
 					e.gc.drawImage(image, 0, 0, image.getBounds().width, image.getBounds().height, 0, 0, w, h);
 					image.dispose();
@@ -103,7 +105,22 @@ public class ImageSelectionControl extends Composite {
 		buttonLoad.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: impl
+				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
+				fd.setFilterExtensions(new String[] {
+						"*.bmp;*.jpg;*.jpeg", //$NON-NLS-1$
+						"*.bmp", //$NON-NLS-1$
+						"*.jpg;*.jpeg", //$NON-NLS-1$
+				});
+				fd.setFilterNames(new String[] {
+						"All Images (*.bmp;*.jpg;*.jpeg)",
+						"Bitmap Files (*.bmp)",
+						"JPEG Files (*.jpg;*.jpeg)"
+				});
+				String f = fd.open();
+				if (f != null) {
+					contentProvider.setImageFile(new File(f));
+					redrawCanvas();
+				}
 			}
 		});
 
@@ -113,7 +130,8 @@ public class ImageSelectionControl extends Composite {
 		buttonClear.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				contentProvider.setImageFile(null);
+				contentProvider.setImageFile(AssociatedImageInterceptor.NULL_FILE); //we cannot use null, as null indicates that we need to load a value
+				redrawCanvas();
 			}
 		});
 	}
