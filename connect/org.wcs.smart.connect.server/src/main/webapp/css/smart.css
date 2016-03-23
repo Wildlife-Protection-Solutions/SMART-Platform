@@ -257,6 +257,13 @@ h2{
 	margin-top: 10px;
 }
 
+.info-icon{
+	background-image: url("information.png");
+    width:16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    display: block;
+}
 .download-icon{
     background-image: url("download.png");
     width:16px;

@@ -24,18 +24,16 @@
   			<div class="catable table-cell smart-table">
   				<div class="table-row smart-table-header">
 					<div class="table-cell smart-table-cell"><fmt:message key="ca.labelheader"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="ca.uuidheader"/></div>
 					<div class="table-cell smart-table-cell"><fmt:message key="ca.statusheader"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="ca.versionheader"/></div>
+					<div class="table-cell smart-table-cell"></div>
 					<div class="table-cell smart-table-cell"></div>
 					<div class="table-cell smart-table-cell"></div>
 				</div>
 				<c:forEach var="ca" items="${cas}" varStatus="count">
 					<div data-cauuid ="${ca.getUuid()}" class="carow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 						<div class="table-cell smart-table-cell">${ca.getLabel()}</div>
-						<div class="table-cell smart-table-cell">${ca.getUuid()}</div>
 						<div class="table-cell smart-table-cell">${ca.getStatus()}</div>
-						<div class="table-cell smart-table-cell">${ca.getVersion().toString()}</div>
+						<div class="table-cell smart-table-cell"><a href="" class="info-icon" id="infoca" data-cauuid = "${ca.getUuid()}" title="details..."></a></div>
 						<div class="table-cell smart-table-cell ">
 							<c:if test="${ca.getStatus() == 'DATA'}">
 								<a href=""  data-cauuid = "${ca.getUuid()}" title="downloadca" class="downloadca download-icon"></a>
@@ -43,8 +41,10 @@
 						</div>
 						<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="deleteca delete-icon"></a></div>
 					</div>
+
 				</c:forEach>
 			</div>  
+
 		</div>
 		<c:if test="${canadd}">
 			<div><button id="btnNewCa" class="block button top-spacer"><fmt:message key="ca.createnew"/></button></div>
@@ -79,6 +79,43 @@
 	  </form>
   </div>
   
+  
+  <div id="caInfoDialog" style="display: none; width:360px" class="dialog">
+    <div class="dialog-title">Conservation Area Details</div>
+  	<div class="smart-table">
+  	<div class="table-row">
+			<div class="table-cell smart-table-cell">Label:</div>
+			<div id="infolabel" class="table-cell smart-table-cell"></div>
+		</div>
+  		<div class="table-row">
+			<div class="table-cell smart-table-cell">Description:</div>
+			<div id="infodescription" class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row">
+			<div class="table-cell smart-table-cell">Designation:</div>
+			<div id="infodesignation" class="table-cell smart-table-cell"></div>
+		</div>
+  		<div class="table-row">
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.uuidheader"/>:</div>
+			<div id="infouuid" class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row">
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.statusheader"/>:</div>
+			<div id="infostatus" class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row">
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.versionheader"/>:</div>
+			<div id="infoversion" class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row">
+			<div class="table-cell smart-table-cell">Revision:</div>
+			<div id="inforevision" class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="block top-spacer" style="text-align:right">
+     	<input class="button" type="button" value="<fmt:message key="ca.cancelbutton"/>" onclick="closeDialog('caInfoDialog'); return false;" />
+    	</div>
+  	</div>  
+  </div>
   
   <div id="downloadDialog" style="display: none;" class="dialog">
     <div class="dialog-title"><fmt:message key="ca.downloadtitle"/></div>

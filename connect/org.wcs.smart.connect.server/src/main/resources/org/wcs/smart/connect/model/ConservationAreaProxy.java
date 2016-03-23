@@ -42,12 +42,27 @@ public class ConservationAreaProxy {
 	private UUID version;
 	private Long revision;
 	
+	private String description;
+	private String designation;
 	
 	public ConservationAreaProxy(ConservationAreaInfo ca){
 		this.caUuid = ca.getUuid();
 		this.label = ca.getLabel();
 		this.status = ca.getStatus();
 		this.version = ca.getVersion();
+	}
+	
+	public void setDescriptionDesignation(String description, String designation){
+		this.description = description;
+		this.designation = designation;
+	}
+	
+	public String getDescription(){
+		return this.description;
+	}
+	
+	public String getDesignation(){
+		return this.designation;
 	}
 	
 	public void setRevision(Long revision){

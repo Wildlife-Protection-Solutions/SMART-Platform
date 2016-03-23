@@ -20,6 +20,12 @@ window.onload = function(){
 	for (var i = 0; i < elements.length; i ++){
 		elements[i].onclick=downloadca;
 	}
+	
+	//info
+	elements = document.querySelectorAll("#infoca");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].onclick=showcainfo;
+	}
 }
 
 function clearAndShowNewCaDialog(){
@@ -58,6 +64,45 @@ function cancelCaDownload(){
 	closeDialog('downloadDialog')
 	return false;
 }
+
+function showcainfo(){
+	var cauuid = this.dataset.cauuid;
+	var geturl = CAURL + '/' + encodeURIComponent(cauuid);
+	var oReq = new XMLHttpRequest();
+	oReq.onload = showcainfodialog;
+	oReq.cauuid = cauuid;
+	oReq.open("GET", geturl, true);
+	oReq.send();
+	return false;
+	
+}
+function showcainfodialog(){
+	if (this.status != 200) {
+		var msg = i18n("ca.error") + ": ";
+		if (this.status == 401){
+			msg += i18n("ca.unauthorized");
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	
+	var ca = JSON.parse(this.responseText)
+	document.querySelector("#infolabel").innerHTML = ca.label;
+	document.querySelector("#infostatus").innerHTML = ca.status;
+	document.querySelector("#infouuid").innerHTML = ca.uuid;
+	document.querySelector("#infodescription").innerHTML = ca.description == null ? "" : ca.description;
+	document.querySelector("#infodesignation").innerHTML = ca.designation == null ? "" : ca.designation;
+	document.querySelector("#infoversion").innerHTML = ca.version;
+	document.querySelector("#inforevision").innerHTML = ca.revision;
+	
+	displayDialog('caInfoDialog', 'main');
+	return false;
+}
+
 function downloadca(){
 	DOWNLOADCA = true;
 	displayDialog('downloadDialog', 'main');
@@ -242,10 +287,18 @@ function createCaTable(){
  	var cas = JSON.parse(this.responseText);
  	for (var i = 0; i < cas.length; i ++){
  		var row = tableCreateRow(parent, 
- 				[cas[i].label, cas[i].uuid, cas[i].status, cas[i].version, null, null], 
+ 				[cas[i].label, cas[i].status, null, null, null], 
  				"carow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.cauuid = cas[i].uuid;
+ 		
+ 		var infoicon = document.createElement("a");
+ 		infoicon.className="info-icon";
+ 		infoicon.title="details...";
+ 		infoicon.dataset.cauuid = cas[i].uuid;
+ 		infoicon.onclick = showcainfo;
+ 		infoicon.href="";
+ 		row.childNodes[2].appendChild(infoicon);
  		
  		if (cas[i].status == "DATA"){
 	 		var downloadca = document.createElement("a");
@@ -254,7 +307,7 @@ function createCaTable(){
 	 		downloadca.dataset.cauuid = cas[i].uuid;
 	 		downloadca.onclick = downloadca;
 	 		downloadca.href="";
-	 		row.childNodes[4].appendChild(downloadca);
+	 		row.childNodes[3].appendChild(downloadca);
  		}
  		
  		var deleteicon = document.createElement("a");
@@ -265,6 +318,6 @@ function createCaTable(){
  		deleteicon.dataset.label = cas[i].label;
  		deleteicon.onclick = confirmdeleteca;
  		deleteicon.href="";
- 		row.childNodes[5].appendChild(deleteicon);
+ 		row.childNodes[4].appendChild(deleteicon);
  	}
 }

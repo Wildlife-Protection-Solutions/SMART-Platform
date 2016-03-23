@@ -66,6 +66,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.PostgresUUIDType;
 import org.mindrot.jbcrypt.BCrypt;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.downloader.ca.CaExporterJob;
@@ -204,6 +205,10 @@ public class ConservationAreas extends HttpServlet{
 				try{
 					validateRead(ca.getUuid(), s);
 					ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
+					ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());
+					if (smartca != null){
+						proxy.setDescriptionDesignation(smartca.getDescription(), smartca.getDesignation());
+					}
 					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
 					conservationAreas.add(proxy);
 				}catch(SmartConnectException ex){
@@ -590,6 +595,11 @@ public class ConservationAreas extends HttpServlet{
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			ConservationAreaProxy proxy = new ConservationAreaProxy(info);
+			
+			ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, cuuid);
+			if (ca != null){
+				proxy.setDescriptionDesignation(ca.getDescription(), ca.getDesignation());
+			}
 			proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid()));
 			return Response.ok().entity(proxy).build();
 		}catch (SmartConnectException ex){
