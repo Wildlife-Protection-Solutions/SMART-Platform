@@ -22,16 +22,8 @@
 	<ResourceLink name="cleanup_task_interval_hours" 
 		global="cleanup_task_interval_hours" />
 		
-	<Resource name="mail/Session" 
-		auth="Container" 
-		type="javax.mail.Session"
-		mail.transport.protocol="smtps"
-		mail.smtp.ssl.enable="true"
-		mail.smtp.auth="true"
-		mail.smtp.from="noreply@refractions.net"
-		mail.smtp.host="smtp.googlemail.com"
-		mail.smtp.user="noreply@refractions.net"
-		password="dontrespondhere2"/>
+	<ResourceLink name="mail/Session" 
+		global="mail/Session"/>
 		
 	<Realm className="org.apache.catalina.realm.LockOutRealm">
 		<Realm className="org.apache.catalina.realm.DataSourceRealm"

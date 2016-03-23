@@ -75,7 +75,17 @@
 	<Environment name="cleanup_task_interval_hours" value="5"
 		type="java.lang.Integer" override="false" />
     	
-    	
+    <Resource name="mail/Session" 
+		auth="Container" 
+		type="javax.mail.Session"
+		mail.transport.protocol="smtps"
+		mail.smtp.ssl.enable="true"
+		mail.smtp.auth="true"
+		mail.smtp.from="noreply@refractions.net"
+		mail.smtp.host="smtp.googlemail.com"
+		mail.smtp.user="noreply@refractions.net"
+		password="dontrespondhere2"/>
+		
   </GlobalNamingResources>
 
   <!-- A "Service" is a collection of one or more "Connectors" that share
