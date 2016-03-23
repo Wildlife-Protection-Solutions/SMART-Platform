@@ -1,12 +1,26 @@
 <Context>
-	<Resource name="jdbc/smart" 
-		auth="Container" 
-		type="javax.sql.DataSource"
-		username="smart" password="smart" 
-		driverClassName="org.postgresql.Driver"
-		url="jdbc:postgresql://192.168.50.131:5432/connectjeff" 
-		maxActive="20"
-		maxIdle="10" factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" />
+
+	<ResourceLink name="jdbc/smart" 
+		global="org.wcs.smart.connect.datasource.postgresql" />
+	
+	<ResourceLink name="filestorelocation" 
+		global="filestorelocation" />
+	<ResourceLink name="dataqueue_cleanup_days" 
+		global="dataqueue_cleanup_days" />
+	<ResourceLink name="spatial_ref_sys_table" 
+		global="spatial_ref_sys_table" />
+	<ResourceLink name="number_background_threads" 
+		global="number_background_threads" />
+	<ResourceLink name="work_item_history_days_available" 
+		global="work_item_history_days_available" />
+	<ResourceLink name="changelog_cleanup_days" 
+		global="changelog_cleanup_days" />
+	<ResourceLink name="ca_export_days_available" 
+		global="ca_export_days_available" />
+	<ResourceLink name="sync_download_hours_available" 
+		global="sync_download_hours_available" />
+	<ResourceLink name="cleanup_task_interval_hours" 
+		global="cleanup_task_interval_hours" />
 		
 	<Resource name="mail/Session" 
 		auth="Container" 
@@ -29,23 +43,6 @@
 		</Realm>
 	</Realm>
 
-	<!-- environment variables -->
-	<!-- SMART Filestore Location -->
-	<Environment name="filestorelocation" value="C:\\temp\\connect_datastore\\"
-		type="java.lang.String" override="false" />
-	<Environment name="spatial_ref_sys_table" value="public.spatial_ref_sys"
-		type="java.lang.String" override="false" />
-	<Environment name="number_background_threads" value="5"
-		type="java.lang.Integer" override="false" />
-	<Environment name="work_item_history_days_available" value="5"
-		type="java.lang.Integer" override="false" />
-	<Environment name="changelog_cleanup_days" value="5"
-		type="java.lang.Integer" override="false" />
-	<Environment name="ca_export_days_available" value="5"
-		type="java.lang.Integer" override="false" />
-	<Environment name="sync_download_hours_available" value="5"
-		type="java.lang.Integer" override="false" />
-	<Environment name="cleanup_task_interval_hours" value="5"
-		type="java.lang.Integer" override="false" />
+	
 </Context>
   	

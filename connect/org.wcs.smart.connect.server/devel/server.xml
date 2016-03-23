@@ -37,6 +37,45 @@
          UserDatabaseRealm to authenticate users
     -->
     <Resource auth="Container" description="User database that can be updated and saved" factory="org.apache.catalina.users.MemoryUserDatabaseFactory" name="UserDatabase" pathname="conf/tomcat-users.xml" type="org.apache.catalina.UserDatabase"/>
+    
+    <!-- the SMART Connect database Connection Details  -->
+    <Resource auth="Container" 
+    	driverClassName="org.postgresql.Driver"
+    	maxActive="20"
+		maxIdle="10"
+		type="javax.sql.DataSource" 
+		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" 
+    	name="org.wcs.smart.connect.datasource.postgresql"
+    	username="smart" 
+    	password="smart" 
+    	url="jdbc:postgresql://192.168.50.131:5432/connectjeff" />
+    	
+    
+    <!-- environment variables -->
+	<!-- SMART Filestore Location -->
+	<Environment name="filestorelocation" value="C:\\temp\\connect_datastore\\"
+		type="java.lang.String" override="false" />
+	<!--  number of days to keep data queue items -->
+	<!--  after this number of days, items with a status of error  -->
+	<!--  or complete will be removed. Associated files will also be removed  -->
+	<!--  set to -1 to keep forever (not recommended) -->
+	<Environment name="dataqueue_cleanup_days" value="30" type="java.lang.Integer" override="false" /> 
+	<Environment name="spatial_ref_sys_table" value="public.spatial_ref_sys"
+		type="java.lang.String" override="false" />
+	<Environment name="number_background_threads" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="work_item_history_days_available" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="changelog_cleanup_days" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="ca_export_days_available" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="sync_download_hours_available" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="cleanup_task_interval_hours" value="5"
+		type="java.lang.Integer" override="false" />
+    	
+    	
   </GlobalNamingResources>
 
   <!-- A "Service" is a collection of one or more "Connectors" that share
