@@ -57,6 +57,7 @@ import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.ScreenOption;
@@ -169,6 +170,7 @@ public enum SmartTable {
 	CMATTRIBUTELISTITEM(CmAttributeListItem.class,".configurableModel.conservationArea"),
 	CMATTRIBUTEOPTION(CmAttributeOption.class,".cmAttribute.node.model.conservationArea"),
 	CMATTRIBUTETREENODE(CmAttributeTreeNode.class,".configurableModel.conservationArea"),
+	CMDMATTRIBUTESESSIONS(CmDmAttributeSettings.class,".id.model.conservationArea" ),
 	CMNODE(CmNode.class,".model.conservationArea"),
 	CONFIGURABLEMODEL(ConfigurableModel.class,null),
 	CONNECTSERVER(ConnectServer.class, null),
