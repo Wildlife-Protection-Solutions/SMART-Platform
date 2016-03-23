@@ -151,7 +151,9 @@ public enum ChangeLogTableManager {
 					ps.setBytes(1, UuidUtils.uuidToByte(ca.getUuid()));
 					try(ResultSet rs = ps.executeQuery()){
 						if (rs.next()){
-							return rs.getLong(1);
+							Long value = rs.getLong(1);
+							if (rs.wasNull()) return null;
+							return value;
 						}
 					}
 				}
