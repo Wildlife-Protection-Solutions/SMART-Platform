@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.connect.apache;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -35,15 +38,15 @@ public enum EnvironmentVariables {
 	INSTANCE;
 	
 	public enum Variable{
-		DATASTORE_LOCATION("filestorelocation"), //$NON-NLS-1$
-		NUM_BACK_THREADS("number_background_threads"), //$NON-NLS-1$
-		CLEANUP_TASK_INTERVAL("cleanup_task_interval_hours"), //$NON-NLS-1$
-		SYNC_DOWNLOAD_AVAILABLE("sync_download_hours_available"), //$NON-NLS-1$
-		WORK_HISTORY_ITEM_AVAILABLE("work_item_history_days_available"), //$NON-NLS-1$
-		CA_EXPORT_AVAILABLE("ca_export_days_available"), //$NON-NLS-1$
-		CHANGELOG_CLEAN_UP_DAYS("changelog_cleanup_days"), //$NON-NLS-1$
-		SPATIAL_REF_SYS_TABLE("spatial_ref_sys_table"), //$NON-NLS-1$
-		DATA_QUEUE_CLEAN_UP_DAYS("dataqueue_cleanup_days"); //$NON-NLS-1$
+		DATASTORE_LOCATION("smartconnect.filestorelocation"), //$NON-NLS-1$
+		NUM_BACK_THREADS("smartconnect.number_background_threads"), //$NON-NLS-1$
+		CLEANUP_TASK_INTERVAL("smartconnect.cleanup_task_interval_hours"), //$NON-NLS-1$
+		SYNC_DOWNLOAD_AVAILABLE("smartconnect.sync_download_hours_available"), //$NON-NLS-1$
+		WORK_HISTORY_ITEM_AVAILABLE("smartconnect.work_item_history_days_available"), //$NON-NLS-1$
+		CA_EXPORT_AVAILABLE("smartconnect.ca_export_days_available"), //$NON-NLS-1$
+		CHANGELOG_CLEAN_UP_DAYS("smartconnect.changelog_cleanup_days"), //$NON-NLS-1$
+		SPATIAL_REF_SYS_TABLE("smartconnect.spatial_ref_sys_table"), //$NON-NLS-1$
+		DATA_QUEUE_CLEAN_UP_DAYS("smartconnect.dataqueue_cleanup_days"); //$NON-NLS-1$
 		
 		public String key;
 		
@@ -56,6 +59,15 @@ public enum EnvironmentVariables {
 	
 	public Object getEnvironmentVariable(Variable v) throws NamingException{
 		return getContext().lookup(v.key);
+	}
+	
+	public List<String> getAllEnvironmentVariables() throws NamingException{
+		List<String> all = new ArrayList<String>();
+		for(Variable v : Variable.values()){
+			all.add(v.key);
+			all.add(getContext().lookup(v.key).toString());
+		}
+		return all;
 	}
 	
 	private Context getContext() throws NamingException{
