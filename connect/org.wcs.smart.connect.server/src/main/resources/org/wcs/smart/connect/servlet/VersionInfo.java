@@ -61,6 +61,8 @@ public class VersionInfo extends HttpServlet{
 		List<CaPluginVersion> versions = null;
 		List<ConservationAreaInfo> areas = null;
 		List<ConnectPluginVersion> plugins = null;
+		String connectVersion = "";
+		String connectUpdated ="";
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		
@@ -79,6 +81,10 @@ public class VersionInfo extends HttpServlet{
 					.createCriteria(ConnectPluginVersion.class)
 					.list();
 			
+			connectVersion = (String)session.createSQLQuery("Select version from connect.connect_version").uniqueResult();
+			connectUpdated = (String)session.createSQLQuery("Select last_updated from connect.connect_version").uniqueResult().toString();
+			 
+			
 		}finally{
 			session.getTransaction().rollback();
 		}
@@ -89,6 +95,8 @@ public class VersionInfo extends HttpServlet{
 			e.printStackTrace();
 		}
 		request.setAttribute("versions", versions); //$NON-NLS-1$
+		request.setAttribute("connectVersion", connectVersion); //$NON-NLS-1$
+		request.setAttribute("connectUpdated", connectUpdated); //$NON-NLS-1$
 		request.setAttribute("areas", areas); //$NON-NLS-1$
 		request.setAttribute("plugins", plugins); //$NON-NLS-1$
 		

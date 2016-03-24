@@ -13,7 +13,7 @@
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
 	<div id="main">
-		<div class="pageheader">Version Information</div>
+		<div class="pageheader">Connect Version: ${connectVersion}    Last Updated:  ${connectUpdated}</div>
 
 		<div class="top-spacer"  style="margin-left: -20px" >
 		

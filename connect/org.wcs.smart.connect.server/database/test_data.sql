@@ -1,3 +1,5 @@
+insert into connect.connect_version (version) values ('4.0');
+
 insert into connect.users (uuid, username, password, email) values ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a36', 'smart', '$2a$12$85fjO64uLvgwaS1WtavLZ.J4OToU8fFo1pQFUlh6EIPVLbFgDffcS', 'smart@smart.com');
 
 insert into connect.user_actions(uuid, username, action) values ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a37', 'smart', 'admin');
