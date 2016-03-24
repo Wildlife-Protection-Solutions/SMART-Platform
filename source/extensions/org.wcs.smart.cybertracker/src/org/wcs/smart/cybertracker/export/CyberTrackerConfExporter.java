@@ -188,7 +188,7 @@ public class CyberTrackerConfExporter {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.CyberTrackerConfExporter_WarnDialog_Title, Messages.CyberTrackerConfExporter_WarnDialog_CtProfileMissing);
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.CyberTrackerConfExporter_Warn_Title, Messages.CyberTrackerConfExporter_WarnDialog_CtProfileMissing);
 				}
 			});
 			ctProperties = CyberTrackerHibernateManager.getAssociatedCmProfile(session, configurableModel).getProfile();
@@ -982,6 +982,8 @@ public class CyberTrackerConfExporter {
 				{
 					List<IAttributeListItemProxy> activeItems = getActiveListItems(attr);
 					if (activeItems == null || activeItems.isEmpty()) {
+						//skip invalid attribute (attribute without any possible value)
+						reportInvalidAttribute(attr);
 						continue;
 					}
 					break;
@@ -991,6 +993,7 @@ public class CyberTrackerConfExporter {
 					List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(attr);
 					if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
 						//skip invalid attribute (attribute without any possible value)
+						reportInvalidAttribute(attr);
 						continue;
 					}
 					break;
@@ -1023,6 +1026,15 @@ public class CyberTrackerConfExporter {
 		return new AttributeSplitResult(invisibleList, toShow, toShowOncesBefore, toShowOncesAfter);
 	}
 
+	private void reportInvalidAttribute(CmAttribute attribute) {
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.CyberTrackerConfExporter_Warn_Title, MessageFormat.format(Messages.CyberTrackerConfExporter_Warn_InvalidAttributeConfiguration, attribute.getName(), attribute.getNode().getName()));
+			}
+		});
+	}
+	
 	private List<IAttributeListItemProxy> getActiveListItems(CmAttribute attribute) {
 		if (attribute.getAttribute().getType() != AttributeType.LIST)
 			return null;
