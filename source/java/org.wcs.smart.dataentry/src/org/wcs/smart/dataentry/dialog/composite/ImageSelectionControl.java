@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
+import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 
 /**
  * Control that allows to select a single image for provided object.
@@ -130,7 +131,7 @@ public class ImageSelectionControl extends Composite {
 		buttonClear.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				contentProvider.setImageFile(AssociatedImageInterceptor.NULL_FILE); //we cannot use null, as null indicates that we need to load a value
+				contentProvider.setImageFile(IImageAssociatedObject.NULL_FILE); //we cannot use null, as null indicates that we need to load a value
 				redrawCanvas();
 			}
 		});

@@ -279,7 +279,8 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.ConfigurableModelEditDialog_SaveCmProgress, IProgressMonitor.UNKNOWN);
-					Session s = HibernateManager.openSession(new AssociatedImageInterceptor());
+					Session s = HibernateManager.openSession();
+//					Session s = HibernateManager.openSession(new AssociatedImageInterceptor());
 					try{
 						s.beginTransaction();
 						//commit transaction

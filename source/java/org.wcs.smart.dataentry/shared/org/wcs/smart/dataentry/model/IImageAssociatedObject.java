@@ -31,6 +31,8 @@ import java.io.File;
  */
 public interface IImageAssociatedObject {
 	
+	public static final File NULL_FILE = new File("NO-SUCH-FILE"); //$NON-NLS-1$
+	
 	public File getImageFile();
 	
 	public void setImageFile(File file);

@@ -32,6 +32,10 @@ import org.hibernate.EmptyInterceptor;
 import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 
 /**
@@ -49,8 +53,6 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 
 	private static final long serialVersionUID = -4670080959693764999L;
 	
-	public static final File NULL_FILE = new File("NO-SUCH-FILE"); //$NON-NLS-1$
-	
 	//track files to delete/save; only delete
 	//after transaction has been committed
 	protected List<File> toDelete = new ArrayList<>();
@@ -62,7 +64,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 	}
 
 	@Override
-	public void afterTransactionCompletion(Transaction tx){
+	public void afterTransactionCompletion(Transaction tx) {
 		if (tx.wasCommitted()){
 			for (File f : toDelete){
 				try{
@@ -93,16 +95,17 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
             Type[] types) {
     	
     	if (shouldIntercept(entity)) {
-    		IImageAssociatedObject imgObject = (IImageAssociatedObject) entity;
-			File file = new File(imgObject.getImagePersistenceLocation());
-			if (file.exists()) {
-				toDelete.add(file);
-			}
+    		if (entity instanceof CmNode) {
+    			deleteCmNode((CmNode)entity);
+    		} else if (entity instanceof CmAttributeTreeNode) {
+    			deleteCmTreeNode((CmAttributeTreeNode)entity);
+    		} else {
+    			handleDelete((IImageAssociatedObject)entity);
+    		}
     	}
     	
     }
 
-    
     /**
 	 * When a object is saved it also saves the file on disk.
 	 */
@@ -115,6 +118,9 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
     	return onSaveOrUpdate(entity);
     }
 
+    /**
+	 * When a object is updated it also saves or deletes the file on disk if needed.
+	 */
 	@Override
 	public boolean onFlushDirty(Object entity, Serializable id,
 			Object[] currentState, Object[] previousState,
@@ -122,26 +128,55 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
     	return onSaveOrUpdate(entity);
 	}
 
-	private boolean onSaveOrUpdate(Object entity) {
-		if (shouldIntercept(entity)) {
-    		IImageAssociatedObject imgObject = (IImageAssociatedObject) entity;
-    		//need some from-to mapping; and also objects can be cleared
-			File from = imgObject.getImageFile();
-			File to = new File(imgObject.getImagePersistenceLocation());
-			if (from == null || from.equals(NULL_FILE)) {
-				if (to.exists()) {
-					toDelete.add(to);
-				}
-			} else if (!from.equals(to)) {
-				toSave.add(new FilePair(from, to));
+	private void deleteCmNode(CmNode node) {
+		handleDelete(node);
+		for (CmNode n : node.getChildren()) {
+			deleteCmNode(n);
+		}
+		for (CmAttribute a : node.getCmAttributes()) {
+			for (CmAttributeListItem li : a.getList()) {
+				handleDelete(li);
 			}
-    	}
-    	return true;
+			for (CmAttributeTreeNode tn : a.getTree()) {
+				deleteCmTreeNode(tn);
+			}
+		}
+	}
+	
+	private void deleteCmTreeNode(CmAttributeTreeNode tn) {
+		handleDelete(tn);
+		for (CmAttributeTreeNode child : tn.getChildren()) {
+			deleteCmTreeNode(child);
+		}
 	}
 
-    protected String getExceptionErrorMessage() {
-    	return "Modifications could not be saved because image files could not be copied. Ensure write permissions to directory or remove associated images";
-    }
+	private boolean onSaveOrUpdate(Object entity) {
+		if (shouldIntercept(entity)) {
+			handleSaveOrUpdate((IImageAssociatedObject)entity);
+		}
+		return false;
+	}
+
+	
+	private void handleSaveOrUpdate(IImageAssociatedObject imgObject) {
+		//need some from-to mapping; and also objects can be cleared
+		File from = imgObject.getImageFile();
+		File to = new File(imgObject.getImagePersistenceLocation());
+		if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
+			if (to.exists()) {
+				toDelete.add(to);
+			}
+		} else if (!from.equals(to)) {
+			toSave.add(new FilePair(from, to));
+		}
+	}
+
+	private void handleDelete(IImageAssociatedObject imgObject) {
+		File file = new File(imgObject.getImagePersistenceLocation());
+		if (file.exists()) {
+			toDelete.add(file);
+		}
+	}
 	
 	/**
 	 * Stores information about which file and where we need to copy.

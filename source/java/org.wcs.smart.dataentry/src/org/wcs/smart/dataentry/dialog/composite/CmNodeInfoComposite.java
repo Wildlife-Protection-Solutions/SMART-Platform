@@ -23,6 +23,7 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -43,6 +44,8 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTr
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -273,7 +276,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		for (Attribute a : CmDefaultTreesUtil.getPresentedTreeAttributes(node)) {
 			if (!existingTrees.contains(a)) {
 				//attribute is not present in CM anymore -> remove default mapping
-				getModel().removeDefaultTrees(a);
+				List<CmAttributeTreeNode> nodes = getModel().removeDefaultTrees(a);
+				for (CmAttributeTreeNode tn : nodes) {
+					tracker.deleteObject(tn);
+				}
 			}
 		}
 		//remove default list mapping if present
@@ -281,7 +287,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		for (Attribute a : CmDefaultListsUtil.getPresentedListAttributes(node)) {
 			if (!existingLists.contains(a)) {
 				//attribute is not present in CM anymore -> remove default mapping
-				getModel().removeDefaultLists(a);
+				List<CmAttributeListItem> items = getModel().removeDefaultLists(a);
+				for (CmAttributeListItem li : items) {
+					tracker.deleteObject(li);
+				}
 			}
 		}
 

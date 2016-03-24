@@ -31,8 +31,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * List Attributes items configuration data.
@@ -42,14 +44,34 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
  */
 @Entity
 @Table(name = "smart.cm_attribute_list")
-public class CmAttributeListItem extends CmAttributeItem {
+public class CmAttributeListItem extends NamedItem implements IImageAssociatedObject {
 
+	private ConfigurableModel configurableModel;
+	private boolean isActive;
+	
 	private AttributeListItem listItem;
 	
 	private CmAttribute attribute;
 	private Attribute dmAttribute;
 	private int listOrder;
+	private File imageFile;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
+	public ConfigurableModel getConfigurableModel() {
+		return configurableModel;
+	}
+	public void setConfigurableModel(ConfigurableModel configurableModel) {
+		this.configurableModel = configurableModel;
+	}
+	
+	@Column(name="is_active")
+	public boolean getIsActive() {
+		return isActive;
+	}
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
+	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="list_element_uuid", referencedColumnName="uuid")
@@ -87,8 +109,18 @@ public class CmAttributeListItem extends CmAttributeItem {
 	}
 	
 	@Transient
+	@Override
 	public File getImageFile() {
-		//TODO: implement real logic
-		return new File("D:\\SMART\\_test_img\\shark1.jpg");
+		return imageFile != null ? imageFile : new File(getImagePersistenceLocation());
+	}
+	@Transient
+	@Override
+	public void setImageFile(File file) {
+		imageFile = file;
+	}
+	@Transient
+	@Override
+	public String getImagePersistenceLocation() {
+		return getConfigurableModel().getFileDataStoreLocation() + File.separator + "li_img1_" + UuidUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
 	}
 }
