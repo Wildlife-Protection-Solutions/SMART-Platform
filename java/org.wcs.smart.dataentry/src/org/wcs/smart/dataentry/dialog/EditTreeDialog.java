@@ -566,7 +566,11 @@ public class EditTreeDialog extends TitleAreaDialog {
 
 			@Override
 			public void setImageFile(File file) {
-				// TODO Auto-generated method stub
+				if (cmNode != null) {
+					cmNode.setImageFile(file);
+					tracker.saveOrUpdate(cmNode);
+					imageControl.redrawCanvas();
+				}
 			}
 		});
 	}

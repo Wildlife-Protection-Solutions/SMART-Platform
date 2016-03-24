@@ -68,7 +68,6 @@ import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
@@ -95,7 +94,7 @@ public class EditListDialog extends TitleAreaDialog{
 	private TableViewer nameTable ;
 	
 	private NamedItem dmNode;
-	private CmAttributeItem cmNode;
+	private CmAttributeListItem cmNode;
 	
 	private Button btnEnable;
 	private ImageSelectionControl imageControl;
@@ -356,16 +355,16 @@ public class EditListDialog extends TitleAreaDialog{
 		imageControl = new ImageSelectionControl(imgCmp, new IImageContentProvider() {
 			@Override
 			public File getImageFile() {
-				// TODO Auto-generated method stub
-				if (cmNode != null) {
-					return ((CmAttributeListItem)cmNode).getImageFile();
-				}
-				return null;
+				return cmNode != null ? cmNode.getImageFile() : null;
 			}
 
 			@Override
 			public void setImageFile(File file) {
-				// TODO Auto-generated method stub
+				if (cmNode != null) {
+					cmNode.setImageFile(file);
+					tracker.saveOrUpdate(cmNode);
+					imageControl.redrawCanvas();
+				}
 			}
 		});
 	}
@@ -401,7 +400,7 @@ public class EditListDialog extends TitleAreaDialog{
 	 * @param dmNode
 	 * @param cmNode
 	 */
-	public void setCurrentSelection(NamedItem dmNode, CmAttributeItem cmNode){
+	public void setCurrentSelection(NamedItem dmNode, CmAttributeListItem cmNode){
 		this.dmNode = dmNode;
 		this.cmNode = cmNode;
 		nameTable.refresh();

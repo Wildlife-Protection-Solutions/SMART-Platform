@@ -44,6 +44,7 @@ import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Configurable model tree node.  Single node
@@ -54,7 +55,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
  */
 @Entity
 @Table(name = "smart.cm_attribute_tree_node")
-public class CmAttributeTreeNode extends NamedItem {
+public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedObject {
 	
 	private AttributeTreeNode dmTreeNode;
 
@@ -64,6 +65,7 @@ public class CmAttributeTreeNode extends NamedItem {
 	private List<CmAttributeTreeNode> children = new ArrayList<CmAttributeTreeNode>();
 	private CmAttributeTreeNode parent = null;
 	private DisplayMode displayMode;
+	private File imageFile;
 	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -158,8 +160,18 @@ public class CmAttributeTreeNode extends NamedItem {
 	}
 	
 	@Transient
+	@Override
 	public File getImageFile() {
-		//TODO: implement real logic
-		return new File("D:\\SMART\\_test_img\\shark2.jpeg");
+		return imageFile != null ? imageFile : new File(getImagePersistenceLocation());
+	}
+	@Transient
+	@Override
+	public void setImageFile(File file) {
+		imageFile = file;
+	}
+	@Transient
+	@Override
+	public String getImagePersistenceLocation() {
+		return getConfigurableModel().getFileDataStoreLocation() + File.separator + "tn_img1_" + UuidUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
 	}
 }

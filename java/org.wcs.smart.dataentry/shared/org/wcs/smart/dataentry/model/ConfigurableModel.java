@@ -44,7 +44,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -159,11 +158,17 @@ public class ConfigurableModel extends NamedItem {
 		}
 	}	
 
+	/**
+	 * @param attribute
+	 * @return The list of nodes that were removed.
+	 */
 	@Transient
-	public void removeDefaultTrees(final Attribute attribute) {
+	public List<CmAttributeTreeNode> removeDefaultTrees(final Attribute attribute) {
 		List<CmAttributeTreeNode> tree = getDefaultTrees(attribute);
+		List<CmAttributeTreeNode> removedItems = new ArrayList<>(tree);
 		tree.clear(); //NOTE: as this is FilteredSubList is will remove given items from original defaultRootTreeNodes list
 		attr2TreeMap.remove(attribute);
+		return removedItems;
 	}
 
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
@@ -221,11 +226,17 @@ public class ConfigurableModel extends NamedItem {
 		}
 	}
 	
+	/**
+	 * @param attribute
+	 * @return The list of items that were removed.
+	 */
 	@Transient
-	public void removeDefaultLists(final Attribute attribute) {
+	public List<CmAttributeListItem> removeDefaultLists(final Attribute attribute) {
 		List<CmAttributeListItem> list = getDefaultLists(attribute);
+		List<CmAttributeListItem> removedItems = new ArrayList<>(list);
 		list.clear(); //NOTE: as this is FilteredSubList it will remove given items from original defaultRootListItems list
 		attr2ListMap.remove(attribute);
+		return removedItems;
 	}
 	
 	/**
