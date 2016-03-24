@@ -80,7 +80,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerConfExporter_SingleGps;
 	public static String CyberTrackerConfExporter_SingleGpsMessage;
 	public static String CyberTrackerConfExporter_WarnDialog_CtProfileMissing;
-	public static String CyberTrackerConfExporter_WarnDialog_Title;
+	public static String CyberTrackerConfExporter_Warn_InvalidAttributeConfiguration;
+	public static String CyberTrackerConfExporter_Warn_Title;
 	public static String CyberTrackerExportDialog_AllFiles;
 	public static String CyberTrackerExportDialog_AssociatedProfile_Postfix;
 	public static String CyberTrackerExportDialog_Button_Browse;
