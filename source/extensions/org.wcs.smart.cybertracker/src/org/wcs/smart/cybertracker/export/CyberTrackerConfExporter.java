@@ -40,6 +40,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -992,6 +994,8 @@ public class CyberTrackerConfExporter {
 				{
 					List<IAttributeListItemProxy> activeItems = getActiveListItems(attr);
 					if (activeItems == null || activeItems.isEmpty()) {
+						//skip invalid attribute (attribute without any possible value)
+						reportInvalidAttribute(attr);
 						continue;
 					}
 					break;
@@ -1001,6 +1005,7 @@ public class CyberTrackerConfExporter {
 					List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(attr);
 					if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
 						//skip invalid attribute (attribute without any possible value)
+						reportInvalidAttribute(attr);
 						continue;
 					}
 					break;
@@ -1033,6 +1038,15 @@ public class CyberTrackerConfExporter {
 		return new AttributeSplitResult(invisibleList, toShow, toShowOncesBefore, toShowOncesAfter);
 	}
 
+	private void reportInvalidAttribute(CmAttribute attribute) {
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.CyberTrackerConfExporter_Warn_Title, MessageFormat.format(Messages.CyberTrackerConfExporter_Warn_InvalidAttributeConfiguration, attribute.getName(), attribute.getNode().getName()));
+			}
+		});
+	}
+	
 	private List<IAttributeListItemProxy> getActiveListItems(CmAttribute attribute) {
 		if (attribute.getAttribute().getType() != AttributeType.LIST)
 			return null;

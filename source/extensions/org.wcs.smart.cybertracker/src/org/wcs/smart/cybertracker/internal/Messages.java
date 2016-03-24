@@ -46,6 +46,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerConfExporter_SaveWithoutGps;
 	public static String CyberTrackerConfExporter_SingleGps;
 	public static String CyberTrackerConfExporter_SingleGpsMessage;
+	public static String CyberTrackerConfExporter_Warn_InvalidAttributeConfiguration;
+	public static String CyberTrackerConfExporter_Warn_Title;
 	public static String CyberTrackerExportDialog_AllFiles;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;
