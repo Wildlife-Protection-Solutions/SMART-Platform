@@ -114,6 +114,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:int" name="ItemHeight" minOccurs="0"/>
 						<xs:element type="xs:int" name="ColumnCount" minOccurs="0"/>
 						<xs:element type="xs:int" name="Attribute" minOccurs="0"/>
+						<xs:element type="xs:int" name="AttributeDetails" minOccurs="0"/>
 						<xs:element type="xs:int" name="ListMode" minOccurs="0"/>
 						<xs:element type="xs:string" name="Translate__Elements" />
 						<xs:element type="xs:string" name="Translate__Links" />
