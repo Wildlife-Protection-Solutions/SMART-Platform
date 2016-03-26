@@ -19,6 +19,12 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="Media">
+    <xs:sequence>
+      <xs:element type="xs:string" name="Image1" />
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:element name="Elements">
     <xs:complexType>
       <xs:sequence>
@@ -49,6 +55,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
                           <xs:element type="xs:string" name="GpsAccuracyEnabled"/>
                           <xs:element type="cts:GpsSightingAccuracy" name="GpsSightingAccuracy" minOccurs="0" maxOccurs="1"/>
                           <xs:element type="cts:GpsWaypointAccuracy" name="GpsWaypointAccuracy" minOccurs="0" maxOccurs="1"/>
+                          <xs:element type="cts:Media" name="Media" minOccurs="0" maxOccurs="1"/>
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
