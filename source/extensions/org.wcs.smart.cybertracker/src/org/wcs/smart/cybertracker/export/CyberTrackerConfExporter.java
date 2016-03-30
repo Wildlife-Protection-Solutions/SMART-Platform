@@ -402,11 +402,11 @@ public class CyberTrackerConfExporter {
 			String tag0 = UuidUtils.uuidToString(listItem.getUuid());
 			String tag2 = isMulti ? String.valueOf(i) : null;
 			CyberTrackerId id = new CyberTrackerId();
-			ElementsUtil. addElementsItem(elements, name, id.getItemId(), tag0, tag1, tag2, tag3, tag4);
+			Elements.List.Items.Item item = ElementsUtil.addElementsItem(elements, name, id.getItemId(), tag0, tag1, tag2, tag3, tag4);
+			ElementsUtil.addElementsItemMedia(item, listItem.getImageFile());
 			ids.add(id);
 		}
 		return ids;
-		
 	}
 	
 	private Node buildMultiSelectNode(CmAttribute cmAttr, CyberTrackerId id /*=startId*/, List<CyberTrackerId> childIds, boolean withNumbers) {
@@ -415,7 +415,7 @@ public class CyberTrackerConfExporter {
 		List<String> values = ctUtil.listItemIds(childIds);
 		String trElements = ctUtil.translateElements(childIds);
 		String trLinks = ctUtil.translateLinks(childIds, true);
-		Node node = screensFactory.createNodeMultiList(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage), values, trElements, trLinks, 1, withNumbers);
+		Node node = screensFactory.createNodeMultiList(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage), values, trElements, trLinks, cmAttr.getCurrentDisplayMode(), withNumbers);
 		//NOTE: next screen is not set here
 		return node;
 	}
@@ -507,7 +507,7 @@ public class CyberTrackerConfExporter {
 				List<String> values = ctUtil.listItemIds(ids);
 				String trElements = ctUtil.translateElements(ids);
 				String trLinks = ctUtil.translateLinks(ids, false);
-				Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId());
+				Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId(), cmAttr.getCurrentDisplayMode());
 				if (!attribute.getIsRequired()) {
 					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -522,7 +522,7 @@ public class CyberTrackerConfExporter {
 					List<String> values = ctUtil.listItemIds(ids);
 					String trElements = ctUtil.translateElements(ids);
 					String trLinks = ctUtil.translateLinks(ids, false);
-					Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId());
+					Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId(), cmAttr.getCurrentDisplayMode());
 					if (!attribute.getIsRequired()) {
 						Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 						control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -602,7 +602,8 @@ public class CyberTrackerConfExporter {
 			String name = treeNode.getName();
 			String tag0 = UuidUtils.uuidToString(treeNode.getUuid());
 			CyberTrackerId id = new CyberTrackerId();
-			ElementsUtil. addElementsItem(elements, name, id.getItemId(), tag0);
+			Elements.List.Items.Item item =  ElementsUtil.addElementsItem(elements, name, id.getItemId(), tag0);
+			ElementsUtil.addElementsItemMedia(item, treeNode.getImageFile());
 			ids.add(id);
 		}
 		return ids;
@@ -808,7 +809,7 @@ public class CyberTrackerConfExporter {
 		
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
-		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, resultElementId, true);
+		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, resultElementId, true, treeCmAttribute.getCurrentDisplayMode());
 		if (!treeCmAttribute.getAttribute().getIsRequired() && navId != null) {
 			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
 			navControl.setTranslateNextScreenId(navId.getNodeId());
@@ -824,8 +825,9 @@ public class CyberTrackerConfExporter {
 		}
 		
 		//below is same as ElementsUtil.addElements(elements, map);
-		for (IAttributeTreeNodeProxy dmObject : map.keySet()) {
-			ElementsUtil.addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), UuidUtils.uuidToString(dmObject.getUuid()));
+		for (IAttributeTreeNodeProxy treeNode : map.keySet()) {
+			Elements.List.Items.Item item = ElementsUtil.addElementsItem(elements, treeNode.getName(), map.get(treeNode).getItemId(), UuidUtils.uuidToString(treeNode.getUuid()));
+			ElementsUtil.addElementsItemMedia(item, treeNode.getImageFile());
 		}
 
 		return result;
@@ -844,7 +846,7 @@ public class CyberTrackerConfExporter {
 		List<CyberTrackerId> childWithKidsIds = ctUtil.getChildrenIds(childWithKids, map);
 
 		//we want to link to node only elements that have active children
-		result.add(ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, childWithKidsIds, resultElementId));
+		result.add(ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, childWithKidsIds, resultElementId, treeNode.getDisplayMode()));
 		
 		for (IAttributeTreeNodeProxy child : childWithKids) {
 			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, label));

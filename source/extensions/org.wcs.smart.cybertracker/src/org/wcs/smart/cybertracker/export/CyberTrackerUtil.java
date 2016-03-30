@@ -37,6 +37,7 @@ import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.DisplayMode;
 
 /**
  * Util for CyberTracker xml data creation
@@ -148,17 +149,21 @@ public class CyberTrackerUtil {
 	}
 
 	public Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement, boolean linkToNode) {
+		return createRadioNode(id, name, childIds, resultElement, linkToNode, DisplayMode.TEXT);
+	}
+	
+	public Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, String resultElement, boolean linkToNode, DisplayMode mode) {
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
 		String trLinks = translateLinks(childIds, linkToNode);
-		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement);
+		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement, mode);
 	}
 	
-	public Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, Collection<CyberTrackerId> childToLinkToNodeIds, String resultElement) {
+	public Node createRadioNode(String id, String name, List<CyberTrackerId> childIds, Collection<CyberTrackerId> childToLinkToNodeIds, String resultElement, DisplayMode mode) {
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
 		String trLinks = translateLinks(childIds, childToLinkToNodeIds);
-		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement);
+		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElement, mode);
 	}
 
 	public List<CyberTrackerId> getChildrenIds(List<?> objects, Map<?, CyberTrackerId> keyMap) {
@@ -216,6 +221,7 @@ public class CyberTrackerUtil {
 //-------------------------------------------------------------	
 	public CmNode buildRoot(ConfigurableModel model) {
 		CmNode fakeRoot = new CmNode();
+		fakeRoot.setModel(model);
 		fakeRoot.setName(model.getName());
 		fakeRoot.setNames(model.getNames());
 		fakeRoot.setChildren(model.getNodes());
@@ -245,7 +251,7 @@ public class CyberTrackerUtil {
 		List<String> values = listItemIds(childIds);
 		String trElements = translateElements(childIds);
 		String trLinks = translateLinks(childIds, true);
-		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElementId);
+		return screensFactory.createNodeRadio(id, name, values, trElements, trLinks, resultElementId, node.getDisplayMode());
 	}
 	
 	public String getName(NamedItem i) {

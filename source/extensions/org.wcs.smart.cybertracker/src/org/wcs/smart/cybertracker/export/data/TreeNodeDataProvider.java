@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.export.data;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +33,7 @@ import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.DisplayMode;
 
 /**
  * Class provides data related to tree attributes nodes for CT export engine
@@ -105,6 +107,16 @@ public class TreeNodeDataProvider {
 		public UUID getUuid() {
 			AttributeTreeNode dmNode = item.getDmTreeNode();
 			return dmNode != null ? dmNode.getUuid() : null;
+		}
+
+		@Override
+		public DisplayMode getDisplayMode() {
+			return item.getDisplayMode();
+		}
+
+		@Override
+		public File getImageFile() {
+			return item.getImageFile();
 		}
 	}
 	

@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.cybertracker.export.data;
 
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
+
+import org.wcs.smart.dataentry.model.DisplayMode;
 
 /**
  * Proxy logic around tree attribute nodes as there names and enable state
@@ -38,5 +41,9 @@ public interface IAttributeTreeNodeProxy {
 	public UUID getUuid();
 	
 	public List<IAttributeTreeNodeProxy> getActiveChildren();
+	
+	public DisplayMode getDisplayMode();
+	
+	public File getImageFile();
 
 }

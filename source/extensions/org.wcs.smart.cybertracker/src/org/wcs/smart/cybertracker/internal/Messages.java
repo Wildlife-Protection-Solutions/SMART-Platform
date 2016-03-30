@@ -279,6 +279,7 @@ public class Messages extends NLS {
 	public static String DataModelWrapper_Name;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Yes;
+	public static String ElementsUtil_MediaFileReadError;
 	public static String ManageProfilesDialog_Button_Create;
 	public static String ManageProfilesDialog_Button_Delete;
 	public static String ManageProfilesDialog_Button_Edit;
