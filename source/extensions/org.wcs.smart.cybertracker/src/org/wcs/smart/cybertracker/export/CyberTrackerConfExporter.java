@@ -1038,7 +1038,7 @@ public class CyberTrackerConfExporter {
 		return new AttributeSplitResult(invisibleList, toShow, toShowOncesBefore, toShowOncesAfter);
 	}
 
-	private void reportInvalidAttribute(CmAttribute attribute) {
+	private void reportInvalidAttribute(final CmAttribute attribute) {
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
