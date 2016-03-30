@@ -21,18 +21,25 @@
  */
 package org.wcs.smart.cybertracker.export;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.elements.Media;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -108,27 +115,27 @@ public class ElementsUtil {
 		return idList;
 	}
 	
-	public static void addElementsItem(Elements elements, String name, String id) {
-		addElementsItem(elements, name, id, null, null, null, null, null, null);
+	public static Elements.List.Items.Item addElementsItem(Elements elements, String name, String id) {
+		return addElementsItem(elements, name, id, null, null, null, null, null, null);
 	}
 
-	public static void addElementsItem(Elements elements, String name, String id, String tag0) {
-		addElementsItem(elements, name, id, tag0, null, null, null, null, null);
+	public static Elements.List.Items.Item addElementsItem(Elements elements, String name, String id, String tag0) {
+		return addElementsItem(elements, name, id, tag0, null, null, null, null, null);
 	}
 
-	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1) {
-		addElementsItem(elements, name, id, tag0, tag1, null, null, null, null);
+	public static Elements.List.Items.Item addElementsItem(Elements elements, String name, String id, String tag0, String tag1) {
+		return addElementsItem(elements, name, id, tag0, tag1, null, null, null, null);
 	}
 
-	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2) {
-		addElementsItem(elements, name, id, tag0, tag1, tag2, null, null, null);
+	public static Elements.List.Items.Item addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2) {
+		return addElementsItem(elements, name, id, tag0, tag1, tag2, null, null, null);
 	}
 	
-	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2, String tag3, String tag4) {
-		addElementsItem(elements, name, id, tag0, tag1, tag2, tag3, tag4, null);
+	public static Elements.List.Items.Item addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2, String tag3, String tag4) {
+		return addElementsItem(elements, name, id, tag0, tag1, tag2, tag3, tag4, null);
 	}
 
-	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2, String tag3, String tag4, String tag5) {
+	public static Elements.List.Items.Item addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2, String tag3, String tag4, String tag5) {
 		Elements.List.Items.Item item = new Elements.List.Items.Item();
 		item.setName(name);
 		item.setId(id);
@@ -139,8 +146,31 @@ public class ElementsUtil {
 		item.setTag4(tag4);
 		item.setTag5(tag5);
 		elements.getList().getItems().getItem().add(item);
+		return item;
 	}
 
+	public static Elements.List.Items.Item addElementsItemMedia(Elements.List.Items.Item item, File image1) {
+		if (image1 != null && image1.exists() && image1.isFile()) {
+			try {
+				byte[] fileData = Files.readAllBytes(image1.toPath());
+				Media media = new Media();
+				media.setImage1(bytesToHex(fileData));
+				item.setMedia(media);
+			} catch (IOException e) {
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.ElementsUtil_MediaFileReadError, image1.getAbsolutePath()) + SharedUtils.LINE_SEPARATOR + e.getMessage() , e);
+			}
+		}
+		return item;
+	}
+
+	public static String bytesToHex(byte[] in) {
+	    final StringBuilder builder = new StringBuilder();
+	    for(byte b : in) {
+	        builder.append(String.format("%02x", b)); //$NON-NLS-1$
+	    }
+	    return builder.toString();
+	}
+	
 	public static CyberTrackerId buildAttributeNullElement(Elements elements, String name) {
 		CyberTrackerId id = new CyberTrackerId();
 		addElementsItem(elements, name, id.getItemId(), NULL_VALUE);
@@ -167,7 +197,8 @@ public class ElementsUtil {
 			if (node.isCollectMultipleObservations()) {
 				tag5 = node.isUseSingleGpsPoint() ? CATEGORY_MULTI_OBS_SINGLE_GPS : CATEGORY_MULTI_OBS_MULTI_GPS;
 			}
-			addElementsItem(elements, LanguageUtil.getName(node, language), map.get(node).getItemId(), tag0, null, null, null, null, tag5);
+			Elements.List.Items.Item item = addElementsItem(elements, LanguageUtil.getName(node, language), map.get(node).getItemId(), tag0, null, null, null, null, tag5);
+			addElementsItemMedia(item, node.getImageFile());
 		}
 	}
 	

@@ -44,6 +44,7 @@ import org.wcs.smart.cybertracker.model.filter.ElementFilters;
 import org.wcs.smart.cybertracker.model.filter.Filter;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -307,7 +308,7 @@ public class ScreensUtil {
 		List<String> values = ctUtil.listItemIds(memberIds);
 		String trElements = ctUtil.translateElements(memberIds);
 		String trLinks = ctUtil.translateLinks(memberIds, false);
-		Node node = screensFactory.createNodeMultiList(id.getNodeId(), Messages.PatrolScreens_Members, values, trElements, trLinks, 1, false);
+		Node node = screensFactory.createNodeMultiList(id.getNodeId(), Messages.PatrolScreens_Members, values, trElements, trLinks, DisplayMode.TEXT, false);
 		container.screenNodes.add(node);
 		return toNextScreen(node);
 	}

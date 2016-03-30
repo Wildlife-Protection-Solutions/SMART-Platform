@@ -32,6 +32,7 @@ import org.wcs.smart.cybertracker.model.screens.MovingMaps;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -47,9 +48,12 @@ public class ScreensObjectFactory {
 	private static final int CONTROL_NUMBER_MAIN_INDEX = 3;
 	private static final int CONTROL_NOTE_MAIN_INDEX = 3;
 
-	private static final int LIST_MODE_DEFAULT = 1;
-	private static final int LIST_MODE_NUMBERS = 5;
+	private static final int LIST_MODE_MS = 1; //"Multi select"
+	private static final int LIST_MODE_MS_ICONS = 3; //"Multi select icons"
+	private static final int LIST_MODE_NUMBERS = 5; //"Number keybad"
 
+	private static final int ATTRIBUTE_IMAGE_1 = 12; //"Image1" for Icon
+	
 	private CyberTrackerPropertiesProfile ctProperties;
 	
 	public ScreensObjectFactory(CyberTrackerPropertiesProfile properties) {
@@ -167,49 +171,14 @@ public class ScreensObjectFactory {
 		return value ? ICyberTrackerConstants.STR_TRUE : ICyberTrackerConstants.STR_FALSE;
 	}
 
-	/**
-    <Node>
-        <Id>???</Id>
-        <Name>???</Name>
-        <Items>
-            <Value>???</Value>
-            <Value>???</Value>
-            ...
-        </Items>
-        <DataClass>TctScreen</DataClass>
-        <Data>
-            <NextId>20</NextId>
-            <TemplateId>{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}</TemplateId>
-            <Name>???</Name>
-            <Controls>
-                <Control>...</Control>
-                ...
-        </Data>
-    </Node>
-	 */
-	public Node createNodeRadio(String id, String name, List<String> values, String trElements, String trLinks, String resultElement) {
-		Node node = new Node();
-		node.setId(id);
-		node.setName(name);
-		if (values != null) {
-			node.setItems(new Node.Items());
-			node.getItems().getValue().addAll(values);
+	private String getTemplateForMode(DisplayMode mode, boolean isMultiselect) {
+		if (mode == null) mode = DisplayMode.DEFAULT_DISPLAY_MODE;
+		switch (mode) {
+		case TEXT:       return isMultiselect ? "{E4BFBBF6-F16B-4C0E-8729-FFCE68569AF3}" : "{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"; //$NON-NLS-1$ //$NON-NLS-2$
+		case IMAGE:      return isMultiselect ? "{27BA2599-685A-4351-B8A8-942A1BC29C96}" : "{54448E7E-52D6-44C8-85EA-108C129FB01A}"; //$NON-NLS-1$ //$NON-NLS-2$
+		case TEXT_IMAGE: return isMultiselect ? "{36143349-6C02-402C-908B-D6934128F360}" : "{D8322C88-66D1-4148-BA28-8F6A3C5342C7}"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		node.setDataClass("TctScreen"); //$NON-NLS-1$
-		
-		Node.Data data = new Node.Data();
-		data.setNextId(20);
-		data.setTemplateId("{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"); //$NON-NLS-1$
-		data.setName(name);
-		Controls controls = new Controls();
-		controls.getControl().add(createControl2());
-		controls.getControl().add(createControl6());
-		controls.getControl().add(createRadioControl7(trElements, trLinks, resultElement));
-		controls.getControl().add(createControl11());
-		data.setControls(controls);
-		node.setData(data);
-		
-		return node;
+		throw new IllegalStateException("Unknown template for the screen with mode: " + mode); //$NON-NLS-1$
 	}
 
 	/**
@@ -223,8 +192,8 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>12</NextId>
-            <TemplateId>{E4BFBBF6-F16B-4C0E-8729-FFCE68569AF3}</TemplateId>
+            <NextId>20</NextId>
+            <TemplateId>???</TemplateId>
             <Name>???</Name>
             <Controls>
                 <Control>...</Control>
@@ -232,7 +201,7 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public Node createNodeMultiList(String id, String name, List<String> values, String trElements, String trLinks, Integer minChecks, boolean withNumbers) {
+	private Node createNode(String id, String name, List<String> values, String templateId, Controls.Control mainControl) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
@@ -243,20 +212,36 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(12);
-		data.setTemplateId("{E4BFBBF6-F16B-4C0E-8729-FFCE68569AF3}"); //$NON-NLS-1$
+		data.setNextId(20);
+		data.setTemplateId(templateId);
 		data.setName(name);
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl6());
-		controls.getControl().add(withNumbers ? createChecklistControl7(trElements, trLinks, minChecks, LIST_MODE_NUMBERS, null) : createChecklistControl7(trElements, trLinks, minChecks, LIST_MODE_DEFAULT, null));
+		controls.getControl().add(mainControl);
 		controls.getControl().add(createControl11());
 		data.setControls(controls);
 		node.setData(data);
 		
 		return node;
 	}
+
+	public Node createNodeRadio(String id, String name, List<String> values, String trElements, String trLinks, String resultElement) {
+		return createNodeRadio(id, name, values, trElements, trLinks, resultElement, DisplayMode.TEXT);
+	}
 	
+	public Node createNodeRadio(String id, String name, List<String> values, String trElements, String trLinks, String resultElement, DisplayMode mode) {
+		Controls.Control control7 = createRadioControl7(trElements, trLinks, resultElement);
+		configureControl7(control7, mode, false, false);
+		return createNode(id, name, values, getTemplateForMode(mode, false), control7);
+	}
+
+	public Node createNodeMultiList(String id, String name, List<String> values, String trElements, String trLinks, DisplayMode mode, boolean withNumbers) {
+		Controls.Control control7 = createControl7(trElements, trLinks);
+		configureControl7(control7, mode, true, withNumbers);
+		return createNode(id, name, values, getTemplateForMode(mode, true), control7);
+	}
+
 	/**
     <Node>
         <Id>???</Id>
@@ -570,7 +555,7 @@ public class ScreensObjectFactory {
         <Translate__RadioElement>???</Translate__RadioElement>
     </Control>
 	 */
-	public Controls.Control createRadioControl7(String trElements, String trLinks, String radioElement) {
+	private Controls.Control createControl7(String trElements, String trLinks) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{289461C2-B3EE-4075-9538-451580BD4B38}"); //$NON-NLS-1$
 		control.setVersion(1);
@@ -583,56 +568,65 @@ public class ScreensObjectFactory {
 		control.setHeight(262);
 		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
 		control.setItemHeight(25);
-		control.setAttribute(0);
-		control.setAutoRadioNext(ctProperties.isAutoNext() ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
 		control.setTranslateElements(trElements);
 		control.setTranslateLinks(trLinks);
+		return control;
+	}
+	
+	/**
+    <Control>
+    	...
+        <AutoRadioNext>...</AutoRadioNext>
+        <Translate__RadioElement>???</Translate__RadioElement>
+    </Control>
+	 */
+	public Controls.Control createRadioControl7(String trElements, String trLinks, String radioElement) {
+		Controls.Control control = createControl7(trElements, trLinks);
+		control.setAutoRadioNext(ctBooleanValue(ctProperties.isAutoNext()));
 		control.setTranslateRadioElement(radioElement);
 		return control;
 	}
 
 	/**
     <Control>
-        <Type>{289461C2-B3EE-4075-9538-451580BD4B38}</Type>
-        <Version>1</Version>
-        <LockProperties>Elements</LockProperties>
-        <Id>7</Id>
-        <Align>5</Align>
-        <Left>0</Left>
-        <Top>34</Top>
-        <Width>240</Width>
-        <Height>262</Height>
-        <Translate__Font>MS Sans Serif,10,B</Translate__Font>
-        <ItemHeight>25</ItemHeight>
-        <Version>1</Version>
-        <Attribute>0</Attribute>
+    	...
         <ListMode>???</ListMode>
-        <NumberChecks>???</NumberChecks>
         <MinChecks>???</MinChecks>
-        <Translate__Elements>???</Translate__Elements>
-        <Translate__Links>???</Translate__Links>
     </Control>
 	 */
-	public Controls.Control createChecklistControl7(String trElements, String trLinks, Integer minChecks, Integer listMode, String numberChecks) {
-		Controls.Control control = new Controls.Control();
-		control.setType("{289461C2-B3EE-4075-9538-451580BD4B38}"); //$NON-NLS-1$
-		control.setVersion(1);
-		control.setLockProperties("Elements"); //$NON-NLS-1$
-		control.setId(7);
-		control.setAlign(5);
-		control.setLeft(0);
-		control.setTop(34);
-		control.setWidth(240);
-		control.setHeight(262);
-		control.setTranslateFont("MS Sans Serif,10,B"); //$NON-NLS-1$
-		control.setItemHeight(25);
-		control.setAttribute(0);
-		control.setListMode(listMode);
-		control.setNumberChecks(numberChecks);
-		control.setMinChecks(minChecks);
-		control.setTranslateElements(trElements);
-		control.setTranslateLinks(trLinks);
-		return control;
+	public void configureControl7(Controls.Control control7, DisplayMode mode, boolean isMultiSelect, boolean isNumeric) {
+		if (mode == null) mode = DisplayMode.DEFAULT_DISPLAY_MODE;
+		switch (mode) {
+		case TEXT: 
+			control7.setAttribute(0);
+			if (isMultiSelect) {
+				int listMode = isNumeric ? LIST_MODE_NUMBERS : LIST_MODE_MS;
+				control7.setListMode(listMode);
+				control7.setMinChecks(1);
+			}
+			break;
+		case IMAGE:
+			control7.setAttribute(ATTRIBUTE_IMAGE_1); 
+			control7.setAttributeDetails(ATTRIBUTE_IMAGE_1);
+			control7.setColumnCount(4);
+			control7.setItemHeight(34);
+			control7.setShowCaption(ctBooleanValue(false));
+			if (isMultiSelect) {
+				int listMode = isNumeric ? LIST_MODE_NUMBERS : LIST_MODE_MS_ICONS;
+				control7.setListMode(listMode);
+				control7.setMinChecks(1);
+			}
+			break;
+		case TEXT_IMAGE:
+			control7.setAttribute(ATTRIBUTE_IMAGE_1); 
+			control7.setAttributeDetails(ATTRIBUTE_IMAGE_1); 
+			if (isMultiSelect) {
+				int listMode = isNumeric ? LIST_MODE_NUMBERS : LIST_MODE_MS;
+				control7.setListMode(listMode);
+				control7.setMinChecks(1);
+			}
+			break;
+		}
 	}
 	
 	/**
