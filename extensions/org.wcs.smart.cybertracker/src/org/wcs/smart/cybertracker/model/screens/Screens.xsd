@@ -173,6 +173,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="TakeGPS" />
 						<xs:element type="xs:int" name="Alignment" minOccurs="0"/>
 						<xs:element type="xs:int" name="Style" minOccurs="0"/>
+						<xs:element type="xs:string" name="ShowCaption" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
