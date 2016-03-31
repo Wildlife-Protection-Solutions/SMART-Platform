@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.model;
 
 import java.io.File;
+import java.util.UUID;
 
 /**
  * Interface indicates that an object has an image associated with it.
@@ -32,6 +33,8 @@ import java.io.File;
 public interface IImageAssociatedObject {
 	
 	public static final File NULL_FILE = new File("NO-SUCH-FILE"); //$NON-NLS-1$
+	
+	public UUID getUuid();
 	
 	public File getImageFile();
 	
