@@ -24,8 +24,9 @@ package org.wcs.smart.dataentry.dialog;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.EmptyInterceptor;
@@ -53,11 +54,10 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 
 	private static final long serialVersionUID = -4670080959693764999L;
 	
-	//track files to delete/save; only delete
+	//track files to delete/save; perform actions
 	//after transaction has been committed
-	protected List<File> toDelete = new ArrayList<>();
-	protected List<FilePair> toSave = new ArrayList<>();
-	
+	//NOTE: we are interested only in last action for the object as it overwrites any previous activities
+	private Map<UUID, IOperation> operations = new HashMap<>();
 	
 	protected boolean shouldIntercept(Object entity) {
 		return (entity instanceof IImageAssociatedObject);
@@ -65,24 +65,12 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 
 	@Override
 	public void afterTransactionCompletion(Transaction tx) {
-		if (tx.wasCommitted()){
-			for (File f : toDelete){
-				try{
-					f.delete();
-				}catch (Exception ex){
-					SmartPlugIn.log("Could not delete file: " + f.toString(), ex); //$NON-NLS-1$
-				}
+		if (tx.wasCommitted()) {
+			for (IOperation op : operations.values()) {
+				op.execute();
 			}
-			toDelete.clear();
-			for (FilePair fp : toSave) {
-				try {
-					FileUtils.copyFile(fp.from, fp.to);
-				} catch (IOException e) {
-					SmartPlugIn.log("Could not copy file: " + fp.from.toString() + " to " + fp.to.toString(), e); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-			toSave.clear();
 		}
+		operations.clear();
 	}
 	/**
 	 * When a parent object is deleted it also deletes the file on disk.
@@ -162,34 +150,85 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		//need some from-to mapping; and also objects can be cleared
 		File from = imgObject.getImageFile();
 		File to = new File(imgObject.getImagePersistenceLocation());
-		if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
-			if (to.exists()) {
-				toDelete.add(to);
-			}
-		} else if (!from.equals(to)) {
-			toSave.add(new FilePair(from, to));
-		}
+		operations.put(imgObject.getUuid(), new SaveOperation(from, to));
 	}
 
 	private void handleDelete(IImageAssociatedObject imgObject) {
 		File file = new File(imgObject.getImagePersistenceLocation());
-		if (file.exists()) {
-			toDelete.add(file);
+		operations.put(imgObject.getUuid(), new DeleteOperation(file));
+	}
+
+	/**
+	 * Interface that represent any operation with associated image file.
+	 * 
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	private interface IOperation {
+		public void execute();
+	}
+
+	/**
+	 * Operation responsible for deleting an associated image file.
+	 * 
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	private class DeleteOperation implements IOperation {
+		
+		private File toDelete;
+		
+		public DeleteOperation(File toDelete) {
+			this.toDelete = toDelete;
+		}
+
+		@Override
+		public void execute() {
+			if (toDelete.exists()) {
+				try {
+					toDelete.delete();
+				} catch (Exception ex) {
+					SmartPlugIn.log("Could not delete file: " + toDelete.toString(), ex); //$NON-NLS-1$
+				}
+			}
 		}
 	}
-	
+
 	/**
+	 * Operation responsible for saving an associated image file.
 	 * Stores information about which file and where we need to copy.
 	 * 
 	 * @author elitvin
 	 * @since 4.0.0
 	 */
-	private class FilePair {
-		File from;
-		File to;
-		FilePair(File from, File to) {
+	private class SaveOperation implements IOperation {
+		
+		private File from;
+		private File to;
+		
+		public SaveOperation(File from, File to) {
 			this.from = from;
 			this.to = to;
+		}
+
+		@Override
+		public void execute() {
+			if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
+				//image was cleared
+				if (to.exists()) {
+					try {
+						to.delete();
+					} catch (Exception ex) {
+						SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$
+					}
+				}
+			} else if (!from.equals(to)) {
+				try {
+					FileUtils.copyFile(from, to);
+				} catch (IOException e) {
+					SmartPlugIn.log("Could not copy file: " + from.toString() + " to " + to.toString(), e); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
 		}
 	}
 }
