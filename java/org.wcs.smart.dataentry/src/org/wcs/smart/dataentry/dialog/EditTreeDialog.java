@@ -97,8 +97,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 	private TreeViewer itemViewer;
 	private TableViewer nameTable;
 	
+	private Composite nodeConfigCmp;
 	private DisplayModeComboViewer modeViewer;
 	private ImageSelectionControl imageControl;
+	private org.eclipse.swt.widgets.Label imgControlLabel;
 
 	private NamedItem dmNode;
 	private CmAttributeTreeNode cmNode;
@@ -226,7 +228,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 		right.setText("Tree Node Properties");
 
 		createNameTable(right);
-		createNodeConfigControls(right);
+		nodeConfigCmp = createNodeConfigControls(right);
+		nodeConfigCmp.setVisible(false);
 		
 		comp.setWeights(new int[]{28,37,35});
 		itemViewer.refresh();		
@@ -521,7 +524,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		nameTable.getTable().setEnabled(false);
 	}
 
-	private void createNodeConfigControls(Composite parent) {
+	private Composite createNodeConfigControls(Composite parent) {
 		Composite containerCmp = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(2, false);
 		layout.marginHeight = layout.marginWidth = 0;
@@ -556,8 +559,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		org.eclipse.swt.widgets.Label imgLbl = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
-		imgLbl.setText("Image:");
+		imgControlLabel = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
+		imgControlLabel.setText("Image:");
 		imageControl = new ImageSelectionControl(containerCmp, new IImageContentProvider() {
 			@Override
 			public File getImageFile() {
@@ -573,6 +576,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 				}
 			}
 		});
+		return containerCmp;
 	}
 	
 	/**
@@ -591,8 +595,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnEnable.setEnabled(cmNode != null);
 		btnRemove.setEnabled(cmNode != null);
 		updateEnableButtonText();
+		nodeConfigCmp.setVisible(itemViewer.getSelection() != null && !itemViewer.getSelection().isEmpty());
 		updateDisplayModeControl();
 		imageControl.setVisible(cmNode != null);
+		imgControlLabel.setVisible(cmNode != null);
 		imageControl.redrawCanvas();
 	}
 
