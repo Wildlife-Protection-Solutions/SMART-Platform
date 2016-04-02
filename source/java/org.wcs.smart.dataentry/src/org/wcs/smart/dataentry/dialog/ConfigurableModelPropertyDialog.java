@@ -319,7 +319,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						fetchTreeData(thiscm[0].getDefaultTrees());
 						monitor.worked(1);
 
-						monitor.subTask("fetching attributes configuration...");
+						monitor.subTask(Messages.ConfigurableModelPropertyDialog_AttrConfigSubTask);
 						fetchAttributeSettings(thiscm[0].getAttributeSettings());
 						monitor.worked(1);
 					} finally {

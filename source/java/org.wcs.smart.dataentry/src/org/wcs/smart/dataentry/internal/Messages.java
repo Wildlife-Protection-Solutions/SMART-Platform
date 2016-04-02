@@ -9,6 +9,7 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_Button_AddGroup;
 	public static String AbstractInfoComposite_CategoriesSubTask;
 	public static String AbstractInfoComposite_CategoryError;
+	public static String AbstractInfoComposite_DisplayMode;
 	public static String AbstractInfoComposite_DisplayName;
 	public static String AbstractInfoComposite_DmLoadingTaskName;
 	public static String AbstractInfoComposite_ErrorDialogTitle;
@@ -38,6 +39,7 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_DeleteConfirmation;
 	public static String CmNodeInfoComposite_DeleteDialogTitle;
 	public static String CmNodeInfoComposite_DeletingNode;
+	public static String CmNodeInfoComposite_Image;
 	public static String CmNodeInfoComposite_Key;
 	public static String CmNodeInfoComposite_PhotoAllowed;
 	public static String CmNodeInfoComposite_photoOptionTooltip;
@@ -92,6 +94,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelFactory_ProgressMessage;
 	public static String ConfigurableModelFactory_TaskName;
 	public static String ConfigurableModelPropertyDialog_AllFiles;
+	public static String ConfigurableModelPropertyDialog_AttrConfigSubTask;
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;
 	public static String ConfigurableModelPropertyDialog_Button_Export_Xml;
@@ -143,6 +146,8 @@ public class Messages extends NLS {
 	public static String DatamodelCatecorySelectorDialog_Message;
 	public static String DatamodelCatecorySelectorDialog_Title;
 	public static String DropdownScreenOptionComposite_EmptyValue;
+	public static String EditListDialog_DisplayMode;
+	public static String EditListDialog_Image;
 	public static String EditTreeDialog_AddGroup;
 	public static String EditTreeDialog_AddNodeButton;
 	public static String EditTreeDialog_AddNodeTooltip;
@@ -150,11 +155,19 @@ public class Messages extends NLS {
 	public static String EditTreeDialog_ConfigurableModelValues;
 	public static String EditTreeDialog_DataModelValues;
 	public static String EditTreeDialog_DeleteTooltip;
+	public static String EditTreeDialog_DisplayMode;
 	public static String EditTreeDialog_EnableTooltip;
+	public static String EditTreeDialog_Image;
 	public static String EditTreeDialog_MessageCustom;
 	public static String EditTreeDialog_MessageDefault;
 	public static String EditTreeDialog_NewGroup;
 	public static String EditTreeDialog_NewGroupTooltip;
+	public static String EditTreeDialog_TreeNodeProperties;
+	public static String ImageSelectionControl_AllImages;
+	public static String ImageSelectionControl_BitmapFiles;
+	public static String ImageSelectionControl_Button_Clear;
+	public static String ImageSelectionControl_Button_Load;
+	public static String ImageSelectionControl_JpegFiles;
 	public static String ListAttributeInfoComposite_Button_Edit;
 	public static String ListAttributeInfoComposite_defaultTooltip;
 	public static String ListAttributeInfoComposite_MultiselectHint;

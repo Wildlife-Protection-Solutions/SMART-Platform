@@ -129,7 +129,7 @@ public class EditListDialog extends TitleAreaDialog{
 		upperConlrolsCmp.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
 
 		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(upperConlrolsCmp, SWT.NONE);
-		label.setText("Display Mode:");
+		label.setText(Messages.EditListDialog_DisplayMode);
 		final DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(upperConlrolsCmp);
 		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		modeViewer.setSelection(new StructuredSelection(attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
@@ -351,7 +351,7 @@ public class EditListDialog extends TitleAreaDialog{
 		imgCmp.setLayout(imgLayout);
 		imgCmp.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 		org.eclipse.swt.widgets.Label imgLbl = new org.eclipse.swt.widgets.Label(imgCmp, SWT.NONE);
-		imgLbl.setText("Image:");
+		imgLbl.setText(Messages.EditListDialog_Image);
 		imageControl = new ImageSelectionControl(imgCmp, new IImageContentProvider() {
 			@Override
 			public File getImageFile() {

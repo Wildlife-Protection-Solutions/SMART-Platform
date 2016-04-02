@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
-import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 
 /**
@@ -102,7 +102,7 @@ public class ImageSelectionControl extends Composite {
 		
 		Button buttonLoad = new Button(btnCmp, SWT.PUSH);
 		buttonLoad.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		buttonLoad.setText("Load...");
+		buttonLoad.setText(Messages.ImageSelectionControl_Button_Load);
 		buttonLoad.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -113,9 +113,9 @@ public class ImageSelectionControl extends Composite {
 						"*.jpg;*.jpeg", //$NON-NLS-1$
 				});
 				fd.setFilterNames(new String[] {
-						"All Images (*.bmp;*.jpg;*.jpeg)",
-						"Bitmap Files (*.bmp)",
-						"JPEG Files (*.jpg;*.jpeg)"
+						Messages.ImageSelectionControl_AllImages,
+						Messages.ImageSelectionControl_BitmapFiles,
+						Messages.ImageSelectionControl_JpegFiles
 				});
 				String f = fd.open();
 				if (f != null) {
@@ -127,7 +127,7 @@ public class ImageSelectionControl extends Composite {
 
 		Button buttonClear = new Button(btnCmp, SWT.PUSH);
 		buttonClear.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		buttonClear.setText("Clear");
+		buttonClear.setText(Messages.ImageSelectionControl_Button_Clear);
 		buttonClear.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
