@@ -231,9 +231,11 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						Session session = HibernateManager.openSession();
 						session.beginTransaction();
 						try {
+							ConfigurableModel currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
 							monitor.worked(1);
-							if (DeleteManager.canDelete(cm, session)){
-								session.delete(cm);
+							if (DeleteManager.canDelete(currentCm, session)){
+								//currentCm.getDefaultLists().size(); //this is strange, but without this line delete fails (see #1744), looks like a bug in hibernate
+								session.delete(currentCm);
 							}
 							session.getTransaction().commit();							
 						}catch (Exception ex){
