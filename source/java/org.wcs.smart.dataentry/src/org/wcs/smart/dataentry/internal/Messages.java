@@ -146,6 +146,9 @@ public class Messages extends NLS {
 	public static String DatamodelCatecorySelectorDialog_Button_Add;
 	public static String DatamodelCatecorySelectorDialog_Message;
 	public static String DatamodelCatecorySelectorDialog_Title;
+	public static String DisplayModeLabelProvider_Image;
+	public static String DisplayModeLabelProvider_Text;
+	public static String DisplayModeLabelProvider_TextImage;
 	public static String DropdownScreenOptionComposite_EmptyValue;
 	public static String EditListDialog_DisplayMode;
 	public static String EditListDialog_Image;
