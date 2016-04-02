@@ -142,6 +142,7 @@ public class Messages extends NLS {
 	public static String CreateNewOpDialog_NoConfigurableModelSelected_Error;
 	public static String CreateNewOpDialog_TemplateLabel;
 	public static String DataentryHibernateManager_ConfigurableModel_Save_Error;
+	public static String DataentryHibernateManager_DeleteConfigurableModelFilestoreError;
 	public static String DatamodelCatecorySelectorDialog_Button_Add;
 	public static String DatamodelCatecorySelectorDialog_Message;
 	public static String DatamodelCatecorySelectorDialog_Title;
