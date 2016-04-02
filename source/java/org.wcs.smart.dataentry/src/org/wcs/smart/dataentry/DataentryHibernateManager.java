@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.dataentry;
 
+import java.io.File;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -156,6 +159,22 @@ public class DataentryHibernateManager extends HibernateManager {
 			session.getTransaction().rollback();
 			SmartPlugIn.displayLog(Messages.DataentryHibernateManager_ConfigurableModel_Save_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return false;
+		}
+	}
+
+	/**
+	 * Delete a filestore for given {@link ConfigurableModel}.
+	 * 
+	 * @param {@link ConfigurableModel} who's filestore to delete
+	 */
+	public static void deleteFilestore(ConfigurableModel model) {
+		File fileStore = new File(model.getFileDataStoreLocation());
+		if (fileStore.exists()) {
+			try {
+				FileUtils.forceDelete(fileStore);
+			} catch(Exception ex) {
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.DataentryHibernateManager_DeleteConfigurableModelFilestoreError, fileStore.getAbsolutePath()), ex);
+			}
 		}
 	}
 	
