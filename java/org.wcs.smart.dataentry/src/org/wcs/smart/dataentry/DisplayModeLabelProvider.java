@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.DisplayMode;
 
 /**
@@ -36,9 +37,9 @@ public class DisplayModeLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof DisplayMode) {
 			switch ((DisplayMode)element) {
-			case TEXT: return "Text";
-			case IMAGE: return "Image";
-			case TEXT_IMAGE: return "Text and Image";
+			case TEXT: return Messages.DisplayModeLabelProvider_Text;
+			case IMAGE: return Messages.DisplayModeLabelProvider_Image;
+			case TEXT_IMAGE: return Messages.DisplayModeLabelProvider_TextImage;
 			}
 		}
 		return super.getText(element);
