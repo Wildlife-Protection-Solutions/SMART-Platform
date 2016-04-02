@@ -115,7 +115,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
 	private void addImageRow(Composite container) {
 		Label label = new Label(container, SWT.NONE);
-		label.setText("Image:");
+		label.setText(Messages.CmNodeInfoComposite_Image);
 		
 		imageControl = new ImageSelectionControl(container, new IImageContentProvider() {
 			@Override

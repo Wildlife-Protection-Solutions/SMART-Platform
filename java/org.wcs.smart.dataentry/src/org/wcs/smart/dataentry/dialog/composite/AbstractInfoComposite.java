@@ -151,7 +151,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	
 	protected DisplayModeComboViewer createDisplayModeControls(Composite parent) {
 		Label label = new Label(parent, SWT.NONE);
-		label.setText("Display Mode:");
+		label.setText(Messages.AbstractInfoComposite_DisplayMode);
 		final DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(parent);
 		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {

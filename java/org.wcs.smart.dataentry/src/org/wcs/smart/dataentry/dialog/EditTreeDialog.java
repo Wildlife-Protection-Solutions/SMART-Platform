@@ -225,7 +225,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		Group right = new Group(comp, SWT.NONE);
 		right.setLayout( new GridLayout());
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		right.setText("Tree Node Properties");
+		right.setText(Messages.EditTreeDialog_TreeNodeProperties);
 
 		createNameTable(right);
 		nodeConfigCmp = createNodeConfigControls(right);
@@ -532,7 +532,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		containerCmp.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 		
 		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
-		label.setText("Display Mode:");
+		label.setText(Messages.EditTreeDialog_DisplayMode);
 		modeViewer = new DisplayModeComboViewer(containerCmp);
 		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		modeViewer.setSelection(new StructuredSelection(attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
@@ -560,7 +560,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		});
 		
 		imgControlLabel = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
-		imgControlLabel.setText("Image:");
+		imgControlLabel.setText(Messages.EditTreeDialog_Image);
 		imageControl = new ImageSelectionControl(containerCmp, new IImageContentProvider() {
 			@Override
 			public File getImageFile() {
