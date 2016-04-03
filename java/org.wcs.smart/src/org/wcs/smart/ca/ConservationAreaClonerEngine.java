@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
@@ -256,9 +257,23 @@ public class ConservationAreaClonerEngine {
 		List<Cloner> allCloners = new ArrayList<Cloner>();
 		allCloners.addAll(cloners);
 		
+		List<Interceptor> interceptors = new ArrayList<>();
+		for (Cloner c : allCloners) {
+			interceptors.addAll(c.cloner.getInterceptors());
+		}
+		Interceptor interceptor = null;
+		if (!interceptors.isEmpty()) {
+			if (interceptors.size() == 1) {
+				interceptor = interceptors.get(0);
+			} else {
+				IMultiInterceptor mi = MultiInterceptor.createInstance();
+				mi.addAll(interceptors);
+				interceptor = mi;
+			}
+		}
 		
 		SmartHibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
-		session = HibernateManager.openSession();
+		session = HibernateManager.openSession(interceptor);
 		Transaction t = session.beginTransaction();
 		try{
 			session.save(newCa);

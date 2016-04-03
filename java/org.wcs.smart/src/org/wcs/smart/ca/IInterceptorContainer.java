@@ -22,34 +22,19 @@
 package org.wcs.smart.ca;
 
 import java.util.Collection;
-import java.util.Collections;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Interceptor;
+
 /**
- * Interface to implement for copying conservation area
- * information when creating a new conservation area from
- * a template.
+ * Interface that represents a container for interceptors.
  * 
- * @author Emily
- *
+ * @author elitvin
+ * @since 4.0.0
  */
-public interface IConservationAreaTemplateCloner {
-
+public interface IInterceptorContainer {
 	
-	/**
-	 * Clones template based information from the templateCa into the
-	 * newCa.
-	 * 
-	 * @param engine 
-	 * @param monitor  
-	 * 
-	 */
-	void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception;
-
-	default Collection<? extends Interceptor> getInterceptors() {
-		return Collections.emptyList();
-	}
-
-
+	public boolean add(Interceptor interceptor);
+	
+	public boolean addAll(Collection<? extends Interceptor> c);
+	
 }
