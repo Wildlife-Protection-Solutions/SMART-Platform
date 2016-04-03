@@ -266,6 +266,8 @@ public class ConservationAreaClonerEngine {
 			if (interceptors.size() == 1) {
 				interceptor = interceptors.get(0);
 			} else {
+				//NOTE: MultiInterceptor implementation is based on reflection. This may have negative impact on performance.
+				//Alternative approach is to implement similar logic without reflection.
 				IMultiInterceptor mi = MultiInterceptor.createInstance();
 				mi.addAll(interceptors);
 				interceptor = mi;

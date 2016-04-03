@@ -75,7 +75,7 @@ public class MultiInterceptor implements IInterceptorContainer, InvocationHandle
                 Object result = m.invoke(i, args);
                 results.add(result);
             } else {
-            	SmartPlugIn.displayLog(MessageFormat.format("Failed to invoke interceptor method {0}. Some data may be lost.", method.getName()), null);
+            	SmartPlugIn.displayLog(MessageFormat.format("Failed to invoke interceptor method {0}. Some data may be lost.", method.getName()), null); //$NON-NLS-1$
             }
 		}
         return !results.isEmpty() ? results.get(0) : null;
