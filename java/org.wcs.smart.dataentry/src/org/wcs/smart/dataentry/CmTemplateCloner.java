@@ -21,13 +21,17 @@
  */
 package org.wcs.smart.dataentry;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Interceptor;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -37,11 +41,13 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -55,6 +61,11 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 
 	private ConservationAreaClonerEngine engine;
 	public CmTemplateCloner() {
+	}
+	
+	@Override
+	public Collection<? extends Interceptor> getInterceptors() {
+		return Arrays.asList(new AssociatedImageInterceptor());
 	}
 
 	@Override
@@ -76,6 +87,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		
 		ConfigurableModel clone = new ConfigurableModel();
 		clone.setConservationArea(engine.getNewCa());
+		clone.setDisplayMode(cm.getDisplayMode());
 		engine.copyLabels(cm, clone);
 		engine.getSession().saveOrUpdate(clone);
 		
@@ -85,6 +97,8 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		}
 		cloneCmAttributeListItems(cm, clone);
 		cloneCmAttributeTreeItems(cm, clone);
+
+		cloneCmDmAttributeSetting(cm, clone);
 		
 		engine.getSession().saveOrUpdate(clone);
 		engine.getSession().flush();
@@ -112,6 +126,10 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 				clone.setDmAttribute(null);
 			}
 			clone.setAttribute((CmAttribute)engine.getNewConservationItem(listItem.getAttribute()));
+			File imgFile = listItem.getImageFile();
+			if (imgFile != null && imgFile.exists()) {
+				clone.setImageFile(listItem.getImageFile());
+			}
 			engine.getSession().saveOrUpdate(clone);
 		}
 		engine.getSession().flush();
@@ -141,6 +159,11 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 				clone.setDmAttribute(null);
 			}
 			clone.setAttribute((CmAttribute)engine.getNewConservationItem(treeItem.getAttribute()));
+			clone.setDisplayMode(treeItem.getDisplayMode());
+			File imgFile = treeItem.getImageFile();
+			if (imgFile != null && imgFile.exists()) {
+				clone.setImageFile(treeItem.getImageFile());
+			}
 			clone.setChildren(new ArrayList<CmAttributeTreeNode>());
 			engine.getSession().saveOrUpdate(clone);
 			
@@ -176,6 +199,11 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		clonedNode.setPhotoRequired(toCopy.isPhotoRequired());
 		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
 		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
+		clonedNode.setDisplayMode(toCopy.getDisplayMode());
+		File imgFile = toCopy.getImageFile();
+		if (imgFile != null && imgFile.exists()) {
+			clonedNode.setImageFile(toCopy.getImageFile());
+		}
 		
 		if (toCopy.getCategory() != null){
 			clonedNode.setCategory(findNewCategory(toCopy.getCategory()));
@@ -239,6 +267,18 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		return cloned;
 	}
 	
+	private void cloneCmDmAttributeSetting(ConfigurableModel srcCm, ConfigurableModel clonedCm) throws Exception {
+		for (CmDmAttributeSettings s : srcCm.getAttributeSettings().values()) {
+			CmDmAttributeSettings clone = new CmDmAttributeSettings();
+			clone.setModel(clonedCm);
+			clone.setDmAttribute(findNewAttribute(s.getDmAttribute()));
+			clone.setDisplayMode(s.getDisplayMode());
+			clonedCm.getAttributeSettings().put(clone.getDmAttribute(), clone);
+			
+			engine.getSession().saveOrUpdate(clone);
+		}
+		engine.getSession().flush();
+	}
 	
 	private Category findNewCategory(Category oldCategory) throws Exception{
 		List<?> categories = engine.getSession().createCriteria(Category.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).add(Restrictions.eq("hkey", oldCategory.getHkey())).list();  //$NON-NLS-1$//$NON-NLS-2$
