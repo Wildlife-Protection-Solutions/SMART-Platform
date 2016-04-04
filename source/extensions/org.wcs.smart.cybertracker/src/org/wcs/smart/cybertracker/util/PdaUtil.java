@@ -25,10 +25,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.commons.io.FileUtils;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
+import org.wcs.smart.util.SmartFileUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -52,15 +51,7 @@ public class PdaUtil {
 	}
 	
 	public static File createTempDirectory() throws IOException {
-		final File temp;
-		temp = File.createTempFile("cybertracker", Long.toString(System.nanoTime())); //$NON-NLS-1$
-		if(!(temp.delete())) {
-			throw new IOException("Could not delete temp file: " + temp.getAbsolutePath()); //$NON-NLS-1$
-		}
-		if(!(temp.mkdir())) {
-			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); //$NON-NLS-1$
-		}
-		return temp;
+		return SmartFileUtils.createTempDirectory("cybertracker"); //$NON-NLS-1$
 	}	
 
 	public static String getRegistryKey(ConservationArea ca) {
@@ -98,17 +89,6 @@ public class PdaUtil {
 		WinRegistry.deleteValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
 	}
 	
-	public static void deleteTempDirectory(File tempDir) {
-		if (tempDir == null)
-			return;
-		try {
-			FileUtils.deleteDirectory(tempDir);
-		} catch (IOException e) {
-			//ignore
-			CyberTrackerPlugIn.log(e.getMessage(), e);
-		}
-	}	
-
 	public static int uploadPda(File file) throws Exception {
 		String appPath = getCTAppPath();
 		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};

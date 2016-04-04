@@ -50,6 +50,7 @@ import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartFileUtils;
 
 /**
  * Importer for CyberTracker application data. 
@@ -127,7 +128,7 @@ public class CyberTrackerImporter {
 			return result;
 			
 		} finally {
-			PdaUtil.deleteTempDirectory(xmlTempDir);
+			SmartFileUtils.deleteTempDirectory(xmlTempDir);
 		}
 	}
 
@@ -150,7 +151,7 @@ public class CyberTrackerImporter {
 			File xmlFile = extractRawXml(appPath, file, xmlTempDir);
 			return importXmlFileData(xmlFile, monitor);
 		} finally {
-			PdaUtil.deleteTempDirectory(xmlTempDir);
+			SmartFileUtils.deleteTempDirectory(xmlTempDir);
 		}
 	}
 	

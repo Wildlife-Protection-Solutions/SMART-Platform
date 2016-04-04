@@ -77,6 +77,7 @@ import org.wcs.smart.cybertracker.util.WinRegistry;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.LanguageViewer;
+import org.wcs.smart.util.SmartFileUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -424,7 +425,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 								Messages.CyberTrackerExportDialog_Error_ExportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 						return;
 					} finally {
-						PdaUtil.deleteTempDirectory(tempDir);
+						SmartFileUtils.deleteTempDirectory(tempDir);
 						monitor.done();
 					}
 					CyberTrackerPlugIn.displayInfo(Messages.CyberTrackerExportHandler_InfoDialog_Title, Messages.CyberTrackerExportHandler_InfoDialog_Message);
