@@ -15,16 +15,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for NameType complex type.
+ * <p>Java class for CmDmAttributeSettingsType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="NameType">
+ * &lt;complexType name="CmDmAttributeSettingsType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="language_code" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="displayMode" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -33,60 +33,60 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "NameType")
-public class NameType {
+@XmlType(name = "CmDmAttributeSettingsType")
+public class CmDmAttributeSettingsType {
 
-    @XmlAttribute(name = "language_code")
-    protected String languageCode;
-    @XmlAttribute(name = "value")
-    protected String value;
+    @XmlAttribute(name = "attributeKey")
+    protected String attributeKey;
+    @XmlAttribute(name = "displayMode")
+    protected String displayMode;
 
     /**
-     * Gets the value of the languageCode property.
+     * Gets the value of the attributeKey property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getLanguageCode() {
-        return languageCode;
+    public String getAttributeKey() {
+        return attributeKey;
     }
 
     /**
-     * Sets the value of the languageCode property.
+     * Sets the value of the attributeKey property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setLanguageCode(String value) {
-        this.languageCode = value;
+    public void setAttributeKey(String value) {
+        this.attributeKey = value;
     }
 
     /**
-     * Gets the value of the value property.
+     * Gets the value of the displayMode property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getValue() {
-        return value;
+    public String getDisplayMode() {
+        return displayMode;
     }
 
     /**
-     * Sets the value of the value property.
+     * Sets the value of the displayMode property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setValue(String value) {
-        this.value = value;
+    public void setDisplayMode(String value) {
+        this.displayMode = value;
     }
 
 }

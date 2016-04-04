@@ -16,16 +16,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for AttributeTreeNodeTypeList complex type.
+ * <p>Java class for CmDmAttributeSettingsTypeList complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="AttributeTreeNodeTypeList">
+ * &lt;complexType name="CmDmAttributeSettingsTypeList">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="node" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}AttributeItemType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="setting" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}CmDmAttributeSettingsType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,40 +35,40 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "AttributeTreeNodeTypeList", propOrder = {
-    "node"
+@XmlType(name = "CmDmAttributeSettingsTypeList", propOrder = {
+    "setting"
 })
-public class AttributeTreeNodeTypeList {
+public class CmDmAttributeSettingsTypeList {
 
-    protected List<AttributeItemType> node;
+    protected List<CmDmAttributeSettingsType> setting;
 
     /**
-     * Gets the value of the node property.
+     * Gets the value of the setting property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the node property.
+     * This is why there is not a <CODE>set</CODE> method for the setting property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getNode().add(newItem);
+     *    getSetting().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link AttributeItemType }
+     * {@link CmDmAttributeSettingsType }
      * 
      * 
      */
-    public List<AttributeItemType> getNode() {
-        if (node == null) {
-            node = new ArrayList<AttributeItemType>();
+    public List<CmDmAttributeSettingsType> getSetting() {
+        if (setting == null) {
+            setting = new ArrayList<CmDmAttributeSettingsType>();
         }
-        return this.node;
+        return this.setting;
     }
 
 }
