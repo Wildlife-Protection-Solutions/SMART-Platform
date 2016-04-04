@@ -29,8 +29,11 @@ elementFormDefault="qualified">
     		<element name="defaultLists" type="smrt:AttributeCmListItemTypeList"
     			maxOccurs="1" minOccurs="0">
     		</element>
-    		
+    		<element name="setting" type="smrt:CmDmAttributeSettingsTypeList"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
     	</sequence>
+    	<attribute name="displayMode" type="string"></attribute>
     </complexType>
 
     <complexType name="LanguageListType">
@@ -64,6 +67,8 @@ elementFormDefault="qualified">
     	<attribute name="categoryKey" type="string"></attribute>
     	<attribute name="photoAllowed" type="boolean"></attribute>
     	<attribute name="photoRequired" type="boolean"></attribute>
+    	<attribute name="displayMode" type="string"></attribute>
+    	<attribute name="imageFile" type="string"></attribute>
     </complexType>
 
     <complexType name="NameType">
@@ -139,6 +144,8 @@ elementFormDefault="qualified">
     	<attribute name="keyRef" type="string"></attribute>
     	<attribute name="hkeyRef" type="string"></attribute>
     	<attribute name="isActive" type="boolean"></attribute>
+    	<attribute name="displayMode" type="string"></attribute>
+    	<attribute name="imageFile" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeCmListItemTypeList">
@@ -156,6 +163,18 @@ elementFormDefault="qualified">
     	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="keyRef" type="string"></attribute>
     	<attribute name="isActive" type="boolean"></attribute>
+    	<attribute name="imageFile" type="string"></attribute>
+    </complexType>
+
+    <complexType name="CmDmAttributeSettingsTypeList">
+    	<sequence>
+    		<element name="setting" type="smrt:CmDmAttributeSettingsType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="CmDmAttributeSettingsType">
+    	<attribute name="attributeKey" type="string"></attribute>
+    	<attribute name="displayMode" type="string"></attribute>
     </complexType>
 
 </schema>
