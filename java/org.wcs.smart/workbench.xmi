@@ -1,0 +1,894 @@
+<?xml version="1.0" encoding="ASCII"?>
+<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_guYCwPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.legacy.ide.application" contributorURI="platform:/plugin/org.eclipse.ui.workbench" selectedElement="_guYCwfqDEeWHBJ8nQ29jIg" bindingContexts="_guafMvqDEeWHBJ8nQ29jIg">
+  <tags>activeSchemeId:org.eclipse.ui.defaultAcceleratorConfiguration</tags>
+  <tags>ModelMigrationProcessor.001</tags>
+  <children xsi:type="basic:TrimmedWindow" xmi:id="_guYCwfqDEeWHBJ8nQ29jIg" elementId="IDEWindow" contributorURI="platform:/plugin/org.eclipse.ui.workbench" selectedElement="_guYCwvqDEeWHBJ8nQ29jIg" label="%trimmedwindow.label.eclipseSDK" x="104" y="104" width="1024" height="768">
+    <persistedState key="coolBarVisible" value="true"/>
+    <persistedState key="perspectiveBarVisible" value="false"/>
+    <tags>topLevel</tags>
+    <children xsi:type="basic:PartSashContainer" xmi:id="_guYCwvqDEeWHBJ8nQ29jIg" selectedElement="_guYCw_qDEeWHBJ8nQ29jIg" horizontal="true">
+      <children xsi:type="advanced:PerspectiveStack" xmi:id="_guYCw_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.ide.perspectivestack" containerData="7500" selectedElement="_guYCxPqDEeWHBJ8nQ29jIg">
+        <children xsi:type="advanced:Perspective" xmi:id="_guYCxPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.DefaultPerspective" selectedElement="_guYCxfqDEeWHBJ8nQ29jIg" label="SMART" iconURI="platform:/plugin/org.wcs.smart/images/icons/eview16/map.png">
+          <persistedState key="persp.hiddenItems" value="persp.hideToolbarSC:org.eclipse.ui.edit.text.toggleShowSelectedElementOnly,"/>
+          <tags>persp.actionSet:org.locationtech.udig.project.ui.layerQuerySet</tags>
+          <tags>persp.actionSet:org.locationtech.udig.project.ui.layerModifySet</tags>
+          <tags>persp.actionSet:org.locationtech.udig.project.ui.layerStyleSet</tags>
+          <children xsi:type="basic:PartSashContainer" xmi:id="_guYCxfqDEeWHBJ8nQ29jIg" selectedElement="_guYCxvqDEeWHBJ8nQ29jIg" horizontal="true">
+            <children xsi:type="basic:PartSashContainer" xmi:id="_guYCxvqDEeWHBJ8nQ29jIg" containerData="8000" selectedElement="_guYCx_qDEeWHBJ8nQ29jIg" horizontal="true">
+              <children xsi:type="basic:PartStack" xmi:id="_guYCx_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.DefaultPerspective.leftFolder" containerData="2000" selectedElement="_guYCyPqDEeWHBJ8nQ29jIg">
+                <tags>newtablook</tags>
+                <tags>active</tags>
+                <tags>noFocus</tags>
+                <children xsi:type="advanced:Placeholder" xmi:id="_guYCyPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerManager" ref="_guZRf_qDEeWHBJ8nQ29jIg"/>
+                <children xsi:type="advanced:Placeholder" xmi:id="_guYCyfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.CatalogView" toBeRendered="false" ref="_guZ39vqDEeWHBJ8nQ29jIg"/>
+              </children>
+              <children xsi:type="basic:PartStack" xmi:id="_guYCyvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.ui.map.MapViewMStack" containerData="8000" selectedElement="_guYCy_qDEeWHBJ8nQ29jIg">
+                <tags>newtablook</tags>
+                <children xsi:type="advanced:Placeholder" xmi:id="_guYCy_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.ui.map.MapView" ref="_guZRavqDEeWHBJ8nQ29jIg">
+                  <tags>NoClose</tags>
+                </children>
+              </children>
+            </children>
+            <children xsi:type="advanced:Placeholder" xmi:id="_guYCzPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.editorss" toBeRendered="false" containerData="2000" ref="_guZRZ_qDEeWHBJ8nQ29jIg"/>
+          </children>
+        </children>
+      </children>
+      <children xsi:type="basic:PartStack" xmi:id="_guYCzfqDEeWHBJ8nQ29jIg" elementId="stickyFolderRight" toBeRendered="false" containerData="2500">
+        <children xsi:type="advanced:Placeholder" xmi:id="_guYCzvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.help.ui.HelpView" toBeRendered="false" ref="_guZRZPqDEeWHBJ8nQ29jIg"/>
+        <children xsi:type="advanced:Placeholder" xmi:id="_guYCz_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.internal.introview" toBeRendered="false" ref="_guZRZfqDEeWHBJ8nQ29jIg"/>
+        <children xsi:type="advanced:Placeholder" xmi:id="_guYC0PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.cheatsheets.views.CheatSheetView" toBeRendered="false" ref="_guZRZvqDEeWHBJ8nQ29jIg"/>
+      </children>
+    </children>
+    <sharedElements xsi:type="basic:Part" xmi:id="_guZRZPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.help.ui.HelpView" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="Help" iconURI="platform:/plugin/org.eclipse.help.ui/icons/view16/help_view.gif" closeable="true">
+      <tags>View</tags>
+      <tags>categoryTag:Help</tags>
+    </sharedElements>
+    <sharedElements xsi:type="basic:Part" xmi:id="_guZRZfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.internal.introview" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="Welcome" iconURI="platform:/plugin/org.eclipse.ui/icons/full/eview16/defaultview_misc.png" closeable="true">
+      <tags>View</tags>
+      <tags>categoryTag:General</tags>
+    </sharedElements>
+    <sharedElements xsi:type="basic:Part" xmi:id="_guZRZvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.cheatsheets.views.CheatSheetView" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="Cheat Sheets" iconURI="platform:/plugin/org.eclipse.ui.cheatsheets/icons/view16/cheatsheet_view.gif" closeable="true">
+      <tags>View</tags>
+      <tags>categoryTag:Help</tags>
+    </sharedElements>
+    <sharedElements xsi:type="advanced:Area" xmi:id="_guZRZ_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.editorss">
+      <tags>NoAutoCollapse</tags>
+      <children xsi:type="basic:PartStack" xmi:id="_guZRaPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.primaryDataStack">
+        <tags>newtablook</tags>
+        <tags>org.eclipse.e4.primaryDataStack</tags>
+        <tags>EditorStack</tags>
+        <children xsi:type="advanced:Placeholder" xmi:id="_guZRafqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.view.browser" toBeRendered="false" ref="_guZ39_qDEeWHBJ8nQ29jIg"/>
+      </children>
+    </sharedElements>
+    <sharedElements xsi:type="basic:Part" xmi:id="_guZRavqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.ui.map.MapView" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="SMART Map View" iconURI="platform:/plugin/org.wcs.smart/images/icons/eview16/map.png" closeable="true">
+      <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;view/>"/>
+      <tags>View</tags>
+      <tags>categoryTag:Other</tags>
+      <menus xmi:id="_guZRa_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.ui.map.MapView">
+        <tags>ViewMenu</tags>
+        <tags>menuContribution:menu</tags>
+      </menus>
+      <toolbar xmi:id="_guZRbPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.ui.map.MapView"/>
+    </sharedElements>
+    <sharedElements xsi:type="basic:Part" xmi:id="_guZRf_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerManager" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="Layers" iconURI="platform:/plugin/org.locationtech.udig.project.ui.editor/icons/eview16/layer_view.gif" closeable="true">
+      <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;view/>"/>
+      <tags>View</tags>
+      <tags>categoryTag:Project</tags>
+      <tags>active</tags>
+      <menus xmi:id="_guZRgPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerManager">
+        <tags>ViewMenu</tags>
+        <tags>menuContribution:menu</tags>
+      </menus>
+      <menus xsi:type="menu:PopupMenu" xmi:id="_guZRgfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerManager">
+        <tags>menuContribution:popup</tags>
+        <tags>popup:org.locationtech.udig.project.ui.layerManager</tags>
+      </menus>
+      <toolbar xmi:id="_guZRgvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerManager"/>
+    </sharedElements>
+    <sharedElements xsi:type="basic:Part" xmi:id="_guZ39vqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.CatalogView" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="Catalog" iconURI="platform:/plugin/org.locationtech.udig.catalog.ui/icons/eview16/catalog_view.gif" closeable="true">
+      <tags>View</tags>
+      <tags>categoryTag:Catalog</tags>
+    </sharedElements>
+    <sharedElements xsi:type="basic:Part" xmi:id="_guZ39_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.view.browser" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="SMART Web Browser" iconURI="platform:/plugin/org.wcs.smart/images/icons/eview16/world.png" closeable="true">
+      <tags>View</tags>
+      <tags>categoryTag:Other</tags>
+    </sharedElements>
+    <trimBars xmi:id="_guZ3-PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.main.toolbar" contributorURI="platform:/plugin/org.eclipse.ui.workbench">
+      <children xsi:type="menu:ToolBar" xmi:id="_guZ4T_qDEeWHBJ8nQ29jIg" elementId="additions" toBeRendered="false">
+        <tags>toolbarSeparator</tags>
+        <children xsi:type="menu:ToolBarSeparator" xmi:id="_guZ4UPqDEeWHBJ8nQ29jIg" elementId="additions" toBeRendered="false"/>
+      </children>
+      <children xsi:type="menu:ToolControl" xmi:id="_guZ4UfqDEeWHBJ8nQ29jIg" elementId="PerspectiveSpacer" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.LayoutModifierToolControl">
+        <tags>stretch</tags>
+        <tags>SHOW_RESTORE_MENU</tags>
+      </children>
+    </trimBars>
+    <trimBars xmi:id="_guZ4VPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.trim.status" contributorURI="platform:/plugin/org.eclipse.ui.workbench" side="Bottom">
+      <children xsi:type="menu:ToolControl" xmi:id="_guZ4WPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.StatusLine" toBeRendered="false" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.StandardTrim">
+        <tags>stretch</tags>
+      </children>
+      <children xsi:type="menu:ToolControl" xmi:id="_guZ4WfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.HeapStatus" toBeRendered="false" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.StandardTrim">
+        <tags>Draggable</tags>
+      </children>
+      <children xsi:type="menu:ToolControl" xmi:id="_guZ4WvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.ProgressBar" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.StandardTrim">
+        <tags>Draggable</tags>
+      </children>
+      <children xsi:type="menu:ToolControl" xmi:id="_guZ4W_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.trim.status.spacer">
+        <tags>stretch</tags>
+      </children>
+    </trimBars>
+    <trimBars xmi:id="_guZ4XPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.trim.vertical1" contributorURI="platform:/plugin/org.eclipse.ui.workbench" side="Left"/>
+    <trimBars xmi:id="_guZ4XfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.trim.vertical2" contributorURI="platform:/plugin/org.eclipse.ui.workbench" side="Right"/>
+  </children>
+  <bindingTables xmi:id="_guZ4XvqDEeWHBJ8nQ29jIg" contributorURI="platform:/plugin/org.eclipse.ui.workbench" bindingContext="_guafMvqDEeWHBJ8nQ29jIg">
+    <bindings xmi:id="_guZ4X_qDEeWHBJ8nQ29jIg" keySequence="CTRL+Z" command="_gucViPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4YPqDEeWHBJ8nQ29jIg" keySequence="CTRL+Y" command="_guc8FPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4YfqDEeWHBJ8nQ29jIg" keySequence="CTRL+X" command="_gucVjPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4YvqDEeWHBJ8nQ29jIg" keySequence="CTRL+V" command="_gucVkPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4Y_qDEeWHBJ8nQ29jIg" keySequence="CTRL+C" command="_gucVPPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4ZPqDEeWHBJ8nQ29jIg" keySequence="ALT+PAGE_UP" command="_guc8KvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4ZfqDEeWHBJ8nQ29jIg" keySequence="CTRL+A" command="_guc70fqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4ZvqDEeWHBJ8nQ29jIg" keySequence="ALT+PAGE_DOWN" command="_guc73fqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4Z_qDEeWHBJ8nQ29jIg" keySequence="SHIFT+INSERT" command="_gucVkPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4aPqDEeWHBJ8nQ29jIg" keySequence="CTRL+F10" command="_guc7cfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4afqDEeWHBJ8nQ29jIg" keySequence="CTRL+INSERT" command="_gucVPPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4avqDEeWHBJ8nQ29jIg" keySequence="SHIFT+DEL" command="_gucVjPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4a_qDEeWHBJ8nQ29jIg" keySequence="CTRL+SPACE" command="_gucVZPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4bPqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+SPACE" command="_gucVRfqDEeWHBJ8nQ29jIg"/>
+  </bindingTables>
+  <bindingTables xmi:id="_guZ4bfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.contexts.window" bindingContext="_guafM_qDEeWHBJ8nQ29jIg">
+    <bindings xmi:id="_guZ4bvqDEeWHBJ8nQ29jIg" keySequence="CTRL+N" command="_guc8HfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4b_qDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+F4" command="_gucVi_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4cPqDEeWHBJ8nQ29jIg" keySequence="CTRL+-" command="_guc7ovqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4cfqDEeWHBJ8nQ29jIg" keySequence="ALT+F7" command="_gucVkfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4cvqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+W" command="_gucVi_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4c_qDEeWHBJ8nQ29jIg" keySequence="CTRL+F6" command="_guc7qvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4dPqDEeWHBJ8nQ29jIg" keySequence="CTRL+F8" command="_guc8SfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4dfqDEeWHBJ8nQ29jIg" keySequence="CTRL+W" command="_guc8I_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4dvqDEeWHBJ8nQ29jIg" keySequence="CTRL+." command="_guc7_vqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4d_qDEeWHBJ8nQ29jIg" keySequence="ALT+-" command="_gucVZ_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4ePqDEeWHBJ8nQ29jIg" keySequence="ALT+CR" command="_gucVN_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4efqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+F7" command="_guc7xvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4evqDEeWHBJ8nQ29jIg" keySequence="F2" command="_guc7TPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4e_qDEeWHBJ8nQ29jIg" keySequence="ALT+SHIFT+F7" command="_guc7-PqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4fPqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+F8" command="_gucVSvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4ffqDEeWHBJ8nQ29jIg" keySequence="F5" command="_guc7gfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4fvqDEeWHBJ8nQ29jIg" keySequence="CTRL+S" command="_guc7ofqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4f_qDEeWHBJ8nQ29jIg" keySequence="F12" command="_gucVZvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4gPqDEeWHBJ8nQ29jIg" keySequence="CTRL+M" command="_gucVWfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4gfqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+F6" command="_guc7o_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4gvqDEeWHBJ8nQ29jIg" keySequence="CTRL+F4" command="_guc8I_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4g_qDEeWHBJ8nQ29jIg" keySequence="ALT+ARROW_LEFT" command="_guc7c_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4hPqDEeWHBJ8nQ29jIg" keySequence="CTRL+F7" command="_gucVPfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4hfqDEeWHBJ8nQ29jIg" keySequence="CTRL+{" command="_gucVS_qDEeWHBJ8nQ29jIg">
+      <parameters xmi:id="_guZ4hvqDEeWHBJ8nQ29jIg" elementId="Splitter.isHorizontal" name="Splitter.isHorizontal" value="false"/>
+    </bindings>
+    <bindings xmi:id="_guZ4h_qDEeWHBJ8nQ29jIg" keySequence="CTRL+P" command="_guc7WPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4iPqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+NUMPAD_DIVIDE" command="_gucVUvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4ifqDEeWHBJ8nQ29jIg" keySequence="CTRL+Q" command="_guc7a_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4ivqDEeWHBJ8nQ29jIg" keySequence="ALT+ARROW_RIGHT" command="_guc7YPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4i_qDEeWHBJ8nQ29jIg" keySequence="CTRL+E" command="_gucVePqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4jPqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+E" command="_guc72_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4jfqDEeWHBJ8nQ29jIg" keySequence="CTRL+F" command="_guc7pPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4jvqDEeWHBJ8nQ29jIg" keySequence="CTRL+," command="_guc7SfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4j_qDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+S" command="_guc7lvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4kPqDEeWHBJ8nQ29jIg" keySequence="DEL" command="_guc7tfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4kfqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+NUMPAD_MULTIPLY" command="_guc7lPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4kvqDEeWHBJ8nQ29jIg" keySequence="CTRL+_" command="_gucVS_qDEeWHBJ8nQ29jIg">
+      <parameters xmi:id="_guZ4k_qDEeWHBJ8nQ29jIg" elementId="Splitter.isHorizontal" name="Splitter.isHorizontal" value="true"/>
+    </bindings>
+    <bindings xmi:id="_guZ4lPqDEeWHBJ8nQ29jIg" keySequence="CTRL+=" command="_guc7aPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4lfqDEeWHBJ8nQ29jIg" keySequence="ALT+SHIFT+Q H" command="_guc7zfqDEeWHBJ8nQ29jIg">
+      <parameters xmi:id="_guZ4lvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.showView.viewId" name="org.eclipse.ui.views.showView.viewId" value="org.eclipse.ui.cheatsheets.views.CheatSheetView"/>
+    </bindings>
+  </bindingTables>
+  <bindingTables xmi:id="_guZ4l_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.textEditorScope" bindingContext="_guafNvqDEeWHBJ8nQ29jIg">
+    <bindings xmi:id="_guZ4mPqDEeWHBJ8nQ29jIg" keySequence="HOME" command="_guc7rvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4mfqDEeWHBJ8nQ29jIg" keySequence="SHIFT+CR" command="_guc7rfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4mvqDEeWHBJ8nQ29jIg" keySequence="ALT+/" command="_guc7svqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4m_qDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+X" command="_gucVUPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4nPqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+K" command="_guc7ufqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guZ4nfqDEeWHBJ8nQ29jIg" keySequence="F2" command="_gucVIvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafAPqDEeWHBJ8nQ29jIg" keySequence="END" command="_guc7gPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafAfqDEeWHBJ8nQ29jIg" keySequence="CTRL+J" command="_guc7f_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafAvqDEeWHBJ8nQ29jIg" keySequence="CTRL+ARROW_DOWN" command="_guc8S_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafA_qDEeWHBJ8nQ29jIg" keySequence="CTRL+ARROW_LEFT" command="_gucVNvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafBPqDEeWHBJ8nQ29jIg" keySequence="CTRL+ARROW_UP" command="_guc7xfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafBfqDEeWHBJ8nQ29jIg" keySequence="CTRL+D" command="_guc7j_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafBvqDEeWHBJ8nQ29jIg" keySequence="SHIFT+HOME" command="_guc7i_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafB_qDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+ARROW_RIGHT" command="_guc77_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafCPqDEeWHBJ8nQ29jIg" keySequence="CTRL+ARROW_RIGHT" command="_guc8FfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafCfqDEeWHBJ8nQ29jIg" keySequence="ALT+CTRL+J" command="_guc8OfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafCvqDEeWHBJ8nQ29jIg" keySequence="CTRL+END" command="_guc78vqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafC_qDEeWHBJ8nQ29jIg" keySequence="SHIFT+END" command="_guc7qfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafDPqDEeWHBJ8nQ29jIg" keySequence="CTRL+HOME" command="_gucVjvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafDfqDEeWHBJ8nQ29jIg" keySequence="CTRL+BS" command="_gucVNfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafDvqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+ARROW_LEFT" command="_guc7sPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafD_qDEeWHBJ8nQ29jIg" keySequence="CTRL+K" command="_guc71fqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafEPqDEeWHBJ8nQ29jIg" keySequence="CTRL+F10" command="_guc7W_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafEfqDEeWHBJ8nQ29jIg" keySequence="INSERT" command="_guc7ZPqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafEvqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+CR" command="_guc7X_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafE_qDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+Y" command="_guc7mfqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafFPqDEeWHBJ8nQ29jIg" keySequence="CTRL+L" command="_gucVe_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafFfqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+INSERT" command="_guc74fqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafFvqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+J" command="_guc8AvqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafF_qDEeWHBJ8nQ29jIg" keySequence="ALT+ARROW_UP" command="_guc8J_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafGPqDEeWHBJ8nQ29jIg" keySequence="ALT+CTRL+ARROW_UP" command="_guc7_PqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafGfqDEeWHBJ8nQ29jIg" keySequence="CTRL+DEL" command="_gucVf_qDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafGvqDEeWHBJ8nQ29jIg" keySequence="ALT+ARROW_DOWN" command="_guc76vqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafG_qDEeWHBJ8nQ29jIg" keySequence="ALT+CTRL+ARROW_DOWN" command="_guc73vqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafHPqDEeWHBJ8nQ29jIg" keySequence="CTRL+SHIFT+DEL" command="_gucVafqDEeWHBJ8nQ29jIg"/>
+    <bindings xmi:id="_guafHfqDEeWHBJ8nQ29jIg" keySequence="ALT+SHIFT+A" command="_gucVgfqDEeWHBJ8nQ29jIg"/>
+  </bindingTables>
+  <bindingTables xmi:id="_guafHvqDEeWHBJ8nQ29jIg" bindingContext="_guafO_qDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafH_qDEeWHBJ8nQ29jIg" bindingContext="_guafPPqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafIPqDEeWHBJ8nQ29jIg" bindingContext="_guafPfqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafIfqDEeWHBJ8nQ29jIg" bindingContext="_guafPvqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafIvqDEeWHBJ8nQ29jIg" bindingContext="_guafP_qDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafI_qDEeWHBJ8nQ29jIg" bindingContext="_guafQPqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafJPqDEeWHBJ8nQ29jIg" bindingContext="_guafQfqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafJfqDEeWHBJ8nQ29jIg" bindingContext="_guafQvqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafJvqDEeWHBJ8nQ29jIg" bindingContext="_guafQ_qDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafJ_qDEeWHBJ8nQ29jIg" bindingContext="_guafRPqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafKPqDEeWHBJ8nQ29jIg" bindingContext="_guafRfqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafKfqDEeWHBJ8nQ29jIg" bindingContext="_guafRvqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafKvqDEeWHBJ8nQ29jIg" bindingContext="_guafR_qDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafK_qDEeWHBJ8nQ29jIg" bindingContext="_guafSPqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafLPqDEeWHBJ8nQ29jIg" bindingContext="_guafSfqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafLfqDEeWHBJ8nQ29jIg" bindingContext="_guafSvqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafLvqDEeWHBJ8nQ29jIg" bindingContext="_guafS_qDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafL_qDEeWHBJ8nQ29jIg" bindingContext="_guafTPqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafMPqDEeWHBJ8nQ29jIg" bindingContext="_guafTfqDEeWHBJ8nQ29jIg"/>
+  <bindingTables xmi:id="_guafMfqDEeWHBJ8nQ29jIg" bindingContext="_guafTvqDEeWHBJ8nQ29jIg"/>
+  <rootContext xmi:id="_guafMvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.contexts.dialogAndWindow" contributorURI="platform:/plugin/org.eclipse.ui.workbench" name="In Dialogs and Windows" description="Either a dialog or a window is open">
+    <children xmi:id="_guafM_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.contexts.window" contributorURI="platform:/plugin/org.eclipse.ui.workbench" name="In Windows" description="A window is open">
+      <children xmi:id="_guafNPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.ui.contexts.views" contributorURI="platform:/plugin/org.eclipse.ui.workbench" name="%bindingcontext.name.bindingView"/>
+      <children xmi:id="_guafNfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.internal.ui.editors.parts.graphicaleditorwithflyoutpalette.context" name="reportdesignereditpart.context"/>
+      <children xmi:id="_guafNvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.textEditorScope" name="Editing Text" description="Editing Text Context"/>
+      <children xmi:id="_guafN_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.tool" name="Tools" description="Context where tool key bindings will work"/>
+    </children>
+    <children xmi:id="_guafOPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.contexts.dialog" contributorURI="platform:/plugin/org.eclipse.ui.workbench" name="In Dialogs" description="A dialog is open"/>
+  </rootContext>
+  <rootContext xmi:id="_guafOfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.contexts.workbenchMenu" name="Workbench Menu" description="When no Workbench windows are active"/>
+  <rootContext xmi:id="_guafOvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.contexts.actionSet" name="Action Set" description="Parent context for action sets"/>
+  <rootContext xmi:id="_guafO_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.publishActionSet" name="Auto::org.eclipse.birt.report.designer.ui.publishActionSet"/>
+  <rootContext xmi:id="_guafPPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.actionSet.presentation" name="Auto::org.eclipse.ui.edit.text.actionSet.presentation"/>
+  <rootContext xmi:id="_guafPfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.resourceQuerySet" name="Auto::org.locationtech.udig.catalog.ui.resourceQuerySet"/>
+  <rootContext xmi:id="_guafPvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.resourceModifySet" name="Auto::org.locationtech.udig.catalog.ui.resourceModifySet"/>
+  <rootContext xmi:id="_guafP_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.serviceQuerySet" name="Auto::org.locationtech.udig.catalog.ui.serviceQuerySet"/>
+  <rootContext xmi:id="_guafQPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.serviceModifySet" name="Auto::org.locationtech.udig.catalog.ui.serviceModifySet"/>
+  <rootContext xmi:id="_guafQfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.data.menu" name="Auto::org.locationtech.udig.catalog.ui.data.menu"/>
+  <rootContext xmi:id="_guafQvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.legend.mapGraphic.action" name="Auto::org.locationtech.udig.legend.mapGraphic.action"/>
+  <rootContext xmi:id="_guafQ_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.mapgraphic.commonDecorators" name="Auto::org.locationtech.udig.mapgraphic.commonDecorators"/>
+  <rootContext xmi:id="_guafRPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.OpenProjectSet" name="Auto::org.locationtech.udig.project.ui.OpenProjectSet"/>
+  <rootContext xmi:id="_guafRfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.map.menu" name="Auto::org.locationtech.udig.project.ui.map.menu"/>
+  <rootContext xmi:id="_guafRvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layer.menu" name="Auto::org.locationtech.udig.project.ui.layer.menu"/>
+  <rootContext xmi:id="_guafR_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.LayerActions" name="Auto::org.locationtech.udig.project.ui.LayerActions"/>
+  <rootContext xmi:id="_guafSPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.renameSet" name="Auto::org.locationtech.udig.project.ui.renameSet"/>
+  <rootContext xmi:id="_guafSfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerQuerySet" name="Auto::org.locationtech.udig.project.ui.layerQuerySet"/>
+  <rootContext xmi:id="_guafSvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerModifySet" name="Auto::org.locationtech.udig.project.ui.layerModifySet"/>
+  <rootContext xmi:id="_guafS_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerStyleSet" name="Auto::org.locationtech.udig.project.ui.layerStyleSet"/>
+  <rootContext xmi:id="_guafTPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.style.sld.editor.layerAction" name="Auto::org.locationtech.udig.style.sld.editor.layerAction"/>
+  <rootContext xmi:id="_guafTfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.helpMenuItems" name="Auto::org.locationtech.udig.helpMenuItems"/>
+  <rootContext xmi:id="_guafTvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.ui.default" name="Auto::org.locationtech.udig.ui.default"/>
+  <descriptors xmi:id="_guafT_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.ui.compatibility.editor" allowMultiple="true" category="org.eclipse.e4.primaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor">
+    <tags>Editor</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafUPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.lib.explorer.view" label="Resource Explorer" iconURI="platform:/plugin/org.eclipse.birt.report.designer.ui.lib.explorer/icons/full/eview16/library_explorer.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Report Design</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafUfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.views.data.DataView" label="Data Explorer" iconURI="platform:/plugin/org.eclipse.birt.report.designer.ui/icons/eview16/data_explorer_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Report Design</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafUvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.attributes.AttributeView" label="Property Editor" iconURI="platform:/plugin/org.eclipse.birt.report.designer.ui/icons/eview16/quick_edit.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Report Design</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafU_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.gef.ui.palette_view" label="Palette" iconURI="platform:/plugin/org.eclipse.gef/icons/palette_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:General</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafVPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.help.ui.HelpView" label="Help" iconURI="platform:/plugin/org.eclipse.help.ui/icons/view16/help_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Help</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafVfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.internal.introview" label="Welcome" iconURI="platform:/plugin/org.eclipse.ui/icons/full/eview16/defaultview_misc.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:General</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafVvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.cheatsheets.views.CheatSheetView" label="Cheat Sheets" iconURI="platform:/plugin/org.eclipse.ui.cheatsheets/icons/view16/cheatsheet_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Help</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafV_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.PropertySheet" label="Properties" iconURI="platform:/plugin/org.eclipse.ui.views/icons/full/eview16/prop_ps.png" allowMultiple="true" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:General</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafWPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.ContentOutline" label="Outline" iconURI="platform:/plugin/org.eclipse.ui.views/icons/full/eview16/outline_co.png" category="org.eclipse.e4.secondaryNavigationStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:General</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafWfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.browser.ui.browserContainerView" label="Web" iconURI="platform:/plugin/org.eclipse.ui/icons/full/eview16/defaultview_misc.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafWvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.CatalogView" label="Catalog" iconURI="platform:/plugin/org.locationtech.udig.catalog.ui/icons/eview16/catalog_view.gif" allowMultiple="true" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Catalog</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafW_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.Search" label="Search" iconURI="platform:/plugin/org.locationtech.udig.catalog.ui/icons/eview16/searchres.gif" allowMultiple="true" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Catalog</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafXPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tool.info.infoView" label="Information" iconURI="platform:/plugin/org.locationtech.udig.info/icons/view16/info_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Project</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafXfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tool.info.documentView" label="Documents" iconURI="platform:/plugin/org.locationtech.udig.info/icons/view16/document_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Project</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafXvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.projectExplorer" label="Projects" iconURI="platform:/plugin/org.locationtech.udig.project.ui.editor/icons/eview16/project_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Project</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafX_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerManager" label="Layers" iconURI="platform:/plugin/org.locationtech.udig.project.ui.editor/icons/eview16/layer_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Project</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafYPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.legendManager" label="Legend" iconURI="platform:/plugin/org.locationtech.udig.project.ui.editor/icons/eview16/legend_view.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Project</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafYfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.render.gridcoverage.view.infoView" label="Mosaic Information" iconURI="platform:/plugin/org.eclipse.ui/icons/full/eview16/defaultview_misc.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Project</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafYvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.style.styleView" label="Style" iconURI="platform:/plugin/org.locationtech.udig.style/icons/style_tsk.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Project</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafY_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tool.select.TableView" label="Table" iconURI="platform:/plugin/org.locationtech.udig.tool.select/icons/eview16/table_view.gif" allowMultiple="true" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafZPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.ProgressView" label="Progress View" iconURI="platform:/plugin/org.eclipse.ui/icons/full/eview16/defaultview_misc.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:General</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafZfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.ui.aoiView" label="AOI" iconURI="platform:/plugin/org.locationtech.udig.ui/icons/eview16/aoi_view.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Catalog</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafZvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.crossCaView" label="Cross Conservation Analysis" iconURI="platform:/plugin/org.wcs.smart/images/icons/eview16/crossca.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafZ_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.conservationAreaList" label="Conservation Area List" iconURI="platform:/plugin/org.wcs.smart/images/icons/eview16/crossca.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafaPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.ui.map.MapView" label="SMART Map View" iconURI="platform:/plugin/org.wcs.smart/images/icons/eview16/map.png" allowMultiple="true" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafafqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.view.browser" label="SMART Web Browser" iconURI="platform:/plugin/org.wcs.smart/images/icons/eview16/world.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafavqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.ui.PatrolListView" label="Patrols" iconURI="platform:/plugin/org.wcs.smart.patrol/images/icons/view16/patrol.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafa_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.parts.definition" label="SMART Query Definition" iconURI="platform:/plugin/org.wcs.smart.query/images/icons/view16/querypatrol.gif" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafbPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.parts.filter" label="Query Filter" iconURI="platform:/plugin/org.wcs.smart.query/images/icons/view16/query_filter_op.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafbfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.parts.itemlist" label="Queries &amp; Summaries" iconURI="platform:/plugin/org.wcs.smart.query/images/icons/view16/query_list.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafbvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.ReportListView" label="Reports" iconURI="platform:/plugin/org.wcs.smart.report/images/icons/obj16/report.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafb_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.birt.ReportView" label="Report View" iconURI="platform:/plugin/org.wcs.smart.report/images/icons/obj16/report.png" allowMultiple="true" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafcPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.IntelligenceListView" label="Intelligence Records" iconURI="platform:/plugin/org.wcs.smart.intelligence/images/etool16/intelligence.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafcfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.observation.ui.incidientView" label="Independent Incidents" iconURI="platform:/plugin/org.wcs.smart.independentincident/images/icons/obj16/incident.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafcvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.entity.typelist" label="Entity Types" iconURI="platform:/plugin/org.wcs.smart.entity/images/icons/obj16/entitytype.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafc_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.surveyDesignListView" label="Surveys" iconURI="platform:/plugin/org.wcs.smart.er/images/icons/obj16/survey.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafdPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.PlanListView" label="Plans" iconURI="platform:/plugin/org.wcs.smart.plan/images/icons/view16/plan.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <descriptors xmi:id="_guafdfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.observation.waypointInfo" label="Waypoint Information" iconURI="platform:/plugin/org.wcs.smart.observation/images/icons/view16/waypoint_info.png" category="org.eclipse.e4.secondaryDataStack" closeable="true" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView">
+    <tags>View</tags>
+    <tags>categoryTag:Other</tags>
+  </descriptors>
+  <commands xmi:id="_gucVH_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.pinEditor" commandName="Pin Editor" description="Pin the current editor" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVIPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.nextTab" commandName="Next Tab" description="Switch to the next tab" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVIfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.quickAccess" commandName="Quick Access" description="Quickly access UI elements" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVIvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.showInformation" commandName="Show Tooltip Description" description="Displays information for the current caret location in a focused hover" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVI_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.command.reset" commandName="Reset" description="Reset service, uncommited changes will be lost" category="_guc8dfqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVJPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.translate" commandName="Translate..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVJfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.pageUp" commandName="Select Page Up" description="Select to the top of the page" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVJvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.resetImageSizeCommand" commandName="resetImageSizeCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVJ_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.pageUp" commandName="Page Up" description="Go up one page" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVKPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.columnPrevious" commandName="Previous Column" description="Go to the previous column" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVKfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.PatrolPerspective" commandName="View Patrols" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVKvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.deleteitem" commandName="Delete Query or Folder" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVK_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.areas.show" commandName="Show Area Boundaries" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVLPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.mission.new" commandName="New Mission" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVLfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.observation.perspective.show" commandName="Open Field Data Perspective" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_gucVLvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.observation.perspective.show.focusview" name="Focus View"/>
+  </commands>
+  <commands xmi:id="_gucVL_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.cutCommand" commandName="cutCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVMPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.missionExportHandler" commandName="Export Missions..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVMfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.EditIntelligenceSources" commandName="Intelligence Sources" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVMvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.revertToTemplateCommand" commandName="revertToTemplateCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVM_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.datatools.connectivity.commands.addrepository" commandName="New Repository Profile Command" description="Command to create a new repository profile" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVNPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.textEnd" commandName="Select Text End" description="Select to the end of the text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVNfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.deletePreviousWord" commandName="Delete Previous Word" description="Delete the previous word" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVNvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.wordPrevious" commandName="Previous Word" description="Go to the previous word" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVN_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.properties" commandName="Properties" description="Display the properties of the selected item" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVOPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.preferences" commandName="Preferences" description="Open the preferences dialog" category="_guc8fvqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_gucVOfqDEeWHBJ8nQ29jIg" elementId="preferencePageId" name="Preference Page"/>
+  </commands>
+  <commands xmi:id="_gucVOvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.renderingCategoryCommand" commandName="Rendering Category" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVO_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.activeContextInfo" commandName="Show activeContext Info" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVPPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.copy" commandName="Copy" description="Copy the selection to the clipboard" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVPfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.nextView" commandName="Next View" description="Switch to the next view" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVPvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.command.serviceProperties" commandName="Service Properties" description="Service property configuration" category="_guc8dfqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVP_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ccaa.users.show" commandName="Manager Users..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVQPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.export" commandName="Export Intelligence" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVQfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.textStart" commandName="Select Text Start" description="Select to the beginning of the text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVQvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.revertTemplate" commandName="Revert to Default Template" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVQ_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.revertToSaved" commandName="Revert to Saved" description="Revert to the last saved state" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVRPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.ZoomCommand" commandName="Zoom Category" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVRfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.contentAssist.contextInformation" commandName="Context Information" description="Show Context Information" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVRvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.dataentry.showConfigurableModel" commandName="ShowConfigurableModel" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVR_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.properties.NewPropertySheetCommand" commandName="Properties" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVSPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.saveAs" commandName="Save As" description="Save the current contents to another location" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVSfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.datatools.connectivity.commands.export" commandName="Export Profiles Command" description="Command to export connection profiles" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVSvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.previousPerspective" commandName="Previous Perspective" description="Switch to the previous perspective" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVS_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.splitEditor" commandName="Toggle Split Editor" description="Split or join the currently active editor." category="_guc8fvqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_gucVTPqDEeWHBJ8nQ29jIg" elementId="Splitter.isHorizontal" name="Orientation" optional="false"/>
+  </commands>
+  <commands xmi:id="_gucVTfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.exportmulti" commandName="Export Query Definitions..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVTvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.NewIntelligence" commandName="Create New Intelligence Record" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVT_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.exportPatrol" commandName="Export Patrol" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVUPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.upperCase" commandName="To Upper Case" description="Changes the selection to upper case" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVUfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.filter" commandName="Filter Items" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVUvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.collapseAll" commandName="Collapse All" description="Collapse the current tree" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVU_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tool.default.zoom.in" commandName="Show in" description="Zoom In" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVVPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.goInto" commandName="Go Into" description="Navigate into the selected item" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVVfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.DeletePlan" commandName="Delete Plan" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVVvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.exportTemplate" commandName="Export Plan Template..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVV_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.infoCommand" commandName="Info Category" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVWPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.independentincident.filter" commandName="Filter Independent Incidents" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVWfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.maximizePart" commandName="Maximize Active View or Editor" description="Toggles maximize/restore state of active view or editor" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVWvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.lockToolBar" commandName="Lock the Toolbars" description="Lock the Toolbars" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVW_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.gef.ui.palette_view" commandName="Palette" category="_guc8c_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVXPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.windowEnd" commandName="Select Window End" description="Select to the end of the window" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVXfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.newEditor" commandName="New Editor" description="Open another editor on the active editor's input" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVXvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.minimizePart" commandName="Minimize Active View or Editor" description="Minimizes the active view or editor" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVX_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.refreshCommand" commandName="&amp;Redraw" description="Redraw Map " category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVYPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.map.selectbasemap" commandName="Set Basemap" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVYfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.editor.exportPdf" commandName="Export To PDF" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_gucVYvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.exportpdf.editor" name="Editor Export"/>
+  </commands>
+  <commands xmi:id="_gucVY_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.newFolder" commandName="New Folder" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVZPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.contentAssist.proposals" commandName="Content Assist" description="Content Assist" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVZfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.up" commandName="Up" description="Navigate up one level" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVZvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.activateEditor" commandName="Activate Editor" description="Activate the editor" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVZ_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.showSystemMenu" commandName="Show System Menu" description="Show the system menu" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVaPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.item.crosstab.ui.createCube" commandName="Create Cube" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVafqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.delete.line.to.end" commandName="Delete to End of Line" description="Delete to the end of a line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVavqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.export" commandName="Export Conservation Area..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVa_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.resetperspective" commandName="Reset Perspective" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVbPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.PanCommand" commandName="Pan Category" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVbfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.help.ui.ignoreMissingPlaceholders" commandName="Do not warn of missing documentation" description="Sets the help preferences to no longer report a warning about the current set of missing documents." category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVbvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.savePerspective" commandName="Save Perspective As" description="Save the current perspective" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVb_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.editTemplate" commandName="Edit Intelligence Template" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVcPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.move" commandName="Move..." description="Move the selected item" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVcfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.entitytype.new" commandName="New Entity Type" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVcvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.editCommand" commandName="Zoom Category" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVc_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.windowEnd" commandName="Window End" description="Go to the end of the window" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVdPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.perspectives.showPerspective" commandName="Show Perspective" description="Show a particular perspective" category="_guc8ePqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_gucVdfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.perspectives.showPerspective.perspectiveId" name="Parameter"/>
+    <parameters xmi:id="_gucVdvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.perspectives.showPerspective.newWindow" name="In New Window"/>
+  </commands>
+  <commands xmi:id="_gucVd_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.linkWithEditor" commandName="Toggle Link with Editor " description="Toggles linking of a view's selection with the active editor's selection" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVePqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.openEditorDropDown" commandName="Quick Switch Editor" description="Open the editor drop down list" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVefqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.editor.exportPdf" commandName="Export To PDF" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_gucVevqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.exportpdf.editor" name="Editor Export"/>
+  </commands>
+  <commands xmi:id="_gucVe_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.line" commandName="Go to Line" description="Go to a specified line of text" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVfPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.open" commandName="Open Query" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVffqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.DeleteIntelligence" commandName="Delete Intelligence" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVfvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.import" commandName="Import Intelligence" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVf_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.deleteNextWord" commandName="Delete Next Word" description="Delete the next word" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVgPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.basemaps.show" commandName="Show Basemap List" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVgfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.toggleBlockSelectionMode" commandName="Toggle Block Selection" description="Toggle block / column selection in the current text editor" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVgvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.surveydesignexport" commandName="Export Survey Designs..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVg_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.insertCommand" commandName="insertCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVhPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.backup" commandName="Backup System" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVhfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.patrolScreens" commandName="Patrol Screens Configuration" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVhvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.resetPerspective" commandName="Reset Perspective" description="Reset the current perspective to its default state" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVh_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.lineUp" commandName="Select Line Up" description="Extend the selection to the previous line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucViPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.undo" commandName="Undo" description="Undo the last operation" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVifqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.map.addlayer" commandName="Add Layer" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVivqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.cut.line.to.end" commandName="Cut to End of Line" description="Cut to the end of a line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVi_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.closeAll" commandName="Close All" description="Close all editors" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVjPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.cut" commandName="Cut" description="Cut the selection to the clipboard" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVjfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.changeuser" commandName="Change Username or Password" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVjvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.textStart" commandName="Text Start" description="Go to the beginning of the text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVj_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.translateitem" commandName="Translate..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVkPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.paste" commandName="Paste" description="Paste from the clipboard" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVkfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.part.nextPage" commandName="Next Page" description="Switch to the next page" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVkvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.translateItem" commandName="Translate..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_gucVk_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.baseInsertCommand" commandName="baseInsertCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7QPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.renameReportItem" commandName="Rename" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7QfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.exportPdf" commandName="Export To PDF" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc7QvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.exportpdf.editor" name="Editor Export"/>
+  </commands>
+  <commands xmi:id="_guc7Q_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.showperspective" commandName="Show Perspective" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc7RPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.perspectiveid" name="Perspective Id"/>
+  </commands>
+  <commands xmi:id="_guc7RfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.createPlaceHolderCommand" commandName="createPlaceHolderCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7RvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.exportReport" commandName="%exportreport.command.name" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc7R_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.export.parameter.isMultiple" name="MultipleReports"/>
+  </commands>
+  <commands xmi:id="_guc7SPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.cybertracker.properties" commandName="Properties" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7SfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.previous" commandName="Previous" description="Navigate to the previous item" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7SvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.cybertracker.survey.export" commandName="Survey CyberTracker Export" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7S_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.deleteColumnCommand" commandName="deleteColumnCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7TPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.rename" commandName="Rename" description="Rename the selected item" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7TfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.clear.mark" commandName="Clear Mark" description="Clear the mark" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7TvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.systempref" commandName="System Preferences" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7T_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.columnPrevious" commandName="Select Previous Column" description="Select the previous column" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7UPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly" commandName="Show Selected Element Only" description="Show Selected Element Only" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7UfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.cut.line.to.beginning" commandName="Cut to Beginning of Line" description="Cut to the beginning of a line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7UvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.incident.new" commandName="New Independent Incident" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7U_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.export" commandName="Export" description="Export" category="_guc8ffqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc7VPqDEeWHBJ8nQ29jIg" elementId="exportWizardId" name="Export Wizard"/>
+  </commands>
+  <commands xmi:id="_guc7VfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.logout" commandName="Logout" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7VvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.editGroupCommand" commandName="editGroupCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7V_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.importTemplate" commandName="Import Intelligence Template..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7WPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.print" commandName="Print" description="Print" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7WfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.pasteAction" commandName="pasteAction" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7WvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.datatools.connectivity.commands.import" commandName="Import Profiles Command" description="Command to import connection profiles" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7W_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.showRulerContextMenu" commandName="Show Ruler Context Menu" description="Show the context menu for the ruler" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7XPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.mapProperties" commandName="Map Properties" description="Map Properties and Settings" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7XfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.help.ui.closeTray" commandName="Close User Assistance Tray" description="Close the user assistance tray containing context help information and cheat sheets." category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7XvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.NewPlan" commandName="Create New Plan" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7X_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.smartEnterInverse" commandName="Insert Line Above Current Line" description="Adds a new line above the current line" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7YPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.forwardHistory" commandName="Forward History" description="Move forward in the editor navigation history" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7YfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.spy" commandName="Show Contributing Plug-in" description="Shows contribution information for the currently selected element" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7YvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.help.helpSearch" commandName="Help Search" description="Open the help search" category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7Y_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.restartWorkbench" commandName="Restart" description="Restart the workbench" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7ZPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.toggleOverwrite" commandName="Toggle Overwrite" description="Toggle overwrite mode" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7ZfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.lineDown" commandName="Line Down" description="Go down one line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7ZvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.translate" commandName="Translate..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7Z_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.newPatrol" commandName="Create New Patrol" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7aPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.gef.zoom_in" commandName="Zoom In" description="Zoom In" category="_guc8evqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7afqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.independentincident.export" commandName="Export Incidents..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7avqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.missionattributes.show" commandName="Mission Properties..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7a_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.gotoLastEditPosition" commandName="Last Edit Location" description="Last edit location" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7bPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.open.hyperlink" commandName="Open Hyperlink" description="Opens the hyperlink at the caret location or opens a chooser if more than one hyperlink is available" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7bfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.openProjectCommand" commandName="OpenProjectCommand" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7bvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.entitytype.delete" commandName="Delete Entity Type(s)" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7b_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.revertToReportItemCommand" commandName="revertToReportItemCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7cPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.missionScreens" commandName="Mission Screens Configuration" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7cfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.showViewMenu" commandName="Show View Menu" description="Show the view menu" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7cvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.shiftRight" commandName="Shift Right" description="Shift a block of text to the right" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7c_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.backwardHistory" commandName="Backward History" description="Move backward in the editor navigation history" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7dPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.previousTab" commandName="Previous Tab" description="Switch to the previous tab" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7dfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.dialogs.openMessageDialog" commandName="Open Message Dialog" description="Open a Message Dialog" category="_guc8d_qDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc7dvqDEeWHBJ8nQ29jIg" elementId="title" name="Title"/>
+    <parameters xmi:id="_guc7d_qDEeWHBJ8nQ29jIg" elementId="message" name="Message"/>
+    <parameters xmi:id="_guc7ePqDEeWHBJ8nQ29jIg" elementId="imageType" name="Image Type Constant" typeId="org.eclipse.ui.dialogs.Integer"/>
+    <parameters xmi:id="_guc7efqDEeWHBJ8nQ29jIg" elementId="defaultIndex" name="Default Button Index" typeId="org.eclipse.ui.dialogs.Integer"/>
+    <parameters xmi:id="_guc7evqDEeWHBJ8nQ29jIg" elementId="buttonLabel0" name="First Button Label"/>
+    <parameters xmi:id="_guc7e_qDEeWHBJ8nQ29jIg" elementId="buttonLabel1" name="Second Button Label"/>
+    <parameters xmi:id="_guc7fPqDEeWHBJ8nQ29jIg" elementId="buttonLabel2" name="Third Button Label"/>
+    <parameters xmi:id="_guc7ffqDEeWHBJ8nQ29jIg" elementId="buttonLabel3" name="Fourth Button Label"/>
+    <parameters xmi:id="_guc7fvqDEeWHBJ8nQ29jIg" elementId="cancelReturns" name="Return Value on Cancel"/>
+  </commands>
+  <commands xmi:id="_guc7f_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.findIncremental" commandName="Incremental Find" description="Incremental find" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7gPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.lineEnd" commandName="Line End" description="Go to the end of the line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7gfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.refresh" commandName="Refresh" description="Refresh the selected items" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7gvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.applyStyleCommand" commandName="applyStyleCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7g_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.swap.mark" commandName="Swap Mark" description="Swap the mark with the cursor position" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7hPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.independentincident.import" commandName="Import Incidents..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7hfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.closeAllPerspectives" commandName="Close All Perspectives" description="Close all open perspectives" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7hvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.deleteReportItem" commandName="Delete" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7h_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.deletePrevious" commandName="Delete Previous" description="Delete the previous character" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7iPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.shiftLeft" commandName="Shift Left" description="Shift a block of text to the left" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7ifqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.querydef.clear" commandName="Clear Query Definition" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7ivqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.publishToTemplateCommand" commandName="publishToTemplateCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7i_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.lineStart" commandName="Select Line Start" description="Select to the beginning of the line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7jPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.columnNext" commandName="Select Next Column" description="Select the next column" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7jfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.copyAction" commandName="copyAction" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7jvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.editStyleCommand" commandName="editStyleCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7j_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.delete.line" commandName="Delete Line" description="Delete a line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7kPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.insertColumnCommand" commandName="insertColumnCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7kfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.cybertracker.patrol.export" commandName="Patrol CyberTracker Export" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7kvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.agency.show" commandName="Show Agency and Rank Lists" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7k_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.ShowPlanFilter" commandName="Show Plan Filter" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7lPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.expandAll" commandName="Expand All" description="Expand the current tree" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7lfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.addLayerCommand" commandName="Add Layer" description="Opens previously saved resources" category="_guc8fPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7lvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.saveAll" commandName="Save All" description="Save all current contents" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7l_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.lineDown" commandName="Select Line Down" description="Extend the selection to the next line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7mPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.showKeyAssist" commandName="Show Key Assist" description="Show the key assist dialog" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7mfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.lowerCase" commandName="To Lower Case" description="Changes the selection to lower case" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7mvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.datatools.connectivity.commands.addprofile" commandName="New Connection Profile Command" description="Command to create a new connection profile" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc7m_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.datatools.connectivity.ui.ignoreCategory" name="ignoreCategory"/>
+    <parameters xmi:id="_guc7nPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.datatools.connectivity.ui.useSelection" name="useSelection"/>
+  </commands>
+  <commands xmi:id="_guc7nfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.deleteCommand" commandName="deleteCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7nvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.importTemplate" commandName="Import Plan Template... " category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7n_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.selectionCommand" commandName="Selection Category" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7oPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.closeOthers" commandName="Close Others" description="Close all editors except the one that is active" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7ofqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.save" commandName="Save" description="Save the current contents" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7ovqDEeWHBJ8nQ29jIg" elementId="org.eclipse.gef.zoom_out" commandName="Zoom Out" description="Zoom Out" category="_guc8evqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7o_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.previousEditor" commandName="Previous Editor" description="Switch to the previous editor" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7pPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.findReplace" commandName="Find and Replace" description="Find and replace text" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7pfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.teamList" commandName="Show Team List" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7pvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.view.DeletePatrol" commandName="Delete Patrol" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7p_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.help.tipsAndTricksAction" commandName="Tips and Tricks" description="Open the tips and tricks help page" category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7qPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.properties.show" commandName="Show Conservation Area Properties Page" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7qfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.lineEnd" commandName="Select Line End" description="Select to the end of the line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7qvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.nextEditor" commandName="Next Editor" description="Switch to the next editor" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7q_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.survey.new" commandName="New Survey" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7rPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.insertExpressionCommand" commandName="insertExpressionCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7rfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.smartEnter" commandName="Insert Line Below Current Line" description="Adds a new line below the current line" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7rvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.lineStart" commandName="Line Start" description="Go to the start of the line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7r_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.importReport" commandName="Import Report..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7sPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.wordPrevious" commandName="Select Previous Word" description="Select the previous word" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7sfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.help.helpContents" commandName="Help Contents" description="Open the help contents" category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7svqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.hippieCompletion" commandName="Word Completion" description="Context insensitive completion" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7s_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.exportLibrary" commandName="Export Library" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7tPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.editCommand" commandName="editCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7tfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.delete" commandName="Delete" description="Delete the selection" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7tvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.delete.line.to.beginning" commandName="Delete to Beginning of Line" description="Delete to the beginning of a line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7t_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.panRightCommand" commandName="Pan Right" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7uPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.importCSSCommand" commandName="importCSSCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7ufqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.findPrevious" commandName="Find Previous" description="Find previous item" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7uvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.command.resourceProperties" commandName="Resource Properties" description="Resource property configuration" category="_guc8f_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7u_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.create.unknown" commandName="Create Unknown Query" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc7vPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.type" name="Query Type"/>
+  </commands>
+  <commands xmi:id="_guc7vfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.exit" commandName="Exit" description="Exit the application" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7vvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.datamodel.show" commandName="Show Data Model" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7v_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.command.new.layer" commandName="&amp;Create Layer" category="_guc8fPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7wPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.importLibrary" commandName="Import Library" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7wfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.addBookmark" commandName="Add Bookmark" description="Add a bookmark" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7wvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.patrolTypes" commandName="Show Patrol Type List" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7w_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.newReport" commandName="New Report" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7xPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.surveydesignimport" commandName="Import Survey Designs..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7xfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.scroll.lineUp" commandName="Scroll Line Up" description="Scroll up one line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7xvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.previousView" commandName="Previous View" description="Switch to the previous view" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7x_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.set.mark" commandName="Set Mark" description="Set the mark" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7yPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.exportLibraryCommand" commandName="exportLibraryCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7yfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.CreateChartViewCommand" commandName="CreateChartViewCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7yvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.toggleShowWhitespaceCharacters" commandName="Show Whitespace Characters" description="Shows whitespace characters in current text editor" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7y_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.insertRowCommand" commandName="insertRowCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7zPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.revert" commandName="Revert" description="Revert to the last saved state" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7zfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.showView" commandName="Show View" description="Shows a particular view" category="_guc8c_qDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc7zvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.showView.viewId" name="View"/>
+    <parameters xmi:id="_guc7z_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.showView.secondaryId" name="Secondary Id"/>
+    <parameters xmi:id="_guc70PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.views.showView.makeFast" name="As FastView"/>
+  </commands>
+  <commands xmi:id="_guc70fqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.selectAll" commandName="Select All" description="Select all" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc70vqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.exit" commandName="Exit" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc70_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.editTemplate" commandName="Edit Plan Template" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc71PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.deleteRowCommand" commandName="deleteRowCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc71fqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.findNext" commandName="Find Next" description="Find next item" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc71vqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.import" commandName="Import" description="Import" category="_guc8ffqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc71_qDEeWHBJ8nQ29jIg" elementId="importWizardId" name="Import Wizard"/>
+  </commands>
+  <commands xmi:id="_guc72PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.item.crosstab.ui.createCrosstab" commandName="Create Crosstab" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc72fqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.folder.add" commandName="Add Sub-Folder" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc72vqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.employees.show" commandName="Show Employee List" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc72_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.switchToEditor" commandName="Switch to Editor" description="Switch to an editor" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc73PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.help.dynamicHelp" commandName="Dynamic Help" description="Open the dynamic help" category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc73fqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.nextSubTab" commandName="Next Sub-Tab" description="Switch to the next sub-tab" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc73vqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.copyLineDown" commandName="Copy Lines" description="Duplicates the selected lines and moves the selection to the copy" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc73_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.cybertracker.import" commandName="CyberTracker Import" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc74PqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.entity.entitytypefilter" commandName="Open Entity Type Filter Dialog" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc74fqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.toggleInsertMode" commandName="Toggle Insert Mode" description="Toggle insert mode" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc74vqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.cheatsheets.openCheatSheet" commandName="Open Cheat Sheet" description="Open a Cheat Sheet." category="_guc8gvqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc74_qDEeWHBJ8nQ29jIg" elementId="cheatSheetId" name="Identifier"/>
+  </commands>
+  <commands xmi:id="_guc75PqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.exportTemplate" commandName="Export Intelligence Template..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc75fqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.exportPdf" commandName="Export To PDF" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc75vqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.exportpdf.editor" name="Editor Export"/>
+  </commands>
+  <commands xmi:id="_guc75_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.closePart" commandName="Close Part" description="Close the active workbench part" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc76PqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.missionImportHandler" commandName="Import Missions..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc76fqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.help.installationDialog" commandName="Installation Information" description="Open the installation dialog" category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc76vqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.moveLineDown" commandName="Move Lines Down" description="Moves the selected lines down" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc76_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.mergeCommand" commandName="mergeCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc77PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.lineUp" commandName="Line Up" description="Go up one line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc77fqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.windowStart" commandName="Window Start" description="Go to the start of the window" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc77vqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.back" commandName="Back" description="Navigate back" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc77_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.wordNext" commandName="Select Next Word" description="Select the next word" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc78PqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.delete" commandName="Delete Conservation Area" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc78fqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.pageDown" commandName="Page Down" description="Go down one page" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc78vqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.textEnd" commandName="Text End" description="Go to the end of the text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc78_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.layerProperties" commandName="Layer Properties" description="Layer Properties and Settings" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc79PqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.editReport" commandName="Edit Report" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc79fqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.stations.show" commandName="Show Station List" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc79vqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.su.show" commandName="Sampling Unit Attributes..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc79_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.panUpCommand" commandName="Pan Up" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7-PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.part.previousPage" commandName="Previous Page" description="Switch to the previous page" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7-fqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.folder.rename" commandName="Rename Query Folder" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7-vqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tool.default.zoom.all" commandName="Show All" description="Zoom to Area of Interest" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7-_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.refreshLibraryCommand" commandName="refreshLibraryCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7_PqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.copyLineUp" commandName="Duplicate Lines" description="Duplicates the selected lines and leaves the selection unchanged" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7_fqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.editBindingCommand" commandName="editBindingCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7_vqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.next" commandName="Next" description="Navigate to the next item" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc7__qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.ShowInformant" commandName="Show Informant Data" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8APqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.closePerspective" commandName="Close Perspective" description="Close the current perspective" category="_guc8fvqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc8AfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.closePerspective.perspectiveId" name="Perspective Id"/>
+  </commands>
+  <commands xmi:id="_guc8AvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.findIncrementalReverse" commandName="Incremental Find Reverse" description="Incremental find reverse" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8A_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.cheatsheets.openCheatSheetURL" commandName="Open Cheat Sheet from URL" description="Open a Cheat Sheet from file at a specified URL." category="_guc8gvqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc8BPqDEeWHBJ8nQ29jIg" elementId="cheatSheetId" name="Identifier" optional="false"/>
+    <parameters xmi:id="_guc8BfqDEeWHBJ8nQ29jIg" elementId="name" name="Name" optional="false"/>
+    <parameters xmi:id="_guc8BvqDEeWHBJ8nQ29jIg" elementId="url" name="URL" optional="false"/>
+  </commands>
+  <commands xmi:id="_guc8B_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.export" commandName="Export Query" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8CPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.browser.openBundleResource" commandName="Open Resource in Browser" description="Opens a bundle resource in the default web browser." category="_guc8fvqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc8CfqDEeWHBJ8nQ29jIg" elementId="plugin" name="Plugin"/>
+    <parameters xmi:id="_guc8CvqDEeWHBJ8nQ29jIg" elementId="path" name="Path"/>
+  </commands>
+  <commands xmi:id="_guc8C_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.publishToLibraryCommand" commandName="publishToLibraryCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8DPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.reloadCssStyleCommand" commandName="reloadCssStyleCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8DfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.deleteGroupCommand" commandName="deleteGroupCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8DvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.import" commandName="Import Query" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8D_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.ShowIntelligenceFilter" commandName="Show Intelligence Filter" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8EPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.help.aboutAction" commandName="About" description="Open the about dialog" category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8EfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.columnNext" commandName="Next Column" description="Go to the next column" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8EvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.delete" commandName="Delete..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8E_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.closeAllSaved" commandName="Close All Saved" description="Close all saved editors" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8FPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.redo" commandName="Redo" description="Redo the last operation" category="_guc8dPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8FfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.goto.wordNext" commandName="Next Word" description="Go to the next word" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8FvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.cut.line" commandName="Cut Line" description="Cut a line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8F_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.projections.show" commandName="Manage Projections...." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8GPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.newStyleCommand" commandName="newStyleCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8GfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.query.run" commandName="Run Query" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8GvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.view.ShowPatrolFilter" commandName="Show Patrol Filter" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8G_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.maptool.activate" commandName="Activate Map Tool" category="_guc8gPqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc8HPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.map.toolid" name="MapTool Id"/>
+  </commands>
+  <commands xmi:id="_guc8HfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.newWizard" commandName="New" description="Open the New item wizard" category="_guc8ffqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc8HvqDEeWHBJ8nQ29jIg" elementId="newWizardId" name="New Wizard"/>
+  </commands>
+  <commands xmi:id="_guc8H_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.runReport" commandName="Run Report" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8IPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.newWindow" commandName="New Window" description="Open another window" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8IfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.deleteNext" commandName="Delete Next" description="Delete the next character" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8IvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tool.default.zoom.out" commandName="Show out" description="Zoom Out" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8I_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.file.close" commandName="Close" description="Close the active editor" category="_guc8ffqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8JPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.customizePerspective" commandName="Customize Perspective" description="Customize the current perspective" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8JfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.report.editLibrary" commandName="Edit Library" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8JvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.help.quickStartAction" commandName="Welcome" description="Show help for beginning users" category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8J_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.moveLineUp" commandName="Move Lines Up" description="Moves the selected lines up" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8KPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.map.style" commandName="Style" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8KfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.renameCommand" commandName="Rename" description="Rename action binding" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8KvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.previousSubTab" commandName="Previous Sub-Tab" description="Switch to the previous sub-tab" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8K_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.importPatrol" commandName="Import Patrol" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8LPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.entitytype.export" commandName="Export Entity Types..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8LfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.hideShowEditors" commandName="Toggle Editor Area Visibility" description="Toggles the visibility of the editor area" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8LvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.showIn" commandName="Show In" category="_guc8efqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc8L_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.showIn.targetId" name="Show In Target Id" optional="false"/>
+  </commands>
+  <commands xmi:id="_guc8MPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.help.displayHelp" commandName="Display Help" description="Display a Help topic" category="_guc8gvqDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc8MfqDEeWHBJ8nQ29jIg" elementId="href" name="Help topic href"/>
+  </commands>
+  <commands xmi:id="_guc8MvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.pageDown" commandName="Select Page Down" description="Select to the bottom of the page" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8M_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.copyCellContentsCommand" commandName="CopyCellContentsAction" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8NPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.dialogs.openInputDialog" commandName="Open Input Dialog" description="Open an Input Dialog" category="_guc8d_qDEeWHBJ8nQ29jIg">
+    <parameters xmi:id="_guc8NfqDEeWHBJ8nQ29jIg" elementId="title" name="Title"/>
+    <parameters xmi:id="_guc8NvqDEeWHBJ8nQ29jIg" elementId="message" name="Message"/>
+    <parameters xmi:id="_guc8N_qDEeWHBJ8nQ29jIg" elementId="initialValue" name="Initial Value"/>
+    <parameters xmi:id="_guc8OPqDEeWHBJ8nQ29jIg" elementId="cancelReturns" name="Return Value on Cancel"/>
+  </commands>
+  <commands xmi:id="_guc8OfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.join.lines" commandName="Join Lines" description="Join lines of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8OvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.panDownCommand" commandName="Pan Down" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8O_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.entitytype.import" commandName="Import Entity Types..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8PPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.help.ui.indexcommand" commandName="Index" description="Show Keyword Index" category="_guc8gvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8PfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.splitCommand" commandName="splitCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8PvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.showContextMenu" commandName="Show Context Menu" description="Show the context menu" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8P_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.intelligence.revertTemplate" commandName="Revert to Default Template" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8QPqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.plan.translate" commandName="Translate..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8QfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.recenter" commandName="Recenter" description="Scroll cursor line to center, top and bottom" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8QvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.incident.delete" commandName="Delete" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8Q_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.observation.options" commandName="Field Data Options..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8RPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.navigate.forward" commandName="Forward" description="Navigate forward" category="_guc8efqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8RfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.surveydesign.new" commandName="New Survey Design" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8RvqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.panLeftCommand" commandName="Pan Left" category="_guc8e_qDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8R_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.ui.command.insertGroupCommand" commandName="insertGroupCommand" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8SPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.select.windowStart" commandName="Select Window Start" description="Select to the start of the window" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8SfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.window.nextPerspective" commandName="Next Perspective" description="Switch to the next perspective" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8SvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.p2.ui.install" commandName="Install New Plugins..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8S_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.edit.text.scroll.lineDown" commandName="Scroll Line Down" description="Scroll down one line of text" category="_guc8dvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8TPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.ToggleCoolbarAction" commandName="Toggle Toolbar Visibility" description="Toggles the visibility of the window toolbar" category="_guc8fvqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8TfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.patrol.patrolMandate" commandName="Show Patrol Mandate List" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8TvqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.ca.basemaps.save" commandName="Save as Basemap" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8T_qDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.er.editItem" commandName="Edit..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8UPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.birt.report.designer.internal.ui.views.createVariable" commandName="%Command.Name.CreateVariable" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8UfqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.eclipse.birt.report.designer.ui.publishActionSet/org.eclipse.birt.report.designer.ui.TemplatepublisAction" commandName="Register Template with New Report Wizard..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8UvqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.eclipse.birt.report.designer.ui.publishActionSet/org.eclipse.birt.report.designer.ui.LibraryPublisAction" commandName="Copy Library to Shared Resource Folder..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8U_qDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.legend.mapGraphic.action/org.locationtech.udig.project.ui.action.addlegend" commandName="Legend" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8VPqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.mapgraphic.commonDecorators/org.locationtech.udig.project.ui.action.addscalebar" commandName="Scalebar" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8VfqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.mapgraphic.commonDecorators/org.locationtech.udig.project.ui.action.addgrid" commandName="Grid" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8VvqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.mapgraphic.commonDecorators/org.locationtech.udig.project.ui.action.addgraticule" commandName="Graticule" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8V_qDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.mapgraphic.commonDecorators/org.locationtech.udig.mapgraphic.other" commandName="Other..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8WPqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.project.ui.OpenProjectSet/org.locationtech.udig.project.ui.openMapAction" commandName="Open Map" description="Open Project" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8WfqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.project.ui.OpenProjectSet/org.locationtech.udig.project.ui.closeProject" commandName="Close Project" description="Close Project;" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8WvqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.project.ui.OpenProjectSet/org.locationtech.udig.project.ui.saveAsProject" commandName="Save Project As" description="Save the project in a different folder" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8W_qDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.project.ui.LayerActions/org.locationtech.udig.project.ui.mylar.action" commandName="Mylar" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8XPqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.style.sld.editor.layerAction/org.locationtech.udig.style.sld.editor.OpenStyleEditorAction" commandName="Change Style..." description="Changes the style of the selected layer." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8XfqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.helpMenuItems/org.locationtech.udig.ui.submitIssueAction" commandName="Submit Issue..." description="Submit an issue for the uDig development team" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8XvqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.helpMenuItems/org.locationtech.udig.ui.tips.action" commandName="Tips and Tricks" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8X_qDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.ui.default/org.locationtech.udig.ui.otherAction" commandName="All Operations..." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8YPqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.printing.ui.mapEditorContribution/org.locationtech.udig.printing.ui.printAction" commandName="Print" description="Creates a Page to be Printed" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8YfqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.printing.ui.pageEditorContribution/org.locationtech.udig.printing.ui.printPdfAction" commandName="Print" description="Print" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8YvqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.catalog.ui.searchContribution/org.locationtech.udig.catalog.ui.aoiAction" commandName="AOI Filter" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8Y_qDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.project.ui.layersContributor/org.locationtech.udig.project.ui.zoomToLayerViewAction" commandName="Zoom to Layers" description="Zoom to Layers" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8ZPqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.project.ui.layersContributor/org.locationtech.udig.project.ui.mylar" commandName="Mylar" description="Toggles whether the selected layer should be focused or not." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8ZfqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.project.ui.legendContributor/org.locationtech.udig.project.ui.zoomToLayerViewAction" commandName="Zoom to Layers" description="Zoom to Layers" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8ZvqDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.project.ui.legendContributor/org.locationtech.udig.project.ui.mylar" commandName="Mylar" description="Toggles whether the selected layer should be focused or not." category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <commands xmi:id="_guc8Z_qDEeWHBJ8nQ29jIg" elementId="AUTOGEN:::org.locationtech.udig.tool.select.tableContribution/org.locationtech.udig.tool.select.aoiAction" commandName="AOI Filter" category="_guc8gPqDEeWHBJ8nQ29jIg"/>
+  <addons xmi:id="_guc8aPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.core.commands.service" contributorURI="platform:/plugin/org.eclipse.ui.workbench" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
+  <addons xmi:id="_guc8afqDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.ui.contexts.service" contributorURI="platform:/plugin/org.eclipse.ui.workbench" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
+  <addons xmi:id="_guc8avqDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.ui.bindings.service" contributorURI="platform:/plugin/org.eclipse.ui.workbench" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
+  <addons xmi:id="_guc8a_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.ui.workbench.commands.model" contributorURI="platform:/plugin/org.eclipse.ui.workbench" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.CommandProcessingAddon"/>
+  <addons xmi:id="_guc8bPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.ui.workbench.contexts.model" contributorURI="platform:/plugin/org.eclipse.ui.workbench" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.ContextProcessingAddon"/>
+  <addons xmi:id="_guc8bfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.e4.ui.workbench.bindings.model" contributorURI="platform:/plugin/org.eclipse.ui.workbench" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.swt/org.eclipse.e4.ui.workbench.swt.util.BindingProcessingAddon"/>
+  <addons xmi:id="_guc8bvqDEeWHBJ8nQ29jIg" elementId="Cleanup Addon" contributorURI="platform:/plugin/org.wcs.smart" contributionURI="bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartCleanUpAddon"/>
+  <addons xmi:id="_guc8b_qDEeWHBJ8nQ29jIg" elementId="DnD Addon" contributorURI="platform:/plugin/org.wcs.smart" contributionURI="bundleclass://org.wcs.smart/org.wcs.smart.ui.workbench.addons.dndaddon.DnDAddon"/>
+  <addons xmi:id="_guc8cPqDEeWHBJ8nQ29jIg" elementId="MinMax Addon" contributorURI="platform:/plugin/org.eclipse.ui.workbench" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.addons.swt/org.eclipse.e4.ui.workbench.addons.minmax.MinMaxAddon"/>
+  <addons xmi:id="_guc8cfqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.workbench.addon.0" contributorURI="platform:/plugin/org.eclipse.ui.workbench" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.HandlerProcessingAddon"/>
+  <addons xmi:id="_guc8cvqDEeWHBJ8nQ29jIg" elementId="SplitterAddon" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.addons.swt/org.eclipse.e4.ui.workbench.addons.splitteraddon.SplitterAddon"/>
+  <categories xmi:id="_guc8c_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.views" name="Views" description="Commands for opening views"/>
+  <categories xmi:id="_guc8dPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.edit" name="Edit"/>
+  <categories xmi:id="_guc8dfqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.service" name="Service Commands" description="Commands for working with catalog services"/>
+  <categories xmi:id="_guc8dvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.textEditor" name="Text Editing" description="Text Editing Commands"/>
+  <categories xmi:id="_guc8d_qDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.dialogs" name="Dialogs" description="Commands for opening dialogs"/>
+  <categories xmi:id="_guc8ePqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.perspectives" name="Perspectives" description="Commands for opening perspectives"/>
+  <categories xmi:id="_guc8efqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.navigate" name="Navigate"/>
+  <categories xmi:id="_guc8evqDEeWHBJ8nQ29jIg" elementId="org.eclipse.gef.category.view" name="View" description="View"/>
+  <categories xmi:id="_guc8e_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.tools.toolCategory" name="Tools" description="Commands that activate tools"/>
+  <categories xmi:id="_guc8fPqDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.project.ui.LayerCommands" name="%LayerCategory.name"/>
+  <categories xmi:id="_guc8ffqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.file" name="File"/>
+  <categories xmi:id="_guc8fvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.window" name="Window"/>
+  <categories xmi:id="_guc8f_qDEeWHBJ8nQ29jIg" elementId="org.locationtech.udig.catalog.ui.resource" name="Resource Commands" description="Commands for working with catalog resources"/>
+  <categories xmi:id="_guc8gPqDEeWHBJ8nQ29jIg" elementId="org.eclipse.core.commands.categories.autogenerated" name="Uncategorized" description="Commands that were either auto-generated or have no category"/>
+  <categories xmi:id="_guc8gfqDEeWHBJ8nQ29jIg" elementId="org.wcs.smart.command.category.maptools" name="Map Tools"/>
+  <categories xmi:id="_guc8gvqDEeWHBJ8nQ29jIg" elementId="org.eclipse.ui.category.help" name="Help"/>
+</application:Application>
