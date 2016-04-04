@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.model.xml;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -41,12 +42,16 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeCmListItemTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeCmTreeNodeTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
+import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsType;
+import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageListType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
 import org.wcs.smart.dataentry.model.xml.generated.ListItemType;
@@ -78,6 +83,9 @@ public class CmSmartToXmlConverter {
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessLanguages);
 			HashMap<String, Language> llookup = processLanguages(cm, xml);
 			setNames(xml.getName(), cm.getNames(), llookup);
+			if (cm.getDisplayMode() != null) {
+				xml.setDisplayMode(cm.getDisplayMode().name());
+			}
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
@@ -93,6 +101,11 @@ public class CmSmartToXmlConverter {
 
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
 			processDefaultTreeNodes(cm, xml, llookup, monitor);
+			monitor.worked(1);
+			if (monitor.isCanceled()) return null;
+
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessAttributeSettings);
+			processCmDmAttributeSettings(cm, xml, llookup, monitor);
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 		} finally {
@@ -129,6 +142,10 @@ public class CmSmartToXmlConverter {
 			if (dmAttribute != null) {
 				xmlNode.setAttributeKey(dmAttribute.getKeyId());
 			}
+			if (cmNode.getDisplayMode() != null) {
+				xmlNode.setDisplayMode(cmNode.getDisplayMode().name());
+			}
+			xmlNode.setImageFile(getImageFileRef(cmNode));
 			processCmTreeNodes(cmNode.getChildren(), xmlNode.getChildren(), llookup, monitor);
 			xmlList.add(xmlNode);
 		}
@@ -160,6 +177,7 @@ public class CmSmartToXmlConverter {
 			if (dmAttribute != null) {
 				xmlNode.setAttributeKey(dmAttribute.getKeyId());
 			}
+			xmlNode.setImageFile(getImageFileRef(cmNode));
 			xmlList.add(xmlNode);
 		}
 	}
@@ -188,6 +206,10 @@ public class CmSmartToXmlConverter {
 		}
 		nt.setPhotoAllowed(node.isPhotoAllowed());
 		nt.setPhotoRequired(node.isPhotoRequired());
+		if (node.getDisplayMode() != null) {
+			nt.setDisplayMode(node.getDisplayMode().name());
+		}
+		nt.setImageFile(getImageFileRef(node));
 		
 		if (node.getCmAttributes() != null){
 			for (CmAttribute ca : node.getCmAttributes()) {
@@ -242,6 +264,24 @@ public class CmSmartToXmlConverter {
 		xmlNodes.add(nt);
 	}
 
+	private static void processCmDmAttributeSettings(ConfigurableModel cm,
+			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
+			HashMap<String, Language> llookup, IProgressMonitor monitor) {
+		if (!cm.getAttributeSettings().isEmpty()) {
+			CmDmAttributeSettingsTypeList xmlList = new CmDmAttributeSettingsTypeList();
+			for (CmDmAttributeSettings s : cm.getAttributeSettings().values()) {
+				CmDmAttributeSettingsType sXml = new CmDmAttributeSettingsType();
+				sXml.setAttributeKey(s.getDmAttribute().getKeyId());
+				if (s.getDisplayMode() != null) {
+					sXml.setDisplayMode(s.getDisplayMode().name());
+				}
+				xmlList.getSetting().add(sXml);
+			}
+			xml.setSetting(xmlList);
+		}
+	}
+
+	
 	private static HashMap<String, Language> processLanguages(ConfigurableModel cm, org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml) {
 		HashMap<String, Language> lookup = new HashMap<String, Language>();
 		LanguageListType llt = new LanguageListType();
@@ -265,6 +305,11 @@ public class CmSmartToXmlConverter {
 			nt.setLanguageCode(llookup.get(UuidUtils.uuidToString(lbl.getLanguage().getUuid())).getCode());
 			list.add(nt);
 		}
+	}
+
+	private static String getImageFileRef(IImageAssociatedObject obj) {
+		File file = obj.getImageFile();
+		return (file != null && file.exists()) ? file.getName() : null;
 	}
 	
 }

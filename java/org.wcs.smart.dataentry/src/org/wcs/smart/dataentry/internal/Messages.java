@@ -47,6 +47,7 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_PhotoRequired;
 	public static String CmNodeInfoComposite_RecordSingleGpsPoint;
 	public static String CmNodeInfoComposite_RecordSingleGpsPointTooltip;
+	public static String CmSmartToXmlConverter_ProcessAttributeSettings;
 	public static String CmSmartToXmlConverter_ProcessCmNodes;
 	public static String CmSmartToXmlConverter_ProcessingNode;
 	public static String CmSmartToXmlConverter_ProcessLanguages;
@@ -59,6 +60,8 @@ public class Messages extends NLS {
 	public static String CmTemplateCloner_TreeNodeNotFoundError;
 	public static String CmTreeLabelProvider_Root;
 	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
+	public static String CmXmlToSmartImporter_ExtractingZip;
+	public static String CmXmlToSmartImporter_ImportAttributesSettings;
 	public static String CmXmlToSmartImporter_ImportingFromXml;
 	public static String CmXmlToSmartImporter_ImportingListItems;
 	public static String CmXmlToSmartImporter_ImportingNode;
@@ -97,8 +100,8 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_AttrConfigSubTask;
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;
-	public static String ConfigurableModelPropertyDialog_Button_Export_Xml;
-	public static String ConfigurableModelPropertyDialog_Button_Import_Xml;
+	public static String ConfigurableModelPropertyDialog_Button_Export_File;
+	public static String ConfigurableModelPropertyDialog_Button_Import_File;
 	public static String ConfigurableModelPropertyDialog_ConfigurableModelDeafultName;
 	public static String ConfigurableModelPropertyDialog_ConfirmDelete;
 	public static String ConfigurableModelPropertyDialog_Converting;
@@ -125,11 +128,14 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_Success_Dialog_Title;
 	public static String ConfigurableModelPropertyDialog_Success_Message;
 	public static String ConfigurableModelPropertyDialog_Success_Title;
+	public static String ConfigurableModelPropertyDialog_SupportedFiles;
 	public static String ConfigurableModelPropertyDialog_Title;
 	public static String ConfigurableModelPropertyDialog_treesSubTask;
 	public static String ConfigurableModelPropertyDialog_Writing;
-	public static String ConfigurableModelPropertyDialog_XmlFile;
 	public static String ConfigurableModelPropertyDialog_XmlFiles;
+	public static String ConfigurableModelPropertyDialog_ZipFile;
+	public static String ConfigurableModelPropertyDialog_ZipFiles;
+	public static String ConfigurableModelPropertyDialog_Zipping;
 	public static String CreateNewOpDialog_BlankCmOp;
 	public static String CreateNewOpDialog_BlankCmToolTip;
 	public static String CreateNewOpDialog_CmTemplateOp;

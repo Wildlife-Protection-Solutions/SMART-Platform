@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -79,6 +80,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartFileUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Dialog for viewing Configurable Models.
@@ -269,7 +272,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		btnExport = new Button(exportImportCmp, SWT.PUSH);
 		btnExport.setEnabled(false);
-		btnExport.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_Xml);
+		btnExport.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_File);
 		btnExport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -278,7 +281,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		});
 
 		btnImport = new Button(exportImportCmp, SWT.PUSH);
-		btnImport.setText(Messages.ConfigurableModelPropertyDialog_Button_Import_Xml);
+		btnImport.setText(Messages.ConfigurableModelPropertyDialog_Button_Import_File);
 		btnImport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -446,8 +449,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		}
 		
 		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
-		fd.setFilterNames(new String[]{Messages.ConfigurableModelPropertyDialog_XmlFile});
-		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
+		fd.setFilterNames(new String[]{Messages.ConfigurableModelPropertyDialog_ZipFile});
+//		fd.setFilterNames(new String[]{Messages.ConfigurableModelPropertyDialog_XmlFile});
+		fd.setFilterExtensions(new String[]{"*.zip"});; //$NON-NLS-1$
 		fd.setFileName(URLUtils.cleanFilename(cm.getName()));
 		String file = fd.open();
 		if (file == null){
@@ -467,19 +471,41 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			pmd.run(true, true, new IRunnableWithProgress() {
 
 				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					try{
-						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_Exporting, 5);
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					File tmpFolder = null;
+					try {
+						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_Exporting, 7);
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Converting);
 						org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = CmSmartToXmlConverter.convert(cm, monitor);
 						
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Writing);
 						if (xml == null || monitor.isCanceled()) return;
 						
-						try(FileOutputStream fout = new FileOutputStream(f)){
+						int index = f.getName().lastIndexOf('.');
+						String name = f.getName();
+						if (index >= 0){
+							name= name.substring(0, index);
+						}
+						tmpFolder = SmartFileUtils.createTempDirectory("smart_cm_export"); //$NON-NLS-1$
+						File xmlFile = new File(tmpFolder.getAbsolutePath() + File.separator + name + ".xml"); //$NON-NLS-1$
+						
+						try(FileOutputStream fout = new FileOutputStream(xmlFile)){
 							CmXmlManager.writeDataModel(xml, fout);
 						}
+						
+						monitor.worked(1);
+						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Zipping);
+						if (monitor.isCanceled()) return;
+						
+						List<File> toZip = new ArrayList<>();
+						toZip.add(xmlFile);
+						File dataFolder = new File(cm.getFileDataStoreLocation());
+						if (dataFolder != null && dataFolder.exists() && dataFolder.isDirectory()) {
+							toZip.addAll(Arrays.asList(dataFolder.listFiles()));
+						}
+						ZipUtil.createZip(toZip.toArray(new File[toZip.size()]), f, monitor);
+						if (monitor.isCanceled()) return;
+						
 						monitor.done();
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
@@ -493,6 +519,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							public void run() {
 								SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_ExportError, ex);
 							}});
+					} finally {
+						SmartFileUtils.deleteTempDirectory(tmpFolder);
 					}
 				}
 			});
@@ -504,8 +532,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 
 	private void importXml() {
 		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-		fd.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[]{Messages.ConfigurableModelPropertyDialog_XmlFiles, Messages.ConfigurableModelPropertyDialog_AllFiles});
+		fd.setFilterExtensions(new String[]{"*.zip;*.xml", "*.zip", "*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		fd.setFilterNames(new String[]{Messages.ConfigurableModelPropertyDialog_SupportedFiles, Messages.ConfigurableModelPropertyDialog_ZipFiles, Messages.ConfigurableModelPropertyDialog_XmlFiles, Messages.ConfigurableModelPropertyDialog_AllFiles});
 		
 		String file = fd.open();
 		if (file != null) {
@@ -517,7 +545,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
 							CmXmlToSmartImporter importer = new CmXmlToSmartImporter();
-							final ConfigurableModel cm = importer.importXml(f, monitor);
+							final ConfigurableModel cm = f.getName().endsWith(".zip") ? importer.importZip(f, monitor) : importer.importXml(f, monitor); //$NON-NLS-1$
 							if (cm != null) {
 								Display.getDefault().syncExec(new Runnable() {
 									@Override
