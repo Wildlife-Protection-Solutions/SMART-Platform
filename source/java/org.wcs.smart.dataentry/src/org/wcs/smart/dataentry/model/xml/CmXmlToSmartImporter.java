@@ -43,19 +43,23 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
+import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeItemType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
+import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsType;
+import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
 import org.wcs.smart.dataentry.model.xml.generated.ListItemType;
 import org.wcs.smart.dataentry.model.xml.generated.NameType;
@@ -65,6 +69,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.OptionSelectionDialog;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.SmartFileUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Converts a SMART XML configurable model to the database
@@ -83,9 +89,41 @@ public class CmXmlToSmartImporter {
 	private Map<String, Attribute> attrLookup;
 	private Map<String, AttributeListItem> listItemLookup;
 	private Map<String, AttributeTreeNode> treeNodeLookup;
+	private Map<String, File> fileLookup;
 	
 	private List<String> warnings;
 
+	/**
+	 * 
+	 * @param xmlFile
+	 * @param monitor
+	 * @return null if error or monitor cancelled
+	 * @throws Exception
+	 */
+	public ConfigurableModel importZip(File zipFile, IProgressMonitor monitor) throws Exception {
+		File tempFolder = null;
+		try {
+			monitor.beginTask(Messages.CmXmlToSmartImporter_ExtractingZip, 1);
+			tempFolder = SmartFileUtils.createTempDirectory("smart_cm_import"); //$NON-NLS-1$
+			ZipUtil.unzipFolder(zipFile, tempFolder);
+			File xmlFile = null;
+			fileLookup = new HashMap<String, File>();
+			for (File file : tempFolder.listFiles()) {
+				fileLookup.put(file.getName(), file);
+				if (file.getName().endsWith(".xml")) { //$NON-NLS-1$
+					xmlFile = file;
+				}
+			}
+			if (xmlFile != null) {
+				return importXml(xmlFile, monitor);
+			}
+		} finally  {
+			fileLookup = null;
+			SmartFileUtils.deleteTempDirectory(tempFolder);
+		}
+		return null;
+	}
+	
 	/**
 	 * 
 	 * @param xmlFile
@@ -116,7 +154,7 @@ public class CmXmlToSmartImporter {
 		treeNodeLookup = new HashMap<String, AttributeTreeNode>();
 		warnings = new ArrayList<String>();
 		
-		session = HibernateManager.openSession(new AttachmentInterceptor());
+		session = HibernateManager.openSession(new AssociatedImageInterceptor());
 		session.beginTransaction();
 		try {
 			langLookup = new HashMap<String, Language>();
@@ -132,6 +170,7 @@ public class CmXmlToSmartImporter {
 			ConfigurableModel cm = new ConfigurableModel();
 			cm.setConservationArea(SmartDB.getCurrentConservationArea());
 			updateNames(cm, xmlCm.getName());
+			cm.setDisplayMode(getDisplayMode(xmlCm.getDisplayMode()));
 			
 			cm.setNodes(processCmNodes(xmlCm.getNodes().getNode(), cm, null, monitor));
 			
@@ -159,6 +198,10 @@ public class CmXmlToSmartImporter {
 				cm.setDefaultLists(CmDefaultListsUtil.upgradeDefaultLists(cm, listItems));
 			}
 
+			if (monitor.isCanceled()) return null;
+			monitor.subTask(Messages.CmXmlToSmartImporter_ImportAttributesSettings);
+			processAttributeSettings(cm, xmlCm.getSetting());
+			
 			if (!warnings.isEmpty()) {
 				StringBuilder sb = new StringBuilder();
 				for (String str: warnings){
@@ -227,6 +270,8 @@ public class CmXmlToSmartImporter {
 			}
 			node.setParent(parent);
 			node.setNodeOrder(result.size());
+			node.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
+			node.setImageFile(findFile(xmlNode.getImageFile()));
 			node.setChildren(processCmTreeNodes(cm, cmAttribute, node, xmlNode.getChildren(), monitor));
 			if (monitor.isCanceled()) return null;
 			result.add(node);
@@ -253,6 +298,7 @@ public class CmXmlToSmartImporter {
 				item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), cmAttribute.getAttribute()));
 			}
 			item.setListOrder(result.size());
+			item.setImageFile(findFile(xmlNode.getImageFile()));
 			if (monitor.isCanceled()) return null;
 			result.add(item);
 		}
@@ -304,6 +350,8 @@ public class CmXmlToSmartImporter {
 			cmNode.setParent(parent);
 			cmNode.setChildren(processCmNodes(xmlNode.getNode(), cm, cmNode, monitor));
 			cmNode.setCmAttributes(processAttributes(xmlNode.getAttribute(), cmNode, monitor));
+			cmNode.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
+			cmNode.setImageFile(findFile(xmlNode.getImageFile()));
 			
 			result.add(cmNode);
 			if (monitor.isCanceled()) return null;
@@ -372,6 +420,18 @@ public class CmXmlToSmartImporter {
 		return result;
 	}
 
+	private void processAttributeSettings(ConfigurableModel cm, CmDmAttributeSettingsTypeList setting) {
+		if (setting != null) {
+			for (CmDmAttributeSettingsType sXml : setting.getSetting()) {
+				CmDmAttributeSettings s = new CmDmAttributeSettings();
+				s.setModel(cm);
+				s.setDmAttribute(fetchAttribute(sXml.getAttributeKey()));
+				s.setDisplayMode(getDisplayMode(sXml.getDisplayMode()));
+				cm.getAttributeSettings().put(s.getDmAttribute(), s);
+			}
+		}
+	}
+	
 	private Category fetchCategory(String key) {
 		if (key == null || key.isEmpty())
 			return null;
@@ -461,6 +521,20 @@ public class CmXmlToSmartImporter {
 		}
 		return a;
 	}
+
+	private File findFile(String name) {
+		if (name == null) {
+			return null;
+		}
+		return fileLookup != null ? fileLookup.get(name) : null;
+	}
+	
+	private DisplayMode getDisplayMode(String mode) {
+		if (mode == null) {
+			return null;
+		}
+		return DisplayMode.valueOf(mode);
+	}
 	
 	/**
 	 * Returns the language code to use as the default language.
@@ -525,5 +599,5 @@ public class CmXmlToSmartImporter {
 		}
 		
 	}
-	
+
 }
