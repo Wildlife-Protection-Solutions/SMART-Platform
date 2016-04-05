@@ -203,6 +203,7 @@ public class CmSmartToXmlConverter {
 		setNames(nt.getName(), node.getNames(), llookup);
 		if (node.getCategory() != null) {
 			nt.setCategoryKey(node.getCategory().getKeyId());
+			nt.setCategoryHkey(node.getCategory().getHkey());
 		}
 		nt.setPhotoAllowed(node.isPhotoAllowed());
 		nt.setPhotoRequired(node.isPhotoRequired());
