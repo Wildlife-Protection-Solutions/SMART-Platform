@@ -172,6 +172,6 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 	@Transient
 	@Override
 	public String getImagePersistenceLocation() {
-		return getConfigurableModel().getFileDataStoreLocation() + File.separator + "tn_img1_" + UuidUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
+		return getConfigurableModel().getFileDataStoreLocation() + File.separator + "tn_img1_" + UuidUtils.getDirectoryPath(getUuid()) + ".jpg"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
