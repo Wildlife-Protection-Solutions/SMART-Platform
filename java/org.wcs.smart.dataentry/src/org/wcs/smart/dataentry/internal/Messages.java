@@ -70,6 +70,8 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_LanguageSelect_Title;
 	public static String CmXmlToSmartImporter_Problem_Attribute;
 	public static String CmXmlToSmartImporter_Problem_Category;
+	public static String CmXmlToSmartImporter_Problem_CategoryHkey;
+	public static String CmXmlToSmartImporter_Problem_CategoryMultipleMatches;
 	public static String CmXmlToSmartImporter_Problem_ListItem;
 	public static String CmXmlToSmartImporter_Problem_TreeNode;
 	public static String CmXmlToSmartImporter_Problem_TreeNodeMultipleMatches;
