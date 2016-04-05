@@ -343,7 +343,7 @@ public class CmXmlToSmartImporter {
 			cmNode.setModel(cm);
 			updateNames(cmNode, xmlNode.getName());
 			monitor.subTask(MessageFormat.format(Messages.CmXmlToSmartImporter_ImportingNode, cmNode.findName(langLookup.get(useAsDefault))));
-			cmNode.setCategory(fetchCategory(xmlNode.getCategoryKey()));
+			cmNode.setCategory(fetchCategory(xmlNode.getCategoryKey(), xmlNode.getCategoryHkey()));
 			cmNode.setPhotoAllowed(xmlNode.isPhotoAllowed());
 			cmNode.setPhotoRequired(xmlNode.isPhotoRequired());
 			cmNode.setNodeOrder(i);
@@ -432,19 +432,40 @@ public class CmXmlToSmartImporter {
 		}
 	}
 	
-	private Category fetchCategory(String key) {
+	private Category fetchCategory(String key, String hkey) {
 		if (key == null || key.isEmpty())
 			return null;
-		Category c = catLookup.get(key);
+		String mapKey = hkey != null ? hkey : key;
+		Category c = catLookup.get(mapKey);
 		if (c == null) {
 			Criteria query = session.createCriteria(Category.class)
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.add(Restrictions.eq("keyId", key)); //$NON-NLS-1$
-			c = (Category) query.uniqueResult();
-			catLookup.put(key, c);
+			if (hkey != null) {
+				query = query.add(Restrictions.eq("hkey", hkey)); //$NON-NLS-1$
+			}
+			List<?> lst = query.list();
+			if (lst.size() > 0) {
+				c = (Category) lst.get(0);
+				catLookup.put(mapKey, c);
+			}
+			if (lst.size() > 1) {
+				StringBuilder sb = new StringBuilder();
+				for (Object object : lst) {
+					Category cat = (Category) object;
+					if (sb.length() > 0) {
+						sb.append("; "); //$NON-NLS-1$
+					}
+					sb.append(cat.getHkey());
+				}
+				warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_CategoryMultipleMatches, key, sb.toString()));
+			}
 		}
 		if (c == null) {
-			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_Category, key));
+			String warnMsg = hkey == null ?
+					MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_Category, key) :
+					MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_CategoryHkey, key, hkey);
+			warnings.add(warnMsg);
 		}
 		return c;
 	}
