@@ -65,6 +65,7 @@ elementFormDefault="qualified">
     		</element>
     	</sequence>
     	<attribute name="categoryKey" type="string"></attribute>
+    	<attribute name="categoryHkey" type="string"></attribute>
     	<attribute name="photoAllowed" type="boolean"></attribute>
     	<attribute name="photoRequired" type="boolean"></attribute>
     	<attribute name="displayMode" type="string"></attribute>
