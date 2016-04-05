@@ -189,6 +189,6 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	@Transient
 	@Override
 	public String getImagePersistenceLocation() {
-		return getModel().getFileDataStoreLocation() + File.separator + "cn_img1_" + UuidUtils.getDirectoryPath(getUuid()); //$NON-NLS-1$
+		return getModel().getFileDataStoreLocation() + File.separator + "cn_img1_" + UuidUtils.getDirectoryPath(getUuid()) + ".jpg"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
