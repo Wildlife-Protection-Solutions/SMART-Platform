@@ -43,10 +43,27 @@ public class ConservationAreaProxy {
 	private Long revision;
 	private String label;
 	private Status status;
+	private String description;
+	private String designation;
 	
 	public ConservationAreaProxy(){
 	}
+
+	public String getDescription(){
+		return this.description;
+	}
 	
+	public String getDesignation(){
+		return this.designation;
+	}
+	
+	public void setDescription(String description){
+		this.description = description;
+	}
+	
+	public void setDesignation(String designation){
+		this.designation = designation;
+	}
 	
 	public void setRevision(Long revision){
 		this.revision = revision;
