@@ -37,6 +37,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
+import org.wcs.smart.query.model.Query;
 
 /**
  * Query dataset handler for allowing queries
@@ -70,6 +71,7 @@ public abstract class AbstractSmartQuery {
 		return this.metadataProvider;
 	}
 	
+	public abstract String[] getGeometryColumnNames(Query query);
 	/**
 	 * Prepares the query but loading and ensure it exists.
 	 * @param smartQuery
@@ -97,7 +99,7 @@ public abstract class AbstractSmartQuery {
 	 * users the metadata provider to create the metadata
 	 */
 	protected IResultSetMetaData getMetaDataInternal(AbstractSmartBirtQuery smartQuery, SmartConnection connection) throws OdaException{
-		return metadataProvider.createMetadata(smartQuery.getQuery(), connection);
+		return metadataProvider.createMetadata(smartQuery.getQuery(), getGeometryColumnNames(smartQuery.getQuery()), connection);
 	}
 	
 	public void dispose(SmartConnection connection) throws SQLException{
@@ -136,7 +138,7 @@ public abstract class AbstractSmartQuery {
 					(SummaryQueryResultSetMetadata)getMetaDataInternal(query,connection),
 					connection);
 		}else{
-			throw new OdaException("Query result set type not supported.");
+			throw new OdaException("Query result set type not supported."); //$NON-NLS-1$
 		}
 	}
 	

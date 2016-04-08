@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.data.oda.smart.query.common;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,12 +43,14 @@ import org.wcs.smart.query.model.QueryColumn;
 public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 
 	private QueryColumn[] queryColumns;
+	private String[] geometryColumns;
 	
 	/**
 	 * Creates a new metadata object
 	 * @param query the query to gather metadata for
 	 */
-	public SimpleQueryResultSetMetadata(SimpleQuery query, SmartConnection connection){
+	public SimpleQueryResultSetMetadata(SimpleQuery query, String[] geometryColumns, SmartConnection connection){
+		this.geometryColumns = geometryColumns;
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
 		for (QueryColumn col : query.getQueryColumns(connection.getCurrentLocale(), connection.getSession())){
 			if (col.isVisible()){
@@ -58,7 +61,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	}
 	
 	public SimpleQueryResultSetMetadata(GriddedQuery query, SmartConnection connection){
-		
+		this.geometryColumns = null;
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
 		for (QueryColumn col : query.getQueryColumns(connection.getCurrentLocale(), connection.getSession())){
 			if (col.isVisible()){
@@ -67,11 +70,14 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		}
 		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
 	}
+	
+	
 	/**
 	 * @param index column index
 	 * @return the query column at a given index
 	 */
 	public QueryColumn getQueryColumn(int index){
+		if (index == queryColumns.length) return null;
 		return queryColumns[index];
 	}
 	
@@ -80,7 +86,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return queryColumns.length;
+		return queryColumns.length + (geometryColumns == null ? 0 : geometryColumns.length);
 	}
 
 	/**
@@ -97,6 +103,9 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
+		if (geometryColumns != null && index > queryColumns.length){
+			return geometryColumns[index - queryColumns.length - 1];  
+		}
 		return queryColumns[index-1].getName();
 	}
 
@@ -105,6 +114,9 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
+		if (geometryColumns != null && index > queryColumns.length){
+			return geometryColumns[index - queryColumns.length - 1];  
+		}
 		return queryColumns[index-1].getKey();
 	}
 
@@ -113,6 +125,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
+		if (geometryColumns != null && index > queryColumns.length) return Types.JAVA_OBJECT;
 		return queryColumns[index-1].getType().getSqlType();
 	}
 

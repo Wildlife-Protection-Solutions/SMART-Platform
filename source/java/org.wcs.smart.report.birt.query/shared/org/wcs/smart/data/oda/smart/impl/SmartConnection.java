@@ -74,6 +74,8 @@ public abstract class SmartConnection implements IConnection {
 		m_isOpen = false;
 	}
 
+	public abstract String getDataSourceProductName();
+	
 	public abstract void openSession();
 	
 	public abstract void closeSession();
@@ -86,6 +88,7 @@ public abstract class SmartConnection implements IConnection {
 	
 	public abstract SmartBirtTable findSmartBirtTable(String queryText) throws OdaException;
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setAppContext(Object context) throws OdaException {
 		if (context instanceof Map){
@@ -135,7 +138,7 @@ public abstract class SmartConnection implements IConnection {
 				return createTableQuery();
 			}
 			throw new OdaException(
-					MessageFormat.format("Dataset {0} not supported by SMART",
+					MessageFormat.format("Dataset {0} not supported by SMART", //$NON-NLS-1$
 							new Object[]{dataSetType}));
 		} catch (Exception e) {
 			throw new OdaException(e);
@@ -201,7 +204,7 @@ public abstract class SmartConnection implements IConnection {
 				.getDataTypeMapping(nativeDataTypeCode);
 		if (typeMapping != null)
 			return typeMapping.getNativeType();
-		return "Undefined mapping type";
+		return "Undefined mapping type"; //$NON-NLS-1$
 	}
 
 }

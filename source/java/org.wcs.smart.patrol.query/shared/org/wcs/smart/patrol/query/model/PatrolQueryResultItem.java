@@ -28,7 +28,14 @@ import java.util.List;
 import java.util.UUID;
 
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * A class to hold the results of a waypoint 
@@ -40,8 +47,12 @@ import org.wcs.smart.query.common.engine.IResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolQueryResultItem implements IResultItem{
+public class PatrolQueryResultItem implements IGeometryResultItem{
 
+	public static final String WAYPOINTGEOM_COLUMN_NAME = "WaypointGeometry"; //$NON-NLS-1$
+	public static final String TRACKGEOM_COLUMN_NAME = "TrackGeometry"; //$NON-NLS-1$
+	
+	private static final GeometryFactory gf = new GeometryFactory();
 	private String caId;
 	private String caName;
 	
@@ -500,5 +511,32 @@ public class PatrolQueryResultItem implements IResultItem{
 	
 	public void setWaypointObserver(String observer){
 		this.waypointObserver = observer;
+	}
+
+	@Override
+	public Geometry asGeometry(String columnName) {
+		if (columnName == WAYPOINTGEOM_COLUMN_NAME){
+			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
+		}else if (columnName == TRACKGEOM_COLUMN_NAME){
+			if (getTrack() == null || getTrack().isEmpty()){
+				return gf.createMultiLineString(new LineString[]{});
+			}else {
+				try {
+					WKBReader reader = new WKBReader();
+					List<byte[]> tracks = getTrack();
+					LineString[] lss = new LineString[tracks.size()];
+					for (int i = 0; i < lss.length; i ++){
+						lss[i] = (LineString)reader.read(tracks.get(i));
+					}
+					return gf.createMultiLineString(lss);
+				} catch (ParseException e) {
+					return gf.createMultiLineString(new LineString[]{});
+					//TODO: log error
+					//PatrolQueryPlugIn.log(MessageFormat.format(Messages.QueryResultItemFeature_GeomParseError, new Object[]{it.getPatrolId()}), e);
+				}
+				
+			}
+		}
+		return null;
 	}
 }

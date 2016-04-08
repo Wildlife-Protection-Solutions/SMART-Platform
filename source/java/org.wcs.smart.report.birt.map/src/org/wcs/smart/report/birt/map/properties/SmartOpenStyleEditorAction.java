@@ -28,6 +28,7 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
+import org.wcs.smart.udig.style.StyleEditorPageManager;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -60,7 +61,7 @@ public class SmartOpenStyleEditorAction {
         Shell shell = Display.getDefault().getActiveShell();
         
         String pageId = StyleManager.INSTANCE.findInitialStylePageId(selectedLayer);
-        final EditorPageManager manager = StyleManager.INSTANCE.createEditorPageManager(selectedLayer);
+        final EditorPageManager manager = StyleEditorPageManager.createEditorPageManager(selectedLayer);
 
         ReportSmartStyleEditorDialog dialog = ReportSmartStyleEditorDialog.createSmartStyleDialog(shell, pageId, selectedLayer, manager);
 

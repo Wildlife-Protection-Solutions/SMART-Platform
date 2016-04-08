@@ -21,23 +21,16 @@
  */
 package org.wcs.smart.plan.report;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.hibernate.Session;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.plan.report.oda.PlanPatrolQuery;
-import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Converts Patrol Plan Query into a map layer
@@ -48,13 +41,7 @@ import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
  */
 public class PlanPatrolMapLayer implements IBirtMapLayerManager {
 
-	public PlanPatrolMapLayer() {
-	}
-
-	@Override
-	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource){
-		return null;
-	}
+	
 	
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
@@ -72,37 +59,42 @@ public class PlanPatrolMapLayer implements IBirtMapLayerManager {
 		return false;
 	}
 
-	@Override
-	public List<IGeoResource> createLayer(DataSetHandle handle, IReportContext context) throws Exception {
-		if (!(handle instanceof OdaDataSetHandle)){
-			return null;
-		}
-		
-		PatrolQuery q = PlanPatrolQuery.createQuery();
-		if (context == null){
-			PlanPatrolQuery.updateQueryFilter(q, ""); //$NON-NLS-1$
-		}else{
-			String bits = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
-			if (bits == null || bits.length() == 0){
-				PlanPatrolQuery.updateQueryFilter(q, ""); //$NON-NLS-1$
-			}else{
-				PlanPatrolQuery.updateQueryFilter(q, bits.split(",")[0]); //$NON-NLS-1$
-			}
-		}
-		//do not close session as assume it is managed by SmartConnection is BIRT report
-		Session session = HibernateManager.openSession();
-		IService qs = QueryServiceFactory.generateQueryService(q);
-		ArrayList<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-		if (qs != null) {
-			QueryExecutor.INSTANCE.executeQuery(q, session, new NullProgressMonitor());
-			List<? extends IGeoResource> resources = qs.resources(null);
-			if (resources.size() > 0){
-				toAdd.add(resources.get(0));
-			}
-		}
-		return toAdd;
-		
-	}
+//	@Override
+//	public List<IGeoResource> createLayer(DataSetHandle handle, IReportContext context) throws Exception {
+//		if (!(handle instanceof OdaDataSetHandle)){
+//			return null;
+//		}
+//		
+//		PatrolQuery q = PlanPatrolQuery.createQuery();
+//		if (context == null){
+//			PlanPatrolQuery.updateQueryFilter(q, ""); //$NON-NLS-1$
+//		}else{
+//			String bits = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
+//			if (bits == null || bits.length() == 0){
+//				PlanPatrolQuery.updateQueryFilter(q, ""); //$NON-NLS-1$
+//			}else{
+//				PlanPatrolQuery.updateQueryFilter(q, bits.split(",")[0]); //$NON-NLS-1$
+//			}
+//		}
+//		//do not close session as assume it is managed by SmartConnection is BIRT report
+//		Session session = HibernateManager.openSession();
+//		IService qs = QueryServiceFactory.generateQueryService(q);
+//		ArrayList<IGeoResource> toAdd = new ArrayList<IGeoResource>();
+//		if (qs != null) {
+//			QueryExecutor.INSTANCE.executeQuery(q, session, new NullProgressMonitor());
+//			List<? extends IGeoResource> resources = qs.resources(null);
+//			if (resources.size() > 0){
+//				toAdd.add(resources.get(0));
+//			}
+//		}
+//		return toAdd;
+//		
+//	}
 	
+	@Override
+	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
+			throws Exception {
+		return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACKGEOM_COLUMN_NAME));
+	}
 
 }

@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.report.birt.map.SmartMapItem;
+import org.wcs.smart.report.birt.map.item.SmartMapItem;
 
 /**
  * Smart map item general properties page.

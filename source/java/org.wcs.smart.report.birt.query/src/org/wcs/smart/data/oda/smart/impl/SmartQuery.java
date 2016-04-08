@@ -29,7 +29,6 @@ import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -63,12 +62,21 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 	public void prepare(String queryText) throws OdaException {
 		parameters = new HashMap<Object, Object>();
 		
+		ParsedQuery parsed = null;
+		try{
+			parsed = parseQueryText(queryText);
+		} catch (Exception e1) {
+			throw new OdaException(e1);
+		}
+		
+		this.uuid = parsed.getUuid();
+		
 		String[] bits = queryText.split(":"); //$NON-NLS-1$
-		this.queryType = QueryTypeManager.INSTANCE.findQueryType(bits[0]);
+		this.queryType = QueryTypeManager.INSTANCE.findQueryType(parsed.getType());
 			
 		/* for historic support */
 		if (this.queryType == null){
-			this.queryType = QueryTypeManager.INSTANCE.findDeprecatedQueryType(bits[0]);
+			this.queryType = QueryTypeManager.INSTANCE.findDeprecatedQueryType(parsed.getType());
 		}
 			
 		if (this.queryType == null){
@@ -76,7 +84,6 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 		}
 		
 		try {
-			this.uuid = UuidUtils.stringToUuid(bits[1]);
 			this.wrapperObject = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType.getKey());
 		} catch (Exception e1) {
 			throw new OdaException(e1);

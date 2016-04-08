@@ -34,9 +34,13 @@ import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
+import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
@@ -124,4 +128,11 @@ public class ObservationReportQuery extends AbstractSmartQuery {
 		return getMetaDataInternal(smartQuery, connection);
 	}
 
+	@Override
+	public String[] getGeometryColumnNames(Query query){
+		if (query.getTypeKey().equals(ObsObservationQuery.KEY) || query.getTypeKey().equals(ObservationWaypointQuery.KEY)){
+			return new String[]{ObservationQueryResultItem.GEOMETRY_COLUMN_NAME};
+		}
+		return null;
+	};
 }

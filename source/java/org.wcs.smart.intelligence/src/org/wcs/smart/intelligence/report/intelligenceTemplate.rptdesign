@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 4.2.1.v201209101448 Build &lt;4.2.1.v20120912-1721></property>
+    <property name="createdBy">Eclipse BIRT Designer Version 4.4.1.v201408290142 Build &lt;4.4.1.v20140916-1320></property>
     <text-property name="title">New Report</text-property>
     <list-property name="propertyBindings">
         <structure>
@@ -147,12 +147,17 @@
                     <structure>
                         <property name="position">1</property>
                         <property name="name">X</property>
-                        <property name="dataType">float</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">2</property>
                         <property name="name">Y</property>
-                        <property name="dataType">float</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">geometry</property>
+                        <property name="dataType">javaObject</property>
                     </structure>
                 </list-property>
             </structure>
@@ -162,13 +167,19 @@
                     <property name="position">1</property>
                     <property name="name">X</property>
                     <property name="nativeName">X</property>
-                    <property name="dataType">float</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">Y</property>
                     <property name="nativeName">Y</property>
-                    <property name="dataType">float</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">geometry</property>
+                    <property name="nativeName">geometry</property>
+                    <property name="dataType">javaObject</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[]]></xml-property>
@@ -540,22 +551,35 @@
             <property name="pageBreakBefore">always</property>
             <text-property name="text">Location Map</text-property>
         </label>
-        <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="415">
+        <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="448">
             <property name="org.wcs.smart.birt.map.basemap">default</property>
-            <simple-property-list name="org.wcs.smart.birt.map.layers">
-                <value></value>
-            </simple-property-list>
-            <simple-property-list name="org.wcs.smart.birt.map.layerDataSet">
-                <value>Intelligence Data Set</value>
-            </simple-property-list>
-            <simple-property-list name="org.wcs.smart.birt.map.layerNames">
-                <value>Intelligence Location Points</value>
-            </simple-property-list>
-            <simple-property-list name="org.wcs.smart.birt.map.layerStyles">
-                <value isNull="true"/>
-            </simple-property-list>
-            <property name="height">6.479166666666667in</property>
-            <property name="width">7.9375in</property>
+            <property name="org.wcs.smart.birt.map.layers2">
+                <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="449">
+                    <property name="org.wcs.smart.birt.map.layerName">Intelligence Location Points</property>
+                    <property name="org.wcs.smart.birt.map.layerType">POINT</property>
+                    <property name="org.wcs.smart.birt.map.geomColumn">geometry</property>
+                    <property name="dataSet">Intelligence Data Set</property>
+                    <list-property name="boundDataColumns">
+                        <structure>
+                            <property name="name">X</property>
+                            <expression name="expression">dataSetRow["X"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">Y</property>
+                            <expression name="expression">dataSetRow["Y"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">geometry</property>
+                            <expression name="expression">dataSetRow["geometry"]</expression>
+                            <property name="dataType">javaObject</property>
+                        </structure>
+                    </list-property>
+                </extended-item>
+            </property>
+            <property name="height">5.427083333333333in</property>
+            <property name="width">7.947916666666667in</property>
         </extended-item>
     </body>
     <list-property name="images">
@@ -574,7 +598,7 @@
                 aCeLy0BkA7UXyyg8fIzDoWHeBaDN4tQdSvAVdU1Aok+nsNTipIEVnkywo/FHatVkBoIhnFisOBoZxcGt
                 Qd4B0GYJNZsDSiAEadUBCkstPtN3Avs2Msa+Dt9XfxoFSNYF/Bh9gP0bOqHLAm2WUF1YQskwrVFYPWkf
                 3h1iXwbvqGfFPSGW9Eah8HSS9fuZDnS32f71m8KFY7xs/QZyu6TH2+2+FAAAAABJRU5ErkJggg==
-            </property>
+</property>
         </structure>
         <structure>
             <property name="name">tick.png</property>
@@ -589,7 +613,7 @@
                 ixJiWx71YY09J5pM/WEbzFcDmHvwwBu2wnikg+lEj4mwBe5bC5h1OUqcwpdC60dxegRmR06TyjCF9G9z
                 +qM2uCJmuMJmaNZaUrCSIi6X+jJIBBYtW5Cge7cd7sgoHDfDaAvKQGAlRZYc6ltJlMxX03UzlaRlBdQr
                 zSCwksLRbOpHUSb7pcsnxCCwngvM2Rm/ugUCi84fycr4l2t8Bb6iqTxSCgNIAAAAAElFTkSuQmCC
-            </property>
+</property>
         </structure>
     </list-property>
 </report>

@@ -550,5 +550,10 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		public void closeSession() {
 			// closed by wizard
 		}
+
+		@Override
+		public String getDataSourceProductName() {
+			return ""; //$NON-NLS-1$
+		}
 	}
 }

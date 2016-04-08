@@ -25,7 +25,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * A class to hold the results of a waypoint 
@@ -37,8 +41,10 @@ import org.wcs.smart.query.common.engine.IResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class ObservationQueryResultItem implements IResultItem{
+public class ObservationQueryResultItem implements IGeometryResultItem{
 
+	private static GeometryFactory gf = new GeometryFactory();
+	public static final String GEOMETRY_COLUMN_NAME = "WaypointGeometry"; //$NON-NLS-1$
 	private String caId;
 	private String caName;
 	private String sourceId;
@@ -279,5 +285,12 @@ public class ObservationQueryResultItem implements IResultItem{
 	
 	public void setWaypointObserver(String observer){
 		this.waypointObserver = observer;
+	}
+
+	@Override
+	public Geometry asGeometry(String columnName) {
+		if (columnName.equals(GEOMETRY_COLUMN_NAME))
+			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
+		return null;
 	}
 }

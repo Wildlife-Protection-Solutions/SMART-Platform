@@ -35,8 +35,13 @@ import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
@@ -48,7 +53,7 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 
 /**
  * Implementation class of IQuery for the SMART ODA runtime driver. <br>
- * This wraps around any smart query (ncluding summaries, patrol, waypoint
+ * This wraps around any smart query (including summaries, patrol, waypoint
  * queries).
  */
 public class PatrolSmartQuery extends AbstractSmartQuery {
@@ -126,5 +131,16 @@ public class PatrolSmartQuery extends AbstractSmartQuery {
 		query.getQuery().setDateFilter(dateFilter);
 
 		return super.executeQueryInternal(query, connection);
+	}
+
+	@Override
+	public String[] getGeometryColumnNames(Query query) {
+		if (query.getTypeKey().equals(PatrolObservationQuery.KEY) || 
+				query.getTypeKey().equals(PatrolWaypointQuery.KEY)){
+			return new String[]{PatrolQueryResultItem.WAYPOINTGEOM_COLUMN_NAME};
+		}else if (query.getTypeKey().equals(PatrolQuery.KEY)){
+			return new String[]{PatrolQueryResultItem.TRACKGEOM_COLUMN_NAME};
+		}
+		return null;
 	}
 }

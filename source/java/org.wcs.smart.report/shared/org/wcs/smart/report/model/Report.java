@@ -42,6 +42,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.report")
 public class Report extends NamedItem {
 
+	public static final String REPORT_DIR = "reports"; //$NON-NLS-1$
+	
 	public static final int MAX_NAME_LENGTH = org.wcs.smart.ca.Label.MAX_LENGTH;
 	
 	private Employee creator;

@@ -35,6 +35,7 @@ import org.locationtech.udig.project.render.IRenderContext;
 import org.locationtech.udig.project.render.IRenderMetricsFactory;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.locationtech.udig.ui.graphics.SLDs;
+import org.wcs.smart.udig.style.SmartGridCellStyleContent;
 
 /**
  * Creates a Metrics object for the smart gridcoverage renderer

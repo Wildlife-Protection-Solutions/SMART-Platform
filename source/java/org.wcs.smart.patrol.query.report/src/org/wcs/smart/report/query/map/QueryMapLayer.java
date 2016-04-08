@@ -21,15 +21,18 @@
  */
 package org.wcs.smart.report.query.map;
 
-import org.locationtech.udig.catalog.IService;
-import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
+import java.util.Collections;
+import java.util.List;
+
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
+import org.wcs.smart.report.birt.map.AbstractQueryMapLayer;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * SMART Query Map Layer
@@ -55,8 +58,20 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 	}
 
 	@Override
-	public IService createQueryService(Query query) {
-		return  QueryServiceFactory.generateQueryService(query);
+	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
+		if (queryTypeKey.equals(PatrolWaypointQuery.KEY) ||
+				queryTypeKey.equals(PatrolObservationQuery.KEY)){
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, PatrolQueryResultItem.WAYPOINTGEOM_COLUMN_NAME);
+			return Collections.singletonList(def);
+		}else if (queryTypeKey.equals(PatrolQuery.KEY)){
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACKGEOM_COLUMN_NAME);
+			return Collections.singletonList(def);
+		}else if (queryTypeKey.equals(PatrolGriddedQuery.KEY)){
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, "raster");
+			return Collections.singletonList(def);
+		}
+		return null;
+		
 	}
 
 }

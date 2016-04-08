@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.report.oda.ui;
 
+import java.util.HashMap;
+
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDriver;
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
@@ -40,10 +42,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.report.oda.PlanTargetQuery;
 import org.wcs.smart.plan.report.oda.SmartPlanDriver;
+import org.wcs.smart.report.execute.SmartReportRunner;
 
 /**
  * SMART Plan targets dataset wizard page.
@@ -108,11 +113,23 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 			java.util.Properties connProps = DesignSessionUtil
 					.getEffectiveDataSourceProperties(getInitializationDesign()
 							.getDataSourceDesign());
-			customConn.open(connProps);
+			
 
 			// update the data set design with the
 			// query's current runtime metadata
-			updateDesign(dataSetDesign, customConn);
+			Session s = HibernateManager.openSession();
+			try{
+				HashMap<String, Object> ctx = new HashMap<String, Object>();
+				ctx.put(SmartReportRunner.SESSION_PARAM, s);
+				
+				customConn.setAppContext(ctx);
+				customConn.open(connProps);
+				
+				updateDesign(dataSetDesign, customConn);	
+			}finally{
+				s.close();
+			}
+			
 			return true;
 			
 		} catch (OdaException e) {

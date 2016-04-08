@@ -66,7 +66,6 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 
-
 	static {
 		tablePrefix.put(Intelligence.class, "i"); //$NON-NLS-1$
 		tablePrefix.put(Informant.class, "ii"); //$NON-NLS-1$
@@ -408,6 +407,17 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		item.setPatrolId(rs.getString("intel_patrolid")); //$NON-NLS-1$
 		item.setInformantId(rs.getString("intel_informantid")); //$NON-NLS-1$
 		item.setDescription(rs.getString("intel_description")); //$NON-NLS-1$
+		
+		Connection c = rs.getStatement().getConnection();
+		String sql = "SELECT x, y FROM " + tableNamePrefix(IntelligencePoint.class) + " WHERE " + tablePrefix(IntelligencePoint.class) + ".intelligence_uuid = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		try(PreparedStatement ps = c.prepareStatement(sql)){
+			ps.setBytes(1, rs.getBytes("intel_uuid")); //$NON-NLS-1$
+			try(ResultSet rs2 = ps.executeQuery()){
+				while(rs2.next()){
+					item.addCoordinate(rs2.getDouble(1), rs2.getDouble(2));
+				}
+			}
+		}
 		
 		return item;
 		

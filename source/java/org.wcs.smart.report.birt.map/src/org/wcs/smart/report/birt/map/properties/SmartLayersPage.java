@@ -22,21 +22,26 @@
 package org.wcs.smart.report.birt.map.properties;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
+import org.eclipse.birt.report.model.api.CachedMetaDataHandle;
+import org.eclipse.birt.report.model.api.Expression;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
+import org.eclipse.birt.report.model.api.MemberHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.eclipse.birt.report.model.api.ReportDesignHandle;
-import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.birt.report.model.api.ResultSetColumnHandle;
+import org.eclipse.birt.report.model.api.StructureFactory;
+import org.eclipse.birt.report.model.api.activity.SemanticException;
+import org.eclipse.birt.report.model.api.elements.structures.ComputedColumn;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -71,13 +76,17 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
-import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
-import org.wcs.smart.report.birt.map.SmartMapItem;
+import org.wcs.smart.report.birt.map.BirtUiUtils;
+import org.wcs.smart.report.birt.map.ExtensionManager;
 import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
+import org.wcs.smart.report.birt.map.item.LayerItem;
+import org.wcs.smart.report.birt.map.item.LayerItemFactory;
+import org.wcs.smart.report.birt.map.item.SmartMapItem;
 import org.wcs.smart.ui.BasemapLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
@@ -101,7 +110,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	private boolean basemapListenerEnabled = false;
 	private TableViewer tblLayers ;
 	
-	private WritableList layerItems;
+//	private ArrayList<LayerDefinition> layerItems;
 
 	private Text txtBounds;
 
@@ -134,6 +143,18 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		//update the ui
 		updateUI();
 	}
+	private LayerItem getLayerItem(Object item){
+		try{
+			if (item instanceof ExtendedItemHandle){
+				if (((ExtendedItemHandle) item).getReportItem() instanceof LayerItem){
+					return (LayerItem) ((ExtendedItemHandle) item).getReportItem();
+				}
+			}
+			return null;
+		}catch (Exception ex){
+			return null;
+		}
+	}
 	
 	/**
 	 * Creates the layer table pane
@@ -148,7 +169,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		toolkit.adapt(tblLayers.getTable());
 		tblLayers.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		tblLayers.setContentProvider(new ObservableListContentProvider());
+		tblLayers.setContentProvider(ArrayContentProvider.getInstance());
 		tblLayers.getTable().setHeaderVisible(true);
 		tblLayers.getTable().setLinesVisible(true);
 		
@@ -159,10 +180,10 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		col1.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof LayerDefinition){
-					LayerDefinition ld = (LayerDefinition)element;
-					if (ld.handle != null){
-						return ld.handle.getDisplayName();
+				LayerItem it = getLayerItem(element);
+				if (it != null){
+					if (it.getHandle().getDataSet() != null){
+						return it.getHandle().getDataSet().getElement().getDisplayName() + "  (" + it.getGeometryColumn() + " [" + it.getLayerType() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}else{
 						return Messages.SmartLayersPage_Error_QueryNotFound ;
 					}
@@ -178,8 +199,9 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		final ColumnLabelProvider col2Lp = new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof LayerDefinition){
-					return ((LayerDefinition) element).name;
+				LayerItem it = getLayerItem(element);
+				if (it != null){
+					return it.getLayerName();
 				}
 				return super.getText(element);
 			}
@@ -188,10 +210,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		col2.setEditingSupport(new EditingSupport(col2.getViewer()) {
 			@Override
 			protected void setValue(Object element, Object value) {
-				if (element instanceof LayerDefinition && value instanceof String){
-					((LayerDefinition)element).name = (String) value;
-					tblLayers.refresh();
-					updateModel(SmartMapItem.SMART_LAYER_PROP);
+				LayerItem it = getLayerItem(element);
+				if (it != null && value instanceof String){
+					try {
+						it.setLayerName((String)value);
+					} catch (SemanticException e) {
+					}
 				}
 			}
 			
@@ -218,11 +242,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		ColumnLabelProvider col3Provider = new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof LayerDefinition){
-					if (((LayerDefinition) element).style == null){
+				LayerItem it = getLayerItem(element);
+				if (it != null){
+					if (it.getLayerStyles() == null){
 						return Messages.SmartLayersPage_DefaultStyleLabel;
 					}else if (getImage(element) == null){
-						return ((LayerDefinition) element).style;
+						return it.getLayerStyles();
 					}
 					return ""; //$NON-NLS-1$
 				}
@@ -231,10 +256,9 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			
 			@Override
 			public Image getImage(Object element) {
-				if (element instanceof LayerDefinition){
-					if (((LayerDefinition) element).style != null){
-						return BirtMapUtils.parseImageFromStyleString(((LayerDefinition)element).style);
-					}
+				LayerItem it = getLayerItem(element);
+				if (it != null && it.getLayerStyles() != null){
+					return BirtUiUtils.parseImageFromStyleString(it.getLayerStyles());
 				}
 				return null;
 			}
@@ -256,20 +280,20 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 			@Override
 			protected Object getValue(Object element) {
-				if (element instanceof LayerDefinition){
-					return ((LayerDefinition)element);
-				}
-				return null;
+				LayerItem it = getLayerItem(element);
+				return it;
 			}
 
 			@Override
 			protected void setValue(Object element, Object value) {
-				if (element instanceof LayerDefinition ){
+				if (element instanceof LayerItem ){
 					if (value instanceof String){
-						((LayerDefinition)element).style = (String)value;
+						try {
+							((LayerItem)element).setLayerStyles((String)value);
+						} catch (SemanticException e) {
+						}
 					}
 					tblLayers.refresh();
-					updateModel(SmartMapItem.SMART_LAYER_PROP);
 				}
 			}
 		});
@@ -481,12 +505,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		j.setSystem(true);
 		j.schedule();
 	}
-	private List<LayerDefinition> getSelectedLayers(){
-		List<LayerDefinition> selections = new ArrayList<LayerDefinition>();
-		for (@SuppressWarnings("unchecked")
-		Iterator<LayerDefinition> iterator = ((IStructuredSelection)tblLayers.getSelection()).iterator(); iterator.hasNext();) {
-			LayerDefinition layerDefinition = (LayerDefinition) iterator.next();
-			selections.add(layerDefinition);
+	
+	private List<LayerItem> getSelectedLayers() throws Exception{
+		List<LayerItem> selections = new ArrayList<LayerItem>();
+		for (Iterator<?> iterator = ((IStructuredSelection)tblLayers.getSelection()).iterator(); iterator.hasNext();) {
+			ExtendedItemHandle layerDefinition = (ExtendedItemHandle) iterator.next();
+			selections.add((LayerItem)layerDefinition.getReportItem());
 		}
 		return selections;
 		
@@ -497,30 +521,52 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		// update the model
 		try {
-			if (prop.equals(SmartMapItem.SMART_LAYER_PROP)) {
-				ArrayList<String> names = new ArrayList<String>();
-				ArrayList<String> defs = new ArrayList<String>();
-				ArrayList<String> styles = new ArrayList<String>();
-				ArrayList<String> datasets = new ArrayList<String>();
-				
-				for (Iterator<?> iterator = layerItems.iterator(); iterator.hasNext();) {
-					LayerDefinition type = (LayerDefinition) iterator.next();
-					
-					names.add(type.name);
-					if (type.handle != null){
-						defs.add(type.handle.getQueryText());
-						datasets.add(type.handle.getName());	
-					}else{
-						defs.add(null);
-						datasets.add(""); //$NON-NLS-1$
-					}
-					styles.add(type.style);
-				}
-				mapItem.setLayers(defs);
-				mapItem.setLayerNames(names);
-				mapItem.setLayerStyles(styles);
-				mapItem.setDatasets(datasets);
-				
+			
+			if (prop.equals(SmartMapItem.SMART_LAYER_PROP2)) {
+//				ArrayList<LayerDefinition> tmpDef = new ArrayList<LayerDefinition>();
+//				tmpDef.addAll(layerItems);
+//				System.out.println("update model");
+//				
+//				List<LayerItem> newItems = new ArrayList<LayerItem>();
+//				for (Iterator<?> iterator = tmpDef.iterator(); iterator.hasNext();) {
+//					LayerDefinition type = (LayerDefinition) iterator.next();
+//					
+//					ExtendedItemHandle eihandle = itemHandle.getModuleHandle().getElementFactory().newExtendedItem(null, LayerItem.EXTENSION_NAME);
+//					LayerItem handle = (LayerItem)(new LayerItemFactory()).newReportItem(eihandle);
+//					
+//					handle.setLayerName(type.info.getLayerName());
+//					handle.setLayerStyles(type.info.getMapStyle());
+//					handle.setGeometryColumn(type.info.getGometryColumn());
+//					handle.setLayerType(type.info.getLayerType());
+//					
+//					if (type.handle == null){
+//						handle.getHandle().setDataSet(null);
+//					}else{
+//						handle.getHandle().setDataSet(type.handle);
+////						//TODO: review this
+////						CachedMetaDataHandle meta = type.handle.getCachedMetaDataHandle();
+////						MemberHandle resultSet = meta.getResultSet();
+////						 
+////						if (resultSet.getListValue() != null) {
+////							for (int i=0; i < resultSet.getListValue().size(); i++) {
+////								ResultSetColumnHandle resultSetColumn=(ResultSetColumnHandle)resultSet.getAt(i);
+////								ComputedColumn column=StructureFactory.newComputedColumn(handle.getHandle(),resultSetColumn.getColumnName());
+////								column.setDataType(resultSetColumn.getDataType());
+////								
+////								column.setExpression("dataSetRow[\"" + resultSetColumn.getColumnName() + "\"]");
+////								column.setExpressionProperty("type", new Expression("javascript", "String"));
+////								try {
+////									handle.getHandle().addColumnBinding(column,false);
+////								} catch (SemanticException e) {
+////									// TODO Auto-generated catch block
+////									e.printStackTrace();
+////								}
+////							}
+////						}
+//					}
+//					newItems.add(handle);
+//				}
+//				mapItem.setLayers(newItems);
 			} else if (prop.equals(SmartMapItem.SMART_BASEMAP_PROP)) {
 				UUID uuid = getSelectedBasemapUuid();
 				if (uuid == null){
@@ -563,6 +609,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	
 	@Override
 	public void setInput(Object input) {
+		if (mapItem != null) return;
 		Object element = input;
 		if (input instanceof List && ((List<?>) input).size() > 0) {
 			element = ((List<?>) input).get(0);
@@ -579,31 +626,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			
 		}else{
 			return;
-		}
-			
-		layerItems = new WritableList();
-		if (mapItem != null && mapItem.getLayers() != null) {
-			for (int i = 0; i < mapItem.getLayers().size(); i++) {
-				LayerDefinition def = new LayerDefinition();
-
-				def.handle = BirtMapUtils.findHandle(
-						(ReportDesignHandle) this.itemHandle.getRoot(),
-						i < mapItem.getDatasets().size() ? mapItem.getDatasets().get(i) : null,
-						mapItem.getLayers().get(i));
-				def.mapLayer = mapItem.findMapLayerManager(def.handle);
-				if (mapItem.getLayerNames() != null  && i < mapItem.getLayerNames().size()){
-					def.name = mapItem.getLayerNames().get(i);
-				}else if (def.handle != null){
-					def.name = def.handle.getName();
-				}else{
-					def.name = Messages.SmartLayersPage_MapLayerNameErrorLabel; 
-				}
-				if (mapItem.getLayerStyles() != null && i < mapItem.getLayerStyles().size()){
-					def.style = mapItem.getLayerStyles().get(i);
-				}
-				layerItems.add(def);
-				
-			}
 		}
 	}
 
@@ -634,28 +656,20 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	private OdaDataSetHandle[] getHandles(){
 		if (itemHandle != null){
 			OdaDataSetHandle[] handles = BirtMapUtils.getDataSets(itemHandle);
-			List<IBirtMapLayerManager> mapLayers = BirtMapUtils.getMapLayerExtensions();
-			
-			List<OdaDataSetHandle> thisHandles = new ArrayList<OdaDataSetHandle>();
-			for (int i = 0; i < handles.length; i ++){
-				for (IBirtMapLayerManager l : mapLayers){
-					if (l.canAddToMap(handles[i])){
-						thisHandles.add(handles[i]);
-					}
-				}
-			}
-			return thisHandles.toArray(new OdaDataSetHandle[thisHandles.size()]);	
+			return handles;
 		}
 		return new OdaDataSetHandle[0];
 	}
 	
-	
+	protected void updateTable(){
+		tblLayers.setInput(mapItem.getLayersProperty().getListValue());
+	}
 	
 	protected void updateUI() {
 		if (tblLayers == null){
 			return;
 		}
-		tblLayers.setInput(layerItems);
+		updateTable();
 		
 		if (mapItem.getMapBounds() == null){
 			txtBounds.setText(Messages.SmartLayersPage_MapExtentsBoundsLabel);
@@ -674,49 +688,54 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	}
 
 	private void clearStyles(){
-		List<LayerDefinition> sels = getSelectedLayers();
-		for (LayerDefinition sel : sels){
-			sel.style = null;
+		try{
+			List<LayerItem> sels = getSelectedLayers();
+			for (LayerItem it : sels){
+				it.setLayerStyles(null);
+			}
+		}catch (Exception ex){
+			SmartMapItemPlugIn.displayLog(ex.getMessage(), ex);
 		}
-		updateModel(SmartMapItem.SMART_LAYER_PROP);
 	}
 	
 	private void deleteLayers() {
-		layerItems.removeAll(getSelectedLayers());
-		updateModel(SmartMapItem.SMART_LAYER_PROP);
+		try{
+			List<LayerItem> sels = getSelectedLayers();
+			for (LayerItem it : sels){
+				it.getHandle().drop();
+			}
+		}catch (Exception ex){
+			SmartMapItemPlugIn.displayLog(ex.getMessage(), ex);
+		}
 	}
 
 	private void moveUp() {
-		List<LayerDefinition> sels = getSelectedLayers();
-		if (sels.size() > 0){
-			LayerDefinition def = sels.get(0);
-			int index = layerItems.indexOf(def);
-			layerItems.remove(def);
-			index--;
-			if (index < 0){
-				index = 0;
+		try{
+			List<LayerItem> sels = getSelectedLayers();
+			if (sels.size() > 0){
+				LayerItem item = sels.get(0);
+				mapItem.moveLayer(item, -1);
+				updateTable();
+				
+				tblLayers.setSelection(new StructuredSelection(item.getHandle()));
 			}
-			layerItems.add(index, def);
-			tblLayers.setSelection(new StructuredSelection(def));
-			
-			updateModel(SmartMapItem.SMART_LAYER_PROP);
+		}catch (Exception ex){
+			SmartMapItemPlugIn.displayLog(ex.getMessage(), ex);
 		}
 	}
 
 	private void moveDown() {
-		List<LayerDefinition> sels = getSelectedLayers();
-		if (sels.size() > 0){
-			LayerDefinition def = sels.get(0);
-			int index = layerItems.indexOf(def);
-			layerItems.remove(def);
-			index++;
-			if (index > layerItems.size()){
-				index = layerItems.size();
+		try{
+			List<LayerItem> sels = getSelectedLayers();
+			if (sels.size() > 0){
+				LayerItem item = sels.get(0);
+				mapItem.moveLayer(item, 1);
+				updateTable();
+				
+				tblLayers.setSelection(new StructuredSelection(item.getHandle()));
 			}
-			layerItems.add(index, def);
-			tblLayers.setSelection(new StructuredSelection(def));
-			
-			updateModel(SmartMapItem.SMART_LAYER_PROP);
+		}catch (Exception ex){
+			SmartMapItemPlugIn.displayLog(ex.getMessage(), ex);
 		}
 	}
 
@@ -726,18 +745,24 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			MessageDialog.openInformation(Display.getDefault().getActiveShell(), ERROR_DIALOG_TITLE, Messages.SmartLayersPage_Error_NoDatasets);
 			return;
 		}
+		List<LayerDefinition> options = new ArrayList<LayerDefinition>();
+		try {
+			options = (new ExtensionManager()).getLayerOptions(handles);
+		} catch (Exception e) {
+			SmartMapItemPlugIn.displayLog(e.getMessage(), e);
+		}
+		
 		DatasetComobInputDialog dialog = new DatasetComobInputDialog(
 			Display.getDefault().getActiveShell(),
 			Messages.SmartLayersPage_AddLayer_DialogTitle,
 			Messages.SmartLayersPage_AddLayer_DialogMessage,
-			handles);
+			options);
 		
 		if (dialog.open() != Window.OK){
 			return;
 		}
 		
-		LayerDefinition ld = new LayerDefinition();
-		ld.handle = dialog.getValue();
+		LayerDefinition ld = dialog.getValue();
 		
 		// attempt to parse id out of name; users do not want ids appearing the legends on maps
 		//#1051
@@ -747,40 +772,40 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		if (start >= 0 && end >= 0 && start < end){
 			name = name.substring(0, start);
 		}
-		ld.name = name;
-		
-		layerItems.add(ld);
-		tblLayers.refresh();
-		
-		updateModel(SmartMapItem.SMART_LAYER_PROP);
-	}
-}
+		ld.info.setLayerName(name);
+		try{
+			ExtendedItemHandle eihandle = itemHandle.getModuleHandle().getElementFactory().newExtendedItem(null, LayerItem.EXTENSION_NAME);
+			LayerItem handle = (LayerItem)(new LayerItemFactory()).newReportItem(eihandle);
+			handle.setLayerName(ld.info.getLayerName());
+			handle.setLayerStyles(ld.info.getMapStyle());
+			handle.setGeometryColumn(ld.info.getGometryColumn());
+			handle.setLayerType(ld.info.getLayerType());
+			if (ld.handle != null){
+				handle.getHandle().setDataSet(ld.handle);
+				CachedMetaDataHandle meta = ld.handle.getCachedMetaDataHandle();
+				MemberHandle resultSet = meta.getResultSet();
+				 
+				if (resultSet.getListValue() != null) {
+					for (int i=0; i < resultSet.getListValue().size(); i++) {
+						ResultSetColumnHandle resultSetColumn=(ResultSetColumnHandle)resultSet.getAt(i);
+						ComputedColumn column=StructureFactory.newComputedColumn(handle.getHandle(),resultSetColumn.getColumnName());
+						column.setDataType(resultSetColumn.getDataType());
+						
+						column.setExpression("dataSetRow[\"" + resultSetColumn.getColumnName() + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
+						column.setExpressionProperty("type", new Expression("javascript", "String"));  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+						try {
+							handle.getHandle().addColumnBinding(column,false);
+						} catch (SemanticException e) {
+							SmartMapItemPlugIn.log(e.getMessage(), e);
+						}
+					}
+				}
+			}
+			mapItem.addLayers(Collections.singletonList(handle));
 
-
-class LayerDefinition{
-	
-	IBirtMapLayerManager mapLayer;
-	OdaDataSetHandle handle;
-	String name;
-	String style;
-	
-	@Override
-	public boolean equals(Object other){
-		if (!(other instanceof LayerDefinition)){
-			return false;
+		}catch (Exception ex){
+			SmartMapItemPlugIn.displayLog(ex.getMessage(), ex);
 		}
-		LayerDefinition o = (LayerDefinition) other;
-		if (o.handle != null && this.handle != null){
-			return (o.handle.equals(this.handle))
-				&& strEquals(o.name, this.name) 
-				&& strEquals(o.style, this.style);
-		}else{
-			return super.equals(other);
-		}
-	}
-	
-	private boolean strEquals(String x, String y){
-		if (x == null && y == null) return true;
-		return (x != null && y != null && x.equals(y));
+		updateTable();
 	}
 }

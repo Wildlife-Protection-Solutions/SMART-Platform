@@ -37,6 +37,7 @@ import org.locationtech.udig.render.internal.gridcoverage.basic.MemoryGridCovera
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.coverage.grid.GridGeometry;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.udig.style.SmartGridCellStyleContent;
 
 import com.vividsolutions.jts.geom.Coordinate;
 

@@ -26,7 +26,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.intelligence.internal.Messages;
 
 /**
- * SMART intelligence location pointst result set metadata.
+ * SMART intelligence location points result set metadata.
  * 
  * @author elitvin
  * @since 3.0.0
@@ -40,7 +40,7 @@ public class IntelligencePointsResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return 2;
+		return 3;
 	}
 
 	/**
@@ -59,6 +59,7 @@ public class IntelligencePointsResultSetMetadata implements IResultSetMetaData {
 		switch(index){
 		case 1: return Messages.IntelligencePointsResultSetMetadata_Column_X;
 		case 2: return Messages.IntelligencePointsResultSetMetadata_Column_Y;
+		case 3: return IntelligencePointsResultSet.GEOM_COLUMN_NAME;
 		}
 		return null;
 	}
@@ -71,6 +72,7 @@ public class IntelligencePointsResultSetMetadata implements IResultSetMetaData {
 		switch(index){
 		case 1: return "X"; //$NON-NLS-1$
 		case 2: return "Y"; //$NON-NLS-1$
+		case 3: return IntelligencePointsResultSet.GEOM_COLUMN_NAME;
 		}
 		return null;
 	}
@@ -83,6 +85,7 @@ public class IntelligencePointsResultSetMetadata implements IResultSetMetaData {
 		switch(index){
 		case 1: return java.sql.Types.DOUBLE;
 		case 2: return java.sql.Types.DOUBLE;
+		case 3: return java.sql.Types.JAVA_OBJECT;
 		}
 		return -1;
 	}

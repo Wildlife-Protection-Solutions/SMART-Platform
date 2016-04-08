@@ -30,9 +30,6 @@ import java.util.UUID;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
-import org.eclipse.birt.report.engine.api.IReportEngine;
-import org.eclipse.birt.report.engine.api.IReportRunnable;
-import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -44,11 +41,13 @@ import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 /**
@@ -124,18 +123,7 @@ public class ExportPlanJob extends Job {
 			}else{
 				reportParameters.put(ReportPlan.PLAN_PARENT, plan.getParent().getLabel());
 			}
-		}catch (Exception ex){
-			SmartPlanPlugIn.displayLog(Messages.ExportPlanJob_ErrorExportingPlan + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-			return Status.CANCEL_STATUS;
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
-		}
 		
-		try{
-			IReportEngine engine = ReportEngineManager.getBirtReportEngine();
-		
-			final IReportRunnable design = engine.openReportDesign(ReportPlan.getPlanTemplate());
 			try(FileOutputStream fout = new FileOutputStream(outputFile)){
 				IRenderOption options = new RenderOption();
 				options.setOutputStream(fout);
@@ -143,18 +131,16 @@ public class ExportPlanJob extends Job {
 				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
 				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 				
-				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
-				try{
-					task.setRenderOption(options);
-					task.setParameterValues(reportParameters);
-					task.run();
-				}finally{
-					task.close();
-				}
+				SmartReportRunner.INSTANCE.runFile(ReportPlan.getPlanTemplate(),
+						SmartDB.getCurrentConservationArea(), ReportEngineManager.getBirtReportEngine(), 
+						options, session, reportParameters);
 			}
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.ExportPlanJob_ErrorExportingPlan + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return Status.CANCEL_STATUS;
+		}finally{
+			session.getTransaction().rollback();
+			session.close();
 		}
 		
 		//launch the file

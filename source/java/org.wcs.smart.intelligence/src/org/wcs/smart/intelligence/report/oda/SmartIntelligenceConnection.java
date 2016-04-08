@@ -22,13 +22,16 @@
 package org.wcs.smart.intelligence.report.oda;
 
 import java.text.MessageFormat;
+import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.hibernate.Session;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.report.execute.SmartReportRunner;
 
 import com.ibm.icu.util.ULocale;
 
@@ -41,21 +44,31 @@ import com.ibm.icu.util.ULocale;
 public class SmartIntelligenceConnection implements IConnection {
 
 	private boolean m_isOpen = false;
-
+	protected Session localSession;
+	protected Map<Object,Object> appContext;
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#open(java.util.Properties)
 	 */
 	public void open(Properties connProperties) throws OdaException {
 		m_isOpen = true;
+		localSession = (Session) appContext.get(SmartReportRunner.SESSION_PARAM);
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#setAppContext(java.lang.Object)
 	 */
 	public void setAppContext(Object context) throws OdaException {
-		// do nothing; assumes no support for pass-through context
+		if (context instanceof Map){
+			this.appContext = (Map<Object,Object>)context;
+		}
 	}
 
+
+	public Session getSession(){
+		return this.localSession;
+	}
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#close()
 	 */
@@ -83,7 +96,7 @@ public class SmartIntelligenceConnection implements IConnection {
 	public IQuery newQuery(String dataSetType) throws OdaException {
 		try {
 			if (dataSetType.equals(IntelligencePointsQuery.ID)) {
-				return new IntelligencePointsQuery();
+				return new IntelligencePointsQuery(this);
 			}
 			throw new OdaException(MessageFormat.format(Messages.SmartIntelligenceConnection_UnsupportedDataset, dataSetType));
 		} catch (Exception e) {

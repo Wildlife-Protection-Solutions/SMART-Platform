@@ -62,14 +62,16 @@ public class QueryResultSetIterator<T extends IResultItem> implements IQueryResu
 		this.rs = rs;
 		this.session = session;
 		this.sessionProvided = session != null;
-		init();
 	}
 	
 	@Override
 	public boolean hasNext() {
+		init();
 		return itOffset + itIndex + 1 < rs.getItemCount();
 	}
+	
 	private void init(){
+		if (queryResults != null) return;
 		if (session == null){
 			session = HibernateManager.openSession();
 		}
@@ -78,6 +80,7 @@ public class QueryResultSetIterator<T extends IResultItem> implements IQueryResu
 
 	@Override
 	public IResultItem next() {
+		init();
 		if (!hasNext())
 			throw new NoSuchElementException();
 		if (data == null) {

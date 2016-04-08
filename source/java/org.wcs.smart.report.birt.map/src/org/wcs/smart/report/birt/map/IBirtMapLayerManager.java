@@ -23,10 +23,7 @@ package org.wcs.smart.report.birt.map;
 
 import java.util.List;
 
-import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.internal.StyleBlackboard;
 
 /**
  * This provides a presentation link between any BIRT datasethandle
@@ -37,7 +34,7 @@ import org.locationtech.udig.project.internal.StyleBlackboard;
  *
  */
 public interface IBirtMapLayerManager {
-
+	
 	/**
 	 *  
 	 * @param handle
@@ -46,22 +43,13 @@ public interface IBirtMapLayerManager {
 	public boolean canAddToMap(DataSetHandle handle);
 	
 	/**
-	 * This style blackboard represents the default style
-	 * for the map layer.  Users will have the ability to change the style, but this
-	 * function should always return the default style (if defined).  Can
-	 * return null if not defined or defined in the georesource.
-	 *  
-	 * @return the style blackboard to associated with the layer or null if none defined
-	 */
-	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource);
-	
-	/**
-	 * Creates georesources based on the dataset handle and report context
+	 * Returns the list of geometry columns that are supported
 	 * 
 	 * @param handle
 	 * @param context may be null if no context set
 	 * @return
 	 * @throws Exception
 	 */
-	public List<IGeoResource> createLayer(DataSetHandle handle, IReportContext context) throws Exception;
+	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle) throws Exception;
+
 }

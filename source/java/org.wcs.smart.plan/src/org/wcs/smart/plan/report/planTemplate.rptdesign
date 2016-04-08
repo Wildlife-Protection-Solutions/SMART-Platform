@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 3.7.2.v20120213 Build &lt;3.7.2.v20120214-1408></property>
+    <property name="createdBy">Eclipse BIRT Designer Version 4.4.1.v201408290142 Build &lt;4.4.1.v20140916-1320></property>
     <text-property name="title">New Report</text-property>
-    <list-property name="propertyBindings">
-        <structure>
-            <property name="name">queryText</property>
-            <property name="id">236</property>
-        </structure>
-    </list-property>
     <parameters>
         <scalar-parameter name="PlanUUID" id="322">
             <property name="valueType">static</property>
@@ -16,6 +10,7 @@
             <property name="distinct">true</property>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
+            <property name="concealValue">false</property>
             <property name="controlType">text-box</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
@@ -189,7 +184,7 @@
         <oda-data-source extensionID="org.wcs.smart.plan.report.oda.SmartPlanDriver" name="SMART Plans" id="234"/>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.wcs.smart.plan.report.oda.SmartPlanTargets" name="Smart Plan Targets" id="235">
+        <oda-data-set extensionID="org.wcs.smart.plan.report.oda.SmartPlanTargets" name="Plan Targets" id="410">
             <text-property name="displayName">Smart Plan Targets</text-property>
             <list-property name="columnHints">
                 <structure>
@@ -211,7 +206,7 @@
                     <text-property name="heading">Status Description</text-property>
                 </structure>
                 <structure>
-                    <property name="columnName">Status</property>
+                    <property name="columnName">targetStatus</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">Status</text-property>
                     <text-property name="heading">Status</text-property>
@@ -221,6 +216,11 @@
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">Plan Id</text-property>
                     <text-property name="heading">Plan Id</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">geometry</property>
+                    <text-property name="displayName">geometry</text-property>
+                    <text-property name="heading">geometry</text-property>
                 </structure>
             </list-property>
             <list-property name="parameters">
@@ -254,13 +254,18 @@
                     </structure>
                     <structure>
                         <property name="position">4</property>
-                        <property name="name">Status</property>
+                        <property name="name">targetStatus</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">5</property>
                         <property name="name">PlanId</property>
                         <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">geometry</property>
+                        <property name="dataType">javaObject</property>
                     </structure>
                 </list-property>
             </structure>
@@ -289,8 +294,8 @@
                 </structure>
                 <structure>
                     <property name="position">4</property>
-                    <property name="name">Status</property>
-                    <property name="nativeName">Status</property>
+                    <property name="name">targetStatus</property>
+                    <property name="nativeName">targetStatus</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
@@ -300,6 +305,13 @@
                     <property name="nativeName">PlanId</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">geometry</property>
+                    <property name="nativeName">geometry</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[plan]]></xml-property>
@@ -392,7 +404,7 @@
         <design:resultColumnDefinitions>
           <design:attributes>
             <design:identifier>
-              <design:name>Status</design:name>
+              <design:name>targetStatus</design:name>
               <design:position>4</design:position>
             </design:identifier>
             <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
@@ -431,14 +443,35 @@
             </design:formattingHints>
           </design:usageHints>
         </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>geometry</design:name>
+              <design:position>6</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>geometry</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>geometry</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
       </design:resultSetColumns>
       <design:criteria/>
     </design:resultSetDefinitions>
   </design:ResultSets>
 </model:DesignValues>]]></xml-property>
         </oda-data-set>
-        <oda-data-set extensionID="org.wcs.smart.plan.report.oda.SmartPlanTargets" name="SubPlan Targets" id="236">
-            <text-property name="displayName">SubPlan Targets</text-property>
+        <oda-data-set extensionID="org.wcs.smart.plan.report.oda.SmartPlanTargets" name="SubPlan Targets" id="411">
+            <text-property name="displayName">Smart SubPlan Targets</text-property>
             <property name="nullsOrdering">nulls lowest</property>
             <list-property name="columnHints">
                 <structure>
@@ -460,7 +493,7 @@
                     <text-property name="heading">Status Description</text-property>
                 </structure>
                 <structure>
-                    <property name="columnName">Status</property>
+                    <property name="columnName">targetStatus</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">Status</text-property>
                     <text-property name="heading">Status</text-property>
@@ -471,12 +504,19 @@
                     <text-property name="displayName">Plan Id</text-property>
                     <text-property name="heading">Plan Id</text-property>
                 </structure>
+                <structure>
+                    <property name="columnName">geometry</property>
+                    <text-property name="displayName">geometry</text-property>
+                    <text-property name="heading">geometry</text-property>
+                </structure>
             </list-property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">Parent Plan UUID</property>
+                    <property name="name">PlanUUID</property>
                     <property name="paramName">PlanUUID</property>
+                    <property name="nativeName">PlanUUID</property>
                     <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
                     <property name="position">1</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -501,13 +541,18 @@
                     </structure>
                     <structure>
                         <property name="position">4</property>
-                        <property name="name">Status</property>
+                        <property name="name">targetStatus</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">5</property>
                         <property name="name">PlanId</property>
                         <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">geometry</property>
+                        <property name="dataType">javaObject</property>
                     </structure>
                 </list-property>
             </structure>
@@ -536,8 +581,8 @@
                 </structure>
                 <structure>
                     <property name="position">4</property>
-                    <property name="name">Status</property>
-                    <property name="nativeName">Status</property>
+                    <property name="name">targetStatus</property>
+                    <property name="nativeName">targetStatus</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
@@ -547,6 +592,13 @@
                     <property name="nativeName">PlanId</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">geometry</property>
+                    <property name="nativeName">geometry</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[subplan]]></xml-property>
@@ -559,7 +611,7 @@
         <design:inOutMode>In</design:inOutMode>
         <design:attributes>
           <design:identifier>
-            <design:name>Plan ID</design:name>
+            <design:name>PlanUUID</design:name>
             <design:position>1</design:position>
           </design:identifier>
           <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
@@ -639,7 +691,7 @@
         <design:resultColumnDefinitions>
           <design:attributes>
             <design:identifier>
-              <design:name>Status</design:name>
+              <design:name>targetStatus</design:name>
               <design:position>4</design:position>
             </design:identifier>
             <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
@@ -673,6 +725,27 @@
           </design:attributes>
           <design:usageHints>
             <design:label>Plan Id</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>geometry</design:name>
+              <design:position>6</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>geometry</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>geometry</design:label>
             <design:formattingHints>
               <design:displaySize>-1</design:displaySize>
             </design:formattingHints>
@@ -1087,7 +1160,7 @@
             <property name="fontFamily">sans-serif</property>
             <property name="marginTop">5pt</property>
             <property name="width">7.947916666666667in</property>
-            <property name="dataSet">Smart Plan Targets</property>
+            <property name="dataSet">Plan Targets</property>
             <list-property name="boundDataColumns">
                 <structure>
                     <property name="name">TargetName</property>
@@ -1108,9 +1181,9 @@
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="name">Status</property>
+                    <property name="name">targetStatus</property>
                     <text-property name="displayName">Status</text-property>
-                    <expression name="expression" type="javascript">dataSetRow["Status"]</expression>
+                    <expression name="expression" type="javascript">dataSetRow["targetStatus"]</expression>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
@@ -1192,7 +1265,7 @@
                         <image id="320">
                             <property name="height">0.16666666666666666in</property>
                             <property name="width">0.16666666666666666in</property>
-                            <method name="onCreate"><![CDATA[if (this.getRowData().getColumnValue("Status") == "C"){
+                            <method name="onCreate"><![CDATA[if (this.getRowData().getColumnValue("targetStatus") == "C"){
 	this.imageName = "tick.png"
 }else{
 	this.imageName = "cross.png"
@@ -1245,16 +1318,9 @@
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="name">Status</property>
-                    <text-property name="displayName">Status</text-property>
-                    <expression name="expression" type="javascript">dataSetRow["Status"]</expression>
-                    <property name="dataType">string</property>
-                    <property name="allowExport">true</property>
-                </structure>
-                <structure>
-                    <property name="name">PlanId</property>
-                    <text-property name="displayName">Plan Id</text-property>
-                    <expression name="expression" type="javascript">dataSetRow["PlanId"]</expression>
+                    <property name="name">TargetDescription</property>
+                    <text-property name="displayName">Target Description</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["TargetDescription"]</expression>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
@@ -1262,14 +1328,18 @@
                     <text-property name="displayName">Status Description</text-property>
                     <expression name="expression" type="javascript">dataSetRow["StatusDescription"]</expression>
                     <property name="dataType">string</property>
-                    <property name="allowExport">true</property>
                 </structure>
                 <structure>
-                    <property name="name">TargetDescription</property>
-                    <text-property name="displayName">Target Description</text-property>
-                    <expression name="expression" type="javascript">dataSetRow["TargetDescription"]</expression>
+                    <property name="name">targetStatus</property>
+                    <text-property name="displayName">Status</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["targetStatus"]</expression>
                     <property name="dataType">string</property>
-                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">PlanId</property>
+                    <text-property name="displayName">Plan Id</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["PlanId"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <list-property name="sort">
@@ -1369,7 +1439,7 @@
                         <image id="311">
                             <property name="height">0.16666666666666666in</property>
                             <property name="width">0.16666666666666666in</property>
-                            <method name="onCreate"><![CDATA[if (this.getRowData().getColumnValue("Status") == "C"){
+                            <method name="onCreate"><![CDATA[if (this.getRowData().getColumnValue("targetStatus") == "C"){
 	this.imageName = "tick.png"
 }else{
 	this.imageName = "cross.png"
@@ -1412,25 +1482,87 @@
             <property name="pageBreakBefore">always</property>
             <text-property name="text">Spatial Targets Map</text-property>
         </label>
-        <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="324">
+        <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="388">
             <property name="org.wcs.smart.birt.map.basemap">default</property>
-            <simple-property-list name="org.wcs.smart.birt.map.layers">
-                <value>subplan</value>
-                <value>plan</value>
-            </simple-property-list>
-            <simple-property-list name="org.wcs.smart.birt.map.layerDataSet">
-                <value>SubPlan Targets</value>
-                <value>Smart Plan Targets</value>
-            </simple-property-list>
-            <simple-property-list name="org.wcs.smart.birt.map.layerNames">
-                <value>SubPlan Targets</value>
-                <value>Smart Plan Targets</value>
-            </simple-property-list>
-            <simple-property-list name="org.wcs.smart.birt.map.layerStyles">
-                <value isNull="true"/>
-                <value isNull="true"/>
-            </simple-property-list>
-            <property name="height">5.125in</property>
+            <property name="org.wcs.smart.birt.map.layers2">
+                <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="418">
+                    <property name="org.wcs.smart.birt.map.layerName">Smart Plan Targets</property>
+                    <property name="org.wcs.smart.birt.map.layerType">MULTIPOINT</property>
+                    <property name="org.wcs.smart.birt.map.geomColumn">geometry</property>
+                    <property name="dataSet">Plan Targets</property>
+                    <list-property name="boundDataColumns">
+                        <structure>
+                            <property name="name">TargetName</property>
+                            <expression name="expression">dataSetRow["TargetName"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">TargetDescription</property>
+                            <expression name="expression">dataSetRow["TargetDescription"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">StatusDescription</property>
+                            <expression name="expression">dataSetRow["StatusDescription"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">targetStatus</property>
+                            <expression name="expression">dataSetRow["targetStatus"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">PlanId</property>
+                            <expression name="expression">dataSetRow["PlanId"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">geometry</property>
+                            <expression name="expression">dataSetRow["geometry"]</expression>
+                            <property name="dataType">javaObject</property>
+                        </structure>
+                    </list-property>
+                </extended-item>
+                <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="419">
+                    <property name="org.wcs.smart.birt.map.layerName">Smart SubPlan Targets</property>
+                    <property name="org.wcs.smart.birt.map.layerType">MULTIPOINT</property>
+                    <property name="org.wcs.smart.birt.map.geomColumn">geometry</property>
+                    <property name="dataSet">SubPlan Targets</property>
+                    <list-property name="boundDataColumns">
+                        <structure>
+                            <property name="name">TargetName</property>
+                            <expression name="expression">dataSetRow["TargetName"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">TargetDescription</property>
+                            <expression name="expression">dataSetRow["TargetDescription"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">StatusDescription</property>
+                            <expression name="expression">dataSetRow["StatusDescription"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">targetStatus</property>
+                            <expression name="expression">dataSetRow["targetStatus"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">PlanId</property>
+                            <expression name="expression">dataSetRow["PlanId"]</expression>
+                            <property name="dataType">string</property>
+                        </structure>
+                        <structure>
+                            <property name="name">geometry</property>
+                            <expression name="expression">dataSetRow["geometry"]</expression>
+                            <property name="dataType">javaObject</property>
+                        </structure>
+                    </list-property>
+                </extended-item>
+            </property>
+            <property name="height">3.7916666666666665in</property>
             <property name="width">7.9375in</property>
         </extended-item>
     </body>
@@ -1450,7 +1582,7 @@
                 aCeLy0BkA7UXyyg8fIzDoWHeBaDN4tQdSvAVdU1Aok+nsNTipIEVnkywo/FHatVkBoIhnFisOBoZxcGt
                 Qd4B0GYJNZsDSiAEadUBCkstPtN3Avs2Msa+Dt9XfxoFSNYF/Bh9gP0bOqHLAm2WUF1YQskwrVFYPWkf
                 3h1iXwbvqGfFPSGW9Eah8HSS9fuZDnS32f71m8KFY7xs/QZyu6TH2+2+FAAAAABJRU5ErkJggg==
-            </property>
+</property>
         </structure>
         <structure>
             <property name="name">tick.png</property>
@@ -1465,7 +1597,7 @@
                 ixJiWx71YY09J5pM/WEbzFcDmHvwwBu2wnikg+lEj4mwBe5bC5h1OUqcwpdC60dxegRmR06TyjCF9G9z
                 +qM2uCJmuMJmaNZaUrCSIi6X+jJIBBYtW5Cge7cd7sgoHDfDaAvKQGAlRZYc6ltJlMxX03UzlaRlBdQr
                 zSCwksLRbOpHUSb7pcsnxCCwngvM2Rm/ugUCi84fycr4l2t8Bb6iqTxSCgNIAAAAAElFTkSuQmCC
-            </property>
+</property>
         </structure>
     </list-property>
 </report>

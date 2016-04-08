@@ -23,6 +23,7 @@ package org.wcs.smart.birt.ui;
 
 import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.report.engine.api.EngineConfig;
+import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
 
@@ -46,8 +47,13 @@ public class ReportEngineManager {
 			if (reportEngine != null){
 				return reportEngine;
 			}
+			
 			IReportEngineFactory factory = (IReportEngineFactory)Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
-			reportEngine = factory.createReportEngine(new EngineConfig());
+			EngineConfig config = new EngineConfig();
+			config.getAppContext().put(EngineConstants.APPCONTEXT_CLASSLOADER_KEY,
+					ReportEngineManager.class.getClassLoader());
+			
+			reportEngine = factory.createReportEngine(config);
 			return reportEngine;
 		}
 	}

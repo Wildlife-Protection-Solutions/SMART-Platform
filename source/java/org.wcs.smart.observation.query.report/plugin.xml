@@ -26,6 +26,8 @@
       <MapLayer
             maplayer="org.wcs.smart.observation.query.report.map.QueryMapLayer">
       </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.observation.query.report.data.QueryStyleProvider"></StyleProvider>
    </extension>
 
 </plugin>

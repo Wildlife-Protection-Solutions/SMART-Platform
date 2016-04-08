@@ -21,10 +21,16 @@
  */
 package org.wcs.smart.intelligence.query.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
-import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * Query result item for storing intelligence record query results.
@@ -32,8 +38,12 @@ import org.wcs.smart.query.common.engine.IResultItem;
  * @author Emily
  *
  */
-public class IntelligenceRecordResultItem implements IResultItem {
+public class IntelligenceRecordResultItem implements IGeometryResultItem {
 
+	public static final String GEOMETRY_COLUMN_NAME = "geometry";
+	
+	private static final GeometryFactory gf = new GeometryFactory();
+	
 	private String conservationAreaName;
 	private String conservationAreaId;
 	private UUID uuid;
@@ -47,6 +57,8 @@ public class IntelligenceRecordResultItem implements IResultItem {
 	private String informantId;
 	private String description;
 	
+	private List<Coordinate> positions = new ArrayList<Coordinate>();
+			
 	public String getConservationAreaName() {
 		return conservationAreaName;
 	}
@@ -118,6 +130,18 @@ public class IntelligenceRecordResultItem implements IResultItem {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public void addCoordinate(double x, double y){
+		positions.add(new Coordinate(x,y));
+	}
+	
+	@Override
+	public Geometry asGeometry(String columnName) {
+		if (columnName.equals(GEOMETRY_COLUMN_NAME)){
+			return gf.createMultiPoint(positions.toArray(new Coordinate[positions.size()]));
+		}
+		return null;
 	}
 	
 		

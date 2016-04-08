@@ -151,7 +151,7 @@ public class PlanTargetGeoResource extends IGeoResource {
              }
         }
         if (adaptee.isAssignableFrom(Style.class)){
-        	Style s = createStyle();
+        	Style s = createStyle(((PlanTargetService)this.service).getSubPlans());
         	if (s != null){
         		return adaptee.cast(s);
         	}
@@ -162,9 +162,9 @@ public class PlanTargetGeoResource extends IGeoResource {
     /*
      * Creates the layer default style
      */
-    private Style createStyle(){
+    public static Style createStyle(boolean isSubPlan){
     	String pointStyle = "circle"; //$NON-NLS-1$
-    	if (((PlanTargetService)this.service).getSubPlans()){
+    	if (isSubPlan){
     		pointStyle = "triangle"; //$NON-NLS-1$
     	}
     	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" //$NON-NLS-1$

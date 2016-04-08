@@ -31,9 +31,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
-import org.eclipse.birt.report.engine.api.IReportEngine;
-import org.eclipse.birt.report.engine.api.IReportRunnable;
-import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -52,11 +49,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.model.Report;
@@ -84,23 +84,22 @@ public class ReportView implements IReportListener{
 		
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
-				IReportEngine engine = ReportEngineManager.getBirtReportEngine();
-				final IReportRunnable design = engine.openReportDesign(ReportPlugIn.getDefault().getReportFile(report).getAbsolutePath());
-				
 				try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
 					HTMLRenderOption options = new HTMLRenderOption();
 					options = new HTMLRenderOption( );
 					options.setOutputStream(bos);
 					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 					options.setOutputFormat(HTMLRenderOption.HTML);
-					IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+					
+					Session s = HibernateManager.openSession();
 					try{
-						task.setRenderOption(options);
-						task.setParameterValues(selectedParams);
-						task.run();
+						SmartReportRunner.INSTANCE.runReport(report,
+								ReportEngineManager.getBirtReportEngine(), 
+								options, s, selectedParams);
 					}finally{
-						task.close();
+						if (s.isOpen())s.close();
 					}
+					
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					if (browser.isDisposed()) return Status.CANCEL_STATUS;
 					

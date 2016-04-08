@@ -29,16 +29,16 @@ import java.util.HashMap;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
-import org.eclipse.birt.report.engine.api.IReportEngine;
-import org.eclipse.birt.report.engine.api.IReportRunnable;
-import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 
@@ -84,23 +84,21 @@ public class RunReportJob extends Job {
 			if (reportFile == null || outputFile == null || info == null) {
 				throw new Exception(Messages.RunReportJob_Error_NoReportFile);
 			}
-			IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 
-			final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
-			
 			IRenderOption options = new RenderOption();
 			try(FileOutputStream fout = new FileOutputStream(outputFile)){
 				options.setOutputStream(fout);
 				options.setEmitterID(info.getID());
 				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
 				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
-				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+				
+				Session session = HibernateManager.openSession();
 				try{
-					task.setRenderOption(options);
-					task.setParameterValues(reportParameters);
-					task.run();
+					SmartReportRunner.INSTANCE.runReport(report, 
+							ReportEngineManager.getBirtReportEngine(), 
+							options, session, reportParameters);
 				}finally{
-					task.close();
+					session.close();
 				}
 			}
 		} catch (Exception e) {

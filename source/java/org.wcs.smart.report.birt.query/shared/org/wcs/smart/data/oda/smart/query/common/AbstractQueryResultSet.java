@@ -44,7 +44,7 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 	private int m_maxRows = -1;
 	private int m_currentRowId = -1;
 
-	private IResultSetMetaData metadata;
+	protected IResultSetMetaData metadata;
 
 	private Object lastObject = null;
 
@@ -126,7 +126,7 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 	 * @param colIndex column index
 	 * @return
 	 */
-	protected abstract Object getCurrentItem(int colIndex);
+	protected abstract Object getCurrentItem(int colIndex) throws OdaException;
 	
 	/**
 	 * @see
@@ -291,7 +291,9 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getBlob(int)
 	 */
 	public IBlob getBlob(int index) throws OdaException {
-		throw new UnsupportedOperationException();
+		//throw new UnsupportedOperationException();
+		lastObject = getCurrentItem(index);
+		return (IBlob) lastObject;
 	}
 
 	/**
@@ -350,7 +352,8 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getObject(int)
 	 */
 	public Object getObject(int index) throws OdaException {
-		return getCurrentItem(index);
+		lastObject = getCurrentItem(index);
+		return lastObject;
 	}
 
 	/**

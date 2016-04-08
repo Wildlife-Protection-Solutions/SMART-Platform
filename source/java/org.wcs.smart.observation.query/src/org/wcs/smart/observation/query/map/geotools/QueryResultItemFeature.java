@@ -31,9 +31,6 @@ import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-
 /**
  * Class to convert a query result item to 
  * a feature.
@@ -42,8 +39,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * @since 1.0.0
  */
 public class QueryResultItemFeature {
-
-	private static GeometryFactory gf = new GeometryFactory();
 	
 	
 	/**
@@ -58,7 +53,7 @@ public class QueryResultItemFeature {
 	 */
 	public static SimpleFeature createObservationFeature(ObservationQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
-		data.add(gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY())));
+		data.add(it.asGeometry(ObservationQueryResultItem.GEOMETRY_COLUMN_NAME));
 		data.add(it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ 
 		int i = 0;
 		for (QueryColumn c : columns){

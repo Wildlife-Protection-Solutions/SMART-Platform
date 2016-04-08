@@ -23,9 +23,11 @@ package org.wcs.smart.data.oda.smart.query.common;
 
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Result set for a SMART observation query.
@@ -35,7 +37,6 @@ import org.wcs.smart.query.common.engine.IResultItem;
  */
 public class PagedQueryResultSet extends AbstractQueryResultSet {
 
-	private SimpleQueryResultSetMetadata metadata;
 	private IPagedQueryResultSet pagedQueryResults;
 	private IQueryResultSetIterator<? extends IResultItem> iterator;
 	private IResultItem currentItem = null;
@@ -49,7 +50,6 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 			SimpleQueryResultSetMetadata metadata,
 			SmartConnection connection) {
 		super(metadata);
-		this.metadata = metadata;
 
 		try {
 			pagedQueryResults = results;
@@ -73,9 +73,17 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 		}
 		return value;
 	}
+	
 	@Override
-	protected Object getCurrentItem(int colIndex) {
-		return metadata.getQueryColumn(colIndex - 1).getValue(currentItem);
+	protected Object getCurrentItem(int colIndex) throws OdaException {
+		QueryColumn col = ((SimpleQueryResultSetMetadata) metadata).getQueryColumn(colIndex - 1);
+		if (col != null) return col.getValue(currentItem);
+		
+		IResultItem item = currentItem;
+		if (item instanceof IGeometryResultItem){
+			return ((IGeometryResultItem)currentItem).asGeometry(getMetaData().getColumnName(colIndex));
+		}
+		return null;
 	}
 	
 	@Override

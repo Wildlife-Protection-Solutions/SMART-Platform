@@ -49,11 +49,17 @@ public class IntelligencePointsQuery implements IQuery {
 
 	//dataset parameters
 	private HashMap<Integer, Object> parameters = null;
-
+	private SmartIntelligenceConnection connection;
 	//dataset metadata
 	private IntelligencePointsParameterMetaData pMetadata = null;
 	
+	
+	public IntelligencePointsQuery(SmartIntelligenceConnection connection){
+		this.connection = connection;
+	}
+	
 	/**
+	 * 
 	 * @see
 	 * org.eclipse.datatools.connectivity.oda.IQuery#prepare(java.lang.String)
 	 * <p></p>
@@ -89,7 +95,7 @@ public class IntelligencePointsQuery implements IQuery {
 	 */
 	public IResultSet executeQuery() throws OdaException {
 		String[] uuids = ((String)parameters.get(1)).split(","); //$NON-NLS-1$
-		return new IntelligencePointsResultSet(uuids, (IntelligencePointsResultSetMetadata)getMetaData());
+		return new IntelligencePointsResultSet(uuids, (IntelligencePointsResultSetMetadata)getMetaData(), connection.getSession());
 	}
 
 	/**

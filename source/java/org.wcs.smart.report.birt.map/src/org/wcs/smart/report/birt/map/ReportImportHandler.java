@@ -30,6 +30,7 @@ import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SlotHandle;
 import org.eclipse.birt.report.model.core.DesignElement;
+import org.wcs.smart.report.birt.map.item.SmartMapItem;
 import org.wcs.smart.report.in.IReportImportHandler;
 
 /**
@@ -59,16 +60,19 @@ public class ReportImportHandler implements IReportImportHandler {
 				if (x instanceof ExtendedItemHandle && ((ExtendedItemHandle) x).getReportItem() instanceof SmartMapItem){
 					SmartMapItem item = (SmartMapItem)((ExtendedItemHandle)x).getReportItem();
 					ArrayList<String> newLayers = new ArrayList<String>();
-					if (item.getLayers() != null){
-						for (String layer : item.getLayers()){
+					for (int i = 0; i < item.getLayersProperty().getContentCount(); i ++){
+						String layer = item.getLayer(i).getLayerName();
+//						for (String layer : item.getLayers()){
 							if (oldToNewQuery.get(layer) != null){
-								newLayers.add(oldToNewQuery.get(layer));
+//								newLayers.add(oldToNewQuery.get(layer));
+								//TODO: test this
+								item.getLayer(i).setLayerName(oldToNewQuery.get(layer));
 							}else{
 								newLayers.add(layer);
 							}
-						}
+							
+//						}
 					}
-					item.setLayers(newLayers);
 				}
 			}
 		}

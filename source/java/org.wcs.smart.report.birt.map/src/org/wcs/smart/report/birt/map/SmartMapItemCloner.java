@@ -63,7 +63,7 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 		List<Report> newReports = engine.getSession().createCriteria(Report.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).list(); //$NON-NLS-1$
 		monitor.beginTask(Messages.SmartMapItemCloner_CloningReportItem, newReports.size());
 		for (Report r : newReports){
-			File reportFile = new File(new File(engine.getNewCa().getFileDataStoreLocation(), ReportPlugIn.REPORT_DIR), r.getFilename());
+			File reportFile = new File(new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR), r.getFilename());
 			updateReportFile(r, reportFile, engine);
 			monitor.worked(1);
 		}

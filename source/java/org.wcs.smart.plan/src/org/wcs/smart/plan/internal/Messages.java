@@ -219,6 +219,7 @@ public class Messages extends NLS {
 	public static String PlanTargetResultSetMetadata_StatusKeyTargetLabel;
 	public static String PlanTargetResultSetMetadata_TargetDescriptionColumnLabel;
 	public static String PlanTargetResultSetMetadata_TargetNameColumnLabel;
+	public static String PlanTargetResultSetMetadata_TargetPointsGeomColumnName;
 	public static String PlanTargetService_PlanTargetsLayerName;
 	public static String PlanTargetService_SubPlanTargetsLayerName;
 	public static String PlanTargetServiceInfo_Description;
