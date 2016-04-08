@@ -91,7 +91,6 @@ import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.handlers.NewMissionHandler;
 import org.wcs.smart.er.ui.handlers.NewSurveyHandler;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Survey design editor page that displays all the 

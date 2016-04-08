@@ -366,7 +366,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	@Override
 	protected String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(" SELECT  "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".start_date, "); //$NON-NLS-1$
@@ -389,6 +389,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(MissionTrack.class) + ".track_type, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionTrack.class) + ".id, "); //$NON-NLS-1$
 		sql.append("smart.distanceInMeter(" + tablePrefix(MissionTrack.class) + ".geometry) / 1000.0, "); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(tablePrefix(MissionTrack.class) + ".geometry, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnit.class) + ".id "); //$NON-NLS-1$
 		
@@ -423,6 +424,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		sql.append("mission_tracktype varchar(32),"); //$NON-NLS-1$
 		sql.append("mission_trackid varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_tracklength double,"); //$NON-NLS-1$
+		sql.append("mission_track blob,"); //$NON-NLS-1$
 		
 		sql.append("samplingunit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("samplingunit_id varchar(128)"); //$NON-NLS-1$
@@ -458,6 +460,9 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		it.setSamplingUnitUuid(UuidUtils.byteToUUID(rs.getBytes("samplingunit_uuid"))); //$NON-NLS-1$
+		
+		it.setGeometry(rs.getBytes("mission_track")); //$NON-NLS-1$
+		
 		return it;
 	}
 

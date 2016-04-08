@@ -26,7 +26,10 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * A class to hold the results of a mission track 
@@ -35,8 +38,10 @@ import org.wcs.smart.query.common.engine.IResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class MissionTrackResultItem implements IResultItem{
+public class MissionTrackResultItem implements IGeometryResultItem{
 
+	public static final String TRACK_GEOMETRY = "TrackGeomtry";
+	
 	private String caId;
 	private String caName;
 	
@@ -62,6 +67,8 @@ public class MissionTrackResultItem implements IResultItem{
 	private MissionTrack.TrackType trackType;
 	private String trackId;
 	private Double trackLength;
+	
+	private byte[] geometry;
 	
 	private HashMap<String, Object> missionProperties = new HashMap<String, Object>();
 	private HashMap<String, Object> suAttributes = new HashMap<String, Object>();
@@ -361,5 +368,27 @@ public class MissionTrackResultItem implements IResultItem{
 	}
 	public void setTrackLength(Double length){
 		this.trackLength = length;
+	}
+
+	public byte[] getGeometry(){
+		return this.geometry;
+	}
+	public void setGeometry(byte[] geometry){
+		this.geometry = geometry;
+	}
+	
+	private static final WKBReader reader = new WKBReader();
+	
+	@Override
+	public Geometry asGeometry(String columnName) {
+		if (columnName.equals(TRACK_GEOMETRY)){
+			if (getGeometry() == null) return null;
+			try{
+				return reader.read(getGeometry());
+			}catch (Exception ex){
+				//TODO: logme
+			}
+		}
+		return null;
 	}
 }

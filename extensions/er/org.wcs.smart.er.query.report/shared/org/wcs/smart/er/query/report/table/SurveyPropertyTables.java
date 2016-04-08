@@ -29,7 +29,6 @@ import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.IDynamicSmartTables;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.er.hibernate.CaSurveyHibernateManager;
-import org.wcs.smart.er.hibernate.CcaaSurveyHibernateManager;
 import org.wcs.smart.er.hibernate.ISurveyHibernateManager;
 import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.model.SurveyDesign;

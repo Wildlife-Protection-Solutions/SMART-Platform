@@ -34,9 +34,16 @@ import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
+import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
@@ -126,4 +133,19 @@ public class SurveyReportQuery extends AbstractSmartQuery {
 		return super.executeQueryInternal(query, connection);
 	}
 
+	@Override
+	public String[] getGeometryColumnNames(Query query) {
+		if (query.getTypeKey().equals(MissionQuery.KEY)){
+			return new String[]{SurveyQueryResultItem.TRACK_GEOMETRY};
+		}else if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
+				query.getTypeKey().equals(SurveyWaypointQuery.KEY) ){
+			return new String[]{SurveyQueryResultItem.WAYPOINT_GEOMETRY};
+		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
+			return new String[]{MissionTrackResultItem.TRACK_GEOMETRY};
+		}
+		return null;
+	}
+
+	
+	
 }

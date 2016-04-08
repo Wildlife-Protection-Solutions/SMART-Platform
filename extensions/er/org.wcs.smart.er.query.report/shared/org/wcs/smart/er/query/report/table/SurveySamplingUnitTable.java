@@ -23,18 +23,14 @@ package org.wcs.smart.er.query.report.table;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.er.hibernate.CaSurveyHibernateManager;
-import org.wcs.smart.er.hibernate.CcaaSurveyHibernateManager;
 import org.wcs.smart.er.hibernate.ISurveyHibernateManager;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.MissionTrack;
@@ -45,6 +41,8 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 
+import com.vividsolutions.jts.io.WKBReader;
+
 
 /**
  * Sampling unit table.
@@ -54,6 +52,8 @@ import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
  */
 public class SurveySamplingUnitTable extends SmartBirtTable {
 
+	public static final String GEOMETRY_COLUMN = "geometry";
+	
 	public static final String SU_PREFIX = "SD_SU"; //$NON-NLS-1$
 	private SurveyDesign sd;
 	private SamplingUnit.GeometryType type;
@@ -76,7 +76,8 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == GeometryType.PLOT || 
 				type == GeometryType.TRANSECT){ 
-			int length = sd.getSamplingUnitAttributes().size() + 2;
+			
+			int length = sd.getSamplingUnitAttributes().size() + 3;
 			if (type == GeometryType.TRANSECT){
 				length ++;
 			}
@@ -89,6 +90,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			for (SurveyDesignSamplingUnitAttribute sua : sd.getSamplingUnitAttributes()){
 				names[i++] = sua.getSamplingUnitAttribute().getKeyId();
 			}
+			names[i++] = GEOMETRY_COLUMN;
 		}
 		return names;
 	}
@@ -99,7 +101,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == GeometryType.PLOT || 
 				type == GeometryType.TRANSECT){ 
-			int length = sd.getSamplingUnitAttributes().size() + 2;
+			int length = sd.getSamplingUnitAttributes().size() + 3;
 			if (type == GeometryType.TRANSECT){
 				length ++;
 			}
@@ -115,6 +117,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			for (SurveyDesignSamplingUnitAttribute sua : sd.getSamplingUnitAttributes()){
 				names[i++] = sua.getSamplingUnitAttribute().getName();
 			}
+			names[i++] = GEOMETRY_COLUMN;
 		}
 		return names;
 	}
@@ -125,7 +128,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == GeometryType.PLOT || 
 				type == GeometryType.TRANSECT){
-			int length = sd.getSamplingUnitAttributes().size() + 2;
+			int length = sd.getSamplingUnitAttributes().size() + 3;
 			if (type == GeometryType.TRANSECT){
 				length ++;
 			}
@@ -143,6 +146,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 					names[i++] = java.sql.Types.DOUBLE;
 				}
 			}
+			names[i++] = java.sql.Types.JAVA_OBJECT;
 		}
 		return names;
 	}
@@ -185,17 +189,19 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 				return e.getId();
 			}else if (index == 1){
 				return e.getState().getGuiName(connection.getCurrentLocale());
-			}else{
-				if (type == GeometryType.TRANSECT){
-					if (index == 2){
-						try{
-							return e.getGeometryLengthKm();
-						}catch (Exception ex){
-							throw new RuntimeException(ex.getMessage(),ex);
-						}
+			}
+			
+			if (type == GeometryType.TRANSECT){
+				if (index == 2){
+					try{
+						return e.getGeometryLengthKm();
+					}catch (Exception ex){
+						throw new RuntimeException(ex.getMessage(),ex);
 					}
-					index--;
 				}
+				index--;
+			}
+			if (index-2<sd.getSamplingUnitAttributes().size()){
 				SamplingUnitAttribute sua = sd.getSamplingUnitAttributes().get(index - 2).getSamplingUnitAttribute();
 				for (SamplingUnitAttributeValue suav : e.getAttributes()){
 					if (suav.getSamplingUnitAttribute().equals(sua)){
@@ -203,9 +209,16 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 							return suav.getStringValue();
 						}else if (sua.getType() == AttributeType.NUMERIC){
 							return suav.getNumberValue();
+						}else if (sua.getType() == AttributeType.LIST){
+							return suav.getAttributeListItem().getName();
 						}
 					}
 				}
+			}
+			try{
+				return e.getGeometry();
+			}catch (Exception ex){
+				throw new RuntimeException(ex.getMessage(),ex);
 			}
 		}else if (object instanceof MissionTrack){
 			MissionTrack mt = (MissionTrack)object;
@@ -220,6 +233,12 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			}else if (index == 4){
 				try{
 					return mt.getGeometryLengthKm();
+				}catch (Exception ex){
+					throw new RuntimeException(ex.getMessage(),ex);
+				}
+			}else{
+				try{
+					return (new WKBReader()).read(mt.getGeom());
 				}catch (Exception ex){
 					throw new RuntimeException(ex.getMessage(),ex);
 				}

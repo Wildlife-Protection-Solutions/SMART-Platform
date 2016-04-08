@@ -27,8 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
@@ -43,7 +46,12 @@ import com.vividsolutions.jts.geom.LineString;
  * @author Emily
  * @since 1.0.0
  */
-public class SurveyQueryResultItem implements IResultItem{
+public class SurveyQueryResultItem implements IGeometryResultItem{
+	
+	public static final String WAYPOINT_GEOMETRY = "WaypointGeomtry";
+	public static final String TRACK_GEOMETRY = "TrackGeomtry";
+	
+	private static final GeometryFactory gf = new GeometryFactory();
 
 	private String caId;
 	private String caName;
@@ -509,5 +517,18 @@ public class SurveyQueryResultItem implements IResultItem{
 			tracks = new ArrayList<LineString>();
 		}
 		tracks.add(track);
+	}
+
+	@Override
+	public Geometry asGeometry(String columnName) {
+		if (columnName.equals(WAYPOINT_GEOMETRY)){
+			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
+		}else if (columnName.equals(TRACK_GEOMETRY)){
+			if (getTracks() == null){
+				return gf.createMultiLineString(new LineString[]{});
+			}
+			return gf.createMultiLineString(getTracks().toArray(new LineString[getTracks().size()]));
+		}
+		return null;
 	}
 }

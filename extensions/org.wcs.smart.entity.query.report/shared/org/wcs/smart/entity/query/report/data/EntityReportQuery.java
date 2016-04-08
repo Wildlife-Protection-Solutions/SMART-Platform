@@ -35,8 +35,12 @@ import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
+import org.wcs.smart.entity.query.model.EntityObservationQuery;
+import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
@@ -117,6 +121,15 @@ public class EntityReportQuery extends AbstractSmartQuery {
 	public IResultSetMetaData getMetaData(AbstractSmartBirtQuery smartQuery, SmartConnection connection)
 			throws OdaException {
 		return getMetaDataInternal(smartQuery, connection);
+	}
+
+	@Override
+	public String[] getGeometryColumnNames(Query query) {
+		if (query.getTypeKey().equals(EntityWaypointQuery.KEY) ||
+				query.getTypeKey().equals(EntityObservationQuery.KEY)){		
+			return new String[]{EntityQueryResultItem.WAYPOINT_GEOM_NAME};
+		}
+		return null;
 	}
 
 }

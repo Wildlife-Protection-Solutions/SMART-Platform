@@ -39,7 +39,6 @@ import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
@@ -78,7 +77,7 @@ public class SurveyResultItemFeature {
 	public static SimpleFeature createObservationFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
 		
-		data.add(gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY())));
+		data.add(it.asGeometry(SurveyQueryResultItem.WAYPOINT_GEOMETRY));
 		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		addQueryColumnData(it, ftype, columns, data);
 		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
@@ -96,11 +95,8 @@ public class SurveyResultItemFeature {
 	 */
 	public static SimpleFeature createTrackFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
-		Geometry g = null;
-		if (it.getTracks() != null && it.getTracks().size() > 0){
-			g = gf.createMultiLineString(it.getTracks().toArray(new LineString[it.getTracks().size()]));
-		}
-		data.add(g);
+		
+		data.add(it.asGeometry(SurveyQueryResultItem.TRACK_GEOMETRY));
 		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		addQueryColumnData(it, ftype, columns, data);
 		
@@ -121,14 +117,8 @@ public class SurveyResultItemFeature {
 			List<QueryColumn> columns, SimpleFeatureType ftype){
 		List<Object> data = new ArrayList<Object>();
 		
-		Geometry g = null;
-		try{
-			MissionTrack mt = (MissionTrack) session.load(MissionTrack.class, it.getTrackUuid());
-			g = mt.getLineString();
-		}catch (Exception ex){
-			ERQueryPlugIn.log(ex.getMessage(), ex);
-		}
-		data.add(g);
+		
+		data.add(it.asGeometry(MissionTrackResultItem.TRACK_GEOMETRY));
 		data.add(it.getMissionId() + "." + UuidUtils.uuidToString(it.getTrackUuid())); //$NON-NLS-1$ 
 		
 		addQueryColumnData(it, ftype, columns, data);
@@ -147,12 +137,6 @@ public class SurveyResultItemFeature {
 		//"fid:String,id:String,start:Date,end:Date,comment:String,geom:LineString:srid=4326"
 		
 		Object[] data = new Object[6];
-		data[0] = mission.getId() + "." + UuidUtils.uuidToString(mission.getUuid()); //$NON-NLS-1$
-		data[1] = mission.getId();
-		data[2] = mission.getStartDate();
-		data[3] = mission.getEndDate();
-		data[4] = mission.getComment();
-		
 		List<LineString> geoms = new ArrayList<LineString>();
 		for (MissionDay md : mission.getMissionDays()){
 			for (MissionTrack mt : md.getTracks()){
@@ -166,11 +150,19 @@ public class SurveyResultItemFeature {
 		
 		if (geoms.size() > 0){
 			Geometry g = gf.createMultiLineString(geoms.toArray(new LineString[geoms.size()]));
-			data[5] = g;
+			data[0] = g;
 		}else{
-			data[5] = null;
+			data[0] = null;
 		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		
+		data[1] = mission.getId() + "." + UuidUtils.uuidToString(mission.getUuid()); //$NON-NLS-1$
+		data[2] = mission.getId();
+		data[3] = mission.getStartDate();
+		data[4] = mission.getEndDate();
+		data[5] = mission.getComment();
+		
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 
 }

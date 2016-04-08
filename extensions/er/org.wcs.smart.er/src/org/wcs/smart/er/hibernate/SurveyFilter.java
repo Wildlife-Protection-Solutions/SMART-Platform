@@ -25,7 +25,6 @@ import java.util.Date;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 //import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;

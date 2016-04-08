@@ -30,6 +30,7 @@ import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Sighting query result item.
+ * 
  * @author Emily
  *
  */

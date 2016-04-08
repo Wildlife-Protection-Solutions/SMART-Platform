@@ -22,14 +22,11 @@
 package org.wcs.smart.er.query.report.table;
 
 import java.text.MessageFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.er.model.IErLabelProvider;
