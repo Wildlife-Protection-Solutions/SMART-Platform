@@ -35,6 +35,7 @@ import org.wcs.smart.plan.internal.Messages;
 public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 
 	public static final String ID = "org.wcs.smart.plan.report.oda.SmartPlanTargets"; //$NON-NLS-1$
+	public static final String GEOM_COLUMN_NAME = "geometry"; //$NON-NLS-1$
 	
 	public PlanTargetResultSetMetadata(){
 	}
@@ -44,7 +45,7 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return 5;
+		return 6;
 	}
 
 	/**
@@ -66,6 +67,7 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 		case 3: return Messages.PlanTargetResultSetMetadata_StatusDescriptionTargetLabel;
 		case 4: return Messages.PlanTargetResultSetMetadata_StatusKeyTargetLabel;
 		case 5: return Messages.PlanTargetResultSetMetadata_PlanIdColumnLabel;
+		case 6: return Messages.PlanTargetResultSetMetadata_TargetPointsGeomColumnName;
 		}
 		return null;
 	}
@@ -79,8 +81,9 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 		case 1: return "TargetName"; //$NON-NLS-1$
 		case 2: return "TargetDescription"; //$NON-NLS-1$
 		case 3: return "StatusDescription"; //$NON-NLS-1$
-		case 4: return "Status"; //$NON-NLS-1$
+		case 4: return "targetStatus"; //$NON-NLS-1$
 		case 5: return "PlanId"; //$NON-NLS-1$
+		case 6: return GEOM_COLUMN_NAME;
 		}
 		return null;
 	}
@@ -96,6 +99,7 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 		case 3: return java.sql.Types.VARCHAR;
 		case 4: return java.sql.Types.VARCHAR;
 		case 5: return java.sql.Types.VARCHAR;
+		case 6: return java.sql.Types.JAVA_OBJECT;
 		}
 		return -1;
 	}

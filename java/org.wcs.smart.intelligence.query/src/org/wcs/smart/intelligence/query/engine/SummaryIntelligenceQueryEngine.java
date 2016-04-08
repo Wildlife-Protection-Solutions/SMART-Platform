@@ -33,7 +33,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
-import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;

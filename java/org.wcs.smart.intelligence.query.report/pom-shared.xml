@@ -41,6 +41,11 @@
     			<artifactId>org.wcs.smart.intelligence.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+				<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.report.birt.map</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
 		
 	</dependencies>	
 </project>

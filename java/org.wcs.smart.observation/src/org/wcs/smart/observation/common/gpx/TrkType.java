@@ -17,10 +17,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
-import org.wcs.smart.observation.common.gpx.ExtensionsType;
-import org.wcs.smart.observation.common.gpx.LinkType;
-import org.wcs.smart.observation.common.gpx.TrksegType;
-
 
 /**
  * 

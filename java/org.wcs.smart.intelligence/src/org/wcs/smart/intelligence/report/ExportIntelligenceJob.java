@@ -28,9 +28,6 @@ import java.util.UUID;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
-import org.eclipse.birt.report.engine.api.IReportEngine;
-import org.eclipse.birt.report.engine.api.IReportRunnable;
-import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,9 +39,11 @@ import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -87,19 +86,7 @@ public class ExportIntelligenceJob extends Job {
 			reportParameters.put(ReportIntelligence.TO_DATE, new java.sql.Date(intelligence.getToDate() != null ? intelligence.getToDate().getTime() : intelligence.getFromDate().getTime()));
 			reportParameters.put(ReportIntelligence.LOCATION, intelligence.getPoints());
 			reportParameters.put(ReportIntelligence.CREATOR, intelligence.getCreator() == null ? "" : SmartLabelProvider.getFullLabel(intelligence.getCreator())); //$NON-NLS-1$
-						
-		} catch (Exception ex) {
-			IntelligencePlugIn.displayLog(Messages.ExportIntelligenceJob_ExportError + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-			return Status.CANCEL_STATUS;
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
-		}
-		
-		try{
-			IReportEngine engine = ReportEngineManager.getBirtReportEngine();
-		
-			final IReportRunnable design = engine.openReportDesign(ReportIntelligence.getIntelligenceTemplate());
+			
 			try(FileOutputStream fout = new FileOutputStream(outputFile)){
 				IRenderOption options = new RenderOption();
 				options.setOutputStream(fout);
@@ -107,20 +94,19 @@ public class ExportIntelligenceJob extends Job {
 				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
 				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 				
-				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
-				try{
-					task.setRenderOption(options);
-					task.setParameterValues(reportParameters);
-					task.run();
-				}finally{
-					task.close();
-				}
+				SmartReportRunner.INSTANCE.runFile(ReportIntelligence.getIntelligenceTemplate(), 
+						SmartDB.getCurrentConservationArea(), ReportEngineManager.getBirtReportEngine(),
+						options, session, reportParameters);
+				
 			}
-			
-		}catch (Exception ex){
+		} catch (Exception ex) {
 			IntelligencePlugIn.displayLog(Messages.ExportIntelligenceJob_ExportError + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return Status.CANCEL_STATUS;
+		} finally {
+			session.getTransaction().rollback();
+			session.close();
 		}
+
 		
 		//launch the file
 		//this has to be done in the display thread to work in linux.

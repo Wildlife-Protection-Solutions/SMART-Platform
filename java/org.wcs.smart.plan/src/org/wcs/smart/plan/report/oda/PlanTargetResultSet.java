@@ -43,7 +43,12 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.model.SpatialPlanTarget;
+import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
 import org.wcs.smart.util.UuidUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * SMRAT Plan target result set
@@ -60,6 +65,8 @@ public class PlanTargetResultSet  implements IResultSet {
 	private PlanTargetResultSetMetadata metadata;
 	
 	private Session session;	//connection session
+	
+	private static GeometryFactory gf = new GeometryFactory();
 	
 	/**
 	 * Creates a new summary results set
@@ -188,6 +195,19 @@ public class PlanTargetResultSet  implements IResultSet {
 			case 3: return pt.getCurrentStatus().getDisplayString(Locale.getDefault());
 			case 4: return pt.getCurrentStatus().getStatus().key;
 			case 5: return pt.getPlan().getId();
+			case 6: 
+			{
+				if (pt instanceof SpatialPlanTarget){
+					SpatialPlanTarget sp = (SpatialPlanTarget)pt;
+					Coordinate[] pnts = new Coordinate[sp.getPoints().size()];
+					int i =0;
+					for (SpatialPlanTargetPoint pnt : sp.getPoints()){
+						pnts[i++] = new Coordinate(pnt.getX(), pnt.getY()); 
+					}
+					return gf.createMultiPoint(pnts);
+				}
+				return null;
+			}
 		}
 		return ""; //$NON-NLS-1$
 	}

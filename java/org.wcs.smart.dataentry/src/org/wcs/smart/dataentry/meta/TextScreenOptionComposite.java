@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
 import org.wcs.smart.dataentry.model.ScreenOption;
 
 /**

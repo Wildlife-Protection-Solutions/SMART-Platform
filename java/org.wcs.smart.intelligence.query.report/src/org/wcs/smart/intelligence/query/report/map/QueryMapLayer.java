@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.intelligence.query.report.map;
 
-import org.locationtech.udig.catalog.IService;
-import org.wcs.smart.intelligence.query.map.udig.QueryServiceFactory;
+import java.util.Collections;
+import java.util.List;
+
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
+import org.wcs.smart.report.birt.map.AbstractQueryMapLayer;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * SMART Query Map Layer
@@ -44,8 +47,11 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 	}
 
 	@Override
-	public IService createQueryService(Query query) {
-		return QueryServiceFactory.generateQueryService(query);
+	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey) {
+		if (queryTypeKey.equals(IntelligenceRecordQuery.KEY)){
+			return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTIPOINT, IntelligenceRecordResultItem.GEOMETRY_COLUMN_NAME));
+		}
+		return null;
 	}
 
 }

@@ -199,7 +199,7 @@ public class PlanTargetEngine {
 	 *  
 	 * @param plan the plan you want all the tracks from
 	 * @param session the session/transaction that is already open and being used with this plan
-	 * @return a list of {@link PatrolEditorInput} directly associated with the plan.
+	 * @return a list of tracks associated with the plan.
 	 */
 	private List<Track> getAllTracks(Plan plan, Session session){
 		StringBuilder sql = new StringBuilder();

@@ -13,21 +13,6 @@ import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
-import org.wcs.smart.observation.common.gpx.BoundsType;
-import org.wcs.smart.observation.common.gpx.CopyrightType;
-import org.wcs.smart.observation.common.gpx.EmailType;
-import org.wcs.smart.observation.common.gpx.ExtensionsType;
-import org.wcs.smart.observation.common.gpx.GpxType;
-import org.wcs.smart.observation.common.gpx.LinkType;
-import org.wcs.smart.observation.common.gpx.MetadataType;
-import org.wcs.smart.observation.common.gpx.PersonType;
-import org.wcs.smart.observation.common.gpx.PtType;
-import org.wcs.smart.observation.common.gpx.PtsegType;
-import org.wcs.smart.observation.common.gpx.RteType;
-import org.wcs.smart.observation.common.gpx.TrkType;
-import org.wcs.smart.observation.common.gpx.TrksegType;
-import org.wcs.smart.observation.common.gpx.WptType;
-
 
 /**
  * This object contains factory methods for each 

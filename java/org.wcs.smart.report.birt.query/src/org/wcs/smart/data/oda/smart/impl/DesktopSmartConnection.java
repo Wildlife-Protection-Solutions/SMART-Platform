@@ -29,6 +29,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTableUtils;
+import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -77,12 +78,17 @@ public class DesktopSmartConnection extends SmartConnection {
 			SmartBirtTable table = SmartBirtTableUtils.getInstance().findTable(queryText, this);
 			if (table == null){
 				throw new OdaException(
-						MessageFormat.format("Could not find SMART data table {0}.", new Object[]{queryText}));
+						MessageFormat.format("Could not find SMART data table {0}.", new Object[]{queryText})); //$NON-NLS-1$
 			}
 			return table;
 		}catch (Exception ex){
 			throw new OdaException (ex);
 		}
+	}
+
+	@Override
+	public String getDataSourceProductName() {
+		return Messages.SmartDatasetMetadata_SmartDataSourceName;
 	}
 
 }

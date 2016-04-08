@@ -51,6 +51,7 @@ public class SmartCategoryFactory implements IScriptFunctionFactory {
 			public Object execute(Object[] arguments, IScriptFunctionContext context)
 					throws BirtException {
 				
+				context.findProperty(IScriptFunctionContext.LOCALE);
 				if (functionName.equals(SMART_USER_FUNCTION)){
 //					return SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee());
 					return "emily";

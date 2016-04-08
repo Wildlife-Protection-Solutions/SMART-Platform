@@ -34,9 +34,11 @@ import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 
@@ -101,4 +103,11 @@ public class IntelligenceReportQuery extends AbstractSmartQuery {
 		throw new OdaException("Unsupported query type."); //$NON-NLS-1$
 	}
 
+	@Override
+	public String[] getGeometryColumnNames(Query query) {
+		if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY)){
+			return new String[]{IntelligenceRecordResultItem.GEOMETRY_COLUMN_NAME};
+		}
+		return null;
+	}
 }

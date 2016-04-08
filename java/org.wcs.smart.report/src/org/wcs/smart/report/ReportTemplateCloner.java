@@ -91,11 +91,11 @@ public class ReportTemplateCloner implements
 	 * directory)
 	 */
 	private void cloneLibrary(ConservationAreaClonerEngine engine) throws IOException{
-		File templateDir = new File(engine.getTemplateCa().getFileDataStoreLocation(), ReportPlugIn.REPORT_DIR);
+		File templateDir = new File(engine.getTemplateCa().getFileDataStoreLocation(), Report.REPORT_DIR);
 		File templateLibraryDir = new File(templateDir, SmartBirtLibrary.LIBRARY_DIR);
 		
 		if (templateLibraryDir.exists()){
-			File caDir = new File(engine.getNewCa().getFileDataStoreLocation(), ReportPlugIn.REPORT_DIR);
+			File caDir = new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR);
 			File caLibraryDir = new File(caDir, SmartBirtLibrary.LIBRARY_DIR);
 			FileUtils.copyDirectory(templateLibraryDir, caLibraryDir);
 		}
@@ -162,8 +162,8 @@ public class ReportTemplateCloner implements
 			clone.setShared(r.getShared());
 			clone.setFilename(r.getFilename());
 			
-			File src = new File(new File(engine.getTemplateCa().getFileDataStoreLocation(), ReportPlugIn.REPORT_DIR), r.getFilename());
-			File dest = new File(new File(engine.getNewCa().getFileDataStoreLocation(), ReportPlugIn.REPORT_DIR), clone.getFilename());
+			File src = new File(new File(engine.getTemplateCa().getFileDataStoreLocation(), Report.REPORT_DIR), r.getFilename());
+			File dest = new File(new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR), clone.getFilename());
 			
 			FileUtils.copyFile(src, dest);
 	
@@ -203,7 +203,7 @@ public class ReportTemplateCloner implements
 		//and replace it with the newuuid
 		LibraryHandle library = rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 		rdh.dropLibraryAndBreakExtends(library);
-		String newLibraryLocation = engine.getNewCa().getFileDataStoreLocation() + File.separator + ReportPlugIn.REPORT_DIR + File.separator + SmartBirtLibrary.LIBRARY_DIR + File.separator + SmartBirtLibrary.LIBRARY_FILENAME;
+		String newLibraryLocation = engine.getNewCa().getFileDataStoreLocation() + File.separator + Report.REPORT_DIR + File.separator + SmartBirtLibrary.LIBRARY_DIR + File.separator + SmartBirtLibrary.LIBRARY_FILENAME;
 		rdh.includeLibrary(newLibraryLocation, SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 		
 		//updates query references

@@ -23,19 +23,14 @@ package org.wcs.smart.intelligence.query.map.udig;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.query.QueryPlugIn;
@@ -47,9 +42,6 @@ import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-
 /**
  * A feature reading for intelligence points associated with intelligence
  * record query.
@@ -58,15 +50,11 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * @since 1.0.0
  */
 public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
-	private static GeometryFactory gf = new GeometryFactory();
 	
 	private SimpleFeatureType ftype;
 	private IQueryResultSetIterator<? extends IResultItem> fIterator;
-	
-	private IntelligenceRecordResultItem currentIntel = null;
-	private Iterator<IntelligencePoint> subInterator;
-	private SimpleFeature next;
 	private List<QueryColumn> cols = null;
+	
 	/**
 	 * Creates a new feature reader.
 	 * 
@@ -90,48 +78,9 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 			}	
 		}	
 		
-		next = getNext();
-	}
-
-	private SimpleFeature getNext(){
-		while (subInterator == null || !subInterator.hasNext()){
-			if (!fIterator.hasNext()){
-				return null;
-			}
-			currentIntel = (IntelligenceRecordResultItem) fIterator.next();	
-			Session s = HibernateManager.openSession();
-			try{
-				Intelligence i = (Intelligence) s.load(Intelligence.class, currentIntel.getUuid());
-				List<IntelligencePoint> pnts = new ArrayList<IntelligencePoint>(i.getPoints());
-				subInterator = pnts.iterator();
-			}finally{
-				s.close();
-			}
-		}
-	
-		IntelligencePoint ip = subInterator.next();
-		return toSimpleFeature(cols, ftype, currentIntel, ip);
 	}
 	
-	/**
-	 * Creates a simple feature from an intelligence point
-	 * @param ftype feature type
-	 * @param currentIntel intelligence record
-	 * @param ip intelligence point
-	 * @return 
-	 */
-	public static SimpleFeature toSimpleFeature(List<QueryColumn> columns, SimpleFeatureType ftype, IntelligenceRecordResultItem currentIntel, IntelligencePoint ip){		
-		List<Object>data = new ArrayList<Object>();
-		data.add(gf.createPoint(new Coordinate(ip.getX(), ip.getY())));
-		data.add(UuidUtils.uuidToString(ip.getUuid()));
-		int i = 0;
-		for (QueryColumn c : columns){
-			if (c.isVisible()){
-				data.add(QueryColumnUtils.getValue(currentIntel, c, ftype.getDescriptor(i++)));
-			}
-		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
-	}
+	
 	/**
 	 * @see org.geotools.data.FeatureReader#close()
 	 */
@@ -153,7 +102,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	 */
 	@Override
 	public boolean hasNext() throws IOException {
-		return next != null;
+		return fIterator.hasNext();
 	}
 
 	/**
@@ -162,9 +111,30 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
-		SimpleFeature current = next;
-		next = getNext();
-		return current;
+		IResultItem it = fIterator.next();
+		return toSimpleFeature(cols, ftype, (IntelligenceRecordResultItem)it);
 		
+		
+	}
+	
+	/**
+	 * Creates a simple feature from an intelligence point
+	 * @param ftype feature type
+	 * @param currentIntel intelligence record
+	 * @param ip intelligence point
+	 * @return 
+	 */
+	public static SimpleFeature toSimpleFeature(List<QueryColumn> columns, 
+			SimpleFeatureType ftype, IntelligenceRecordResultItem currentIntel){		
+		List<Object>data = new ArrayList<Object>();
+		data.add(currentIntel.asGeometry(IntelligenceRecordResultItem.GEOMETRY_COLUMN_NAME));
+		data.add(UuidUtils.uuidToString(currentIntel.getUuid()));
+		int i = 0;
+		for (QueryColumn c : columns){
+			if (c.isVisible()){
+				data.add(QueryColumnUtils.getValue(currentIntel, c, ftype.getDescriptor(i++)));
+			}
+		}
+		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
 	}
 }

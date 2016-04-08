@@ -37,6 +37,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Shared implementation for oda queries wrapper.
@@ -64,6 +65,18 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	protected SmartParameterMetaData pMetadata = null;
 	protected SmartConnection connection;
 
+	/**
+	 * Parses the query text in the query type and query UUID
+	 * @param queryText
+	 * @return 
+	 */
+	public static ParsedQuery parseQueryText(String queryText){
+		String[] bits = queryText.split(":"); //$NON-NLS-1$
+		String queryType = bits[0];
+		UUID uuid = UuidUtils.stringToUuid(bits[1]);
+		return new ParsedQuery(queryType, uuid);
+	}
+	
 	/**
 	 * Creates a new smart query
 	 */
@@ -97,7 +110,6 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	 * .Object)
 	 */
 	public void setAppContext(Object context) throws OdaException {
-		// do nothing; assumes no support for pass-through context
 	}
 
 	/**
@@ -120,8 +132,7 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 		if (metadata != null){
 			return metadata;
 		}
-//		throw new OdaException(Messages.SmartQuery_Error_CouldNoLoadMetadata);
-		throw new OdaException("Cannot load metadata for the provided query.");
+		throw new OdaException("Cannot load metadata for the provided query."); //$NON-NLS-1$
 	}
 
 	/**

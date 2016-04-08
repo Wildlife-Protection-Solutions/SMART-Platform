@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.report.birt.map.properties;
 
-import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import java.util.List;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.StringConverter;
@@ -63,7 +64,7 @@ public class DatasetComobInputDialog extends Dialog {
 	/**
 	 * The input value; null by default.
 	 */
-	private OdaDataSetHandle value = null;
+	private LayerDefinition value = null;
 
 	/**
 	 * Ok button widget.
@@ -85,7 +86,7 @@ public class DatasetComobInputDialog extends Dialog {
 	 */
 	private String errorMessage;
 	
-	private OdaDataSetHandle[] handles;
+	private List<LayerDefinition> mapOptions;
 	
 	/**
 	 * Creates an input dialog with OK and Cancel buttons. Note that the dialog
@@ -106,11 +107,11 @@ public class DatasetComobInputDialog extends Dialog {
 	 */
 	public DatasetComobInputDialog(Shell parentShell, 
 			String dialogTitle, 
-			String dialogMessage, OdaDataSetHandle[] handles) {
+			String dialogMessage, List<LayerDefinition> mapOptions) {
 		super(parentShell);
 		this.title = dialogTitle;
 		message = dialogMessage;
-		this.handles = handles;
+		this.mapOptions = mapOptions;
 	}
 
 	/**
@@ -118,7 +119,7 @@ public class DatasetComobInputDialog extends Dialog {
 	 * 
 	 * @return the input string
 	 */
-	public OdaDataSetHandle getValue() {
+	public LayerDefinition getValue() {
 		return value;
 	}
 
@@ -162,7 +163,7 @@ public class DatasetComobInputDialog extends Dialog {
 			if (sel.isEmpty()){
 				value = null;
 			}else{
-				value = (OdaDataSetHandle) sel.getFirstElement();	
+				value = (LayerDefinition) sel.getFirstElement();	
 			}
 			
 		} else {
@@ -201,7 +202,7 @@ public class DatasetComobInputDialog extends Dialog {
 		// do this here because setting the text will set enablement on the ok
 		// button
 		combo.getCombo().setFocus();
-		combo.setSelection(new StructuredSelection(handles[0]));
+		combo.setSelection(new StructuredSelection(mapOptions.get(0)));
 	}
 
 	/*
@@ -235,13 +236,13 @@ public class DatasetComobInputDialog extends Dialog {
 		combo.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof OdaDataSetHandle){
-					return ((OdaDataSetHandle) element).getDisplayName();
+				if (element instanceof LayerDefinition){
+					return ((LayerDefinition)element).handle.getDisplayName() + " - " + ((LayerDefinition) element).info.getGometryColumn() + " ( " + ((LayerDefinition) element).info.getLayerType() + ")";
 				}
 				return super.getText(element);
 			}
 		});
-		combo.setInput(handles);
+		combo.setInput(mapOptions);
 		
 		errorMessageText = new Text(composite, SWT.READ_ONLY | SWT.WRAP);
 		errorMessageText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));

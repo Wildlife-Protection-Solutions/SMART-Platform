@@ -26,10 +26,11 @@ import java.text.MessageFormat;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.hibernate.Session;
 import org.wcs.smart.data.oda.smart.impl.DesktopSmartConnection;
-import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartDatasetMetadata;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.report.execute.SmartReportRunner;
 /**
  * Connection for the SMART plan driver.
  * 
@@ -41,6 +42,15 @@ import org.wcs.smart.plan.internal.Messages;
  */
 public class SmartPlanConnection extends DesktopSmartConnection {
 
+	
+	@Override
+	public void openSession(){
+		localSession = (Session) appContext.get(SmartReportRunner.SESSION_PARAM);
+	}
+	
+	@Override
+	public void closeSession(){
+	}
 	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#getMetaData(java.lang.String)

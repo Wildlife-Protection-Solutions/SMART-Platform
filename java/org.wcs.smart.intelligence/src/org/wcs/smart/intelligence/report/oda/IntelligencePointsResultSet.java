@@ -35,12 +35,14 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.util.UuidUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * SMRAT Intelligence Location Points target result set
@@ -50,6 +52,10 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class IntelligencePointsResultSet implements IResultSet {
 
+	private static final GeometryFactory gf = new GeometryFactory();
+	
+	public static final String GEOM_COLUMN_NAME = "geometry";
+	
 	private int m_maxRows = -1;
 
 	private int currentRow = -1;
@@ -59,29 +65,26 @@ public class IntelligencePointsResultSet implements IResultSet {
 	
 	private Session session;
 	
-	public IntelligencePointsResultSet(String[] uuids, IntelligencePointsResultSetMetadata metaData) {
+	public IntelligencePointsResultSet(String[] uuids, 
+			IntelligencePointsResultSetMetadata metaData,
+			Session session) {
 		this.metadata = metaData;
 		points = new ArrayList<IntelligencePoint>();
 
-		session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			for (int i = 0; i < uuids.length; i ++){
-				try{
-					Intelligence p = (Intelligence)session.createCriteria(Intelligence.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(uuids[i]))).list().get(0); //$NON-NLS-1$
-					if (p != null) {
-						points.addAll(p.getPoints());
-						m_maxRows += p.getPoints().size();
-					}
-				}catch (Exception ex){
-					IntelligencePlugIn.log("Error creating plan target result set", ex); //$NON-NLS-1$
+		for (int i = 0; i < uuids.length; i ++){
+			try{
+				Intelligence p = (Intelligence)session.createCriteria(Intelligence.class)
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+						.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(uuids[i]))).list().get(0); //$NON-NLS-1$
+				if (p != null) {
+					points.addAll(p.getPoints());
+					m_maxRows += p.getPoints().size();
 				}
+			}catch (Exception ex){
+				IntelligencePlugIn.log("Error creating plan target result set", ex); //$NON-NLS-1$
 			}
-		}finally{
-			session.getTransaction().commit();
 		}
+		
 	}
 
 	/**
@@ -162,6 +165,7 @@ public class IntelligencePointsResultSet implements IResultSet {
 		switch (colIndex) {
 			case 1: return pt.getX();
 			case 2: return pt.getY();
+			case 3: return gf.createPoint(new Coordinate(pt.getX(), pt.getY()));
 		}
 		return ""; //$NON-NLS-1$
 	}

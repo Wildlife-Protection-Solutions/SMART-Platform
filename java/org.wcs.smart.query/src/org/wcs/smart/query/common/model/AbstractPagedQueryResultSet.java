@@ -21,20 +21,11 @@
  */
 package org.wcs.smart.query.common.model;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;

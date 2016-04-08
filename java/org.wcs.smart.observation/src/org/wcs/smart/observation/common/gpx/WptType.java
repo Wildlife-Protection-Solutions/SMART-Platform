@@ -20,9 +20,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.wcs.smart.observation.common.gpx.ExtensionsType;
-import org.wcs.smart.observation.common.gpx.LinkType;
-
 
 /**
  * 

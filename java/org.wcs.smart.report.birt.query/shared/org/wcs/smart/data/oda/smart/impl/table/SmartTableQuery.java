@@ -79,7 +79,7 @@ public class SmartTableQuery implements IQuery {
 			this.table = connection.findSmartBirtTable(queryText);
 			if (this.table == null){
 				throw new OdaException(
-						MessageFormat.format("Could not find SMART data table {0}.", new Object[]{queryText}));
+						MessageFormat.format("Could not find SMART data table {0}.", new Object[]{queryText})); //$NON-NLS-1$
 			}
 		}catch (Exception ex){
 			throw new OdaException(ex);

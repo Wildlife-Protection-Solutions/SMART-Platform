@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;

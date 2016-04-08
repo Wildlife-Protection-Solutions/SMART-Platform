@@ -868,6 +868,11 @@
                nativeDataTypeCode="12"
                odaScalarDataType="String">
          </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
    </extension>
    <extension
@@ -875,6 +880,9 @@
       <MapLayer
             maplayer="org.wcs.smart.intelligence.report.IntelligencePointsMapLayer">
       </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.intelligence.report.IntelligencePointsStyleProvider">
+      </StyleProvider>
    </extension>
    <extension
          point="org.wcs.smart.patrol.query.contribution">

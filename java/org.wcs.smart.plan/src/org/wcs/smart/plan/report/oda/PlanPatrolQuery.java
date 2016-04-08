@@ -34,7 +34,6 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.data.oda.smart.impl.QueryDatasetExtensionManager;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
@@ -96,7 +95,7 @@ public class PlanPatrolQuery extends SmartQuery {
 	public IResultSet executeQuery() throws OdaException {
 		String[] planUuids = ((String)parameters.get(3)).split(","); //$NON-NLS-1$
 		try{
-			updateQueryFilter((PatrolQuery)this.smartQuery, planUuids[0]);
+			updateQueryFilter((PatrolQuery)this.smartQuery, planUuids[0], connection.getSession());
 		}catch (Exception ex){
 			throw new OdaException(ex);
 		}
@@ -133,13 +132,12 @@ public class PlanPatrolQuery extends SmartQuery {
 	
 	//do not close session as assume it is managed by SmartConnection is BIRT report
 	//uses the current session which should be associated with connection
-	public static void updateQueryFilter(PatrolQuery pq, String parentPlanUuid) throws Exception{
+	public static void updateQueryFilter(PatrolQuery pq, String parentPlanUuid, Session session) throws Exception{
 		if (parentPlanUuid == null || parentPlanUuid.length() == 0){
 			pq.setQueryFilter("observation|patrol:uuid equals \"\""); //$NON-NLS-1$
 			return;
 		}
 		
-		Session session = HibernateManager.openSession();
 		Plan p = (Plan)session.createCriteria(Plan.class)
 				.add(Restrictions.eq("uuid",UuidUtils.stringToUuid(parentPlanUuid))).list().get(0); //$NON-NLS-1$
 		

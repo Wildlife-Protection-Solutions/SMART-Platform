@@ -62,6 +62,11 @@
                nativeDataTypeCode="12"
                odaScalarDataType="String">
          </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="%table.dataset.display.name"

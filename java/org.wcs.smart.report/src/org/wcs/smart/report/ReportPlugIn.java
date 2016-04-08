@@ -50,8 +50,6 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.report"; //$NON-NLS-1$
 
-	public static final String REPORT_DIR = "reports"; //$NON-NLS-1$
-
 	/**
 	 * The main query icon
 	 */
@@ -109,7 +107,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	public static File getReportDirectory(ConservationArea ca) {
 		return new File(ca.getFileDataStoreLocation()
 				+ File.separator
-				+ ReportPlugIn.REPORT_DIR + File.separator);
+				+ Report.REPORT_DIR + File.separator);
 	}
 
 	/**

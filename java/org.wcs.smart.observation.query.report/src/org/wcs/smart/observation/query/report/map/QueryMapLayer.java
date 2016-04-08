@@ -21,13 +21,16 @@
  */
 package org.wcs.smart.observation.query.report.map;
 
-import org.locationtech.udig.catalog.IService;
-import org.wcs.smart.observation.query.map.udig.QueryServiceFactory;
+import java.util.Collections;
+import java.util.List;
+
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
+import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
+import org.wcs.smart.report.birt.map.AbstractQueryMapLayer;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * SMART Query Map Layer
@@ -48,8 +51,17 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 	}
 
 	@Override
-	public IService createQueryService(Query query) {
-		return QueryServiceFactory.generateQueryService(query);
+	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
+		if (queryTypeKey.equals(ObsObservationQuery.KEY) ||
+				queryTypeKey.equals(ObservationWaypointQuery.KEY)){
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, ObservationQueryResultItem.GEOMETRY_COLUMN_NAME);
+			return Collections.singletonList(def);
+		}else if (queryTypeKey.equals(ObservationGriddedQuery.KEY)){
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, "raster");
+			return Collections.singletonList(def);
+		}
+		return null;
+		
 	}
 
 }

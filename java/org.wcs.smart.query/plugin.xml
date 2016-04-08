@@ -1052,14 +1052,14 @@
             class="org.wcs.smart.query.common.importexport.GridArcImageExporter">
       </Exporter>
    </extension>
-   <extension
+ <!--  <extension
          point="org.locationtech.udig.project.renderer">
       <renderer
             class="org.wcs.smart.query.udig.render.SmartMemoryGridCoverageMetricsFactory"
             id="org.wcs.smart.udig.render.SmartGridRenderer"
             name="SMART Raster Renderer">
       </renderer>
-   </extension>
+   </extension>-->
    <extension
          point="org.locationtech.udig.style.styleConfigurator">
       <styleConfigurator
@@ -1069,14 +1069,6 @@
             requires="org.wcs.smart.query.common.model.udig.RasterService"
             styleId="org.locationtech.udig.style.sld">
       </styleConfigurator>
-   </extension>
-   <extension
-         point="org.locationtech.udig.project.style">
-      <style
-            class="org.wcs.smart.query.udig.render.SmartGridCellStyleContent"
-            id="org.wcs.smart.query.grid.style.border"
-            name="%style.name">
-      </style>
    </extension>
 
 

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.birt.map;
+package org.wcs.smart.report.birt.map.item;
 
 import java.util.Locale;
 
@@ -28,7 +28,6 @@ import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.extension.IMessages;
 import org.eclipse.birt.report.model.api.extension.IReportItem;
 import org.eclipse.birt.report.model.api.extension.ReportItemFactory;
-import org.wcs.smart.report.birt.map.internal.Messages;
 
 import com.ibm.icu.util.ULocale;
 
@@ -38,7 +37,7 @@ import com.ibm.icu.util.ULocale;
  * @author Emily
  *
  */
-public class SmartMapFactory  extends ReportItemFactory implements IMessages{
+public class SmartMapItemFactory  extends ReportItemFactory implements IMessages{
 
 	/**
 	 * @see org.eclipse.birt.report.model.api.extension.IReportItemFactory#newReportItem(org.eclipse.birt.report.model.api.DesignElementHandle)
@@ -62,7 +61,7 @@ public class SmartMapFactory  extends ReportItemFactory implements IMessages{
 	@Override
 	public String getMessage(String key, Locale locale) {
 		if (key.equals("SmartMapItem.Name")){ //$NON-NLS-1$
-			return Messages.SmartMapItem_Name;
+			return "SMART MAP";//$NON-NLS-1$
 		}
 		return null;
 	}

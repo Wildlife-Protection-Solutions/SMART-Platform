@@ -793,6 +793,11 @@
                nativeDataTypeCode="93"
                odaScalarDataType="Timestamp">
          </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Plan Patrols"
@@ -888,6 +893,9 @@
       <MapLayer
             maplayer="org.wcs.smart.plan.report.PlanPatrolMapLayer">
       </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.plan.report.PlanPointsStyleProvider">
+      </StyleProvider>
    </extension>
    <extension
          point="org.wcs.smart.ca.templateCloner">

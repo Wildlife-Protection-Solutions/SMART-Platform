@@ -38,6 +38,7 @@ import org.locationtech.udig.ui.ColorEditor;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.udig.style.SmartGridCellStyleContent;
 
 /**
  * A style configurator that allows 

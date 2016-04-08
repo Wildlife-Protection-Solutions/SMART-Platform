@@ -136,7 +136,7 @@ public class IntelQueryDataSource extends AbstractDataStore{
 	 */
 	private static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:Point:srid=4326"); //$NON-NLS-1$
+		sb.append("the_geom:MultiPoint:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$
 		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
 		return sb.toString();

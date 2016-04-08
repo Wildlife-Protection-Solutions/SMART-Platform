@@ -21,24 +21,15 @@
  */
 package org.wcs.smart.patrol.query.map.geotools;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Class to convert a query result item to 
@@ -49,9 +40,6 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 public class QueryResultItemFeature {
 
-	private static GeometryFactory gf = new GeometryFactory();
-	
-	
 	/**
 	 * Converts a query result item to a feature.
 	 * The feature type must have been generated 
@@ -64,7 +52,7 @@ public class QueryResultItemFeature {
 	 */
 	public static SimpleFeature createObservationFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
 		List<Object> data = new ArrayList<Object>();
-		data.add(gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY())));
+		data.add(it.asGeometry(PatrolQueryResultItem.WAYPOINTGEOM_COLUMN_NAME));
 		data.add(it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		int i = 0;
 		for (QueryColumn c : columns){
@@ -90,26 +78,8 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createTrackFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
 		
 		List<Object> data = new ArrayList<Object>();
-		
-		if (it.getTrack() == null || it.getTrack().size() == 0) {
-			data.add(gf.createLineString((Coordinate[]) null));
-		} else {
-			try {
-				WKBReader reader = new WKBReader();
-				List<byte[]> tracks = it.getTrack();
-				LineString[] lss = new LineString[tracks.size()];
-				for (int i = 0; i < lss.length; i ++){
-					lss[i] = (LineString)reader.read(tracks.get(i));
-				}
-				data.add(gf.createMultiLineString(lss));
-			} catch (ParseException e) {
-				data.add(gf.createLineString((Coordinate[]) null));
-				PatrolQueryPlugIn.log(MessageFormat.format(Messages.QueryResultItemFeature_GeomParseError, new Object[]{it.getPatrolId()}), e);
-			}
-		}
-		
+		data.add(it.asGeometry(PatrolQueryResultItem.TRACKGEOM_COLUMN_NAME));
 		data.add(it.getPatrolId() + "." + System.nanoTime()); //$NON-NLS-1$
-		
 		int i = 0;
 		for (QueryColumn c : columns){
 			if (c.isVisible()){
@@ -117,6 +87,5 @@ public class QueryResultItemFeature {
 			}
 		}
 		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
-		
 	}
 }

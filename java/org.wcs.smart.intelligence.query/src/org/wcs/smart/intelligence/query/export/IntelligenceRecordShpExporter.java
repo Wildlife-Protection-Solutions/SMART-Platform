@@ -21,12 +21,8 @@
  */
 package org.wcs.smart.intelligence.query.export;
 
-import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.query.map.udig.IntelQueryDataSource;
 import org.wcs.smart.intelligence.query.map.udig.IntelQueryFeatureReader;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
@@ -67,15 +63,7 @@ public class IntelligenceRecordShpExporter extends ShapeQueryExporter{
 	protected void writeRow(IResultItem row) throws Exception {
 		IntelligenceRecordResultItem currentIntel = (IntelligenceRecordResultItem)row;
 		SimpleFeatureType ftype = shapefile.getSchema(shapefile.getTypeNames()[0]);
-		Session s = HibernateManager.openSession();
-		try{
-			Intelligence i = (Intelligence) s.load(Intelligence.class, currentIntel.getUuid());
-			for (IntelligencePoint ip : i.getPoints()){
-				features.add(IntelQueryFeatureReader.toSimpleFeature(queryColumns, ftype, currentIntel, ip));
-			}
-		}finally{
-			s.close();
-		}
+		features.add(IntelQueryFeatureReader.toSimpleFeature(queryColumns, ftype, currentIntel));
 	}
 
 	@Override

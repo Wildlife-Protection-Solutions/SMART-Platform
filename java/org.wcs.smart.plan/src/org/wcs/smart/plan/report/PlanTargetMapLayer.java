@@ -21,21 +21,16 @@
  */
 package org.wcs.smart.plan.report;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.wcs.smart.plan.map.geotools.PlanTargetDataSourceFactory;
-import org.wcs.smart.plan.map.udig.PlanTargetService;
 import org.wcs.smart.plan.report.oda.PlanTargetQuery;
+import org.wcs.smart.plan.report.oda.PlanTargetResultSetMetadata;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Converts Plan Target ID Oda Dataset Handle to a map
@@ -45,11 +40,6 @@ import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
  *
  */
 public class PlanTargetMapLayer implements IBirtMapLayerManager {
-
-	@Override
-	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource){
-		return null;
-	}
 	
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
@@ -63,41 +53,46 @@ public class PlanTargetMapLayer implements IBirtMapLayerManager {
 		return false;
 	}
 
-	@Override
-	public List<IGeoResource> createLayer(DataSetHandle handle,
-			IReportContext context) throws Exception {
-		if (!(handle instanceof OdaDataSetHandle)){
-			return null;
-		}
-		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
-		if (!odaHandle.getExtensionID().equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
-			return null;
-		}
-		
-		boolean onlySubplans = false;
-		if (odaHandle.getQueryText().equals(PlanTargetQuery.SUBPLAN_ONLY)){
-			onlySubplans = true;
-		}else{
-			onlySubplans= false;
-		}
-		
-		String uuid = null;
-		if (context != null){
-			//The oda layer supports multiple plans
-			//here we only support a single plan so get only the first plan
-			String planUuids = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
-			String[] uuids = planUuids.split(","); //$NON-NLS-1$
-			uuid = uuids[0];
-		}
-		
-		Map<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, uuid);
-		params.put(PlanTargetDataSourceFactory.SUB_PLANS.key, onlySubplans);
-		
-		PlanTargetService service = new PlanTargetService(params);
-		List<IGeoResource> resources = new ArrayList<IGeoResource>();
-		resources.addAll(service.resources(null));
-		return resources;
-	}
+//	@Override
+//	public List<IGeoResource> createLayer(DataSetHandle handle,
+//			IReportContext context) throws Exception {
+//		if (!(handle instanceof OdaDataSetHandle)){
+//			return null;
+//		}
+//		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
+//		if (!odaHandle.getExtensionID().equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
+//			return null;
+//		}
+//		
+//		boolean onlySubplans = false;
+//		if (odaHandle.getQueryText().equals(PlanTargetQuery.SUBPLAN_ONLY)){
+//			onlySubplans = true;
+//		}else{
+//			onlySubplans= false;
+//		}
+//		
+//		String uuid = null;
+//		if (context != null){
+//			//The oda layer supports multiple plans
+//			//here we only support a single plan so get only the first plan
+//			String planUuids = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
+//			String[] uuids = planUuids.split(","); //$NON-NLS-1$
+//			uuid = uuids[0];
+//		}
+//		
+//		Map<String, Serializable> params = new HashMap<String, Serializable>();
+//		params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, uuid);
+//		params.put(PlanTargetDataSourceFactory.SUB_PLANS.key, onlySubplans);
+//		
+//		PlanTargetService service = new PlanTargetService(params);
+//		List<IGeoResource> resources = new ArrayList<IGeoResource>();
+//		resources.addAll(service.resources(null));
+//		return resources;
+//	}
 
+	@Override
+	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
+			throws Exception {
+		return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTIPOINT, PlanTargetResultSetMetadata.GEOM_COLUMN_NAME));
+	}
 }

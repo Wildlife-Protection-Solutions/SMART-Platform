@@ -27,9 +27,11 @@ import java.util.List;
 
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Result set for a simple SMART query.
@@ -89,8 +91,15 @@ public class MemoryQueryResultSet extends AbstractQueryResultSet {
 	}
 
 	@Override
-	protected Object getCurrentItem(int colIndex) {
-		return metadata.getQueryColumn(colIndex - 1).getValue(items.get(getRow()));
+	protected Object getCurrentItem(int colIndex) throws OdaException{
+		QueryColumn col = metadata.getQueryColumn(colIndex - 1);
+		if (col != null) return col.getValue(items.get(getRow()));
+		
+		IResultItem item = items.get(getRow());
+		if (item instanceof IGeometryResultItem){
+			return ((IGeometryResultItem)item).asGeometry(getMetaData().getColumnName(colIndex));
+		}
+		return null;
 	}
 
 	@Override

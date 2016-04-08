@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.patrol.query,
  org.wcs.smart.query,
  org.wcs.smart.report.birt.query,
- org.wcs.smart.p2
+ org.wcs.smart.p2,
+ org.wcs.smart.report
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.plan,

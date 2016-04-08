@@ -57,10 +57,7 @@ public class ReportSmartStyleEditorDialog extends SmartStyleEditorDialog impleme
 		return dialog;
 	}
 
-	  
-    
-
-    /**
+	/**
      * Creates a new dialog under the control of the given manager manager.
      * 
      * @param parentShell the parent shell

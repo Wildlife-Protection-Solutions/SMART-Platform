@@ -22,7 +22,6 @@
 package org.wcs.smart.query.common.model;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Collection;
 

@@ -43,7 +43,7 @@ import org.wcs.smart.query.model.filter.date.WaypointDateField;
 public class SummaryMetadataProvider implements IMetadataProvider {
 
 	@Override
-	public IResultSetMetaData createMetadata(Query query, SmartConnection c) throws OdaException {
+	public IResultSetMetaData createMetadata(Query query, String[] geometryColumns, SmartConnection c) throws OdaException {
 		ObservationSummaryQuery q = (ObservationSummaryQuery)query;
 		
 		//set a default date filter for parsing

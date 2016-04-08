@@ -80,8 +80,10 @@ public class SmartDatasetMetadata implements IDataSetMetaData {
 	 * getDataSourceProductName()
 	 */
 	public String getDataSourceProductName() throws OdaException {
-		return "Smart Data Source";
-//		return Messages.SmartDatasetMetadata_SmartDataSourceName;
+		if (m_connection instanceof SmartConnection){
+			return ((SmartConnection) m_connection).getDataSourceProductName();
+		}
+		return null;
 	}
 
 	/*

@@ -158,7 +158,7 @@ public class IntelligenceGeoResource extends IGeoResource {
         return super.resolve(adaptee, monitor);
     }
     
-    private Style createStyle(){
+    public static Style createStyle(){
     	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> " //$NON-NLS-1$
     			+ "<styleEntry type=\"SLDStyle\" version=\"1.0\">" //$NON-NLS-1$
     			+ "&lt;sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\"&gt;" //$NON-NLS-1$

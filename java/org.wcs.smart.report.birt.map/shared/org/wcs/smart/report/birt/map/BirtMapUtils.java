@@ -23,9 +23,10 @@ package org.wcs.smart.report.birt.map;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -34,15 +35,10 @@ import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.eclipse.birt.report.model.api.util.DimensionUtil;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.XMLMemento;
-import org.geotools.styling.Style;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
-import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -53,26 +49,16 @@ import org.wcs.smart.udig.style.StyleManager;
  */
 public class BirtMapUtils {
 	
-	public static Image parseImageFromStyleString(String styleString){
-		StyleBlackboard sb = parseStyleString(styleString);
-		if (sb == null) return null;
-		
-		Style glyphStyle = (Style) sb.get(SLDContent.ID);
-		if (glyphStyle == null) return null;
-		
-		return StyleManager.INSTANCE.createImage(glyphStyle);	
-	}
 	
 	public static StyleBlackboard parseStyleString(String styleString){
 		//for backwards compatibility this can either be a blackboard
 		//json string or a single SLD xmlMemento
 		if (styleString.startsWith("[")){ //$NON-NLS-1$
-			//blackboard
 			try{
 				StyleBlackboard sb = StyleManager.INSTANCE.fromString(styleString);
 				return sb;
 			}catch (Exception ex){
-				SmartMapItemPlugIn.log(ex.getMessage(), ex);
+				Logger.getLogger(BirtMapUtils.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 				return null;
 			}
 		}else{
@@ -81,7 +67,6 @@ public class BirtMapUtils {
 			sb.put(SLDContent.ID, mementoToStyle(styleString));
 			return sb;
 		}
-		
 	}
 	
 	/**
@@ -98,7 +83,7 @@ public class BirtMapUtils {
 			SLDContent cnt = new SLDContent();
 			return cnt.load(memento);
 		} catch (Exception ex) {
-			SmartMapItemPlugIn.log(Messages.BirtMapUtils_SLDParseError, ex);
+			Logger.getLogger(BirtMapUtils.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 			return null;
 		}
 	}
@@ -197,30 +182,30 @@ public class BirtMapUtils {
 		
 	}
 	
-	private static List<IBirtMapLayerManager> layerExtensions = null;
-	private static Object lock = new Object();
-	public static List<IBirtMapLayerManager> getMapLayerExtensions(){
-		if (layerExtensions != null){
-			return layerExtensions;
-		}
-		synchronized (lock) {
-			if (layerExtensions == null){
-				String maplayer = "org.wcs.smart.report.birt.maplayer"; //$NON-NLS-1$
-				List<IBirtMapLayerManager> items = new ArrayList<IBirtMapLayerManager>();
-				if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-				IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(maplayer);
-				try {
-					for (IConfigurationElement e : config) {
-						IBirtMapLayerManager mapLayer = (IBirtMapLayerManager) e.createExecutableExtension("maplayer"); //$NON-NLS-1$
-						items.add(mapLayer);
-					}
-				}catch (Exception ex){
-					SmartMapItemPlugIn.log(ex.getMessage(), ex);
-				}
-				layerExtensions = items;
-			}
-		}
-		
-		return layerExtensions;
-	}
+//	private static List<IBirtMapLayerManager> layerExtensions = null;
+//	private static Object lock = new Object();
+//	public static List<IBirtMapLayerManager> getMapLayerExtensions(){
+//		if (layerExtensions != null){
+//			return layerExtensions;
+//		}
+//		synchronized (lock) {
+//			if (layerExtensions == null){
+//				String maplayer = "org.wcs.smart.report.birt.maplayer"; //$NON-NLS-1$
+//				List<IBirtMapLayerManager> items = new ArrayList<IBirtMapLayerManager>();
+//				if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+//				IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(maplayer);
+//				try {
+//					for (IConfigurationElement e : config) {
+//						IBirtMapLayerManager mapLayer = (IBirtMapLayerManager) e.createExecutableExtension("maplayer"); //$NON-NLS-1$
+//						items.add(mapLayer);
+//					}
+//				}catch (Exception ex){
+//					SmartMapItemPlugIn.log(ex.getMessage(), ex);
+//				}
+//				layerExtensions = items;
+//			}
+//		}
+//		
+//		return layerExtensions;
+//	}
 }

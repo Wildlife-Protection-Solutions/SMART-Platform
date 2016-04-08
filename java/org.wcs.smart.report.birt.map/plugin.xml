@@ -5,8 +5,9 @@
    <extension
          point="org.eclipse.birt.report.model.reportItemModel">
       <reportItem
-            class="org.wcs.smart.report.birt.map.SmartMapFactory"
+            class="org.wcs.smart.report.birt.map.item.SmartMapItemFactory"
             displayNameID="SmartMapItem.Name"
+            extendsFrom="ReportItem"
             extensionName="org.wcs.smart.report.birt.SmartMap">
          <property
                allowExpression="false"
@@ -15,46 +16,6 @@
                isEncryptable="false"
                name="org.wcs.smart.birt.map.basemap"
                type="string">
-         </property>
-         <property
-               canInherit="true"
-               defaultDisplayName="%mapitem.parameter.layers.name"
-               hasOwnModel="true"
-               isEncryptable="false"
-               isList="false"
-               name="org.wcs.smart.birt.map.layers"
-               subType="string"
-               type="list">
-         </property>
-         <property
-               canInherit="true"
-               defaultDisplayName="dataset name"
-               hasOwnModel="true"
-               isEncryptable="false"
-               isList="false"
-               name="org.wcs.smart.birt.map.layerDataSet"
-               subType="string"
-               type="list">
-         </property>
-         <property
-               canInherit="true"
-               defaultDisplayName="%mapitem.parameter.layerNames.name"
-               hasOwnModel="true"
-               isEncryptable="false"
-               isList="false"
-               name="org.wcs.smart.birt.map.layerNames"
-               subType="string"
-               type="list">
-         </property>
-         <property
-               canInherit="true"
-               defaultDisplayName="%mapitem.parameter.layerStyles.name"
-               hasOwnModel="true"
-               isEncryptable="false"
-               isList="false"
-               name="org.wcs.smart.birt.map.layerStyles"
-               subType="string"
-               type="list">
          </property>
          <propertyGroup
                defaultDisplayName="%mapitem.parameter.bounds.name"
@@ -113,33 +74,66 @@
                allowedUnits="CM,IN,MM,PT,PC,PX"
                propertyName="height">
          </overrideProperty>
+         <property
+               canInherit="true"
+               isEncryptable="false"
+               isList="true"
+               name="org.wcs.smart.birt.map.layers2"
+               type="element">
+            <elementType
+                  name="org.wcs.smart.report.birt.MapLayer">
+            </elementType>
+         </property>
       </reportItem>
-   </extension>
-   <extension
-         point="org.eclipse.birt.report.designer.ui.reportitemUI">
-      <model
-            extensionName="org.wcs.smart.report.birt.SmartMap">
-      </model>
-      <palette
-            icon="images/icons/obj16/map.png"></palette>
-      <editor
-            canResize="true"
-            showInDesigner="true"
-            showInMasterPage="true">
-      </editor>
-      <outline
-            icon="images/icons/obj16/map.png">
-      </outline>
-      <reportItemImageUI
-            class="org.wcs.smart.report.birt.map.SmartMapItemImageUi">
-      </reportItemImageUI>
-   </extension>
-   <extension
-         point="org.eclipse.birt.report.engine.reportitemPresentation">
       <reportItem
-            class="org.wcs.smart.report.birt.map.SmartMapPresentationImpl"
-            name="org.wcs.smart.report.birt.SmartMap">
+            class="org.wcs.smart.report.birt.map.item.LayerItemFactory"
+            extendsFrom="ReportItem"
+            extensionName="org.wcs.smart.report.birt.MapLayer"
+            hasStyle="false"
+            isNameRequired="false">
+         <property
+               canInherit="true"
+               defaultDisplayName="%mapitem.parameter.layerNames.name"
+               hasOwnModel="true"
+               isEncryptable="false"
+               isList="false"
+               name="org.wcs.smart.birt.map.layerName"
+               type="string">
+         </property>
+         <property
+               canInherit="true"
+               defaultDisplayName="%mapitem.parameter.layerStyles.name"
+               hasOwnModel="true"
+               isEncryptable="false"
+               isList="false"
+               name="org.wcs.smart.birt.map.layerStyle"
+               type="string">
+         </property>
+         <property
+               canInherit="false"
+               hasOwnModel="true"
+               isEncryptable="false"
+               isList="false"
+               name="org.wcs.smart.birt.map.layerType"
+               type="string">
+         </property>
+         <property
+               canInherit="true"
+               hasOwnModel="true"
+               isEncryptable="false"
+               isList="false"
+               name="org.wcs.smart.birt.map.geomColumn"
+               type="string">
+         </property>
       </reportItem>
+   </extension>
+   <extension
+         point="org.eclipse.birt.report.engine.extendedItemFactory">
+      <itemFactory
+            class="org.wcs.smart.report.birt.map.item.MapItemFactory"
+            id="org.wcs.smart.report.birt.SmartMap"
+            name="org.wcs.smart.report.birt.SmartMap">
+      </itemFactory>
    </extension>
    <extension
          point="org.eclipse.birt.report.designer.ui.elementAdapters">
@@ -169,6 +163,26 @@
                id="org.wcs.smart.reportCloner">
          </require>
       </templateCloner>
+   </extension>
+   <extension
+         point="org.eclipse.birt.report.designer.ui.reportitemUI">
+      <model
+            extensionName="org.wcs.smart.report.birt.SmartMap">
+      </model>
+      <palette
+            icon="images/icons/obj16/map.png">
+      </palette>
+      <editor
+            canResize="true"
+            showInDesigner="true"
+            showInMasterPage="true">
+      </editor>
+      <outline
+            icon="images/icons/obj16/map.png">
+      </outline>
+      <reportItemImageUI
+            class="org.wcs.smart.report.birt.map.SmartMapItemImageUi">
+      </reportItemImageUI>
    </extension>
 
 </plugin>

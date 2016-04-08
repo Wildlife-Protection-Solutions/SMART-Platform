@@ -6,6 +6,9 @@
       <MapLayer
             maplayer="org.wcs.smart.report.query.map.QueryMapLayer">
       </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.report.query.data.oda.query.QueryStyleProvider">
+      </StyleProvider>
    </extension>
    <extension
          point="org.wcs.smart.report.birt.query.queryDataset">

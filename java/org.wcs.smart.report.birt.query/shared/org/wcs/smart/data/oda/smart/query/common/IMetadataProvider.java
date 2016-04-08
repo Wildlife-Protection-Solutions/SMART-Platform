@@ -34,6 +34,6 @@ import org.wcs.smart.query.model.Query;
  */
 public interface IMetadataProvider {
 
-	public IResultSetMetaData createMetadata(Query query, SmartConnection c)  throws OdaException;
+	public IResultSetMetaData createMetadata(Query query, String[] geometryColumns, SmartConnection c)  throws OdaException;
 	
 }
