@@ -38,7 +38,7 @@ import org.locationtech.udig.project.internal.ProjectPlugin;
  * @author Mauricio Pazos
  *
  */
-final class SyleContentFactory {
+public final class SyleContentFactory {
 	
 	/** cache of created StyleConten */
 	private static HashMap<String, StyleContent> STYLE_TO_CONTENT = new HashMap<String, StyleContent>();

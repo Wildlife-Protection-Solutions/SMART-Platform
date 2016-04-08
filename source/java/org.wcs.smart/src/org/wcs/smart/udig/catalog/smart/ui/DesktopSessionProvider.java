@@ -19,57 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.udig.catalog.smart.ui;
 
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
-import org.wcs.smart.ca.Station;
-import org.wcs.smart.hibernate.SmartDB;
+import java.util.Locale;
+
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 
 /**
- * The start of a permission manager for providing security around
- * objects.  This is minimally populated and is being populated on
- * an as required basis. 
+ * Session provider for dekstop smart services.
  * 
  * @author Emily
  *
  */
-public enum PermissionManager {
-	
-	INSTANCE;
-	
-	/**
-	 * Determine if the current user has permission to delete
-	 * a particular object type.
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	public boolean canDelete(Class<?> clazz){
-		if (clazz.equals(Station.class)){
-			return isAdmin();
-		}else if (clazz.equals(Employee.class)){
-			return isAdmin();
-		}
-		return false;
+public class DesktopSessionProvider implements IDatabaseConnectionProvider {
+
+	private static final long serialVersionUID = 1L;
+
+	@Override
+	public Session openSession() {
+		return HibernateManager.openSession();
 	}
-	
-	/**
-	 * Determines if the current user can configure smart desktop
-	 * accounts
-	 * @return
-	 */
-	public boolean canConfigureSmartUser(){
-		return isAdmin();
+
+	@Override
+	public Locale getLocale() {
+		return Locale.getDefault();
 	}
-	
-	/**
-	 * Determines if the current user is an admin user.
-	 * @return
-	 */
-	public boolean isAdmin(){
-		SmartUserLevel level =SmartDB.getCurrentEmployee().getSmartUserLevel();
-		if (level == null) return false;
-		return level == SmartUserLevel.ADMIN;
-	}
+
 }

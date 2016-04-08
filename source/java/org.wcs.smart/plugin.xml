@@ -1431,6 +1431,11 @@
             id="org.wcs.smart.udig.savedStyle"
             name="%savedstyle.name">
       </style>
+      <style
+            class="org.wcs.smart.udig.style.SmartGridCellStyleContent"
+            id="org.wcs.smart.query.grid.style.border"
+            name="SMART Grid Border Style">
+      </style>
    </extension>
    <extension
          id="id2"
@@ -1458,6 +1463,12 @@
       <ChangeLogTracker
             clazz="org.wcs.smart.upgrade.SmartChangeLogTracker">
       </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.login">
+      <loginHandler
+            clazz="org.wcs.smart.udig.catalog.smart.ui.RefreshListener">
+      </loginHandler>
    </extension>
 
 </plugin>

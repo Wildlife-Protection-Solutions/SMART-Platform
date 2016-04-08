@@ -30,7 +30,7 @@ import org.locationtech.udig.project.internal.StyleEntry;
  * @author Mauricio Pazos
  *
  */
-final class StyleRegister {
+public final class StyleRegister {
 
 	private final String id; 
 	private final String memento;

@@ -96,6 +96,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.style.SmartLayerStyle;
+import org.wcs.smart.udig.style.StyleImageProducer;
 import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
@@ -319,11 +320,16 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		});
 		loadStylesJob.schedule();
 		
-		String uuid = (String)getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
-		if (uuid == null || uuid.length() != 32){
-			currentLayerSs = null;
-		}else{
-			currentLayerSs = UUID.fromString(uuid);
+		Object x = getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
+		if (x instanceof UUID){
+			currentLayerSs = (UUID)x;
+		}else if (x instanceof String){
+			String uuid = (String)x;
+			if (uuid == null || uuid.length() != 32){
+				currentLayerSs = null;
+			}else{
+				currentLayerSs = UUID.fromString(uuid);
+			}
 		}
 		return leftArea;
 	}
@@ -544,7 +550,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 							StyleBlackboard parsed = StyleManager.INSTANCE.fromString(toSave.getStyleString());
 							Style sld = (Style)parsed.get(SLDContent.ID);
 							if (sld != null){
-								((SmartStyleLabelProvider)lstSmart.getLabelProvider()).setGlyph(toSave, StyleManager.INSTANCE.createImage(sld));
+								((SmartStyleLabelProvider)lstSmart.getLabelProvider()).setGlyph(toSave, StyleImageProducer.INSTANCE.createImage(sld));
 							}
 						}catch (Exception ex){
 							
@@ -782,7 +788,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 							getShell().getDisplay().syncExec(new Runnable(){
 								@Override
 								public void run() {
-									lprovider.setGlyph(ss, StyleManager.INSTANCE.createImage(lsld));
+									lprovider.setGlyph(ss, StyleImageProducer.INSTANCE.createImage(lsld));
 									if (!lstSmart.getControl().isDisposed()) lstSmart.refresh(ss);
 								}});
 							

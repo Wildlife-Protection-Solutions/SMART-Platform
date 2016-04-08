@@ -563,6 +563,7 @@ public class Messages extends NLS {
 	public static String DerbyRestoreEngine_VersionError;
 	public static String DerbyRestoreEngine_Warning_Dialog_Message;
 	public static String DerbyRestoreEngine_Warning_Dialog_Title;
+	public static String DesktopSmartServiceLabelProvider_ConnectionProvider;
 	public static String DialogConstants_AddButton_Label;
 	public static String DialogConstants_DeleteButton_Label;
 	public static String DialogConstants_DisableAllButton_Label;
@@ -860,6 +861,7 @@ public class Messages extends NLS {
 	public static String Rank_Label;
 	public static String RankDeleteAdvisor_Error_NotRank;
 	public static String RankDeleteAdvisor_Error_RankReferenced;
+	public static String RefreshListener_MapLayerRefreshError;
 	public static String RestoreDialog_BrowseButton;
 	public static String RestoreDialog_Error_DialogTitle;
 	public static String RestoreDialog_FileError_DialogMessage;

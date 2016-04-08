@@ -29,8 +29,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-//import org.eclipse.equinox.p2.ui.Policy;
-//import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
@@ -41,13 +39,16 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
 import org.osgi.framework.BundleContext;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.SmartStartUp;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
+import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
+import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
+import org.wcs.smart.udig.catalog.smart.ui.DesktopSmartServiceLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -243,6 +244,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
 		SmartContext.INSTANCE.setClass(ICoreLabelProvider.class, new SmartLabelProvider());
 		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
+		
+		SmartContext.INSTANCE.setClass(IDatabaseConnectionProvider.class, new DesktopSessionProvider());
+		SmartContext.INSTANCE.setClass(ISmartMapLabelProvider.class, new DesktopSmartServiceLabelProvider());
 	}
 
 	public static void initializeDatabase(){
@@ -383,17 +387,6 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static SmartPlugIn getDefault() {
 		return plugin;
 	}
-
-//	private void configureP2Policy(Policy policy) {
-////		policy.setRepositoriesVisible(false);
-//		policy.setShowLatestVersionsOnly(true);
-//		policy.setGroupByCategory(true);
-//		policy.setShowDrilldownRequirements(true);
-//		policy.setRestartPolicy(Policy.RESTART_POLICY_PROMPT);
-//		//this causes problems in udig as it doesn't seem to be run
-//		//in display thread
-////		policy.setRestartPolicy(Policy.RESTART_POLICY_FORCE);
-//	}
 	
 	public static void log(int status, String message, Throwable t){
         getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));

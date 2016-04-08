@@ -19,57 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.udig.catalog.smart;
 
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
-import org.wcs.smart.ca.Station;
-import org.wcs.smart.hibernate.SmartDB;
+import java.io.Serializable;
+import java.util.Locale;
+
+import org.hibernate.Session;
 
 /**
- * The start of a permission manager for providing security around
- * objects.  This is minimally populated and is being populated on
- * an as required basis. 
- * 
+ * Connection provider for SMART Services
  * @author Emily
  *
  */
-public enum PermissionManager {
-	
-	INSTANCE;
-	
+public interface IDatabaseConnectionProvider extends Serializable{
+
 	/**
-	 * Determine if the current user has permission to delete
-	 * a particular object type.
+	 * Opens a new session.  Service is responsible for closing session
+	 * once complete.
 	 * 
-	 * @param clazz
+	 * This should open a new session as it may be closed by
+	 * the calling function at any time.
 	 * @return
 	 */
-	public boolean canDelete(Class<?> clazz){
-		if (clazz.equals(Station.class)){
-			return isAdmin();
-		}else if (clazz.equals(Employee.class)){
-			return isAdmin();
-		}
-		return false;
-	}
+	public Session openSession();
 	
 	/**
-	 * Determines if the current user can configure smart desktop
-	 * accounts
+	 * The current locale
 	 * @return
 	 */
-	public boolean canConfigureSmartUser(){
-		return isAdmin();
-	}
-	
-	/**
-	 * Determines if the current user is an admin user.
-	 * @return
-	 */
-	public boolean isAdmin(){
-		SmartUserLevel level =SmartDB.getCurrentEmployee().getSmartUserLevel();
-		if (level == null) return false;
-		return level == SmartUserLevel.ADMIN;
-	}
+	public Locale getLocale();
 }

@@ -74,6 +74,7 @@ import org.wcs.smart.udig.catalog.smart.SmartGeoResource;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResourceInfo;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
+import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -160,7 +161,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (services.size() > 0){
 			ss = (SmartService) CatalogPlugin.getDefault().getLocalCatalog().find(serviceurl, monitor).get(0);
 		}else{
-			ss = new SmartService(params);
+			ss = new SmartService(params, new DesktopSessionProvider());
 		}
 		
 		if (updated){

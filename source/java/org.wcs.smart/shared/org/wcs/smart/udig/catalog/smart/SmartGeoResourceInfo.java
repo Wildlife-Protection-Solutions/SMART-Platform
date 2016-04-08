@@ -22,6 +22,9 @@
 package org.wcs.smart.udig.catalog.smart;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
@@ -32,9 +35,11 @@ import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.SmartLabelProvider;
+//import org.wcs.smart.SmartPlugIn;
+//import org.wcs.smart.internal.Messages;
+//import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -48,7 +53,7 @@ public class SmartGeoResourceInfo extends IGeoResourceInfo {
 	private int featureCount = -1;
 	
 	public SmartGeoResourceInfo( SmartGeoResource resource, IProgressMonitor monitor){
-		this.title = SmartLabelProvider.getAreaTypeName(resource.areaType);
+		this.title = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(resource.areaType, Locale.getDefault());
 		try {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
@@ -65,7 +70,7 @@ public class SmartGeoResourceInfo extends IGeoResourceInfo {
 			this.bounds = env;
 		} catch (IOException e) {
 			this.featureCount = -1;
-			SmartPlugIn.log(Messages.SmartGeoResourceInfo_Error_ComputingBounds + title, e);
+			Logger.getLogger(SmartGeoResource.class.getName()).log(Level.SEVERE, "Error computing bounds for Smart GeoResource.", e); //$NON-NLS-1$
 		}
 	}
 	

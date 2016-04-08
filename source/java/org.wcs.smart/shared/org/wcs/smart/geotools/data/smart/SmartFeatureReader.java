@@ -23,6 +23,7 @@ package org.wcs.smart.geotools.data.smart;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -34,8 +35,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -51,16 +50,17 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		
 	private boolean createTransaction = false;
 	
-	public SmartFeatureReader(ConservationArea ca,
-			AreaType type,SimpleFeatureType ftype) {
-		this.session = HibernateManager.openSession();
+	public SmartFeatureReader(UUID ca,
+			AreaType type,SimpleFeatureType ftype, 
+			Session session) {
+		this.session = session;
 		if (!session.getTransaction().isActive()){
 			this.session.beginTransaction();
 			createTransaction = true;
 		}
 		
 		itemCursor = session.createCriteria(Area.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("conservationArea.uuid", ca)) //$NON-NLS-1$
 				.add(Restrictions.eq("type", type)).setReadOnly(true).setCacheable(false).scroll(ScrollMode.FORWARD_ONLY); //$NON-NLS-1$
 		
 		
@@ -105,7 +105,7 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
-		//		String spec = "geom:MultiPolygon:srid=4326,uuid:String,id:String,key:String";
+		//String spec = "geom:MultiPolygon:srid=4326,uuid:String,id:String,key:String";
 		Area a = (Area)itemCursor.get(0);
 		String fid = ftype.getTypeName() + "." + a.getKeyId(); //$NON-NLS-1$
 		Object values[] = new Object[5];
@@ -113,7 +113,6 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		values[1] = fid;
 		values[2] = a.getName();
 		values[3] = a.getKeyId();
-//		values[4] = SmartUtils.encodeHex(a.getUuid());
 		values[4] = UuidUtils.uuidToString(a.getUuid());
 		
 		return SimpleFeatureBuilder.build(ftype, values, fid);
