@@ -36,6 +36,9 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+
 /**
  * Entity type table for BIRT reporting 
  * 
@@ -44,7 +47,12 @@ import org.wcs.smart.entity.model.EntityType;
  */
 public class EntityTable extends SmartBirtTable {
 
+	public static final String GEOMETRY_COL_KEY = "geometry"; //$NON-NLS-1$
+	
 	public static final String ENTITYKEY_PREFIX = "ENTITY"; //$NON-NLS-1$
+	
+	private static final GeometryFactory gf = new GeometryFactory();
+	
 	private EntityType et;
 	
 	public EntityTable(EntityType et) {
@@ -54,11 +62,13 @@ public class EntityTable extends SmartBirtTable {
 
 	@Override
 	public String[] getColumnNames(SmartConnection connection) {
+		int size = et.getAttributes().size() + 2;
 		int add = 2;
 		if (et.getType() == EntityType.Type.FIXED){
 			add = 4;
+			size += 3;
 		}
-		String[] cols = new String[et.getAttributes().size() + add];
+		String[] cols = new String[size];
 		
 		cols[0] = "entity:id"; //$NON-NLS-1$
 		cols[1] = "entity:status"; //$NON-NLS-1$
@@ -72,17 +82,22 @@ public class EntityTable extends SmartBirtTable {
 			cols[i+add] = ea.getKeyId();
 			i++;
 		}
+		if (et.getType() == EntityType.Type.FIXED){
+			cols[i+add] = GEOMETRY_COL_KEY;
+		}
 		return cols;
 	}
 
 	@Override
 	public String[] getColumnLabels(SmartConnection connection) {
 		int add = 2;
+		int size = et.getAttributes().size() + 2;
 		if (et.getType() == EntityType.Type.FIXED){
 			add = 4;
+			size += 3;
 		}
 		
-		String[] cols = new String[et.getAttributes().size() + add];
+		String[] cols = new String[size];
 		
 		IEntityLabelProvider lblProvider = SmartContext.INSTANCE.getClass(IEntityLabelProvider.class);
 		
@@ -99,17 +114,21 @@ public class EntityTable extends SmartBirtTable {
 			cols[i+add]=ea.getName();
 			i++;
 		}
+		if (et.getType() == EntityType.Type.FIXED){
+			cols[i+add] = GEOMETRY_COL_KEY;
+		}
 		return cols;
 	}
 
 	@Override
 	public int[] getColumnTypes(SmartConnection connection) {
+		int size = et.getAttributes().size() + 2;
 		int add = 2;
 		if (et.getType() == EntityType.Type.FIXED){
 			add = 4;
+			size += 3;
 		}
-		int[] cols = new int[et.getAttributes().size() + add];
-		
+		int[] cols = new int[size];
 		cols[0] = java.sql.Types.VARCHAR;
 		cols[1] = java.sql.Types.VARCHAR;
 		if (et.getType() == EntityType.Type.FIXED){
@@ -130,6 +149,9 @@ public class EntityTable extends SmartBirtTable {
 				cols[i+add]=java.sql.Types.VARCHAR;
 			}
 			i++;
+		}
+		if (et.getType() == EntityType.Type.FIXED){
+			cols[i+add] = java.sql.Types.JAVA_OBJECT;
 		}
 		return cols;
 	}
@@ -163,6 +185,9 @@ public class EntityTable extends SmartBirtTable {
 				return e.getX();
 			}else if (index == 3){
 				return e.getY();
+			}else if ((index-4) == et.getAttributes().size() ){
+				if (e.getX() == null || e.getY() == null) return null;
+				return gf.createPoint(new Coordinate(e.getX(), e.getY()));
 			}
 			index = index - 2;
 		}

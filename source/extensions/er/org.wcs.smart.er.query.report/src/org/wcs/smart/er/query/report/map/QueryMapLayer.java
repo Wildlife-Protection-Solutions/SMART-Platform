@@ -21,15 +21,19 @@
  */
 package org.wcs.smart.er.query.report.map;
 
-import org.locationtech.udig.catalog.IService;
-import org.wcs.smart.er.query.map.udig.QueryServiceFactory;
+import java.util.Collections;
+import java.util.List;
+
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
+import org.wcs.smart.report.birt.map.AbstractQueryMapLayer;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * SMART query map layer implementation for survey queries
@@ -51,10 +55,23 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 		return false;
 	}
 
-
 	@Override
-	public IService createQueryService(Query query) {
-		return QueryServiceFactory.generateQueryService(query);
+	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey) {		
+		if (queryTypeKey.equals(SurveyObservationQuery.KEY) ||
+				queryTypeKey.equals(SurveyWaypointQuery.KEY)){			
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, SurveyQueryResultItem.WAYPOINT_GEOMETRY);
+			return Collections.singletonList(def);
+		}else if (queryTypeKey.equals(MissionQuery.KEY)){
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, SurveyQueryResultItem.TRACK_GEOMETRY);
+			return Collections.singletonList(def);
+		}else if (queryTypeKey.equals(MissionTrackQuery.KEY)){
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, MissionTrackResultItem.TRACK_GEOMETRY);
+			return Collections.singletonList(def);
+		}else if (queryTypeKey.equals(SurveyGriddedQuery.KEY)){
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, "raster");
+			return Collections.singletonList(def);
+		}
+		return null;
 	}
 
 }

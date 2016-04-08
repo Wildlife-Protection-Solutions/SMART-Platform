@@ -38,9 +38,8 @@ import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.model.QueryResultSetIterator;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Feature reading for mission tracks associated with observation
@@ -131,7 +130,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		if (isWaypointMissionTrack){
 			byte[] next = (byte[]) this.fIterator.next();
-			Mission mission = (Mission) getSession().load(Mission.class, next);
+			Mission mission = (Mission) getSession().load(Mission.class, UuidUtils.byteToUUID(next));
 			SimpleFeature f = SurveyResultItemFeature.createObservationFeature(mission, ftype);
 			return f;
 		}else{

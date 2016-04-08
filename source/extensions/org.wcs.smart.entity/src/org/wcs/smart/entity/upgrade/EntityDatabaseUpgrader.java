@@ -21,16 +21,13 @@
  */
 package org.wcs.smart.entity.upgrade;
 
-import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.updatesite.AddEntityJob;
-import org.wcs.smart.entity.updatesite.OnInstallAction;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;

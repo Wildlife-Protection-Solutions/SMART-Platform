@@ -21,31 +21,18 @@
  */
 package org.wcs.smart.entity.report;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.MemberHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.locationtech.udig.catalog.CatalogPlugin;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IResolve;
-import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.eclipse.birt.report.model.api.ResultSetColumnHandle;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
-import org.wcs.smart.entity.map.FixedEntityGeoResource;
-import org.wcs.smart.entity.map.FixedEntityService;
-import org.wcs.smart.entity.map.FixedEntityServiceExtension;
-import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Map Layers for fixed entity types.
@@ -58,10 +45,6 @@ public class FixedEntityMapLayer implements IBirtMapLayerManager {
 	public FixedEntityMapLayer() {
 	}
 
-	@Override
-	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource){
-		return null;
-	}
 	
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
@@ -80,66 +63,21 @@ public class FixedEntityMapLayer implements IBirtMapLayerManager {
 		return false;
 	}
 
+
 	@Override
-	public List<IGeoResource> createLayer(DataSetHandle handle,
-			IReportContext context) throws Exception {
-		if (!(handle instanceof OdaDataSetHandle)){
-			return null;
-		}
-		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
-		if (!odaHandle.getExtensionID().equals(SmartTableQuery.SMART_DATASET_TYPE)){
-			return null;
-		}
-		
-		String entityTypeKey =  odaHandle.getQueryText().split(":")[2]; //$NON-NLS-1$
-		
-		EntityType et = null;
-		//session is managed by running report
-		Session s = HibernateManager.openSession();
-		Criteria c = s.createCriteria(EntityType.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", entityTypeKey)); //$NON-NLS-1$ 
-		List<?> data = c.list();
-		if (data.size() > 0){
-			if (((EntityType)data.get(0)).getType()==EntityType.Type.FIXED){
-				et = (EntityType)data.get(0);
+	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
+			throws Exception {
+		MemberHandle metadata = handle.getCachedMetaDataHandle().getResultSet();
+		if (metadata.getListValue() != null) {
+			for (int i=0; i < metadata.getListValue().size(); i++) {
+				ResultSetColumnHandle resultSetColumn=(ResultSetColumnHandle)metadata.getAt(i);
+				if (resultSetColumn.getColumnName().equals(EntityTable.GEOMETRY_COL_KEY)){
+					MapLayerInfo info = new MapLayerInfo(null, null, LayerType.POINT, resultSetColumn.getColumnName());
+					return Collections.singletonList(info);
+				}
 			}
 		}
-		
-		if (et == null){
-			return null;
-		}
-		
-		Map<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(FixedEntityServiceExtension.CAUUID_KEY, et.getConservationArea().getUuid());
-		
-		//find fixed entity service
-		FixedEntityService service = null;
-		List<IResolve> citems = CatalogPlugin.getDefault().getLocalCatalog().find(FixedEntityServiceExtension.createURL(et.getConservationArea()), null);
-		for (IResolve i : citems){
-			if (i instanceof FixedEntityService){
-				service = (FixedEntityService) i;
-			}
-			
-		}
-		if (service == null){
-			service = (FixedEntityService) CatalogPlugin.getDefault().getLocalCatalog().acquire(FixedEntityServiceExtension.createURL(et.getConservationArea()), null);
-		}
-		
-		//find georesource
-		List<IGeoResource> resources = new ArrayList<IGeoResource>();
-		List<? extends IGeoResource> items = service.resources(null);
-		for (IGeoResource i : items){
-			if (((FixedEntityGeoResource)i).getEntityTypeKey().equals(et.getKeyId())){
-				resources.add(i);		
-			}
-		}
-		for (EntityAttribute ea : et.getAttributes()){
-			ea.getName();
-		}
-		service.refresh(et, null);
-		
-		return resources;
+		return null;
 	}
 
 }

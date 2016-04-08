@@ -32,7 +32,6 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.common.engine.CleanUpQueryJob;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;

@@ -21,32 +21,16 @@
  */
 package org.wcs.smart.er.query.report.table;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.locationtech.udig.catalog.CatalogPlugin;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IResolve;
-import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
-import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
-import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
-import org.wcs.smart.er.map.samplingunit.SamplingUnitServiceExtension;
-import org.wcs.smart.er.map.samplingunit.SamplingUnitSourceFactory;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Map Layers for survey sampling units.
@@ -59,10 +43,6 @@ public class SurveySamplingUnitMapLayer implements IBirtMapLayerManager {
 	public SurveySamplingUnitMapLayer() {
 	}
 
-	@Override
-	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource){
-		return null;
-	}
 	
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
@@ -78,62 +58,24 @@ public class SurveySamplingUnitMapLayer implements IBirtMapLayerManager {
 		return false;
 	}
 
+
+
 	@Override
-	public List<IGeoResource> createLayer(DataSetHandle handle,
-			IReportContext context) throws Exception {
-		if (!(handle instanceof OdaDataSetHandle)){
-			return null;
-		}
-		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
-		if (!odaHandle.getExtensionID().equals(SmartTableQuery.SMART_DATASET_TYPE)){
-			return null;
-		}
-		
-		String surveyDesignKey =  odaHandle.getQueryText().split(":")[2]; //$NON-NLS-1$
-		SamplingUnit.GeometryType suType = SamplingUnit.GeometryType.valueOf(odaHandle.getQueryText().split(":")[1]); //$NON-NLS-1$
-		SurveyDesign sd = null;
-		
-		//session is managed by running report
-		Session s = HibernateManager.openSession();
-		Criteria c = s.createCriteria(SurveyDesign.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", surveyDesignKey)); //$NON-NLS-1$ 
-		List<?> data = c.list();
-		if (data.size() > 0){
-			sd = (SurveyDesign)data.get(0);
-		}
-		
-		if (sd == null){
-			return null;
-		}
-		
-		Map<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(SamplingUnitSourceFactory.SD_UUID.key, sd.getUuid());
-		
-		//find fixed entity service
-		SamplingUnitService service = null;
-		List<IResolve> citems = CatalogPlugin.getDefault().getLocalCatalog().find(SamplingUnitServiceExtension.createURL(params), null);
-		for (IResolve i : citems){
-			service = (SamplingUnitService) i;
-		}
-		if (service == null){
-			service = (SamplingUnitService) CatalogPlugin.getDefault().getLocalCatalog().acquire(SamplingUnitServiceExtension.createURL(params), null);
-		}
-		
-		//find georesource
-		List<IGeoResource> resources = new ArrayList<IGeoResource>();
-		List<? extends IGeoResource> items = service.resources(null);
-		for (IGeoResource i : items){
-			if (suType == SamplingUnit.GeometryType.PLOT && 
-					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.GeometryType.PLOT.name()))){
-				resources.add(i);
-			}else if (suType == SamplingUnit.GeometryType.TRANSECT && 
-					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.GeometryType.TRANSECT.name()))){
-				resources.add(i);
+	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
+			throws Exception {
+		if (handle instanceof OdaDataSetHandle){
+			String queryText = ((OdaDataSetHandle) handle).getQueryText();
+			SamplingUnit.GeometryType suType = SamplingUnit.GeometryType.valueOf(queryText.split(":")[1]); //$NON-NLS-1$
+			if (suType == SamplingUnit.GeometryType.PLOT){
+				return Collections.singletonList(new MapLayerInfo(null, null, 
+						LayerType.POINT, SurveySamplingUnitTable.GEOMETRY_COLUMN));		
+			}else if (suType == SamplingUnit.GeometryType.TRANSECT){
+				return Collections.singletonList(new MapLayerInfo(null, null, 
+						LayerType.LINE, SurveySamplingUnitTable.GEOMETRY_COLUMN));
 			}
 		}
+		return null;
 		
-		return resources;
 	}
 
 }
