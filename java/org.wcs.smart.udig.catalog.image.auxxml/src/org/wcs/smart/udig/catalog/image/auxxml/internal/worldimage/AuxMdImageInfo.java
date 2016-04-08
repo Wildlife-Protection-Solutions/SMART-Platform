@@ -3,10 +3,9 @@
  */
 package org.wcs.smart.udig.catalog.image.auxxml.internal.worldimage;
 
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResource;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResourceInfo;
-
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**

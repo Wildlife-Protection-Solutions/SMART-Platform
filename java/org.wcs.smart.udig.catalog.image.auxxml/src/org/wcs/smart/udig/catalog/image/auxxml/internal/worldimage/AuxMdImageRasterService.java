@@ -22,12 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.locationtech.udig.catalog.ID;
-import org.locationtech.udig.catalog.URLUtils;
-import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResource;
-import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
-import org.locationtech.udig.catalog.rasterings.AbstractRasterServiceInfo;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
@@ -35,6 +29,12 @@ import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.factory.Hints;
 import org.geotools.gce.image.WorldImageFormatFactory;
 import org.geotools.referencing.CRS;
+import org.locationtech.udig.catalog.ID;
+import org.locationtech.udig.catalog.URLUtils;
+import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResource;
+import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
+import org.locationtech.udig.catalog.rasterings.AbstractRasterServiceInfo;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Copied from uDig, then modified to include the ability to
