@@ -14,6 +14,7 @@
         	<jts.version>1.13</jts.version>
         	<hibernate.version>4.2.18.Final</hibernate.version>
         	<birt.version>4.4.1</birt.version>
+        	<udig.version>2.0.0-SNAPSHOT</udig.version>
     	</properties>
     
 	<modules>
@@ -30,6 +31,7 @@
 		<module>./org.wcs.smart.intelligence.query/pom-shared.xml</module>
 		<module>./org.wcs.smart.independentincident/pom-shared.xml</module>
 		<module>./org.wcs.smart.report.birt.query/pom-shared.xml</module>
+		<module>./org.wcs.smart.report.birt.map/pom-shared.xml</module>
 		<module>./org.wcs.smart.observation.query.report/pom-shared.xml</module>
 		<module>./org.wcs.smart.patrol.query.report/pom-shared.xml</module>
 		<module>./org.wcs.smart.intelligence.query.report/pom-shared.xml</module>
