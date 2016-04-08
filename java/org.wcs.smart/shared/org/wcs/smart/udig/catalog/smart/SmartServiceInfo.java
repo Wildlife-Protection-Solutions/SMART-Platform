@@ -19,57 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.udig.catalog.smart;
 
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
-import org.wcs.smart.ca.Station;
-import org.wcs.smart.hibernate.SmartDB;
+import java.util.Locale;
+
+import org.locationtech.udig.catalog.IServiceInfo;
+import org.wcs.smart.SmartContext;
 
 /**
- * The start of a permission manager for providing security around
- * objects.  This is minimally populated and is being populated on
- * an as required basis. 
- * 
+ * Smart service information.
  * @author Emily
- *
+ * @since 1.0.0
  */
-public enum PermissionManager {
-	
-	INSTANCE;
-	
-	/**
-	 * Determine if the current user has permission to delete
-	 * a particular object type.
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	public boolean canDelete(Class<?> clazz){
-		if (clazz.equals(Station.class)){
-			return isAdmin();
-		}else if (clazz.equals(Employee.class)){
-			return isAdmin();
-		}
-		return false;
+public class SmartServiceInfo extends IServiceInfo{
+
+	public SmartServiceInfo(SmartService service){
+		ISmartMapLabelProvider provider = SmartContext.INSTANCE.getClass(ISmartMapLabelProvider.class);
+		Locale l = service.getLocale();
+		
+		this.description =  provider.getSmartServiceDescription(l);
+		this.icon = provider.getSmartServiceImage(l);
+		this.keywords = provider.getSmartServiceKeywords(l);
+		this.title = provider.getSmartServiceTitle(l);
 	}
 	
-	/**
-	 * Determines if the current user can configure smart desktop
-	 * accounts
-	 * @return
-	 */
-	public boolean canConfigureSmartUser(){
-		return isAdmin();
-	}
-	
-	/**
-	 * Determines if the current user is an admin user.
-	 * @return
-	 */
-	public boolean isAdmin(){
-		SmartUserLevel level =SmartDB.getCurrentEmployee().getSmartUserLevel();
-		if (level == null) return false;
-		return level == SmartUserLevel.ADMIN;
-	}
 }

@@ -27,26 +27,23 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.ui.PlatformUI;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.geotools.data.smart.SmartDataSource;
 import org.wcs.smart.geotools.data.smart.SmartDataSourceFactory;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.internal.Messages;
 
 /**
  * A udig service for smart
@@ -68,38 +65,36 @@ public class SmartService extends IService {
 	private SmartDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
-	//listeners to ensure service is refreshed when data is modified
-	private IEventBroker eb ;
-	private EventHandler dataChangeEventHandler = new EventHandler(){
-		@Override
-		public void handleEvent(Event event) {
-			SmartService.this.info = null;
-			if (members != null){
-				for (SmartGeoResource r : members){
-					r.reset();
-				}
-			}
-		}
-	};
+	private IDatabaseConnectionProvider connectionProvider;
 	
-	public SmartService(Map<String, Serializable> params) {
+	public SmartService(Map<String, Serializable> params, IDatabaseConnectionProvider connectionProvider) {
+		this.connectionProvider = connectionProvider;
 		this.params = params;
 		this.url = SmartServiceExtension.createURL(this.params);
-		
-		//on reset info
-		IEclipseContext ctx =(IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		eb = (IEventBroker) ctx.get(IEventBroker.class.getName());
-		eb.subscribe(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, null, dataChangeEventHandler, true);
 	}
 	
-	
+	/**
+	 * The database connection provider for the service
+	 * @return
+	 */
+	public IDatabaseConnectionProvider getConnectionProvider(){
+		return this.connectionProvider;
+	}
+
+	/**
+	 * The current locale for the service
+	 * @return
+	 */
+	public Locale getLocale(){
+		return connectionProvider.getLocale();
+	}
 	
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
 	 */
 	@Override
 	public Status getStatus() {
-		if (SmartDB.isMultipleAnalysis()){
+		if (isMultipleCa()){
 			return Status.RESTRICTED_ACCESS;
 		}
 		return Status.CONNECTED;
@@ -122,6 +117,14 @@ public class SmartService extends IService {
 	public URL getIdentifier() {
 		return this.url;
 	}
+	
+	private UUID getConservationAreaUuid(){
+		return (UUID)params.get(SmartServiceExtension.CA_UUID_KEY);
+	}
+	
+	private boolean isMultipleCa(){
+		return ConservationArea.MULTIPLE_CA.equals(getConservationAreaUuid());
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -138,7 +141,7 @@ public class SmartService extends IService {
 				if (members == null){
 					members = new ArrayList<SmartGeoResource>();
 					//these are only valid for single-cas
-					if (!SmartDB.isMultipleAnalysis()){
+					if (!isMultipleCa()){
 						for (int i = 0; i < Area.AreaType.values().length; i ++){
 							members.add(new SmartGeoResource(this, Area.AreaType.values()[i]));
 						}
@@ -168,9 +171,6 @@ public class SmartService extends IService {
 
 	@Override
 	public void dispose( IProgressMonitor monitor ) {
-
-		eb.unsubscribe(dataChangeEventHandler);
-		
         if (members == null)
             return;
 
@@ -181,7 +181,7 @@ public class SmartService extends IService {
                 resolve.dispose(subProgressMonitor);
                 subProgressMonitor.done();
             } catch (Throwable e) {
-            	SmartPlugIn.log(Messages.SmartService_Error_DisposingService, e);
+            	Logger.getLogger(SmartService.class.getName()).log(Level.SEVERE, "Error disposing Smart Service.", e); //$NON-NLS-1$
             }
         }
         if (this.ds != null){
@@ -201,6 +201,7 @@ public class SmartService extends IService {
                     try {
                         Map<String, Serializable> paramsLocal = new HashMap<String, Serializable>();
                         paramsLocal.put(SmartDataSourceFactory.CA_UUID.key, params.get(SmartServiceExtension.CA_UUID_KEY));
+                        paramsLocal.put(SmartDataSourceFactory.SESSION_PROVIDER.key, connectionProvider);
                         if (dsf.canProcess(paramsLocal)) {
                             this.ds = (SmartDataSource) dsf.createDataStore(paramsLocal);
                         }

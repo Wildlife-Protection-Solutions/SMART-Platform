@@ -25,15 +25,15 @@ import java.awt.RenderingHints.Key;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
-import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.internal.Messages;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
+import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
 
 /**
  * Smart area data source factory.  This is a read only data source
@@ -42,14 +42,15 @@ import org.wcs.smart.internal.Messages;
  */
 public class SmartDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param CA_UUID = new Param("cauuid", UUID.class, Messages.SmartDataSourceFactory_CA_ParameterName, true);  //$NON-NLS-1$
-	  
+	public static final Param CA_UUID = new Param("cauuid", UUID.class, SmartContext.INSTANCE.getClass(ISmartMapLabelProvider.class).getDataSourceConservationAreaPropName(Locale.getDefault()), true);  //$NON-NLS-1$
+	public static final Param SESSION_PROVIDER = new Param("sessionprovider", IDatabaseConnectionProvider.class, SmartContext.INSTANCE.getClass(ISmartMapLabelProvider.class).getDataSourceSessionProviderPropName(Locale.getDefault()), true);  //$NON-NLS-1$
+		  
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
 	 */
 	@Override
 	public boolean canProcess(Map<String, Serializable> params) {
-		if (params.containsKey(CA_UUID.key)){
+		if (params.containsKey(CA_UUID.key) && params.containsKey(SESSION_PROVIDER.key)){
 			return true;
 		}
 		return false;
@@ -59,8 +60,8 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	 * @see org.geotools.data.DataAccessFactory#getDescription()
 	 */
 	@Override
-	public String getDescription() {
-		return Messages.SmartDataSourceFactory_SmartDataSourceDescription;
+	public String getDescription() {		
+		return SmartContext.INSTANCE.getClass(ISmartMapLabelProvider.class).getDataSourceDescription(Locale.getDefault());
 	}
 
 	/* (non-Javadoc)
@@ -68,7 +69,7 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return Messages.SmartDataSourceFactory_SmartDataSourceName;
+		return SmartContext.INSTANCE.getClass(ISmartMapLabelProvider.class).getDataSourceDisplayName(Locale.getDefault());
 	}
 
 	/* (non-Javadoc)
@@ -76,7 +77,7 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public Param[] getParametersInfo() {
-		return new Param[]{CA_UUID };
+		return new Param[]{CA_UUID, SESSION_PROVIDER };
 	}
 
 	/**
@@ -102,19 +103,9 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
-		
-		Session session = HibernateManager.openSession();
-		ConservationArea ca = null;
-		try{
-			ca = (ConservationArea)session.load(ConservationArea.class, ((UUID)params.get(CA_UUID.key)));	
-		
-		}finally{
-			session.close();
-		}
-		if (ca == null ){
-			throw new IOException(Messages.SmartDataSourceFactory_Error_ReadingSmartDataSource);
-		}
-		return new SmartDataSource(ca);
+		UUID caUuid = (UUID) params.get(CA_UUID.key);
+		IDatabaseConnectionProvider provider = (IDatabaseConnectionProvider) params.get(SESSION_PROVIDER.key);
+		return new SmartDataSource(caUuid, provider);
 	}
 
 	/* (non-Javadoc)
@@ -123,7 +114,7 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, Serializable> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException(Messages.SmartDataSourceFactory_Error_ReadOnly);
+		throw new UnsupportedOperationException("This is a read-only data store."); //$NON-NLS-1$
 	}
 
 }

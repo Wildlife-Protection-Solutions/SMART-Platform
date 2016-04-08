@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IMemento;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.StyleContent;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -70,7 +69,9 @@ public class SmartLayerStyle extends StyleContent {
 			if (uuid == null || uuid.length() != 32) return null;
 			return UuidUtils.stringToUuid(uuid);
 		}catch (Exception ex){
-			SmartPlugIn.log(ex.getMessage(), ex);
+//			SmartPlugIn.log(ex.getMessage(), ex);
+			ex.printStackTrace();
+			//TODO
 		}
 		return null;
 	}

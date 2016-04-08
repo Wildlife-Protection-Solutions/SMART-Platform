@@ -81,6 +81,8 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 			}
 		}else if (value instanceof Employee){
 			return SmartLabelProvider.getFullLabel((Employee)value);
+		}else if (value instanceof AreaType){
+			return getAreaTypeName((AreaType)value);
 		}
 		
 		if (value.equals(AGENCY_NAME_KEY)) return Messages.Agency_AgencyName;

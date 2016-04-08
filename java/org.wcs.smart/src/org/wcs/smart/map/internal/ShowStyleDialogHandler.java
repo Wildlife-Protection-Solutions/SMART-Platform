@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
+import org.wcs.smart.udig.style.StyleEditorPageManager;
 import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.SmartStyleEditorDialog;
 
@@ -56,7 +57,7 @@ public class ShowStyleDialogHandler {
 		Layer selectedLayer = (Layer) ((IStructuredSelection) currentSelection).getFirstElement();
 
 		String pageId = StyleManager.INSTANCE.findInitialStylePageId(selectedLayer);
-	    EditorPageManager manager = StyleManager.INSTANCE.createEditorPageManager(selectedLayer);
+	    EditorPageManager manager = StyleEditorPageManager.createEditorPageManager(selectedLayer);
 
 		SmartStyleEditorDialog dialog = new SmartStyleEditorDialog(activeShell,manager);
 		dialog.setSelectedNode(pageId);

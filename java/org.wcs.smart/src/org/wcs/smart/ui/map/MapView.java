@@ -46,7 +46,6 @@ import org.locationtech.udig.project.ui.internal.tool.display.ToolProxy;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
-import org.locationtech.udig.tools.internal.ZoomHandler;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;

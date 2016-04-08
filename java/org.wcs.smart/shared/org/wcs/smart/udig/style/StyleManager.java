@@ -24,27 +24,14 @@ package org.wcs.smart.udig.style;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
-import org.geotools.styling.FeatureTypeStyle;
-import org.geotools.styling.LineSymbolizer;
-import org.geotools.styling.PointSymbolizer;
-import org.geotools.styling.PolygonSymbolizer;
-import org.geotools.styling.RasterSymbolizer;
-import org.geotools.styling.Rule;
-import org.geotools.styling.Style;
-import org.geotools.styling.Symbolizer;
 import org.locationtech.udig.core.internal.ExtensionPointProcessor;
 import org.locationtech.udig.core.internal.ExtensionPointUtil;
 import org.locationtech.udig.project.ILayer;
@@ -54,12 +41,7 @@ import org.locationtech.udig.project.internal.ProjectPlugin;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.style.sld.SLD;
-import org.locationtech.udig.style.sld.editor.EditorNode;
-import org.locationtech.udig.style.sld.editor.EditorPageManager;
-import org.locationtech.udig.ui.graphics.Glyph;
-import org.locationtech.udig.ui.graphics.SLDs;
 import org.opengis.coverage.grid.GridCoverage;
-import org.wcs.smart.SmartPlugIn;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -74,17 +56,6 @@ import com.google.gson.stream.JsonWriter;
  */
 public class StyleManager {
 
-	/**
-	 * List of styles to exclude from the smart style
-	 * editor
-	 */
-	private final static Collection<String> EXCLUDED_STYLES = 
-			Arrays.asList("cache",  //$NON-NLS-1$
-					"filter",  //$NON-NLS-1$
-					"cache-gridcoverage",  //$NON-NLS-1$
-					"org.locationtech.udig.style.advanced.editorpages.CoverageColorMaskStyleEditorPage" //$NON-NLS-1$
-			);
-	
 	public static final StyleManager INSTANCE = new StyleManager();
 	
 	private static final String ID_KEY = "id"; //$NON-NLS-1$
@@ -296,26 +267,7 @@ public class StyleManager {
     }
  
     
-	/**
-	 * Creates an editor manage for a give layer style
-	 * @param selectedLayer
-	 * @return
-	 */
-	public EditorPageManager createEditorPageManager(ILayer selectedLayer){
-		EditorPageManager mgr = EditorPageManager.loadManager(SmartPlugIn.getDefault(), selectedLayer);
-		
-		List<EditorNode> toRemove = new ArrayList<EditorNode>();
-		for (EditorNode en : mgr.getRootSubNodes()){
-			if (EXCLUDED_STYLES.contains(en.getId())){
-				toRemove.add(en);
-			}
-		}
-		
-		for (EditorNode en: toRemove){
-			mgr.remove(en);
-		}
-		return mgr;
-	}
+	
 	
 	/**
 	 * Find the initial style page editor for a given style.
@@ -339,57 +291,5 @@ public class StyleManager {
 		} catch (Exception e) {
 		}
 		return pageId;
-	}
-	
-	/**
-	 * Converts and sld style to a glyph image
-	 */
-	public Image createImage(Style sld) {
-		Rule r = getRule(sld);
-		if (r == null) {
-			return null;
-		}
-		if (r.symbolizers().size() == 0) {
-			return null;
-		}
-
-		Symbolizer sym = r.symbolizers().get(0);
-		if (PointSymbolizer.class.isAssignableFrom(sym.getClass())) {
-			return Glyph.point(r).createImage();
-		} else if (LineSymbolizer.class.isAssignableFrom(sym.getClass())) {
-			return Glyph.line(r).createImage();
-		} else if (PolygonSymbolizer.class.isAssignableFrom(sym.getClass())) {
-			return Glyph.polygon(r).createImage();
-		} else if (RasterSymbolizer.class.isAssignableFrom(sym.getClass())) {
-			return Glyph.grid(null, null, null, null).createImage();
-		}
-		return null;
-	}
-
-	private Rule getRule(Style sld) {
-		Rule rule = null;
-		int size = 0;
-
-		for (FeatureTypeStyle style : sld.featureTypeStyles()) {
-			for (Rule potentialRule : style.rules()) {
-				if (potentialRule != null) {
-					Symbolizer[] symbs = potentialRule.getSymbolizers();
-					for (int m = 0; m < symbs.length; m++) {
-						if (symbs[m] instanceof PointSymbolizer) {
-							int newSize = SLDs.pointSize((PointSymbolizer) symbs[m]);
-							if (newSize > 16 && size != 0) {
-								// return with previous rule
-								return rule;
-							}
-							size = newSize;
-							rule = potentialRule;
-						} else {
-							return potentialRule;
-						}
-					}
-				}
-			}
-		}
-		return rule;
 	}
 }

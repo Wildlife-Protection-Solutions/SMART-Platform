@@ -21,23 +21,32 @@
  */
 package org.wcs.smart.udig.catalog.smart;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.locationtech.udig.catalog.IServiceInfo;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.internal.Messages;
+import java.util.Locale;
+
+import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
- * Smart service information.
+ * Label provider for various SMART Service strings.
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class SmartServiceInfo extends IServiceInfo{
-
-	public SmartServiceInfo(SmartService service){
-		this.description = Messages.SmartServiceInfo_Description;
-		this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
-		this.keywords = new String[]{Messages.SmartServiceInfo_Keyword1, Messages.SmartServiceInfo_Keyword2};
-		this.title = Messages.SmartServiceInfo_Title;
-	}
+public interface ISmartMapLabelProvider {
 	
+	public String getDataSourceConservationAreaPropName(Locale l);
+	
+	public String getDataSourceSessionProviderPropName(Locale l);
+	
+	public String getDataSourceDisplayName(Locale l);
+	
+	public String getDataSourceDescription(Locale l);
+	
+	public String getDataSourceReadErrorMessage(Locale l);
+	
+	public String getSmartServiceDescription(Locale l);
+	
+	public String getSmartServiceTitle(Locale l);
+	
+	public String[] getSmartServiceKeywords(Locale l);
+	
+	public ImageDescriptor getSmartServiceImage(Locale l);
 }

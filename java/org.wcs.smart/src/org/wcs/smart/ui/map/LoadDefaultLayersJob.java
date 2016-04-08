@@ -51,6 +51,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
+import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**
@@ -97,7 +98,7 @@ public class LoadDefaultLayersJob extends Job{
 	protected IStatus run(IProgressMonitor monitor) {
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(SmartServiceExtension.CA_UUID_KEY, SmartDB.getCurrentConservationArea().getUuid());
-		SmartService ss = new SmartService(params);
+		SmartService ss = new SmartService(params, new DesktopSessionProvider());
 		CatalogPlugin.getDefault().getLocalCatalog().add(ss);
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		

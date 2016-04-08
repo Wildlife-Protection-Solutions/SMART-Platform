@@ -22,6 +22,7 @@
 package org.wcs.smart.geotools.data.smart;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
@@ -29,9 +30,8 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 
 /**
  * Geotools data store for SMART area layers.
@@ -40,10 +40,12 @@ import org.wcs.smart.ca.ConservationArea;
  */
 public class SmartDataSource extends AbstractDataStore{
 
-	private ConservationArea ca = null;
-
-	public SmartDataSource(ConservationArea ca){
+	private UUID ca = null;
+	private IDatabaseConnectionProvider connectionProvider;
+	
+	public SmartDataSource(UUID ca, IDatabaseConnectionProvider connectionProvider){
 		this.ca = ca;
+		this.connectionProvider = connectionProvider;
 	}
 
 	@Override
@@ -62,12 +64,13 @@ public class SmartDataSource extends AbstractDataStore{
 		}
 		return types;
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
 	 */
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new SmartFeatureReader(ca, Area.AreaType.valueOf(typeName), getSchema(typeName));
+		return new SmartFeatureReader(ca, Area.AreaType.valueOf(typeName), getSchema(typeName), connectionProvider.openSession());
 	}
 
 	
@@ -81,10 +84,7 @@ public class SmartDataSource extends AbstractDataStore{
 			SimpleFeatureType type =  DataUtilities.createType("smart." + typeName, spec); //$NON-NLS-1$
 			return type;
 		} catch (SchemaException e) {
-			SmartPlugIn.log(e.getMessage(), e);
+			throw new IOException(e);
 		}
-		return null;
 	}
-
-	
 }

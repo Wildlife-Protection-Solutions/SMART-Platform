@@ -131,11 +131,14 @@ public class MapSettings {
 	private static final String SMARTBM_FILE_PROTOCOL = "smartbm"; //$NON-NLS-1$
 
 	/**
-	 * 
+	 * basemap blackboard keys
 	 */
 	public static final String BASEMAP_BLACKBOARD_KEY = "org.wcs.smart.basemaplayers"; //$NON-NLS-1$
 	public static final String BASEMAP_BLACKBOARD_UUID_KEY = "org.wcs.smart.basemap.uuid"; //$NON-NLS-1$
 
+	/**
+	 * filestore directory for basemaps
+	 */
 	public static final String MAP_DIRECTORY = "maps"; //$NON-NLS-1$
 	
 	/** settings for the current user */

@@ -135,8 +135,6 @@ public class SmartGeoResource extends IGeoResource {
         	 DataStore ds = ((SmartService)service).getDataStore(monitor);
              if (ds != null) {
                  FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(areaType.name());
-                 
-//                 CachingFeatureSource cfs = new CachingFeatureSource(fs);
                  if (fs != null)
                      return adaptee.cast(fs);
              }else{
@@ -151,9 +149,6 @@ public class SmartGeoResource extends IGeoResource {
                  return adaptee.cast(fs);
              }
         }
-
         return super.resolve(adaptee, monitor);
     }
-
-    
 }

@@ -34,7 +34,7 @@ import org.locationtech.udig.ui.palette.ColourScheme;
  * @author Mauricio Pazos
  *
  */
-final class MapRegister {
+public final class MapRegister {
 
 	private final BrewerPalette colorPalette;
 	private final List<LayerRegister> layerList;
