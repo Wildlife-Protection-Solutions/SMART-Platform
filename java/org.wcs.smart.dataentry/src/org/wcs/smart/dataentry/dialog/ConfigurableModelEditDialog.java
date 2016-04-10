@@ -23,6 +23,8 @@ package org.wcs.smart.dataentry.dialog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -251,6 +253,12 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 				SmartPlugIn.displayLog(Messages.ConfigurableModelEditDialog_LoadExtensionError, ex);
 			}
 		}
+		Collections.sort(extraTabs, new Comparator<IConfigurableModelEditorTabContent>() {
+			@Override
+			public int compare(IConfigurableModelEditorTabContent o1, IConfigurableModelEditorTabContent o2) {
+				return Integer.compare(o1.getTabIndex(), o2.getTabIndex());
+			}
+		});
 		return extraTabs;
 	}
 	

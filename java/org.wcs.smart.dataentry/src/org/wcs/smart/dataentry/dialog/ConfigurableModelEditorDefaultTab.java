@@ -327,6 +327,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		tracker.updates.clear();
 	}
 
+	@Override
+	public int getTabIndex() {
+		return 0;
+	}
+
 	/**
 	 * Change tracker for tracking changes to model items.  
 	 * 
