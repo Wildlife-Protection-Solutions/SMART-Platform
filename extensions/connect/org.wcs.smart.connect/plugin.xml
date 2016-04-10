@@ -371,5 +371,11 @@
             class="org.wcs.smart.connect.internal.server.ConnectCaExportProcessor">
       </processor>
    </extension>
+   <extension
+         point="org.wcs.smart.dataentry.extradata">
+      <tab
+            content="org.wcs.smart.connect.dataentry.ConfigurableModelEditorConnectTab">
+      </tab>
+   </extension>
 
 </plugin>
