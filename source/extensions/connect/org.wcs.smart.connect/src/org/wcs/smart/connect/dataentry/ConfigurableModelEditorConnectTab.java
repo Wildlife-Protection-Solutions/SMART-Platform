@@ -41,8 +41,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider;
 import org.wcs.smart.dataentry.dialog.IConfigurableModelEditorTabContent;
 
 /**
@@ -80,8 +78,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		innerLeft.setLayout(new GridLayout());
 		
 		modelTreeViewer = new TreeViewer(innerLeft, SWT.V_SCROLL | SWT.H_SCROLL| SWT.BORDER);
-		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
-		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(false));
+		modelTreeViewer.setLabelProvider(new ConnectCmTreeLabelProvider(dialog.getModel()));
+		modelTreeViewer.setContentProvider(new ConnectCmTreeContentProvider(false));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)modelTreeViewer.getControl().getLayoutData()).widthHint = 100;
 		((GridData)modelTreeViewer.getControl().getLayoutData()).heightHint = 100;
