@@ -13,6 +13,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.dataentry,
  org.wcs.smart.dataentry.dialog,
+ org.wcs.smart.dataentry.dialog.composite,
  org.wcs.smart.dataentry.meta,
  org.wcs.smart.dataentry.model
 Bundle-Vendor: org.wcs.smart
