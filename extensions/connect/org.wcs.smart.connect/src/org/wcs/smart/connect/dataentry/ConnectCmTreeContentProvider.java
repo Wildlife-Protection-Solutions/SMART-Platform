@@ -41,12 +41,6 @@ public class ConnectCmTreeContentProvider extends ConfigurableModelTreeContentPr
 	}
 
 	@Override
-	public Object[] getElements(Object inputElement) {
-		// TODO Auto-generated method stub
-		return super.getElements(inputElement);
-	}
-	
-	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof CmAttribute) {
 			CmAttribute a = (CmAttribute) parentElement;
