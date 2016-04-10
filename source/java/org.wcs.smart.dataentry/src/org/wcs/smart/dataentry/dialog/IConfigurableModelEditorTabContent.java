@@ -60,4 +60,10 @@ public interface IConfigurableModelEditorTabContent {
 	 */
 	public void performSave(Session s);
 
+	/**
+	 * Index that identifies the position of the tab.
+	 * @return index that indicates in which order tabs are displayed
+	 */
+	public int getTabIndex();
+	
 }

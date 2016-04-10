@@ -291,4 +291,10 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	public void performSave(Session s) {
 		s.saveOrUpdate(cmProfile);
 	}
+	
+	@Override
+	public int getTabIndex() {
+		return 100;
+	}
+	
 }
