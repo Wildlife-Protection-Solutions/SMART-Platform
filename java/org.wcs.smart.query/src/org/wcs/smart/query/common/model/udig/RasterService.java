@@ -169,7 +169,7 @@ public class RasterService extends AbstractRasterService {
 			rb.setTable(Collections.singletonList(gi),md);
 			rb.setGridCellSize(1);
 			rb.build();
-			return rb.getResult();	
+			return rb.getImageFile();	
 		}
 		GridQueryResult results = (GridQueryResult) query.getCachedResults();
 		if (results == null){
@@ -201,7 +201,7 @@ public class RasterService extends AbstractRasterService {
 				results.getMetadata());
 		rb.setGridCellSize(gridCellSize);
 		rb.build();
-		File f = rb.getResult();
+		File f = rb.getImageFile();
 		results.setLastRasterFile(f);
 		return f;
 	}

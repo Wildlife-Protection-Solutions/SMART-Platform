@@ -54,7 +54,10 @@ public class GridQueryColumn extends QueryColumn{
 		private GridColumns(ColumnType type, String key){
 			this.type = type;
 			this.key = key;
-			
+		}
+		
+		public String getKey(){
+			return this.key;
 		}
 	}
 	

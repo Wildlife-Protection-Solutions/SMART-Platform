@@ -25,7 +25,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
+import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.data.FeatureSource;
+import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.opengis.feature.Feature;
@@ -57,17 +60,23 @@ public class MapGeoResourceInfo extends IGeoResourceInfo {
 	public void computeBounds(MapGeoResource resource){
 		
 		try {
-			@SuppressWarnings("unchecked")
-			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, new NullProgressMonitor());
-			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-			this.bounds = env;
-			fs.getFeatures().accepts(new FeatureVisitor() {
-				@Override
-				public void visit(Feature f) {
-					BoundingBox bb = f.getBounds();
-					env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
-				}
-			}, null);
+			if (resource.canResolve(FeatureSource.class)){
+				@SuppressWarnings("unchecked")
+				FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, new NullProgressMonitor());
+				final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
+				this.bounds = env;
+				fs.getFeatures().accepts(new FeatureVisitor() {
+					@Override
+					public void visit(Feature f) {
+						BoundingBox bb = f.getBounds();
+						env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
+					}
+				}, null);
+			}else if (resource.canResolve(AbstractGridCoverage2DReader.class)){
+				GridCoverage2DReader reader = resource.resolve(GridCoverage2DReader.class, new NullProgressMonitor());
+				GeneralEnvelope ge = reader.getOriginalEnvelope();
+				this.bounds = new ReferencedEnvelope(ge.getMinimum(0), ge.getMaximum(0), ge.getMinimum(1), ge.getMaximum(1), ge.getCoordinateReferenceSystem());
+			}
 		} catch (Exception e) {
 			Logger.getLogger(MapGeoResourceInfo.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}

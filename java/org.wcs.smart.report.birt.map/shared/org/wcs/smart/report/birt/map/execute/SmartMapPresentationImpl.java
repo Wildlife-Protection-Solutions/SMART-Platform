@@ -184,7 +184,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			MapConfiguration queryResults = (MapConfiguration) ((IForeignContent) content).getRawValue();
 			for (int i = 0; i < queryResults.getQueryCount(); i++) {
 				IQueryResults results = (IQueryResults) queryResults.getQueryResults(i).getQueryResults();
-
+				
 				MapGeoResource resource = new MapGeoResource(results, 
 						queryResults.getInfo(i), 
 						service);

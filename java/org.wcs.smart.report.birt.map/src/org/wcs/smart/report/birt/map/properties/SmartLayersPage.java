@@ -76,7 +76,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
@@ -117,6 +116,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	private ExtendedItemHandle itemHandle;
 	private SmartMapItem mapItem;
 	private StyleCellEditor cellEditor;
+	
+	public SmartLayersPage() {
+		super();
+		basemapJob.setSystem(true);
+	}
 	
 	@Override
 	public void buildUI(Composite parent) {
@@ -384,7 +388,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			}
 		});
 		
-		
 		loadBasemaps();
 		basemapCombo.getControl().addFocusListener(new FocusListener() {
 			@Override
@@ -438,72 +441,73 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		});
 	}
 	
-	private synchronized void loadBasemaps(){
-		Job j = new Job("loading basemapes"){ //$NON-NLS-1$
+	Job basemapJob = new Job("loading basemapes"){ //$NON-NLS-1$
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				basemapListenerEnabled = false;
-				List<BasemapDefinition> maps = null;
-				try{
-					Session session = HibernateManager.openSession();
-					session.beginTransaction();
-					try {
-						maps = HibernateManager.getBasemaps(session);
-					} finally {
-						if (session.getTransaction().isActive()) {
-							session.getTransaction().commit();
-						}
-						session.close();
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			basemapListenerEnabled = false;
+			List<BasemapDefinition> maps = null;
+			try{
+				Session session = HibernateManager.openSession();
+				session.beginTransaction();
+				try {
+					maps = HibernateManager.getBasemaps(session);
+				} finally {
+					if (session.getTransaction().isActive()) {
+						session.getTransaction().commit();
 					}
-					
-					BasemapDefinition defaultdef = new BasemapDefinition();
-					defaultdef.setName(Messages.SmartLayersPage_DefaultBasemapLabel);
-					defaultdef.setUuid( DEFAULT_BASEMAP );
-					
-					BasemapDefinition nonedef = new BasemapDefinition();
-					nonedef.setName(Messages.SmartLayersPage_NoBasemapLabel);
-					
-					Object selection = defaultdef;
-					if (mapItem != null){
-						String uuid = mapItem.getBasemapName();
-						if (uuid == null){
-							selection = nonedef;
-						}else if (uuid != null && uuid.equals(SmartMapItem.DEFAULT_BASEMAP_KEY)){
-							selection = defaultdef;
-						}else if (uuid != null){
-							for (BasemapDefinition def : maps){
-								if (UuidUtils.uuidToString(def.getUuid()).equals(uuid)){
-									selection = def;
-									break;
-								}
+					session.close();
+				}
+				
+				BasemapDefinition defaultdef = new BasemapDefinition();
+				defaultdef.setName(Messages.SmartLayersPage_DefaultBasemapLabel);
+				defaultdef.setUuid( DEFAULT_BASEMAP );
+				
+				BasemapDefinition nonedef = new BasemapDefinition();
+				nonedef.setName(Messages.SmartLayersPage_NoBasemapLabel);
+				
+				Object selection = defaultdef;
+				if (mapItem != null){
+					String uuid = mapItem.getBasemapName();
+					if (uuid == null){
+						selection = nonedef;
+					}else if (uuid != null && uuid.equals(SmartMapItem.DEFAULT_BASEMAP_KEY)){
+						selection = defaultdef;
+					}else if (uuid != null){
+						for (BasemapDefinition def : maps){
+							if (UuidUtils.uuidToString(def.getUuid()).equals(uuid)){
+								selection = def;
+								break;
 							}
 						}
 					}
-					maps.add(defaultdef);
-					maps.add(nonedef);
-					
-					final List<BasemapDefinition> mymaps = maps;
-					final Object myselection = selection;
-					Display.getDefault().syncExec(new Runnable(){
-	
-						@Override
-						public void run() {
-							basemapCombo.setInput(mymaps.toArray());
-							basemapCombo.setSelection(new StructuredSelection(myselection));		
-						}
-						
-					});
-					
-					return Status.OK_STATUS;
-				}finally{
-					basemapListenerEnabled = true;
 				}
+				maps.add(defaultdef);
+				maps.add(nonedef);
+				
+				final List<BasemapDefinition> mymaps = maps;
+				final Object myselection = selection;
+				Display.getDefault().syncExec(new Runnable(){
+
+					@Override
+					public void run() {
+						basemapCombo.setInput(mymaps.toArray());
+						basemapCombo.setSelection(new StructuredSelection(myselection));		
+					}
+					
+				});
+				
+				return Status.OK_STATUS;
+			}finally{
+				basemapListenerEnabled = true;
 			}
-			
-		};
-		j.setSystem(true);
-		j.schedule();
+		}
+		
+	};
+	
+	private synchronized void loadBasemaps(){
+		
+		basemapJob.schedule();
 	}
 	
 	private List<LayerItem> getSelectedLayers() throws Exception{
@@ -518,56 +522,9 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 
 	private void updateModel(String prop) {
-		
 		// update the model
 		try {
-			
-			if (prop.equals(SmartMapItem.SMART_LAYER_PROP2)) {
-//				ArrayList<LayerDefinition> tmpDef = new ArrayList<LayerDefinition>();
-//				tmpDef.addAll(layerItems);
-//				System.out.println("update model");
-//				
-//				List<LayerItem> newItems = new ArrayList<LayerItem>();
-//				for (Iterator<?> iterator = tmpDef.iterator(); iterator.hasNext();) {
-//					LayerDefinition type = (LayerDefinition) iterator.next();
-//					
-//					ExtendedItemHandle eihandle = itemHandle.getModuleHandle().getElementFactory().newExtendedItem(null, LayerItem.EXTENSION_NAME);
-//					LayerItem handle = (LayerItem)(new LayerItemFactory()).newReportItem(eihandle);
-//					
-//					handle.setLayerName(type.info.getLayerName());
-//					handle.setLayerStyles(type.info.getMapStyle());
-//					handle.setGeometryColumn(type.info.getGometryColumn());
-//					handle.setLayerType(type.info.getLayerType());
-//					
-//					if (type.handle == null){
-//						handle.getHandle().setDataSet(null);
-//					}else{
-//						handle.getHandle().setDataSet(type.handle);
-////						//TODO: review this
-////						CachedMetaDataHandle meta = type.handle.getCachedMetaDataHandle();
-////						MemberHandle resultSet = meta.getResultSet();
-////						 
-////						if (resultSet.getListValue() != null) {
-////							for (int i=0; i < resultSet.getListValue().size(); i++) {
-////								ResultSetColumnHandle resultSetColumn=(ResultSetColumnHandle)resultSet.getAt(i);
-////								ComputedColumn column=StructureFactory.newComputedColumn(handle.getHandle(),resultSetColumn.getColumnName());
-////								column.setDataType(resultSetColumn.getDataType());
-////								
-////								column.setExpression("dataSetRow[\"" + resultSetColumn.getColumnName() + "\"]");
-////								column.setExpressionProperty("type", new Expression("javascript", "String"));
-////								try {
-////									handle.getHandle().addColumnBinding(column,false);
-////								} catch (SemanticException e) {
-////									// TODO Auto-generated catch block
-////									e.printStackTrace();
-////								}
-////							}
-////						}
-//					}
-//					newItems.add(handle);
-//				}
-//				mapItem.setLayers(newItems);
-			} else if (prop.equals(SmartMapItem.SMART_BASEMAP_PROP)) {
+			if (prop.equals(SmartMapItem.SMART_BASEMAP_PROP)) {
 				UUID uuid = getSelectedBasemapUuid();
 				if (uuid == null){
 					mapItem.setBasemapName(null);
@@ -609,7 +566,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	
 	@Override
 	public void setInput(Object input) {
-		if (mapItem != null) return;
 		Object element = input;
 		if (input instanceof List && ((List<?>) input).size() > 0) {
 			element = ((List<?>) input).get(0);
@@ -677,6 +633,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			ReferencedEnvelope env = mapItem.getMapBounds();
 			txtBounds.setText(env.getCoordinateReferenceSystem().getName().getCode() + ": (" + env.getMinX() + "," + env.getMinY() + "),(" + env.getMaxX() + "," + env.getMaxY() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
+		//basemapCombo.set
+		loadBasemaps();
 		//for mac ui table issue see smart bug 1349
 		//putting this here causes error in layout in window so I've moved this above; after table created.
 		//tblLayers.getTable().pack();

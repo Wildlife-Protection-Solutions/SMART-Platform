@@ -55,6 +55,8 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 		}else if (queryType.equals(EntityWaypointQuery.KEY)){	
 			tableName = EntityWaypointQuery.class.getSimpleName(); 
 			resourceKey = "Waypoint"; //$NON-NLS-1$
+		}else{
+			return null;
 		}
 		
 		Query query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -68,8 +70,7 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-			
+			e.printStackTrace();	
 		}
 		return null;
 

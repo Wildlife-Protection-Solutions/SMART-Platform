@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.birt.report.designer.ui;visibility:=reexport,
  org.eclipse.birt.report.model,
  org.locationtech.udig.project,
  org.eclipse.emf.ecore,
- org.wcs.smart.report.birt.query;bundle-version="4.0.0"
+ org.wcs.smart.report.birt.query;bundle-version="4.0.0",
+ org.wcs.smart.query;bundle-version="4.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

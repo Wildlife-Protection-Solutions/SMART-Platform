@@ -54,6 +54,8 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 		}else if (queryType.equals(ObservationWaypointQuery.KEY)){	
 			tableName = ObservationWaypointQuery.class.getSimpleName(); 
 			resourceKey = "Waypoint"; //$NON-NLS-1$
+		}else{
+			return null;
 		}
 		
 		Query query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$

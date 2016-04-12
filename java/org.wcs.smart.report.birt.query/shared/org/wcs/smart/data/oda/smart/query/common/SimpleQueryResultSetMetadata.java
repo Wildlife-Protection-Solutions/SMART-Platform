@@ -42,15 +42,19 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 
-	private QueryColumn[] queryColumns;
-	private String[] geometryColumns;
+	protected QueryColumn[] queryColumns;
+	protected String[] geometryColumns;
 	
 	/**
 	 * Creates a new metadata object
 	 * @param query the query to gather metadata for
 	 */
 	public SimpleQueryResultSetMetadata(SimpleQuery query, String[] geometryColumns, SmartConnection connection){
+		this(query, connection);
 		this.geometryColumns = geometryColumns;
+	}
+	
+	protected SimpleQueryResultSetMetadata(SimpleQuery query, SmartConnection connection){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
 		for (QueryColumn col : query.getQueryColumns(connection.getCurrentLocale(), connection.getSession())){
 			if (col.isVisible()){
@@ -60,8 +64,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
 	}
 	
-	public SimpleQueryResultSetMetadata(GriddedQuery query, SmartConnection connection){
-		this.geometryColumns = null;
+	protected SimpleQueryResultSetMetadata(GriddedQuery query, SmartConnection connection){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
 		for (QueryColumn col : query.getQueryColumns(connection.getCurrentLocale(), connection.getSession())){
 			if (col.isVisible()){
@@ -70,7 +73,6 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		}
 		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
 	}
-	
 	
 	/**
 	 * @param index column index
