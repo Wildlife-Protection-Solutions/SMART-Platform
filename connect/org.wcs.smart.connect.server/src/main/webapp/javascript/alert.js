@@ -681,13 +681,22 @@ function updateRealtimeLayer(updatedUrl){
             	}
                 
             	date = date.substr(0, date.length-4);
-                return 'Event: ' + feature.properties.type +
-                	"<br>Alert ID: " + feature.properties.id +
-                	"<br>Reported time: " + date +
-                	"<br>Location: " +
+                var text = i18n("alert.event");
+                if(feature.properties.type == 'Unknown Type'){
+                	text = text + "<font color='red'>"
+                }
+                text = text + feature.properties.type;
+                if(feature.properties.type == 'Unknown Type'){
+                	text = text + "</font>"
+                }
+                	
+                text = text + "<br>" + i18n("alert.alertid") + feature.properties.id +
+                	"<br>" + i18n("alert.reportedtime") + date +
+                	"<br>" + i18n("alert.location") +
                     coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW') +
-                    "<br>Desc: " + feature.properties.desc + 
-                    "<br>Importance: " + feature.properties.level;
+                    "<br>" +i18n("alert.description") + feature.properties.desc + 
+                    "<br>" + i18n("alert.importance") + feature.properties.level;
+                return text;
             }
             ,
             bindFeaturePopup = function(fId) {

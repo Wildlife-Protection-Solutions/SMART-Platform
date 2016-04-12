@@ -168,9 +168,9 @@ CREATE TABLE connect.alerts
 CREATE TABLE connect.alert_types(
 	-- A unqiue identifier for hibernate.
 	uuid uuid NOT NULL,
-	-- Label for the type.
+	-- A link to the alert type.	
 	key varchar(32),
-	-- A link to the alert type.
+	-- Label for the type.
 	label varchar(64),
 	color varchar(16),
 	fillColor varchar(16),
@@ -182,6 +182,8 @@ CREATE TABLE connect.alert_types(
 	spin boolean not null,
 	PRIMARY KEY (uuid)
 ) WITHOUT OIDS;
+
+insert into connect.alert_types values( '00000000-0000-0000-0000-000000000000' ,'unknown','Unknown Type','#000000','#000000','1', '', 'red', 'false');
 
 
 CREATE TABLE connect.style_configuration(

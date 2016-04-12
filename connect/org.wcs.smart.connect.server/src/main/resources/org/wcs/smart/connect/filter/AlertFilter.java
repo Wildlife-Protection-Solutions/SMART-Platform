@@ -167,13 +167,10 @@ public class AlertFilter {
 		//type
 		if(typeUuidFilter != null){
 			Disjunction or = Restrictions.disjunction();
-			if(typeUuidFilter.size() == 0){
-				return emptyList; //if you have no options selected, your result will always be no alerts.				
-
-			}
 			for(int x=0; x < typeUuidFilter.size();x++){
 				or.add(Restrictions.eq("typeUuid", typeUuidFilter.get(x) )); //$NON-NLS-1$
 			}
+			or.add(Restrictions.eq("typeUuid", UUID.fromString("00000000-0000-0000-0000-000000000000"))); //$NON-NLS-1$
 			c.add(or);
 		}
 		//status

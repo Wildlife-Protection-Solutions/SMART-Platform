@@ -481,7 +481,7 @@ public class ConnectAlert extends HttpServlet {
 	@POST
     @Path("/{usergenid}")
     public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newAlert) {
-		validateAlertValues(newAlert);
+		boolean error = validateAlertValues(newAlert);
 		
 		validateUser(AlertAction.CREATE_ALERTS_KEY, newAlert.getCaUuid());
 		
@@ -508,7 +508,13 @@ public class ConnectAlert extends HttpServlet {
 		a.setTrack(track);
 		
 		a.setCaUuid(newAlert.getCaUuid());
-		a.setTypeUuid(newAlert.getTypeUuid());
+		
+		if(error){
+			a.setDescription(newAlert.getDescription() + Messages.getString("ConnectAlert.UnknownAlertTypeDescription",SmartUtils.getRequestLocale(request)) );
+			a.setTypeUuid(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+		}else{
+			a.setTypeUuid(newAlert.getTypeUuid());
+		}
 	
 		a.setCreatorUuid(getCreatorUuid());
 		
@@ -676,21 +682,22 @@ public class ConnectAlert extends HttpServlet {
 		return user.getUuid();
 	}
 
-    private void validateAlertValues(GeoJsonAlert newAlert) {
+    private boolean validateAlertValues(GeoJsonAlert newAlert) {
     	Alert a = new Alert();
     	a.setCaUuid(newAlert.getCaUuid());
     	a.setX(newAlert.getLongitude());
     	a.setY(newAlert.getLatitude());
     	a.setTypeUuid(newAlert.getTypeUuid());
     	a.setLevel(newAlert.getLevel());
-    	validateAlertValues(a); 
+    	return validateAlertValues(a); 
     }
     
-    private void validateAlertValues(Alert newAlert) {
+    private boolean validateAlertValues(Alert newAlert) {
 		//validate type
 		String err = validateAlertType(newAlert.getTypeUuid());
 		if (err != null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
+			//we don't want to throw away alerts that might have old/deleted/invalid types, we want to show them somehow still, with errors noted.
+			return true;
 		}
 		
 		//validate alert CA UUID
@@ -708,6 +715,7 @@ public class ConnectAlert extends HttpServlet {
 		if (newAlert.getLevel() == null || newAlert.getLevel() < -32768 || newAlert.getLevel() > 32767){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConnectAlert.InvalidLevel", SmartUtils.getRequestLocale(request)), newAlert.getLevel())); //$NON-NLS-1$
 		}
+		return false;
 	}
     
     private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
@@ -736,7 +744,7 @@ public class ConnectAlert extends HttpServlet {
     	            properties.put("status", obj.getStatus().getGuiName(SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
     	            properties.put("typeuuid", obj.getTypeUuid()); //$NON-NLS-1$
 
-    	            AlertType type = HibernateManager.getAlertType(s, obj.getTypeUuid());
+    	            AlertType type = HibernateManager.getAlertTypeIncludeUnknown(s, obj.getTypeUuid());
     	    		properties.put("type", type.getLabel()); //$NON-NLS-1$
     	            
     	            properties.put("id", obj.getUserGeneratedId()); //$NON-NLS-1$
