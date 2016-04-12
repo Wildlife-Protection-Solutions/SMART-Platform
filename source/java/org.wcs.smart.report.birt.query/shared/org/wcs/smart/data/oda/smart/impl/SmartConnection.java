@@ -93,6 +93,7 @@ public abstract class SmartConnection implements IConnection {
 	public void setAppContext(Object context) throws OdaException {
 		if (context instanceof Map){
 			this.appContext = (Map<Object,Object>)context;
+			this.appContext.put(SmartConnection.class.getCanonicalName(), this);
 		}
 	}
 	

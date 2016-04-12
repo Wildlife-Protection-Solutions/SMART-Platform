@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.report.birt.map;
 
+import java.io.File;
+
 import org.locationtech.udig.project.internal.StyleBlackboard;
 
 /**
@@ -60,6 +62,8 @@ public class MapLayerInfo {
 	private String gometryColumn;
 	
 	private StyleBlackboard blackboard;
+	
+	private File rasterFile;
 	
 	public MapLayerInfo(String layerName, String mapStyle, LayerType type, String gometryColumn){
 		this.layerName = layerName;
@@ -107,5 +111,14 @@ public class MapLayerInfo {
 
 	public void setGometryColumn(String gometryColumn) {
 		this.gometryColumn = gometryColumn;
+	}
+
+
+	public void setRasterFile(File file) {
+		this.rasterFile = file;
+	}
+	
+	public File getRasterFile(){
+		return this.rasterFile;
 	}
 }

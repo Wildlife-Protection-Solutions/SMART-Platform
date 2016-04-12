@@ -53,7 +53,7 @@
          <attribute name="maplayer" type="string" use="required">
             <annotation>
                <documentation>
-                  Query Text Strings should be of the form &lt;KEY&gt;:&lt;UUID&gt; .  You can also have &lt;KEY&gt;:&lt;KEY2&gt; as  long as the second key does not resemble a uuid.  This is so queries will be cloned correctly when cloning a conservation area.  In the first case (uuid) the key will be updated to the new uuid in the cloned conservation area.  In the second case nothing is done.  If something needs to be cloned you must implement a custom ca cloner.
+                  
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.report.birt.map.IBirtMapLayerManager"/>
@@ -68,7 +68,7 @@
          <attribute name="styleprovider" type="string" use="required">
             <annotation>
                <documentation>
-                  Provides the default style for the given query. Can return null for a query if it has no default style or is not supported by this extension point.
+                  Provides the default style for the given query. Should return null for a query if it has no default style or the query is not supported by this extension point.
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.report.birt.map.IBirtQueryStyleProvider"/>

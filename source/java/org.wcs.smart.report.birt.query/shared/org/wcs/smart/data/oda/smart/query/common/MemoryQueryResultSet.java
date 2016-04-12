@@ -73,6 +73,9 @@ public class MemoryQueryResultSet extends AbstractQueryResultSet {
 	
 	@SuppressWarnings("unchecked")
 	private void init(Collection<? extends IResultItem> queryResults){
+		if (queryResults == null){
+			queryResults = new ArrayList<IResultItem>();
+		}
 		setMaxRows(queryResults.size());
 		
 		if (queryResults instanceof List){

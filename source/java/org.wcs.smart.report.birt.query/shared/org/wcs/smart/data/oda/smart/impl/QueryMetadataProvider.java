@@ -23,6 +23,7 @@ package org.wcs.smart.data.oda.smart.impl;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.query.common.GriddedQueryResultSetMetadata;
 import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
 import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -45,7 +46,7 @@ public enum QueryMetadataProvider implements IMetadataProvider{
 			return new SimpleQueryResultSetMetadata((SimpleQuery)query, geometryColumns, c);
 		}
 		if (query instanceof GriddedQuery){
-			return new SimpleQueryResultSetMetadata((GriddedQuery)query, c);
+			return new GriddedQueryResultSetMetadata((GriddedQuery)query, c);
 		}
 		return null;
 	}

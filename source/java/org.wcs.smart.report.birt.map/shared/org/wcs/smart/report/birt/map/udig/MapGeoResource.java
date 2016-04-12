@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.report.birt.map.udig;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,11 +34,14 @@ import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
+import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.gce.geotiff.GeoTiffFormatFactorySpi;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IResolve;
@@ -45,6 +50,7 @@ import org.locationtech.udig.catalog.IServiceInfo;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
 /**
  * Georesource for BIRT SMART Map Layer
@@ -60,6 +66,8 @@ public class MapGeoResource extends IGeoResource {
 	private IQueryResults queryResults;
 	private MapLayerInfo mapInfo;
 	private OdaDataSetHandle dataSetHandle;
+	
+	private AbstractGridCoverage2DReader reader;
 	
 	/**
 	 * Creates a new query georesource.
@@ -147,16 +155,27 @@ public class MapGeoResource extends IGeoResource {
 		if (adaptee == null)
 			return false;
 
-		return adaptee.isAssignableFrom(IGeoResourceInfo.class)
-				|| adaptee.isAssignableFrom(FeatureSource.class)
+		if (adaptee.isAssignableFrom(IGeoResourceInfo.class)  ||
+				adaptee.isAssignableFrom(IGeoResource.class) ||
+				adaptee.isAssignableFrom(getClass())  ||
+				adaptee.isAssignableFrom(IService.class)  ||
+				adaptee.isAssignableFrom(IResolve.class)){
+			return true;
+		}
+		if (isVector()){
+			if (adaptee.isAssignableFrom(FeatureSource.class)
 				|| adaptee.isAssignableFrom(FeatureStore.class)
 				|| adaptee.isAssignableFrom(SimpleFeatureStore.class)
-	            || adaptee.isAssignableFrom(SimpleFeatureSource.class)
-	            || adaptee.isAssignableFrom(IGeoResource.class) 
-	            || adaptee.isAssignableFrom(IService.class)
-	            || adaptee.isAssignableFrom(getClass()) 
-	            || adaptee.isAssignableFrom(IResolve.class);
-
+	            || adaptee.isAssignableFrom(SimpleFeatureSource.class)){
+				return true;
+			}
+		}
+		if (isRaster()){
+			if (adaptee.isAssignableFrom(AbstractGridCoverage2DReader.class)){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private synchronized DataStore getDataStore(){
@@ -165,9 +184,32 @@ public class MapGeoResource extends IGeoResource {
 		if (queryResults == null){
 			datastore = new BirtDataStore(dataSetHandle, dataType, mapInfo);
 		}else{
-			datastore = new BirtDataStore(queryResults, dataType, mapInfo);
+			if (isVector()){
+				datastore = new BirtDataStore(queryResults, dataType, mapInfo);
+			}else if (isRaster()){
+				return null;
+			}
 		}
 		return datastore;
+	}
+	
+	private boolean isVector(){
+		if (mapInfo.getLayerType() == LayerType.LINE || 
+				mapInfo.getLayerType() == LayerType.MULTILINE ||
+				mapInfo.getLayerType() == LayerType.MULTIPOINT||
+				mapInfo.getLayerType() == LayerType.MULTIPOLYGON||
+				mapInfo.getLayerType() == LayerType.POINT ||
+				mapInfo.getLayerType() == LayerType.POLYGON){
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isRaster(){
+		if (mapInfo.getLayerType() == LayerType.RASTER){
+			return true;
+		}
+		return false;
 	}
     /**
      * @see org.locationtech.udig.catalog.IGeoResource#resolve(java.lang.Class, org.eclipse.core.runtime.IProgressMonitor)
@@ -178,49 +220,68 @@ public class MapGeoResource extends IGeoResource {
 		if (adaptee.isAssignableFrom(IGeoResourceInfo.class)) {
 			return adaptee.cast(super.getInfo(monitor));
 		}
-		if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ) {
-			DataStore ds = getDataStore();
-			if (ds != null) {
-				FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds
-						.getFeatureSource(dataType);
-				if (fs != null)
+		if (isVector()){
+			if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ) {
+				DataStore ds = getDataStore();
+				if (ds != null) {
+					FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds
+							.getFeatureSource(dataType);
+					if (fs != null)
+						return adaptee.cast(fs);
+				} 
+			}
+			if (adaptee.isAssignableFrom(FeatureStore.class) || adaptee.isAssignableFrom(SimpleFeatureStore.class)) {
+				@SuppressWarnings("unchecked")
+				FeatureSource<SimpleFeatureType, SimpleFeature> fs = resolve(
+						FeatureSource.class, monitor);
+				if (fs != null && fs instanceof FeatureStore) {
 					return adaptee.cast(fs);
-			} 
-		}
-		if (adaptee.isAssignableFrom(FeatureStore.class) || adaptee.isAssignableFrom(SimpleFeatureStore.class)) {
-			@SuppressWarnings("unchecked")
-			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resolve(
-					FeatureSource.class, monitor);
-			if (fs != null && fs instanceof FeatureStore) {
-				return adaptee.cast(fs);
+				}
 			}
 		}
-		 if (adaptee.isAssignableFrom(IGeoResourceInfo.class)) {
-	            return adaptee.cast(getInfo(monitor));
-	        }
-	        if (adaptee.isAssignableFrom(IService.class)) {
-	            return adaptee.cast(service(monitor));
-	        }
-	        if (adaptee.isAssignableFrom(IServiceInfo.class)) {
-	            try {
-	                monitor.beginTask("service info", 100); //$NON-NLS-1$
-	                IService service = service(new SubProgressMonitor(monitor, 40));
-	                if (service != null) {
-	                    IServiceInfo info = service.getInfo(new SubProgressMonitor(monitor, 60));
-	                    return adaptee.cast(info);
-	                }
-	            } finally {
-	                monitor.done();
-	            }
-	        }
-	        if (adaptee.isAssignableFrom(IGeoResource.class)) {
-	            monitor.done();
-	            return adaptee.cast(this);
-	        }
-	        if (adaptee.isAssignableFrom(getClass())) {
-	            return adaptee.cast(this);
-	        }
-	        return null;
+		if (isRaster()){
+			if (adaptee.isAssignableFrom(AbstractGridCoverage2DReader.class)){
+				if (reader == null){
+					synchronized (this) {
+						if (reader == null){
+							AbstractGridFormat frmt = (new GeoTiffFormatFactorySpi()).createFormat();
+		                    File file = mapInfo.getRasterFile();
+			                if (file != null) {
+			                	this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file);
+			                }else{
+			                	throw new FileNotFoundException( "Raster file not found for gridded query."); //$NON-NLS-1$
+			                }
+						}
+					}
+				}
+				return  adaptee.cast(this.reader);
+			}
+		}
+		if (adaptee.isAssignableFrom(IGeoResourceInfo.class)) {
+			return adaptee.cast(getInfo(monitor));
+		}
+	    if (adaptee.isAssignableFrom(IService.class)) {
+	    	return adaptee.cast(service(monitor));
+	    }
+	    if (adaptee.isAssignableFrom(IServiceInfo.class)) {
+	    	try {
+	    		monitor.beginTask("service info", 100); //$NON-NLS-1$
+	    		IService service = service(new SubProgressMonitor(monitor, 40));
+	    		if (service != null) {
+	    			IServiceInfo info = service.getInfo(new SubProgressMonitor(monitor, 60));
+	    			return adaptee.cast(info);
+	    		}
+	    	} finally {
+	    		monitor.done();
+	    	}
+	    }
+	    if (adaptee.isAssignableFrom(IGeoResource.class)) {
+	    	monitor.done();
+	    	return adaptee.cast(this);
+	    }
+	    if (adaptee.isAssignableFrom(getClass())) {
+	    	return adaptee.cast(this);
+	    }
+	    return null;
 	}
-
 }

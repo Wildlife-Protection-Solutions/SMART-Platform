@@ -105,4 +105,21 @@ public class MapQueryService extends IService {
 		return null;
 	}
 
+	@Override
+	public <T> boolean canResolve( Class<T> adaptee ) {
+		 for (IGeoResource r : resources){
+			 if (r.canResolve(adaptee)){
+				 return true;
+			 }
+		 }
+		 return super.canResolve(adaptee);
+	}
+	@Override
+	public <T> T resolve( Class<T> adaptee, IProgressMonitor monitor ) throws IOException {
+		for (IGeoResource r : resources){
+			T resolve = r.resolve(adaptee, monitor);
+			if (resolve != null) return resolve;
+		}
+		return super.resolve(adaptee, monitor);
+	}
 }

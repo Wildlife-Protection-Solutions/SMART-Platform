@@ -66,6 +66,11 @@
 			<artifactId>gt-render</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-geotiff</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>		
         	<dependency>
 			<groupId>org.locationtech.udig</groupId>
 			<artifactId>org.locationtech.udig.catalog</artifactId>

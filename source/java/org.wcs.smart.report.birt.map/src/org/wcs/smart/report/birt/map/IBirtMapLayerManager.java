@@ -43,7 +43,8 @@ public interface IBirtMapLayerManager {
 	public boolean canAddToMap(DataSetHandle handle);
 	
 	/**
-	 * Returns the list of geometry columns that are supported
+	 * Returns the list of geometry columns that are supported.  Only the
+	 * geometry column name and layer type must be provided.  
 	 * 
 	 * @param handle
 	 * @param context may be null if no context set
