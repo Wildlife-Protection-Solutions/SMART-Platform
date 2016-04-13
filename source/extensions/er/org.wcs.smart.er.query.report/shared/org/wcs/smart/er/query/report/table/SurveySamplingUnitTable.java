@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -52,7 +53,10 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 public class SurveySamplingUnitTable extends SmartBirtTable {
 
-	public static final String GEOMETRY_COLUMN = "geometry";
+	/**
+	 * Sampling unit geometry
+	 */
+	public static final String GEOMETRY_COLUMN = "su:geometry"; //$NON-NLS-1$
 	
 	public static final String SU_PREFIX = "SD_SU"; //$NON-NLS-1$
 	private SurveyDesign sd;
@@ -117,7 +121,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			for (SurveyDesignSamplingUnitAttribute sua : sd.getSamplingUnitAttributes()){
 				names[i++] = sua.getSamplingUnitAttribute().getName();
 			}
-			names[i++] = GEOMETRY_COLUMN;
+			names[i++] = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, connection.getCurrentLocale());
 		}
 		return names;
 	}

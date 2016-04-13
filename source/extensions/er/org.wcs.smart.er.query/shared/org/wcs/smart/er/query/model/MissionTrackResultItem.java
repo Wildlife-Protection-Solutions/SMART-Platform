@@ -24,6 +24,8 @@ package org.wcs.smart.er.query.model;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
@@ -40,7 +42,7 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 public class MissionTrackResultItem implements IGeometryResultItem{
 
-	public static final String TRACK_GEOMETRY = "TrackGeomtry";
+	public static final String TRACK_GEOMCOLUMN_KEY = "TrackGeomtry";
 	
 	private String caId;
 	private String caName;
@@ -381,12 +383,12 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	
 	@Override
 	public Geometry asGeometry(String columnName) {
-		if (columnName.equals(TRACK_GEOMETRY)){
+		if (columnName.equals(TRACK_GEOMCOLUMN_KEY)){
 			if (getGeometry() == null) return null;
 			try{
 				return reader.read(getGeometry());
 			}catch (Exception ex){
-				//TODO: logme
+				Logger.getLogger(MissionTrackResultItem.class.getName()).log(Level.WARNING, "Error parsing geometry.", ex); //$NON-NLS-1$
 			}
 		}
 		return null;

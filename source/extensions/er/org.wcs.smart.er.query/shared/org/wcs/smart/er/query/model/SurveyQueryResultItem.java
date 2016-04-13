@@ -48,8 +48,14 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class SurveyQueryResultItem implements IGeometryResultItem{
 	
-	public static final String WAYPOINT_GEOMETRY = "WaypointGeomtry";
-	public static final String TRACK_GEOMETRY = "TrackGeomtry";
+	/**
+	 * Waypoint geometry field name
+	 */
+	public static final String WAYPOINT_GEOMCOLUMN_KEY = "wp:geometry"; //$NON-NLS-1$
+	/**
+	 * Track geometry field name
+	 */
+	public static final String TRACK_GEOMCOLUMN_KEY = "track:geometry"; //$NON-NLS-1$
 	
 	private static final GeometryFactory gf = new GeometryFactory();
 
@@ -521,9 +527,9 @@ public class SurveyQueryResultItem implements IGeometryResultItem{
 
 	@Override
 	public Geometry asGeometry(String columnName) {
-		if (columnName.equals(WAYPOINT_GEOMETRY)){
+		if (columnName.equals(WAYPOINT_GEOMCOLUMN_KEY)){
 			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
-		}else if (columnName.equals(TRACK_GEOMETRY)){
+		}else if (columnName.equals(TRACK_GEOMCOLUMN_KEY)){
 			if (getTracks() == null){
 				return gf.createMultiLineString(new LineString[]{});
 			}

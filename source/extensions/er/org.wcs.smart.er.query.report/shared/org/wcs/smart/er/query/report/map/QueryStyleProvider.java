@@ -23,6 +23,8 @@ package org.wcs.smart.er.query.report.map;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -64,7 +66,7 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 			resourceKey = "MissionTracks"; //$NON-NLS-1$
 		}else if (queryType.equals(SurveyGriddedQuery.KEY)){	
 			tableName = SurveyGriddedQuery.class.getSimpleName(); 
-			resourceKey = "Gridded"; //$NON-NLS-1$
+			resourceKey = "raster"; //$NON-NLS-1$
 		}
 		
 		Query query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -77,12 +79,8 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 		try {
 			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			
+			Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Error parsing SMART Query style.", e); //$NON-NLS-1$
 		}
 		return null;
-
 	}
-
 }

@@ -44,7 +44,10 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  */
 public class EntityQueryResultItem implements IGeometryResultItem{
 
-	public static final String WAYPOINT_GEOM_NAME = "WaypointGeometry";
+	/**
+	 * Waypoint point geometry field name
+	 */
+	public static final String WAYPOINT_GEOM_COLUMNKEY = "wp:geometry"; //$NON-NLS-1$
 	
 	private static final GeometryFactory gf = new GeometryFactory();
 	
@@ -318,7 +321,7 @@ public class EntityQueryResultItem implements IGeometryResultItem{
 
 	@Override
 	public Geometry asGeometry(String columnName) {
-		if (columnName.equals(WAYPOINT_GEOM_NAME)){
+		if (columnName.equals(WAYPOINT_GEOM_COLUMNKEY)){
 			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
 		}
 		return null;
