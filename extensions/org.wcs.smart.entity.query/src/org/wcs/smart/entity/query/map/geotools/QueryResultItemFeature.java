@@ -52,7 +52,7 @@ public class QueryResultItemFeature {
 	 */
 	public static SimpleFeature createObservationFeature(EntityQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
-		data.add(it.asGeometry(EntityQueryResultItem.WAYPOINT_GEOM_NAME));
+		data.add(it.asGeometry(EntityQueryResultItem.WAYPOINT_GEOM_COLUMNKEY));
 		data.add(it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$
 		int i = 0;
 		for(QueryColumn c : columns){

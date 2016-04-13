@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Query;
+import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -47,7 +48,10 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  */
 public class EntityTable extends SmartBirtTable {
 
-	public static final String GEOMETRY_COL_KEY = "geometry"; //$NON-NLS-1$
+	/**
+	 * Entity position geometry
+	 */
+	public static final String GEOMETRY_COL_KEY = "entity:geometry"; //$NON-NLS-1$
 	
 	public static final String ENTITYKEY_PREFIX = "ENTITY"; //$NON-NLS-1$
 	
@@ -115,7 +119,7 @@ public class EntityTable extends SmartBirtTable {
 			i++;
 		}
 		if (et.getType() == EntityType.Type.FIXED){
-			cols[i+add] = GEOMETRY_COL_KEY;
+			cols[i+add] = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, connection.getCurrentLocale());
 		}
 		return cols;
 	}

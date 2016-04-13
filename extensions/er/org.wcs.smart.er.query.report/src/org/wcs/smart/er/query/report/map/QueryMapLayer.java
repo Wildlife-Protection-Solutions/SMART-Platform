@@ -59,16 +59,16 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey) {		
 		if (queryTypeKey.equals(SurveyObservationQuery.KEY) ||
 				queryTypeKey.equals(SurveyWaypointQuery.KEY)){			
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, SurveyQueryResultItem.WAYPOINT_GEOMETRY);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, SurveyQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(MissionQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, SurveyQueryResultItem.TRACK_GEOMETRY);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(MissionTrackQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, MissionTrackResultItem.TRACK_GEOMETRY);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, MissionTrackResultItem.TRACK_GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(SurveyGriddedQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, "raster");
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, null);
 			return Collections.singletonList(def);
 		}
 		return null;

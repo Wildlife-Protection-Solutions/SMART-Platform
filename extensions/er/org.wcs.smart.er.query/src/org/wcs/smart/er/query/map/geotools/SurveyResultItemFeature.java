@@ -77,7 +77,7 @@ public class SurveyResultItemFeature {
 	public static SimpleFeature createObservationFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
 		
-		data.add(it.asGeometry(SurveyQueryResultItem.WAYPOINT_GEOMETRY));
+		data.add(it.asGeometry(SurveyQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY));
 		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		addQueryColumnData(it, ftype, columns, data);
 		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
@@ -96,7 +96,7 @@ public class SurveyResultItemFeature {
 	public static SimpleFeature createTrackFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
 		
-		data.add(it.asGeometry(SurveyQueryResultItem.TRACK_GEOMETRY));
+		data.add(it.asGeometry(SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY));
 		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		addQueryColumnData(it, ftype, columns, data);
 		
@@ -118,7 +118,7 @@ public class SurveyResultItemFeature {
 		List<Object> data = new ArrayList<Object>();
 		
 		
-		data.add(it.asGeometry(MissionTrackResultItem.TRACK_GEOMETRY));
+		data.add(it.asGeometry(MissionTrackResultItem.TRACK_GEOMCOLUMN_KEY));
 		data.add(it.getMissionId() + "." + UuidUtils.uuidToString(it.getTrackUuid())); //$NON-NLS-1$ 
 		
 		addQueryColumnData(it, ftype, columns, data);

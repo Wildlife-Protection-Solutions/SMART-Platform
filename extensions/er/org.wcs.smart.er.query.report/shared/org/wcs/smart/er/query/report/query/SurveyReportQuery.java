@@ -24,13 +24,16 @@ package org.wcs.smart.er.query.report.query;
 import java.sql.Date;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
+import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
@@ -134,18 +137,20 @@ public class SurveyReportQuery extends AbstractSmartQuery {
 	}
 
 	@Override
-	public String[] getGeometryColumnNames(Query query) {
-		if (query.getTypeKey().equals(MissionQuery.KEY)){
-			return new String[]{SurveyQueryResultItem.TRACK_GEOMETRY};
-		}else if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
-				query.getTypeKey().equals(SurveyWaypointQuery.KEY) ){
-			return new String[]{SurveyQueryResultItem.WAYPOINT_GEOMETRY};
+	public GeometryColumn[] getGeometryColumns(Query query, Locale l) {
+		if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
+				query.getTypeKey().equals(SurveyWaypointQuery.KEY)){		
+			return new GeometryColumn[]{
+					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),SurveyQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY)};
+		}else if (query.getTypeKey().equals(MissionQuery.KEY)){
+			return new GeometryColumn[]{
+					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY)};
 		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
-			return new String[]{MissionTrackResultItem.TRACK_GEOMETRY};
+			return new GeometryColumn[]{
+					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),MissionTrackResultItem.TRACK_GEOMCOLUMN_KEY)};
 		}
 		return null;
 	}
-
 	
 	
 }
