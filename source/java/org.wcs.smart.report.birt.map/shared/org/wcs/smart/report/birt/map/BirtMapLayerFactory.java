@@ -115,8 +115,8 @@ public class BirtMapLayerFactory extends EObjectImpl implements LayerFactory {
 	        layer.setGeoResource(resource);
 
 	        // determine the default colour
-	        //TODO: use palette instead of single color
-	        theLayer.setDefaultColor(Color.red);
+	        Color c = getMap().getColourScheme().addItem(theLayer.getID().toString());
+	        theLayer.setDefaultColor(c);
 	        runLayerCreatedInterceptor(layer);
 
 	        return layer;

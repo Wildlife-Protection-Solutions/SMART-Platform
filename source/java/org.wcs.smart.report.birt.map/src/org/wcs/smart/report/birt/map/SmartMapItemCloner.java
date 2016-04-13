@@ -38,7 +38,6 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
@@ -52,6 +51,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {

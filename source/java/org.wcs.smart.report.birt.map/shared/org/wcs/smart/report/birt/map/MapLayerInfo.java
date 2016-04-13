@@ -105,7 +105,7 @@ public class MapLayerInfo {
 		this.layerType = layerType;
 	}
 
-	public String getGometryColumn() {
+	public String getGeometryColumn() {
 		return gometryColumn;
 	}
 

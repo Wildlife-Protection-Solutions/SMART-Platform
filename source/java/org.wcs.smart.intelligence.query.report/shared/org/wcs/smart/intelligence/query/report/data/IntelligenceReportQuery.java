@@ -27,8 +27,11 @@ import java.util.Locale;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
+import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
@@ -102,11 +105,13 @@ public class IntelligenceReportQuery extends AbstractSmartQuery {
 		}
 		throw new OdaException("Unsupported query type."); //$NON-NLS-1$
 	}
-
+	
 	@Override
-	public String[] getGeometryColumnNames(Query query) {
-		if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY)){
-			return new String[]{IntelligenceRecordResultItem.GEOMETRY_COLUMN_NAME};
+	public GeometryColumn[] getGeometryColumns(Query query, Locale l) {
+		if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY)){		
+			return new GeometryColumn[]{
+					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
+							IntelligenceRecordResultItem.GEOMCOLUMN_KEY)};
 		}
 		return null;
 	}

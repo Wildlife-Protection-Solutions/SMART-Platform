@@ -50,6 +50,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartLabelProvider implements ICoreLabelProvider {
 
+	
 	public static final String BOOLEAN_TRUE_LABEL = Messages.Attribute_BooleanAttribute_True_Label;
 	public static final String BOOLEAN_FALSE_LABEL = Messages.Attribute_BooleanAttribute_False_Label;
 	public static final String AGENCY_NAME = Messages.Agency_AgencyName;
@@ -84,7 +85,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		}else if (value instanceof AreaType){
 			return getAreaTypeName((AreaType)value);
 		}
-		
+		if (value.equals(GEOMETRY_LABEL)) return "Geometry";
 		if (value.equals(AGENCY_NAME_KEY)) return Messages.Agency_AgencyName;
 		if (value.equals(RANK_NAME_KEY)) return Messages.Rank_Label;
 		if (value.equals(EMP_AGENCY_KEY)) return Messages.Employee_Agency_Label;

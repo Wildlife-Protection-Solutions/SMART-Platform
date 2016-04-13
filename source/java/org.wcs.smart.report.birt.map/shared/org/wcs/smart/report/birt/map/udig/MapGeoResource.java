@@ -22,7 +22,6 @@
 package org.wcs.smart.report.birt.map.udig;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,8 +33,10 @@ import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
@@ -67,7 +68,7 @@ public class MapGeoResource extends IGeoResource {
 	private MapLayerInfo mapInfo;
 	private OdaDataSetHandle dataSetHandle;
 	
-	private AbstractGridCoverage2DReader reader;
+	private GridCoverage2DReader reader;
 	
 	/**
 	 * Creates a new query georesource.
@@ -171,7 +172,8 @@ public class MapGeoResource extends IGeoResource {
 			}
 		}
 		if (isRaster()){
-			if (adaptee.isAssignableFrom(AbstractGridCoverage2DReader.class)){
+			if (adaptee.isAssignableFrom(AbstractGridCoverage2DReader.class) || 
+					adaptee.isAssignableFrom(GridCoverage2D.class)){
 				return true;
 			}
 		}
@@ -244,17 +246,25 @@ public class MapGeoResource extends IGeoResource {
 				if (reader == null){
 					synchronized (this) {
 						if (reader == null){
-							AbstractGridFormat frmt = (new GeoTiffFormatFactorySpi()).createFormat();
-		                    File file = mapInfo.getRasterFile();
-			                if (file != null) {
+			                if (mapInfo.getRasterFile() != null) {
+			                	AbstractGridFormat frmt = (new GeoTiffFormatFactorySpi()).createFormat();
+			                    File file = mapInfo.getRasterFile();
 			                	this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file);
 			                }else{
-			                	throw new FileNotFoundException( "Raster file not found for gridded query."); //$NON-NLS-1$
+			                	//need empty grid coverage for styling
+			                	return adaptee.cast(EmptyGridCoverage.getReaderInstance());
 			                }
 						}
 					}
 				}
 				return  adaptee.cast(this.reader);
+			}
+			
+			if (adaptee.isAssignableFrom(GridCoverage2D.class)){
+				if (mapInfo.getRasterFile() == null){
+					//create empty grid
+					return  adaptee.cast(EmptyGridCoverage.getInstance());
+				}
 			}
 		}
 		if (adaptee.isAssignableFrom(IGeoResourceInfo.class)) {

@@ -267,7 +267,6 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		StringBuilder log = new StringBuilder();
 		for (Entry<String, Object> entry : currentParameters.entrySet()){
 			if (entry.getValue() instanceof UUID){
-				//TODO: test this uuid stuff
 				pp.setObject(entry.getKey(), (UUID)entry.getValue());
 				log.append("x'"+ UuidUtils.uuidToString((UUID)entry.getValue()) + ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{

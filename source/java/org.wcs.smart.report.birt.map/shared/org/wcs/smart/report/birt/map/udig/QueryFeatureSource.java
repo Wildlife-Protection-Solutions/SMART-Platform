@@ -97,7 +97,7 @@ public class QueryFeatureSource extends ContentFeatureSource {
 		sb.append("the_geom:" + mapInfo.getLayerType().getGeotoolsType() + ":srid=4326"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(",fid:String"); //$NON-NLS-1$
 		for (int i = 1; i <= md.getColumnCount(); i++){
-			if (md.getColumnName(i).equalsIgnoreCase(mapInfo.getGometryColumn())) continue;
+			if (md.getColumnName(i).equalsIgnoreCase(mapInfo.getGeometryColumn())) continue;
 			
 			String maptype = null;
 			int type = md.getColumnType(i);

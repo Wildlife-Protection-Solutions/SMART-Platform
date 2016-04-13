@@ -24,13 +24,16 @@ package org.wcs.smart.report.query.data.oda.query;
 import java.sql.Date;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
+import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
@@ -134,12 +137,16 @@ public class PatrolSmartQuery extends AbstractSmartQuery {
 	}
 
 	@Override
-	public String[] getGeometryColumnNames(Query query) {
-		if (query.getTypeKey().equals(PatrolObservationQuery.KEY) || 
-				query.getTypeKey().equals(PatrolWaypointQuery.KEY)){
-			return new String[]{PatrolQueryResultItem.WAYPOINTGEOM_COLUMN_NAME};
+	public GeometryColumn[] getGeometryColumns(Query query, Locale l) {
+		if (query.getTypeKey().equals(PatrolObservationQuery.KEY) ||
+				query.getTypeKey().equals(PatrolWaypointQuery.KEY)){		
+			return new GeometryColumn[]{
+					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
+							PatrolQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY)};
 		}else if (query.getTypeKey().equals(PatrolQuery.KEY)){
-			return new String[]{PatrolQueryResultItem.TRACKGEOM_COLUMN_NAME};
+			return new GeometryColumn[]{
+					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
+							PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY)};
 		}
 		return null;
 	}

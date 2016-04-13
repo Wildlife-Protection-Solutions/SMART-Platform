@@ -49,7 +49,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey) {
 		if (queryTypeKey.equals(IntelligenceRecordQuery.KEY)){
-			return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTIPOINT, IntelligenceRecordResultItem.GEOMETRY_COLUMN_NAME));
+			return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTIPOINT, IntelligenceRecordResultItem.GEOMCOLUMN_KEY));
 		}
 		return null;
 	}

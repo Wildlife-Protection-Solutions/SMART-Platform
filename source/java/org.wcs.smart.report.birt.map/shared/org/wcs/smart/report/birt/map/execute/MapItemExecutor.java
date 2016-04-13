@@ -50,7 +50,6 @@ import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.locationtech.udig.project.internal.impl.ProjectFactoryImpl;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -151,8 +150,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 			try{
 				f.delete();
 			}catch (Throwable t){
-				//TODO:
-				t.printStackTrace();
+				Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, t.getMessage(), t);
 			}
 		}
 	}
@@ -256,7 +254,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 			sb.put(SLDContent.ID, style);
 			return sb;
 		} catch (Exception ex) {
-			//TODO:
+			Logger.getLogger(MapItemExecutor.class.getName()).log(Level.FINE, "Could not create raster default style.", ex); //$NON-NLS-1$
 			return null;
 		}
 	}

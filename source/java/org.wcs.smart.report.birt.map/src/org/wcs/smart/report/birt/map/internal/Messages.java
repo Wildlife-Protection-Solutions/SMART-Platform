@@ -28,6 +28,8 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_Error_settingMap;
 	public static String SmartLayersPage_Error_SettingMapProperty;
 	public static String SmartLayersPage_ErrorDialog_Title;
+	public static String SmartLayersPage_ErrorLabel;
+	public static String SmartLayersPage_GeometryColumnLabel;
 	public static String SmartLayersPage_LayerName_ColumnHeader;
 	public static String SmartLayersPage_LoadingLbl;
 	public static String SmartLayersPage_MapBoundsLabel;
@@ -39,6 +41,7 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_NoBasemapLabel;
 	public static String SmartLayersPage_removetooltip;
 	public static String SmartLayersPage_resettooltip;
+	public static String SmartLayersPage_RefreshLabel;
 	public static String SmartLayersPage_ReportDataset_ColumnName;
 	public static String SmartLayersPage_SetBoundsLink1;
 	public static String SmartLayersPage_Style_ColumnHeader;

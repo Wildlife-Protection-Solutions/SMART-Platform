@@ -25,6 +25,8 @@ import java.awt.Color;
 import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IMemento;
@@ -69,9 +71,7 @@ public class SmartLayerStyle extends StyleContent {
 			if (uuid == null || uuid.length() != 32) return null;
 			return UuidUtils.stringToUuid(uuid);
 		}catch (Exception ex){
-//			SmartPlugIn.log(ex.getMessage(), ex);
-			ex.printStackTrace();
-			//TODO
+			Logger.getLogger(SmartLayerStyle.class.getName()).log(Level.WARNING, "Error parsing smart layer style.", ex); //$NON-NLS-1$
 		}
 		return null;
 	}

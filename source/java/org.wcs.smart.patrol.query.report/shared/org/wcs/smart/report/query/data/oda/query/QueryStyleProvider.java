@@ -23,6 +23,8 @@ package org.wcs.smart.report.query.data.oda.query;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -49,7 +51,7 @@ public class QueryStyleProvider  extends AbstractQueryStyleProvider{
 		String resourceKey = null;
 		if (queryType.equals(PatrolGriddedQuery.KEY)){
 			tableName = PatrolGriddedQuery.class.getSimpleName(); 
-			resourceKey = "Gridded"; //$NON-NLS-1$
+			resourceKey = "raster"; //$NON-NLS-1$
 		}else if (queryType.equals(PatrolObservationQuery.KEY)){
 			tableName = PatrolObservationQuery.class.getSimpleName(); 
 			resourceKey = "Waypoint"; //$NON-NLS-1$
@@ -73,9 +75,7 @@ public class QueryStyleProvider  extends AbstractQueryStyleProvider{
 		try {
 			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			
+			Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Could not parse query style.", e); //$NON-NLS-1$
 		}
 		return null;
 

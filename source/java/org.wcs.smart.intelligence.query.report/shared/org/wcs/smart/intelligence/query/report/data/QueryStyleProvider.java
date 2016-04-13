@@ -23,6 +23,8 @@ package org.wcs.smart.intelligence.query.report.data;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -62,9 +64,7 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 		try {
 			return StyleManager.INSTANCE.fromStringMap(stylemap).get(resourceKey);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			
+			Logger.getLogger(QueryStyleProvider.class.getName()).log(Level.WARNING, "Error parsing SMART Query style.", e); //$NON-NLS-1$			
 		}
 		return null;
 

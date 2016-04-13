@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
-import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -73,9 +72,11 @@ public class MapGeoResourceInfo extends IGeoResourceInfo {
 					}
 				}, null);
 			}else if (resource.canResolve(AbstractGridCoverage2DReader.class)){
-				GridCoverage2DReader reader = resource.resolve(GridCoverage2DReader.class, new NullProgressMonitor());
+				AbstractGridCoverage2DReader reader = resource.resolve(AbstractGridCoverage2DReader.class, new NullProgressMonitor());
 				GeneralEnvelope ge = reader.getOriginalEnvelope();
-				this.bounds = new ReferencedEnvelope(ge.getMinimum(0), ge.getMaximum(0), ge.getMinimum(1), ge.getMaximum(1), ge.getCoordinateReferenceSystem());
+				if (ge != null){
+					this.bounds = new ReferencedEnvelope(ge.getMinimum(0), ge.getMaximum(0), ge.getMinimum(1), ge.getMaximum(1), ge.getCoordinateReferenceSystem());
+				}
 			}
 		} catch (Exception e) {
 			Logger.getLogger(MapGeoResourceInfo.class.getName()).log(Level.WARNING, e.getMessage(), e);

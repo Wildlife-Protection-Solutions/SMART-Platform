@@ -113,9 +113,8 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 			try {
 				// retrieves the last query result
 				GriddedQuery query = (GriddedQuery) parentEditor.getQuery();
-				//TODO; if null then it has not be run or it is still running
-				//if not run we might want to run again
-				//if still running we probably want to wait.
+
+				//if null then it has not be run or it is still running
 				IQueryResult queryResults = query.getCachedResults();
 				
 				if ((queryResults == null) || ((GridQueryResult)queryResults).getData().isEmpty())

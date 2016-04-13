@@ -94,7 +94,7 @@ public class PlanPatrolMapLayer implements IBirtMapLayerManager {
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
 			throws Exception {
-		return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACKGEOM_COLUMN_NAME));
+		return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY));
 	}
 
 }

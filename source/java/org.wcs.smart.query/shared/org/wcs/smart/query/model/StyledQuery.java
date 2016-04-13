@@ -29,6 +29,7 @@ import javax.persistence.Entity;
  * @author Emily
  *
  */
+
 @Entity
 public abstract class StyledQuery extends Query {
 
@@ -36,17 +37,6 @@ public abstract class StyledQuery extends Query {
 	
 	private String styleMemento;
 	
-	// a single query can create multiple layers 
-	// ex: survey observation queries (survey tracks and waypoints)
-	// are returned as two separate layers
-	//so we need to be able to map layer to a style
-	//we use the ref section of the layer id as the query
-	//uuid may not be set when this is set which will cause
-	//problems if we use the entire layer id
-//	@Transient
-//	private Map<String, StyleBlackboard> queryStyles;
-	
-
 	/**
 	 * The string representation of the layer style
 	 * @return
@@ -61,59 +51,6 @@ public abstract class StyledQuery extends Query {
 	 */
 	public void setStyle(String style){
 		this.styleMemento = style;
-//		queryStyles = null;
 	}
-	
-//	private void loadQueryStyleMap(){
-//		if (getStyle() == null){
-//			queryStyles = new HashMap<String, StyleBlackboard>();
-//			return;
-//		}
-//		try{
-//			queryStyles = StyleManager.INSTANCE.fromStringMap(getStyle());
-//		}catch (Exception ex){
-//			queryStyles = new HashMap<String, StyleBlackboard>();
-//			QueryPlugIn.log("Style parsing error", ex); //$NON-NLS-1$
-//		}
-//	}
-//	/**
-//	 * Updates the current query style from the contents of the blackboard
-//	 * 
-//	 * @param geoResourceID
-//	 * @param blackboard setting to null will remove style for the given layer
-//	 * @throws IOException
-//	 */
-//	@Transient
-//	public void updateStyle(String geoResourceKey, StyleBlackboard blackboard) throws IOException{
-//		if (queryStyles == null){
-//			loadQueryStyleMap();
-//		}
-//		if (blackboard == null){
-//			queryStyles.remove(geoResourceKey);
-//		}else{
-//			queryStyles.put(geoResourceKey, blackboard);
-//		}
-//		
-//		setStyle(StyleManager.INSTANCE.asString(queryStyles));
-//	}
-//	
-//	
-//	/**
-//	 * Applies the current query style to the given style blackboard
-//	 * @param toUpdate
-//	 */
-//	@Transient
-//	public void applyStyle(String geoResourceKey, StyleBlackboard toUpdate) throws IOException, WorkbenchException{
-//		if (queryStyles == null){
-//			loadQueryStyleMap();
-//		}
-//		StyleBlackboard local = queryStyles.get(geoResourceKey);
-//		if (local != null){
-//			toUpdate.clear();
-//			for (StyleEntry se : local.getContent()){
-//				toUpdate.put(se.getID(), se.getStyle());
-//			}
-//		}
-//	}
-	
+		
 }

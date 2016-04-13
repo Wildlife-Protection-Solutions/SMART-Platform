@@ -592,7 +592,6 @@ public class ImportReportEngine {
 
 			}
 			
-			//TODO: - perhaps ask users where they want to import report
 			if (sharedReport){
 				smartQuery.setIsShared(true);
 			}else{

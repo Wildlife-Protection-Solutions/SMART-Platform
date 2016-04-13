@@ -28,7 +28,6 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.birt.map.internal.Messages;
 
 
@@ -50,7 +49,6 @@ public class SmartMapItemPlugIn  extends AbstractUIPlugin {
 	
 	// The shared instance
 	private static SmartMapItemPlugIn plugin;
-	private static ReportImportHandler importHandler = new ReportImportHandler();
 
 	/**
 	 * The constructor
@@ -69,16 +67,12 @@ public class SmartMapItemPlugIn  extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
-		ReportEventManager.getInstance().addImportHandler(importHandler);
 	}
 
 	/**
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		ReportEventManager.getInstance().removeImportHandler(importHandler);
-		
 		plugin = null;
 		super.stop(context);
 	}
