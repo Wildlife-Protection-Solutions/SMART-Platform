@@ -40,7 +40,10 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  */
 public class IntelligenceRecordResultItem implements IGeometryResultItem {
 
-	public static final String GEOMETRY_COLUMN_NAME = "geometry";
+	/**
+	 * Intelligence point geometry field name
+	 */
+	public static final String GEOMCOLUMN_KEY = "intel:geometry"; //$NON-NLS-1$
 	
 	private static final GeometryFactory gf = new GeometryFactory();
 	
@@ -138,7 +141,7 @@ public class IntelligenceRecordResultItem implements IGeometryResultItem {
 	
 	@Override
 	public Geometry asGeometry(String columnName) {
-		if (columnName.equals(GEOMETRY_COLUMN_NAME)){
+		if (columnName.equals(GEOMCOLUMN_KEY)){
 			return gf.createMultiPoint(positions.toArray(new Coordinate[positions.size()]));
 		}
 		return null;

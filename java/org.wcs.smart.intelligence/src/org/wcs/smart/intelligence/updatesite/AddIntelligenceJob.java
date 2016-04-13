@@ -328,7 +328,6 @@ public class AddIntelligenceJob extends Job {
 			public void execute(Connection c) throws SQLException {
 				PreparedStatement pst = c.prepareStatement("INSERT INTO smart.intelligence_source (UUID, CA_UUID, KEYID, IS_ACTIVE) VALUES (?, ?, ?, ?)"); //$NON-NLS-1$
 				pst.setObject(1, UuidUtils.uuidToByte(uuid));
-				//TODO: set this
 				pst.setObject(2, UuidUtils.uuidToByte(ca.getUuid()));
 				pst.setString(3, keyId);
 				pst.setBoolean(4, true);

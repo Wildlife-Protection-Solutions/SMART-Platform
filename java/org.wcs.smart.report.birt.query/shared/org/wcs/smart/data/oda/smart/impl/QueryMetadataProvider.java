@@ -41,7 +41,7 @@ public enum QueryMetadataProvider implements IMetadataProvider{
 	INSTANCE;
 	
 	@Override
-	public IResultSetMetaData createMetadata(Query query, String[] geometryColumns, SmartConnection c)throws OdaException {
+	public IResultSetMetaData createMetadata(Query query, GeometryColumn[] geometryColumns, SmartConnection c)throws OdaException {
 		if (query instanceof SimpleQuery){
 			return new SimpleQueryResultSetMetadata((SimpleQuery)query, geometryColumns, c);
 		}

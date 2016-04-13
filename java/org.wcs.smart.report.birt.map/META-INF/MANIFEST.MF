@@ -28,5 +28,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart
 Export-Package: org.wcs.smart.report.birt.map,
  org.wcs.smart.report.birt.map.properties
-Import-Package: org.locationtech.udig.style.sld
+Import-Package: javax.media.jai,
+ org.locationtech.udig.style.sld
 

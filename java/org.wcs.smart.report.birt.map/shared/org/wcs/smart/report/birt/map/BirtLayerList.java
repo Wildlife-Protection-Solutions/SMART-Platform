@@ -139,7 +139,7 @@ public class BirtLayerList extends SynchronizedEObjectWithInverseResolvingEList<
                             .createExecutableExtension("class"); //$NON-NLS-1$
                     interceptor.run(layer);
                 } catch (CoreException e) {
-                	Logger.getLogger(BirtLayerList.class.getName()).log(Level.SEVERE, "Error creating class: " + element.getAttribute("class") + " part of the layer interceptor: " + attribute,  e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                	Logger.getLogger(BirtLayerList.class.getName()).log(Level.FINE, "Error creating class: " + element.getAttribute("class") + " part of the layer interceptor: " + attribute,  e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 } catch (Throwable t) {
                 	Logger.getLogger(BirtLayerList.class.getName()).log(Level.SEVERE, "Error running interceptor: " + attribute,  t); //$NON-NLS-1$
                 }

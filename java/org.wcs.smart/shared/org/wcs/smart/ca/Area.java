@@ -22,6 +22,8 @@
 package org.wcs.smart.ca;
 
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -131,8 +133,7 @@ public class Area extends NamedItem{
 					value = new MultiPolygon(new Polygon[]{(Polygon)value}, value.getFactory());
 				}
 			} catch (ParseException e) {
-				//TODO: figure out logging here
-				//SmartPlugIn.log(Messages.Area_Error_LoadingGeom, e);
+				Logger.getLogger(Area.class.getName()).log(Level.WARNING, "Error parsing area geometry", e); //$NON-NLS-1$
 			}
 		}
 		return value;

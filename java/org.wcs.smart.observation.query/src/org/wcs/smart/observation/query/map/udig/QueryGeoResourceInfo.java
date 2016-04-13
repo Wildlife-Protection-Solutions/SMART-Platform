@@ -64,7 +64,6 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 			this.bounds = env;
 			QueryService service = (QueryService) resource.resolve(IService.class, monitor);
 			if (service.getQuery() instanceof IPagedQuery){
-				//TODO: what to do there if cached results not set
 				IPagedQueryResultSet rs = (IPagedQueryResultSet) service.getQuery().getCachedResults();
 				if (rs != null){
 					Envelope local = rs.getEnvelope();

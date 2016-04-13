@@ -37,7 +37,6 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 		if (item instanceof IndepedentIncidentSource){
 			 return Messages.IndepedentIncidentSource_IndIncidentWaypointsourceName;
 		}
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

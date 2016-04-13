@@ -61,13 +61,13 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
 		if (queryTypeKey.equals(PatrolWaypointQuery.KEY) ||
 				queryTypeKey.equals(PatrolObservationQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, PatrolQueryResultItem.WAYPOINTGEOM_COLUMN_NAME);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, PatrolQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(PatrolQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACKGEOM_COLUMN_NAME);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(PatrolGriddedQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, "raster");
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, null);
 			return Collections.singletonList(def);
 		}
 		return null;

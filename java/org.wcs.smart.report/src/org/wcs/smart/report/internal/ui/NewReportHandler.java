@@ -90,8 +90,6 @@ public class NewReportHandler {
 		
 		final File smartLibrary = SmartBirtLibrary.getInstance().getLibraryFile();
 		if (!smartLibrary.exists()) {
-			// TODO: I don't think we need to throw an exception here 
-			// perhaps just an error dialog instead
 			throw new IllegalStateException(Messages.NewReportHandler_Error_NoLibrary);
 		}
 

@@ -112,12 +112,12 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		try{
 			List<Object> data = new ArrayList<Object>();
-			data.add(itr.getValue(info.getGometryColumn()));
+			data.add(itr.getValue(info.getGeometryColumn()));
 			data.add(String.valueOf(System.nanoTime()));
 			//create a feature
 			for (int k = 1; k <= md.getColumnCount(); k ++){
 				
-				if (md.getColumnLabel(k).equals(info.getGometryColumn())){
+				if (md.getColumnLabel(k).equals(info.getGeometryColumn())){
 					continue;
 				}
 				data.add(itr.getValue(md.getColumnLabel(k)));

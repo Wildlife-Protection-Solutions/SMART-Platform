@@ -36,6 +36,7 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.style.IStyleConfigurator;
 import org.locationtech.udig.ui.ColorEditor;
 import org.opengis.filter.FilterFactory;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.udig.style.SmartGridCellStyleContent;
@@ -244,8 +245,7 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
 			}
 			return dash;
 		}catch (Exception ex){
-			//TODO:
-			ex.printStackTrace();
+			QueryPlugIn.log(ex.getMessage(), ex);
 		}
 		return LineStyle.LINE_SOLID.dashArray;
 	}

@@ -60,7 +60,6 @@ public class DateParameterComponent extends AbstractBirtParameter {
 		if (defaultValue != null && defaultValue instanceof Date){
 			this.defaultValue = (Date) defaultValue;
 		}
-		//TODO: add support for default value
 		if (includeDate){
 			dFormat = SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE;
 		}

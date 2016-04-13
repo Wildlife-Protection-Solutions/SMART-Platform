@@ -75,8 +75,6 @@ public abstract class SimpleQuery extends StyledQuery {
 	 */
 	public SimpleQuery(){
 		super();
-//		setName(Messages.SimpleQuery_DefaultQueryName);
-		//TODO:
 
 		dateFilter = null;
 		strQueryFilter = ""; //$NON-NLS-1$

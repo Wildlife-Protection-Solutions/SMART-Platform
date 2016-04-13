@@ -127,7 +127,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	public static SimpleFeature toSimpleFeature(List<QueryColumn> columns, 
 			SimpleFeatureType ftype, IntelligenceRecordResultItem currentIntel){		
 		List<Object>data = new ArrayList<Object>();
-		data.add(currentIntel.asGeometry(IntelligenceRecordResultItem.GEOMETRY_COLUMN_NAME));
+		data.add(currentIntel.asGeometry(IntelligenceRecordResultItem.GEOMCOLUMN_KEY));
 		data.add(UuidUtils.uuidToString(currentIntel.getUuid()));
 		int i = 0;
 		for (QueryColumn c : columns){

@@ -38,14 +38,13 @@ import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.FeatureType;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 
 /**
- * Empty feature source for styling
+ * Empty feature source for styling of vector layers
+ * 
  * @author Emily
  *
  */
@@ -73,14 +72,14 @@ public class EmptyFeatureSource extends ContentFeatureSource {
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(
 			Query query) throws IOException {
-		return new FeatureReader(){
+		return new FeatureReader<SimpleFeatureType, SimpleFeature>(){
 
 			@Override
 			public void close() throws IOException {
 			}
 
 			@Override
-			public FeatureType getFeatureType() {
+			public SimpleFeatureType getFeatureType() {
 				return EmptyFeatureSource.this.getSchema();
 			}
 
@@ -90,7 +89,7 @@ public class EmptyFeatureSource extends ContentFeatureSource {
 			}
 
 			@Override
-			public Feature next() throws IOException, IllegalArgumentException,
+			public SimpleFeature next() throws IOException, IllegalArgumentException,
 					NoSuchElementException {
 				return null;
 			}
@@ -126,7 +125,7 @@ public class EmptyFeatureSource extends ContentFeatureSource {
 		
 		for (int i=0; i < resultSet.getListValue().size(); i++) {
 			ResultSetColumnHandle resultSetColumn = (ResultSetColumnHandle)resultSet.getAt(i);
-			if (resultSetColumn.getColumnName().equalsIgnoreCase(mapInfo.getGometryColumn())) continue;
+			if (resultSetColumn.getColumnName().equalsIgnoreCase(mapInfo.getGeometryColumn())) continue;
 			
 			String colType = resultSetColumn.getDataType();
 			String maptype;
@@ -145,7 +144,7 @@ public class EmptyFeatureSource extends ContentFeatureSource {
 			}else if (colType.equalsIgnoreCase(DesignChoiceConstants.COLUMN_DATA_TYPE_BOOLEAN)){
 				maptype = "Integer"; //$NON-NLS-1$
 			}else{
-				Logger.getLogger(QueryFeatureSource.class.getName()).log(Level.SEVERE, "Query type not supported: " + colType, (Exception)null);
+				Logger.getLogger(QueryFeatureSource.class.getName()).log(Level.SEVERE, "Query type not supported: " + colType, (Exception)null); //$NON-NLS-1$
 				continue;
 			}
 			

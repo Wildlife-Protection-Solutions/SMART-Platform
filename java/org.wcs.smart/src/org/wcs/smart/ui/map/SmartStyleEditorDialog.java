@@ -601,7 +601,9 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
             	try{
             		StyleBlackboard z = StyleManager.INSTANCE.fromString(currentSelectedStyle.getStyleString());
             		StyleBlackboard y = getSelectedLayer().getStyleBlackboard();
-            		
+            		if (y.contains(SmartLayerStyle.STYLE_ID)){
+            			y.remove(SmartLayerStyle.STYLE_ID);
+            		}
             		if (blackboardsEqual(z,y)){
             			setSmartLayerStyle(currentSelectedStyle);
             			selection = currentSelectedStyle;

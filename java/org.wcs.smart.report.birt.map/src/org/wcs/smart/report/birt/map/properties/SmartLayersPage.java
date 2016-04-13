@@ -23,6 +23,7 @@ package org.wcs.smart.report.birt.map.properties;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +31,8 @@ import java.util.UUID;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
 import org.eclipse.birt.report.model.api.CachedMetaDataHandle;
+import org.eclipse.birt.report.model.api.ColumnHintHandle;
+import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.Expression;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.MemberHandle;
@@ -81,6 +84,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.BirtUiUtils;
 import org.wcs.smart.report.birt.map.ExtensionManager;
+import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.report.birt.map.item.LayerItem;
@@ -116,10 +120,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	private ExtendedItemHandle itemHandle;
 	private SmartMapItem mapItem;
 	private StyleCellEditor cellEditor;
+	private HashMap<LayerItem, Image> styleImageCache;
 	
 	public SmartLayersPage() {
 		super();
 		basemapJob.setSystem(true);
+		styleImageCache = new HashMap<LayerItem, Image>();
 	}
 	
 	@Override
@@ -147,6 +153,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		//update the ui
 		updateUI();
 	}
+	
+	
 	private LayerItem getLayerItem(Object item){
 		try{
 			if (item instanceof ExtendedItemHandle){
@@ -187,7 +195,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				LayerItem it = getLayerItem(element);
 				if (it != null){
 					if (it.getHandle().getDataSet() != null){
-						return it.getHandle().getDataSet().getElement().getDisplayName() + "  (" + it.getGeometryColumn() + " [" + it.getLayerType() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						return it.getHandle().getDataSet().getElement().getDisplayName();
 					}else{
 						return Messages.SmartLayersPage_Error_QueryNotFound ;
 					}
@@ -262,7 +270,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			public Image getImage(Object element) {
 				LayerItem it = getLayerItem(element);
 				if (it != null && it.getLayerStyles() != null){
-					return BirtUiUtils.parseImageFromStyleString(it.getLayerStyles());
+					Image x = styleImageCache.get(it);
+					if (x == null){
+						x = BirtUiUtils.parseImageFromStyleString(it.getLayerStyles());
+						styleImageCache.put(it, x);
+					}
+					return x;
 				}
 				return null;
 			}
@@ -290,10 +303,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 			@Override
 			protected void setValue(Object element, Object value) {
-				if (element instanceof LayerItem ){
+				if (element instanceof ExtendedItemHandle ){
 					if (value instanceof String){
 						try {
-							((LayerItem)element).setLayerStyles((String)value);
+							LayerItem it =(LayerItem)((ExtendedItemHandle)element).getReportItem(); 
+							styleImageCache.put(it, null);
+							it.setLayerStyles((String)value);
 						} catch (SemanticException e) {
 						}
 					}
@@ -301,6 +316,27 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				}
 			}
 		});
+		
+		//geomtry column binding  
+		final TableViewerColumn col4 = new TableViewerColumn(tblLayers, SWT.DEFAULT);
+		col4.getColumn().setText(Messages.SmartLayersPage_GeometryColumnLabel);
+		col4.getColumn().setWidth(200);
+		ColumnLabelProvider col4Provider = new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				LayerItem it = getLayerItem(element);
+				if (it != null){
+					if (it.getLayerType() == LayerType.RASTER){
+						return it.getLayerType().name();
+					}else if (it.getGeometryColumn() != null){
+						return it.getGeometryColumn() + " [" + it.getLayerType().name() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+				return Messages.SmartLayersPage_ErrorLabel;
+			};
+		};
+		col4.setLabelProvider(col4Provider);
+		
 		tblLayers.getTable().pack();
 		Composite btnPanel = toolkit.createComposite(contentpane);
 		GridLayout gl = new GridLayout(1, true);
@@ -354,6 +390,20 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				moveDown();
+			}
+		});
+		Button btnUpdate = toolkit.createButton(btnPanel, Messages.SmartLayersPage_RefreshLabel, SWT.PUSH);
+		btnUpdate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnUpdate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				List<?> layers = (List<?>) tblLayers.getInput();
+				for (Object x : layers){
+					if (x instanceof ExtendedItemHandle){
+						updateLayerGeometry((ExtendedItemHandle)x);
+					}
+				}
+				tblLayers.refresh();
 			}
 		});
 	}	
@@ -506,7 +556,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	};
 	
 	private synchronized void loadBasemaps(){
-		
 		basemapJob.schedule();
 	}
 	
@@ -697,6 +746,65 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		}
 	}
 
+	private void updateLayerGeometry(ExtendedItemHandle handle){
+		List<LayerDefinition> options = new ArrayList<LayerDefinition>();
+		try {
+			options = (new ExtensionManager()).getLayerOptions(new DataSetHandle[]{handle.getDataSet()});
+			
+			if (options.size() != 1) return;
+
+			LayerItem li = (LayerItem) handle.getReportItem();
+			String keyName = options.get(0).info.getGeometryColumn();
+			
+			li.setGeometryColumn(findLabel((OdaDataSetHandle)handle.getDataSet(), keyName));
+			li.setLayerType(options.get(0).info.getLayerType());
+			
+			updateBindings(li, (OdaDataSetHandle)li.getHandle().getDataSet());
+		} catch (Exception e) {
+			SmartMapItemPlugIn.displayLog(e.getMessage(), e);
+		}
+		
+		
+	}
+	private void updateBindings(LayerItem li, OdaDataSetHandle dsHandle) throws SemanticException{
+		CachedMetaDataHandle meta = dsHandle.getCachedMetaDataHandle();
+		MemberHandle resultSet = meta.getResultSet();
+		 
+		li.getHandle().getColumnBindings().clearValue();
+		
+		if (resultSet.getListValue() != null) {
+			for (int i=0; i < resultSet.getListValue().size(); i++) {
+				ResultSetColumnHandle resultSetColumn=(ResultSetColumnHandle)resultSet.getAt(i);
+				ComputedColumn column=StructureFactory.newComputedColumn(li.getHandle(),resultSetColumn.getColumnName());
+				column.setDataType(resultSetColumn.getDataType());
+				
+				column.setExpression("dataSetRow[\"" + resultSetColumn.getColumnName() + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
+				column.setExpressionProperty("type", new Expression("javascript", "String"));  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+				
+				try {
+					
+					li.getHandle().addColumnBinding(column,false);
+				} catch (SemanticException e) {
+					SmartMapItemPlugIn.log(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	private String findLabel(OdaDataSetHandle handle, String geomKey){
+		Iterator<?> it = handle.columnHintsIterator();
+		while(it.hasNext()){
+			Object x = it.next();
+			if (x instanceof ColumnHintHandle){
+				ColumnHintHandle hh = (ColumnHintHandle) x;
+				if (hh.getColumnName().equals(geomKey)){
+					if (hh.getAlias() != null) return hh.getAlias();
+					return hh.getColumnName();
+				}
+			}
+		}
+		return geomKey;
+	}
+	
 	private void addLayer() {
 		OdaDataSetHandle[] handles = getHandles();
 		if (handles.length == 0){
@@ -736,28 +844,14 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			LayerItem handle = (LayerItem)(new LayerItemFactory()).newReportItem(eihandle);
 			handle.setLayerName(ld.info.getLayerName());
 			handle.setLayerStyles(ld.info.getMapStyle());
-			handle.setGeometryColumn(ld.info.getGometryColumn());
+			handle.setGeometryColumn(ld.info.getGeometryColumn());
 			handle.setLayerType(ld.info.getLayerType());
 			if (ld.handle != null){
 				handle.getHandle().setDataSet(ld.handle);
-				CachedMetaDataHandle meta = ld.handle.getCachedMetaDataHandle();
-				MemberHandle resultSet = meta.getResultSet();
-				 
-				if (resultSet.getListValue() != null) {
-					for (int i=0; i < resultSet.getListValue().size(); i++) {
-						ResultSetColumnHandle resultSetColumn=(ResultSetColumnHandle)resultSet.getAt(i);
-						ComputedColumn column=StructureFactory.newComputedColumn(handle.getHandle(),resultSetColumn.getColumnName());
-						column.setDataType(resultSetColumn.getDataType());
-						
-						column.setExpression("dataSetRow[\"" + resultSetColumn.getColumnName() + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
-						column.setExpressionProperty("type", new Expression("javascript", "String"));  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-						try {
-							handle.getHandle().addColumnBinding(column,false);
-						} catch (SemanticException e) {
-							SmartMapItemPlugIn.log(e.getMessage(), e);
-						}
-					}
-				}
+				//find the column with the name matching ld.info.getGeometryColumnand update
+				//to the displayName value
+				handle.setGeometryColumn(findLabel(ld.handle, ld.info.getGeometryColumn()));
+				updateBindings(handle, (OdaDataSetHandle)handle.getHandle().getDataSet());
 			}
 			mapItem.addLayers(Collections.singletonList(handle));
 

@@ -54,10 +54,10 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
 		if (queryTypeKey.equals(ObsObservationQuery.KEY) ||
 				queryTypeKey.equals(ObservationWaypointQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, ObservationQueryResultItem.GEOMETRY_COLUMN_NAME);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, ObservationQueryResultItem.GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(ObservationGriddedQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, "raster");
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, null);
 			return Collections.singletonList(def);
 		}
 		return null;

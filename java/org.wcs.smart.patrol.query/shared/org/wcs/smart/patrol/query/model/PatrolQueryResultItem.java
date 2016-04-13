@@ -26,6 +26,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
@@ -34,6 +36,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
@@ -49,8 +52,15 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 public class PatrolQueryResultItem implements IGeometryResultItem{
 
-	public static final String WAYPOINTGEOM_COLUMN_NAME = "WaypointGeometry"; //$NON-NLS-1$
-	public static final String TRACKGEOM_COLUMN_NAME = "TrackGeometry"; //$NON-NLS-1$
+	/**
+	 * Waypoint geometry field name
+	 */
+	public static final String WAYPOINT_GEOMCOLUMN_KEY = "wp:geometry"; //$NON-NLS-1$
+	
+	/**
+	 * Track geometry field name
+	 */
+	public static final String TRACK_GEOMCOLUMN_KEY = "track:geometry"; //$NON-NLS-1$
 	
 	private static final GeometryFactory gf = new GeometryFactory();
 	private String caId;
@@ -62,7 +72,6 @@ public class PatrolQueryResultItem implements IGeometryResultItem{
 	private String station;
 	private String team;
 	private String objective;
-//	private int objectiveRating;
 	private String mandate;
 	private PatrolType.Type patrolType;
 	private UUID patrolUuid;
@@ -515,26 +524,32 @@ public class PatrolQueryResultItem implements IGeometryResultItem{
 
 	@Override
 	public Geometry asGeometry(String columnName) {
-		if (columnName == WAYPOINTGEOM_COLUMN_NAME){
+		if (columnName == WAYPOINT_GEOMCOLUMN_KEY){
 			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
-		}else if (columnName == TRACKGEOM_COLUMN_NAME){
+		}else if (columnName == TRACK_GEOMCOLUMN_KEY){
 			if (getTrack() == null || getTrack().isEmpty()){
 				return gf.createMultiLineString(new LineString[]{});
 			}else {
 				try {
 					WKBReader reader = new WKBReader();
 					List<byte[]> tracks = getTrack();
-					LineString[] lss = new LineString[tracks.size()];
-					for (int i = 0; i < lss.length; i ++){
-						lss[i] = (LineString)reader.read(tracks.get(i));
+					List<LineString> lss = new ArrayList<LineString>();
+					for (int i = 0; i < tracks.size(); i ++){
+						Geometry g = reader.read(tracks.get(i));
+						if (g instanceof LineString){
+							lss.add((LineString)g);
+						}else if (g instanceof MultiLineString){
+							MultiLineString mg = (MultiLineString)g;
+							for (int j = 0; j < mg.getNumGeometries(); j ++){
+								lss.add((LineString)mg.getGeometryN(j));
+							}
+						}
 					}
-					return gf.createMultiLineString(lss);
+					return gf.createMultiLineString(lss.toArray(lss.toArray(new LineString[lss.size()])));
 				} catch (ParseException e) {
+					Logger.getLogger(PatrolQueryResultItem.class.getName()).log(Level.WARNING, "Error parsing track geometry.", e); //$NON-NLS-1$
 					return gf.createMultiLineString(new LineString[]{});
-					//TODO: log error
-					//PatrolQueryPlugIn.log(MessageFormat.format(Messages.QueryResultItemFeature_GeomParseError, new Object[]{it.getPatrolId()}), e);
 				}
-				
 			}
 		}
 		return null;

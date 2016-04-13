@@ -138,12 +138,11 @@ public class SavedQueryTree {
 								}
 							}
 							
-							//TODO: root folders
 							if (!folderUuid.equals(folder)){
 								//remove from existing list
 								ins.getValue().remove(input);
-								//add to new list
 								
+								//add to new list								
 								List<QueryEditorInput> newFolderList = queries.get(folderUuid);
 								if (newFolderList == null){
 									newFolderList = new ArrayList<QueryEditorInput>();

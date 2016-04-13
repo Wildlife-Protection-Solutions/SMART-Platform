@@ -28,6 +28,7 @@ import java.util.List;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
+import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -43,13 +44,13 @@ import org.wcs.smart.query.model.QueryColumn;
 public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 
 	protected QueryColumn[] queryColumns;
-	protected String[] geometryColumns;
+	protected GeometryColumn[] geometryColumns;
 	
 	/**
 	 * Creates a new metadata object
 	 * @param query the query to gather metadata for
 	 */
-	public SimpleQueryResultSetMetadata(SimpleQuery query, String[] geometryColumns, SmartConnection connection){
+	public SimpleQueryResultSetMetadata(SimpleQuery query, GeometryColumn[] geometryColumns, SmartConnection connection){
 		this(query, connection);
 		this.geometryColumns = geometryColumns;
 	}
@@ -106,7 +107,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
 		if (geometryColumns != null && index > queryColumns.length){
-			return geometryColumns[index - queryColumns.length - 1];  
+			return geometryColumns[index - queryColumns.length - 1].getLabel();  
 		}
 		return queryColumns[index-1].getName();
 	}
@@ -117,7 +118,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnName(int index) throws OdaException {
 		if (geometryColumns != null && index > queryColumns.length){
-			return geometryColumns[index - queryColumns.length - 1];  
+			return geometryColumns[index - queryColumns.length - 1].getKey();  
 		}
 		return queryColumns[index-1].getKey();
 	}

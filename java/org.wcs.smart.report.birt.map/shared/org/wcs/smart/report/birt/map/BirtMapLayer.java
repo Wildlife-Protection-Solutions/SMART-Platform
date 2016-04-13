@@ -1466,7 +1466,6 @@ public class BirtMapLayer extends EObjectImpl implements Layer {
      * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
-    @SuppressWarnings("unchecked")
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {

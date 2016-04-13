@@ -22,8 +22,6 @@
 package org.wcs.smart.report.birt.map.properties;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,18 +40,17 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.birt.map.AddLayersCommand;
 import org.wcs.smart.report.birt.map.BirtMapFactory;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.execute.BirtStyleManager;
-import org.wcs.smart.report.birt.map.execute.MapItemExecutor;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.report.birt.map.item.LayerItem;
 import org.wcs.smart.report.birt.map.udig.MapGeoResource;
 import org.wcs.smart.report.birt.map.udig.MapQueryService;
-import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -93,61 +90,42 @@ public class StyleCellEditor extends DialogCellEditor {
 					// add a layer to the map
 
 					try {
-//						if (mapLayer.mapLayer != null){
-							MapQueryService service = new MapQueryService();
-							MapLayerInfo info = new MapLayerInfo(mapLayer.getLayerName(), mapLayer.getLayerStyles(), mapLayer.getLayerType(), mapLayer.getGeometryColumn());
-							MapGeoResource iGeoResource = new MapGeoResource((OdaDataSetHandle)mapLayer.getHandle().getDataSet(), info, service);
-							
-							ArrayList<IGeoResource> thisresources = new ArrayList<IGeoResource>();
-							thisresources.add(iGeoResource);
-							
-							AddLayersCommand cmd = new AddLayersCommand(thisresources, 0);
-							cmd.setMap(map);
-							cmd.run(new NullProgressMonitor());
-							
-							layer = cmd.getLayers().get(0);
+						MapQueryService service = new MapQueryService();
+						MapLayerInfo info = new MapLayerInfo(mapLayer.getLayerName(), mapLayer.getLayerStyles(), mapLayer.getLayerType(), mapLayer.getGeometryColumn());
+						MapGeoResource iGeoResource = new MapGeoResource((OdaDataSetHandle)mapLayer.getHandle().getDataSet(), info, service);
 						
-							//TODO: this needs testing I don't think layer.getgeoresource returns the correct resource
-							StyleBlackboard sb = null;
-							if (info.getMapStyle() != null){
-								//use user defined style for map
-								sb = BirtMapUtils.parseStyleString(info.getMapStyle());
-								
-								//TODO: implement this
-//								if (layer.getHandle().getDataSet() instanceof OdaDataSetHandle){// &&
-//									try{
-//										Session session =  (Session)context.getAppContext().get(SmartReportRunner.SESSION_PARAM);
-//										String queryText = ((OdaDataSetHandle)layer.getHandle().getDataSet()).getQueryText();
-//										String xid = ((OdaDataSetHandle)layer.getHandle().getDataSet()).getExtensionID();
-//										StyleBlackboard queryStyle = BirtStyleManager.INSTANCE.getStyle(xid, queryText, session);
-//										
-//										StyleBlackboard ss = processSmartStyle(queryStyle, session);
-//										if (ss != null){
-//											def.getInfo().setMapStyleBlackboard(ss);
-//										}else{
-//											def.getInfo().setMapStyleBlackboard(queryStyle);	
-//										}
-//									}catch (Exception ex){
-//										Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, "Error loading layer style for report map.", ex); //$NON-NLS-1$
-//									}
-//								}
-//								
-//							}else if (mapLayer.mapLayer.getDefaultStyle(ds, layer.getGeoResource()) != null){
-//								//use default style defined by the map layer
-//								sb = mapLayer.mapLayer.getDefaultStyle(ds, layer.getGeoResource());
-							}else{
-								//no defined style; udig will look in the georesource 
-								//for an later we'll look in the georesource for sld style
-								sb = null;
-							}
+						ArrayList<IGeoResource> thisresources = new ArrayList<IGeoResource>();
+						thisresources.add(iGeoResource);
+						
+						AddLayersCommand cmd = new AddLayersCommand(thisresources, 0);
+						cmd.setMap(map);
+						cmd.run(new NullProgressMonitor());
+						
+						layer = cmd.getLayers().get(0);
+					
+						StyleBlackboard sb = null;
+						if (info.getMapStyle() != null){
+							//use user defined style for map
+							sb = BirtMapUtils.parseStyleString(info.getMapStyle());
+						}else{
 							
-							if (sb != null){
-								layer.getStyleBlackboard().clear();
-								if (sb.getContent() != null){
-									layer.getStyleBlackboard().addAll(sb);
-								}
+							Session session = HibernateManager.openSession();
+							try{
+								String queryText = ((OdaDataSetHandle)mapLayer.getHandle().getDataSet()).getQueryText();
+								sb = BirtStyleManager.INSTANCE.getStyle(
+										((OdaDataSetHandle)mapLayer.getHandle().getDataSet()).getExtensionID(),
+										queryText, session);
+							}finally{
+								session.close();
 							}
-//						}
+						}
+						
+						if (sb != null){
+							layer.getStyleBlackboard().clear();
+							if (sb.getContent() != null){
+							layer.getStyleBlackboard().addAll(sb);
+							}
+						}
 					} catch (Exception ex) {
 						SmartMapItemPlugIn.displayLog(Messages.StyleCellEditor_Error_CouldNotCreateStyleEditor + ex.getMessage(), ex);
 					}
