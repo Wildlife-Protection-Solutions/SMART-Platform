@@ -132,7 +132,9 @@ public class ExportPlanJob extends Job {
 				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 				
 				SmartReportRunner.INSTANCE.runFile(ReportPlan.getPlanTemplate(),
-						SmartDB.getCurrentConservationArea(), ReportEngineManager.getBirtReportEngine(), 
+						SmartDB.getCurrentConservationArea(),
+						SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
+						ReportEngineManager.getBirtReportEngine(), 
 						options, session, reportParameters);
 			}
 		}catch (Exception ex){

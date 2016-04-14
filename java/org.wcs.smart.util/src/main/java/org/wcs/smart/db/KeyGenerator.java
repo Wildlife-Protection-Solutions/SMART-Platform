@@ -28,40 +28,37 @@ public class KeyGenerator {
 			"on a.uuid = b.element_uuid";
 		
 
-		ResultSet rs = c.createStatement().executeQuery(sql);
-		
 		ArrayList<Object[]> keys = new ArrayList<Object[]>();
 		HashMap<String,HashSet<String>> usedKeys = new HashMap<String,HashSet<String>>();
-		
-		
-		while(rs.next()){
-			byte[] uuid = rs.getBytes(1);
-			String name = rs.getString(2);
-			byte[] cauuid = rs.getBytes(3);
-			
-			HashSet<String> existingKeys = usedKeys.get(Arrays.toString(cauuid));
-			if (existingKeys == null){
-				existingKeys = new HashSet<String>();
-				usedKeys.put(Arrays.toString(cauuid), existingKeys);
+		try(ResultSet rs = c.createStatement().executeQuery(sql)){
+			while(rs.next()){
+				byte[] uuid = rs.getBytes(1);
+				String name = rs.getString(2);
+				byte[] cauuid = rs.getBytes(3);
+				
+				HashSet<String> existingKeys = usedKeys.get(Arrays.toString(cauuid));
+				if (existingKeys == null){
+					existingKeys = new HashSet<String>();
+					usedKeys.put(Arrays.toString(cauuid), existingKeys);
+				}
+				if (name == null){
+					name = tableName;
+				}
+				
+				String key = generateKey(name, existingKeys);
+				
+				existingKeys.add(key);
+				keys.add(new Object[]{uuid, key});
 			}
-			if (name == null){
-				name = tableName;
-			}
-			
-			String key = generateKey(name, existingKeys);
-			
-			existingKeys.add(key);
-			keys.add(new Object[]{uuid, key});
 		}
 
-		
-		PreparedStatement ps = c.prepareStatement("UPDATE " + tableName + " set keyid = ? where uuid = ?");
-		for (Object[] updates : keys){
-			ps.setString(1, (String)updates[1]);
-			ps.setBytes(2, (byte[])updates[0]);
-			ps.execute();
-		}
-		
+		try(PreparedStatement ps = c.prepareStatement("UPDATE " + tableName + " set keyid = ? where uuid = ?")){
+			for (Object[] updates : keys){
+				ps.setString(1, (String)updates[1]);
+				ps.setBytes(2, (byte[])updates[0]);
+				ps.execute();
+			}
+		}		
 		c.commit();
 	}
 	

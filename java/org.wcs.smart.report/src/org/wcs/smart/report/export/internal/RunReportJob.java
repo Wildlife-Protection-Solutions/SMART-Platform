@@ -37,10 +37,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Job that runs a report and writes the results to a file.
@@ -95,6 +97,7 @@ public class RunReportJob extends Job {
 				Session session = HibernateManager.openSession();
 				try{
 					SmartReportRunner.INSTANCE.runReport(report, 
+							SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 							ReportEngineManager.getBirtReportEngine(), 
 							options, session, reportParameters);
 				}finally{

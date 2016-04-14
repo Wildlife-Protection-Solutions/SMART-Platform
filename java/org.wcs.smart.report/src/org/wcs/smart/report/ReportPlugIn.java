@@ -24,7 +24,9 @@ package org.wcs.smart.report;
 import java.io.File;
 import java.io.IOException;
 
+import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.ui.ReportPlugin;
+import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -32,6 +34,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.query.event.QueryEventManager;
@@ -86,24 +89,9 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, ReportCaDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
 		QueryEventManager.getInstance().addListener(queryListener);
+		
 	}
-
-	public static void initReports() {
-
-		try {
-			ReportPlugin
-					.getDefault()
-					.getPreferenceStore()
-					.setValue(
-							ReportPlugin.RESOURCE_PREFERENCE,
-							SmartBirtLibrary.getInstance().getLibraryLocation()
-									.getCanonicalPath());
-		} catch (IOException e) {
-			displayLog(
-					Messages.ReportPlugIn_Error_InitializingParams+ e.getLocalizedMessage(), e);
-		}
-	}
-
+	
 	public static File getReportDirectory(ConservationArea ca) {
 		return new File(ca.getFileDataStoreLocation()
 				+ File.separator
@@ -118,6 +106,19 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		QueryEventManager.getInstance().removeListener(queryListener);
 		plugin = null;
 		super.stop(context);
+	}
+	
+	public void initReports(){
+		try {
+			ReportPlugin.getDefault().setResourcePreference(SmartBirtLibrary.getInstance().getLibraryLocation().getCanonicalPath());
+//			ReportPlugin.getDefault().setResourcePreference((new File(SmartContext.INSTANCE.getFilestoreLocation())).getCanonicalPath());
+//			SessionHandle.setBirtResourcePath(SmartBirtLibrary.getInstance().getLibraryLocation().getCanonicalPath());
+			SessionHandle.setBirtResourcePath((new File(SmartContext.INSTANCE.getFilestoreLocation())).getCanonicalPath());
+			SessionHandleAdapter.getInstance( ).getSessionHandle( ).setResourceFolder( (new File(SmartContext.INSTANCE.getFilestoreLocation())).getCanonicalPath() );
+		} catch (IOException e) {
+			org.wcs.smart.report.ReportPlugIn.displayLog(
+					Messages.ReportPlugIn_Error_InitializingParams+ e.getLocalizedMessage(), e);
+		}
 	}
 
 	/**

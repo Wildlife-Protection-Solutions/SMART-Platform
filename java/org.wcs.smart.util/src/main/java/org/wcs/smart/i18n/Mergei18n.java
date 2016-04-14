@@ -118,6 +118,11 @@ public class Mergei18n {
             if (!flangDir.isDirectory()){
                 continue;
             }
+            
+            if (flangDir.getName().startsWith(matchDir)){
+            	filesList.add(flangDir);
+            }
+            
             File[] transToMerge = flangDir.listFiles(new FilenameFilter(){
 
                 @Override

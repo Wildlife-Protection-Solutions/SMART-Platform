@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.birt.report.engine;bundle-version="3.7.2",
  org.eclipse.birt.report.designer.core;bundle-version="3.7.2",
  org.eclipse.ui.forms,
- org.wcs.smart.hibernate.libs;bundle-version="4.0.0"
+ org.wcs.smart.hibernate.libs;bundle-version="4.0.0",
+ org.wcs.smart;bundle-version="4.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.birt.ui

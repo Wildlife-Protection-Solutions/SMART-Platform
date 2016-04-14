@@ -22,10 +22,12 @@
 package org.wcs.smart.birt.ui;
 
 import org.eclipse.birt.core.framework.Platform;
+import org.eclipse.birt.report.designer.ui.ReportPlugin;
 import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
+import org.wcs.smart.SmartContext;
 
 /**
  * Report engine manger for SMART
@@ -50,6 +52,7 @@ public class ReportEngineManager {
 			
 			IReportEngineFactory factory = (IReportEngineFactory)Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
 			EngineConfig config = new EngineConfig();
+			config.setResourcePath(SmartContext.INSTANCE.getFilestoreLocation());
 			config.getAppContext().put(EngineConstants.APPCONTEXT_CLASSLOADER_KEY,
 					ReportEngineManager.class.getClassLoader());
 			

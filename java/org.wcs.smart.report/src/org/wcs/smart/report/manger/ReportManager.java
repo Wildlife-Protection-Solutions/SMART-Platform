@@ -227,7 +227,7 @@ public class ReportManager {
 		try {
 			
 			if (r != null) {
-				ReportPlugIn.initReports();
+				ReportPlugIn.getDefault().initReports();
 				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
 				

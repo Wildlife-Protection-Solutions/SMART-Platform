@@ -26,3 +26,4 @@ Export-Package: org.wcs.smart.report,
  org.wcs.smart.report.in,
  org.wcs.smart.report.model,
  org.wcs.smart.report.ui
+Import-Package: org.eclipse.birt.data.engine.api

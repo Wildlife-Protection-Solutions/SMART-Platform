@@ -22,6 +22,8 @@
 package org.wcs.smart.report.internal.ui;
 
 import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,6 +49,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportEventManager;
@@ -190,11 +193,14 @@ public class NewReportHandler {
 					}
 					
 					//open the report
+					session.setResourceFolder(SmartContext.INSTANCE.getFilestoreLocation());
 					ReportDesignHandle rdh = session.createDesign(reportFile.getAbsolutePath());
 					rdh.setTitle(report.getName());
 					
 					//add default library
-					rdh.includeLibrary(smartLibrary.getPath(), library.getNamespace());
+					Path p = smartLibrary.toPath();
+					Path fs = (new File(SmartContext.INSTANCE.getFilestoreLocation())).toPath();
+					rdh.includeLibrary(fs.relativize(p).toString(), library.getNamespace());
 					
 					//add date parameter automatically
 					if (param != null){

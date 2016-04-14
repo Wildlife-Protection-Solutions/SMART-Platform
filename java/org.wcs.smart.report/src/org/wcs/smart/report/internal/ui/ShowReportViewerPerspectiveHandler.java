@@ -21,33 +21,32 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 /**
  * Handler for displaying the report viewer view
  * @author egouge
  * @since 1.0.0
  */
-public class ShowReportViewerPerspectiveHandler  extends AbstractHandler implements IHandler {
+public class ShowReportViewerPerspectiveHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		try {
-			ReportPlugIn.initReports();
-			
-			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench().showPerspective(
-					ReportViewerPerspective.ID, 
-					HandlerUtil.getActiveWorkbenchWindow(event));
-			
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}	
-		return null;
+	@Execute
+	public void execute(MWindow window){
+		
+		ReportPlugIn.getDefault().initReports();
+		
+		(new ShowPerspectiveHandler()).execute(ReportViewerPerspective.ID, window);
+		
+	}
+	
+	public static class ShowReportViewerPerspectiveHandlerWrapper extends DIHandler<ShowReportViewerPerspectiveHandler>{
+		public ShowReportViewerPerspectiveHandlerWrapper(){
+			super(ShowReportViewerPerspectiveHandler.class);
+		}
 	}
 
 }

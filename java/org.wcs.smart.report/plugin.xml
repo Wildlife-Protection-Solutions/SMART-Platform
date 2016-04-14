@@ -57,6 +57,10 @@
             id="org.wcs.smart.report.translateItem"
             name="%translate.command.name">
       </command>
+      <command
+            id="org.wcs.smart.report.show"
+            name="Show Reports Viewer">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -212,6 +216,10 @@
             class="org.wcs.smart.report.internal.ui.TranslateNamesHandler$TranslateNamesHandlerWrapper"
             commandId="org.wcs.smart.report.translateItem">
       </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.ShowReportViewerPerspectiveHandler$ShowReportViewerPerspectiveHandlerWrapper"
+            commandId="org.wcs.smart.report.show">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -219,7 +227,7 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.query.menu.view">
          <command
-               commandId="org.wcs.smart.command.showperspective"
+               commandId="org.wcs.smart.report.show"
                icon="images/icons/etool16/report_view.png"
                id="org.wcs.smart.query.toolbar.report"
                label="%showreportperspective.menu.label"
@@ -246,10 +254,6 @@
                   </test>
                </or>
             </visibleWhen>
-            <parameter
-                  name="org.wcs.smart.perspectiveid"
-                  value="org.wcs.smart.report.ReportViewerPerspective">
-            </parameter>
          </command>
       </menuContribution>
       <menuContribution
@@ -655,7 +659,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.command.showperspective"
+                  commandId="org.wcs.smart.report.show"
                   icon="images/icons/etool16/report_view.png"
                   label="%showreportperspective.menu.label"
                   mnemonic="%showreportperspective.menu.mnemonic"
@@ -681,10 +685,6 @@
                      </test>
                   </or>
                </visibleWhen>
-               <parameter
-                     name="org.wcs.smart.perspectiveid"
-                     value="org.wcs.smart.report.ReportViewerPerspective">
-               </parameter>
             </command>
          </menu>
       </menuContribution>
@@ -909,7 +909,8 @@
             name="SMART_Functions">
          <Function
                desc="%smart.birt.functions.smartuser.desc"
-               name="SmartUser">
+               name="SmartUser"
+               variableArguments="false">
             <DataType
                   value="String">
             </DataType>
@@ -917,7 +918,7 @@
          <Function
                desc="%smart.birt.functions.caname.desc"
                isConstructor="false"
-               isStatic="false"
+               isStatic="true"
                isVisible="true"
                name="ConservationAreaName"
                variableArguments="false">
@@ -925,7 +926,7 @@
          <Function
                desc="%smart.birt.functions.caid.desc"
                isConstructor="false"
-               isStatic="false"
+               isStatic="true"
                isVisible="true"
                name="ConservationAreaId"
                variableArguments="false">
