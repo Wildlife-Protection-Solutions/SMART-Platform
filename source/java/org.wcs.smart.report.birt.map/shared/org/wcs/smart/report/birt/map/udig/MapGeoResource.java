@@ -114,6 +114,20 @@ public class MapGeoResource extends IGeoResource {
 		}
 	}
 
+	@Override
+	public void dispose(IProgressMonitor monitor){
+		super.dispose(monitor);
+		if (reader != null){
+			try {
+				reader.dispose();
+			} catch (IOException e) {
+				Logger.getLogger(MapGeoResource.class.getName()).log(Level.WARNING, e.getMessage(), e);
+			}
+		}
+		if (datastore != null){
+			datastore.dispose();
+		}
+	}
 
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()

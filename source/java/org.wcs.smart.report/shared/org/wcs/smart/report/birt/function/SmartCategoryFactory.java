@@ -27,6 +27,7 @@ import org.eclipse.birt.core.script.functionservice.IScriptFunctionExecutor;
 import org.eclipse.birt.core.script.functionservice.IScriptFunctionFactory;
 //import org.wcs.smart.hibernate.SmartDB;
 //import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.report.execute.SmartTimezoneWrapper;
 
 /**
  * Smart functions for BIRT reports
@@ -51,16 +52,13 @@ public class SmartCategoryFactory implements IScriptFunctionFactory {
 			public Object execute(Object[] arguments, IScriptFunctionContext context)
 					throws BirtException {
 				
-				context.findProperty(IScriptFunctionContext.LOCALE);
+				SmartTimezoneWrapper ll = (SmartTimezoneWrapper) context.findProperty(IScriptFunctionContext.TIMEZONE);
 				if (functionName.equals(SMART_USER_FUNCTION)){
-//					return SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee());
-					return "emily";
+					return ll.getUser();
 				}else if (functionName.equals(CA_NAME_FUNCTION)){
-//					return SmartDB.getCurrentConservationArea().getName();
-					return "emily2";
+					return ll.getConservationArea().getName();
 				}else if (functionName.equals(CA_ID_FUNCTION)){
-//					return SmartDB.getCurrentConservationArea().getId();
-					return "emily3";
+					return ll.getConservationArea().getId();
 				}
 				return null;
 			}

@@ -86,6 +86,8 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		
+		System.setProperty("org.geotools.referencing.forceXY", "true");
+		
 		logger.info("Configuring Hibernate SessionFactory"); //$NON-NLS-1$
 		Configuration config = new Configuration();
 		
@@ -114,8 +116,12 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(SmartUserRole.class);
 		config.addAnnotatedClass(ServerDataQueueItem.class);
 
-		for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
-			config.addAnnotatedClass(c);
+		try{
+			for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
+				config.addAnnotatedClass(c);
+			}
+		}catch (Exception ex){
+			throw new RuntimeException("Could not read hibernate class files.", ex);
 		}
 
 		ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();

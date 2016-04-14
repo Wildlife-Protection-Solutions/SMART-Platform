@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
@@ -60,6 +61,7 @@ import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 
 /**
@@ -94,6 +96,7 @@ public class ReportView implements IReportListener{
 					Session s = HibernateManager.openSession();
 					try{
 						SmartReportRunner.INSTANCE.runReport(report,
+								SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 								ReportEngineManager.getBirtReportEngine(), 
 								options, s, selectedParams);
 					}finally{

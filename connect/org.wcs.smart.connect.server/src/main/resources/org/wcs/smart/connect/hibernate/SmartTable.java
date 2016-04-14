@@ -53,7 +53,6 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -166,7 +165,6 @@ public enum SmartTable {
 	CATEGORY(Category.class,null),
 	CATEGORYATTRIBUTE(CategoryAttribute.class,".id.category.conservationArea"),
 	CMATTRIBUTE(CmAttribute.class,".node.model.conservationArea"),
-	CMATTRIBUTEITEM(CmAttributeItem.class,null),
 	CMATTRIBUTELISTITEM(CmAttributeListItem.class,".configurableModel.conservationArea"),
 	CMATTRIBUTEOPTION(CmAttributeOption.class,".cmAttribute.node.model.conservationArea"),
 	CMATTRIBUTETREENODE(CmAttributeTreeNode.class,".configurableModel.conservationArea"),

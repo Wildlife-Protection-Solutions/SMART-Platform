@@ -257,6 +257,11 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			} finally {
 				g.dispose();
 			}			
+			
+			//dispose of all resources used in map
+			for (Layer l : orderedLayers){
+				l.getGeoResource().dispose(new NullProgressMonitor());
+			}
 			return writeImage(image);
 
 		} catch (Exception ex) {
@@ -296,13 +301,15 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 	private ByteArrayInputStream writeImage(BufferedImage image)
 			throws IOException {
 		ImageIO.setUseCache(false);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
+		
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
 			ImageIO.write(image, "png", ios); //$NON-NLS-1$
 			ios.flush();
+			ByteArrayInputStream bis = new ByteArrayInputStream(baos.toByteArray());
+			return bis;
 		}
-		ByteArrayInputStream bis = new ByteArrayInputStream(baos.toByteArray());
-		return bis;
+		
 	}
 
 	// draws the error string on the map starting at 0,0;

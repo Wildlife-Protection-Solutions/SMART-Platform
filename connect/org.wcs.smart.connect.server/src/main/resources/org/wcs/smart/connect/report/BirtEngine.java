@@ -77,7 +77,7 @@ public class BirtEngine {
 				config.setLogConfig(configProps.getProperty("logDirectory"),
 						level);
 			}
-
+			config.setResourcePath(SmartContext.INSTANCE.getFilestoreLocation());
 			config.getAppContext().put(
 					EngineConstants.APPCONTEXT_CLASSLOADER_KEY,
 					Thread.currentThread().getContextClassLoader());

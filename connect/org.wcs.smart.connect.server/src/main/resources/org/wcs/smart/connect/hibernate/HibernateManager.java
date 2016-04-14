@@ -65,6 +65,11 @@ public class HibernateManager {
 		return getSessionFactory(context).getCurrentSession();
 	}
 	
+	public static Session openNewSession(ServletContext context, Locale l){
+		I18nUtil.setLocale(l);
+		return getSessionFactory(context).openSession();
+	}
+	
 	/**
 	 * Creates a new session from the given context that uses the given
 	 * locale for loading database labels. 

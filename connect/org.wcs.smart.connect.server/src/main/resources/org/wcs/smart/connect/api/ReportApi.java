@@ -25,6 +25,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -59,22 +61,50 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
+import org.eclipse.birt.report.engine.api.HTMLServerImageHandler;
+import org.eclipse.birt.report.engine.api.IParameterDefn;
+import org.eclipse.birt.report.engine.api.IParameterDefnBase;
+import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.birt.report.engine.api.RenderOption;
+import org.eclipse.birt.report.engine.api.impl.ReportEngine;
+import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.ICatalog;
+import org.locationtech.udig.catalog.ID;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IResolve;
+import org.locationtech.udig.catalog.IResolveChangeListener;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.internal.shp.ShpPlugin;
+import org.locationtech.udig.internal.ui.UiPlugin;
+import org.locationtech.udig.project.internal.ProjectPlugin;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.model.ReportParameter;
+import org.wcs.smart.connect.model.ReportParameter.Type;
 import org.wcs.smart.connect.report.BirtEngine;
+import org.wcs.smart.connect.report.ConnectConnectionProvider;
 import org.wcs.smart.connect.report.ReportProxy;
-import org.wcs.smart.connect.report.query.ServerSmartConnection;
+import org.wcs.smart.connect.report.UdigPreferenceStore;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.report.execute.ParameterFinder;
+import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 import org.wcs.smart.util.UuidUtils;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * SMART Connect Report REST API
@@ -120,7 +150,7 @@ public class ReportApi extends HttpServlet{
 		
 		Report report = null;
 		Session s = HibernateManager.getSession(context, request.getLocale());
-		
+		//TODO:ISmartMapLabelProvider
 		List<ConservationArea> conservationAreas = new ArrayList<ConservationArea>();
 		try{
 			s.beginTransaction();
@@ -151,6 +181,8 @@ public class ReportApi extends HttpServlet{
 			s.getTransaction().rollback();
 		}
 		
+		 
+					
 		try{
 		//TODO: create one at start up and shut down at shutdown
 		IReportEngine engine = BirtEngine.getBirtEngine(context);
@@ -162,27 +194,242 @@ public class ReportApi extends HttpServlet{
 				report.getFilename());
 				
 		HashMap<String, Object> parameters = new HashMap<String, Object>();
-		parameters.put("Start Date", new Date((new Date()).getTime() - 1000l *60 *60*24*30*3));
+//		parameters.put("Start Date", new Date((new Date()).getTime() - 1000l *60 *60*24*30*3));
 		parameters.put("End Date", new Date());
 		
-//		parameters.put("Start Date", new Date(115,0,1));
+		parameters.put("Start Date", new Date(100,0,1));
 //		parameters.put("End Date", new Date(115,1,1));
 		try(InputStream inStream = Files.newInputStream(reportFile)){
 			final IReportRunnable design = engine.openReportDesign(inStream);
 					
 			try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
-				HTMLRenderOption options = new HTMLRenderOption();
-				options = new HTMLRenderOption( );
+//				RenderOption options = new RenderOption();
+				RenderOption options = new HTMLRenderOption( );
 				options.setOutputStream(bos);
 				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 				options.setOutputFormat(HTMLRenderOption.HTML);
-				IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+//				options.setOutputFormat(PDFRenderOption.);
+				
+				((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images");
+				((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images"));
+				options.setImageHandler(new HTMLServerImageHandler());
+//				options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf");
+//				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+//				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 
+				//TODO: we only need to call this code once put in birt setup
+				ProjectPlugin.Implementation projectPlugin = new ProjectPlugin.Implementation();
+				projectPlugin.setPreferenceStore(new UdigPreferenceStore());
+				new UiPlugin(){
+					private IPreferenceStore localPreference;
+					@Override
+				    public IPreferenceStore getPreferenceStore() {
+						if (localPreference == null){
+							localPreference = new UdigPreferenceStore();
+						}
+						return localPreference;
+					}
+				};
+				new CatalogPlugin(){
+					ICatalog defaultCat;
+					@Override
+					 public ICatalog getLocalCatalog() {
+						if (defaultCat == null){
+							defaultCat = new ICatalog() {
+								
+								@Override
+								public String getTitle() {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public org.locationtech.udig.catalog.IResolve.Status getStatus() {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public Throwable getMessage() {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public URL getIdentifier() {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public ID getID() {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public <T> boolean canResolve(Class<T> adaptee) {
+									// TODO Auto-generated method stub
+									return false;
+								}
+								
+								@Override
+								public List<IResolve> search(String pattern, Envelope bbox,
+										IProgressMonitor monitor) throws IOException {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public <T extends IResolve> T getById(Class<T> type, ID id,
+										IProgressMonitor monitor) {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public List<IResolve> find(ID resourceId, IProgressMonitor monitor) {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public <T> T resolve(Class<T> adaptee, IProgressMonitor monitor)
+										throws IOException {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public void replace(ID id, IService replacement)
+										throws UnsupportedOperationException {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void removeListener(IResolveChangeListener listener) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void remove(IService service) throws UnsupportedOperationException {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void addListener(IResolveChangeListener listener) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public IService add(IService service) throws UnsupportedOperationException {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public IService acquire(URL url, IProgressMonitor monitor)
+										throws IOException {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public IService acquire(Map<String, Serializable> connectionParameters,
+										IProgressMonitor monitor) throws IOException {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public void removeCatalogListener(IResolveChangeListener listener) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public String[] getTemporaryDescriptorClasses() {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public List<IResolve> find(URL resourceId, IProgressMonitor monitor) {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public IGeoResource createTemporaryResource(Object descriptor)
+										throws IllegalArgumentException {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public List<IService> constructServices(Map<String, Serializable> params,
+										IProgressMonitor monitor) throws IOException {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public List<IService> constructServices(URL url, IProgressMonitor monitor)
+										throws IOException {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public List<IService> checkNonMembers(List<IService> constructServiceList) {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public List<IService> checkMembers(List<IService> constructServiceList) {
+									// TODO Auto-generated method stub
+									return null;
+								}
+								
+								@Override
+								public void addCatalogListener(IResolveChangeListener listener) {
+									// TODO Auto-generated method stub
+									
+								}
+							};
+						}
+				        return defaultCat;
+					}
+					
+				};
+				new ShpPlugin(){
+					private IPreferenceStore localPreference;
+					@Override
+				    public IPreferenceStore getPreferenceStore() {
+						if (localPreference == null){
+							localPreference = new UdigPreferenceStore();
+						}
+						return localPreference;
+					}
+				};
+				
+				//TODO: not thread safe
+				SmartContext.INSTANCE.setClass(IDatabaseConnectionProvider.class, new ConnectConnectionProvider(context, request.getLocale()));
+//				IRunAndRenderTask task = new SmartRunAndRenderengine.createRunAndRenderTask(design);
+				IRunAndRenderTask task = new SmartReportRunner.SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal().getName());
+				
+//				options.set
 				//add items to app context
 				Map items = task.getAppContext();
-				items.put(ServerSmartConnection.CONNECTION_KEY, HibernateManager.getSession(context, request.getLocale()));
+				items.put(SmartReportRunner.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
 				items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
-				items.put("org.wcs.smart.report.ca", conservationAreas);
+				items.put(SmartReportRunner.CA_PARAM, report.getConservationArea());
+				items.put("org.wcs.smart.report.ca.filter", conservationAreas);
 				
 				try{
 					task.setRenderOption(options);
@@ -194,6 +441,7 @@ public class ReportApi extends HttpServlet{
 				
 				String html = bos.toString("UTF8");
 				return writeHtml(html);
+//				return writePdf(bos);
 			}
 		}
 		}catch(Exception ex){
@@ -202,7 +450,20 @@ public class ReportApi extends HttpServlet{
 		}
 		
 	}
-	
+	private Response writePdf(ByteArrayOutputStream bos){
+		StreamingOutput sout = new StreamingOutput() {
+			
+			@Override
+			public void write(OutputStream output) throws IOException,
+					WebApplicationException {
+				output.write(bos.toByteArray());
+				
+			}
+		};
+		Response rs = Response.ok(sout, "application/pdf " ) //$NON-NLS-1$
+	            .build();
+		return rs;
+	}
 	private Response writeHtml(final String html){
 		
 		StreamingOutput sout = new StreamingOutput() {
@@ -339,6 +600,96 @@ public class ReportApi extends HttpServlet{
 		return proxies;
 	}
 	
+	
+
+	@GET
+    @Path("/{reportuuid}/params")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public List<ReportParameter> getReportsParameters(@PathParam("reportuuid") String reportUuid) throws SmartConnectException{
+		
+		List<ReportParameter> rparameters = new ArrayList<ReportParameter>();
+		UUID uuid = UuidUtils.stringToUuid(reportUuid);
+		
+		Report report = null;
+		Session s = HibernateManager.getSession(context, request.getLocale());
+		try{
+			s.beginTransaction();
+			report = (Report) s.get(Report.class, uuid);
+			
+			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, "Report not found");
+			
+			HashMap<String, IParameterDefnBase> parameters = ParameterFinder.INSTANCE.getParameters(report, BirtEngine.getBirtEngine(context));
+			
+			for (IParameterDefnBase param : parameters.values()){
+				
+				if (param instanceof IParameterDefn){
+					rparameters.add(createParameter((IParameterDefn) param));
+				}else if (param instanceof IParameterGroupDefn){
+					ReportParameter pp = new ReportParameter();
+					pp.setName(param.getName());
+					pp.setDisplayText(param.getPromptText());
+					pp.setType(Type.GROUP);
+					
+					rparameters.add(pp);
+					
+					for (Object child: ((IParameterGroupDefn) param).getContents()){
+						if (child instanceof IParameterDefn){
+							pp.getChildren().add(createParameter((IParameterDefn) child));
+						}else{
+							throw new Exception(MessageFormat.format("Child of group parameter group not supported: {0}.", param.getName()));
+						}
+					}					
+				}else{
+					throw new Exception(MessageFormat.format("Parameter type not supported: {0}.", param.getName()));
+				}
+			}
+		}catch (Exception ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			throw new SmartConnectException(Status.BAD_REQUEST, ex);
+		}finally{
+			s.getTransaction().rollback();
+		}
+		return rparameters;
+	}
+	
+	private ReportParameter createParameter(IParameterDefn param) throws Exception{
+		ReportParameter pp = new ReportParameter();
+		pp.setName(param.getName());
+		pp.setDisplayText(param.getPromptText());
+		if (param instanceof ScalarParameterDefn){
+			pp.setDefaultValue(((ScalarParameterDefn)param).getDefaultValue());
+		}
+		switch(param.getDataType()){
+		case IParameterDefn.TYPE_DATE:
+			pp.setType(Type.DATE);
+			break;
+		case IParameterDefn.TYPE_TIME:
+			pp.setType(Type.TIME);
+			break;
+		case IParameterDefn.TYPE_DATE_TIME:
+			pp.setType(Type.DATETIME);
+			break;
+		case IParameterDefn.TYPE_BOOLEAN:
+			pp.setType(Type.BOOLEAN);
+			break;
+		case IParameterDefn.TYPE_DECIMAL:
+		case IParameterDefn.TYPE_FLOAT:
+			pp.setType(Type.DOUBLE);
+			break;		
+		case IParameterDefn.TYPE_INTEGER:
+			pp.setType(Type.INTEGER);
+			break;
+		case IParameterDefn.TYPE_STRING:
+			pp.setType(Type.STRING);
+			break;
+		case IParameterDefn.TYPE_ANY:
+		default:
+			throw new Exception(MessageFormat.format("Parameter type {0} is not supported.", new Object[]{ param.getDataType() }));
+			
+		}
+		return pp;
+	}
+		
 	private Response createErrorResponse(Status code, String message){
 		String error = MessageFormat.format("\"status\": {0}, \"error:\": \"" + message + "\"", code.getStatusCode(), message); //$NON-NLS-1$ //$NON-NLS-2$
 		return Response

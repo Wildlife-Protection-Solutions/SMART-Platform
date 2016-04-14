@@ -30,15 +30,13 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.WKBReader;
 /**
  * Result set of observation (all data) queries.
@@ -76,7 +74,7 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 		}
 		for(int x = from; x < to; x++) {
 			rs.next();
-			GeomIntelligenceRecordItem it = asQueryResultItem(rs);
+			IntelligenceRecordResultItem it = asQueryResultItem(rs);
 			items.add(it);
 		}
 		
@@ -102,11 +100,8 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public Geometry createGeometry(IResultItem rs) throws Exception {
-		byte[] b =  ((GeomIntelligenceRecordItem)rs).getGeometry();
-		if (b == null){
-			return new GeometryCollection(new Geometry[]{}, gf);	
-		}
-		return reader.read(b);
+		IntelligenceRecordResultItem it = (IntelligenceRecordResultItem) rs;
+		return it.asGeometry(IntelligenceRecordResultItem.GEOMCOLUMN_KEY);
 	}
 
 	@Override
@@ -116,8 +111,8 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 		return name + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 	
-	public GeomIntelligenceRecordItem asQueryResultItem(ResultSet rs) throws SQLException{
-		GeomIntelligenceRecordItem item = new GeomIntelligenceRecordItem();
+	public IntelligenceRecordResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+		IntelligenceRecordResultItem item = new IntelligenceRecordResultItem();
 		item.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		item.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		item.setUuid((UUID)rs.getObject("intel_uuid")); //$NON-NLS-1$
@@ -133,7 +128,17 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 		item.setInformantId(rs.getString("intel_informantid")); //$NON-NLS-1$
 		item.setDescription(rs.getString("intel_description")); //$NON-NLS-1$
 		
-		item.setGeometry(rs.getBytes("intel_locations"));
+		try{
+			byte[] geom = rs.getBytes("intel_locations"); //$NON-NLS-1$
+			if (geom != null){
+				MultiPoint mp = (MultiPoint)reader.read(geom);
+				for (int i = 0; i < mp.getNumGeometries(); i ++){
+					item.addCoordinate(((Point)mp.getGeometryN(i)).getX(), ((Point)mp.getGeometryN(i)).getY());
+				}
+			}
+		}catch (Exception ex){
+			throw new SQLException(ex);
+		}
 		return item;
 		
 	}

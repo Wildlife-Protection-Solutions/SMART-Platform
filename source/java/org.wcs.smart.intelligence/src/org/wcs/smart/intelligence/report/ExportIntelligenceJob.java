@@ -95,7 +95,9 @@ public class ExportIntelligenceJob extends Job {
 				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 				
 				SmartReportRunner.INSTANCE.runFile(ReportIntelligence.getIntelligenceTemplate(), 
-						SmartDB.getCurrentConservationArea(), ReportEngineManager.getBirtReportEngine(),
+						SmartDB.getCurrentConservationArea(), 
+						SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
+						ReportEngineManager.getBirtReportEngine(),
 						options, session, reportParameters);
 				
 			}

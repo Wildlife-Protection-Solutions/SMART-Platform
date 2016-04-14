@@ -1,29 +1,23 @@
 <Context>
-
-	<ResourceLink name="jdbc/smart" 
-		global="org.wcs.smart.connect.datasource.postgresql" />
-	
-	<ResourceLink name="smartconnect.filestorelocation" 
-		global="smartconnect.filestorelocation" />
-	<ResourceLink name="smartconnect.dataqueue_cleanup_days" 
-		global="smartconnect.dataqueue_cleanup_days" />
-	<ResourceLink name="smartconnect.spatial_ref_sys_table" 
-		global="smartconnect.spatial_ref_sys_table" />
-	<ResourceLink name="smartconnect.number_background_threads" 
-		global="smartconnect.number_background_threads" />
-	<ResourceLink name="smartconnect.work_item_history_days_available" 
-		global="smartconnect.work_item_history_days_available" />
-	<ResourceLink name="smartconnect.changelog_cleanup_days" 
-		global="smartconnect.changelog_cleanup_days" />
-	<ResourceLink name="smartconnect.ca_export_days_available" 
-		global="smartconnect.ca_export_days_available" />
-	<ResourceLink name="smartconnect.sync_download_hours_available" 
-		global="smartconnect.sync_download_hours_available" />
-	<ResourceLink name="smartconnect.cleanup_task_interval_hours" 
-		global="smartconnect.cleanup_task_interval_hours" />
+	<Resource name="jdbc/smart" 
+		auth="Container" 
+		type="javax.sql.DataSource"
+		username="smart" password="smart" 
+		driverClassName="org.postgresql.Driver"
+		url="jdbc:postgresql://192.168.50.131:5432/connectemily" 
+		maxActive="20"
+		maxIdle="10" factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" />
 		
-	<ResourceLink name="mail/Session" 
-		global="mail/Session"/>
+	<Resource name="mail/Session" 
+		auth="Container" 
+		type="javax.mail.Session"
+		mail.transport.protocol="smtps"
+		mail.smtp.ssl.enable="true"
+		mail.smtp.auth="true"
+		mail.smtp.from="noreply@refractions.net"
+		mail.smtp.host="smtp.googlemail.com"
+		mail.smtp.user="noreply@refractions.net"
+		password="dontrespondhere2"/>
 		
 	<Realm className="org.apache.catalina.realm.LockOutRealm">
 		<Realm className="org.apache.catalina.realm.DataSourceRealm"
@@ -35,6 +29,25 @@
 		</Realm>
 	</Realm>
 
-	
+	<!-- environment variables -->
+	<!-- SMART Filestore Location -->
+	<Environment name="filestorelocation" value="C:\\temp\\connect_datastore\\"
+		type="java.lang.String" override="false" />
+	<Environment name="spatial_ref_sys_table" value="public.spatial_ref_sys"
+		type="java.lang.String" override="false" />
+	<Environment name="number_background_threads" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="work_item_history_days_available" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="changelog_cleanup_days" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="ca_export_days_available" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="sync_download_hours_available" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="cleanup_task_interval_hours" value="5"
+		type="java.lang.Integer" override="false" />
+	<Environment name="dataqueue_cleanup_days" value="5"
+		type="java.lang.Integer" override="false" />
 </Context>
   	

@@ -54,6 +54,7 @@ import org.wcs.smart.connect.query.columns.IntelligenceQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.ObservationQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.PatrolQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
+import org.wcs.smart.connect.report.SmartServiceLabelProvider;
 import org.wcs.smart.entity.IEntityLabelProvider;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
 import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
@@ -75,6 +76,7 @@ import org.wcs.smart.plan.IPlanLabelProvider;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
 import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
+import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
 
 /**
  * Web listener to initialize the SMART Context on startup.  This configures
@@ -117,6 +119,7 @@ public class SmartContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(ISurveyQueryColumnProvider.class, new SurveyQueryColumnProvider());
 		SmartContext.INSTANCE.setClass(IPatrolContributionFinder.class, new PatrolContributionFinder());
 		SmartContext.INSTANCE.setClass(IWaypointSourceEngine.class, WaypointSourceEngine.INSTANCE);
+		SmartContext.INSTANCE.setClass(ISmartMapLabelProvider.class, new SmartServiceLabelProvider());
 		
 		/* filestore configurations */
 		SmartContext.INSTANCE.setTempFilestoreLocation((File)arg0.getServletContext().getAttribute(ServletContext.TEMPDIR));

@@ -81,7 +81,7 @@ public class GroupedReportParameters implements IBirtParameterComponent {
 	@Override
 	public Composite createComposite(Composite parent, IDialogSettings settings) {
 		Group g = new Group(parent, SWT.NONE);
-		g.setText(base.getDisplayName());
+		g.setText(base.getDisplayName() != null ? base.getDisplayName() : base.getName());
 		g.setLayout(new GridLayout(1, false));
 		
 		for (IBirtParameterComponent p : params){

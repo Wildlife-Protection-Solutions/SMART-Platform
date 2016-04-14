@@ -29,9 +29,13 @@ import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.birt.report.engine.api.impl.ReportEngine;
+import org.eclipse.birt.report.engine.api.impl.RunAndRenderTask;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.report.model.Report;
+
+import com.ibm.icu.util.TimeZone;
 
 /**
  * BIRT Report running.  This initailizes the required parameters for running
@@ -63,14 +67,14 @@ public enum SmartReportRunner {
 	 * @param reportParameters
 	 * @throws Exception
 	 */
-	public void runReport(Report report, IReportEngine engine, IRenderOption options, 
+	public void runReport(Report report, String currentUser, IReportEngine engine, IRenderOption options, 
 			Session session, HashMap<String, Object> reportParameters) throws Exception{
 		
 		File reportFile = new File(report.getConservationArea().getFileDataStoreLocation()
 				+ File.separator
 				+ Report.REPORT_DIR + File.separator + report.getFilename());
 		
-		runFile(reportFile, report.getConservationArea(), engine, options, session, reportParameters);
+		runFile(reportFile, report.getConservationArea(), currentUser, engine, options, session, reportParameters);
 	}
 	
 
@@ -84,12 +88,12 @@ public enum SmartReportRunner {
 	 * @param reportParameters
 	 * @throws Exception
 	 */
-	public void runFile(File file, ConservationArea ca, IReportEngine engine, IRenderOption options, 
+	@SuppressWarnings("unchecked")
+	public void runFile(File file, ConservationArea ca, String currentUser, IReportEngine engine, IRenderOption options, 
 			Session session, HashMap<String, Object> reportParameters) throws Exception{
 		
 		IReportRunnable design = engine.openReportDesign(file.getAbsolutePath());
-		IRunAndRenderTask task = engine.createRunAndRenderTask(design);
-		
+		IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, ca, currentUser);
 		try{
 			task.getAppContext().put(CA_PARAM, ca);
 			task.getAppContext().put(SESSION_PARAM, session);
@@ -111,11 +115,12 @@ public enum SmartReportRunner {
 	 * @param reportParameters
 	 * @throws Exception
 	 */
-	public void runFile(InputStream is, ConservationArea ca, IReportEngine engine, IRenderOption options, 
+	@SuppressWarnings("unchecked")
+	public void runFile(InputStream is, ConservationArea ca, String currentUser, IReportEngine engine, IRenderOption options, 
 			Session session, HashMap<String, Object> reportParameters) throws Exception{
 		
 		IReportRunnable design = engine.openReportDesign(is);
-		IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+		IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, ca, currentUser);
 		
 		try{
 			task.getAppContext().put(CA_PARAM, ca);
@@ -127,4 +132,17 @@ public enum SmartReportRunner {
 			task.close();
 		}
 	}
+
+	public static class SmartRunAndRender extends RunAndRenderTask{
+		public SmartRunAndRender(ReportEngine engine, IReportRunnable runnable, ConservationArea ca, String currentUser) {
+			super(engine, runnable);
+		
+			//hack to allow smart birt functions to have access to ca and user
+			TimeZone tz = executionContext.getScriptContext().getTimeZone();
+			SmartTimezoneWrapper ss = new SmartTimezoneWrapper(tz, ca, currentUser);
+			executionContext.getScriptContext().setTimeZone(ss);
+		}
+		
+	}
+	
 }

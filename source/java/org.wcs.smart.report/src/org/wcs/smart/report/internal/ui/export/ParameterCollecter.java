@@ -23,22 +23,18 @@ package org.wcs.smart.report.internal.ui.export;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.eclipse.birt.report.engine.api.IGetParameterDefinitionTask;
 import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.birt.report.engine.api.IParameterDefnBase;
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
-import org.eclipse.birt.report.engine.api.IReportEngine;
-import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.birt.ui.ReportEngineManager;
-import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.SmartReportParameters;
+import org.wcs.smart.report.execute.ParameterFinder;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.viewer.parameter.BooleanParameterComponent;
 import org.wcs.smart.report.internal.ui.viewer.parameter.DateParameterComponent;
@@ -77,39 +73,10 @@ public class ParameterCollecter {
 	public  HashMap<String, Object> getParameters(Report[] reports) throws Exception{
 		allParameters = new HashMap<String, IParameterDefnBase>();
 		for (int i = 0; i < reports.length; i++){
-			getParameters(reports[i]);
+			allParameters.putAll( ParameterFinder.INSTANCE.getParameters(reports[i], ReportEngineManager.getBirtReportEngine()));
 		}
 		displayParameters();
 		return paramValues;
-	}
-	
-	/*
-	 * Determines all parameters for a given report
-	 * and adds them to the local report collection.
-	 */
-	private void getParameters(Report r) throws Exception{
-		
-		IReportEngine engine = ReportEngineManager.getBirtReportEngine();
-		
-		final IReportRunnable design = engine.openReportDesign(ReportPlugIn.getDefault().getReportFile(r).getAbsolutePath());
-		final IGetParameterDefinitionTask paramDefnTask = engine.createGetParameterDefinitionTask( design );
-		Collection<?> parameters = paramDefnTask.getParameterDefns(true);
-		
-		for (Iterator<?> iterator = parameters.iterator(); iterator.hasNext();) {
-			IParameterDefnBase param = (IParameterDefnBase)iterator.next();
-			IParameterDefnBase def = allParameters.get(param.getName());
-			if (def == null){
-				allParameters.put(param.getName(), param);	
-			}else{
-				if (def.getParameterType() != param.getParameterType()){
-					throw new Exception(MessageFormat.format(
-							Messages.ParameterCollecter_MultipleTypeParameter, new Object[]{param.getName()}));
-				}
-				//TODO: implement more here to make sure they are the same
-			}
-			
-		}
-		
 	}
 	
 	private IBirtParameterComponent getComponentForParameter(IParameterDefn ptype) throws Exception{

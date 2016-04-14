@@ -38,18 +38,19 @@ import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.report.execute.SmartReportRunner;
 
 /**
  * Implementation class of IConnection for SMART ODA runtime driver.
  */
 public class ServerSmartConnection extends SmartConnection {
 
-	public static final String CONNECTION_KEY = "org.wcs.smart.session"; //$NON-NLS-1$
+	
 	private SmartBirtTableUtils tableFinder = null;
 	
 	@Override
 	public void openSession(){
-		localSession = (Session) ((Map)appContext).get(CONNECTION_KEY);
+		localSession = (Session) ((Map)appContext).get(SmartReportRunner.SESSION_PARAM);
 		localSession.beginTransaction();
 	}
 	
@@ -99,12 +100,17 @@ public class ServerSmartConnection extends SmartConnection {
 
 	@Override
 	public Collection<ConservationArea> getConservationAreas() {
-		Object x = appContext.get("org.wcs.smart.report.ca");
+		Object x = appContext.get("org.wcs.smart.report.ca.filter");
 		if (x == null) return null;
 		if (x instanceof ConservationArea){
 			return Collections.singleton((ConservationArea)x);
 		}
 		return (Collection<ConservationArea>)x;
+	}
+
+	@Override
+	public String getDataSourceProductName() {
+		return "Smart Data Source";
 	}
 
 }
