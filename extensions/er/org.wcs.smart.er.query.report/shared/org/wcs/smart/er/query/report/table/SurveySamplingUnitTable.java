@@ -144,7 +144,8 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 				names[i++] = java.sql.Types.DOUBLE;
 			}
 			for (SurveyDesignSamplingUnitAttribute sua : sd.getSamplingUnitAttributes()){
-				if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+				if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT 
+						|| sua.getSamplingUnitAttribute().getType() == AttributeType.LIST){
 					names[i++] = java.sql.Types.VARCHAR;
 				}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
 					names[i++] = java.sql.Types.DOUBLE;
