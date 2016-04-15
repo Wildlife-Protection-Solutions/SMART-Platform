@@ -22,7 +22,6 @@
 package org.wcs.smart.report.internal.ui;
 
 import java.io.File;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;

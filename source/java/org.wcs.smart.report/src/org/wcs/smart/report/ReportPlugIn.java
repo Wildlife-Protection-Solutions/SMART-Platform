@@ -34,7 +34,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.wcs.smart.SmartContext;
+import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.query.event.QueryEventManager;
@@ -110,11 +110,12 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	
 	public void initReports(){
 		try {
-			ReportPlugin.getDefault().setResourcePreference(SmartBirtLibrary.getInstance().getLibraryLocation().getCanonicalPath());
-//			ReportPlugin.getDefault().setResourcePreference((new File(SmartContext.INSTANCE.getFilestoreLocation())).getCanonicalPath());
-//			SessionHandle.setBirtResourcePath(SmartBirtLibrary.getInstance().getLibraryLocation().getCanonicalPath());
-			SessionHandle.setBirtResourcePath((new File(SmartContext.INSTANCE.getFilestoreLocation())).getCanonicalPath());
-			SessionHandleAdapter.getInstance( ).getSessionHandle( ).setResourceFolder( (new File(SmartContext.INSTANCE.getFilestoreLocation())).getCanonicalPath() );
+			String value = SmartBirtLibrary.getInstance().getLibraryLocation().getCanonicalPath();
+			ReportPlugin.getDefault().setResourcePreference(value);
+			SessionHandle.setBirtResourcePath(value);
+			SessionHandleAdapter.getInstance( ).getSessionHandle( ).setResourceFolder(value);
+			SessionHandleAdapter.getInstance().getSessionHandle().setResourceLocator(BirtResourceLocator.INSTANCE);			
+			
 		} catch (IOException e) {
 			org.wcs.smart.report.ReportPlugIn.displayLog(
 					Messages.ReportPlugIn_Error_InitializingParams+ e.getLocalizedMessage(), e);

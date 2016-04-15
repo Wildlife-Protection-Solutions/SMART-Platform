@@ -13,10 +13,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.birt.report.designer.core;bundle-version="3.7.2",
  org.eclipse.ui.forms,
  org.wcs.smart.hibernate.libs;bundle-version="4.0.0",
- org.wcs.smart;bundle-version="4.0.0"
+ org.wcs.smart;bundle-version="4.0.0",
+ com.ibm.icu;bundle-version="52.1.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: org.wcs.smart.birt.ui
+Export-Package: org.wcs.smart.birt,
+ org.wcs.smart.birt.ui
 Bundle-Vendor: org.wcs.smart
 Import-Package: com.vividsolutions.jts,
  com.vividsolutions.jts.geom,
