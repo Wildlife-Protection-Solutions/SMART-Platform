@@ -31,7 +31,7 @@
     			<artifactId>org.wcs.smart.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-				<dependency>
+		<dependency>
     			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.report.birt.query</artifactId>
     			<version>${smart.version}</version>

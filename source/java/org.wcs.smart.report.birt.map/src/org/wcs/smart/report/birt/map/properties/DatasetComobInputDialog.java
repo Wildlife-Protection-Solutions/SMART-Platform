@@ -237,7 +237,7 @@ public class DatasetComobInputDialog extends Dialog {
 			@Override
 			public String getText(Object element){
 				if (element instanceof LayerDefinition){
-					return ((LayerDefinition)element).handle.getDisplayName() + " - " + ((LayerDefinition) element).info.getGeometryColumn() + " ( " + ((LayerDefinition) element).info.getLayerType() + ")";
+					return ((LayerDefinition)element).handle.getDisplayName() + " [" + ((LayerDefinition) element).info.getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return super.getText(element);
 			}
