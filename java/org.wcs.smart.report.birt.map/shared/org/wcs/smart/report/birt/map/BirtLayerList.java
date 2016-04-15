@@ -135,6 +135,7 @@ public class BirtLayerList extends SynchronizedEObjectWithInverseResolvingEList<
             if (element.getName().equals(configurationName)) {
                 String attribute = element.getAttribute("name"); //$NON-NLS-1$
                 try {
+                	if (element.getAttribute("class").equalsIgnoreCase("org.wcs.smart.udig.style.SmartLayerStyleInterceptor")) continue; //$NON-NLS-1$ //$NON-NLS-2$
                     LayerInterceptor interceptor = (LayerInterceptor) element
                             .createExecutableExtension("class"); //$NON-NLS-1$
                     interceptor.run(layer);
