@@ -21,13 +21,19 @@
  */
 package org.wcs.smart.birt.ui;
 
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.birt.report.designer.internal.ui.util.UIUtil;
 import org.eclipse.birt.report.designer.ui.editors.IReportProvider;
 import org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor;
+import org.eclipse.birt.report.model.api.IVersionInfo;
 import org.eclipse.birt.report.model.api.ModuleHandle;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -105,8 +111,60 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor {
 	
 	@Override
 	public void addPages(){
-		super.addPages();
-		if (getManager() != null){
+		/*
+		 * This is copied from the BIRT MultiPageReportEditor to fix the version checking library resource.  I 
+		 * could not figure out how to get the checkVersion function to use the correct
+		 * ResourceLocator, so I copied the functionality here and specifically used the required locator
+		 */
+		List<?> formPageList = EditorContributorManager.getInstance( )
+				.getEditorContributor( getEditorSite( ).getId( ) ).formPageList;
+		boolean error = false;
+
+		// For back compatible only.
+		// Provide warning message to let user select if the auto convert needs
+		// See bugzilla bug 136536 for detail.
+		String fileName = getProvider( ).getInputPath( getEditorInput( ) ).toOSString( );
+		List<?> message = SmartModuleUtils.checkVersion( fileName );
+		if ( message.size( ) > 0 ){
+			IVersionInfo info = (IVersionInfo) message.get( 0 );
+
+			if ( !MessageDialog.openConfirm( UIUtil.getDefaultShell( ),
+					"Warning",  //$NON-NLS-1$
+					info.getLocalizedMessage( ) ) ){
+				for ( Iterator<?> iter = formPageList.iterator( ); iter.hasNext( ); ){
+					FormPageDef pagedef = (FormPageDef) iter.next( );
+					if ( XMLSourcePage_ID.equals( pagedef.id ) ){
+						try{
+							addPage( pagedef.createPage( ), pagedef.displayName );
+							break;
+						}catch ( Exception e ){}
+					}
+				}
+				return;
+			}
+		}
+		
+		UIUtil.processSessionResourceFolder( getEditorInput( ),
+				UIUtil.getProjectFromInput( getEditorInput( ) ),
+				null );
+		// load the model first here, so consequent pages can directly use it
+		// without reloading
+		getProvider( ).getReportModuleHandle( getEditorInput( ) );
+
+		for ( Iterator<?> iter = formPageList.iterator( ); iter.hasNext( ); ){
+			FormPageDef pagedef = (FormPageDef) iter.next( );
+			try{
+				addPage( pagedef.createPage( ), pagedef.displayName );
+			}catch ( Exception e ){
+				error = true;
+			}
+		}
+
+		if (error) {
+			setActivePage(XMLSourcePage_ID);
+		}
+
+		if (getManager() != null) {
 			getManager().addPages();
 		}
 	}
@@ -162,4 +220,6 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor {
 	public void firePropertyChange(int propertyId){
 		super.firePropertyChange(propertyId);
 	}
+	
+	
 }
