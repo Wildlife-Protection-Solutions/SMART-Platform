@@ -70,6 +70,8 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	private List<IConfigurableModelEditorTabContent> tabs;
 	private boolean changesMade = false;
 	
+	private List<IConfigurableModelChangeListener> cmListeners = new ArrayList<IConfigurableModelChangeListener>();
+	
 	public ConfigurableModelEditDialog(ConfigurableModel model) {
 		super(Display.getDefault().getActiveShell());
 		this.model = model;
@@ -269,6 +271,7 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	}
 
 	public void notifyChangesMade() {
+		fireChangesMade();
 		setChangesMade(true);
 	}
 	
@@ -276,6 +279,19 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 		return model;
 	}
 	
+	protected void fireChangesMade() {
+		for (IConfigurableModelChangeListener listener : cmListeners) {
+			listener.notifyChangesMade();
+		}
+	}
+	
+	public void addModelChangedListener(IConfigurableModelChangeListener listener) {
+		cmListeners.add(listener);
+	}
+
+	public void removeModelChangedListener(IConfigurableModelChangeListener listener) {
+		cmListeners.remove(listener);
+	}
 	
 	protected boolean performSave() {
 		final boolean[] ret = new boolean[]{false};
