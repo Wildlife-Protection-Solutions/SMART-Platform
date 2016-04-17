@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.connect.dataentry;
 
+import java.util.List;
+
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider;
 import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 
 /**
@@ -35,7 +38,7 @@ import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
  * @since 4.0.0
  */
 public class ConnectCmTreeContentProvider extends ConfigurableModelTreeContentProvider {
-
+	
 	public ConnectCmTreeContentProvider(boolean showRoot) {
 		super(showRoot, true);
 	}
@@ -46,28 +49,35 @@ public class ConnectCmTreeContentProvider extends ConfigurableModelTreeContentPr
 			CmAttribute a = (CmAttribute) parentElement;
 			AttributeType type = a.getAttribute().getType();
 			if (AttributeType.LIST.equals(type)) {
-				return a.getCurrentList().toArray();
+				return wrapChildren(a, a.getCurrentList());
 			}
 			if (AttributeType.TREE.equals(type)) {
-				return a.getCurrentTree().toArray();
+				return wrapChildren(a, a.getCurrentTree());
 			}
 		}
-		if (parentElement instanceof CmAttributeTreeNode) {
-			CmAttributeTreeNode tn = (CmAttributeTreeNode) parentElement;
-			return tn.getChildren().toArray();
+		if (parentElement instanceof ConnectCmTreeElement) {
+			ConnectCmTreeElement el = (ConnectCmTreeElement) parentElement;
+			if (el.getElement() instanceof CmAttributeTreeNode) {
+				CmAttributeTreeNode tn = (CmAttributeTreeNode) el.getElement();
+				return wrapChildren(el.getAttribute(), tn.getChildren());
+			}
+			//NOTE: we should never be here!!!
+			SmartPlugIn.log("Unexpected alert item while looking for children inside Connect Alerts tab in Configurable Model.", null); //$NON-NLS-1$
 		}
 		return super.getChildren(parentElement);
 	}
 	
 	@Override
 	public Object getParent(Object element) {
-		if (element instanceof CmAttributeListItem) {
-			CmAttributeListItem li = (CmAttributeListItem) element;
-			return li.getAttribute();
-		}
-		if (element instanceof CmAttributeTreeNode) {
-			CmAttributeTreeNode tn = (CmAttributeTreeNode) element;
-			return tn.getParent() != null ? tn.getParent() : tn.getAttribute();
+		if (element instanceof ConnectCmTreeElement) {
+			ConnectCmTreeElement el = (ConnectCmTreeElement) element;
+			if (el.getElement() instanceof CmAttributeTreeNode) {
+				CmAttributeTreeNode tn = (CmAttributeTreeNode) el.getElement();
+				if (tn.getParent() != null) {
+					return new ConnectCmTreeElement(el.getAttribute(), tn.getParent()); //wrapping for consistency (needed for ConnectAlertSourceLabelProvider)
+				}
+			}
+			return el.getAttribute();
 		}
 		return super.getParent(element);
 	}
@@ -85,10 +95,23 @@ public class ConnectCmTreeContentProvider extends ConfigurableModelTreeContentPr
 			}
 			return false; //all other types of attributes do not have children
 		}
-		if (element instanceof CmAttributeTreeNode) {
-			CmAttributeTreeNode tn = (CmAttributeTreeNode) element;
-			return !tn.getChildren().isEmpty();
+		if (element instanceof ConnectCmTreeElement) {
+			ConnectCmTreeElement el = (ConnectCmTreeElement) element;
+			if (el.getElement() instanceof CmAttributeTreeNode) {
+				CmAttributeTreeNode tn = (CmAttributeTreeNode) el.getElement();
+				return !tn.getChildren().isEmpty();
+			}
+			return false;
 		}
 		return super.hasChildren(element);
 	}
+	
+	private Object[] wrapChildren(CmAttribute attribute, List<? extends UuidItem> kids) {
+		Object[] result = new Object[kids.size()];
+		for (int i = 0; i < kids.size(); i++) {
+			result[i] = new ConnectCmTreeElement(attribute, kids.get(i));
+		}
+		return result;
+	}
+	
 }

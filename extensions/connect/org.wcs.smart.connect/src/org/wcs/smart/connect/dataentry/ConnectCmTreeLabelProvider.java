@@ -62,24 +62,36 @@ public class ConnectCmTreeLabelProvider extends LabelProvider implements IColorP
 		return cmLabelProvider;
 	}
 
+	private Object findTergetElement(Object element) {
+		if (element instanceof ConnectCmTreeElement) {
+			ConnectCmTreeElement el = (ConnectCmTreeElement) element;
+			return el.getElement();
+		}
+		return element;
+	}
+
 	@Override
 	public String getText(Object element) {
-		return findLabelProvider(element).getText(element);
+		Object obj = findTergetElement(element);
+		return findLabelProvider(obj).getText(obj);
 	}
 	
 	@Override
 	public Image getImage(Object element) {
-		return findLabelProvider(element).getImage(element);
+		Object obj = findTergetElement(element);
+		return findLabelProvider(obj).getImage(obj);
 	}
 	
 	@Override
 	public Color getForeground(Object element) {
-		return ((IColorProvider)findLabelProvider(element)).getForeground(element);
+		Object obj = findTergetElement(element);
+		return ((IColorProvider)findLabelProvider(obj)).getForeground(obj);
 	}
 	
 	@Override
 	public Color getBackground(Object element) {
-		return ((IColorProvider)findLabelProvider(element)).getBackground(element);
+		Object obj = findTergetElement(element);
+		return ((IColorProvider)findLabelProvider(obj)).getBackground(obj);
 	}
 
 }
