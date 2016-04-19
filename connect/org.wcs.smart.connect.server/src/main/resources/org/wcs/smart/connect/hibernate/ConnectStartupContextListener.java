@@ -55,6 +55,7 @@ import org.wcs.smart.connect.model.SmartRoleAction;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.report.BirtEngine;
 
 /**
  * Web listener to configure the hibernate connection on start up and shut down.
@@ -81,6 +82,8 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		if (scheduler != null){
 			scheduler.shutdown();
 		}
+		
+		BirtEngine.destroyBirtEngine();
 	}
 
 	@Override

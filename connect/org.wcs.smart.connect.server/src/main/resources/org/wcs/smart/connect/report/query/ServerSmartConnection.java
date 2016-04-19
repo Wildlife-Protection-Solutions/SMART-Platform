@@ -51,16 +51,10 @@ public class ServerSmartConnection extends SmartConnection {
 	@Override
 	public void openSession(){
 		localSession = (Session) ((Map)appContext).get(SmartReportRunner.SESSION_PARAM);
-		localSession.beginTransaction();
 	}
 	
 	@Override
 	public void closeSession(){
-		if (localSession != null){
-			if (localSession.getTransaction().isActive()){
-				localSession.getTransaction().rollback();
-			}
-		}
 	}
 
 	@Override

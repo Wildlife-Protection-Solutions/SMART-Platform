@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.report;
 
+import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -34,8 +35,15 @@ import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
+import org.locationtech.udig.project.internal.ProjectPlugin;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.connect.report.udig.CatalogPluginWrapper;
+import org.wcs.smart.connect.report.udig.ProjectPluginWrapper;
+import org.wcs.smart.connect.report.udig.ShpPluginWrapper;
+import org.wcs.smart.connect.report.udig.UdigPreferenceStore;
+import org.wcs.smart.connect.report.udig.UiPluginWrapper;
 import org.wcs.smart.data.oda.smart.impl.ISmartConnectionFactory;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 
 /**
  * BIRT Report Engine;
@@ -95,11 +103,25 @@ public class BirtEngine {
 			IReportEngineFactory factory = (IReportEngineFactory) Platform
 					.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
 			birtEngine = factory.createReportEngine(config);
+			
+			configureUdig(sc);
 
 		}
 		return birtEngine;
 	}
 
+	public static void configureUdig(ServletContext context){
+		//TODO: we only need to call this code once put in birt setup
+		SmartContext.INSTANCE.setClass(IDatabaseConnectionProvider.class, new ConnectConnectionProvider(context, Locale.getDefault()));
+		
+		new ProjectPluginWrapper();
+//		new UdigPreferenceStore();
+		new CatalogPluginWrapper();
+		new ShpPluginWrapper();
+		new UiPluginWrapper();
+	}
+	
+	
 	public static synchronized void destroyBirtEngine() {
 		if (birtEngine == null) {
 			return;

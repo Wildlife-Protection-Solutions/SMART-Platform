@@ -1,4 +1,6 @@
-package org.wcs.smart.connect.report;
+package org.wcs.smart.connect.report.udig;
+
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -6,8 +8,9 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 public class UdigPreferenceStore extends ScopedPreferenceStore {
 
+	private HashMap<String, Object> prefs = new HashMap<String,Object>();
 	public UdigPreferenceStore() {
-		super (DefaultScope.INSTANCE, "org.wcs.smart");
+		super (DefaultScope.INSTANCE, "org.wcs.smart"); //$NON-NLS-1$
 	}
 
 	
@@ -28,7 +31,7 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	 */
 	@Override
 	public boolean contains(String name) {
-		return false;
+		return prefs.containsKey(name);
 	}
 
 	/*
@@ -50,7 +53,10 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	 */
 	@Override
 	public boolean getBoolean(String name) {
-		return BOOLEAN_DEFAULT_DEFAULT;
+		Boolean b = (Boolean) prefs.get(name);
+		if (b == null)
+			return getDefaultBoolean(name);
+		return b;
 	}
 
 	/*
@@ -120,7 +126,10 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	 */
 	@Override
 	public double getDouble(String name) {
-		return DOUBLE_DEFAULT_DEFAULT;
+		Double b = (Double) prefs.get(name);
+		if (b == null)
+			return getDefaultDouble(name);
+		return b;
 	}
 
 
@@ -131,7 +140,10 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	 */
 	@Override
 	public float getFloat(String name) {
-		return FLOAT_DEFAULT_DEFAULT;		
+		Float b = (Float) prefs.get(name);
+		if (b == null)
+			return getDefaultFloat(name);
+		return b;	
 	}
 
 	/*
@@ -141,7 +153,10 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	 */
 	@Override
 	public int getInt(String name) {
-		return INT_DEFAULT_DEFAULT;
+		Integer b = (Integer) prefs.get(name);
+		if (b == null)
+			return getDefaultInt(name);
+		return b;	
 	}
 
 	/*
@@ -151,7 +166,10 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	 */
 	@Override
 	public long getLong(String name) {
-		return LONG_DEFAULT_DEFAULT;
+		Long b = (Long) prefs.get(name);
+		if (b == null)
+			return getDefaultLong(name);
+		return b;	
 	}
 
 	/*
@@ -161,7 +179,10 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	 */
 	@Override
 	public String getString(String name) {
-		return  STRING_DEFAULT_DEFAULT; 
+		String b = (String) prefs.get(name);
+		if (b == null)
+			return getDefaultString(name);
+		return b;	
 	}
 
 	/*
@@ -192,7 +213,7 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	 */
 	@Override
 	public void putValue(String name, String value) {
-		//NOT SUPPORTED
+		prefs.put(name, value);
 	}
 
 	/*
@@ -291,6 +312,7 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	@Override
 	public void setValue(String name, double value) {
 		//NOT SUPPORTED
+		prefs.put(name, value);
 	}
 
 	/*
@@ -302,6 +324,7 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	@Override
 	public void setValue(String name, float value) {
 		//NOT SUPPORTED
+		prefs.put(name, value);
 	}
 
 	/*
@@ -313,6 +336,7 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	@Override
 	public void setValue(String name, int value) {
 		//NOT SUPPORTED
+		prefs.put(name, value);
 	}
 
 	/*
@@ -324,6 +348,7 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	@Override
 	public void setValue(String name, long value) {
 		//NOT SUPPORTED
+		prefs.put(name, value);
 	}
 
 	/*
@@ -335,6 +360,7 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	@Override
 	public void setValue(String name, String value) {
 		//NOT SUPPORTED
+		prefs.put(name, value);
 	}
 
 	/*
@@ -346,6 +372,7 @@ public class UdigPreferenceStore extends ScopedPreferenceStore {
 	@Override
 	public void setValue(String name, boolean value) {
 		//NOT SUPPORTED
+		prefs.put(name, value);
 	}
 
 
