@@ -143,9 +143,10 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 	 */
 	public Object onRowSets(IRowSet[] rowSets) throws BirtException {
 
+		int localdpi = 96;// (int)(dpi*1.5);
 		
-		int iwidth = BirtMapUtils.getWidthInPx(modelHandle, dpi);
-		int iheight = BirtMapUtils.getHeightInPx(modelHandle, dpi);
+		int iwidth = BirtMapUtils.getWidthInPx(modelHandle, localdpi);
+		int iheight = BirtMapUtils.getHeightInPx(modelHandle, localdpi);
 
 		List<GeoSmart> layers = new ArrayList<GeoSmart>();
 		try {
@@ -253,7 +254,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			BufferedImage image = new BufferedImage(iwidth, iheight, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = image.createGraphics();
 			try {
-				drawMap(g, new java.awt.Dimension(iwidth, iheight), renderedMap, dpi);
+				drawMap(g, new java.awt.Dimension(iwidth, iheight), renderedMap, localdpi);
 			} finally {
 				g.dispose();
 			}			
@@ -309,7 +310,6 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			ByteArrayInputStream bis = new ByteArrayInputStream(baos.toByteArray());
 			return bis;
 		}
-		
 	}
 
 	// draws the error string on the map starting at 0,0;
