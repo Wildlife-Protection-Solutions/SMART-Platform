@@ -137,7 +137,7 @@ public class SmartHibernateManager {
 				if (!((SessionFactoryImplementor)sessionFactory).getDialect().supportsSequences()){
 					//fail
 					throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
-				}				
+				}	
 			}
 		}
 	}
@@ -282,9 +282,14 @@ public class SmartHibernateManager {
 				}	
 			});
 		}
+//		printSessionCount();
 		return session;
+		
 	}
 	
+	public static void printSessionCount(){
+		System.out.println("SESSION COUNT: " + allSessions.size());
+	}
 	/**
 	 * Closes the current session factory.
 	 */
