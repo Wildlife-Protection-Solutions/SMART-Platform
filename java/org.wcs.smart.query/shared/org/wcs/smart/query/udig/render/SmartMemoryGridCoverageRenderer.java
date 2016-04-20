@@ -25,6 +25,8 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -36,7 +38,6 @@ import org.locationtech.udig.project.render.RenderException;
 import org.locationtech.udig.render.internal.gridcoverage.basic.MemoryGridCoverageRenderer;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.coverage.grid.GridGeometry;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.udig.style.SmartGridCellStyleContent;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -75,8 +76,12 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
 		ReferencedEnvelope bounds = getContext().getLayer().getBounds(monitor,
 				getContext().getCRS());
 		try {
+			
 			GridCoverage gc = getContext().getLayer().getGeoResource().resolve(GridCoverage.class, monitor);
-
+			
+			if (gc == null){
+				return;
+			}
 			GridGeometry ggc = gc.getGridGeometry();
 			int numXCells = ggc.getGridRange().getHigh(0) - ggc.getGridRange().getLow(0) + 1;
 			int numYCells = ggc.getGridRange().getHigh(1) - ggc.getGridRange().getLow(1) + 1;
@@ -102,8 +107,10 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
 				graphics.drawLine(s.x, s.y, e.x, e.y);
 			}
 
+			
 		} catch (IOException e) {
-			QueryPlugIn.log(e.getMessage(), e);
+			
+			Logger.getLogger(SmartMemoryGridCoverageRenderer.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}
 	}
 

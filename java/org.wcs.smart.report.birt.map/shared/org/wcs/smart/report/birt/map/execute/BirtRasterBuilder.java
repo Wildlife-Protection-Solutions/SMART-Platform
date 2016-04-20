@@ -109,7 +109,7 @@ public class BirtRasterBuilder {
 	 */
 	public void buildRaster(IQueryResults results) throws Exception{
 		generatedFiles = new ArrayList<File>();
-		rasterTempFile = File.createTempFile("smart" + System.nanoTime(), ".tiff"); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		
 		IResultIterator data = results.getPreparedQuery().execute(null).getResultIterator();
 	
@@ -135,6 +135,8 @@ public class BirtRasterBuilder {
 			
 			gridresults.add(i);
 		}
+		if (gridresults.isEmpty()) return;
+		
 		GridQueryResultMetadata md = new GridQueryResultMetadata(minValue, maxValue, minX, maxX, minY, maxY);
 		
 		long rasterHeight = maxY - minY + 1;
@@ -146,6 +148,7 @@ public class BirtRasterBuilder {
 				(minY-1) * cellSize - 0.5*cellSize + originY, 
 				rasterWidth * cellSize , rasterHeight * cellSize);
 		
+		rasterTempFile = File.createTempFile("smart" + System.nanoTime(), ".tiff"); //$NON-NLS-1$ //$NON-NLS-2$
 		RasterBuilder builder = new RasterBuilder();
 		builder.setEnvelope(env);
 		builder.setFileName(rasterTempFile.getAbsolutePath());

@@ -35,10 +35,12 @@ import org.geotools.styling.Symbolizer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.style.IStyleConfigurator;
 import org.locationtech.udig.ui.ColorEditor;
+import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.udig.style.SmartGridCellStyleContent;
 
 /**
@@ -87,7 +89,8 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
 	
     @Override
     public boolean canStyle( Layer layer ) {
-    	return layer.canAdaptTo(RasterService.class);
+    	return layer.canAdaptTo(GridCoverage.class) &&
+    	layer.canAdaptTo(Query.class);
     }
 
     @Override

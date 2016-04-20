@@ -297,7 +297,7 @@ public class RasterService extends AbstractRasterService {
 			 @Override
 			 public <T> boolean canResolve(Class<T> adaptee) {
 				if (adaptee == null) return false;
-			
+				if (adaptee.isAssignableFrom(GriddedQuery.class)) return true;
 				return adaptee.isAssignableFrom(RasterService.class) || 
 							super.canResolve(adaptee);
 			}
