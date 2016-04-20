@@ -48,8 +48,12 @@ import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
+import org.locationtech.udig.catalog.rasterings.GridCoverageLoader;
+import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.parameter.GeneralParameterValue;
+import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 
@@ -69,6 +73,7 @@ public class MapGeoResource extends IGeoResource {
 	private OdaDataSetHandle dataSetHandle;
 	
 	private GridCoverage2DReader reader;
+	
 	
 	/**
 	 * Creates a new query georesource.
@@ -177,6 +182,8 @@ public class MapGeoResource extends IGeoResource {
 				adaptee.isAssignableFrom(IResolve.class)){
 			return true;
 		}
+		
+		
 		if (isVector()){
 			if (adaptee.isAssignableFrom(FeatureSource.class)
 				|| adaptee.isAssignableFrom(FeatureStore.class)
@@ -187,7 +194,8 @@ public class MapGeoResource extends IGeoResource {
 		}
 		if (isRaster()){
 			if (adaptee.isAssignableFrom(AbstractGridCoverage2DReader.class) || 
-					adaptee.isAssignableFrom(GridCoverage2D.class)){
+					adaptee.isAssignableFrom(GridCoverage2D.class) ||
+					adaptee.isAssignableFrom(GriddedQuery.class)){
 				return true;
 			}
 		}
@@ -227,6 +235,46 @@ public class MapGeoResource extends IGeoResource {
 		}
 		return false;
 	}
+	
+	private void getRasterReader(){
+		if (reader == null){
+			synchronized (this) {
+				if (reader == null){
+	                if (mapInfo.getRasterFile() != null) {
+	                	AbstractGridFormat frmt = (new GeoTiffFormatFactorySpi()).createFormat();
+	                    File file = mapInfo.getRasterFile();
+	                	this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file);
+	                }
+				}
+			}
+		}
+	}
+	
+
+    /**
+     * Template method called by findResource that is responsible for loading the coverage.  By default
+     * it loads a very small coverage for getting info from but not using as a real datasource
+     * @return
+     * @throws IOException
+     */
+    protected GridCoverage loadCoverage() throws IOException {
+//        ParameterGroup pvg = new Par//getReadParameters();
+//        		
+//        ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY
+//                .createValue();
+//        policy.setValue(OverviewPolicy.IGNORE);
+//
+//        // this will basically read 4 tiles worth of data at once from the disk...
+//        ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
+//
+//        // Setting read type: use JAI ImageRead (true) or ImageReaders read methods (false)
+//        ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
+//        useJaiRead.setValue(true);
+
+        GridCoverage gridCoverage = reader.read(new GeneralParameterValue[]{});
+        return gridCoverage;
+    }
+    
     /**
      * @see org.locationtech.udig.catalog.IGeoResource#resolve(java.lang.Class, org.eclipse.core.runtime.IProgressMonitor)
      */
@@ -257,27 +305,24 @@ public class MapGeoResource extends IGeoResource {
 		}
 		if (isRaster()){
 			if (adaptee.isAssignableFrom(AbstractGridCoverage2DReader.class)){
-				if (reader == null){
-					synchronized (this) {
-						if (reader == null){
-			                if (mapInfo.getRasterFile() != null) {
-			                	AbstractGridFormat frmt = (new GeoTiffFormatFactorySpi()).createFormat();
-			                    File file = mapInfo.getRasterFile();
-			                	this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file);
-			                }else{
-			                	//need empty grid coverage for styling
-			                	return adaptee.cast(EmptyGridCoverage.getReaderInstance());
-			                }
-						}
-					}
+				getRasterReader();
+				if (this.reader == null){
+					return adaptee.cast(EmptyGridCoverage.getReaderInstance());
 				}
+			
 				return  adaptee.cast(this.reader);
 			}
-			
+			if (adaptee.isAssignableFrom(GridCoverageLoader.class)) {
+				if (mapInfo.getRasterFile() == null) return null;
+				return adaptee.cast(new GridCoverageLoader(this));
+			}
 			if (adaptee.isAssignableFrom(GridCoverage2D.class)){
 				if (mapInfo.getRasterFile() == null){
 					//create empty grid
-					return  adaptee.cast(EmptyGridCoverage.getInstance());
+//					return  adaptee.cast(EmptyGridCoverage.getInstance());
+					return null;
+				}else{
+					return adaptee.cast(loadCoverage());
 				}
 			}
 		}

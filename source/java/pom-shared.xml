@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	
+	<modelVersion>4.0.0</modelVersion>
+	
 	<groupId>org.wcs.smart</groupId>
   	<artifactId>smart</artifactId>
-  	<version>4.0</version>
+  	<version>4.0.0-SNAPSHOT</version>
   	<packaging>pom</packaging>
   	
-	<modelVersion>4.0.0</modelVersion>
+	
  	
 	<properties>
 		<smart.version>4.0.0-SNAPSHOT</smart.version>
@@ -15,6 +17,8 @@
         	<hibernate.version>4.2.18.Final</hibernate.version>
         	<birt.version>4.4.1</birt.version>
         	<udig.version>2.0.0-SNAPSHOT</udig.version>
+        	
+        	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     	</properties>
     
 	<modules>
@@ -42,9 +46,9 @@
 		<module>../extensions/er/org.wcs.smart.er/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er.query/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er.query.report/pom-shared.xml</module>
+		<module>../extensions/org.wcs.smart.cybertracker/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect.dataqueue/pom-shared.xml</module>
-		<module>../extensions/org.wcs.smart.cybertracker/pom-shared.xml</module>
 	</modules>
  
 	<build>
@@ -73,6 +77,7 @@
       			<plugin>
     				<groupId>org.apache.felix</groupId>
     				<artifactId>maven-bundle-plugin</artifactId>
+    				<version>3.0.1</version>
     				<extensions>true</extensions>
 				<!--<configuration><manifestLocation>META-INF</manifestLocation></configuration>-->
   			</plugin>

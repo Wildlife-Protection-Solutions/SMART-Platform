@@ -27,13 +27,17 @@ import org.locationtech.udig.project.render.ICompositeRenderContext;
 import org.locationtech.udig.project.render.IRenderContext;
 import org.locationtech.udig.project.render.IRenderMetricsFactory;
 import org.locationtech.udig.project.render.IRenderer;
-import org.wcs.smart.query.common.model.udig.RasterService;
+import org.opengis.coverage.grid.GridCoverage;
+import org.wcs.smart.query.model.Query;
+
 
 
 /**
  * The Render metrics factory for grid coverage renderer that includes
  * cell bounds.
  *
+ * This renderer is only valid for georesources that can resolve to a GridCoverage and Smart 
+ * Query.
  */
 public class SmartMemoryGridCoverageMetricsFactory implements IRenderMetricsFactory {
 
@@ -49,9 +53,10 @@ public class SmartMemoryGridCoverageMetricsFactory implements IRenderMetricsFact
             return false;
         }
         IGeoResource geoResource = context.getGeoResource();
-		if( geoResource.canResolve(RasterService.class) ){
-			return true;
-		}
+        if (geoResource.canResolve(GridCoverage.class) && 
+        		geoResource.canResolve(Query.class)){
+        	return true;
+        }
 		return false;
     }
 

@@ -21,5 +21,15 @@
     			<artifactId>org.wcs.smart.core</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.render.gridcoverage.basic</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.catalog.rasterings</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
 	</dependencies>	
 </project>
