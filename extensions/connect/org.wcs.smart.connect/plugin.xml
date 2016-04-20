@@ -32,7 +32,7 @@
       <class
             ca_property=".id.server.conservationArea"
             class="org.wcs.smart.connect.model.ConnectServerOption"
-            supportsCcaa="true">
+            supportsCcaa="false">
       </class>
    </extension>
    <extension
