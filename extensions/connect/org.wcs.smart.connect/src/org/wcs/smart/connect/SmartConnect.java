@@ -135,11 +135,13 @@ public class SmartConnect {
 				//compare certifications; cannot simply compare the filename
 				//as the same filename is used for all certificates
 				if (lastConnect.server.getCertificateFileName() == null && server.getCertificateFileName() == null){
+					lastConnect.server = server;
 					return lastConnect;
 				}else if (lastConnect.currentCertificate != null && server.getCertificateFileName() != null){
 					try(InputStream is = new BufferedInputStream(Files.newInputStream(server.getLocalCertificateFile()))){
 						Certificate temp = CertificateFactory.getInstance("X.509").generateCertificate(is); //$NON-NLS-1$
 						if (temp.equals(lastConnect.currentCertificate)){
+							lastConnect.server = server;
 							return lastConnect;
 						}
 					}catch (Exception ex){

@@ -141,6 +141,10 @@ public class ServerPanel extends Composite implements ModifyListener {
 				scd.show();
 				scd.setDescriptionText(Messages.ServerPanel_ServerRequired);
 				txtServer.setData(VALID_KEY, false);
+			}else if (txtServer.getText().endsWith("/")){ //$NON-NLS-1$
+				scd.show();
+				scd.setDescriptionText(Messages.ServerPanel_InvalidServerURL);
+				txtServer.setData(VALID_KEY, false);
 			}else{
 				scd.hide();
 				txtServer.setData(VALID_KEY, true);
