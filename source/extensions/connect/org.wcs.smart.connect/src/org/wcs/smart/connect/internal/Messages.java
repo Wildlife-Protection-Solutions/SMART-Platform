@@ -319,6 +319,7 @@ public class Messages extends NLS {
 	public static String ServerPanel_CertificateLabel;
 	public static String ServerPanel_CertificateMessage;
 	public static String ServerPanel_InvalidCertificate;
+	public static String ServerPanel_InvalidServerURL;
 	public static String ServerPanel_ServerRequired;
 	public static String ServerPanel_UrlLabel;
 	public static String ServerPanel_UseExistingCert;
