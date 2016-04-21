@@ -1470,6 +1470,14 @@
             clazz="org.wcs.smart.udig.catalog.smart.ui.RefreshListener">
       </loginHandler>
    </extension>
+   <extension
+         point="org.locationtech.udig.project.renderer">
+      <renderer
+            class="org.wcs.smart.udig.legend.SmartMapGraphicRendererMetricsFactory"
+            id="org.wcs.smart.udig.legend.LegendRenderer"
+            name="Smart Legend Renderer">
+      </renderer>
+   </extension>
 
 </plugin>
 
