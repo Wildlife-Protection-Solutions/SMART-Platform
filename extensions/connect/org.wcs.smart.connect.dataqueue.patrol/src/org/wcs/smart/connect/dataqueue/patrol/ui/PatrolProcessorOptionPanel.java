@@ -29,10 +29,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 import org.wcs.smart.connect.dataqueue.patrol.PatrolDataQueueProcessorOption;
 import org.wcs.smart.connect.dataqueue.patrol.internal.Messages;
@@ -90,6 +93,20 @@ public class PatrolProcessorOptionPanel implements IProcessingOptionPanel {
 	public Composite createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
+		
+		Composite warn = new Composite(main, SWT.NONE);
+		warn.setLayout(new GridLayout(2, false));
+		warn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lwarn = new Label(warn, SWT.NONE);
+		lwarn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		lwarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Label l = new Label(warn, SWT.WRAP);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.widthHint = 100;
+		l.setLayoutData(gd);
+		l.setText(DESKTOP_ONLY_MESSAGE);
 		
 		btnIds = new Button(main, SWT.CHECK);
 		btnIds.setText(Messages.PatrolProcessorOptionPanel_PidOptionLabel);

@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -75,6 +76,19 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 		listeners = new ArrayList<ModifyListener>();
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
+
+		Composite warn = new Composite(main, SWT.NONE);
+		warn.setLayout(new GridLayout(2, false));
+		warn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Label lwarn = new Label(warn, SWT.NONE);
+		lwarn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		lwarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		Label lblwarn = new Label(warn, SWT.WRAP);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.widthHint = 100;
+		lblwarn.setLayoutData(gd);
+		lblwarn.setText(IServerOptionsPanel.DESKTOP_ONLY_MESSAGE);
 		
 		ModifyListener ml = new ModifyListener() {
 			@Override

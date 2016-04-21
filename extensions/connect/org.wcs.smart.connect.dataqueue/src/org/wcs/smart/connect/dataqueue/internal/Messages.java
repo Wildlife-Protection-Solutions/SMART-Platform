@@ -125,6 +125,7 @@ public class Messages extends NLS {
 	public static String DataQueueView_ServerRefreshTask3;
 	public static String DataQueueView_StatusColumnName;
 	public static String DataQueueView_TypeColumName;
+	public static String IProcessingOptionPanel_InfoMessage;
 	public static String LocalDataQueueItem_CompleteStatusLabel;
 	public static String LocalDataQueueItem_DownloadingStatusLabel;
 	public static String LocalDataQueueItem_ErrorStatusLabel;

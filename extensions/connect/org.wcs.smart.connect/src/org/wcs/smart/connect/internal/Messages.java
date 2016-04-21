@@ -234,6 +234,7 @@ public class Messages extends NLS {
 	public static String FileUploaderJob_Waiting;
 	public static String ImportFromConnectStartupOption_name;
 	public static String IOUtils_DownloadCancelled;
+	public static String IServerOptionsPanel_InfoMessage;
 	public static String LocalCaListPage_CaLabel;
 	public static String LocalCaListPage_CaLoadError;
 	public static String LocalCaListPage_deselectall;
