@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 
 /**
@@ -37,6 +38,8 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 public interface IProcessingOptionPanel {
 	
 	public static final String EXTENSION_ID = "org.wcs.smart.connect.dataqueue.processor.option"; //$NON-NLS-1$
+	
+	public static final String DESKTOP_ONLY_MESSAGE = Messages.IProcessingOptionPanel_InfoMessage;
 	
 	/**
 	 * The name of the panel

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.replication.AutoReplicationStartUp;
@@ -87,6 +88,20 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
+		
+		Composite warn = new Composite(main, SWT.NONE);
+		warn.setLayout(new GridLayout(2, false));
+		warn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lwarn = new Label(warn, SWT.NONE);
+		lwarn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		lwarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Label l = new Label(warn, SWT.WRAP);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.widthHint = 100;
+		l.setLayoutData(gd);
+		l.setText(IServerOptionsPanel.DESKTOP_ONLY_MESSAGE);
 		
 		Group g1 = new Group(main, SWT.DEFAULT);
 		g1.setText(Messages.AutoOptionsPanel_StartUpOptionLabel);
