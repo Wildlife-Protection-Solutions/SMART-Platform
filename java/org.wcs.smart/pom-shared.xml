@@ -56,6 +56,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.legend</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
 			<artifactId>org.locationtech.udig.style</artifactId>
 			<version>${udig.version}</version>
 		</dependency>
@@ -94,6 +99,11 @@
 			<groupId>org.eclipse.jface</groupId>
 			<artifactId>org.eclipse.jface</artifactId>
 			<version>3.10.1.v20140813-1009</version>
+		</dependency>
+		<dependency>
+		    <groupId>swt</groupId>
+		    <artifactId>swt-win32</artifactId>
+		    <version>2.1.0</version>
 		</dependency>
 	</dependencies>
 </project>

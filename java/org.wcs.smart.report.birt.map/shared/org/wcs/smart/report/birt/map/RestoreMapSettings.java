@@ -99,6 +99,7 @@ public class RestoreMapSettings {
 		final HashMap<URL, LayerRegister> definitionMap = new HashMap<URL, LayerRegister>();
 
 		for (LayerRegister basemapLayer : userMap.getLayerList()) {
+			if (!basemapLayer.getVisible()) continue; //we have no use for invisible layers in birt maps
 			List<IGeoResource> resources = prepareLayers(currentMap, basemapLayer.getURI(),
 					basemapLayer.getName(), ca);
 			if (resources != null) {
