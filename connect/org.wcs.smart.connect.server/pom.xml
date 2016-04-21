@@ -504,14 +504,6 @@
 		</dependency>
 		
 		<!-- report maps -->
-		<!--<dependency>
-		    <groupId>org.eclipse</groupId>
-		    <artifactId>ui</artifactId>
-		    <version>3.3.0-I20070614-0800</version>
-		</dependency>	
-		-->
-		
-		
 		<dependency>
     			<groupId>org.eclipse.ui.workbench</groupId>
     			<artifactId>org.eclipse.ui.workbench</artifactId>
@@ -524,58 +516,54 @@
     			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.jface</groupId>
+			<artifactId>org.eclipse.jface</artifactId>
+			<version>3.10.1.v20140813-1009</version>
+		</dependency>
+		<dependency>
     			<groupId>org.eclipse.equinox</groupId>
     			<artifactId>common</artifactId>
     			<version>3.6.200-v20130402-1505</version>
 		</dependency>
 		
-		<!--<dependency>
-			<groupId>org.eclipse</groupId>
-			<artifactId>jface</artifactId>
-			<version>3.3.0-I20070606-0010</version>
-		</dependency>-->
-		<dependency>
-			<groupId>org.eclipse.jface</groupId>
-			<artifactId>org.eclipse.jface</artifactId>
-			<version>3.10.1.v20140813-1009</version>
-		</dependency>
 		<dependency>
 			<groupId>org.eclipse.core</groupId>
 			<artifactId>org.eclipse.core.commands</artifactId>
 			<version>3.6.0</version>
 		</dependency>
 		
-		<dependency>
+		<!--<dependency>
 		    <groupId>swt</groupId>
 		    <artifactId>swt-win32</artifactId>
 		    <version>2.1.0</version>
-		</dependency>
-		<dependency>
-    			<groupId>com.ibm.icu</groupId>
-    			<artifactId>icu4j</artifactId>
-    			<version>50.1.1</version>
-		</dependency>
+		</dependency>-->
 		
 		<dependency>
-	    		<groupId>joda-time</groupId>
-	    		<artifactId>joda-time</artifactId>
-	    		<version>2.9.3</version>
+    		<groupId>com.ibm.icu</groupId>
+    		<artifactId>icu4j</artifactId>
+    		<version>50.1</version>
 		</dependency>
 		<dependency>
-	    		<groupId>org.picocontainer</groupId>
-	    		<artifactId>picocontainer</artifactId>
-	    		<version>2.15</version>
+	    	<groupId>joda-time</groupId>
+	    	<artifactId>joda-time</artifactId>
+	    	<version>1.6</version>
 		</dependency>
 		<dependency>
-	    		<groupId>com.google.guava</groupId>
-	    		<artifactId>guava</artifactId>
-	    		<version>15.0</version>
+	    	<groupId>org.picocontainer</groupId>
+	    	<artifactId>picocontainer</artifactId>
+	    	<version>2.15</version>
+	    	<!--desktop uses version 1.2 but not available in mvn-->
 		</dependency>
 		<dependency>
-            		<groupId>com.google.code.gson</groupId>
-            		<artifactId>gson</artifactId>
-            		<version>2.2.4</version>
-        	</dependency>
-		
+	    	<groupId>com.google.guava</groupId>
+	    	<artifactId>guava</artifactId>
+	    	<version>15.0</version>
+		</dependency>
+		<dependency>
+			<!-- basemaps-->
+          	<groupId>com.google.code.gson</groupId>
+           	<artifactId>gson</artifactId>
+			<version>2.2.4</version>
+        </dependency>
 	</dependencies>
 </project>

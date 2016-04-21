@@ -1,0 +1,2 @@
+mvn install:install-file -Dfile=C:\data\SMART\Eclipse4\smart-eclipe-target\plugins\org.eclipse.ui.workbench_3.106.1.v20140827-1737.jar -DgroupId=org.eclipse.ui.workbench -DartifactId=org.eclipse.ui.workbench -Dversion=3.106.1.v20140827-1737 -Dpackaging=jar
+mvn install:install-file -Dfile=C:\data\SMART\Eclipse4\smart-eclipe-target\plugins\org.eclipse.jface_3.10.1.v20140813-1009.jar -DgroupId=org.eclipse.jface -DartifactId=org.eclipse.jface -Dversion=3.10.1.v20140813-1009 -Dpackaging=jar
