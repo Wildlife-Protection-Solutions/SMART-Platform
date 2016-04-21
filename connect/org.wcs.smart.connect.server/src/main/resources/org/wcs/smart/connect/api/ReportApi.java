@@ -69,16 +69,13 @@ import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
-import org.eclipse.ui.XMLMemento;
 import org.hibernate.Session;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.ReportParameter;
 import org.wcs.smart.connect.model.ReportParameter.Type;
 import org.wcs.smart.connect.report.BirtEngine;
-import org.wcs.smart.connect.report.ConnectConnectionProvider;
 import org.wcs.smart.connect.report.ReportProxy;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -87,7 +84,6 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.report.execute.ParameterFinder;
 import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.model.Report;
-import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -138,7 +134,6 @@ public class ReportApi extends HttpServlet{
 		List<ConservationArea> conservationAreas = new ArrayList<ConservationArea>();
 		try{
 			s.beginTransaction();
-			s.clear();	
 			report = (Report) s.get(Report.class, uuid);
 			
 			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, "Report not found");
@@ -152,7 +147,7 @@ public class ReportApi extends HttpServlet{
 				}
 			}
 			
-			
+			//TODO: support ccaa reports
 			String caFilter = null;
 			if (report.getConservationArea().getIsCcaa()){
 				//we use the ccaafilter; otherwise we ignore it
@@ -160,67 +155,62 @@ public class ReportApi extends HttpServlet{
 			}else{
 				conservationAreas.add(report.getConservationArea());
 			}
+				
+			try{
+				IReportEngine engine = BirtEngine.getBirtEngine(context);
+				java.nio.file.Path reportFile = FileSystems.getDefault().getPath(
+					report.getConservationArea().getFileDataStoreLocation(),
+					Report.REPORT_DIR,
+					report.getFilename());
+	
+				//TODO configure parameters
+				HashMap<String, Object> parameters = new HashMap<String, Object>();
+				//		parameters.put("Start Date", new Date((new Date()).getTime() - 1000l *60 *60*24*30*3));
+				parameters.put("End Date", new java.sql.Date(  (new Date()).getTime() ));
+				parameters.put("Start Date", new java.sql.Date(100,0,1));
+				//		parameters.put("End Date", new Date(115,1,1));
 			
-		
-		
-		 
+				try(InputStream inStream = Files.newInputStream(reportFile)){
+					final IReportRunnable design = engine.openReportDesign(inStream);
 					
-		try{
-			IReportEngine engine = BirtEngine.getBirtEngine(context);
+					try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
+						//TODO: support various output formats
+		//				RenderOption options = new RenderOption();
+						RenderOption options = new HTMLRenderOption( );
+						options.setOutputStream(bos);
+						options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+						options.setOutputFormat(HTMLRenderOption.HTML);
+						
+		//				options.setOutputFormat(PDFRenderOption.);
+					
+						((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images");
+						((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images"));
+						options.setImageHandler(new HTMLServerImageHandler());
+	//					options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf");
+	//					options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+						//options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 		
-
-			java.nio.file.Path reportFile = FileSystems.getDefault().getPath(
-				report.getConservationArea().getFileDataStoreLocation(),
-				"reports",
-				report.getFilename());
-				
-			HashMap<String, Object> parameters = new HashMap<String, Object>();
-			//		parameters.put("Start Date", new Date((new Date()).getTime() - 1000l *60 *60*24*30*3));
-			parameters.put("End Date", new java.sql.Date(  (new Date()).getTime() ));
-			parameters.put("Start Date", new java.sql.Date(100,0,1));
-			//		parameters.put("End Date", new Date(115,1,1));
+						IRunAndRenderTask task = new SmartReportRunner.SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal().getName());
 		
-			try(InputStream inStream = Files.newInputStream(reportFile)){
-				final IReportRunnable design = engine.openReportDesign(inStream);
+						Map items = task.getAppContext();
+						items.put(SmartReportRunner.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
+						items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
+						items.put(SmartReportRunner.CA_PARAM, report.getConservationArea());
+						items.put("org.wcs.smart.report.ca.filter", conservationAreas);
+						
+						try{
+							task.setRenderOption(options);
+							task.setParameterValues(parameters);
+							task.run();
+						}finally{
+							task.close();
+						}
 					
-				try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
-	//				RenderOption options = new RenderOption();
-					RenderOption options = new HTMLRenderOption( );
-					options.setOutputStream(bos);
-					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
-					options.setOutputFormat(HTMLRenderOption.HTML);
-					
-	//				options.setOutputFormat(PDFRenderOption.);
-				
-					((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images");
-					((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images"));
-					options.setImageHandler(new HTMLServerImageHandler());
-//					options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf");
-//					options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
-					//options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
-	
-					IRunAndRenderTask task = new SmartReportRunner.SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal().getName());
-	
-					Map items = task.getAppContext();
-					items.put(SmartReportRunner.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
-					items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
-					items.put(SmartReportRunner.CA_PARAM, report.getConservationArea());
-					items.put("org.wcs.smart.report.ca.filter", conservationAreas);
-					
-					try{
-						task.setRenderOption(options);
-						task.setParameterValues(parameters);
-						task.run();
-					}finally{
-						task.close();
+						String html = bos.toString("UTF8");
+						return writeHtml(html);
+	//					return writePdf(bos);
 					}
-				
-					String html = bos.toString("UTF8");
-					return writeHtml(html);
-//					return writePdf(bos);
 				}
-			}
-		
 			}catch(Exception ex){
 				logger.log(Level.SEVERE, ex.getMessage(), ex);
 				throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error running report: " + ex.getMessage()); 
