@@ -9,6 +9,8 @@ var startDatePicker, endDatePicker;
 
 var isDateChanging = false;
 
+var parameterNames = new Array();
+
 /* configure events on html elements */
 window.onload = function(){
 
@@ -18,8 +20,35 @@ window.onload = function(){
 
 	
 	document.getElementById("runreportbutton").onclick = function(){
+		
+		//Validate parameters
+		if (document.getElementById('cafilter').style.display.toUpperCase() != "NONE"){
+			var valid = 0;
+			var elements = document.getElementsByName('ccaafilter');
+			for (var i = 0; i < elements.length; i ++){
+				if (elements[i].checked){
+					valid=1;
+					break;
+				}
+			}
+			if (valid == 0){
+				window.alert("You must select at least one CA");
+				return false;
+			}
+		}
+		var csString = "";
+		for(x=0; x < parameterNames.length; x++){
+			name = parameterNames[x];
+			if(document.getElementById(name).value == ""){
+				window.alert("Missing Parameter Valid for: " + name);
+				return false;
+			}
+		}
+		
+
+		
 		closeDialog('reportOptionsDialog');
-		window.open(generateUrl(REPORTLINKURL));
+		window.open(generateUrl(REPORTURL));
 	};
 
 	document.getElementById("cancel").onclick = function(){
@@ -47,6 +76,7 @@ window.onload = function(){
         i18n: pickaday_i18n,
         onSelect: selectCustom
 	});
+
 
 	//populate predefined dates
 	var selectdiv = document.getElementById("defineddates");
@@ -123,8 +153,10 @@ function updateDates(){
 			startDatePicker.setDate(startYear, false);
 			
 		}else if (datekey== "alldates"){
-			startdate.value = "";
-			enddate.value = "";
+			startYear = new Date(1979, 0, 1,0,0,0);
+			startDatePicker.setDate(startYear, false);
+			var today = new Date();
+			endDatePicker.setDate(today, false);
 		}else if (datekey== "custom"){
 			
 		}
@@ -214,11 +246,6 @@ function createReportTable(){
 	 		runicon.onclick = showReportOptions;
 	 		row.childNodes[3].appendChild(runicon);
 	 		
-//	 		var filter = qdatefilter[reports[i].typeKey][0];
-	 		//var csvlink = document.createElement("a");
-	 		//csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=" + filter;
-	 		//csvlink.innerHTML = "csv";
-	 		//row.childNodes[5].appendChild(csvlink);
  		 }
  		}
  	}
@@ -250,29 +277,60 @@ function showReportOptions(){
 	var poselement = document.querySelector("#reporttable");
 	var pos = getPosition(poselement);
 	
-	
-	//update datefilter options
-	//document.querySelector
-	var datefielddiv = document.getElementById("datefield");
-	while(datefielddiv.firstChild){
-		datefielddiv.removeChild(datefielddiv.firstChild);
+	//clear custom paramater from any previous reports
+	var parent = document.getElementById("customParamters");
+	while (parent.firstChild) {
+		parent.removeChild(parent.firstChild);
 	}
+	parent.innerHTML = "<font style='color:red'>Loading custom parameters.</font>";
+
+	//update report parameters required
+	var oReq = new XMLHttpRequest();
+	oReq.onload = showParamaterSelection;
+	oReq.open("Get", REPORTURL  + uuid + "/params", true);
+	oReq.send();
+
 	
-//	var ops = qdatefilter[querytype];
-//	for (var i = 0; i < ops.length; i++){
-//		var doption = ops[i];
-//		var name = datefilters[doption];
-//		
-//		var object = document.createElement("option");
-//		object.value = doption;
-//		object.innerHTML = name;
-//		datefielddiv.appendChild(object);
-//	}
-//	datefielddiv.selectedIndex = 0;
-	 document.querySelector("#reportformat").selectedIndex = 0;
+	document.querySelector("#reportformat").selectedIndex = 0;
 	displayDialogLocation('reportOptionsDialog', pos.x, window.pageYOffset + 20);
 
 }
+
+//callback from getting parameters
+//this function adds GUI items to match each required parameter
+function showParamaterSelection(){
+	var parent = document.getElementById("customParamters");
+	parent.innerHTML = "";
+	var json = JSON.parse(this.responseText);
+ 	for (var i = 0; i < json.length; i++){
+ 		if(json[i].type == "GROUP"){
+ 			if(json[i].children[0].type == "DATE") 
+ 				document.getElementById("paramaters_fieldset").style.display = "block";
+ 				continue; //we have a default for dates already, it is easier to have a default dates GUI than allow custom dates drop downs etc.  
+ 			var f = document.createElement("fieldset");
+ 			if(json[i].displayText != null){
+ 				f.innerHTML = "<legend>" + json[i].displayText + ":" + "</legend>";
+ 			}else{
+ 				f.innerHTML = "<legend>" + json[i].name + ":" + "</legend>";
+ 			}
+ 			for (var x = 0; x < json[i].children.length; x++){
+ 				parameterNames.push(json[i].children[x].name);
+ 				if(json[i].children[x].type == "BOOLEAN"){
+ 		 			addBooleanParamater(json[i].children[x], f, false);
+ 		 		}else{
+ 		 			addTextboxParamater(json[i].children[x], f,false);
+ 		 		}
+ 			}
+ 			parent.insertBefore(f, parent.childNodes[4]);
+ 		}else if(json[i].type == "BOOLEAN"){
+ 			addBooleanParamater(json[i], parent, true);
+ 			parameterNames.push(json[i].name);
+ 		}else{// use a basic textbox for all other types: strings, integers, floats etc.
+ 			addTextboxParamater(json[i], parent, true);
+ 			parameterNames.push(json[i].name);
+ 		}
+ 	}
+ }
 
 function isFoundInRow(row){
 	if(isIn(row.conservationArea)|| isIn(row.name)|| isIn(row.type)|| isIn(row.id)){
@@ -315,30 +373,18 @@ function searchChanged(){
 
 }
 function getUrlOnly(){
-	  window.prompt(i18n("report.copytoclipboard"), generateUrl(REPORTLINKURL));
+	  window.prompt(i18n("report.copytoclipboard"), generateUrl(REPORTURL));
 }
 
 
 
 function generateUrl(root){
 	var uuid = document.getElementById('reportuuid').value;
-	//var dateField = document.getElementById('datefield').value;
 	
-	var url = root + uuid + "?format=abc";// +"?format=" + format + "&date_filter=" + dateField
-	
-	if(document.getElementById('startdate').value != ""){
-		var startDate = new Date(document.getElementById('startdate').value.substring(4));//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
-		var startDateString = startDate.getFullYear() + "-" + startDate.getMonth() + "-" + startDate.getDate() + " 00:00:00";
-		
-		url = url + "&start_date=" + startDateString; 
-	}
-	if(document.getElementById('enddate').value != ""){
-		var endDate = new Date(document.getElementById('enddate').value.substring(4)); //use end of the day, since it is the "to" date.
-		var endDateString = endDate.getFullYear() + "-" + endDate.getMonth() + "-" + endDate.getDate() + " 23:59:59";
-	
-		url = url + "&end_date=" + endDateString; 
-	}
-	
+	//add the UUID
+	var url = root + uuid + "?format=" + document.getElementById('reportformat').value;
+
+	//add the cafilter if applicable
 	if (document.getElementById('cafilter').style.display.toUpperCase() != "NONE"){
 		var elements = document.getElementsByName('ccaafilter');
 		var cafilter = "";
@@ -352,6 +398,28 @@ function generateUrl(root){
 		}
 	}
 
+	//add date filters
+	if(document.getElementById('startdate').value != ""){
+		var startDate = new Date(document.getElementById('startdate').value.substring(4));//substring(4) drops the "Wed " from the field, which isn't a valid date string.
+		var startDateString = startDate.getFullYear() + "-" + (startDate.getMonth()+1) + "-" + startDate.getDate();
+		
+		url = url + "&start_date=" + startDateString; 
+	}
+	if(document.getElementById('enddate').value != ""){
+		var endDate = new Date(document.getElementById('enddate').value.substring(4)); //use end of the day, since it is the "to" date.
+		var endDateString = endDate.getFullYear() + "-" + (endDate.getMonth()+1) + "-" + endDate.getDate();
+	
+		url = url + "&end_date=" + endDateString; 
+	}
+	
+	
+	//Add all other parameters to parameterList comma separated list of name/value pairs.
+	var csString = "";
+	for(x=0; x < parameterNames.length; x++){
+		name = parameterNames[x];
+		csString += name + "," + document.getElementById(name).value + ",";
+	}
+	url = url + "&parameterList=" + csString;
 	return resolve(url);
 }
 
@@ -426,3 +494,43 @@ function resolve(url) {
 	  return resolved_url;
 }
 
+
+function addBooleanParamater(param, parent, newGroup){
+	if(newGroup == true){
+		var f = document.createElement("fieldset");
+		f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+	}else{
+		var f = document.createElement("p");
+	}
+
+	var newList = document.createElement("select");
+	newList.setAttribute("id", param.name);
+	var optionT = new Option("true", "true");
+	var optionF = new Option("false", "false");
+	//Here we append that text node to our drop down list.
+	newList.appendChild(optionT);
+	newList.appendChild(optionF);
+	newList.style.width="100%";
+
+	f.appendChild(newList);
+	parent.insertBefore(f, parent.childNodes[4]);
+	
+}
+
+
+function addTextboxParamater(param, parent, newGroup){
+	if(newGroup == true){
+		var f = document.createElement("fieldset");
+		f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+	}else{
+		var f = document.createElement("p");
+	}
+	var newInput = document.createElement("input");
+	newInput.setAttribute("id", param.name);
+	newInput.style.width="100%";
+	newInput.type = "text";
+
+	f.appendChild(newInput);
+	parent.insertBefore(f, parent.childNodes[4]);
+
+}

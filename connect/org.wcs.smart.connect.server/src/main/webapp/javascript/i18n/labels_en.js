@@ -152,6 +152,7 @@ labels_en= {
 "report.lastyear":"Last Year",
 "report.alldates":"All Dates",
 "report.custom":"Custom",
+"reports.runreport":"Run Report",
 
 "users.errorupdatinguser" : " Error updating user information.",
 "dataqueue.fileuploaded":"File Uploaded",

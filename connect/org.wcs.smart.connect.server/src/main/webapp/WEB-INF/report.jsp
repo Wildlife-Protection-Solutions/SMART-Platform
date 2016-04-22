@@ -15,25 +15,9 @@
 		var search="${search}";
 		
 		var REPORTURL = "${pageContext.request.contextPath}/api/report/";
-// 		var REPORTLINKURL = "${pageContext.request.contextPath}/connect/report/api/";
-		var REPORTLINKURL = "${pageContext.request.contextPath}/api/report/";
 		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/withdataonly";
 		
-// 		var datefilters = {
-// 				<c:forEach var="df" items="${datefilters}">
-// 				    '${df[0]}': '${df[1]}',
-// 				</c:forEach>
-// 				};
-		
-// 		var qdatefilter = {
-// 				<c:forEach var="entry" items="${qdatefilters}">
-// 				    '${entry.key}': [
-// 				    	<c:forEach var="op" items="${entry.value}">
-// 				    		'${op}',
-// 				    	</c:forEach>
-// 				    ],
-// 				</c:forEach>
-// 				};
+
 	</script>
 		
 	<title><fmt:message key="report.pagetitle"/></title>	
@@ -87,15 +71,10 @@
 	     		<p><fmt:message key="report.reportuuid" /><input id="reportuuid" type="text" name="uuid" value="" style="width:100%" disabled/></p>
      		</fieldset>
      		
-     		<fieldset>
+     		<p id="customParamters"></p>
+     		
+     		<fieldset id="paramaters_fieldset" style="display:none">
 	     		<legend><fmt:message key="report.datefilter"/></legend>
-	     		<p><fmt:message key="report.datefield" />
-		     		<select id="datefield" name="datefield" style="width:100%">
-			     		<c:forEach var="df" items="${datefilters}" varStatus="count">
-		     				<option value="${df[0]}">${df[1]}</option> 
-						</c:forEach> 
-		     		</select>
-		     	</p>
 		     	<p><fmt:message key="report.datefilterlabel"/>
 		     	  <select style="width:100%" id="defineddates"></select>
 		     	</p>
@@ -109,9 +88,12 @@
      		<fieldset>
 	     		<legend><fmt:message key="report.format" /></legend>
 	     		<select id="reportformat" name="format" style="width:100%">
-					<c:forEach var="exp" items="${exporters}" varStatus="count">
-	     				<option value="${exp[0]}">${exp[1]}</option> 
-					</c:forEach> 
+	     				<option value="pdf">PDF</option>
+	     				<option value="html">HTML</option>
+	     				<option value="doc">Word .doc</option>
+<%-- 					<c:forEach var="exp" items="${exporters}" varStatus="count"> --%>
+<%-- 	     				<option value="${exp[0]}">${exp[1]}</option>  --%>
+<%-- 					</c:forEach>  --%>
      			</select>
      		</fieldset>
      		

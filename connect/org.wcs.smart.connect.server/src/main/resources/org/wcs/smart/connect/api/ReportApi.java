@@ -31,9 +31,9 @@ import java.nio.file.Files;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -118,21 +118,22 @@ public class ReportApi extends HttpServlet{
 	@SuppressWarnings("unchecked")
 	@GET
     @Path("/{reportuuid}")
-	public Response exectueReport(@PathParam("reportuuid") String reportUuid, 
-			@QueryParam("format") String format,
+	public Response exectueReport(@PathParam("reportuuid") String reportUuid,
 			@QueryParam("start_date") String start,
 			@QueryParam("end_date") String end,
-			@QueryParam("date_filter") String filter,
-			@QueryParam("delimiter") String delimiter,
-			@QueryParam("cafilter") String cafilter){
+			@QueryParam("cafilter") String cafilter,
+			@QueryParam("format") String format,
+			@QueryParam("parameterList") String parameterList){
 
-		UUID uuid = UuidUtils.stringToUuid(reportUuid);
+		UUID uuid = UuidUtils.stringToUuid(reportUuid);		
 		
 		Report report = null;
 		Session s = HibernateManager.getSession(context, request.getLocale());
 
 		List<ConservationArea> conservationAreas = new ArrayList<ConservationArea>();
 		try{
+			
+			
 			s.beginTransaction();
 			report = (Report) s.get(Report.class, uuid);
 			
@@ -162,13 +163,7 @@ public class ReportApi extends HttpServlet{
 					report.getConservationArea().getFileDataStoreLocation(),
 					Report.REPORT_DIR,
 					report.getFilename());
-	
-				//TODO configure parameters
-				HashMap<String, Object> parameters = new HashMap<String, Object>();
-				//		parameters.put("Start Date", new Date((new Date()).getTime() - 1000l *60 *60*24*30*3));
-				parameters.put("End Date", new java.sql.Date(  (new Date()).getTime() ));
-				parameters.put("Start Date", new java.sql.Date(100,0,1));
-				//		parameters.put("End Date", new Date(115,1,1));
+
 			
 				try(InputStream inStream = Files.newInputStream(reportFile)){
 					final IReportRunnable design = engine.openReportDesign(inStream);
@@ -199,6 +194,14 @@ public class ReportApi extends HttpServlet{
 						items.put("org.wcs.smart.report.ca.filter", conservationAreas);
 						
 						try{
+							Map<String, Object> parameters = new HashMap<String, Object>();
+							//put all the non-constant parameters in the hashmap
+							ConvertToMap(parameters, parameterList, s, uuid);
+							parameters.put("reportUuid", reportUuid);
+							parameters.put("End Date", java.sql.Date.valueOf(start) );
+							parameters.put("Start Date", java.sql.Date.valueOf(end) );
+							parameters.put("cafilter", cafilter);
+							
 							task.setRenderOption(options);
 							task.setParameterValues(parameters);
 							task.run();
@@ -207,8 +210,15 @@ public class ReportApi extends HttpServlet{
 						}
 					
 						String html = bos.toString("UTF8");
-						return writeHtml(html);
-	//					return writePdf(bos);
+						if(format.equals("html")){
+							return writeHtml(html);
+						}else if(format.equals("pdf")){
+							return writePdf(bos);
+						}else if(format.equals("doc")){
+							return writeDoc(bos);
+						}else{
+							return writeHtml(html);
+						}
 					}
 				}
 			}catch(Exception ex){
@@ -219,6 +229,7 @@ public class ReportApi extends HttpServlet{
 			s.getTransaction().rollback();
 		}
 	}
+	
 	private Response writePdf(ByteArrayOutputStream bos){
 		StreamingOutput sout = new StreamingOutput() {
 			
@@ -230,6 +241,22 @@ public class ReportApi extends HttpServlet{
 			}
 		};
 		Response rs = Response.ok(sout, "application/pdf " ) //$NON-NLS-1$
+	            .build();
+		return rs;
+	}
+	
+	//TODO make the doc writer actually work
+	private Response writeDoc(ByteArrayOutputStream bos){
+		StreamingOutput sout = new StreamingOutput() {
+			
+			@Override
+			public void write(OutputStream output) throws IOException,
+					WebApplicationException {
+				output.write(bos.toByteArray());
+				
+			}
+		};
+		Response rs = Response.ok(sout, "application/doc " ) //$NON-NLS-1$
 	            .build();
 		return rs;
 	}
@@ -376,13 +403,26 @@ public class ReportApi extends HttpServlet{
 	@Produces({ MediaType.APPLICATION_JSON })
 	public List<ReportParameter> getReportsParameters(@PathParam("reportuuid") String reportUuid) throws SmartConnectException{
 		
-		List<ReportParameter> rparameters = new ArrayList<ReportParameter>();
 		UUID uuid = UuidUtils.stringToUuid(reportUuid);
-		
-		Report report = null;
 		Session s = HibernateManager.getSession(context, request.getLocale());
+		
+		List<ReportParameter> parameters; 
 		try{
 			s.beginTransaction();
+			parameters = getParameters(uuid, s);
+		}catch (Exception ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			throw new SmartConnectException(Status.BAD_REQUEST, ex);
+		}finally{
+			s.getTransaction().rollback();
+		}
+		return parameters;
+	}
+
+	private List<ReportParameter> getParameters(UUID uuid, Session s) throws Exception {
+		List<ReportParameter> rparameters = new ArrayList<ReportParameter>();
+		Report report = null;
+
 			report = (Report) s.get(Report.class, uuid);
 			
 			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, "Report not found");
@@ -412,12 +452,7 @@ public class ReportApi extends HttpServlet{
 					throw new Exception(MessageFormat.format("Parameter type not supported: {0}.", param.getName()));
 				}
 			}
-		}catch (Exception ex){
-			logger.log(Level.WARNING, ex.getMessage(), ex);
-			throw new SmartConnectException(Status.BAD_REQUEST, ex);
-		}finally{
-			s.getTransaction().rollback();
-		}
+		
 		return rparameters;
 	}
 	
@@ -467,4 +502,49 @@ public class ReportApi extends HttpServlet{
 				.entity("{" + error +"}") //$NON-NLS-1$ //$NON-NLS-2$
 				.build();
 	}
+	
+	private void ConvertToMap(Map<String, Object> m, String l, Session s, UUID uuid) throws Exception {
+		List<ReportParameter> parameters = getParameters(uuid, s);
+		Object value;
+		List<String> items = Arrays.asList(l.split(","));
+		for(int x=0; x < items.size(); x=x+2){
+			String name = items.get(x);
+			Type type = getType(name, parameters);
+			
+			switch(type){
+				case DATE:
+					value = java.sql.Date.valueOf(items.get(x+1));
+					break;
+				case DATETIME:
+					value = java.sql.Timestamp.valueOf(items.get(x+1));
+					break;
+				case DOUBLE:
+					value = Double.valueOf(items.get(x+1));
+					break;
+				case INTEGER:
+					value = Integer.valueOf(items.get(x+1));
+					break;
+				case STRING:
+					value = items.get(x+1);
+					break;
+				case BOOLEAN:
+					value = Boolean.valueOf(items.get(x+1));
+					break;
+				default:
+					value = items.get(x+1);
+					break;
+			}
+			m.put(name, value);
+		}
+	}
+
+	private Type getType(String name, List<ReportParameter> parameters) {
+		for(int x=0; x<parameters.size(); x++){
+			if(name.equals(parameters.get(x).getName()) ){
+				return parameters.get(x).getType();
+			}
+		}
+		return null;
+	}
 }
+
