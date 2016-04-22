@@ -187,14 +187,18 @@ public class RestoreMapSettings {
 
 			// the service for the url exist then gets the resource
 			geoResources = new ArrayList<IGeoResource>();
-	     	for( IResolve resolve : newServices ) {            	
-            	List<IResolve> members = resolve.members(new NullProgressMonitor());
-            	for (IResolve member : members){
+	     	for( IResolve resolve : newServices ) {        
+	     		//search fo georesource
+            	List<IResolve> members = new ArrayList<IResolve>();
+            	members.addAll(resolve.members(new NullProgressMonitor()));
+            	while(members.size() > 0){
+            		IResolve member = members.remove(0);
             		if (member.canResolve(IGeoResource.class)){
             			if (URLUtils.urlEquals(member.getIdentifier(), url, false)){
             				geoResources.add(member.resolve(IGeoResource.class, new NullProgressMonitor()));
             			}
             		}
+            		members.addAll(member.members(new NullProgressMonitor()));
             	}
 	        }
 	        return geoResources;
