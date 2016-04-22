@@ -71,11 +71,13 @@ import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.ReportParameter;
 import org.wcs.smart.connect.model.ReportParameter.Type;
 import org.wcs.smart.connect.report.BirtEngine;
+import org.wcs.smart.connect.report.ReportFormat;
 import org.wcs.smart.connect.report.ReportProxy;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -119,8 +121,6 @@ public class ReportApi extends HttpServlet{
 	@GET
     @Path("/{reportuuid}")
 	public Response exectueReport(@PathParam("reportuuid") String reportUuid,
-			@QueryParam("start_date") String start,
-			@QueryParam("end_date") String end,
 			@QueryParam("cafilter") String cafilter,
 			@QueryParam("format") String format,
 			@QueryParam("parameterList") String parameterList){
@@ -130,6 +130,16 @@ public class ReportApi extends HttpServlet{
 		Report report = null;
 		Session s = HibernateManager.getSession(context, request.getLocale());
 
+		ReportFormat rformat = null;
+		for (ReportFormat fr : ReportFormat.values()){
+			if (fr.getTypeKey().equalsIgnoreCase(format)){
+				rformat= fr;
+			}
+		}
+		if (rformat == null){
+			throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format("Report format {1} not supported", format));
+		}
+		
 		List<ConservationArea> conservationAreas = new ArrayList<ConservationArea>();
 		try{
 			
@@ -169,21 +179,19 @@ public class ReportApi extends HttpServlet{
 					final IReportRunnable design = engine.openReportDesign(inStream);
 					
 					try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
-						//TODO: support various output formats
-		//				RenderOption options = new RenderOption();
-						RenderOption options = new HTMLRenderOption( );
-						options.setOutputStream(bos);
+						RenderOption options ;
+						if (rformat == ReportFormat.HTML){
+							options = new HTMLRenderOption();
+							((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images");
+							((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images"));
+							options.setOutputFormat(HTMLRenderOption.HTML);
+						}else{
+							options = new RenderOption();
+							options.setEmitterID(rformat.getEmitterId());
+						}
 						options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
-						options.setOutputFormat(HTMLRenderOption.HTML);
-						
-		//				options.setOutputFormat(PDFRenderOption.);
-					
-						((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images");
-						((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images"));
 						options.setImageHandler(new HTMLServerImageHandler());
-	//					options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf");
-	//					options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
-						//options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+						options.setOutputStream(bos);
 		
 						IRunAndRenderTask task = new SmartReportRunner.SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal().getName());
 		
@@ -197,10 +205,8 @@ public class ReportApi extends HttpServlet{
 							Map<String, Object> parameters = new HashMap<String, Object>();
 							//put all the non-constant parameters in the hashmap
 							ConvertToMap(parameters, parameterList, s, uuid);
-							parameters.put("reportUuid", reportUuid);
-							parameters.put("End Date", java.sql.Date.valueOf(start) );
-							parameters.put("Start Date", java.sql.Date.valueOf(end) );
-							parameters.put("cafilter", cafilter);
+//							parameters.put("reportUuid", reportUuid);
+//							parameters.put("cafilter", cafilter);
 							
 							task.setRenderOption(options);
 							task.setParameterValues(parameters);
@@ -209,14 +215,10 @@ public class ReportApi extends HttpServlet{
 							task.close();
 						}
 					
-						String html = bos.toString("UTF8");
-						if(format.equals("html")){
-							return writeHtml(html);
-						}else if(format.equals("pdf")){
-							return writePdf(bos);
-						}else if(format.equals("doc")){
-							return writeDoc(bos);
+						if(rformat != ReportFormat.HTML){
+							return writeBinary(bos, rformat.getResponseType());
 						}else{
+							String html = bos.toString(StandardCharsets.UTF_8.name());
 							return writeHtml(html);
 						}
 					}
@@ -230,8 +232,8 @@ public class ReportApi extends HttpServlet{
 		}
 	}
 	
-	private Response writePdf(ByteArrayOutputStream bos){
-		StreamingOutput sout = new StreamingOutput() {
+	private Response writeBinary(ByteArrayOutputStream bos, String type){
+			StreamingOutput sout = new StreamingOutput() {
 			
 			@Override
 			public void write(OutputStream output) throws IOException,
@@ -240,26 +242,11 @@ public class ReportApi extends HttpServlet{
 				
 			}
 		};
-		Response rs = Response.ok(sout, "application/pdf " ) //$NON-NLS-1$
+		Response rs = Response.ok(sout, type + " " ) //$NON-NLS-1$
 	            .build();
 		return rs;
 	}
 	
-	//TODO make the doc writer actually work
-	private Response writeDoc(ByteArrayOutputStream bos){
-		StreamingOutput sout = new StreamingOutput() {
-			
-			@Override
-			public void write(OutputStream output) throws IOException,
-					WebApplicationException {
-				output.write(bos.toByteArray());
-				
-			}
-		};
-		Response rs = Response.ok(sout, "application/doc " ) //$NON-NLS-1$
-	            .build();
-		return rs;
-	}
 	private Response writeHtml(final String html){
 		
 		StreamingOutput sout = new StreamingOutput() {
@@ -276,18 +263,6 @@ public class ReportApi extends HttpServlet{
 		return rs;
 	}
 	
-	private Response writeText(java.nio.file.Path thisfile){
-		Response rs = Response.ok(getStream(thisfile), MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name()) //$NON-NLS-1$
-	            .build();
-		return rs;
-	}
-	
-	private Response writeBinary(java.nio.file.Path thisfile){
-		Response rs = Response.ok(getStream(thisfile), MediaType.APPLICATION_OCTET_STREAM )
-				.header("Content-Disposition", "attachment; filename=" + thisfile.getFileName().toString()) //$NON-NLS-1$ //$NON-NLS-2$
-	            .build();
-		return rs;
-	}
 	
 	private StreamingOutput getStream(final java.nio.file.Path thisfile){
 		if (thisfile == null) throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error executing query request."); //$NON-NLS-1$
@@ -504,16 +479,17 @@ public class ReportApi extends HttpServlet{
 	}
 	
 	private void ConvertToMap(Map<String, Object> m, String l, Session s, UUID uuid) throws Exception {
+		if (l.trim().isEmpty()) return;
 		List<ReportParameter> parameters = getParameters(uuid, s);
 		Object value;
 		List<String> items = Arrays.asList(l.split(","));
 		for(int x=0; x < items.size(); x=x+2){
 			String name = items.get(x);
 			Type type = getType(name, parameters);
-			
+			if (type == null) throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format("Invalid parameter: {0}", name));
 			switch(type){
 				case DATE:
-					value = java.sql.Date.valueOf(items.get(x+1));
+					value = new java.sql.Date(SmartUtils.parseDate(items.get(x+1)).getTime());
 					break;
 				case DATETIME:
 					value = java.sql.Timestamp.valueOf(items.get(x+1));
@@ -539,9 +515,16 @@ public class ReportApi extends HttpServlet{
 	}
 
 	private Type getType(String name, List<ReportParameter> parameters) {
-		for(int x=0; x<parameters.size(); x++){
-			if(name.equals(parameters.get(x).getName()) ){
-				return parameters.get(x).getType();
+		List<ReportParameter> toSearch = new ArrayList<ReportParameter>();
+		toSearch.addAll(parameters);
+		
+		while(toSearch.size() > 0){
+			ReportParameter rp = toSearch.remove(0);
+			if(rp.getName().equals(name)){
+				return rp.getType();
+			}
+			if (rp.getType() == Type.GROUP){
+				toSearch.addAll(rp.getChildren());
 			}
 		}
 		return null;

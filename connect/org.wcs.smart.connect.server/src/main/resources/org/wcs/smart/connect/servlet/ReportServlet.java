@@ -1,8 +1,6 @@
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,11 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
-import org.wcs.smart.connect.query.QueryManager;
-import org.wcs.smart.connect.query.engine.CsvExporter;
-import org.wcs.smart.connect.query.engine.ShpExporter;
-import org.wcs.smart.connect.query.engine.TiffRasterExporter;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
+import org.wcs.smart.connect.report.ReportFormat;
 
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "report")
 public class ReportServlet extends HttpServlet {
@@ -27,21 +21,14 @@ public class ReportServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-//		List<String[]> dateFilters = new ArrayList<String[]>();
-//		for (IDateFieldFilter dateFilter : QueryManager.dateFields){
-//			dateFilters.add(new String[]{dateFilter.getKey(), dateFilter.getGuiName(request.getLocale())});
-//		}
-//		String[][] exporters = new String[][]{
-//				{CsvExporter.FORMAT_KEY, CsvExporter.getName(request.getLocale())},
-//				{ShpExporter.FORMAT_KEY, ShpExporter.getName(request.getLocale())},
-//				{TiffRasterExporter.FORMAT_KEY, TiffRasterExporter.getName(request.getLocale())}};
-//		
-//		//date filters with name
-//		request.setAttribute("datefilters", dateFilters); //$NON-NLS-1$
-//		//date filters associated with query types
-//		request.setAttribute("qdatefilters", QueryManager.DATE_FILTERS); //$NON-NLS-1$
-//		request.setAttribute("exporters", exporters); //$NON-NLS-1$
-//		request.setAttribute("search", request.getParameter("search")); //$NON-NLS-1$ //$NON-NLS-2$
+		String[][] formats = new String[ReportFormat.values().length][2];
+		int cnt = 0;
+		for (ReportFormat rf : ReportFormat.values()){
+			formats[cnt][0] = rf.getTypeKey();
+			formats[cnt++][1] = rf.getGuiName();
+		}
+
+		request.setAttribute("reportformats", formats); //$NON-NLS-1$
 		request.getRequestDispatcher("/WEB-INF/report.jsp").forward(request, response); //$NON-NLS-1$
 	}
 

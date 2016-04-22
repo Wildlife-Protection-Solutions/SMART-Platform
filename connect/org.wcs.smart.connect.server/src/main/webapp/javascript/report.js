@@ -45,8 +45,6 @@ window.onload = function(){
 			}
 		}
 		
-
-		
 		closeDialog('reportOptionsDialog');
 		window.open(generateUrl(REPORTURL));
 	};
@@ -60,7 +58,7 @@ window.onload = function(){
 
 	startDatePicker = new Pikaday({
 		format: 'YYYY-MM-DD',
-		field: document.getElementById('startdate'),
+		field: document.getElementById('Start Date'),
 		firstDay: 1,
         minDate: new Date('1950-01-01'),
         yearRange: [1950,2050],
@@ -69,7 +67,7 @@ window.onload = function(){
 	});
 
 	endDatePicker = new Pikaday({
-		field: document.getElementById('enddate'),
+		field: document.getElementById('End Date'),
 		firstDay: 1,
         minDate: new Date('1950-01-01'),
         yearRange: [1950,2050],
@@ -109,8 +107,8 @@ function updateDates(){
 	var dd = document.getElementById("defineddates");
 	var datekey = dd.options[dd.selectedIndex].value;
 	
-	var startdate = document.getElementById("startdate");
-	var enddate = document.getElementById("enddate");
+	var startdate = document.getElementById("Start Date");
+	var enddate = document.getElementById("End Date");
 
 	isDateChanging = true;
 		if (datekey== "last30days"){
@@ -300,28 +298,34 @@ function showReportOptions(){
 //this function adds GUI items to match each required parameter
 function showParamaterSelection(){
 	var parent = document.getElementById("customParamters");
+	document.getElementById("paramaters_fieldset").style.display = "none";
 	parent.innerHTML = "";
 	var json = JSON.parse(this.responseText);
  	for (var i = 0; i < json.length; i++){
  		if(json[i].type == "GROUP"){
- 			if(json[i].children[0].type == "DATE") 
+ 			if (json[i].name=="Report Dates"){
+ 				//start and end dates already made; use default gui but still add to parameter list
  				document.getElementById("paramaters_fieldset").style.display = "block";
- 				continue; //we have a default for dates already, it is easier to have a default dates GUI than allow custom dates drop downs etc.  
- 			var f = document.createElement("fieldset");
- 			if(json[i].displayText != null){
- 				f.innerHTML = "<legend>" + json[i].displayText + ":" + "</legend>";
- 			}else{
- 				f.innerHTML = "<legend>" + json[i].name + ":" + "</legend>";
+ 				for (var x = 0; x < json[i].children.length; x++){
+ 					parameterNames.push(json[i].children[x].name);
+ 				}
+ 			}else{ 	
+ 				var f = document.createElement("fieldset");
+ 				if(json[i].displayText != null){
+ 					f.innerHTML = "<legend>" + json[i].displayText + ":" + "</legend>";
+ 				}else{
+ 					f.innerHTML = "<legend>" + json[i].name + ":" + "</legend>";
+ 				}
+ 				for (var x = 0; x < json[i].children.length; x++){
+ 					parameterNames.push(json[i].children[x].name);
+ 					if(json[i].children[x].type == "BOOLEAN"){
+ 						addBooleanParamater(json[i].children[x], f, false);
+ 					}else{
+ 						addTextboxParamater(json[i].children[x], f,false);
+ 					}
+ 				}
+ 				parent.insertBefore(f, parent.childNodes[4]);
  			}
- 			for (var x = 0; x < json[i].children.length; x++){
- 				parameterNames.push(json[i].children[x].name);
- 				if(json[i].children[x].type == "BOOLEAN"){
- 		 			addBooleanParamater(json[i].children[x], f, false);
- 		 		}else{
- 		 			addTextboxParamater(json[i].children[x], f,false);
- 		 		}
- 			}
- 			parent.insertBefore(f, parent.childNodes[4]);
  		}else if(json[i].type == "BOOLEAN"){
  			addBooleanParamater(json[i], parent, true);
  			parameterNames.push(json[i].name);
@@ -398,26 +402,18 @@ function generateUrl(root){
 		}
 	}
 
-	//add date filters
-	if(document.getElementById('startdate').value != ""){
-		var startDate = new Date(document.getElementById('startdate').value.substring(4));//substring(4) drops the "Wed " from the field, which isn't a valid date string.
-		var startDateString = startDate.getFullYear() + "-" + (startDate.getMonth()+1) + "-" + startDate.getDate();
-		
-		url = url + "&start_date=" + startDateString; 
-	}
-	if(document.getElementById('enddate').value != ""){
-		var endDate = new Date(document.getElementById('enddate').value.substring(4)); //use end of the day, since it is the "to" date.
-		var endDateString = endDate.getFullYear() + "-" + (endDate.getMonth()+1) + "-" + endDate.getDate();
-	
-		url = url + "&end_date=" + endDateString; 
-	}
-	
-	
 	//Add all other parameters to parameterList comma separated list of name/value pairs.
 	var csString = "";
 	for(x=0; x < parameterNames.length; x++){
 		name = parameterNames[x];
-		csString += name + "," + document.getElementById(name).value + ",";
+		if (name == "Start Date" || name == "End Date"){
+			//parse out correct date format
+			var startDate = new Date(document.getElementById(name).value.substring(4));
+			var dateStr = startDate.getFullYear() + "-" + (startDate.getMonth()+1) + "-" + startDate.getDate() + " 00:00:00";
+			csString += name + "," +dateStr + ",";
+		}else{
+			csString += name + "," + document.getElementById(name).value + ",";
+		}
 	}
 	url = url + "&parameterList=" + csString;
 	return resolve(url);

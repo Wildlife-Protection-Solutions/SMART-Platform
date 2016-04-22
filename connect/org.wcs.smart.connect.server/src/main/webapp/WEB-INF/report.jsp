@@ -13,11 +13,8 @@
 	
 	<script type="text/javascript" >
 		var search="${search}";
-		
 		var REPORTURL = "${pageContext.request.contextPath}/api/report/";
 		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/withdataonly";
-		
-
 	</script>
 		
 	<title><fmt:message key="report.pagetitle"/></title>	
@@ -80,20 +77,17 @@
 		     	</p>
 	     		
 	     		<div style="margin-left:20px">
-		     		<p><fmt:message key="report.startdate" /> <input id="startdate" type="text" name="startdate" class="date-input" style="float:none;"/></p>
-		     		<p><fmt:message key="report.enddate" /> <input id="enddate" type="text" name="enddate" class="date-input" style="float:none;"/></p>
+		     		<p><fmt:message key="report.startdate" /> <input id="Start Date" type="text" name="startdate" class="date-input" style="float:none;"/></p>
+		     		<p><fmt:message key="report.enddate" /> <input id="End Date" type="text" name="enddate" class="date-input" style="float:none;"/></p>
 	     		</div>
      		</fieldset>
      		
      		<fieldset>
 	     		<legend><fmt:message key="report.format" /></legend>
 	     		<select id="reportformat" name="format" style="width:100%">
-	     				<option value="pdf">PDF</option>
-	     				<option value="html">HTML</option>
-	     				<option value="doc">Word .doc</option>
-<%-- 					<c:forEach var="exp" items="${exporters}" varStatus="count"> --%>
-<%-- 	     				<option value="${exp[0]}">${exp[1]}</option>  --%>
-<%-- 					</c:forEach>  --%>
+	     			<c:forEach var="exp" items="${reportformats}" varStatus="count">
+	     				<option value="${exp[0]}">${exp[1]}</option> 
+					</c:forEach>
      			</select>
      		</fieldset>
      		

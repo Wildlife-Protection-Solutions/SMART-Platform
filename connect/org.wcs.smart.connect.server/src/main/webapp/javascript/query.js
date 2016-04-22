@@ -375,13 +375,13 @@ function generateUrl(root){
 	
 	if(document.getElementById('startdate').value != ""){
 		var startDate = new Date(document.getElementById('startdate').value.substring(4));//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
-		var startDateString = startDate.getFullYear() + "-" + startDate.getMonth() + "-" + startDate.getDate() + " 00:00:00";
+		var startDateString = startDate.getFullYear() + "-" + (startDate.getMonth() + 1) + "-" + startDate.getDate() + " 00:00:00";
 		
 		url = url + "&start_date=" + startDateString; 
 	}
 	if(document.getElementById('enddate').value != ""){
 		var endDate = new Date(document.getElementById('enddate').value.substring(4)); //use end of the day, since it is the "to" date.
-		var endDateString = endDate.getFullYear() + "-" + endDate.getMonth() + "-" + endDate.getDate() + " 23:59:59";
+		var endDateString = endDate.getFullYear() + "-" + (endDate.getMonth()+1) + "-" + endDate.getDate() + " 23:59:59";
 	
 		url = url + "&end_date=" + endDateString; 
 	}
