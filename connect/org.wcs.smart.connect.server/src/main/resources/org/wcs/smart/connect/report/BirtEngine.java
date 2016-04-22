@@ -35,7 +35,13 @@ import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.locationtech.udig.catalog.internal.wms.WmsPlugin;
+import org.locationtech.udig.catalog.rasterings.RasteringsPlugin;
 import org.locationtech.udig.project.internal.ProjectPlugin;
+import org.locationtech.udig.project.preferences.PreferenceConstants;
+import org.locationtech.udig.render.wms.basic.WMSPlugin;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.report.udig.CatalogPluginWrapper;
 import org.wcs.smart.connect.report.udig.ProjectPluginWrapper;
@@ -111,15 +117,43 @@ public class BirtEngine {
 	}
 
 	public static void configureUdig(ServletContext context){
-		//TODO: we only need to call this code once put in birt setup
+
 		SmartContext.INSTANCE.setClass(IDatabaseConnectionProvider.class, new ConnectConnectionProvider(context, Locale.getDefault()));
 		
+		//startup required udig plugins
 		new ProjectPluginWrapper();
-//		new UdigPreferenceStore();
 		new CatalogPluginWrapper();
 		new ShpPluginWrapper();
 		new UiPluginWrapper();
-	}
+
+		new WmsPlugin(){
+			@Override
+			public ImageDescriptor getGridObjectImage(){
+		    	return null;
+		    }
+			@Override
+		    public ImageDescriptor getGridMissingImage(){
+		    	return null;
+		    }
+		};
+		
+		new WMSPlugin(){
+			private UdigPreferenceStore localPreference;
+			
+			@Override
+		    public ScopedPreferenceStore getPreferenceStore() {
+				if (localPreference == null){
+					localPreference = new UdigPreferenceStore();	
+					localPreference.setValue(
+							org.locationtech.udig.render.wms.basic.preferences.PreferenceConstants.P_USE_DEFAULT_ORDER, Boolean.FALSE);
+					localPreference.setValue(
+							org.locationtech.udig.render.wms.basic.preferences.PreferenceConstants.P_IMAGE_TYPE_ORDER, "image/png,image/png8,image/gif,image/tiff,image/bmp,image/jpeg"); //$NON-NLS-1$
+								
+				}
+				return localPreference;
+			}
+		};
+	}	
 	
 	
 	public static synchronized void destroyBirtEngine() {

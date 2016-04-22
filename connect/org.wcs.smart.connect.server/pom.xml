@@ -400,7 +400,12 @@
 			<artifactId>gt-xsd-sld</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>			
-        	<dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-image</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+        <dependency>
 			<groupId>org.locationtech.udig</groupId>
 			<artifactId>org.locationtech.udig.catalog</artifactId>
 			<version>${udig.version}</version>
@@ -453,6 +458,11 @@
 		<dependency>
 			<groupId>org.locationtech.udig</groupId>
 			<artifactId>org.locationtech.udig.style.sld</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.style.wms</artifactId>
 			<version>${udig.version}</version>
 		</dependency>
 		<dependency>
