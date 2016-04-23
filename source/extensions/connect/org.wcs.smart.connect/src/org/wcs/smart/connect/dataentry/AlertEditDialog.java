@@ -130,6 +130,8 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		});
         
         setChangesMade(isNew);
+        setTitle(isNew ? "Create New Alert" : "Edit Alert");
+        setMessage(isNew ? "Create new alert item for the configurable model" : "Edit selected alert item for the configurable model");
 		return main;
 	}
 
