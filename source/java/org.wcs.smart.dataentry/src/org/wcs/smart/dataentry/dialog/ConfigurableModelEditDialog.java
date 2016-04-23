@@ -312,6 +312,10 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 							s.flush();
 						}
 						s.getTransaction().commit();
+
+						for (IConfigurableModelEditorTabContent tab : tabs) {
+							tab.postSave();
+						}
 						
 						ret[0] = true;
 					}catch (Exception ex){

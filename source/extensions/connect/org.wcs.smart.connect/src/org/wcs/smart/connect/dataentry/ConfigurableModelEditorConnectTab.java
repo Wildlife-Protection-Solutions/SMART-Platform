@@ -25,8 +25,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -85,9 +87,12 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	private List<ConnectAlert> dbAlertsList;
 	private List<String> alertTypeList;
 	
+	private ConnectAlertSourceLabelProvider alertSourceLabelProvider;
+	
 	@Override
 	public void setDialog(ConfigurableModelEditDialog dialog) {
 		this.dialog = dialog;
+		alertSourceLabelProvider = new ConnectAlertSourceLabelProvider(dialog.getModel());
 	}
 
 	@Override
@@ -175,7 +180,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			@Override
 			public void notifyChangesMade() {
 				modelTreeViewer.refresh();
-				//TODO: delete alerts if alert item was removed from tree
+				//TODO: delete alerts if alert item was removed from configurable model itself
 			}
 		});
 		
@@ -200,7 +205,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		TableViewerColumn colAlert = new TableViewerColumn(table, SWT.NONE);
 		colAlert.getColumn().setWidth(200);
 		colAlert.getColumn().setText("Alert");
-		colAlert.setLabelProvider(new ConnectAlertSourceLabelProvider(dialog.getModel()));		
+		colAlert.setLabelProvider(alertSourceLabelProvider);		
 		TableViewerColumn colType = new TableViewerColumn(table, SWT.NONE);
 		colType.getColumn().setWidth(90);
 		colType.getColumn().setText("Type");
@@ -280,6 +285,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		if (d.open() == Window.OK) {
 			alertsList.add(alert);
 			alertTable.refresh();
+			dialog.notifyChangesMade();
 		}
 	}
 
@@ -292,6 +298,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				AlertEditDialog d = new AlertEditDialog(dialog.getShell(), false, alert, getAlertTypes());
 				if (d.open() == Window.OK) {
 					alertTable.refresh(true);
+					dialog.notifyChangesMade();
 				}
 			}
 		}		
@@ -310,6 +317,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 //					count++;
 				}
 				alertTable.refresh();
+				dialog.notifyChangesMade();
 //				MessageDialog.openInformation(dialog.getShell(), "Alert delete", MessageFormat.format("{0} out of {1} alert(s) deleted.", count, size));
 			}
 		}
@@ -342,9 +350,20 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			SmartPlugIn.displayLog("Error occurs while loading SMART Connect Alerts.", e);
 			return Collections.emptyList();
 		}
+		//replace lazy items with real
+		CmElementsMap map = new CmElementsMap(cm);
+		for (ConnectAlert a : resultList) {
+			a.setModel(cm);
+			if (a.getAttrubute() != null) {
+				a.setAttrubute(map.getCmAttribute(a.getAttrubute().getUuid()));
+			}
+			if (a.getAlertItem() != null) {
+				a.setAlertItem(map.getUuidItem(a.getAlertItem().getUuid()));
+			}
+		}
 		return resultList;
 	}
-	
+
 	private List<String> getAlertTypes() {
 		if (alertTypeList == null) {
 			//TODO: need real list
@@ -355,7 +374,20 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	
 	@Override
 	public void performSave(Session s) {
-		// TODO Auto-generated method stub
+		Set<ConnectAlert> removed = new HashSet<ConnectAlert>(dbAlertsList);
+		removed.removeAll(alertsList);
+		for (ConnectAlert a : removed) {
+			s.delete(a);
+		}
+		for (ConnectAlert a : alertsList) {
+			s.saveOrUpdate(a);
+		}
+	}
+	
+	@Override
+	public void postSave() {
+		//no need to fetch alerts from database as alertsList must be identical to current database state.
+		dbAlertsList = new ArrayList<ConnectAlert>(alertsList); 
 	}
 
 	@Override
