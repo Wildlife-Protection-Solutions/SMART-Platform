@@ -61,6 +61,14 @@ public interface IConfigurableModelEditorTabContent {
 	public void performSave(Session s);
 
 	/**
+	 * Method is called after save operation successfully completed.
+	 * This may be required by some tabs to update their state.
+	 */
+	public default void postSave() {
+		//nothing
+	}
+
+	/**
 	 * Index that identifies the position of the tab.
 	 * @return index that indicates in which order tabs are displayed
 	 */
