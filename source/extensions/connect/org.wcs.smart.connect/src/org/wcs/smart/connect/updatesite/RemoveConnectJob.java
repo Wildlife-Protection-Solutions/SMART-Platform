@@ -36,7 +36,7 @@ import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
- * Job removes all entity plug-in related tabled from the database
+ * Job removes all connect plug-in related tabled from the database
  * 
  * @author elitvin
  * @since 3.0.0
