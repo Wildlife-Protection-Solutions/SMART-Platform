@@ -34,6 +34,11 @@
             class="org.wcs.smart.connect.model.ConnectServerOption"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".model.conservationArea"
+            class="org.wcs.smart.connect.model.ConnectAlert"
+            supportsCcaa="true">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.ca.filestoredir">
