@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.dataentry.extradata">
+      <tab
+            content="org.wcs.smart.connect.cybertracker.dataentry.ConfigurableModelEditorConnectTab">
+      </tab>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            ca_property=".model.conservationArea"
+            class="org.wcs.smart.connect.cybertracker.model.ConnectAlert"
+            supportsCcaa="true">
+      </class>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.cybertracker.updatesite.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.cybertracker.updatesite.OnUninstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.connect.cybertracker.updatesite.ConnectCtChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.connect.cybertracker.upgrade.ConnectCtDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+
+</plugin>
