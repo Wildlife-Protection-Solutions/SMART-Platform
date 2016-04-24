@@ -325,6 +325,9 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 
 	private List<ConnectAlert> loadAlerts(final ConfigurableModel cm) {
 		final List<ConnectAlert> resultList = new ArrayList<ConnectAlert>();
+		if (cm.getUuid() == null) {
+			return resultList;
+		}
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(dialog.getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
