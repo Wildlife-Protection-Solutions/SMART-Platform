@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART CONNECT for CyberTracker
+Bundle-SymbolicName: org.wcs.smart.connect.cybertracker;singleton:=true
+Bundle-Version: 4.0.0.qualifier
+Bundle-Activator: org.wcs.smart.connect.cybertracker.ConnectCtPlugIn
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.wcs.smart.dataentry,
+ org.wcs.smart,
+ org.wcs.smart.p2
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: org.wcs.smart
+Export-Package: org.wcs.smart.connect.cybertracker.model,
+ org.wcs.smart.connect.cybertracker.updatesite
