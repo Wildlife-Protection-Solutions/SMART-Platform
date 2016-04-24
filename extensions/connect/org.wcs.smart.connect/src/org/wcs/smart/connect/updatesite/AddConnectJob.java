@@ -40,7 +40,7 @@ import org.wcs.smart.connect.upgrade.ConnectDatabaseUpgrader;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
- * Job removes adds entity plug-in related tabled to the database
+ * Job adds connecy plug-in related tabled to the database
  * 
  * @author elitvin
  * @since 3.0.0
