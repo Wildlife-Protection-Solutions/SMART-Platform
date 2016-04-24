@@ -50,7 +50,6 @@ public class RemoveConnectJob extends Job {
 		"CONNECT_SERVER_OPTION", //$NON-NLS-1$
 		"CONNECT_SERVER", //$NON-NLS-1$
 		"CONNECT_CHANGE_LOG", //$NON-NLS-1$
-		"CONNECT_ALERT", //$NON-NLS-1$
 	};
 	
 	public RemoveConnectJob() {

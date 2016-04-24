@@ -189,14 +189,6 @@ public class AddConnectJob extends Job {
 			"GRANT EXECUTE ON FUNCTION SMART.is_replication_enabled_ca TO DATA_ENTRY", //$NON-NLS-1$
 			"GRANT EXECUTE ON FUNCTION SMART.is_replication_enabled_ca TO MANAGER", //$NON-NLS-1$
 
-			"CREATE TABLE smart.connect_alert ( UUID CHAR(16) for bit data NOT NULL, CM_UUID CHAR(16) for bit data  NOT NULL, ALERT_ITEM_UUID CHAR(16) for bit data  NOT NULL, CM_ATTRIBUTE_UUID CHAR(16) for bit data, LEVEL SMALLINT NOT NULL, TYPE VARCHAR(64), PRIMARY KEY (UUID))", //$NON-NLS-1$
-			"ALTER TABLE smart.connect_alert ADD CONSTRAINT connect_alert_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-			"ALTER TABLE smart.connect_alert ADD CONSTRAINT connect_alert_cm_attribute_uuid_fk FOREIGN KEY (CM_ATTRIBUTE_UUID) REFERENCES smart.cm_attribute(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-
-			"GRANT ALL PRIVILEGES ON smart.connect_alert TO ANALYST", //$NON-NLS-1$
-			"GRANT ALL PRIVILEGES ON smart.connect_alert TO DATA_ENTRY", //$NON-NLS-1$
-			"GRANT ALL PRIVILEGES ON smart.connect_alert TO MANAGER" //$NON-NLS-1$
-
 		};
 		
 		session.doWork(new Work() {
