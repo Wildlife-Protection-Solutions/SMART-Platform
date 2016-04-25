@@ -58,6 +58,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.cybertracker.dataentry.CmElementsVisitor.IVisitHandler;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.IConfigurableModelChangeListener;
@@ -180,13 +181,36 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			@Override
 			public void notifyChangesMade() {
 				modelTreeViewer.refresh();
-				//TODO: delete alerts if alert item was removed from configurable model itself
+				cleanupAlerts();
+				alertTable.refresh();
 			}
 		});
 		
 		updateNewButtonState();
 		updateEditDeleteButtonState();
 		return container;
+	}
+
+	/**
+	 * Delete alerts if alert item was removed from configurable model itself
+	 */
+	protected void cleanupAlerts() {
+		final Set<UuidItem> cmItems = new HashSet<>();
+		CmElementsVisitor visitor = new CmElementsVisitor();
+		visitor.visit(dialog.getModel(), new IVisitHandler() {
+			@Override
+			public void handle(UuidItem item) {
+				cmItems.add(item);
+			}
+		});
+		//now set contains all items that present in configurable model
+		for (Iterator<ConnectAlert> i = alertsList.iterator(); i.hasNext();) {
+			ConnectAlert a = i.next();
+			if (!cmItems.contains(a.getAlertItem()) || (a.getAttrubute() != null && !cmItems.contains(a.getAttrubute()))) {
+				//node for which alert is configured was removed from configurable model -> we need to remove related alert
+				i.remove();
+			}
+		}
 	}
 
 	private TableViewer createAlertsTable(Composite parent) {

@@ -21,59 +21,59 @@
  */
 package org.wcs.smart.connect.cybertracker.dataentry;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.List;
 
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.connect.cybertracker.dataentry.CmElementsVisitor.IVisitHandler;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
- * Map that allows to quickly find any element in {@link ConfigurableModel} based on its {@link UUID}.
- * NOTE: Only maps objects that have UUID. 
+ * Utility class that allows to quickly go through all {@link ConfigurableModel} child elements including tree nodes and list items.
  * 
  * @author elitvin
  * @since 4.0.0
  */
-class CmElementsMap {
+public class CmElementsVisitor {
 
-	private Map<UUID, UuidItem> map;
-
-	public CmElementsMap(ConfigurableModel model) {
-		map = new HashMap<>();
-		if (model.getUuid() == null) {
-			return;
-		}
-		map.put(model.getUuid(), model);
-		CmElementsVisitor visitor = new CmElementsVisitor();
-		visitor.visit(model, new IVisitHandler() {
-			@Override
-			public void handle(UuidItem item) {
-				if (item.getUuid() != null) {
-					map.put(item.getUuid(), item);
-				}
-			}
-		});
+	public void visit(ConfigurableModel model, IVisitHandler handler) {
+		visitNodes(handler, model.getNodes());
+		visitList(handler, model.getDefaultLists());
+		visitTree(handler, model.getDefaultTrees());
 	}
 
-	public UuidItem getUuidItem(UUID uuid) {
-		if (uuid == null) {
-			return null;
+	private void visitNodes(IVisitHandler handler, List<CmNode> nodes) {
+		for (CmNode cmNode : nodes) {
+			handler.handle(cmNode);
+			if (cmNode.getCategory() != null) {
+				handler.handle(cmNode.getCategory());
+			}
+			for (CmAttribute attr : cmNode.getCmAttributes()) {
+				handler.handle(attr);
+				visitList(handler, attr.getList());
+				visitTree(handler, attr.getTree());
+			}
+			visitNodes(handler, cmNode.getChildren());
 		}
-		UuidItem obj = map.get(uuid);
-		if (obj == null) {
-			//just some development validation
-			SmartPlugIn.log("Unexpected item requested from a configurable model map: " + uuid, null); //$NON-NLS-1$
-		}
-		return obj;
 	}
 	
-	public CmAttribute getCmAttribute(UUID uuid) {
-		UuidItem obj = getUuidItem(uuid);
-		return obj instanceof CmAttribute ? (CmAttribute) obj : null;
+	private void visitList(IVisitHandler handler, List<CmAttributeListItem> lists) {
+		for (CmAttributeListItem item : lists) {
+			handler.handle(item);
+		}
+	}
+	
+	private void visitTree(IVisitHandler handler, List<CmAttributeTreeNode> trees) {
+		for (CmAttributeTreeNode node : trees) {
+			handler.handle(node);
+			visitTree(handler, node.getChildren());
+		}
+	}
+	
+	public static interface IVisitHandler {
+		public void handle(UuidItem item);
 	}
 
 }
