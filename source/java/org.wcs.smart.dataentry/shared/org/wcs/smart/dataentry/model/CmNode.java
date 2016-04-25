@@ -103,7 +103,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	}
 
 	/**
-	 * @return all children nodes; <code>null</code> if leaf node
+	 * @return all children nodes; empty list if leaf node
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause = "node_order")
