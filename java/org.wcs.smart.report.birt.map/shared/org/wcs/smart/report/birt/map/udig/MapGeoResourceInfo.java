@@ -74,8 +74,11 @@ public class MapGeoResourceInfo extends IGeoResourceInfo {
 			}else if (resource.canResolve(AbstractGridCoverage2DReader.class)){
 				AbstractGridCoverage2DReader reader = resource.resolve(AbstractGridCoverage2DReader.class, new NullProgressMonitor());
 				GeneralEnvelope ge = reader.getOriginalEnvelope();
-				if (ge != null){
+				if (ge != null && !ge.isNull()){
 					this.bounds = new ReferencedEnvelope(ge.getMinimum(0), ge.getMaximum(0), ge.getMinimum(1), ge.getMaximum(1), ge.getCoordinateReferenceSystem());
+				}else{
+					this.bounds = new ReferencedEnvelope();
+					this.bounds.setToNull();
 				}
 			}
 		} catch (Exception e) {

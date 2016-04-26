@@ -97,7 +97,8 @@ public class EmptyGridCoverage {
 	private static class EmptyGridCoverage2DReader extends AbstractGridCoverage2DReader{
 		public EmptyGridCoverage2DReader(){
 			super();
-			this.originalEnvelope = new GeneralEnvelope((org.opengis.geometry.Envelope)new Envelope2D(null, 0, 0, 0, 0));
+			this.originalEnvelope = new GeneralEnvelope(2);
+			this.originalEnvelope.setToNull();
 		}
 		@Override
 		public Format getFormat() {
