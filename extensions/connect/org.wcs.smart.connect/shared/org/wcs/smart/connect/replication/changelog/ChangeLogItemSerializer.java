@@ -121,10 +121,8 @@ public abstract class ChangeLogItemSerializer {
 			
 			ResultSet rs = ps.executeQuery();
 			if (!rs.next()){
-				//throw new SQLException("Not value found for object: " + item.getTableName() + " _ " + item.getFieldName1() + " _ " + item.getKey1().toString());
 				//not data was found for the object;
 				//this should be because it is deleted later in the change log history
-				//TODO: for validation purposes we could valid this is the case
 				item.setAction(Action.DELETE);
 				stream.writeObject(item);
 				return;

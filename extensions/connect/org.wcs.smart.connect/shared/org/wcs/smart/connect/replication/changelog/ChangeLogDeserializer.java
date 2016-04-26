@@ -127,7 +127,7 @@ public abstract class ChangeLogDeserializer {
 		
 			if (type == Types.BLOB ||
 					type == Types.BINARY){
-				//TODO: both (blob and clob) of these are going to cause problems if the 
+				//both (blob and clob) of these are going to cause problems if the 
 				//length is greater than integer max value
 				long length = is.readLong();
 				byte[] bytes = new byte[(int)length];
