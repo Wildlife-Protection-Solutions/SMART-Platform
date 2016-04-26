@@ -142,6 +142,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setText(IDialogConstants.OK_LABEL);
 		getButton(IDialogConstants.OK_ID).setEnabled(this.isNew); //this will enable "Save" button when new alert is created
 	}
 
