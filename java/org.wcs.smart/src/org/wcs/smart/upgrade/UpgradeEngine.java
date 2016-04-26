@@ -58,7 +58,7 @@ public class UpgradeEngine {
 		V320("3.2.0", Upgrader320To321.class), //$NON-NLS-1$
 		V330("3.2.1", Upgrader321To330.class), //$NON-NLS-1$
 		V331("3.3.0", Upgrader330To331.class), //$NON-NLS-1$
-		V400("4.0.0", Upgrader331To400.class); //$NON-NLS-1$
+		V400("3.3.1", Upgrader331To400.class); //$NON-NLS-1$
 		
 		public String versionString;
 		public Class<? extends IDatabaseUpgrader> upgradeEngine;

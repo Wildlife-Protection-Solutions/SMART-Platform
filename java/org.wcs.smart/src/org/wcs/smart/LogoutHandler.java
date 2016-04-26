@@ -24,6 +24,7 @@ package org.wcs.smart;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 
 /**
  * 
@@ -40,6 +41,7 @@ public class LogoutHandler {
 	 */
 	@Execute
 	public void execute()  {
+//		SmartHibernateManager.printSessionCount();
 		PlatformUI.getWorkbench().restart();
 	}
 	

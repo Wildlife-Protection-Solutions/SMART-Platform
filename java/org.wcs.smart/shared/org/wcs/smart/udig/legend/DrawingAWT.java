@@ -169,7 +169,7 @@ public final class DrawingAWT {
 			AffineTransform worldToScreenTransform, boolean drawVertices,
 			Symbolizer symbolizer, MathTransform mathTransform, LiteShape shape) {
 		if (symbolizer instanceof RasterSymbolizer) {
-			// TODO
+
 		} else {
 			Geometry g = findGeometry(feature, symbolizer);
 			if (g == null) {
@@ -411,8 +411,6 @@ public final class DrawingAWT {
 
 	private String getGeometryPropertyName(Symbolizer s) {
 		String geomName = null;
-		// TODO: fix the styles, the getGeometryPropertyName should probably be
-		// moved into an interface...
 		if (s instanceof PolygonSymbolizer) {
 			geomName = ((PolygonSymbolizer) s).getGeometryPropertyName();
 		} else if (s instanceof PointSymbolizer) {
@@ -426,8 +424,6 @@ public final class DrawingAWT {
 	}
 
 	/**
-	 * TODO summary sentence for worldToScreenTransform ...
-	 * 
 	 * @param bounds
 	 * @param rectangle
 	 * @return
