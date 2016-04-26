@@ -49,6 +49,7 @@
 		<module>../extensions/org.wcs.smart.cybertracker/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect.dataqueue/pom-shared.xml</module>
+		<module>../extensions/connect/org.wcs.smart.connect.cybertracker/pom-shared.xml</module>
 	</modules>
  
 	<build>
