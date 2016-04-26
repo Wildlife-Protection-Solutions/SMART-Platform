@@ -1778,6 +1778,9 @@ public class BirtMapLayer extends EObjectImpl implements Layer {
             } else {
                 result = new ReferencedEnvelope(tmp.getMinX(), tmp.getMaxX(), tmp.getMinY(),
                         tmp.getMaxY(), getCRS());
+                if (tmp.isNull()){
+                	result.setToNull();
+                }
             }
 
             if (result != null) {
