@@ -47,6 +47,7 @@ import org.wcs.smart.er.query.engine.visitors.AreaFilterVisitor;
 import org.wcs.smart.er.query.engine.visitors.MissionPropertyFilterCollectorVisitor;
 import org.wcs.smart.er.query.engine.visitors.SamplingUnitAttributeFilterCollectorVisitor;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
+import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -316,7 +317,9 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 			}
 		}
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -420,7 +423,9 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 				sql.append(" " + prefix(MissionAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				logger.finest(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
+				try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();
@@ -581,11 +586,11 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 				sql.append("WHERE "); //$NON-NLS-1$
 				String p1 = engine.addParameterValue(key.getKey());
 				sql.append(" " + prefix(SamplingUnitAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				
 
 				logger.finest(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
+				try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();

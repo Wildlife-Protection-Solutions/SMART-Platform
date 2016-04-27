@@ -42,6 +42,7 @@ import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
 import org.wcs.smart.connect.uploader.PostgresqlMetadataCreator;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
@@ -68,11 +69,13 @@ public class ChangeLogPackager {
 	private Path filestorePath;
 	private File tempDir;
 	private Session session;
+	private WorkItem item;
 	
-	public ChangeLogPackager(Session session, UUID caUuid, long startRevision){
+	public ChangeLogPackager(Session session, UUID caUuid, long startRevision, WorkItem item){
 		this.startRevision = startRevision;
 		this.session = session;
 		this.caUuid = caUuid;
+		this.item = item;
 		
 		tempDir = ZipUtil.createTemporaryDirectory();
 		filestorePath = tempDir.toPath().resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
@@ -115,7 +118,7 @@ public class ChangeLogPackager {
 	}
 	
 	private void packageMetadata() throws Exception{
-		PostgresqlMetadataCreator.generateMetadata(session, caUuid, metadataFile, endRevision);
+		PostgresqlMetadataCreator.generateMetadata(session, caUuid, metadataFile, endRevision, item);
 	}
 	
 	private void packageChangLog() throws Exception{
@@ -156,6 +159,6 @@ public class ChangeLogPackager {
 	}
 	
 	private List<ChangeLogItem> getChangeLogItems() throws SmartConnectException{
-		return ChangeLogManager.INSTANCE.getItems(session, caUuid, startRevision);
+		return ChangeLogManager.INSTANCE.getItems(session, caUuid, startRevision, item);
 	}
 }

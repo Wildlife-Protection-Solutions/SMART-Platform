@@ -510,8 +510,8 @@ public class ConnectAlert extends HttpServlet {
 		a.setCaUuid(newAlert.getCaUuid());
 		
 		if(error){
-			a.setDescription(newAlert.getDescription() + Messages.getString("ConnectAlert.UnknownAlertTypeDescription",SmartUtils.getRequestLocale(request)) );
-			a.setTypeUuid(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+			a.setDescription(newAlert.getDescription() + Messages.getString("ConnectAlert.UnknownAlertTypeDescription",SmartUtils.getRequestLocale(request)) ); //$NON-NLS-1$
+			a.setTypeUuid(AlertType.NULL_TYPE);
 		}else{
 			a.setTypeUuid(newAlert.getTypeUuid());
 		}
@@ -844,7 +844,7 @@ public class ConnectAlert extends HttpServlet {
 				if(validateTrack(newAlert.getTrack()) ){
 					toUpdate.setTrack(newAlert.getTrack());
 				}else{
-					throw new SmartConnectException("Invalid Track Provided");
+					throw new SmartConnectException(Messages.getString("ConnectAlert.InvalidTrack", request.getLocale())); //$NON-NLS-1$
 				}
 			}
 			
@@ -871,13 +871,13 @@ public class ConnectAlert extends HttpServlet {
     }
 
 	private boolean validateTrack(String string) {
-		string = string.replaceAll("\\s",""); //strip whitespace
+		string = string.replaceAll("\\s",""); //strip whitespace //$NON-NLS-1$ //$NON-NLS-2$
 		
-		if(!string.substring(0,1).equals("[") || !string.substring(string.length() - 1, string.length()).equals("]")){
+		if(!string.substring(0,1).equals("[") || !string.substring(string.length() - 1, string.length()).equals("]")){ //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 		string = string.substring(1, string.length() - 1); // Get rid of braces.
-		String[] parts = string.split(",");
+		String[] parts = string.split(","); //$NON-NLS-1$
 		int x = 0;
 		boolean odd = true;
 		for (String part : parts) {
@@ -887,12 +887,12 @@ public class ConnectAlert extends HttpServlet {
 				odd = true;
 			}
 			if(odd){
-				if(!part.substring(part.length() - 1, part.length()).equals("]")){
+				if(!part.substring(part.length() - 1, part.length()).equals("]")){ //$NON-NLS-1$
 					return false;
 				}
 				part = part.substring(0,part.length()-1);
 			}else{ //even, the first character should be a bracket
-				if(!part.substring(0,1).equals("[")) {
+				if(!part.substring(0,1).equals("[")) { //$NON-NLS-1$
 					return false;
 				}
 				part = part.substring(1,part.length());

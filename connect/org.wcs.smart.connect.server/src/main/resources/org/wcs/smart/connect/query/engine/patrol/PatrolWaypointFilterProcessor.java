@@ -44,6 +44,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.query.engine.visitors.AreaFilterVisitor;
+import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
@@ -300,7 +301,9 @@ public class PatrolWaypointFilterProcessor implements IFilterProcessor{
 			}
 		}
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -372,7 +375,9 @@ public class PatrolWaypointFilterProcessor implements IFilterProcessor{
 		}
 
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 
 		IFilterVisitor attProcessor = new IFilterVisitor() {
 			@Override
@@ -545,7 +550,9 @@ public class PatrolWaypointFilterProcessor implements IFilterProcessor{
 				}
 			}
 			logger.finest(sql.toString());
-			engine.parseQueryString(c, sql.toString()).executeUpdate();
+			try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+				ps.executeUpdate();
+			}
 		}
 	}
 }

@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.query.engine;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -95,9 +94,7 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -417,7 +414,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		currentParameters.clear();
 	}
 	
-	public PreparedStatement parseQueryString(Connection connection, String query) throws SQLException{
+	public PsqlNamedPreparedStatement parseQueryString(Connection connection, String query) throws SQLException{
 		PsqlNamedPreparedStatement pp = new PsqlNamedPreparedStatement(connection, query);
 		StringBuilder log = new StringBuilder();
 		for (Entry<String, Object> entry : currentParameters.entrySet()){
@@ -430,7 +427,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			}
 		}
 		logger.finest(log.toString());
-		return pp.getStatement();
+		return pp;
 	}
 	
 	/**

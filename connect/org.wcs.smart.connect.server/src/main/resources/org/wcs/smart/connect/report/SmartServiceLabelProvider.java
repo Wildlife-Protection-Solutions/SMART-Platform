@@ -24,6 +24,7 @@ package org.wcs.smart.connect.report;
 import java.util.Locale;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
 /**
  * Label provider; these all return nothing as we don't use these strings in making the map
@@ -34,38 +35,38 @@ public class SmartServiceLabelProvider implements ISmartMapLabelProvider {
 
 	@Override
 	public String getDataSourceConservationAreaPropName(Locale l) {
-		return "Conservation Area Property";
+		return Messages.getString("SmartServiceLabelProvider.CaPropertyName", l); //$NON-NLS-1$
 	}
 
 	@Override
 	public String getDataSourceSessionProviderPropName(Locale l) {
-		return "Data Source Property";
+		return Messages.getString("SmartServiceLabelProvider.DataSourcePropertName", l); //$NON-NLS-1$
 	}
 
 	
 	@Override
 	public String getDataSourceDisplayName(Locale l) {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getDataSourceDescription(Locale l) {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getDataSourceReadErrorMessage(Locale l) {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getSmartServiceDescription(Locale l) {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getSmartServiceTitle(Locale l) {
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override

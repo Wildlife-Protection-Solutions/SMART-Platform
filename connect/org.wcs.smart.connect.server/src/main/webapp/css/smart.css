@@ -447,7 +447,10 @@ div.scrollable {
 .user-tables-clear{
 	clear: both;	
 }
-
+.info-tables-float{
+	display: block;
+	padding: 10px 10px 10px 0px;
+}
 /* SMART Tabs */
 
 .tabheader{

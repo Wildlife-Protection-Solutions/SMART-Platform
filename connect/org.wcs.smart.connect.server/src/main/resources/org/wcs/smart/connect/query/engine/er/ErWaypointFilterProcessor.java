@@ -57,6 +57,7 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
@@ -335,7 +336,9 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			}
 		}
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -414,7 +417,9 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" on " + prefix(SurveyWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 
 		IFilterVisitor attProcessor = new IFilterVisitor() {
 			@Override
@@ -599,7 +604,9 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		}
 		
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	private void processMissionFilter(MissionPropertyFilter lfilter, String colName, Connection c) throws SQLException{
@@ -691,7 +698,9 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		}
 		
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -797,7 +806,9 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			}
 			
 			logger.finest(sql.toString());
-			engine.parseQueryString(c, sql.toString()).executeUpdate();
+			try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+				ps.executeUpdate();
+			}
 			return;
 		}
 		
@@ -883,6 +894,8 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		}
 		
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 }

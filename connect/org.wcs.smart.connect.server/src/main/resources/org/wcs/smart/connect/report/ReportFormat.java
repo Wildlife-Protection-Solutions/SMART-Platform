@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.connect.report;
 
+import java.util.Locale;
+
+import org.wcs.smart.connect.i18n.Messages;
+
 /**
  * Supported report output formats.
  * @author Emily
@@ -28,19 +32,19 @@ package org.wcs.smart.connect.report;
  */
 public enum ReportFormat {
 
-	HTML("html", "HTML", null, null),
-	PDF("pdf", "PDF", "org.eclipse.birt.report.engine.emitter.pdf", "application/pdf"),
-	DOC("doc", "Word Document (.doc)", "org.eclipse.birt.report.engine.emitter.word", "application/doc"),
-	ODT("odt", "Open Document (.odf)", "org.eclipse.birt.report.engine.emitter.odt", "application/odt");
+	HTML("html", "ReportFormat_HTMLOutType", null, null), //$NON-NLS-1$ //$NON-NLS-2$
+	PDF("pdf", "ReportFormat_PdfOutType", "org.eclipse.birt.report.engine.emitter.pdf", "application/pdf"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	DOC("doc", "ReportFormat_WordOutType", "org.eclipse.birt.report.engine.emitter.word", "application/msword"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	ODT("odt", "ReportFormat_OdfOutType", "org.eclipse.birt.report.engine.emitter.odt", "application/odt"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	
 	private String typeKey;
-	private String guiName;
+	private String guiNameKey;
 	private String emitterId;
 	private String responseType;
 	
-	ReportFormat(String typeKey, String guiName, String emitterId, String responseType){
+	ReportFormat(String typeKey, String guiNameKey, String emitterId, String responseType){
 		this.typeKey = typeKey;
-		this.guiName = guiName;
+		this.guiNameKey = guiNameKey;
 		this.emitterId = emitterId;
 		this.responseType = responseType;
 	}
@@ -52,11 +56,20 @@ public enum ReportFormat {
 		return this.typeKey;
 	}
 	
-	public String getGuiName(){
-		return this.guiName;
+	public String getGuiName(Locale l){
+		return Messages.getString(guiNameKey, l);
 	}
 	
 	public String getEmitterId(){
 		return this.emitterId;
+	}
+	
+	public String getContentDisposition(String filename){
+		if (this == DOC){
+			 return "attachment;filename=" + filename + ".doc"; //$NON-NLS-1$ //$NON-NLS-2$
+		}else if (this == ODT){
+			return "attachment;filename=" + filename + ".odt"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return null;
 	}
 }

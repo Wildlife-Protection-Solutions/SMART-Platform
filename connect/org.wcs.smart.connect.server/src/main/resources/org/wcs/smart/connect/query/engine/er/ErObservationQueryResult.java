@@ -100,7 +100,7 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 
 	@Override
 	public String createId(IResultItem rs) throws Exception {
-		return ((SurveyQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		return ((SurveyQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ 
 	}
 
 

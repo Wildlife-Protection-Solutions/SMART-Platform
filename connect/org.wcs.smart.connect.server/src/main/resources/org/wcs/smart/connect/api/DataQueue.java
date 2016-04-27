@@ -371,6 +371,7 @@ public class DataQueue {
 			item.setUploadedDate(new Date());
 				
 			WorkItem up = new WorkItem();
+			up.setLocale(request.getLocale());
 			up.setConservationAreaInfo(ca);
 			up.setStartTime(new Date());
 			up.setStatus(WorkItem.Status.UPLOADING);

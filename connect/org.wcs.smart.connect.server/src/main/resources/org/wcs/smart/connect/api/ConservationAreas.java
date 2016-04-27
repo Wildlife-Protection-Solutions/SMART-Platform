@@ -447,6 +447,7 @@ public class ConservationAreas extends HttpServlet{
 
 			//create a new download item
 			item = new WorkItem();
+			item.setLocale(request.getLocale());
 			item.setConservationAreaInfo(info);
 			item.setLocalFilename(""); //$NON-NLS-1$
 			item.setMessage(null);
@@ -530,6 +531,7 @@ public class ConservationAreas extends HttpServlet{
 			
 			//create a new download item
 			item = new WorkItem();
+			item.setLocale(request.getLocale());
 			item.setConservationAreaInfo(info);
 			item.setLocalFilename(""); //$NON-NLS-1$
 			item.setMessage(null);
@@ -875,6 +877,7 @@ public class ConservationAreas extends HttpServlet{
 			}
 							
 			WorkItem up = new WorkItem();
+			up.setLocale(request.getLocale());
 			up.setConservationAreaInfo(ca);
 			up.setStartTime(new Date());
 			up.setStatus(WorkItem.Status.UPLOADING);
@@ -947,6 +950,7 @@ public class ConservationAreas extends HttpServlet{
 			}
 							
 			WorkItem up = new WorkItem();
+			up.setLocale(request.getLocale());
 			up.setConservationAreaInfo(ca);
 			up.setStartTime(new Date());
 			up.setStatus(WorkItem.Status.UPLOADING);

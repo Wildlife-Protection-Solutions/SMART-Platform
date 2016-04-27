@@ -9,6 +9,8 @@ import javax.persistence.Table;
 @Table(name="connect.roles")
 public class SmartRole {
 
+	public static final String SYSTEM_ROLE_NAME = "SYSTEM ROLE"; //$NON-NLS-1$
+	
 	public String roleId;
 	public String rolename;
 	public boolean isSystem;

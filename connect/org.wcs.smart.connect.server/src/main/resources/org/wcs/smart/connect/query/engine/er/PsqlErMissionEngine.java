@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -136,7 +135,7 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 				
 					c.commit();
 					int itemcnt;
-					try(ResultSet rs = c.createStatement().executeQuery("select count(*) FROM " + getQueryDataTable())){ //$NON-NLS-1$ //$NON-NLS-2$
+					try(ResultSet rs = c.createStatement().executeQuery("select count(*) FROM " + getQueryDataTable())){ //$NON-NLS-1$ 
 						rs.next();
 						itemcnt = rs.getInt(1);
 					}

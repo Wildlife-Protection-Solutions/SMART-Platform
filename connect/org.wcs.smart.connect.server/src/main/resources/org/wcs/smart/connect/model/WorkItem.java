@@ -24,6 +24,7 @@ package org.wcs.smart.connect.model;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -69,7 +70,13 @@ public class WorkItem extends ConnectUuidItem {
 	private Type type;
 	private Status status;
 	private String message;
-
+	private String locale;
+	
+	public WorkItem(){
+		
+	}
+	@Transient
+	public Locale cachedLocale;
 
 	@ManyToOne
 	@JoinColumn(name = "ca_uuid")
@@ -87,6 +94,26 @@ public class WorkItem extends ConnectUuidItem {
 	}
 	public void setStartTime(Date startTime){
 		this.startTime = startTime;
+	}
+	
+	@Column(name="locale")
+	public String getItemLocale(){
+		return this.locale;
+	}
+	public void setItemLocale(String locale){
+		this.locale = locale;
+	}
+	
+	@Transient
+	public Locale getLocale(){
+		if (cachedLocale == null){
+			cachedLocale = Locale.forLanguageTag(locale);
+		}
+		return cachedLocale;
+	}
+	@Transient
+	public void setLocale(Locale l){
+		setItemLocale(l.toLanguageTag());
 	}
 	
 	@Column(name="total_bytes")

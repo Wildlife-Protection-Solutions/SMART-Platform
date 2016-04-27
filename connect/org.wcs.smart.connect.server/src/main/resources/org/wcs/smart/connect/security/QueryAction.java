@@ -57,6 +57,7 @@ public class QueryAction implements ISmartConnectAction{
 		return new String[]{RUNQUERY_KEY};
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
 

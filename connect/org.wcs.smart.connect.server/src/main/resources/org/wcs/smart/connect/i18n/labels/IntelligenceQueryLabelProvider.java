@@ -50,23 +50,18 @@ public class IntelligenceQueryLabelProvider implements
 		if (item == FixedQueryColumn.FixedColumns.INTEL_PATROL_SOURCE) return Messages.getString("IntelligenceQueryLabelProvider.PatrolName", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.INTEL_INFORMANT_ID) return Messages.getString("IntelligenceQueryLabelProvider.InformantId", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.INTEL_DESCRIPTION) return Messages.getString("IntelligenceQueryLabelProvider.DescriptionLabel", l); //$NON-NLS-1$
-		
 		if (item == IntelligenceFilterOption.NAME) return Messages.getString("IntelligenceQueryLabelProvider.NameLabel", l); //$NON-NLS-1$
 		if (item == IntelligenceFilterOption.SOURCE) return Messages.getString("IntelligenceQueryLabelProvider.SourceLabel", l); //$NON-NLS-1$
 		if (item == IntelligenceFilterOption.PATROLID) return Messages.getString("IntelligenceQueryLabelProvider.PIDLabel", l); //$NON-NLS-1$
 		if (item == IntelligenceFilterOption.DESCRIPTION) return Messages.getString("IntelligenceQueryLabelProvider.DescriptionLabel", l); //$NON-NLS-1$
 		if (item == IntelligenceFilterOption.INFORMANTID) return Messages.getString("IntelligenceQueryLabelProvider.IDLabel", l); //$NON-NLS-1$
-		
 		if (item instanceof ReceivedDateFilter) return Messages.getString("IntelligenceQueryLabelProvider.ReceievedDateFilterLabel", l); //$NON-NLS-1$
-		
-
-		if (item.equals(NUM_RECORD_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l);
-		if (item.equals(NUM_RECORD_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l);
-		if (item.equals(FOLLOWUP_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l);
-		if (item.equals(FOLLOWUP_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l);
-		if (item.equals(NOFOLLOWUP_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l);
-		if (item.equals(NOFOLLOWUP_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l);
-		
+		if (item.equals(NUM_RECORD_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l); //$NON-NLS-1$
+		if (item.equals(NUM_RECORD_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NumberRecordsHeaderLabel", l); //$NON-NLS-1$
+		if (item.equals(FOLLOWUP_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l); //$NON-NLS-1$
+		if (item.equals(FOLLOWUP_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.FollwedUpHeaderLabel", l); //$NON-NLS-1$
+		if (item.equals(NOFOLLOWUP_LONGNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l); //$NON-NLS-1$
+		if (item.equals(NOFOLLOWUP_SHORTNAME)) return Messages.getString("PsqlSummaryIntelligenceQueryEngine.NotFollowedUpHeaderLabel", l); //$NON-NLS-1$
 		return null;
 	}
 }

@@ -48,6 +48,8 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 
+	private static final String TRACK_PROP_KEY = "org.wcs.smart.track"; //$NON-NLS-1$
+	
 	private WKBReader reader = new WKBReader();
 	
 	public ErMissionTrackQueryResult(PsqlErMissionTrackEngine engine, int itemcnt){
@@ -97,7 +99,7 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 
 	@Override
 	public Geometry createGeometry(IResultItem item) throws Exception {
-		byte[] b = (byte[]) ((MissionTrackResultItem)item).getMissionPropertyValue("org.wcs.smart.track");
+		byte[] b = (byte[]) ((MissionTrackResultItem)item).getMissionPropertyValue(TRACK_PROP_KEY);
 		if (b == null){
 			return new GeometryCollection(new Geometry[]{}, gf);	
 		}
@@ -106,7 +108,7 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 
 	@Override
 	public String createId(IResultItem rs) throws Exception {
-		return ((MissionTrackResultItem)rs).getTrackId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		return ((MissionTrackResultItem)rs).getTrackId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 
 
@@ -164,7 +166,7 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		it.setSamplingUnitUuid((UUID)rs.getObject("samplingunit_uuid")); //$NON-NLS-1$
 		
-		it.addMissionPropertyValue("org.wcs.smart.track",rs.getBytes("trackgeom")); //$NON-NLS-1$
+		it.addMissionPropertyValue(TRACK_PROP_KEY,rs.getBytes("trackgeom")); //$NON-NLS-1$
 		return it;
 	}
 	

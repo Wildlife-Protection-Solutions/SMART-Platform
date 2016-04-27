@@ -26,7 +26,6 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,6 +98,7 @@ public class ShpExporter {
 		final Path shpfile = outDirectory.resolve(newName+ ".shp"); //$NON-NLS-1$
 		
 		session.doWork(new Work(){
+			@SuppressWarnings("unchecked")
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try{

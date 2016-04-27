@@ -13,11 +13,15 @@
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
 	<div id="main">
-		<div class="pageheader">Connect Version: ${connectVersion}    Last Updated:  ${connectUpdated}</div>
-
-		<div class="top-spacer"  style="margin-left: -20px" >
+		<div class="pageheader">SMART Connect System Information</div>
 		
-		<div class="catable table-cell smart-table user-tables-float">
+		
+		<div>
+			<p>Connect Version: ${connectVersion}</p>
+			<p>Last Updated:  ${connectUpdated}</p>
+		</div>
+
+		<div class="catable table-cell smart-table info-tables-float">
 		Conservation Areas
   				<div class="table-row smart-table-header">
   					<div class="table-cell smart-table-cell">CA LAbel</div>
@@ -38,9 +42,23 @@
 				</c:forEach>
 			</div>  
 		
-			
-  			<div class="catable table-cell smart-table user-tables-float">
-  			CA Versions
+			<div class="catable table-cell smart-table info-tables-float">
+			Connect Installed Plugins
+  				<div class="table-row smart-table-header">
+  					<div class="table-cell smart-table-cell">Plugin ID</div>
+  					<div class="table-cell smart-table-cell">Version</div>
+				</div>
+				<c:forEach var="p" items="${plugins}" varStatus="count">
+					<div class="carow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
+						<div class="table-cell smart-table-cell">${p.getPluginId()}</div>
+						<div class="table-cell smart-table-cell">${p.getVersion()}</div>
+					</div>
+
+				</c:forEach>
+			</div>  
+
+			<div class="catable table-cell smart-table info-tables-float">
+  			Conservation Area Plugins
   				<div class="table-row smart-table-header">
 					<div class="table-cell smart-table-cell">CA UUID</div>
   					<div class="table-cell smart-table-cell">Plugin ID</div>
@@ -56,24 +74,7 @@
 				</c:forEach>
 			</div>  
 			
-			
-			<div class="catable table-cell smart-table user-tables-float">
-			Plugin Versions
-  				<div class="table-row smart-table-header">
-  					<div class="table-cell smart-table-cell">Plugin ID</div>
-  					<div class="table-cell smart-table-cell">Version</div>
-				</div>
-				<c:forEach var="p" items="${plugins}" varStatus="count">
-					<div class="carow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
-						<div class="table-cell smart-table-cell">${p.getPluginId()}</div>
-						<div class="table-cell smart-table-cell">${p.getVersion()}</div>
-					</div>
-
-				</c:forEach>
-			</div>  
-
-			
-			<div class="catable table-cell smart-table user-tables-float">
+			<div class="catable table-cell smart-table info-tables-float">
 			Environment Variables
   				<div class="table-row smart-table-header">
   					<div class="table-cell smart-table-cell">Variable</div>

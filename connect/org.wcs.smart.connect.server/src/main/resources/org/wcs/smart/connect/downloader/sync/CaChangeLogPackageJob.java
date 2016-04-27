@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.wcs.smart.connect.database.LockManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
@@ -75,14 +76,14 @@ public class CaChangeLogPackageJob implements Runnable {
 			//set error status
 			s.beginTransaction();
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
-			item.setMessage(MessageFormat.format("Error processing item {0}: {1}.", item.getUuid().toString(), ex.getMessage()));
+			item.setMessage(MessageFormat.format(Messages.getString("CaChangeLogPackageJob.ProcessingError", item.getLocale()), item.getUuid().toString(), ex.getMessage())); //$NON-NLS-1$
 			s.getTransaction().commit();
 			
 			return;
 		}
 		
 		try{
-			ChangeLogPackager packer = new ChangeLogPackager(s, info.getUuid(), startRevision);
+			ChangeLogPackager packer = new ChangeLogPackager(s, info.getUuid(), startRevision, item);
 			Path file = packer.createPackage();
 		
 			s.beginTransaction();
@@ -99,7 +100,7 @@ public class CaChangeLogPackageJob implements Runnable {
 			try{
 				s.beginTransaction();
 				item.setStatus(Status.ERROR);
-				item.setMessage("{\"error\": " + "\"Could not create change log package. " + ex.getMessage() + "\"}");
+				item.setMessage("{\"error\": \"" + MessageFormat.format(Messages.getString("CaChangeLogPackageJob.ChangeLogError", item.getLocale()), ex.getMessage()) + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				s.saveOrUpdate(item);
 				s.getTransaction().commit();
 			}catch (Exception ex2){

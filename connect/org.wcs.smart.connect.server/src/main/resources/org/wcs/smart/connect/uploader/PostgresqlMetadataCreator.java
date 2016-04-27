@@ -28,7 +28,9 @@ import java.util.UUID;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 
@@ -52,11 +54,11 @@ public class PostgresqlMetadataCreator {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void generateMetadata(Session session, 
-			UUID caUuid, Path file, long revision) throws Exception{
+			UUID caUuid, Path file, long revision, WorkItem item) throws Exception{
 		
 		ConservationAreaInfo ca = (ConservationAreaInfo) session.load(ConservationAreaInfo.class, caUuid);
 		if (ca == null){
-			throw new Exception("Could not find Conservation Area.");
+			throw new Exception(Messages.getString("PostgresqlMetadataCreator.CaNotFound", item.getLocale())); //$NON-NLS-1$
 		}
 		
 		PackageMetadata metadata = new PackageMetadata();

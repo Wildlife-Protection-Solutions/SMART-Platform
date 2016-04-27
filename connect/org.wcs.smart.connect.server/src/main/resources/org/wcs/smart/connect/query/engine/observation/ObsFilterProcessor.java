@@ -39,6 +39,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.engine.visitor.AreaFilterVisitor;
+import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.model.filter.AttributeInfo;
@@ -311,7 +312,9 @@ public class ObsFilterProcessor implements IFilterProcessor {
 		}
 		
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -424,7 +427,9 @@ public class ObsFilterProcessor implements IFilterProcessor {
 				sql.append("'"); //$NON-NLS-1$
 
 				logger.finest(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
+				try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();

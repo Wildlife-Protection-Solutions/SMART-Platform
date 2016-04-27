@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.dataqueue.DataQueueProcessor;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.uploader.ca.LoadCaProcessor;
@@ -69,7 +70,7 @@ public enum ItemProcessManager {
 		if (processor == null){
 			session.beginTransaction();
 			item.setStatus(Status.ERROR);
-			item.setMessage(MessageFormat.format("No processor found for the file type {0}", item.getType().toString()));
+			item.setMessage(MessageFormat.format(Messages.getString("ItemProcessManager.ProcessorNotFound", item.getLocale()), item.getType().toString())); //$NON-NLS-1$
 			session.getTransaction().commit();
 			return;
 		}else{

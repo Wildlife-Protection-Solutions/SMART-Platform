@@ -40,6 +40,7 @@ import org.wcs.smart.entity.query.engine.visitor.HasObservationFilterVisitor;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -313,7 +314,9 @@ public class PsqlEntityFilterProcessor implements IFilterProcessor {
 			}
 		}
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -426,8 +429,9 @@ public class PsqlEntityFilterProcessor implements IFilterProcessor {
 				sql.append(" " + prefix(Attribute.class) + ".keyid = " + p1); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				logger.finest(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
-
+				try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$

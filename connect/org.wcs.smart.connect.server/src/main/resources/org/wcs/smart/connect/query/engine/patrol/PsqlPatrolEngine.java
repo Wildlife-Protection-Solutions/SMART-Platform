@@ -141,10 +141,9 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 					getResults(c, session);
 					
 					c.commit();
+
 					//item cnt
 					int itemcnt = 0;
-					String sql = getDataQuery();
-
 					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM (" + getDataQuery(false) + ") foo")){ //$NON-NLS-1$ //$NON-NLS-2$
 						rs.next();
 						itemcnt = rs.getInt(1);

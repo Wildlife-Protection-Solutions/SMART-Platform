@@ -26,29 +26,20 @@ import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 
-import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.RasterFactory;
-import javax.media.jai.RenderedOp;
 import javax.media.jai.TiledImage;
 
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
-import org.opengis.coverage.grid.GridCoverage;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GridResultItem;
-import org.wcs.smart.util.SharedUtils;
 
 
 /**
@@ -88,8 +79,6 @@ final class RasterBuilder {
 	private int width;
 	private int height;
 
-	/** grid cell size */
-	private double gridCellSize;
 	
 	/**
 	 * Sets the file name to write the raster to
@@ -131,15 +120,6 @@ final class RasterBuilder {
 		this.table = data;
 		this.metadata = metadata;
 	}
-	
-	/**
-	 * Sets the grid cell size.
-	 * 
-	 * @param cellSize
-	 */
-	public void setGridCellSize(double cellSize){
-		this.gridCellSize = cellSize;
-	}
 
 	/**
 	 * Creates the raster file using the values present in the table.
@@ -154,19 +134,12 @@ final class RasterBuilder {
 
 		TiledImage raster = null;
 		try {
+			//writes geotif with envelope and crs information
 			raster = createRaster();
-
 			try(OutputStream fout = Files.newOutputStream(file)){
 				GeoTiffWriter writer = new GeoTiffWriter(fout);
-				writer.write((new GridCoverageFactory()).create("smartraster", raster, envelope),null);// new GeneralParameterValue[]{params});
+				writer.write((new GridCoverageFactory()).create("smartraster", raster, envelope),null);// new GeneralParameterValue[]{params}); //$NON-NLS-1$
 			}
-			 
-//			RenderedOp op = JAI.create("filestore",raster,file.toFile().getCanonicalPath(),"TIFF"); //$NON-NLS-1$ //$NON-NLS-2$
-//			op.dispose();
-//			String baseFile = file.toFile().getCanonicalPath().substring(0,  file.toFile().getCanonicalPath().lastIndexOf('.'));
-//			createProjectionFile(baseFile, envelope.getCoordinateReferenceSystem());
-//			createWorldFile(baseFile, gridCellSize, envelope.getMinX(), envelope.getMaxY());
-			
 		}catch (Exception ex){
 			throw ex;
 		} finally {
@@ -175,52 +148,7 @@ final class RasterBuilder {
 			}
 		}
 	}
-
-	/**
-	 * Writes required world file
-	 * @param baseFile
-	 * @param gridSize
-	 * @param xmin
-	 * @param ymax
-	 * @throws IOException
-	 */
-	private void createWorldFile(final String baseFile,
-			double gridSize, double xmin, double ymax) throws IOException {
-		final File prjFile = new File(new StringBuffer(baseFile).append(".tfw") //$NON-NLS-1$
-				.toString());
-		try(BufferedWriter out = new BufferedWriter(new FileWriter(prjFile))){
-			out.write(String.valueOf(gridSize));
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write("0"); //$NON-NLS-1$
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write("0"); //$NON-NLS-1$
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write(String.valueOf(-gridSize));
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write(String.valueOf(xmin));
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write(String.valueOf(ymax));
-			out.write(SharedUtils.LINE_SEPARATOR);
-		}
-
-	}
 	
-	/**
-	 * Writes projection file
-	 * @param baseFile
-	 * @param coordinateReferenceSystem
-	 * @throws IOException
-	 */
-	private void createProjectionFile(final String baseFile,
-			final CoordinateReferenceSystem coordinateReferenceSystem)
-	
-			throws IOException {
-		final File prjFile = new File(new StringBuffer(baseFile).append(".prj") //$NON-NLS-1$
-				.toString());
-		try(BufferedWriter out = new BufferedWriter(new FileWriter(prjFile))){
-			out.write(coordinateReferenceSystem.toWKT());
-		}
-	}
 
 	/**
 	 * Creates a raster based on the list of values for band 0 

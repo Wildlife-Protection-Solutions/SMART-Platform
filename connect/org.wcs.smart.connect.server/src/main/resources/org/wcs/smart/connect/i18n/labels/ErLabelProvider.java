@@ -40,57 +40,26 @@ public class ErLabelProvider implements IErLabelProvider{
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item == SamplingUnit.GeometryType.PLOT){
-			return Messages.getString("ErLabelProvider.Point", l); //$NON-NLS-1$
-		}
-		if (item == SamplingUnit.GeometryType.TRANSECT){
-			return Messages.getString("ErLabelProvider.Line", l);  //$NON-NLS-1$
-		} 
-		if (item == SamplingUnit.State.ACTIVE){
-			return Messages.getString("ErLabelProvider.Active", l); //$NON-NLS-1$
-		}
-		if (item == SamplingUnit.State.INACTIVE){
-			return Messages.getString("ErLabelProvider.InActive", l); //$NON-NLS-1$
-		}
-		if (item == SurveyDesign.State.ACTIVE){
-			return Messages.getString("ErLabelProvider.SDActive", l); //$NON-NLS-1$
-		}
-		if (item == SurveyDesign.State.INACTIVE){
-			return Messages.getString("ErLabelProvider.SDInactive", l); //$NON-NLS-1$
-		}
-		if (item == MissionTrack.TrackType.TRACK){
-			return Messages.getString("ErLabelProvider.MissionTrackUnassociated", l); //$NON-NLS-1$
-		}
-		if (item == MissionTrack.TrackType.SAMPLING_UNIT){
-			return Messages.getString("ErLabelProvider.MissionTrackSU", l); //$NON-NLS-1$
-		}
-		if (item instanceof SurveyWaypointSource){
-			return  Messages.getString("ErLabelProvider.MissionTrackSurvey", l); //$NON-NLS-1$
-		}
-		
-		if (item.equals(ID_COLUMN_KEY)){
-			return "ID";
-		}
-		if (item.equals(LENGTH_COLUMN_KEY)){
-			return "Length (km)";
-		}
-		if (item.equals(STATE_COLUMN_KEY)){
-			return "State";
-		}
-		if (item.equals(SU_TABLE_LONGNAME_KEY)){
-			return "{0} [{1} - Sampling Units]";
-		}
-		if (item.equals(SD_TABLE_LONGNAME_KEY)){
-			return "{0} [Survey Design Properties]";
-		}
-		
-		if (item.equals(SD_DESCRIPTION_COL_KEY)) return "Description";
-		if (item.equals(SD_ENDDATE_COL_KEY)) return "End Date";
-		if (item.equals(SD_STARTDATE_COL_KEY)) return "Start Date";
-		if (item.equals(SD_STATUS_COL_KEY)) return "Status";
-		if (item.equals(SD_KEY_COL_KEY)) return "Key";
-		if (item.equals(SD_NAME_COL_KEY)) return "Name";
+		if (item == SamplingUnit.GeometryType.PLOT) return Messages.getString("ErLabelProvider.Point", l); //$NON-NLS-1$
+		if (item == SamplingUnit.GeometryType.TRANSECT) return Messages.getString("ErLabelProvider.Line", l);  //$NON-NLS-1$
+		if (item == SamplingUnit.State.ACTIVE) return Messages.getString("ErLabelProvider.Active", l); //$NON-NLS-1$
+		if (item == SamplingUnit.State.INACTIVE) return Messages.getString("ErLabelProvider.InActive", l); //$NON-NLS-1$
+		if (item == SurveyDesign.State.ACTIVE) return Messages.getString("ErLabelProvider.SDActive", l); //$NON-NLS-1$ 
+		if (item == SurveyDesign.State.INACTIVE) return Messages.getString("ErLabelProvider.SDInactive", l); //$NON-NLS-1$
+		if (item == MissionTrack.TrackType.TRACK) return Messages.getString("ErLabelProvider.MissionTrackUnassociated", l); //$NON-NLS-1$
+		if (item == MissionTrack.TrackType.SAMPLING_UNIT) return Messages.getString("ErLabelProvider.MissionTrackSU", l); //$NON-NLS-1$
+		if (item instanceof SurveyWaypointSource) return  Messages.getString("ErLabelProvider.MissionTrackSurvey", l); //$NON-NLS-1$
+		if (item.equals(ID_COLUMN_KEY)) return Messages.getString("ErLabelProvider.IDColumnName", l); //$NON-NLS-1$
+		if (item.equals(LENGTH_COLUMN_KEY)) return Messages.getString("ErLabelProvider.LengthColumName", l); //$NON-NLS-1$
+		if (item.equals(STATE_COLUMN_KEY)) return Messages.getString("ErLabelProvider.StatusColumnName", l); //$NON-NLS-1$
+		if (item.equals(SU_TABLE_LONGNAME_KEY)) return Messages.getString("ErLabelProvider.SuTableLogName", l); //$NON-NLS-1$
+		if (item.equals(SD_TABLE_LONGNAME_KEY)) return Messages.getString("ErLabelProvider.SuveyDesignTableName", l); //$NON-NLS-1$
+		if (item.equals(SD_DESCRIPTION_COL_KEY)) return Messages.getString("ErLabelProvider.DescriptionColumn", l); //$NON-NLS-1$
+		if (item.equals(SD_ENDDATE_COL_KEY)) return Messages.getString("ErLabelProvider.EndDateColumn", l); //$NON-NLS-1$
+		if (item.equals(SD_STARTDATE_COL_KEY)) return Messages.getString("ErLabelProvider.StartDateColumn", l); //$NON-NLS-1$
+		if (item.equals(SD_STATUS_COL_KEY)) return Messages.getString("ErLabelProvider.StatusColumn", l); //$NON-NLS-1$
+		if (item.equals(SD_KEY_COL_KEY)) return Messages.getString("ErLabelProvider.KeyColumn", l); //$NON-NLS-1$
+		if (item.equals(SD_NAME_COL_KEY)) return Messages.getString("ErLabelProvider.NameColumn", l); //$NON-NLS-1$
 		return null;
 	}
-
 }

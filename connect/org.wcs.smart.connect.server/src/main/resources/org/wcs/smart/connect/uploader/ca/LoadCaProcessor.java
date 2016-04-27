@@ -22,12 +22,14 @@
 package org.wcs.smart.connect.uploader.ca;
 
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
@@ -61,14 +63,14 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			
 			if (info.getStatus() != ConservationAreaInfo.Status.UPLOADING){
 				if (info.getStatus() == ConservationAreaInfo.Status.NODATA){
-					throw new Exception("Conservation Area deleted from server before Conservation Area import completed.  You need to re-export the Conservation Area to SMART Connect.");	
+					throw new Exception(Messages.getString("LoadCaProcessor.CaDeleted", item.getLocale()));	 //$NON-NLS-1$
 				}
 				//this shouldn't happen - somebody else has loaded data
-				throw new Exception("Another process has loaded data for this Conservation Area already.  Cannot duplicate data.");				
+				throw new Exception(Messages.getString("LoadCaProcessor.AlreadyProcessing", item.getLocale()));				 //$NON-NLS-1$
 			}
 			
 			//load data
-			PostgresqlCaLoader ldr = new PostgresqlCaLoader(session);
+			PostgresqlCaLoader ldr = new PostgresqlCaLoader(session, item);
 			ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()), info);
 			session.flush();
 			
@@ -83,7 +85,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			}else{
 				//this should never happen
 				info.setStatus(ConservationAreaInfo.Status.NODATA);
-				throw new Exception("Conservation Area was loaded but Conservation Area details were not found. Delete the Conservation area and try again.");
+				throw new Exception(Messages.getString("LoadCaProcessor.CaDetailsMissing", item.getLocale())); //$NON-NLS-1$
 			}
 			
 			//update item status
@@ -104,7 +106,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 				
 				session.update(item);
 				item.setStatus(Status.ERROR);
-				item.setMessage("Error extracting data: " + ex.getMessage());
+				item.setMessage(MessageFormat.format(Messages.getString("LoadCaProcessor.DataExtractionError", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
 				session.getTransaction().commit();
 			}catch (Exception ex2){
 				logger.log(Level.SEVERE, ex2.getMessage(), ex2);

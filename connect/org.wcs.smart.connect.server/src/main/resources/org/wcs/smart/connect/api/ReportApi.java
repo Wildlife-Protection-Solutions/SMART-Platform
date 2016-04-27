@@ -52,12 +52,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.HTMLServerImageHandler;
 import org.eclipse.birt.report.engine.api.IParameterDefn;
@@ -70,10 +71,12 @@ import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ReportParameter;
 import org.wcs.smart.connect.model.ReportParameter.Type;
 import org.wcs.smart.connect.report.BirtEngine;
@@ -137,7 +140,7 @@ public class ReportApi extends HttpServlet{
 			}
 		}
 		if (rformat == null){
-			throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format("Report format {1} not supported", format));
+			throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ReportApi.FormatNotSupported", request.getLocale()), format)); //$NON-NLS-1$
 		}
 		
 		List<ConservationArea> conservationAreas = new ArrayList<ConservationArea>();
@@ -147,14 +150,14 @@ public class ReportApi extends HttpServlet{
 			s.beginTransaction();
 			report = (Report) s.get(Report.class, uuid);
 			
-			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, "Report not found");
+			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
 			
 			//check for permission to this query for this user.
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, uuid)){
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid())){
 					//access is OK since they have access to All Queries in this CA.
 				}else{
-					return createErrorResponse(Status.UNAUTHORIZED, "You do not have permission to access this report."); 
+					return createErrorResponse(Status.UNAUTHORIZED, Messages.getString("ReportApi.InvalidAccess", request.getLocale()));  //$NON-NLS-1$
 				}
 			}
 			
@@ -182,8 +185,8 @@ public class ReportApi extends HttpServlet{
 						RenderOption options ;
 						if (rformat == ReportFormat.HTML){
 							options = new HTMLRenderOption();
-							((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images");
-							((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images"));
+							((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images"); //$NON-NLS-1$
+							((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images")); //$NON-NLS-1$
 							options.setOutputFormat(HTMLRenderOption.HTML);
 						}else{
 							options = new RenderOption();
@@ -195,16 +198,17 @@ public class ReportApi extends HttpServlet{
 		
 						IRunAndRenderTask task = new SmartReportRunner.SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal().getName());
 		
-						Map items = task.getAppContext();
+						Map<Object,Object> items = task.getAppContext();
 						items.put(SmartReportRunner.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
 						items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
 						items.put(SmartReportRunner.CA_PARAM, report.getConservationArea());
-						items.put("org.wcs.smart.report.ca.filter", conservationAreas);
+						items.put("org.wcs.smart.report.ca.filter", conservationAreas); //$NON-NLS-1$
 						
 						try{
 							Map<String, Object> parameters = new HashMap<String, Object>();
 							//put all the non-constant parameters in the hashmap
-							ConvertToMap(parameters, parameterList, s, uuid);
+
+							covertParametersToMap(parameters, parameterList, s, uuid);
 //							parameters.put("reportUuid", reportUuid);
 //							parameters.put("cafilter", cafilter);
 							
@@ -216,7 +220,7 @@ public class ReportApi extends HttpServlet{
 						}
 					
 						if(rformat != ReportFormat.HTML){
-							return writeBinary(bos, rformat.getResponseType());
+							return writeBinary(bos, rformat, report);
 						}else{
 							String html = bos.toString(StandardCharsets.UTF_8.name());
 							return writeHtml(html);
@@ -225,14 +229,14 @@ public class ReportApi extends HttpServlet{
 				}
 			}catch(Exception ex){
 				logger.log(Level.SEVERE, ex.getMessage(), ex);
-				throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error running report: " + ex.getMessage()); 
+				throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, Messages.getString("ReportApi.ReportError", request.getLocale()) + ex.getMessage());  //$NON-NLS-1$
 			}
 		}finally{
 			s.getTransaction().rollback();
 		}
 	}
 	
-	private Response writeBinary(ByteArrayOutputStream bos, String type){
+	private Response writeBinary(ByteArrayOutputStream bos, ReportFormat outFormat, Report r){
 			StreamingOutput sout = new StreamingOutput() {
 			
 			@Override
@@ -242,9 +246,13 @@ public class ReportApi extends HttpServlet{
 				
 			}
 		};
-		Response rs = Response.ok(sout, type + " " ) //$NON-NLS-1$
-	            .build();
-		return rs;
+		
+		ResponseBuilder rs = Response.ok(sout, outFormat.getResponseType() + " " ); //$NON-NLS-1$
+		String content = outFormat.getContentDisposition(URLUtils.cleanFilename(r.getName()));
+		if (content != null){
+			rs.header(HttpHeaders.CONTENT_DISPOSITION, content);
+		}
+		return rs.build();
 	}
 	
 	private Response writeHtml(final String html){
@@ -261,26 +269,6 @@ public class ReportApi extends HttpServlet{
 		Response rs = Response.ok(sout, MediaType.TEXT_HTML + "; charset=" + StandardCharsets.UTF_8.name()) //$NON-NLS-1$
 	            .build();
 		return rs;
-	}
-	
-	
-	private StreamingOutput getStream(final java.nio.file.Path thisfile){
-		if (thisfile == null) throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error executing query request."); //$NON-NLS-1$
-		return new StreamingOutput() {
-		      @Override
-		      public void write(OutputStream output) throws IOException {
-		        try {
-		        	if (thisfile != null){
-		        		FileUtils.copyFile(thisfile.toFile(), output);
-		        	}
-		        } catch (Exception e) {
-		           e.printStackTrace();
-		        }finally{
-		        	Files.deleteIfExists(thisfile);
-		        	
-		        }
-		      }
-		    };
 	}
 	
 	private List<ConservationArea> parseCaFilter(String caFilter, Session session){
@@ -348,6 +336,14 @@ public class ReportApi extends HttpServlet{
 		return allowed; 
 	}
 	
+	/**
+	 * Finds all reports
+	 * @param session
+	 * @param l
+	 * @param includeMyQueries
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
 	private List<ReportProxy> getReports(Session session, final Locale l, Boolean includeMyQueries){
 		List<ReportProxy> proxies = new ArrayList<ReportProxy>();
 		
@@ -400,7 +396,7 @@ public class ReportApi extends HttpServlet{
 
 			report = (Report) s.get(Report.class, uuid);
 			
-			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, "Report not found");
+			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
 			
 			HashMap<String, IParameterDefnBase> parameters = ParameterFinder.INSTANCE.getParameters(report, BirtEngine.getBirtEngine(context));
 			
@@ -420,11 +416,11 @@ public class ReportApi extends HttpServlet{
 						if (child instanceof IParameterDefn){
 							pp.getChildren().add(createParameter((IParameterDefn) child));
 						}else{
-							throw new Exception(MessageFormat.format("Child of group parameter group not supported: {0}.", param.getName()));
+							throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterNotSupported", request.getLocale()), param.getName())); //$NON-NLS-1$
 						}
 					}					
 				}else{
-					throw new Exception(MessageFormat.format("Parameter type not supported: {0}.", param.getName()));
+					throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterTypeNotSupported", request.getLocale()), param.getName())); //$NON-NLS-1$
 				}
 			}
 		
@@ -463,7 +459,7 @@ public class ReportApi extends HttpServlet{
 			break;
 		case IParameterDefn.TYPE_ANY:
 		default:
-			throw new Exception(MessageFormat.format("Parameter type {0} is not supported.", new Object[]{ param.getDataType() }));
+			throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterTypeNotSupported", request.getLocale()), new Object[]{ param.getDataType() })); //$NON-NLS-1$
 			
 		}
 		return pp;
@@ -478,15 +474,15 @@ public class ReportApi extends HttpServlet{
 				.build();
 	}
 	
-	private void ConvertToMap(Map<String, Object> m, String l, Session s, UUID uuid) throws Exception {
+	private void covertParametersToMap(Map<String, Object> m, String l, Session s, UUID uuid) throws Exception {
 		if (l.trim().isEmpty()) return;
 		List<ReportParameter> parameters = getParameters(uuid, s);
 		Object value;
-		List<String> items = Arrays.asList(l.split(","));
+		List<String> items = Arrays.asList(l.split(",")); //$NON-NLS-1$
 		for(int x=0; x < items.size(); x=x+2){
 			String name = items.get(x);
 			Type type = getType(name, parameters);
-			if (type == null) throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format("Invalid parameter: {0}", name));
+			if (type == null) throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ReportApi.InvalidParameter", request.getLocale()), name)); //$NON-NLS-1$
 			switch(type){
 				case DATE:
 					value = new java.sql.Date(SmartUtils.parseDate(items.get(x+1)).getTime());

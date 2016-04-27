@@ -199,7 +199,7 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public String createId(IResultItem rs) throws Exception {
-		return ((ObservationQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		return ((ObservationQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 
 

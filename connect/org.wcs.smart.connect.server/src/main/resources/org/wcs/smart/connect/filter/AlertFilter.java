@@ -39,6 +39,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
+import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -161,7 +162,6 @@ public class AlertFilter {
 				or.add(Restrictions.eq("level", levelFilter.get(x))); //$NON-NLS-1$
 			}
 			c.add(or);
-			
 		}
 		
 		//type
@@ -170,9 +170,10 @@ public class AlertFilter {
 			for(int x=0; x < typeUuidFilter.size();x++){
 				or.add(Restrictions.eq("typeUuid", typeUuidFilter.get(x) )); //$NON-NLS-1$
 			}
-			or.add(Restrictions.eq("typeUuid", UUID.fromString("00000000-0000-0000-0000-000000000000"))); //$NON-NLS-1$
+			or.add(Restrictions.eq("typeUuid", AlertType.NULL_TYPE)); //$NON-NLS-1$
 			c.add(or);
 		}
+		
 		//status
 		if(statusFilter != null){
 			Disjunction or = Restrictions.disjunction();

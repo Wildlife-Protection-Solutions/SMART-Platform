@@ -43,10 +43,8 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
-import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -160,25 +158,25 @@ public class ConnectStyleConfiguration extends HttpServlet {
     public StyleConfiguration addStyleConfiguration(MultipartFormDataInput input) {
 		validateUser(AlertAction.CREATE_ALERTS_KEY);
 		byte[] bg_image, header_image, login_image = null;
-		String body_style = "";
-		String header_style = "";
-		String footer_text= "";
-		String server_name ="";
+		String body_style = ""; //$NON-NLS-1$
+		String header_style = ""; //$NON-NLS-1$
+		String footer_text= ""; //$NON-NLS-1$
+		String server_name =""; //$NON-NLS-1$
 		
 		try{
-			InputStream in = input.getFormDataMap().get("bg_image").get(0).getBody(InputStream.class,null);
+			InputStream in = input.getFormDataMap().get("bg_image").get(0).getBody(InputStream.class,null); //$NON-NLS-1$
 			bg_image = IOUtils.toByteArray(in);
 			
-			InputStream in2 = input.getFormDataMap().get("header_image").get(0).getBody(InputStream.class,null);
+			InputStream in2 = input.getFormDataMap().get("header_image").get(0).getBody(InputStream.class,null); //$NON-NLS-1$
 			header_image = IOUtils.toByteArray(in2);
 			
-			InputStream in3 = input.getFormDataMap().get("login_image").get(0).getBody(InputStream.class,null);
+			InputStream in3 = input.getFormDataMap().get("login_image").get(0).getBody(InputStream.class,null); //$NON-NLS-1$
 			login_image = IOUtils.toByteArray(in3);
 			
-			header_style = input.getFormDataMap().get("header_style").get(0).getBodyAsString();
-			body_style = input.getFormDataMap().get("body_style").get(0).getBodyAsString();
-			footer_text= input.getFormDataMap().get("footer_text").get(0).getBodyAsString();
-			server_name = input.getFormDataMap().get("server_name").get(0).getBodyAsString();
+			header_style = input.getFormDataMap().get("header_style").get(0).getBodyAsString(); //$NON-NLS-1$
+			body_style = input.getFormDataMap().get("body_style").get(0).getBodyAsString(); //$NON-NLS-1$
+			footer_text= input.getFormDataMap().get("footer_text").get(0).getBodyAsString(); //$NON-NLS-1$
+			server_name = input.getFormDataMap().get("server_name").get(0).getBodyAsString(); //$NON-NLS-1$
 
 
 	    }catch (Exception ex){
@@ -192,7 +190,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		newStyle.setBackgroundImage(bg_image);
 		newStyle.setLoginImage(login_image);
 
-		newStyle.setStyleId("The Style");
+		newStyle.setStyleId("The Style"); //$NON-NLS-1$
 		newStyle.setBodyStyle(body_style);
 		newStyle.setHeaderStyle(header_style);
 		newStyle.setFooterText(footer_text);
@@ -236,10 +234,10 @@ public class ConnectStyleConfiguration extends HttpServlet {
     public StyleConfiguration editStyleConfiguration(MultipartFormDataInput input) {
 		validateUser(AlertAction.CREATE_ALERTS_KEY);
 		byte[] bg_image, header_image, login_image = null;
-		String body_style = "";
-		String header_style = "";
-		String footer_text= "";
-		String server_name ="";
+		String body_style = ""; //$NON-NLS-1$
+		String header_style = ""; //$NON-NLS-1$
+		String footer_text= ""; //$NON-NLS-1$
+		String server_name =""; //$NON-NLS-1$
 		
 		StyleConfiguration style;
 		Session s = HibernateManager.getSession(context);
@@ -253,19 +251,19 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		}
 		
 		try{
-			InputStream in = input.getFormDataMap().get("bg_image").get(0).getBody(InputStream.class,null);
+			InputStream in = input.getFormDataMap().get("bg_image").get(0).getBody(InputStream.class,null); //$NON-NLS-1$
 			bg_image = IOUtils.toByteArray(in);
 			
-			InputStream in2 = input.getFormDataMap().get("header_image").get(0).getBody(InputStream.class,null);
+			InputStream in2 = input.getFormDataMap().get("header_image").get(0).getBody(InputStream.class,null); //$NON-NLS-1$
 			header_image = IOUtils.toByteArray(in2);
 			
-			InputStream in3 = input.getFormDataMap().get("login_image").get(0).getBody(InputStream.class,null);
+			InputStream in3 = input.getFormDataMap().get("login_image").get(0).getBody(InputStream.class,null); //$NON-NLS-1$
 			login_image = IOUtils.toByteArray(in3);
 			
-			header_style = input.getFormDataMap().get("header_style").get(0).getBodyAsString();
-			body_style = input.getFormDataMap().get("body_style").get(0).getBodyAsString();
-			footer_text= input.getFormDataMap().get("footer_text").get(0).getBodyAsString();
-			server_name = input.getFormDataMap().get("server_name").get(0).getBodyAsString();
+			header_style = input.getFormDataMap().get("header_style").get(0).getBodyAsString(); //$NON-NLS-1$
+			body_style = input.getFormDataMap().get("body_style").get(0).getBodyAsString(); //$NON-NLS-1$
+			footer_text= input.getFormDataMap().get("footer_text").get(0).getBodyAsString(); //$NON-NLS-1$
+			server_name = input.getFormDataMap().get("server_name").get(0).getBodyAsString(); //$NON-NLS-1$
 
 	    }catch (Exception ex){
 	    	throw new SmartConnectException(ex.getMessage(), ex);
@@ -327,7 +325,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		try{
 			toDelete = HibernateManager.getStyleConfiguration(s);
 			if (toDelete == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConnectStyle.StyleNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.NOT_FOUND, ""); //$NON-NLS-1$
 			}
 			s.delete(toDelete);
 			s.flush();

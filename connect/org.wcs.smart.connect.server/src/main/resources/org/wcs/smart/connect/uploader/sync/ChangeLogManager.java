@@ -35,8 +35,10 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
+import org.wcs.smart.connect.model.WorkItem;
 
 /**
  * Postgresql specific manager for interacting with the
@@ -208,12 +210,12 @@ public enum ChangeLogManager {
 	 * @param startRevision
 	 * @return
 	 */
-	public List<ChangeLogItem> getItems(Session session, UUID caUuid, long startRevision){
+	public List<ChangeLogItem> getItems(Session session, UUID caUuid, long startRevision, WorkItem item){
 
 		//first check that the start revision is after the last clean up revision
 		if (startRevision < getLastDeleteRevision(session, caUuid)){
 //			//some change log items were removed so we cannot sync this class
-			throw new SmartConnectException(Status.NOT_FOUND, "The change log table on server has been cleaned up since your last request.  You must re-download the entire conservation area from SMART Connect to reestablish replication.");
+			throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ChangeLogManager.ChangeLogError", item.getLocale())); //$NON-NLS-1$
 		}
 		
 		StringBuilder query = new StringBuilder();

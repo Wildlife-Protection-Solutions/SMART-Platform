@@ -61,7 +61,7 @@ public class QueryResultSetIterator<T extends IResultItem> implements IQueryResu
 		return itOffset + itIndex + 1 < rs.getItemCount();
 	}
 	private void init(){
-		queryResults = rs.getResultSet(session);
+		if (rs.getItemCount() > 0) queryResults = rs.getResultSet(session);
 	}
 
 	@Override

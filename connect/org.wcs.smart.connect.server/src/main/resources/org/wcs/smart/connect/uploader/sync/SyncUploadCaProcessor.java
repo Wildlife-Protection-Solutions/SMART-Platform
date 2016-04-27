@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.wcs.smart.connect.database.LockManager;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConservationAreaInfo.Status;
 import org.wcs.smart.connect.model.WorkItem;
@@ -63,7 +64,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 			//set error status
 			session.beginTransaction();
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
-			item.setMessage(MessageFormat.format("Error processing item {0}: {1}.", item.getUuid().toString(), ex.getMessage()));
+			item.setMessage(MessageFormat.format(Messages.getString("SyncUploadCaProcessor.ProcessingError", item.getLocale()), item.getUuid().toString(), ex.getMessage())); //$NON-NLS-1$
 			session.getTransaction().commit();
 			
 			cleanUp(item);
@@ -79,12 +80,12 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 	
 				ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
 				if (info.getStatus() == Status.NODATA){
-					throw new Exception("No data loaded for conservation area.  Cannot sync until data has been uploaded.");
+					throw new Exception(Messages.getString("SyncUploadCaProcessor.CaNoData", item.getLocale())); //$NON-NLS-1$
 				}
 				
 				//load data
 				Path file = DataStoreManager.INSTANCE.getFile(item.getLocalFilename()).toPath();
-				PostgresqlSyncProcessor processor = new PostgresqlSyncProcessor(file, info, session);
+				PostgresqlSyncProcessor processor = new PostgresqlSyncProcessor(file, info, session, item);
 				processor.processFile();
 				
 				session.flush();
@@ -101,7 +102,9 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 				
 				session.beginTransaction();
 				item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
-				item.setMessage(MessageFormat.format("Error processing work item: {0}", ex.getMessage()));
+				try{
+					item.setMessage(MessageFormat.format(Messages.getString("SyncUploadCaProcessor.ProcessingError2", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
+				}catch (Exception ex2){}
 				session.getTransaction().commit();
 			}
 		}finally{

@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.report.model.Report;
 
@@ -45,7 +46,7 @@ public class ReportAction implements ISmartConnectAction{
 	@Override
 	public String getActionName(String actionKey, Locale l) {
 		if (actionKey.equals(RUNREPORT_KEY)){
-			return "Run Report"; //$NON-NLS-1$
+			return Messages.getString("ReportAction.RunReportAction", l); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -55,17 +56,18 @@ public class ReportAction implements ISmartConnectAction{
 		return new String[]{RUNREPORT_KEY};
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
 
 		List<ResourceOption> ops = new ArrayList<ResourceOption>();
-		ResourceOption ro = new ResourceOption("All Reports", null); //$NON-NLS-1$
+		ResourceOption ro = new ResourceOption(Messages.getString("ReportAction.AllReportsLabel", l), null);  //$NON-NLS-1$
 		ops.add(ro);
 		
 		//Get all CAs and add an "All Queries from XYZ" option for each
 		List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
 		for (ConservationAreaInfo ca : db){
-			ResourceOption r = new ResourceOption(MessageFormat.format("All Reports from {0}", ca.getLabel()), ca.getUuid()); //$NON-NLS-1$
+			ResourceOption r = new ResourceOption(MessageFormat.format(Messages.getString("ReportAction.AllReportsFromCaLabel", l), ca.getLabel()), ca.getUuid());  //$NON-NLS-1$
 			ops.add(r);
 		}
 		
@@ -81,13 +83,13 @@ public class ReportAction implements ISmartConnectAction{
 
 	@Override
 	public String getResourceName(UUID resource, Session s, Locale l) {
-		if (resource == null) return "All Reports"; //$NON-NLS-1$
+		if (resource == null) return Messages.getString("ReportAction.AllReportsLabel", l); //$NON-NLS-1$
 		
 		
 		//Check if the resource is a CA UUIID
 		ConservationAreaInfo cainfo = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, resource);
 		if(cainfo != null){
-			return MessageFormat.format("All Reports from {0}", cainfo.getLabel()); //$NON-NLS-1$
+			return MessageFormat.format(Messages.getString("ReportAction.AllReportsFromCaLabel", l), cainfo.getLabel());  //$NON-NLS-1$
 		}
 		
 		Report localReport = (Report) s.get(Report.class, resource);

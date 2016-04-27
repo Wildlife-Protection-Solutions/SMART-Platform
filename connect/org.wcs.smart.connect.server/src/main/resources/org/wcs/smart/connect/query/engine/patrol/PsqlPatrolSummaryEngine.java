@@ -599,8 +599,9 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		
 		//do something here with sql
 		logger.finest(sql.toString());
-		ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
-		return createValueResults(rs, groupBy, patrolItem.asString());
+		try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery()){
+			return createValueResults(rs, groupBy, patrolItem.asString());
+		}
 	}
 
 	
@@ -691,8 +692,9 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 
 			// do something here with sql
 			logger.finest(sql.toString());
-			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
-			return createValueResults(rs, groupBy, attributeItem.asString());
+			try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery()){
+				return createValueResults(rs, groupBy, attributeItem.asString());
+			}
 		} else if (attributeItem.getAttributeType() == AttributeType.LIST) {
 			StringBuilder fromSql = new StringBuilder();
 			
@@ -777,8 +779,9 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			
 			//do something here with sql
 			logger.finest(sql.toString());
-			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
-			return createValueResults(rs, groupBy, attributeItem.asString());
+			try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery()){
+				return createValueResults(rs, groupBy, attributeItem.asString());
+			}
 		} else if (attributeItem.getAttributeType() == AttributeType.TREE) {
 			StringBuilder fromSql = new StringBuilder();
 			
@@ -863,8 +866,9 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			}
 			
 			logger.finest(sql.toString());
-			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
-			return createValueResults(rs, groupBy, attributeItem.asString());
+			try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery()){
+				return createValueResults(rs, groupBy, attributeItem.asString());
+			}
 		}
 		return null;
 	}
@@ -915,7 +919,6 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			SummaryResultKey key = new SummaryResultKey(valueKey, groupby);
 			results.put(key, rs.getDouble(rsindex++));
 		}
-		rs.close();
 		return results;
 	}
 	
@@ -1066,8 +1069,9 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		}
 		
 		logger.finest(sql.toString());
-		ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
-		return createValueResults(rs, groupBy, categoryItem.asString());
+		try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery()){
+			return createValueResults(rs, groupBy, categoryItem.asString());
+		}
 	}
 	
 	/**

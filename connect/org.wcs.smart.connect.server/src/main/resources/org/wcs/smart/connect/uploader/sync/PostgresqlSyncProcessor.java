@@ -31,11 +31,15 @@ import org.apache.commons.io.FileUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ZipUtil;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.connect.uploader.ca.CaProcessorUtils;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * A postgresql specific processor for processing a change
@@ -51,13 +55,16 @@ public class PostgresqlSyncProcessor {
 	private Session session;
 	private ConservationAreaInfo info;
 	private PackageMetadata metadata;
+	private WorkItem item;
 	
-	public PostgresqlSyncProcessor(Path file, ConservationAreaInfo info, Session session){
+	public PostgresqlSyncProcessor(Path file, ConservationAreaInfo info, Session session, WorkItem item){
 		this.zipFile = file;
 		this.info = info;
 		this.session = session;
+		this.item = item;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void processFile() throws Exception{
 		
 		//create a temporary location to unzip file
@@ -79,29 +86,29 @@ public class PostgresqlSyncProcessor {
 				}
 			}
 			if (metadataFile == null){
-				throw new Exception("Invalid sync package, no metadata file provided.");
+				throw new Exception(Messages.getString("PostgresqlSyncProcessor_NoMetadataFile", item.getLocale())); //$NON-NLS-1$
 			}
 			if (changeLogFile == null){
-				throw new Exception("Invalid sync package, no change log file provided.");
+				throw new Exception(Messages.getString("PostgresqlSyncProcessor_NoChangeLogFile", item.getLocale())); //$NON-NLS-1$
 			}
 			//check metadata
 			metadata = MetadataPackager.INSTANCE.readMetadata(metadataFile);
 			//check ca
 			if (!info.getUuid().equals(metadata.getConservationArea())){
-				throw new Exception("Conservation area uuids do not match");
+				throw new Exception(Messages.getString("PostgresqlSyncProcessor_CaUuidError", item.getLocale())); //$NON-NLS-1$
 			}
 			//check version
 			if (!info.getVersion().equals(metadata.getVersion())){
-				throw new Exception("Conservation area versions do not match");
+				throw new Exception(Messages.getString("PostgresqlSyncProcessor_CaVersionError", item.getLocale())); //$NON-NLS-1$
 			}
 			
 			//check revision
 			long serverRevision = ChangeLogManager.INSTANCE.getLastRevision(session, info.getUuid());
 			if (metadata.getServerRevision() > serverRevision ){
-				throw new Exception("Invalid server revision.  Cannot sync package");
+				throw new Exception(Messages.getString("PostgresqlSyncProcessor_InvalidServerRevision", item.getLocale())); //$NON-NLS-1$
 			}
 			if (metadata.getServerRevision() < serverRevision){
-				throw new Exception("Local copy not up-to-date.  You must download and apply changes from the server before you can upload your changes.");
+				throw new Exception(Messages.getString("PostgresqlSyncProcessor_LocalCopyNotUpToDate", item.getLocale())); //$NON-NLS-1$
 			}
 			
 			
@@ -117,10 +124,10 @@ public class PostgresqlSyncProcessor {
 				String version = metadata.getPluginVersion(pluginid);
 				String dbVersion = dbVersions.get(pluginid);
 				if (dbVersion == null){
-					throw new Exception("The connect server does not have the plugin " + pluginid + " installed. You cannot sync without this plugin installed.");
+					throw new Exception(MessageFormat.format(Messages.getString("PostgresqlSyncProcessor.MissingPlugin", item.getLocale()), pluginid)); //$NON-NLS-1$
 				}
 				if (!version.equals(dbVersion)){
-					throw new Exception("The connect server has different version for plugin " + pluginid + ". (server: " + dbVersion + " / client:" + version);
+					throw new Exception(MessageFormat.format(Messages.getString("PostgresqlSyncProcessor.InvalidPluginVersion", item.getLocale()), pluginid, dbVersion, version)); //$NON-NLS-1$
 				}
 			}
 			

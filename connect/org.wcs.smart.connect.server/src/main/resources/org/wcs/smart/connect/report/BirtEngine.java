@@ -38,9 +38,6 @@ import org.eclipse.birt.report.engine.api.IReportEngineFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.locationtech.udig.catalog.internal.wms.WmsPlugin;
-import org.locationtech.udig.catalog.rasterings.RasteringsPlugin;
-import org.locationtech.udig.project.internal.ProjectPlugin;
-import org.locationtech.udig.project.preferences.PreferenceConstants;
 import org.locationtech.udig.render.wms.basic.WMSPlugin;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.report.udig.CatalogPluginWrapper;
@@ -65,36 +62,38 @@ public class BirtEngine {
 
 	public static synchronized IReportEngine getBirtEngine(ServletContext sc) {
 		if (birtEngine == null) {
+			System.setProperty("org.geotools.referencing.forceXY", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+			
 			SmartContext.INSTANCE.setClass(ISmartConnectionFactory.class, new ConnectionFactory());
 			EngineConfig config = new EngineConfig();
 			if (configProps != null) {
-				String logLevel = configProps.getProperty("logLevel");
+				String logLevel = configProps.getProperty("logLevel"); //$NON-NLS-1$
 				Level level = Level.OFF;
-				if ("SEVERE".equalsIgnoreCase(logLevel)) {
+				if ("SEVERE".equalsIgnoreCase(logLevel)) {  //$NON-NLS-1$
 					level = Level.SEVERE;
-				} else if ("WARNING".equalsIgnoreCase(logLevel)) {
+				} else if ("WARNING".equalsIgnoreCase(logLevel)) {  //$NON-NLS-1$
 					level = Level.WARNING;
-				} else if ("INFO".equalsIgnoreCase(logLevel)) {
+				} else if ("INFO".equalsIgnoreCase(logLevel)) { //$NON-NLS-1$
 					level = Level.INFO;
-				} else if ("CONFIG".equalsIgnoreCase(logLevel)) {
+				} else if ("CONFIG".equalsIgnoreCase(logLevel)) { //$NON-NLS-1$
 					level = Level.CONFIG;
-				} else if ("FINE".equalsIgnoreCase(logLevel)) {
+				} else if ("FINE".equalsIgnoreCase(logLevel)) { //$NON-NLS-1$
 					level = Level.FINE;
-				} else if ("FINER".equalsIgnoreCase(logLevel)) {
+				} else if ("FINER".equalsIgnoreCase(logLevel)) { //$NON-NLS-1$
 					level = Level.FINER;
-				} else if ("FINEST".equalsIgnoreCase(logLevel)) {
+				} else if ("FINEST".equalsIgnoreCase(logLevel)) { //$NON-NLS-1$
 					level = Level.FINEST;
-				} else if ("OFF".equalsIgnoreCase(logLevel)) {
+				} else if ("OFF".equalsIgnoreCase(logLevel)) { //$NON-NLS-1$
 					level = Level.OFF;
 				}
-
-				config.setLogConfig(configProps.getProperty("logDirectory"),
-						level);
+				config.setLogConfig(configProps.getProperty("logDirectory"),level); //$NON-NLS-1$
 			}
 			config.setResourcePath(SmartContext.INSTANCE.getFilestoreLocation());
+			
 			config.getAppContext().put(
 					EngineConstants.APPCONTEXT_CLASSLOADER_KEY,
 					Thread.currentThread().getContextClassLoader());
+			
 			// if you are using 3.7 POJO Runtime no need to setEngineHome
 			//config.setEngineHome("");
 			IPlatformContext context = new PlatformServletContext(sc);

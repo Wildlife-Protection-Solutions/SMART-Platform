@@ -16,7 +16,6 @@ import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.util.UuidUtils;
 
 public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet {
 

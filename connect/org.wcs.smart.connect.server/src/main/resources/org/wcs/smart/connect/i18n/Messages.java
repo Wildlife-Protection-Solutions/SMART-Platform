@@ -34,9 +34,15 @@ public class Messages {
 
 	public static String getString(String key, Locale locale) {
 		try {
-			String value = ResourceBundle.getBundle(BUNDLE_NAME,locale).getString(key);
+			String value = null;
+			if (locale != null){
+				value = ResourceBundle.getBundle(BUNDLE_NAME,locale).getString(key);
+			}
 			if (value == null){
 				value = ResourceBundle.getBundle(BUNDLE_NAME).getString(key);
+			}
+			if (value == null){
+				value = '!' + key + '!';
 			}
 			return value;
 		} catch (MissingResourceException e) {

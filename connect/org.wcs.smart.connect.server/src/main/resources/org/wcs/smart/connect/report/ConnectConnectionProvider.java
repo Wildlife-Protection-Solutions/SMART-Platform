@@ -5,7 +5,6 @@ import java.util.Locale;
 import javax.servlet.ServletContext;
 
 import org.hibernate.Session;
-import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 

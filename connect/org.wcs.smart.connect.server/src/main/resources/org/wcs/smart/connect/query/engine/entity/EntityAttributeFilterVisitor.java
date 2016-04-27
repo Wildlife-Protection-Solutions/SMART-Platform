@@ -41,6 +41,7 @@ import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -224,7 +225,9 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				try{
 					tmp.append(PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, engine.tablePrefix(EntityType.class), tempEngine));
 					logger.finest(tmp.toString());
-					tempEngine.parseQueryString(c, tmp.toString()).executeUpdate();
+					try(NamedPreparedStatement ps = tempEngine.parseQueryString(c, tmp.toString())){
+						ps.executeUpdate();
+					}
 				}catch (Exception ex){
 					throw new RuntimeException(ex);
 				}

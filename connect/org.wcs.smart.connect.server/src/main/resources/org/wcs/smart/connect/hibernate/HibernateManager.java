@@ -115,6 +115,7 @@ public class HibernateManager {
 	 * @param username
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<SmartUserRole> getUserRoles(Session session, String username){
 		return (ArrayList<SmartUserRole>)session
 				.createCriteria(SmartUserRole.class)
@@ -182,7 +183,7 @@ public class HibernateManager {
 	public static List<AlertType> getAlertTypes(Session session) {
 		return (List<AlertType>)session
 				.createCriteria(AlertType.class)
-				.add(Restrictions.ne("uuid", UUID.fromString("00000000-0000-0000-0000-000000000000"))) //$NON-NLS-1$
+				.add(Restrictions.ne("uuid", AlertType.NULL_TYPE)) //$NON-NLS-1$
 				.addOrder(Order.asc("label")) //$NON-NLS-1$
 				.list();
 	}
@@ -206,7 +207,7 @@ public class HibernateManager {
 		AlertType a = (AlertType)session
 				.createCriteria(AlertType.class)
 				.add(Restrictions.eq("uuid", typeUuid)) //$NON-NLS-1$
-				.add(Restrictions.ne("uuid", UUID.fromString("00000000-0000-0000-0000-000000000000"))) //$NON-NLS-1$
+				.add(Restrictions.ne("uuid", AlertType.NULL_TYPE)) //$NON-NLS-1$
 				.uniqueResult();
 		return a;
 	}
@@ -302,9 +303,15 @@ public class HibernateManager {
 		return activeUsers;
 	}
 
+	/**
+	 * Returns the system role (not the connect roles).
+	 * 
+	 * @param s
+	 * @return
+	 */
 	public static SmartRole getSmartRole(Session s) {
 		return (SmartRole) s.createCriteria(SmartRole.class)
-		.add(Restrictions.eq("roleName", "SYSTEM ROLE")) //$NON-NLS-1$
+		.add(Restrictions.eq("roleName", SmartRole.SYSTEM_ROLE_NAME))  //$NON-NLS-1$
 		.uniqueResult();
 	}
 }

@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -83,7 +84,7 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 		}
 		
 		if (this.wrapperObject == null){
-			throw new OdaException(MessageFormat.format("The query type {0} not supported in reports.", new Object[]{bits[0]}));
+			throw new OdaException(MessageFormat.format(Messages.getString("SmartQuery.QuerytypeNotSupported",connection.getCurrentLocale()), bits[0])); //$NON-NLS-1$
 		}			
 
 		if (smartQuery == null) {

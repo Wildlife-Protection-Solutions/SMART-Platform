@@ -64,6 +64,7 @@ public class CaAction implements ISmartConnectAction{
 		return new String[]{ADDCA_KEY, VIEWCA_KEY, UPDATECA_KEY, DELETECA_KEY};
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
 		if (actionKey.equals(ADDCA_KEY)){

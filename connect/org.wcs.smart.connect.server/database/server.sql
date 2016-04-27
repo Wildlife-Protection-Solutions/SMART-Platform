@@ -35,6 +35,7 @@ CREATE TABLE connect.work_item
 	local_filename varchar not null,
 	type varchar(16) not null,
 	status varchar(16) not null,
+	locale varchar(56) not null,
 	message varchar,
 	PRIMARY KEY (uuid)
 ) WITHOUT OIDS;
@@ -236,7 +237,7 @@ create table connect.connect_version
 last_updated timestamp default (now())
 )WITHOUT OIDS;
 
-insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, true, true, true, true,'','', 30, 8 , -7.5, 34);
+--insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, true, true, true, true,'','', 30, 8 , -7.5, 34);
 
 
 

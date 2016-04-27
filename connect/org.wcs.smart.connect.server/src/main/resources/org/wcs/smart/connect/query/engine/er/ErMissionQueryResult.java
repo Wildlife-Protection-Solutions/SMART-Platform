@@ -104,7 +104,7 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 
 	@Override
 	public String createId(IResultItem rs) throws Exception {
-		return ((SurveyQueryResultItem)rs).getMissionId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		return ((SurveyQueryResultItem)rs).getMissionId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 
 
@@ -130,7 +130,7 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 				+ " GROUP BY " //$NON-NLS-1$
 				+ sb.toString().substring(0, sb.length() - 1);
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery(sql); //$NON-NLS-1$
+						ResultSet.CONCUR_READ_ONLY).executeQuery(sql);
 			}
 		});
 	}

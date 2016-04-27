@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
@@ -66,7 +67,7 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 			
 			session.beginTransaction();
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
-			item.setMessage(MessageFormat.format("Error processing work item: {0}", ex.getMessage()));
+			item.setMessage(MessageFormat.format(Messages.getString("DataQueueProcessor.DataQueueProcessorError", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
 			session.getTransaction().commit();
 		}
 	}

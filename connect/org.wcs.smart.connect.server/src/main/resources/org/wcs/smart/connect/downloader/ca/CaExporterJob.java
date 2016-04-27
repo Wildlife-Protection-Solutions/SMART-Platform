@@ -130,7 +130,7 @@ public class CaExporterJob implements Runnable {
 						s.beginTransaction();
 						s.saveOrUpdate(item);
 						item.setStatus(Status.ERROR);
-						item.setMessage("{\"error\": " + "Error packaging Conservation Area for export. " + ex.getMessage() + "\"}"); //$NON-NLS-1$
+						item.setMessage("{\"error\": \"" + MessageFormat.format(Messages.getString("CaExporterJob.caExportError", item.getLocale()), ex.getMessage()) + "\"}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						s.getTransaction().commit();
 					}
 				}

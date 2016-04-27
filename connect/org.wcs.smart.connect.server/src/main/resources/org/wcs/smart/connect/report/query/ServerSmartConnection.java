@@ -31,6 +31,7 @@ import java.util.Map;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -44,10 +45,10 @@ import org.wcs.smart.report.execute.SmartReportRunner;
  * Implementation class of IConnection for SMART ODA runtime driver.
  */
 public class ServerSmartConnection extends SmartConnection {
-
 	
 	private SmartBirtTableUtils tableFinder = null;
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void openSession(){
 		localSession = (Session) ((Map)appContext).get(SmartReportRunner.SESSION_PARAM);
@@ -84,7 +85,7 @@ public class ServerSmartConnection extends SmartConnection {
 			SmartBirtTable table = tableFinder.findTable(queryText, this);
 			if (table == null){
 				throw new OdaException(
-						MessageFormat.format("Could not find SMART data table {0}.", new Object[]{queryText}));
+						MessageFormat.format(Messages.getString("ServerSmartConnection.DataTableNotFound", getCurrentLocale()), new Object[]{queryText})); //$NON-NLS-1$
 			}
 			return table;
 		}catch (Exception ex){
@@ -92,6 +93,7 @@ public class ServerSmartConnection extends SmartConnection {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<ConservationArea> getConservationAreas() {
 		Object x = appContext.get("org.wcs.smart.report.ca.filter");
@@ -104,7 +106,7 @@ public class ServerSmartConnection extends SmartConnection {
 
 	@Override
 	public String getDataSourceProductName() {
-		return "Smart Data Source";
+		return Messages.getString("ServerSmartConnection.DataSourceName", getCurrentLocale()); //$NON-NLS-1$
 	}
 
 }

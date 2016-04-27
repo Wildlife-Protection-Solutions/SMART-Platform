@@ -36,7 +36,6 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -112,7 +111,7 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 					EntityQueryResultItem it = (EntityQueryResultItem) rii;
 					if (it.getObservationUuid() != null) {
 						uuids.add(it.getObservationUuid());
-						sql.append("?,");
+						sql.append("?,"); //$NON-NLS-1$
 					}
 				}
 				sql.deleteCharAt(sql.length() - 1);
@@ -275,7 +274,7 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public String createId(IResultItem rs) throws Exception {
-		return ((EntityQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		return ((EntityQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 
 

@@ -337,7 +337,7 @@ function showParamaterSelection(){
  }
 
 function isFoundInRow(row){
-	if(isIn(row.conservationArea)|| isIn(row.name)|| isIn(row.type)|| isIn(row.id)){
+	if(isIn(row.conservationArea)|| isIn(row.name)|| isIn(row.id)){
 		return true;
 	}
 	return false;

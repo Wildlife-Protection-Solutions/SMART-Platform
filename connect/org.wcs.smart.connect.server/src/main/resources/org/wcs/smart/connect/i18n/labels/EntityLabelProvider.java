@@ -43,12 +43,12 @@ public class EntityLabelProvider implements IEntityLabelProvider{
 		if (item == EntityType.Type.FIXED) return Messages.getString("EntityLabelProvider.FixedLabel", l); //$NON-NLS-1$
 		if (item == EntityType.Type.TRANSIENT) return Messages.getString("EntityLabelProvider.TransientLabel", l); //$NON-NLS-1$
 
-		if (item.equals(ENTITY_TYPE_REPORT_KEY )) return "{0} [Entity Type]";
-		if (item.equals(ID_FIELD_KEY)) return "ID";
-		if (item.equals(STATUS_FIELD_KEY)) return "Status";
-		if (item.equals(X_FIELD_KEY)) return "X Position";
-		if (item.equals(Y_FIELD_KEY)) return "Y Position";
-		if (item.equals(CA_FIELD_KEY)) return "Conservation Area ID";
+		if (item.equals(ENTITY_TYPE_REPORT_KEY )) return Messages.getString("EntityLabelProvider.EneityType", l); //$NON-NLS-1$
+		if (item.equals(ID_FIELD_KEY)) return Messages.getString("EntityLabelProvider.EntityIDColumn", l); //$NON-NLS-1$
+		if (item.equals(STATUS_FIELD_KEY)) return Messages.getString("EntityLabelProvider.EntityStatusColumn", l); //$NON-NLS-1$
+		if (item.equals(X_FIELD_KEY)) return Messages.getString("EntityLabelProvider.EntityXColumn", l); //$NON-NLS-1$
+		if (item.equals(Y_FIELD_KEY)) return Messages.getString("EntityLabelProvider.EntityYColumn", l); //$NON-NLS-1$
+		if (item.equals(CA_FIELD_KEY)) return Messages.getString("EntityLabelProvider.EntityCaId", l); //$NON-NLS-1$
 		return null;
 	}
 

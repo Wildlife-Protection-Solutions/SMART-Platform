@@ -55,9 +55,11 @@ import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.WorkItem;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -90,9 +92,11 @@ public class PostgresqlCaLoader {
 		"smart.connect_data_queue"}; //$NON-NLS-1$
 	
 	private Session session;
+	private WorkItem item;
 	
-	public PostgresqlCaLoader(Session session){
+	public PostgresqlCaLoader(Session session, WorkItem item){
 		this.session = session;
+		this.item = item;
 	}
 	
 	public void importData(File zipFile, ConservationAreaInfo ca) throws Exception {
@@ -164,7 +168,7 @@ public class PostgresqlCaLoader {
 		while(tablesToProcess.size() > 0){
 			String tableName = tablesToProcess.poll();
 			if (last.equals(tableName)){
-				throw new Exception("Circular table dependencies");
+				throw new Exception(Messages.getString("PostgresqlCaLoader.CircularDep", item.getLocale())); //$NON-NLS-1$
 			}
 			HashSet<String> requires = keys.get(tableName);
 			boolean exportTable = false;
@@ -185,10 +189,10 @@ public class PostgresqlCaLoader {
 			
 			if (exportTable){
 				List<TableInfo> infos = tables.get(tableName);
-				if (infos == null) throw new Exception("Could not get tableinfo for table. " + tableName);
+				if (infos == null) throw new Exception(MessageFormat.format(Messages.getString("PostgresqlCaLoader.TableInfoNotFound", item.getLocale()), tableName)); //$NON-NLS-1$
 				for (TableInfo info : infos){
 					if (!info.getDataFile().exists()){
-						throw new Exception(MessageFormat.format("Missing data file ({1}) for table {0}.", new Object[]{ tableName, info.getDataFile().getAbsolutePath()}));
+						throw new Exception(MessageFormat.format(Messages.getString("PostgresqlCaLoader.MissingDataFile", item.getLocale()), tableName, info.getDataFile().getAbsolutePath())); //$NON-NLS-1$
 					}
 					if (!toIngore.contains(tableName.toLowerCase())){
 						importData(tableName, info.getColumns(), info.getDataFile() );
@@ -244,16 +248,16 @@ public class PostgresqlCaLoader {
 		for (CaPluginVersion v : caPlugins){
 			String sv = connect.get(v.getPluginId());
 			if (sv == null){
-				sb.append(v.getPluginId() + ": Not supported on connect, ");
+				sb.append(MessageFormat.format(Messages.getString("PostgresqlCaLoader.PluginNotSupported", item.getLocale()), v.getPluginId())); //$NON-NLS-1$
 			}else if (!sv.equals(v.getVersion())){
-				sb.append(v.getPluginId() + " [Desktop: " + v.getVersion() + "; Server:" + sv + "], ");
+				sb.append(MessageFormat.format(Messages.getString("PostgresqlCaLoader.PluginVersion", item.getLocale()), v.getPluginId(), v.getVersion(), sv)); //$NON-NLS-1$
 			}
 		}
 		
 		if (sb.length() > 0){
 			sb.deleteCharAt(sb.length()-1);
 			sb.deleteCharAt(sb.length()-1);
-			throw new Exception("Connect does not support the following plugin versions: " + sb.toString());
+			throw new Exception(MessageFormat.format(Messages.getString("PostgresqlCaLoader.PluginVersionsNotSupported", item.getLocale()), sb.toString())); //$NON-NLS-1$
 		}
 	}
 	

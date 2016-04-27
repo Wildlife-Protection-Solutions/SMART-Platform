@@ -84,15 +84,15 @@
     <div class="dialog-title">Conservation Area Details</div>
   	<div class="smart-table">
   	<div class="table-row">
-			<div class="table-cell smart-table-cell">Label:</div>
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.label"/>:</div>
 			<div id="infolabel" class="table-cell smart-table-cell"></div>
 		</div>
   		<div class="table-row">
-			<div class="table-cell smart-table-cell">Description:</div>
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.description"/>:</div>
 			<div id="infodescription" class="table-cell smart-table-cell"></div>
 		</div>
 		<div class="table-row">
-			<div class="table-cell smart-table-cell">Designation:</div>
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.designation"/>:</div>
 			<div id="infodesignation" class="table-cell smart-table-cell"></div>
 		</div>
   		<div class="table-row">
@@ -108,7 +108,7 @@
 			<div id="infoversion" class="table-cell smart-table-cell"></div>
 		</div>
 		<div class="table-row">
-			<div class="table-cell smart-table-cell">Revision:</div>
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.revision"/>:</div>
 			<div id="inforevision" class="table-cell smart-table-cell"></div>
 		</div>
 		<div class="block top-spacer" style="text-align:right">

@@ -65,6 +65,7 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -443,7 +444,9 @@ public class ErFilterProcessor implements IFilterProcessor {
 			}
 		}
 		logger.finest(sql.toString());
-		engine.parseQueryString(c, sql.toString()).executeUpdate();
+		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
 	}
 	
 	
@@ -591,7 +594,9 @@ public class ErFilterProcessor implements IFilterProcessor {
 				sql.append(" " + prefix(Attribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				logger.finest(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();;
+				try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();
@@ -747,7 +752,9 @@ public class ErFilterProcessor implements IFilterProcessor {
 				sql.append(" " + prefix(MissionAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				logger.finest(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
+				try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();
@@ -912,7 +919,9 @@ public class ErFilterProcessor implements IFilterProcessor {
 				sql.append(prefix(SamplingUnitAttribute.class) + ".keyid = " + p1); //$NON-NLS-1$
 				
 				logger.finest(sql.toString());
-				engine.parseQueryString(c, sql.toString()).executeUpdate();
+				try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+					ps.executeUpdate();
+				}
 
 				// - create index
 				sql = new StringBuilder();

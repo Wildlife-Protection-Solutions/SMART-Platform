@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.report.udig;
 
 import java.io.IOException;
@@ -46,171 +67,140 @@ public class CatalogPluginWrapper extends CatalogPlugin {
 	@Override
 	public ICatalog getLocalCatalog() {
 		if (defaultCat == null){
+			//empty catalog that does nothing
 			defaultCat = new ICatalog() {
 				
 				@Override
 				public String getTitle() {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public org.locationtech.udig.catalog.IResolve.Status getStatus() {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public Throwable getMessage() {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public URL getIdentifier() {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public ID getID() {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public <T> boolean canResolve(Class<T> adaptee) {
-					// TODO Auto-generated method stub
 					return false;
 				}
 				
 				@Override
 				public List<IResolve> search(String pattern, Envelope bbox,
 						IProgressMonitor monitor) throws IOException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public <T extends IResolve> T getById(Class<T> type, ID id,
 						IProgressMonitor monitor) {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public List<IResolve> find(ID resourceId, IProgressMonitor monitor) {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public <T> T resolve(Class<T> adaptee, IProgressMonitor monitor)
 						throws IOException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public void replace(ID id, IService replacement)
 						throws UnsupportedOperationException {
-					// TODO Auto-generated method stub
-					
 				}
 				
 				@Override
 				public void removeListener(IResolveChangeListener listener) {
-					// TODO Auto-generated method stub
-					
 				}
 				
 				@Override
 				public void remove(IService service) throws UnsupportedOperationException {
-					// TODO Auto-generated method stub
-					
 				}
 				
 				@Override
-				public void addListener(IResolveChangeListener listener) {
-					// TODO Auto-generated method stub
-					
+				public void addListener(IResolveChangeListener listener) {	
 				}
 				
 				@Override
 				public IService add(IService service) throws UnsupportedOperationException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public IService acquire(URL url, IProgressMonitor monitor)
 						throws IOException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public IService acquire(Map<String, Serializable> connectionParameters,
 						IProgressMonitor monitor) throws IOException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public void removeCatalogListener(IResolveChangeListener listener) {
-					// TODO Auto-generated method stub
-					
 				}
 				
 				@Override
 				public String[] getTemporaryDescriptorClasses() {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public List<IResolve> find(URL resourceId, IProgressMonitor monitor) {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public IGeoResource createTemporaryResource(Object descriptor)
 						throws IllegalArgumentException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public List<IService> constructServices(Map<String, Serializable> params,
 						IProgressMonitor monitor) throws IOException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public List<IService> constructServices(URL url, IProgressMonitor monitor)
 						throws IOException {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public List<IService> checkNonMembers(List<IService> constructServiceList) {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public List<IService> checkMembers(List<IService> constructServiceList) {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public void addCatalogListener(IResolveChangeListener listener) {
-					// TODO Auto-generated method stub
-					
 				}
 			};
 		}
@@ -223,7 +213,7 @@ public class CatalogPluginWrapper extends CatalogPlugin {
      * @return Registered {@link ServiceExtension}
      */
     public List<ServiceExtension> getServiceExtensions(){
-        List<ServiceExtension> list = new ArrayList<ServiceExtension>( getRegisteredExtensions().values() );
+        List<ServiceExtension> list = new ArrayList<ServiceExtension>( getRegisteredExtensionsLocal().values() );
         return Collections.unmodifiableList( list );
     }
     /**
@@ -235,11 +225,11 @@ public class CatalogPluginWrapper extends CatalogPlugin {
     public void register( String id, ServiceExtension extension ){
         try {
             registeredLock.lock();
-            getRegisteredExtensions();
+            getRegisteredExtensionsLocal();
             if( registered.containsKey(id)){
                 ServiceExtension existing = registered.get(id);
                 String exsistingName = existing != null ? existing.getClass().getSimpleName() : null;
-                throw new IllegalStateException("ServiceExtension "+id+" already registered with "+exsistingName );
+                throw new IllegalStateException("ServiceExtension "+id+" already registered with "+exsistingName ); //$NON-NLS-1$ //$NON-NLS-2$
             }
             
             registered.put( id, extension );
@@ -247,11 +237,12 @@ public class CatalogPluginWrapper extends CatalogPlugin {
             registeredLock.unlock();
         }
     }
+    
     /**
      * Internal method to lazily process the {@link #CATALOG_SERVICE_EXTENSION}
      * @return Map of {@link ServiceExtension} by id
      */
-    Map<String, ServiceExtension> getRegisteredExtensions() {
+	protected Map<String, ServiceExtension> getRegisteredExtensionsLocal() {
         try {
             registeredLock.lock();
             if (registered == null) { // load available
@@ -287,7 +278,7 @@ public class CatalogPluginWrapper extends CatalogPlugin {
     }
     /** Look up a specific implementation; used mostly for test cases */
     public <E extends ServiceExtension> E serviceImplementation( Class<E> implementation ) {
-        for( Map.Entry<String, ServiceExtension> entry : getRegisteredExtensions().entrySet() ) {
+        for( Map.Entry<String, ServiceExtension> entry : getRegisteredExtensionsLocal().entrySet() ) {
             String id = entry.getKey();
             ServiceExtension serviceExtension = entry.getValue();
 
@@ -301,7 +292,7 @@ public class CatalogPluginWrapper extends CatalogPlugin {
     }
     /** Look up a specific implementation; used mostly for test cases */
     public ServiceExtension serviceImplementation( String serviceExtensionId ) {
-        for( Map.Entry<String, ServiceExtension> entry : getRegisteredExtensions().entrySet() ) {
+        for( Map.Entry<String, ServiceExtension> entry : getRegisteredExtensionsLocal().entrySet() ) {
             String id = entry.getKey();
             ServiceExtension serviceExtension = entry.getValue();
 

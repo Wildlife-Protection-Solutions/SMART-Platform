@@ -25,7 +25,7 @@ public class ReportServlet extends HttpServlet {
 		int cnt = 0;
 		for (ReportFormat rf : ReportFormat.values()){
 			formats[cnt][0] = rf.getTypeKey();
-			formats[cnt++][1] = rf.getGuiName();
+			formats[cnt++][1] = rf.getGuiName(request.getLocale());
 		}
 
 		request.setAttribute("reportformats", formats); //$NON-NLS-1$

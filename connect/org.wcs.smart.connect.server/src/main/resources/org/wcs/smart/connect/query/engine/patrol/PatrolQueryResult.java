@@ -107,14 +107,13 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public String createId(IResultItem rs) throws Exception {
-		return ((PatrolQueryResultItem)rs).getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		return ((PatrolQueryResultItem)rs).getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 	
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
 			throws SQLException {
-		//TODO: fix this
 		PatrolQueryResultItem it = new PatrolQueryResultItem();
-		UUID cauuid = (UUID)rs.getObject("r_p_ca_uuid"); //$NON-NLS-1$
+		//UUID cauuid = (UUID)rs.getObject("r_p_ca_uuid"); //$NON-NLS-1$
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid((UUID)rs.getObject("r_p_uuid")); //$NON-NLS-1$
