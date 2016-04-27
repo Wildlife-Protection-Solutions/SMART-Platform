@@ -10,7 +10,7 @@ Require-Bundle: org.wcs.smart,
  org.eclipse.ui.forms,
  org.wcs.smart.observation,
  org.locationtech.udig.catalog.rasterings;bundle-version="1.2.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.observation.query,
  org.wcs.smart.observation.query.engine,

@@ -101,7 +101,7 @@ public class RunReportJob extends Job {
 							ReportEngineManager.getBirtReportEngine(), 
 							options, session, reportParameters);
 				}finally{
-					session.close();
+					if (session.isOpen()) session.close();
 				}
 			}
 		} catch (Exception e) {
