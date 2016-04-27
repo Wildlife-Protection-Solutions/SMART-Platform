@@ -15,6 +15,7 @@ insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er.query', '3.0');
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.connect', '1.0');
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.connect.dataqueue', '1.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.connect.cybertracker', '1.0');
 
 insert into connect.alert_types values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50', 'emergency', 'Emergency','#80AEFF','#000000','.8','exclamation','orage','f');
 insert into connect.alert_types values('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51', 'observation', 'Observation','#a0AEFF','#000000','.8','fire','green','f');
