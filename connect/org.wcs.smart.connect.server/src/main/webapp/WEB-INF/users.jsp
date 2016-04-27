@@ -46,7 +46,7 @@
 				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
 				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" data-email="${user.getEmail()}" title="<fmt:message key="users.editusertooltip"/>" class="edituser update-icon"></a></div>
- 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.deactivateusertooltipusertooltip"/>" class="deactivateuser delete-icon"></a></div> 
+ 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.deactivateusertooltip"/>" class="deactivateuser delete-icon"></a></div> 
 <%-- 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.deleteusertooltip"/>" class="deleteuser delete-icon"></a></div> --%>
 
 			</div>
