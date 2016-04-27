@@ -305,8 +305,8 @@ background-color: lightsteelblue
 			<select class="type_field" name="type_markerColor">
 				<option value="white"><fmt:message key="settings.colorwhite"/></option>
 				<option value="black"><fmt:message key="settings.colorblack"/></option>
-				<option value="grey"><fmt:message key="settings.colorgrey"/></option>
-				<option value="lightgrey"><fmt:message key="settings.colorlightgrey"/></option>
+				<option value="gray"><fmt:message key="settings.colorgray"/></option>
+				<option value="lightgray"><fmt:message key="settings.colorlightgray"/></option>
 				<option value="red"><fmt:message key="settings.colorred"/></option>
 				<option value="darkred"><fmt:message key="settings.colordarkred"/></option>
 				<option value="orange"><fmt:message key="settings.colororange"/></option>

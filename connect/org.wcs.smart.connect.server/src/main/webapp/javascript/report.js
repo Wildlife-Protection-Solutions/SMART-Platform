@@ -344,6 +344,8 @@ function isFoundInRow(row){
 }
 
 function isIn(text){
+	if(text == undefined)return false;
+	
 	text = text.toLowerCase();
 	if(text.indexOf(search) > -1){
 		return true;

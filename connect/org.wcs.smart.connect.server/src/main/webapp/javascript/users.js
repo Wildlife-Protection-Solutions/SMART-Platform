@@ -704,7 +704,7 @@ function activateUser(){
 function deactivateUser(){
 	var username = this.dataset.username;
 	
-	displayConfirmDialog("De-active User", "Deactivating a user will prevent that user from logging into Connect.  Are you sure you want to dactivate the user " + username +"?  "  , function(){
+	displayConfirmDialog("De-active User", i18n("users.deactivatewarning") + username +"?  "  , function(){
 		hideInfo();
 	
 		var oReq = new XMLHttpRequest();
