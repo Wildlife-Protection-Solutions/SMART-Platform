@@ -186,6 +186,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			for (int i = 0; i < queryResults.getQueryCount(); i++) {
 				IQueryResults results = (IQueryResults) queryResults.getQueryResults(i).getQueryResults();
 				
+				
 				MapGeoResource resource = new MapGeoResource(results, 
 						queryResults.getInfo(i), 
 						service);
@@ -207,17 +208,17 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 				for (GeoSmart smrt : layers) {
 					if (smrt.georesource != null && smrt.georesource.equals(l.getGeoResource())) {
 							l.setName(smrt.info.getLayerName());
-							if (smrt.info.getMapStyle() != null) {
+							if (smrt.info.getMapStyleBlackboard() != null){
+								StyleBlackboard sb = smrt.info.getMapStyleBlackboard();
+								l.getStyleBlackboard().clear();
+								l.getStyleBlackboard().addAll(sb);
+							}else if (smrt.info.getMapStyle() != null) {
 								// use user defined style
 								StyleBlackboard sb = BirtMapUtils.parseStyleString(smrt.info.getMapStyle());
 								if (sb != null) {
 									l.getStyleBlackboard().clear();
 									l.getStyleBlackboard().addAll(sb);
 								}
-							}else if (smrt.info.getMapStyleBlackboard() != null){
-								StyleBlackboard sb = smrt.info.getMapStyleBlackboard();
-								l.getStyleBlackboard().clear();
-								l.getStyleBlackboard().addAll(sb);
 							}
 					}
 				}

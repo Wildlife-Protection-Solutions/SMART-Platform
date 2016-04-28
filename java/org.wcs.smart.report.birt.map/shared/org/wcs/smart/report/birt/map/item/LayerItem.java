@@ -96,7 +96,7 @@ public class LayerItem extends ReportItem {
 	/**
 	 * @return the layer styles
 	 */
-	public String getLayerStyles(){
+	public String getLayerStyle(){
 		return handle.getStringProperty(SMART_LAYERSTYLE_PROP);
 	}
 	

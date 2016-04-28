@@ -38,7 +38,8 @@ public class GridQueryResult implements IQueryResult {
 	
 	protected Collection<GridResultItem> data;
 	private File lastFile;
-	 
+	protected boolean isDisposed = false;
+	
 	protected GridQueryResultMetadata resultMetadata;
 	
 		
@@ -67,6 +68,7 @@ public class GridQueryResult implements IQueryResult {
 
 	@Override
 	public void dispose(Session session) throws SQLException {
+		this.isDisposed = true;
 		data = null;
 		if (lastFile != null){
 			try{
@@ -75,5 +77,10 @@ public class GridQueryResult implements IQueryResult {
 		
 			}
 		}
+	}
+	
+	@Override
+	public boolean isDisposed(){
+		return isDisposed;
 	}
 }

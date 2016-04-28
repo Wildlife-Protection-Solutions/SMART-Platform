@@ -36,6 +36,7 @@ import org.hibernate.Session;
 public class  MemoryQueryResult<T extends IResultItem> implements IQueryResult {
 
 	private List<T> data;
+	protected boolean isDisposed = false;
 	
 	public MemoryQueryResult(List<T> data){
 		this.data = data;
@@ -47,6 +48,12 @@ public class  MemoryQueryResult<T extends IResultItem> implements IQueryResult {
 
 	@Override
 	public void dispose(Session session) throws SQLException {
+		this.isDisposed = true;
 		data = null;
+	}
+	
+	@Override
+	public boolean isDisposed(){
+		return isDisposed;
 	}
 }

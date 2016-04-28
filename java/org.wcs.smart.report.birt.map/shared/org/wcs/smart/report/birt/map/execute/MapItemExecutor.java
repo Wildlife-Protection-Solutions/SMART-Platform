@@ -54,6 +54,7 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.query.common.GriddedQueryResultSetMetadata;
+import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.map.item.LayerItem;
 import org.wcs.smart.report.execute.SmartReportRunner;
@@ -163,15 +164,18 @@ public class MapItemExecutor implements IReportItemExecutor{
 		IDataQueryDefinition[] query = context.getQueries( modelHandle );
 		for (int i = 0; i < query.length; i ++){
 			MapQueryDefinition def = (MapQueryDefinition) query[i];
+			
+			//find geometry column alias
+			LayerItem layer = def.getLayerItem();
 			IBaseResultSet qresult = context.executeQuery( null, def.getWrapper(), elementHandle );
 			configuration.addQuery(qresult,def.getInfo());
-
 			String queryText = ((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getQueryText();
 
 			double minValue = 0;
 			double maxValue = 0;
-			//create raster results file
+
 			if (def.getInfo().getLayerType() == LayerType.RASTER){
+				//create raster results file
 				SmartConnection connection = (SmartConnection) context.getAppContext().get(SmartConnection.class.getCanonicalName());
 				IQuery tmp = connection.newQuery(((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getExtensionID());
 				tmp.prepare(queryText);
@@ -192,37 +196,47 @@ public class MapItemExecutor implements IReportItemExecutor{
 			}
 			
 			//Configure layer styles
-			if (def.getInfo().getMapStyle() == null){
-				LayerItem layer = def.getLayerItem();
-				if (layer.getLayerStyles() == null || layer.getLayerStyles().isEmpty()){
-					//no style is provided; so lets try to load the default style
-					if (layer.getHandle().getDataSet() instanceof OdaDataSetHandle){// &&
-						try{
-							Session session =  (Session)context.getAppContext().get(SmartReportRunner.SESSION_PARAM);
-							
-							String xid = ((OdaDataSetHandle)layer.getHandle().getDataSet()).getExtensionID();
-							StyleBlackboard queryStyle = BirtStyleManager.INSTANCE.getStyle(xid, queryText, session);
-							if (queryStyle != null){
-								StyleBlackboard ss = processSmartStyle(queryStyle, session);
-								if (ss != null){
-									def.getInfo().setMapStyleBlackboard(ss);
-								}else{
-									def.getInfo().setMapStyleBlackboard(queryStyle);	
-								}
-							}else{
-								//not query style provider; use a default
-								if (layer.getLayerType() == LayerType.RASTER){
-									def.getInfo().setMapStyleBlackboard(createDefaultRasterStyle(minValue, maxValue));
-								}
-							}
-						}catch (Exception ex){
-							Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, "Error loading layer style for report map.", ex); //$NON-NLS-1$
-						}
-					}
-				}				
-			}
+			processStyles(def, layer, queryText, minValue, maxValue);
+				
+				
 		}		
 		return configuration;
+	}
+
+	private void processStyles(MapQueryDefinition def, LayerItem layer,
+			String queryText, double minValue, double maxValue) {
+		StyleBlackboard styleBlackboard = null;
+		try{
+			if (def.getInfo().getMapStyle() == null
+					|| def.getInfo().getMapStyle().trim().isEmpty()){
+				//no style is provided; so lets try to load the default style from the query
+				Session session =  (Session)context.getAppContext().get(SmartReportRunner.SESSION_PARAM);
+				String xid = ((OdaDataSetHandle)layer.getHandle().getDataSet()).getExtensionID();
+				styleBlackboard = BirtStyleManager.INSTANCE.getStyle(xid, queryText, session);
+			}else{
+				//parse provided style
+				String styleString = def.getInfo().getMapStyle();
+				styleBlackboard = BirtMapUtils.parseStyleString(styleString);
+			}
+			
+			if (styleBlackboard != null){
+				//parse out smart saved style
+				Session session =  (Session)context.getAppContext().get(SmartReportRunner.SESSION_PARAM);
+				StyleBlackboard ss = processSmartStyle(styleBlackboard, session);
+				if (ss != null){
+					def.getInfo().setMapStyleBlackboard(ss);
+				}else{
+					def.getInfo().setMapStyleBlackboard(styleBlackboard);
+				}
+			}else{
+				//for raster layers we want to generate a defaul style 
+				if (layer.getLayerType() == LayerType.RASTER){
+					def.getInfo().setMapStyleBlackboard(createDefaultRasterStyle(minValue, maxValue));
+				}
+			}
+		}catch (Exception ex){
+			Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, "Error loading layer style for report map.", ex); //$NON-NLS-1$
+		}
 	}
 
 	private StyleBlackboard createDefaultRasterStyle(double minValue, double maxValue){

@@ -199,16 +199,22 @@ public class DataModelMerger {
 	 * @return
 	 */
 	private boolean canKeep(Attribute a, ConservationArea[] ca, Session session){
-		String hql = "SELECT count(*) FROM Attribute WHERE keyId = :key AND conservationArea in (:ca)";//$NON-NLS-1$
+		String hql = "FROM Attribute WHERE keyId = :key AND conservationArea in (:ca)";//$NON-NLS-1$
 		Query q = session.createQuery(hql);
 		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
-		Long cnt = (Long) q.list().get(0);
-		if (cnt == ca.length){
-			//this category exists in each conservation area so we keep it
-			return true;
+		List<Attribute> atts = q.list();
+		if (atts.size() != ca.length) return false;
+		if (atts.size() == 0) return false;
+		Attribute.AttributeType type = atts.get(0).getType();
+		for (Attribute at : atts){
+			if (at.getType() != type){
+				//types do not match.
+				return false;
+			}
 		}
-		return false;
+		//attribute exists in each ca with the same type
+		return true;
 	}
 	
 	/**
