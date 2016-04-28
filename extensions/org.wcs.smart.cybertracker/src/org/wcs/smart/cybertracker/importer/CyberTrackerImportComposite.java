@@ -137,7 +137,7 @@ public class CyberTrackerImportComposite extends Composite {
 	
 	private void buildContentMap() {
 		if (Platform.getExtensionRegistry() != null) {
-			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(CyberTrackerPlugIn.EXTENSION_ID);
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(CyberTrackerPlugIn.DATASOURCE_EXTENSION_ID);
 			try {
 				for (IConfigurationElement e : config) {
 					String name = e.getAttribute("name"); //$NON-NLS-1$

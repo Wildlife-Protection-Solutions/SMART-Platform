@@ -29,7 +29,8 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	/**
 	 * Extension id
 	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.cybertracker.datasource"; //$NON-NLS-1$
+	public static final String DATASOURCE_EXTENSION_ID = "org.wcs.smart.cybertracker.datasource"; //$NON-NLS-1$
+	public static final String ALERT_EXTENSION_ID = "org.wcs.smart.cybertracker.alert"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static CyberTrackerPlugIn plugin;

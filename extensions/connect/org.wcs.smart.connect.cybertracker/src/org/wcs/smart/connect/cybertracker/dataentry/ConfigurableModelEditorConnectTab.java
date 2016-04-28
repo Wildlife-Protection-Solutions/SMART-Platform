@@ -24,7 +24,6 @@ package org.wcs.smart.connect.cybertracker.dataentry;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -55,9 +54,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
 import org.wcs.smart.connect.cybertracker.dataentry.CmElementsVisitor.IVisitHandler;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
@@ -360,33 +359,13 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 					monitor.beginTask("Loading SMART Connect Alerts", 1);
 					Session s = HibernateManager.openSession();
 					s.beginTransaction();
-					try {
-						@SuppressWarnings("unchecked")
-						List<ConnectAlert> items = s.createCriteria(ConnectAlert.class)
-								.add(Restrictions.eq("model", cm)).list();  //$NON-NLS-1$
-						resultList.addAll(items);
-					} catch (Exception ex) {
-						SmartPlugIn.displayLog("Error occurs while loading SMART Connect Alerts.", ex);
-					} finally {
-						s.getTransaction().rollback();
-						s.close();
-					}
+					resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
+					s.getTransaction().rollback();
+					s.close();
 				}
 			});
 		} catch (Exception e) {
 			SmartPlugIn.displayLog("Error occurs while loading SMART Connect Alerts.", e);
-			return Collections.emptyList();
-		}
-		//replace lazy items with real
-		CmElementsMap map = new CmElementsMap(cm);
-		for (ConnectAlert a : resultList) {
-			a.setModel(cm);
-			if (a.getAttrubute() != null) {
-				a.setAttrubute(map.getCmAttribute(a.getAttrubute().getUuid()));
-			}
-			if (a.getAlertItem() != null) {
-				a.setAlertItem(map.getUuidItem(a.getAlertItem().getUuid()));
-			}
 		}
 		return resultList;
 	}
