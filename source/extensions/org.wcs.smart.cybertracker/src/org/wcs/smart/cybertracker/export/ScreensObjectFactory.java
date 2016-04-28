@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.export;
 
 import java.util.List;
 
+import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.screens.Controls;
@@ -42,6 +43,8 @@ import org.wcs.smart.hibernate.SmartDB;
  * @since 1.0.0
  */
 public class ScreensObjectFactory {
+
+	private static final int DEFAULT_NODE_NEXT_ID = 20;
 	
 	private static final int CONTROL_2_INDEX = 0;
 	private static final int CONTROL_RADIO_MAIN_INDEX = 2;
@@ -192,7 +195,7 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>20</NextId>
+            <NextId>DEFAULT_NODE_NEXT_ID</NextId>
             <TemplateId>???</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -212,7 +215,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(20);
+		data.setNextId(DEFAULT_NODE_NEXT_ID);
 		data.setTemplateId(templateId);
 		data.setName(name);
 		Controls controls = new Controls();
@@ -753,7 +756,7 @@ public class ScreensObjectFactory {
 		control.setDisplayHeight(50);
 		control.setDecimals(2);
 		control.setMinValue(0);
-		control.setPassword(password);
+		control.setPassword(password != null ? String.valueOf(password) : null);
 		control.setPasswordAutoNext(2);
 		return control;
 	}
@@ -1117,6 +1120,35 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
+	/**
+    <Control>
+    	<Type>{935A0794-78BF-4689-B6F5-F3EC3070BD20}</Type>
+        <Id>null</Id> <!-- will be assigned by addControlToNode -->
+        <Active>???</Active>
+        <Url>???</Url>
+        <UserName>???</UserName>
+        <Password>???</Password>
+        <Type>???</Type>
+        <Level>???</Level>
+        <Translate__Elements>AEDF0166046BED44858F00236E1A9114</Translate__Elements>
+    </Control>
+	 */
+	public Controls.Control createAlertControl(AlertData data, String trElements) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{935A0794-78BF-4689-B6F5-F3EC3070BD20}"); //$NON-NLS-1$
+		control.setId(null);
+		if (data.getActive() != null) {
+			control.setActive(ctBooleanValue(data.getActive()));
+		}
+		control.setUrl(data.getUrl());
+		control.setUserName(data.getUsername());
+		control.setPassword(data.getPassword());
+		//control.setAlertType(240); //TODO: need type
+		control.setLevel(data.getLevel());
+		control.setTranslateElements(trElements);
+		return control;
+	}	
+	
 	//Util methods
 	public static Controls.Control getNavigationControl(Node node) {
 		return node.getData().getControls().getControl().get(CONTROL_2_INDEX);
@@ -1143,6 +1175,31 @@ public class ScreensObjectFactory {
 	}
 	
 	public static void addControlToNode(Node node, Controls.Control control) {
+		//do some indexes validation and assign new indexes if they are invalid
+		Integer nodeIndex = node.getData().getNextId();
+		if (nodeIndex == null || nodeIndex < DEFAULT_NODE_NEXT_ID) {
+			node.getData().setNextId(DEFAULT_NODE_NEXT_ID);
+			nodeIndex = DEFAULT_NODE_NEXT_ID;
+		}
+		Integer controlId = 0;
+		for (Controls.Control c : node.getData().getControls().getControl()) {
+			if (c.getId() != null) {
+				controlId = Math.max(controlId, c.getId());
+			}
+		}
+		controlId++; //id for new control
+		
+		if (control.getId() == null || control.getId() < controlId) {
+			control.setId(controlId);
+		} else {
+			controlId = control.getId();
+		}
+		
+		if (nodeIndex <= controlId) {
+			node.getData().setNextId(controlId + 1);
+		}
+		
 		node.getData().getControls().getControl().add(control);
-	}	
+	}
+
 }

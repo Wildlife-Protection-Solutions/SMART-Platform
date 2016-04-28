@@ -19,61 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.cybertracker.dataentry;
+package org.wcs.smart.cybertracker.export.alert;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.connect.cybertracker.dataentry.CmElementsVisitor.IVisitHandler;
-import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
- * Map that allows to quickly find any element in {@link ConfigurableModel} based on its {@link UUID}.
- * NOTE: Only maps objects that have UUID. 
+ * Class that combines all Alert extensions for CyberTracker and allows to obtain {@link AlertData}
+ * for items from configurable model.
  * 
  * @author elitvin
  * @since 4.0.0
  */
-class CmElementsMap {
-
-	private Map<UUID, UuidItem> map;
-
-	public CmElementsMap(ConfigurableModel model) {
-		map = new HashMap<>();
-		if (model.getUuid() == null) {
-			return;
-		}
-		map.put(model.getUuid(), model);
-		CmElementsVisitor visitor = new CmElementsVisitor();
-		visitor.visit(model, new IVisitHandler() {
-			@Override
-			public void handle(UuidItem item) {
-				if (item.getUuid() != null) {
-					map.put(item.getUuid(), item);
-				}
-			}
-		});
-	}
-
-	public UuidItem getUuidItem(UUID uuid) {
-		if (uuid == null) {
-			return null;
-		}
-		UuidItem obj = map.get(uuid);
-		if (obj == null) {
-			//just some development validation
-			SmartPlugIn.log("Unexpected item requested from a configurable model map: " + uuid, null); //$NON-NLS-1$
-		}
-		return obj;
-	}
+public class AlertExportDataProvider {
 	
-	public CmAttribute getCmAttribute(UUID uuid) {
-		UuidItem obj = getUuidItem(uuid);
-		return obj instanceof CmAttribute ? (CmAttribute) obj : null;
+	private List<IAlertProvider> providers = new ArrayList<>();
+	
+	public AlertExportDataProvider(ConfigurableModel model) {
+		if (Platform.getExtensionRegistry() != null) {
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(CyberTrackerPlugIn.ALERT_EXTENSION_ID);
+			try {
+				for (IConfigurationElement e : config) {
+					ICtAlertExtension ext = (ICtAlertExtension) e.createExecutableExtension("clazz"); //$NON-NLS-1$
+					providers.add(ext.createAlertProvider(model));
+				}
+			}catch (Exception ex){
+				SmartPlugIn.displayLog("Error getting Alert extensions for CyberTracker", ex);
+			}
+		}
 	}
 
+	public List<AlertData> getAlertData(UuidItem item) {
+		List<AlertData> result = new ArrayList<>();
+		for (IAlertProvider p : providers) {
+			result.addAll(p.getAlertData(item));
+		}
+		return result;
+	}
 }

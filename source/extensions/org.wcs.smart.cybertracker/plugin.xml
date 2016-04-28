@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.wcs.smart.cybertracker.datasource" name="Data Source for CyberTracker" schema="schema/org.wcs.smart.cybertracker.datasource.exsd"/>
+   <extension-point id="org.wcs.smart.cybertracker.alert" name="Alert Data for CyberTracker" schema="schema/org.wcs.smart.cybertracker.alert.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution

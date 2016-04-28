@@ -45,5 +45,11 @@
             upgrader="org.wcs.smart.connect.cybertracker.upgrade.ConnectCtDatabaseUpgrader">
       </dbUpgrader>
    </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.alert">
+      <alertExtension
+            clazz="org.wcs.smart.connect.cybertracker.alert.ConnectCtAlertExtension">
+      </alertExtension>
+   </extension>
 
 </plugin>

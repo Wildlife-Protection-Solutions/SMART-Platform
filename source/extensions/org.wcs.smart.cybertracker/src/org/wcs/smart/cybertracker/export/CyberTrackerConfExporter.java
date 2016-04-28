@@ -53,6 +53,8 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
+import org.wcs.smart.cybertracker.export.alert.AlertData;
+import org.wcs.smart.cybertracker.export.alert.AlertExportDataProvider;
 import org.wcs.smart.cybertracker.export.data.IAttributeListItemProxy;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.export.data.ListItemsDataProvider;
@@ -63,6 +65,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.reports.Items;
 import org.wcs.smart.cybertracker.model.reports.Reports;
+import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
@@ -113,6 +116,8 @@ public class CyberTrackerConfExporter {
 	private Language currentLanguage;
 	private CyberTrackerPropertiesProfile ctProperties;
 	
+	private AlertExportDataProvider alertDataProvider;
+	
 	public void setCurrentLanguage(Language currentLanguage) {
 		this.currentLanguage = currentLanguage;
 	}
@@ -135,6 +140,7 @@ public class CyberTrackerConfExporter {
 			
 			monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
 			
+			alertDataProvider = new AlertExportDataProvider(configurableModel);
 			elements = ElementsUtil.buildEmptyElements();
 			newWpResultId = new CyberTrackerId();
 			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
@@ -149,6 +155,7 @@ public class CyberTrackerConfExporter {
 			processExportSource(elements, cmProvider.getExportSource());
 			return performExport(destFolder, monitor);
 		} finally {
+			alertDataProvider = null;
 			screensFactory = null;
 			ctUtil = null;
 			configurableModel = null;
@@ -298,6 +305,7 @@ public class CyberTrackerConfExporter {
 		Node categoryNode = ctUtil.createRadioNode(node, keyMap, getNodeLevelResultElementId(level).getItemId());
 		Control headerControl = ScreensObjectFactory.getHeaderControl(categoryNode);
 		headerControl.setColor(NODE_HEADER_COLOR);
+		addAlerts(categoryNode, node.getChildren(), keyMap);
 		result.add(categoryNode);
 		
 		Integer nextLevel = level + 1;
@@ -854,6 +862,22 @@ public class CyberTrackerConfExporter {
 		return result;
 	}
 
+	private void addAlerts(Node ctNode, List<CmNode> kids, Map<CmNode, CyberTrackerId> keyMap) {
+		// TODO: test it, refactor it to support lists and trees
+		for (CmNode kid : kids) {
+			List<AlertData> dataList = alertDataProvider.getAlertData(kid);
+			if (!dataList.isEmpty()) {
+				CyberTrackerId ctId = keyMap.get(kid);
+				String trElements = ctId.getItemTranslatedId();
+				for (AlertData alertData : dataList) {
+					Controls.Control alertControl = screensFactory.createAlertControl(alertData, trElements);
+					ScreensObjectFactory.addControlToNode(ctNode, alertControl);
+				}
+			}
+		}
+	}
+
+	
 	private boolean isSingleLevelTree(CmAttribute cmAttr) {
 		boolean isSingleLevel = true;
 		List<IAttributeTreeNodeProxy> children = getActiveTreeNodes(cmAttr);
