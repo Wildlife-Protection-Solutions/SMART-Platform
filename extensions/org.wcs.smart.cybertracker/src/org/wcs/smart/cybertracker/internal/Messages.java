@@ -21,6 +21,7 @@ public class Messages extends NLS {
 	public static String AbstractSmartImporter_PauseRecordedSeveralTimes;
 	public static String AddCyberTrackerJob_InstallCtJobName;
 	public static String AddCyberTrackerJob_Progress1;
+	public static String AlertExportDataProvider_Error;
 	public static String ConfigurableModelEditorCyberTrackerTab_Button_CreateProfile;
 	public static String ConfigurableModelEditorCyberTrackerTab_Button_EditProfile;
 	public static String ConfigurableModelEditorCyberTrackerTab_Button_ManageProfiles;

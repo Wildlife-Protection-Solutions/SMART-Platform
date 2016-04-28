@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
@@ -51,7 +52,7 @@ public class AlertExportDataProvider {
 					providers.add(ext.createAlertProvider(model));
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog("Error getting Alert extensions for CyberTracker", ex);
+				SmartPlugIn.displayLog(Messages.AlertExportDataProvider_Error, ex);
 			}
 		}
 	}
