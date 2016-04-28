@@ -80,7 +80,7 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 	@Override
 	public void dispose(Session session) throws SQLException {
 		if (isLoading) return;
-		
+		super.dispose(session);
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {

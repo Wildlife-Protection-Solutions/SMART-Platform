@@ -120,7 +120,7 @@ public abstract class AbstractSmartQuery {
 			SmartConnection connection) throws OdaException {
 		// the result set
 		result = query.getQuery().getCachedResults();
-		if (result == null) {
+		if (result == null || result.isDisposed()) {
 			try {
 				result = connection.executeQuery(query.getQuery());
 			} catch (Exception ex) {

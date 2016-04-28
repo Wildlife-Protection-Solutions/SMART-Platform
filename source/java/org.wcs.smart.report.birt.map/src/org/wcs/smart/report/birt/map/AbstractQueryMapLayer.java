@@ -64,72 +64,11 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 		if (odaHandle.getExtensionID().equals(SmartQuery.SMART_DATASET_TYPE)) {
 			String queryText = odaHandle.getQueryText();
 			String queryTypeKey = queryText.split(":")[0]; //$NON-NLS-1$
-			if (canAddToMap(queryTypeKey)){
-				return getGeometryOptions(queryTypeKey);
+			if (canAddToMap(queryTypeKey)){return getGeometryOptions(queryTypeKey);
 			}
 		}
 		return new ArrayList<MapLayerInfo>();
 	}
-	
-//	
-//	@Override
-//	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource) {
-//		if (!(handle instanceof OdaDataSetHandle)){
-//			return null;
-//		}
-//		
-//		String queryText = ((OdaDataSetHandle)handle).getQueryText();
-//		UUID quuid = null;
-//		try {
-//			quuid = UuidUtils.stringToUuid(queryText.split(":")[1]); //$NON-NLS-1$
-//		} catch (Exception e) {
-//			Activator.log(e.getMessage(), e);
-//			return null;
-//		}
-//		
-//		String queryType = queryText.split(":")[0]; //$NON-NLS-1$
-//		IQueryType qtype = QueryTypeManager.INSTANCE.findQueryType(queryType);
-//		/* for historic support */
-//		if (qtype == null) {
-//			qtype = QueryTypeManager.INSTANCE.findDeprecatedQueryType(queryType);
-//		}
-//		if (qtype == null) return null;
-//		
-//		if (!StyledQuery.class.isAssignableFrom(qtype.getHibernateClass())){
-//			return null;
-//		}
-//		//load query and see if we have a style for the query
-//		StyledQuery sq = (StyledQuery) getQuery(quuid, qtype);
-//		if (sq != null && sq.getStyle() != null){
-//			String key = null;
-//			if (sq instanceof GriddedQuery){
-//				key = "raster"; //$NON-NLS-1$
-//			}else{
-//				key = resource.getIdentifier().getRef();
-//				
-//			}
-//			try {
-//				return StyleManager.INSTANCE.fromStringMap(sq.getStyle()).get(key);
-//			} catch (Exception e) {
-//				Activator.log(e.getMessage(), e);
-//				return null;
-//			}
-//		}
-//		return null;
-//	}
-//
-//	/**
-//	 * Gets the query associated with the layer.  
-//	 * 
-//	 */
-//	protected Query getQuery(UUID quuid, IQueryType qtype){
-//		//do not close session as assume it is managed by SmartConnection is BIRT report
-//		Session session = HibernateManager.openSession();
-//		return QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
-//	}
-	
-	
-	
 	
 
 }

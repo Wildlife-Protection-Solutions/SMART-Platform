@@ -43,6 +43,7 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 
 	protected int itemCount = 0;
 
+	protected boolean isDisposed = false;
 	
 	/**
 	 * Opens a session, creates a result set and loads the data from 
@@ -63,6 +64,16 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 			session.close();
 		}
 		return result;
+	}
+
+	@Override
+	public void dispose(Session session) throws SQLException{
+		this.isDisposed = true;
+	}
+
+	@Override
+	public boolean isDisposed() {
+		return this.isDisposed;
 	}
 
 	

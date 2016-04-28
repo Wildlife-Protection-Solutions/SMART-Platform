@@ -82,6 +82,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet {
 	
 	@Override
 	public void dispose(Session session)throws SQLException {
+		super.dispose(session);
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection c) throws SQLException {

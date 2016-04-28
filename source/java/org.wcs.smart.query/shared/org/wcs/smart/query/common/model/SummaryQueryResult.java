@@ -50,6 +50,8 @@ public class SummaryQueryResult implements IQueryResult{
 	private int[] colheaders;
 	private int[] rowheaders;
 	
+	protected boolean isDisposed = false;
+	
 	/**
 	 * Creates an empty summary results
 	 */
@@ -343,5 +345,20 @@ public class SummaryQueryResult implements IQueryResult{
 	
 	@Override
 	public void dispose(Session session) throws SQLException{
+		this.colheaders = null;
+		this.columnHeaders = null;
+		this.columnHeaderValues = null;
+		this.data = null;
+		this.rowheaders = null;
+		this.rowHeaders = null;
+		this.rowHeaderValues = null;
+		this.valueHeaders = null;
+		
+		this.isDisposed = true;
+	}
+	
+	@Override
+	public boolean isDisposed(){
+		return isDisposed;
 	}
 }
