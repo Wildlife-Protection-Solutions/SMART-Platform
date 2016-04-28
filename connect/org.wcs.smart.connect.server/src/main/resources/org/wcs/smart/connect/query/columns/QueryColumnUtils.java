@@ -73,12 +73,12 @@ public class QueryColumnUtils {
 
 	/**
 	 * Determines if a given observation options tracks the distance
-	 * and direction.  Will return true if op is null.
+	 * and direction.  Will return false if op is null.
 	 * @param op
 	 * @return
 	 */
 	public static boolean trackDistanceDirection(ObservationOptions op){
-		if (op == null) return true;
+		if (op == null) return false;
 		return op.getTrackDistanceDirection();
 	}
 
@@ -89,7 +89,7 @@ public class QueryColumnUtils {
 	 * @return
 	 */
 	public static boolean trackObserver(ObservationOptions op){
-		if (op == null) return true;
+		if (op == null) return false;
 		return op.getTrackObserver();
 	}
 	

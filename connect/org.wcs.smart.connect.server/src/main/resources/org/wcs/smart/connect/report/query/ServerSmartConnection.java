@@ -39,12 +39,14 @@ import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.report.execute.SmartReportRunner;
 
 /**
  * Implementation class of IConnection for SMART ODA runtime driver.
  */
 public class ServerSmartConnection extends SmartConnection {
+	public static final String  CCAA_FILTER_KEY = "org.wcs.smart.report.ca.filter"; //$NON-NLS-1$
 	
 	private SmartBirtTableUtils tableFinder = null;
 	
@@ -96,7 +98,7 @@ public class ServerSmartConnection extends SmartConnection {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<ConservationArea> getConservationAreas() {
-		Object x = appContext.get("org.wcs.smart.report.ca.filter");
+		Object x = appContext.get(CCAA_FILTER_KEY);
 		if (x == null) return null;
 		if (x instanceof ConservationArea){
 			return Collections.singleton((ConservationArea)x);
@@ -104,6 +106,17 @@ public class ServerSmartConnection extends SmartConnection {
 		return (Collection<ConservationArea>)x;
 	}
 
+	public String createCaFilter(){
+		if (getConservationAreas() == null ) return "";
+		StringBuilder sb = new StringBuilder();
+		for (ConservationArea ca : getConservationAreas()){
+			sb.append(ca.getUuid());
+			sb.append(ConservationAreaFilter.CA_SPLITTER);
+		}
+		sb = sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
+		
+	}
 	@Override
 	public String getDataSourceProductName() {
 		return Messages.getString("ServerSmartConnection.DataSourceName", getCurrentLocale()); //$NON-NLS-1$

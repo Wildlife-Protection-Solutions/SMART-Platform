@@ -82,6 +82,7 @@ import org.wcs.smart.connect.model.ReportParameter.Type;
 import org.wcs.smart.connect.report.BirtEngine;
 import org.wcs.smart.connect.report.ReportFormat;
 import org.wcs.smart.connect.report.ReportProxy;
+import org.wcs.smart.connect.report.query.ServerSmartConnection;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -202,7 +203,7 @@ public class ReportApi extends HttpServlet{
 						items.put(SmartReportRunner.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
 						items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
 						items.put(SmartReportRunner.CA_PARAM, report.getConservationArea());
-						items.put("org.wcs.smart.report.ca.filter", conservationAreas); //$NON-NLS-1$
+						items.put(ServerSmartConnection.CCAA_FILTER_KEY, conservationAreas);
 						
 						try{
 							Map<String, Object> parameters = new HashMap<String, Object>();
@@ -392,38 +393,32 @@ public class ReportApi extends HttpServlet{
 
 	private List<ReportParameter> getParameters(UUID uuid, Session s) throws Exception {
 		List<ReportParameter> rparameters = new ArrayList<ReportParameter>();
-		Report report = null;
-
-			report = (Report) s.get(Report.class, uuid);
-			
-			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
-			
-			HashMap<String, IParameterDefnBase> parameters = ParameterFinder.INSTANCE.getParameters(report, BirtEngine.getBirtEngine(context));
-			
-			for (IParameterDefnBase param : parameters.values()){
-				
-				if (param instanceof IParameterDefn){
-					rparameters.add(createParameter((IParameterDefn) param));
-				}else if (param instanceof IParameterGroupDefn){
-					ReportParameter pp = new ReportParameter();
-					pp.setName(param.getName());
-					pp.setDisplayText(param.getPromptText());
-					pp.setType(Type.GROUP);
-					
-					rparameters.add(pp);
-					
-					for (Object child: ((IParameterGroupDefn) param).getContents()){
-						if (child instanceof IParameterDefn){
-							pp.getChildren().add(createParameter((IParameterDefn) child));
-						}else{
-							throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterNotSupported", request.getLocale()), param.getName())); //$NON-NLS-1$
-						}
-					}					
-				}else{
-					throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterTypeNotSupported", request.getLocale()), param.getName())); //$NON-NLS-1$
-				}
-			}
 		
+		Report report = (Report) s.get(Report.class, uuid);
+		if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
+			
+		HashMap<String, IParameterDefnBase> parameters = ParameterFinder.INSTANCE.getParameters(report, BirtEngine.getBirtEngine(context));
+		for (IParameterDefnBase param : parameters.values()){
+			if (param instanceof IParameterDefn){
+				rparameters.add(createParameter((IParameterDefn) param));
+			}else if (param instanceof IParameterGroupDefn){
+				ReportParameter pp = new ReportParameter();
+				pp.setName(param.getName());
+				pp.setDisplayText(param.getPromptText());
+				pp.setType(Type.GROUP);
+				rparameters.add(pp);
+				
+				for (Object child: ((IParameterGroupDefn) param).getContents()){
+					if (child instanceof IParameterDefn){
+						pp.getChildren().add(createParameter((IParameterDefn) child));
+					}else{
+						throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterNotSupported", request.getLocale()), param.getName())); //$NON-NLS-1$
+					}
+				}					
+			}else{
+				throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterTypeNotSupported", request.getLocale()), param.getName())); //$NON-NLS-1$
+			}
+		}
 		return rparameters;
 	}
 	

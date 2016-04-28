@@ -170,7 +170,7 @@ public enum SmartTable {
 	CMATTRIBUTETREENODE(CmAttributeTreeNode.class,".configurableModel.conservationArea"),
 	CMDMATTRIBUTESESSIONS(CmDmAttributeSettings.class,".id.model.conservationArea" ),
 	CMNODE(CmNode.class,".model.conservationArea"),
-	CMCONNECTALERT(org.wcs.smart.connect.cybertracker.model.ConnectAlert.class, ".id.server.conservationArea"),
+	CMCONNECTALERT(org.wcs.smart.connect.cybertracker.model.ConnectAlert.class, ".model.conservationArea"),
 	CONFIGURABLEMODEL(ConfigurableModel.class,null),
 	CONNECTSERVER(ConnectServer.class, null),
 	CONNECTSERVEROPTION(ConnectServerOption.class, ".id.server.conservationArea"),

@@ -89,6 +89,11 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 
 		if (smartQuery == null) {
 			smartQuery = QueryManager.INSTANCE.findQuery(uuid, connection.getSession());
+			if (smartQuery.getConservationArea().getIsCcaa()){
+				//need to configure ccaa filter here
+				smartQuery = smartQuery.clone(smartQuery.getOwner());
+				smartQuery.setConservationAreaFilter(((ServerSmartConnection)connection).createCaFilter());
+			}
 		}
 	}
 	

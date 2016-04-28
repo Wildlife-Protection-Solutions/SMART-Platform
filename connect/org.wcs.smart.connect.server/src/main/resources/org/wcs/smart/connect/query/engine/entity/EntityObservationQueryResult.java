@@ -321,6 +321,7 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public void dispose(Session session) throws SQLException{
+		super.dispose(session);
 		engine.cleanUp(session);		
 	}
 

@@ -172,6 +172,7 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 	
 	@Override
 	public void dispose(Session session) throws SQLException {
+		super.dispose(session);
 		engine.cleanUp(session);
 	}
 

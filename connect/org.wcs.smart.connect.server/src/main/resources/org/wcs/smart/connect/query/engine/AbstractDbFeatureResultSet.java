@@ -60,7 +60,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	public static final String MULTI_LINESTRING_GEOM_TYPE = "MultiLineString"; //$NON-NLS-1$
 		
 	protected GeometryFactory gf = new GeometryFactory();
-	
+	protected boolean isDisposed = false;
 	protected int itemCount;
 	
 	/**
@@ -182,5 +182,15 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	public void setSorting(QueryColumn arg0, int arg1) {
 		// Does not support sorting
 		throw new UnsupportedOperationException("Resultset sorting not supported");
+	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException{
+		this.isDisposed = true;
+	}
+	
+	@Override
+	public boolean isDisposed(){
+		return this.isDisposed;
 	}
 }
