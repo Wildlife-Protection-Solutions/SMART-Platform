@@ -379,7 +379,7 @@ function searchChanged(){
 
 }
 function getUrlOnly(){
-	  window.prompt(i18n("report.copytoclipboard"), generateUrl(REPORTURL));
+	  window.prompt(i18n("report.copytoclipboard"), generateUrl(REPORTLINKURL));
 }
 
 

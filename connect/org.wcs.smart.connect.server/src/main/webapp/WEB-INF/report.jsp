@@ -14,6 +14,7 @@
 	<script type="text/javascript" >
 		var search="${search}";
 		var REPORTURL = "${pageContext.request.contextPath}/api/report/";
+		var REPORTLINKURL = "${pageContext.request.contextPath}/connect/report/api/";
 		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/withdataonly";
 	</script>
 		
