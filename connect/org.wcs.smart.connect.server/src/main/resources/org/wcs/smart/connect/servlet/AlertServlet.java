@@ -73,7 +73,7 @@ public class AlertServlet extends HttpServlet{
 		session.beginTransaction();
 		try{
 			users = HibernateManager.getUsers(session);
-			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(session);
+			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(session, false);
 			for(ConservationAreaInfo c: cas){
 				if(SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AlertAction.VIEW_ALERTS_KEY, c.getUuid())){
 					authorizedCas.add(c);

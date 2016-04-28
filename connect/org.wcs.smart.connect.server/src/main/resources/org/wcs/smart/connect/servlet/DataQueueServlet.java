@@ -45,7 +45,7 @@ public class DataQueueServlet extends HttpServlet {
 				return;
 			}
 			canUpload = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), DataQueueAction.ADD_KEY);
-			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(s);
+			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(s, true);
 			for (Iterator<ConservationAreaInfo> iterator = cas.iterator(); iterator.hasNext();) {
 				ConservationAreaInfo conservationAreaInfo = (ConservationAreaInfo) iterator.next();
 				if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), DataQueueAction.ADD_KEY, conservationAreaInfo.getUuid())){

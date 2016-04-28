@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import javax.servlet.ServletContext;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
@@ -157,12 +158,14 @@ public class HibernateManager {
 	 * Only Include actual Desktop CAs with DATA (exclude 'CCAA', 'NO DATA' and 'Uploading')
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<ConservationAreaInfo> getConservationAreaInfosWithoutCCAA(Session session) {
-		return (List<ConservationAreaInfo>)session
+	public static List<ConservationAreaInfo> getConservationAreaInfosWithoutCCAA(Session session, boolean includeDataOnly) {
+		Criteria list = session
 				.createCriteria(ConservationAreaInfo.class)
-				.add(Restrictions.ne("uuid", ConservationAreaInfo.CCAA_UUID)) //$NON-NLS-1$
-				.add(Restrictions.eq("status", ConservationAreaInfo.Status.DATA)) //$NON-NLS-1$
-				.list();
+				.add(Restrictions.ne("uuid", ConservationAreaInfo.CCAA_UUID)); //$NON-NLS-1$
+				if(includeDataOnly){
+					list.add(Restrictions.eq("status", ConservationAreaInfo.Status.DATA)); //$NON-NLS-1$
+				}
+				return (List<ConservationAreaInfo>)list.list();
 	}
 
 	
