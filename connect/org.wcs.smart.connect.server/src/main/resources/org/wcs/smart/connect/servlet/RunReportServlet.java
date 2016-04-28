@@ -30,16 +30,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
-import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.api.ReportApi;
 
 /**
- * Servlet for running queries from web interface.  
+ * Servlet for running reports from web interface.
+ *   
  * @author Emily
  *
  */
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "report/api/*")
-public class RunPatrolServlet extends HttpServlet {
+public class RunReportServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
      

@@ -53,19 +53,22 @@ public class QueryResultSetIterator<T extends IResultItem> implements IQueryResu
 		this.pageSize = pageSize;
 		this.rs = rs;
 		this.session = session;
-		init();
+		this.queryResults = null;
 	}
 	
 	@Override
 	public boolean hasNext() {
+		init();
 		return itOffset + itIndex + 1 < rs.getItemCount();
 	}
 	private void init(){
+		if (queryResults != null) return;
 		if (rs.getItemCount() > 0) queryResults = rs.getResultSet(session);
 	}
 
 	@Override
 	public IResultItem next() {
+		init();
 		if (!hasNext())
 			throw new NoSuchElementException();
 		if (data == null) {
