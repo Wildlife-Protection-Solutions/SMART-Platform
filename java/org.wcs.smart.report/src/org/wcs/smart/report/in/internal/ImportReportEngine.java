@@ -24,6 +24,7 @@ package org.wcs.smart.report.in.internal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -68,6 +69,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
@@ -205,7 +207,9 @@ public class ImportReportEngine {
 			//remove existing library & make sure it points to the library associated with this ca
 			LibraryHandle library = rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 			rdh.dropLibraryAndBreakExtends(library);
-			rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFile().toString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
+			
+			//add default library
+			rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFileString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 			
 			//update report/query info			
 			ReportManager.updateReportQueries(session, rdh, importReport);

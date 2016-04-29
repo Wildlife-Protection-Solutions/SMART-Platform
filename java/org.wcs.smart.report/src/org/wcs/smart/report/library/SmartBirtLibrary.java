@@ -23,6 +23,7 @@ package org.wcs.smart.report.library;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 import org.wcs.smart.SmartContext;
@@ -109,12 +110,26 @@ public class SmartBirtLibrary {
 		return this.libraryLocation;
 	}
 	/**
-	 * 
+	 * This returns the path to the BIRT SMART Library File 
 	 * @return the birt smart library file
 	 */
 	public File getLibraryFile(){
 		return this.libraryFile;
 	}
 	
+	/**
+	 * This returns the string representation of the
+	 * library file path that should be included in the report.
+	 * This value is relative to the conservation area, not the
+	 * runtime path (ie <cauuid>/reports/library.rpt and
+	 * not data/filestore/<cauuid>/reports/library.rpt)
+	 * 
+	 * @return
+	 */
+	public String getLibraryFileString(){
+		Path p = getLibraryFile().toPath();
+		Path fs = (new File(SmartContext.INSTANCE.getFilestoreLocation())).toPath();
+		return fs.relativize(p).toString();
+	}
 	
 }

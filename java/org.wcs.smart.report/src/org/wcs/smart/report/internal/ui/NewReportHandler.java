@@ -197,9 +197,7 @@ public class NewReportHandler {
 					rdh.setTitle(report.getName());
 					
 					//add default library
-					Path p = smartLibrary.toPath();
-					Path fs = (new File(SmartContext.INSTANCE.getFilestoreLocation())).toPath();
-					rdh.includeLibrary(fs.relativize(p).toString(), library.getNamespace());
+					rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFileString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 					
 					//add date parameter automatically
 					if (param != null){
