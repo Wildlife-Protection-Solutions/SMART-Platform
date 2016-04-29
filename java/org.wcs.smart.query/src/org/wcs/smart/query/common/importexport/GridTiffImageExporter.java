@@ -72,6 +72,8 @@ public class GridTiffImageExporter implements IQueryExporter {
 	public void export(Query query, IQueryResult result, File file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
+		if ( ((GridQueryResult)result).getData().size() == 0 )
+			throw new Exception(Messages.GridTiffImageExporter_EmptyTiffError);
 		
 		File sourceFile = ((GridQueryResult)result).getRasterFile();
 		if (sourceFile == null || !sourceFile.exists()){

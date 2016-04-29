@@ -474,6 +474,7 @@ public class Messages extends NLS {
 	public static String GridArcImageExporter_ExporterName;
 	public static String GridArcImageExporter_ExportError;
 	public static String GridArcImageExporter_FileNotFound;
+	public static String GridTiffImageExporter_EmptyTiffError;
 	public static String GridTiffImageExporter_FileNotFound;
 	public static String GridTiffImageExporter_QueryError;
 	public static String GridTiffImageExporter_TiffExporterName;
