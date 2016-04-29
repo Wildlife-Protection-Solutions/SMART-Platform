@@ -165,8 +165,8 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		try {
 			featureCollection.clear();
 			featureCollection.add(createIncidentFeature(featureType));
-			store.removeFeatures(Filter.INCLUDE);
 			try{
+				store.removeFeatures(Filter.INCLUDE);
 				store.addFeatures(featureCollection);
 			}catch (ConcurrentModificationException ex){
 				//try again - this should only happen once (udig removes listener)
