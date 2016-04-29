@@ -178,6 +178,11 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="Url" />
 						<xs:element type="xs:string" name="UserName" />
 						<xs:element type="xs:int" name="Level" />
+						<xs:element type="xs:string" name="CaId" />
+						<xs:element type="xs:string" name="Description" />
+						<xs:element type="xs:string" name="AlertType" />
+						<xs:element type="xs:int" name="PingFrequency" />
+						<xs:element type="xs:string" name="Translate__PatrolElementId" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
