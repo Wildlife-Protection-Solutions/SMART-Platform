@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.query.engine;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -70,6 +72,12 @@ public class TiffRasterExporter {
 	 */
 	public void exportResults(GriddedQuery query, GridQueryResults results, Session session){
 		try{
+			if ( results.getData().size() == 0){
+				//create an empty file
+				Files.createFile(rasterFile);
+				return;	
+			}
+			
 			RasterBuilder rb = new RasterBuilder();
 			rb.setFileName(rasterFile);
 			
@@ -101,4 +109,5 @@ public class TiffRasterExporter {
 			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, Messages.getString("TiffRasterExporter.WriteError", l)); //$NON-NLS-1$
 		}
 	}
+
 }

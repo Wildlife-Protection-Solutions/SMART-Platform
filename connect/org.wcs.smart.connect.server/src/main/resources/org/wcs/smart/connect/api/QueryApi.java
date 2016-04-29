@@ -267,7 +267,7 @@ public class QueryApi extends HttpServlet{
 			}finally{
 				if (result != null) result.dispose(s);
 			}
-			
+
 		}catch (Exception ex){
 			String error = ex.getMessage();
 			if (ex instanceof JDBCException && ex.getCause() instanceof SQLException){
