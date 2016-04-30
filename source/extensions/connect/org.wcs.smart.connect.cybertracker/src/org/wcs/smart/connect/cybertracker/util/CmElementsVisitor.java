@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.cybertracker.dataentry;
+package org.wcs.smart.connect.cybertracker.util;
 
 import java.util.List;
 
@@ -38,18 +38,15 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class CmElementsVisitor {
 
-	public void visit(ConfigurableModel model, IVisitHandler handler) {
+	public void visit(ConfigurableModel model, IElementVisitHandler handler) {
 		visitNodes(handler, model.getNodes());
 		visitList(handler, model.getDefaultLists());
 		visitTree(handler, model.getDefaultTrees());
 	}
 
-	private void visitNodes(IVisitHandler handler, List<CmNode> nodes) {
+	private void visitNodes(IElementVisitHandler handler, List<CmNode> nodes) {
 		for (CmNode cmNode : nodes) {
 			handler.handle(cmNode);
-			if (cmNode.getCategory() != null) {
-				handler.handle(cmNode.getCategory());
-			}
 			for (CmAttribute attr : cmNode.getCmAttributes()) {
 				handler.handle(attr);
 				visitList(handler, attr.getList());
@@ -59,20 +56,20 @@ public class CmElementsVisitor {
 		}
 	}
 	
-	private void visitList(IVisitHandler handler, List<CmAttributeListItem> lists) {
+	private void visitList(IElementVisitHandler handler, List<CmAttributeListItem> lists) {
 		for (CmAttributeListItem item : lists) {
 			handler.handle(item);
 		}
 	}
 	
-	private void visitTree(IVisitHandler handler, List<CmAttributeTreeNode> trees) {
+	private void visitTree(IElementVisitHandler handler, List<CmAttributeTreeNode> trees) {
 		for (CmAttributeTreeNode node : trees) {
 			handler.handle(node);
 			visitTree(handler, node.getChildren());
 		}
 	}
 	
-	public static interface IVisitHandler {
+	public static interface IElementVisitHandler {
 		public void handle(UuidItem item);
 	}
 

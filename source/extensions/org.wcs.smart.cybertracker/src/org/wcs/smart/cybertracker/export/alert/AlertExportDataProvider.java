@@ -30,6 +30,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
@@ -57,10 +58,10 @@ public class AlertExportDataProvider {
 		}
 	}
 
-	public List<AlertData> getAlertData(UuidItem item) {
+	public List<AlertData> getAlertData(UuidItem item, CmAttribute attribute) {
 		List<AlertData> result = new ArrayList<>();
 		for (IAlertProvider p : providers) {
-			result.addAll(p.getAlertData(item));
+			result.addAll(p.getAlertData(item, attribute));
 		}
 		return result;
 	}
