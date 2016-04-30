@@ -24,6 +24,8 @@ package org.wcs.smart.cybertracker.export.data;
 import java.io.File;
 import java.util.UUID;
 
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
+
 /**
  * Proxy logic around list attribute items as there names and enable state
  * might be obtained either from configured data or from original datamodel if no data configured
@@ -38,4 +40,6 @@ public interface IAttributeListItemProxy {
 	public UUID getUuid();
 
 	public File getImageFile();
+
+	public CmAttributeListItem getListItem();
 }

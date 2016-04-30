@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -45,6 +46,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -72,6 +74,7 @@ import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -305,7 +308,7 @@ public class CyberTrackerConfExporter {
 		Node categoryNode = ctUtil.createRadioNode(node, keyMap, getNodeLevelResultElementId(level).getItemId());
 		Control headerControl = ScreensObjectFactory.getHeaderControl(categoryNode);
 		headerControl.setColor(NODE_HEADER_COLOR);
-		addAlerts(categoryNode, node.getChildren(), keyMap);
+		addAlerts(categoryNode, node.getChildren(), null, keyMap);
 		result.add(categoryNode);
 		
 		Integer nextLevel = level + 1;
@@ -520,6 +523,9 @@ public class CyberTrackerConfExporter {
 					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
 				}
+				List<CmAttributeListItem> items = getActiveListItems(cmAttr).stream().map(p -> p.getListItem()).collect(Collectors.toList());
+				Map<CmAttributeListItem, CyberTrackerId> itemsMap = IntStream.range(0, items.size()).boxed().collect(Collectors.toMap(j -> items.get(j), j -> ids.get(j)));
+				addAlerts(node, items, cmAttr, itemsMap);
 				result.add(node);
 				break;
 			}
@@ -862,12 +868,11 @@ public class CyberTrackerConfExporter {
 		return result;
 	}
 
-	private void addAlerts(Node ctNode, List<CmNode> kids, Map<CmNode, CyberTrackerId> keyMap) {
-		// TODO: test it, refactor it to support lists and trees
-		for (CmNode kid : kids) {
-			List<AlertData> dataList = alertDataProvider.getAlertData(kid);
+	private void addAlerts(Node ctNode, List<? extends UuidItem> displayedItems, CmAttribute cmAttr,  Map<? extends UuidItem, CyberTrackerId> item2CtIdMap) {
+		for (UuidItem kid : displayedItems) {
+			List<AlertData> dataList = alertDataProvider.getAlertData(kid, cmAttr);
 			if (!dataList.isEmpty()) {
-				CyberTrackerId ctId = keyMap.get(kid);
+				CyberTrackerId ctId = item2CtIdMap.get(kid);
 				String trElements = ctId.getItemTranslatedId();
 				for (AlertData alertData : dataList) {
 					Controls.Control alertControl = screensFactory.createAlertControl(alertData, trElements);
@@ -876,7 +881,6 @@ public class CyberTrackerConfExporter {
 			}
 		}
 	}
-
 	
 	private boolean isSingleLevelTree(CmAttribute cmAttr) {
 		boolean isSingleLevel = true;

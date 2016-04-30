@@ -1143,7 +1143,7 @@ public class ScreensObjectFactory {
 		control.setUrl(data.getUrl());
 		control.setUserName(data.getUsername());
 		control.setPassword(data.getPassword());
-		//control.setAlertType(240); //TODO: need type
+		control.setAlertType(data.getType());
 		control.setLevel(data.getLevel());
 		control.setTranslateElements(trElements);
 		return control;

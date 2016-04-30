@@ -86,6 +86,11 @@ public class ListItemsDataProvider {
 		public File getImageFile() {
 			return item.getImageFile();
 		}
+
+		@Override
+		public CmAttributeListItem getListItem() {
+			return item;
+		}
 	}
 	
 }

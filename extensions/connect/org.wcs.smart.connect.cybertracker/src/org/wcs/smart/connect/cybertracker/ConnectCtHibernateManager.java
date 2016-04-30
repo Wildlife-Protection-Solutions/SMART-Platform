@@ -31,9 +31,9 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.connect.cybertracker.dataentry.CmElementsVisitor;
-import org.wcs.smart.connect.cybertracker.dataentry.CmElementsVisitor.IVisitHandler;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
+import org.wcs.smart.connect.cybertracker.util.CmElementsVisitor;
+import org.wcs.smart.connect.cybertracker.util.CmElementsVisitor.IElementVisitHandler;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -95,7 +95,7 @@ public class ConnectCtHibernateManager {
 			}
 			map.put(model.getUuid(), model);
 			CmElementsVisitor visitor = new CmElementsVisitor();
-			visitor.visit(model, new IVisitHandler() {
+			visitor.visit(model, new IElementVisitHandler() {
 				@Override
 				public void handle(UuidItem item) {
 					if (item.getUuid() != null) {

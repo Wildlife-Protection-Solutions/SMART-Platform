@@ -19,22 +19,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.export.alert;
+package org.wcs.smart.connect.cybertracker.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.dataentry.model.CmAttribute;
 
 /**
- * Interface that must be implemented by alert providers.
- * Returns list of {@link AlertData} object based on alert configuration for passed element.
+ * Lookup that allows to quickly find alerts configured for specific node.
  * 
  * @author elitvin
  * @since 4.0.0
  */
-public interface IAlertProvider {
+public class AlertLookup {
 
-	public List<AlertData> getAlertData(UuidItem item, CmAttribute attribute);
+	//lookup map
+	private Map<CmAttribute, Map<UuidItem, List<ConnectAlert>>> attrMap;
 
+	public AlertLookup(List<ConnectAlert> alerts) {
+		attrMap = new HashMap<>();
+		for (ConnectAlert a : alerts) {
+			Map<UuidItem, List<ConnectAlert>> map = attrMap.get(a.getAttrubute());
+			if (map == null) {
+				map = new HashMap<>();
+				attrMap.put(a.getAttrubute(), map); //NOTE: null key is allowed
+			}
+			List<ConnectAlert> aList = map.get(a.getAlertItem());
+			if (aList == null) {
+				aList = new ArrayList<>();
+				map.put(a.getAlertItem(), aList);
+			}
+			aList.add(a);
+		}
+	}
+
+	public List<ConnectAlert> getAlerts(UuidItem item, CmAttribute attribute) {
+		Map<UuidItem, List<ConnectAlert>> map = attrMap.get(attribute);
+		if (map == null) {
+			return Collections.emptyList();
+		}
+		List<ConnectAlert> aList = map.get(item);
+		if (aList == null) {
+			return Collections.emptyList();
+		}
+		return new ArrayList<>(aList);
+	}
+	
 }

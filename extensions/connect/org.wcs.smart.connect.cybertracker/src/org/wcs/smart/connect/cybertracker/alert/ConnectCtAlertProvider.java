@@ -23,6 +23,7 @@ package org.wcs.smart.connect.cybertracker.alert;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,8 +35,10 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
+import org.wcs.smart.connect.cybertracker.util.AlertLookup;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.export.alert.IAlertProvider;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -46,14 +49,17 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @since 4.0.0
  */
 public class ConnectCtAlertProvider implements IAlertProvider {
+
+	private AlertLookup lookup;
 	
-	private List<ConnectAlert> alerts;
 	private String username;
 	private String password;
 	private String url;
 
 	public ConnectCtAlertProvider(ConfigurableModel model) {
-		alerts = loadAlerts(model);
+		List<ConnectAlert> alerts = loadAlerts(model);
+		lookup = new AlertLookup(alerts);
+		
 		// TODO: fix init logic
 		username = "user";
 		password = "pwd";
@@ -61,14 +67,14 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	}
 
 	@Override
-	public List<AlertData> getAlertData(UuidItem item) {
-		//TODO: implement some lookup logic for fast search
-		//TODO: need to match both item and attribute
+	public List<AlertData> getAlertData(UuidItem item, CmAttribute attribute) {
+		List<ConnectAlert> alerts = lookup.getAlerts(item, attribute);
+		if (alerts == null || alerts.isEmpty()) {
+			return Collections.emptyList();
+		}
 		List<AlertData> result = new ArrayList<>();
 		for (ConnectAlert a : alerts) {
-			if (item.equals(a.getAlertItem())) {
-				result.add(createAlertData(a));
-			}
+			result.add(createAlertData(a));
 		}
 		return result;
 	}
@@ -97,7 +103,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 							monitor.beginTask("Loading SMART Connect Alerts", 1);
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
-							resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, false));
+							resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
 							s.getTransaction().rollback();
 							s.close();
 						}
