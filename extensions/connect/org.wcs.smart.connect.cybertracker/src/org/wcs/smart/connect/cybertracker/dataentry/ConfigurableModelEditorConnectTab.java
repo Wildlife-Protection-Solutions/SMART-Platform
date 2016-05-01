@@ -383,9 +383,10 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		Set<ConnectAlert> removed = new HashSet<ConnectAlert>(dbAlertsList);
 		removed.removeAll(alertsList);
 		for (ConnectAlert a : removed) {
-			if (s.get(ConnectAlert.class, a.getUuid()) != null) {
+			Object del = s.get(ConnectAlert.class, a.getUuid());
+			if (del != null) {
 				//it may be the case that object was removed by constraint in db 
-				s.delete(a);
+				s.delete(del);
 			}
 		}
 		for (ConnectAlert a : alertsList) {
