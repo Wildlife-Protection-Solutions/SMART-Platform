@@ -55,7 +55,7 @@ public class TreeNodeDataProvider {
 		List<IAttributeTreeNodeProxy> result = new ArrayList<IAttributeTreeNodeProxy>();
 		for (CmAttributeTreeNode cmItem : nodesList) {
 			if (cmItem != null && cmItem.getIsActive()) {
-				CommonTreeNodeProxy proxy = new CmTreeNodeProxy(cmItem);
+				CmTreeNodeProxy proxy = new CmTreeNodeProxy(cmItem);
 				List<IAttributeTreeNodeProxy> children = wrapChildTreeNodes(session, cmItem, configurableModel);
 				proxy.setActiveChildren(children);
 				result.add(proxy);
@@ -75,20 +75,9 @@ public class TreeNodeDataProvider {
 		return data;
 	}
 
-	private abstract class CommonTreeNodeProxy implements IAttributeTreeNodeProxy {
-		private List<IAttributeTreeNodeProxy> children;
-		@Override
-		public List<IAttributeTreeNodeProxy> getActiveChildren() {
-			return children;
-		}
-		
-		public void setActiveChildren(List<IAttributeTreeNodeProxy> children) {
-			this.children = children;
-		}
-	}
-	
-	private class CmTreeNodeProxy extends CommonTreeNodeProxy {
+	private class CmTreeNodeProxy implements IAttributeTreeNodeProxy {
 		private CmAttributeTreeNode item;
+		private List<IAttributeTreeNodeProxy> children;
 
 		public CmTreeNodeProxy(CmAttributeTreeNode item) {
 			this.item = item;
@@ -110,6 +99,14 @@ public class TreeNodeDataProvider {
 		}
 
 		@Override
+		public List<IAttributeTreeNodeProxy> getActiveChildren() {
+			return children;
+		}
+		public void setActiveChildren(List<IAttributeTreeNodeProxy> children) {
+			this.children = children;
+		}
+		
+		@Override
 		public DisplayMode getDisplayMode() {
 			return item.getDisplayMode();
 		}
@@ -117,6 +114,11 @@ public class TreeNodeDataProvider {
 		@Override
 		public File getImageFile() {
 			return item.getImageFile();
+		}
+		
+		@Override
+		public CmAttributeTreeNode getTreeNode() {
+			return item;
 		}
 	}
 	

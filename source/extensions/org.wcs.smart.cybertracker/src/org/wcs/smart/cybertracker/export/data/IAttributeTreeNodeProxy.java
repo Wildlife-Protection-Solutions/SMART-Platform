@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.DisplayMode;
 
 /**
@@ -45,5 +46,7 @@ public interface IAttributeTreeNodeProxy {
 	public DisplayMode getDisplayMode();
 	
 	public File getImageFile();
+
+	public CmAttributeTreeNode getTreeNode();
 
 }

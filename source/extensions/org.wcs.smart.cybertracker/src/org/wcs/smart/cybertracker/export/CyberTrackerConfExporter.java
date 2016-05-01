@@ -76,6 +76,7 @@ import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -380,11 +381,11 @@ public class CyberTrackerConfExporter {
 		return nodeList;
 	}
 
-	private List<CyberTrackerId> addListElements(CmAttribute cmAttr) {
+	private ElementsAddResult addListElements(CmAttribute cmAttr) {
 		return addListElements(cmAttr, false, null);
 	}
 
-	private List<CyberTrackerId> addListElements(CmAttribute listAttr, boolean isMulti, CmAttribute numAttr) {
+	private ElementsAddResult addListElements(CmAttribute listAttr, boolean isMulti, CmAttribute numAttr) {
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
 		Attribute attribute = listAttr.getAttribute();
 		if (!AttributeType.LIST.equals(attribute.getType())) {
@@ -396,13 +397,14 @@ public class CyberTrackerConfExporter {
 			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
 			throw new IllegalArgumentException("Cannot add a screen without any items to display"); //$NON-NLS-1$
 		}
-		List<String> itemNames = new ArrayList<String>();
-		List<String> tag0Values = new ArrayList<String>();
+		List<String> itemNames = new ArrayList<>(activeItems.size());
+		List<String> tag0Values = new ArrayList<>(activeItems.size());
 		for (IAttributeListItemProxy listItem : activeItems) {
 			itemNames.add(listItem.getName());
 			tag0Values.add(UuidUtils.uuidToString(listItem.getUuid()));
-			
 		}
+		List<CmAttributeListItem> items = new ArrayList<>(activeItems.size());
+		Map<CmAttributeListItem, CyberTrackerId> itemsMap = new HashMap<>();
 
 		String tag1 = isMulti ? ElementsUtil.MULISELECT_ELEMENT_TAG : null;
 		String tag3 = isMulti ? getAttributeResultElementId(attribute, 0).getItemId() : null;
@@ -416,8 +418,10 @@ public class CyberTrackerConfExporter {
 			Elements.List.Items.Item item = ElementsUtil.addElementsItem(elements, name, id.getItemId(), tag0, tag1, tag2, tag3, tag4);
 			ElementsUtil.addElementsItemMedia(item, listItem.getImageFile());
 			ids.add(id);
+			items.add(listItem.getListItem());
+			itemsMap.put(listItem.getListItem(), id);
 		}
-		return ids;
+		return new ElementsAddResult(ids, items, itemsMap);
 	}
 	
 	private Node buildMultiSelectNode(CmAttribute cmAttr, CyberTrackerId id /*=startId*/, List<CyberTrackerId> childIds, boolean withNumbers) {
@@ -470,12 +474,14 @@ public class CyberTrackerConfExporter {
 			//block to check for multi-select / numeric multi-select
 			if (cmAttr.isMultiselect() && cmAttr.isVisible() && AttributeType.LIST.equals(attribute.getType())) {
 				CmAttribute numAttr = attrList.size() > i+1 && attrList.get(i+1).isNumeric() ? attrList.get(i+1) : null;
-				List<CyberTrackerId> multiIds = addListElements(cmAttr, true, numAttr); 
+				ElementsAddResult addResult = addListElements(cmAttr, true, numAttr);
+				List<CyberTrackerId> multiIds = addResult.getIds();
 				Node mNode = buildMultiSelectNode(cmAttr, id, multiIds, numAttr != null);
 				Control control2 = ScreensObjectFactory.getNavigationControl(mNode);
 				CyberTrackerId nextId = new CyberTrackerId();
 				//reference to "Next" screen
 				control2.setTranslateNextScreenId(nextId.getNodeId());
+				addAlerts(mNode, addResult.getAddedItems(), cmAttr, addResult.getItem2CtIdMap());
 				result.add(mNode);
 				int cutIndex = numAttr == null ? i+1 : i+2;
 				List<CmAttribute> toShow = attrList.subList(cutIndex, attrList.size()); //sublist of everything after multi-select / numeric multi-select
@@ -514,7 +520,8 @@ public class CyberTrackerConfExporter {
 			}
 			case LIST:
 			{
-				List<CyberTrackerId> ids = addListElements(cmAttr);
+				ElementsAddResult addResult = addListElements(cmAttr);
+				List<CyberTrackerId> ids = addResult.getIds();
 				List<String> values = ctUtil.listItemIds(ids);
 				String trElements = ctUtil.translateElements(ids);
 				String trLinks = ctUtil.translateLinks(ids, false);
@@ -523,16 +530,15 @@ public class CyberTrackerConfExporter {
 					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
 				}
-				List<CmAttributeListItem> items = getActiveListItems(cmAttr).stream().map(p -> p.getListItem()).collect(Collectors.toList());
-				Map<CmAttributeListItem, CyberTrackerId> itemsMap = IntStream.range(0, items.size()).boxed().collect(Collectors.toMap(j -> items.get(j), j -> ids.get(j)));
-				addAlerts(node, items, cmAttr, itemsMap);
+				addAlerts(node, addResult.getAddedItems(), cmAttr, addResult.getItem2CtIdMap());
 				result.add(node);
 				break;
 			}
 			case TREE:
 			{
 				if (cmAttr.isFlattenTree() || isSingleLevelTree(cmAttr)) {
-					List<CyberTrackerId> ids = addFinalTreeNodes(cmAttr, cmAttr.isFlattenTree() ? new NameTreeNodeComparator() : null);
+					ElementsAddResult addResult = addFinalTreeNodes(cmAttr, cmAttr.isFlattenTree() ? new NameTreeNodeComparator() : null);
+					List<CyberTrackerId> ids = addResult.getIds();
 					List<String> values = ctUtil.listItemIds(ids);
 					String trElements = ctUtil.translateElements(ids);
 					String trLinks = ctUtil.translateLinks(ids, false);
@@ -541,6 +547,7 @@ public class CyberTrackerConfExporter {
 						Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 						control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
 					}
+					addAlerts(node, addResult.getAddedItems(), cmAttr, addResult.getItem2CtIdMap());
 					result.add(node);
 				} else {
 					String nodeId = id.getNodeId();
@@ -600,7 +607,7 @@ public class CyberTrackerConfExporter {
 		return id;
 	}
 	
-	private List<CyberTrackerId> addFinalTreeNodes(CmAttribute cmAttr, Comparator<IAttributeTreeNodeProxy> comparator) {
+	private ElementsAddResult addFinalTreeNodes(CmAttribute cmAttr, Comparator<IAttributeTreeNodeProxy> comparator) {
 		List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(cmAttr);
 		if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
 			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
@@ -611,7 +618,9 @@ public class CyberTrackerConfExporter {
 			Collections.sort(finalTreeNodes, comparator);
 		}
 		
-		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
+		List<CyberTrackerId> ids = new ArrayList<>(finalTreeNodes.size());
+		List<CmAttributeTreeNode> items = new ArrayList<>(finalTreeNodes.size());
+		Map<CmAttributeTreeNode, CyberTrackerId> itemsMap = new HashMap<>();
 		for (IAttributeTreeNodeProxy treeNode : finalTreeNodes) {
 			String name = treeNode.getName();
 			String tag0 = UuidUtils.uuidToString(treeNode.getUuid());
@@ -619,8 +628,10 @@ public class CyberTrackerConfExporter {
 			Elements.List.Items.Item item =  ElementsUtil.addElementsItem(elements, name, id.getItemId(), tag0);
 			ElementsUtil.addElementsItemMedia(item, treeNode.getImageFile());
 			ids.add(id);
+			items.add(treeNode.getTreeNode());
+			itemsMap.put(treeNode.getTreeNode(), id);
 		}
-		return ids;
+		return new ElementsAddResult(ids, items, itemsMap);
 	}
 	
 	private List<IAttributeTreeNodeProxy> listFinalTreeNodes(List<IAttributeTreeNodeProxy> activeTreeNodes) {
@@ -817,9 +828,8 @@ public class CyberTrackerConfExporter {
 	 * @return
 	 */
 	private List<Node> buildAttributeTreeNodes(CmAttribute treeCmAttribute, String nodeId, CyberTrackerId navId, String resultElementId, String label, boolean terminate) {
-		List<Node> result = new ArrayList<Node>();
-		List<IAttributeTreeNodeProxy> activeTreeNodes = new ArrayList<IAttributeTreeNodeProxy>();
-		activeTreeNodes.addAll(getActiveTreeNodes(treeCmAttribute));
+		List<Node> result = new ArrayList<>();
+		List<IAttributeTreeNodeProxy> activeTreeNodes = new ArrayList<>(getActiveTreeNodes(treeCmAttribute));
 		
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
@@ -833,9 +843,12 @@ public class CyberTrackerConfExporter {
 				navId = null; //we are under mutli-select and if two next screens are defined that causes stacking problem (so we need to avoid next screen for leaves)
 			}
 		}
+		List<CmAttributeTreeNode> items = activeTreeNodes.stream().map(p -> p.getTreeNode()).collect(Collectors.toList());
+		Map<CmAttributeTreeNode, CyberTrackerId> itemsMap = IntStream.range(0, items.size()).boxed().collect(Collectors.toMap(j -> items.get(j), j -> childIds.get(j)));
+		addAlerts(treeRootNode, items, treeCmAttribute, itemsMap);
 		result.add(treeRootNode);
 		for (IAttributeTreeNodeProxy treeNode : activeTreeNodes) {
-			result.addAll(buildAttributeTreeNodes(treeNode, map, navId, resultElementId, label));
+			result.addAll(buildAttributeTreeNodes(treeCmAttribute, treeNode, map, navId, resultElementId, label));
 		}
 		
 		//below is same as ElementsUtil.addElements(elements, map);
@@ -847,7 +860,7 @@ public class CyberTrackerConfExporter {
 		return result;
 	}
 	
-	private List<Node> buildAttributeTreeNodes(IAttributeTreeNodeProxy treeNode, Map<IAttributeTreeNodeProxy, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, String label) {
+	private List<Node> buildAttributeTreeNodes(CmAttribute treeCmAttribute, IAttributeTreeNodeProxy treeNode, Map<IAttributeTreeNodeProxy, CyberTrackerId> map, CyberTrackerId navId, String resultElementId, String label) {
 		List<Node> result = new ArrayList<Node>();
 		if (treeNode == null || treeNode.getActiveChildren() == null || treeNode.getActiveChildren().isEmpty()) {
 			return result;
@@ -856,14 +869,19 @@ public class CyberTrackerConfExporter {
 		String id = map.get(treeNode).getNodeId();
 		List<IAttributeTreeNodeProxy> activeChildren = treeNode.getActiveChildren();
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeChildren, map);
+		List<CmAttributeTreeNode> items = activeChildren.stream().map(p -> p.getTreeNode()).collect(Collectors.toList());
+		Map<CmAttributeTreeNode, CyberTrackerId> itemsMap = IntStream.range(0, items.size()).boxed().collect(Collectors.toMap(j -> items.get(j), j -> childIds.get(j)));
+
 		List<IAttributeTreeNodeProxy> childWithKids = activeChildren.stream().filter(x -> x != null && x.getActiveChildren() != null && !x.getActiveChildren().isEmpty()).collect(Collectors.toList());
 		List<CyberTrackerId> childWithKidsIds = ctUtil.getChildrenIds(childWithKids, map);
 
 		//we want to link to node only elements that have active children
-		result.add(ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, childWithKidsIds, resultElementId, treeNode.getDisplayMode()));
+		Node node = ctUtil.createRadioNode(id, treeNode.getName() + label, childIds, childWithKidsIds, resultElementId, treeNode.getDisplayMode());
+		addAlerts(node, items, treeCmAttribute, itemsMap);
+		result.add(node);
 		
 		for (IAttributeTreeNodeProxy child : childWithKids) {
-			result.addAll(buildAttributeTreeNodes(child, map, navId, resultElementId, label));
+			result.addAll(buildAttributeTreeNodes(treeCmAttribute, child, map, navId, resultElementId, label));
 		}		
 		return result;
 	}
@@ -1163,4 +1181,28 @@ public class CyberTrackerConfExporter {
 		}
 	}
 
+	private final class ElementsAddResult {
+		private List<CyberTrackerId> ids;
+		private List<? extends UuidItem> addedItems;
+		private Map<? extends UuidItem, CyberTrackerId> item2CtIdMap;
+		
+		public ElementsAddResult(List<CyberTrackerId> ids,
+				List<? extends UuidItem> addedItems,
+				Map<? extends UuidItem, CyberTrackerId> item2CtIdMap) {
+			this.ids = ids;
+			this.addedItems = addedItems;
+			this.item2CtIdMap = item2CtIdMap;
+		}
+		
+		public List<CyberTrackerId> getIds() {
+			return ids;
+		}
+		public List<? extends UuidItem> getAddedItems() {
+			return addedItems;
+		}
+		public Map<? extends UuidItem, CyberTrackerId> getItem2CtIdMap() {
+			return item2CtIdMap;
+		}
+		
+	}
 }
