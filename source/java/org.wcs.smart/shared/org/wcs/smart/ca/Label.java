@@ -169,19 +169,20 @@ public class Label  {
 	
 	private static synchronized String searchAll(Locale lang, UUID element, Session session){
 		if (lang == null) return ""; //$NON-NLS-1$
-		
-		List<?> options = session.createCriteria(Label.class)
-				.add(Restrictions.eq("id.element.uuid",element)).list(); //$NON-NLS-1$
-
+			
+		List<?> options = session.createSQLQuery("SELECT a.code, b.value, a.isdefault from smart.language a, smart.i18n_label b where a.uuid = b.language_uuid and b.element_uuid = :element") //$NON-NLS-1$
+				.setParameter("element", element) //$NON-NLS-1$
+				.list();
+			
 		if (options.size() == 1){
-			return ((Label)options.get(0)).getValue();
+			return (String)((Object[])options.get(0))[1];
 		}
-		
+			
 		String langmatch = null;
 		String defaultvalue = null;
 		for (Object obj : options){
-			Label l = (Label)obj;
-			String code = l.getLanguage().getCode();
+			String label = (String)((Object[])obj)[1];
+			String code = (String)((Object[])obj)[0];
 			Locale test = null;
 			if (code.contains("_")){ //$NON-NLS-1$
 				String[] bits = code.split("_"); //$NON-NLS-1$
@@ -190,14 +191,14 @@ public class Label  {
 				test = new Locale(code);
 			}
 			if (test.equals(lang)){
-				return l.getValue();
+				return label;
 			}else if (test.getLanguage().equals(lang.getLanguage())){
-				langmatch = l.getValue();
+				langmatch = label;
 			}
-			if (l.getLanguage().isDefault()){
-				defaultvalue = l.getValue();
+			if ((Boolean)((Object[])obj)[2]){
+				defaultvalue = label;
 			}
-		}
+			}
 		if (langmatch != null) return langmatch;
 		if (defaultvalue != null) return defaultvalue;
 		return null;
