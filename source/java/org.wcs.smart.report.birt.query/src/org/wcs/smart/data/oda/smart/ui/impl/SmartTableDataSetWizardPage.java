@@ -455,7 +455,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 				.createResultSetDefinition();
 		// resultSetDefn.setName( value ); // result set name
 		resultSetDefn.setResultSetColumns(columns);
-
+		
 		// no exception in conversion; go ahead and assign to specified
 		// dataSetDesign
 		dataSetDesign.setPrimaryResultSet(resultSetDefn);

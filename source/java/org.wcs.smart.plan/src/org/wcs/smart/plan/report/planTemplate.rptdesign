@@ -1490,76 +1490,12 @@
                     <property name="org.wcs.smart.birt.map.layerType">MULTIPOINT</property>
                     <property name="org.wcs.smart.birt.map.geomColumn">geometry</property>
                     <property name="dataSet">Plan Targets</property>
-                    <list-property name="boundDataColumns">
-                        <structure>
-                            <property name="name">TargetName</property>
-                            <expression name="expression">dataSetRow["TargetName"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">TargetDescription</property>
-                            <expression name="expression">dataSetRow["TargetDescription"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">StatusDescription</property>
-                            <expression name="expression">dataSetRow["StatusDescription"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">targetStatus</property>
-                            <expression name="expression">dataSetRow["targetStatus"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">PlanId</property>
-                            <expression name="expression">dataSetRow["PlanId"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">geometry</property>
-                            <expression name="expression">dataSetRow["geometry"]</expression>
-                            <property name="dataType">javaObject</property>
-                        </structure>
-                    </list-property>
                 </extended-item>
                 <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="419">
                     <property name="org.wcs.smart.birt.map.layerName">Smart SubPlan Targets</property>
                     <property name="org.wcs.smart.birt.map.layerType">MULTIPOINT</property>
                     <property name="org.wcs.smart.birt.map.geomColumn">geometry</property>
                     <property name="dataSet">SubPlan Targets</property>
-                    <list-property name="boundDataColumns">
-                        <structure>
-                            <property name="name">TargetName</property>
-                            <expression name="expression">dataSetRow["TargetName"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">TargetDescription</property>
-                            <expression name="expression">dataSetRow["TargetDescription"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">StatusDescription</property>
-                            <expression name="expression">dataSetRow["StatusDescription"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">targetStatus</property>
-                            <expression name="expression">dataSetRow["targetStatus"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">PlanId</property>
-                            <expression name="expression">dataSetRow["PlanId"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">geometry</property>
-                            <expression name="expression">dataSetRow["geometry"]</expression>
-                            <property name="dataType">javaObject</property>
-                        </structure>
-                    </list-property>
                 </extended-item>
             </property>
             <property name="height">3.7916666666666665in</property>

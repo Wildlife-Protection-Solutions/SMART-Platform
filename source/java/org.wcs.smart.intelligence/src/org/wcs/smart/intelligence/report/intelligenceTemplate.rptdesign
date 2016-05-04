@@ -559,23 +559,6 @@
                     <property name="org.wcs.smart.birt.map.layerType">POINT</property>
                     <property name="org.wcs.smart.birt.map.geomColumn">geometry</property>
                     <property name="dataSet">Intelligence Data Set</property>
-                    <list-property name="boundDataColumns">
-                        <structure>
-                            <property name="name">X</property>
-                            <expression name="expression">dataSetRow["X"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">Y</property>
-                            <expression name="expression">dataSetRow["Y"]</expression>
-                            <property name="dataType">string</property>
-                        </structure>
-                        <structure>
-                            <property name="name">geometry</property>
-                            <expression name="expression">dataSetRow["geometry"]</expression>
-                            <property name="dataType">javaObject</property>
-                        </structure>
-                    </list-property>
                 </extended-item>
             </property>
             <property name="height">5.427083333333333in</property>
