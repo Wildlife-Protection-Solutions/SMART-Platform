@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Transaction;
@@ -118,9 +120,17 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     			if (!to.getParentFile().exists()){
     				SmartUtils.createDirectory(to.getParentFile());
     			}
+    			
+    			Pattern p = Pattern.compile("(\\d+)_(.*)"); //$NON-NLS-1$
     			int counter = 1;
+    			String name = attachment.getFilename();
     			while(to.exists()){
-    				String name = (counter++) + "_" + attachment.getFilename(); //$NON-NLS-1$
+    				Matcher m = p.matcher(name);
+    				if (m.matches()){
+    					name = (Integer.parseInt(m.group(1)) +1 ) + "_" + m.group(2); //$NON-NLS-1$
+    				}else{
+    					name = (counter++) + "_" + attachment.getFilename(); //$NON-NLS-1$
+    				}
     				to = new File(to.getParentFile(), name);
     			}
     			if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){

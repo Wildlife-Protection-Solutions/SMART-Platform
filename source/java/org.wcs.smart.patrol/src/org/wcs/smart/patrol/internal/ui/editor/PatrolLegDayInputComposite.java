@@ -619,7 +619,7 @@ public class PatrolLegDayInputComposite {
 			}
 
 		});
-		
+		j.schedule();
 		
 		
 	}

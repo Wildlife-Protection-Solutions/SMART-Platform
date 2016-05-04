@@ -105,12 +105,15 @@ public class MoveWaypointDialog extends TitleAreaDialog{
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
 		
-		parent.setLayout(new GridLayout(1, false));
+		final Composite outer = new Composite(parent, SWT.NONE);
+		outer.setLayout(new GridLayout());
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		final Composite legtype = new Composite(parent, SWT.NONE);
+		final Composite legtype = new Composite(outer, SWT.NONE);
 		legtype.setLayout(new GridLayout(2, false));
-		legtype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		legtype.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(legtype, SWT.NONE);
 		lbl.setText(Messages.MoveWaypointDialog_MoveTo_Label );
@@ -200,7 +203,7 @@ public class MoveWaypointDialog extends TitleAreaDialog{
 		}
 		
 		setMessage(Messages.MoveWaypointDialog_DialogMessage);
-		
+		setTitle(Messages.MoveWaypointDialog_DialogTitle);
 		getShell().setText(Messages.MoveWaypointDialog_DialogTitle);
 		return parent;
 	}
