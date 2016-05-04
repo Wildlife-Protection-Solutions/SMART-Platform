@@ -130,7 +130,7 @@ public class ExportQueryDefLocationPage extends WizardPage {
 				}
 				String f = dd.open();
 				if (f != null) {
-					txtFile.setData(f);
+					txtFile.setText(f);
 				}
 				
 			}

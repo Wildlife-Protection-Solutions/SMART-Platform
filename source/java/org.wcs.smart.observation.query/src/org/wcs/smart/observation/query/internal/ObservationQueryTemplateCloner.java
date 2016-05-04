@@ -39,6 +39,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
@@ -84,7 +85,7 @@ public class ObservationQueryTemplateCloner implements
 			ObservationGriddedQuery clone = (ObservationGriddedQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObservationGriddedQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			clone.setCrsDefinition(query.getCrsDefinition());
 			
@@ -115,7 +116,7 @@ public class ObservationQueryTemplateCloner implements
 			ObservationSummaryQuery clone = (ObservationSummaryQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObservationSummaryQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
@@ -144,7 +145,7 @@ public class ObservationQueryTemplateCloner implements
 
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
@@ -175,7 +176,7 @@ public class ObservationQueryTemplateCloner implements
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));

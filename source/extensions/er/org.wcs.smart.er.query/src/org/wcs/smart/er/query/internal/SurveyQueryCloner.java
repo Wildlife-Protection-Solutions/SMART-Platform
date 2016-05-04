@@ -41,6 +41,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
@@ -100,7 +101,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			SurveyGriddedQuery clone = (SurveyGriddedQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveyGriddedQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			clone.setCrsDefinition(query.getCrsDefinition());
 			
@@ -135,7 +136,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			SurveySummaryQuery clone = (SurveySummaryQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveySummaryQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
@@ -168,7 +169,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
@@ -203,7 +204,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
@@ -238,7 +239,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
@@ -273,7 +274,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
