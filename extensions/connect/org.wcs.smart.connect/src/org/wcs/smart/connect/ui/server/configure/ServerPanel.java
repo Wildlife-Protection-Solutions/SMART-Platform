@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 
@@ -58,10 +59,10 @@ public class ServerPanel extends Composite implements ModifyListener {
 	private static final String CD_KEY = "cd"; //$NON-NLS-1$
 	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
 	
-	
 	private Text txtServer;
 	private Text txtCertificate;
 	private List<ModifyListener> listeners;
+	private boolean updatePref;
 	
 	public ServerPanel(Composite parent) {
 		super(parent, SWT.NONE);
@@ -149,6 +150,9 @@ public class ServerPanel extends Composite implements ModifyListener {
 				scd.hide();
 				txtServer.setData(VALID_KEY, true);
 			}
+			if (updatePref && (Boolean)txtServer.getData(VALID_KEY)){
+				ConnectPlugIn.getDefault().getPreferenceStore().setValue(ConnectPlugIn.CONNECT_URL_PREF, txtServer.getText());
+			}
 		}
 		
 		if (e.getSource() == txtCertificate){
@@ -191,7 +195,12 @@ public class ServerPanel extends Composite implements ModifyListener {
 		if (server.getServerUrl() != null){
 			txtServer.setText(server.getServerUrl());
 		}else{
-			txtServer.setText("https://localhost:8443/server");
+			updatePref = true;
+			String url = ConnectPlugIn.getDefault().getPreferenceStore().getString(ConnectPlugIn.CONNECT_URL_PREF);
+			if (url == null || url.isEmpty()){
+				url = "https://localhost:8443/server"; //$NON-NLS-1$
+			}
+			txtServer.setText(url);
 		}
 		if (server.getCertificateFileName() != null){
 			txtCertificate.setText(USE_EXISTING);
@@ -203,6 +212,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 	public String getServerUrl(){
 		return txtServer.getText();
 	}
+	
 	/**
 	 * blank resets to default;
 	 * null makes no changes (should use current)

@@ -104,12 +104,6 @@ public class DownloadInstallCcaaHandler {
 		proxy.setUuid(ConservationArea.MULTIPLE_CA);
 		final DownloadCaEngine installer = new DownloadCaEngine(proxy, connect);
 		
-		if (!installer.deleteCa(SmartDB.getCurrentConservationArea(), activeShell)){
-			return;
-		}
-		if (!installer.validateCaDeleted()){
-			return;
-		}
 		final List<Exception> errors = new ArrayList<Exception>();
 		try{
 			ProgressMonitorDialog monitor = new ProgressMonitorDialog(activeShell);
