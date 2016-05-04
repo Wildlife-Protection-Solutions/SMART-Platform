@@ -34,6 +34,7 @@ import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 /**
  * Clones intelligence query data.
@@ -77,7 +78,7 @@ public class IntelligenceQueryTemplateCloner implements
 			IntelligenceSummaryQuery clone = new IntelligenceSummaryQuery();
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
@@ -107,7 +108,7 @@ public class IntelligenceQueryTemplateCloner implements
 			IntelligenceRecordQuery clone = new IntelligenceRecordQuery();
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
-			clone.setConservationAreaFilter(query.getConservationAreaFilter());
+			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());
 			clone.setDateFilter(query.getDateFilter());
 			if (query.getFolder() != null){
 				clone.setFolder((QueryFolder)engine.getNewConservationItem(query.getFolder()));
