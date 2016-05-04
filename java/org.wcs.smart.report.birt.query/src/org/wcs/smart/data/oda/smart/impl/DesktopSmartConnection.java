@@ -49,7 +49,8 @@ public class DesktopSmartConnection extends SmartConnection {
 		cleanup = false;
 		if (appContext != null){
 			localSession = (Session) appContext.get(SmartReportRunner.SESSION_PARAM);
-		}else{
+		}
+		if (localSession == null){
 			cleanup = true;
 			localSession = HibernateManager.openSession();
 			localSession.beginTransaction();
