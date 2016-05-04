@@ -95,11 +95,11 @@ public class ConservationAreaManager {
 		
 		monitor.beginTask(Messages.ConservationAreaManager_Progress_DeleteCa, work);
 		monitor.worked(0);
-		Session session = HibernateManager.openSession();
-		session.update(ca);
 		
+		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
+			ca = (ConservationArea)session.get(ConservationArea.class, ca.getUuid());
 			final File fileStore = new File(ca.getFileDataStoreLocation());
 			
 			runDeleteHandlers(ca, session, monitor);
