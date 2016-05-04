@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -108,6 +109,9 @@ public class ReportIntelligence {
 			//it doesn't already exist
 			if (getCustomTemplateLocation() == null){
 				File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR, INTELLIGENCE_TEMPLATE);
+				if (!f.getParentFile().exists()){
+					Files.createDirectory(f.getParentFile().toPath());
+				}
 				try(InputStream in = getIntelligenceTemplate();
 						OutputStream out = new FileOutputStream(f)){
 					IOUtils.copy(in, out);
