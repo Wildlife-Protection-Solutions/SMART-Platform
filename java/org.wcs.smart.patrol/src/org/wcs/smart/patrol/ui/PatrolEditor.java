@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.ui;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -48,7 +49,10 @@ import org.wcs.smart.common.control.CombinedSelectionProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -369,13 +373,18 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		savePatrolPart(patrolLegDay);
 	}
 	
-	
+	/**
+	 * Returns a job to save one set of waypoints and remove another. Does not schedule job.
+	 * 
+	 * @param toSave waypoints to save
+	 * @param toDelete waypoints to delete
+	 * @return
+	 */
 	public Job moveWaypoints(final Collection<PatrolWaypoint> toSave, final Collection<PatrolWaypoint> toDelete){
 		Job moveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session saveSession = HibernateManager
-						.openSession(new WaypointAttachmentInterceptor());
+				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 				try{
 					saveSession.beginTransaction();
 					
@@ -384,12 +393,41 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						saveSession.delete(wp);
 						saveSession.delete(wp.getWaypoint());					
 					}
+					Patrol p = null;
+					File rootFolder = null;
+					if (toSave.size() > 0){
+						PatrolWaypointSource pws = (PatrolWaypointSource) WaypointSourceEngine.INSTANCE.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+						p = toSave.iterator().next().getPatrolLegDay().getPatrolLeg().getPatrol();
+						rootFolder = new File(p.getConservationArea().getFileDataStoreLocation(), pws.getDatastoreFileLocation(p));
+					}
 					/* save waypoints */
 					for (PatrolWaypoint wp : toSave) {
+						if (!wp.getPatrolLegDay().getPatrolLeg().getPatrol().equals(p)) throw new Exception("Cannot save waypoints that are not associated with the same patrol in a single statement."); //$NON-NLS-1$
+						
 						wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 						wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
+						
+						//configure attachment locations; this is necessary because the waypoint is saved before the patrol waypoint
+						//and in these case the waypoint won't be able to find the patrol waypoint which is necessary to compute
+						//the filestore location
+						if (wp.getWaypoint().getAttachments() != null){
+							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+								wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
+							}
+						}
+						if (wp.getWaypoint().getObservations() != null){
+							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment wa : wo.getAttachments()){
+										wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
+									}
+								}
+							}
+						}
+						
 						saveSession.saveOrUpdate(wp.getWaypoint());
 						saveSession.saveOrUpdate(wp);
+						
 						
 						// remove observations with no data
 						if (wp.getWaypoint().getObservations() != null) {
@@ -415,6 +453,32 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					saveSession.close();
 				}
 				
+				//load the attachment locations after close to ensure
+				//items can be viewed in ui without error
+				Session s = HibernateManager.openSession();
+				try{
+					for (PatrolWaypoint wp : toSave) {
+						if (wp.getWaypoint().getAttachments() != null){
+							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+								wa.computeFileLocation(s);
+							}
+						}
+						if (wp.getWaypoint().getObservations() != null){
+							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment wa : wo.getAttachments()){
+										wa.computeFileLocation(s);
+									}
+								}
+							}
+						}
+					}
+				}catch (Exception ex){
+					ex.printStackTrace();
+				}finally{
+					s.close();
+				}
+				
 				/* fire events */
 				for (PatrolWaypoint wp : toDelete){
 					try{
@@ -433,10 +497,9 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				return Status.OK_STATUS;
 			}
 		};
-		moveJob.schedule();
 		return moveJob;
-		
 	}
+	
 	/**
 	 * Saves the collection of waypoints.
 	 * 
