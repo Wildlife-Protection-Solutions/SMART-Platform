@@ -82,7 +82,7 @@ public class DownloadCaEngine {
 	 * @throws Exception
 	 */
 	public boolean downloadImport(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.DownloadCaEngine_TaskName, 4);
+		monitor.beginTask(Messages.DownloadCaEngine_TaskName, 5);
 		
 		/* request ca */
 		monitor.subTask(Messages.DownloadCaEngine_InitSubtaskName);
@@ -122,6 +122,23 @@ public class DownloadCaEngine {
 		
 		Path p = connect.downloadFileFromUrl(downloadUrl, null, new SubProgressMonitor(monitor, 1));
 		
+		ConservationArea desktopCa = null;
+		Session s = HibernateManager.openSession();
+		try{
+			desktopCa = (ConservationArea)s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+		}finally{
+			s.close();
+		}
+		if (desktopCa != null){
+			/* delete existing ca */
+			if (!deleteCa(SmartDB.getCurrentConservationArea(), new SubProgressMonitor(monitor,1))){
+				return false;
+			}
+			if (!validateCaDeleted()){
+				return false;
+			}		
+		}
+				
 		/* import file */
 		monitor.subTask(Messages.DownloadCaEngine_InstallSubtaskName);
 		try{
@@ -211,7 +228,8 @@ public class DownloadCaEngine {
 		return validateCaDeleted();
 	}
 
-	public boolean validateCaDeleted(){
+	
+	private boolean validateCaDeleted(){
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
@@ -227,7 +245,8 @@ public class DownloadCaEngine {
 		}
 		return true;
 	}
-	public boolean deleteCa(final ConservationArea ca, final Shell activeShell){
+	
+	private boolean deleteCa(final ConservationArea ca, final Shell activeShell){
 		//we don't revert back here; that will be done after download complete
 		HibernateManager.endSessionFactory(true);
 		HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
@@ -242,18 +261,36 @@ public class DownloadCaEngine {
 					DisplayAccess.accessDisplayDuringStartup();
 					monitor.setTaskName(Messages.DownloadCaEngine_DeleteTaskName);
 					try{
-						ConservationAreaManager.getInstance().deleteConservationArea(ca, monitor, false);
+						ConservationAreaManager.getInstance().deleteConservationArea(ca, new SubProgressMonitor(monitor,1), false);
 					}catch (final Exception ex){
 						cont[0] = false;
-						SmartPlugIn.displayLog(Messages.DownloadCaEngine_CaDataError, ex);	
-					}		
+						SmartPlugIn.displayLog(Messages.DownloadCaEngine_CaDataError, ex);
+					}
+					monitor.done();
 				}
 			});
 		}catch (Exception ex){
 			SmartPlugIn.displayLog( Messages.DownloadCaEngine_CaDataError, ex);
 			return false;
 		}
-		if (!cont[0]) return false;
+		if (!cont[0]) return false;	
+		return true;
+	}
+	
+	private boolean deleteCa(final ConservationArea ca, final IProgressMonitor monitor) throws Exception{
+		//we don't revert back here; that will be done after download complete
+		HibernateManager.endSessionFactory(true);
+		HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+		
+		monitor.beginTask(Messages.DownloadCaEngine_DeleteTaskName, 1);
+					
+		try{
+			ConservationAreaManager.getInstance().deleteConservationArea(ca, new SubProgressMonitor(monitor,1), false);
+		}catch (final Exception ex){
+			SmartPlugIn.log(Messages.DownloadCaEngine_CaDataError, ex);
+			throw new Exception("Unable to delete Conservation Area before installing new Conservation Area.", ex); //$NON-NLS-1$
+		}
+		monitor.done();
 		return true;
 	}
 }
