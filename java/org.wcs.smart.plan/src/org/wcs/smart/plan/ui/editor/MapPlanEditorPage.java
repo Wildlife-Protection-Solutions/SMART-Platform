@@ -30,6 +30,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
@@ -64,6 +65,7 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.map.udig.PlanTargetService;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -186,12 +188,28 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		}
 		
 		private IGeoResource createTrackPoints(IProgressMonitor monitor) throws IOException{
-			PatrolQuery pq = PatrolQueryFactory.createPatrolQuery();
+			final PatrolQuery pq = PatrolQueryFactory.createPatrolQuery();
 			pq.updateName(SmartDB.getCurrentLanguage(), Messages.MapPlanEditorPage_QueryName);
 			pq.setName(Messages.MapPlanEditorPage_QueryName);
 			pq.setDateFilter(new DateFilter(PatrolStartDateField.INSTANCE, AllDatesFilter.INSTANCE));
 			pq.setQueryFilter(generateQueryString());
+			pq.setConservationArea(SmartDB.getCurrentConservationArea());
 			
+			Job runQueryJob = new Job(Messages.MapPlanEditorPage_ExecutingPatrolQuery){
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Session s = HibernateManager.openSession();
+					try{
+						pq.setCachedResults(QueryExecutor.INSTANCE.executeQuery(pq, s, monitor));
+					}catch (Exception ex){
+						SmartPlanPlugIn.log(ex.getMessage(), ex);
+					}finally{
+						s.close();
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			runQueryJob.schedule();
 			//add pq to map
 			IService service = QueryServiceFactory.generateQueryService(pq);
 			@SuppressWarnings("unchecked")
@@ -235,12 +253,19 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			synchronized (lockObj) {
 				if (patrolLayer != null){
 					try{
-						PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, monitor);
+						monitor.beginTask(Messages.MapPlanEditorPage_UpadingPatrolLayer, 2);
+						PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, new SubProgressMonitor(monitor, 1));
 						pq.setCachedResults(null); //clear cached results
 						if (pq != null){
 							pq.setQueryFilter(generateQueryString()); //update filter
 						}
-					}catch (IOException e){
+						Session session = HibernateManager.openSession();
+						try{
+							pq.setCachedResults(QueryExecutor.INSTANCE.executeQuery(pq, session, new SubProgressMonitor(monitor, 1)));
+						}finally{
+							session.close();
+						}
+					}catch (Exception e){
 						SmartPlanPlugIn.log("Error refreshing patrols layers." + e.getMessage(), e); //$NON-NLS-1$
 					}
 					mapViewer.getRenderManager().refresh(null);

@@ -49,6 +49,7 @@ public class Messages extends NLS {
 	public static String LoadPlanJob_Title;
 	public static String MapPlanEditorPage_CommandName;
 	public static String MapPlanEditorPage_ErrorInitializePlanTargets;
+	public static String MapPlanEditorPage_ExecutingPatrolQuery;
 	public static String MapPlanEditorPage_PlanJobName;
 	public static String MapPlanEditorPage_QueryName;
 	public static String MapPlanEditorPage_RefreshError;
@@ -56,6 +57,7 @@ public class Messages extends NLS {
 	public static String MapPlanEditorPage_SubPlanError;
 	public static String MapPlanEditorPage_SubplanJobName;
 	public static String MapPlanEditorPage_UnknownError;
+	public static String MapPlanEditorPage_UpadingPatrolLayer;
 	public static String NewPatrolPlanWizardPage_ErrorDialog_Message;
 	public static String NewPatrolPlanWizardPage_ErrorDialog_Title;
 	public static String NewPatrolPlanWizardPage_Message;
