@@ -47,4 +47,9 @@ public class DesktopSessionProvider implements IDatabaseConnectionProvider {
 		return Locale.getDefault();
 	}
 
+	@Override
+	public void finishSession(Session session) {
+		session.close();
+	}
+
 }

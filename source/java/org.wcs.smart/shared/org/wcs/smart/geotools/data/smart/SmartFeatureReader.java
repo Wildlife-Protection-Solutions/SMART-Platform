@@ -35,6 +35,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -45,6 +46,7 @@ import org.wcs.smart.util.UuidUtils;
 public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType ftype;
+	private IDatabaseConnectionProvider provider = null;
 	private Session session = null;
 	private ScrollableResults itemCursor = null;
 		
@@ -52,8 +54,9 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	
 	public SmartFeatureReader(UUID ca,
 			AreaType type,SimpleFeatureType ftype, 
-			Session session) {
-		this.session = session;
+			IDatabaseConnectionProvider dbProvider) {
+		this.provider = dbProvider;
+		this.session = dbProvider.openSession();
 		if (!session.getTransaction().isActive()){
 			this.session.beginTransaction();
 			createTransaction = true;
@@ -79,8 +82,8 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 			//otherwise somebody else created it and we are just using it; so
 			//donot cleanup
 			session.getTransaction().rollback();
-			session.close();
 		}
+		provider.finishSession(session);
 	}
 
 	/* (non-Javadoc)

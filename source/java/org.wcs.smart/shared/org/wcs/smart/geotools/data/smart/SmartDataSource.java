@@ -70,7 +70,7 @@ public class SmartDataSource extends AbstractDataStore{
 	 */
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new SmartFeatureReader(ca, Area.AreaType.valueOf(typeName), getSchema(typeName), connectionProvider.openSession());
+		return new SmartFeatureReader(ca, Area.AreaType.valueOf(typeName), getSchema(typeName), connectionProvider);
 	}
 
 	

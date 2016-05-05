@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.ca.Area;
@@ -55,7 +54,7 @@ import org.wcs.smart.geotools.data.smart.SmartDataSourceFactory;
  * @author Emily
  * @since 1.0.0
  */
-public class SmartService extends IService {
+public class SmartService extends ISessionService {
 
 	public static final String SERVICE_ID = "org.wcs.smart.udig.catalog.smartService"; //$NON-NLS-1$
 	private Map<String, Serializable> params;
@@ -65,22 +64,12 @@ public class SmartService extends IService {
 	private SmartDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
-	private IDatabaseConnectionProvider connectionProvider;
-	
 	public SmartService(Map<String, Serializable> params, IDatabaseConnectionProvider connectionProvider) {
 		this.connectionProvider = connectionProvider;
 		this.params = params;
 		this.url = SmartServiceExtension.createURL(this.params);
 	}
 	
-	/**
-	 * The database connection provider for the service
-	 * @return
-	 */
-	public IDatabaseConnectionProvider getConnectionProvider(){
-		return this.connectionProvider;
-	}
-
 	/**
 	 * The current locale for the service
 	 * @return

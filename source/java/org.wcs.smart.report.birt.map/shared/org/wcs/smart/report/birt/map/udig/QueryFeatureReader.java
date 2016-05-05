@@ -65,7 +65,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		this.ftype = ftype;
 		try{
 			this.itr = queryResults.getPreparedQuery().execute(null).getResultIterator();
-			this.md = itr.getResultMetaData();
+			this.md = itr.getResultMetaData();	
 		}catch (Exception ex){
 			Logger.getLogger(QueryFeatureReader.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 		}
@@ -79,7 +79,10 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public void close() throws IOException {
 		try {
-			itr.close();
+			if (itr != null){
+				itr.close();
+				itr = null;
+			}
 		} catch (BirtException e) {
 			throw new IOException(e);
 		}
@@ -99,6 +102,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public boolean hasNext() throws IOException {
 		try {
+			if (itr == null) return false;
 			return itr.next();
 		} catch (BirtException e) {
 			throw new IOException(e);
