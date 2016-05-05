@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.updatesite.AddConnectCtJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -41,7 +42,7 @@ public class ConnectCtDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Installing SMART Connect for CyberTracker PlugIn database tables.", 1);
+		monitor.beginTask(Messages.ConnectCtDatabaseUpgrader_UpgageTaskName, 1);
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();

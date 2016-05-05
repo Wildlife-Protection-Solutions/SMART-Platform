@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -45,7 +46,7 @@ public class RemoveConnectCtJob extends Job {
 	};
 	
 	public RemoveConnectCtJob() {
-		super("Remove SMART Connect for CyberTracker plugin database tables.");
+		super(Messages.RemoveConnectCtJob_Title);
 	}
 
 	@Override
@@ -74,10 +75,10 @@ public class RemoveConnectCtJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog("Error uninstalling SMART Connect for CyberTracker module.  Could not remove database tables.  Please contact your system administrator.", e);
+					SmartPlugIn.displayLog(Messages.RemoveConnectCtJob_UninstallError, e);
 				}
 			});
-			return new Status(IStatus.ERROR, ConnectCtPlugIn.PLUGIN_ID, 1, "Error uninstalling SMART Connect for CyberTracker " + e.getLocalizedMessage(), e); 
+			return new Status(IStatus.ERROR, ConnectCtPlugIn.PLUGIN_ID, 1, "Error uninstalling SMART Connect for CyberTracker " + e.getLocalizedMessage(), e);  //$NON-NLS-1$
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();

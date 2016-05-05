@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -62,7 +63,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 	private ConnectAlertSourceLabelProvider sourceLabelProvider;
 
 	protected AlertEditDialog(Shell parent, boolean isNew, ConnectAlert alert, List<String> alertTypes) {
-		super(parent, isNew ? "Create New Alert" : "Edit Alert");
+		super(parent, isNew ? Messages.AlertEditDialog_NewAlertTitle : Messages.AlertEditDialog_EditAlertTitle);
 		this.alert = alert;
 		this.alertTypes = alertTypes;
 		this.isNew = isNew;
@@ -76,7 +77,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lblSource = new Label(main, SWT.NONE);
-		lblSource.setText("Source:");
+		lblSource.setText(Messages.AlertEditDialog_Source);
 		
 		sourceObj = new Label(main, SWT.NONE);
 		String srcText = sourceLabelProvider.getText(alert);
@@ -84,7 +85,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		sourceObj.setText(srcText.replaceAll("&", "&&")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Label lblType = new Label(main, SWT.NONE);
-		lblType.setText("Type:");
+		lblType.setText(Messages.AlertEditDialog_Type);
 		
         typeViewer = new ComboViewer(main, SWT.READ_ONLY);
         typeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -109,7 +110,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		});
 
 		Label lblImportance = new Label(main, SWT.NONE);
-		lblImportance.setText("Importance:");
+		lblImportance.setText(Messages.AlertEditDialog_Importance);
 		
 		importanceViewer = new ComboViewer(main, SWT.READ_ONLY);
 		importanceViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -130,8 +131,8 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		});
         
         setChangesMade(isNew);
-        setTitle(isNew ? "Create New Alert" : "Edit Alert");
-        setMessage(isNew ? "Create new alert item for the configurable model" : "Edit selected alert item for the configurable model");
+        setTitle(isNew ? Messages.AlertEditDialog_NewAlertTitle : Messages.AlertEditDialog_EditAlertTitle);
+        setMessage(isNew ? Messages.AlertEditDialog_NewAlertMessage : Messages.AlertEditDialog_EditAlertMessage);
 		return main;
 	}
 

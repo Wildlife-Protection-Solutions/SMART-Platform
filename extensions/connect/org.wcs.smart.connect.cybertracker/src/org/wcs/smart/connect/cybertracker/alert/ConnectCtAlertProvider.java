@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.connect.cybertracker.util.AlertLookup;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
@@ -100,7 +101,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 					pmd.run(true, false, new IRunnableWithProgress() {
 						@Override
 						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-							monitor.beginTask("Loading SMART Connect Alerts", 1);
+							monitor.beginTask(Messages.ConnectCtAlertProvider_LoadAlertsTaskName, 1);
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
 							resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
@@ -109,7 +110,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 						}
 					});
 				} catch (Exception e) {
-					SmartPlugIn.displayLog("Error occurs while loading SMART Connect Alerts.", e);
+					SmartPlugIn.displayLog(Messages.ConnectCtAlertProvider_LoadAlertsError, e);
 				}
 			}
 		});

@@ -57,6 +57,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.connect.cybertracker.util.AlertLookup;
 import org.wcs.smart.connect.cybertracker.util.CmTreeNodesVisitor;
@@ -100,7 +101,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 
 	@Override
 	public String getTabName() {
-		return "Alerts - SMART Connect";
+		return Messages.ConfigurableModelEditorConnectTab_TabName;
 	}
 
 	@Override
@@ -127,7 +128,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		modelTreeViewer.expandToLevel(2);
 
 		btnNew = new Button(innerLeft, SWT.PUSH);
-		btnNew.setText("New Alert");
+		btnNew.setText(Messages.ConfigurableModelEditorConnectTab_Button_NewAlert);
 		btnNew.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false));
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -157,7 +158,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		btnEdit = new Button(buttonPanel, SWT.PUSH);
-		btnEdit.setText("Edit");
+		btnEdit.setText(Messages.ConfigurableModelEditorConnectTab_Button_Edit);
 		btnEdit.setLayoutData(new GridData(SWT.BEGINNING, SWT.BOTTOM, false, false));
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -167,7 +168,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		});
 
 		btnDelete = new Button(buttonPanel, SWT.PUSH);
-		btnDelete.setText("Delete");
+		btnDelete.setText(Messages.ConfigurableModelEditorConnectTab_Button_Delete);
 		btnDelete.setLayoutData(new GridData(SWT.BEGINNING, SWT.BOTTOM, false, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -227,11 +228,11 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		
 		TableViewerColumn colAlert = new TableViewerColumn(table, SWT.NONE);
 		colAlert.getColumn().setWidth(200);
-		colAlert.getColumn().setText("Alert");
+		colAlert.getColumn().setText(Messages.ConfigurableModelEditorConnectTab_Column_Alert);
 		colAlert.setLabelProvider(alertSourceLabelProvider);		
 		TableViewerColumn colType = new TableViewerColumn(table, SWT.NONE);
 		colType.getColumn().setWidth(90);
-		colType.getColumn().setText("Type");
+		colType.getColumn().setText(Messages.ConfigurableModelEditorConnectTab_Column_Type);
 		colType.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -245,7 +246,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 
 		TableViewerColumn colImportance = new TableViewerColumn(table, SWT.NONE);
 		colImportance.getColumn().setWidth(90);
-		colImportance.getColumn().setText("Importance");
+		colImportance.getColumn().setText(Messages.ConfigurableModelEditorConnectTab_Column_Importance);
 		colImportance.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -330,7 +331,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	private void handleDeleteAlert() {
 		IStructuredSelection sel = (IStructuredSelection) alertTable.getSelection();
 		if (sel != null && !sel.isEmpty()) {
-			if (MessageDialog.openQuestion(dialog.getShell(), "Confirm Delete", "Do you really want to delete selected alerts?")) {
+			if (MessageDialog.openQuestion(dialog.getShell(), Messages.ConfigurableModelEditorConnectTab_ConfirmDeleteDialogTitle, Messages.ConfigurableModelEditorConnectTab_ConfirmDeleteDialogMessage)) {
 //				int size = sel.size();
 //				int count = 0;
 				for (Iterator<?> i = sel.iterator(); i.hasNext();) {
@@ -356,7 +357,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Loading SMART Connect Alerts", 1);
+					monitor.beginTask(Messages.ConfigurableModelEditorConnectTab_LoadAlertsTaskName, 1);
 					Session s = HibernateManager.openSession();
 					s.beginTransaction();
 					resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
@@ -365,7 +366,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog("Error occurs while loading SMART Connect Alerts.", e);
+			SmartPlugIn.displayLog(Messages.ConfigurableModelEditorConnectTab_LoadAlertsError, e);
 		}
 		return resultList;
 	}
