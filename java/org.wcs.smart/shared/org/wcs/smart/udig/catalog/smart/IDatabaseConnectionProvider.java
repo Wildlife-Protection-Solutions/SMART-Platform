@@ -34,8 +34,8 @@ import org.hibernate.Session;
 public interface IDatabaseConnectionProvider extends Serializable{
 
 	/**
-	 * Opens a new session.  Service is responsible for closing session
-	 * once complete.
+	 * Opens a new session.  Service is responsible for finishSession( session )
+	 * once complete with the session.
 	 * 
 	 * This should open a new session as it may be closed by
 	 * the calling function at any time.
@@ -43,6 +43,11 @@ public interface IDatabaseConnectionProvider extends Serializable{
 	 */
 	public Session openSession();
 	
+	/**
+	 * Should be called to close the session once you are done with it.
+	 * @param session
+	 */
+	public void finishSession(Session session);
 	/**
 	 * The current locale
 	 * @return

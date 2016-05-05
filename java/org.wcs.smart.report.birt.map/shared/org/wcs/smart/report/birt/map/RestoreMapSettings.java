@@ -59,6 +59,8 @@ import org.wcs.smart.map.internal.settings.LayerRegister;
 import org.wcs.smart.map.internal.settings.MapRegister;
 import org.wcs.smart.map.internal.settings.StyleRegister;
 import org.wcs.smart.map.internal.settings.SyleContentFactory;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
+import org.wcs.smart.udig.catalog.smart.ISessionService;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -74,6 +76,8 @@ public class RestoreMapSettings {
 	private static final String SMARTBM_FILE_PROTOCOL = "smartbm"; //$NON-NLS-1$
 	private static final String MAP_DIRECTORY = "maps"; //$NON-NLS-1$
 	
+	private IDatabaseConnectionProvider dbProvider;
+	
 	/**
 	 * Applies the custom settings to the map.
 	 * <p>
@@ -83,7 +87,10 @@ public class RestoreMapSettings {
 	 * 
 	 * @param currentMap the displayed map
 	 */
-	public synchronized void applyTo(Map currentMap, BasemapDefinition baseMap, ConservationArea ca) {
+	public synchronized void applyTo(Map currentMap, BasemapDefinition baseMap, 
+			ConservationArea ca, IDatabaseConnectionProvider dbProvider) {
+	
+		this.dbProvider = dbProvider;
 		
 		// get map definition selected
 		String jsonMap = baseMap.getMapDef();
@@ -274,6 +281,9 @@ public class RestoreMapSettings {
         	IService service = iterator.next();
         	if (service == null) continue;
             availableServices.add(service);
+            if (service instanceof ISessionService){
+            	((ISessionService) service).setConnectionProvider(dbProvider);
+            }
         }
         return availableServices;
     }

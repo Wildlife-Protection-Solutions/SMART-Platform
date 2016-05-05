@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -90,15 +91,12 @@ import org.wcs.smart.report.birt.map.BirtMapViewportModelImpl;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.RestoreMapSettings;
 import org.wcs.smart.report.birt.map.item.SmartMapItem;
-//import org.wcs.smart.map.internal.settings.RestoreMapSettingt.ms;
-//import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.report.birt.map.udig.MapGeoResource;
 import org.wcs.smart.report.birt.map.udig.MapQueryService;
 import org.wcs.smart.report.execute.SmartReportRunner;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
-//import org.wcs.smart.udig.catalog.smart.SmartService;
-//import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -162,7 +160,30 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			// -- Restore Basemap --
 			BasemapDefinition def = getBasemap(mapItem.getBasemapName());
 			if (def != null) {
-				(new RestoreMapSettings()).applyTo((Map) renderedMap, def, reportca);
+				IDatabaseConnectionProvider provider = new IDatabaseConnectionProvider() {
+					
+					/**
+					 * 
+					 */
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Session openSession() {
+						return (Session)context.getAppContext().get(SmartReportRunner.SESSION_PARAM);
+					}
+					
+					@Override
+					public Locale getLocale() {
+						return context.getLocale();
+					}
+					
+					@Override
+					public void finishSession(Session session) {
+						//do nothing we don't want to close the session as it is reused
+					}
+				};
+				
+				(new RestoreMapSettings()).applyTo((Map) renderedMap, def, reportca, provider);
 			} else if (reportca != null){
 				if (mapItem.getBasemapName() != null
 						&& mapItem.getBasemapName().equals(
