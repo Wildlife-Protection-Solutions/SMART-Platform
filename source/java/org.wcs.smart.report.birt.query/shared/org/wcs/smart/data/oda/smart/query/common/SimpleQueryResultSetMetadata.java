@@ -23,6 +23,7 @@ package org.wcs.smart.data.oda.smart.query.common;
 
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
@@ -63,6 +64,23 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 			}
 		}
 		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
+		
+		//search duplicate names and update 
+		//see ticket #1535 for more info
+		HashSet<String> names = new HashSet<String>();
+		for (QueryColumn qc : queryColumns){
+			if (names.contains(qc.getName())){
+				//need to update the name
+				int counter = 1;
+				String name = qc.getName();
+				while(names.contains(name)){
+					name = name + "_" + counter; //$NON-NLS-1$
+					counter++;
+				}
+				qc.setName(name);
+			}
+			names.add(qc.getName());
+		}
 	}
 	
 	protected SimpleQueryResultSetMetadata(GriddedQuery query, SmartConnection connection){
