@@ -148,6 +148,7 @@ public class TreeEditorField  {
 	 */
 	public void setLanguage(Language language){
 		((AttributeTreeLabelProvider)tree.getTreeViewer().getLabelProvider()).setLanguage(language);
+		tree.getTreeViewer().refresh(true);
 	}
 	
 	/**
