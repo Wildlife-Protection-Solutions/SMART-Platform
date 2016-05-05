@@ -78,23 +78,6 @@ public class CmDefaultTreesUtil {
 		return buildDefaultTree(model, a, null, null, null);
 	}
 	
-//	private static List<CmAttributeTreeNode> buildDefaultTree(ConfigurableModel model, Attribute a, CmAttributeTreeNode cmParent, AttributeTreeNode dmParent) {
-//		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
-//		List<AttributeTreeNode> source = dmParent != null ? dmParent.getActiveChildren() : a.getActiveTreeNodes();
-//		for (AttributeTreeNode dmNode : source) {
-//			CmAttributeTreeNode cmNode = new CmAttributeTreeNode();
-//			cmNode.setConfigurableModel(model);
-//			cmNode.setDmTreeNode(dmNode);
-//			cmNode.setIsActive(dmNode.getIsActive());
-//			cmNode.setParent(cmParent);
-//			cmNode.setNodeOrder(dmNode.getNodeOrder());
-//			cmNode.setDmAttribute(a);
-//			cmNode.setChildren(buildDefaultTree(model, a, cmNode, dmNode));
-//			result.add(cmNode);
-//		}
-//		return result;
-//	}
-
 	/**
 	 * Upgrades tree mapping used in 3.1.0 and previous versions to 3.2.0
 	 * @param oldNodes

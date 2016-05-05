@@ -1014,6 +1014,7 @@ public class AttributeInfoPanel extends Composite {
 					item = (AttributeListItem) session.merge(item);	
 				}else{
 					//new item
+					session.saveOrUpdate(item);
 					DataModelManager.INSTANCE.fireAddListener(session, item);
 					att.getAttributeList().add(item);
 				}
