@@ -104,6 +104,14 @@ public abstract class QueryColumn implements Cloneable{
 	}
 
 	/**
+	 * Overwrites the default column name with the new name
+	 * @param name
+	 */
+	public void setName(String name){
+		this.name = name;
+	}
+	
+	/**
 	 * @return the column data type
 	 */
 	public ColumnType getType(){
