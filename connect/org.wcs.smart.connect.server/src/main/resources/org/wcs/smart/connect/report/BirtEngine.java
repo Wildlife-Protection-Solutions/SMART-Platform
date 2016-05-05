@@ -62,7 +62,7 @@ public class BirtEngine {
 
 	public static synchronized IReportEngine getBirtEngine(ServletContext sc) {
 		if (birtEngine == null) {
-			System.setProperty("org.geotools.referencing.forceXY", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+			
 			
 			SmartContext.INSTANCE.setClass(ISmartConnectionFactory.class, new ConnectionFactory());
 			EngineConfig config = new EngineConfig();

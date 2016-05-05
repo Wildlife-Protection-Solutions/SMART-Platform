@@ -88,6 +88,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
+		System.setProperty("org.geotools.referencing.forceXY", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		logger.info("Configuring Hibernate SessionFactory"); //$NON-NLS-1$
 		Configuration config = new Configuration();
