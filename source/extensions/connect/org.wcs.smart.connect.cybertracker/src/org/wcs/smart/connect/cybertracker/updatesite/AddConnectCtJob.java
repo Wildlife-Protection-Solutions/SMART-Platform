@@ -33,8 +33,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.upgrade.ConnectCtDatabaseUpgrader;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -47,7 +47,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class AddConnectCtJob extends Job {
 
 	public AddConnectCtJob() {
-		super("Create Connect for CyberTracker Tables");
+		super(Messages.AddConnectCtJob_Title);
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class AddConnectCtJob extends Job {
 						
 		Session session = HibernateManager.openSession();
 		try{
-			monitor.beginTask("Creating Connect for CyberTracker Database Tables", 10);
+			monitor.beginTask(Messages.AddConnectCtJob_CreateTablesTaskName, 10);
 			String currentVersion = HibernateManager.getPlugInVersion(ConnectCtPlugIn.PLUGIN_ID, session);
 			if (currentVersion == null){
 				session.beginTransaction();
@@ -71,12 +71,12 @@ public class AddConnectCtJob extends Job {
 						@Override
 						public void run() {
 							MessageDialog.openError(Display.getDefault().getActiveShell(),
-									"ErrorTitle",
-									"An error occurred while installing the 'SMART Connect for CyberTracker' module (failed to create required database tables). Please restart the system, uninstall the module, then try reinstalling the module.  If the problem persists contact your system administrator.");
+									Messages.AddConnectCtJob_ErrorDialogTitle,
+									Messages.AddConnectCtJob_ErrorDialogMessage);
 						}
 						
 					});
-					return new Status(Status.ERROR, ConnectCtPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
+					return new Status(Status.ERROR, ConnectCtPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
 				}	
 				currentVersion = ConnectCtPlugIn.DB_VERSION_1;
 			}

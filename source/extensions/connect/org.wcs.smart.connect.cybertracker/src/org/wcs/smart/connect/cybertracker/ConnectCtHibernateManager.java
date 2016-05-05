@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.connect.cybertracker.util.CmElementsVisitor;
 import org.wcs.smart.connect.cybertracker.util.CmElementsVisitor.IElementVisitHandler;
@@ -72,7 +73,7 @@ public class ConnectCtHibernateManager {
 			}
 			return items;
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog("Error occurs while loading SMART Connect Alerts.", ex);
+			SmartPlugIn.displayLog(Messages.ConnectCtHibernateManager_LoadAlertsError, ex);
 			return Collections.emptyList();
 		}
 	}
