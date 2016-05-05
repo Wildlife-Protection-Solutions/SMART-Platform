@@ -115,13 +115,15 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 					}
 				}
 				
+				CmTreeLabelProvider cmTreeLabelProvider = (CmTreeLabelProvider)attributeTreeViewer.getLabelProvider();
+				cmTreeLabelProvider.setLanguage(language);
 				if (getSourceObject() != lastSelection){
 					//tree viewer
-					((CmTreeLabelProvider)attributeTreeViewer.getLabelProvider()).setLanguage(language);
 					preLoadTree(getSourceObject());
 					attributeTreeViewer.setInput(getSourceObject());
 					attributeTreeViewer.expandToLevel(2);
 				}
+				attributeTreeViewer.refresh(true);
 				
 				btnIsCustomConfig.setSelection(getSourceObject().isUseCustomConfig());
 				

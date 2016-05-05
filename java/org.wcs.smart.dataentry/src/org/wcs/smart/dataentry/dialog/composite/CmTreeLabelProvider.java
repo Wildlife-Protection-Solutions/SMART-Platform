@@ -71,6 +71,10 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 				}
 			}
 			if (label != null){
+				AttributeTreeNode dmNode = node.getDmTreeNode();
+				if (dmNode != null) {
+					label += "  [" + dmNode.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
 				return label;
 			}
 			return super.getText(node.getDmTreeNode());

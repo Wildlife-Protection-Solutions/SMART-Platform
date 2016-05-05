@@ -163,7 +163,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				((ConfigurableModelLabelProvider)modelTreeViewer.getLabelProvider()).setLanguage(languageViewer.getCurrentSelection());
-				modelTreeViewer.refresh();
+				modelTreeViewer.refresh(true);
 				updateRightPanelState();
 			}
 		});
