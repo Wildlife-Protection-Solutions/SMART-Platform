@@ -172,9 +172,7 @@ public class Label  {
 	
 	private static synchronized String searchAll(Locale lang, UUID element, Session session){
 		if (lang == null) return ""; //$NON-NLS-1$
-//		if(true) return "abc";
-		//session.getSessionFactory().getSessionFactoryOptions().
-		System.out.println(((SessionFactoryImplementor)session.getSessionFactory()).getDialect());
+
 		SQLQuery query = session.createSQLQuery("SELECT a.code, b.value, a.isdefault from smart.language a, smart.i18n_label b where a.uuid = b.language_uuid and b.element_uuid = :element"); //$NON-NLS-1$
 		if (((SessionFactoryImplementor)session.getSessionFactory()).getDialect() instanceof PostgreSQL82Dialect){
 			query.setParameter("element", element, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
