@@ -125,7 +125,9 @@ public class DownloadCaEngine {
 		ConservationArea desktopCa = null;
 		Session s = HibernateManager.openSession();
 		try{
-			desktopCa = (ConservationArea)s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+			if (SmartDB.getCurrentConservationArea() != null){
+				desktopCa = (ConservationArea)s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+			}
 		}finally{
 			s.close();
 		}
