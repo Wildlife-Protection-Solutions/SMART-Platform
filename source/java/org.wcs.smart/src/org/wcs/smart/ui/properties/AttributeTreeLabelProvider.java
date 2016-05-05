@@ -90,7 +90,7 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 				}
 				return l + "  [" + obj.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
-				return obj.getName();
+				return obj.getName() + "  [" + obj.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$;
 			}
 		}
 		return super.getText(element);
