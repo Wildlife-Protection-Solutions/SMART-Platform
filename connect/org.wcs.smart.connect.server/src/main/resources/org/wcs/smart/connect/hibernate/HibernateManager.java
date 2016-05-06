@@ -264,9 +264,20 @@ public class HibernateManager {
 
 	@SuppressWarnings("unchecked")
 	public static List<AlertFilterDefault> getAlertFilterDefaults(Session session) {
-		return (List<AlertFilterDefault>)session
+		List<AlertFilterDefault> defaults = null;
+		defaults = (List<AlertFilterDefault>)session
 				.createCriteria(AlertFilterDefault.class)
 				.list();
+		if(defaults.size() == 0){
+			AlertFilterDefault d = new AlertFilterDefault();
+			d.setDefaultPastHours(24);
+			d.setStartingLat(0);
+			d.setStartingLong(30);
+			d.setStartingZoomLevel(3);
+			d.setSecondsRefresh(60);
+			defaults.add(d);
+		}
+		return defaults;
 	}
 	
 	public static StyleConfiguration getStyleConfiguration(Session session) {

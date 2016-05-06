@@ -553,6 +553,15 @@ function typeDeleted(){
 function createNewType(){
 	
 	var typeLabel = document.querySelector("input[name=type_label]").value;
+	
+	if(typeLabel == ""){
+		var element = document.getElementById("typedialogerror");
+		element.style.display = "block";
+		element.innerHTML = i18n("settings.blanktypename");
+		element.className = "errorsection";
+		return false;
+	}
+	
 	var typeColor = document.querySelector("input[name=type_color]").value;
 //	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
 	var typeOpacity = document.querySelector("input[name=type_opacity]").value;

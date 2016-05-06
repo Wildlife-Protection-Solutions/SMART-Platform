@@ -280,7 +280,7 @@ background-color: lightsteelblue
 
 <div id="typeDialog" style="display: none;" class="dialog">
   <div class="dialog-title"><fmt:message key="settings.typeedit.title" /></div>
-  <div id="layerdialogerror" class="errorsection"></div>
+  <div id="typedialogerror" class="errorsection"></div>
 	<form id="alerttypesform">
      		<div id="layererror" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
      		<label class="top-spacer block"><fmt:message key="settings.typeedit.typelabel" /></label>
