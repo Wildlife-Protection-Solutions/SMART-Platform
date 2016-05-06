@@ -23,9 +23,16 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_Column_Type;
 	public static String ConfigurableModelEditorConnectTab_ConfirmDeleteDialogMessage;
 	public static String ConfigurableModelEditorConnectTab_ConfirmDeleteDialogTitle;
+	public static String ConfigurableModelEditorConnectTab_ConnectDialogMessage;
+	public static String ConfigurableModelEditorConnectTab_ConnectDialogText;
+	public static String ConfigurableModelEditorConnectTab_ConnectDialogTitle;
 	public static String ConfigurableModelEditorConnectTab_LoadAlertsError;
 	public static String ConfigurableModelEditorConnectTab_LoadAlertsTaskName;
+	public static String ConfigurableModelEditorConnectTab_RefreshToolTip;
+	public static String ConfigurableModelEditorConnectTab_RefreshTypes;
 	public static String ConfigurableModelEditorConnectTab_TabName;
+	public static String ConfigurableModelEditorConnectTab_WarningMessage;
+	public static String ConfigurableModelEditorConnectTab_WarningTitle;
 	public static String ConnectCtAlertProvider_LoadAlertsError;
 	public static String ConnectCtAlertProvider_LoadAlertsTaskName;
 	public static String ConnectCtDatabaseUpgrader_UpgageTaskName;

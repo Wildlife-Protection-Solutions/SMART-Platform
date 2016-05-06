@@ -36,6 +36,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.wcs.smart.connect.api.model.AlertType;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 
@@ -96,4 +97,7 @@ public interface ConnectClient {
 	@Path("/" + CA_PATH + "/{cauuid}")
 	public Response updateConservationArea(@HeaderParam("X-Upload-Content-Length") Long length, @PathParam("cauuid") String caUuid);
 
+	@GET
+    @Path("/connectalert/alertTypes/")
+    public List<AlertType> getAlertTypes();
 }

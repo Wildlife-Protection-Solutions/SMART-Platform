@@ -69,7 +69,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		this.isNew = isNew;
 		this.sourceLabelProvider = new ConnectAlertSourceLabelProvider(alert.getModel());
 	}
-
+	
 	@Override
 	protected Composite createContent(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
@@ -78,12 +78,14 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		
 		Label lblSource = new Label(main, SWT.NONE);
 		lblSource.setText(Messages.AlertEditDialog_Source);
+		lblSource.setLayoutData(new GridData(SWT.TOP, SWT.FILL, true, false));
 		
-		sourceObj = new Label(main, SWT.NONE);
+		sourceObj = new Label(main, SWT.WRAP);
 		String srcText = sourceLabelProvider.getText(alert);
 		//need to replace all '&' with '&&' so it won't be treated as mnemonic indication
 		sourceObj.setText(srcText.replaceAll("&", "&&")); //$NON-NLS-1$ //$NON-NLS-2$
-
+		sourceObj.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)sourceObj.getLayoutData()).widthHint = 450;
 		Label lblType = new Label(main, SWT.NONE);
 		lblType.setText(Messages.AlertEditDialog_Type);
 		
@@ -143,6 +145,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.CLOSE_ID).setText(IDialogConstants.CANCEL_LABEL);
 		getButton(IDialogConstants.OK_ID).setText(IDialogConstants.OK_LABEL);
 		getButton(IDialogConstants.OK_ID).setEnabled(this.isNew); //this will enable "Save" button when new alert is created
 	}
@@ -152,11 +155,11 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		if (IDialogConstants.OK_ID == buttonId) {
 			if (performSave()) {
 				super.setReturnCode(IDialogConstants.OK_ID);
-				if (isNew) {
-					close();
-				}
+				close();
 			}
 		} else if (IDialogConstants.CLOSE_ID == buttonId) {
+			//we don't care in this case
+			changesMade = false;
 			close();
 		}
 	}

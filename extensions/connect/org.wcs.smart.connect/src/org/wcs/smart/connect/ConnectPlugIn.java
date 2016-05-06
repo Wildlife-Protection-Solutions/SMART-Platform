@@ -61,7 +61,9 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	public static final String SERVER_OK_ICON = "org.wcs.smart.connect.server.ok"; //$NON-NLS-1$
 	public static final String REFRESH_ICON = "org.wcs.smart.connect.refresh"; //$NON-NLS-1$
 	
-	public static final String CONNECT_URL_PREF = "org.wcs.smart.connect.url.pref";
+	public static final String CONNECT_URL_PREF = "org.wcs.smart.connect.url.pref"; //$NON-NLS-1$
+	
+	public static final String CONNECT_ALERT_TYPE_CACHE_PREF = "org.wcs.smart.connect.alert.types"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor
