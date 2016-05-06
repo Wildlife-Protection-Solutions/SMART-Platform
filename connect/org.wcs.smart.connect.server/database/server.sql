@@ -169,8 +169,6 @@ CREATE TABLE connect.alerts
 CREATE TABLE connect.alert_types(
 	-- A unqiue identifier for hibernate.
 	uuid uuid NOT NULL,
-	-- A link to the alert type.	
-	key varchar(32),
 	-- Label for the type.
 	label varchar(64),
 	color varchar(16),

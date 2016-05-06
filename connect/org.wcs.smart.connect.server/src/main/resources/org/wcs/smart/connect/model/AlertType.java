@@ -43,21 +43,12 @@ public class AlertType extends ConnectUuidItem{
 	
 	public static final UUID NULL_TYPE = UUID.fromString("00000000-0000-0000-0000-000000000000"); //$NON-NLS-1$
 	
-	private String key;
 	private String label;
 	private String color; 
 	private String opacity;
 	private String markerIcon;
 	private String markerColor;
 	private Boolean spin;
-	
-	@Column(name="key")
-	public String getKey() {
-		return key;
-	}
-	public void setKey(String key) {
-		this.key = key;
-	}
 	
 	@Column(name="label")
 	public String getLabel() {
