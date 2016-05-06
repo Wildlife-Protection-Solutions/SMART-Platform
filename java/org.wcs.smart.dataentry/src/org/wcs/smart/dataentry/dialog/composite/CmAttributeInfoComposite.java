@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -64,8 +63,8 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	private Label lblEnterOnces;
 	private ComboViewer enterOncesComboViewer;
 	
-	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
-		super(parent, model, tracker);
+	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model) {
+		super(parent, model);
 		createControls();
 	}
 	
@@ -175,8 +174,6 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				}
 				if (fire){
 					fireModelChanged();
-					tracker.saveOrUpdate(getSourceObject());
-					tracker.saveOrUpdate(op);
 				}
 			}
 		});
@@ -217,7 +214,6 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().getCmAttributeOptions().get(optionId).setBooleanValue(btnBool.getSelection());
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});

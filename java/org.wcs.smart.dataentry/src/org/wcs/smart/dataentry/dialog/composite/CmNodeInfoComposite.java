@@ -23,7 +23,6 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -40,12 +39,9 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmAttributeListItem;
-import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -70,8 +66,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
 	private ImageSelectionControl imageControl;
 	
-	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker,  boolean isGroup) {
-		super(parent, model, tracker);
+	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, boolean isGroup) {
+		super(parent, model);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		this.setLayout(layout);
@@ -126,7 +122,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void setImageFile(File file) {
 				getSourceObject().setImageFile(file);
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -158,7 +153,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoAllowed(btnPhoto.getSelection());
 				btnPhotoRequired.setEnabled(getSourceObject().isPhotoAllowed());
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -172,7 +166,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoRequired(btnPhotoRequired.getSelection());
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -187,7 +180,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setCollectMultipleObservations(btnCollectMultiple.getSelection());
 				btnSingleGpsPoint.setEnabled(getSourceObject().isCollectMultipleObservations());
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -201,7 +193,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setUseSingleGpsPoint(btnSingleGpsPoint.getSelection());
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -257,10 +248,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			for (CmNode n : getModel().getNodes()){
 				n.setNodeOrder(i++);
 			}
-			tracker.deleteObject(node);
 		} else {
-			tracker.saveOrUpdate(parentNode);
-			tracker.deleteObject(node);
 			//not a root node
 			parentNode.getChildren().remove(node);
 			
@@ -276,10 +264,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		for (Attribute a : CmDefaultTreesUtil.getPresentedTreeAttributes(node)) {
 			if (!existingTrees.contains(a)) {
 				//attribute is not present in CM anymore -> remove default mapping
-				List<CmAttributeTreeNode> nodes = getModel().removeDefaultTrees(a);
-				for (CmAttributeTreeNode tn : nodes) {
-					tracker.deleteObject(tn);
-				}
+				getModel().removeDefaultTrees(a);
 			}
 		}
 		//remove default list mapping if present
@@ -287,10 +272,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		for (Attribute a : CmDefaultListsUtil.getPresentedListAttributes(node)) {
 			if (!existingLists.contains(a)) {
 				//attribute is not present in CM anymore -> remove default mapping
-				List<CmAttributeListItem> items = getModel().removeDefaultLists(a);
-				for (CmAttributeListItem li : items) {
-					tracker.deleteObject(li);
-				}
+				getModel().removeDefaultLists(a);
 			}
 		}
 

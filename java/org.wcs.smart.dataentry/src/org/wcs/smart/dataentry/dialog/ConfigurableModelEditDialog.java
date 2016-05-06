@@ -72,9 +72,22 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	
 	private List<IConfigurableModelChangeListener> cmListeners = new ArrayList<IConfigurableModelChangeListener>();
 	
-	public ConfigurableModelEditDialog(ConfigurableModel model) {
+	private Session session = null;
+	
+	public ConfigurableModelEditDialog(ConfigurableModel cm) {
 		super(Display.getDefault().getActiveShell());
-		this.model = model;
+		
+		session = HibernateManager.openSession();
+		if (cm.getUuid() != null){
+			this.model = (ConfigurableModel)session.get(ConfigurableModel.class, cm.getUuid());	
+		}else{
+			this.model = cm;
+		}
+		
+	}
+	
+	public Session getSession(){
+		return this.session;
 	}
 
 	@Override
@@ -303,30 +316,21 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.ConfigurableModelEditDialog_SaveCmProgress, IProgressMonitor.UNKNOWN);
-					Session s = HibernateManager.openSession(new AssociatedImageInterceptor());
 					try{
-						s.beginTransaction();
-						//commit transaction
+						session.beginTransaction();
 						for (IConfigurableModelEditorTabContent tab : tabs) {
-							tab.performSave(s);
-							s.flush();
+							tab.performSave(session);
+							session.flush();
 						}
-						s.getTransaction().commit();
-
-						for (IConfigurableModelEditorTabContent tab : tabs) {
-							tab.postSave();
-						}
-						
+						session.getTransaction().commit();
 						ret[0] = true;
 					}catch (Exception ex){
-						s.getTransaction().rollback();
+						session.getTransaction().rollback();
 						SmartPlugIn.displayLog(Messages.ConfigurableModelEditDialog_SaveError  + ex.getMessage(), ex);
 						ret[0] = false;
 					}finally{
-						s.close();
 						monitor.done();
 					}
-					
 				}
 			});
 		}catch(Exception ex){

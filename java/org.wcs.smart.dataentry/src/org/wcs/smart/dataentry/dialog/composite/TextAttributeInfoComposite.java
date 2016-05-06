@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -55,8 +54,8 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public TextAttributeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
-		super(parent, model, tracker);
+	public TextAttributeInfoComposite(Composite parent, ConfigurableModel model) {
+		super(parent, model);
 	}
 
 	/* (non-Javadoc)
@@ -115,7 +114,6 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 						}
 						op.setStringValue(text.getText());
 					}
-					tracker.saveOrUpdate(getSourceObject());
 					fireModelChanged();
 				}
 				cd.hide();
@@ -140,7 +138,6 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 				}else{
 					cd.hide();
 				}
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});

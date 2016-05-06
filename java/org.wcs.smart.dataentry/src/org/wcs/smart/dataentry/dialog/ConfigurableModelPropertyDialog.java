@@ -28,7 +28,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -57,21 +56,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeListItem;
-import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
-import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
@@ -192,8 +183,6 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				if (cm == null){
 					return;
 				}
-				cm = loadConfigurableModel(cm);
-				
 				Dialog dialog = new ConfigurableModelEditDialog(cm);
 				dialog.open();
 				
@@ -232,11 +221,17 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							InterruptedException {
 						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_ProgressDelete, 2);
 						Session session = HibernateManager.openSession();
+						session.setFlushMode(FlushMode.COMMIT);
 						session.beginTransaction();
 						try {
 							ConfigurableModel currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
 							monitor.worked(1);
 							if (DeleteManager.canDelete(currentCm, session)){
+								currentCm.getAttributeSettings().clear();
+								currentCm.getNodes().clear();
+								currentCm.getDefaultLists().clear();
+								currentCm.getDefaultTrees().clear();
+								
 								session.delete(currentCm);
 								session.getTransaction().commit();
 								//deleting filestore
@@ -294,114 +289,6 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		return container;
 	}
 	
-	private ConfigurableModel loadConfigurableModel(final ConfigurableModel toLoad){
-		final ConfigurableModel[] thiscm = new ConfigurableModel[1];
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try{
-			pmd.run(true, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					monitor.beginTask(Messages.ConfigurableModelPropertyDialog_loadingTask, 4);
-					Session session = getSession();
-					try {
-						monitor.subTask(Messages.ConfigurableModelPropertyDialog_modelSubTask);
-						thiscm[0] = DataentryHibernateManager.getFullConfigurableModel(toLoad.getUuid(), session);
-						monitor.worked(1);
-						
-						//lazily load remaining data
-						monitor.subTask(Messages.ConfigurableModelPropertyDialog_nodesSubTask);
-						fetchNodesData(thiscm[0].getNodes());
-						monitor.worked(1);
-						
-						monitor.subTask(Messages.ConfigurableModelPropertyDialog_treesSubTask);
-						fetchListData(thiscm[0].getDefaultLists());
-						monitor.worked(1);
-						
-						monitor.subTask(Messages.ConfigurableModelPropertyDialog_ListsSubTask);
-						fetchTreeData(thiscm[0].getDefaultTrees());
-						monitor.worked(1);
-
-						monitor.subTask(Messages.ConfigurableModelPropertyDialog_AttrConfigSubTask);
-						fetchAttributeSettings(thiscm[0].getAttributeSettings());
-						monitor.worked(1);
-					} finally {
-						monitor.done();
-						session.close();
-					}
-				}
-			});
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadError + ex.getMessage(), ex);
-		}
-		return thiscm[0];
-	}
-	
-	
-	
-	private void fetchNodesData(List<CmNode> nodes) {
-		if (nodes == null)
-			return;
-		
-		for (CmNode cmNode : nodes) {
-			if (cmNode.getCategory() != null){
-				Category c = cmNode.getCategory();
-				while (c != null){
-					c.getNames().size();
-					c = c.getParent();
-				}
-			}
-			for (CmAttribute cmAttribute : cmNode.getCmAttributes()){
-				cmAttribute.getNames().size();
-				if (cmAttribute.getAttribute() != null){
-					cmAttribute.getAttribute().getNames().size();
-					if (cmAttribute.getAttribute().getActiveListItems() != null){
-						for (AttributeListItem cli : cmAttribute.getAttribute().getActiveListItems()){
-							cli.getNames().size();
-						}
-					}
-					fetchAttributeTree(cmAttribute.getAttribute().getActiveTreeNodes());
-				}
-				fetchListData(cmAttribute.getCurrentList());
-				fetchListData(cmAttribute.getDefaultList());
-				fetchListData(cmAttribute.getList());
-				fetchTreeData(cmAttribute.getCurrentTree());
-				fetchTreeData(cmAttribute.getDefaultTree());
-				fetchTreeData(cmAttribute.getTree());						
-			}
-			cmNode.getNames().size();
-			cmNode.getCmAttributes().size();
-			fetchNodesData(cmNode.getChildren());
-			
-		}
-	}
-	private void fetchListData(List<CmAttributeListItem> list){
-		if (list == null) return;
-		for (CmAttributeListItem c : list){
-			c.getNames().size();
-			c.getListItem().getNames().size();
-		}
-	}
-	private void fetchTreeData(List<CmAttributeTreeNode> list){
-		if (list == null) return;
-		for (CmAttributeTreeNode c : list){
-			c.getNames().size();
-			if (c.getDmTreeNode() != null) c.getDmTreeNode().getNames().size();
-			fetchTreeData(c.getChildren());
-		}
-	}
-	private void fetchAttributeTree(List<AttributeTreeNode> tree){
-		if (tree == null) return;
-		for(AttributeTreeNode n : tree){
-			n.getNames().size();
-			fetchAttributeTree(n.getActiveChildren());
-		}
-	}
-	private void fetchAttributeSettings(Map<Attribute, CmDmAttributeSettings> settings){
-		if (settings == null) return;
-		settings.size();
-	}
 
 	@Override
 	protected boolean performSave() {

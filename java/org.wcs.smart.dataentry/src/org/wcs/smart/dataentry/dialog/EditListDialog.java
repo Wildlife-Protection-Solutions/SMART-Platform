@@ -61,7 +61,6 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
@@ -70,7 +69,6 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
-import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -88,7 +86,6 @@ public class EditListDialog extends TitleAreaDialog{
 
 	protected CmAttribute attribute;
 	protected ConfigurableModel editModel;
-	protected ChangeTracker tracker;
 	
 	private Viewer itemViewer;
 	private TableViewer nameTable ;
@@ -99,10 +96,9 @@ public class EditListDialog extends TitleAreaDialog{
 	private Button btnEnable;
 	private ImageSelectionControl imageControl;
 	
-	public EditListDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, ChangeTracker tracker) {
+	public EditListDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel) {
 		super(parentShell);
 		this.attribute = attribute;
-		this.tracker = tracker;
 		this.editModel = editModel;
 	}
 
@@ -139,14 +135,8 @@ public class EditListDialog extends TitleAreaDialog{
 				attribute.setCurrentDisplayMode(modeViewer.getSelectedDisplayMode());
 				//we need to save either configurable model global setting (for default configuration)
 				//or attribute option (for custom configuration), this is way we try to save both below
-				CmAttributeOption op = attribute.getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
-				if (op != null) {
-					tracker.saveOrUpdate(op);
-				}
-				CmDmAttributeSettings settings = editModel.getAttributeSettings().get(attribute.getAttribute());
-				if (settings != null) {
-					tracker.saveOrUpdate(settings);
-				}
+				attribute.getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
+				editModel.getAttributeSettings().get(attribute.getAttribute());
 			}
 		});
 		
@@ -289,11 +279,7 @@ public class EditListDialog extends TitleAreaDialog{
 					if (cmNode != null){
 						cmNode.updateName(((Language)element), (String)value);
 					}
-				}
-				if (cmNode != null){
-					tracker.saveOrUpdate(cmNode);
-				}
-				
+				}				
 				nameTable.refresh();
 				itemViewer.refresh();
 			}
@@ -362,7 +348,6 @@ public class EditListDialog extends TitleAreaDialog{
 			public void setImageFile(File file) {
 				if (cmNode != null) {
 					cmNode.setImageFile(file);
-					tracker.saveOrUpdate(cmNode);
 					imageControl.redrawCanvas();
 				}
 			}
@@ -492,7 +477,6 @@ public class EditListDialog extends TitleAreaDialog{
 		CmAttributeListItem item = getConfiguredNode(dmNode);
 		if (item != null){
 			item.setIsActive(enable);
-			tracker.saveOrUpdate(item);
 		}
 	}
 	
