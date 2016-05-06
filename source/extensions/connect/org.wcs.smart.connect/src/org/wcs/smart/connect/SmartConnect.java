@@ -78,6 +78,7 @@ import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.api.io.CopyProgressMonitor;
 import org.wcs.smart.connect.api.io.IOUtils;
 import org.wcs.smart.connect.api.io.ProgressInputStream;
+import org.wcs.smart.connect.api.model.AlertType;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.internal.Messages;
@@ -273,6 +274,20 @@ public class SmartConnect {
 			client = null;
 		}
 	}
+	
+	/**
+	 * 
+	 * 
+	 * @return list of alert types available on the server
+	 */
+	public List<AlertType> getAlertTypes() throws Exception{
+		createClient();
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
+		ConnectClient simple = target.proxy(ConnectClient.class);
+		return simple.getAlertTypes();
+	}
+	
+	
 	/**
 	 * Validates the user/password/url associated.  
 	 * All errors are logged.

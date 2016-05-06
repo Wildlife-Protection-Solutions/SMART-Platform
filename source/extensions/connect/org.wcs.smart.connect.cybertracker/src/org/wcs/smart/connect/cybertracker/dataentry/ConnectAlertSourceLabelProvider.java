@@ -59,9 +59,9 @@ public class ConnectAlertSourceLabelProvider extends ColumnLabelProvider {
 			StringBuilder sb = new StringBuilder();
 			while (!stack.isEmpty()) {
 				if (sb.length() > 0) {
-					sb.append(" -> "); //$NON-NLS-1$
+					sb.insert(0, " -> "); //$NON-NLS-1$
 				}
-				sb.append(stack.pop());
+				sb.insert(0, stack.pop());
 			}
 			return sb.toString();
 			

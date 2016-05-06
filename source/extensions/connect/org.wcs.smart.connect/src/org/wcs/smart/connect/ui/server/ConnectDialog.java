@@ -72,6 +72,7 @@ public class ConnectDialog extends TitleAreaDialog {
 	
 	protected ConnectServer cs = null;
 	protected ConnectUser user = null;
+	protected Employee employee;
 	
 	private ControlDecoration cdUser;
 	private ControlDecoration cdPassword;
@@ -79,8 +80,6 @@ public class ConnectDialog extends TitleAreaDialog {
 	
 	private SmartConnect connect;
 	private boolean hideConfigure;
-	
-	private Employee e;
 	
 	public ConnectDialog(Shell parentShell) {
 		this(parentShell, false, SmartDB.getCurrentEmployee());
@@ -93,7 +92,7 @@ public class ConnectDialog extends TitleAreaDialog {
 	public ConnectDialog(Shell parentShell, boolean hideConfigure, Employee e){
 		super(parentShell);
 		this.hideConfigure = hideConfigure;
-		this.e = e;
+		this.employee = e;
 	}
 	
 	@Override
@@ -202,17 +201,54 @@ public class ConnectDialog extends TitleAreaDialog {
 			btn.setEnabled(ok);
 		}		
 	}
-	private void initData(){
-
+	
+	/**
+	 * Loads the server info from the database
+	 */
+	protected void loadDatabaseInformation(){
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
 			cs = ConnectHibernateManager.getConnectServer(s);
-			user = ConnectHibernateManager.getConnectUser(e, s);			
+			user = ConnectHibernateManager.getConnectUser(employee, s);			
 			s.getTransaction().commit();
 		}finally{
 			s.close();
 		}
+	}
+	
+	/**
+	 * Updates the database with the saved user info
+	 * @param user
+	 * @param newPassword
+	 * @throws Exception
+	 */
+	protected void saveUserInfo(final String user, String newPassword)
+			throws Exception {
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			if (ConnectDialog.this.user == null){
+				ConnectUser newuser = new ConnectUser();
+				newuser.setConnectUsername(user);
+				newuser.setServer(cs);
+				newuser.setSmartUser(employee);
+				ConnectDialog.this.user = newuser;
+				s.save(newuser);
+			}
+			ConnectDialog.this.user.setConnectPassword(newPassword);
+			s.saveOrUpdate(ConnectDialog.this.user);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			throw ex;
+		}finally{
+			s.close();
+		}
+	}
+	
+	private void initData(){
+		loadDatabaseInformation();
 		
 		lblServer.setText(""); //$NON-NLS-1$
 		txtUser.setText(""); //$NON-NLS-1$
@@ -310,26 +346,7 @@ public class ConnectDialog extends TitleAreaDialog {
 						}
 						if (ConnectDialog.this.user == null || savePass){
 							if (!strequals(existingPassword, newPassword == null ? null : pass)){
-								Session s = HibernateManager.openSession();
-								try{
-									s.beginTransaction();
-									if (ConnectDialog.this.user == null){
-										ConnectUser newuser = new ConnectUser();
-										newuser.setConnectUsername(user);
-										newuser.setServer(cs);
-										newuser.setSmartUser(e);
-										ConnectDialog.this.user = newuser;
-										s.save(newuser);
-									}
-									ConnectDialog.this.user.setConnectPassword(newPassword);
-									s.saveOrUpdate(ConnectDialog.this.user);
-									s.getTransaction().commit();
-								}catch (Exception ex){
-									s.getTransaction().rollback();
-									throw ex;
-								}finally{
-									s.close();
-								}
+								saveUserInfo(user, newPassword);
 							}
 						}
 						

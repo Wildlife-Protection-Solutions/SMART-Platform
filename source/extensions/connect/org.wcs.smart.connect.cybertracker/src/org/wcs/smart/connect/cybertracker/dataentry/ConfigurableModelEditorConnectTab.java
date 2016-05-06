@@ -21,18 +21,13 @@
  */
 package org.wcs.smart.connect.cybertracker.dataentry;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -53,15 +48,25 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.ConnectHibernateManager;
+import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.api.model.AlertType;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.connect.cybertracker.util.AlertLookup;
 import org.wcs.smart.connect.cybertracker.util.CmTreeNodesVisitor;
 import org.wcs.smart.connect.cybertracker.util.CmTreeNodesVisitor.INodeVisitHandler;
+import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.IConfigurableModelChangeListener;
 import org.wcs.smart.dataentry.dialog.IConfigurableModelEditorTabContent;
@@ -69,7 +74,6 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Tab with SMART Connect Alerts content for configurable model.
@@ -125,11 +129,24 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				updateNewButtonState();
 			}
 		});
+		modelTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				IStructuredSelection sel = (IStructuredSelection) modelTreeViewer.getSelection();
+				if (sel != null && !sel.isEmpty()) {
+					Object obj = sel.getFirstElement();
+					if (obj instanceof CmNode || obj instanceof CmAttributeListItem || obj instanceof ConnectCmTreeElement){
+						handleNewAlert();
+					}
+				}
+			}
+		});
 		modelTreeViewer.expandToLevel(2);
 
 		btnNew = new Button(innerLeft, SWT.PUSH);
 		btnNew.setText(Messages.ConfigurableModelEditorConnectTab_Button_NewAlert);
 		btnNew.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false));
+		((GridData)btnNew.getLayoutData()).widthHint = 90;
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -152,7 +169,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		alertTable.setInput(alertsList);
 
 		Composite buttonPanel = new Composite(rightPanel, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout(2, false));
+		buttonPanel.setLayout(new GridLayout(3, false));
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
 		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -160,6 +177,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		btnEdit = new Button(buttonPanel, SWT.PUSH);
 		btnEdit.setText(Messages.ConfigurableModelEditorConnectTab_Button_Edit);
 		btnEdit.setLayoutData(new GridData(SWT.BEGINNING, SWT.BOTTOM, false, false));
+		((GridData)btnEdit.getLayoutData()).widthHint = 90;
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -170,10 +188,23 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		btnDelete = new Button(buttonPanel, SWT.PUSH);
 		btnDelete.setText(Messages.ConfigurableModelEditorConnectTab_Button_Delete);
 		btnDelete.setLayoutData(new GridData(SWT.BEGINNING, SWT.BOTTOM, false, false));
+		((GridData)btnDelete.getLayoutData()).widthHint = 90;
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleDeleteAlert();
+			}
+		});
+		
+		Button btnRefresh = new Button(buttonPanel, SWT.PUSH);
+		btnRefresh.setText(Messages.ConfigurableModelEditorConnectTab_RefreshTypes);
+		btnRefresh.setToolTipText(Messages.ConfigurableModelEditorConnectTab_RefreshToolTip);
+		btnRefresh.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
+		btnRefresh.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				alertTypeList = null;
+				getAlertTypes();
 			}
 		});
 		
@@ -305,7 +336,12 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		if (alert == null) {
 			return;
 		}
-		AlertEditDialog d = new AlertEditDialog(dialog.getShell(), true, alert, getAlertTypes());
+		List<String> alertTypes = getAlertTypes();
+		if (alertTypes == null){
+			//TODO: ERROR MESSAGE
+			return;
+		}
+		AlertEditDialog d = new AlertEditDialog(dialog.getShell(), true, alert, alertTypes);
 		if (d.open() == Window.OK) {
 			alertsList.add(alert);
 			alertTable.refresh();
@@ -319,7 +355,13 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			Object obj = sel.getFirstElement();
 			if (obj instanceof ConnectAlert) {
 				ConnectAlert alert = (ConnectAlert) obj;
-				AlertEditDialog d = new AlertEditDialog(dialog.getShell(), false, alert, getAlertTypes());
+				List<String> alertTypes = getAlertTypes();
+				if (alertTypes == null){
+					//TODO: ERROR MESSAGE
+					return;
+				}
+				
+				AlertEditDialog d = new AlertEditDialog(dialog.getShell(), false, alert, alertTypes);
 				if (d.open() == Window.OK) {
 					alertTable.refresh(true);
 					dialog.notifyChangesMade();
@@ -352,29 +394,97 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		if (cm.getUuid() == null) {
 			return resultList;
 		}
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(dialog.getShell());
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask(Messages.ConfigurableModelEditorConnectTab_LoadAlertsTaskName, 1);
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
-					s.getTransaction().rollback();
-					s.close();
-				}
-			});
-		} catch (Exception e) {
-			SmartPlugIn.displayLog(Messages.ConfigurableModelEditorConnectTab_LoadAlertsError, e);
-		}
+		resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, dialog.getSession(), true));
 		return resultList;
 	}
 
+	
 	private List<String> getAlertTypes() {
 		if (alertTypeList == null) {
-			//TODO: need real list
-			alertTypeList = (List<String>) Arrays.asList("One", "Two", "Three");
+			ConnectDialog cd = new ConnectDialog(dialog.getShell(), true){
+				@Override
+				protected Control createDialogArea(Composite parent) {
+					setTitle(Messages.ConfigurableModelEditorConnectTab_ConnectDialogTitle);
+					getShell().setText(Messages.ConfigurableModelEditorConnectTab_ConnectDialogText);
+					setMessage(Messages.ConfigurableModelEditorConnectTab_ConnectDialogMessage);
+					return super.createDialogArea(parent);	
+				}
+				protected void loadDatabaseInformation(){
+					Session s = dialog.getSession();
+					s.beginTransaction();
+					cs = ConnectHibernateManager.getConnectServer(s);
+					user = ConnectHibernateManager.getConnectUser(employee, s);			
+					s.getTransaction().commit();
+				}
+				protected void saveUserInfo(final String newName, String newPassword)
+						throws Exception {
+					Session s = dialog.getSession();
+					try{
+						s.beginTransaction();
+						if (user == null){
+							ConnectUser newuser = new ConnectUser();
+							newuser.setConnectUsername(newName);
+							newuser.setServer(cs);
+							newuser.setSmartUser(employee);
+							user = newuser;
+							s.save(newuser);
+						}
+						user.setConnectPassword(newPassword);
+						s.saveOrUpdate(user);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+
+					}finally{
+						s.close();
+					}
+				}
+			};
+			
+			List<String> newAlerts = null;
+			
+			if (cd.open() != Window.CANCEL){
+				SmartConnect sc = cd.getConnection();
+				try{
+					List<AlertType> types = sc.getAlertTypes();
+					newAlerts = new ArrayList<String>();
+					for(AlertType at : types){
+						newAlerts.add(at.getLabel());
+					}
+				}catch (Exception ex){
+					ConnectPlugIn.log("Unable to get Alert Types from server:" + ex.getMessage(), ex); //$NON-NLS-1$
+				}
+			}
+			if (newAlerts == null){
+				MessageDialog.openWarning(dialog.getShell(), 
+						Messages.ConfigurableModelEditorConnectTab_WarningTitle, 
+						Messages.ConfigurableModelEditorConnectTab_WarningMessage);
+				
+				String types = ConnectPlugIn.getDefault().getPreferenceStore().getString(ConnectPlugIn.CONNECT_ALERT_TYPE_CACHE_PREF);
+				if (types == null || types.isEmpty()){
+					//nothing found - empty list
+					newAlerts = new ArrayList<String>();
+				}else{
+					newAlerts = new ArrayList<String>();
+					JSONParser parser = new JSONParser();
+					JSONArray array;
+					try {
+						array = ((JSONArray )parser.parse(types));
+						for (Iterator<?> iterator = array.iterator(); iterator.hasNext();) {
+							String object = (String) iterator.next();
+							newAlerts.add(object);
+						}
+					} catch (ParseException e) {
+						ConnectPlugIn.log("Error parsing alert types from preference store.", e); //$NON-NLS-1$
+					}
+				}
+			}else{
+				JSONArray array = new JSONArray();
+				array.addAll(newAlerts);
+				ConnectPlugIn.getDefault().getPreferenceStore().setValue(ConnectPlugIn.CONNECT_ALERT_TYPE_CACHE_PREF, array.toJSONString());
+			}
+			
+			alertTypeList = newAlerts;
 		}
 		return alertTypeList;
 	}
@@ -384,6 +494,9 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		Set<ConnectAlert> removed = new HashSet<ConnectAlert>(dbAlertsList);
 		removed.removeAll(alertsList);
 		for (ConnectAlert a : removed) {
+			//evict alert and reload from database; without evict it may not be in the database but
+			//still the hibernate cache
+			s.evict(a);
 			Object del = s.get(ConnectAlert.class, a.getUuid());
 			if (del != null) {
 				//it may be the case that object was removed by constraint in db 

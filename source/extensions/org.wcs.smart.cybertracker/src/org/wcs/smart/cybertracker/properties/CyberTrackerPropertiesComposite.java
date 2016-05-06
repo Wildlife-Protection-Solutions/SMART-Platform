@@ -126,6 +126,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private ControlDecoration utmZoneDecoration;
     
     private ControlDecoration maxPhotoCountDecoration;
+	private TabFolder tabFolder;
 	
 	public CyberTrackerPropertiesComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -138,7 +139,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 
 	private void createContent(Composite parent) {
 		
-		final TabFolder tabFolder = new TabFolder (parent, SWT.NONE);
+		tabFolder = new TabFolder (parent, SWT.NONE);
 		Rectangle clientArea = parent.getClientArea ();
 		tabFolder.setLocation (clientArea.x, clientArea.y);
 		
