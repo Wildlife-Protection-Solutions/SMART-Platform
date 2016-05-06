@@ -64,7 +64,6 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
@@ -73,7 +72,6 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
@@ -91,7 +89,6 @@ public class EditTreeDialog extends TitleAreaDialog {
 
 	protected CmAttribute attribute;
 	protected ConfigurableModel editModel;
-	protected ChangeTracker tracker;
 	
 	private Viewer dmTreeViewer;
 	private TreeViewer itemViewer;
@@ -110,10 +107,9 @@ public class EditTreeDialog extends TitleAreaDialog {
 	private Button btnAdd;
 	private Button btnRemove;
 	
-	public EditTreeDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, ChangeTracker tracker) {
+	public EditTreeDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel) {
 		super(parentShell);
 		this.attribute = attribute;
-		this.tracker = tracker;
 		this.editModel = editModel;
 	}
 
@@ -245,16 +241,25 @@ public class EditTreeDialog extends TitleAreaDialog {
 	protected void deleteItems() {
 		for (Iterator<?> i = ((StructuredSelection)itemViewer.getSelection()).iterator(); i.hasNext();) {
 			CmAttributeTreeNode cmTreeNode = (CmAttributeTreeNode) i.next();
+			
+			List<CmAttributeTreeNode> kids = new ArrayList<CmAttributeTreeNode>();
+			kids.addAll(cmTreeNode.getChildren());
+			while(kids.size() > 0){
+				CmAttributeTreeNode kid = kids.remove(0);
+				if (kid.getChildren().size() ==0){
+					if (kid.getParent() != null) kid.getParent().getChildren().remove(kid);
+					kid.setParent(null);
+				}else{
+					kids.addAll(kid.getChildren());
+					kids.add(kid);
+				}
+			}
+			
 			CmAttributeTreeNode parent = cmTreeNode.getParent();
 			List<CmAttributeTreeNode> children = getTargetList(parent);
 			children.remove(cmTreeNode);
 			updateNodeOrder(children);
 			cmTreeNode.setParent(null);
-			if (parent != null) tracker.saveOrUpdate(parent);
-			tracker.deleteObject(cmTreeNode);
-//			for (CmAttributeTreeNode n : children){
-//				tracker.saveOrUpdate(n);
-//			}
 		}
 		itemViewer.refresh();
 	}
@@ -274,7 +279,6 @@ public class EditTreeDialog extends TitleAreaDialog {
 		cmTreeNode.updateName(SmartDB.getCurrentLanguage(), Messages.EditTreeDialog_NewGroup);
 		cmTreeNode.setNodeOrder(children.size());
 		children.add(cmTreeNode);
-		tracker.saveOrUpdate(cmTreeNode);
 		itemViewer.refresh();
 		itemViewer.expandToLevel(cmTreeNode, 1);
 	}
@@ -303,13 +307,11 @@ public class EditTreeDialog extends TitleAreaDialog {
 		List<CmAttributeTreeNode> target = getTargetList(parent);
 		cmTreeNode.setNodeOrder(target.size());
 		target.add(cmTreeNode);
-		tracker.saveOrUpdate(cmTreeNode);
 		if (addSubNodes && dmTreeNode.getActiveChildren() != null && !dmTreeNode.getActiveChildren().isEmpty()) {
 			for (AttributeTreeNode child : dmTreeNode.getActiveChildren()) {
 				addCmTreeNode(child, cmTreeNode, addSubNodes);
 			}
 		}
-
 	}
 
 	private void updateNodeOrder(List<CmAttributeTreeNode> list) {
@@ -465,15 +467,9 @@ public class EditTreeDialog extends TitleAreaDialog {
 						}
 					}
 				}else if(dmNode == null || !dmNode.findName(lang).equals(newValue)){
-//					if (cmNode == null){
-//						cmNode = createNewAlaisItem(dmNode);
-//					}
 					cmNode.updateName(((Language)element), (String)value);
 				}
-				if (cmNode != null){
-					tracker.saveOrUpdate(cmNode);
-				}
-				
+
 				nameTable.refresh();
 				itemViewer.refresh();
 			}
@@ -544,17 +540,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 					attribute.setCurrentDisplayMode(modeViewer.getSelectedDisplayMode());
 					//we need to save either configurable model global setting (for default configuration)
 					//or attribute option (for custom configuration), this is way we try to save both below
-					CmAttributeOption op = attribute.getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
-					if (op != null) {
-						tracker.saveOrUpdate(op);
-					}
-					CmDmAttributeSettings settings = editModel.getAttributeSettings().get(attribute.getAttribute());
-					if (settings != null) {
-						tracker.saveOrUpdate(settings);
-					}
+					attribute.getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
+					editModel.getAttributeSettings().get(attribute.getAttribute());
 				} else {
 					cmNode.setDisplayMode(modeViewer.getSelectedDisplayMode());
-					tracker.saveOrUpdate(cmNode);
 				}
 			}
 		});
@@ -571,7 +560,6 @@ public class EditTreeDialog extends TitleAreaDialog {
 			public void setImageFile(File file) {
 				if (cmNode != null) {
 					cmNode.setImageFile(file);
-					tracker.saveOrUpdate(cmNode);
 					imageControl.redrawCanvas();
 				}
 			}
@@ -630,7 +618,6 @@ public class EditTreeDialog extends TitleAreaDialog {
 			setCurrentSelection(cmTreeNode.getDmTreeNode(), cmTreeNode);
 		}
 		cmTreeNode.setIsActive(enable);
-		tracker.saveOrUpdate(cmTreeNode);
 	}
 	
 	protected void enableItem(CmAttributeTreeNode cmTreeNode, boolean enable){

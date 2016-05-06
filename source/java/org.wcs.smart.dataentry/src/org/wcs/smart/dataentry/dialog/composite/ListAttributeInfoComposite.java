@@ -44,7 +44,6 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.EditListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -80,8 +79,8 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public ListAttributeInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
-		super(parent, model, tracker);
+	public ListAttributeInfoComposite(Composite parent, ConfigurableModel model) {
+		super(parent, model);
 	}
 
 	@Override
@@ -121,7 +120,6 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT).setBooleanValue(btnMulti.getSelection());
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -195,7 +193,6 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 					}
 				}
 				if (!initializingControl){
-					tracker.saveOrUpdate(getSourceObject());
 					fireModelChanged();
 				}
 			}
@@ -243,7 +240,6 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (option == null) {
 					option = CmAttributeOptionFactory.createCustomCofigOption(getSourceObject());
 					getSourceObject().getCmAttributeOptions().put(option.getOptionId(), option);
-					tracker.saveOrUpdate(getSourceObject());
 				}
 				option.setBooleanValue(btnIsCustomConfig.getSelection());
 				
@@ -256,7 +252,6 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				
 				listViewer.setInput(getSourceObject().getCurrentList());
 				listViewer.refresh();
-				tracker.saveOrUpdate(getSourceObject());
 				fireModelChanged();
 			}
 		});
@@ -265,7 +260,6 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void clearCustomListConfiguration(CmAttribute a) {
 		for (CmAttributeListItem toDelete : a.getList()){
 			toDelete.setAttribute(null);
-			tracker.deleteObject(toDelete);
 		}
 		getSourceObject().getList().clear();
 	}
@@ -286,12 +280,11 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
-					EditListDialog dialog = new EditListDialog(getShell(), getSourceObject(), getModel(), tracker);
+					EditListDialog dialog = new EditListDialog(getShell(), getSourceObject(), getModel());
 					dialog.open();
 							
 					updateListControl();
 					listViewer.refresh();
-					tracker.saveOrUpdate(getSourceObject());
 					fireModelChanged();
 				}
 			}

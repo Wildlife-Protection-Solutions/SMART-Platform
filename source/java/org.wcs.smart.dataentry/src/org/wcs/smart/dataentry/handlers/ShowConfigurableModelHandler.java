@@ -53,6 +53,7 @@ public class ShowConfigurableModelHandler {
 
 	@Execute
 	public void execute(Shell activeShell) throws ExecutionException {
+
 		DataModelProgressMonitorDialog pd = new DataModelProgressMonitorDialog(activeShell);
 		pd.run();
 		if (pd.isEmptyDataModel() && MessageDialog.openQuestion(activeShell, Messages.ShowConfigurableModelHandler_NoDmDialog_Title, Messages.ShowConfigurableModelHandler_NoDmDialog_Message)) {

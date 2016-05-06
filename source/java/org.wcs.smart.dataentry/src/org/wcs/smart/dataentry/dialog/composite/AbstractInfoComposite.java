@@ -68,7 +68,6 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
-import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ChangeTracker;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.DatamodelCategorySelectorDialog;
@@ -93,15 +92,13 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 public abstract class AbstractInfoComposite extends Composite {
 
 	private ConfigurableModel model;
-	protected ChangeTracker tracker;
 	
 	private List<IModelChangedListener> modelListeners = new ArrayList<IModelChangedListener>();
 	private List<ISourceObjectChangedListener> sourceListeners = new ArrayList<ISourceObjectChangedListener>();
 
-	public AbstractInfoComposite(Composite parent, ConfigurableModel model, ChangeTracker tracker) {
+	public AbstractInfoComposite(Composite parent, ConfigurableModel model) {
 		super(parent, SWT.NONE);
 		this.model = model;
-		this.tracker = tracker;
 	}
 
 	public abstract Object getSourceObject();
@@ -173,7 +170,6 @@ public abstract class AbstractInfoComposite extends Composite {
 				}
 				if (fire) {
 					fireModelChanged();
-					tracker.saveOrUpdate(obj);
 				}
 			}
 		});
@@ -234,9 +230,6 @@ public abstract class AbstractInfoComposite extends Composite {
 		node.setName(Messages.AbstractInfoComposite_NewGroupDefaultName);
 		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
 		addToParent(node);
-		
-		tracker.saveOrUpdate(node);
-		if (node.getParent() != null) tracker.saveOrUpdate(node.getParent());
 	}
 	
 	/**
@@ -340,7 +333,6 @@ public abstract class AbstractInfoComposite extends Composite {
 				addToParent(node);
 			}
 		});
-		tracker.saveOrUpdate(node);
 	}
 
 	private void ensureDefaultTreeExists(Attribute a) {
@@ -349,7 +341,6 @@ public abstract class AbstractInfoComposite extends Composite {
 		if (!existingTrees.contains(a)) {
 			List<CmAttributeTreeNode> defTree = CmDefaultTreesUtil.buildDefaultTree(m, a);
 			m.getDefaultTrees().addAll(defTree);
-			tracker.saveOrUpdate(m);
 		}
 	}
 
@@ -359,7 +350,6 @@ public abstract class AbstractInfoComposite extends Composite {
 		if (!existingLists.contains(a)) {
 			List<CmAttributeListItem> defList = CmDefaultListsUtil.buildDefaultList(m, a);
 			m.getDefaultLists().addAll(defList);
-			tracker.saveOrUpdate(m);
 		}
 	}
 
@@ -533,7 +523,6 @@ public abstract class AbstractInfoComposite extends Composite {
 						if (changed){
 							//only fire if name actually changed
 							fireModelChanged();
-							tracker.saveOrUpdate(getSourceObject());
 						}
 					}
 					
@@ -554,7 +543,6 @@ public abstract class AbstractInfoComposite extends Composite {
 							cd.hide();
 						}
 						fireModelChanged();
-						tracker.saveOrUpdate(getSourceObject());
 						
 					}
 				}
@@ -570,7 +558,6 @@ public abstract class AbstractInfoComposite extends Composite {
 						if (translateDialog.open() == Window.OK){
 							updateText(item);
 							fireModelChanged();
-							tracker.saveOrUpdate(getSourceObject());
 						}
 						
 					}
