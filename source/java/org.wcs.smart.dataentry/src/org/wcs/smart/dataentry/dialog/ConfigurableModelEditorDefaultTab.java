@@ -236,11 +236,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TEXT, attrComposite);
 
-		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, dialog);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.LIST, attrComposite);
 
-		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, dialog);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);
 

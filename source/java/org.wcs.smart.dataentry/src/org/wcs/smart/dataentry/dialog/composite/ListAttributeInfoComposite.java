@@ -45,6 +45,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.CmCustomListsUtil;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.EditListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -52,7 +53,6 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
@@ -75,13 +75,17 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 
 	private boolean initializingControl = false;
 	private Object lastSelection = null;
+	
+	private ConfigurableModelEditDialog dialog;
+	
 	/**
 	 * @param parent
 	 * @param model
 	 * @param session
 	 */
-	public ListAttributeInfoComposite(Composite parent, ConfigurableModel model) {
-		super(parent, model);
+	public ListAttributeInfoComposite(Composite parent, ConfigurableModelEditDialog dialog) {
+		super(parent, dialog.getModel());
+		this.dialog = dialog;
 	}
 
 	@Override
@@ -282,8 +286,8 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
-					EditListDialog dialog = new EditListDialog(getShell(), getSourceObject(), getModel());
-					dialog.open();
+					EditListDialog dlg = new EditListDialog(getShell(), getSourceObject(), getModel(), dialog.getSession());
+					dlg.open();
 							
 					updateListControl();
 					listViewer.refresh();

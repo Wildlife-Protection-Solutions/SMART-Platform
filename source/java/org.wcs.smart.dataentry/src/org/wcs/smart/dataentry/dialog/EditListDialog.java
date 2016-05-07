@@ -96,10 +96,13 @@ public class EditListDialog extends TitleAreaDialog{
 	private Button btnEnable;
 	private ImageSelectionControl imageControl;
 	
-	public EditListDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel) {
+	private Session session;
+	
+	public EditListDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, Session session) {
 		super(parentShell);
 		this.attribute = attribute;
 		this.editModel = editModel;
+		this.session = session;
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -348,6 +351,11 @@ public class EditListDialog extends TitleAreaDialog{
 			public void setImageFile(File file) {
 				if (cmNode != null) {
 					cmNode.setImageFile(file);
+					if (cmNode.getUuid() != null) {
+						//need this logic to correctly trigger intercepter
+						session.evict(cmNode);
+						session.saveOrUpdate(cmNode);
+					}
 					imageControl.redrawCanvas();
 				}
 			}
