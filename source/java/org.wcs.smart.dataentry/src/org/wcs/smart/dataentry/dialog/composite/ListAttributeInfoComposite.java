@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.dataentry.CmCustomListsUtil;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.dialog.EditListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
@@ -94,6 +95,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1));
 		createIsCustomConfigControl(container);
 		createListControl(container);
+		createRevertToDmButton(container);
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -291,6 +293,32 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		});
 	}
 
+	private void createRevertToDmButton(Composite container) {
+		Button btnRename = new Button(container, SWT.PUSH);
+		btnRename.setText(Messages.ListAttributeInfoComposite_Button_Revert);
+		btnRename.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
+
+		btnRename.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String msg = getSourceObject().isUseCustomConfig() ? Messages.ListAttributeInfoComposite_ConfirmRevert_Custom_Message : Messages.ListAttributeInfoComposite_ConfirmRevert_Default_Message;
+				if (MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_ConfirmRevert_Title, msg)) {
+					CmAttribute cmAttr = getSourceObject();
+					List<CmAttributeListItem> newList = getSourceObject().isUseCustomConfig() ? 
+							CmCustomListsUtil.buildCustomList(getModel(), cmAttr, cmAttr.getAttribute()) : CmDefaultListsUtil.buildDefaultList(getModel(), cmAttr.getAttribute());
+								
+					List<CmAttributeListItem> currentList = cmAttr.getCurrentList();
+					currentList.clear();
+					currentList.addAll(newList);
+					
+					updateListControl();
+					listViewer.refresh();
+					fireModelChanged();
+				}
+			}
+		});
+	}
+	
 	private void updateListControl() {
 		((CmListItemLabelProvider)listViewer.getLabelProvider()).setLanguage(currentLanguage);
 		listViewer.setInput(getSourceObject().getCurrentList());
