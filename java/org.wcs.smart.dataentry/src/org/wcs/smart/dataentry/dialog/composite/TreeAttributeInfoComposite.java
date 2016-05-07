@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -45,6 +46,8 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.dataentry.CmCustomTreesUtil;
+import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider;
 import org.wcs.smart.dataentry.dialog.EditTreeDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
@@ -95,6 +98,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		createIsCustomConfigControl(container);
 		createTreeControl(container);
 		createEditTreeButton(container);
+		createRevertToDmButton(container);
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -238,9 +242,8 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		}
 		fireModelChanged();
 	}
+
 	private void createTreeControl(Composite container) {
-		
-		
 		attributeTreeViewer = new TreeViewer(container);
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider(getModel()));
@@ -250,7 +253,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void createEditTreeButton(Composite container) {
 		Button btnRename = new Button(container, SWT.PUSH);
 		btnRename.setText(Messages.TreeAttributeInfoComposite_RenameButton);
-		btnRename.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false,2,1));
+		btnRename.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
 
 		btnRename.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -264,7 +267,31 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				}
 			}
 		});
-		
+	}
+
+	private void createRevertToDmButton(Composite container) {
+		Button btnRename = new Button(container, SWT.PUSH);
+		btnRename.setText(Messages.TreeAttributeInfoComposite_Button_Revert);
+		btnRename.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
+
+		btnRename.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String msg = getSourceObject().isUseCustomConfig() ? Messages.TreeAttributeInfoComposite_ConfirmRevert_Custom_Message : Messages.TreeAttributeInfoComposite_ConfirmRevert_Default_Message;
+				if (MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_ConfirmRevert_Title, msg)) {
+					CmAttribute cmAttr = getSourceObject();
+					List<CmAttributeTreeNode> newList = getSourceObject().isUseCustomConfig() ? 
+							CmCustomTreesUtil.buildCustomTree(getModel(), cmAttr, cmAttr.getAttribute()) : CmDefaultTreesUtil.buildDefaultTree(getModel(), cmAttr.getAttribute());
+								
+					List<CmAttributeTreeNode> currentTree = cmAttr.getCurrentTree();
+					currentTree.clear();
+					currentTree.addAll(newList);
+					
+					attributeTreeViewer.refresh();
+					fireModelChanged();
+				}
+			}
+		});
 	}
 
 	/**
