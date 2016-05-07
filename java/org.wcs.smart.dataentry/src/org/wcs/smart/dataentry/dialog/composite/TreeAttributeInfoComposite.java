@@ -49,13 +49,13 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.CmCustomTreesUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.EditTreeDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
@@ -72,13 +72,17 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	private Button btnIsCustomConfig;
 	
 	private Object lastSelection;
+
+	private ConfigurableModelEditDialog dialog;
+
 	/**
 	 * @param parent
 	 * @param model
 	 * @param session
 	 */
-	public TreeAttributeInfoComposite(Composite parent, ConfigurableModel model) {
-		super(parent, model);
+	public TreeAttributeInfoComposite(Composite parent, ConfigurableModelEditDialog dialog) {
+		super(parent, dialog.getModel());
+		this.dialog = dialog;
 	}
 
 	/* (non-Javadoc)
@@ -259,8 +263,8 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnMessage1)) {
-					EditTreeDialog dialog = new EditTreeDialog(getShell(), getSourceObject(), getModel());
-					dialog.open();
+					EditTreeDialog dlg = new EditTreeDialog(getShell(), getSourceObject(), getModel(), dialog.getSession());
+					dlg.open();
 					
 					attributeTreeViewer.refresh();
 					fireModelChanged();

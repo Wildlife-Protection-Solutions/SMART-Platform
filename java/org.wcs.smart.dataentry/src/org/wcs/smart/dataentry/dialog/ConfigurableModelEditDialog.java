@@ -77,13 +77,12 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	public ConfigurableModelEditDialog(ConfigurableModel cm) {
 		super(Display.getDefault().getActiveShell());
 		
-		session = HibernateManager.openSession();
+		session = HibernateManager.openSession(new AssociatedImageInterceptor());
 		if (cm.getUuid() != null){
 			this.model = (ConfigurableModel)session.get(ConfigurableModel.class, cm.getUuid());	
 		}else{
 			this.model = cm;
 		}
-		
 	}
 	
 	public Session getSession(){

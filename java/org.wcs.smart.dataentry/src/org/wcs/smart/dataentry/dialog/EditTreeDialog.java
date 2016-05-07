@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -106,11 +107,14 @@ public class EditTreeDialog extends TitleAreaDialog {
 	private Button btnAddSubNodes;
 	private Button btnAdd;
 	private Button btnRemove;
-	
-	public EditTreeDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel) {
+
+	private Session session;
+
+	public EditTreeDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, Session session) {
 		super(parentShell);
 		this.attribute = attribute;
 		this.editModel = editModel;
+		this.session = session;
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -560,6 +564,11 @@ public class EditTreeDialog extends TitleAreaDialog {
 			public void setImageFile(File file) {
 				if (cmNode != null) {
 					cmNode.setImageFile(file);
+					if (cmNode.getUuid() != null) {
+						//need this logic to correctly trigger intercepter
+						session.evict(cmNode);
+						session.saveOrUpdate(cmNode);
+					}
 					imageControl.redrawCanvas();
 				}
 			}
