@@ -71,4 +71,11 @@ public class AlertLookup {
 		return new ArrayList<>(aList);
 	}
 	
+	public boolean isEmpty() {
+		return attrMap.isEmpty();
+	}
+
+	public void clear() {
+		attrMap.clear();
+	}
 }

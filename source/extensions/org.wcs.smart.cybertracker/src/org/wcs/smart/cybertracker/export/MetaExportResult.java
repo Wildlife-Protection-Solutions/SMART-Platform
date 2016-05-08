@@ -16,6 +16,7 @@ public class MetaExportResult {
 	public List<IdNamePair> resultElements = new ArrayList<IdNamePair>();
 	public CyberTrackerId rootId = null;
 	public List<String> defaultValues = new ArrayList<String>();
+	public String tripUniqueElementId;
 
 	public static class IdNamePair {
 		public String id;

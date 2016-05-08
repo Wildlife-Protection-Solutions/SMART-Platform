@@ -374,4 +374,16 @@ public class ConnectDialog extends TitleAreaDialog {
 	public SmartConnect getConnection(){
 		return this.connect;
 	}
+
+	protected Text getTxtUser() {
+		return txtUser;
+	}
+	
+	protected Text getTxtPassword() {
+		return txtPassword;
+	}
+	
+	protected Button getChSavePassword() {
+		return chSavePassword;
+	} 
 }

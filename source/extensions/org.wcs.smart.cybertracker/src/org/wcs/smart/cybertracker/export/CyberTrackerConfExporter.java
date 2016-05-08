@@ -97,6 +97,7 @@ public class CyberTrackerConfExporter {
 	private CyberTrackerUtil ctUtil;
 	
 	private CyberTrackerId rootId;
+	private String tripUniqueElementId;
 	private Elements elements;
 	private Map<Attribute, Map<Integer, CyberTrackerId>> attr2resultId = new HashMap<Attribute, Map<Integer, CyberTrackerId>>();
 	private Map<Integer, CyberTrackerId> nodeLevel2resultId = new HashMap<Integer, CyberTrackerId>();
@@ -143,8 +144,10 @@ public class CyberTrackerConfExporter {
 			}
 			
 			monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
-			
+
+			monitor.subTask(Messages.CyberTrackerConfExporter_Progress_AlertsConfig);
 			alertDataProvider = new AlertExportDataProvider(configurableModel);
+
 			elements = ElementsUtil.buildEmptyElements();
 			newWpResultId = new CyberTrackerId();
 			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
@@ -172,6 +175,7 @@ public class CyberTrackerConfExporter {
 			addPhotoElementIds = null;
 			elements = null;
 			rootId = null;
+			tripUniqueElementId = null;
 			attr2resultId.clear();
 			nodeLevel2resultId.clear();
 			listAttr2ItemData.clear();
@@ -223,6 +227,7 @@ public class CyberTrackerConfExporter {
 		List<Node> screenNodes = new ArrayList<Node>();
 		screenNodes.addAll(metaScreensData.screenNodes);
 		rootId = metaScreensData.rootId;
+		tripUniqueElementId = metaScreensData.tripUniqueElementId;
 		monitor.worked(5);
 
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
@@ -893,7 +898,7 @@ public class CyberTrackerConfExporter {
 				CyberTrackerId ctId = item2CtIdMap.get(kid);
 				String trElements = ctId.getItemTranslatedId();
 				for (AlertData alertData : dataList) {
-					Controls.Control alertControl = screensFactory.createAlertControl(alertData, trElements);
+					Controls.Control alertControl = screensFactory.createAlertControl(alertData, tripUniqueElementId, trElements);
 					ScreensObjectFactory.addControlToNode(ctNode, alertControl);
 				}
 			}
