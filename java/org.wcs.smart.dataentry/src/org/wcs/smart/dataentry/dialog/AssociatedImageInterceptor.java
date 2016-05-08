@@ -150,7 +150,11 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		//need some from-to mapping; and also objects can be cleared
 		File from = imgObject.getImageFile();
 		File to = new File(imgObject.getImagePersistenceLocation());
-		operations.put(imgObject.getUuid(), new SaveOperation(from, to));
+		IOperation lastOp = operations.get(imgObject.getUuid());
+		if (!(lastOp instanceof DeleteOperation)) {
+			//in case this object was deleted other operations do not make sense
+			operations.put(imgObject.getUuid(), new SaveOperation(from, to));
+		}
 	}
 
 	private void handleDelete(IImageAssociatedObject imgObject) {
