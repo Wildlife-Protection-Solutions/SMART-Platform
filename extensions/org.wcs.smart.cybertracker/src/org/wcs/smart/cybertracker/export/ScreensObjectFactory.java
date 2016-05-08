@@ -1133,7 +1133,7 @@ public class ScreensObjectFactory {
         <Translate__Elements>AEDF0166046BED44858F00236E1A9114</Translate__Elements>
     </Control>
 	 */
-	public Controls.Control createAlertControl(AlertData data, String trElements) {
+	public Controls.Control createAlertControl(AlertData data, String patrolId, String trElements) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{935A0794-78BF-4689-B6F5-F3EC3070BD20}"); //$NON-NLS-1$
 		control.setId(null);
@@ -1143,8 +1143,10 @@ public class ScreensObjectFactory {
 		control.setUrl(data.getUrl());
 		control.setUserName(data.getUsername());
 		control.setPassword(data.getPassword());
+		control.setCaId(data.getCaId());
 		control.setAlertType(data.getType());
 		control.setLevel(data.getLevel());
+		control.setTranslatePatrolElementId(patrolId);
 		control.setTranslateElements(trElements);
 		return control;
 	}	

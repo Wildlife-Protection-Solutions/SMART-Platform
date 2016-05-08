@@ -115,6 +115,7 @@ public class ScreensUtil {
 		
 		String resultId = createResultElement(RESULT_ID, elements);
 		addUniqueAttrubute(nodeBegin, resultId);
+		container.tripUniqueElementId = resultId;
 		String resultDateId = createResultElement(RESULT_START_DATE, elements);
 		String resultTimeId = createResultElement(RESULT_START_TIME, elements);
 		addStartTimeAttrubute(nodeBegin, resultDateId, resultTimeId);

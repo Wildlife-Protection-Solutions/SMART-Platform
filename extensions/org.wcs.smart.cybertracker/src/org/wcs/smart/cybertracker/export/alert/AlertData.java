@@ -36,6 +36,7 @@ public class AlertData {
 	private String username;
 	private String url;
 	private Integer pingFrequency;
+	private String caId;
 	
 	public Boolean getActive() {
 		return active;
@@ -86,4 +87,10 @@ public class AlertData {
 		this.pingFrequency = pingFrequency;
 	}
 
+	public String getCaId() {
+		return caId;
+	}
+	public void setCaId(String caId) {
+		this.caId = caId;
+	}
 }

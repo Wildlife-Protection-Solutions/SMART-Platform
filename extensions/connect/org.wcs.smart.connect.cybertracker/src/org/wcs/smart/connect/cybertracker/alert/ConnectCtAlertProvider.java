@@ -27,8 +27,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -42,6 +44,7 @@ import org.wcs.smart.cybertracker.export.alert.IAlertProvider;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Alert provider for CyberTracker by Connect plugin.
@@ -57,14 +60,40 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	private String password;
 	private String url;
 
+	private String caId;
+	
 	public ConnectCtAlertProvider(ConfigurableModel model) {
+		caId = UuidUtils.uuidToString(model.getConservationArea().getUuid());
 		List<ConnectAlert> alerts = loadAlerts(model);
 		lookup = new AlertLookup(alerts);
 		
-		// TODO: fix init logic
-		username = "user";
-		password = "pwd";
-		url = "http://127.0.0.1/test";
+		if (!lookup.isEmpty()) {
+			//we have at lease one alert configured for this model, so we need to init server related fields
+			initConnectFields();
+		}
+	}
+	
+	private void initConnectFields() {
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				ConnectAlertConfigDialog cd = new ConnectAlertConfigDialog(Display.getDefault().getActiveShell());
+				if (cd.open() != Window.CANCEL) {
+					url = cd.getServerUrl();
+					username = cd.getUsername();
+					password = cd.getPassword();
+				} else {
+					//we don't now server configuration -> alerts will be ignored
+					lookup.clear();
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ConnectCtAlertProvider_NoAlertConfigInfo_Title, Messages.ConnectCtAlertProvider_NoAlertConfigInfo_Message);
+						}
+					});
+				}
+			}
+		});
 	}
 
 	@Override
@@ -86,6 +115,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 		data.setUrl(url);
 		data.setUsername(username);
 		data.setPassword(password);
+		data.setCaId(caId);
 		data.setType(a.getType());
 		data.setLevel(a.getLevel());
 		return data;

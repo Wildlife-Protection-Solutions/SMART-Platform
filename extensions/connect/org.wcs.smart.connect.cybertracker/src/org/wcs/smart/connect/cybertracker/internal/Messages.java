@@ -33,8 +33,13 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_TabName;
 	public static String ConfigurableModelEditorConnectTab_WarningMessage;
 	public static String ConfigurableModelEditorConnectTab_WarningTitle;
+	public static String ConnectAlertConfigDialog_DataExtractError;
+	public static String ConnectAlertConfigDialog_Message;
+	public static String ConnectAlertConfigDialog_Title;
 	public static String ConnectCtAlertProvider_LoadAlertsError;
 	public static String ConnectCtAlertProvider_LoadAlertsTaskName;
+	public static String ConnectCtAlertProvider_NoAlertConfigInfo_Message;
+	public static String ConnectCtAlertProvider_NoAlertConfigInfo_Title;
 	public static String ConnectCtDatabaseUpgrader_UpgageTaskName;
 	public static String ConnectCtHibernateManager_LoadAlertsError;
 	public static String RemoveConnectCtJob_Title;

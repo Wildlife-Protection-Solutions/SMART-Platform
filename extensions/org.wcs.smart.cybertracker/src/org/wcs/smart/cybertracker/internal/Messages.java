@@ -73,6 +73,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerConfExporter_EndGroupMessage;
 	public static String CyberTrackerConfExporter_EndObservationGroup;
 	public static String CyberTrackerConfExporter_NextGroupTask;
+	public static String CyberTrackerConfExporter_Progress_AlertsConfig;
 	public static String CyberTrackerConfExporter_ResumeObservationGroup;
 	public static String CyberTrackerConfExporter_SaveAndGps;
 	public static String CyberTrackerConfExporter_SaveGroup;
