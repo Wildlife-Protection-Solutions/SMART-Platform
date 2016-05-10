@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -71,6 +72,9 @@ public class SurveyDesignLabelProvider extends LabelProvider {
 		}
 		if (element instanceof SurveyDesignEditorInput){
 			return ((SurveyDesignEditorInput) element).getName();
+		}
+		if (element instanceof SurveyDesignProxy){
+			return ((SurveyDesignProxy)element).getName();
 		}
 		return super.getText(element);
 	}

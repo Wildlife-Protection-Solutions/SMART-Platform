@@ -55,7 +55,7 @@ public class ConnectAlertConfigDialog extends ConnectDialog {
 		getShell().setText(Messages.ConnectAlertConfigDialog_Title);
 		setMessage(Messages.ConnectAlertConfigDialog_Message);
 		Control control = super.createDialogArea(parent);
-		getChSavePassword().setVisible(false);
+		chSavePassword.setVisible(false);
 		return control;
 	}
 	
@@ -90,8 +90,8 @@ public class ConnectAlertConfigDialog extends ConnectDialog {
 	@Override
 	protected void okPressed() {
 		server = cs.getServerUrl();
-		username = getTxtUser().getText().trim();
-		password = getTxtPassword().getText().trim();
+		username = txtUser.getText().trim();
+		password = txtPassword.getText().trim();
 		setReturnCode(Window.OK);
 		close();
 	}

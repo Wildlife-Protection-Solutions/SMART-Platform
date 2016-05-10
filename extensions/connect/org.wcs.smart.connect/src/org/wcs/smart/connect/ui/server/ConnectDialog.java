@@ -66,9 +66,9 @@ public class ConnectDialog extends TitleAreaDialog {
 
 	private Label lblServer;
 	
-	private Text txtUser;
-	private Text txtPassword;
-	private Button chSavePassword;
+	protected Text txtUser;
+	protected Text txtPassword;
+	protected Button chSavePassword;
 	
 	protected ConnectServer cs = null;
 	protected ConnectUser user = null;
@@ -374,16 +374,4 @@ public class ConnectDialog extends TitleAreaDialog {
 	public SmartConnect getConnection(){
 		return this.connect;
 	}
-
-	protected Text getTxtUser() {
-		return txtUser;
-	}
-	
-	protected Text getTxtPassword() {
-		return txtPassword;
-	}
-	
-	protected Button getChSavePassword() {
-		return chSavePassword;
-	} 
 }
