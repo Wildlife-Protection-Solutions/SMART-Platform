@@ -270,8 +270,9 @@ public class MapComposite extends Composite implements MapPart {
 		try {
 			featureCollection.clear();
 			featureCollection.addAll(getSmartPointAsFeatures(featureType));
-			store.removeFeatures(Filter.INCLUDE);
+			
 			try{
+				store.removeFeatures(Filter.INCLUDE);
 				store.addFeatures(featureCollection);
 			}catch (ConcurrentModificationException ex){
 				//try again - this should only happen once (udig removes listener)
