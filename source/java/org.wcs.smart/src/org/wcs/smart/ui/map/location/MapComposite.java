@@ -348,6 +348,7 @@ public class MapComposite extends Composite implements MapPart {
 
 	@Override
 	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {
+		if (mapViewer == null) return;
 		mapViewer.setSelectionProvider(selectionProvider);
 
 	}

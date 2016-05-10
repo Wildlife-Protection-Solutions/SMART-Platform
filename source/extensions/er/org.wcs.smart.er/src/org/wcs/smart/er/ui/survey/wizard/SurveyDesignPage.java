@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.hibernate.SurveyDesignFilter;
+import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Survey;
@@ -46,7 +47,6 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.handlers.NewSurveyDesignHandler;
-import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -120,7 +120,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		
 		
 		if (init != null){
-			SurveyDesignEditorInput sdei = new SurveyDesignEditorInput(init.getName(), init.getUuid(), init.getKeyId(), init.getState());
+			SurveyDesignProxy sdei = new SurveyDesignProxy(init.getName(), init.getUuid(), init.getKeyId(), init.getState());
 			if (!items.contains(sdei)){
 				items.add(sdei);
 			}
@@ -154,7 +154,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 	@Override
 	public boolean isPageComplete(){
 		Object x = ((StructuredSelection)cmbViewer.getSelection()).getFirstElement();
-		if (x instanceof SurveyDesignEditorInput){
+		if (x instanceof SurveyDesignProxy){
 			return true;
 		}
 		return false;
@@ -163,8 +163,8 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 	@Override
 	public boolean updateSurvey(Survey survey, Session session) {
 		Object x = ((StructuredSelection)cmbViewer.getSelection()).getFirstElement();
-		if (x instanceof SurveyDesignEditorInput){
-			SurveyDesign sd = (SurveyDesign) session.load(SurveyDesign.class, ((SurveyDesignEditorInput) x).getUuid());
+		if (x instanceof SurveyDesignProxy){
+			SurveyDesign sd = (SurveyDesign) session.load(SurveyDesign.class, ((SurveyDesignProxy) x).getUuid());
 			survey.setSurveyDesign(sd);
 			return true;
 		}

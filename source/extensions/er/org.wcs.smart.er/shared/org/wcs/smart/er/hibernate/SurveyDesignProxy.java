@@ -55,4 +55,16 @@ public class SurveyDesignProxy {
 		return key;
 	}
 	
+	@Override
+	public boolean equals(Object element){
+		if (element instanceof SurveyDesignProxy){
+			return ((SurveyDesignProxy)element).getUuid().equals(uuid);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return uuid.hashCode();
+	}
 }
