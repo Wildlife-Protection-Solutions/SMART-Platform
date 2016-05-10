@@ -121,17 +121,26 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     				SmartUtils.createDirectory(to.getParentFile());
     			}
     			
-    			Pattern p = Pattern.compile("(\\d+)_(.*)"); //$NON-NLS-1$
-    			int counter = 1;
     			String name = attachment.getFilename();
+    			int pos = name.indexOf('.');
+    			String basename = name;
+    			String extension = ""; //$NON-NLS-1$
+    			if (pos > 0){
+    				basename = name.substring(0, pos);
+    				extension = name.substring(pos);
+    			}
+    			
+    			Pattern p = Pattern.compile("(.*)_(\\d+)"); //$NON-NLS-1$
+    			int counter = 1;
+    			
     			while(to.exists()){
-    				Matcher m = p.matcher(name);
+    				Matcher m = p.matcher(basename);
     				if (m.matches()){
-    					name = (Integer.parseInt(m.group(1)) +1 ) + "_" + m.group(2); //$NON-NLS-1$
+    					basename = m.group(1) + "_" + (Integer.parseInt(m.group(2)) +1 ); //$NON-NLS-1$
     				}else{
-    					name = (counter++) + "_" + attachment.getFilename(); //$NON-NLS-1$
+    					basename = basename + "_" + (counter++); //$NON-NLS-1$
     				}
-    				to = new File(to.getParentFile(), name);
+    				to = new File(to.getParentFile(), basename + extension);
     			}
     			if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
     				throw new RuntimeException(getExceptionErrorMessage());
