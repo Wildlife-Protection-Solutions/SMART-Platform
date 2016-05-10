@@ -476,8 +476,9 @@ public class ConnectAlert extends HttpServlet {
 	 *  "ping" to keep a last-known location and past track of devices without creating a new alert everytime the location is updated. 
 	 * 
 	 * @param	usergenid	provided in the URL, the user generated ID of the alert. The system generates a UUID automatically.
-	 * @return Returns a JSON Alert object for the created alert 
+	 * @return Returns a JSON Alert object for the created alert
 	 */
+	
 	@POST
     @Path("/{usergenid}")
     public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newAlert) {

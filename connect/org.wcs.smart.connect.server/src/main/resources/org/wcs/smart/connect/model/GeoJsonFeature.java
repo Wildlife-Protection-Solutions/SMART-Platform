@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.connect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GeoJsonFeature{
 	private String type;
 	private GeoJsonGeometry geometry;

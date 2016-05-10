@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /*
  * An Alert entity
  *
@@ -34,7 +36,7 @@ import java.util.UUID;
  */
 
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GeoJsonAlert{
 	private String type;
 	private ArrayList<GeoJsonFeature> features ;

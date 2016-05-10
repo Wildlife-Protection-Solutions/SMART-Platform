@@ -23,6 +23,9 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GeoJsonProperties{
 	
 	private String deviceId; 
