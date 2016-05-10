@@ -23,7 +23,9 @@ package org.wcs.smart.data.oda.smart.ui.impl;
 
 import java.util.Properties;
 
+import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.datatools.connectivity.oda.design.ui.pages.impl.DefaultDataSourceWizardPage;
+import org.eclipse.datatools.connectivity.ui.PingJob;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -36,7 +38,8 @@ import org.wcs.smart.data.oda.smart.ui.internal.Messages;
  */
 public class SmartDataSourceWizardPage extends DefaultDataSourceWizardPage {
 
-	Properties p = new Properties();
+	private Properties p = new Properties();
+	
 	public SmartDataSourceWizardPage(String pageName) {
 		super(pageName);
 	}
@@ -58,5 +61,17 @@ public class SmartDataSourceWizardPage extends DefaultDataSourceWizardPage {
 		this.p = prop;
 
 	}
+	
+	@Override
+    protected Runnable createTestConnectionRunnable( final IConnectionProfile profile )
+    {
+        return new Runnable() 
+        {
+            public void run() 
+            {
+                PingJob.PingUIJob.showTestConnectionMessage( getShell(), null );
+            }
+        };
+    }
 
 }
