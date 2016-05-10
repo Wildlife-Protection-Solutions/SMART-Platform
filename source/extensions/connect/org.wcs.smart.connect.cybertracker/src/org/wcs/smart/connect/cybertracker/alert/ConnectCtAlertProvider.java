@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
@@ -44,7 +45,6 @@ import org.wcs.smart.cybertracker.export.alert.IAlertProvider;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Alert provider for CyberTracker by Connect plugin.
@@ -63,7 +63,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	private String caId;
 	
 	public ConnectCtAlertProvider(ConfigurableModel model) {
-		caId = UuidUtils.uuidToString(model.getConservationArea().getUuid());
+		caId = model.getConservationArea().getUuid().toString();
 		List<ConnectAlert> alerts = loadAlerts(model);
 		lookup = new AlertLookup(alerts);
 		
@@ -112,7 +112,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	private AlertData createAlertData(ConnectAlert a) {
 		AlertData data = new AlertData();
 		data.setActive(true);
-		data.setUrl(url);
+		data.setUrl(url + "/" + SmartConnect.API_URL + "/connectalert"); //$NON-NLS-1$ //$NON-NLS-2$
 		data.setUsername(username);
 		data.setPassword(password);
 		data.setCaId(caId);
