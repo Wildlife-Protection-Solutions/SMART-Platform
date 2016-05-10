@@ -13,6 +13,8 @@
             setThreadContextClassLoader="false"
             odaVersion="3.2"
             id="org.wcs.smart.data.oda.smart">
+         <properties>
+         </properties>
       </dataSource>
       <dataSet
             defaultDisplayName="%query.dataset.display.name"
