@@ -21,47 +21,41 @@
  */
 package org.wcs.smart.connect.internal.server.replication;
 
-import org.hibernate.Session;
-import org.wcs.smart.connect.ConnectHibernateManager;
-import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.connect.model.ConnectServerOption;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.eclipse.core.runtime.jobs.Job;
 
 /**
- * Manager to manage auto replication.  This is
- * run on startup and enables auto 
- * replication is required.
- * 
+ * Manager for auto replication job
  * @author Emily
  *
  */
-public enum AutoReplicationStartUp {
+public enum AutoReplicationManager {
 
 	INSTANCE;
 	
-	public void onStartUp(){
-		Session s = HibernateManager.openSession();
-		try{
-			ConnectServer cs = ConnectHibernateManager.getConnectServer(s);
-			if (cs == null) return;
-			
-			if (ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(cs)){
-				//start auto sync job
-				int delay = ConnectServerOption.ConnectionOption.SYNC_MINUTE.getIntegerValue(cs);
-				enableAutoReplication(delay);
-			}
-		}finally{
-			s.close();
-		}
+	private AutoReplicationJob job = null;
+	
+	/**
+	 * Schedules the job to run at the given delay interval
+	 * @param delay
+	 */
+	public void schedule(long delay){
+		Job x = getJob();
+		x.cancel();
+		x.schedule(delay);
+	}
+	
+	private AutoReplicationJob getJob(){
+		if (job == null) job = new AutoReplicationJob(false);
+		return job;
 	}
 	
 	/**
-	 * Starts the background auto replication job after the given
-	 * delay.
-	 * @param delayMinutes delay in mintues
+	 * Disables auto replication
 	 */
-	public void enableAutoReplication(int delayMinutes){
-		long delaysec = delayMinutes * 60 * 1000l;
-		AutoReplicationManager.INSTANCE.schedule(delaysec);
+	public void disable(){
+		if (job != null){
+			job.cancel();
+			job = null;
+		}
 	}
 }

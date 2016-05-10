@@ -44,6 +44,8 @@ public class Messages extends NLS {
 	public static String DateComposite_PatrolLengthWarning;
 	public static String DateComposite_StartDate_Label;
 	public static String DateComposite_Title;
+	public static String DateComposite_WarnMessage;
+	public static String DateComposite_WarnTitle;
 	public static String DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage;
 	public static String DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle;
 	public static String DeletePatrolHandler_DeleteErrorMessage;

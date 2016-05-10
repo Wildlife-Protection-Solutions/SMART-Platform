@@ -296,8 +296,7 @@ public class PatrolLeg extends UuidItem {
 				}
 				session.flush();
 			}
-			
-			day.setPatrolLeg(null);
+			//day.setPatrolLeg(null);
 			this.days.remove(day);
 		}
 		

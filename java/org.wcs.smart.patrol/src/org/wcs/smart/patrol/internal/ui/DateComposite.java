@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui;
 import java.text.MessageFormat;
 import java.util.Date;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -145,6 +146,14 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
 	public boolean updatePatrol(Patrol p, Session session) {
+		if (p.getStartDate() != null && p.getEndDate() != null){
+			if (getStartDate().after(p.getStartDate()) || getEndDate().before(p.getEndDate())){
+				if (!MessageDialog.openQuestion(dtEndDate.getShell(), Messages.DateComposite_WarnTitle, Messages.DateComposite_WarnMessage)){
+					return false;
+				}
+				
+			}
+		}
 		p.setStartDate(getStartDate());
 		p.setEndDate(getEndDate());		
 		if (p.getLegs().size() == 1){
