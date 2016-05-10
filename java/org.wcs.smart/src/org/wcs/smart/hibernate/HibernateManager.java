@@ -431,6 +431,7 @@ public class HibernateManager extends SmartHibernateManager{
 					List<Employee> otherUsers = x.createCriteria(Employee.class)
 						.add( Restrictions.eq("smartUserId", userName).ignoreCase()) //$NON-NLS-1$
 						.add(Restrictions.isNull("endEmploymentDate")) //$NON-NLS-1$
+						.add(Restrictions.ne("conservationArea", ca)) //$NON-NLS-1$
 						.list();
 					for (Employee o : otherUsers){
 						if (validatePassword(password, o)){
