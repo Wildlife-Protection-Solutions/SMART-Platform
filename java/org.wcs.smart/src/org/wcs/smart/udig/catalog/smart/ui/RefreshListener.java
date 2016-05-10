@@ -62,6 +62,7 @@ public class RefreshListener implements ILoginHandler{
 			NullProgressMonitor monitor = new NullProgressMonitor();
 			SmartService service = CatalogPlugin.getDefault().getLocalCatalog().getById(SmartService.class,
 					serviceUrl, monitor);
+			if (service == null) return;
 			try{
 				for (IResolve r : service.members(monitor)){
 					if (r.canResolve(SmartGeoResource.class)){
