@@ -21,9 +21,17 @@
  */
 package org.wcs.smart.connect.cybertracker;
 
+import java.text.MessageFormat;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
+import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
 /**
@@ -37,8 +45,34 @@ public class ConnectCtTemplateCloner implements IConservationAreaTemplateCloner 
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		// TODO: implement!!!
+		@SuppressWarnings("unchecked")
+		List<ConfigurableModel> cmList = engine.getSession().createCriteria(ConfigurableModel.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
+		monitor.beginTask(Messages.ConnectCtTemplateCloner_TaskName, cmList.size());
+		
+		for (ConfigurableModel cm : cmList) {
+			monitor.subTask(MessageFormat.format(Messages.ConnectCtTemplateCloner_CloneAlerts, cm.getName()));
+			cloneAlertsForCm(engine, cm, monitor);
+			monitor.worked(1);
+		}
+	}
 
+	private void cloneAlertsForCm(ConservationAreaClonerEngine engine, ConfigurableModel cm, IProgressMonitor monitor) throws Exception {
+		@SuppressWarnings("unchecked")
+		List<ConnectAlert> alerts = engine.getSession().createCriteria(ConnectAlert.class).add(Restrictions.eq("model", cm)).list(); //$NON-NLS-1$
+		if (!alerts.isEmpty()) {
+			ConfigurableModel cmClone = (ConfigurableModel) engine.getNewConservationItem(cm);
+			for (ConnectAlert a : alerts) {
+				ConnectAlert clone = new ConnectAlert();
+				clone.setModel(cmClone);
+				clone.setAttrubute((CmAttribute)engine.getNewConservationItem(a.getAttrubute()));
+				clone.setAlertItem(engine.getNewConservationItem(a.getAlertItem()));
+				clone.setType(a.getType());
+				clone.setLevel(a.getLevel());
+
+				engine.getSession().save(clone);
+			}
+			engine.getSession().flush();
+		}
 	}
 
 }

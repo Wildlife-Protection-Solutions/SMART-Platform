@@ -131,6 +131,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 				clone.setImageFile(listItem.getImageFile());
 			}
 			engine.getSession().saveOrUpdate(clone);
+			engine.addConservationItemMapping(listItem, clone);
 		}
 		engine.getSession().flush();
 	}
@@ -166,6 +167,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			}
 			clone.setChildren(new ArrayList<CmAttributeTreeNode>());
 			engine.getSession().saveOrUpdate(clone);
+			engine.addConservationItemMapping(treeItem, clone);
 			
 			//at this point we don't necessarily have the
 			//parent cloned; so we need to set up
@@ -220,7 +222,6 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			engine.addConservationItemMapping(att, clonedAtt);
 		}
 		
-		
 		//add to parent
 		if (clonedParent != null){
 			clonedNode.setParent(clonedParent);
@@ -228,7 +229,9 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		}else{
 			clonedModel.getNodes().add(clonedNode);
 		}
-		
+		engine.getSession().flush();
+		engine.addConservationItemMapping(toCopy, clonedNode);
+
 		//process kids
 		for (CmNode kid : toCopy.getChildren()){
 			processNode(clonedNode,kid,clonedModel);

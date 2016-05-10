@@ -51,5 +51,15 @@
             clazz="org.wcs.smart.connect.cybertracker.alert.ConnectCtAlertExtension">
       </alertExtension>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.connect.cybertracker.ConnectCtTemplateCloner"
+            id="org.wcs.smart.connect.cybertracker.templateCloner">
+         <require
+               id="org.wcs.smart.dataentry.cmTemplateCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>

@@ -42,6 +42,8 @@ public class Messages extends NLS {
 	public static String ConnectCtAlertProvider_NoAlertConfigInfo_Title;
 	public static String ConnectCtDatabaseUpgrader_UpgageTaskName;
 	public static String ConnectCtHibernateManager_LoadAlertsError;
+	public static String ConnectCtTemplateCloner_CloneAlerts;
+	public static String ConnectCtTemplateCloner_TaskName;
 	public static String RemoveConnectCtJob_Title;
 	public static String RemoveConnectCtJob_UninstallError;
 	static {
