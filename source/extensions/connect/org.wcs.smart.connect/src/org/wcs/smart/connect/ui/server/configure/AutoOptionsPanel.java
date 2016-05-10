@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
-import org.wcs.smart.connect.internal.server.replication.AutoReplicationStartUp;
+import org.wcs.smart.connect.internal.server.replication.AutoReplicationManager;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectServerOption.ConnectionOption;
@@ -73,8 +73,6 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 	private Label lblMinutes, lblMinutes2, lblPackageSize;
 	private Text txtMinutes, txtPackageSize;
 	private ControlDecoration cdMinutes, cdPackageSize;
-	
-	private boolean isAutoReplicationPrev;
 	
 	@Override
 	public String getName(){
@@ -367,9 +365,7 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 	}
 	
 	@Override
-	public void updateServer(ConnectServer server){
-		isAutoReplicationPrev = ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(server);
-		
+	public void updateServer(ConnectServer server){		
 		server.setOption(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_SHUTDOWN.name(), ((Boolean)btnDownShutDown.getSelection()).toString());
 		server.setOption(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_STARTUP.name(), ((Boolean)btnDownStartUp.getSelection()).toString());
 		server.setOption(ConnectServerOption.ConnectionOption.UPLOAD_ON_SHUTDOWN.name(), ((Boolean)btnUploadShutDown.getSelection()).toString());
@@ -403,11 +399,14 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 
 	@Override
 	public void afterSave(ConnectServer server){
+		
 		boolean isAutoReplication = ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(server);
-		if (!isAutoReplicationPrev && isAutoReplication){
-			//auto replication state has been updated; we need to initiate auto replication
+		if (isAutoReplication){
 			int delay = ConnectServerOption.ConnectionOption.SYNC_MINUTE.getIntegerValue(server);
-			AutoReplicationStartUp.INSTANCE.enableAutoReplication(delay);
+			AutoReplicationManager.INSTANCE.schedule(delay * 60 * 1000l);
+		}else{
+			//turn it off
+			AutoReplicationManager.INSTANCE.disable();
 		}
 	}
 

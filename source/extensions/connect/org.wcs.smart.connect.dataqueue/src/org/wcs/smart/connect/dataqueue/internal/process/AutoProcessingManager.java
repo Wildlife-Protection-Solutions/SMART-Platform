@@ -97,6 +97,7 @@ public enum AutoProcessingManager {
 		lastStatus.updateStatus(AutoProcessingStatus.Status.OK, null);
 		statusModified();
 		long delaysec = delayMinutes * 60 * 1000l;
+		autoReplication.cancel();
 		autoReplication.schedule(delaysec);
 	}
 	
