@@ -338,8 +338,8 @@ public class Messages extends NLS {
 	public static String PatrolLegLeaderChangeDialog_DialogMessage;
 	public static String PatrolLegLeaderChangeDialog_DialogTitle;
 	public static String PatrolLegLeaderChangeDialog_DialogTitle2;
-	public static String PatrolLegLeaderChangeDialog_Error_StartDateAfterStart;
-	public static String PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd;
+	public static String PatrolLegLeaderChangeDialog_Error_StartDateAfterStart1;
+	public static String PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd1;
 	public static String PatrolLegLeaderChangeDialog_LegIdPostfix;
 	public static String PatrolLegLeaderChangeDialog_NewLeaderRequired;
 	public static String PatrolLegLeaderChangeDialog_OpCustome;
