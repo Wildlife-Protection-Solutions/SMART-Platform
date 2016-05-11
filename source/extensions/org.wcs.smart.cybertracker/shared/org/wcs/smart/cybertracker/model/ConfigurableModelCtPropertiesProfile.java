@@ -79,6 +79,19 @@ public class ConfigurableModelCtPropertiesProfile {
 		this.profile = profile;
 	}
 
+	@Override
+	public boolean equals(Object other){
+		if (other instanceof ConfigurableModelCtPropertiesProfile){
+			return ((ConfigurableModelCtPropertiesProfile)other).id.equals(this.id);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return id.hashCode();
+	}
+	
 	/**
 	 * Primary key for {@link ConfigurableModelCtPropertiesProfile}
 	 * 
@@ -99,6 +112,19 @@ public class ConfigurableModelCtPropertiesProfile {
 		}
 		public void setModel(ConfigurableModel model) {
 			this.model = model;
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (other instanceof ConfigurableModelCtPropertiesProfilePk){
+				return ((ConfigurableModelCtPropertiesProfilePk)other).getModel().equals(this.model);
+			}
+			return false;
+		}
+		
+		@Override
+		public int hashCode(){
+			return model.hashCode();
 		}
 	}
 	

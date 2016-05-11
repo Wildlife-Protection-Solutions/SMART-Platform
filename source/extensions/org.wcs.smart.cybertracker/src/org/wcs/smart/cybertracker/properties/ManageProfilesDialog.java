@@ -55,7 +55,6 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -75,8 +74,11 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	private Button btnEdit;
 	private Button btnDelete;
 	
-	public ManageProfilesDialog(Shell parent) {
+	private Session session;
+	
+	public ManageProfilesDialog(Shell parent, Session session) {
 		super(parent, Messages.ManageProfilesDialog_Title);
+		this.session = session;
 	}
 
 	@Override
@@ -114,6 +116,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		
 		btnCreate = new Button(btnCmp, SWT.PUSH);
 		btnCreate.setText(Messages.ManageProfilesDialog_Button_Create);
+		btnCreate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnCreate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -123,6 +126,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 
 		btnEdit = new Button(btnCmp, SWT.PUSH);
 		btnEdit.setText(Messages.ManageProfilesDialog_Button_Edit);
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -132,6 +136,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		
 		btnDelete = new Button(btnCmp, SWT.PUSH);
 		btnDelete.setText(Messages.ManageProfilesDialog_Button_Delete);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -203,16 +208,14 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ManageProfilesDialog_DeleteTask_Name, 1);
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
+					session.beginTransaction();
 					try {
-						CyberTrackerHibernateManager.deleteProfile(s, p);
-						s.getTransaction().commit();							
+						CyberTrackerHibernateManager.deleteProfile(session, p);
+						session.getTransaction().commit();							
 					}catch (Exception ex){
-						s.getTransaction().rollback();
+						session.getTransaction().rollback();
 						SmartPlugIn.displayLog(Messages.ManageProfilesDialog_DeleteTask_Error, ex);
 					} finally {
-						s.close();
 						monitor.done();
 					}
 				}
@@ -238,16 +241,14 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ManageProfilesDialog_LoadProfileList_Task, 1);
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
+					session.beginTransaction();
 					try {
-						profileList.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(s));
+						profileList.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
 						Collections.sort(profileList, new CtProfileDefaultNameComparator());
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(Messages.ManageProfilesDialog_LoadProfileList_Error, ex);
 					} finally {
-						s.getTransaction().rollback();
-						s.close();
+						session.getTransaction().rollback();
 					}
 				}
 			});
