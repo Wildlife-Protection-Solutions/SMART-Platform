@@ -25,7 +25,9 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.cybertracker.properties.ManageProfilesDialog;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Handler for opening dialog to edit properties used be default for CyberTracker application.
@@ -37,8 +39,13 @@ public class CyberTrackerPropertiesHandler {
 
 	@Execute
 	public void execute (Shell shell) {
-		Dialog dialog = new ManageProfilesDialog(shell);
-		dialog.open();
+		Session session = HibernateManager.openSession();
+		try{
+			Dialog dialog = new ManageProfilesDialog(shell, session);
+			dialog.open();
+		}finally{
+			session.close();
+		}
 	}
 
 	public static class CyberTrackerPropertiesHandlerWrapper extends DIHandler<CyberTrackerPropertiesHandler>{
