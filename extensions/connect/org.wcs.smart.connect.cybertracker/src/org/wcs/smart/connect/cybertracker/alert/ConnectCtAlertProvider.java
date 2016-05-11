@@ -64,12 +64,16 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	
 	public ConnectCtAlertProvider(ConfigurableModel model) {
 		caId = model.getConservationArea().getUuid().toString();
-		List<ConnectAlert> alerts = loadAlerts(model);
-		lookup = new AlertLookup(alerts);
-		
-		if (!lookup.isEmpty()) {
-			//we have at lease one alert configured for this model, so we need to init server related fields
-			initConnectFields();
+		if (model.getUuid() != null){
+			List<ConnectAlert> alerts = loadAlerts(model);
+			lookup = new AlertLookup(alerts);
+			if (!lookup.isEmpty()) {
+				//we have at lease one alert configured for this model, so we need to init server related fields
+				initConnectFields();
+			}
+		}else{
+			//this case we are using the data model with has no alerts
+			lookup = new AlertLookup(Collections.emptyList());
 		}
 	}
 	
