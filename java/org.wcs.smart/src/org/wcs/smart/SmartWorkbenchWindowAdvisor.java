@@ -101,7 +101,10 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			}
 			
 			//close database connection
-			HibernateManager.endSessionFactory(false);
+			try {
+				HibernateManager.endSessionFactory(false, true);
+			} catch (Exception e) {
+			}
 			
 		}
 	};

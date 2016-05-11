@@ -8,7 +8,7 @@
             locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.surveyseparator">
          <command
                commandId="org.wcs.smart.cybertracker.survey.export"
-               label="%command.cybertracker.survey.export.label"
+               label="%command.cybertracker.survey.export.label1"
                style="push">
          </command>
       </menuContribution>
@@ -26,7 +26,7 @@
             locationURI="toolbar:org.wcs.smart.cybertracker">
          <command
                commandId="org.wcs.smart.cybertracker.survey.export"
-               label="%command.cybertracker.survey.export.label"
+               label="%command.cybertracker.survey.export.label1"
                style="push">
             <visibleWhen
                   checkEnabled="false">

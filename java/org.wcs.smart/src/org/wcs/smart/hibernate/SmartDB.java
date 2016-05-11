@@ -190,7 +190,7 @@ public class SmartDB {
 	 */
 	public static void setConservationAreaConfiguration(Employee user, String plainTextPassword,
 			ConservationArea ca, 
-			ConservationAreaConfiguration configuration){
+			ConservationAreaConfiguration configuration) throws Exception{
 		currentCa = ca;
 		if (currentEmployee == null || !currentEmployee.equals(user)){
 			//new user

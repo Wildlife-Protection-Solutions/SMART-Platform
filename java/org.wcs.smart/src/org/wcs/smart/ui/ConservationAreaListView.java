@@ -127,9 +127,13 @@ public class ConservationAreaListView {
 					}
 					
 					ConservationAreaConfiguration newConfig = dialog.getNewConfiguration();
-					SmartDB.setConservationAreaConfiguration(newConfig.getCcaaUser(), 
+					try{
+						SmartDB.setConservationAreaConfiguration(newConfig.getCcaaUser(), 
 							SmartDB.getPlainTextPassword(),
 							SmartDB.getCurrentConservationArea(), newConfig);
+					}catch (Exception ex){
+						SmartPlugIn.displayLog(ex.getMessage(), ex);
+					}
 					eventManager.send(SmartDB.CCAA_CONFIGURATION_MODIFIED, newConfig);
 					
 					

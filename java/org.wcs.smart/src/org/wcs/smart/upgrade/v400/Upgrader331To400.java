@@ -86,7 +86,7 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 		/* do a hard derby upgrade to version 10.12.1.1 */ 
 		try{
 			//disconnect 
-			HibernateManager.endSessionFactory(true);
+			HibernateManager.endSessionFactory(true, true);
 			//perform hard upgrade
 			DriverManager.getConnection(dbUrl + ";create=false;upgrade=true;user=" + DbUser.ADMIN.getUserName() + ";password=" + DbUser.ADMIN.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$ 
 			DerbyHibernateExtensions.shutDown(true);

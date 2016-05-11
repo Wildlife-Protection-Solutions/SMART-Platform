@@ -50,7 +50,10 @@ public class StartUpDialog extends InitializeDialog {
 	 */
 	@Override
 	public void onCancel() {
-		HibernateManager.endSessionFactory(false);
+		try {
+			HibernateManager.endSessionFactory(false, true);
+		} catch (Exception e) {
+		}
 		System.exit(0);
 	}
 

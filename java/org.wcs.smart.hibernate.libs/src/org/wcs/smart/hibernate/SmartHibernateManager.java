@@ -97,20 +97,12 @@ public class SmartHibernateManager {
 	 * 
 	 * @param username
 	 * @param password
+	 * @throws Exception 
 	 */
-	public static void setUserName(String username, String password){
+	public static void setUserName(String username, String password) throws Exception{
 		userName = username;
 		passWord = password;
-		synchronized (sessionFactoryLock) {
-			if (sessionFactory != null){
-				try{
-					sessionFactory.close();
-				}catch (Exception ex){
-					ex.printStackTrace();
-				}
-			}
-			sessionFactory = null;	
-		}
+		endSessionFactory(false);
 	}
 	
 	/**
@@ -202,9 +194,10 @@ public class SmartHibernateManager {
 			}
 		}
 		//ensure all sessions are closed
-		SmartHibernateManager.endSessionFactory();
+		SmartHibernateManager.endSessionFactoryNoLock();
 		if (username != null){
-			setUserName(username, password);
+			userName = username;
+			passWord = password;
 		}
 		
 		//open new session
@@ -221,8 +214,9 @@ public class SmartHibernateManager {
 	public static void unlockDatabase(String username, String password){
 		thisLock.release();
 		if (username != null){
-			SmartHibernateManager.endSessionFactory();
-			setUserName(username, password);
+			SmartHibernateManager.endSessionFactoryNoLock();
+			userName = username;
+			passWord = password;
 		}
 	}
 	
@@ -282,18 +276,11 @@ public class SmartHibernateManager {
 				}	
 			});
 		}
-//		printSessionCount();
 		return session;
 		
 	}
 	
-	public static void printSessionCount(){
-		System.out.println("SESSION COUNT: " + allSessions.size());
-	}
-	/**
-	 * Closes the current session factory.
-	 */
-	protected static void endSessionFactory(){
+	protected static void endSessionFactoryNoLock(){
 		synchronized (sessionFactoryLock) {
 			if (sessionFactory != null){
 				sessionFactory.close();
@@ -302,6 +289,30 @@ public class SmartHibernateManager {
 		}
 	}
 	
+	/**
+	 * Closes the current session factory.
+	 * @param force true if the session factory should close even if active session exists
+	 */
+	protected static void endSessionFactory(boolean force) throws Exception{
+		thisLock.acquire();
+		try{
+			int cnt = 0;
+			while(allSessions.size() > 0 && cnt < SESSION_WAIT_COUNT){
+				//wait for thread to be closed
+				try {
+					Thread.sleep( SESSION_CLOSE_WAIT );
+				} catch (InterruptedException e) {}
+				cnt++;
+			}
+			if (allSessions.size() > 0 && !force){
+				throw new Exception("Could not end current database session.  There are still active transactions.");
+			}
+			
+			endSessionFactoryNoLock();
+		}finally{
+			thisLock.release();
+		}
+	}
 	
 	/**
 	 * @return gets all hibernate mappings

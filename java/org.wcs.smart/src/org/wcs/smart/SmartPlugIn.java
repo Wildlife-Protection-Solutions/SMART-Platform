@@ -282,7 +282,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * Checks the current database version against the expected version.  If an excpetion
+	 * Checks the current database version against the expected version.  If an exception
 	 * is thrown, the calling function should terminate the application.
 	 *  
 	 * @return
