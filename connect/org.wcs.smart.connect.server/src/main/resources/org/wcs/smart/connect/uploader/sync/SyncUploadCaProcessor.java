@@ -98,7 +98,11 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				logger.log(Level.SEVERE, ex.getMessage(), ex);
-				session.getTransaction().rollback();
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex2){
+					logger.log(Level.SEVERE, ex2.getMessage(), ex2);	
+				}
 				
 				session.beginTransaction();
 				item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
