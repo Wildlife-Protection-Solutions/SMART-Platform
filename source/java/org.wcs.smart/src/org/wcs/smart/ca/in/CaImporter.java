@@ -104,7 +104,7 @@ public class CaImporter {
 		//TODO: consider doing a disk space check to ensure
 		//enough disk space for this operation
 		monitor.subTask(Messages.CaImporter_Progress_BackupCurrent);
-		HibernateManager.endSessionFactory(true);
+		HibernateManager.endSessionFactory(true, false);
 		File dbBackup = backup();
 		monitor.worked(10);
 		
@@ -139,7 +139,7 @@ public class CaImporter {
 					try{
 						session.close();
 					}catch (Exception ex2){}
-					HibernateManager.endSessionFactory(true);
+					HibernateManager.endSessionFactory(true, true);
 					restoreBackup(dbBackup);
 				}catch (Exception e){
 					throw new Exception(Messages.CaImporter_Error_ImportErrorBackupNoRestored + ex.getLocalizedMessage(), e);
@@ -168,7 +168,7 @@ public class CaImporter {
 				SmartPlugIn.log(Messages.CaImporter_Error_CouldNotCloseSession, ex);
 			}
 			/* disconnect from admin user */
-			HibernateManager.endSessionFactory(true);
+			HibernateManager.endSessionFactory(true, true);
 			monitor.done();
 		}
 		

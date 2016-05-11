@@ -91,7 +91,7 @@ public class SyncMultipleCaWizard extends Wizard {
 						List<CaUserDetails> details = validateCaUsers(activeShell, allCas, username, password);
 						monitor.worked(1 + (allCas.size() - details.size()));
 						
-						HibernateManager.endSessionFactory(true);
+						HibernateManager.endSessionFactory(true, false);
 						HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 						
 						try{
@@ -106,9 +106,11 @@ public class SyncMultipleCaWizard extends Wizard {
 								}
 							}
 						}finally{
-							HibernateManager.endSessionFactory(true);
+							HibernateManager.endSessionFactory(true, true);
 							HibernateManager.setUserName(SmartDB.DbUser.LOGIN.getUserName(), SmartDB.DbUser.LOGIN.getPassword());	
 						}
+					}catch (Exception ex){
+						errors.add(ex.getMessage());
 					}finally{
 						monitor.done();
 					}

@@ -48,6 +48,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -259,18 +260,22 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 			return; // nothing to initialize
 
 		String queryText = dataSetDesign.getQueryText();
-		if (queryText == null)
-			return; // nothing to initialize
-
-		// initialize control
-		// m_queryTextField.setText( queryText );
+		if (queryText != null && !queryText.isEmpty()){
+			Map<TableCategory, List<SmartBirtTable>> tables = (Map<TableCategory, List<SmartBirtTable>>) smartTables.getInput();
+			SmartBirtTable selection = null;
+			for (List<SmartBirtTable> table : tables.values()){
+				for (SmartBirtTable t : table){
+					if (t.getTableKey().equals(queryText)){
+						selection = t;
+						break;
+					}
+				}
+				if (selection != null) break;
+			}
+			if (selection != null) smartTables.setSelection(new StructuredSelection(selection));
+		}
 		validateData();
 		setMessage(DEFAULT_MESSAGE);
-
-		/*
-		 * To optionally honor the request for an editable or read-only design
-		 * session, use isSessionEditable();
-		 */
 	}
 
 	/**

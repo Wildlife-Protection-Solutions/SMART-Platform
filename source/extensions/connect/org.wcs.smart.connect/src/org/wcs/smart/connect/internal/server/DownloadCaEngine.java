@@ -249,14 +249,13 @@ public class DownloadCaEngine {
 	}
 	
 	private boolean deleteCa(final ConservationArea ca, final Shell activeShell){
-		//we don't revert back here; that will be done after download complete
-		HibernateManager.endSessionFactory(true);
-		HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
-		
 		//delete ca
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		final boolean[] cont = new boolean[]{true};
 		try{
+			//we don't revert back here; that will be done after download complete
+			HibernateManager.endSessionFactory(true, false);
+			HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -281,7 +280,7 @@ public class DownloadCaEngine {
 	
 	private boolean deleteCa(final ConservationArea ca, final IProgressMonitor monitor) throws Exception{
 		//we don't revert back here; that will be done after download complete
-		HibernateManager.endSessionFactory(true);
+		HibernateManager.endSessionFactory(true, false);
 		HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 		
 		monitor.beginTask(Messages.DownloadCaEngine_DeleteTaskName, 1);

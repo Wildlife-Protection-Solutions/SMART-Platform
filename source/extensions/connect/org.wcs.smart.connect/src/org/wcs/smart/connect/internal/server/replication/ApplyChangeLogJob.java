@@ -482,8 +482,13 @@ public class ApplyChangeLogJob extends Job {
 								Collections.singleton(currentEmployee.getConservationArea()),
 								afterDownload,
 								Collections.singleton(afterDownload), s);
-						SmartDB.setConservationAreaConfiguration(afterDownload, 
+						try{
+							SmartDB.setConservationAreaConfiguration(afterDownload, 
 								password, currentEmployee.getConservationArea(), cc);
+						}catch (Exception ex){
+							ConnectPlugIn.displayLog(ex.getMessage(), ex);
+							cont[0] = false;
+						}
 					}
 				});
 			}

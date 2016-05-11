@@ -85,7 +85,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		/* do a hard derby upgrade */ 
 		try{
 			//disconnect 
-			HibernateManager.endSessionFactory(true);
+			HibernateManager.endSessionFactory(true, true);
 			//perform hard upgrade
 			DriverManager.getConnection(dbUrl + ";create=false;upgrade=true;user=" + DbUser.ADMIN.getUserName() + ";password=" + DbUser.ADMIN.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$ 
 			DerbyHibernateExtensions.shutDown(true);

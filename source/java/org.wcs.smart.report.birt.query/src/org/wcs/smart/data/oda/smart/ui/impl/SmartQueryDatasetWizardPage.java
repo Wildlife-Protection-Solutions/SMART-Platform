@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -46,6 +47,7 @@ import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSess
 import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -58,6 +60,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
@@ -83,6 +86,8 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	private TreeViewer queryTree;
 	private boolean hideUserQueries = false;
 	
+	private UUID init;
+	
 	private Job loadQueriesJob = new Job(Messages.CustomDataSetWizardPage_LoadQueryJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -92,6 +97,19 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 			data.put(QueryListContentProvider.FOLDER_KEY, SavedQueryTree
 					.getInstance().getFolders());
 
+			//find the query to select by default
+			QueryEditorInput initialValue = null;
+			if (init != null){
+				for (List<QueryEditorInput> items : SavedQueryTree.getInstance().getQueries().values()){
+					for (QueryEditorInput i : items){
+						if (i.getUuid().equals(init)){
+							initialValue = i;
+							break;
+						}
+					}
+					if (initialValue != null) break;
+				}
+			}
 			
 			if (hideUserQueries){
 				//shared report should only have shared queries
@@ -107,12 +125,15 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 				}
 				data.put(QueryListContentProvider.FOLDER_KEY, folders2);
 			}
-			
+			final QueryEditorInput ii = initialValue;
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					queryTree.setInput(data);
-					
+					if (ii != null){
+						queryTree.setSelection(new StructuredSelection(ii));
+					}
+					validateData();
 				}
 			});
 
@@ -187,7 +208,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 				validateData();
 			}
 		});
-		loadQueriesJob.schedule();
+		
 		setPageComplete(false);
 		return composite;
 	}
@@ -196,29 +217,18 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 * Initializes the page control with the last edited data set design.
 	 */
 	private void initializeControl() {
-		/*
-		 * To optionally restore the designer state of the previous design
-		 * session, use getInitializationDesignerState();
-		 */
-
 		// Restores the last saved data set design
 		DataSetDesign dataSetDesign = getInitializationDesign();
 		if (dataSetDesign == null)
 			return; // nothing to initialize
 
 		String queryText = dataSetDesign.getQueryText();
-		if (queryText == null)
-			return; // nothing to initialize
-
-		// initialize control
-		// m_queryTextField.setText( queryText );
+		if (queryText != null && !queryText.isEmpty()){
+			init = AbstractSmartBirtQuery.parseQueryText(queryText).getUuid();			
+		}
 		validateData();
 		setMessage(DEFAULT_MESSAGE);
-
-		/*
-		 * To optionally honor the request for an editable or read-only design
-		 * session, use isSessionEditable();
-		 */
+		loadQueriesJob.schedule();
 	}
 
 	/**

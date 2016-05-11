@@ -284,6 +284,18 @@
             </control>
          </toolbar>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.connect.toolbar">
+            <command
+                  commandId="org.wcs.smart.connect.server.changelog.sync"
+                  style="push"
+                  tooltip="Synchronize data with Connect">
+            </command>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">

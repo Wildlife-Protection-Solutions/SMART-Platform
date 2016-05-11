@@ -233,7 +233,7 @@ public class DerbyRestoreEngine {
 		
 		/* shut down the database */
 		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ShutDown);
-		HibernateManager.endSessionFactory(true);
+		HibernateManager.endSessionFactory(true, false);
 		monitor.worked(1);
 
 		/* connect to the extractedDb and verify version */
@@ -248,7 +248,7 @@ public class DerbyRestoreEngine {
 			validateConfiguration(versions);
 			upgrader.postProcess(new SubProgressMonitor(monitor, 1));
 		}catch (Exception ex){
-			HibernateManager.endSessionFactory(true);
+			HibernateManager.endSessionFactory(true, true);
 			String cleanUpErr = cleanUp(new File[] { temp });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
@@ -259,7 +259,7 @@ public class DerbyRestoreEngine {
 			}
 			throw ex;
 		}finally{
-			HibernateManager.endSessionFactory(true);	
+			HibernateManager.endSessionFactory(true, true);	
 			//restore database parameter to main db
 			SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());

@@ -258,9 +258,10 @@ public class HibernateManager extends SmartHibernateManager{
 	 * 
 	 * @param reconnect should be true if the application
 	 * is going to re-connect to the database.
+	 * @throws Exception 
 	 */
-	public static void endSessionFactory(boolean reconnect){
-		SmartHibernateManager.endSessionFactory();
+	public static void endSessionFactory(boolean reconnect, boolean force) throws Exception{
+		SmartHibernateManager.endSessionFactory(force);
 		DerbyHibernateExtensions.shutDown(reconnect);
 	}
 	

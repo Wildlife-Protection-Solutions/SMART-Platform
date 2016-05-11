@@ -245,7 +245,10 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private void handleButtonCancelWidgetSelected() {
 		// Abort the loading of the RCP application
 		getSplash().getDisplay().close();
-		HibernateManager.endSessionFactory(false);
+		try {
+			HibernateManager.endSessionFactory(false, true);
+		} catch (Exception e) {
+		}
 		System.exit(0);		
 	}
 	
