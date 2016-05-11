@@ -27,7 +27,6 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.Assert;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
@@ -135,10 +134,13 @@ public class CyberTrackerHibernateManager {
 	 * Delete a profile and related records
 	 * @throws Exception 
 	 */
+	@SuppressWarnings("unchecked")
 	public static void deleteProfile(Session session, CyberTrackerPropertiesProfile profile) {
-		Query q = session.createQuery("delete from ConfigurableModelCtPropertiesProfile where profile = :p"); //$NON-NLS-1$
-		q.setParameter("p", profile); //$NON-NLS-1$
-		q.executeUpdate();
+		List<ConfigurableModelCtPropertiesProfile> usedProfiles = session.createCriteria(ConfigurableModelCtPropertiesProfile.class)
+				.add(Restrictions.eq("profile", profile)).list(); //$NON-NLS-1$
+		for (ConfigurableModelCtPropertiesProfile ct : usedProfiles){
+			session.delete(ct);
+		}
 		session.delete(profile);
 	}
 	
@@ -153,10 +155,13 @@ public class CyberTrackerHibernateManager {
 		if (configurableModel.getUuid() == null) {
 			return createDefaultCmProfile(session, configurableModel);
 		}
-		Query q = session.createQuery("from ConfigurableModelCtPropertiesProfile where id.model = :cm"); //$NON-NLS-1$
-		q.setParameter("cm", configurableModel); //$NON-NLS-1$
-		ConfigurableModelCtPropertiesProfile cm2ctp = (ConfigurableModelCtPropertiesProfile) q.uniqueResult();
-		return cm2ctp != null ? cm2ctp : createDefaultCmProfile(session, configurableModel);
+		ConfigurableModelCtPropertiesProfile item = (ConfigurableModelCtPropertiesProfile)session
+				.createCriteria(ConfigurableModelCtPropertiesProfile.class)
+				.add(Restrictions.eq("id.model", configurableModel)).uniqueResult(); //$NON-NLS-1$
+		if (item == null){
+			return createDefaultCmProfile(session, configurableModel);
+		}
+		return item;
 	}
 
 	private static ConfigurableModelCtPropertiesProfile createDefaultCmProfile(Session session, ConfigurableModel configurableModel) {

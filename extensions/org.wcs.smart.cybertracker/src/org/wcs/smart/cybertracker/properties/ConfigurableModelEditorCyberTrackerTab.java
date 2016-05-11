@@ -88,7 +88,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	private void loadProfile(){
 		CyberTrackerPropertiesProfile prevSelection = getSelectedProfile();
 		
-		Session s = dialog.getSession();// HibernateManager.openSession();
+		Session s = dialog.getSession();
 		cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(s, dialog.getModel());
 			
 		profileList = CyberTrackerHibernateManager.getPropertiesProfiles(s);
@@ -213,7 +213,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 
 	protected void profileChanged() {
 		final CyberTrackerPropertiesProfile p = getSelectedProfile();
-		lblProfileName.setText(MessageFormat.format("''{0}'' Profile Details:", p.getName()));
+		lblProfileName.setText(MessageFormat.format(Messages.ConfigurableModelEditorCyberTrackerTab_ProfileDetailsMessage, p.getName()));
 		Job j = new Job(Messages.ConfigurableModelEditorCyberTrackerTab_profileLoadJobname){
 
 			@Override
@@ -254,7 +254,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	}
 
 	protected void manageProfiles() {
-		Dialog d = new ManageProfilesDialog(dialog.getShell());
+		Dialog d = new ManageProfilesDialog(dialog.getShell(), dialog.getSession());
 		d.open();
 		loadProfile();
 	}
