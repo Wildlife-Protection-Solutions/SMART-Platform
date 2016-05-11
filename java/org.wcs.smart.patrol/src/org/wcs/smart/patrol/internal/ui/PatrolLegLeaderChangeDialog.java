@@ -178,12 +178,12 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog implements Sele
 		}
 		if (newStart.before(existingLeg.getStartDate())){
 			error = MessageFormat.format(
-					Messages.PatrolLegLeaderChangeDialog_Error_StartDateAfterStart,
+					Messages.PatrolLegLeaderChangeDialog_Error_StartDateAfterStart1,
 					new Object[]{ dateTimeFormatter.format(existingLeg.getStartDate())}) ;
 			
 		}else if (newStart.after(existingLeg.getEndDate())){
 			error = MessageFormat.format(
-					Messages.PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd,
+					Messages.PatrolLegLeaderChangeDialog_Error_StartDateBeforeEnd1,
 					new Object[]{ dateTimeFormatter.format(existingLeg.getEndDate()) });
 		}
 
