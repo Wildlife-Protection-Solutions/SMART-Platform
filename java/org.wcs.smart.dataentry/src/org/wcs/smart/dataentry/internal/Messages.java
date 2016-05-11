@@ -174,6 +174,7 @@ public class Messages extends NLS {
 	public static String EditTreeDialog_MessageDefault;
 	public static String EditTreeDialog_NewGroup;
 	public static String EditTreeDialog_NewGroupTooltip;
+	public static String EditTreeDialog_NoPropertiesToDisplay;
 	public static String EditTreeDialog_TreeNodeProperties;
 	public static String ImageSelectionControl_AllImages;
 	public static String ImageSelectionControl_BitmapFiles;

@@ -71,7 +71,6 @@ import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
@@ -99,6 +98,9 @@ public class EditTreeDialog extends TitleAreaDialog {
 	private DisplayModeComboViewer modeViewer;
 	private ImageSelectionControl imageControl;
 	private org.eclipse.swt.widgets.Label imgControlLabel;
+	private org.eclipse.swt.widgets.Label lblNoTreeProps;
+	
+	private Group treePropsGroup;
 
 	private NamedItem dmNode;
 	private CmAttributeTreeNode cmNode;
@@ -206,7 +208,6 @@ public class EditTreeDialog extends TitleAreaDialog {
 					if (type instanceof CmAttributeTreeNode){
 						enableItem((CmAttributeTreeNode)type, enable);
 					}
-					
 				}
 				itemViewer.refresh();
 				updateEnableButtonText();
@@ -222,13 +223,15 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnPanel.setLayout(gla);
 		btnPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-		Group right = new Group(comp, SWT.NONE);
-		right.setLayout( new GridLayout());
-		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		right.setText(Messages.EditTreeDialog_TreeNodeProperties);
+		treePropsGroup = new Group(comp, SWT.NONE);
+		treePropsGroup.setLayout( new GridLayout());
+		treePropsGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		treePropsGroup.setText(Messages.EditTreeDialog_TreeNodeProperties);
 
-		createNameTable(right);
-		nodeConfigCmp = createNodeConfigControls(right);
+		lblNoTreeProps = new org.eclipse.swt.widgets.Label(treePropsGroup, SWT.NONE);
+		lblNoTreeProps.setText(Messages.EditTreeDialog_NoPropertiesToDisplay);
+		createNameTable(treePropsGroup);
+		nodeConfigCmp = createNodeConfigControls(treePropsGroup);
 		nodeConfigCmp.setVisible(false);
 		
 		comp.setWeights(new int[]{28,37,35});
@@ -379,7 +382,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				Object x = ((StructuredSelection)tree.getSelection()).getFirstElement();
+				IStructuredSelection selection = (IStructuredSelection)tree.getSelection();
+				Object x = selection.getFirstElement();
 				AttributeTreeNode currentNode = null;
 				CmAttributeTreeNode currentCmNode = null;
 				if (x instanceof CmAttributeTreeNode) {
@@ -521,7 +525,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		});
 		
 		nameTable.setInput(SmartDB.getCurrentConservationArea().getLanguages());
-		nameTable.getTable().setEnabled(false);
+		nameTable.getTable().setVisible(false);
 	}
 
 	private Composite createNodeConfigControls(Composite parent) {
@@ -539,16 +543,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (cmNode == null) {
-					//we are configuring a root of the tree; its configuration is stored as a part of attribute
-					attribute.setCurrentDisplayMode(modeViewer.getSelectedDisplayMode());
-					//we need to save either configurable model global setting (for default configuration)
-					//or attribute option (for custom configuration), this is way we try to save both below
-					attribute.getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
-					editModel.getAttributeSettings().get(attribute.getAttribute());
-				} else {
-					cmNode.setDisplayMode(modeViewer.getSelectedDisplayMode());
-				}
+				handleDisplayModeChanged();
 			}
 		});
 		
@@ -583,38 +578,95 @@ public class EditTreeDialog extends TitleAreaDialog {
 	 * @param dmNode
 	 * @param cmNode
 	 */
-	public void setCurrentSelection(NamedItem dmNode, CmAttributeTreeNode cmNode){
+	public void setCurrentSelection(NamedItem dmNode, CmAttributeTreeNode cmNode) {
+		boolean isSingleElement = ((IStructuredSelection)itemViewer.getSelection()).size() == 1;
+
 		this.dmNode = dmNode;
 		this.cmNode = cmNode;
 		nameTable.refresh();
 		
-		nameTable.getTable().setEnabled(cmNode != null);
+		boolean nameTableVisible = cmNode != null && isSingleElement;
+		nameTable.getTable().setVisible(nameTableVisible);
+		changeLayoutDataExclude(nameTable.getTable(), !nameTableVisible);
+		
 		btnEnable.setEnabled(cmNode != null);
 		btnRemove.setEnabled(cmNode != null);
 		updateEnableButtonText();
-		nodeConfigCmp.setVisible(itemViewer.getSelection() != null && !itemViewer.getSelection().isEmpty());
+		
+		boolean nodeConfigCmpVisible = itemViewer.getSelection() != null && !itemViewer.getSelection().isEmpty();
+		nodeConfigCmp.setVisible(nodeConfigCmpVisible);
+		changeLayoutDataExclude(nodeConfigCmp, !nodeConfigCmpVisible);
+		
 		updateDisplayModeControl();
-		imageControl.setVisible(cmNode != null);
-		imgControlLabel.setVisible(cmNode != null);
+		imageControl.setVisible(cmNode != null && isSingleElement);
+		imgControlLabel.setVisible(cmNode != null && isSingleElement);
 		imageControl.redrawCanvas();
+		
+		boolean noPropsVisible = !nameTableVisible && !nodeConfigCmpVisible;
+		lblNoTreeProps.setVisible(noPropsVisible);
+		changeLayoutDataExclude(lblNoTreeProps, !noPropsVisible);
+		
+		treePropsGroup.layout(true, true);
 	}
 
-	private void updateDisplayModeControl() {
-		if (cmNode == null) {
-			//value for root
-			modeViewer.setSelection(new StructuredSelection(attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
-		} else {
-			modeViewer.setSelection(new StructuredSelection(cmNode.getDisplayMode() != null ? cmNode.getDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
+	private void changeLayoutDataExclude(Control control, boolean value) {
+		if (control.getLayoutData() instanceof GridData) {
+			GridData gd = (GridData)control.getLayoutData();
+			gd.exclude = value;
 		}
-		
+	}
+	
+	private void updateDisplayModeControl() {
+		//we display a mode value in dropdown only if it is identical for all selected items,
+		//otherwise empty selection is displayed, but we still allow assigning new value
+		DisplayMode mode = null;
+		IStructuredSelection selection = (IStructuredSelection) itemViewer.getSelection();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			Object obj = iterator.next();
+			DisplayMode objMode = fetchDisplayMode(obj);
+			if (mode != objMode) {
+				if (mode != null) {
+					//we have two different modes among selected objects -> do not display any value in dropdown
+					mode = null;
+					break;
+				} else {
+					//first iteration
+					mode = objMode;
+				}
+			}
+		}
+		modeViewer.setSelection(mode != null ? new StructuredSelection(mode) : null);
+	}
+	
+	private DisplayMode fetchDisplayMode(Object obj) {
+		if (obj instanceof CmAttributeTreeNode) {
+			CmAttributeTreeNode tn = (CmAttributeTreeNode) obj;
+			return tn.getDisplayMode() != null ? tn.getDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE;
+		}
+		//value for root
+		return attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE;
 	}
 	
 	private void updateEnableButtonText(){
-
 		if (this.cmNode == null || this.cmNode.getIsActive()){
 			btnEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		}else{
 			btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		}
+	}
+
+	private void handleDisplayModeChanged() {
+		DisplayMode mode = modeViewer.getSelectedDisplayMode();
+		IStructuredSelection selection = (IStructuredSelection) itemViewer.getSelection();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			Object obj = iterator.next();
+			if (obj instanceof CmAttributeTreeNode) {
+				CmAttributeTreeNode tn = (CmAttributeTreeNode) obj;
+				tn.setDisplayMode(mode);
+			} else {
+				//we are configuring a root of the tree; its configuration is stored as a part of attribute
+				attribute.setCurrentDisplayMode(mode);
+			}
 		}
 	}
 	
