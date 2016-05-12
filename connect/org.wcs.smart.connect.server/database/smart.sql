@@ -232,6 +232,14 @@ CREATE TABLE smart.configurable_model
    PRIMARY KEY (UUID)
 );
 
+CREATE TABLE smart.connect_ct_properties 
+( 
+	UUID uuid NOT NULL, 
+	CM_UUID uuid NOT NULL, 
+	PING_FREQUENCY INTEGER, 
+	PRIMARY KEY (UUID)
+);
+
 CREATE TABLE SMART.CM_DM_ATTRIBUTE_SETTINGS 
 (
 	CM_UUID UUID NOT NULL, 
@@ -2344,6 +2352,11 @@ ALTER TABLE smart.WP_OBSERVATION_ATTRIBUTES
 ADD CONSTRAINT OBSERVATION_ATTRIBUTE_ATT_UUID_FK
 FOREIGN KEY (ATTRIBUTE_UUID)
 REFERENCES smart.DM_ATTRIBUTE(UUID) ON DELETE CASCADE DEFERRABLE;
+
+ALTER TABLE smart.connect_ct_properties 
+ADD CONSTRAINT connect_ct_properties_cm_uuid_fk 
+FOREIGN KEY (CM_UUID) 
+REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE DEFERRABLE;
 
 -- Unique Constraints
 alter table smart.PATROL_MANDATE add constraint patrol_mandate_keyid_unq UNIQUE(ca_uuid, keyid) DEFERRABLE ;

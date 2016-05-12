@@ -45,6 +45,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectUser;
@@ -171,6 +172,7 @@ public enum SmartTable {
 	CMDMATTRIBUTESESSIONS(CmDmAttributeSettings.class,".id.model.conservationArea" ),
 	CMNODE(CmNode.class,".model.conservationArea"),
 	CMCONNECTALERT(org.wcs.smart.connect.cybertracker.model.ConnectAlert.class, ".model.conservationArea"),
+	CTCONNECTPROPERTY(ConnectCtProperties.class, ".model.conservationArea"),
 	CONFIGURABLEMODEL(ConfigurableModel.class,null),
 	CONNECTSERVER(ConnectServer.class, null),
 	CONNECTSERVEROPTION(ConnectServerOption.class, ".id.server.conservationArea"),
