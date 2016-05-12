@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.query.engine;
 
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;

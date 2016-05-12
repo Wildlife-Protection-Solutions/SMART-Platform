@@ -53,9 +53,11 @@ public class GeoJsonAlert{
 	public String getDeviceId() {
 		return features.get(0).getProperties().getDateTime();
 	}
+	
 	public String getId() {
 		return features.get(0).getProperties().getId();
 	}
+	
 	public Date getDateTime() {
 		String dateString = features.get(0).getProperties().getDateTime();
 		if (dateString == null || dateString == "") return null; //$NON-NLS-1$
@@ -68,33 +70,40 @@ public class GeoJsonAlert{
 		}
 		return date;
 	}
+	
 	public String getAltitude() {
 		return features.get(0).getProperties().getAltitude();
 	}
+	
 	public String getAccuracy() {
 		return features.get(0).getProperties().getAccuracy();
 	}
+	
 	public UUID getCaUuid() {
 		return features.get(0).getProperties().getCaUuid();
 	}
+	
 	public Integer getLevel() {
 		return features.get(0).getProperties().getLevel();
 	}
+	
 	public String getDescription() {
 		return features.get(0).getProperties().getDescription();
 	}
+	
 	public UUID getTypeUuid() {
 		return features.get(0).getProperties().getTypeUuid();
 	}
+	
 	public Object getSighting() {
 		return features.get(0).getProperties().getSighting();
 	}
-	
 	
 	//direct getters for coordinates
 	public Double getLatitude() {
 		return features.get(0).getGeometry().getCoordinates().get(1);
 	}
+	
 	public Double getLongitude() {
 		return features.get(0).getGeometry().getCoordinates().get(0);
 	}

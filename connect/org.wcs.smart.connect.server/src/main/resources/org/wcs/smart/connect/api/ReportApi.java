@@ -163,7 +163,6 @@ public class ReportApi extends HttpServlet{
 			}
 			
 			//TODO: support ccaa reports
-			String caFilter = null;
 			if (report.getConservationArea().getIsCcaa()){
 				//we use the ccaafilter; otherwise we ignore it
 				conservationAreas.addAll(parseCaFilter(cafilter, s));
