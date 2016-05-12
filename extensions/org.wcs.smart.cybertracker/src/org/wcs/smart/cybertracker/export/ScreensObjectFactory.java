@@ -1143,8 +1143,8 @@ public class ScreensObjectFactory {
 		control.setUrl(data.getUrl());
 		control.setUserName(data.getUsername());
 		control.setPassword(data.getPassword());
-		control.setCaId(data.getCaId());
-		control.setAlertType(data.getType());
+		control.setCaId(AlertData.toCtString(data.getCaId()));
+		control.setAlertType(AlertData.toCtString(data.getType()));
 		control.setLevel(data.getLevel());
 		control.setPingFrequency(data.getPingFrequency());
 		control.setTranslatePatrolElementId(patrolId);

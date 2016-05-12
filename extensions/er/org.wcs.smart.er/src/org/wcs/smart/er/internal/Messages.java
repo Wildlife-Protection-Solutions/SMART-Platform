@@ -169,7 +169,19 @@ public class Messages extends NLS {
 	public static String ERDatabaseUpgrader_UpgradeError;
 
 	public static String ERDatabaseUpgrader_UpgradeTask;
+	public static String ErLabelProvider_DescriptionColumn;
+
+	public static String ErLabelProvider_EndDateColumn;
+
+	public static String ErLabelProvider_KeyColumn;
+
+	public static String ErLabelProvider_NameColumn;
+
 	public static String ErLabelProvider_sd_table_name;
+
+	public static String ErLabelProvider_StartDateColumn;
+
+	public static String ErLabelProvider_StatusColumn;
 
 	public static String ErLabelProvider_su_table_name;
 

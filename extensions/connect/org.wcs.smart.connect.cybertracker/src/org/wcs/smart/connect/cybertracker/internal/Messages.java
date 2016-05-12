@@ -31,6 +31,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_PingFrequency;
 	public static String ConfigurableModelEditorConnectTab_PingFrequency_Error;
 	public static String ConfigurableModelEditorConnectTab_PingFrequency_Tooltip;
+	public static String ConfigurableModelEditorConnectTab_RefreshForLabels;
 	public static String ConfigurableModelEditorConnectTab_RefreshToolTip;
 	public static String ConfigurableModelEditorConnectTab_RefreshTypes;
 	public static String ConfigurableModelEditorConnectTab_TabName;

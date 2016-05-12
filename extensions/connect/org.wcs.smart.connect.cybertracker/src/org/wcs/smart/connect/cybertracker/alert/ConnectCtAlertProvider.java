@@ -34,6 +34,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
@@ -62,14 +63,14 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	private String password;
 	private String url;
 
-	private String caId;
+	private ConservationArea ca = null;
 	
 	public ConnectCtAlertProvider(ConfigurableModel model) {
 		init(model);
 	}
 
 	private void init(final ConfigurableModel cm) {
-		caId = cm.getConservationArea().getUuid().toString();
+		ca = cm.getConservationArea();
 		if (cm.getUuid() != null) {
 			final List<ConnectAlert> alerts = new ArrayList<ConnectAlert>();
 			Display.getDefault().syncExec(new Runnable(){
@@ -151,7 +152,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 		data.setUrl(url);
 		data.setUsername(username);
 		data.setPassword(password);
-		data.setCaId(caId);
+		data.setCaId(ca.getUuid());
 		data.setType(a.getType());
 		data.setLevel(a.getLevel());
 		data.setPingFrequency(properties.getPingFrequency());

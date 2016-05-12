@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.export.alert;
 
+import java.util.UUID;
+
 /**
  * Data that is required to populate "Configure Alert" action in CyberTracker application.
  * 
@@ -31,12 +33,14 @@ public class AlertData {
 	
 	private Boolean active;
 	private Integer level;
-	private String type;
+	
 	private String password;
 	private String username;
 	private String url;
 	private Integer pingFrequency;
-	private String caId;
+	
+	private UUID caId;
+	private UUID type;
 	
 	public Boolean getActive() {
 		return active;
@@ -52,10 +56,10 @@ public class AlertData {
 		this.level = level;
 	}
 	
-	public String getType() {
+	public UUID getType() {
 		return type;
 	}
-	public void setType(String type) {
+	public void setType(UUID type) {
 		this.type = type;
 	}
 	
@@ -87,10 +91,14 @@ public class AlertData {
 		this.pingFrequency = pingFrequency;
 	}
 
-	public String getCaId() {
+	public UUID getCaId() {
 		return caId;
 	}
-	public void setCaId(String caId) {
+	public void setCaId(UUID caId) {
 		this.caId = caId;
+	}
+	
+	public static String toCtString(UUID uuid){
+		return uuid.toString();
 	}
 }

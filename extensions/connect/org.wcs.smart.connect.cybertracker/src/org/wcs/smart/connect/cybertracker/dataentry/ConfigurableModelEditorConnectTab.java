@@ -23,10 +23,12 @@ package org.wcs.smart.connect.cybertracker.dataentry;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -58,6 +60,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wcs.smart.SmartPlugIn;
@@ -91,6 +94,10 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class ConfigurableModelEditorConnectTab implements IConfigurableModelEditorTabContent {
 	
+	private static final String LABEL_KEY = "label"; //$NON-NLS-1$
+
+	private static final String UUID_KEY = "uuid"; //$NON-NLS-1$
+
 	private ConfigurableModelEditDialog dialog;
 
 	private TreeViewer modelTreeViewer;
@@ -104,7 +111,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	
 	private List<ConnectAlert> alertsList;
 	private List<ConnectAlert> dbAlertsList;
-	private List<String> alertTypeList;
+	private List<ConnectAlertType> alertTypeList;
+	private HashMap<UUID, ConnectAlertType> typeCache;
 	
 	private ConnectCtProperties properties;
 	
@@ -255,6 +263,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			public void widgetSelected(SelectionEvent e) {
 				alertTypeList = null;
 				getAlertTypes();
+				alertTable.refresh();
 			}
 		});
 		
@@ -325,12 +334,19 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		TableViewerColumn colType = new TableViewerColumn(table, SWT.NONE);
 		colType.getColumn().setWidth(90);
 		colType.getColumn().setText(Messages.ConfigurableModelEditorConnectTab_Column_Type);
+
+		updateTypeCache();
 		colType.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof ConnectAlert) {
 					ConnectAlert a = (ConnectAlert) element;
-					return a.getType();
+					ConnectAlertType alerttype = typeCache.get(a.getType());
+					if (alerttype == null){
+						return a.getTypeInternal() + Messages.ConfigurableModelEditorConnectTab_RefreshForLabels;
+					}else{
+						return alerttype.getLabel();
+					}
 				}
 			  	return super.getText(element);
 			}
@@ -353,6 +369,21 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		return table;
 	}
 
+	private synchronized void updateTypeCache(){
+		typeCache = new HashMap<UUID, ConnectAlertType>();
+		if (alertTypeList == null){
+			ArrayList<ConnectAlertType> types = getCachedAlertTypes();
+			for (ConnectAlertType t : types){
+				typeCache.put(t.getUuid(), t);
+			}
+		}else{
+			for (ConnectAlertType t : alertTypeList){
+				typeCache.put(t.getUuid(), t);
+			}
+		}
+	}
+	
+	
 	private void updateNewButtonState() {
 		boolean canCreate = false;
 		IStructuredSelection sel = (IStructuredSelection) modelTreeViewer.getSelection();
@@ -397,7 +428,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		if (alert == null) {
 			return;
 		}
-		List<String> alertTypes = getAlertTypes();
+		List<ConnectAlertType> alertTypes = getAlertTypes();
 		if (alertTypes == null){
 			//TODO: ERROR MESSAGE
 			return;
@@ -416,7 +447,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			Object obj = sel.getFirstElement();
 			if (obj instanceof ConnectAlert) {
 				ConnectAlert alert = (ConnectAlert) obj;
-				List<String> alertTypes = getAlertTypes();
+				List<ConnectAlertType> alertTypes = getAlertTypes();
 				if (alertTypes == null){
 					//TODO: ERROR MESSAGE
 					return;
@@ -456,7 +487,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	}
 
 	
-	private List<String> getAlertTypes() {
+	@SuppressWarnings("unchecked")
+	private List<ConnectAlertType> getAlertTypes() {
 		if (alertTypeList == null) {
 			ConnectDialog cd = new ConnectDialog(dialog.getShell(), true){
 				@Override
@@ -498,15 +530,15 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				}
 			};
 			
-			List<String> newAlerts = null;
+			List<ConnectAlertType> newAlerts = null;
 			
 			if (cd.open() != Window.CANCEL){
 				SmartConnect sc = cd.getConnection();
 				try{
 					List<AlertType> types = sc.getAlertTypes();
-					newAlerts = new ArrayList<String>();
+					newAlerts = new ArrayList<ConnectAlertType>();
 					for(AlertType at : types){
-						newAlerts.add(at.getLabel());
+						newAlerts.add(new ConnectAlertType(at.getUuid(), at.getLabel()));
 					}
 				}catch (Exception ex){
 					ConnectPlugIn.log("Unable to get Alert Types from server:" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -516,36 +548,50 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				MessageDialog.openWarning(dialog.getShell(), 
 						Messages.ConfigurableModelEditorConnectTab_WarningTitle, 
 						Messages.ConfigurableModelEditorConnectTab_WarningMessage);
-				
-				String types = ConnectPlugIn.getDefault().getPreferenceStore().getString(ConnectPlugIn.CONNECT_ALERT_TYPE_CACHE_PREF);
-				if (types == null || types.isEmpty()){
-					//nothing found - empty list
-					newAlerts = new ArrayList<String>();
-				}else{
-					newAlerts = new ArrayList<String>();
-					JSONParser parser = new JSONParser();
-					JSONArray array;
-					try {
-						array = ((JSONArray )parser.parse(types));
-						for (Iterator<?> iterator = array.iterator(); iterator.hasNext();) {
-							String object = (String) iterator.next();
-							newAlerts.add(object);
-						}
-					} catch (ParseException e) {
-						ConnectPlugIn.log("Error parsing alert types from preference store.", e); //$NON-NLS-1$
-					}
-				}
+				newAlerts = getCachedAlertTypes();
 			}else{
 				JSONArray array = new JSONArray();
-				array.addAll(newAlerts);
+				for (ConnectAlertType a : newAlerts){
+					JSONObject obj = new JSONObject();
+					obj.put(UUID_KEY, a.getUuid().toString());
+					obj.put(LABEL_KEY, a.getLabel());
+					array.add(obj);
+				}
 				ConnectPlugIn.getDefault().getPreferenceStore().setValue(ConnectPlugIn.CONNECT_ALERT_TYPE_CACHE_PREF, array.toJSONString());
 			}
 			
 			alertTypeList = newAlerts;
 		}
+		updateTypeCache();
 		return alertTypeList;
 	}
 	
+	private ArrayList<ConnectAlertType> getCachedAlertTypes(){
+		String types = ConnectPlugIn.getDefault().getPreferenceStore().getString(ConnectPlugIn.CONNECT_ALERT_TYPE_CACHE_PREF);
+		if (types == null || types.isEmpty()){
+			//nothing found - empty list
+			return new ArrayList<ConnectAlertType>();
+		}else{
+			ArrayList<ConnectAlertType> newAlerts = new ArrayList<ConnectAlertType>();
+			JSONParser parser = new JSONParser();
+			JSONArray array;
+			try {
+				array = ((JSONArray )parser.parse(types));
+				for (Iterator<?> iterator = array.iterator(); iterator.hasNext();) {
+					JSONObject object = (JSONObject)iterator.next();
+					
+					UUID uuid = UUID.fromString((String)object.get(UUID_KEY));
+					String label = (String)object.get(LABEL_KEY);
+					
+					newAlerts.add(new ConnectAlertType(uuid, label));
+				}
+			} catch (ParseException e) {
+				ConnectPlugIn.log("Error parsing alert types from preference store.", e); //$NON-NLS-1$
+			}
+			return newAlerts;
+		}
+		
+	}
 	@Override
 	public String validate() {
 		if (!isPingFrequencyValid()) {

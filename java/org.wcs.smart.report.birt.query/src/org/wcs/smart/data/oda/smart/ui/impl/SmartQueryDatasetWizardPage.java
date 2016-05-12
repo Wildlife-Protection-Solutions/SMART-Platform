@@ -89,7 +89,9 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	private UUID init;
 	
 	private Job loadQueriesJob = new Job(Messages.CustomDataSetWizardPage_LoadQueryJobName) {
+	
 		@Override
+		@SuppressWarnings("unchecked")
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
 			data.put(QueryListContentProvider.QUERY_KEY, SavedQueryTree

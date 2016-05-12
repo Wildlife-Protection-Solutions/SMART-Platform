@@ -165,6 +165,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		smartTables.setContentProvider(new ITreeContentProvider() {
 			
 			private HashMap<TableCategory, List<SmartBirtTable>> tables;
+			@SuppressWarnings("unchecked")
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 				if (newInput instanceof HashMap){
@@ -248,6 +249,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 	/**
 	 * Initializes the page control with the last edited data set design.
 	 */
+	@SuppressWarnings("unchecked")
 	private void initializeControl() {
 		/*
 		 * To optionally restore the designer state of the previous design
