@@ -115,6 +115,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 				ConnectAlertConfigDialog cd = new ConnectAlertConfigDialog(Display.getDefault().getActiveShell());
 				if (cd.open() != Window.CANCEL) {
 					url = cd.getServerUrl();
+					url += SmartConnect.API_URL + "/connectalert"; //$NON-NLS-1$
 					username = cd.getUsername();
 					password = cd.getPassword();
 				} else {
@@ -147,7 +148,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	private AlertData createAlertData(ConnectAlert a) {
 		AlertData data = new AlertData();
 		data.setActive(true);
-		data.setUrl(url + "/" + SmartConnect.API_URL + "/connectalert"); //$NON-NLS-1$ //$NON-NLS-2$
+		data.setUrl(url);
 		data.setUsername(username);
 		data.setPassword(password);
 		data.setCaId(caId);
