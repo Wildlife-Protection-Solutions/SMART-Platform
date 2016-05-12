@@ -39,7 +39,7 @@ public class GeoJsonProperties{
 	private Integer level;
 	private String description;
 	private UUID typeUuid;
-	private Object sighting;
+	private GeoJsonSighting sighting;
 	
 	public String getDeviceId() {
 		return deviceId;
