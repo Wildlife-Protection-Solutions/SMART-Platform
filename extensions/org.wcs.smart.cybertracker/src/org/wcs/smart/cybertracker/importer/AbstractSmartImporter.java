@@ -500,6 +500,7 @@ public abstract class AbstractSmartImporter {
 		} catch (Exception ex) {
 			CyberTrackerPlugIn.log("Could not determine CyberTracker ExportMedia folder", ex); //$NON-NLS-1$
 		}
+		int fileCnt = 0;
 		for (S.A a : s.getA()) {
 			if (isPhotoI(a.getI(), eMap)) {
 				if (mediaFolder == null) {
@@ -518,7 +519,8 @@ public abstract class AbstractSmartImporter {
 				//create user friendly file name
 				int index = a.getV().lastIndexOf('.');
 				String ext = index >= 0 ? a.getV().substring(index) : ""; //$NON-NLS-1$
-				String fileName = namePrefix+"_Waypoint_"+wp.getId()+ext; //$NON-NLS-1$
+				String fileName = namePrefix + "_Waypoint_" + wp.getId() + (fileCnt == 0 ? "" : "_" + fileCnt) + ext; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				fileCnt++;
 				
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setWaypoint(wp);
