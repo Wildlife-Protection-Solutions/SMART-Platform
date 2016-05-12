@@ -39,6 +39,7 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
+import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.connect.cybertracker.util.AlertLookup;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.export.alert.IAlertProvider;
@@ -55,6 +56,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class ConnectCtAlertProvider implements IAlertProvider {
 
 	private AlertLookup lookup;
+	private ConnectCtProperties properties;
 	
 	private String username;
 	private String password;
@@ -63,18 +65,47 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	private String caId;
 	
 	public ConnectCtAlertProvider(ConfigurableModel model) {
-		caId = model.getConservationArea().getUuid().toString();
-		if (model.getUuid() != null){
-			List<ConnectAlert> alerts = loadAlerts(model);
+		init(model);
+	}
+
+	private void init(final ConfigurableModel cm) {
+		caId = cm.getConservationArea().getUuid().toString();
+		if (cm.getUuid() != null) {
+			final List<ConnectAlert> alerts = new ArrayList<ConnectAlert>();
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+					try {
+						pmd.run(true, false, new IRunnableWithProgress() {
+							@Override
+							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+								monitor.beginTask(Messages.ConnectCtAlertProvider_LoadAlertsTaskName, 1);
+								Session s = HibernateManager.openSession();
+								s.beginTransaction();
+								alerts.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
+								properties = ConnectCtHibernateManager.getCtProperties(cm, s);
+								s.getTransaction().rollback();
+								s.close();
+							}
+						});
+					} catch (Exception e) {
+						SmartPlugIn.displayLog(Messages.ConnectCtAlertProvider_LoadAlertsError, e);
+					}
+				}
+			});
 			lookup = new AlertLookup(alerts);
 			if (!lookup.isEmpty()) {
 				//we have at lease one alert configured for this model, so we need to init server related fields
 				initConnectFields();
 			}
-		}else{
+		} else {
 			//this case we are using the data model with has no alerts
 			lookup = new AlertLookup(Collections.emptyList());
+			properties = new ConnectCtProperties();
+			properties.setPingFrequency(ConnectCtProperties.PING_FREQUENCY_DEFAULT_VALUE);
 		}
+
 	}
 	
 	private void initConnectFields() {
@@ -122,33 +153,8 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 		data.setCaId(caId);
 		data.setType(a.getType());
 		data.setLevel(a.getLevel());
+		data.setPingFrequency(properties.getPingFrequency());
 		return data;
 	}
 
-	private List<ConnectAlert> loadAlerts(final ConfigurableModel cm) {
-		final List<ConnectAlert> resultList = new ArrayList<ConnectAlert>();
-		Display.getDefault().syncExec(new Runnable(){
-			@Override
-			public void run() {
-				ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-				try {
-					pmd.run(true, false, new IRunnableWithProgress() {
-						@Override
-						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-							monitor.beginTask(Messages.ConnectCtAlertProvider_LoadAlertsTaskName, 1);
-							Session s = HibernateManager.openSession();
-							s.beginTransaction();
-							resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
-							s.getTransaction().rollback();
-							s.close();
-						}
-					});
-				} catch (Exception e) {
-					SmartPlugIn.displayLog(Messages.ConnectCtAlertProvider_LoadAlertsError, e);
-				}
-			}
-		});
-		return resultList;
-	}
-	
 }

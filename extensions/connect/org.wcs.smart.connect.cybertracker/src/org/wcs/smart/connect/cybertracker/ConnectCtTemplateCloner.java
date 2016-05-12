@@ -30,6 +30,7 @@ import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
+import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -52,6 +53,7 @@ public class ConnectCtTemplateCloner implements IConservationAreaTemplateCloner 
 		for (ConfigurableModel cm : cmList) {
 			monitor.subTask(MessageFormat.format(Messages.ConnectCtTemplateCloner_CloneAlerts, cm.getName()));
 			cloneAlertsForCm(engine, cm, monitor);
+			cloneConnectCtProperties(engine, cm, monitor);
 			monitor.worked(1);
 		}
 	}
@@ -68,6 +70,22 @@ public class ConnectCtTemplateCloner implements IConservationAreaTemplateCloner 
 				clone.setAlertItem(engine.getNewConservationItem(a.getAlertItem()));
 				clone.setType(a.getType());
 				clone.setLevel(a.getLevel());
+
+				engine.getSession().save(clone);
+			}
+			engine.getSession().flush();
+		}
+	}
+
+	private void cloneConnectCtProperties(ConservationAreaClonerEngine engine, ConfigurableModel cm, IProgressMonitor monitor) {
+		@SuppressWarnings("unchecked")
+		List<ConnectCtProperties> props = engine.getSession().createCriteria(ConnectCtProperties.class).add(Restrictions.eq("model", cm)).list(); //$NON-NLS-1$
+		if (!props.isEmpty()) {
+			ConfigurableModel cmClone = (ConfigurableModel) engine.getNewConservationItem(cm);
+			for (ConnectCtProperties p : props) {
+				ConnectCtProperties clone = new ConnectCtProperties();
+				clone.setModel(cmClone);
+				clone.setPingFrequency(p.getPingFrequency());
 
 				engine.getSession().save(clone);
 			}

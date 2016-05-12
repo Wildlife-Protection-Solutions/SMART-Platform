@@ -53,6 +53,7 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Dialog for editing Configurable Models.
@@ -304,8 +305,24 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	public void removeModelChangedListener(IConfigurableModelChangeListener listener) {
 		cmListeners.remove(listener);
 	}
+
+	private String validateTabs() {
+		for (IConfigurableModelEditorTabContent tab : tabs) {
+			String error = tab.validate();
+			if (error != null) {
+				return error;
+			}
+		}
+		return null;
+	}
+	
 	
 	protected boolean performSave() {
+		String error = validateTabs();
+		if (error != null) {
+			MessageDialog.openError(getShell(), "Error", "Unable to save changes. Some data is invalid. Fix error and try again." + SharedUtils.LINE_SEPARATOR + error);
+			return false;
+		}
 		final boolean[] ret = new boolean[]{false};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
@@ -339,5 +356,5 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 		if (ret[0]) setChangesMade(false);
 		return ret[0];		
 	}
-	
+
 }

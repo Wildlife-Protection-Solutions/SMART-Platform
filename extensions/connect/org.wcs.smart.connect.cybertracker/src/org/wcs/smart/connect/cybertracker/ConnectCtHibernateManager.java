@@ -27,12 +27,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.persistence.Transient;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
+import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.connect.cybertracker.util.CmElementsVisitor;
 import org.wcs.smart.connect.cybertracker.util.CmElementsVisitor.IElementVisitHandler;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -45,6 +48,37 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  * @since 4.0.0
  */
 public class ConnectCtHibernateManager {
+
+	public static ConnectCtProperties getCtProperties(ConfigurableModel cm, Session s) {
+		if (cm.getUuid() == null) {
+			return createDefaultProperties(cm);
+		}
+		@SuppressWarnings("unchecked")
+		List<ConnectCtProperties> items = s.createCriteria(ConnectCtProperties.class).add(Restrictions.eq("model", cm)).list();  //$NON-NLS-1$
+		switch (items.size()) {
+		case 0:
+			//no properties yet -> create new one
+			return createDefaultProperties(cm);
+		case 1:
+			return items.get(0);
+		default:
+			//invalid case (this is suppose to be one-to-one relationship)
+			//should never happen!!!
+			SmartPlugIn.displayLog(Messages.ConnectCtHibernateManager_Error_MultipleConnectCtProperties, null);
+			for (int i = 1; i < items.size(); i++) {
+				s.delete(items.get(i));
+			}
+			return items.get(0);
+		}
+	}
+
+	@Transient
+	public static ConnectCtProperties createDefaultProperties(ConfigurableModel cm) {
+		ConnectCtProperties p = new ConnectCtProperties();
+		p.setModel(cm);
+		p.setPingFrequency(ConnectCtProperties.PING_FREQUENCY_DEFAULT_VALUE);
+		return p;
+	}
 	
 	/**
 	 * Fetches a list of {@link ConnectAlert} for {@link ConfigurableModel}

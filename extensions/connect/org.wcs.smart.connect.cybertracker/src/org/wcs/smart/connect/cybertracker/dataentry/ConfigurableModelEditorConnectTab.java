@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.cybertracker.dataentry;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -42,6 +45,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -49,6 +54,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -62,6 +69,7 @@ import org.wcs.smart.connect.api.model.AlertType;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
+import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.connect.cybertracker.util.AlertLookup;
 import org.wcs.smart.connect.cybertracker.util.CmTreeNodesVisitor;
 import org.wcs.smart.connect.cybertracker.util.CmTreeNodesVisitor.INodeVisitHandler;
@@ -91,9 +99,14 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	private Button btnEdit;
 	private Button btnDelete;
 	
+	private Text txtPingFrequency;
+	private ControlDecoration pingFrequencyDecoration;
+	
 	private List<ConnectAlert> alertsList;
 	private List<ConnectAlert> dbAlertsList;
 	private List<String> alertTypeList;
+	
+	private ConnectCtProperties properties;
 	
 	private ConnectAlertSourceLabelProvider alertSourceLabelProvider;
 	
@@ -110,6 +123,9 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 
 	@Override
 	public Composite createTabContent(Composite parent) {
+		dbAlertsList = loadAlerts(dialog.getModel());
+		properties = ConnectCtHibernateManager.getCtProperties(dialog.getModel(), dialog.getSession());
+		
 		SashForm container = new SashForm(parent, SWT.HORIZONTAL);
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -156,6 +172,41 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
+
+		Composite topPanel = new Composite(rightPanel, SWT.NONE);
+		topPanel.setLayout(new GridLayout(2, false));
+		((GridLayout)topPanel.getLayout()).marginHeight = 0;
+		((GridLayout)topPanel.getLayout()).marginWidth = 0;
+		topPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lblPing = new Label(topPanel, SWT.NONE);
+		lblPing.setText(Messages.ConfigurableModelEditorConnectTab_PingFrequency);
+		lblPing.setToolTipText(Messages.ConfigurableModelEditorConnectTab_PingFrequency_Tooltip);
+		
+		txtPingFrequency = new Text(topPanel, SWT.BORDER);
+		txtPingFrequency.setToolTipText(Messages.ConfigurableModelEditorConnectTab_PingFrequency_Tooltip);
+		txtPingFrequency.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtPingFrequency.setText(properties.getPingFrequency() != null ? String.valueOf(properties.getPingFrequency()) : ""); //$NON-NLS-1$
+		txtPingFrequency.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isPingFrequencyValid()) {
+					pingFrequencyDecoration.hide();
+					properties.setPingFrequency(Integer.valueOf(txtPingFrequency.getText()));
+				} else {
+					pingFrequencyDecoration.show();
+				}
+				dialog.notifyChangesMade();
+			}
+		});
+
+		pingFrequencyDecoration = new ControlDecoration(txtPingFrequency, SWT.LEFT);
+		pingFrequencyDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		pingFrequencyDecoration.setShowHover(true);
+		pingFrequencyDecoration.setDescriptionText(MessageFormat.format(Messages.ConfigurableModelEditorConnectTab_PingFrequency_Error, ConnectCtProperties.PING_FREQUENCY_MIN_VALUE, ConnectCtProperties.PING_FREQUENCY_MAX_VALUE));
+		pingFrequencyDecoration.hide();
+		
 		
 		alertTable = createAlertsTable(rightPanel);
 		alertTable.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -164,7 +215,6 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				updateEditDeleteButtonState();
 			}
 		});
-		dbAlertsList = loadAlerts(dialog.getModel());
 		alertsList = new ArrayList<ConnectAlert>(dbAlertsList); //this is a copy of db data that can be changes, changes will be persisted on 'Save'
 		alertTable.setInput(alertsList);
 
@@ -223,6 +273,17 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		updateNewButtonState();
 		updateEditDeleteButtonState();
 		return container;
+	}
+
+	private boolean isPingFrequencyValid() {
+		if (txtPingFrequency == null || txtPingFrequency.getText() == null || txtPingFrequency.getText().isEmpty())
+			return false;
+		try {
+			Integer result = Integer.valueOf(txtPingFrequency.getText());
+			return result >= ConnectCtProperties.PING_FREQUENCY_MIN_VALUE && result <= ConnectCtProperties.PING_FREQUENCY_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	/**
@@ -374,17 +435,13 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		IStructuredSelection sel = (IStructuredSelection) alertTable.getSelection();
 		if (sel != null && !sel.isEmpty()) {
 			if (MessageDialog.openQuestion(dialog.getShell(), Messages.ConfigurableModelEditorConnectTab_ConfirmDeleteDialogTitle, Messages.ConfigurableModelEditorConnectTab_ConfirmDeleteDialogMessage)) {
-//				int size = sel.size();
-//				int count = 0;
 				for (Iterator<?> i = sel.iterator(); i.hasNext();) {
 					ConnectAlert alert = (ConnectAlert) i.next();
 					//no actual delete from database, it will be done when 'Save' is pressed
 					alertsList.remove(alert);
-//					count++;
 				}
 				alertTable.refresh();
 				dialog.notifyChangesMade();
-//				MessageDialog.openInformation(dialog.getShell(), "Alert delete", MessageFormat.format("{0} out of {1} alert(s) deleted.", count, size));
 			}
 		}
 	}
@@ -490,6 +547,14 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	}
 	
 	@Override
+	public String validate() {
+		if (!isPingFrequencyValid()) {
+			return MessageFormat.format(Messages.ConfigurableModelEditorConnectTab_PingFrequency_Error, ConnectCtProperties.PING_FREQUENCY_MIN_VALUE, ConnectCtProperties.PING_FREQUENCY_MAX_VALUE);
+		}
+		return null;
+	}
+	
+	@Override
 	public void performSave(Session s) {
 		Set<ConnectAlert> removed = new HashSet<ConnectAlert>(dbAlertsList);
 		removed.removeAll(alertsList);
@@ -506,6 +571,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		for (ConnectAlert a : alertsList) {
 			s.saveOrUpdate(a);
 		}
+
+		s.saveOrUpdate(properties);
 	}
 	
 	@Override
