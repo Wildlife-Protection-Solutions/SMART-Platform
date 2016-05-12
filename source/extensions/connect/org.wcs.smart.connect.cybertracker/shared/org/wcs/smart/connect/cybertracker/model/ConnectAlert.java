@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.connect.cybertracker.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -76,11 +79,22 @@ public class ConnectAlert extends UuidItem {
 	}
     
 	@Column(name="Type")
-    public String getType() {
+	public String getTypeInternal(){
 		return type;
 	}
-    public void setType(String type) {
+	
+	public void setTypeInternal(String type){
 		this.type = type;
+	}
+	
+	@Transient
+    public UUID getType() {
+		if (type == null) return null;
+		return UUID.fromString(getTypeInternal());
+	}
+	@Transient
+    public void setType(UUID type) {
+		this.type = type.toString();
 	}
     
 	@Column(name="level")

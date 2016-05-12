@@ -159,7 +159,7 @@ public class SmartBirtTableUtils {
 				IDynamicSmartTables dtables = (IDynamicSmartTables) config[i].createExecutableExtension("class"); //$NON-NLS-1$
 				cachedDynamic.put(tc, dtables);
 			}else if (config[i].getName().equals("ImageProvider")){ //$NON-NLS-1$
-				imageProviders.add((ITableImageProvider)config[i].createExecutableExtension("class"));
+				imageProviders.add((ITableImageProvider)config[i].createExecutableExtension("class")); //$NON-NLS-1$
 			}
 		}
 	}

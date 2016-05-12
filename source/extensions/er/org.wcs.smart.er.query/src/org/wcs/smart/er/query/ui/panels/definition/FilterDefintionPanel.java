@@ -239,8 +239,8 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 							@Override
 							public void run() {
 								MessageDialog.openError(Display.getDefault().getActiveShell(),
-										"Survey Design Not Found",
-										MessageFormat.format("The survey design {0} not found.  Survey design filter will be reset.", sq.getSurveyDesign()));
+										Messages.FilterDefintionPanel_DesignNotFoundTitle,
+										MessageFormat.format(Messages.FilterDefintionPanel_DesignNotFoundMessage, sq.getSurveyDesign()));
 							}
 						});
 						

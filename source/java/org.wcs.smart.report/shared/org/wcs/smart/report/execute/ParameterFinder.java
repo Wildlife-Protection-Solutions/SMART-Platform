@@ -65,7 +65,7 @@ public enum ParameterFinder {
 				allParameters.put(param.getName(), param);	
 			}else{
 				if (def.getParameterType() != param.getParameterType()){
-					throw new Exception(MessageFormat.format("Reports contain parameters with the same name {0} but require different parameter types.  These reports cannot be run at the same time.", new Object[]{param.getName()}));
+					throw new Exception(MessageFormat.format("Reports contain parameters with the same name ({0}) but require different parameter types.  These reports cannot be run at the same time.", new Object[]{param.getName()}));
 				}
 				//TODO: implement more here to make sure they are the same
 			}

@@ -73,6 +73,7 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 		return allItems;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
 		String[] litems = groupBy.getRawItems();
 		if (litems != null){

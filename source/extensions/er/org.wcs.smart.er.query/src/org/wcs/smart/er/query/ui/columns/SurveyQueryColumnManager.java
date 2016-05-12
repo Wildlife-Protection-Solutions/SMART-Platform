@@ -427,7 +427,6 @@ public class SurveyQueryColumnManager {
 		}
 		
 		@Override
-		@SuppressWarnings("unchecked")
 		protected IStatus run(IProgressMonitor monitor) {
 			columns = new ArrayList<MissionPropertyQueryColumn>();
 			Session s = HibernateManager.openSession();
@@ -449,13 +448,14 @@ public class SurveyQueryColumnManager {
 	}
 	
 	private String getMissionPropertyColumnName(MissionAttribute ma){
-		return Messages.MissionPropertyQueryColumn_MissionPropertyColumnLabel + "|" + ma.getName();
+		return Messages.MissionPropertyQueryColumn_MissionPropertyColumnLabel + "|" + ma.getName(); //$NON-NLS-1$
 	}
 	
 	private String getSamplingUnitAttributeColumnName(SamplingUnitAttribute sua){
-		return Messages.SamplingUnitAttributeQueryColumn_SuLabel + "|" + sua.getName();
+		return Messages.SamplingUnitAttributeQueryColumn_SuLabel + "|" + sua.getName(); //$NON-NLS-1$
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<MissionPropertyQueryColumn> getMissionPropertyColumns(Session session, SurveyDesign sd){
 		List<MissionPropertyQueryColumn> columns = new ArrayList<MissionPropertyQueryColumn>();
 		if (sd == null){
@@ -478,6 +478,8 @@ public class SurveyQueryColumnManager {
 		});
 		return columns;
 	}
+	
+	@SuppressWarnings("unchecked")
 	private List<SamplingUnitAttributeQueryColumn> getSamplingUnitAttributeColumns(Session session, SurveyDesign sd){
 		List<SamplingUnitAttributeQueryColumn> columns = new ArrayList<SamplingUnitAttributeQueryColumn>();
 		if (sd == null){

@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.cybertracker.dataentry;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -57,12 +58,12 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 	private ComboViewer importanceViewer;
 	
 	private ConnectAlert alert;
-	private List<String> alertTypes;
+	private List<ConnectAlertType> alertTypes;
 	private boolean isNew;
 	
 	private ConnectAlertSourceLabelProvider sourceLabelProvider;
 
-	protected AlertEditDialog(Shell parent, boolean isNew, ConnectAlert alert, List<String> alertTypes) {
+	protected AlertEditDialog(Shell parent, boolean isNew, ConnectAlert alert, List<ConnectAlertType> alertTypes) {
 		super(parent, isNew ? Messages.AlertEditDialog_NewAlertTitle : Messages.AlertEditDialog_EditAlertTitle);
 		this.alert = alert;
 		this.alertTypes = alertTypes;
@@ -92,18 +93,29 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
         typeViewer = new ComboViewer(main, SWT.READ_ONLY);
         typeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         typeViewer.setContentProvider(ArrayContentProvider.getInstance());
-        typeViewer.setLabelProvider(new LabelProvider());
+        typeViewer.setLabelProvider(new LabelProvider(){
+        	@Override
+        	public String getText(Object element){
+        		if (element instanceof ConnectAlertType){
+        			return ((ConnectAlertType)element).getLabel();
+        		}
+        		return super.getText(element);
+        	
+        	}
+        });
 
         typeViewer.setInput(alertTypes);
         if (alert.getType() == null) {
-        	alert.setType(alertTypes.isEmpty() ? "" : alertTypes.get(0)); //$NON-NLS-1$
+        	alert.setType(alertTypes.isEmpty() ? null : alertTypes.get(0).getUuid());
         }
-        if (alertTypes.contains(alert.getType())) {
-            typeViewer.setSelection(new StructuredSelection(alert.getType()));
-        } else {
-        	//TODO: what to do?
+        UUID selection = alert.getType();
+        for (ConnectAlertType t : alertTypes){
+        	if (t.getUuid().equals(selection)){
+        		typeViewer.setSelection(new StructuredSelection(t));
+        		break;
+        	}
         }
- 
+        
         typeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -168,7 +180,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 	protected boolean performSave() {
 		IStructuredSelection selType = (IStructuredSelection) typeViewer.getSelection();
 		if (selType != null && !selType.isEmpty()) {
-			alert.setType((String) selType.getFirstElement());
+			alert.setType( ((ConnectAlertType)selType.getFirstElement()).getUuid() );
 		}
 
 		IStructuredSelection selLvl = (IStructuredSelection) importanceViewer.getSelection();

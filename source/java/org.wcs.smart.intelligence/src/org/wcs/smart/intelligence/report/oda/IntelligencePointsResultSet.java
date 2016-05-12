@@ -54,7 +54,7 @@ public class IntelligencePointsResultSet implements IResultSet {
 
 	private static final GeometryFactory gf = new GeometryFactory();
 	
-	public static final String GEOM_COLUMN_NAME = "geometry";
+	public static final String GEOM_COLUMN_NAME = "geometry"; //$NON-NLS-1$
 	
 	private int m_maxRows = -1;
 

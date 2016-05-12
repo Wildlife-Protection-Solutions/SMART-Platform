@@ -80,6 +80,7 @@ public class SurveyIdGroupByViewer extends AbstractGroupByViewer<SurveyIdGroupBy
 		return di;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
 		if (groupBy.getRawItems() != null){
 			return getItems(session);

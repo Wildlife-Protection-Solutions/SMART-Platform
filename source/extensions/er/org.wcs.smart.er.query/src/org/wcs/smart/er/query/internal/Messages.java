@@ -63,6 +63,8 @@ public class Messages extends NLS {
 	public static String FilterContentProvider_SuLabel;
 	public static String FilterContentProvider_TrackSamplingUnits;
 	public static String FilterContentProvider_TrackTypeNode;
+	public static String FilterDefintionPanel_DesignNotFoundMessage;
+	public static String FilterDefintionPanel_DesignNotFoundTitle;
 	public static String FilterItemPanel_RefreshFilterTreeJobName;
 	public static String FilterProcessor_CannotFilterTrackAndObs;
 	public static String FilterProcessor_DateFilterNotSupported;

@@ -119,7 +119,7 @@ public class ImportAttributes implements IRunnableWithProgress {
 			final List<String> warnings = new ArrayList<String>();
 			boolean changes = false;
 			
-			try( CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){ //$NON-NLS-1$
+			try( CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){
 				String[] headers = reader.readNext();
 				monitor.worked(1);
 				int idIndex = -1;
