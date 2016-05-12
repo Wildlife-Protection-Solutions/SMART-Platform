@@ -12,7 +12,12 @@
       <class
             ca_property=".model.conservationArea"
             class="org.wcs.smart.connect.cybertracker.model.ConnectAlert"
-            supportsCcaa="true">
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".model.conservationArea"
+            class="org.wcs.smart.connect.cybertracker.model.ConnectCtProperties"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

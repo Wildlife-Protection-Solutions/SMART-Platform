@@ -1146,6 +1146,7 @@ public class ScreensObjectFactory {
 		control.setCaId(data.getCaId());
 		control.setAlertType(data.getType());
 		control.setLevel(data.getLevel());
+		control.setPingFrequency(data.getPingFrequency());
 		control.setTranslatePatrolElementId(patrolId);
 		control.setTranslateElements(trElements);
 		return control;

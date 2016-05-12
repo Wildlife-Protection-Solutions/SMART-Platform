@@ -43,6 +43,7 @@ public class RemoveConnectCtJob extends Job {
 	
 	private static String[] TABLES = new String[]{
 		"CONNECT_ALERT", //$NON-NLS-1$
+		"connect_ct_properties", //$NON-NLS-1$
 	};
 	
 	public RemoveConnectCtJob() {

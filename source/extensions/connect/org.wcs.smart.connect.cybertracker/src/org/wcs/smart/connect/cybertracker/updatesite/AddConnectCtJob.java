@@ -112,7 +112,14 @@ public class AddConnectCtJob extends Job {
 
 			"GRANT ALL PRIVILEGES ON smart.connect_alert TO ANALYST", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON smart.connect_alert TO DATA_ENTRY", //$NON-NLS-1$
-			"GRANT ALL PRIVILEGES ON smart.connect_alert TO MANAGER" //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.connect_alert TO MANAGER", //$NON-NLS-1$
+
+			"CREATE TABLE smart.connect_ct_properties ( UUID CHAR(16) for bit data NOT NULL, CM_UUID CHAR(16) for bit data  NOT NULL, PING_FREQUENCY INTEGER, PRIMARY KEY (UUID))", //$NON-NLS-1$
+			"ALTER TABLE smart.connect_ct_properties ADD CONSTRAINT connect_ct_properties_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+			"GRANT ALL PRIVILEGES ON smart.connect_ct_properties TO ANALYST", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.connect_ct_properties TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.connect_ct_properties TO MANAGER" //$NON-NLS-1$
 		};
 		
 		session.doWork(new Work() {

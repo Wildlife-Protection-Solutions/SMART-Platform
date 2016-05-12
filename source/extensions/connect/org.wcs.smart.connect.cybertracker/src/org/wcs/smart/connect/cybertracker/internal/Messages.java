@@ -28,6 +28,9 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_ConnectDialogTitle;
 	public static String ConfigurableModelEditorConnectTab_LoadAlertsError;
 	public static String ConfigurableModelEditorConnectTab_LoadAlertsTaskName;
+	public static String ConfigurableModelEditorConnectTab_PingFrequency;
+	public static String ConfigurableModelEditorConnectTab_PingFrequency_Error;
+	public static String ConfigurableModelEditorConnectTab_PingFrequency_Tooltip;
 	public static String ConfigurableModelEditorConnectTab_RefreshToolTip;
 	public static String ConfigurableModelEditorConnectTab_RefreshTypes;
 	public static String ConfigurableModelEditorConnectTab_TabName;
@@ -41,6 +44,7 @@ public class Messages extends NLS {
 	public static String ConnectCtAlertProvider_NoAlertConfigInfo_Message;
 	public static String ConnectCtAlertProvider_NoAlertConfigInfo_Title;
 	public static String ConnectCtDatabaseUpgrader_UpgageTaskName;
+	public static String ConnectCtHibernateManager_Error_MultipleConnectCtProperties;
 	public static String ConnectCtHibernateManager_LoadAlertsError;
 	public static String ConnectCtTemplateCloner_CloneAlerts;
 	public static String ConnectCtTemplateCloner_TaskName;

@@ -73,5 +73,13 @@ public interface IConfigurableModelEditorTabContent {
 	 * @return index that indicates in which order tabs are displayed
 	 */
 	public int getTabIndex();
+
+	/**
+	 * Does validation if it is required for the tab.
+	 * @return error message or null
+	 */
+	public default String validate() {
+		return null;
+	}
 	
 }
