@@ -85,6 +85,11 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 	}
 	
 	@Override
+	public String getDescription(){
+		return Messages.DataQueueOptionPanel_Description;
+	}
+	
+	@Override
 	public Composite createComposite(Composite parent, boolean isEditable){
 		this.isEditable = isEditable;
 		listeners = new ArrayList<ModifyListener>();

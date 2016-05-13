@@ -72,6 +72,11 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 	}
 	
 	@Override
+	public String getDescription(){
+		return Messages.ServerOptionsPanel_Description;
+	}
+	
+	@Override
 	public Composite createComposite(Composite parent, boolean isEditable){
 		listeners = new ArrayList<ModifyListener>();
 		Composite main = new Composite(parent, SWT.NONE);
