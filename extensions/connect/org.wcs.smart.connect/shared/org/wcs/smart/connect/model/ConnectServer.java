@@ -91,7 +91,10 @@ public class ConnectServer extends UuidItem{
 		return this.certificate;
 	}
 	/**
-	 * relative file location of the certificate file in the filestore
+	 * relative file location of the certificate file in the filestore.
+	 * To support multiple OS's the path any directory separators in this path
+	 * must be represented by / not \.
+	 * 
 	 * @param certificate
 	 */
 	public void setCertificateFileName(String certificate){
@@ -138,7 +141,14 @@ public class ConnectServer extends UuidItem{
 			Files.delete(copyToFile);
 		}
 		Files.copy(copyFrom, copyToFile);
-		setCertificateFileName(Paths.get(getConservationArea().getFileDataStoreLocation()).relativize(copyToFile).toString());
+		
+
+		String relativeFile = Paths.get(getConservationArea().getFileDataStoreLocation()).relativize(copyToFile).toString();
+		//to support multiple os's convert directory identifiers to forward slashes
+		//TODO: This should probably not be done on linux/mac as \ are valid path names.  However we control
+		//this name so it should be ok.
+		relativeFile = relativeFile.replaceAll("\\\\","/"); //$NON-NLS-1$ //$NON-NLS-2$
+		setCertificateFileName(relativeFile);
 	}
 	
 	/**
