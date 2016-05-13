@@ -85,6 +85,8 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Tab with SMART Connect Alerts content for configurable model.
@@ -373,6 +375,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		typeCache = new HashMap<UUID, ConnectAlertType>();
 		if (alertTypeList == null){
 			ArrayList<ConnectAlertType> types = getCachedAlertTypes();
+			if (types == null) return;
 			for (ConnectAlertType t : types){
 				typeCache.put(t.getUuid(), t);
 			}
@@ -430,7 +433,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		}
 		List<ConnectAlertType> alertTypes = getAlertTypes();
 		if (alertTypes == null){
-			//TODO: ERROR MESSAGE
+			MessageDialog.openError(dialog.getShell(),Messages.ConfigurableModelEditorConnectTab_NoAlertsTitle, Messages.ConfigurableModelEditorConnectTab_NoAlertsMessage);
 			return;
 		}
 		AlertEditDialog d = new AlertEditDialog(dialog.getShell(), true, alert, alertTypes);
@@ -449,7 +452,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				ConnectAlert alert = (ConnectAlert) obj;
 				List<ConnectAlertType> alertTypes = getAlertTypes();
 				if (alertTypes == null){
-					//TODO: ERROR MESSAGE
+					MessageDialog.openWarning(dialog.getShell(),Messages.ConfigurableModelEditorConnectTab_NoAlertsTitle, Messages.ConfigurableModelEditorConnectTab_NoAlertsMessage);
 					return;
 				}
 				
@@ -523,9 +526,6 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 						s.getTransaction().commit();
 					}catch (Exception ex){
 						s.getTransaction().rollback();
-
-					}finally{
-						s.close();
 					}
 				}
 			};
@@ -550,14 +550,16 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 						Messages.ConfigurableModelEditorConnectTab_WarningMessage);
 				newAlerts = getCachedAlertTypes();
 			}else{
-				JSONArray array = new JSONArray();
-				for (ConnectAlertType a : newAlerts){
-					JSONObject obj = new JSONObject();
-					obj.put(UUID_KEY, a.getUuid().toString());
-					obj.put(LABEL_KEY, a.getLabel());
-					array.add(obj);
+				if (newAlerts  != null){
+					JSONArray array = new JSONArray();
+					for (ConnectAlertType a : newAlerts){
+						JSONObject obj = new JSONObject();
+						obj.put(UUID_KEY, a.getUuid().toString());
+						obj.put(LABEL_KEY, a.getLabel());
+						array.add(obj);
+					}
+					ConnectPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(), array.toJSONString());
 				}
-				ConnectPlugIn.getDefault().getPreferenceStore().setValue(ConnectPlugIn.CONNECT_ALERT_TYPE_CACHE_PREF, array.toJSONString());
 			}
 			
 			alertTypeList = newAlerts;
@@ -566,11 +568,21 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		return alertTypeList;
 	}
 	
+	/**
+	 * the preference key for caching alert types - this is Conservation Area specific
+	 * @return
+	 */
+	private String getPreferenceKey(){
+		String cauuid = UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid());
+		return ConnectPlugIn.CONNECT_ALERT_TYPE_CACHE_PREF + "." + cauuid; //$NON-NLS-1$
+	}
+	
 	private ArrayList<ConnectAlertType> getCachedAlertTypes(){
-		String types = ConnectPlugIn.getDefault().getPreferenceStore().getString(ConnectPlugIn.CONNECT_ALERT_TYPE_CACHE_PREF);
+		
+		String types = ConnectPlugIn.getDefault().getPreferenceStore().getString(getPreferenceKey());
 		if (types == null || types.isEmpty()){
 			//nothing found - empty list
-			return new ArrayList<ConnectAlertType>();
+			return null;
 		}else{
 			ArrayList<ConnectAlertType> newAlerts = new ArrayList<ConnectAlertType>();
 			JSONParser parser = new JSONParser();

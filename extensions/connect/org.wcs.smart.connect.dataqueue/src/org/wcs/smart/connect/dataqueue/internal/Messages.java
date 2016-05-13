@@ -64,6 +64,7 @@ public class Messages extends NLS {
 	public static String DataQueueOptionPanel_DeleteOptionLabel;
 	public static String DataQueueOptionPanel_DeleteOptionLabel2;
 	public static String DataQueueOptionPanel_DeleteOptionUnits;
+	public static String DataQueueOptionPanel_Description;
 	public static String DataQueueOptionPanel_GeneralSectionLabel;
 	public static String DataQueueOptionPanel_InvalidDeleteUnits1;
 	public static String DataQueueOptionPanel_InvalidDeleteUnits2;

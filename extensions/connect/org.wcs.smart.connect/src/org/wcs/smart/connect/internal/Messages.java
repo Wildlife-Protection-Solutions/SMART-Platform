@@ -42,6 +42,7 @@ public class Messages extends NLS {
 	public static String AutoOptionsPanel_AutoOpLabel;
 	public static String AutoOptionsPanel_AutoSyncOptionsPanelName;
 	public static String AutoOptionsPanel_CheckChangesLabel;
+	public static String AutoOptionsPanel_Description;
 	public static String AutoOptionsPanel_InvalidMinutes;
 	public static String AutoOptionsPanel_InvalidMinutes2;
 	public static String AutoOptionsPanel_InvalidSize;
@@ -311,6 +312,7 @@ public class Messages extends NLS {
 	public static String ServerOptionLabelProvider_WaitTimeLabel;
 	public static String ServerOptionLabelProvider_WaitTimeTooltip;
 	public static String ServerOptionsPanel_ConnectOpPanelName;
+	public static String ServerOptionsPanel_Description;
 	public static String ServerOptionsPanel_InvalidNumber;
 	public static String ServerOptionsPanel_NotApplicable;
 	public static String ServerOptionsWizardPage_Message;

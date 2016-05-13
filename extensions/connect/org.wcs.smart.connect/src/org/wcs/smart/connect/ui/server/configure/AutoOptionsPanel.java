@@ -80,6 +80,11 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 	}
 	
 	@Override
+	public String getDescription(){
+		return Messages.AutoOptionsPanel_Description;
+	}
+	
+	@Override
 	public Composite createComposite(Composite parent, boolean isEditable){
 		this.isEditable = isEditable;
 		listeners = new ArrayList<ModifyListener>();

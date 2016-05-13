@@ -334,19 +334,22 @@ public class ConnectDialog extends TitleAreaDialog {
 					
 					//save password
 					try{
-						String existingPassword = null;
-						try{
-							existingPassword = ConnectPlugIn.decryptPassword(ConnectDialog.this.user);
-						}catch (Exception ex){
-							existingPassword = ""; //$NON-NLS-1$
-						}
-						String newPassword = null;
 						if (savePass){
-							newPassword = ConnectPlugIn.encryptPassword(pass);
-						}
-						if (ConnectDialog.this.user == null || savePass){
-							if (!strequals(existingPassword, newPassword == null ? null : pass)){
+							String existingPassword = null;
+							try{
+								existingPassword = ConnectPlugIn.decryptPassword(ConnectDialog.this.user);
+							}catch (Exception ex){
+								existingPassword = ""; //$NON-NLS-1$
+							}
+							
+							if (!strequals(existingPassword, pass)){
+								String newPassword = ConnectPlugIn.encryptPassword(pass);
 								saveUserInfo(user, newPassword);
+							}
+						}else{
+							if (ConnectDialog.this.user.getConnectPassword() != null){
+								//set to null
+								saveUserInfo(user, null);
 							}
 						}
 						

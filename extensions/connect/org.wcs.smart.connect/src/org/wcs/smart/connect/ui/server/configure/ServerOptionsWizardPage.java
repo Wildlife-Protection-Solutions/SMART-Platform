@@ -58,7 +58,8 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		panel.createComposite(inner, true);
 		
 		setTitle(Messages.ServerOptionsWizardPage_Title);
-		setMessage(Messages.ServerOptionsWizardPage_Message);
+		setTitle(panel.getName());
+		setMessage(panel.getDescription());
 		
 		setControl(outer);
 	

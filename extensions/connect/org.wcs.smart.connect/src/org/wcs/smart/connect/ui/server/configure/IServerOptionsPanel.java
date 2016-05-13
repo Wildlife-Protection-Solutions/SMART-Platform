@@ -55,6 +55,12 @@ public interface IServerOptionsPanel {
 	public String getName();
 	
 	/**
+	 * The description of the contents of the panel
+	 * @return
+	 */
+	public String getDescription();
+	
+	/**
 	 * Initializes widgets on the panel with information from the
 	 * connect server.
 	 * 
