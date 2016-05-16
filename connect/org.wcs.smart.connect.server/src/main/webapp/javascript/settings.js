@@ -8,12 +8,12 @@ var allActions = null;
 //A selection of icons, the full list, which you can type into the text box is at http://fortawesome.github.io/Font-Awesome/icons/
 
 var iconOptions = ["ambulance","asterisk","battery-quarter","binoculars","bomb","bug","bullseye","bus","bullhorn","car","check","circle","cog",
-                   "clipboard","cloud","crosshairs","exclamation","eye","fire","flask","gavel","group","heartbeat","home","leaf","money","motorcycle","pause","paw",                  
-                   "plane","play","stop","tree","trophy","user"];
+                   "clipboard","cloud","crosshairs","exclamation","eye","fire","flask","gavel","group","heartbeat","home","leaf","money","motorcycle","pause","paw","user",                  
+                   "plane","play","stop","tree","trophy"];
 
 var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb","bug","bullseye","bus","bullhorn","car","check","circle","cog",
                          "clipboard","cloud","crosshairs","exclamation","eye","fire","flask/chemical","gavel","group of people", "heartbeat","home","leaf","money",
-                         "motorcycle","pause","paw","plane","play","stop","tree","trophy","person"];
+                         "motorcycle","pause","paw","person","plane","play","stop","tree","trophy"];
 
 
 /* configure events on html elements */

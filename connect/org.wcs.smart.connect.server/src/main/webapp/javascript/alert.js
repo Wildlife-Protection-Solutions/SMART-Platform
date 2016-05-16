@@ -277,7 +277,7 @@ function settab(tab){
 			document.getElementById('tab3text').className += "unselectedTab";
 			break;
 		case 3:
-			document.getElementById("map-info-box").style.display = "none";
+			document.getElementById("map-info-box").style.display = "block";
 			document.getElementById("filter-controls").style.display = "block";
 			
 			document.getElementById("tab3").style.zIndex = 2;

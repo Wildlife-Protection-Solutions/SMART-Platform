@@ -145,10 +145,11 @@
 	<div id="filter-controls">
 		<a id="filter-link" onClick="hideShowFilters()" style="cursor: pointer;"><img id="filter-button" style="cursor: pointer;"/><fmt:message key="alert.hidefilters" /></a>
 
-		<form id="filter-form" name="filter-form" onsubmit="return false;">
+		<form id="filter-form" name="filter-form" action="" onsubmit="return false;">
 			<input id="sortBy" type="hidden" name="sortBy" value="userGeneratedId"/>
 			<input id="sortAscending" type="hidden" name="sortAscending"  value="true"/>
-
+			
+			<p>
 			<select id='filterDate' class='updateChange' name="time_filter" style="margin-bottom:3px">
 				<option value=1><fmt:message key="alert.within1" /></option>
 				<option value=2><fmt:message key="alert.within2" /></option>
@@ -162,11 +163,15 @@
 				<option value=-99><fmt:message key="alert.alldates" /></option>
 				<option value=-1><fmt:message key="alert.customdates" /></option>
 			</select>
-
+			</p>
+			
+			<p>
 			<br><input type="text" id="datePickerFrom" class="date-input">
 			<font class="date-text"><fmt:message key="alert.dateto"/> </font><input type="text" id="datePickerTo" class="date-input">
-
-			<p><fmt:message key="alert.filters.types" /><br>
+			</p>
+			
+			<p style="clear:both;">
+			<fmt:message key="alert.filters.types" /><br>
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
      			<input class='filterType updateChange' name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox"> ${type.getLabel()} </input><br> 
 			</c:forEach> 
