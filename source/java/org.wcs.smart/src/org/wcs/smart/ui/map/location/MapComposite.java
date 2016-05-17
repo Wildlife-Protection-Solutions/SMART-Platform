@@ -186,7 +186,9 @@ public class MapComposite extends Composite implements MapPart {
 			@Override
 			public void done(IJobChangeEvent event) {
 				if (isDisposed() || mapViewer == null) return;
+				
 				mapViewer.getMap().sendCommandSync(new ZoomExtentCommand());
+				mapViewer.getMap().getRenderManager().refresh(null);
 			}
 		});
 		defaultLayer.schedule();

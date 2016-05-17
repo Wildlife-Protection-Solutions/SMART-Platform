@@ -256,7 +256,8 @@ public final class DrawingAWT {
 			LineSymbolizer lineSymbolizer = (LineSymbolizer) symb;
 			Color c = SLDs.color(lineSymbolizer);
 			int w = SLDs.width(lineSymbolizer);
-			if (c != null && w > 0) {
+			if (w == 0) w = 1;
+			if (c != null && w >= 0) {
 				g.setColor(c);
 				g.setStroke(ViewportGraphics.LINE_SOLID, w);
 				g.draw(shape);
@@ -268,6 +269,8 @@ public final class DrawingAWT {
 			Color c = SLDs.pointColor(pointSymbolizer);
 			Color fill = SLDs.pointFillWithAlpha(pointSymbolizer);
 			int width = SLDs.width(SLDs.stroke(pointSymbolizer));
+			if (width < 0) width = 0;
+	           
 			float[] point = new float[6];
 			shape.getPathIterator(null).currentSegment(point);
 			SLDStyleFactory styleFactory = new SLDStyleFactory();
