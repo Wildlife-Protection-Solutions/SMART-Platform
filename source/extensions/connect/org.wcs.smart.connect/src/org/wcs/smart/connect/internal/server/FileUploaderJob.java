@@ -26,6 +26,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 
+import javax.ws.rs.InternalServerErrorException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -86,6 +88,14 @@ public abstract class FileUploaderJob extends Job {
 							serverStatus.getCurrentSize(),
 							copyMonitor);
 				}catch (Exception ex){
+					if (ex instanceof InternalServerErrorException){
+						try{
+							InternalServerErrorException isee = (InternalServerErrorException)ex;
+							String info  = isee.getResponse().readEntity(String.class);
+							ConnectPlugIn.log(info, null);
+						}catch (Exception ex2){	
+						}
+					}
 					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
 				
