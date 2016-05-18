@@ -90,6 +90,7 @@ public class ImportPatrolHandler {
 	}
 
 	private void reportCombinedWarnings(Shell activeShell, ImportConfig config) {
+		if (config.getWarnings().isEmpty()) return;
 		CombinedReportBuilder reportBuilder = new CombinedReportBuilder();
 		String message = reportBuilder.buildReport(config.getWarnings(), config.getWarningFiles());	
 		
