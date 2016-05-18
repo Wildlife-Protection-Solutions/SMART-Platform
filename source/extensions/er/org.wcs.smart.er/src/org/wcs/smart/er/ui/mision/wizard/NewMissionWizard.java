@@ -70,6 +70,8 @@ import org.wcs.smart.util.SharedUtils;
  */
 public class NewMissionWizard extends Wizard implements IPageChangingListener{
 
+	public enum StartPage {MISSION, SURVEY, DESIGN};
+	
 	private Session session;
 	
 	private Mission newMission;
@@ -81,6 +83,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 	private List<MissionComposite> localPages;
 	
 	private Object lastPage;
+	private StartPage startPage;
 	
 	/**
 	 * Creates a new wizard
@@ -101,6 +104,10 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 			newMission.setStartDate(parentSurvey.getStartDate());
 			newMission.setEndDate(parentSurvey.getEndDate());
 		}
+	}
+	
+	public void setStartPage(StartPage startPage){
+		this.startPage = startPage;
 	}
 	
 	public Mission getNewMission(){
@@ -221,22 +228,21 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     	setWindowTitle(Messages.NewMissionWizard_WizardTitle);
 
     	localPages = new ArrayList<MissionComposite>();
-    	if (parentDesign == null){
-    		//get active surveys
-    		SurveyDesignFilter f = new SurveyDesignFilter(SmartDB.getCurrentConservationArea());
-    		f.setSurveyStates(new State[]{State.ACTIVE});
-    		List<SurveyDesignEditorInput> others = new ArrayList<SurveyDesignEditorInput>();
-    		for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, f)){
-				others.add(new SurveyDesignEditorInput(proxy));
-			}
-    		localPages.add(new SurveyDesignComposite(others));
-    	}
+
+   		//get active surveys
+    	SurveyDesignFilter f = new SurveyDesignFilter(SmartDB.getCurrentConservationArea());
+    	f.setSurveyStates(new State[]{State.ACTIVE});
+    	List<SurveyDesignEditorInput> others = new ArrayList<SurveyDesignEditorInput>();
+    	for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, f)){
+			others.add(new SurveyDesignEditorInput(proxy));
+		}
+    	localPages.add(new SurveyDesignComposite(others, parentDesign));
     	
     	if (parentSurvey != null){
     		newMission.setSurvey(parentSurvey);
     	}
     	
-    	localPages.add(new SurveyComposite());
+    	localPages.add(new SurveyComposite(parentSurvey));
     	localPages.add(new IdComposite());
     	localPages.add(new DateComposite());
     	localPages.add(new MissionEmployeeComposite());
@@ -252,16 +258,21 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 
 	@Override
 	public IWizardPage getStartingPage() {
-		if (parentDesign == null){
-			return super.getStartingPage();
+		if (startPage != null){
+			if (startPage == StartPage.DESIGN && parentDesign == null){
+				return getPages()[0];
+			}
+			if (startPage == StartPage.SURVEY && parentDesign != null){
+				return getPages()[1];		
+			}
+			if (startPage == StartPage.MISSION && parentDesign != null && parentSurvey != null){
+				return getPages()[2];
+			}
+			if (startPage == StartPage.MISSION && parentDesign != null && parentSurvey == null){
+				return getPages()[1];
+			}
 		}
-		if (parentSurvey == null){
-			return super.getStartingPage();
-		}
-		if (getPageCount() == 0) {
-			return null;
-		}
-		return getPages()[1];
+		return super.getStartingPage();
 	}
 
 	@Override

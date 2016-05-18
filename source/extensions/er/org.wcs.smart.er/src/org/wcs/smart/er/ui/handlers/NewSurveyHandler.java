@@ -24,15 +24,21 @@ package org.wcs.smart.er.ui.handlers;
 import java.util.Iterator;
 import java.util.UUID;
 
+import javax.inject.Named;
+
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignListView;
@@ -50,9 +56,12 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
  */
 public class NewSurveyHandler {
 
+	public static final String STARTPAGE_ID_PARAM = "org.wcs.smart.er.survey.new.parameter.startpage"; //$NON-NLS-1$
+	
 	//EG: See DeleteSurveyElementHandler for use of ESelectionService over ActiveSelection
 	@Execute
-	public void execute(ESelectionService selService, 
+	public void execute(@Optional @Named(STARTPAGE_ID_PARAM) String startPage,
+			ESelectionService selService, 
 			Shell activeShell,
 			IEclipseContext ctx){
 		Object selection = selService.getSelection();
@@ -81,8 +90,13 @@ public class NewSurveyHandler {
 				}
 			}
 		}
-		
-		Survey newSurvey = newSurvey(activeShell, parentDesign, parentSurvey);
+		NewSurveyWizard.StartPage initPage = null;
+		if (startPage != null && startPage.equalsIgnoreCase("survey")){ //$NON-NLS-1$
+			initPage = NewSurveyWizard.StartPage.SURVEY;
+		}else{
+			initPage = NewSurveyWizard.StartPage.DESIGN;
+		}
+		Survey newSurvey = newSurvey(activeShell, parentDesign, parentSurvey, initPage);
 		if (newSurvey != null){
 			ctx.set(ShowFieldDataPerspective.FOCUS_VIEW, SurveyDesignListView.ID);
 			ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, ctx);
@@ -94,11 +108,12 @@ public class NewSurveyHandler {
 	 * @param parent
 	 * @param parentDesign parent survey design; can be null if unknown
 	 * @param parentSurvey sibling survey; can be null if unknown
-	 * 
+	 * @param startPage can be null or the initial page of the wizard
 	 * @return the newly created survey of null if not created
 	 */
-	public static Survey newSurvey(Shell parent, UUID parentDesign, UUID parentSurvey){
+	public static Survey newSurvey(Shell parent, UUID parentDesign, UUID parentSurvey, NewSurveyWizard.StartPage startPage){
 		NewSurveyWizard newWizard = new NewSurveyWizard(parentDesign, parentSurvey);
+		newWizard.setStartPage(startPage);
 		WizardDialog wd = new WizardDialog(parent, newWizard);
 		if (wd.open() == WizardDialog.OK){
 			return newWizard.getNewSurvey();
@@ -106,9 +121,25 @@ public class NewSurveyHandler {
 		return null;
 	}
 	
-	public static class NewSurveyHandlerWrapper extends DIHandler<NewSurveyHandler>{
+	public static class NewSurveyHandlerWrapper extends AbstractHandler{
+		private NewSurveyHandler component;
+		
 		public NewSurveyHandlerWrapper(){
-			super(NewSurveyHandler.class);
+			IEclipseContext context = getActiveContext();
+			component = ContextInjectionFactory.make(NewSurveyHandler.class, context);
+		}
+		
+		private static IEclipseContext getActiveContext() {
+			IEclipseContext parentContext = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+			return parentContext.getActiveLeaf();
+		}
+		
+		@Override
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+			//Default di handler does not add parameters into context
+			IEclipseContext ctx = getActiveContext();
+			ctx.set(STARTPAGE_ID_PARAM, event.getParameter(STARTPAGE_ID_PARAM));
+			return ContextInjectionFactory.invoke(component, Execute.class, ctx);
 		}
 	}
 }

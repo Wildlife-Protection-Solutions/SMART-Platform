@@ -35,6 +35,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.er.ui.mision.SurveyComposite;
+import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
 
 /**
  * Wizard page that is comprised of a survey design composite.
@@ -96,13 +97,23 @@ public class MissionCompositeWizardPage extends WizardPage {
 			composite.init(mission, session);
 		}
 		String text = ""; //$NON-NLS-1$
-		if (survey != null ){
-			text += survey.getId();
+		if (composite instanceof SurveyDesignComposite){
+			
+		}else if (composite instanceof SurveyComposite){
+			if (surveyDesign != null){
+				text += surveyDesign.getName(); 
+			}
+		}else{
+			if (survey != null ){
+				text += survey.getId();
+			}
+			if (surveyDesign != null){
+				if (!text.isEmpty()) text += " - "; //$NON-NLS-1$
+				text += surveyDesign.getName(); 
+			}
 		}
-		if (surveyDesign != null){
-			if (!text.isEmpty()) text += " - "; //$NON-NLS-1$
-			text += surveyDesign.getName(); 
-		}
+		
+		
 		if (!text.isEmpty()){
 			sd.setText(text); 
 			sd.getParent().layout();

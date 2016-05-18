@@ -376,12 +376,22 @@
          </separator>
          <command
                commandId="org.wcs.smart.er.mission.new"
+               label="%mission.create.command.name"
                style="push"
                tooltip="%mission.create.command.tooltip1">
+            <parameter
+                  name="org.wcs.smart.er.mission.new.parameter.startpage"
+                  value="mission">
+            </parameter>
          </command>
          <command
                commandId="org.wcs.smart.er.survey.new"
+               label="%survey.create.command.name"
                style="push">
+            <parameter
+                  name="org.wcs.smart.er.survey.new.parameter.startpage"
+                  value="survey">
+            </parameter>
          </command>
          <separator
                name="org.wcs.smart.er.list.seperator.2"
@@ -647,10 +657,20 @@
       <command
             id="org.wcs.smart.er.survey.new"
             name="%survey.create.command.name">
+         <commandParameter
+               id="org.wcs.smart.er.survey.new.parameter.startpage"
+               name="Start Page"
+               optional="true">
+         </commandParameter>
       </command>
       <command
             id="org.wcs.smart.er.mission.new"
             name="%mission.create.command.name">
+         <commandParameter
+               id="org.wcs.smart.er.mission.new.parameter.startpage"
+               name="Start Page"
+               optional="true">
+         </commandParameter>
       </command>
       <command
             id="org.wcs.smart.er.missionattributes.show"

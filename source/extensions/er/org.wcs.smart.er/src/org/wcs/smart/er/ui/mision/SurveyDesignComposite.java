@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -52,9 +53,11 @@ public class SurveyDesignComposite extends MissionComposite{
 	private ComboViewer cmbDesigns;
 	
 	private List<SurveyDesignEditorInput> surveys;
+	private SurveyDesign init;
 	
-	public SurveyDesignComposite(List<SurveyDesignEditorInput> surveys){
+	public SurveyDesignComposite(List<SurveyDesignEditorInput> surveys, SurveyDesign initSelection){
 		this.surveys = surveys;
+		this.init = initSelection;
 	}
 	
 	
@@ -89,11 +92,16 @@ public class SurveyDesignComposite extends MissionComposite{
 	 */
 	@Override
 	public void init(Mission design, Session session) {
-
+		SurveyDesign sd = init;
+		if (design.getSurvey() != null){
+			sd = design.getSurvey().getSurveyDesign();
+		}
+		SurveyDesignEditorInput selection = new SurveyDesignEditorInput(null,  sd.getUuid(),  null,  null);
+		cmbDesigns.setSelection(new StructuredSelection(selection));
 	}
 
 	/**
-	 * Does nothing
+	 * Does nothing.  This will be configured when the user selectes the survey
 	 */
 	@Override
 	public void updateDesign(Mission design) {

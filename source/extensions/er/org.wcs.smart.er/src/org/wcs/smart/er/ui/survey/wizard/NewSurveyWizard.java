@@ -46,6 +46,8 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 
+	public enum StartPage {DESIGN, SURVEY};
+	
 	private Session session;
 	
 	private Survey newSurvey;
@@ -56,6 +58,7 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 	private SurveyIdPage idPage;
 	private SurveyDatePage datePage;
 	
+	private StartPage startPage = null;
 	/**
 	 * Creates a new wizard
 	 * @param parentDesign parent design; optional
@@ -75,6 +78,10 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 			Survey survey = (Survey) session.load(Survey.class, surveySibling);
 			newSurvey.setSurveyDesign(survey.getSurveyDesign());
 		}
+	}
+	
+	public void setStartPage(StartPage startPage){
+		this.startPage = startPage;
 	}
 	
 	/**
@@ -150,6 +157,13 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 
 	@Override
 	public IWizardPage getStartingPage() {
+		if (startPage != null){
+			if (startPage == StartPage.DESIGN){
+				return super.getStartingPage();
+			}else if (startPage == StartPage.SURVEY && newSurvey.getSurveyDesign() != null){
+				return idPage;
+			}
+		}
 		if (newSurvey.getSurveyDesign() == null){
 			return super.getStartingPage();
 		}

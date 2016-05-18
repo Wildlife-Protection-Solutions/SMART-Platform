@@ -58,6 +58,12 @@ public class SurveyComposite extends MissionComposite{
 	private ComboViewer cmbSurveys;
 	private SurveyDesign parentSurvey;
 	private Session session;
+	private Survey defaultSurvey;
+	
+	public SurveyComposite(Survey defaultSurvey){
+		this.defaultSurvey = defaultSurvey;
+	}
+	
 	
 	@Override
 	public Control createControl(Composite parent) {
@@ -124,6 +130,8 @@ public class SurveyComposite extends MissionComposite{
 		refreshSurveys(session);
 		if (mission.getSurvey() != null){
 			cmbSurveys.setSelection(new StructuredSelection(mission.getSurvey()));
+		}else if (defaultSurvey != null){
+			cmbSurveys.setSelection(new StructuredSelection(defaultSurvey));
 		}
 	}
 	
@@ -137,7 +145,7 @@ public class SurveyComposite extends MissionComposite{
 	private void createSurvey(){
 		//New Survey ...
 		//this will close the hibernate current hibernate session
-		Survey newSurvey = NewSurveyHandler.newSurvey(cmbSurveys.getControl().getShell(), parentSurvey.getUuid(), null );
+		Survey newSurvey = NewSurveyHandler.newSurvey(cmbSurveys.getControl().getShell(), parentSurvey.getUuid(), null, null);
 		if (newSurvey == null){
 			//new survey not created
 			return;
@@ -164,10 +172,10 @@ public class SurveyComposite extends MissionComposite{
 
 	@Override
 	public boolean isValid() {
-		if (cmbSurveys.getSelection().isEmpty()){
-			return false;
+		if (!cmbSurveys.getSelection().isEmpty() && ((IStructuredSelection)cmbSurveys.getSelection()).getFirstElement() instanceof Survey ){
+			return true;
 		}
-		if (((IStructuredSelection)cmbSurveys.getSelection()).getFirstElement() instanceof Survey ){
+		if (defaultSurvey != null){
 			return true;
 		}
 		return false;

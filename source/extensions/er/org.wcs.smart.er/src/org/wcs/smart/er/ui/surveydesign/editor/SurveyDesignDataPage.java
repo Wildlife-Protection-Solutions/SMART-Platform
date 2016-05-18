@@ -90,6 +90,7 @@ import org.wcs.smart.er.ui.handlers.DeleteSurveyElementHandler;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.handlers.NewMissionHandler;
 import org.wcs.smart.er.ui.handlers.NewSurveyHandler;
+import org.wcs.smart.er.ui.mision.wizard.NewMissionWizard;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -369,14 +370,14 @@ public class SurveyDesignDataPage extends EditorPart {
 		}
 		NewMissionHandler.newMission(getSite().getShell(),
 				parentEditor.getSurveyDesign().getUuid(), 
-				n==null? null : n.getUuid());
+				n==null? null : n.getUuid(), NewMissionWizard.StartPage.MISSION);
 	}
 	
 	/*
 	 * opens new survey wizard
 	 */
 	private void newSurvey(){
-		NewSurveyHandler.newSurvey(getSite().getShell(), parentEditor.getSurveyDesign().getUuid(), null);
+		NewSurveyHandler.newSurvey(getSite().getShell(), parentEditor.getSurveyDesign().getUuid(), null, null);
 	}
 	
 	/*
