@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -113,22 +114,28 @@ public abstract class InitializeDialog  extends Dialog {
 		DialogHeader dh = new DialogHeader(parent, SWT.NONE);
 		dh.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		dh.setHeader(getHeaderText());
-
-		Composite contents = new Composite(parent, SWT.NONE);
-		contents.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,true, true));
-		gl = new GridLayout(1, false);
-		gl.verticalSpacing = 10;
-		contents.setLayout(gl);
 		
-		Label lblNewLabel = new Label(contents, SWT.WRAP);
-		lblNewLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,true, true));
+		Composite rest = new Composite(parent, SWT.NONE);
+		rest.setLayout(new GridLayout());
+		rest.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		
+		Label lblNewLabel = new Label(rest, SWT.WRAP);
+		lblNewLabel.setLayoutData(new GridData(SWT.LEFT, SWT.LEFT, true, false));
 		lblNewLabel.setText(getMessageText());
-
+		
+		ScrolledComposite sc = new ScrolledComposite(rest,  SWT.V_SCROLL);
+		sc.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		
+		Composite contents = new Composite(sc, SWT.NONE);
+		contents.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		gl = new GridLayout(1, false);
+		contents.setLayout(gl);
+		sc.setContent(contents);
+		
 		Composite opComp = new Composite(contents, SWT.NONE);
 		gl = new GridLayout(1, false);
-		gl.marginLeft = 20;
 		opComp.setLayout(gl);
-		
+		opComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		List<IAdvancedStartupOption> ops = getStartUpOptions();
 		btnOps = new Button[ops.size()];
 		int i = 0;
@@ -138,8 +145,11 @@ public abstract class InitializeDialog  extends Dialog {
 			btnop.setData(op);
 			btnOps[i++] = btnop;
 		}
+
 		btnOps[0].setSelection(true);
 		
+		contents.setSize(contents.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+	 
 		Label lbl = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,false));
 		
@@ -147,12 +157,16 @@ public abstract class InitializeDialog  extends Dialog {
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		gl = new GridLayout(2, true);
 		gl.horizontalSpacing = 20;
-		gl.marginHeight = 10;
+		gl.marginHeight = 0;
 		buttonComp.setLayout(gl);
 				
 		return parent;
 	}
 
+	@Override
+	protected boolean isResizable(){
+		return true;
+	}
 	
 	/**
 	 * Starts the process for restoring a database
