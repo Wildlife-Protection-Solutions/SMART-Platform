@@ -32,6 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.DesignConfig;
 import org.eclipse.birt.report.model.api.DesignEngine;
+import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.LibraryHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
@@ -222,7 +223,24 @@ public class ReportTemplateCloner implements
 						//new query reference cannot be found; 
 						throw new Exception(MessageFormat.format(Messages.ReportTemplateCloner_CloneError, new Object[]{report.getName()}));
 					}
-					
+				}
+			}
+		}
+		
+		//update any map basemap references
+		Iterator<?> items = rdh.getBody().iterator();
+		while(items.hasNext()){
+			Object x = items.next();
+			if (x instanceof ExtendedItemHandle){
+				if (((ExtendedItemHandle)x).getExtensionName().equals("org.wcs.smart.report.birt.SmartMap")){ //$NON-NLS-1$
+					//update basemap
+					ExtendedItemHandle ei = (ExtendedItemHandle)x;
+					ei.clearProperty("org.wcs.smart.birt.map.basemap"); //$NON-NLS-1$
+					ei.clearProperty("org.wcs.smart.report.birt.map.bounds.xmin"); //$NON-NLS-1$
+					ei.clearProperty("org.wcs.smart.report.birt.map.bounds.ymin"); //$NON-NLS-1$
+					ei.clearProperty("org.wcs.smart.report.birt.map.bounds.xmax"); //$NON-NLS-1$
+					ei.clearProperty("org.wcs.smart.report.birt.map.bounds.ymax"); //$NON-NLS-1$
+					ei.clearProperty("org.wcs.smart.report.birt.map.bounds.srid"); //$NON-NLS-1$
 				}
 			}
 		}

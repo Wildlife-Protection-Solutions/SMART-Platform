@@ -31,12 +31,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.LibraryHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
@@ -68,6 +70,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
@@ -211,6 +214,43 @@ public class ImportReportEngine {
 			
 			//update report/query info			
 			ReportManager.updateReportQueries(session, rdh, importReport);
+			
+			//deal with maps
+			Iterator<?> items = rdh.getBody().iterator();
+			while(items.hasNext()){
+				Object x = items.next();
+				if (x instanceof ExtendedItemHandle){
+					if (((ExtendedItemHandle)x).getExtensionName().equals("org.wcs.smart.report.birt.SmartMap")){ //$NON-NLS-1$
+						//update basemap
+						ExtendedItemHandle ei = (ExtendedItemHandle)x;
+						String basemap = (String) ei.getProperty("org.wcs.smart.birt.map.basemap"); //$NON-NLS-1$
+						
+						//determine if basemap is a uuid and if the basemap exists in the 
+						//import ca.  If not clear the basemap 
+						UUID basemapUuid = null;
+						try{
+							basemapUuid = UuidUtils.stringToUuid(basemap); 
+						}catch (Exception ex){}
+						
+						if (basemapUuid != null){
+							BasemapDefinition bm = (BasemapDefinition) session.get(BasemapDefinition.class, basemapUuid);
+							if (bm == null){
+								basemapUuid = null;
+							}else if (!bm.getConservationArea().equals(importCa)){
+								basemapUuid = null;
+							}
+						}
+						if (basemapUuid == null){
+							ei.clearProperty("org.wcs.smart.birt.map.basemap"); //$NON-NLS-1$
+							ei.clearProperty("org.wcs.smart.report.birt.map.bounds.xmin"); //$NON-NLS-1$
+							ei.clearProperty("org.wcs.smart.report.birt.map.bounds.ymin"); //$NON-NLS-1$
+							ei.clearProperty("org.wcs.smart.report.birt.map.bounds.xmax"); //$NON-NLS-1$
+							ei.clearProperty("org.wcs.smart.report.birt.map.bounds.ymax"); //$NON-NLS-1$
+							ei.clearProperty("org.wcs.smart.report.birt.map.bounds.srid"); //$NON-NLS-1$
+						}
+					}
+				}
+			}
 			
 			//fire events
 			ReportEventManager.getInstance().fireReportImportHandlers(rdh, oldToNewQueries);

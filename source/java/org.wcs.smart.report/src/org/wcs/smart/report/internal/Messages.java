@@ -68,6 +68,7 @@ public class Messages extends NLS {
 	public static String ExportReportWizard_DialogMessage;
 	public static String ExportReportWizard_DialogTitle;
 	public static String ExportReportWizard_ExportError;
+	public static String ExportReportWizard_ExportReportWizardTitle;
 	public static String ExportReportWizard_ImportComplete;
 	public static String ExportReportWizardPage_CaOption;
 	public static String ExportReportWizardPage_OutputRequired;

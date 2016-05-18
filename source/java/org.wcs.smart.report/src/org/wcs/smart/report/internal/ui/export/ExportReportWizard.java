@@ -77,7 +77,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 	 *
 	 */
 	public ExportReportWizard(boolean isMultiple, List<Report> initReports) {
-		setWindowTitle(Messages.ImportReportWizard_Title);
+		setWindowTitle(Messages.ExportReportWizard_ExportReportWizardTitle);
 		
 		super.setNeedsProgressMonitor(true);
 		this.isMultiple = isMultiple;
