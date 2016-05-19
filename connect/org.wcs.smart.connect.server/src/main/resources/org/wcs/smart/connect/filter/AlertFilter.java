@@ -65,6 +65,7 @@ public class AlertFilter {
 	private boolean sortAscending; 
 	
 	
+	@SuppressWarnings("deprecation")
 	public AlertFilter(String levelFilter, String typeUuidFilter, 
 			String statusFilter, String caUuidFilter, String startDateFilter, 
 			String endDateFilter, String textSearchFilter, String sortBy, 
@@ -134,6 +135,9 @@ public class AlertFilter {
 			try {		
 				this.startDateFilter = new Date(Long.parseLong(startDateFilter));
 				this.endDateFilter = new Date(Long.parseLong(endDateFilter));
+				//Adjust the filters back to UTC, new Date() takes into account the local timezone, we don't want that.
+				this.startDateFilter.setMinutes(this.startDateFilter.getMinutes() + this.startDateFilter.getTimezoneOffset());
+				this.endDateFilter.setMinutes(this.endDateFilter.getMinutes() + this.endDateFilter.getTimezoneOffset());
 			} catch (Exception e) {
 				throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidDate",l)); //$NON-NLS-1$
 			}

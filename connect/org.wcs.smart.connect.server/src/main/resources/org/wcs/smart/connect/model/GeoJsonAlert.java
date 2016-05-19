@@ -64,15 +64,22 @@ public class GeoJsonAlert{
 		Date date = null;
 		String dateString = features.get(0).getProperties().getDateTime();
 		if (dateString == null || dateString == "") return null; //$NON-NLS-1$
-		try {
-			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-			dateFormatter.setTimeZone(TimeZone.getDefault());		
-			date = (dateFormatter.parse(dateString.replaceAll("Z$", "-0000"))); //$NON-NLS-1$
 
+		try {
+			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			//Get the date in UTC, we need to remove the "Z" at the end of cybertracker dates
+			date = f.parse(dateString.replaceAll("Z$", ""));			
+			
+			
+//			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+//			dateFormatter.setTimeZone(TimeZone.getTimeZone("Etc/Universal")); //keep in UTC time, default behavior is to convert to local/server time, we don't want that.		
+//			date = (dateFormatter.parse(dateString.replaceAll("Z$", "-0000"))); //$NON-NLS-1$ //get rid of the Z on the end of the date from CT, it is in UTC time.
+			//date = dateFormatter.parse(dateString); //$NON-NLS-1$
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		return date;
+		
 	}
 	
 	public String getAltitude() {

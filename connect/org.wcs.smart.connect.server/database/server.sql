@@ -144,7 +144,7 @@ CREATE TABLE connect.alerts
 	-- A unqiue identifier that the user generates.
 	user_generated_id varchar NOT NULL,
 	-- The date/time the alert was created.
-	date timestamp with time zone NOT NULL, 
+	date timestamp NOT NULL, 
 	-- Description associated with alert.
 	description varchar,
 	-- A link to the alert type.

@@ -612,11 +612,13 @@ function getFilteredUrl(base){
 		//do nothing, no filter gives all dates back.
 	}else if(dateSelect >0){ //number of trailing hours from now
 		var now = new Date();
-		var start = new Date()
-		start.setHours(now.getHours() - dateSelect);
+		var nowUTC = now.getTime();
 		
-		filteredUrl += "&startDateFilter=" +  start.getTime(); 
-		filteredUrl += "&endDateFilter=" + now.getTime();
+		var start = new Date()
+		var startUTC = start.getTime() - dateSelect*60*60*1000;  
+		
+		filteredUrl += "&startDateFilter=" +  startUTC; 
+		filteredUrl += "&endDateFilter=" + nowUTC;
 	}
 
 	filteredUrl += "&sortBy=" + document.getElementById('sortBy').value + "&sortAscending=" + document.getElementById('sortAscending').value;
@@ -674,13 +676,15 @@ function updateRealtimeLayer(updatedUrl){
             	
                 var feature = e.features[fId];
                 var c = feature.geometry.coordinates;
-                var date = feature.properties.date;
+                var date = new Date(feature.properties.date);
+                //the time we get from the DB is in UTC, this undoes the automatic timezone translation that happens when you "new Date()" it.
+                date = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
                 
                 if(feature.properties.type == undefined){
                 	return "Track Selected - Please click an alert for alert details.";
             	}
                 
-            	date = date.substr(0, date.length-4);
+            	//date = date.tostring();
                 var text = i18n("alert.event");
                 if(feature.properties.type == 'Unknown Type'){
                 	text = text + "<font color='red'>"
