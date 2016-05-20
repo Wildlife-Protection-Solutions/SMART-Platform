@@ -618,7 +618,7 @@ function getFilteredUrl(base){
 		var startUTC = start.getTime() - dateSelect*60*60*1000;  
 		
 		filteredUrl += "&startDateFilter=" +  startUTC; 
-		filteredUrl += "&endDateFilter=" + nowUTC;
+//		filteredUrl += "&endDateFilter=" + nowUTC; //leaving this out for now, we can show things in the future if times are off slightly
 	}
 
 	filteredUrl += "&sortBy=" + document.getElementById('sortBy').value + "&sortAscending=" + document.getElementById('sortAscending').value;
@@ -660,7 +660,7 @@ function updateRealtimeLayer(updatedUrl){
         crossOrigin: true,
         type: 'json'
     }, {
-        interval: interval,
+        interval: 9000000, //not needed anymore, probably should stop using the 'realtime' object at all since we have our own javascript interval timer now for refreshes 
 //        filter: eventFilter,   //client side-filtering, not using this for now.
         pointToLayer: stylePoints,
         style: styleFunction
@@ -839,6 +839,11 @@ function setMapFilters(){
  	var defaults = geojson[0];
  	
  	interval = defaults.secondsRefresh * 1000;
+ 	
+ 	//timer to refresh the alerts at the set interval
+ 	setInterval(function(){
+ 		refreshAlerts()
+ 	}, interval);
  	
  	
  	var filter_form = document.getElementById('filter-form');
