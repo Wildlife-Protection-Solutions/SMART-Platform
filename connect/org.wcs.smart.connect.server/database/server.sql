@@ -144,7 +144,7 @@ CREATE TABLE connect.alerts
 	-- A unqiue identifier that the user generates.
 	user_generated_id varchar NOT NULL,
 	-- The date/time the alert was created.
-	date timestamp NOT NULL, 
+	date timestamp with time zone NOT NULL, 
 	-- Description associated with alert.
 	description varchar,
 	-- A link to the alert type.
@@ -182,7 +182,7 @@ CREATE TABLE connect.alert_types(
 	PRIMARY KEY (uuid)
 ) WITHOUT OIDS;
 
-insert into connect.alert_types values( '00000000-0000-0000-0000-000000000000' ,'unknown','Unknown Type','#000000','#000000','1', '', 'red', 'false');
+insert into connect.alert_types values( '00000000-0000-0000-0000-000000000000' ,'Unknown Type','#000000','#000000','1', '', 'red', 'false');
 
 
 CREATE TABLE connect.style_configuration(

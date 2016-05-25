@@ -129,15 +129,17 @@ public class AlertFilter {
 			}
 		}
 		
+		
 		//date filters
-		if(startDateFilter != null && !startDateFilter.equals("")			 //$NON-NLS-1$
-			&& endDateFilter != null && !endDateFilter.equals("") ){ //$NON-NLS-1$
+		if(startDateFilter != null && !startDateFilter.equals("")){ //$NON-NLS-1$ 
 			try {		
+				if(endDateFilter == null || endDateFilter.equals("")){
+					this.endDateFilter = new Date((System.currentTimeMillis() + (1000 * 60 * 60 * 24 * 365))); //Add lots of time to now, in case clocks are off etc, really annoying to not see 'future' alerts when you select "all alerts".
+				}else{
+					this.endDateFilter = new Date(Long.parseLong(endDateFilter));
+				}
 				this.startDateFilter = new Date(Long.parseLong(startDateFilter));
-				this.endDateFilter = new Date(Long.parseLong(endDateFilter));
-				//Adjust the filters back to UTC, new Date() takes into account the local timezone, we don't want that.
-				this.startDateFilter.setMinutes(this.startDateFilter.getMinutes() + this.startDateFilter.getTimezoneOffset());
-				this.endDateFilter.setMinutes(this.endDateFilter.getMinutes() + this.endDateFilter.getTimezoneOffset());
+			
 			} catch (Exception e) {
 				throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidDate",l)); //$NON-NLS-1$
 			}

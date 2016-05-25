@@ -24,12 +24,10 @@ package org.wcs.smart.connect.model;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.TimeZone;
 import java.util.Date;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ibm.icu.text.DateFormat;
 
 /*
  * An Alert entity
@@ -66,15 +64,8 @@ public class GeoJsonAlert{
 		if (dateString == null || dateString == "") return null; //$NON-NLS-1$
 
 		try {
-			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			//Get the date in UTC, we need to remove the "Z" at the end of cybertracker dates
-			date = f.parse(dateString.replaceAll("Z$", ""));			
-			
-			
-//			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-//			dateFormatter.setTimeZone(TimeZone.getTimeZone("Etc/Universal")); //keep in UTC time, default behavior is to convert to local/server time, we don't want that.		
-//			date = (dateFormatter.parse(dateString.replaceAll("Z$", "-0000"))); //$NON-NLS-1$ //get rid of the Z on the end of the date from CT, it is in UTC time.
-			//date = dateFormatter.parse(dateString); //$NON-NLS-1$
+			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+			date = f.parse(dateString);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
