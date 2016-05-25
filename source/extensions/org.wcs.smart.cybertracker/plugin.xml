@@ -223,5 +223,11 @@
             content="org.wcs.smart.cybertracker.properties.ConfigurableModelEditorCyberTrackerTab">
       </tab>
    </extension>
+   <extension
+         point="org.wcs.smart.dataentry.xml">
+      <contribution
+            class="org.wcs.smart.cybertracker.xml.dataentry.Ct2CmXmlExtraDataContribution">
+      </contribution>
+   </extension>
 
 </plugin>

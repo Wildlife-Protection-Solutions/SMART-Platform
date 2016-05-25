@@ -360,7 +360,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					File tmpFolder = null;
 					try {
-						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_Exporting, 7);
+						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_Exporting, 8);
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Converting);
 						org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = CmSmartToXmlConverter.convert(cm, monitor);
 						

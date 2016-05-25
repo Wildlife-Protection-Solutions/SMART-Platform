@@ -15,16 +15,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for CmDmAttributeSettingsType complex type.
+ * <p>Java class for CmExtraDataIntegerKeyType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="CmDmAttributeSettingsType">
+ * &lt;complexType name="CmExtraDataIntegerKeyType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="displayMode" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}int" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -33,60 +33,60 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "CmDmAttributeSettingsType")
-public class CmDmAttributeSettingsType {
+@XmlType(name = "CmExtraDataIntegerKeyType")
+public class CmExtraDataIntegerKeyType {
 
-    @XmlAttribute(name = "attributeKey")
-    protected String attributeKey;
-    @XmlAttribute(name = "displayMode")
-    protected String displayMode;
+    @XmlAttribute(name = "key")
+    protected String key;
+    @XmlAttribute(name = "value")
+    protected Integer value;
 
     /**
-     * Gets the value of the attributeKey property.
+     * Gets the value of the key property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getAttributeKey() {
-        return attributeKey;
+    public String getKey() {
+        return key;
     }
 
     /**
-     * Sets the value of the attributeKey property.
+     * Sets the value of the key property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setAttributeKey(String value) {
-        this.attributeKey = value;
+    public void setKey(String value) {
+        this.key = value;
     }
 
     /**
-     * Gets the value of the displayMode property.
+     * Gets the value of the value property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link Integer }
      *     
      */
-    public String getDisplayMode() {
-        return displayMode;
+    public Integer getValue() {
+        return value;
     }
 
     /**
-     * Sets the value of the displayMode property.
+     * Sets the value of the value property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link Integer }
      *     
      */
-    public void setDisplayMode(String value) {
-        this.displayMode = value;
+    public void setValue(Integer value) {
+        this.value = value;
     }
 
 }

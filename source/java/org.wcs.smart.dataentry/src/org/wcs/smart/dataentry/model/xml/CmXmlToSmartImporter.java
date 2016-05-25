@@ -55,6 +55,8 @@ import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
+import org.wcs.smart.dataentry.model.xml.external.IConvertedCmExtraData;
+import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeItemType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
@@ -201,6 +203,18 @@ public class CmXmlToSmartImporter {
 			if (monitor.isCanceled()) return null;
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportAttributesSettings);
 			processAttributeSettings(cm, xmlCm.getSetting());
+
+			//converting extra data
+			List<IConvertedCmExtraData> convertedExtraData = new ArrayList<IConvertedCmExtraData>();
+			for (IXmlCmExtraDataContribution edc : XmlCmExtraDataContributionFactory.getContributions()) {
+				IConvertedCmExtraData extraData = edc.fromXml(xmlCm.getExtraData(), session);
+				if (extraData != null) {
+					if (extraData.getWarnings() != null) {
+						warnings.addAll(extraData.getWarnings());
+					}
+					convertedExtraData.add(extraData);
+				}
+			}
 			
 			if (!warnings.isEmpty()) {
 				StringBuilder sb = new StringBuilder();
@@ -231,6 +245,9 @@ public class CmXmlToSmartImporter {
 			
 			monitor.subTask(Messages.CmXmlToSmartImporter_Saving);
 			session.save(cm);
+			for (IConvertedCmExtraData extraData : convertedExtraData) {
+				extraData.saveInTransaction(session, cm);
+			}
 			session.getTransaction().commit();
 			return cm;
 			

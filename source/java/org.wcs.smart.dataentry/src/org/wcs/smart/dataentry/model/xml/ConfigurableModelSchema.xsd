@@ -32,6 +32,7 @@ elementFormDefault="qualified">
     		<element name="setting" type="smrt:CmDmAttributeSettingsTypeList"
     			maxOccurs="1" minOccurs="0">
     		</element>
+    		<element name="extraData" type="smrt:CmExtraDataType" maxOccurs="unbounded" minOccurs="0"/>
     	</sequence>
     	<attribute name="displayMode" type="string"></attribute>
     </complexType>
@@ -176,6 +177,32 @@ elementFormDefault="qualified">
     <complexType name="CmDmAttributeSettingsType">
     	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="displayMode" type="string"></attribute>
+    </complexType>
+
+    <complexType name="CmExtraDataType">
+    	<sequence>
+            <element name="stringKey" type="smrt:CmExtraDataStringKeyType" maxOccurs="unbounded" minOccurs="0"/>
+            <element name="integerKey" type="smrt:CmExtraDataIntegerKeyType" maxOccurs="unbounded" minOccurs="0"/>
+            <element name="labelKey" type="smrt:CmExtraDataLabelKeyType" maxOccurs="unbounded" minOccurs="0"/>
+    	</sequence>
+    	<attribute name="type" type="string"/>
+    </complexType>
+
+    <complexType name="CmExtraDataStringKeyType">
+    	<attribute name="key" type="string"/>
+    	<attribute name="value" type="string"/>
+    </complexType>
+
+    <complexType name="CmExtraDataIntegerKeyType">
+    	<attribute name="key" type="string"/>
+    	<attribute name="value" type="int"/>
+    </complexType>
+
+    <complexType name="CmExtraDataLabelKeyType">
+    	<sequence>
+            <element name="label" type="smrt:NameType" maxOccurs="unbounded" minOccurs="1"/>
+    	</sequence>
+    	<attribute name="key" type="string"/>
     </complexType>
 
 </schema>

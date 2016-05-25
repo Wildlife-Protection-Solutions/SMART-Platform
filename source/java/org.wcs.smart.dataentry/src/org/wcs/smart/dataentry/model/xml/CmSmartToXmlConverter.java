@@ -46,12 +46,14 @@ import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
+import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeCmListItemTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeCmTreeNodeTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
 import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsType;
 import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsTypeList;
+import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageListType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
 import org.wcs.smart.dataentry.model.xml.generated.ListItemType;
@@ -108,6 +110,17 @@ public class CmSmartToXmlConverter {
 			processCmDmAttributeSettings(cm, xml, llookup, monitor);
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
+			
+			monitor.subTask("Processing additional data");
+			for (IXmlCmExtraDataContribution dc : XmlCmExtraDataContributionFactory.getContributions()) {
+				List<CmExtraDataType> extraData = dc.exportData(cm, session);
+				if (extraData != null) {
+					xml.getExtraData().addAll(extraData);
+				}
+			}
+			monitor.worked(1);
+			if (monitor.isCanceled()) return null;
+			
 		} finally {
 			session.getTransaction().rollback();
 			session.close();

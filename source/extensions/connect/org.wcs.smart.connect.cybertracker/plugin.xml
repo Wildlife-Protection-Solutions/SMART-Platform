@@ -66,5 +66,11 @@
          </require>
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.dataentry.xml">
+      <contribution
+            class="org.wcs.smart.connect.cybertracker.xml.dataentry.ConnectCt2CmXmlExtraDataContribution">
+      </contribution>
+   </extension>
 
 </plugin>
