@@ -43,7 +43,7 @@ public interface IXmlExtraDataContribution {
 
 	/**
 	 * Returns "extra-data" that current extension points wants to save
-	 * to XML file for give patrol.
+	 * to XML file for given patrol.
 	 * 
 	 * @param patrol
 	 * @return List<ExtraDataType>

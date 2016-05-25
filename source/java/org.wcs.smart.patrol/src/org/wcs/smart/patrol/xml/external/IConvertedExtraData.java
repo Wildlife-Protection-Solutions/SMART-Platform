@@ -44,7 +44,7 @@ public interface IConvertedExtraData {
 	 * 
 	 * @param session
 	 * @param patrol
-	 * @return <true> if data successfully save in database
+	 * @return <true> if data successfully saved in database
 	 */
 	public boolean saveInTransaction(Session session, Patrol patrol);
 
