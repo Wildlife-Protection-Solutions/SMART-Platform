@@ -676,7 +676,10 @@ function updateRealtimeLayer(updatedUrl){
             	
                 var feature = e.features[fId];
                 var c = feature.geometry.coordinates;
-                var date = new Date(feature.properties.date);
+   //             var date = new Date(feature.properties.date);
+                var date = feature.properties.date;
+ //               var date = date.substr(0, feature.properties.date.length -4);
+                
                 
                 if(feature.properties.type == undefined){
                 	return "Track Selected - Please click an alert for alert details.";

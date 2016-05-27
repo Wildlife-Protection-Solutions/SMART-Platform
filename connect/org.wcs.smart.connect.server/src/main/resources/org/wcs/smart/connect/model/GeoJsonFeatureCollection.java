@@ -23,59 +23,42 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.wcs.smart.util.UuidUtils;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class GeoJsonProperties{
-	
-	private String deviceId; 
-	private String id;
-	private String dateTime;
-	private String latitude;
-	private String longitude;
-	private String altitude;
-	private String accuracy;
-	private UUID caUuid;
-	private Integer level;
-	private String description;
-	private UUID typeUuid;
-	private GeoJsonSighting sighting;
-	
-	public String getDeviceId() {
-		return deviceId;
-	}
-	public String getId() {
-		return id;
-	}
-	public String getDateTime() {
-		return dateTime;
-	}
-	public String getLatitude() {
-		return latitude;
-	}
-	public String getLongitude() {
-		return longitude;
-	}
-	public String getAltitude() {
-		return altitude;
-	}
-	public String getAccuracy() {
-		return accuracy;
-	}
-	public UUID getCaUuid() {
-		return caUuid;
-	}
-	public Integer getLevel() {
-		return level;
-	}
-	public String getDescription() {
-		return description;
-	}
-	public UUID getTypeUuid() {
-		return typeUuid;
-	}
-	public GeoJsonSighting getSighting() {
-		return sighting;
+/*
+ * A geoJSON feature collection. I assume there will be some differences from GeoJsonAlert as we figure out with Cybertracker what they are going to send in this object.
+ *
+ * @Author Jeff
+ */
+
+
+
+public class GeoJsonFeatureCollection extends GeoJsonAlert{
+
+	//TODO  update this when we have a CA ID in teh JSON to get properly
+	public UUID getConservationAreaUUID() {
+		return UuidUtils.stringToUuid("1f925d6f-808f-4cbc-8103-c6f357e1ca3e");
 	}
 
+	public String getname() {
+		String str = getConservationAreaUUID().toString() + "::" + getPatrolID().toString() + "::";
+		int i = getFirstObservationId();
+		String text = String.valueOf(i);
+		return str + text;
+	}
+
+
+	private Object getPatrolID() {
+		GeoJsonFeature first = this.getFirstFeature();
+		return first.getProperties().getSighting().getPatrolId();
+	}
+
+	private GeoJsonFeature getFirstFeature() {
+		return this.getFeatures().get(0);
+	}
+	
+	private int getFirstObservationId() {
+		GeoJsonFeature first = this.getFirstFeature();
+		return first.getProperties().getSighting().getObservationId();
+	}
 }

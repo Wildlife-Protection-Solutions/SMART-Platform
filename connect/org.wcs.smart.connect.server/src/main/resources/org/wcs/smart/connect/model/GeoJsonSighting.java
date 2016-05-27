@@ -31,4 +31,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class GeoJsonSighting {
 	private Date date;
 	private Time time;
+	private String patrolId;
+	private int observationId;
+	
+	public String getPatrolId() {
+		return patrolId;
+	}
+	public void setPatrolId(String patrolId) {
+		this.patrolId = patrolId;
+	}
+	
+	public int getObservationId() {
+		return observationId;
+	}
+	public void setObservationId(int observationId) {
+		this.observationId = observationId;
+	}
+	
 }
