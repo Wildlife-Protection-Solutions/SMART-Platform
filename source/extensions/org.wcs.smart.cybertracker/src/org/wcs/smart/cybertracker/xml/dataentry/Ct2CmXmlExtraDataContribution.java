@@ -23,10 +23,12 @@ package org.wcs.smart.cybertracker.xml.dataentry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -83,7 +85,7 @@ public class Ct2CmXmlExtraDataContribution implements IXmlCmExtraDataContributio
 	}
 	
 	@Override
-	public IConvertedCmExtraData fromXml(List<CmExtraDataType> extraDataList, Session session) {
+	public IConvertedCmExtraData fromXml(List<CmExtraDataType> extraDataList, Map<String, UuidItem> dataMap, Session session) {
 		return new ConvertedCt2CmExtraData(extraDataList, session);
 	}
 

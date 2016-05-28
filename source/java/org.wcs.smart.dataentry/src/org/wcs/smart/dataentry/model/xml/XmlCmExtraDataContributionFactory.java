@@ -28,6 +28,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
 
 /**
@@ -53,7 +54,7 @@ public class XmlCmExtraDataContributionFactory {
 				}
 				contributions = items;
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog("Error parsing Extra-Data contribution for Configurable Model.", ex);
+				SmartPlugIn.displayLog(Messages.XmlCmExtraDataContributionFactory_ErrorParseExtraData, ex);
 				return Collections.emptyList();
 			}
 		}

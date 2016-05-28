@@ -21,12 +21,21 @@
  */
 package org.wcs.smart.connect.cybertracker.xml.dataentry;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
+import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
+import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.external.IConvertedCmExtraData;
+import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataIntegerKeyType;
+import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataStringKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
 
 /**
@@ -37,10 +46,82 @@ import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
  */
 public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 
-	private List<String> warnings = new ArrayList<String>();
+	private List<String> warnings = new ArrayList<>();
+
+	private List<ConnectAlert> alerts = new ArrayList<>();
+	private ConnectCtProperties properties;
 	
-	public ConvertedConnectCt2CmExtraData(List<CmExtraDataType> extraDataList, Session session) {
-		// TODO Auto-generated constructor stub
+	public ConvertedConnectCt2CmExtraData(List<CmExtraDataType> extraDataList, Map<String, UuidItem> dataMap, Session session) {
+		for (CmExtraDataType extraDataType : extraDataList) {
+			if(ConnectCt2CmXmlExtraDataContribution.TYPE_ALERT.equals(extraDataType.getType())) {
+				ConnectAlert a = createAlert(extraDataType, dataMap);
+				if (a != null) {
+					alerts.add(a);
+				}
+			}
+			if(ConnectCt2CmXmlExtraDataContribution.TYPE_PROPERTIES.equals(extraDataType.getType())) {
+				properties = createProperties(extraDataType);
+			}
+		}
+	}
+
+	private ConnectAlert createAlert(CmExtraDataType dataType, Map<String, UuidItem> dataMap) {
+		ConnectAlert a = new ConnectAlert();
+		for (CmExtraDataStringKeyType strKeyType : dataType.getStringKey()) {
+			if (ConnectCt2CmXmlExtraDataContribution.KEY_ALERT_TYPE.equals(strKeyType.getKey())) {
+				a.setTypeInternal(strKeyType.getValue());
+			} if (ConnectCt2CmXmlExtraDataContribution.KEY_ALERT_ITEM.equals(strKeyType.getKey())) {
+				UuidItem item = dataMap.get(strKeyType.getValue());
+				if (item != null) {
+					a.setAlertItem(item);
+				} else {
+					warnings.add(MessageFormat.format(Messages.ConvertedConnectCt2CmExtraData_InvalidReference, strKeyType.getValue()));
+					return null;
+				}
+			} if (ConnectCt2CmXmlExtraDataContribution.KEY_ALERT_ATTRIBUTE.equals(strKeyType.getKey())) {
+				UuidItem item = dataMap.get(strKeyType.getValue());
+				if (item != null) {
+					a.setAttrubute((CmAttribute)item);
+				} else {
+					warnings.add(MessageFormat.format(Messages.ConvertedConnectCt2CmExtraData_InvalidReference, strKeyType.getValue()));
+					return null;
+				}
+			}
+		}
+		for (CmExtraDataIntegerKeyType intKeyType : dataType.getIntegerKey()) {
+			if (ConnectCt2CmXmlExtraDataContribution.KEY_ALERT_LEVEL.equals(intKeyType.getKey())) {
+				a.setLevel(intKeyType.getValue());
+			}
+		}
+		
+		//validation
+		if (a.getAlertItem() == null) {
+			warnings.add(Messages.ConvertedConnectCt2CmExtraData_Missing_AlertItem);
+			return null;
+		}
+		if (a.getLevel() == null) {
+			warnings.add(Messages.ConvertedConnectCt2CmExtraData_Missing_Level);
+			return null;
+		}
+		
+		return a;
+	}
+
+	private ConnectCtProperties createProperties(CmExtraDataType dataType) {
+		ConnectCtProperties p = new ConnectCtProperties();
+		for (CmExtraDataIntegerKeyType intKeyType : dataType.getIntegerKey()) {
+			if (ConnectCt2CmXmlExtraDataContribution.KEY_PING_FREQUENCY.equals(intKeyType.getKey())) {
+				p.setPingFrequency(intKeyType.getValue());
+			}
+		}
+		
+		//validation
+		if (p.getPingFrequency() == null) {
+			warnings.add(Messages.ConvertedConnectCt2CmExtraData_Missing_PingFrequency);
+			return null;
+		}
+		
+		return p;
 	}
 
 	@Override
@@ -50,7 +131,14 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 
 	@Override
 	public boolean saveInTransaction(Session session, ConfigurableModel cm) {
-		// TODO Auto-generated method stub
+		if (properties != null) {
+			properties.setModel(cm);
+			session.saveOrUpdate(properties);
+		}
+		for (ConnectAlert a : alerts) {
+			a.setModel(cm);
+			session.saveOrUpdate(a);
+		}
 		return true;
 	}
 

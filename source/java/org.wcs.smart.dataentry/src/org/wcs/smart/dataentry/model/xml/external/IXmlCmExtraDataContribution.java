@@ -22,8 +22,10 @@
 package org.wcs.smart.dataentry.model.xml.external;
 
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
 
@@ -60,10 +62,11 @@ public interface IXmlCmExtraDataContribution {
 	 * @see IConvertedCmExtraData
 	 * 
 	 * @param extraDataList
+	 * @param dataMap
 	 * @param session 
 	 * @return
 	 */
-	public IConvertedCmExtraData fromXml(List<CmExtraDataType> extraDataList, Session session);
+	public IConvertedCmExtraData fromXml(List<CmExtraDataType> extraDataList, Map<String, UuidItem> dataMap, Session session);
 	
 	
 }

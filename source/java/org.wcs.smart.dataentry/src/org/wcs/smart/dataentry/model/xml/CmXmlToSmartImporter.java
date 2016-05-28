@@ -39,6 +39,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -94,6 +95,7 @@ public class CmXmlToSmartImporter {
 	private Map<String, File> fileLookup;
 	
 	private List<String> warnings;
+	private Map<String, UuidItem> dataMap;
 
 	/**
 	 * 
@@ -155,6 +157,7 @@ public class CmXmlToSmartImporter {
 		listItemLookup = new HashMap<String, AttributeListItem>();
 		treeNodeLookup = new HashMap<String, AttributeTreeNode>();
 		warnings = new ArrayList<String>();
+		dataMap = new HashMap<>();
 		
 		session = HibernateManager.openSession(new AssociatedImageInterceptor());
 		session.beginTransaction();
@@ -207,7 +210,7 @@ public class CmXmlToSmartImporter {
 			//converting extra data
 			List<IConvertedCmExtraData> convertedExtraData = new ArrayList<IConvertedCmExtraData>();
 			for (IXmlCmExtraDataContribution edc : XmlCmExtraDataContributionFactory.getContributions()) {
-				IConvertedCmExtraData extraData = edc.fromXml(xmlCm.getExtraData(), session);
+				IConvertedCmExtraData extraData = edc.fromXml(xmlCm.getExtraData(), dataMap, session);
 				if (extraData != null) {
 					if (extraData.getWarnings() != null) {
 						warnings.addAll(extraData.getWarnings());
@@ -289,6 +292,7 @@ public class CmXmlToSmartImporter {
 			node.setNodeOrder(result.size());
 			node.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
 			node.setImageFile(findFile(xmlNode.getImageFile()));
+			addToDataMap(xmlNode.getId(), node);
 			node.setChildren(processCmTreeNodes(cm, cmAttribute, node, xmlNode.getChildren(), monitor));
 			if (monitor.isCanceled()) return null;
 			result.add(node);
@@ -316,6 +320,7 @@ public class CmXmlToSmartImporter {
 			}
 			item.setListOrder(result.size());
 			item.setImageFile(findFile(xmlNode.getImageFile()));
+			addToDataMap(xmlNode.getId(), item);
 			if (monitor.isCanceled()) return null;
 			result.add(item);
 		}
@@ -369,6 +374,7 @@ public class CmXmlToSmartImporter {
 			cmNode.setCmAttributes(processAttributes(xmlNode.getAttribute(), cmNode, monitor));
 			cmNode.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
 			cmNode.setImageFile(findFile(xmlNode.getImageFile()));
+			addToDataMap(xmlNode.getId(), cmNode);
 			
 			result.add(cmNode);
 			if (monitor.isCanceled()) return null;
@@ -391,6 +397,7 @@ public class CmXmlToSmartImporter {
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
 			cmAttr.setTree(processCmTreeNodes(parent.getModel(), cmAttr, null, xmlAttr.getTreeNode(), monitor));
 			cmAttr.setList(processCmListItems(parent.getModel(), cmAttr, xmlAttr.getListItem(), monitor));
+			addToDataMap(xmlAttr.getId(), cmAttr);
 
 			result.add(cmAttr);
 			if (monitor.isCanceled()) return null;
@@ -574,6 +581,12 @@ public class CmXmlToSmartImporter {
 		return DisplayMode.valueOf(mode);
 	}
 	
+	private void addToDataMap(String id, UuidItem item) {
+		if (id != null) {
+			dataMap.put(id, item);
+		}
+	}
+
 	/**
 	 * Returns the language code to use as the default language.
 	 * <p>

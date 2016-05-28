@@ -71,6 +71,7 @@ elementFormDefault="qualified">
     	<attribute name="photoRequired" type="boolean"></attribute>
     	<attribute name="displayMode" type="string"></attribute>
     	<attribute name="imageFile" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
     </complexType>
 
     <complexType name="NameType">
@@ -94,6 +95,7 @@ elementFormDefault="qualified">
     		</element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeOptionType">
@@ -148,6 +150,7 @@ elementFormDefault="qualified">
     	<attribute name="isActive" type="boolean"></attribute>
     	<attribute name="displayMode" type="string"></attribute>
     	<attribute name="imageFile" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeCmListItemTypeList">
@@ -166,6 +169,7 @@ elementFormDefault="qualified">
     	<attribute name="keyRef" type="string"></attribute>
     	<attribute name="isActive" type="boolean"></attribute>
     	<attribute name="imageFile" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
     </complexType>
 
     <complexType name="CmDmAttributeSettingsTypeList">

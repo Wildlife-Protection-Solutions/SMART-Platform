@@ -23,8 +23,10 @@ package org.wcs.smart.connect.cybertracker.xml.dataentry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
@@ -106,7 +108,7 @@ public class ConnectCt2CmXmlExtraDataContribution implements IXmlCmExtraDataCont
 			data.getStringKey().add(attributeKey);
 		}
 		
-		//alert type TODO: how to look for type?
+		//alert type
 		CmExtraDataStringKeyType typeKey = new CmExtraDataStringKeyType();
 		typeKey.setKey(KEY_ALERT_TYPE);
 		typeKey.setValue(a.getTypeInternal());
@@ -122,8 +124,8 @@ public class ConnectCt2CmXmlExtraDataContribution implements IXmlCmExtraDataCont
 	}
 
 	@Override
-	public IConvertedCmExtraData fromXml(List<CmExtraDataType> extraDataList, Session session) {
-		return new ConvertedConnectCt2CmExtraData(extraDataList, session);
+	public IConvertedCmExtraData fromXml(List<CmExtraDataType> extraDataList, Map<String, UuidItem> dataMap, Session session) {
+		return new ConvertedConnectCt2CmExtraData(extraDataList, dataMap, session);
 	}
 
 }

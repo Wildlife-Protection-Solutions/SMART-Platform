@@ -28,6 +28,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -60,7 +61,7 @@ public class ConvertedCt2CmExtraData implements IConvertedCmExtraData {
 
 	private CyberTrackerPropertiesProfile fetchProfile(CmExtraDataType dataType, Session session) {
 		if (dataType.getLabelKey().isEmpty()) {
-			warnings.add("CyberTracker Profile: Key record is not valid. Name key part is missing. Current default profile will be used.");
+			warnings.add(Messages.ConvertedCt2CmExtraData_InvalidKeyRecord);
 			return null;
 		}
 		String name = null;
@@ -79,7 +80,7 @@ public class ConvertedCt2CmExtraData implements IConvertedCmExtraData {
 			}
 		}
 		if (name == null) {
-			warnings.add(MessageFormat.format("CyberTracker Profile: Unable to determine a name in default or current language code ''{0}'' for CyberTracker properties profile. Current default profile will be used.", codeWarnLabel));
+			warnings.add(MessageFormat.format(Messages.ConvertedCt2CmExtraData_NameNotDetermined, codeWarnLabel));
 			return null;
 		}
 		
@@ -91,11 +92,11 @@ public class ConvertedCt2CmExtraData implements IConvertedCmExtraData {
 		@SuppressWarnings("unchecked")
 		List<CyberTrackerPropertiesProfile> list = query.list();
 		if (list.isEmpty()) {
-			warnings.add(MessageFormat.format("CyberTracker Profile: CyberTracker Profile with name ''{0}'' that this configurable model refers is not found. Current default profile will be used.", name));
+			warnings.add(MessageFormat.format(Messages.ConvertedCt2CmExtraData_NameNotFound, name));
 			return null;
 		}
 		if (list.size() > 1) {
-			warnings.add(MessageFormat.format("CyberTracker Profile: Multiple CyberTracker Profiles have name ''{0}'' that this configurable model refers. First found match will be applied.", name));
+			warnings.add(MessageFormat.format(Messages.ConvertedCt2CmExtraData_NameMultipleMatches, name));
 		}
 		return list.get(0);
 	}

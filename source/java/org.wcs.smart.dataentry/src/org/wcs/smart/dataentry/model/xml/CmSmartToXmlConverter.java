@@ -111,7 +111,7 @@ public class CmSmartToXmlConverter {
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
-			monitor.subTask("Processing additional data");
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessExtraData);
 			for (IXmlCmExtraDataContribution dc : XmlCmExtraDataContributionFactory.getContributions()) {
 				List<CmExtraDataType> extraData = dc.exportData(cm, session);
 				if (extraData != null) {
@@ -159,6 +159,7 @@ public class CmSmartToXmlConverter {
 				xmlNode.setDisplayMode(cmNode.getDisplayMode().name());
 			}
 			xmlNode.setImageFile(getImageFileRef(cmNode));
+			xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
 			processCmTreeNodes(cmNode.getChildren(), xmlNode.getChildren(), llookup, monitor);
 			xmlList.add(xmlNode);
 		}
@@ -191,6 +192,7 @@ public class CmSmartToXmlConverter {
 				xmlNode.setAttributeKey(dmAttribute.getKeyId());
 			}
 			xmlNode.setImageFile(getImageFileRef(cmNode));
+			xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
 			xmlList.add(xmlNode);
 		}
 	}
@@ -224,6 +226,7 @@ public class CmSmartToXmlConverter {
 			nt.setDisplayMode(node.getDisplayMode().name());
 		}
 		nt.setImageFile(getImageFileRef(node));
+		nt.setId(node.getUuid().toString()); //this will allow to reference this item in extradata
 		
 		if (node.getCmAttributes() != null){
 			for (CmAttribute ca : node.getCmAttributes()) {
@@ -265,6 +268,7 @@ public class CmSmartToXmlConverter {
 				}
 				processCmListItems(ca.getList(), at.getListItem(), llookup, monitor);
 				processCmTreeNodes(ca.getTree(), at.getTreeNode(), llookup, monitor);
+				at.setId(ca.getUuid().toString()); //this will allow to reference this item in extradata
 				nt.getAttribute().add(at);
 			}
 		}

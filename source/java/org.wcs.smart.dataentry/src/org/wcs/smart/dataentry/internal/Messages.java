@@ -49,6 +49,7 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_RecordSingleGpsPointTooltip;
 	public static String CmSmartToXmlConverter_ProcessAttributeSettings;
 	public static String CmSmartToXmlConverter_ProcessCmNodes;
+	public static String CmSmartToXmlConverter_ProcessExtraData;
 	public static String CmSmartToXmlConverter_ProcessingNode;
 	public static String CmSmartToXmlConverter_ProcessLanguages;
 	public static String CmSmartToXmlConverter_ProcessListItems;
@@ -228,6 +229,7 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_valueLabel;
 	public static String TreeAttributeInfoComposite_WarnMessage1;
 	public static String TreeAttributeInfoComposite_WarnTitle;
+	public static String XmlCmExtraDataContributionFactory_ErrorParseExtraData;
 	public static String YesNoScreenOptionComposite_No;
 	public static String YesNoScreenOptionComposite_Yes;
 	static {

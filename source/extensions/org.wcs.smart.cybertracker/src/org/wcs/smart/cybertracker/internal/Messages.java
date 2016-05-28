@@ -32,6 +32,10 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorCyberTrackerTab_ProfileDetailsMessage;
 	public static String ConfigurableModelEditorCyberTrackerTab_profileLoadJobname;
 	public static String ConfigurableModelEditorCyberTrackerTab_TabName;
+	public static String ConvertedCt2CmExtraData_InvalidKeyRecord;
+	public static String ConvertedCt2CmExtraData_NameMultipleMatches;
+	public static String ConvertedCt2CmExtraData_NameNotDetermined;
+	public static String ConvertedCt2CmExtraData_NameNotFound;
 	public static String CreateNewProfileOpDialog_Blank;
 	public static String CreateNewProfileOpDialog_Blank_Tooltip;
 	public static String CreateNewProfileOpDialog_DefaultProfileName;
