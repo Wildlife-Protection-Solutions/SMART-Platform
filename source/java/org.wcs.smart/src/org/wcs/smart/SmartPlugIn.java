@@ -174,6 +174,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Image descriptor for wizard banner export
 	 */
 	public static final String WIZBAN_EXPORT_IMAGE = "org.wsc.smart.WIZBAN_EXPORT_IMAGE"; //$NON-NLS-1$
+	/**
+	 * Image descriptor for wizard banner export
+	 */
+	public static final String ZOOM_IMAGE = "org.wsc.smart.ZOOM_IMAGE"; //$NON-NLS-1$
 	
 	/**
 	 * Browser images
@@ -376,6 +380,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(BROWSER_GO, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_refresh.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_HOME, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/home.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_STOP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/stop.png")); //$NON-NLS-1$
+	     
+	     reg.put(ZOOM_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/elcl16/zoom_tool.png")); //$NON-NLS-1$
 	 
 	}
 	

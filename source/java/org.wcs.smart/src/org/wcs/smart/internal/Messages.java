@@ -1069,6 +1069,7 @@ public class Messages extends NLS {
 	public static String TrackPointDialog_XColumnName;
 	public static String TrackPointDialog_YColumnName;
 	public static String TrackPointDialog_ZColumnName;
+	public static String TrackPointDialog_ZoomToPoint;
 	public static String TranslateNamesHandler_Error_TranslatingName;
 	public static String TranslateSimpleListItemDialog_DialogMessage;
 	public static String TranslateSimpleListItemDialog_DialogTitle;

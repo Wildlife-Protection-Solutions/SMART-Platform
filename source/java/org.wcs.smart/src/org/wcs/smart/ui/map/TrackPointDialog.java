@@ -124,6 +124,7 @@ import org.wcs.smart.util.UuidUtils;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Dialog for display tack points for a track.
@@ -316,12 +317,14 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		column.getColumn().setWidth(150);
 		
 		if (canEdit){
-			final DeletePointAction deletePointAction = new DeletePointAction();
+			 
 			final MenuManager contextMenu = new MenuManager();
-	        contextMenu.add(deletePointAction);
+			contextMenu.add(new ZoomPointAction());
+	        contextMenu.add(new DeletePointAction());
 	        contextMenu.addMenuListener(new IMenuListener() {
 				public void menuAboutToShow(IMenuManager mgr) {
 					((ActionContributionItem)contextMenu.getItems()[0]).update();
+					((ActionContributionItem)contextMenu.getItems()[1]).update();
 				}
 			});
 	        trackviewer.getTable().setMenu(contextMenu.createContextMenu(trackviewer.getTable()));
@@ -547,9 +550,9 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 		
 		if (canEdit){
-			final DeletePointAction deletePointAction = new DeletePointAction();
 			final MenuManager contextMenu = new MenuManager();
-	        contextMenu.add(deletePointAction);
+		
+	        contextMenu.add(new DeletePointAction());
 	        contextMenu.addMenuListener(new IMenuListener() {
 				public void menuAboutToShow(IMenuManager mgr) {
 					((ActionContributionItem)contextMenu.getItems()[0]).update();
@@ -1053,6 +1056,181 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		@Override
 		public void runWithEvent(Event event) {
 			deleteSelectedPoints();
+		}
+
+		@Override
+		public void setActionDefinitionId(String id) {
+		}
+
+		@Override
+		public void setChecked(boolean checked) {
+		}
+
+		@Override
+		public void setDescription(String text) {
+		}
+
+		@Override
+		public void setDisabledImageDescriptor(ImageDescriptor newImage) {
+		}
+		
+		@Override
+		public void setEnabled(boolean enabled) {
+		}
+
+		@Override
+		public void setHelpListener(HelpListener listener) {
+		}
+
+		@Override
+		public void setHoverImageDescriptor(ImageDescriptor newImage) {
+		}
+
+		@Override
+		public void setId(String id) {
+		}
+
+		@Override
+		public void setImageDescriptor(ImageDescriptor newImage) {
+		}
+
+		@Override
+		public void setMenuCreator(IMenuCreator creator) {
+		}
+
+		@Override
+		public void setText(String text) {
+		}
+
+		@Override
+		public void setToolTipText(String text) {
+		}
+
+		@Override
+		public void setAccelerator(int keycode) {
+		}
+	
+	}
+	
+	
+	class ZoomPointAction extends AbstractAction{
+
+		@Override
+		public int getAccelerator() {
+			return 0;
+		}
+
+		@Override
+		public String getActionDefinitionId() {
+			return null;
+		}
+
+		@Override
+		public String getDescription() {
+			return Messages.TrackPointDialog_ZoomToPoint;
+		}
+
+		@Override
+		public ImageDescriptor getDisabledImageDescriptor() {
+			return null;
+		}
+
+		@Override
+		public HelpListener getHelpListener() {
+			return null;
+		}
+
+		@Override
+		public ImageDescriptor getHoverImageDescriptor() {
+			return null;
+		}
+
+		@Override
+		public String getId() {
+			return null;
+		}
+
+		@Override
+		public ImageDescriptor getImageDescriptor() {
+			return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ZOOM_IMAGE);
+		}
+
+		@Override
+		public IMenuCreator getMenuCreator() {
+			return null;
+		}
+
+		@Override
+		public int getStyle() {
+			return AS_PUSH_BUTTON;
+		}
+
+		@Override
+		public String getText() {
+			return Messages.TrackPointDialog_ZoomToPoint;
+		}
+
+		@Override
+		public String getToolTipText() {
+			return Messages.TrackPointDialog_ZoomToPoint;
+		}
+
+		@Override
+		public boolean isChecked() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return !trackviewer.getSelection().isEmpty();
+		}
+
+		@Override
+		public boolean isHandled() {
+			return false;
+		}
+
+		@Override
+		public void run() {
+			StructuredSelection sel = (StructuredSelection) trackviewer.getSelection();
+			for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+				Object x = (Object) iterator.next();
+				if (x instanceof SimpleFeature){
+					
+					//find previous and next points to use for zoom scale
+					SimpleFeature sf = (SimpleFeature)x;
+					Coordinate point = ((Point)sf.getDefaultGeometry()).getCoordinate();
+					LineString ls = getEditTrackLineString();
+					int index = -1;
+					for (int i = 0; i < ls.getCoordinates().length; i ++){
+						if (ls.getCoordinates()[i].equals(point)){
+							index = i;
+						}
+					}
+					ReferencedEnvelope env = null;
+					env = new ReferencedEnvelope(point.x, point.x, point.y, point.y, sf.getFeatureType().getCoordinateReferenceSystem() );
+					if (index == 0){
+						env.expandToInclude(ls.getCoordinateN(1));
+					}else if (index == ls.getCoordinates().length - 1){
+						env.expandToInclude(ls.getCoordinateN(ls.getCoordinates().length - 2));
+					}else if (index > 0){
+						env.expandToInclude(ls.getCoordinateN(index + 1));
+						env.expandToInclude(ls.getCoordinateN(index - 1));
+					}
+					
+					//center on point
+					env = new ReferencedEnvelope(point.x - env.getWidth()/2, point.x + env.getWidth() / 2, point.y - env.getHeight()/2, point.y+ env.getHeight()/2, env.getCoordinateReferenceSystem());
+					//zoom map
+					mapViewer.getMap().getViewportModelInternal().setBounds(env);
+					
+					return;
+				}
+			}	
+		}
+
+		@Override
+		public void runWithEvent(Event event) {
+			run();
 		}
 
 		@Override
