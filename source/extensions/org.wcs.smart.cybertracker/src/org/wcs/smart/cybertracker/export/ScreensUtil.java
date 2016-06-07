@@ -56,23 +56,25 @@ import org.wcs.smart.util.UuidUtils;
 public class ScreensUtil {
 	
 	//NOTE: Naming with "Patrol" are required for backward compatibility with CT exports from version 3.2 or lower
-	public static final String RESULT_ID = "#PatrolID"; //$NON-NLS-1$
-	public static final String RESULT_START_DATE = "#PatrolStartDate"; //$NON-NLS-1$
-	public static final String RESULT_START_TIME = "#PatrolStartTime"; //$NON-NLS-1$
+	public static final String COMMON_PREFIX = "SMART_"; //$NON-NLS-1$
 
-	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
-	public static final String RESULT_ENG_WAYPOINT_GROUP = "#WaypointGroupEnd"; //$NON-NLS-1$
-	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
+	public static final String RESULT_ID = COMMON_PREFIX + "PatrolID"; //$NON-NLS-1$
+	public static final String RESULT_START_DATE = COMMON_PREFIX + "PatrolStartDate"; //$NON-NLS-1$
+	public static final String RESULT_START_TIME = COMMON_PREFIX + "PatrolStartTime"; //$NON-NLS-1$
 
-	public static final String RESULT_DEFAULT_META_VALUES = "#DefaultPatrolValues"; //$NON-NLS-1$
+	public static final String RESULT_NEW_WAYPOINT = COMMON_PREFIX + "NewWaypoint"; //$NON-NLS-1$
+	public static final String RESULT_ENG_WAYPOINT_GROUP = COMMON_PREFIX + "WaypointGroupEnd"; //$NON-NLS-1$
+	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = COMMON_PREFIX + "DefaultAttributeValues"; //$NON-NLS-1$
 
-	public static final String RESULT_OBSERVER = "#Observer"; //$NON-NLS-1$
+	public static final String RESULT_DEFAULT_META_VALUES = COMMON_PREFIX + "DefaultPatrolValues"; //$NON-NLS-1$
 
-	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
+	public static final String RESULT_OBSERVER = COMMON_PREFIX + "Observer"; //$NON-NLS-1$
+
+	public static final String RESULT_PHOTO = COMMON_PREFIX + "Photo"; //$NON-NLS-1$
 	
-	public static final String RESULT_DATATYPE = "#DataType"; //$NON-NLS-1$
+	public static final String RESULT_DATATYPE = COMMON_PREFIX + "DataType"; //$NON-NLS-1$
 
-	public static final String RESULT_PAUSED = "#Paused"; //$NON-NLS-1$
+	public static final String RESULT_PAUSED = COMMON_PREFIX + "Paused"; //$NON-NLS-1$
 
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;

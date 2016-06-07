@@ -71,15 +71,15 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class SurveyScreensUtil extends ScreensUtil {
 
-	public static final String RESULT_SURVEY_DESIGN = "#SurveyDesign"; //$NON-NLS-1$
+	public static final String RESULT_SURVEY_DESIGN = ScreensUtil.COMMON_PREFIX + "SurveyDesign"; //$NON-NLS-1$
 
-	public static final String RESULT_MISSION_LEADER = "#Leader"; //$NON-NLS-1$
-	public static final String RESULT_MISSION_COMMENTS = "#Comments"; //$NON-NLS-1$
+	public static final String RESULT_MISSION_LEADER = ScreensUtil.COMMON_PREFIX + "Leader"; //$NON-NLS-1$
+	public static final String RESULT_MISSION_COMMENTS = ScreensUtil.COMMON_PREFIX + "Comments"; //$NON-NLS-1$
 	
-	public static final String RESULT_MISSION_START_SAMPLING_UNIT = "#StartSamplingUnit"; //$NON-NLS-1$
-	public static final String RESULT_MISSION_SAMPLING_UNIT = "#SamplingUnit"; //$NON-NLS-1$
+	public static final String RESULT_MISSION_START_SAMPLING_UNIT = ScreensUtil.COMMON_PREFIX + "StartSamplingUnit"; //$NON-NLS-1$
+	public static final String RESULT_MISSION_SAMPLING_UNIT = ScreensUtil.COMMON_PREFIX + "SamplingUnit"; //$NON-NLS-1$
 
-	public static final String RESULT_MISSION_PROPETY_PREFIX = "#MP#"; //$NON-NLS-1$
+	public static final String RESULT_MISSION_PROPETY_PREFIX = ScreensUtil.COMMON_PREFIX + "MP_"; //$NON-NLS-1$
 	
 	public static final String DATATYPE_SURVEY = "survey"; //$NON-NLS-1$
 

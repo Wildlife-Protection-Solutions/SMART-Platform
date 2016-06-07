@@ -61,6 +61,8 @@ import org.wcs.smart.util.SmartFileUtils;
  */
 public class CyberTrackerImporter {
 	
+	public static final String PREFIX_BEFORE_401 = "#"; //$NON-NLS-1$
+	
 	//this key should be mapped to patrol to support backward compatibility with versions 3.2.1 or less
 	private static final String NO_DATTYPE_NAME = "null"; //$NON-NLS-1$
 	
@@ -170,6 +172,8 @@ public class CyberTrackerImporter {
 			throw new Exception(MessageFormat.format(Messages.CyberTrackerImporter_Read_Error, file.getName()));
 		}
 		
+		preserveCompatibility400(data);
+		
 		CyberTrackerRawData rawData = new CyberTrackerRawData(data);
 		data = null; //we don't need data object anymore
 
@@ -182,6 +186,37 @@ public class CyberTrackerImporter {
 		return records;
 	}
 
+	/**
+	 * After 4.0.0 prefix for meta records was changed from "#" to "SMART_".
+	 * This was needed because SMART Connect cannot parse '#' in json.
+	 * Here we need to replace all old prefixes to new one in case data from older versions is imported.
+	 * @param data
+	 */
+	private void preserveCompatibility400(Data data) {
+		if (data == null || data.getElements() == null)
+			return;
+		for (Data.Elements.E e : data.getElements().getE()) {
+			if (e.getN() != null && e.getN().startsWith(PREFIX_BEFORE_401)) {
+				e.setN(getCompatibleName400(e.getN()));
+			}
+		}
+		
+		if (data.getSightings() == null)
+			return;
+		for (Data.Sightings.S s : data.getSightings().getS()) {
+			for (Data.Sightings.S.A a : s.getA()) {
+				if (a.getN() != null && a.getN().startsWith(PREFIX_BEFORE_401)) {
+					a.setN(getCompatibleName400(a.getN()));
+				}
+			}
+		}
+	}
+
+	private String getCompatibleName400(String oldName) {
+		String name = oldName.replaceFirst(PREFIX_BEFORE_401, ScreensUtil.COMMON_PREFIX);
+		return name.replace('#', '_');
+	}
+	
 	private String getDataType(CyberTrackerRawData rawData) {
 		for (E e : rawData.elementsMap.values()) {
 			if (ScreensUtil.RESULT_DATATYPE.equals(e.getN())) {

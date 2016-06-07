@@ -264,7 +264,7 @@ public class CyberTrackerConfExporter {
 			for (Attribute attribute : attr2resultId.keySet()) {
 				Map<Integer, CyberTrackerId> map = attr2resultId.get(attribute);
 				for (Integer i : map.keySet()) {
-					columnItems.add(ReportsObjectFactory.createColumnItem(map.get(i).getItemId(), LanguageUtil.getName(attribute, currentLanguage) + "#" + i)); //$NON-NLS-1$
+					columnItems.add(ReportsObjectFactory.createColumnItem(map.get(i).getItemId(), LanguageUtil.getName(attribute, currentLanguage) + "_" + i)); //$NON-NLS-1$
 				}
 			}
 			columnItems.add(ReportsObjectFactory.createColumnItem(defaultAttrValuesResultId.getItemId(), ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES));
@@ -820,7 +820,7 @@ public class CyberTrackerConfExporter {
 		if (id == null) {
 			id = new CyberTrackerId();
 			String uuid = UuidUtils.uuidToString(attribute.getUuid());
-			ElementsUtil.addElementsItem(elements, attribute.getKeyId()+"#"+index, id.getItemId(), uuid, ElementsUtil.ATTRIBUTE_ELEMENT_TAG, index.toString()); //$NON-NLS-1$
+			ElementsUtil.addElementsItem(elements, attribute.getKeyId()+"_"+index, id.getItemId(), uuid, ElementsUtil.ATTRIBUTE_ELEMENT_TAG, index.toString()); //$NON-NLS-1$
 			map.put(index, id);
 		}
 		return id;

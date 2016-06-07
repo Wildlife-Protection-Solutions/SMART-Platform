@@ -79,16 +79,16 @@ public class PatrolScreensUtil extends ScreensUtil {
 	
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 
-	public static final String RESULT_PATROL_TYPE = "#PatrolType"; //$NON-NLS-1$
-	public static final String RESULT_TRANSPORT = "#PatrolTransport"; //$NON-NLS-1$
-	public static final String RESULT_ARMED = "#Armed"; //$NON-NLS-1$
-	public static final String RESULT_TEAM = "#Team"; //$NON-NLS-1$
-	public static final String RESULT_STATION = "#Station"; //$NON-NLS-1$
-	public static final String RESULT_MANDATE = "#Mandate"; //$NON-NLS-1$
-	public static final String RESULT_OBJECTIVE = "#Objective"; //$NON-NLS-1$
-	public static final String RESULT_COMMENTS = "#Comments"; //$NON-NLS-1$
-	public static final String RESULT_LEADER = "#Leader"; //$NON-NLS-1$
-	public static final String RESULT_PILOT = "#Pilot"; //$NON-NLS-1$
+	public static final String RESULT_PATROL_TYPE = ScreensUtil.COMMON_PREFIX + "PatrolType"; //$NON-NLS-1$
+	public static final String RESULT_TRANSPORT = ScreensUtil.COMMON_PREFIX + "PatrolTransport"; //$NON-NLS-1$
+	public static final String RESULT_ARMED = ScreensUtil.COMMON_PREFIX + "Armed"; //$NON-NLS-1$
+	public static final String RESULT_TEAM = ScreensUtil.COMMON_PREFIX + "Team"; //$NON-NLS-1$
+	public static final String RESULT_STATION = ScreensUtil.COMMON_PREFIX + "Station"; //$NON-NLS-1$
+	public static final String RESULT_MANDATE = ScreensUtil.COMMON_PREFIX + "Mandate"; //$NON-NLS-1$
+	public static final String RESULT_OBJECTIVE = ScreensUtil.COMMON_PREFIX + "Objective"; //$NON-NLS-1$
+	public static final String RESULT_COMMENTS = ScreensUtil.COMMON_PREFIX + "Comments"; //$NON-NLS-1$
+	public static final String RESULT_LEADER = ScreensUtil.COMMON_PREFIX + "Leader"; //$NON-NLS-1$
+	public static final String RESULT_PILOT = ScreensUtil.COMMON_PREFIX + "Pilot"; //$NON-NLS-1$
 	
 	public static final String DATATYPE_PATROL = "patrol"; //$NON-NLS-1$
 
