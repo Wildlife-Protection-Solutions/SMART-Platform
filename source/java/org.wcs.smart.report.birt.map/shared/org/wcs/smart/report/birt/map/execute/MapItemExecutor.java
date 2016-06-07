@@ -168,35 +168,38 @@ public class MapItemExecutor implements IReportItemExecutor{
 			//find geometry column alias
 			LayerItem layer = def.getLayerItem();
 			IBaseResultSet qresult = context.executeQuery( null, def.getWrapper(), elementHandle );
-			configuration.addQuery(qresult,def.getInfo());
-			String queryText = ((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getQueryText();
+			if (qresult != null){
+				//if qresult is null we were unable to execute the query for some reason
+				configuration.addQuery(qresult,def.getInfo());
+				String queryText = ((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getQueryText();
 
-			double minValue = 0;
-			double maxValue = 0;
-
-			if (def.getInfo().getLayerType() == LayerType.RASTER){
-				//create raster results file
-				SmartConnection connection = (SmartConnection) context.getAppContext().get(SmartConnection.class.getCanonicalName());
-				IQuery tmp = connection.newQuery(((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getExtensionID());
-				tmp.prepare(queryText);
-				IResultSetMetaData md = tmp.getMetaData();
-				if (md instanceof GriddedQueryResultSetMetadata){
-					//build the raster
-					GriddedQueryResultSetMetadata gmd = (GriddedQueryResultSetMetadata)md;
-					BirtRasterBuilder builder = new BirtRasterBuilder(gmd.getCoordinateReferenceSystem(), 
-							gmd.getOrigin(), gmd.getCellSize(), gmd.getXColumn(), 
-							gmd.getYColumn(), gmd.getValueColumn());
-					builder.buildRaster((IQueryResults)qresult.getQueryResults());
-					def.getInfo().setRasterFile(builder.getFileImage());
-					cleanUp.addAll(builder.getAllFiles());
-					
-					minValue = builder.getMinValue();
-					maxValue = builder.getMaxValue();
+				double minValue = 0;
+				double maxValue = 0;
+	
+				if (def.getInfo().getLayerType() == LayerType.RASTER){
+					//create raster results file
+					SmartConnection connection = (SmartConnection) context.getAppContext().get(SmartConnection.class.getCanonicalName());
+					IQuery tmp = connection.newQuery(((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getExtensionID());
+					tmp.prepare(queryText);
+					IResultSetMetaData md = tmp.getMetaData();
+					if (md instanceof GriddedQueryResultSetMetadata){
+						//build the raster
+						GriddedQueryResultSetMetadata gmd = (GriddedQueryResultSetMetadata)md;
+						BirtRasterBuilder builder = new BirtRasterBuilder(gmd.getCoordinateReferenceSystem(), 
+								gmd.getOrigin(), gmd.getCellSize(), gmd.getXColumn(), 
+								gmd.getYColumn(), gmd.getValueColumn());
+						builder.buildRaster((IQueryResults)qresult.getQueryResults());
+						def.getInfo().setRasterFile(builder.getFileImage());
+						cleanUp.addAll(builder.getAllFiles());
+						
+						minValue = builder.getMinValue();
+						maxValue = builder.getMaxValue();
+					}
 				}
+				
+				//Configure layer styles
+				processStyles(def, layer, queryText, minValue, maxValue);
 			}
-			
-			//Configure layer styles
-			processStyles(def, layer, queryText, minValue, maxValue);
 				
 				
 		}		
