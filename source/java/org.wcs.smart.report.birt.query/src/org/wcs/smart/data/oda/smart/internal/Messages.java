@@ -5,6 +5,12 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.data.oda.smart.internal.messages"; //$NON-NLS-1$
 	
+	public static String Report400Upgrader_ErrorMessage;
+
+	public static String Report400Upgrader_ErrorTitle;
+
+	public static String Report400Upgrader_UpgradeError;
+
 	public static String ReportQueryListener_BeforeSave_QueryUsedWarning;
 	public static String ReportQueryListener_QuerySaveError;
 	public static String ReportQueryListener_Warning_DialogTitle;

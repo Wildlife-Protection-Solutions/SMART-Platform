@@ -54,7 +54,7 @@ public class SmartProperties {
 	public static final String PROP_BACKUP_DIR = "BACKUP"; //$NON-NLS-1$
 	
 	private static final String SYSPROP_GPS_BABEL = "GPSBABEL"; //$NON-NLS-1$
-	private static final String SYSPROP_DATASTORE = "DATASTORE_DIR"; //$NON-NLS-1$
+	public static final String SYSPROP_DATASTORE = "DATASTORE_DIR"; //$NON-NLS-1$
 	private static final String SYSPROP_BACKUPDIR = "BACKUP_DIR"; //$NON-NLS-1$
 	
 	
@@ -100,6 +100,8 @@ public class SmartProperties {
 			return getSystemProperty(SYSPROP_BACKUPDIR);
 		}else if (key.equals(DB_VERSION_KEY)){
 			return getSmartProperties(key);
+		}else if (key.equals(SYSPROP_DATASTORE)){
+			return getSystemProperty(SYSPROP_DATASTORE);
 		}
 		throw new IllegalStateException(MessageFormat.format(Messages.SmartProperties_InvalidProperty, new Object[]{key}));
 	}
@@ -141,7 +143,7 @@ public class SmartProperties {
 	
 	/**
 	 * Sets smart property.
-	 * <p>Only supports setting of PROP_GPS_BABEL All other properties
+	 * <p>Only supports setting of PROP_GPS_BABEL and SYSPROP_DATASTORE. All other properties
 	 * not supported.</p>
 	 * 
 	 * @param key smart property key
@@ -150,6 +152,8 @@ public class SmartProperties {
 	 */
 	public void setKey(String key, String value) throws Exception{
 		if (key.equals(PROP_GPS_BABEL)){
+			SmartPlugIn.getDefault().getPreferenceStore().setValue(key, value);
+		}else if (key.equals(SYSPROP_DATASTORE)){
 			SmartPlugIn.getDefault().getPreferenceStore().setValue(key, value);
 		}
 	}

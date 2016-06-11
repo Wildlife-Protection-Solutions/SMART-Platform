@@ -195,6 +195,71 @@
             class="org.wcs.smart.report.birt.query.DummyStartUp">
       </startup>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <coreUpgrader
+            fromVersion="3.3.1"
+            toVersion="4.0.0"
+            upgrader="org.wcs.smart.report.Report400Upgrader">
+      </coreUpgrader>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.wcs.smart.report.ReportListView?after=org.wcs.smart.query.separator3">
+         <command
+               commandId="org.wcs.smart.report.query.bindings.fix"
+               style="push"
+               tooltip="fixes problems with query bindings in the reports">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <test
+                           args="edit"
+                           property="org.wcs.smart.report.menu.editable">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.separator4"
+               visible="true">
+         </separator>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:outlinemenu?after=org.eclipse.birt.report.designer.ui.actions.NewJointDataSetAction">
+         <separator
+               name="org.wcs.smart.report.birt.query.separator2"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.report.query.bindings.fix"
+               style="push"
+               tooltip="fixes problems with query bindings in the reports">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.report.query.bindings.fix"
+            name="Update Report Query Bindings">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.report.FixQueryColumnBindingHandler$FixQueryHandlerWrapper"
+            commandId="org.wcs.smart.report.query.bindings.fix">
+      </handler>
+   </extension>
 
 
 </plugin>

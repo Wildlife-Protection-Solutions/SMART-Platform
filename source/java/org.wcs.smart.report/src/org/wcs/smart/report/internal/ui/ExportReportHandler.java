@@ -57,7 +57,6 @@ public class ExportReportHandler {
 	@Execute
 	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, 
 			@Optional @Named(MULTIPLE_PARAM)String multipleParam, Shell activeShell){
-		
 		List<Report> selectedReports = new ArrayList<Report>();
 		
 		// find all selected reports

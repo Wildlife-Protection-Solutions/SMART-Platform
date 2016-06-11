@@ -35,9 +35,19 @@ import org.wcs.smart.report.birt.map.MapLayerInfo;
 public class MapConfiguration {
 
 	private List<QueryLayer> results;
+	private List<Throwable> exceptions;
 	
 	public MapConfiguration(){
 		results = new ArrayList<QueryLayer>();
+		exceptions = new ArrayList<Throwable>();
+	}
+	
+	public void addException(Throwable ex){
+		exceptions.add(ex);
+	}
+	
+	public List<Throwable> getExceptions(){
+		return this.exceptions;
 	}
 	
 	public void addQuery(IBaseResultSet qresults, MapLayerInfo info){

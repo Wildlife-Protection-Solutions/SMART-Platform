@@ -18,6 +18,7 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
+            <element ref="coreUpgrader"/>
             <element ref="dbUpgrader"/>
          </sequence>
          <attribute name="point" type="string" use="required">
@@ -57,6 +58,35 @@
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.upgrade.IDatabaseUpgrader"/>
                </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="coreUpgrader">
+      <complexType>
+         <attribute name="upgrader" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.upgrade.IDatabaseUpgrader"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="fromVersion" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="toVersion" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

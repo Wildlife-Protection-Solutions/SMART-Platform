@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
@@ -241,8 +242,10 @@ public class DerbyRestoreEngine {
 		/* need to login as admin user to perform upgrade */
 		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
-		
+		String datastore = SmartContext.INSTANCE.getFilestoreLocation();
+		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 		try{
+			SmartContext.INSTANCE.setFilestoreLocation(extractedFilestore.getAbsolutePath());
 			UpgradeEngine upgrader = new UpgradeEngine();
 			upgrader.upgradeSystem(new SubProgressMonitor(monitor, 1), versions);
 			validateConfiguration(versions);
@@ -259,6 +262,7 @@ public class DerbyRestoreEngine {
 			}
 			throw ex;
 		}finally{
+			SmartContext.INSTANCE.setFilestoreLocation(datastore);
 			HibernateManager.endSessionFactory(true, true);	
 			//restore database parameter to main db
 			SmartHibernateManager.setDatabaseParameter(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));

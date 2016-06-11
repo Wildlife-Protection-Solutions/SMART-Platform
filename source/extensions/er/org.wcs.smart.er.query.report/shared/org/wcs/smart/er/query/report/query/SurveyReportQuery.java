@@ -137,15 +137,15 @@ public class SurveyReportQuery extends AbstractSmartQuery {
 	}
 
 	@Override
-	public GeometryColumn[] getGeometryColumns(Query query, Locale l) {
-		if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
-				query.getTypeKey().equals(SurveyWaypointQuery.KEY)){		
+	public GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l) {
+		if (queryTypeKey.equals(SurveyObservationQuery.KEY) ||
+				queryTypeKey.equals(SurveyWaypointQuery.KEY)){		
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),SurveyQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY)};
-		}else if (query.getTypeKey().equals(MissionQuery.KEY)){
+		}else if (queryTypeKey.equals(MissionQuery.KEY)){
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY)};
-		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
+		}else if (queryTypeKey.equals(MissionTrackQuery.KEY)){
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),MissionTrackResultItem.TRACK_GEOMCOLUMN_KEY)};
 		}

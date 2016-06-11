@@ -399,6 +399,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		String lname = smartQuery.getName();
 		lname = lname.replaceAll("[/\\\\.!;,]", "_");  //$NON-NLS-1$//$NON-NLS-2$
 		dataSetDesign.setDisplayName(lname + " [" + smartQuery.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+
 	}
 
 	/**

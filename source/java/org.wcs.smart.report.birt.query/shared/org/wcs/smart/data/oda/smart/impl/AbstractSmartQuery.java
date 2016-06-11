@@ -78,7 +78,7 @@ public abstract class AbstractSmartQuery {
 	 * @param query
 	 * @return the set of columns that represent geometry columns in the query results
 	 */
-	public abstract GeometryColumn[] getGeometryColumns(Query query, Locale l);
+	public abstract GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l);
 	
 	/**
 	 * Prepares the query but loading and ensure it exists.
@@ -107,7 +107,7 @@ public abstract class AbstractSmartQuery {
 	 * users the metadata provider to create the metadata
 	 */
 	protected IResultSetMetaData getMetaDataInternal(AbstractSmartBirtQuery smartQuery, SmartConnection connection) throws OdaException{
-		return metadataProvider.createMetadata(smartQuery.getQuery(), getGeometryColumns(smartQuery.getQuery(), connection.getCurrentLocale()), connection);
+		return metadataProvider.createMetadata(smartQuery.getQuery(), getGeometryColumns(smartQuery.getQuery().getTypeKey(), connection.getCurrentLocale()), connection);
 	}
 	
 	public void dispose(SmartConnection connection) throws SQLException{

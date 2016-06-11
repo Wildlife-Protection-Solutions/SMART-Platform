@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,14 +112,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 	public IContent execute() throws BirtException {
 		IForeignContent content = context.getReportContent().createForeignContent();
 		content.setRawType(IForeignContent.EXTERNAL_TYPE);
-		try {
-			content.setRawValue(executeQuery());
-		} catch (BirtException e) {
-			throw e;
-		}catch (Throwable ex){
-			throw new BirtException("org.wcs.smart.report.birt.map", "Error executing SMART Query",  //$NON-NLS-1$ //$NON-NLS-2$
-					(ResourceBundle)null, ex);
-		}
+		content.setRawValue(executeQuery());
 		return content;
 	}
 
@@ -156,7 +148,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 		}
 	}
 
-	protected MapConfiguration executeQuery(  ) throws Exception{
+	protected MapConfiguration executeQuery(  ) {
 		cleanUp = new ArrayList<File>();
 		MapConfiguration configuration = new MapConfiguration();
 		DesignElementHandle elementHandle = modelHandle.getContainer();
@@ -164,44 +156,45 @@ public class MapItemExecutor implements IReportItemExecutor{
 		IDataQueryDefinition[] query = context.getQueries( modelHandle );
 		for (int i = 0; i < query.length; i ++){
 			MapQueryDefinition def = (MapQueryDefinition) query[i];
-			
-			//find geometry column alias
-			LayerItem layer = def.getLayerItem();
-			IBaseResultSet qresult = context.executeQuery( null, def.getWrapper(), elementHandle );
-			if (qresult != null){
-				//if qresult is null we were unable to execute the query for some reason
-				configuration.addQuery(qresult,def.getInfo());
-				String queryText = ((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getQueryText();
-
-				double minValue = 0;
-				double maxValue = 0;
+			try{
+				//find geometry column alias
+				LayerItem layer = def.getLayerItem();
+				IBaseResultSet qresult = context.executeQuery( null, def.getWrapper(), elementHandle );
+				if (qresult != null){
+					//if qresult is null we were unable to execute the query for some reason
+					configuration.addQuery(qresult,def.getInfo());
+					String queryText = ((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getQueryText();
 	
-				if (def.getInfo().getLayerType() == LayerType.RASTER){
-					//create raster results file
-					SmartConnection connection = (SmartConnection) context.getAppContext().get(SmartConnection.class.getCanonicalName());
-					IQuery tmp = connection.newQuery(((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getExtensionID());
-					tmp.prepare(queryText);
-					IResultSetMetaData md = tmp.getMetaData();
-					if (md instanceof GriddedQueryResultSetMetadata){
-						//build the raster
-						GriddedQueryResultSetMetadata gmd = (GriddedQueryResultSetMetadata)md;
-						BirtRasterBuilder builder = new BirtRasterBuilder(gmd.getCoordinateReferenceSystem(), 
-								gmd.getOrigin(), gmd.getCellSize(), gmd.getXColumn(), 
-								gmd.getYColumn(), gmd.getValueColumn());
-						builder.buildRaster((IQueryResults)qresult.getQueryResults());
-						def.getInfo().setRasterFile(builder.getFileImage());
-						cleanUp.addAll(builder.getAllFiles());
-						
-						minValue = builder.getMinValue();
-						maxValue = builder.getMaxValue();
+					double minValue = 0;
+					double maxValue = 0;
+		
+					if (def.getInfo().getLayerType() == LayerType.RASTER){
+						//create raster results file
+						SmartConnection connection = (SmartConnection) context.getAppContext().get(SmartConnection.class.getCanonicalName());
+						IQuery tmp = connection.newQuery(((OdaDataSetHandle)def.getLayerItem().getHandle().getDataSet()).getExtensionID());
+						tmp.prepare(queryText);
+						IResultSetMetaData md = tmp.getMetaData();
+						if (md instanceof GriddedQueryResultSetMetadata){
+							//build the raster
+							GriddedQueryResultSetMetadata gmd = (GriddedQueryResultSetMetadata)md;
+							BirtRasterBuilder builder = new BirtRasterBuilder(gmd.getCoordinateReferenceSystem(), 
+									gmd.getOrigin(), gmd.getCellSize(), gmd.getXColumn(), 
+									gmd.getYColumn(), gmd.getValueColumn());
+							builder.buildRaster((IQueryResults)qresult.getQueryResults());
+							def.getInfo().setRasterFile(builder.getFileImage());
+							cleanUp.addAll(builder.getAllFiles());
+							
+							minValue = builder.getMinValue();
+							maxValue = builder.getMaxValue();
+						}
 					}
+					
+					//Configure layer styles
+					processStyles(def, layer, queryText, minValue, maxValue);
 				}
-				
-				//Configure layer styles
-				processStyles(def, layer, queryText, minValue, maxValue);
-			}
-				
-				
+			}catch(Throwable t){
+				configuration.addException(t);
+			}	
 		}		
 		return configuration;
 	}

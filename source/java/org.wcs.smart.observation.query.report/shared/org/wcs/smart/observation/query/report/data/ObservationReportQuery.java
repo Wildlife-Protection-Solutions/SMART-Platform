@@ -132,9 +132,9 @@ public class ObservationReportQuery extends AbstractSmartQuery {
 	}
 
 	@Override
-	public GeometryColumn[] getGeometryColumns(Query query, Locale l) {
-		if (query.getTypeKey().equals(ObsObservationQuery.KEY) ||
-				query.getTypeKey().equals(ObservationWaypointQuery.KEY)){		
+	public GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l) {
+		if (queryTypeKey.equals(ObsObservationQuery.KEY) ||
+				queryTypeKey.equals(ObservationWaypointQuery.KEY)){		
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
 							ObservationQueryResultItem.GEOMCOLUMN_KEY)};

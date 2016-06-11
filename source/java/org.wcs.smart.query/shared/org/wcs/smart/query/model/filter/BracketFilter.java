@@ -59,7 +59,7 @@ public class BracketFilter implements IFilter{
 	 */
 	@Override
 	public String asString(){
-		return "(" + filter.asString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "( " + filter.asString() + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 

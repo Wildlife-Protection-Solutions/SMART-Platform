@@ -160,6 +160,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
+		ModuleHandle initialModel = editor.getModel();
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
@@ -175,6 +176,12 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 			s.close();
 		}
 		try {
+			//on the xml page saving changes the model so we need to reconfigure
+			//the listeners
+			if (!editor.getModel().equals(initialModel)){
+				initialModel.removeListener(nameChangeListener);
+				editor.getModel().addListener(nameChangeListener);
+			}
 			editor.refreshMarkers(editor.getEditorInput());
 		} catch (CoreException e) {
 			e.printStackTrace();
@@ -320,6 +327,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 	@Override
 	public void dispose() {
 		editor.getModel().removeListener(nameChangeListener);
+		
 		ReportEventManager.getInstance().removeReportListener(this);
 		editor = null;
 	}

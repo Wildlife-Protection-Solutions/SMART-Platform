@@ -50,7 +50,7 @@ public class WaypointSourceGroupBy implements IGroupBy {
 	protected WaypointSourceGroupBy(String key){
 		String bits[] = key.split(":"); //$NON-NLS-1$
 		if (bits.length > 2){
-			keys= new String[bits.length-1];
+			keys= new String[bits.length-2];
 			for (int i = 2; i < bits.length; i ++){
 				keys[i-2] = bits[i];
 			}

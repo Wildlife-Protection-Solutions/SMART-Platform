@@ -65,7 +65,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.data.oda.smart.impl.ISmartQuery"/>
+                  <meta.attribute kind="java" basedOn="org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery:"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -11,6 +11,12 @@ public class Messages extends NLS {
 	public static String CustomDataSetWizardPage_LoadQueryJobName;
 	public static String CustomDataSetWizardPage_PickQuery_Message;
 	public static String CustomDataSetWizardPage_SelectQuery_Label;
+	public static String FixQueryColumnBindingHandler_CancelledDialog;
+	public static String FixQueryColumnBindingHandler_CancelledMsg;
+	public static String FixQueryColumnBindingHandler_ErrorMsg;
+	public static String FixQueryColumnBindingHandler_ReportError;
+	public static String FixQueryColumnBindingHandler_SubTask;
+	public static String FixQueryColumnBindingHandler_TaskName;
 	public static String SmartTableDataSetWizardPage_Error_CouldNoClose;
 	public static String SmartTableDataSetWizardPage_Error_MustLinkReportParameters;
 	public static String SmartTableDataSetWizardPage_Error_MustSelectTable;

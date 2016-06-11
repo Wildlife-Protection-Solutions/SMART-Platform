@@ -127,9 +127,9 @@ public class EntityReportQuery extends AbstractSmartQuery {
 	}
 
 	@Override
-	public GeometryColumn[] getGeometryColumns(Query query, Locale l) {
-		if (query.getTypeKey().equals(EntityWaypointQuery.KEY) ||
-				query.getTypeKey().equals(EntityObservationQuery.KEY)){		
+	public GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l) {
+		if (queryTypeKey.equals(EntityWaypointQuery.KEY) ||
+				queryTypeKey.equals(EntityObservationQuery.KEY)){		
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
 							EntityQueryResultItem.WAYPOINT_GEOM_COLUMNKEY)};

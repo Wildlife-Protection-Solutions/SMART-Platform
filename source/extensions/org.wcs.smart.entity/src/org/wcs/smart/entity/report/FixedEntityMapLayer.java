@@ -62,7 +62,7 @@ public class FixedEntityMapLayer implements IBirtMapLayerManager {
 		}
 		return false;
 	}
-
+	
 
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)

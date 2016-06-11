@@ -83,18 +83,29 @@ public enum QueryTypeManager {
 	 * @return
 	 */
 	public IQueryType findDeprecatedQueryType(String deprecatedTypeString){
-		if (deprecatedTypeString.equals("OBSERVATION")){ //$NON-NLS-1$
-			return findQueryType("patrolobservation"); //$NON-NLS-1$
-		}else if (deprecatedTypeString.equals("PATROL")){ //$NON-NLS-1$
-			return findQueryType("patrolquery"); //$NON-NLS-1$
-		}else if (deprecatedTypeString.equals("GRIDDED")){ //$NON-NLS-1$
-			return findQueryType("patrolgrid"); //$NON-NLS-1$
-		}else if (deprecatedTypeString.equals("SUMMARY")){ //$NON-NLS-1$
-			return findQueryType("patrolsummary"); //$NON-NLS-1$
-		}else if (deprecatedTypeString.equals("WAYPOINT")){ //$NON-NLS-1$
-			return findQueryType("patrolwaypoint"); //$NON-NLS-1$
+		String newTypeString = findDeprecatedQueryTypeString(deprecatedTypeString);
+		if (newTypeString.equals(deprecatedTypeString)) return null;
+		return findQueryType(newTypeString);
+	}
+	
+	/**
+	 * Returns the current valid query type string
+	 * @param deprecatedTypeString
+	 * @return
+	 */
+	public String findDeprecatedQueryTypeString(String queryTypeString){
+		if (queryTypeString.equals("OBSERVATION")){ //$NON-NLS-1$
+			return "patrolobservation"; //$NON-NLS-1$
+		}else if (queryTypeString.equals("PATROL")){ //$NON-NLS-1$
+			return "patrolquery"; //$NON-NLS-1$
+		}else if (queryTypeString.equals("GRIDDED")){ //$NON-NLS-1$
+			return "patrolgrid"; //$NON-NLS-1$
+		}else if (queryTypeString.equals("SUMMARY")){ //$NON-NLS-1$
+			return "patrolsummary"; //$NON-NLS-1$
+		}else if (queryTypeString.equals("WAYPOINT")){ //$NON-NLS-1$
+			return "patrolwaypoint"; //$NON-NLS-1$
 		}
-		return null;
+		return queryTypeString;
 	}
 	/**
 	 * Gets the query item panel that is associated with the given query

@@ -1,5 +1,6 @@
 package org.wcs.smart.upgrade;
 
+import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -50,21 +51,24 @@ public class UpgradeEngine {
 	private static final String EXTENSION_ID = "org.wcs.smart.dbUpgrage"; //$NON-NLS-1$
 	
 	private enum UpgradeFromVersion {
-		V112("1.1.2", Upgrader112To200.class), //$NON-NLS-1$
-		V200("2.0.0", Upgrader200To300.class), //$NON-NLS-1$
-		V300("3.0.0", Upgrader300To302.class), //$NON-NLS-1$
-		V302("3.0.2", Upgrader302To310.class), //$NON-NLS-1$
-		V310("3.1.0", Upgrader310To320.class), //$NON-NLS-1$
-		V320("3.2.0", Upgrader320To321.class), //$NON-NLS-1$
-		V330("3.2.1", Upgrader321To330.class), //$NON-NLS-1$
-		V331("3.3.0", Upgrader330To331.class), //$NON-NLS-1$
-		V400("3.3.1", Upgrader331To400.class); //$NON-NLS-1$
+		V112("1.1.2", "2.0.0", Upgrader112To200.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V200("2.0.0", "3.0.0", Upgrader200To300.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V300("3.0.0", "3.0.2", Upgrader300To302.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V302("3.0.2", "3.1.0", Upgrader302To310.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V310("3.1.0", "3.2.0", Upgrader310To320.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V320("3.2.0", "3.2.1", Upgrader320To321.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V330("3.2.1", "3.3.0", Upgrader321To330.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V331("3.3.0", "3.3.1", Upgrader330To331.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V400("3.3.1", "4.0.0", Upgrader331To400.class); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		public String versionString;
+		public String fromVersion;
+		public String toVersion;
 		public Class<? extends IDatabaseUpgrader> upgradeEngine;
 		
-		private UpgradeFromVersion(String version, Class<? extends IDatabaseUpgrader> engine){
-			this.versionString = version;
+		
+		private UpgradeFromVersion(String fromVersion, String toVersion, Class<? extends IDatabaseUpgrader> engine){
+			this.fromVersion = fromVersion;
+			this.toVersion = toVersion;
 			this.upgradeEngine = engine;
 		}
 	}
@@ -118,7 +122,7 @@ public class UpgradeEngine {
 		
 			UpgradeFromVersion fromVersion = null;
 			for (UpgradeFromVersion v : UpgradeFromVersion.values()){
-				if (v.versionString.equals(newDbVersion)){
+				if (v.fromVersion.equals(newDbVersion)){
 					fromVersion = v;
 				}
 			}
@@ -155,6 +159,11 @@ public class UpgradeEngine {
 				IDatabaseUpgrader upgrader = v.upgradeEngine.newInstance();
 				upgrader.upgrade(new SubProgressMonitor(monitor, 0));
 				upgradersRun.add(upgrader);
+				
+				List<IDatabaseUpgrader> additionalItems = getCoreExtensions(v.fromVersion, v.toVersion);
+				for (IDatabaseUpgrader item : additionalItems){
+					item.upgrade(new SubProgressMonitor(monitor, 0));
+				}
 			}
 			monitor.worked(1);
 		}
@@ -273,7 +282,9 @@ public class UpgradeEngine {
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
 		try {
 			for (IConfigurationElement e : config) {
-				items.add((IDatabaseUpgrader)e.createExecutableExtension("upgrader")); //$NON-NLS-1$
+				if (e.getName().equals("dbUpgrader")){ //$NON-NLS-1$
+					items.add((IDatabaseUpgrader)e.createExecutableExtension("upgrader")); //$NON-NLS-1$
+				}
 			}
 		}catch (Exception ex){
 			SmartPlugIn.log(ex.getMessage(), ex);
@@ -281,6 +292,26 @@ public class UpgradeEngine {
 		return items;
 	}
 
+	private List<IDatabaseUpgrader> getCoreExtensions(String fromVersion, String toVersion) {
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<IDatabaseUpgrader> items = new ArrayList<IDatabaseUpgrader>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				if (e.getName().equals("coreUpgrader")){ //$NON-NLS-1$
+					String efromVersion = e.getAttribute("fromVersion");
+					String etoVersion = e.getAttribute("toVersion");
+					if (efromVersion.equals(fromVersion) && etoVersion.equals(toVersion)){
+						items.add((IDatabaseUpgrader)e.createExecutableExtension("upgrader")); //$NON-NLS-1$
+					}
+				}
+			}
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		return items;
+	}
+	
 	/**
 	 * Runs an file containing a set of sql commands.  
 	 * Note: input stream is closed when complete 

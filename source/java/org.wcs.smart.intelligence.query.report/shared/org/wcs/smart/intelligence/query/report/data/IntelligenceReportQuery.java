@@ -107,8 +107,8 @@ public class IntelligenceReportQuery extends AbstractSmartQuery {
 	}
 	
 	@Override
-	public GeometryColumn[] getGeometryColumns(Query query, Locale l) {
-		if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY)){		
+	public GeometryColumn[] getGeometryColumns(String queryTypeKey, Locale l) {
+		if (queryTypeKey.equals(IntelligenceRecordQuery.KEY)){		
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
 							IntelligenceRecordResultItem.GEOMCOLUMN_KEY)};

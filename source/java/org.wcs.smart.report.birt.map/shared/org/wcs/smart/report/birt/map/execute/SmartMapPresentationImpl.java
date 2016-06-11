@@ -204,6 +204,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
 			MapQueryService service = new MapQueryService();
 			MapConfiguration queryResults = (MapConfiguration) ((IForeignContent) content).getRawValue();
+
 			for (int i = 0; i < queryResults.getQueryCount(); i++) {
 				IQueryResults results = (IQueryResults) queryResults.getQueryResults(i).getQueryResults();
 				
@@ -219,8 +220,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 
 				layers.add(geoSmart);
 				toAdd.add(resource);
+				
 			}
-			Collections.reverse(toAdd);
+			
 			AddLayersCommand cmd = new AddLayersCommand(toAdd, renderedMap.getMapLayers().size());
 			executeCommmand(renderedMap, cmd);
 			StringBuilder layerErrors = new StringBuilder();
@@ -277,6 +279,14 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			Graphics2D g = image.createGraphics();
 			try {
 				drawMap(g, new java.awt.Dimension(iwidth, iheight), renderedMap, localdpi);
+				
+				if (layerErrors.length() > 0){
+					addErrorMessage(g, layerErrors.toString(), iwidth, iheight); 
+				}
+				for (Throwable t : queryResults.getExceptions()){
+					addErrorMessage(g, t.getMessage(), iwidth, iheight); 
+				}
+				
 			} finally {
 				g.dispose();
 			}			
