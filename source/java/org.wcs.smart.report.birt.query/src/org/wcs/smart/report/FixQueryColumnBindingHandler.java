@@ -28,6 +28,8 @@ import java.util.List;
 
 import javax.inject.Named;
 
+import org.eclipse.birt.report.model.api.ModuleHandle;
+import org.eclipse.birt.report.model.api.SlotHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
@@ -40,10 +42,12 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.ui.SmartReportEditorInput;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -59,31 +63,64 @@ public class FixQueryColumnBindingHandler {
 	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, 
 		EPartService partService, final Shell activeShell){
 		
-		Report toUpdate = null;
-		for (MPart p : partService.getParts()){
-			if (p.isVisible() && E3Utils.isCompatibilityEditor(p)){
-				if (E3Utils.getSourceObject(p) instanceof RCPMultiPageReportEditor){
-					toUpdate = ((SmartReportEditorInput)((RCPMultiPageReportEditor)E3Utils.getSourceObject(p)).getEditorInput()).getReport();
-				}
-			}
+		if (thisSelection == null || 
+			!(thisSelection instanceof IStructuredSelection) || 
+			((IStructuredSelection)thisSelection).isEmpty() ){		
+			return;
 		}
 		
+		final List<Object> selection= ((IStructuredSelection)thisSelection).toList();
 		final List<Report> reports = new ArrayList<Report>();
-		
-		if (toUpdate == null){
-			if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty() ){
+		for (Object sel : selection){
+			if (sel instanceof SlotHandle){
+				ModuleHandle mhandle = ((SlotHandle)sel).getModule().getRoot().getModuleHandle();
+				fixReport(mhandle, activeShell);
 				return;
 			}
-			final List<Object> selection= ((IStructuredSelection)thisSelection).toList();
-			for (Object x : selection){
-				if (x instanceof Report){
-					reports.add((Report)x);
+			if (sel instanceof Report){
+				reports.add((Report)sel);
+			}
+		}
+		
+		List<Report> toSkip = new ArrayList<Report>();
+		for (Report r : reports){
+			
+			//save an close any existing editor
+			for (MPart part : partService.getParts()){
+				if (E3Utils.isCompatibilityEditor(part)){
+					IEditorPart epart = (IEditorPart)E3Utils.getSourceObject(part);
+					if (epart.isDirty()){
+						if (epart.getEditorInput() instanceof SmartReportEditorInput){
+							SmartReportEditorInput ri = (SmartReportEditorInput)epart.getEditorInput();
+							if (ri.getReport().equals(r)){
+								//do you want to save your changes or skip update
+								MessageDialog md = new MessageDialog(activeShell, Messages.FixQueryColumnBindingHandler_SaveDialogTitle, null, MessageFormat.format(Messages.FixQueryColumnBindingHandler_SaveDialogMessage, r.getName()),
+										MessageDialog.QUESTION, new String[]{DialogConstants.SAVE_TEXT, Messages.FixQueryColumnBindingHandler_SaveDialogButton1, Messages.FixQueryColumnBindingHandler_SaveDialogButton2},
+										0);
+								int index = md.open();
+								if (index == 0){
+									//save
+									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().saveEditor(epart, false);
+									//partService.savePart(part, false); -> for compatibility parts this will still prompt
+									partService.hidePart(part, true);
+								}
+								if (index == 1){
+									//close and discard
+									partService.hidePart(part, true);
+									
+								}
+								if (index == 2){
+									toSkip.add(r);
+								}
+							}
+						}
+					}
 				}
 			}
-		}else{
-			reports.add(toUpdate);
 		}
-		//TODO: need to make sure file is not open in editor
+		reports.removeAll(toSkip);
+		
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try{
 		pmd.run(true, true, new IRunnableWithProgress() {
@@ -95,8 +132,8 @@ public class FixQueryColumnBindingHandler {
 				for (Report r : reports){
 					monitor.subTask(MessageFormat.format(Messages.FixQueryColumnBindingHandler_SubTask, r.getName()));
 					try{
-						ReportQueryColumnBindingFixer fixer = new ReportQueryColumnBindingFixer(r);
-						fixer.fixReport();						
+						ReportQueryColumnBindingFixer fixer = new ReportQueryColumnBindingFixer();
+						fixer.fixReport(r, monitor);
 					} catch (Exception ex) {
 						ReportPlugIn.displayLog(
 								MessageFormat.format(Messages.FixQueryColumnBindingHandler_ReportError, r.getName(), ex.getLocalizedMessage()), ex);
@@ -120,6 +157,36 @@ public class FixQueryColumnBindingHandler {
 			ReportPlugIn.displayLog(
 					Messages.FixQueryColumnBindingHandler_ErrorMsg + ex.getLocalizedMessage(), ex);
 		}
+	}
+	
+	private void fixReport(final ModuleHandle rm, final Shell activeShell){
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
+		try{
+		pmd.run(true, true, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(final IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				monitor.beginTask(Messages.FixQueryColumnBindingHandler_TaskName, 2);
+				monitor.worked(1);
+				monitor.subTask(MessageFormat.format(Messages.FixQueryColumnBindingHandler_SubTask, "")); //$NON-NLS-1$
+				
+				final ReportQueryColumnBindingFixer fixer = new ReportQueryColumnBindingFixer();
+				try{
+					fixer.fixReport(rm, monitor);
+				} catch (Exception ex) {
+					ReportPlugIn.displayLog(
+							MessageFormat.format(Messages.FixQueryColumnBindingHandler_ModuleErrorMsg, ex.getLocalizedMessage()), ex);
+				}
+				monitor.worked(1);
+				monitor.done();
+			}
+		});
+		}catch (Exception ex){
+			ReportPlugIn.displayLog(
+					Messages.FixQueryColumnBindingHandler_ErrorMsg + ex.getLocalizedMessage(), ex);
+		}
+		
 	}
 	
 	public static class FixQueryHandlerWrapper extends DIHandler<FixQueryColumnBindingHandler>{
