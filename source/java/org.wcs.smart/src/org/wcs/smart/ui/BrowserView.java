@@ -30,6 +30,7 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -89,6 +90,7 @@ public class BrowserView {
 	
 	@PostConstruct
 	public void createPartControl(final Composite parent) {
+		part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
 		((FillLayout)parent.getLayout()).marginHeight = 0;
 		((FillLayout)parent.getLayout()).marginWidth = 0;
 		
@@ -179,6 +181,7 @@ public class BrowserView {
 			public void changed(ProgressEvent event) {
 				if (event.total == 0) return;
 				if (event.total == event.current) return;
+				if (btnRefresh.isDisposed()) return;
 				btnRefresh.setEnabled(false);
 			}
 		});

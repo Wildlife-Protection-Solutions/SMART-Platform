@@ -164,7 +164,6 @@
                minimized="false"
                moveable="true"
                relationship="stack"
-               relative="org.eclipse.ui.editorss"
                showTitle="true"
                visible="false">
          </view>

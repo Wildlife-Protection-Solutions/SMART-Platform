@@ -25,7 +25,15 @@ import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.MElementContainer;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.model.application.ui.advanced.MArea;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPlaceholder;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.swt.widgets.Shell;
@@ -37,10 +45,25 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class ProcessDataQueueHandler {
 	
+	@SuppressWarnings("unchecked")
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell,
-			EPartService ePartService) {
-		ePartService.showPart(DataQueueView.ID, PartState.VISIBLE);
+			EPartService ePartService, EModelService mService, MApplication app) {
+		
+		MPart part = ePartService.findPart(DataQueueView.ID);
+		if (part == null){
+			part = ePartService.showPart(DataQueueView.ID, PartState.VISIBLE);
+			
+			//move to editor area if applicable
+			MPerspective current = mService.getActivePerspective(app.getSelectedElement());
+			MUIElement element = mService.find("org.eclipse.ui.editorss", current); //$NON-NLS-1$
+			if (element.isToBeRendered()){
+				mService.move(part, (MElementContainer<MUIElement>)((MArea)((MPlaceholder)element).getRef()).getChildren().get(0), 0);
+				ePartService.showPart(part, PartState.ACTIVATE);
+			}
+		}else{
+			ePartService.activate(part);
+		}
 		
 	}
 	

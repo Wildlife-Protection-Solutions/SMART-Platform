@@ -194,7 +194,6 @@
                closeable="true"
                id="org.wcs.smart.view.browser"
                relationship="stack"
-               relative="org.eclipse.ui.editorss"
                visible="false">
          </view>
       </perspectiveExtension>
