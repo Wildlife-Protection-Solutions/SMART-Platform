@@ -151,6 +151,12 @@ public class PatrolType {
 		this.isActive = isActive;
 	}
 	
+	/**
+	 * The maximum speed in km/h that should be used
+	 * to validate gps observations for this patrol type
+	 * 
+	 * @return
+	 */
 	@Column(name = "max_speed")
 	public Integer getMaxSpeed() {
 		return maxSpeed;
