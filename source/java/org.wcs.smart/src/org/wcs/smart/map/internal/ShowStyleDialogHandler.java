@@ -21,15 +21,19 @@
  */
 package org.wcs.smart.map.internal;
 
+import java.util.Iterator;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.udig.style.StyleEditorPageManager;
 import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.SmartStyleEditorDialog;
@@ -43,18 +47,34 @@ import org.wcs.smart.ui.map.SmartStyleEditorDialog;
 public class ShowStyleDialogHandler {
 
 	@Execute
-	public void execute(Shell activeShell,
-			@Named(IServiceConstants.ACTIVE_SELECTION) Object currentSelection) {
-		if (currentSelection == null)
+	public void execute(Shell activeShell, ESelectionService selectionService) {
+		Object currentSelection = selectionService.getSelection();
+		if (currentSelection == null){
+			SmartPlugIn.logInfo("Style selection is null"); //$NON-NLS-1$
 			return;
-		if (!(currentSelection instanceof IStructuredSelection))
+		}
+		if (!(currentSelection instanceof IStructuredSelection)){
+			SmartPlugIn.logInfo("Style selection is not structured selection"); //$NON-NLS-1$
 			return;
-		if (((IStructuredSelection) currentSelection).isEmpty())
+		}
+		if (((IStructuredSelection) currentSelection).isEmpty()){
+			SmartPlugIn.logInfo("Style selection is empty"); //$NON-NLS-1$
 			return;
-		if (!(((IStructuredSelection) currentSelection).getFirstElement() instanceof Layer))
-			return;
-
-		Layer selectedLayer = (Layer) ((IStructuredSelection) currentSelection).getFirstElement();
+		}
+		
+		Layer selectedLayer = null;
+		for (Iterator<?> iterator = ((IStructuredSelection)currentSelection).iterator(); iterator.hasNext();) {
+			Object type = (Object) iterator.next();
+			if (type instanceof Layer){
+				selectedLayer = (Layer)type;
+				break;
+			}
+			
+		}
+		if (selectedLayer == null){
+			SmartPlugIn.logInfo("No layer found in current selection."); //$NON-NLS-1$
+			return;	
+		}
 
 		String pageId = StyleManager.INSTANCE.findInitialStylePageId(selectedLayer);
 	    EditorPageManager manager = StyleEditorPageManager.createEditorPageManager(selectedLayer);

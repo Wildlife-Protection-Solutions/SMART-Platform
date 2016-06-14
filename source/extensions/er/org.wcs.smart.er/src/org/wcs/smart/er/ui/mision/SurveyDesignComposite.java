@@ -96,8 +96,10 @@ public class SurveyDesignComposite extends MissionComposite{
 		if (design.getSurvey() != null){
 			sd = design.getSurvey().getSurveyDesign();
 		}
-		SurveyDesignEditorInput selection = new SurveyDesignEditorInput(null,  sd.getUuid(),  null,  null);
-		cmbDesigns.setSelection(new StructuredSelection(selection));
+		if (sd != null){
+			SurveyDesignEditorInput selection = new SurveyDesignEditorInput(null,  sd.getUuid(),  null,  null);
+			cmbDesigns.setSelection(new StructuredSelection(selection));
+		}
 	}
 
 	/**

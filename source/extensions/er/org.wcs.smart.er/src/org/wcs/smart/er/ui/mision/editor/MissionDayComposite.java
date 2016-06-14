@@ -184,7 +184,9 @@ public class MissionDayComposite {
 	public MissionDayComposite(MissionDayPage editor) {
 		this.editor = editor;
 		try{
-			lcrs = ReprojectUtils.stringToCrs(editor.getMissionEditor().getObservationOptions().getViewProjection().getDefinition());
+			if (editor.getMissionEditor().getObservationOptions().getViewProjection() != null){
+				lcrs = ReprojectUtils.stringToCrs(editor.getMissionEditor().getObservationOptions().getViewProjection().getDefinition());
+			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		}
