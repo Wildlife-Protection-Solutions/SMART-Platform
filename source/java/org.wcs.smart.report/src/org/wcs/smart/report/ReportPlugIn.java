@@ -32,8 +32,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -90,6 +94,20 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
 		QueryEventManager.getInstance().addListener(queryListener);
 		
+		PlatformUI.getWorkbench().addWindowListener(new IWindowListener() {
+			@Override
+			public void windowOpened(IWorkbenchWindow window) {
+				//initialize report configuration
+				initReports();
+			}
+			
+			@Override
+			public void windowDeactivated(IWorkbenchWindow window) {}
+			@Override
+			public void windowClosed(IWorkbenchWindow window) {}
+			@Override
+			public void windowActivated(IWorkbenchWindow window) {}
+		});
 	}
 	
 	public static File getReportDirectory(ConservationArea ca) {
@@ -110,12 +128,11 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	
 	public void initReports(){
 		try {
-			String value = SmartBirtLibrary.getInstance().getLibraryLocation().getCanonicalPath();
-			ReportPlugin.getDefault().setResourcePreference(value);
-			SessionHandle.setBirtResourcePath(value);
-			SessionHandleAdapter.getInstance( ).getSessionHandle( ).setResourceFolder(value);
+			String fileStore = SmartContext.INSTANCE.getFilestoreLocation();
+			ReportPlugin.getDefault().setResourcePreference(SmartBirtLibrary.getInstance().getLibraryLocation().getCanonicalPath());
+			SessionHandle.setBirtResourcePath(fileStore);
+			SessionHandleAdapter.getInstance( ).getSessionHandle( ).setResourceFolder(fileStore);
 			SessionHandleAdapter.getInstance().getSessionHandle().setResourceLocator(BirtResourceLocator.INSTANCE);			
-			
 		} catch (IOException e) {
 			org.wcs.smart.report.ReportPlugIn.displayLog(
 					Messages.ReportPlugIn_Error_InitializingParams+ e.getLocalizedMessage(), e);

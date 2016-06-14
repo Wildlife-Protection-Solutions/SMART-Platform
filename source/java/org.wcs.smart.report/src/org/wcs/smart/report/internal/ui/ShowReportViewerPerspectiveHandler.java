@@ -36,11 +36,7 @@ public class ShowReportViewerPerspectiveHandler {
 
 	@Execute
 	public void execute(MWindow window){
-		
-		ReportPlugIn.getDefault().initReports();
-		
 		(new ShowPerspectiveHandler()).execute(ReportViewerPerspective.ID, window);
-		
 	}
 	
 	public static class ShowReportViewerPerspectiveHandlerWrapper extends DIHandler<ShowReportViewerPerspectiveHandler>{

@@ -47,7 +47,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportEventManager;
@@ -191,7 +190,6 @@ public class NewReportHandler {
 					}
 					
 					//open the report
-					session.setResourceFolder(SmartContext.INSTANCE.getFilestoreLocation());
 					ReportDesignHandle rdh = session.createDesign(reportFile.getAbsolutePath());
 					rdh.setTitle(report.getName());
 					

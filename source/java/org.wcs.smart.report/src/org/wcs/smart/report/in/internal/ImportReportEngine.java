@@ -203,9 +203,10 @@ public class ImportReportEngine {
 			//save report to database
 			session.saveOrUpdate(importReport);
 			
-			ReportDesignHandle rdh = SessionHandleAdapter.getInstance().getSessionHandle().openDesign(reportXmlFile.getAbsolutePath());
+			SessionHandle handle = SessionHandleAdapter.getInstance().getSessionHandle();
+			ReportDesignHandle rdh = handle.openDesign(reportXmlFile.getAbsolutePath());
 			
-			//remove existing library & make sure it points to the library associated with this ca
+			//remove existing library & make sure it points to the library associated with this conservation area
 			LibraryHandle library = rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 			rdh.dropLibraryAndBreakExtends(library);
 			

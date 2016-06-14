@@ -22,7 +22,6 @@
 package org.wcs.smart.birt.ui;
 
 import org.eclipse.birt.core.framework.Platform;
-import org.eclipse.birt.report.designer.ui.ReportPlugin;
 import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
@@ -41,6 +40,7 @@ public class ReportEngineManager {
 	private static IReportEngine reportEngine;
 	private static final Object lock = new Object(); 
 	
+	@SuppressWarnings("unchecked")
 	public static IReportEngine getBirtReportEngine(){
 		if (reportEngine != null){
 			return reportEngine;
