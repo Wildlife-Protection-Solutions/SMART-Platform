@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.map.samplingunit;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,25 +31,16 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.styling.FeatureTypeStyle;
-import org.geotools.styling.Graphic;
-import org.geotools.styling.LineSymbolizer;
-import org.geotools.styling.Mark;
-import org.geotools.styling.PointSymbolizer;
-import org.geotools.styling.Rule;
-import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
-import org.geotools.styling.StyleFactory;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.model.SamplingUnit.GeometryType;
+import org.wcs.smart.er.map.SamplingUnitStyleProvider;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -180,64 +170,10 @@ public class SamplingUnitGeoResource extends IGeoResource {
 			}
 		}
 		if (adaptee.isAssignableFrom(Style.class)){
-			return adaptee.cast(createDefaultStyle(monitor));
+			return adaptee.cast(SamplingUnitStyleProvider.createDefaultStyle(SamplingUnit.GeometryType.valueOf(dataType)));
 		}
 		return super.resolve(adaptee, monitor);
 	}
 
-	private Style createDefaultStyle(IProgressMonitor monitor) throws IOException{
-		StyleFactory styleFactory = CommonFactoryFinder.getStyleFactory();
-		FilterFactory filterFactory = CommonFactoryFinder.getFilterFactory();
-		
-		if (dataType.equals(GeometryType.PLOT.name()) ){
-			Graphic gr = styleFactory.createDefaultGraphic();
-
-	        Mark mark = styleFactory.getCircleMark();
-
-	        mark.setStroke(styleFactory.createStroke(
-	                filterFactory.literal(Color.BLACK), 
-	                filterFactory.literal(1)));
-
-	        mark.setFill(styleFactory.createFill(
-	        		filterFactory.literal(Color.RED)));
-
-	        gr.graphicalSymbols().clear();
-	        gr.graphicalSymbols().add(mark);
-	        gr.setSize(filterFactory.literal(6));
-
-	        /*
-	         * Setting the geometryPropertyName arg to null signals that we want to
-	         * draw the default geomettry of features
-	         */
-	        PointSymbolizer sym = styleFactory.createPointSymbolizer(gr, null);
-
-	        Rule rule = styleFactory.createRule();
-	        rule.symbolizers().add(sym);
-	        FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(new Rule[]{rule});
-	        Style style = styleFactory.createStyle();
-	        style.featureTypeStyles().add(fts);
-	        
-	        return style;
-	        
-		}else if (dataType.equals(GeometryType.TRANSECT.name()) ){
-	        Stroke stroke = styleFactory.createStroke(
-	                filterFactory.literal(Color.RED),
-	                filterFactory.literal(1));
-
-	        /*
-	         * Setting the geometryPropertyName arg to null signals that we want to
-	         * draw the default geomettry of features
-	         */
-	        LineSymbolizer sym = styleFactory.createLineSymbolizer(stroke, null);
-
-	        Rule rule = styleFactory.createRule();
-	        rule.symbolizers().add(sym);
-	        FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(new Rule[]{rule});
-	        Style style = styleFactory.createStyle();
-	        style.featureTypeStyles().add(fts);
-
-	        return style;
-		}
-		return null;
-	}
+	
 }

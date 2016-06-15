@@ -37,6 +37,9 @@
       <MapLayer
             maplayer="org.wcs.smart.er.query.report.table.SurveySamplingUnitMapLayer">
       </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.er.query.report.map.QueryStyleProvider">
+      </StyleProvider>
    </extension>
    <extension
          point="org.wcs.smart.data.oda.smart.table">

@@ -22,12 +22,10 @@
 package org.wcs.smart.entity.map;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.ui.XMLMemento;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
@@ -38,11 +36,11 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
-import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.report.EntityTableStyleProvider;
 
 /**
  * Georesource for fixed entity types.
@@ -168,59 +166,19 @@ public class FixedEntityGeoResource extends IGeoResource {
         }
         
         if (adaptee.isAssignableFrom(Style.class)){
-        	Style s = createStyle();
-        	if (s != null){
-        		return adaptee.cast(s);
-        	}
+        	try{
+	        	Style s = EntityTableStyleProvider.createDefaultStyle();
+	        	if (s != null){
+	        		return adaptee.cast(s);
+	        	}
+        	} catch (Exception ex) {
+    			EntityPlugIn.displayLog(Messages.FixedEntityGeoResource_ErrorCreatingLayerStyle, ex);
+    			return null;
+    		}
         }
         return super.resolve(adaptee, monitor);
     }
     
-    /*
-     * Creates the layer default style
-     */
-    private Style createStyle(){
-
-    	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
-    			"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
-    			"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$
-    			"	&lt;sld:UserStyle xmlns=\"http://www.opengis.net/sld\""+ //$NON-NLS-1$
-    			"		xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\""+ //$NON-NLS-1$
-    			"		xmlns:gml=\"http://www.opengis.net/gml\"&gt;"+ //$NON-NLS-1$
-    			"		&lt;sld:Name&gt;Default Styler&lt;/sld:Name&gt;"+ //$NON-NLS-1$
-    			"		&lt;sld:Title /&gt;"+ //$NON-NLS-1$
-    			"		&lt;sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
-    			"			&lt;sld:Name&gt;simple&lt;/sld:Name&gt;"+ //$NON-NLS-1$
-    			"			&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;"+ //$NON-NLS-1$
-    			"			&lt;sld:SemanticTypeIdentifier&gt;generic:geometry&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
-    			"			&lt;sld:SemanticTypeIdentifier&gt;simple&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
-    			//rule for default style
-    			"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
-    			"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-    			"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
-    			"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
-    			"							&lt;sld:WellKnownName&gt;star&lt;/sld:WellKnownName&gt;"+ //$NON-NLS-1$
-    			"							&lt;sld:Fill&gt;"+ //$NON-NLS-1$
-    			"								&lt;sld:CssParameter name=\"fill\"&gt;#00FFFF&lt;/sld:CssParameter&gt;"+ //$NON-NLS-1$
-    			"							&lt;/sld:Fill&gt;"+ //$NON-NLS-1$
-//    			"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
-    			"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
-    			"						&lt;sld:Size&gt;11.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
-    			"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
-    			"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-    			"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$
-    				"		&lt;/sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
-    			"	&lt;/sld:UserStyle&gt;"+ //$NON-NLS-1$
-    			"</styleEntry>"; //$NON-NLS-1$
-		try {
-			XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
-			SLDContent c = new SLDContent();
-			Style style = (Style)c.load(memento);
-			return style;
-		} catch (Exception ex) {
-			EntityPlugIn.displayLog(Messages.FixedEntityGeoResource_ErrorCreatingLayerStyle, ex);
-			return null;
-		}
-    }
+    
 
 }

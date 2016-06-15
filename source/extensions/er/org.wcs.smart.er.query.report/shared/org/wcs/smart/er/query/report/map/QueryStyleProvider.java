@@ -26,14 +26,23 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.styling.Style;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.style.sld.SLDContent;
+import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
+import org.wcs.smart.data.oda.smart.impl.ParsedQuery;
+import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
+import org.wcs.smart.er.map.SamplingUnitStyleProvider;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.er.query.report.table.SurveySamplingUnitTable;
 import org.wcs.smart.report.birt.map.AbstractQueryStyleProvider;
 import org.wcs.smart.udig.style.StyleManager;
 
@@ -45,6 +54,30 @@ import org.wcs.smart.udig.style.StyleManager;
  */
 public class QueryStyleProvider extends AbstractQueryStyleProvider{
 
+	@Override
+	public StyleBlackboard getStyle(String extensionId, String queryText,
+			Session s) {
+		if (extensionId.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)){
+		
+			ParsedQuery pquery = AbstractSmartBirtQuery.parseQueryText(queryText);
+			return getStyle(pquery.getType(), pquery.getUuid(), s);
+		}else if (extensionId.equals(SmartTableQuery.SMART_DATASET_TYPE)){
+			Style style = null;
+			if (queryText.toUpperCase().startsWith(SurveySamplingUnitTable.SU_PREFIX + ":" + GeometryType.TRANSECT.name())){ //$NON-NLS-1$
+				style = SamplingUnitStyleProvider.createDefaultStyle(GeometryType.TRANSECT);
+			}
+			if (queryText.toUpperCase().startsWith(SurveySamplingUnitTable.SU_PREFIX + ":" + GeometryType.PLOT.name())){ //$NON-NLS-1$
+				style = SamplingUnitStyleProvider.createDefaultStyle(GeometryType.PLOT);
+			}
+			if (style != null){
+				StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
+				sb.put(SLDContent.ID, style);
+				return sb;
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public StyleBlackboard getStyle(String queryType, UUID queryUuid, Session s) {
 		if (queryUuid == null) return null;

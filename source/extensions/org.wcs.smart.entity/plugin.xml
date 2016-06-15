@@ -555,6 +555,9 @@
       <MapLayer
             maplayer="org.wcs.smart.entity.report.FixedEntityMapLayer">
       </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.entity.report.EntityTableStyleProvider">
+      </StyleProvider>
    </extension>
    <extension
          point="org.wcs.smart.ca.datamodel.editAdvisor">
