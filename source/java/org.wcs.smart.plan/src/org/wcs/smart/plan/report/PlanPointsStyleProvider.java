@@ -26,6 +26,7 @@ import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.plan.map.udig.PlanTargetGeoResource;
+import org.wcs.smart.plan.report.oda.PlanPatrolQuery;
 import org.wcs.smart.plan.report.oda.PlanTargetQuery;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
 
@@ -40,10 +41,16 @@ public class PlanPointsStyleProvider implements IBirtLayerStyleProvider {
 	@Override
 	public StyleBlackboard getStyle(String extensionId, String queryText,
 			Session s) {
-		if (!extensionId.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)) return null;
-		StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
-		sb.put(SLDContent.ID, PlanTargetGeoResource.createStyle(!queryText.equals("plan"))); //$NON-NLS-1$		
-		return sb;
+		if (extensionId.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
+			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
+			sb.put(SLDContent.ID, PlanTargetGeoResource.createStyle(!queryText.equals("plan"))); //$NON-NLS-1$		
+			return sb;
+		}else if (extensionId.equals(PlanPatrolQuery.SMART_DATASET_TYPE) && queryText.trim().isEmpty()){
+			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
+			sb.put(SLDContent.ID, PlanPatrolMapLayer.createDefaultTrackStyle()); 		
+			return sb;
+		}
+		return null;
 	}
 
 }

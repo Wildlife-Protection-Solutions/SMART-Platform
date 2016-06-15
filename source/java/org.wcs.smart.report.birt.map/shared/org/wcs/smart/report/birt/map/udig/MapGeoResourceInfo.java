@@ -64,11 +64,18 @@ public class MapGeoResourceInfo extends IGeoResourceInfo {
 				FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, new NullProgressMonitor());
 				final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
 				this.bounds = env;
+				env.setToNull();
 				fs.getFeatures().accepts(new FeatureVisitor() {
 					@Override
 					public void visit(Feature f) {
 						BoundingBox bb = f.getBounds();
-						env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
+						if (!bb.isEmpty()){
+							if (env.isNull()){
+								env.init(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY());
+							}else{
+								env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
+							}
+						}
 					}
 				}, null);
 			}else if (resource.canResolve(AbstractGridCoverage2DReader.class)){

@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -148,8 +147,6 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 
 		List<GeoSmart> layers = new ArrayList<GeoSmart>();
 		try {
-			
-		
 			ConservationArea reportca = (ConservationArea) context.getAppContext().get(SmartReportRunner.CA_PARAM);
 			
 			// -- Create Map --

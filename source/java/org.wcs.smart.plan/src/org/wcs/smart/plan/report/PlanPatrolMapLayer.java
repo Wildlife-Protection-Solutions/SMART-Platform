@@ -26,6 +26,13 @@ import java.util.List;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.LineSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleFactory;
+import org.opengis.filter.FilterFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.plan.report.oda.PlanPatrolQuery;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
@@ -40,8 +47,6 @@ import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
  *
  */
 public class PlanPatrolMapLayer implements IBirtMapLayerManager {
-
-	
 	
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
@@ -58,38 +63,6 @@ public class PlanPatrolMapLayer implements IBirtMapLayerManager {
 		}
 		return false;
 	}
-
-//	@Override
-//	public List<IGeoResource> createLayer(DataSetHandle handle, IReportContext context) throws Exception {
-//		if (!(handle instanceof OdaDataSetHandle)){
-//			return null;
-//		}
-//		
-//		PatrolQuery q = PlanPatrolQuery.createQuery();
-//		if (context == null){
-//			PlanPatrolQuery.updateQueryFilter(q, ""); //$NON-NLS-1$
-//		}else{
-//			String bits = (String) context.getParameterValue(ReportPlan.PLAN_UUID);
-//			if (bits == null || bits.length() == 0){
-//				PlanPatrolQuery.updateQueryFilter(q, ""); //$NON-NLS-1$
-//			}else{
-//				PlanPatrolQuery.updateQueryFilter(q, bits.split(",")[0]); //$NON-NLS-1$
-//			}
-//		}
-//		//do not close session as assume it is managed by SmartConnection is BIRT report
-//		Session session = HibernateManager.openSession();
-//		IService qs = QueryServiceFactory.generateQueryService(q);
-//		ArrayList<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-//		if (qs != null) {
-//			QueryExecutor.INSTANCE.executeQuery(q, session, new NullProgressMonitor());
-//			List<? extends IGeoResource> resources = qs.resources(null);
-//			if (resources.size() > 0){
-//				toAdd.add(resources.get(0));
-//			}
-//		}
-//		return toAdd;
-//		
-//	}
 	
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(DataSetHandle handle)
@@ -97,4 +70,25 @@ public class PlanPatrolMapLayer implements IBirtMapLayerManager {
 		return Collections.singletonList(new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY));
 	}
 
+	/**
+	 * Creates the default style for the patrol plan map layer
+	 * @return
+	 */
+	public static Style createDefaultTrackStyle(){
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+		LineSymbolizer ls = sf.createLineSymbolizer();
+		ls.setStroke(sf.createStroke(ff.literal("#0000FF"), ff.literal(1))); //$NON-NLS-1$
+		    	
+		FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+		    	
+		Style style = sf.createStyle();
+		style.featureTypeStyles().add(fts);
+		    	
+		Rule r= sf.createRule();
+		fts.rules().add(r);
+		r.symbolizers().add(ls);
+		    
+		return style;
+	}
 }

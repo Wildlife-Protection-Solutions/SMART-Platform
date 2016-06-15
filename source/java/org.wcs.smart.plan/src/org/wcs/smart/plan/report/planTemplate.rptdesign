@@ -189,36 +189,37 @@
             <list-property name="columnHints">
                 <structure>
                     <property name="columnName">TargetName</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">Target Name</property>
                     <text-property name="displayName">Target Name</text-property>
                     <text-property name="heading">Target Name</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">TargetDescription</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">Target Description</property>
                     <text-property name="displayName">Target Description</text-property>
                     <text-property name="heading">Target Description</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">StatusDescription</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">Status Description</property>
                     <text-property name="displayName">Status Description</text-property>
                     <text-property name="heading">Status Description</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">targetStatus</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">targetStatus</property>
                     <text-property name="displayName">Status</text-property>
                     <text-property name="heading">Status</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">PlanId</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">Plan Id</property>
                     <text-property name="displayName">Plan Id</text-property>
                     <text-property name="heading">Plan Id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">geometry</property>
+                    <property name="alias">Geometry</property>
                     <text-property name="displayName">geometry</text-property>
                     <text-property name="heading">geometry</text-property>
                 </structure>
@@ -476,36 +477,37 @@
             <list-property name="columnHints">
                 <structure>
                     <property name="columnName">TargetName</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">Target Name</property>
                     <text-property name="displayName">Target Name</text-property>
                     <text-property name="heading">Target Name</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">TargetDescription</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">Target Description</property>
                     <text-property name="displayName">Target Description</text-property>
                     <text-property name="heading">Target Description</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">StatusDescription</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">Status Description</property>
                     <text-property name="displayName">Status Description</text-property>
                     <text-property name="heading">Status Description</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">targetStatus</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">targetStatus</property>
                     <text-property name="displayName">Status</text-property>
                     <text-property name="heading">Status</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">PlanId</property>
-                    <property name="analysis">dimension</property>
+                    <property name="alias">Plan Id</property>
                     <text-property name="displayName">Plan Id</text-property>
                     <text-property name="heading">Plan Id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">geometry</property>
+                    <property name="alias">Geometry</property>
                     <text-property name="displayName">geometry</text-property>
                     <text-property name="heading">geometry</text-property>
                 </structure>

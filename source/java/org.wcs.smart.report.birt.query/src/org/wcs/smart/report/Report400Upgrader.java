@@ -26,6 +26,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,6 +45,7 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
 import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
@@ -75,18 +77,63 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 	private static final String NAME_ATT_NAME = "name"; //$NON-NLS-1$
 	private static final String LIST_PROPERTY_TAG_NAME = "list-property"; //$NON-NLS-1$
 
+	private enum Type {TABLE, QUERY, PLAN, INTEL};
+	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
 			upgradeReportFiles(session);
+			
+			final List<String> warnings = new ArrayList<String>();
+			List<ConservationArea> cas = session.createCriteria(ConservationArea.class).list();
+			for (ConservationArea ca : cas){
+				try{
+					upgradePlan(ca);
+				} catch (Exception ex) {
+					warnings.add(MessageFormat.format("Could not upgrade customized Plan pdf template for Conservation Area ''{0}''", ca.getName()));
+					ReportPlugIn.log(ex.getMessage(), ex);
+				}
+				
+				try{
+					upgradeIntelligence(ca);
+				} catch (Exception ex) {
+					warnings.add(MessageFormat.format("Could not upgrade customized Intelligence pdf template for Conservation Area ''{0}''", ca.getName()));
+					ReportPlugIn.log(ex.getMessage(), ex);
+				}
+				
+				
+			}
+			
+
+			if (warnings.size() > 0){
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.Report400Upgrader_ErrorTitle, "The following templates could not be updated.  Items using these templates may not work as expected.", warnings);
+						wd.open();
+					}});
+			}
 			session.getTransaction().commit();
 		} finally {
 			session.close();
 		}
 	}
 
+	private void upgradePlan(ConservationArea ca) throws Exception{
+		File planFile = new File(ca.getFileDataStoreLocation() + File.separator + "plans" + File.separator + "planTemplate.rptdesign"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (planFile.exists()){
+			xmlUpdater(planFile);
+		}
+	}
+	private void upgradeIntelligence(ConservationArea ca) throws Exception{
+		File planFile = new File(ca.getFileDataStoreLocation() + File.separator + "intelligence" + File.separator + "intelligenceTemplate.rptdesign"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (planFile.exists()){
+			xmlUpdater(planFile);
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	private void upgradeReportFiles(Session session) throws Exception {
 		List<Report> reports = session.createCriteria(Report.class).list();
@@ -110,8 +157,6 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 					wd.open();
 				}});
 		}
-		// TODO: upgrade customized plan templates
-		// TODO: upgrade customized intelligence templates
 	}
 
 	/**
@@ -161,7 +206,28 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 
 		}
 
+		//map elements
+		HashMap<String, String> datasetname2extension = new HashMap<>();		
+
+		updateDataSets(doc, datasetname2extension);
+		updateMap(doc, datasetname2extension);
+
+		// write the content into xml file
+		TransformerFactory transformerFactory = TransformerFactory
+				.newInstance();
+		Transformer transformer = transformerFactory.newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+		transformer.setOutputProperty(
+				"{http://xml.apache.org/xslt}indent-amount", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		DOMSource source = new DOMSource(doc);
+		StreamResult result = new StreamResult(file);
+		transformer.transform(source, result);
+	}
+	
+	private static void updateMap(Document doc, HashMap<String,String> dataSetTypeMapping) throws Exception{
 		NodeList mapItems = doc.getElementsByTagName(EXTENDED_ITEM_TAG_NAME);
+		
 		for (int i = 0; i < mapItems.getLength(); i++) {
 			Node mapItem = mapItems.item(i);
 
@@ -229,8 +295,8 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 						String[] dataValues = new String[] { 
 								names.get(k),
 								styles.get(k),
-								parseQueryType(layers.get(k)),
-								parseGeometryColumn(layers.get(k)),
+								parseQueryType(layers.get(k), dataSetTypeMapping.get(dataset.get(k))),
+								parseGeometryColumn(layers.get(k), dataSetTypeMapping.get(dataset.get(k))),
 								dataset.get(k) };
 
 						for (int x = 0; x < propNames.length; x++) {
@@ -247,264 +313,368 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 				}
 			}
 		}
-
+	}
+	private static void updateDataSets(Document doc,  HashMap<String,String> dataSetTypeMapping) throws Exception{
 		// update dataset columns - we need to add Geometry column to various
-		// query types
-		NodeList dataSetItems = doc.getElementsByTagName(ODA_DATA_SET_TAG_NAME); 
-		for (int i = 0; i < dataSetItems.getLength(); i++) {
-			boolean isTable = false;
-			Node dataSetItem = dataSetItems.item(i);
-			String extid = dataSetItem.getAttributes().getNamedItem(EXTENSION_ID_ATT_NAME).getTextContent(); 
-			if (extid.equalsIgnoreCase("org.wcs.smart.data.oda.smart.smartTableDataset")) { //$NON-NLS-1$
-				isTable = true;
-			} else if (extid.equalsIgnoreCase("org.wcs.smart.data.oda.smart.smartQueryDataset")) { //$NON-NLS-1$
-				isTable = false;
-			}
-
-			Node hints = null;
-			Node metadata = null;
-			Node resultSet = null;
-			Node queryText = null;
-			int maxColumnNum = -1;
-			for (int j = 0; j < dataSetItem.getChildNodes().getLength(); j++) {
-				Node property = dataSetItem.getChildNodes().item(j);
-				if (property.getNodeName().equalsIgnoreCase(LIST_PROPERTY_TAG_NAME)) {
-					String name = property.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent();
-					if (name.equalsIgnoreCase("columnHints")) { //$NON-NLS-1$
-						hints = property;
+				// query types
+				
+				NodeList dataSetItems = doc.getElementsByTagName(ODA_DATA_SET_TAG_NAME); 
+				for (int i = 0; i < dataSetItems.getLength(); i++) {
+					Type dataSetType = null;
+					Node dataSetItem = dataSetItems.item(i);
+					String extid = dataSetItem.getAttributes().getNamedItem(EXTENSION_ID_ATT_NAME).getTextContent(); 
+					
+					if (extid.equalsIgnoreCase("org.wcs.smart.data.oda.smart.smartTableDataset")) { //$NON-NLS-1$
+						dataSetType = Type.TABLE;
+					} else if (extid.equalsIgnoreCase("org.wcs.smart.data.oda.smart.smartQueryDataset")) { //$NON-NLS-1$
+						dataSetType = Type.QUERY;
+					}else if (extid.equals("org.wcs.smart.plan.report.oda.SmartPlanTargets")){ //$NON-NLS-1$
+						dataSetType = Type.PLAN;
+					}else if (extid.equals("org.wcs.smart.intelligence.report.oda.SmartIntelligencePoints")){ //$NON-NLS-1$
+						dataSetType = Type.INTEL;
 					}
-					if (name.equalsIgnoreCase("resultSet")) { //$NON-NLS-1$
-						resultSet = property;
 
-						for (int k = 0; k < property.getChildNodes().getLength(); k++) {
-							Node struct = property.getChildNodes().item(k);
-							for (int l = 0; l < struct.getChildNodes().getLength(); l++) {
-								Node prop = struct.getChildNodes().item(l);
-								if (prop.getNodeName().equals(PROPERTY_TAG_NAME) && 
-										prop.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(POSITION_ATT_VALUE)) {
-									Integer value = Integer.parseInt(prop.getTextContent());
-									if (value > maxColumnNum) {
-										maxColumnNum = value;
+					if (dataSetType == null) continue;
+					dataSetTypeMapping.put(dataSetItem.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent(), extid);
+					Node hints = null;
+					Node metadata = null;
+					Node resultSet = null;
+					Node queryText = null;
+					int maxColumnNum = -1;
+					for (int j = 0; j < dataSetItem.getChildNodes().getLength(); j++) {
+						Node property = dataSetItem.getChildNodes().item(j);
+						if (property.getNodeName().equalsIgnoreCase(LIST_PROPERTY_TAG_NAME)) {
+							String name = property.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent();
+							if (name.equalsIgnoreCase("columnHints")) { //$NON-NLS-1$
+								hints = property;
+							}
+							if (name.equalsIgnoreCase("resultSet")) { //$NON-NLS-1$
+								resultSet = property;
+
+								for (int k = 0; k < property.getChildNodes().getLength(); k++) {
+									Node struct = property.getChildNodes().item(k);
+									for (int l = 0; l < struct.getChildNodes().getLength(); l++) {
+										Node prop = struct.getChildNodes().item(l);
+										if (prop.getNodeName().equals(PROPERTY_TAG_NAME) && 
+												prop.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(POSITION_ATT_VALUE)) {
+											Integer value = Integer.parseInt(prop.getTextContent());
+											if (value > maxColumnNum) {
+												maxColumnNum = value;
+											}
+										}
 									}
 								}
 							}
 						}
-					}
-				}
-				if (property.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
-					String tname = property.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent();
-					if (tname.equalsIgnoreCase("cachedMetaData")) { //$NON-NLS-1$
-						for (int k = 0; k < property.getChildNodes().getLength(); k++) {
-							Node subproperty = property.getChildNodes().item(k);
-							if (subproperty.getNodeName().equalsIgnoreCase(LIST_PROPERTY_TAG_NAME)) {
-								String name = subproperty.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent();
-								if (name.equalsIgnoreCase("resultSet")) { //$NON-NLS-1$
-									metadata = subproperty;
-								}
-							}
-						}
-					}
-				}
-				if (property.getNodeName().equalsIgnoreCase("xml-property")) { //$NON-NLS-1$
-					if (property.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("queryText")) { //$NON-NLS-1$
-						queryText = property;
-					}
-				}
-			}
-			if (queryText != null) {
-				GeometryColumn[] columns = null;
-				if (!isTable) {
-					String queryType = queryText.getTextContent().split(":")[0]; //$NON-NLS-1$
-					queryType = QueryTypeManager.INSTANCE.findDeprecatedQueryTypeString(queryType);
-					AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType);
-					columns = qq.getGeometryColumns(queryType, Locale.getDefault());
-
-					// for patrol queries we need to remove observer column as
-					// this is not valid in the new query but is in old query
-					// type
-					if (queryType.equalsIgnoreCase("patrolquery")) { //$NON-NLS-1$
-						Node toDelete = null;
-						for (int x = 0; x < hints.getChildNodes().getLength(); x++) {
-							Node structure = hints.getChildNodes().item(x);
-							if (structure.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
-								for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
-									Node kid = structure.getChildNodes().item(y);
-									if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME )&& 
-											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("columnName") &&  //$NON-NLS-1$
-											kid.getTextContent().equalsIgnoreCase("ob:observer")) { //$NON-NLS-1$
-										toDelete = structure;
-										break;
+						if (property.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
+							String tname = property.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent();
+							if (tname.equalsIgnoreCase("cachedMetaData")) { //$NON-NLS-1$
+								for (int k = 0; k < property.getChildNodes().getLength(); k++) {
+									Node subproperty = property.getChildNodes().item(k);
+									if (subproperty.getNodeName().equalsIgnoreCase(LIST_PROPERTY_TAG_NAME)) {
+										String name = subproperty.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent();
+										if (name.equalsIgnoreCase("resultSet")) { //$NON-NLS-1$
+											metadata = subproperty;
+										}
 									}
 								}
 							}
-							if (toDelete != null) break;
 						}
-						if (toDelete != null) {
-							toDelete.getParentNode().removeChild(toDelete);
+						if (property.getNodeName().equalsIgnoreCase("xml-property")) { //$NON-NLS-1$
+							if (property.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("queryText")) { //$NON-NLS-1$
+								queryText = property;
+							}
 						}
-
-						toDelete = null;
-						int index = -1;
+					}
+					
+					if (dataSetType == Type.PLAN){
+						//rename the Status column to targetStatus
+						//resultSet name=Status to name=targetStatus; nativeName=Status to nativeName=targetStatus
+						//cachedMetadata name=Status to name=targetStatus
+						
 						for (int x = 0; x < resultSet.getChildNodes().getLength(); x++) {
 							Node structure = resultSet.getChildNodes().item(x);
-							int thisindex = -1;
 							if (structure.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
 								for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
 									Node kid = structure.getChildNodes().item(y);
 									if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) && 
 											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(NAME_ATT_NAME) && 
-											kid.getTextContent().equalsIgnoreCase("ob:observer")) { //$NON-NLS-1$
-										toDelete = structure;
-										if (thisindex != -1) {
-											index = thisindex;
-											break;
-										}
+											kid.getTextContent().equalsIgnoreCase("Status")) { //$NON-NLS-1$
+										kid.setTextContent("targetStatus"); //$NON-NLS-1$
 									}
 									if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) && 
-											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(POSITION_ATT_VALUE)) {
-										thisindex = Integer.parseInt(kid.getTextContent());
-										if (toDelete != null) {
-											index = thisindex;
-											break;
-										}
+											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("nativeName") &&  //$NON-NLS-1$
+											kid.getTextContent().equalsIgnoreCase("Status")) { //$NON-NLS-1$
+										kid.setTextContent("targetStatus"); //$NON-NLS-1$
 									}
-								}
+								}		
 							}
-							if (toDelete != null) break;
 						}
 						
-						if (toDelete != null){
-							toDelete.getParentNode().removeChild(toDelete);
-						}
-
-						toDelete = null;
 						for (int x = 0; x < metadata.getChildNodes().getLength(); x++) {
 							Node structure = metadata.getChildNodes().item(x);
 							if (structure.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
 								for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
 									Node kid = structure.getChildNodes().item(y);
 									if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) && 
-											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(POSITION_ATT_VALUE)) {
-										int thisindex = Integer.parseInt(kid.getTextContent());
-										if (thisindex == index) {
-											toDelete = structure;
-											break;
-										}
+											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(NAME_ATT_NAME) && 
+											kid.getTextContent().equalsIgnoreCase("Status")) { //$NON-NLS-1$
+										kid.setTextContent("targetStatus"); //$NON-NLS-1$
+									}
+								}		
+							}
+						}
+						
+						for (int x = 0; x < hints.getChildNodes().getLength(); x++) {
+							Node structure = hints.getChildNodes().item(x);
+							if (structure.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
+								Node toDelete = null;
+								String alias = null;
+								for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
+									Node kid = structure.getChildNodes().item(y);
+									if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) && 
+											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("columnName") &&  //$NON-NLS-1$
+											kid.getTextContent().equalsIgnoreCase("Status")) { //$NON-NLS-1$
+										kid.setTextContent("targetStatus"); //$NON-NLS-1$
+									}
+									if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) && 
+											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("analysis")){ //$NON-NLS-1$
+										toDelete = kid;
+									}
+									if (kid.getNodeName().equalsIgnoreCase("text-property") &&  //$NON-NLS-1$
+											kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("displayName")){ //$NON-NLS-1$
+										alias = kid.getTextContent();
 									}
 								}
+								if (toDelete != null) toDelete.getParentNode().removeChild(toDelete);
+								if (alias != null){
+									if (alias.equalsIgnoreCase("Status")){ //$NON-NLS-1$
+										alias = "targetStatus"; //$NON-NLS-1$
+									}
+									Node propNode = doc.createElement(PROPERTY_TAG_NAME);
+									Attr attribute = doc.createAttribute(NAME_ATT_NAME);
+									attribute.setValue("alias"); //$NON-NLS-1$
+									propNode.getAttributes().setNamedItem(attribute);
+									propNode.setTextContent(alias);
+									structure.appendChild(propNode);
+								}
 							}
-							if (toDelete != null)
-								break;
 						}
-						if (toDelete != null){
-							toDelete.getParentNode().removeChild(toDelete);
+						NodeList structures = doc.getElementsByTagName("expression");  //$NON-NLS-1$
+						for (int j = 0; j < structures.getLength(); j++) {
+							Node n = structures.item(j);
+							if (n != null && n.getParentNode() != null && n.getParentNode().getParentNode() != null &&
+							  n.getParentNode().getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)
+								&& n.getParentNode().getParentNode().getNodeName().equalsIgnoreCase(LIST_PROPERTY_TAG_NAME)
+									&& n.getParentNode().getParentNode().getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("boundDataColumns") //$NON-NLS-1$
+									&& n.getTextContent().equalsIgnoreCase("dataSetRow[\"Status\"]")){ //$NON-NLS-1$
+								n.setTextContent("dataSetRow[\"targetStatus\"]"); //$NON-NLS-1$
+							}
+									
 						}
+						
+						
 					}
-					
-				} else {
-					String geom = parseGeometryColumn(queryText
-							.getTextContent());
-					GeometryColumn gc = new GeometryColumn(geom, geom);
-					columns = new GeometryColumn[] { gc };
-				}
+					if (queryText != null) {
+						GeometryColumn[] columns = null;
+						if (dataSetType == Type.QUERY) {
+							String queryType = queryText.getTextContent().split(":")[0]; //$NON-NLS-1$
+							if (queryText.getTextContent().trim().isEmpty()){
+								//assume patrol plan query
+								queryType = "patrolquery"; //$NON-NLS-1$
+							}
+							
+							queryType = QueryTypeManager.INSTANCE.findDeprecatedQueryTypeString(queryType);
+							AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType);
+							columns = qq.getGeometryColumns(queryType, Locale.getDefault());
 
-				if (columns != null) {
-					for (GeometryColumn c : columns) {
-						maxColumnNum++;
-						Node dsstructure = doc.createElement(STRUCTURE_TAG_NAME);
-						String[] prop = new String[] { 
-								POSITION_ATT_VALUE,
-								NAME_ATT_NAME, 
-								"nativeName",  //$NON-NLS-1$
-								"dataType", //$NON-NLS-1$
-								"nativeDataType" }; //$NON-NLS-1$
-						String[] propValues = new String[] {
-								String.valueOf(maxColumnNum), 
-								c.getKey(),
-								c.getKey(), 
-								JAVA_OBJECT_TYPE, 
-								"2000" }; //$NON-NLS-1$
-						
-						for (int x = 0; x < prop.length; x++) {
-							Node propNode = doc.createElement(PROPERTY_TAG_NAME);
-							Attr attribute = doc.createAttribute(NAME_ATT_NAME);
-							attribute.setValue(prop[x]);
-							propNode.getAttributes().setNamedItem(attribute);
-							propNode.setTextContent(propValues[x]);
-							dsstructure.appendChild(propNode);
+							// for patrol queries we need to remove observer column as
+							// this is not valid in the new query but is in old query
+							// type
+							if (queryType.equalsIgnoreCase("patrolquery")) { //$NON-NLS-1$
+								Node toDelete = null;
+								for (int x = 0; x < hints.getChildNodes().getLength(); x++) {
+									Node structure = hints.getChildNodes().item(x);
+									if (structure.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
+										for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
+											Node kid = structure.getChildNodes().item(y);
+											if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME )&& 
+													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("columnName") &&  //$NON-NLS-1$
+													kid.getTextContent().equalsIgnoreCase("ob:observer")) { //$NON-NLS-1$
+												toDelete = structure;
+												break;
+											}
+										}
+									}
+									if (toDelete != null) break;
+								}
+								if (toDelete != null) {
+									toDelete.getParentNode().removeChild(toDelete);
+								}
+
+								toDelete = null;
+								int index = -1;
+								for (int x = 0; x < resultSet.getChildNodes().getLength(); x++) {
+									Node structure = resultSet.getChildNodes().item(x);
+									int thisindex = -1;
+									if (structure.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
+										for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
+											Node kid = structure.getChildNodes().item(y);
+											if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) && 
+													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(NAME_ATT_NAME) && 
+													kid.getTextContent().equalsIgnoreCase("ob:observer")) { //$NON-NLS-1$
+												toDelete = structure;
+												if (thisindex != -1) {
+													index = thisindex;
+													break;
+												}
+											}
+											if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) && 
+													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(POSITION_ATT_VALUE)) {
+												thisindex = Integer.parseInt(kid.getTextContent());
+												if (toDelete != null) {
+													index = thisindex;
+													break;
+												}
+											}
+										}
+									}
+									if (toDelete != null) break;
+								}
+								
+								if (toDelete != null){
+									toDelete.getParentNode().removeChild(toDelete);
+								}
+
+								toDelete = null;
+								for (int x = 0; x < metadata.getChildNodes().getLength(); x++) {
+									Node structure = metadata.getChildNodes().item(x);
+									if (structure.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)) {
+										for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
+											Node kid = structure.getChildNodes().item(y);
+											if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) && 
+													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase(POSITION_ATT_VALUE)) {
+												int thisindex = Integer.parseInt(kid.getTextContent());
+												if (thisindex == index) {
+													toDelete = structure;
+													break;
+												}
+											}
+										}
+									}
+									if (toDelete != null)
+										break;
+								}
+								if (toDelete != null){
+									toDelete.getParentNode().removeChild(toDelete);
+								}
+							}
+							
+						} else if (dataSetType == Type.TABLE){
+							String geom = parseGeometryColumn(queryText
+									.getTextContent(), ""); //$NON-NLS-1$
+							GeometryColumn gc = new GeometryColumn(geom, geom);
+							columns = new GeometryColumn[] { gc };
+						} else if (dataSetType == Type.PLAN || dataSetType == Type.INTEL){
+							GeometryColumn gc = new GeometryColumn("Geometry", "geometry"); //$NON-NLS-1$ //$NON-NLS-2$
+							columns = new GeometryColumn[] { gc };
 						}
-						resultSet.appendChild(dsstructure);
 
-						Node mdstructure = doc.createElement(STRUCTURE_TAG_NAME);
-						prop = new String[] { POSITION_ATT_VALUE,
-								NAME_ATT_NAME,
-								"dataType" }; //$NON-NLS-1$
-						propValues = new String[] {
-								String.valueOf(maxColumnNum), 
-								c.getLabel(),
-								JAVA_OBJECT_TYPE };
-						
-						for (int x = 0; x < prop.length; x++) {
-							Node propNode = doc.createElement(PROPERTY_TAG_NAME);
-							Attr attribute = doc.createAttribute(NAME_ATT_NAME);
-							attribute.setValue(prop[x]);
-							propNode.getAttributes().setNamedItem(attribute);
-							propNode.setTextContent(propValues[x]);
-							mdstructure.appendChild(propNode);
+						if (columns != null) {
+							for (GeometryColumn c : columns) {
+								maxColumnNum++;
+								Node dsstructure = doc.createElement(STRUCTURE_TAG_NAME);
+								String[] prop = new String[] { 
+										POSITION_ATT_VALUE,
+										NAME_ATT_NAME, 
+										"nativeName",  //$NON-NLS-1$
+										"dataType", //$NON-NLS-1$
+										"nativeDataType" }; //$NON-NLS-1$
+								String[] propValues = new String[] {
+										String.valueOf(maxColumnNum), 
+										c.getKey(),
+										c.getKey(), 
+										JAVA_OBJECT_TYPE, 
+										"2000" }; //$NON-NLS-1$
+								
+								for (int x = 0; x < prop.length; x++) {
+									Node propNode = doc.createElement(PROPERTY_TAG_NAME);
+									Attr attribute = doc.createAttribute(NAME_ATT_NAME);
+									attribute.setValue(prop[x]);
+									propNode.getAttributes().setNamedItem(attribute);
+									propNode.setTextContent(propValues[x]);
+									dsstructure.appendChild(propNode);
+								}
+								resultSet.appendChild(dsstructure);
+
+								Node mdstructure = doc.createElement(STRUCTURE_TAG_NAME);
+								prop = new String[] { POSITION_ATT_VALUE,
+										NAME_ATT_NAME,
+										"dataType" }; //$NON-NLS-1$
+								propValues = new String[] {
+										String.valueOf(maxColumnNum), 
+										c.getLabel(),
+										JAVA_OBJECT_TYPE };
+								
+								for (int x = 0; x < prop.length; x++) {
+									Node propNode = doc.createElement(PROPERTY_TAG_NAME);
+									Attr attribute = doc.createAttribute(NAME_ATT_NAME);
+									attribute.setValue(prop[x]);
+									propNode.getAttributes().setNamedItem(attribute);
+									propNode.setTextContent(propValues[x]);
+									mdstructure.appendChild(propNode);
+
+								}
+								metadata.appendChild(mdstructure);
+
+								Node hintstructure = doc.createElement(STRUCTURE_TAG_NAME);
+								prop = new String[] { "columnName", "alias" }; //$NON-NLS-1$ //$NON-NLS-2$
+								propValues = new String[] { c.getKey(), c.getLabel() };
+								
+								for (int x = 0; x < prop.length; x++) {
+									Node propNode = doc.createElement(PROPERTY_TAG_NAME);
+									Attr attribute = doc.createAttribute(NAME_ATT_NAME);
+									attribute.setValue(prop[x]);
+									propNode.getAttributes().setNamedItem(attribute);
+									propNode.setTextContent(propValues[x]);
+									hintstructure.appendChild(propNode);
+								}
+								
+								prop = new String[] { "displayName", "heading" }; //$NON-NLS-1$ //$NON-NLS-2$
+								propValues = new String[] { c.getLabel(), c.getLabel() };
+								for (int x = 0; x < prop.length; x++) {
+									Node propNode = doc.createElement("text-property"); //$NON-NLS-1$
+									Attr attribute = doc.createAttribute(NAME_ATT_NAME);
+									attribute.setValue(prop[x]);
+									propNode.getAttributes().setNamedItem(attribute);
+									propNode.setTextContent(propValues[x]);
+									hintstructure.appendChild(propNode);
+
+								}
+								hints.appendChild(hintstructure);
+							}
 
 						}
-						metadata.appendChild(mdstructure);
 
-						Node hintstructure = doc.createElement(STRUCTURE_TAG_NAME);
-						prop = new String[] { "columnName", "alias" }; //$NON-NLS-1$ //$NON-NLS-2$
-						propValues = new String[] { c.getKey(), c.getLabel() };
-						
-						for (int x = 0; x < prop.length; x++) {
-							Node propNode = doc.createElement(PROPERTY_TAG_NAME);
-							Attr attribute = doc.createAttribute(NAME_ATT_NAME);
-							attribute.setValue(prop[x]);
-							propNode.getAttributes().setNamedItem(attribute);
-							propNode.setTextContent(propValues[x]);
-							hintstructure.appendChild(propNode);
-						}
-						
-						prop = new String[] { "displayName", "heading" }; //$NON-NLS-1$ //$NON-NLS-2$
-						propValues = new String[] { c.getLabel(), c.getLabel() };
-						for (int x = 0; x < prop.length; x++) {
-							Node propNode = doc.createElement("text-property"); //$NON-NLS-1$
-							Attr attribute = doc.createAttribute(NAME_ATT_NAME);
-							attribute.setValue(prop[x]);
-							propNode.getAttributes().setNamedItem(attribute);
-							propNode.setTextContent(propValues[x]);
-							hintstructure.appendChild(propNode);
-
-						}
-						hints.appendChild(hintstructure);
 					}
 
 				}
-
-			}
-
-		}
-
-		// write the content into xml file
-		TransformerFactory transformerFactory = TransformerFactory
-				.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-		transformer.setOutputProperty(
-				"{http://xml.apache.org/xslt}indent-amount", "2"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		DOMSource source = new DOMSource(doc);
-		StreamResult result = new StreamResult(file);
-		transformer.transform(source, result);
 	}
-
-	private static String parseQueryType(String queryText) {
+	private static String parseQueryType(String queryText, String datasetExtId) {
+		if (queryText.trim().isEmpty()){
+			if (datasetExtId.equalsIgnoreCase("org.wcs.smart.intelligence.report.oda.SmartIntelligencePointst")){ //$NON-NLS-1$
+				return "MULTIPOINT"; //$NON-NLS-1$
+			}else if (datasetExtId.equalsIgnoreCase("org.wcs.smart.data.oda.smart.smartQueryDataset")){ //$NON-NLS-1$
+				//assume patrol plan query for plan template
+				return "MULTILINE"; //$NON-NLS-1$
+			}
+		}
 		String[] bits = queryText.split(":"); //$NON-NLS-1$
 		if (bits[0].equals("ENTITY")) { //$NON-NLS-1$
 			return "POINT"; //$NON-NLS-1$
+		}
+		if (bits[0].equals("subplan") || bits[0].equals("plan")){ //$NON-NLS-1$ //$NON-NLS-2$
+			return "MULTIPOINT"; //$NON-NLS-1$
 		}
 		if (bits[0].equals("SD_SU")) { //$NON-NLS-1$
 			if (bits[1].equalsIgnoreCase("TRANSECT")) { //$NON-NLS-1$
@@ -536,14 +706,30 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 		return "POINT"; //$NON-NLS-1$
 	}
 
-	private static String parseGeometryColumn(String queryText)
+	private static String parseGeometryColumn(String queryText, String datasetExtId)
 			throws Exception {
+		if (queryText.trim().isEmpty()){
+			if (datasetExtId.equalsIgnoreCase("org.wcs.smart.intelligence.report.oda.SmartIntelligencePoints")){ //$NON-NLS-1$
+				return "geometry"; //$NON-NLS-1$
+			}else if (datasetExtId.equalsIgnoreCase("org.wcs.smart.data.oda.smart.smartQueryDataset")){ //$NON-NLS-1$
+				AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler("patrolquery"); //$NON-NLS-1$
+				GeometryColumn[] columns = qq.getGeometryColumns("patrolquery", Locale.getDefault()); //$NON-NLS-1$
+				if (columns == null)
+					return null;
+				return columns[0].getKey();
+			}
+		}
+		
 		String[] bits = queryText.split(":"); //$NON-NLS-1$
 		if (bits[0].equals("ENTITY")) { //$NON-NLS-1$
 			return "entity:geometry"; //$NON-NLS-1$
 		}
 		if (bits[0].equals("SD_SU")) { //$NON-NLS-1$
 			return "su:geometry"; //$NON-NLS-1$
+		}
+		if (bits[0].equals("subplan") //$NON-NLS-1$
+				|| bits[0].equals("plan")){ //$NON-NLS-1$ 
+			return "geometry"; //$NON-NLS-1$
 		}
 		// plans are multipoint with the name geometry
 		// planpatrol is multiline with name track:geometry

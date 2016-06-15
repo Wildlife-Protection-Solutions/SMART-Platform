@@ -46,7 +46,7 @@ public class QueryStyleProvider  extends AbstractQueryStyleProvider{
 
 	@Override
 	public StyleBlackboard getStyle(String queryType, UUID queryUuid, Session s) {
-		
+		if (queryUuid == null) return null;
 		String tableName = null;
 		String resourceKey = null;
 		if (queryType.equals(PatrolGriddedQuery.KEY)){

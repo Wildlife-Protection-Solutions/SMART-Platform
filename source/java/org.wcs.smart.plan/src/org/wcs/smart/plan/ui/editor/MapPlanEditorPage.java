@@ -37,12 +37,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.styling.FeatureTypeStyle;
-import org.geotools.styling.LineSymbolizer;
-import org.geotools.styling.Rule;
-import org.geotools.styling.Style;
-import org.geotools.styling.StyleFactory;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
@@ -52,7 +46,6 @@ import org.locationtech.udig.project.command.UndoableMapCommand;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.style.sld.SLDContent;
-import org.opengis.filter.FilterFactory;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
@@ -65,6 +58,7 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.map.udig.PlanTargetService;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.report.PlanPatrolMapLayer;
 import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
@@ -408,29 +402,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		}
 		return "observation|" + query.toString(); //$NON-NLS-1$
     }
-    
-    
-    /*
-     * Creates the layer default style
-     */
-    private Style createDefaultTrackStyle(){
-    	StyleFactory sf = CommonFactoryFinder.getStyleFactory();
-    	FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-    	LineSymbolizer ls = sf.createLineSymbolizer();
-    	ls.setStroke(sf.createStroke(ff.literal("#0000FF"), ff.literal(1))); //$NON-NLS-1$
-    	
-    	FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-    	
-    	Style style = sf.createStyle();
-    	style.featureTypeStyles().add(fts);
-    	
-    	Rule r= sf.createRule();
-    	fts.rules().add(r);
-    	r.symbolizers().add(ls);
-    
-    	return style;
-    }
-    
+       
     
     private class AddPlanningLayers extends AbstractCommand implements UndoableMapCommand{
 		
@@ -447,7 +419,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			command.run(monitor);
 			
 			Layer trackLayer = command.getLayers().get(layers.size() - 1);
-			trackLayer.getStyleBlackboard().put(SLDContent.ID, createDefaultTrackStyle());
+			trackLayer.getStyleBlackboard().put(SLDContent.ID, PlanPatrolMapLayer.createDefaultTrackStyle());
 			trackLayer.refresh(null);
 		}
 		

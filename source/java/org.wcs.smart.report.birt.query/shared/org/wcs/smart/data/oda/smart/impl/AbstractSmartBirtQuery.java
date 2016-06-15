@@ -73,7 +73,10 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	public static ParsedQuery parseQueryText(String queryText){
 		String[] bits = queryText.split(":"); //$NON-NLS-1$
 		String queryType = bits[0];
-		UUID uuid = UuidUtils.stringToUuid(bits[1]);
+		UUID uuid = null;
+		if (bits.length >= 2 &&  !bits[1].isEmpty()){
+			uuid = UuidUtils.stringToUuid(bits[1]);
+		}
 		return new ParsedQuery(queryType, uuid);
 	}
 	
