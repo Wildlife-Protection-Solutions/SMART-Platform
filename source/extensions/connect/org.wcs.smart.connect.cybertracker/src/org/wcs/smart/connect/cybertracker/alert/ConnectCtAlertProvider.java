@@ -59,6 +59,8 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	private AlertLookup lookup;
 	private ConnectCtProperties properties;
 	
+	private boolean isServerConfigured;
+	
 	private String username;
 	private String password;
 	private String url;
@@ -70,6 +72,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	}
 
 	private void init(final ConfigurableModel cm) {
+		isServerConfigured = true;
 		ca = cm.getConservationArea();
 		if (cm.getUuid() != null) {
 			final List<ConnectAlert> alerts = new ArrayList<ConnectAlert>();
@@ -101,7 +104,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 				initConnectFields();
 			}
 		} else {
-			//this case we are using the data model with has no alerts
+			//this case we are using the data model which has no alerts
 			lookup = new AlertLookup(Collections.emptyList());
 			properties = new ConnectCtProperties();
 			properties.setPingFrequency(ConnectCtProperties.PING_FREQUENCY_DEFAULT_VALUE);
@@ -121,6 +124,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 					password = cd.getPassword();
 				} else {
 					//we don't now server configuration -> alerts will be ignored
+					isServerConfigured = false;
 					lookup.clear();
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
@@ -136,7 +140,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 	@Override
 	public List<AlertData> getAlertData(UuidItem item, CmAttribute attribute) {
 		List<ConnectAlert> alerts = lookup.getAlerts(item, attribute);
-		if (alerts == null || alerts.isEmpty()) {
+		if (alerts == null || alerts.isEmpty() || !isServerConfigured) {
 			return Collections.emptyList();
 		}
 		List<AlertData> result = new ArrayList<>();
@@ -146,6 +150,16 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 		return result;
 	}
 
+	@Override
+	public AlertData getPingAlertData() {
+		if (!isServerConfigured) {
+			return null;
+		}
+		AlertData data = createAlertData(null);
+		data.setPingOnly(true);
+		return data;
+	}
+	
 	private AlertData createAlertData(ConnectAlert a) {
 		AlertData data = new AlertData();
 		data.setActive(true);
@@ -153,8 +167,10 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 		data.setUsername(username);
 		data.setPassword(password);
 		data.setCaId(ca.getUuid());
-		data.setType(a.getType());
-		data.setLevel(a.getLevel());
+		if (a != null) {
+			data.setType(a.getType());
+			data.setLevel(a.getLevel());
+		}
 		data.setPingFrequency(properties.getPingFrequency());
 		return data;
 	}

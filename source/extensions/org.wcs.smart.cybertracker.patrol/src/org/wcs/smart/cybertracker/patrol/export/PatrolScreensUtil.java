@@ -42,6 +42,7 @@ import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
+import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
@@ -105,7 +106,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 	 * @return root id
 	 */
 	@Override
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
 		registerDatatype(elements, DATATYPE_PATROL);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
@@ -275,12 +276,12 @@ public class PatrolScreensUtil extends ScreensUtil {
 			
 		}
 		
-		addTaskNode(id, result, elements, startId, dmRootId, ctProps);
+		addTaskNode(id, result, elements, startId, dmRootId, ctProps, pingAlertData);
 		result.rootId = id;
 		return result;
 	}
 
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerPropertiesProfile ctProps) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		
@@ -300,7 +301,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
 		}
 		
-		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps);
+		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData);
 	}
 	
 	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {

@@ -170,7 +170,10 @@ public class ScreensObjectFactory {
 		return movingMaps;
 	}
 
-	private String ctBooleanValue(boolean value) {
+	private String ctBooleanValue(Boolean value) {
+		if (value == null) {
+			return null;
+		}
 		return value ? ICyberTrackerConstants.STR_TRUE : ICyberTrackerConstants.STR_FALSE;
 	}
 
@@ -1148,6 +1151,7 @@ public class ScreensObjectFactory {
 		control.setLevel(data.getLevel());
 		control.setPingFrequency(data.getPingFrequency());
 		control.setTranslatePatrolElementId(patrolId);
+		control.setPingOnly(ctBooleanValue(data.getPingOnly()));
 		control.setTranslateElements(trElements);
 		return control;
 	}	

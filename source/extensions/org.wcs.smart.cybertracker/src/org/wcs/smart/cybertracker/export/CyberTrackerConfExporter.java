@@ -218,7 +218,7 @@ public class CyberTrackerConfExporter {
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
 		ScreensUtil screensUtil = createScreensUtil(ctUtil);
-		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session, ctProperties);
+		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session, ctProperties, alertDataProvider.getPingAlertData());
 		if (metaScreensData == null) {
 			//failed to generate patrol data
 			//error message is expected to be displayed be PatrolScreensUtil

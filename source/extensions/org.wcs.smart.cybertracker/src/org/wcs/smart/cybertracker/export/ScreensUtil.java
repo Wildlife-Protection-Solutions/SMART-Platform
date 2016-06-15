@@ -35,6 +35,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
+import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
@@ -42,6 +43,7 @@ import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.filter.Categories;
 import org.wcs.smart.cybertracker.model.filter.ElementFilters;
 import org.wcs.smart.cybertracker.model.filter.Filter;
+import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.dataentry.model.DisplayMode;
@@ -84,7 +86,7 @@ public class ScreensUtil {
 		this.screensFactory = ctUtil.getScreensFactory();
 	}
 	
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
 //		MetaExportResult result = new MetaExportResult();
 		return null; //TODO: in case we want to export without any meta screens logic for that should be placed here
 	}
@@ -137,7 +139,7 @@ public class ScreensUtil {
 		return idsBegin.get(0);
 	}
 
-	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, List<CyberTrackerId> nodeIds, CyberTrackerPropertiesProfile ctProps) {
+	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, List<CyberTrackerId> nodeIds, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
 		if (nextTaskOptions.size() != nodeIds.size()) {
 			throw new IllegalArgumentException("Unable to build next task node. Number of task options is not equal to the number of referenced nodes."); //$NON-NLS-1$
 		}
@@ -178,6 +180,15 @@ public class ScreensUtil {
 		}
 		
 		addGpsConfiguration(node, ctProps);
+		
+		//add ping control (e.g. configure alert action with ping only set to true)
+		for (AlertData data : pingAlertData) {
+			if (data != null) {
+				Controls.Control pingControl = screensFactory.createAlertControl(data, container.tripUniqueElementId, null);
+				ScreensObjectFactory.addControlToNode(node, pingControl);
+			}
+		}
+
 		container.screenNodes.add(node);
 	}
 	

@@ -65,4 +65,15 @@ public class AlertExportDataProvider {
 		}
 		return result;
 	}
+
+	public List<AlertData> getPingAlertData() {
+		List<AlertData> result = new ArrayList<>();
+		for (IAlertProvider p : providers) {
+			AlertData pingAlertData = p.getPingAlertData();
+			if (pingAlertData != null) {
+				result.add(pingAlertData);
+			}
+		}
+		return result;
+	}
 }

@@ -37,4 +37,6 @@ public interface IAlertProvider {
 
 	public List<AlertData> getAlertData(UuidItem item, CmAttribute attribute);
 
+	public AlertData getPingAlertData();
+
 }

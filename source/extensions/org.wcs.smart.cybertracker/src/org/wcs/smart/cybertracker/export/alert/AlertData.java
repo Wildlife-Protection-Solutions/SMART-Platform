@@ -38,6 +38,7 @@ public class AlertData {
 	private String username;
 	private String url;
 	private Integer pingFrequency;
+	private Boolean pingOnly;
 	
 	private UUID caId;
 	private UUID type;
@@ -98,7 +99,14 @@ public class AlertData {
 		this.caId = caId;
 	}
 	
+	public Boolean getPingOnly() {
+		return pingOnly;
+	}
+	public void setPingOnly(Boolean pingOnly) {
+		this.pingOnly = pingOnly;
+	}
+	
 	public static String toCtString(UUID uuid){
-		return uuid.toString();
+		return uuid != null ? uuid.toString() : null;
 	}
 }

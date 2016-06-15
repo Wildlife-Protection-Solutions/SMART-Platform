@@ -36,6 +36,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
+import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
@@ -88,7 +89,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 	}
 
 	@Override
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
 		registerDatatype(elements, DATATYPE_SURVEY);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
@@ -199,12 +200,12 @@ public class SurveyScreensUtil extends ScreensUtil {
 		cyberTrackerIds = suToCtIds(elements, samplingUnits);
 		id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_StartSamplingUnit, RESULT_MISSION_START_SAMPLING_UNIT, cyberTrackerIds, true);
 
-		addTaskNode(id, result, elements, startId, dmRootId, cyberTrackerIds, surveyDesign.getTrackObserver(), memberIds, membersFilter, ctProps);
+		addTaskNode(id, result, elements, startId, dmRootId, cyberTrackerIds, surveyDesign.getTrackObserver(), memberIds, membersFilter, ctProps, pingAlertData);
 		result.rootId = id;
 		return result;
 	}
 
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter, CyberTrackerPropertiesProfile ctProps) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		
@@ -232,7 +233,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
 		}
 		
-		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps);
+		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData);
 	}
 	
 	//Not the best design, but we can obtain required data from Elements in this case
