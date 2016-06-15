@@ -96,6 +96,8 @@ public class Messages extends NLS {
 	public static String ImportReportEngine_Error_QueryNotFound;
 	public static String ImportReportEngine_Error_ReportExists;
 	public static String ImportReportEngine_EventImportError;
+	public static String ImportReportEngine_ImportDialogMessage;
+	public static String ImportReportEngine_ImportDialogTitle;
 	public static String ImportReportEngine_ImportQuery_WarningDialog_Message;
 	public static String ImportReportEngine_ImportQuery_WarningDialog_Title;
 	public static String ImportReportEngine_ImportQueryJobName;

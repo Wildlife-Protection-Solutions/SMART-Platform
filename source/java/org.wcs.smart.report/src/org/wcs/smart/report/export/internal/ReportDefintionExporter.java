@@ -68,6 +68,12 @@ import org.wcs.smart.util.UuidUtils;
 public class ReportDefintionExporter implements IReportExporter {
 
 	private static final String QUERYFILE_EXTENSION = ".query"; //$NON-NLS-1$
+	
+	public static final String VERSION_2 = "2"; //$NON-NLS-1$
+	
+	public static final String VERSION_KEY = "version"; //$NON-NLS-1$
+	
+	public static final String FILENAME_KEY = "filename"; //$NON-NLS-1$
 
 	public ReportDefintionExporter() {
 	}
@@ -124,7 +130,8 @@ public class ReportDefintionExporter implements IReportExporter {
 				prop.setProperty(
 						"name_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
 			}
-			prop.setProperty("filename", report.getFilename()); //$NON-NLS-1$
+			prop.setProperty(FILENAME_KEY, report.getFilename());
+			prop.setProperty(VERSION_KEY, VERSION_2);
 			try(FileOutputStream fout = new FileOutputStream(f)){
 				prop.store(fout, null);
 			}

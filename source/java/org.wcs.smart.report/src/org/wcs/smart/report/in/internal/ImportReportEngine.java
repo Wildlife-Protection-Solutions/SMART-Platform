@@ -86,6 +86,7 @@ import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.export.internal.ReportDefintionExporter;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
@@ -308,7 +309,11 @@ public class ImportReportEngine {
 		}
 		}finally{
 			if (tmpDir.exists()){
-				FileUtils.deleteDirectory(tmpDir);
+				try{
+					FileUtils.deleteDirectory(tmpDir);
+				}catch (Throwable t){
+					ReportPlugIn.displayLog(t.getMessage(), t);
+				}
 			}
 		}
 	}
@@ -348,12 +353,15 @@ public class ImportReportEngine {
 		try(InputStream inStream = new FileInputStream(f)){
 			prop.load(inStream);
 		}		
-		Report r = new Report();
+		final Report r = new Report();
 		r.setConservationArea(newCa);
 		
+		String version = null;
 		for (Object o : prop.keySet()){
-			if (o.equals("filename")){ //$NON-NLS-1$
+			if (o.equals(ReportDefintionExporter.FILENAME_KEY)){
 				r.setFilename((String)prop.get(o));
+			}else if (o.equals(ReportDefintionExporter.VERSION_KEY)){
+				version = (String)prop.get(o);
 			}else if (((String)o).startsWith("name_")){ //$NON-NLS-1$
 				String key = (String)o;
 				int index = key.indexOf('_');
@@ -377,6 +385,17 @@ public class ImportReportEngine {
 			}
 		}
 		
+		if (version == null || !version.equals(ReportDefintionExporter.VERSION_2)){
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(),
+							Messages.ImportReportEngine_ImportDialogTitle,
+							MessageFormat.format(Messages.ImportReportEngine_ImportDialogMessage, r.getName()));					
+				}				
+			});
+
+		}
 		return r;
 	}
 	
