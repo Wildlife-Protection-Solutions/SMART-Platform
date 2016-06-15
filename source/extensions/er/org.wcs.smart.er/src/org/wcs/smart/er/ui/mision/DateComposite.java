@@ -95,6 +95,23 @@ public class DateComposite extends MissionComposite {
 					
 			return false;
 		}
+		
+		long startD = dates.getStartDate().getTime();
+		long endD = dates.getEndDate().getTime();
+		
+		if (startD + Mission.MAX_MISSION_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
+			String error = MessageFormat.format(
+						Messages.DateComposite_MaxMissionLength,
+						new Object[]{ Mission.MAX_MISSION_LENGTH_DAYS});
+			dates.setError(error);
+			return false;
+		}else if(startD + Mission.WARN_MISSION_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
+			String warning = 
+					MessageFormat.format(
+							Messages.DateComposite_WarnMissionLength,
+							new Object[]{Mission.WARN_MISSION_LENGTH_DAYS});
+			dates.setWarning(warning);
+		}
 		return true;
 	}
 	

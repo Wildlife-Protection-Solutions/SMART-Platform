@@ -169,7 +169,7 @@ public class QueryDefView  {
 			if (!(element instanceof MPart)) return;
 			
 			Object src = E3Utils.getSourceObject((MPart)element); 
-			if (src instanceof IQueryEditor){
+			if (src != null && src instanceof IQueryEditor){
 				if (current == null || ((IQueryEditor)src).getQueryProxy().getQuery().equals(current.getQuery())){
 					//closing the current active part
 					setQuery(null);

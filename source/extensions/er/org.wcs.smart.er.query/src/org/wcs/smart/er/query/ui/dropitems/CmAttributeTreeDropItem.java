@@ -211,6 +211,7 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 	
 	private void updateLabel(){
 		if (defaultNode != null){
+			if (lblitem.isDisposed()) return;
 			lblitem.setText( formatStringForLabel(defaultNode.getName().isEmpty() ? defaultNode.getDmTreeNode().getName() : defaultNode.getName()));
 		}
 	}

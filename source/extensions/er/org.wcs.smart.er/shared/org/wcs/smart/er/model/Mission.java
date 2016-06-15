@@ -52,8 +52,25 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.mission")
 public class Mission extends UuidItem{
 
-	public static final int MAX_LENGTH_ID = 128; 
+	/**
+	 * Maximum mission id length
+	 */
+	public static final int MAX_LENGTH_ID = 128;
+	
+	/**
+	 * Maximum mission comment length 
+	 */
 	public static final int MAX_LENGTH_COMMENT = 32700;
+	
+	/**
+	 * Absolute maximum length of mission in days
+	 */
+	public static final int MAX_MISSION_LENGTH_DAYS = 60;
+	
+	/**
+	 * User warning mission length
+	 */
+	public static final int WARN_MISSION_LENGTH_DAYS = 30;
 	
 	private String id;
 	private Survey survey;

@@ -86,7 +86,11 @@ public class Messages extends NLS {
 	public static String CsvSamplingUnitImporter_Progress1;
 	public static String DateComposite_DateError;
 	public static String DateComposite_Description;
+
+	public static String DateComposite_MaxMissionLength;
 	public static String DateComposite_Title;
+
+	public static String DateComposite_WarnMissionLength;
 	public static String DateComposites_Description;
 	public static String DateComposites_Title;
 	public static String DatesComponent_EndDateLabel;
