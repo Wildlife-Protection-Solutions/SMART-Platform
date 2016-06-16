@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -34,11 +35,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.attachment.AttachmentComposite;
+import org.wcs.smart.common.attachment.IAttachmentsChangeListener;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for displaying attachments associated 
@@ -65,6 +68,15 @@ public class AttachmentDialog extends TitleAreaDialog {
 	}
 	
 	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+	}
+	
+	
+	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite)super.createDialogArea(parent);
 		
@@ -74,6 +86,12 @@ public class AttachmentDialog extends TitleAreaDialog {
 				return new WaypointAttachment();
 			}
 		};
+		attachmentComposite.addAttachmentsChangeListener(new IAttachmentsChangeListener() {
+			@Override
+			public void attachmentsChanged() {
+				getButton(IDialogConstants.OK_ID).setEnabled(true);
+			}
+		});
 		if (waypoint.getAttachments() != null){
 			attachmentComposite.initAttachments(waypoint.getAttachments());
 		}

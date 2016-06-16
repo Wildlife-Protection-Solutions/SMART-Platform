@@ -26,12 +26,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.EmptyInterceptor;
 import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SessionInterceptor;
 import org.wcs.smart.map.internal.settings.MapSettings;
 
 /**
@@ -45,7 +44,7 @@ import org.wcs.smart.map.internal.settings.MapSettings;
  * @author Emily
  * @since 1.0.0
  */
-public class BasemapInterceptor extends EmptyInterceptor {
+public class BasemapInterceptor extends SessionInterceptor {
 
 	private static final long serialVersionUID = 2710377589619179841L;
 
@@ -53,11 +52,9 @@ public class BasemapInterceptor extends EmptyInterceptor {
 	//after transaction has been committed
 	protected List<File> toDelete = new ArrayList<File>();
 	
-	
 	protected boolean shouldIntercept(Object entity) {
 		return (entity instanceof BasemapDefinition);
 	}
-	
 	
 	@Override
 	public void afterTransactionCompletion(Transaction tx){
@@ -84,7 +81,7 @@ public class BasemapInterceptor extends EmptyInterceptor {
     	if (shouldIntercept(entity)) {
     		BasemapDefinition basemap = (BasemapDefinition) entity;
     		MapSettings ms = MapSettings.getInstance(basemap);
-    		toDelete.addAll(ms.getFilesToDelete(HibernateManager.openSession()));
+    		toDelete.addAll(ms.getFilesToDelete(session));
     	}
     	
     }

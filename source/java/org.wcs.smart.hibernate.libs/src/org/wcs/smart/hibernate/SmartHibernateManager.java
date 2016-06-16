@@ -50,7 +50,6 @@ import org.hibernate.service.ServiceRegistryBuilder;
  */
 public class SmartHibernateManager {
 
-	//TODO: make these configurable
 	/*
 	 * Amount of time to wait between checking if session
 	 * has completed in millisecons
@@ -70,7 +69,7 @@ public class SmartHibernateManager {
 	private static  String passWord = "smrt"; //$NON-NLS-1$
 	private static String databaseLocation = ""; //$NON-NLS-1$
 	
-	private static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
+	private static ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
 
 	/*
 	 * collection of all sessions opened 
@@ -157,6 +156,53 @@ public class SmartHibernateManager {
 	}
 	
 	/**
+	 * <p>Attempts to lock the database for the given session.  If it returns
+	 * then you can assume you have the only active session to the database.  
+	 * You need to call unlockDatabase when done. 
+	 * Once locked no other threads will be able to open session until unlockDatabase()
+	 * is called.</p>
+	 * 
+	 * <p>
+	 * This attempts to acquire a lock, if acquired it waits a reasonable amount of time for
+	 * all other session to close.  If they don't close, then it releases the lock, waits briefly 
+	 * then attempts to repeat the process.  It tries 10 times then fails and throws an Exception.
+	 * </p>
+	 *  
+	 * 
+	 * @param currentSession
+	 * @throws Exception
+	 */
+	public static void lockDatabase(Session currentSession) throws Exception{
+		for (int i = 0; i < 10; i ++){
+			//acquire lock
+			thisLock.acquire();
+
+			//wait for all sessions except the current session 
+			int cnt = 0;
+			while(allSessions.size() > 1 && cnt < SESSION_WAIT_COUNT){
+				//wait for thread to be closed
+				try {
+					Thread.sleep( 100 );
+				} catch (InterruptedException e) {}
+				cnt++;
+			}
+			if (allSessions.size() > 1 || allSessions.size() == 0 || allSessions.get(0) != currentSession){
+				//cannot lock the database; lets release the lock giving other threads a chance
+				//to get a session and complete;
+				thisLock.release();
+				Thread.sleep( 100 );
+			}else{
+				return;
+			}
+		}
+		
+		throw new Exception("Cannot acquire database lock."); //$NON-NLS-1$
+	}
+	
+	public static void unlockDatabase(){
+		thisLock.release();
+	}
+	/**
 	 * Locks the database by waiting for active sessions
 	 * to complete or closing them automatically and preventing
 	 * any other sessions from being granted.  MUST call unlock 
@@ -237,17 +283,15 @@ public class SmartHibernateManager {
 	 * @param interceptor a session interceptor
 	 * @return
 	 */
-	protected static Session openSession(Interceptor interceptor){
+	protected static Session openSession(Interceptor interceptor) {
 		//ensure the database is not locked then acquire session
 		try {
 			thisLock.acquire();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		thisLock.release();
-		return openSessionOnly(interceptor);
-		
+		return openSessionOnly(interceptor);	
 	}
 	
 	private static Session openSessionOnly(Interceptor interceptor){
@@ -255,7 +299,6 @@ public class SmartHibernateManager {
 			createSessionFactory();
 		}
 		Session session = (Session) sessionMapsThreadLocal.get();
-		
 		if (session == null || !session.isOpen() ){
 			if (interceptor == null){
 				session = sessionFactory.openSession();
@@ -276,6 +319,10 @@ public class SmartHibernateManager {
 				}	
 			});
 		}
+		
+		if (interceptor != null && interceptor instanceof SessionInterceptor){
+			((SessionInterceptor)interceptor).setSession(session);
+		}
 		return session;
 		
 	}
@@ -283,7 +330,9 @@ public class SmartHibernateManager {
 	protected static void endSessionFactoryNoLock(){
 		synchronized (sessionFactoryLock) {
 			if (sessionFactory != null){
-				sessionFactory.close();
+				//clear the thread local; this should not be a problem but 
+				//this will clear any sessions linked to old session factory
+				sessionMapsThreadLocal = new ThreadLocal<Session>();
 			}
 			sessionFactory = null;	
 		}
@@ -306,6 +355,11 @@ public class SmartHibernateManager {
 			}
 			if (allSessions.size() > 0 && !force){
 				throw new Exception("Could not end current database session.  There are still active transactions.");
+			}else if (force){
+				for (Session s : allSessions){
+					//force close
+					s.close();
+				}
 			}
 			
 			endSessionFactoryNoLock();

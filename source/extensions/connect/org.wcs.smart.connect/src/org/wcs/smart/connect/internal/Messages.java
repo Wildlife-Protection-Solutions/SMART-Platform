@@ -225,6 +225,7 @@ public class Messages extends NLS {
 	public static String EditConnectServerInfoDialog_Title;
 	public static String FileStoreWatcher_Error;
 	public static String FileStoreWatcher_Error2;
+	public static String FileStoreWatcher_FilestoreLogError;
 	public static String FileStoreWatcher_Overflow;
 	public static String FileUploaderJob_Cancelled;
 	public static String FileUploaderJob_StatusCheckSubTaskName;

@@ -86,11 +86,9 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 		if (queryType.equals(SurveyObservationQuery.KEY)){
 			tableName = SurveyObservationQuery.class.getSimpleName(); 
 			resourceKey = "Waypoint"; //$NON-NLS-1$
-			//TODO: for track layer WaypointMissionTracks
 		}else if (queryType.equals(SurveyWaypointQuery.KEY)){
 			tableName = SurveyWaypointQuery.class.getSimpleName(); 
 			resourceKey = "Waypoint"; //$NON-NLS-1$
-			//TODO: for track layer WaypointMissionTracks
 		}else if (queryType.equals(MissionQuery.KEY)){	
 			tableName = MissionQuery.class.getSimpleName(); 
 			resourceKey = "MissionTracks"; //$NON-NLS-1$
@@ -100,6 +98,8 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 		}else if (queryType.equals(SurveyGriddedQuery.KEY)){	
 			tableName = SurveyGriddedQuery.class.getSimpleName(); 
 			resourceKey = "raster"; //$NON-NLS-1$
+		}else{
+			return null;
 		}
 		
 		Query query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$

@@ -70,7 +70,8 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 				return false;
 			}
 			return isEnabled[0];	
-		}return false;
+		}
+		return false;
 	}
 
 }

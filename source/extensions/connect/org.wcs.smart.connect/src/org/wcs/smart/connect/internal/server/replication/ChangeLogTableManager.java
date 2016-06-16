@@ -45,7 +45,7 @@ import org.wcs.smart.util.UuidUtils;
 public enum ChangeLogTableManager {
 
 	INSTANCE;
-		
+	
 	/**
 	 * Delete all records for a given conservation area.
 	 * 
@@ -96,7 +96,7 @@ public enum ChangeLogTableManager {
 	 * @param s
 	 * @param item
 	 */
-	public void addItem(Session s, ChangeLogItem item){
+	public void addItem(Session s, ChangeLogItem item){		
 		//i tired doing just a s.save(item) however I could not
 		//get this to work with the revision identify field
 		String tableName = ((AbstractEntityPersister)s.getSessionFactory()

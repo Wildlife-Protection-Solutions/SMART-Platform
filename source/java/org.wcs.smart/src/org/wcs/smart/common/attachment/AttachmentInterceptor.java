@@ -28,11 +28,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hibernate.EmptyInterceptor;
 import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SessionInterceptor;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -47,14 +46,13 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class AttachmentInterceptor extends EmptyInterceptor {
+public class AttachmentInterceptor extends SessionInterceptor {
 
 	private static final long serialVersionUID = 2710377589619179841L;
 
 	//track files to delete; only delete
 	//after transaction has been committed
 	protected List<File> toDelete = new ArrayList<File>();
-	
 	
 	protected boolean shouldIntercept(Object entity) {
 		return (entity instanceof ISmartAttachment);
@@ -87,7 +85,7 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     	if (shouldIntercept(entity)) {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
     		try {
-    			attachment.computeFileLocation(HibernateManager.openSession());
+    			attachment.computeFileLocation(session);
 				toDelete.add(attachment.getAttachmentFile());
 			} catch (Exception ex) {
 				SmartPlugIn.log("Unable to delete attachment", ex); //$NON-NLS-1$
@@ -112,7 +110,7 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     		
     		if (attachment.getCopyFromLocation() != null){
     			try {
-					attachment.computeFileLocation(HibernateManager.openSession());
+					attachment.computeFileLocation(session);
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}

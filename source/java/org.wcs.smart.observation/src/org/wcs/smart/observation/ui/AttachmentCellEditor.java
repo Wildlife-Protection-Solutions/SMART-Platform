@@ -73,6 +73,7 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		AttachmentDialog attd = new AttachmentDialog(cellEditorWindow.getShell(), wp);
 		
 		if (attd.open() == Window.CANCEL){
+			setValue(null);
 			return null;
 		}
 		
