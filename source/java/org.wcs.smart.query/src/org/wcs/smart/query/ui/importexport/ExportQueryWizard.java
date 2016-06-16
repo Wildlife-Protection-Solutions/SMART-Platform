@@ -492,8 +492,10 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			page2.initValues();
 			page2.setPageComplete(true);
 		}else if (event.getTargetPage() == page3){
-			page3.initValues(initSelection);
-			page3.setPageComplete(true);
+			if (event.getCurrentPage() != page4){
+				page3.initValues(initSelection);
+				page3.setPageComplete(true);
+			}
 		}
 	}
 
