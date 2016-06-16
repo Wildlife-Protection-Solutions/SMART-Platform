@@ -93,7 +93,9 @@ public class GriddedLineIntersector<T> extends RobustLineIntersector {
 	@Override
 	protected int computeIntersect(Coordinate p1, Coordinate p2, Coordinate q1,
 			Coordinate q2) {
-
+		
+		if(this.ex != null) return -1;
+		
 		int r = super.computeIntersect(p1, p2, q1, q2);
 
 		int cnt = 0;

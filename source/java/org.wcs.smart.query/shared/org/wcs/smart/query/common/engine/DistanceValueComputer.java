@@ -26,6 +26,7 @@ import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.util.GeometryUtils;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -58,11 +59,27 @@ public class DistanceValueComputer implements IValueComputer<Double> {
 		Envelope env = t.getBounds(gridDef);
 		
 		GeometryFactory gf = new GeometryFactory();
-		Geometry g = ls.intersection(gf.toGeometry(env));
+		Geometry bbox = gf.toGeometry(env);
 
-		
-		double newlength = processGeometry(g, gridDef.getCrs());
-		return newlength;
+		//#1798
+		//previously this was doing with ls.intersection(bbox); however this
+		//throw topology exceptions in some cases, produced the wrong results when the track
+		//doubled back on itself and was substantially slower
+		double length = 0;
+		for (int i = 1; i < ls.getNumPoints(); i ++){
+			Coordinate c1 = ls.getCoordinateN(i-1);
+			Coordinate c2 = ls.getCoordinateN(i);
+			if (env.intersects(new Envelope(c1, c2))){
+				Geometry part = gf.createLineString(new Coordinate[]{c1,c2});
+				if (env.contains(c1) && env.contains(c2)){
+						//return full length of segment
+				}else{
+					part = part.intersection(bbox);
+				}
+				length += processGeometry(part, gridDef.getCrs());
+			}
+		}
+		return length;
 	}
 	
 	private double processGeometry(Geometry g, CoordinateReferenceSystem crs) throws Exception{
@@ -79,4 +96,6 @@ public class DistanceValueComputer implements IValueComputer<Double> {
 		return 0;
 	}
 
+	
+	
 }
