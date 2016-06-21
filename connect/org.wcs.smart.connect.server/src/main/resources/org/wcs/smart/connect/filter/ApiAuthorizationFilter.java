@@ -63,18 +63,34 @@ public class ApiAuthorizationFilter implements Filter {
 	public void destroy() {
 	}
 
+	 /**
+     * Checks if this is a X-domain pre-flight request.
+     * @param request
+     * @return
+     */
+    private boolean isPreflight(HttpServletRequest request) {
+        return "OPTIONS".equals(request.getMethod()); //$NON-NLS-1$
+    }
+    
 	/**
 	 * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
 	 */
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest r = (HttpServletRequest)request;
 		HttpSession s = r.getSession(false);
-	
+
+		if (isPreflight(r)){
+			//to support CORS requests
+			chain.doFilter(request, response);
+			return;
+		}
+		
 		if (s == null || r.getRemoteUser() == null){
 			//here we want to try basic authentication
 			boolean isOk = false;
 			logger.finer("Attempting basic authorization"); //$NON-NLS-1$
 			String auth = r.getHeader("Authorization"); //$NON-NLS-1$
+			
 			if (auth != null){
 				auth = auth.trim();
 				String[] bits = auth.split("\\s+"); //$NON-NLS-1$
