@@ -92,9 +92,14 @@ public class ConnectAlert extends UuidItem {
 		if (type == null) return null;
 		return UUID.fromString(getTypeInternal());
 	}
+	
 	@Transient
     public void setType(UUID type) {
-		this.type = type.toString();
+		if (type == null){
+			this.type = null;
+		}else{
+			this.type = type.toString();
+		}
 	}
     
 	@Column(name="level")

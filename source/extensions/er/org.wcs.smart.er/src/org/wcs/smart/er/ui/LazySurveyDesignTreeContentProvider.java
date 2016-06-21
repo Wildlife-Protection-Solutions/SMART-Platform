@@ -115,7 +115,7 @@ public class LazySurveyDesignTreeContentProvider extends
 	@Override
 	public Object getParent(Object element) {
 		if (element instanceof SurveyListTreeNode) {
-			((SurveyListTreeNode)element).getParent();
+			return ((SurveyListTreeNode)element).getParent();
 		}
 		return null;
 	}

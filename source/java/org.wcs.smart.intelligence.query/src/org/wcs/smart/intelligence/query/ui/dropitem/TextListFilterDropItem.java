@@ -218,7 +218,7 @@ public class TextListFilterDropItem  extends DropItem{
 				String lastSelection = currentSelection;
 				
 				currentSelection = newSelection.getKey();
-				if (! (lastSelection != null && lastSelection.equals(newSelection))){
+				if (! (lastSelection != null && lastSelection.equals(newSelection.getKey()))){
 					queryChanged();	
 				}
 			}

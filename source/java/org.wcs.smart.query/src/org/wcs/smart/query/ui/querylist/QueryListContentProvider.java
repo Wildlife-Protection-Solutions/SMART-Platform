@@ -79,7 +79,7 @@ public class QueryListContentProvider implements ITreeContentProvider{
 			return;
 		}
 		if (newInput instanceof HashMap){
-			HashMap<UUID, Object> data = (HashMap<UUID, Object>)newInput;
+			HashMap<Object, Object> data = (HashMap<Object, Object>)newInput;
 			rootFolders = (List<QueryFolder>) data.get(FOLDER_KEY);
 			queries = (HashMap<UUID, List<QueryEditorInput>>) data.get(QUERY_KEY);
 		}

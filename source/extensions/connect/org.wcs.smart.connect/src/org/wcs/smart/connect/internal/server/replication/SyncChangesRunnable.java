@@ -45,7 +45,10 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
  */
 public class SyncChangesRunnable implements IRunnableWithProgress{
 	
-	private Boolean lockObject = new Boolean(false);
+	private final Object lock = new Object();
+	private Boolean isComplete = new Boolean(false);
+	
+	
 	private boolean upload;
 	private SmartConnect connect;
 	private ConservationArea ca;
@@ -61,17 +64,17 @@ public class SyncChangesRunnable implements IRunnableWithProgress{
 	}
 	
 	private void unlock(){
-		synchronized (lockObject) {
-			lockObject.notifyAll();
-			lockObject = true;
+		synchronized (lock) {
+			isComplete = true;
+			lock.notifyAll();
 		}	
 	}
 	
 	private void lock(){
-		synchronized (lockObject) {
-			if (!lockObject){
+		synchronized (lock) {
+			while (!isComplete){
 				try {
-					lockObject.wait();
+					lock.wait();
 				} catch (InterruptedException e) {
 					ConnectPlugIn.log(e.getMessage(),e);
 				}
@@ -126,6 +129,7 @@ public class SyncChangesRunnable implements IRunnableWithProgress{
 		try {
 			engine.downloadInstall();
 			monitor.worked(1);
+			//wait until job is complete
 			lock();
 		} catch (Exception ex) {
 			thrownException = ex;

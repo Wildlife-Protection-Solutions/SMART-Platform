@@ -186,7 +186,7 @@ public class ListFilterDropItem extends DropItem{
 
 	@Override
 	public void initializeData(Object data) {
-		if (data == null && !(data instanceof Object[])) return;
+		if (data == null || !(data instanceof Object[])) return;
 		Object[] opString = (Object[])data;
 		if (opString[1] instanceof String){
 			currentSelection = new ListItem(null, null, (String)opString[1]);

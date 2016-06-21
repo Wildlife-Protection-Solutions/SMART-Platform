@@ -160,7 +160,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 				
 				//ensure all languages are loaded; this is to support the translate link
 				for (Label l : surveyDesign.getNames()){
-					l.getLanguage().equals(null);
+					l.getLanguage().getLabel();
 				}
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);

@@ -62,9 +62,7 @@ public class IntelligencePointsResultSet implements IResultSet {
 	private Object lastObject = null;
 	private List<IntelligencePoint> points;
 	private IntelligencePointsResultSetMetadata metadata;
-	
-	private Session session;
-	
+		
 	public IntelligencePointsResultSet(String[] uuids, 
 			IntelligencePointsResultSetMetadata metaData,
 			Session session) {
@@ -127,12 +125,6 @@ public class IntelligencePointsResultSet implements IResultSet {
 	 */
 	public void close() throws OdaException {
 		currentRow = 0;
-		
-		if (session != null && session.isOpen()){
-			
-			session.close();
-		}
-		session = null;
 	}
 
 	/**

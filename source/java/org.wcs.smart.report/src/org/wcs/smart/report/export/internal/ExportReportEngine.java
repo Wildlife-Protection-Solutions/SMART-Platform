@@ -123,7 +123,7 @@ public class ExportReportEngine {
 		
 		for (int i = 0; i < reports.size(); i ++){
 			File outputFile = file;
-			if (file == null){
+			if (outputFile == null){
 				if (outputFormat != null){
 					outputFile = getOutputFileName(reports.get(i), directory,outputFormat.getFormat());
 				}else if (exporter != null){

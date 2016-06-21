@@ -727,7 +727,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		}else if (f instanceof SurveyFilter){
 			return createDropItems((SurveyFilter)f, session);
 		}else if (f instanceof TrackTypeFilter){
-			return createDropItems((SurveyFilter)f, session);
+			return createDropItems((TrackTypeFilter)f, session);
 		}else if (f instanceof BooleanExpression){
 			return createDropItems((BooleanExpression)f, session);
 		}

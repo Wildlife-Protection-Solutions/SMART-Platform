@@ -445,16 +445,14 @@ public class BirtMapLayer extends EObjectImpl implements Layer {
     }
 
     public IGeoResource getGeoResource() {
-        if (geoResource == null) {
-        	if (geoResource == null) {
-        		if (getGeoResources() != NULL && getGeoResources().size() > 0){
-        			geoResource = getGeoResources().get(0);
-        		} else {
-        			return (IGeoResource) NULL.get(0);
-        		}
-        	}
-        }
-        return geoResource;
+       	if (geoResource == null) {
+       		if (getGeoResources() != NULL && getGeoResources().size() > 0){
+       			geoResource = getGeoResources().get(0);
+       		} else {
+       			return (IGeoResource) NULL.get(0);
+       		}
+       	}
+       	return geoResource;
     }
 
     /**

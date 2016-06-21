@@ -135,6 +135,10 @@ public class UploadChangeLogEngine {
 				record = previous;
 			}
 			
+			if (record == null){
+				throw new IllegalStateException("No active sync record found."); //$NON-NLS-1$
+			}
+			
 			monitor.worked(1);
 			 
 			//package changes

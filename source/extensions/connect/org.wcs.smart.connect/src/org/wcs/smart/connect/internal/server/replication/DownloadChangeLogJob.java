@@ -80,8 +80,7 @@ public class DownloadChangeLogJob extends Job {
 			Long start = System.nanoTime();
 			WorkItemStatus status = null ;
 			int waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
-			while(status == null || (status.getStatus() == WorkItemStatus.Status.PROCESSING || 
-					status.getStatus() == WorkItemStatus.Status.PROCESSING)){
+			while(status == null || status.getStatus() == WorkItemStatus.Status.PROCESSING){
 				Long current = System.nanoTime();
 				if ( current - start > ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) * 1000000l) throw new Exception(Messages.DownloadChangeLogJob_Timeout);
 				Thread.sleep(waitTime);

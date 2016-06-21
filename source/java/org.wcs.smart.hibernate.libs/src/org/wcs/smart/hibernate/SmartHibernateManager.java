@@ -410,7 +410,7 @@ public class SmartHibernateManager {
 		return null;
 	}
 	
-	private static void readClassMetadata() throws ClassNotFoundException, InvalidRegistryObjectException{
+	private static synchronized void readClassMetadata() throws ClassNotFoundException, InvalidRegistryObjectException{
 		if (hibernateClassMetadata != null) return;
 		if (Platform.getExtensionRegistry() == null) ;
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);

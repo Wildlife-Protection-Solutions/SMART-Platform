@@ -103,7 +103,7 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackPointDialog_GeometryError, ex);
-			
+			return;
 		}
 
 		//save and fire

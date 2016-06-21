@@ -135,7 +135,7 @@ public class ReportQueryColumnBindingFixer {
 						// metadata.get
 						String name = c.getColumnName();
 						for (ResultSetColumn cc : metadata) {
-							if (cc.getPosition() == c.getPosition()) {
+							if (cc.getPosition().equals(c.getPosition())) {
 								name = cc.getColumnName();
 								break;
 							}

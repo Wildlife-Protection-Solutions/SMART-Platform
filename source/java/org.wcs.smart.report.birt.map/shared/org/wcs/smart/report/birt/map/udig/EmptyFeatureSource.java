@@ -132,7 +132,6 @@ public class EmptyFeatureSource extends ContentFeatureSource {
 			if (colType.equalsIgnoreCase(DesignChoiceConstants.COLUMN_DATA_TYPE_INTEGER)){
 				maptype = "Integer"; //$NON-NLS-1$
 			}else if (colType.equalsIgnoreCase(DesignChoiceConstants.COLUMN_DATA_TYPE_DECIMAL) ||
-				colType.equalsIgnoreCase(DesignChoiceConstants.COLUMN_DATA_TYPE_FLOAT) ||
 				colType.equalsIgnoreCase(DesignChoiceConstants.COLUMN_DATA_TYPE_FLOAT)){ 
 				maptype = "Double"; //$NON-NLS-1$
 			}else if (colType.equalsIgnoreCase(DesignChoiceConstants.COLUMN_DATA_TYPE_STRING)){

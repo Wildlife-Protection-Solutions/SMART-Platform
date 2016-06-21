@@ -113,7 +113,7 @@ public class SmartConnect {
 	public static final Semaphore UPLOAD_LOCK = new Semaphore(1); 
 	
 	
-	private static SmartConnect lastConnect;
+	private static SmartConnect lastConnect = null;
 	
 	/**
 	 * Finds the connect instance reusing existing connection
@@ -636,7 +636,7 @@ public class SmartConnect {
 		}catch (Exception ex){
 			ConnectPlugIn.log(ex.getMessage(), ex);
 		}finally{
-			r.close();
+			if (r != null) r.close();
 		}
 	}
 	

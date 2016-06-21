@@ -65,7 +65,6 @@ import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 public class MapGeoResource extends IGeoResource {
 
 	private URL url = null;
-	private String dataType;
 	
 	private BirtDataStore datastore;
 	private IQueryResults queryResults;
@@ -74,6 +73,7 @@ public class MapGeoResource extends IGeoResource {
 	
 	private GridCoverage2DReader reader;
 	
+	private String id;
 	
 	/**
 	 * Creates a new query georesource.
@@ -102,12 +102,14 @@ public class MapGeoResource extends IGeoResource {
 	
 	public MapGeoResource(OdaDataSetHandle dataSetHandle, 
 			MapLayerInfo mapInfo, MapQueryService service){
+		
 		this.dataSetHandle = dataSetHandle;
 		this.mapInfo = mapInfo;
 		this.queryResults = null;
 		super.service = service;
+		this.id = mapInfo.getLayerName().replaceAll("[^0-9a-zAZ]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 		try {
-			this.url = new URL(service.getIdentifier(), service.getIdentifier().toExternalForm() + "#" + dataType, MapQueryService.RELAXED_HANDLER);			 //$NON-NLS-1$
+			this.url = new URL(service.getIdentifier(), service.getIdentifier().toExternalForm() + "#" + id, MapQueryService.RELAXED_HANDLER);			 //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			Logger.getLogger(MapGeoResource.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}	
@@ -206,10 +208,10 @@ public class MapGeoResource extends IGeoResource {
 		if (datastore != null) return datastore;
 		
 		if (queryResults == null){
-			datastore = new BirtDataStore(dataSetHandle, dataType, mapInfo);
+			datastore = new BirtDataStore(dataSetHandle, id, mapInfo);
 		}else{
 			if (isVector()){
-				datastore = new BirtDataStore(queryResults, dataType, mapInfo);
+				datastore = new BirtDataStore(queryResults, id, mapInfo);
 			}else if (isRaster()){
 				return null;
 			}
@@ -289,7 +291,7 @@ public class MapGeoResource extends IGeoResource {
 				DataStore ds = getDataStore();
 				if (ds != null) {
 					FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds
-							.getFeatureSource(dataType);
+							.getFeatureSource(id);
 					if (fs != null)
 						return adaptee.cast(fs);
 				} 

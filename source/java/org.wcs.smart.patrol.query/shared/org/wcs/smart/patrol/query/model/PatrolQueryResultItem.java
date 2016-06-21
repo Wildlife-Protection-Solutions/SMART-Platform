@@ -524,9 +524,9 @@ public class PatrolQueryResultItem implements IGeometryResultItem{
 
 	@Override
 	public Geometry asGeometry(String columnName) {
-		if (columnName == WAYPOINT_GEOMCOLUMN_KEY){
+		if (columnName.equalsIgnoreCase(WAYPOINT_GEOMCOLUMN_KEY)){
 			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
-		}else if (columnName == TRACK_GEOMCOLUMN_KEY){
+		}else if (columnName.equalsIgnoreCase(TRACK_GEOMCOLUMN_KEY)){
 			if (getTrack() == null || getTrack().isEmpty()){
 				return gf.createMultiLineString(new LineString[]{});
 			}else {

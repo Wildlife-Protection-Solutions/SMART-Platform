@@ -536,10 +536,10 @@ public class GlyphAWT {
             c2=c;
         }
         
-        final Color color=c2;
+        final Color color = c2;
         
         int saturation = color.getRed() + color.getGreen() + color.getBlue();               
-        final Color contrast = saturation < 384 ? c.brighter() : c.darker();        
+        final Color contrast = saturation < 384 ? color.brighter() : color.darker();        
         return new ImageDescriptor(){
             public ImageData getImageData() {
             	BufferedImage bimage = new BufferedImage(DEFAULT_WIDTH, DEFAULT_HEIGHT,BufferedImage.TYPE_4BYTE_ABGR );
