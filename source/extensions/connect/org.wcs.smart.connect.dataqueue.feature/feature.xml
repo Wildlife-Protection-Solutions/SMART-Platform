@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.feature"
       label="Core SMART Connect Data Queue Module (Required)"
-      version="4.0.0.qualifier"
+      version="4.0.1.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 
