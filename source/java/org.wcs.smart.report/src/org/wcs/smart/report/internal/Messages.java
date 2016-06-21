@@ -44,15 +44,9 @@ public class Messages extends NLS {
 	public static String ExportReportDialog_BrowseButton;
 	public static String ExportReportDialog_DialogMessage;
 	public static String ExportReportDialog_DialogTitleA1;
-	public static String ExportReportDialog_DialogTitleB;
-	public static String ExportReportDialog_DirDoesNotExist1;
 	public static String ExportReportDialog_DirectoryDialogMessage;
 	public static String ExportReportDialog_DirectoryDialogTitle;
-	public static String ExportReportDialog_Error_DialogTitle;
-	public static String ExportReportDialog_ExportButton;
-	public static String ExportReportDialog_ExportDialogTitle;
 	public static String ExportReportDialog_FormatLabel;
-	public static String ExportReportDialog_InvalidDir;
 	public static String ExportReportDialog_MultiExportPageTitle;
 	public static String ExportReportDialog_OutputDirectoryLabel;
 	public static String ExportReportDialog_OutputFileLabel;
@@ -146,7 +140,6 @@ public class Messages extends NLS {
 	public static String NewReportHandler_Error_NoLibrary;
 	public static String NewReportHandler_Progress_CreatingReport;
 	public static String NumberParameterComponent_ConversionError;
-	public static String ParameterCollecter_MultipleTypeParameter;
 	public static String ParameterCollecter_TypeNotSupported;
 	public static String ParameterCollecter_TypeXNotSupported;
 	public static String QueryReportPropertyProvider_ErrorLabel;

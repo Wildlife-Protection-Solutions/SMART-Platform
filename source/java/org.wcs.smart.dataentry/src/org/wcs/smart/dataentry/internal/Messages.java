@@ -38,7 +38,6 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_CollectMultiplObservationsTooltip;
 	public static String CmNodeInfoComposite_DeleteConfirmation;
 	public static String CmNodeInfoComposite_DeleteDialogTitle;
-	public static String CmNodeInfoComposite_DeletingNode;
 	public static String CmNodeInfoComposite_Image;
 	public static String CmNodeInfoComposite_Key;
 	public static String CmNodeInfoComposite_PhotoAllowed;
@@ -100,7 +99,6 @@ public class Messages extends NLS {
 	public static String ConfigurableModelFactory_ProgressMessage;
 	public static String ConfigurableModelFactory_TaskName;
 	public static String ConfigurableModelPropertyDialog_AllFiles;
-	public static String ConfigurableModelPropertyDialog_AttrConfigSubTask;
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;
 	public static String ConfigurableModelPropertyDialog_Button_Export_File;
@@ -115,15 +113,10 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_ExportError;
 	public static String ConfigurableModelPropertyDialog_Exporting;
 	public static String ConfigurableModelPropertyDialog_Import_Error;
-	public static String ConfigurableModelPropertyDialog_loadingTask;
-	public static String ConfigurableModelPropertyDialog_ListsSubTask;
-	public static String ConfigurableModelPropertyDialog_LoadError;
 	public static String ConfigurableModelPropertyDialog_LoadingText;
 	public static String ConfigurableModelPropertyDialog_LoadJobName;
 	public static String ConfigurableModelPropertyDialog_LoadModelsListError;
 	public static String ConfigurableModelPropertyDialog_Message;
-	public static String ConfigurableModelPropertyDialog_modelSubTask;
-	public static String ConfigurableModelPropertyDialog_nodesSubTask;
 	public static String ConfigurableModelPropertyDialog_Overwrite_Dialog_Message;
 	public static String ConfigurableModelPropertyDialog_Overwrite_Dialog_Title;
 	public static String ConfigurableModelPropertyDialog_ProgressDelete;
@@ -133,7 +126,6 @@ public class Messages extends NLS {
 	public static String ConfigurableModelPropertyDialog_Success_Title;
 	public static String ConfigurableModelPropertyDialog_SupportedFiles;
 	public static String ConfigurableModelPropertyDialog_Title;
-	public static String ConfigurableModelPropertyDialog_treesSubTask;
 	public static String ConfigurableModelPropertyDialog_Writing;
 	public static String ConfigurableModelPropertyDialog_XmlFiles;
 	public static String ConfigurableModelPropertyDialog_ZipFile;

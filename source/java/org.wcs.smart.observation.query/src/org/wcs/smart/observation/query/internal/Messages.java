@@ -21,8 +21,6 @@ public class Messages extends NLS {
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
 	public static String DerbySummaryEngine_Progress_ProcessingValue;
 	public static String DerbySummaryEngine_Progress_RunningQuery;
-	public static String FixedColumnLabelProvider_BooleanPatrolAttribute_FalseLabel;
-	public static String FixedColumnLabelProvider_BooleanPatrolAttribute_TrueLabel;
 	public static String FixedQueryColumn_CaIdColumnName;
 	public static String FixedQueryColumn_CaNameColumnName;
 	public static String FixedQueryColumn_CommentColumnName;

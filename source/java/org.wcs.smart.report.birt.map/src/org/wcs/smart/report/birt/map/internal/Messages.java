@@ -4,7 +4,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.report.birt.map.internal.messages"; //$NON-NLS-1$
-	public static String BirtMapUtils_SLDParseError;
 	public static String DatasetComobInputDialog_Error_NoDataset;
 	public static String MapDialog_CoordinatesLabel;
 	public static String MapDialog_DialogTitle;
@@ -34,27 +33,20 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_LoadingLbl;
 	public static String SmartLayersPage_MapBoundsLabel;
 	public static String SmartLayersPage_MapExtentsBoundsLabel;
-	public static String SmartLayersPage_MapLayerNameErrorLabel;
 	public static String SmartLayersPage_MapLayersLabel;
 	public static String SmartLayersPage_MoveDownButton;
 	public static String SmartLayersPage_MoveUpButton;
 	public static String SmartLayersPage_NoBasemapLabel;
 	public static String SmartLayersPage_removetooltip;
 	public static String SmartLayersPage_resettooltip;
-	public static String SmartLayersPage_RefreshLabel;
 	public static String SmartLayersPage_ReportDataset_ColumnName;
 	public static String SmartLayersPage_SetBoundsLink1;
 	public static String SmartLayersPage_Style_ColumnHeader;
-	public static String SmartMapItem_CouldNotParseCrs;
 	public static String SmartMapItemImageUi_ErrorCreatingMapItem;
 	public static String SmartMapItemPlugIn_ErrorDialogTitle;
-	public static String SmartMapPresentationImpl_ErrorCreatingMap;
-	public static String SmartMapPresentationImpl_ErrorLabel;
-	public static String SmartMapPresentationImpl_ErrorRenderingMap;
 	public static String StyleCellEditor_CreateMapLayerJobName;
 	public static String StyleCellEditor_Error_CouldNotCreateStyleEditor;
 	public static String StyleCellEditor_Error_CouldNotOpenStyleDialog;
-	public static String SmartMapItem_Name;
 	public static String SmartMapItemCloner_CloneError;
 	public static String SmartMapItemCloner_CloningReportItem;
 	public static String SmartStyleEditorDialog_RevertButton;

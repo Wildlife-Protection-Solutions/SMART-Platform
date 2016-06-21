@@ -6,16 +6,12 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.internal.messages"; //$NON-NLS-1$
 
 	public static String AddERJob_ErrorMsg;
-
 	public static String AddERJob_ErrorTitle;
-
-	public static String AddERJob_InstallError;
 	public static String AddERJob_Title;
 	public static String AddWaypointDialog_EmptyProjectionError;
 	public static String AddWaypointDialog_EmptyWaypointIDError;
 	public static String AddWaypointDialog_EmptyXError;
 	public static String AddWaypointDialog_EmptyYError;
-
 	public static String AddWaypointDialog_GeometryError;
 	public static String AddWaypointDialog_InvalidWaypointIDError;
 	public static String AddWaypointDialog_InvalidXError;
@@ -170,25 +166,15 @@ public class Messages extends NLS {
 	public static String EditSurveyElementHandler_MissionError;
 	public static String EmployeeDeleteAdvisor_DeleteError;
 	public static String EmployeeDeleteAdvisor_InvalidObject;
-	public static String ERDatabaseUpgrader_UpgradeError;
-
 	public static String ERDatabaseUpgrader_UpgradeTask;
 	public static String ErLabelProvider_DescriptionColumn;
-
 	public static String ErLabelProvider_EndDateColumn;
-
 	public static String ErLabelProvider_KeyColumn;
-
 	public static String ErLabelProvider_NameColumn;
-
 	public static String ErLabelProvider_sd_table_name;
-
 	public static String ErLabelProvider_StartDateColumn;
-
 	public static String ErLabelProvider_StatusColumn;
-
 	public static String ErLabelProvider_su_table_name;
-
 	public static String ExportWizard_DirectoryMessage;
 	public static String ExportWizard_ExportDialogTitle;
 	public static String ExportWizard_ExportError;
@@ -533,7 +519,6 @@ public class Messages extends NLS {
 	public static String RemoveERJob_Title;
 	public static String RemoveERJob_UninstallError;
 	public static String SamplingUnit_ActiveState;
-	public static String SamplingUnit_GeometryTypeNotSupported;
 	public static String SamplingUnit_InActiveState;
 	public static String SamplingUnit_LinearGeomType;
 	public static String SamplingUnit_PointGeomType;
@@ -761,7 +746,6 @@ public class Messages extends NLS {
 	public static String SurveyPermissionManager_MissionToOld;
 	public static String SurveyPermissionManager_SurveyToOld;
 	public static String SurveyWaypointSource_Name;
-	public static String SurveyWaypointSource_WaypointNotFound;
 	public static String TemplateWizardPage_BlankDesign;
 	public static String TemplateWizardPage_ConservationArea;
 

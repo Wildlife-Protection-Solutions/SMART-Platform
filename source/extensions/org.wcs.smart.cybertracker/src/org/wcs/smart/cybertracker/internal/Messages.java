@@ -46,8 +46,6 @@ public class Messages extends NLS {
 	public static String CreateNewProfileOpDialog_ProfileTemplate_Required;
 	public static String CreateNewProfileOpDialog_Template;
 	public static String CreateNewProfileOpDialog_Title;
-	public static String CtDatabaseUpgrader_ErrorTitle;
-	public static String CtDatabaseUpgrader_UpgradeError;
 	public static String CtDatabaseUpgrader_UpgradeTask;
 	public static String CTPatrolTableContainer_CyberTrackerFiles;
 	public static String CTPatrolTableContainer_DeleteWarn_Message;
@@ -249,7 +247,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_ProfileName_Tooltip;
 	public static String CyberTrackerPropertiesDialog_Projection;
 	public static String CyberTrackerPropertiesDialog_Projection_Tooltip;
-	public static String CyberTrackerPropertiesDialog_Save_Error;
 	public static String CyberTrackerPropertiesDialog_SaveProfile_Error;
 	public static String CyberTrackerPropertiesDialog_SaveProfile_Task;
 	public static String CyberTrackerPropertiesDialog_ShowEdit;
@@ -267,9 +264,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_SkipButtonTimeout;
 	public static String CyberTrackerPropertiesDialog_SkipButtonTimeout_Tooltip;
 	public static String CyberTrackerPropertiesDialog_SkipButtonTimeoutInvalid;
-	public static String CyberTrackerPropertiesDialog_StorageTime;
-	public static String CyberTrackerPropertiesDialog_StorageTime_Tooltip;
-	public static String CyberTrackerPropertiesDialog_StorageTimeInvalid;
 	public static String CyberTrackerPropertiesDialog_TimeOffset;
 	public static String CyberTrackerPropertiesDialog_TimeOffset_Tooltip;
 	public static String CyberTrackerPropertiesDialog_Title;

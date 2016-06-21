@@ -26,8 +26,6 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_ConnectDialogMessage;
 	public static String ConfigurableModelEditorConnectTab_ConnectDialogText;
 	public static String ConfigurableModelEditorConnectTab_ConnectDialogTitle;
-	public static String ConfigurableModelEditorConnectTab_LoadAlertsError;
-	public static String ConfigurableModelEditorConnectTab_LoadAlertsTaskName;
 	public static String ConfigurableModelEditorConnectTab_NoAlertsMessage;
 	public static String ConfigurableModelEditorConnectTab_NoAlertsTitle;
 	public static String ConfigurableModelEditorConnectTab_PingFrequency;

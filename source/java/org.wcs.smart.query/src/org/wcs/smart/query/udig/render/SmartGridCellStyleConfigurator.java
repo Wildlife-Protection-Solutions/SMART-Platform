@@ -38,7 +38,6 @@ import org.locationtech.udig.ui.ColorEditor;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.udig.style.SmartGridCellStyleContent;

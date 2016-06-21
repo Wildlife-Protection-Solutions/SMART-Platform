@@ -57,8 +57,6 @@ public class Messages extends NLS {
 	public static String Area_AdminArea_Name;
 	public static String Area_BufferedManagementArea_Name;
 	public static String Area_CaBoundaryArea_Name;
-	public static String Area_Error_LoadingDefaultCRS;
-	public static String Area_Error_LoadingGeom;
 	public static String Area_ManagementArea_Name;
 	public static String Area_PatrolSectorArea_Name;
 	public static String AreaIdDialog_DialogMessage;
@@ -515,8 +513,6 @@ public class Messages extends NLS {
 	public static String DeleteConservationArea_Confirm_Delete;
 	public static String DeleteConservationArea_Delete_DialogTitle;
 	public static String DeleteConservationArea_DeleteError;
-	public static String DeleteConservationArea_Error_DeleteError;
-	public static String DeleteConservationArea_Error_DeleteJobError;
 	public static String DeleteConservationArea_Error_DialogTitle;
 	public static String DeleteConservationArea_Error_Permission;
 	public static String DeleteConservationArea_Error_Username_DialogMessage;
@@ -657,7 +653,6 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_ProgressCommitChanges;
 	public static String ExportEmployeeDialog_CSVFormat_1;
 	public static String ExportEmployeeDialog_CSVFormat_2;
-	public static String ExportEmployeeDialog_CSVFormat_3;
 	public static String ExportEmployeeDialog_DialogMessage;
 	public static String ExportEmployeeDialog_DialogTitle;
 	public static String ExportEmployeeDialog_FailureMessage;
@@ -775,8 +770,6 @@ public class Messages extends NLS {
 	public static String InitCaDataModelDialog_XmlFileFilter_Name;
 	public static String InitializeDialog_Continue_Button;
 	public static String InitializeDialog_CreateCa_Label;
-	public static String InitializeDialog_Error_ImportCa;
-	public static String InitializeDialog_Error_SystemRestore;
 	public static String InitializeDialog_Import_Label;
 	public static String InitializeDialog_Restore_Label;
 	public static String InitializeDialog_StartupError;
@@ -914,14 +907,11 @@ public class Messages extends NLS {
 	public static String SmartAreaWizardPage_SmartLayerConnectionPage_Title;
 	public static String SmartDataSourceFactory_CA_ParameterName;
 	public static String SmartDataSourceFactory_Error_ReadingSmartDataSource;
-	public static String SmartDataSourceFactory_Error_ReadOnly;
 	public static String SmartDataSourceFactory_SmartDataSourceDescription;
 	public static String SmartDataSourceFactory_SmartDataSourceName;
 	public static String SmartDB_Error_NoSmartDatabase;
-	public static String SmartDB_Error_ReadingDefaultCRS;
 	public static String SmartFilterDialog_Apply_Button;
 	public static String SmartFilterDialog_Reset_Button;
-	public static String SmartGeoResourceInfo_Error_ComputingBounds;
 	public static String SmartInstallationInfoPage_DBLocation_Label;
 	public static String SmartInstallationInfoPage_DbPluginVersions;
 	public static String SmartInstallationInfoPage_DefaultLang_Label;
@@ -953,7 +943,6 @@ public class Messages extends NLS {
 	public static String SmartSavedStylePage_SaveError2;
 	public static String SmartSavedStylePage_SaveError3;
 	public static String SmartSavedStylePage_SaveJobName;
-	public static String SmartService_Error_DisposingService;
 	public static String SmartServiceInfo_Description;
 	public static String SmartServiceInfo_Keyword1;
 	public static String SmartServiceInfo_Keyword2;
@@ -1088,7 +1077,6 @@ public class Messages extends NLS {
 	public static String UpgradeEngine_subprogress1;
 	public static String UpgradeEngine_subprogress2;
 	public static String UpgradeEngine_subprogress3;
-	public static String UpgradeEngine_subprogress4;
 	public static String UpgradeEngine_subprogress5;
 	public static String UpgradeEngine_subprogress6;
 	public static String UpgradeEngine_UpgradeTask;

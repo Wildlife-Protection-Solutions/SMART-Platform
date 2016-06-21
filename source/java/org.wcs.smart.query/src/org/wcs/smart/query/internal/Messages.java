@@ -5,7 +5,6 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.query.internal.messages"; //$NON-NLS-1$
 	public static String DerbyFilterToSqlGenerator_FilterTypeNotSupported;
-	public static String AbstractPagedQueryResultSet_CleanupTablesJobName;
 	public static String AbstractPagedQueryResultSet_ErrorLoadingQueryResults;
 	public static String AbstractValueDropItem_ChangeRate;
 	public static String AbstractValueDropItem_ComputeRate;
@@ -48,7 +47,6 @@ public class Messages extends NLS {
 	public static String AttributeValueItem_attributenotfound;
 	public static String AttributeValueItem_categorynotfound;
 	public static String AttributeValueItem_listitemnotfound;
-	public static String AttributeValueItem_NonNumericAttributeInvalid;
 	public static String AttributeValueItem_treenodenotfound;
 	public static String BasicFilterDefintionPanel_FiltersPanelName;
 	public static String BasicGridDefinitionPanel_IncreaseSize;
@@ -71,7 +69,6 @@ public class Messages extends NLS {
 	public static String CategoryValueItem_categorynotfound;
 	public static String CategoryValueItem_CountIncidentLabel;
 	public static String CategoryValueItem_CountObservationLabel;
-	public static String ConservationAreaFilter_InvalidCaFilter;
 	public static String ConservationAreaFilterPanel_CaFilterError;
 	public static String ConservationAreaFilterPanel_CaFilterPanelTitle;
 	public static String ConservationAreaFilterPanel_Error_NoCas;
@@ -84,7 +81,6 @@ public class Messages extends NLS {
 	public static String DataModelTreeNode_DataModelFiltersLabel;
 	public static String DataModelTreeNode_DmGroupByLabel;
 	public static String DataModelTreeNode_DmValuesLabel;
-	public static String DateGroupBy_GroupByNoSupported;
 	public static String DateGroupBy_InvalidFilter;
 	public static String DateTreeNode_TreeNodeLabel;
 	public static String DayDateGroupBy_GroupByDayName;
@@ -117,12 +113,10 @@ public class Messages extends NLS {
 	public static String ExportQueryDefLocationPage_WizardTitle;
 	public static String ExportQueryListPage_DirDialogMessage;
 	public static String ExportQueryListPage_DirDialogText;
-	public static String ExportQueryListPage_OutputFolderLabel1;
 	public static String ExportQueryListPage_PageMessage;
 	public static String ExportQueryListPage_PageTitle;
 	public static String ExportQueryListPage_QueriesLabel;
 	public static String ExportQueryListPage_QueryRequired;
-	public static String ExportQueryListPage_ValidOutputDirRequired;
 	public static String ExportQueryLocationPage_AllFilesFilterName;
 	public static String ExportQueryLocationPage_BrowseButton;
 	public static String ExportQueryLocationPage_delimiterLabel;
@@ -388,7 +382,6 @@ public class Messages extends NLS {
 	public static String GriddedEditor_MappedResultsTabName;
 	public static String GriddedEditor_RunQueryJob;
 	public static String GriddedEditor_TableResultsTabName;
-	public static String GriddedQuery_ParseError;
 	public static String GriddedResultsMapEditorPage_AddLayersJobeName;
 	public static String GriddedResultsMapEditorPage_CRS_DialogMessage;
 	public static String GriddedResultsMapEditorPage_CRS_DialogTitle;
@@ -402,7 +395,6 @@ public class Messages extends NLS {
 	public static String GriddedResultsMapEditorPage_UnknownLabel;
 	public static String GriddedTableContent_NaLabel;
 	public static String GriddedTableContent_NumberofRecordsLabel;
-	public static String GriddedTableContent_QueryLabel;
 	public static String GriddedTableContent_QueryProperties;
 	public static String GriddedTableContent_RunQueryLink;
 	public static String ObservationQuerySummaryInfo_NAValueLabel;
@@ -418,7 +410,6 @@ public class Messages extends NLS {
 	public static String QueryEditorTableContent_NaLabel;
 	public static String QueryEditorTableContent_NumberOfIncidentLabel;
 	public static String QueryEditorTableContent_NumberOfRecordsLabel1;
-	public static String QueryEditorTableContent_QueryLabel;
 	public static String QueryEditorTableContent_QueryPropertiesLable;
 	public static String QueryEditorTableContent_RunQueryLink;
 	public static String QueryExecutor_QueryEngineNotFound;
@@ -447,8 +438,6 @@ public class Messages extends NLS {
 	public static String RasterService_Progress_CreatingInfo;
 	public static String RasterService_QueryNotRunErr;
 	public static String RasterService_urlError;
-	public static String SimpleQuery_DefaultQueryName;
-	public static String SimpleQuery_ParseError;
 	public static String SummaryEditor_ErrorDialogTitle;
 	public static String SummaryEditor_ErrorLoadingQuery;
 	public static String SummaryEditor_ErrorParsingQuery;
@@ -457,8 +446,6 @@ public class Messages extends NLS {
 	public static String SummaryEditor_PropertiesLabel;
 	public static String SummaryEditor_QueryError;
 	public static String SummaryEditor_RunQueryJobName;
-	public static String SummaryEditor_SummaryQueryLabel;
-	public static String SummaryQuery_ParseError;
 	public static String SummaryResultsArea_RunSummaryLink;
 	public static String WaypointQuerySummaryInfo_NumberOfIncidentLabel;
 	public static String WaypointQuerySummaryInfo_UnknownNumberOfIncidents;

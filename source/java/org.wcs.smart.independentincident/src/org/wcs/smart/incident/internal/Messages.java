@@ -89,7 +89,6 @@ public class Messages extends NLS {
 	public static String IncidentImporter_XmlIncidentNotFound;
 	public static String IncidentImporter_XmlNotFound;
 	public static String IncidentManager_IncidentTooOldToEdit;
-	public static String IncidentManager_InsufficientPrivilegesToEdit;
 	public static String IncidentMapPage_Error1;
 	public static String IncidentMapPage_Error2;
 	public static String IncidentMapPage_MapLayerName;

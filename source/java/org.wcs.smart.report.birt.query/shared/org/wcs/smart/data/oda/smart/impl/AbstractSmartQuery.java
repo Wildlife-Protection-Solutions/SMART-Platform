@@ -38,7 +38,6 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
-import org.wcs.smart.query.model.Query;
 
 /**
  * Query dataset handler for allowing queries

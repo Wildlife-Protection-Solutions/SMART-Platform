@@ -6,7 +6,6 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.plan.internal.messages"; //$NON-NLS-1$
 	public static String AddPlanJob_Error;
 	public static String AddPlanJob_Title;
-	public static String AdministrativePlanTarget_CategoryName;
 	public static String AdministrativePlanTarget_GuiName;
 	public static String AdministrativePlanTargetPropertyPage_Achieved_Label;
 	public static String AdministrativePlanTargetPropertyPage_Description_Label;
@@ -62,7 +61,6 @@ public class Messages extends NLS {
 	public static String NewPatrolPlanWizardPage_ErrorDialog_Title;
 	public static String NewPatrolPlanWizardPage_Message;
 	public static String NewPatrolPlanWizardPage_Title;
-	public static String NumericPlanTarget_CategoryName;
 	public static String NumericPlanTarget_days;
 	public static String NumericPlanTarget_GuiName;
 	public static String NumericPlanTarget_hours;
@@ -94,8 +92,6 @@ public class Messages extends NLS {
 	public static String PatrolPlanContribution_PlanId_Label;
 	public static String PatrolPlanContribution_RefreshJob_Title;
 	public static String PatrolPlanContribution_Save_Error;
-	public static String PatrolPlanQueryFilter_FetchPlanChilder_Interrupted;
-	public static String PatrolPlanQueryFilter_FetchPlanChilder_JobTitle;
 	public static String PlanCaDeleteHandler_DeletePatrolPlan_SubTasl;
 	public static String PlanCaDeleteHandler_DeletePlans_SubTask;
 	public static String PlanCaDeleteHandler_DeleteTargets_SubTask;
@@ -116,7 +112,6 @@ public class Messages extends NLS {
 	public static String PlanConfigurationPreferencePage_ErrorDialog_Message;
 	public static String PlanConfigurationPreferencePage_ErrorDialog_Title;
 	public static String PlanConfigurationPreferencePage_METER_LABEL;
-	public static String PlanDatabaseUpgrader_upgradeError;
 	public static String PlanDatabaseUpgrader_UpgradeTask;
 	public static String PlanDatesComposite_ClidRangeViolation_Message;
 	public static String PlanDatesComposite_EndDate;
@@ -167,7 +162,6 @@ public class Messages extends NLS {
 	public static String PlanFilterDialog_Title;
 	public static String PlanHibernateManager_DeletePlan_Error;
 	public static String PlanHibernateManager_ErrorMatchingPatrolToPlan;
-	public static String PlanHibernateManager_FetchChildren_Error;
 	public static String PlanHibernateManager_Plan_NotFound_Error;
 	public static String PlanHibernateManager_SavePlan_Error;
 	public static String PlanIdNameDescComposite_Description;
@@ -258,8 +252,6 @@ public class Messages extends NLS {
 	public static String SmartPlanPlugIn_Error;
 	public static String SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonName;
 	public static String SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonTooltip;
-	public static String SpatialPlanTarget_CategoryName;
-	public static String SpatialPlanTarget_Points_Label;
 	public static String SpatialPlanTargetPropertyPage_Description_Label;
 	public static String SpatialPlanTargetPropertyPage_Description_Required_Error;
 	public static String SpatialPlanTargetPropertyPage_DistanceForCompletion_Label;

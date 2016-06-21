@@ -1,6 +1,5 @@
 package org.wcs.smart.upgrade;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;

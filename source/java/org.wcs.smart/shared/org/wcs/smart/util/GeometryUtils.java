@@ -389,9 +389,10 @@ public class GeometryUtils {
 	 * Computes the distance in meter of the given
 	 * linestring.
 	 * 
-	 * Linestring must be in 4326 projection.
 	 * 
 	 * @param ls
+	 * @param crs linestring projection
+	 * 
 	 * @return
 	 * @throws TransformException 
 	 */

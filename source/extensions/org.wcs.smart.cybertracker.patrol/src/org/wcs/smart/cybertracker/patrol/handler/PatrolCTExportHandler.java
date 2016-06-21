@@ -25,7 +25,6 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.patrol.export.PatrolCTExportDialog;
-import org.wcs.smart.cybertracker.patrol.handler.PatrolCTExportHandler;
 
 /**
  * Handler for exporting data to CyberTracker application.

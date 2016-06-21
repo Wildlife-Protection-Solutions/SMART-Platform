@@ -26,13 +26,9 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.wcs.smart.intelligence.internal.messages"; //$NON-NLS-1$
 
-    public static String AddIntelligenceJob_CannotUpgrade;
-
-	public static String AddIntelligenceJob_Error;
+    public static String AddIntelligenceJob_Error;
 
 	public static String AddIntelligenceJob_Title;
-
-	public static String AddIntelligenceJob_UpgradeError;
 
 	public static String CaDeleteHandler_DeletingIntelligences;
 
@@ -288,7 +284,6 @@ public class Messages extends NLS {
 
 	public static String IntelligenceCaCloner_ProgressMessage;
 
-	public static String IntelligenceDatabaseUpgrader_UpgradeError;
 
 	public static String IntelligenceDatabaseUpgrader_UpgradeTask;
 
@@ -315,10 +310,6 @@ public class Messages extends NLS {
     public static String IntelligenceDates_To_Label;
 
 	public static String IntelligenceDatesComposite_DateRange_Error;
-
-    public static String IntelligenceDbUpgrader30To32_ErrorMessage;
-
-	public static String IntelligenceDbUpgrader30To32_ProgressMessage;
 
 	public static String IntelligenceDesc_Description_Label;
 
@@ -381,8 +372,6 @@ public class Messages extends NLS {
 	public static String IntelligenceFilteredSelectComposite_Filter_Tooltip;
 
 	public static String IntelligenceGroupByDropItem_DropItemName;
-
-	public static String IntelligenceGroupByPatrolContribution_ContributionName;
 
 	public static String IntelligenceGroupByPatrolContribution_MotivatedByIntelligenceLabel;
 
@@ -574,8 +563,6 @@ public class Messages extends NLS {
 
 	public static String PatrolMotivationComposite_Selector_Selected_Label;
 
-	public static String PersistentManager_FileCreateError;
-
 	public static String PersistentManager_ReadError;
 
 	public static String PersistentManager_SaveError;
@@ -659,8 +646,6 @@ public class Messages extends NLS {
 	public static String SourceTypesPropertyDialog_SourceDuplicate;
 
 	public static String SourceTypesPropertyDialog_Title;
-
-	public static String UpgradeFromVersion_InstanceCreateError;
 
 	public static String XmlToIntelligenceConverter_DescriptionTooLong;
 

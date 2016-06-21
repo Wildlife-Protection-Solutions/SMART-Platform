@@ -4,14 +4,9 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.entity.internal.messages"; //$NON-NLS-1$
-	public static String AddEntityJob_Error;
 	public static String AddEntityJob_ErrorMsg;
 	public static String AddEntityJob_ErrorTitle;
-	public static String AddEntityJob_InstallError;
-	public static String AddEntityJob_InstallError2;
 	public static String AddEntityJob_JobName;
-	public static String AddEntityJob_TaskName;
-	public static String AddEntityJob_UnsupportedVersion;
 	public static String AttributeMappingWizardPage_ConfigurationSectionName;
 	public static String AttributeMappingWizardPage_DateFormatLabel;
 	public static String AttributeMappingWizardPage_DateFormatTooltip;
@@ -99,7 +94,6 @@ public class Messages extends NLS {
 	public static String EntityCsvImporter_XRequired;
 	public static String EntityCsvImporter_YCannotBeParsed;
 	public static String EntityCsvImporter_YRequired;
-	public static String EntityDatabaseUpgrader_UpgradeError;
 	public static String EntityDatabaseUpgrader_UpgradeTask;
 	public static String EntityEditPanelComposite_IdError;
 	public static String EntityEditPanelComposite_LocationLabel;
@@ -126,15 +120,12 @@ public class Messages extends NLS {
 	public static String EntityQueryService_ServiceDescription;
 	public static String EntityQueryService_ServiceName;
 	public static String EntitySightingQuery_QueryName;
-	public static String EntitySightingQueryType_QueryTypeName;
 	public static String EntityTable_LongName;
 	public static String EntityTemplateCloner_AttributeNotFound;
 	public static String EntityTemplateCloner_ProgressCloning3;
 	public static String EntityTemplateCloner_ProgressCloningTypes;
 	public static String EntityTemplateCloner_ProgressCloningTypes2;
-	public static String EntityType_ActiveStatusLabel;
 	public static String EntityType_FixedTypeLabel;
-	public static String EntityType_InvActiveStatusLabel;
 	public static String EntityType_TransientTypeLabel;
 	public static String EntityTypeConfigurationPage_AliasColumnName;
 	public static String EntityTypeConfigurationPage_AttributeLabel;

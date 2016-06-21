@@ -195,10 +195,8 @@ public class Messages extends NLS {
 	public static String PatrolDayEditor_LegSectionNamePrefix;
 	public static String PatrolDayEditorInput_DayEditor_Tooltip;
 	public static String PatrolDayEditorInput_DayEditorName_Prefix;
-	public static String PatrolEditor_1;
 	public static String PatrolEditor_AttachmentError;
 	public static String PatrolEditor_DeleteWaypointsError;
-	public static String PatrolEditor_EditError_InsufficientPrivledges;
 	public static String PatrolEditor_EditError_PatrolToOld;
 	public static String PatrolEditor_EditorName_Prefix;
 	public static String PatrolEditor_Error_SavingPatrol;
@@ -445,7 +443,6 @@ public class Messages extends NLS {
 	public static String PatrolMemberWizardPage_SelectEmployees_Label;
 	public static String PatrolMemberWizardPage_Title;
 	public static String PatrolMetaConfigDialog_DialogMessage;
-	public static String PatrolMetaConfigDialog_DialogTitle;
 	public static String PatrolMetaConfigDialog_ShellTitle;
 	public static String PatrolObjectiveWizardPage_PageMessage;
 	public static String PatrolObjectiveWizardPage_Title;
@@ -559,7 +556,6 @@ public class Messages extends NLS {
 	public static String PatrolViewFilter_PatrolIdSort;
 	public static String PatrolViewFilter_StartDateSort;
 	public static String PatrolWaypointSource_PatrolWaypointSourceName;
-	public static String PatrolWaypointSource_WaypointNotFoundError;
 	public static String PatrolXmlImportDialog_AutoGenerateIdsTooltip;
 	public static String PatrolXmlImportDialog_IdsOptionLabel;
 	public static String PatrolXmlImportDialog_IgnoreWarningOp;

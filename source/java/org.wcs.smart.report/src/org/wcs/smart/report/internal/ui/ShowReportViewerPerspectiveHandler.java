@@ -24,7 +24,6 @@ package org.wcs.smart.report.internal.ui;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 /**
