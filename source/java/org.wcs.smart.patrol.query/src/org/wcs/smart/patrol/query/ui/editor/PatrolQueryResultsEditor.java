@@ -41,10 +41,14 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
@@ -66,6 +70,7 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -74,7 +79,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolQueryResultsEditor extends MultiPageEditorPart implements MapPart, IMapQueryEditor, IAdaptable{
+public class PatrolQueryResultsEditor extends MultiPageEditorPart implements MapPart, IMapQueryEditor, IAdaptable, IProjectionProvider{
 
 	public static final String ID = "org.wcs.smart.query.ui.PatrolQueryResultsEditor";  //$NON-NLS-1$
 
@@ -84,7 +89,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	private boolean isDirty = false;
 	
 	private IAreaModifiedListener areaListener = null;
-	
+	private Projection projection = null;
 	
 	Job runQueryJob = new Job(Messages.PatrolQueryResultsEditor_RunQueryJobName) {
 		@Override
@@ -158,6 +163,20 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
+				projection = ObservationHibernateManager.getCurrentViewProjection(session);
+				try{
+					if (projection != null && projection.getParsedCoordinateReferenceSystem() == null){
+						projection.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(projection.getDefinition()));
+					}
+				}catch (Exception ex){
+					projection = null;
+				}
+				if (projection == null){
+					projection = new Projection();
+					projection.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+					projection.setName(SmartDB.DATABASE_CRS.getName().toString());
+				}
+				
 				Query tquery = (PatrolQuery) session.load(PatrolQuery.class, input.getUuid());
 				query = new QueryProxy(tquery);
 				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
@@ -195,6 +214,10 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
 	}
 
+	@Override
+	public Projection getProjection(){
+		return this.projection;
+	}
 	
 	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#dispose()

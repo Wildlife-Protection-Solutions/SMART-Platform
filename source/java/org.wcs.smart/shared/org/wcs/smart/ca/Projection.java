@@ -20,6 +20,9 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 
 /**
@@ -41,6 +44,7 @@ public class Projection extends UuidItem {
 	private String definition;
 	private boolean isDefault;
 
+	private CoordinateReferenceSystem parsedCrs;
 	
 	/**
 	 * Creates a new empty projection
@@ -110,5 +114,22 @@ public class Projection extends UuidItem {
 	
 	public void setIsDefault(boolean isDefault){
 		this.isDefault = isDefault;
+	}
+	
+	
+	@Transient
+	public void setParsedCoordinateReferenceSystem(CoordinateReferenceSystem crs){
+		this.parsedCrs = crs;
+	}
+	
+	/**
+	 * This will return null unless the user has set it explicity using the
+	 * set function.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public CoordinateReferenceSystem getParsedCoordinateReferenceSystem(){
+		return this.parsedCrs;
 	}
 }

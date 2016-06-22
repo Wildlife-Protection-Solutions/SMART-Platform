@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.observation.query.ui;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.wcs.smart.observation.query.map.udig.QueryService;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
@@ -32,8 +34,9 @@ import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryCol
 import org.wcs.smart.observation.query.model.types.ObservationQueryType;
 import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
 import org.wcs.smart.query.common.model.udig.IQueryService;
-import org.wcs.smart.query.common.ui.GridColumnLabelProvider;
+import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
+import org.wcs.smart.query.common.ui.ReprojectingQueryColumnLabelProvder;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -69,15 +72,29 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 	}
 
 	@Override
-	protected CellLabelProvider getColumnLabelProvider(QueryColumn column) {
+	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
 		if (column instanceof FixedQueryColumn){
-			return new FixedColumnLabelProvider(column);
+			if (column.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+				for (QueryColumn qc : allColumns){
+					if (qc.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+						return new ReprojectingQueryColumnLabelProvder(column,column,qc, this);
+					}
+				}
+			}
+			if (column.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+				for (QueryColumn qc : allColumns){
+					if (qc.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+						return new ReprojectingQueryColumnLabelProvder(column,qc,column, this);
+					}
+				}
+			}
+			return new QueryColumnLabelProvider(column);
 		}else if (column instanceof ObservationAttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);
 		}else if (column instanceof ObservationCategoryQueryColumn){
 			return new CategoryColumnLabelProvider(column);
 		}else if (column instanceof GridQueryColumn){
-			return new GridColumnLabelProvider(column);
+			return new QueryColumnLabelProvider(column);
 		}
 		return null;
 

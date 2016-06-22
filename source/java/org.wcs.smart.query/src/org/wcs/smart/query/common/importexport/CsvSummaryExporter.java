@@ -153,4 +153,13 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 		return "csv"; //$NON-NLS-1$
 	}
 
+
+	/**
+	 * Summary queries do not support reprojection
+	 */
+	@Override
+	public boolean supportsProjection() {
+		return false;
+	}
+
 }

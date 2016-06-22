@@ -62,10 +62,11 @@ import org.locationtech.udig.project.render.ViewportModelEvent.EventType;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.tool.Tool;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ISmartPoint;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.map.location.SmartPointLabelProvider.ICrsProvider;
 import org.wcs.smart.ui.map.location.tool.IMapPointSelectionListener;
 import org.wcs.smart.ui.map.location.tool.SelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -84,7 +85,7 @@ import com.vividsolutions.jts.geom.Point;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class LocationSelectComposite<T extends ISmartPoint> extends SashForm implements IMapPointSelectionListener, ICrsProvider, ISmartPointDataProvider {
+public abstract class LocationSelectComposite<T extends ISmartPoint> extends SashForm implements IMapPointSelectionListener, IProjectionProvider, ISmartPointDataProvider {
 
 	private static final int MAP_MIN_WIDTH = 280;
 	
@@ -307,6 +308,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 						//update the transform outside of the display thread
 						//if this is done inside the display thread it seems
 						//o cause deadlocking issues in geotools
+						mapProjection = null;
 						IBaseLabelProvider provider = pointsListViewer.getLabelProvider();
 						if (provider instanceof SmartPointLabelProvider){
 							((SmartPointLabelProvider) provider).updateTransform();
@@ -367,7 +369,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 
 	private Point convertToDBCrs(double x, double y) {
 		try {
-			CoordinateReferenceSystem sourceCrs = getCurrentCrs();
+			CoordinateReferenceSystem sourceCrs = getProjection().getParsedCoordinateReferenceSystem();
 			Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x, y));
 			return (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, GeometryUtils.SMART_CRS));
 		} catch (Exception e) {
@@ -377,9 +379,14 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		
 	}
 
+	private Projection mapProjection = null;
 	@Override
-	public CoordinateReferenceSystem getCurrentCrs() {
-		return mapComposite.getMap().getViewportModelInternal().getCRS();
+	public Projection getProjection() {
+		if (mapProjection == null){
+			mapProjection = new Projection();
+			mapProjection.setParsedCoordinateReferenceSystem(mapComposite.getMap().getViewportModelInternal().getCRS());
+		}
+		return mapProjection;
 	}
 	
 	protected abstract T createNewPoint();
@@ -419,7 +426,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 
 	private void updateAddButtonDecoration() {
 		if (addButton == null) return;
-		boolean warn = addButton.isEnabled() && !CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, getCurrentCrs());
+		boolean warn = addButton.isEnabled() && !CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, getProjection().getParsedCoordinateReferenceSystem());
 		if (warn) {
 			addButtonDecoration.show();
 		} else {

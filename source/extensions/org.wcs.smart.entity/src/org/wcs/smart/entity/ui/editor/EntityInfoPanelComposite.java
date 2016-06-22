@@ -30,21 +30,20 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.entity.EntityPlugIn;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
-import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.ReprojectUtils;
+
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Creates a panel for displaying all
@@ -58,10 +57,11 @@ public class EntityInfoPanelComposite extends Composite{
 	private Composite main;
 	private ScrolledComposite scroll;
 
-	private ObservationOptions observationOptions;
-	private CoordinateReferenceSystem crs;
 	private Entity entity;
 	private EntityType etype;
+	
+	private Label lblX;
+	private Label lblY;
 	
 	private Text txtId;
 	private Text txtX;
@@ -69,18 +69,21 @@ public class EntityInfoPanelComposite extends Composite{
 	private Text txtStatus;
 	
 	private HashMap<String, Text> attributeToUi = null;
+	private IProjectionProvider prjProvider;
 	
 	/**
 	 * Creates a new panel.
 	 * 
 	 * @param parent
 	 */
-	public EntityInfoPanelComposite(Composite parent){
+	public EntityInfoPanelComposite(Composite parent, IProjectionProvider prjProvider){
 		super(parent, SWT.NONE);
 		GridLayout gl = new GridLayout();
 		gl.marginWidth = 0;
 		gl.marginHeight = 0;
 		setLayout(gl);
+	
+		this.prjProvider = prjProvider;
 		
 		scroll = new ScrolledComposite(this, SWT.V_SCROLL | SWT.H_SCROLL);
 		scroll.setExpandHorizontal(true);
@@ -133,17 +136,6 @@ public class EntityInfoPanelComposite extends Composite{
 		
 		Session s = HibernateManager.openSession();
 		try{
-			this.observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
-			this.entity = (Entity) s.load(Entity.class, entity.getUuid());
-			try{
-				if (observationOptions.getViewProjection() != null){
-					this.crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
-				}else{
-					this.crs = SmartDB.DATABASE_CRS;
-				}
-			}catch (Exception ex){
-				EntityPlugIn.displayLog(ex.getMessage(), ex);
-			}
 			initEntityFields();
 			
 		}finally{
@@ -166,19 +158,27 @@ public class EntityInfoPanelComposite extends Composite{
 		}
 		
 		txtId.setText(entity.getId());
+		Point geom = null;
+		if (txtX != null || txtY != null){
+			geom = ReprojectUtils.transform(entity.getX(), entity.getY(), prjProvider.getProjection().getParsedCoordinateReferenceSystem());
+		}
 		if (txtX != null){
 			if ( entity.getX() != null){
-				txtX.setText(String.valueOf(ReprojectUtils.transform(entity.getX(), entity.getY(), crs).getX()));
+				txtX.setText(String.valueOf(geom.getX()));
 			}else{
 				txtX.setText(""); //$NON-NLS-1$
 			}
+			lblX.setToolTipText(prjProvider.getProjection().getName());
+			txtX.setToolTipText(prjProvider.getProjection().getName());
 		}
 		if (txtY != null){
 			if ( entity.getY() != null){
-				txtY.setText(String.valueOf(ReprojectUtils.transform(entity.getX(), entity.getY(), crs).getY()));
+				txtY.setText(String.valueOf(geom.getY()));
 			}else{
 				txtY.setText(""); //$NON-NLS-1$
 			}
+			lblY.setToolTipText(prjProvider.getProjection().getName());
+			txtY.setToolTipText(prjProvider.getProjection().getName());
 		}
 		
 		txtStatus.setText(entity.getStatus().getGuiName(Locale.getDefault()));
@@ -239,13 +239,13 @@ public class EntityInfoPanelComposite extends Composite{
 		txtStatus.setEditable(false);
 		
 		if (etype.getType() == EntityType.Type.FIXED){
-			toolkit.createLabel(comp, EntityLabelProvider.X_FIELD_NAME + ":"); //$NON-NLS-1$
+			lblX = toolkit.createLabel(comp, EntityLabelProvider.X_FIELD_NAME + ":"); //$NON-NLS-1$
 			txtX = toolkit.createText(comp, ""); //$NON-NLS-1$
 			txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtX.getLayoutData()).widthHint = 100;
 			txtX.setEditable(false);
 			
-			toolkit.createLabel(comp, EntityLabelProvider.Y_FIELD_NAME + ":"); //$NON-NLS-1$
+			lblY = toolkit.createLabel(comp, EntityLabelProvider.Y_FIELD_NAME + ":"); //$NON-NLS-1$
 			txtY = toolkit.createText(comp, ""); //$NON-NLS-1$
 			txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtY.getLayoutData()).widthHint = 100;

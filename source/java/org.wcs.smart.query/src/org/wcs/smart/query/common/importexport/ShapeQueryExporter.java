@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -37,9 +38,15 @@ import org.geotools.data.FeatureStore;
 import org.geotools.data.FileDataStoreFactorySpi;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -51,6 +58,8 @@ import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Shapefile query exporter.  Exports
@@ -64,13 +73,24 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
     protected DataStore shapefile = null;    
     protected ArrayList<SimpleFeature> features = null;
     protected Query query;
-   
+    protected CoordinateReferenceSystem crs;
+    
     /**
      * Creates new shapefile exporter
      */
     public ShapeQueryExporter() {
 
 	}
+    
+
+	/**
+	 * 
+	 * @return shapefile exports support reprojection
+	 */
+	public boolean supportsProjection(){
+		return true;
+	}
+	
 	/**
 	 * Creates a shapefile and initialises the schema.
 	 * 
@@ -105,10 +125,24 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void finish() throws Exception {
+		//TODO: sort out schema crs - that will likely be wrong
+        MathTransform transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, crs, true);
+        
+		List<SimpleFeature> reprojected = new ArrayList<SimpleFeature>();
+		for (SimpleFeature f : features){
+			if (CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS, crs)){
+				reprojected.add(f);
+			}else{
+				SimpleFeature copy = SimpleFeatureBuilder.copy(f);
+				copy.setDefaultGeometry(JTS.transform((Geometry)f.getDefaultGeometry(), transform));
+				reprojected.add(f);
+			}
+		}
 		FeatureStore<SimpleFeatureType, SimpleFeature> fs = 
 				(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource(shapefile.getTypeNames()[0]);
 		fs.setTransaction(new DefaultTransaction());
-		fs.addFeatures( DataUtilities.collection(features) );
+		
+		fs.addFeatures( DataUtilities.collection(reprojected) );
 		fs.getTransaction().commit();
 		
 		shapefile.dispose();
@@ -152,6 +186,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	@Override
 	public void export(Query query, IQueryResult results, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		this.query = ((SimpleQuery)query);
+		crs = (CoordinateReferenceSystem) parameters.get(IQueryExporter.PROJECTION_PARAM_KEY);
 		
 		if (results instanceof IPagedQueryResultSet){
 			super.setData((IPagedQueryResultSet)results, ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);

@@ -43,13 +43,17 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -86,6 +90,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private boolean hasError = false;
 	private List<QueryEditorInput> initSelection = null;
 	
+	private List<Projection> supportedProjections = null;
+	private Projection defaultProjection = null;
+	
 	private ExportQueryWizard(Query query, List<QueryEditorInput> initSelection) {
 		this.query = query;
 		if (this.query != null){
@@ -97,6 +104,13 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		
 		setDialogSettings(QueryPlugIn.getDefault().getDialogSettings());
 		
+		Session s = HibernateManager.openSession();
+		try{
+			supportedProjections = s.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+			defaultProjection = ObservationHibernateManager.getCurrentViewProjection(s);
+		}finally{
+			s.close();
+		}
 		super.setNeedsProgressMonitor(true);
 	}
 	
@@ -108,7 +122,6 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	public ExportQueryWizard(List<QueryEditorInput> initSelection) {
 		this(null, initSelection);
-		
 	}
 	
 	/**
@@ -132,6 +145,15 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
     	}
     	return false;
     }
+    
+    public List<Projection> getSupportedProjections(){
+    	return this.supportedProjections;
+    }
+    
+    public Projection getDefaultProjection(){
+    	return this.defaultProjection;
+    }
+    
 	/**
 	 * @see org.eclipse.jface.wizard.Wizard#addPages()
 	 */

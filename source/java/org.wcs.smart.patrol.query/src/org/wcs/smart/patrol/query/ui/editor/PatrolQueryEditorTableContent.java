@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.ui.editor;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -325,8 +326,8 @@ public class PatrolQueryEditorTableContent {
 	
 		resultsTable = new QueryResultsTable(){
 			@Override
-			public CellLabelProvider getLabelProvider(QueryColumn column) {
-				return PatrolTableColumn.getLabelProvider(column);
+			public CellLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
+				return PatrolTableColumn.getLabelProvider(column, allColumns, PatrolQueryEditorTableContent.this.editor);
 			}
 		};
 

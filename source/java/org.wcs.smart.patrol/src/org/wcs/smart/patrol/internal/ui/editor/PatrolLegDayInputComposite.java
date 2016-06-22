@@ -87,13 +87,13 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
@@ -161,7 +161,7 @@ public class PatrolLegDayInputComposite {
 	private Font okayFont;
 	private Font errorFont;
 	
-	private CoordinateReferenceSystem tempCrs;
+	private Projection prj;
 	
 	private IPatrolEventListener trackListener = new IPatrolEventListener() {
 		@Override
@@ -205,10 +205,17 @@ public class PatrolLegDayInputComposite {
 		this.editor = editor;
 		try{
 			if (observationOptions != null) {
-				Projection projection = observationOptions.getViewProjection();
-				if (projection != null)
-					this.tempCrs = ReprojectUtils.stringToCrs(projection.getDefinition());
+				prj = observationOptions.getViewProjection();
+				if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
+					prj.setParsedCoordinateReferenceSystem( ReprojectUtils.stringToCrs(prj.getDefinition()) );
+				}
 			}
+			if (prj == null){
+				prj = new Projection();
+				prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+				prj.setName(SmartDB.DATABASE_CRS.getName().toString());
+			}
+			
 		}catch (Exception ex){
 			SmartPatrolPlugIn.log(ex.getMessage(), ex);
 		}
@@ -796,6 +803,9 @@ public class PatrolLegDayInputComposite {
 			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH){
 				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
 			}
+			if(columntype == OtColumn.EAST || columntype == OtColumn.NORTH){
+				column.getColumn().setToolTipText(prj.getName());
+			}
 			
 			observationTableColumns.put(columntype, column);
 			
@@ -951,9 +961,9 @@ public class PatrolLegDayInputComposite {
 		if (column == OtColumn.ID) {
 			return String.valueOf(wp.getId());
 		} else if (column == OtColumn.EAST) {
-			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), tempCrs).getX());
+			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), prj.getParsedCoordinateReferenceSystem()).getX());
 		} else if (column == OtColumn.NORTH) {
-			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), tempCrs).getY());
+			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), prj.getParsedCoordinateReferenceSystem()).getY());
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
 				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());

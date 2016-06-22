@@ -91,7 +91,9 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	private Text txtDescription;
 	private Text txtFromDate;
 	private Text txtToDate;
+	private Label lblPoints;
 	private TableViewer pointsList;
+	
 	private TableViewer attachmentsList;
 	private Label txtCreator;
 
@@ -238,12 +240,12 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		txtToDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
 
-		Label locLbl = toolkit.createLabel(content, Messages.IntelligenceLocation_Location_Label);
-		locLbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		lblPoints = toolkit.createLabel(content, Messages.IntelligenceLocation_Location_Label);
+		lblPoints.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		Table pointsTable = toolkit.createTable(content, SWT.V_SCROLL | SWT.H_SCROLL);
 		pointsList = new TableViewer(pointsTable);
 		pointsList.setContentProvider(ArrayContentProvider.getInstance());
-		pointsList.setLabelProvider(new SmartPointLabelProvider());
+		pointsList.setLabelProvider(new SmartPointLabelProvider(parentEditor));
 		pointsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		((GridData)pointsTable.getLayoutData()).heightHint = 50;
 		Hyperlink locLink = createEditLink(toolkit, content, PanelType.LOCATION);
@@ -297,6 +299,8 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		if (intel.getToDate() == null){
 			txtToDate.setEnabled(false);
 		}
+		lblPoints.setToolTipText(parentEditor.getProjection().getName());
+		pointsList.getTable().setToolTipText(parentEditor.getProjection().getName());
 		pointsList.setInput(intel.getPoints().toArray());
 		attachmentsList.setInput(intel.getAttachments().toArray());
 	}

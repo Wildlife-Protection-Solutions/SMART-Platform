@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -41,10 +42,18 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.events.IWaypointEventListener;
+import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.events.WaypointEventManager.EventType;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
@@ -68,6 +77,7 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -76,18 +86,27 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class QueryResultsEditor extends MultiPageEditorPart implements MapPart, IMapQueryEditor, IAdaptable{
+public abstract class QueryResultsEditor extends MultiPageEditorPart implements MapPart, IMapQueryEditor, IAdaptable, IProjectionProvider{
 
 	protected QueryProxy query;
 	protected QueryResultsTablePage page1;
 	protected QueryMapPageEditor page2;
 	private boolean isDirty = false;
 	
+	private Projection prj = null;
+	private boolean reloadPrj = false;
+	
 	/*
 	 * Listener for changes to area names/ids
 	 */
 	private IAreaModifiedListener areaListener = null;
 	
+	private IWaypointEventListener optionsMpd = new IWaypointEventListener() {
+		@Override
+		public void handleEvent(Waypoint wp) {
+			reloadPrj = true;
+		}
+	};
 	/**
 	 * Job to run the query and refresh the results
 	 */
@@ -96,6 +115,28 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			runQueryJob.setName(Messages.QueryResultsEditor_RunQueryJobName + getQuery().getName());
+			if (reloadPrj){
+				Session session = HibernateManager.openSession();
+				try{			
+					prj = ObservationHibernateManager.getCurrentViewProjection(session);
+				}finally{
+					session.close();
+				}
+				try{
+					if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
+						prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+					}
+				}catch (Exception ex){
+					prj = null;
+				}
+				if (prj == null){
+					prj = new Projection();
+					prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+					prj.setName(SmartDB.DATABASE_CRS.getName().toString());
+				}
+				reloadPrj = false;
+			}
+			
 			final IProgressMonitor mymonitor = page1.createProgressMonitor();
 			try {
 				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor); 
@@ -169,6 +210,19 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
+				prj = ObservationHibernateManager.getCurrentViewProjection(session);
+				try{
+					if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
+						prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+					}
+				}catch (Exception ex){
+					prj = null;
+				}
+				if (prj == null){
+					prj = new Projection();
+					prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+					prj.setName(SmartDB.DATABASE_CRS.getName().toString());
+				}
 				Query squery = (SimpleQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
 				query = new QueryProxy(squery);
 				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
@@ -203,6 +257,8 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	
 		areaListener = new QueryAreaModifiedListener(this);
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		
+		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_OPTIONS_MODIFIED, optionsMpd);
 	}
 
 	
@@ -215,6 +271,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		
 		query.dispose();
 		QueryEventManager.getInstance().removeListener(qListener);
+		WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_OPTIONS_MODIFIED, optionsMpd);
 		if (areaListener != null){
 			ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
 		}
@@ -576,6 +633,15 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 
 	/**
+	 * The projection to use for displaying results
+	 */
+	@Override
+	public Projection getProjection(){
+		return this.prj;
+	}
+	
+	
+	/**
 	 * Creates a new query of the given type
 	 * @param type
 	 * @return
@@ -595,11 +661,14 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	protected abstract IDateFieldFilter[] getDateFilterOptions();
 	
 	/**
-	 * Column label provider 
-	 * @param column
+	 * Column label provider
+	 *  
+	 * @param column The column to get the label provider for
+	 * @param allColumns all columns in the table, incase the label provider requires data from
+	 * another column
 	 * @return
 	 */
-	protected abstract CellLabelProvider getColumnLabelProvider(QueryColumn column);
+	protected abstract CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns);
 	
 	
 }

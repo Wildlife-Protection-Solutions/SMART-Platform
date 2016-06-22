@@ -28,22 +28,28 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.entity.EntityCsvExporter;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
-import org.wcs.smart.export.config.ICsvDataExporter;
-import org.wcs.smart.export.config.ICsvExportDialogConfig;
+import org.wcs.smart.entity.model.EntityType.Type;
 import org.wcs.smart.export.dialog.AbstractCsvDialog;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.ProjectionLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -54,10 +60,11 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ExportEntityDialog extends AbstractCsvDialog {
 
-	private ICsvExportDialogConfig config;
+	private EntityCsvExporter config;
 	private Button chIncludeAll;
-	
+	private ComboViewer lstProjection = null;
 	private boolean activeOnly = true;
+	private Projection selectedPrj = null;
 	
 	public static final String EXPORT_ENTITIES_DIRKEY = "org.wcs.smart.export.entities.directory"; //$NON-NLS-1$
 	
@@ -67,27 +74,31 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 	 */
 	public ExportEntityDialog(Shell parentShell, EntityCsvExporter config) {
 		super(parentShell, config.getDialogConfiguration());
-		this.config = config.getDialogConfiguration();
+		this.config = config;
 	}
 
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			activeOnly = !chIncludeAll.getSelection();
-			
+			if (lstProjection != null){
+				selectedPrj = (Projection)((StructuredSelection)lstProjection.getSelection()).getFirstElement();
+			}else{
+				selectedPrj = null;
+			}
 			EntityPlugIn.getDefault().getDialogSettings().put(EXPORT_ENTITIES_DIRKEY, (new File(csvComposite.getFileText())).getParent()); 
 		}
 		super.buttonPressed(buttonId);
 	}
+	
 	@Override
 	protected boolean performAction(File file, char delimiter, boolean headers,
 			IProgressMonitor monitor, Session session) throws Exception {
-		ICsvDataExporter exporter = config.getExporter();
-		if (exporter instanceof EntityCsvExporter){
-			((EntityCsvExporter) exporter).setActiveOnly(activeOnly);
-		}
 		
-		return exporter.exportCsvFile(file, delimiter, SmartDB.getCurrentConservationArea(), 
+		config.setActiveOnly(activeOnly);
+		config.setProjection(selectedPrj);
+		
+		return config.getDialogConfiguration().getExporter().exportCsvFile(file, delimiter, SmartDB.getCurrentConservationArea(), 
 				headers, monitor, session);
 	}
 
@@ -103,6 +114,21 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 		Composite fileComp = super.createFileComposite(comp, true);
 		fileComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		if (config.getEntityType().getType() == Type.FIXED){
+			//include projection for location
+			//spacer
+			new Label(fileComp, SWT.NONE);
+			Label lblProj = new Label(fileComp, SWT.NONE);
+			lblProj.setText(Messages.ExportEntityDialog_ProjectionLabel);
+			
+			lstProjection = new ComboViewer(fileComp, SWT.DROP_DOWN | SWT.READ_ONLY);
+			lstProjection.getControl().setLayoutData(new GridData(SWT.FILL,  SWT.FILL,  true, false));
+			lstProjection.setContentProvider(ArrayContentProvider.getInstance());
+			lstProjection.setLabelProvider(ProjectionLabelProvider.getInstance());
+			lstProjection.setInput(config.getProjectionOptions());
+			lstProjection.setSelection(new StructuredSelection(config.getCurrentProjection()));
+		}
+		
 		Composite custom = new Composite(comp, SWT.NONE);
 		custom.setLayout(new GridLayout());
 		chIncludeAll = new Button(custom, SWT.CHECK);
@@ -112,7 +138,7 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 		if (file == null){
 			file = System.getProperty("user.home"); //$NON-NLS-1$
 		}
-		File init = new File(file, URLUtils.cleanFilename(((EntityCsvExporter)config.getExporter()).getEntityType().getName()) + ".csv"); //$NON-NLS-1$
+		File init = new File(file, URLUtils.cleanFilename(config.getEntityType().getName()) + ".csv"); //$NON-NLS-1$
 		super.csvComposite.setFileText(init.toString());
 		
 		return comp;

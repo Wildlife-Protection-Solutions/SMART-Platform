@@ -41,7 +41,7 @@ public abstract class GridQueryDefinitionExporter extends DefinitionQueryExporte
 
 	public GridQueryDefinitionExporter() {
 	}
-
+	
 	/**
 	 * @see org.wcs.smart.query.export.DefinitionQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */

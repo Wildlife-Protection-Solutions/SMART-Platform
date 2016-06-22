@@ -89,5 +89,13 @@ public class GridArcImageExporter implements IQueryExporter {
 		writer.dispose();
 
 	}
+	
+	/**
+	 * Grid exports support reprojection
+	 */
+	@Override
+	public boolean supportsProjection() {
+		return true;
+	}
 
 }

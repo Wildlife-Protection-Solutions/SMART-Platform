@@ -19,45 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.ui.querytable;
+package org.wcs.smart.query.common.ui;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
- * Class represents one of the fixed table columns that do not change from
- * conservation area to conservation area.
- * 
- * <p>
- * This includes items such as the patrol id, patrol type etc but not items
- * related to the datamodel.
- * </p>
- * 
+ * Label provider for simple query column
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class FixedColumnLabelProvider extends ColumnLabelProvider {
+public class QueryColumnLabelProvider extends ColumnLabelProvider{
 
-	private QueryColumn column;
+	protected QueryColumn col;
 
-	/**
-	 * Creates a new fixed table column.
-	 * 
-	 * @param column
-	 *            the column definition
-	 */
-	public FixedColumnLabelProvider(QueryColumn column) {
-		this.column = column;
+	public QueryColumnLabelProvider(QueryColumn col){
+		this.col = col;
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object )
-	 */
-	public String getText(Object element) {
-		if (element instanceof PatrolQueryResultItem) {
-			return column.getValueAsString(column.getValue((PatrolQueryResultItem) element));
+	@Override
+	public String getText(Object element){
+		if (element instanceof IResultItem){
+			return col.getValueAsString( col.getValue((IResultItem)element));
 		}
-		return element == null ? "" : element.toString();//$NON-NLS-1$
+		return element.toString();
 	}
 }

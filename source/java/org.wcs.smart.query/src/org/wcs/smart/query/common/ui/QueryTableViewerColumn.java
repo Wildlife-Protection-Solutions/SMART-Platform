@@ -60,6 +60,9 @@ public class QueryTableViewerColumn {
 		}
 		tcolumn.setLabelProvider(lblProvider);
 		
+		if (lblProvider instanceof ReprojectingQueryColumnLabelProvder){
+			tcolumn.getColumn().setToolTipText( ((ReprojectingQueryColumnLabelProvder)lblProvider).getProjection().getName() );
+		}
 		tcolumn.getColumn().addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){

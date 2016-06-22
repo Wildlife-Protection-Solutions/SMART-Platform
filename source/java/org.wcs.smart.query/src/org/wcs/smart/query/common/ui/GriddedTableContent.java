@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.ui;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -286,8 +287,8 @@ public class GriddedTableContent {
 		
 		resultsTable = new QueryResultsTable(){
 			@Override
-			public CellLabelProvider getLabelProvider(QueryColumn column) {
-				return new GridColumnLabelProvider(column);
+			public CellLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
+				return new QueryColumnLabelProvider(column);
 			}
 			
 		};

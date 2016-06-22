@@ -73,7 +73,13 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 		return "xml"; //$NON-NLS-1$
 	}
 
-
+	/**
+	 * 
+	 * @return definition exports do not support reprojection
+	 */
+	public boolean supportsProjection(){
+		return false;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)

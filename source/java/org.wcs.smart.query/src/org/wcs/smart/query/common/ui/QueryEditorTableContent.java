@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.ui;
 
 import java.util.Locale;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -292,8 +293,8 @@ public class QueryEditorTableContent {
 		
 		resultsTable = new QueryLazyResultsTable(){
 			@Override
-			public CellLabelProvider getLabelProvider(QueryColumn column) {
-				return editor.getColumnLabelProvider(column);
+			public CellLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
+				return editor.getColumnLabelProvider(column, allColumns);
 			}
 			
 		};

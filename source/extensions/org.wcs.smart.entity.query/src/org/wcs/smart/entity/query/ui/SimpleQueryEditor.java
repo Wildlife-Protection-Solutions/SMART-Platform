@@ -53,8 +53,9 @@ import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
-import org.wcs.smart.query.common.ui.GridColumnLabelProvider;
+import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
+import org.wcs.smart.query.common.ui.ReprojectingQueryColumnLabelProvder;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -93,15 +94,30 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 	}
 
 	@Override
-	protected CellLabelProvider getColumnLabelProvider(QueryColumn column) {
+	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
 		if (column instanceof FixedQueryColumn){
-			return new FixedColumnLabelProvider(column);
+			
+			if (column.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+				for (QueryColumn qc : allColumns){
+					if (qc.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+						return new ReprojectingQueryColumnLabelProvder(column,column,qc, this);
+					}
+				}
+			}
+			if (column.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+				for (QueryColumn qc : allColumns){
+					if (qc.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+						return new ReprojectingQueryColumnLabelProvder(column,qc,column, this);
+					}
+				}
+			}
+			return new QueryColumnLabelProvider(column);
 		}else if (column instanceof EtAttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);
 		}else if (column instanceof EtCategoryQueryColumn){
 			return new CategoryColumnLabelProvider(column);
 		}else if (column instanceof GridQueryColumn){
-			return new GridColumnLabelProvider(column);
+			return new QueryColumnLabelProvider(column);
 		}else if (column instanceof EntityAttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);
 		}

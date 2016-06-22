@@ -41,10 +41,13 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.entity.EntityPermissionManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.ccca.EntityTypeCcaaManager;
@@ -57,6 +60,9 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Editor for managing entity types and 
@@ -65,7 +71,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
-public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
+public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IAdaptable, IProjectionProvider{
 
 
 	public static final String ID = "org.wcs.smart.entity.editor.entitytype"; //$NON-NLS-1$
@@ -77,6 +83,9 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	
 	private EntityType entityType;
 	private List<Entity> cachedEntities = null;	//for ccaa analysis
+	
+	private Projection currentPrj;
+	private List<Projection> availablePrj = null;
 	
 	private IEntityListener listener = new IEntityListener() {
 		
@@ -172,6 +181,14 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 	}
 
 	@Override
+	public Projection getProjection(){
+		return currentPrj;
+	}
+	
+	public List<Projection> getAvailablePrjs(){
+		return availablePrj;
+	}
+	@Override
 	protected void createPages() {
 		try{
 			entityPage = new EntitiesPage(this);
@@ -223,6 +240,23 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 						s.saveOrUpdate(entityType);
 					}
 					entityType.getNames().size();
+					
+					try{
+						ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
+						if (observationOptions.getViewProjection() != null){
+							currentPrj = observationOptions.getViewProjection();
+							currentPrj.setParsedCoordinateReferenceSystem( ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition()) );
+						}else{
+							currentPrj = new Projection();
+							currentPrj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+							currentPrj.setName(SmartDB.DATABASE_CRS.getName().toString());
+						}
+					}catch (Exception ex){
+						EntityPlugIn.displayLog(ex.getMessage(), ex);
+					}
+					
+					availablePrj = s.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", entityType.getConservationArea())).list();
+					
 					Display.getDefault().syncExec(new Runnable(){
 
 						@Override

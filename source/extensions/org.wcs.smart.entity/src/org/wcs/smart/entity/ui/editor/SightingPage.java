@@ -192,7 +192,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		
 		sec.setClient(compSighting);
 		
-		sightingTable = new SightingTable(compSighting);
+		sightingTable = new SightingTable(compSighting, parentEditor);
 		sightingTable.getTable().getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(sightingTable.getTable().getTable());
 		

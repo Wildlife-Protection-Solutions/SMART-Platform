@@ -101,22 +101,34 @@ public class SmartServiceExtension implements ServiceExtension {
 	}
 	
 	/**
-	 * Dermines of the url is a valid smart service url
+	 * Determines of the URL is a valid smart service URL
 	 * 
-	 * @param url url to test
+	 * @param url URL to test
 	 * @return <code>true</code> if valid, <code>false</code> otherwise
 	 */
 	public static boolean isValid(URL url){
 		if (url.getProtocol().equals(PROTOCOL)){
 			if (url.getHost().equals(HOST) && url.getPath().startsWith("/")){ //$NON-NLS-1$
-				return true;
+				//check for valud ca uuid
+				String scauuid = url.getPath();
+				if (scauuid == null) return false;
+				if (scauuid.charAt(0) == '/'){
+					scauuid = scauuid.substring(1);
+				}
+				try{
+					UuidUtils.stringToUuid(scauuid);
+					return true;
+				}catch(Throwable t){
+					
+				}
+				return false;
 			}
 		}
 		return false;
 	}
 	
 	/**
-	 * Creates parameter map from url. Returns null if url invalid.
+	 * Creates parameter map from URL. Returns null if URL invalid.
 	 * 
 	 * @param url
 	 * @return

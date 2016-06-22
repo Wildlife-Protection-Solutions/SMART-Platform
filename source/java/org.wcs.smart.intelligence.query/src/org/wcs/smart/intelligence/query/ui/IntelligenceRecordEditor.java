@@ -21,15 +21,16 @@
  */
 package org.wcs.smart.intelligence.query.ui;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
 import org.wcs.smart.intelligence.query.map.udig.QueryService;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
-import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -64,28 +65,10 @@ public class IntelligenceRecordEditor extends QueryResultsEditor {
 	}
 
 	@Override
-	protected CellLabelProvider getColumnLabelProvider(QueryColumn column) {
+	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> columns) {
 		if (column instanceof FixedQueryColumn){
-			return new FixedColumnLableProvider((QueryColumn)column);
+			return new QueryColumnLabelProvider((QueryColumn)column);
 		}
 		return null;
-	}
-
-	public class FixedColumnLableProvider extends ColumnLabelProvider{
-
-		private QueryColumn col;
-		
-		public FixedColumnLableProvider(QueryColumn col){
-			this.col = col;
-		}
-		
-		@Override
-		public String getText(Object element) {
-			if (element instanceof IResultItem){
-				return  col.getValueAsString(col.getValue((IResultItem)element));
-			}
-			return super.getText(element);
-		}
-		
 	}
 }

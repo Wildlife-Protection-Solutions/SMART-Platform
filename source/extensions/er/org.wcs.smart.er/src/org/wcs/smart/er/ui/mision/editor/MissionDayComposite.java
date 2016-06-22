@@ -529,6 +529,13 @@ public class MissionDayComposite {
 
 			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH) {
 				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
+			}else{
+				if (editor.getMissionEditor().getObservationOptions() != null && 
+						editor.getMissionEditor().getObservationOptions().getViewProjection() != null){
+					column.getColumn().setToolTipText(editor.getMissionEditor().getObservationOptions().getViewProjection().getName());
+				}else{
+					column.getColumn().setToolTipText( lcrs.getName().toString());
+				}
 			}
 			
 			observationTableColumns.put(columntype, column);

@@ -171,4 +171,12 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		//export
 		super.export(monitor);		
 	}
+	
+	/**
+	 * Simple queries not support reprojection
+	 */
+	@Override
+	public boolean supportsProjection() {
+		return true;
+	}
 }

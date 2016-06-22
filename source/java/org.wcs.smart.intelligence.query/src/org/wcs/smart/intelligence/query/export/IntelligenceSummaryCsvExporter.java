@@ -153,4 +153,9 @@ public class IntelligenceSummaryCsvExporter implements ICsvQueryExporter {
 		return "csv"; //$NON-NLS-1$
 	}
 
+	@Override
+	public boolean supportsProjection() {
+		return false;
+	}
+
 }

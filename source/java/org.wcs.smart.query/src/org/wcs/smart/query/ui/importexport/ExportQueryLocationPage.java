@@ -24,6 +24,9 @@ package org.wcs.smart.query.ui.importexport;
 import java.io.File;
 import java.util.HashMap;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -35,14 +38,17 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.locationtech.udig.catalog.URLUtils;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.ui.ProjectionLabelProvider;
 
 /**
  * Query wizard page to select the output file format.
@@ -56,6 +62,12 @@ public class ExportQueryLocationPage extends WizardPage {
 
 	private Label lblDelimiter;
 	private DelimiterCombo cmbDelimiter;
+	private Label lblSpacer;
+	
+	private ComboViewer cmbProjection;
+	private Label lblProjection;
+	
+	private Composite main;
 	
 	/**
 	 * Creates a new query wizard page.
@@ -87,12 +99,27 @@ public class ExportQueryLocationPage extends WizardPage {
 			initFile += exporter.getDefaultExtension();
 		}
 		txtFile.setText( initFile );
-		
-		
+
 		boolean isDelimiter =  ((ExportQueryWizard)getWizard()).getQueryExporter() instanceof ICsvQueryExporter;
-		lblDelimiter.setVisible(isDelimiter);
-		cmbDelimiter.getCombo().setVisible(isDelimiter);
 		
+		Control[] ctrs = new Control[]{lblDelimiter, cmbDelimiter == null ? null : cmbDelimiter.getControl(), lblSpacer, lblProjection, cmbProjection == null ? null : cmbProjection.getControl()};
+		for (Control c : ctrs){
+			if (c != null) c.dispose();
+		}
+		lblDelimiter = null;
+		cmbDelimiter = null;
+		lblSpacer = null;
+		lblProjection = null;
+		cmbProjection = null;
+		
+		if (isDelimiter){
+			createDelimiterOption();
+		}
+		if (exporter.supportsProjection()){
+			createProjectionOption();
+		}
+		
+		main.layout(true);
 		setPageComplete(false);
 	}
 	
@@ -101,7 +128,7 @@ public class ExportQueryLocationPage extends WizardPage {
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		Composite main = new Composite(parent, SWT.NONE);
+		main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(3, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
@@ -146,12 +173,7 @@ public class ExportQueryLocationPage extends WizardPage {
 			}
 		});
 		
-		lblDelimiter = new Label(main, SWT.NONE);
-		lblDelimiter.setText(Messages.ExportQueryLocationPage_delimiterLabel);
-		lblDelimiter.setToolTipText(Messages.ExportQueryLocationPage_delimiterTooltip);
-		
-		cmbDelimiter = new DelimiterCombo(main,  SWT.DROP_DOWN);
-		
+
 		
 		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQuery().getName()); //$NON-NLS-1$
 		setMessage(Messages.ExportQueryLocationPage_DialogMessage);
@@ -159,6 +181,40 @@ public class ExportQueryLocationPage extends WizardPage {
 		setControl(main);
 	}
 
+	private void createDelimiterOption(){
+		lblDelimiter = new Label(main, SWT.NONE);
+		lblDelimiter.setText(Messages.ExportQueryLocationPage_delimiterLabel);
+		lblDelimiter.setToolTipText(Messages.ExportQueryLocationPage_delimiterTooltip);
+		
+		cmbDelimiter = new DelimiterCombo(main,  SWT.DROP_DOWN);
+	
+		lblSpacer = new Label(main, SWT.NONE);
+	}
+	
+	private void createProjectionOption(){
+
+		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
+		
+		lblProjection = new Label(main, SWT.NONE);
+		lblProjection.setText("Projection:");
+		lblProjection.setToolTipText("Export projection");
+		
+		cmbProjection = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
+		cmbProjection.setLabelProvider(ProjectionLabelProvider.getInstance());
+		cmbProjection.setInput( wizard.getSupportedProjections()  );
+		cmbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		if (wizard.getDefaultProjection() != null){
+			cmbProjection.setSelection(new StructuredSelection(wizard.getDefaultProjection()));
+		}else{
+			cmbProjection.setSelection(new StructuredSelection(wizard.getSupportedProjections().get(0)));
+		}
+	}
+	
+	public Projection getProjection(){
+		if (cmbProjection == null) return null;
+		return (Projection)((StructuredSelection)cmbProjection.getSelection()).getFirstElement();
+	}
 	/**
 	 * @return the selected file
 	 */
@@ -167,13 +223,16 @@ public class ExportQueryLocationPage extends WizardPage {
 	}
 	
 	public HashMap<String, Object> getOptions() throws Exception{
-		if (cmbDelimiter.getCombo().isVisible()){
-			HashMap<String, Object> ops = new HashMap<String, Object>();
+		HashMap<String, Object> ops = new HashMap<String, Object>();
+		if (cmbDelimiter != null){
 			ops.put(ICsvQueryExporter.DELIMITER_KEY, cmbDelimiter.getDelimiter());
-			return ops;
-		}else{
-			return null;
 		}
+		if (cmbProjection != null){
+			ops.put(IQueryExporter.PROJECTION_PARAM_KEY, getProjection().getParsedCoordinateReferenceSystem());
+		}
+		if (ops.isEmpty()) return null;
+		return ops;
+		
 	}
 	 public IWizardPage getNextPage() {
 		 return null;

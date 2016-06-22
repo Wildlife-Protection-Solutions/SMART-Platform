@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.common.engine.IResultItem;
 
@@ -70,6 +71,8 @@ public abstract class QueryColumn implements Cloneable{
 	private ColumnType type;
 	private boolean isVisible = true;
 	
+	private IProjectionProvider prjProvider;
+	
 	/**
 	 * Creates a new query column 
 	 * @param name the column name as displayed to the user
@@ -81,6 +84,16 @@ public abstract class QueryColumn implements Cloneable{
 		this.key = key;
 		this.type = type;
 	}
+	
+	public void setProjectionProvider(IProjectionProvider prjProvider){
+		this.prjProvider = prjProvider;
+	}
+	
+	public IProjectionProvider getProjectionProvider(){
+		return this.prjProvider;
+	}
+	
+	
 	/**
 	 * A unique key for the column.
 	 * <p>This can be used when persisting 

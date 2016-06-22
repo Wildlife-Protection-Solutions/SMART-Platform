@@ -34,7 +34,9 @@ import org.eclipse.swt.SWT;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.opengis.referencing.FactoryException;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.entity.ccca.EntityTypeCcaaManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
@@ -47,7 +49,10 @@ import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
+
+import com.vividsolutions.jts.geom.Point;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -63,15 +68,35 @@ public class EntityCsvExporter implements ICsvDataExporter {
 	private boolean activeOnly;
 	private EntityDialogConfig config;
 	
-	public EntityCsvExporter(EntityType et){
+	private Projection currentPrj;
+	private List<Projection> prjOptions;
+	
+	public EntityCsvExporter(EntityType et, Projection currentPrj, List<Projection> prjOptions){
 		this.entityType = et;
 		this.config = new EntityDialogConfig();
+		this.currentPrj = currentPrj;
+		this.prjOptions = prjOptions;
 	}
+	
 	
 	public EntityDialogConfig getDialogConfiguration(){
 		return this.config;
 	}
 	
+	public Projection getCurrentProjection(){
+		return this.currentPrj;
+	}
+	
+	public void setProjection(Projection prj) throws FactoryException{
+		this.currentPrj = prj;
+		if (prj.getParsedCoordinateReferenceSystem() == null){
+			prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+		}
+	}
+	
+	public List<Projection> getProjectionOptions(){
+		return this.prjOptions;
+	}
 	/**
 	 * 
 	 * @return the entity type being exported
@@ -89,9 +114,6 @@ public class EntityCsvExporter implements ICsvDataExporter {
 	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca,
 			boolean headers, IProgressMonitor monitor, Session session)
 			throws Exception {
-		
-		
-		
 		
 		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), 
@@ -135,8 +157,14 @@ public class EntityCsvExporter implements ICsvDataExporter {
 				csvout[0] = entity.getId();
 				csvout[1] = entity.getStatus().getGuiName(Locale.getDefault());
 				if (entityType.getType().equals(EntityType.Type.FIXED)){
-					csvout[2] = String.valueOf(entity.getX());
-					csvout[3] = String.valueOf(entity.getY());
+					if (currentPrj == null || currentPrj.getParsedCoordinateReferenceSystem() == null){
+						csvout[2] = String.valueOf(entity.getX());
+						csvout[3] = String.valueOf(entity.getY());
+					}else{
+						Point pnt = ReprojectUtils.transform(entity.getX(), entity.getY(), currentPrj.getParsedCoordinateReferenceSystem());
+						csvout[2] = String.valueOf(pnt.getX());
+						csvout[3] = String.valueOf(pnt.getY());
+					}
 				}
 				if (SmartDB.isMultipleAnalysis()){
 					csvout[extra-1] = entity.getEntityType().getConservationArea().getId();
@@ -180,7 +208,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 	}
 
 	
-	class EntityDialogConfig implements ICsvExportDialogConfig{
+	public class EntityDialogConfig implements ICsvExportDialogConfig{
 
 		@Override
 		public boolean includeHasHeader() {

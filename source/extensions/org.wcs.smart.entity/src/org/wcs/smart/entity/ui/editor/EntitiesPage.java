@@ -162,7 +162,6 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 				editEntity();
 			}
 		});
-		
 
 		int buttonSize = 80;
 		if (EntityPermissionManager.canCreateEditDeleteEntities()){
@@ -253,7 +252,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		entityDetails.setLayout(new GridLayout());
 		entityDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	
-		entityInfoPanel = new EntityInfoPanelComposite(entityDetails);
+		entityInfoPanel = new EntityInfoPanelComposite(entityDetails, parentEditor);
 		entityInfoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		entityTable.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -291,7 +290,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 	
 	private void exportEntities(){
 		EntityType et = parentEditor.getEntityType();
-		EntityCsvExporter exporter = new EntityCsvExporter(et);
+		EntityCsvExporter exporter = new EntityCsvExporter(et, parentEditor.getProjection(), parentEditor.getAvailablePrjs());
 		ExportEntityDialog dialog = new ExportEntityDialog(getSite().getShell(), exporter);
 		dialog.open();
 	}

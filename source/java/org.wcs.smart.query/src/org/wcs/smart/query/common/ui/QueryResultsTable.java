@@ -179,7 +179,7 @@ public abstract class QueryResultsTable {
 	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<QueryColumn> columns) {
 		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.size()];
 		for (int i = 0; i < columns.size(); i++) {
-			viewers[i] = new QueryTableViewerColumn(viewer,columns.get(i), getColumnSorter(), getLabelProvider(columns.get(i)));
+			viewers[i] = new QueryTableViewerColumn(viewer,columns.get(i), getColumnSorter(), getLabelProvider(columns.get(i), columns));
 		}
 		return viewers;
 	}
@@ -189,7 +189,7 @@ public abstract class QueryResultsTable {
 	 * @param column
 	 * @return
 	 */
-	public abstract CellLabelProvider getLabelProvider(QueryColumn column);
+	public abstract CellLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns);
 	
 	
 	protected IQueryColumnSorter getColumnSorter() {

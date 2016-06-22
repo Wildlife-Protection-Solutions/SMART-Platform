@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.query.ui.editor;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -146,8 +148,8 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	}
 	
 	@Override
-	protected CellLabelProvider getColumnLabelProvider(QueryColumn column){
-		return SurveyQueryColumnManager.getLabelProvider(column);
+	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
+		return SurveyQueryColumnManager.getLabelProvider(column, allColumns, this);
 	}
 
 	@Override

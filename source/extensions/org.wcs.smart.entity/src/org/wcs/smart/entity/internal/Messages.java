@@ -233,6 +233,7 @@ public class Messages extends NLS {
 	public static String ExportEntityDialog_ExportDialogTitle;
 	public static String ExportEntityDialog_FileExists;
 	public static String ExportEntityDialog_IncludeInactive;
+	public static String ExportEntityDialog_ProjectionLabel;
 	public static String ExportEntityTypeHandler_BrowseLabel;
 	public static String ExportEntityTypeHandler_DialogMessage;
 	public static String ExportEntityTypeHandler_DialogTitle;

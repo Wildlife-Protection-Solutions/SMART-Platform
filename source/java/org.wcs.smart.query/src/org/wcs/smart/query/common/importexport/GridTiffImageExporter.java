@@ -91,4 +91,11 @@ public class GridTiffImageExporter implements IQueryExporter {
 	    writer.dispose();
 	}
 
+	/**
+	 * Tiff exports support reprojection
+	 */
+	@Override
+	public boolean supportsProjection() {
+		return true;
+	}
 }

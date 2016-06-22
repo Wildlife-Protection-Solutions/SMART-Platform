@@ -21,17 +21,16 @@
  */
 package org.wcs.smart.entity.ui.editor.sightings;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -44,12 +43,12 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
-import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
 import org.wcs.smart.query.common.ui.QueryTableViewerColumn;
+import org.wcs.smart.query.common.ui.ReprojectingQueryColumnLabelProvder;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Sightings table for displaying and managing sighting
@@ -65,8 +64,9 @@ public class SightingTable {
 	
 	private QueryLazyResultsContentProvider sorter;
 	private List<QueryTableViewerColumn> tableColumns = null;
+	private IProjectionProvider prjProvider;
 	
-	public SightingTable(Composite composite){
+	public SightingTable(Composite composite, IProjectionProvider parentEditor){
 		sightingsTable = new TableViewer(composite, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		
 		sightingsTable.getTable().setHeaderVisible(true);
@@ -74,6 +74,8 @@ public class SightingTable {
 		sorter = new QueryLazyResultsContentProvider(sightingsTable);
 		sightingsTable.setContentProvider(sorter);
 		sightingsTable.setItemCount(0);
+		
+		this.prjProvider = parentEditor;
 		
 	}
 	
@@ -121,15 +123,26 @@ public class SightingTable {
 		
 		tableColumns = new ArrayList<QueryTableViewerColumn>();
 		currentCols = getQueryColumns(et);
+		
+		//find the x & y columns so they can be reprojected as required
+		QueryColumn xCol = null;
+		QueryColumn yCol = null;
 		for (final QueryColumn col : currentCols){
-			tableColumns.add(new QueryTableViewerColumn(sightingsTable,col, sorter, new ColumnLabelProvider(){
-				public String getText(Object element){
-					if (element instanceof IResultItem){
-						return asString(col.getValue((IResultItem)element), col.getType());
-					}
-					return element.toString();
-				}
-			}));
+			if (col.getKey().equals(SightingQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+				xCol = col;
+			}
+			if (col.getKey().equals(SightingQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+				yCol = col;
+			}
+		}
+		
+		ColumnViewerToolTipSupport.enableFor(sightingsTable);
+		for (QueryColumn col : currentCols){
+			if ( (col == xCol || col== yCol) && prjProvider.getProjection() != null && prjProvider.getProjection().getParsedCoordinateReferenceSystem() != null){
+				tableColumns.add(new QueryTableViewerColumn(sightingsTable,col, sorter, new ReprojectingQueryColumnLabelProvder(col, xCol, yCol, prjProvider)));				
+			}else{
+				tableColumns.add(new QueryTableViewerColumn(sightingsTable,col, sorter, new QueryColumnLabelProvider(col)));
+			}
 			
 		}
 		
@@ -164,7 +177,7 @@ public class SightingTable {
 		//fixed columns for waypoint and fixed entity attributes
 		for (FixedColumns fixed : SightingQueryColumn.FixedColumns.values()){
 			QueryColumn column = new SightingQueryColumn(fixed.getGuiName(),fixed.getKey(),fixed.getType(), fixed.dbColName);
-			
+
 			if (fixed == FixedColumns.WAYPOINT_DIRECTION || fixed == FixedColumns.WAYPOINT_DISTANCE){
 				if (obsOptions.getTrackDistanceDirection()){
 					cols.add(column);
@@ -219,36 +232,5 @@ public class SightingTable {
 		return cols;
 	}
 	
-	private static String asString(Object value, ColumnType type) {
-		if (value == null){
-			return ""; //$NON-NLS-1$
-		}
-		if (type == ColumnType.BOOLEAN) {
-			if ((Double) value >= 0.5) {
-				return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
-			} else {
-				return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
-			}
-		} else if (type == ColumnType.DATE) {
-			return DateFormat.getDateInstance().format((Date) value);
-		} else if (type == ColumnType.TIME) {
-			return DateFormat.getTimeInstance().format((Date) value);
-		} else if (type == ColumnType.STRING) {
-			return (String) value;
-		} else if (type == ColumnType.INTEGER) {
-			return String.valueOf((Integer) value);
-		} else if (type == ColumnType.LONG) {
-			return String.valueOf((Long) value);
-		} else if (type == ColumnType.NUMBER) {
-			if (value instanceof Double) {
-				return String.valueOf((Double) value);
-			} else if (value instanceof Float) {
-				return String.valueOf((Float) value);
-			} else if (value instanceof Integer) {
-				return String.valueOf((Integer) value);
-			}
-		}
-		return ""; //$NON-NLS-1$
-
-	}
+	
 }

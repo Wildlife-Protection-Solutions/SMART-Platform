@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -54,6 +55,8 @@ import org.wcs.smart.er.query.model.column.SurveyCategoryQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
+import org.wcs.smart.query.common.ui.ReprojectingQueryColumnLabelProvder;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -310,8 +313,22 @@ public class SurveyQueryColumnManager {
 	 * @param column
 	 * @return
 	 */
-	public static ColumnLabelProvider getLabelProvider(QueryColumn column){
-		return new FixedColumnLabelProvider(column);
+	public static ColumnLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns, IProjectionProvider prjProvider){
+		if (column.getKey().equalsIgnoreCase(SurveyQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+			for (QueryColumn qc : allColumns){
+				if (qc.getKey().equalsIgnoreCase(SurveyQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+					return new ReprojectingQueryColumnLabelProvder(column,column,qc, prjProvider);
+				}
+			}
+		}
+		if (column.getKey().equalsIgnoreCase(SurveyQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+			for (QueryColumn qc : allColumns){
+				if (qc.getKey().equalsIgnoreCase(SurveyQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+					return new ReprojectingQueryColumnLabelProvder(column,qc,column, prjProvider);
+				}
+			}
+		}
+		return new QueryColumnLabelProvider(column);
 	}
 	
 	public  QueryColumn[] getMissionQueryColumns(final SurveyDesign sd) {

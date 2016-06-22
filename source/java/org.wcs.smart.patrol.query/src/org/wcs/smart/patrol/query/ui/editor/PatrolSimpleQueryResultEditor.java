@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.query.ui.editor;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
@@ -58,8 +60,8 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 		return PatrolObservationQueryType.validDateFields();
 	}
 	
-	protected CellLabelProvider getColumnLabelProvider(QueryColumn column){
-		return PatrolTableColumn.getLabelProvider(column);
+	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
+		return PatrolTableColumn.getLabelProvider(column, allColumns, this);
 	}
 
 	@Override

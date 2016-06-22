@@ -27,6 +27,7 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
@@ -44,11 +45,11 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class SmartPointLabelProvider extends LabelProvider {
 	
-	private ICrsProvider crsProvider;
+	private IProjectionProvider crsProvider;
 	private MathTransform transform;
 	private CoordinateReferenceSystem transformCrs;
 	
-	public SmartPointLabelProvider(ICrsProvider provider) {
+	public SmartPointLabelProvider(IProjectionProvider provider) {
 		super();
 		this.crsProvider = provider;
 	}
@@ -80,7 +81,7 @@ public class SmartPointLabelProvider extends LabelProvider {
 	 * </p>
 	 */
 	public void updateTransform() {
-		CoordinateReferenceSystem destCrs = crsProvider.getCurrentCrs();
+		CoordinateReferenceSystem destCrs = crsProvider.getProjection().getParsedCoordinateReferenceSystem();
 		if (destCrs == null) {
 			transform = null;
 			transformCrs = null;
@@ -101,7 +102,7 @@ public class SmartPointLabelProvider extends LabelProvider {
 		}
 
 		try {
-			CoordinateReferenceSystem destCrs = crsProvider.getCurrentCrs();
+			CoordinateReferenceSystem destCrs = crsProvider.getProjection().getParsedCoordinateReferenceSystem();
 			if (destCrs == null) {
 				return point;
 			}
@@ -116,16 +117,4 @@ public class SmartPointLabelProvider extends LabelProvider {
 		}
 	}
 
-	/**
-	 * Clients must implement and pass this interface to {@link SmartPointLabelProvider}
-	 * if it is required to display points in user defined {@link CoordinateReferenceSystem}
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	public interface ICrsProvider {
-		
-		public CoordinateReferenceSystem getCurrentCrs();
-		
-	}
 }

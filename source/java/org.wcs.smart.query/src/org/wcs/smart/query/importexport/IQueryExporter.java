@@ -48,12 +48,19 @@ public interface IQueryExporter {
 	 */
 	public static final String QUERY_DEFINTION_EXPORTER_ID = "org.wcs.smart.query.export.definition"; //$NON-NLS-1$
 
+	public static final String PROJECTION_PARAM_KEY = "projection"; //$NON-NLS-1$
 	
 	/**
 	 * 
 	 * @return unique exporter identifier 
 	 */
 	public String getId();
+	
+	/**
+	 * 
+	 * @return true if the exporter supports projections
+	 */
+	public boolean supportsProjection();
 	
 	/**
 	 * @return the exporter name

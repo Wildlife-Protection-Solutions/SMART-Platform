@@ -116,6 +116,7 @@ public class IncidentSummaryPage extends EditorPart {
 	private Text txtDate;
 	private Text txtTime;
 	private Text txtLocation;
+	private Label lblLocation;
 	private Text txtDistance;
 	private Text txtDirection;
 	private ListViewer attachments;
@@ -197,15 +198,19 @@ public class IncidentSummaryPage extends EditorPart {
 			try{
 				if (observationOptions.getViewProjection() != null){
 					crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+					txtLocation.setToolTipText(observationOptions.getViewProjection().getName());
+					lblLocation.setToolTipText(observationOptions.getViewProjection().getName());
 				}else{
 					crs = SmartDB.DATABASE_CRS;
+					txtLocation.setToolTipText(crs.getName().toString());
+					lblLocation.setToolTipText(crs.getName().toString());
 				}
 			}catch(FactoryException ex){
 				IncidentPlugIn.log(ex.getMessage(), ex);
 			}
 			Point p = ReprojectUtils.transform(incident.getX(), incident.getY(), crs);
 			this.txtLocation.setText(p.getX() + Messages.IncidentSummaryPage_LocationSeparator + p.getY());
-		
+			
 			if (editor.getOptions().getTrackDistanceDirection()){
 				if (incident.getDirection() == null){
 					this.txtDirection.setText(""); //$NON-NLS-1$
@@ -308,7 +313,7 @@ public class IncidentSummaryPage extends EditorPart {
 		txtTime.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createEdit(left, canEdit, DateTimeComposite.ID);
 		
-		toolkit.createLabel(left, Messages.IncidentSummaryPage_LocationLabel);
+		lblLocation = toolkit.createLabel(left, Messages.IncidentSummaryPage_LocationLabel);
 		txtLocation = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtLocation.setEditable(false);
 		txtLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

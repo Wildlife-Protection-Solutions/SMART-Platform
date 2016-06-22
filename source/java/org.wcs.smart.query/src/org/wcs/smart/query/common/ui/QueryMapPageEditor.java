@@ -180,7 +180,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 				}
 			}
 			//clear selection
-			mapViewer.getRenderManager().refresh(null);
+			if(mapViewer != null && mapViewer.getRenderManager() != null){
+				mapViewer.getRenderManager().refresh(null);
+			}
 			return Status.OK_STATUS;
 		}
     };
