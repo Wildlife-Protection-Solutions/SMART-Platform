@@ -133,7 +133,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 		
 		GeometryFactory gf = new GeometryFactory();
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
+		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(null), it.getWaypointY(null)));
 		data[1] = it.getEntityId() + "." + UuidUtils.uuidToString(it.getWaypointUuid()); //$NON-NLS-1$ 
 		for (int i = 0; i < columns.size(); i ++){
 			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));

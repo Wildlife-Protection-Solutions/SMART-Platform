@@ -524,7 +524,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		public TempConnection(Session session){
 			this.localSession = session;
 			appContext = new HashMap<Object, Object>();
-			appContext.put(SmartConnection.LOCAL_CONTEXT_VAR, Locale.getDefault());
+			appContext.put(SmartConnection.LOCALE_CONTEXT_VAR, Locale.getDefault());
 		}
 			
 		@Override

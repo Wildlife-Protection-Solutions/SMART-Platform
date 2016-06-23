@@ -29,8 +29,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -390,8 +392,9 @@ public class PatrolQueryResultItem implements IGeometryResultItem{
 	/**
 	 * @return waypoint x (longitude) position
 	 */
-	public double getWaypointX() {
-		return waypointX;
+	public double getWaypointX(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointX;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getX();
 	}
 	/**
 	 * @param waypointX waypoint y (longitude)
@@ -404,8 +407,9 @@ public class PatrolQueryResultItem implements IGeometryResultItem{
 	/**
 	 * @return the waypoint y (latitude)
 	 */
-	public double getWaypointY() {
-		return waypointY;
+	public double getWaypointY(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointY;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getY();
 	}
 	/**
 	 * @param waypointY the waypoint y (latitude)
@@ -522,10 +526,13 @@ public class PatrolQueryResultItem implements IGeometryResultItem{
 		this.waypointObserver = observer;
 	}
 
+	/**
+	 * Converts the result item to a geometry in the database projection (4326)
+	 */
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equalsIgnoreCase(WAYPOINT_GEOMCOLUMN_KEY)){
-			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
+			return gf.createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
 		}else if (columnName.equalsIgnoreCase(TRACK_GEOMCOLUMN_KEY)){
 			if (getTrack() == null || getTrack().isEmpty()){
 				return gf.createMultiLineString(new LineString[]{});

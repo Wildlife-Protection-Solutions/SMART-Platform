@@ -25,7 +25,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -182,11 +184,13 @@ public class ObservationQueryResultItem implements IGeometryResultItem{
 	public void setWaypointId(int waypointId) {
 		this.waypointId = waypointId;
 	}
+	
 	/**
 	 * @return waypoint x (longitude) position
 	 */
-	public double getWaypointX() {
-		return waypointX;
+	public double getWaypointX(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointX;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getX();
 	}
 	/**
 	 * @param waypointX waypoint y (longitude)
@@ -199,8 +203,9 @@ public class ObservationQueryResultItem implements IGeometryResultItem{
 	/**
 	 * @return the waypoint y (latitude)
 	 */
-	public double getWaypointY() {
-		return waypointY;
+	public double getWaypointY(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointY;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getY();
 	}
 	/**
 	 * @param waypointY the waypoint y (latitude)
@@ -294,7 +299,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem{
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(GEOMCOLUMN_KEY))
-			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
+			return gf.createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
 		return null;
 	}
 }

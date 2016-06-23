@@ -22,7 +22,7 @@
 package org.wcs.smart.er.query.map.geotools;
 
 import java.io.IOException;
-import java.util.Locale;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -35,6 +35,7 @@ import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Feature reader for waypoint/observation survey query.
@@ -46,8 +47,8 @@ public class SurveyFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 
 	private SimpleFeatureType ftype;
 	private IQueryResultSetIterator<? extends IResultItem> fIterator;
-	private SimpleQuery query;
-		
+	private List<QueryColumn> columns;
+	
 	/**
 	 * Creates a new feature reader.
 	 * 
@@ -55,11 +56,11 @@ public class SurveyFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	 * @param ftype the feature type
 	 */
 	public SurveyFeatureReader(SimpleQuery query,
-			SimpleFeatureType ftype) {
+			SimpleFeatureType ftype, List<QueryColumn> columns) {
 		
 		this.ftype = ftype;
 		this.fIterator = null;
-		this.query = query;
+		this.columns = columns;
 		if (query instanceof IPagedQuery){
 			try {
 				IPagedQueryResultSet cachedResults = (IPagedQueryResultSet) query.getCachedResults();
@@ -108,7 +109,7 @@ public class SurveyFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		SurveyQueryResultItem next = (SurveyQueryResultItem) this.fIterator.next();
-		SimpleFeature f = SurveyResultItemFeature.createObservationFeature(next, query.getQueryColumns(Locale.getDefault(), null), ftype);
+		SimpleFeature f = SurveyResultItemFeature.createObservationFeature(next, columns, ftype);
 		return f;
 	}
 	

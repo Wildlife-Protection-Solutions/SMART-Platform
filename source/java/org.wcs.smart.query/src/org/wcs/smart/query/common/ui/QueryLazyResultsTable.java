@@ -67,13 +67,13 @@ public abstract class QueryLazyResultsTable extends QueryResultsTable {
 				table.setInput(result);
 			}
 
-			//update projection tooltip
-			for (int i = 0; i < table.getTable().getColumnCount(); i ++){
-				if (table.getLabelProvider(i) instanceof ReprojectingQueryColumnLabelProvder){
-					table.getTable().getColumn(i).setToolTipText(  ((ReprojectingQueryColumnLabelProvder)table.getLabelProvider(i) ).getProjection().getName() ); 
+			//update tooltip
+			for(QueryTableViewerColumn t : tableViewerColumns){
+				if (t.getColumn().getTooltip() != null){
+					t.getTableColumn().getColumn().setToolTipText(t.getColumn().getTooltip());
 				}
-				
 			}
+
 		}
 	}
 

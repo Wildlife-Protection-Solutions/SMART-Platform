@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.map.geotools;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
@@ -39,6 +40,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -52,8 +54,9 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 
 	private SimpleFeatureType ftype;
 	private Iterator<?> fIterator;
-	private SimpleQuery query;
+	
 	private Session session = null;
+	private List<QueryColumn> columns;
 	
 	private boolean isWaypointMissionTrack= false;
 	/**
@@ -63,11 +66,11 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	 * @param ftype the feature type
 	 */
 	public MissionFeatureReader(SimpleQuery query,
-			SimpleFeatureType ftype) {
+			SimpleFeatureType ftype, List<QueryColumn> columns) {
 		
 		this.ftype = ftype;
 		this.fIterator = null;
-		this.query = query;
+		this.columns = columns;
 		
 		Object cachedResults;
 		try {
@@ -137,11 +140,11 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 			Object n = this.fIterator.next();
 			if (n instanceof SurveyQueryResultItem){
 				SurveyQueryResultItem next = (SurveyQueryResultItem) n;
-				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, query.getQueryColumns(Locale.getDefault(), null), ftype);
+				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, columns, ftype);
 				return f;
 			}else if (n instanceof MissionTrackResultItem){
 				MissionTrackResultItem next = (MissionTrackResultItem) n;
-				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, getSession(), query.getQueryColumns(Locale.getDefault(), null), ftype);
+				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, columns, ftype);
 				return f;
 			}
 		}

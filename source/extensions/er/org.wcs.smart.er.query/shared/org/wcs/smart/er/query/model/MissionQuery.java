@@ -123,9 +123,9 @@ public class MissionQuery extends SimpleQuery implements IPagedQuery, ISurveyQue
 			return;
 		}
 		this.surveyDesignKey = key;
-		synchronized (this) {
-			this.queryColumns = null;	
-		}
+//		synchronized (this) {
+//			this.queryColumns = null;	
+//		}
 		
 	}
 	

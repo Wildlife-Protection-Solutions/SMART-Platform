@@ -33,6 +33,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -66,8 +67,8 @@ public abstract class SimpleQuery extends StyledQuery {
 	/* transient fieldss */
 	protected QueryFilter queryFilter;	//cached copy of the parsed query
 	private DateFilter dateFilter;
-	@Transient
-	protected volatile List<QueryColumn> queryColumns = null;
+//	@Transient
+//	protected volatile List<QueryColumn> queryColumns = null;
 	
 	/**
 	 * Creates a new waypoint query with the default
@@ -114,12 +115,12 @@ public abstract class SimpleQuery extends StyledQuery {
 	
 
 	/**
-	 * Updates the visible columns based 
-	 * on the isVisible field of the associated
-	 * WaypointQueryColumn columns.
+	 * Updates the string the identifiers the visible columns and is
+	 * saved in the database, with the information from the
+	 * query columns array provided.  
 	 */
 	@Transient
-	public void updateVisibleColumns(){
+	public void updateVisibleColumns(List<QueryColumn> queryColumns){
 		StringBuilder sb = new StringBuilder();
 		boolean all = true;
 		for (QueryColumn col : queryColumns){
@@ -230,18 +231,20 @@ public abstract class SimpleQuery extends StyledQuery {
 	 * 
 	 * @param l
 	 * @param session
+	 * @param prjProvider the projection provider for reprojecting column data.  Can be null if no reprojection
+	 * to take place
 	 * @return
 	 */
 	@Transient
-	public List<QueryColumn> getQueryColumns(Locale l, Session session){
-		if (queryColumns != null) return queryColumns;
-		
-		synchronized (this) {
-			if (queryColumns != null) return queryColumns;
-			
+	public List<QueryColumn> computeQueryColumns(Locale l, Session session, IProjectionProvider prjProvider){
+//		if (queryColumns != null) return queryColumns;
+//		
+//		synchronized (this) {
+//			if (queryColumns != null) return queryColumns;
+//			
 			QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, session);
 			
-			queryColumns = new ArrayList<QueryColumn>();
+			List<QueryColumn> queryColumns = new ArrayList<QueryColumn>();
 			HashSet<String> visible = null;
 			if (visibleColumns != null){
 				String[] bits = visibleColumns.split(COLUMN_SPLITTER);
@@ -259,11 +262,14 @@ public abstract class SimpleQuery extends StyledQuery {
 				}else{
 					cols[i].setVisible(false);
 				}
+				cols[i].setProjectionProvider(prjProvider);
 			}
-		}
+//		}
 		return queryColumns;
 		
 	}
+	
+	
 	
 	@Transient
 	protected abstract Class<? extends IQueryColumnProvider> getColumnProviderClass();

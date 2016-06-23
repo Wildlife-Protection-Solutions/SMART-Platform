@@ -53,7 +53,7 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	public static final String PATROL_TYPE = "Patrol";  //$NON-NLS-1$
 	
 	private PatrolQuery query;
-	
+	private List<QueryColumn> queryColumns;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	/**
@@ -87,7 +87,8 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	 */
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new PatrolQueryFeatureReader(this.query, getSchema(typeName));
+		this.queryColumns = query.computeQueryColumns(Locale.getDefault(),  null, null);
+		return new PatrolQueryFeatureReader(this.query, getSchema(typeName), queryColumns);
 	}
 
 	
@@ -126,16 +127,16 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createPatrolSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + PATROL_TYPE, getFeatureSchemaDef(query.getQueryColumns(Locale.getDefault(), null), true)); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType("smart." + PATROL_TYPE, getFeatureSchemaDef(queryColumns, true, false)); //$NON-NLS-1$
 		return type;
 	}
 	
 	
-	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){ 
+	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){ 
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:MultiLineString:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
 		
 		return sb.toString();
 	}

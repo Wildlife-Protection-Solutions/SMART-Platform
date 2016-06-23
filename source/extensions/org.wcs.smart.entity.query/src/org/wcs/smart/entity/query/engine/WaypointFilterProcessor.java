@@ -41,6 +41,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.engine.visitor.AreaFilterVisitor;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
+import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -351,7 +352,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				if ( filter instanceof AttributeFilter ||
 					filter instanceof CategoryFilter  ||	
 					filter instanceof CategoryAttributeFilter ||
-					filter instanceof EntityAttributeFilter){						
+					filter instanceof EntityAttributeFilter	){						
 					
 					String colName = engine.createTempTableName();
 					engine.filterTables.put(filter, colName);

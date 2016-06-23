@@ -22,7 +22,7 @@
 package org.wcs.smart.entity.query.map.geotools;
 
 import java.io.IOException;
-import java.util.Locale;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -35,6 +35,7 @@ import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Feature reader for waypoint/observation query.
@@ -47,7 +48,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	private SimpleFeatureType ftype;
 	private IQueryResultSetIterator<? extends IResultItem> fIterator;
 	private SimpleQuery query;
-		
+	private List<QueryColumn> columns;
 	/**
 	 * Creates a new feature reader.
 	 * 
@@ -55,11 +56,11 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 * @param ftype the feature type
 	 */
 	public QueryFeatureReader(SimpleQuery query,
-			SimpleFeatureType ftype) {
+			SimpleFeatureType ftype, List<QueryColumn> columns) {
 		
 		this.ftype = ftype;
 		this.fIterator = null;
-		this.query = query;
+		this.columns = columns;
 		if (query instanceof IPagedQuery){
 			try {
 				Object cachedResults = query.getCachedResults();
@@ -108,7 +109,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		EntityQueryResultItem next = (EntityQueryResultItem) this.fIterator.next();
-		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, query.getQueryColumns(Locale.getDefault(), null), ftype);
+		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, columns, ftype);
 		return f;
 	}
 	

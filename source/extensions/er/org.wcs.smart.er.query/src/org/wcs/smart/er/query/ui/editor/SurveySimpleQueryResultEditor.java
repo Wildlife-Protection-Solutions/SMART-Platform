@@ -73,7 +73,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 			
 			//update table columns
 			getQueryResultsTable().clearColumns();
-			getQueryResultsTable().initQuery(getQueryInternal());
+			getQueryResultsTable().initQuery(getQueryInternal(), SurveySimpleQueryResultEditor.this);
 			
 			//update layer
 			page2.reset(false);

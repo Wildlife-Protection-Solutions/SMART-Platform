@@ -3,6 +3,7 @@ package org.wcs.smart.query.common.engine;
 import java.sql.SQLException;
 
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public interface IQueryResult {
 
@@ -13,7 +14,8 @@ public interface IQueryResult {
 	
 	/**
 	 * 
-	 * @return ture if result set has been disposed of
+	 * @return true if result set has been disposed of
 	 */
 	public boolean isDisposed();
+	
 }

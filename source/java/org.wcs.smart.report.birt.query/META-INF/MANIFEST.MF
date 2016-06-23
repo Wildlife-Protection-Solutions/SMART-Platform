@@ -7,7 +7,8 @@ Bundle-Activator: org.wcs.smart.report.birt.query.Activator
 Require-Bundle: org.wcs.smart,
  org.wcs.smart.query,
  org.wcs.smart.report,
- org.eclipse.datatools.connectivity.oda.design.ui
+ org.eclipse.datatools.connectivity.oda.design.ui,
+ org.wcs.smart.observation
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.data.oda.smart.impl,

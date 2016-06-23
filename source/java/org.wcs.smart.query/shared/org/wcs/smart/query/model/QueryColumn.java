@@ -25,9 +25,11 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 
@@ -71,7 +73,7 @@ public abstract class QueryColumn implements Cloneable{
 	private ColumnType type;
 	private boolean isVisible = true;
 	
-	private IProjectionProvider prjProvider;
+	protected IProjectionProvider prjProvider;
 	
 	/**
 	 * Creates a new query column 
@@ -89,10 +91,24 @@ public abstract class QueryColumn implements Cloneable{
 		this.prjProvider = prjProvider;
 	}
 	
-	public IProjectionProvider getProjectionProvider(){
-		return this.prjProvider;
+	protected CoordinateReferenceSystem getProjection(){
+		if (prjProvider == null) return null;
+		if (prjProvider.getProjection() == null) return null;
+		return prjProvider.getProjection().getParsedCoordinateReferenceSystem();
 	}
 	
+	protected String getProjectionTooltip(){
+		if (prjProvider != null) return prjProvider.getProjection().getName();
+		return SmartDB.DATABASE_CRS.getName().toString();
+	}
+	
+	/**
+	 * 
+	 * @return Query column tooltip.  Null if not applicable
+	 */
+	public String getTooltip(){
+		return null;
+	}
 	
 	/**
 	 * A unique key for the column.

@@ -61,7 +61,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 	}
 	
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
-		return PatrolTableColumn.getLabelProvider(column, allColumns, this);
+		return PatrolTableColumn.getLabelProvider(column, allColumns);
 	}
 
 	@Override

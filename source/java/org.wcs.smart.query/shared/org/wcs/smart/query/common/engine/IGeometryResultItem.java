@@ -33,7 +33,8 @@ public interface IGeometryResultItem extends IResultItem{
 	
 	/**
 	 * 
-	 * @return the geometry associated with the result item
+	 * @return The geometry associated with the result item.  This
+	 * geometry should always be in the default (4326) projection.
 	 */
 	public Geometry asGeometry(String columnName);
 

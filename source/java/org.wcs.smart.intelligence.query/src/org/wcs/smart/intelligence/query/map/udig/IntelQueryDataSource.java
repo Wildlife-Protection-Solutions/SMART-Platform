@@ -53,6 +53,7 @@ public class IntelQueryDataSource extends AbstractDataStore{
 	public static final String INTEL_TYPE = "Intelligence";  //$NON-NLS-1$
 	
 	private IntelligenceRecordQuery query;
+	private List<QueryColumn> cachedColumns;
 	
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
@@ -87,7 +88,7 @@ public class IntelQueryDataSource extends AbstractDataStore{
 	 */
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new IntelQueryFeatureReader(this.query, getSchema(typeName));
+		return new IntelQueryFeatureReader(this.query, getSchema(typeName), cachedColumns);
 	}
 
 	/**
@@ -107,7 +108,8 @@ public class IntelQueryDataSource extends AbstractDataStore{
 		if (type == null){
 			try {
 				if (typeName.equals(INTEL_TYPE)) {
-					type = createIntelligenceRecordSchema(query.getQueryColumns(Locale.getDefault(), null));
+					cachedColumns = query.computeQueryColumns(Locale.getDefault(), null, null);
+					type = createIntelligenceRecordSchema(cachedColumns, false);
 				} 
 			}catch(SchemaException ex){
 				throw new IOException(Messages.IntelQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
@@ -125,8 +127,8 @@ public class IntelQueryDataSource extends AbstractDataStore{
 	 * 
 	 * @throws SchemaException
 	 */
-	public static SimpleFeatureType createIntelligenceRecordSchema(List<QueryColumn> columns) throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + INTEL_TYPE, getFeatureSchemaDef(columns, true)); //$NON-NLS-1$
+	public static SimpleFeatureType createIntelligenceRecordSchema(List<QueryColumn> columns, boolean forShape) throws SchemaException{
+		SimpleFeatureType type =  DataUtilities.createType("smart." + INTEL_TYPE, getFeatureSchemaDef(columns, true, forShape)); //$NON-NLS-1$
 		return type;
 	}
 	
@@ -134,11 +136,11 @@ public class IntelQueryDataSource extends AbstractDataStore{
 	/**
 	 * Create feature definition string from query columns.
 	 */
-	private static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
+	private static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:MultiPoint:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
 		return sb.toString();
 	}
 	

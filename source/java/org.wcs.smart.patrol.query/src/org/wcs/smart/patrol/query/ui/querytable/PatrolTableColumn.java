@@ -24,12 +24,10 @@ package org.wcs.smart.patrol.query.ui.querytable;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
-import org.wcs.smart.query.common.ui.ReprojectingQueryColumnLabelProvder;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -40,22 +38,8 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class PatrolTableColumn {
 
-	public static ColumnLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns, IProjectionProvider prjProvider){
+	public static ColumnLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
 		if (column instanceof FixedQueryColumn){
-			if (column.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-				for (QueryColumn qc : allColumns){
-					if (qc.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-						return new ReprojectingQueryColumnLabelProvder(column,column,qc, prjProvider);
-					}
-				}
-			}
-			if (column.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-				for (QueryColumn qc : allColumns){
-					if (qc.getKey().equalsIgnoreCase(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-						return new ReprojectingQueryColumnLabelProvder(column,qc,column, prjProvider);
-					}
-				}
-			}
 			return new QueryColumnLabelProvider(column);
 		}else if (column instanceof PatrolAttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);

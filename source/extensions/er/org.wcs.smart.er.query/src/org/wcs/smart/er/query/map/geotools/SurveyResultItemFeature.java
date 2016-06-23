@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
@@ -113,8 +112,7 @@ public class SurveyResultItemFeature {
 	 * @param ftype the feature type 
 	 * @return created feature 
 	 */
-	public static SimpleFeature createTrackFeature(MissionTrackResultItem it, Session session,
-			List<QueryColumn> columns, SimpleFeatureType ftype){
+	public static SimpleFeature createTrackFeature(MissionTrackResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
 		List<Object> data = new ArrayList<Object>();
 		
 		

@@ -44,11 +44,10 @@ import com.vividsolutions.jts.geom.Point;
 public class ReprojectUtils {
 
 	//static map for looking up projections
-	//based on wkt string so doesn't have to continually parse projection
-	/**
-	 * This map should be cleared by any functions with use this class.
-	 */
-	public static final HashMap<String, MathTransform> transformMap = new HashMap<String, MathTransform>();
+	//based on wkt string or target crs.
+	//assumption is the source CRS is always SMART_CRS
+	private static final HashMap<Object, MathTransform> transformMap = new HashMap<Object, MathTransform>();
+	
 	
 	/**
 	 * Computes the tile id of a given coordinate in long/lat (4326);
@@ -134,7 +133,12 @@ public class ReprojectUtils {
 			CoordinateReferenceSystem targetCrs = target;
 			
 			if (!CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, targetCrs)){
-				MathTransform transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, targetCrs);
+				
+				MathTransform transform = transformMap.get(targetCrs);
+				if (transform == null){
+					transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, targetCrs);
+					transformMap.put(targetCrs, transform);
+				}
 				Point p = (Point) JTS.transform(point, transform);
 				return p;
 			}

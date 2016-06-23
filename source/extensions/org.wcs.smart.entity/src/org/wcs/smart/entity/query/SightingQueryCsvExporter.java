@@ -22,12 +22,18 @@
 package org.wcs.smart.entity.query;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.importexport.CsvSimpleQueryExporter;
+import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * CSV Exporter for sightings query
@@ -57,8 +63,28 @@ public class SightingQueryCsvExporter extends CsvSimpleQueryExporter {
 				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
 			}catch(Exception ex){}
 		}
+		//projection
+		IProjectionProvider provider = null;
+		if (parameters.get(IQueryExporter.PROJECTION_PARAM_KEY) != null){
+			final Projection prj = (Projection) parameters.get(IQueryExporter.PROJECTION_PARAM_KEY);
+			provider = new IProjectionProvider() {
+				@Override
+				public Projection getProjection() {
+					return prj;
+				}
+			};
+		}
+				
 		EntitySightingQuery squery = (EntitySightingQuery) query;
-		super.setData((SightingPagedResults)result, squery.getQueryColumns(), file);
+		List<QueryColumn> cols = squery.getQueryColumns();
+		List<QueryColumn> cols2 = new ArrayList<QueryColumn>();
+		for (QueryColumn c : cols){
+			QueryColumn clone = c.clone();
+			clone.setProjectionProvider(provider);
+			cols2.add(clone);
+		}
+		
+		super.setData((SightingPagedResults)result, cols2, file);
 		super.export(monitor);
 	}
 	

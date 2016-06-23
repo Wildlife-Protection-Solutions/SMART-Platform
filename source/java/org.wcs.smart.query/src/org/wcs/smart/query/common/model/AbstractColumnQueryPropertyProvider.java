@@ -125,17 +125,16 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 				return super.getText(element);
 			}
 		});
-		
-		List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null);
-		columnViewer.setInput(cols.toArray());
+
+		//we don't care about projection here; this is just for visibility
+		List<QueryColumn> cols = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, null);
+		columnViewer.setInput(cols);
 		columnViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				fireChangeMade();
 			}
 		});
-		
-
 		
 		for (QueryColumn col : cols){
 			columnViewer.setChecked(col, col.isVisible());
@@ -168,11 +167,11 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	 */
 	@Override
 	public String save(Query query, Session session){
-		List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), session);
+		List<QueryColumn> cols = (List<QueryColumn>)columnViewer.getInput();
 		for (QueryColumn col : cols){
 			col.setVisible( columnViewer.getChecked(col) );
 		}
-		((SimpleQuery) query).updateVisibleColumns();
+		((SimpleQuery) query).updateVisibleColumns(cols);
 		return null;
 	}
 }

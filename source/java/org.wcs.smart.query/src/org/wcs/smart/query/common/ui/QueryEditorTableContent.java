@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.common.ui;
 
-import java.util.Locale;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -93,8 +92,8 @@ public class QueryEditorTableContent {
 	public void initValues(SimpleQuery query) {
 		if (stackComposite.isDisposed()) return;
 		setQueryName(query);
-		resultsTable.initQuery(query);
-		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null));
+		resultsTable.initQuery(query, editor);
+//		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null, editor));
 	}
 
 	/**

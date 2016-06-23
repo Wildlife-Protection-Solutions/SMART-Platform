@@ -117,23 +117,13 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			runQueryJob.setName(Messages.QueryResultsEditor_RunQueryJobName + getQuery().getName());
 			if (reloadPrj){
 				Session session = HibernateManager.openSession();
+				
 				try{			
-					prj = ObservationHibernateManager.getCurrentViewProjection(session);
+					loadProjection(session);
 				}finally{
 					session.close();
 				}
-				try{
-					if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
-						prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
-					}
-				}catch (Exception ex){
-					prj = null;
-				}
-				if (prj == null){
-					prj = new Projection();
-					prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-					prj.setName(SmartDB.DATABASE_CRS.getName().toString());
-				}
+				
 				reloadPrj = false;
 			}
 			
@@ -210,19 +200,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				prj = ObservationHibernateManager.getCurrentViewProjection(session);
-				try{
-					if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
-						prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
-					}
-				}catch (Exception ex){
-					prj = null;
-				}
-				if (prj == null){
-					prj = new Projection();
-					prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-					prj.setName(SmartDB.DATABASE_CRS.getName().toString());
-				}
+				loadProjection(session);
 				Query squery = (SimpleQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
 				query = new QueryProxy(squery);
 				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
@@ -262,6 +240,21 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 
 	
+	private void loadProjection(Session session){
+		prj = ObservationHibernateManager.getCurrentViewProjection(session);
+		try{
+			if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
+				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+			}
+		}catch (Exception ex){
+			prj = null;
+		}
+		if (prj == null){
+			prj = new Projection();
+			prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+			prj.setName(SmartDB.DATABASE_CRS.getName().toString());
+		}
+	}
 	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#dispose()
 	 */
@@ -293,7 +286,12 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				//create a new query
 				this.query = new QueryProxy(createNewQuery(input2.getType()));
 				setDirty(false);
-				
+				Session s = HibernateManager.openSession();
+				try{
+					loadProjection(s);
+				}finally{
+					s.close();
+				}
 			}else{
 				loadQueryLoad.schedule();
 			}
@@ -390,7 +388,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					SimpleQuery q = getQueryInternal();
-					q.getQueryColumns(Locale.getDefault(), null);
+//					q.getQueryColumns(Locale.getDefault(), null, QueryResultsEditor.this);
 					
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 

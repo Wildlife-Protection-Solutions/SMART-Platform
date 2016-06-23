@@ -25,8 +25,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -210,12 +212,15 @@ public class EntityQueryResultItem implements IGeometryResultItem{
 	public void setWaypointId(int waypointId) {
 		this.waypointId = waypointId;
 	}
+	
 	/**
 	 * @return waypoint x (longitude) position
 	 */
-	public double getWaypointX() {
-		return waypointX;
+	public double getWaypointX(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointX;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getX();
 	}
+	
 	/**
 	 * @param waypointX waypoint y (longitude)
 	 */
@@ -225,10 +230,11 @@ public class EntityQueryResultItem implements IGeometryResultItem{
 	
 	
 	/**
-	 * @return the waypoint y (latitude)
+	 * @return waypoint x (longitude) position
 	 */
-	public double getWaypointY() {
-		return waypointY;
+	public double getWaypointY(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointY;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getY();
 	}
 	/**
 	 * @param waypointY the waypoint y (latitude)
@@ -322,7 +328,7 @@ public class EntityQueryResultItem implements IGeometryResultItem{
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(WAYPOINT_GEOM_COLUMNKEY)){
-			return gf.createPoint(new Coordinate(getWaypointX(), getWaypointY()));
+			return gf.createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
 		}
 		return null;
 	}

@@ -124,9 +124,9 @@ public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurv
 			return;
 		}
 		this.surveyDesignKey = key;
-		synchronized (this) {
-			this.queryColumns = null;	
-		}
+//		synchronized (this) {
+//			this.queryColumns = null;	
+//		}
 		
 	}
 	

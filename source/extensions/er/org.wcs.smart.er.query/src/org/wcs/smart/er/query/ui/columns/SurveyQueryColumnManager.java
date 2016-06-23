@@ -56,7 +56,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
-import org.wcs.smart.query.common.ui.ReprojectingQueryColumnLabelProvder;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -314,20 +313,6 @@ public class SurveyQueryColumnManager {
 	 * @return
 	 */
 	public static ColumnLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns, IProjectionProvider prjProvider){
-		if (column.getKey().equalsIgnoreCase(SurveyQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-			for (QueryColumn qc : allColumns){
-				if (qc.getKey().equalsIgnoreCase(SurveyQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-					return new ReprojectingQueryColumnLabelProvder(column,column,qc, prjProvider);
-				}
-			}
-		}
-		if (column.getKey().equalsIgnoreCase(SurveyQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-			for (QueryColumn qc : allColumns){
-				if (qc.getKey().equalsIgnoreCase(SurveyQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-					return new ReprojectingQueryColumnLabelProvder(column,qc,column, prjProvider);
-				}
-			}
-		}
 		return new QueryColumnLabelProvider(column);
 	}
 	

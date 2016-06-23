@@ -90,7 +90,14 @@ public class FixedQueryColumn extends QueryColumn {
 		this.l = l;
 	}
 
-
+	@Override
+	public String getTooltip(){
+		if (column == FixedColumns.WAYPOINT_X || column == FixedColumns.WAYPOINT_Y){
+			return getProjectionTooltip();
+		}
+		return null;
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
 	 */
@@ -115,9 +122,9 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_TIME:
 				return new Time(item.getWpDateTime().getTime());
 			case WAYPOINT_X:
-				return item.getWaypointX();
+				return item.getWaypointX(getProjection());
 			case WAYPOINT_Y:
-				return item.getWaypointY();
+				return item.getWaypointY(getProjection());
 			case CA_ID:
 				return item.getConservationAreaId();
 			case CA_NAME:

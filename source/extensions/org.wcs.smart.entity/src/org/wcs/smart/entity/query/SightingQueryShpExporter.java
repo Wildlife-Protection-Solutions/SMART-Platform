@@ -22,19 +22,28 @@
 package org.wcs.smart.entity.query;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.entity.map.EntityQueryDataSource;
 import org.wcs.smart.entity.map.EntityQueryDataSourceFeatureReader;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Shapefile exporter for sighting query
@@ -49,15 +58,15 @@ public class SightingQueryShpExporter extends ShapeQueryExporter {
 	}
 
 	@Override
-	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType)
+	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type)
 			throws Exception {
-		return EntityQueryDataSourceFeatureReader.createSightingResult((SightingResultItem)it, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
+		return EntityQueryDataSourceFeatureReader.createSightingResult((SightingResultItem)it, queryColumns, type);
 	}
 
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType)
 			throws Exception {
-		return EntityQueryDataSource.createQuerySchema(queryColumns, false);
+		return EntityQueryDataSource.createQuerySchema(queryColumns, false, true);
 	}
 	
 	/* (non-Javadoc)
@@ -68,8 +77,27 @@ public class SightingQueryShpExporter extends ShapeQueryExporter {
 			HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 	
 		this.query = ((EntitySightingQuery)query);
-		super.setData((IPagedQueryResultSet)results, 
-				((EntitySightingQuery)query).getQueryColumns(), file);
+		
+		outputPrj = (Projection) parameters.get(IQueryExporter.PROJECTION_PARAM_KEY);
+		IProjectionProvider provider = new IProjectionProvider() {
+			@Override
+			public Projection getProjection() {
+				return outputPrj;
+			}
+		};
+		List<QueryColumn> columns = ((EntitySightingQuery)query).getQueryColumns();
+		List<QueryColumn> cols2 = new ArrayList<QueryColumn>();
+		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
+			QueryColumn column = (QueryColumn) iterator.next();
+			if (column.isVisible()){
+				QueryColumn clone = column.clone();
+				clone.setProjectionProvider(provider);
+				cols2.add(clone);
+				
+			}
+		}
+		
+		super.setData((IPagedQueryResultSet)results, cols2, file);
 		super.export(monitor);
 		
 	}

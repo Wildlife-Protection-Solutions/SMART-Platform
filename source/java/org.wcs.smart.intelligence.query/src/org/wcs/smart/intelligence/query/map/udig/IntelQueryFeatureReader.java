@@ -24,7 +24,6 @@ package org.wcs.smart.intelligence.query.map.udig;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -62,8 +61,8 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 	 * @param ftype the feature type
 	 */
 	public IntelQueryFeatureReader(IntelligenceRecordQuery query,
-			SimpleFeatureType ftype) {
-		cols = query.getQueryColumns(Locale.getDefault(), null);
+			SimpleFeatureType ftype, List<QueryColumn> cols) {
+		this.cols = cols;
 		this.ftype = ftype;
 		this.fIterator = null;
 		

@@ -46,7 +46,6 @@ import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
 import org.wcs.smart.query.common.ui.QueryTableViewerColumn;
-import org.wcs.smart.query.common.ui.ReprojectingQueryColumnLabelProvder;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
@@ -66,7 +65,7 @@ public class SightingTable {
 	private List<QueryTableViewerColumn> tableColumns = null;
 	private IProjectionProvider prjProvider;
 	
-	public SightingTable(Composite composite, IProjectionProvider parentEditor){
+	public SightingTable(Composite composite, IProjectionProvider prjProvider){
 		sightingsTable = new TableViewer(composite, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		
 		sightingsTable.getTable().setHeaderVisible(true);
@@ -74,9 +73,7 @@ public class SightingTable {
 		sorter = new QueryLazyResultsContentProvider(sightingsTable);
 		sightingsTable.setContentProvider(sorter);
 		sightingsTable.setItemCount(0);
-		
-		this.prjProvider = parentEditor;
-		
+		this.prjProvider = prjProvider;
 	}
 	
 	/**
@@ -125,25 +122,9 @@ public class SightingTable {
 		currentCols = getQueryColumns(et);
 		
 		//find the x & y columns so they can be reprojected as required
-		QueryColumn xCol = null;
-		QueryColumn yCol = null;
-		for (final QueryColumn col : currentCols){
-			if (col.getKey().equals(SightingQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-				xCol = col;
-			}
-			if (col.getKey().equals(SightingQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-				yCol = col;
-			}
-		}
-		
 		ColumnViewerToolTipSupport.enableFor(sightingsTable);
 		for (QueryColumn col : currentCols){
-			if ( (col == xCol || col== yCol) && prjProvider.getProjection() != null && prjProvider.getProjection().getParsedCoordinateReferenceSystem() != null){
-				tableColumns.add(new QueryTableViewerColumn(sightingsTable,col, sorter, new ReprojectingQueryColumnLabelProvder(col, xCol, yCol, prjProvider)));				
-			}else{
-				tableColumns.add(new QueryTableViewerColumn(sightingsTable,col, sorter, new QueryColumnLabelProvider(col)));
-			}
-			
+			tableColumns.add(new QueryTableViewerColumn(sightingsTable,col, sorter, new QueryColumnLabelProvider(col)));		
 		}
 		
 		sightingsTable.getTable().setRedraw(true);
@@ -194,6 +175,10 @@ public class SightingTable {
 						cols.add(column);	
 					}	
 				}
+			}
+			if (fixed == FixedColumns.WAYPOINT_X ||
+					fixed == FixedColumns.WAYPOINT_Y){
+				column.setProjectionProvider(prjProvider);
 			}
 		}
 		

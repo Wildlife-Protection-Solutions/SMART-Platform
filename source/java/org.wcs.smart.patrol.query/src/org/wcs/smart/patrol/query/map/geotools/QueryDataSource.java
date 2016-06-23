@@ -53,6 +53,7 @@ public class QueryDataSource extends AbstractDataStore{
 	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
 	
 	private SimpleQuery query;
+	private List<QueryColumn> columns;
 	
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
@@ -101,7 +102,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 */
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new QueryFeatureReader(this.query, getSchema(typeName));
+		return new QueryFeatureReader(this.query, getSchema(typeName), columns);
 	}
 
 	
@@ -140,20 +141,17 @@ public class QueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(query.getQueryColumns(Locale.getDefault(), null), true)); //$NON-NLS-1$
+		this.columns = query.computeQueryColumns(Locale.getDefault(),  null, null);
+		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(columns, true, false)); //$NON-NLS-1$
 		return type;
 	}
 	
 	
-	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
-		
+	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){
 		StringBuilder sb = new StringBuilder();
-		
 		sb.append("the_geom:Point:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
-		
-		
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
 		return sb.toString();
 		
 	}

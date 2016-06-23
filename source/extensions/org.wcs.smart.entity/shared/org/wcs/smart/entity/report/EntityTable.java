@@ -36,6 +36,7 @@ import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -186,9 +187,19 @@ public class EntityTable extends SmartBirtTable {
 		}
 		if (et.getType() == EntityType.Type.FIXED){
 			if (index == 2){
-				return e.getX();
+				try{
+					return ReprojectUtils.transform(e.getX(), e.getY(), connection.getProjectionProvider().getProjection().getParsedCoordinateReferenceSystem()).getX();
+				}catch(Exception ex){
+					//TODO: log me
+					return e.getX();
+				}
 			}else if (index == 3){
-				return e.getY();
+				try{
+					return ReprojectUtils.transform(e.getX(), e.getY(), connection.getProjectionProvider().getProjection().getParsedCoordinateReferenceSystem()).getY();
+				}catch(Exception ex){
+					//TODO: log me
+					return e.getY();
+				}
 			}else if ((index-4) == et.getAttributes().size() ){
 				if (e.getX() == null || e.getY() == null) return null;
 				return gf.createPoint(new Coordinate(e.getX(), e.getY()));

@@ -101,8 +101,8 @@ public class PatrolQueryEditorTableContent {
 	 */
 	public void initValues(PatrolQuery query) {
 		updateName(query);
-		resultsTable.initQuery(query);
-		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null));
+		resultsTable.initQuery(query, editor);
+//		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null, editor));
 	}
 
 	/**
@@ -327,7 +327,7 @@ public class PatrolQueryEditorTableContent {
 		resultsTable = new QueryResultsTable(){
 			@Override
 			public CellLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
-				return PatrolTableColumn.getLabelProvider(column, allColumns, PatrolQueryEditorTableContent.this.editor);
+				return PatrolTableColumn.getLabelProvider(column, allColumns);
 			}
 		};
 

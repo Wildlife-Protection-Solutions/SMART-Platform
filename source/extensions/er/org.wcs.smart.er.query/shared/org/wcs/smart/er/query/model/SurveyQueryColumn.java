@@ -108,6 +108,13 @@ public class SurveyQueryColumn extends QueryColumn {
 		this.l = l;
 	}
 
+	@Override
+	public String getTooltip(){
+		if (column == FixedColumns.WAYPOINT_X || column == FixedColumns.WAYPOINT_Y){
+			return getProjectionTooltip();
+		}
+		return null;
+	}
 
 	/**
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
@@ -132,8 +139,8 @@ public class SurveyQueryColumn extends QueryColumn {
 				case WAYPOINT_ID: return item.getWaypointId();
 				case WAYPOINT_DATE: return item.getWaypointDateTime();
 				case WAYPOINT_TIME: return item.getWaypointDateTime(); 
-				case WAYPOINT_X: return item.getWaypointX(); 
-				case WAYPOINT_Y: return item.getWaypointY(); 
+				case WAYPOINT_X: return item.getWaypointX(getProjection()); 
+				case WAYPOINT_Y: return item.getWaypointY(getProjection()); 
 				case WAYPOINT_DIRECTION: return item.getWaypointDirection(); 
 				case WAYPOINT_DISTANCE: return item.getWaypointDistance(); 
 				case WAYPOINT_COMMENT: return item.getWaypointComment(); 

@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,13 +40,15 @@ import org.geotools.data.FileDataStoreFactorySpi;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
@@ -58,6 +61,7 @@ import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -70,10 +74,12 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public abstract class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExporter{
 
-    protected DataStore shapefile = null;    
     protected ArrayList<SimpleFeature> features = null;
     protected Query query;
-    protected CoordinateReferenceSystem crs;
+    protected Projection outputPrj;
+    
+    private IQueryType cachedQueryType;
+    protected SimpleFeatureType cachedFeatureType;
     
     /**
      * Creates new shapefile exporter
@@ -98,17 +104,10 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 */
 	@Override
 	protected void init() throws Exception {
-		URL shpFileURL = URLUtils.fileToURL(this.outputFile);
-		
-		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
-        Map<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(ShapefileDataStoreFactory.URLP.key, shpFileURL);
-		
-		shapefile = factory.createNewDataStore(params);
-		SimpleFeatureType type = createSchema(QueryTypeManager.INSTANCE.findQueryType(this.query.getTypeKey()));
-		
-		shapefile.createSchema(type);
+		cachedQueryType = QueryTypeManager.INSTANCE.findQueryType(this.query.getTypeKey());
 		features = new ArrayList<SimpleFeature>();
+		
+		cachedFeatureType = createSchema(cachedQueryType);
 	}
 
 	/**
@@ -116,7 +115,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 */
 	@Override
 	protected void writeRow(IResultItem row) throws Exception {
-		features.add(createFeature(row, QueryTypeManager.INSTANCE.findQueryType(this.query.getTypeKey())));
+		features.add(createFeature(row, cachedQueryType, cachedFeatureType));
 	}
 
 	/**
@@ -126,18 +125,31 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	@Override
 	protected void finish() throws Exception {
 		//TODO: sort out schema crs - that will likely be wrong
-        MathTransform transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, crs, true);
-        
+		
+		URL shpFileURL = URLUtils.fileToURL(this.outputFile);
+		
+		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
+        Map<String, Serializable> params = new HashMap<String, Serializable>();
+		params.put(ShapefileDataStoreFactory.URLP.key, shpFileURL);
+		
+		DataStore shapefile = factory.createNewDataStore(params);
+		
+		//retype 
 		List<SimpleFeature> reprojected = new ArrayList<SimpleFeature>();
-		for (SimpleFeature f : features){
-			if (CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS, crs)){
-				reprojected.add(f);
-			}else{
+		if (outputPrj == null || CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS, outputPrj.getParsedCoordinateReferenceSystem())){
+			reprojected = features;
+			shapefile.createSchema(cachedFeatureType);
+		}else{
+			SimpleFeatureType reprojectedType = SimpleFeatureTypeBuilder.retype(cachedFeatureType, outputPrj.getParsedCoordinateReferenceSystem());
+			shapefile.createSchema(reprojectedType);
+			MathTransform transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, outputPrj.getParsedCoordinateReferenceSystem(), true);
+			for (SimpleFeature f : features){
 				SimpleFeature copy = SimpleFeatureBuilder.copy(f);
 				copy.setDefaultGeometry(JTS.transform((Geometry)f.getDefaultGeometry(), transform));
-				reprojected.add(f);
+				reprojected.add(copy);
 			}
 		}
+		
 		FeatureStore<SimpleFeatureType, SimpleFeature> fs = 
 				(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource(shapefile.getTypeNames()[0]);
 		fs.setTransaction(new DefaultTransaction());
@@ -174,7 +186,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 * @param it
 	 * @return
 	 */
-	protected abstract SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception;
+	protected abstract SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception;
 	
 	/**
 	 * Creates the feature type
@@ -186,14 +198,28 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	@Override
 	public void export(Query query, IQueryResult results, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		this.query = ((SimpleQuery)query);
-		crs = (CoordinateReferenceSystem) parameters.get(IQueryExporter.PROJECTION_PARAM_KEY);
+		outputPrj = (Projection) parameters.get(IQueryExporter.PROJECTION_PARAM_KEY);
+		IProjectionProvider provider = new IProjectionProvider() {
+			@Override
+			public Projection getProjection() {
+				return outputPrj;
+			}
+		};
+		List<QueryColumn> columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
+			QueryColumn column = (QueryColumn) iterator.next();
+			if (!column.isVisible()){
+				iterator.remove();
+			}
+		}
 		
+		//get all data in default projection and reproject when we write out features
 		if (results instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet)results, ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
+			super.setData((IPagedQueryResultSet)results, columns, file);
 		}else if (results instanceof MemoryQueryResult){
-			super.setData(((MemoryQueryResult)results).getData(), ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
+			super.setData(((MemoryQueryResult)results).getData(), columns, file);
 		}else if (results instanceof GridQueryResult){
-			super.setData(((GridQueryResult)results).getData(), ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
+			super.setData(((GridQueryResult)results).getData(), columns, file);
 		}
 		super.export(monitor);
 		

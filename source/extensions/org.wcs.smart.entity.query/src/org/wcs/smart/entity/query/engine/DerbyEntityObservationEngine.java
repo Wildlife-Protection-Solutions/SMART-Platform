@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
@@ -42,6 +43,7 @@ import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
+import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -52,6 +54,7 @@ import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -387,6 +390,8 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 			public void visit(IFilter filter) {
 				if (filter instanceof EntityAttributeFilter){
 					entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+				}else if (filter instanceof EntityTypeFilter){
+					entityTypes.add(((EntityTypeFilter) filter).getEntityTypeKey());
 				}
 			}
 		});

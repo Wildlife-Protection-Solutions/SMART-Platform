@@ -48,8 +48,6 @@ import org.wcs.smart.query.model.Query;
  */
 public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 
-	private Session session = null;
-	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.export.IQueryExporter#canExport(org.wcs.smart.query.model.Query)
 	 */
@@ -65,14 +63,14 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	}
 
 	@Override
-	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
+	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception{
 		if (queryType.getKey().equals(MissionQuery.KEY)){
-			return SurveyResultItemFeature.createTrackFeature((SurveyQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
+			return SurveyResultItemFeature.createTrackFeature((SurveyQueryResultItem)it,  queryColumns, type);
 		}else if ( query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
 				    query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
-			return SurveyResultItemFeature.createObservationFeature((SurveyQueryResultItem)it, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
+			return SurveyResultItemFeature.createObservationFeature((SurveyQueryResultItem)it, queryColumns, type);
 		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
-			return SurveyResultItemFeature.createTrackFeature((MissionTrackResultItem)it, session, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
+			return SurveyResultItemFeature.createTrackFeature((MissionTrackResultItem)it, queryColumns, type);
 		}
 		return null;
 	}
@@ -80,13 +78,13 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
 		if (queryType.getKey().equals(MissionQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}else if ( query.getTypeKey().equals(SurveyObservationQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}else if (query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}
 		return null;
 		
@@ -101,7 +99,6 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	 */
 	protected void init() throws Exception{
 		super.init();
-		session = HibernateManager.openSession();
 	}
 	
 	/**
@@ -111,7 +108,6 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	 */
 	protected void finish() throws Exception{
 		super.finish();
-		session.close();
 	}
 }
 

@@ -39,6 +39,7 @@ import org.wcs.smart.entity.query.model.columns.EtAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EtCategoryQueryColumn;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
+import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -97,6 +98,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet
 				if (filter instanceof EntityAttributeFilter) {
 					entityTypes.add(((EntityAttributeFilter) filter)
 							.getEntityKey());
+				}else if (filter instanceof EntityTypeFilter){
+					entityTypes.add( ((EntityTypeFilter)filter).getEntityTypeKey());
 				}
 			}
 		});
@@ -117,6 +120,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet
 				if (filter instanceof EntityAttributeFilter) {
 					entityTypes.add(((EntityAttributeFilter) filter)
 							.getEntityKey());
+				}else if (filter instanceof EntityTypeFilter){
+					entityTypes.add( ((EntityTypeFilter)filter).getEntityTypeKey());
 				}
 			}
 		});

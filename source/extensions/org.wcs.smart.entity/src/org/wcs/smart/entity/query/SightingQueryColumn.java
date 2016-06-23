@@ -105,6 +105,14 @@ public class SightingQueryColumn extends QueryColumn{
 		this.dbCol = dbCol;
 	}
 	
+	@Override
+	public String getTooltip(){
+		if (getKey().equals(FixedColumns.WAYPOINT_X.getKey()) || getKey().equals(FixedColumns.WAYPOINT_Y.getKey())){
+			return getProjectionTooltip();
+		}
+		return null;
+	}
+	
 	public String getDbColumn(){
 		return this.dbCol;
 	}
@@ -131,9 +139,9 @@ public class SightingQueryColumn extends QueryColumn{
 		}else if (getKey().equals(FixedColumns.WAYPOINT_TIME.getKey())){
 			return ri.getWaypointDateTime();
 		}else if (getKey().equals(FixedColumns.WAYPOINT_X.getKey())){
-			return ri.getWaypointX();
+			return ri.getWaypointX(getProjection());
 		}else if (getKey().equals(FixedColumns.WAYPOINT_Y.getKey())){
-			return ri.getWaypointY();
+			return ri.getWaypointY(getProjection());
 		}else if (getKey().equals(FixedColumns.WAYPOINT_DIRECTION.getKey())){
 			return ri.getWaypointDirection();
 		}else if (getKey().equals(FixedColumns.WAYPOINT_DISTANCE.getKey())){
@@ -159,7 +167,9 @@ public class SightingQueryColumn extends QueryColumn{
 
 	@Override
 	public QueryColumn clone() {
-		throw new IllegalStateException("Cannot clone sighting columns."); //$NON-NLS-1$
+		SightingQueryColumn clone = new SightingQueryColumn(getName(), getKey(), getType(), dbCol);
+		clone.setProjectionProvider(prjProvider);
+		return clone;
 	}
 	
 }

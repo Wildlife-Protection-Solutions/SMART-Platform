@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -58,7 +59,14 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	
 	protected SimpleQueryResultSetMetadata(SimpleQuery query, SmartConnection connection){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
-		for (QueryColumn col : query.getQueryColumns(connection.getCurrentLocale(), connection.getSession())){
+		
+		IProjectionProvider provider = null;
+		try{
+			provider =connection.getProjectionProvider();
+		}catch (Exception ex){
+			//TODO: log me
+		}
+		for (QueryColumn col : query.computeQueryColumns(connection.getCurrentLocale(), connection.getSession(), provider)){
 			if (col.isVisible()){
 				vis.add(col);
 			}
@@ -85,7 +93,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	
 	protected SimpleQueryResultSetMetadata(GriddedQuery query, SmartConnection connection){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
-		for (QueryColumn col : query.getQueryColumns(connection.getCurrentLocale(), connection.getSession())){
+		for (QueryColumn col : query.computeQueryColumns(connection.getCurrentLocale(), connection.getSession())){
 			if (col.isVisible()){
 				vis.add(col);
 			}

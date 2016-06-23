@@ -64,7 +64,7 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	public static final String TRACKS_TYPE = "MissionTracks"; //$NON-NLS-1$
 	
 	private SimpleQuery query;
-	
+	private List<QueryColumn> cachedColumns;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	/**
@@ -104,11 +104,11 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
 		if (typeName.equals(WAYPOINT_TYPE)){
-			return new SurveyFeatureReader(this.query, getSchema(typeName));
+			return new SurveyFeatureReader(this.query, getSchema(typeName), cachedColumns);
 		}else if (typeName.equals(WAYPOINT_MISSION_TRACK_TYPE)){
-			return new MissionFeatureReader(this.query, getSchema(typeName));
+			return new MissionFeatureReader(this.query, getSchema(typeName), cachedColumns);
 		}else if (typeName.equals(TRACKS_TYPE)){
-			return new MissionFeatureReader(this.query, getSchema(typeName));
+			return new MissionFeatureReader(this.query, getSchema(typeName), cachedColumns);
 		}
 		return null;
 	}
@@ -152,31 +152,34 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(query.getQueryColumns(Locale.getDefault(), null), true)); //$NON-NLS-1$
+		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  null);
+		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(cachedColumns, true, false)); //$NON-NLS-1$
 		return type;
 	}
 	
 	private SimpleFeatureType createMissionTrackSchema() throws SchemaException{
+		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  null);
 		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_MISSION_TRACK_TYPE, getMissionTrackFeatureSchemaDef()); //$NON-NLS-1$
 		return type;
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(query.getQueryColumns(Locale.getDefault(), null), true)); //$NON-NLS-1$
+		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  null);
+		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(cachedColumns, true, false)); //$NON-NLS-1$
 		return type;
 	}
 	
-	public static String getWaypointFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
+	public static String getWaypointFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
 		return sb.toString();
 	}
 	
-	public static String getTrackFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
+	public static String getTrackFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:MultiLineString:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
 		return sb.toString();
 	}
 	

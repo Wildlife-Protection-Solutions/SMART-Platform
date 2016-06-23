@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
@@ -52,7 +53,7 @@ public abstract class QueryResultsTable {
 	private static final String INITQUERYTABLE_JOBNAME = Messages.QueryResultsTable_InitQueryResultsTableJobName;
 	
 	protected TableViewer table;
-	private QueryTableViewerColumn[] tableViewerColumns;
+	protected QueryTableViewerColumn[] tableViewerColumns;
 	
 	private QueryResultItemComparator sorter;
 	
@@ -95,31 +96,44 @@ public abstract class QueryResultsTable {
 	}
 	
 	
-	public void initQuery(final SimpleQuery query){
+	public void initQuery(final SimpleQuery query, final IProjectionProvider prjProvider){
 		if (tableViewerColumns != null){
-			//columns already created
+			//columns already created; lets update visibility
+			List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
+			for (QueryTableViewerColumn column : tableViewerColumns){
+				for (QueryColumn c : cols){
+					if (column.getColumn().equals(c)){
+						if (c.isVisible()){
+							column.show();
+						}else{
+							column.hide();
+						}
+						break;
+					}
+				}
+			}
 			return;
 		}
-		Job job = new Job(INITQUERYTABLE_JOBNAME){
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				// in display thread update table
-				table.getControl().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (table.getTable().isDisposed()){
-							return;
-						}
-						List<QueryColumn> cols = query.getQueryColumns(Locale.getDefault(), null);
+//		Job job = new Job(INITQUERYTABLE_JOBNAME){
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor) {
+//				// in display thread update table
+//				table.getControl().getDisplay().asyncExec(new Runnable() {
+//					@Override
+//					public void run() {
+//						if (table.getTable().isDisposed()){
+//							return;
+//						}
+						List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
 						tableViewerColumns = createColumns(table,cols);
 						table.refresh(true);
-					}
-				});
-				return Status.OK_STATUS;
-			}
-		};
-		
-		job.schedule();
+//					}
+//				});
+//				return Status.OK_STATUS;
+//			}
+//		};
+//		
+//		job.schedule();
 	}
 	
 	public void initQuery(final GriddedQuery query){
@@ -137,7 +151,7 @@ public abstract class QueryResultsTable {
 						if (table.getTable().isDisposed()){
 							return;
 						}
-						tableViewerColumns = createColumns(table,query.getQueryColumns(Locale.getDefault(), null));
+						tableViewerColumns = createColumns(table, query.computeQueryColumns(Locale.getDefault(), null));
 						table.refresh(true);
 					}
 				});
@@ -195,45 +209,6 @@ public abstract class QueryResultsTable {
 	protected IQueryColumnSorter getColumnSorter() {
 		return sorter;
 	}
-	
-	/**
-	 * 
-	 * Updates the visible columns in the table.
-	 * @param visibleColumns
-	 */
-	public void updateVisible(List<QueryColumn> queryColumns) {
-		if (this.tableViewerColumns == null){
-			//not yet initialized 
-			return;
-		}
-
-		table.getTable().setRedraw(false);
-		try{
-			if (queryColumns == null){
-				//show all
-				for (int i = 0; i < tableViewerColumns.length; i ++){
-					tableViewerColumns[i].show();
-				}
-			}else{
-				for (int i = 0; i < tableViewerColumns.length; i ++){
-					for (QueryColumn column :queryColumns){
-						if (column == tableViewerColumns[i].getColumn()){
-							if (queryColumns.get(i).isVisible()){
-								tableViewerColumns[i].show();
-							}else{
-								tableViewerColumns[i].hide();						
-							}
-							break;
-						}
-					}		
-				}
-			}
-		}finally{
-			table.getTable().setRedraw(true);
-		}
-	}
-	
-
 	
 }
 

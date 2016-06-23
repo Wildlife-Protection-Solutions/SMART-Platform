@@ -50,7 +50,7 @@ public class IntelligenceRecordShpExporter extends ShapeQueryExporter{
 	}
 
 	@Override
-	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType)
+	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType fType)
 			throws Exception {
 		throw new UnsupportedOperationException("createFeature not supported for intelligence shp exporter.");  //$NON-NLS-1$
 	}
@@ -62,14 +62,13 @@ public class IntelligenceRecordShpExporter extends ShapeQueryExporter{
 	@Override
 	protected void writeRow(IResultItem row) throws Exception {
 		IntelligenceRecordResultItem currentIntel = (IntelligenceRecordResultItem)row;
-		SimpleFeatureType ftype = shapefile.getSchema(shapefile.getTypeNames()[0]);
-		features.add(IntelQueryFeatureReader.toSimpleFeature(queryColumns, ftype, currentIntel));
+		features.add(IntelQueryFeatureReader.toSimpleFeature(queryColumns, cachedFeatureType, currentIntel));
 	}
 
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType)
 			throws Exception {
-		return IntelQueryDataSource.createIntelligenceRecordSchema(this.queryColumns);
+		return IntelQueryDataSource.createIntelligenceRecordSchema(this.queryColumns, true);
 	}
 
 }

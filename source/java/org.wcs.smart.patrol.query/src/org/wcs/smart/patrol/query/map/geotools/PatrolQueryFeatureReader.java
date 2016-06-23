@@ -23,7 +23,7 @@ package org.wcs.smart.patrol.query.map.geotools;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Locale;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -34,6 +34,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * A patrol query geotools feature reader.
@@ -45,7 +46,7 @@ public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType
 
 	private SimpleFeatureType ftype;
 	private Iterator<PatrolQueryResultItem> fIterator;
-	private PatrolQuery  query;
+	private List<QueryColumn> columns;
 	
 	/**
 	 * Creates a new feature reader.
@@ -54,11 +55,11 @@ public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType
 	 * @param ftype the feature type
 	 */
 	public PatrolQueryFeatureReader(PatrolQuery query,
-			SimpleFeatureType ftype) {
+			SimpleFeatureType ftype, List<QueryColumn> columns) {
 		
 		this.ftype = ftype;
 		this.fIterator = null;
-		this.query = query;
+		this.columns = columns;
 		
 		try {
 			IQueryResult cachedResults = query.getCachedResults();
@@ -106,7 +107,7 @@ public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType
 			NoSuchElementException {
 		
 		PatrolQueryResultItem next = (PatrolQueryResultItem) this.fIterator.next();
-		SimpleFeature f = QueryResultItemFeature.createTrackFeature(next, query.getQueryColumns(Locale.getDefault(), null), ftype);
+		SimpleFeature f = QueryResultItemFeature.createTrackFeature(next, columns, ftype);
 		return f;
 	}
 	

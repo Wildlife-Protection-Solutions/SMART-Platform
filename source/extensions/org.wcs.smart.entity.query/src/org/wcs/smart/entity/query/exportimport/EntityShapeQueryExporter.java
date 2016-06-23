@@ -56,12 +56,12 @@ public class EntityShapeQueryExporter extends ShapeQueryExporter{
 	}
 
 	@Override
-	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
-		return QueryResultItemFeature.createObservationFeature((EntityQueryResultItem) it, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
+	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception{
+		return QueryResultItemFeature.createObservationFeature((EntityQueryResultItem) it, queryColumns, type);
 	}
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
-		return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
+		return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		
 	}
 		

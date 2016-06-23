@@ -87,8 +87,6 @@ public class FixedQueryColumn extends QueryColumn {
 		this.l = l;
 	}
 
-
-
 	/**)
 	 * @see org.wcs.smart.query.model.QueryColumn#getValue(org.wcs.smart.query.common.engine.IResultItem)
 	 */

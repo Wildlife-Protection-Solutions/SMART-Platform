@@ -43,12 +43,14 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.locationtech.udig.catalog.URLUtils;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Query wizard page to select the output file format.
@@ -228,7 +230,12 @@ public class ExportQueryLocationPage extends WizardPage {
 			ops.put(ICsvQueryExporter.DELIMITER_KEY, cmbDelimiter.getDelimiter());
 		}
 		if (cmbProjection != null){
-			ops.put(IQueryExporter.PROJECTION_PARAM_KEY, getProjection().getParsedCoordinateReferenceSystem());
+			CoordinateReferenceSystem crs = getProjection().getParsedCoordinateReferenceSystem();
+			if (crs == null){
+				crs = ReprojectUtils.stringToCrs(getProjection().getDefinition());
+				getProjection().setParsedCoordinateReferenceSystem(crs);
+			}
+			ops.put(IQueryExporter.PROJECTION_PARAM_KEY, getProjection());
 		}
 		if (ops.isEmpty()) return null;
 		return ops;

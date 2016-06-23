@@ -44,6 +44,7 @@ import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
+import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -94,6 +95,8 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 			public void visit(IFilter filter) {
 				if (filter instanceof EntityAttributeFilter){
 					entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+				}else if (filter instanceof EntityTypeFilter){
+					entityTypes.add(((EntityTypeFilter) filter).getEntityTypeKey());
 				}
 			}
 		});

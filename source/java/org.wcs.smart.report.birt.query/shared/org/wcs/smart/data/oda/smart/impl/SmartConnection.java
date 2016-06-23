@@ -35,11 +35,17 @@ import org.eclipse.datatools.connectivity.oda.util.manifest.DataTypeMapping;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ExtensionManifest;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
 import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.ibm.icu.util.ULocale;
 
@@ -49,15 +55,32 @@ import com.ibm.icu.util.ULocale;
 public abstract class SmartConnection implements IConnection {
 	
 	/**
-	 * App context local variable
+	 * App context locale variable
 	 */
-	public static final String LOCAL_CONTEXT_VAR = "org.wcs.smart.report.locale"; //$NON-NLS-1$
+	public static final String LOCALE_CONTEXT_VAR = "org.wcs.smart.report.locale"; //$NON-NLS-1$
+	/**
+	 * App context projection provider variable
+	 */
+	public static final String PROJECTION_PROVIDER_CONTEXT_VAR = "org.wcs.smart.report.crs"; //$NON-NLS-1$
+	
 	public static final String ODA_DATA_SOURCE_ID = "org.wcs.smart.data.oda.smart"; //$NON-NLS-1$
 	
 	protected boolean m_isOpen = false;
 	protected Session localSession;
 	protected Map<Object,Object> appContext;
 	
+	private final static IProjectionProvider defaultProjectionProvider = new IProjectionProvider() {
+		private Projection p; 
+		@Override
+		public Projection getProjection() {
+			if (p == null){
+				p = new Projection();
+				p.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+				p.setName(SmartDB.DATABASE_CRS.getName().toString());
+			}
+			return p;
+		}
+	};
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#open(java.util.Properties)
 	 */
@@ -105,9 +128,34 @@ public abstract class SmartConnection implements IConnection {
 	 */
 	public Locale getCurrentLocale(){
 		if (appContext == null) return Locale.getDefault();
-		Locale l = (Locale) appContext.get(LOCAL_CONTEXT_VAR);
+		Locale l = (Locale) appContext.get(LOCALE_CONTEXT_VAR);
 		if (l == null) return Locale.getDefault();
 		return l;
+	}
+	
+	public IProjectionProvider getProjectionProvider() throws Exception{
+		if (appContext != null){
+			IProjectionProvider value = (IProjectionProvider) appContext.get(PROJECTION_PROVIDER_CONTEXT_VAR);	
+			if (value == null){
+				final Projection prj = ObservationHibernateManager.getCurrentViewProjection(getSession());
+				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+				if (prj != null){
+					IProjectionProvider provider  = new IProjectionProvider() {
+						@Override
+						public Projection getProjection() {
+							return prj;
+						}
+					};
+					appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, provider);
+					return provider;
+				}else{
+					appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, defaultProjectionProvider);
+				}
+			}else{
+				return value;
+			}
+		}
+		return defaultProjectionProvider;		
 	}
 	
 	/**

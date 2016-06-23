@@ -61,8 +61,8 @@ public abstract class GriddedQuery extends StyledQuery {
 	protected GridQueryDefinition query;	//parsed query string
 	@Transient
 	protected DateFilter dateFilter;		//temp date filter
-	@Transient
-	protected volatile List<QueryColumn> queryColumns = null;	//parsed query columns
+//	@Transient
+//	protected volatile List<QueryColumn> queryColumns = null;	//parsed query columns
 	@Transient
 	protected CoordinateReferenceSystem crs;	//parsed crs definition
 	
@@ -169,17 +169,18 @@ public abstract class GriddedQuery extends StyledQuery {
 	 * @return the columns associated with the query
 	 */
 	@Transient
-	public List<QueryColumn> getQueryColumns(Locale l, Session session) {
-		if (this.queryColumns != null) return queryColumns;
-		synchronized (this) {
-			if (this.queryColumns != null) return queryColumns;
+	public List<QueryColumn> computeQueryColumns(Locale l, Session session) {
+//		if (this.queryColumns != null) return queryColumns;
+//		synchronized (this) {
+//			if (this.queryColumns != null) return queryColumns;
+		List<QueryColumn> queryColumns = new ArrayList<QueryColumn>();
 			QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, session);
 			queryColumns = new ArrayList<QueryColumn>();
 			for (int i = 0; i < cols.length; i ++){
 				queryColumns.add(cols[i]);
 			}	
-		}
-		return this.queryColumns;
+//		}
+		return queryColumns;
 	}
 
 	/**

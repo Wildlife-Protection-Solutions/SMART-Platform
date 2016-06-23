@@ -59,20 +59,20 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 	}
 
 	@Override
-	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
+	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception{
 		if (queryType.getKey().equals(PatrolQuery.KEY)){
-			return QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
+			return QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)it,  queryColumns, type);
 		}else{
-			return QueryResultItemFeature.createObservationFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
+			return QueryResultItemFeature.createObservationFeature((PatrolQueryResultItem)it,  queryColumns, type);
 		}
 	}
 	
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
 		if (queryType.getKey().equals(PatrolQuery.KEY)){
-			return DataUtilities.createType("smart." + PatrolQueryDataSource.PATROL_TYPE, PatrolQueryDataSource.getFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
+			return DataUtilities.createType("smart." + PatrolQueryDataSource.PATROL_TYPE, PatrolQueryDataSource.getFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}else{
-			return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
+			return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}
 	}
 		

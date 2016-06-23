@@ -25,13 +25,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -39,6 +40,7 @@ import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
+import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IPagedQuery;
@@ -144,18 +146,32 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	public void export(Query query, IQueryResult result, File file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
+		//delimiter
 		if (parameters.get(DELIMITER_KEY) != null){
 			try{
 				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
 			}catch(Exception ex){}
 		}
+
+		//projection
+		IProjectionProvider provider = null;
+		if (parameters.get(IQueryExporter.PROJECTION_PARAM_KEY) != null){
+			final Projection prj = (Projection) parameters.get(IQueryExporter.PROJECTION_PARAM_KEY);
+			provider = new IProjectionProvider() {
+				@Override
+				public Projection getProjection() {
+					return prj;
+				}
+			};
+		}
 		
 		//filter visible columns 
 		//in SMART this returns all possible query columns; we only want to include visible query columns
-		List<QueryColumn> columns = new ArrayList<QueryColumn>(((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null));
+
+		List<QueryColumn> columns = (((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider));
 		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
 			QueryColumn column = (QueryColumn) iterator.next();
-			if (!column.isVisible()) {
+			if (!column.isVisible()){
 				iterator.remove();
 			}
 		}
