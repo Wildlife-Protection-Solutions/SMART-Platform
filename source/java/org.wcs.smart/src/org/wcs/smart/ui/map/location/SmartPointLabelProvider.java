@@ -31,6 +31,7 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.GeometryUtils;
 

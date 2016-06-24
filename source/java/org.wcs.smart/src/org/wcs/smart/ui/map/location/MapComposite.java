@@ -73,6 +73,7 @@ import org.opengis.filter.Filter;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.udig.SetBasemapTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapInfoAreaComposite;

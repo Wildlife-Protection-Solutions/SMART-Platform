@@ -73,6 +73,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.ui.ProjectionLabelProvider;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
@@ -97,7 +98,6 @@ public class EntityEditPanelComposite extends Composite{
 	private Entity entity;
 	private EntityType etype;
 
-	private final GeometryFactory gf = new GeometryFactory();
 	private Projection currentProjection;
 	private Projection dbProjection;
 	
@@ -478,7 +478,7 @@ public class EntityEditPanelComposite extends Composite{
 	private void transformInput(final Projection source, final Projection target) {
 		try {
 			//reproject
-			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
+			Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
 			Point p = (Point) JTS.transform(point, CRS.findMathTransform(
 					ReprojectUtils.stringToCrs(source.getDefinition()), 
 					ReprojectUtils.stringToCrs(target.getDefinition())));

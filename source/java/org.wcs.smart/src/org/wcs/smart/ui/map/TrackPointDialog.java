@@ -113,7 +113,7 @@ import org.opengis.filter.identity.FeatureId;
 import org.opengis.geometry.Envelope;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.map.tool.PanTool;
 import org.wcs.smart.ui.map.tool.TrackPointSelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -415,8 +415,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 			}
 		});
 		
-		GeometryFactory gf = new GeometryFactory();
-		LineString ls = gf.createLineString(allC.toArray(new Coordinate[allC.size()]));
+		LineString ls = GeometryFactoryProvider.getFactory().createLineString(allC.toArray(new Coordinate[allC.size()]));
 		setEditTrackLineString(ls);
 		
 		//update track and point layers
@@ -500,8 +499,8 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		}
 		
 		isModified = true;
-		GeometryFactory gf = new GeometryFactory();
-		LineString ls = gf.createLineString(newc);
+
+		LineString ls = GeometryFactoryProvider.getFactory().createLineString(newc);
 		setEditTrackLineString(ls);
 		
 		//update track and point layers

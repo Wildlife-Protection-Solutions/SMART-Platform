@@ -19,21 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.map.location;
+package org.wcs.smart;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.wcs.smart.ca.Projection;
 
 /**
- * Provider for {@link GeometryFactory}
+ * Basic implementation of projection provider 
  * 
- * @author elitvin
- * @since 1.0.0
+ * @author Emily
+ *
  */
-public class GeometryFactoryProvider {
+public class ProjectionProvider implements IProjectionProvider{
 
-	private static final GeometryFactory gf = new GeometryFactory();
+	private Projection prj;
+	
+	public ProjectionProvider(Projection prj){
+		this.prj = prj;
+	}
 
-	public static GeometryFactory getFactory() {
-		return gf;
+	@Override
+	public Projection getProjection() {
+		return prj;
 	}
 }

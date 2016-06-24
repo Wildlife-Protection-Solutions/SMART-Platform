@@ -32,6 +32,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.PlanTargetStatus;
@@ -51,8 +52,6 @@ public class PlanTargetFeatureReader implements FeatureReader<SimpleFeatureType,
 
 	private SimpleFeatureType ftype;
 	private Iterator<SpatialPlanTargetPoint> fIterator;
-	
-	private static GeometryFactory gf = new GeometryFactory();
 	
 	/**
 	 * Creates a new feature reader
@@ -134,7 +133,7 @@ public class PlanTargetFeatureReader implements FeatureReader<SimpleFeatureType,
 	private SimpleFeature getPointAsFeature(SpatialPlanTargetPoint point){
 		//
 		Object data[] = new Object[7];
-		data[0] = gf.createPoint(new Coordinate(point.getX(), point.getY()));
+		data[0] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(point.getX(), point.getY()));
 		data[1] = ftype.getName() + "." + UuidUtils.uuidToString(point.getUuid()); //$NON-NLS-1$
 		data[2] = point.getPlanTarget().getName();
 		data[3] = point.getPlanTarget().getDescription();

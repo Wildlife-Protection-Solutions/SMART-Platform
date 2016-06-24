@@ -1,0 +1,82 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.observation;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ProjectionProvider;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Projection;
+import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
+
+/**
+ * Utility functions associated with observations
+ * @author Emily
+ *
+ */
+public enum ObservationUtils {
+	
+	INSTANCE;
+	
+	/**
+	 * Creates a projection provider that returns the
+	 * observation view projection if defined.  If not defined
+	 * then projection provider returns the database default projection.
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public IProjectionProvider createProjectionProvider(Session session, ConservationArea ca){
+		Projection prj = getCurrentViewProjection(session, ca);
+		if (prj != null){
+			try{
+				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+			}catch (Exception ex){
+				Logger.getLogger(ObservationUtils.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+				prj = null;
+			}
+		}
+		if (prj == null){
+			prj = new Projection();
+			prj.setParsedCoordinateReferenceSystem(GeometryUtils.SMART_CRS);
+			prj.setName(GeometryUtils.SMART_CRS.getName().toString());
+		}
+		return new ProjectionProvider(prj);
+	}
+	
+	private Projection getCurrentViewProjection(Session s, ConservationArea ca) {
+		ObservationOptions observationOptions = (ObservationOptions) s.get(ObservationOptions.class, ca.getUuid());
+		if (observationOptions != null) {
+			Projection p = observationOptions.getViewProjection();
+			if (p != null) {
+				p.getDefinition(); //lazy load
+			}
+			return p;
+		}
+		return null;
+	}
+}

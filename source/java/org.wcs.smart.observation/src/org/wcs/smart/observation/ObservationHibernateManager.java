@@ -111,31 +111,7 @@ public class ObservationHibernateManager extends HibernateManager{
 		return null;
 	}
 
-	/**
-	 * Creates a projection provider that returns the
-	 * observation view projection if defined.  If not defined
-	 * then projection provider returns the database default projection.
-	 * 
-	 * @param s
-	 * @return
-	 */
-	public static IProjectionProvider createProjectionProvider(Session session){
-		Projection prj = ObservationHibernateManager.getCurrentViewProjection(session);
-		if (prj != null){
-			try{
-				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
-			}catch (Exception ex){
-				ObservationPlugIn.log(ex.getMessage(), ex);
-				prj = null;
-			}
-		}
-		if (prj == null){
-			prj = new Projection();
-			prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-			prj.setName(SmartDB.DATABASE_CRS.getName().toString());
-		}
-		return new ProjectionProvider(prj);
-	}
+	
 	/**
 	 * Creates new patrol options for a given conservation area and saves it to the database.
 	 * 

@@ -36,6 +36,7 @@ import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -56,7 +57,7 @@ public class EntityTable extends SmartBirtTable {
 	
 	public static final String ENTITYKEY_PREFIX = "ENTITY"; //$NON-NLS-1$
 	
-	private static final GeometryFactory gf = new GeometryFactory();
+	private static final GeometryFactory gf = GeometryFactoryProvider.getFactory();
 	
 	private EntityType et;
 	

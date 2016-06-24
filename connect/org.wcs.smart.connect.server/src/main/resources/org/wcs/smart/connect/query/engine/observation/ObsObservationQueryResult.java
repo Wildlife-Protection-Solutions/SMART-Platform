@@ -194,7 +194,7 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 	@Override
 	public Geometry createGeometry(IResultItem rs) throws Exception {
 		ObservationQueryResultItem i = ((ObservationQueryResultItem)rs);
-		return gf.createPoint(new Coordinate(i.getWaypointX(), i.getWaypointY())); 
+		return gf.createPoint(new Coordinate(i.getWaypointX(null), i.getWaypointY(null))); 
 	}
 
 	@Override

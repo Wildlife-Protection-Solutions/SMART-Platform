@@ -110,6 +110,7 @@ import org.wcs.smart.er.ui.mision.udig.MissionGeoResource;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.er.ui.mision.udig.MissionServiceExtension;
 import org.wcs.smart.er.ui.mision.udig.SplitTool;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.udig.SetBasemapTool;
@@ -688,8 +689,8 @@ public class TracksComposite extends Composite implements MapPart{
 				}
 			}
 			
-			GeometryFactory gf = new GeometryFactory();
-			LineString newLs = gf.createLineString(ls.toArray(new Coordinate[ls.size()]));
+			
+			LineString newLs = GeometryFactoryProvider.getFactory().createLineString(ls.toArray(new Coordinate[ls.size()]));
 			main.setLineString(newLs);
 		
 			refresh(true);
@@ -735,8 +736,7 @@ public class TracksComposite extends Composite implements MapPart{
 							return;
 						}
 						
-						GeometryFactory gf = new GeometryFactory();
-						LineString ls2 = gf.createLineString(new Coordinate[]{points.get(0), points.get(1)});
+						LineString ls2 = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[]{points.get(0), points.get(1)});
 						
 						Point intersection = null;
 						Geometry g = ls1.intersection(ls2);

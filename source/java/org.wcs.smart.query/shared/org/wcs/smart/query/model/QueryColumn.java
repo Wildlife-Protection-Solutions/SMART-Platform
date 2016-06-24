@@ -29,8 +29,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.util.GeometryUtils;
 
 
 /**
@@ -99,7 +99,7 @@ public abstract class QueryColumn implements Cloneable{
 	
 	protected String getProjectionTooltip(){
 		if (prjProvider != null) return prjProvider.getProjection().getName();
-		return SmartDB.DATABASE_CRS.getName().toString();
+		return GeometryUtils.SMART_CRS.getName().toString();
 	}
 	
 	/**

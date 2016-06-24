@@ -33,7 +33,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GridResultItem;
@@ -85,8 +87,9 @@ public class CsvExporter {
 				new OutputStreamWriter(
 	              new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8)
 				,delimiter)) {
-					
-				List<QueryColumn> cols = query.getQueryColumns(l, session);
+				
+				IProjectionProvider prj = ObservationUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
+				List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
 				
 				//headers
 				String[] data = new String[cols.size()];
@@ -127,7 +130,7 @@ public class CsvExporter {
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
 				new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
 
-			List<QueryColumn> cols = query.getQueryColumns(l, session);
+			List<QueryColumn> cols = query.computeQueryColumns(l, session);
 
 			String[] data = new String[cols.size()];
 			for (int i = 0; i < cols.size(); i++) {
@@ -163,7 +166,8 @@ public class CsvExporter {
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
 				new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
 
-			List<QueryColumn> cols = query.getQueryColumns(l, session);
+			IProjectionProvider prj = ObservationUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
+			List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
 
 			String[] data = new String[cols.size()];
 			for (int i = 0; i < cols.size(); i++) {

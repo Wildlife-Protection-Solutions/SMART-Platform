@@ -103,9 +103,9 @@ import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+import org.wcs.smart.map.GeometryFactoryProvider;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * Map layer for rendering SMART Maps inside BIRT
@@ -1833,7 +1833,7 @@ public class BirtMapLayer extends EObjectImpl implements Layer {
                 bbox = boundingBox;
             }
             String geom = getSchema().getGeometryDescriptor().getName().getLocalPart();
-            Object bboxGeom = new GeometryFactory().toGeometry(bbox);
+            Object bboxGeom = GeometryFactoryProvider.getFactory().toGeometry(bbox);
             bboxFilter = factory.intersects(factory.property(geom), factory.literal(bboxGeom));
 
         } catch (Exception e) {

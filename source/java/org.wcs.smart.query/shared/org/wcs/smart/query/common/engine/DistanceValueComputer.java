@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.engine;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.util.GeometryUtils;
@@ -58,7 +59,7 @@ public class DistanceValueComputer implements IValueComputer<Double> {
 		
 		Envelope env = t.getBounds(gridDef);
 		
-		GeometryFactory gf = new GeometryFactory();
+		GeometryFactory gf = GeometryFactoryProvider.getFactory();
 		Geometry bbox = gf.toGeometry(env);
 
 		//#1798

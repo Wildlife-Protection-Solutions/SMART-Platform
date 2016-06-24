@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -48,9 +49,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem{
 	 * Waypoint geometry field name
 	 */
 	public static final String GEOMCOLUMN_KEY = "wp:geometry"; //$NON-NLS-1$
-	
-	private static GeometryFactory gf = new GeometryFactory();
-	
+		
 	private String caId;
 	private String caName;
 	private String sourceId;
@@ -299,7 +298,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem{
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(GEOMCOLUMN_KEY))
-			return gf.createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
+			return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
 		return null;
 	}
 }

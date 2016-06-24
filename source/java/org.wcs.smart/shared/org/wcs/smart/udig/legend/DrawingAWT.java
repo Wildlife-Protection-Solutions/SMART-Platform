@@ -64,6 +64,7 @@ import org.opengis.filter.FilterFactory;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.style.GraphicalSymbol;
+import org.wcs.smart.map.GeometryFactoryProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -83,7 +84,7 @@ import com.vividsolutions.jts.geom.Polygon;
  */
 public final class DrawingAWT {
 	
-	private GeometryFactory gf = new GeometryFactory();
+	private GeometryFactory gf = GeometryFactoryProvider.getFactory();
 	
 	public DrawingAWT(){
 		

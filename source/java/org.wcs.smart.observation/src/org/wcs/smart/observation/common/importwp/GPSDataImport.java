@@ -44,6 +44,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.common.gpx.GpxType;
 import org.wcs.smart.observation.common.gpx.TrkType;
@@ -476,7 +477,7 @@ public class GPSDataImport {
 		if (coordinates.size() < 2) {
 			return null;
 		}
-		GeometryFactory gf = new GeometryFactory();
+		
 		Collections.sort(coordinates, new Comparator<Waypoint>() {
 			@Override
 			public int compare(Waypoint o1, Waypoint o2) {
@@ -503,7 +504,7 @@ public class GPSDataImport {
 			cs.add(c);
 		}
 
-		LineString track = gf.createLineString(cs
+		LineString track = GeometryFactoryProvider.getFactory().createLineString(cs
 				.toArray(new Coordinate[coordinates.size()]));
 		return track;
 	}

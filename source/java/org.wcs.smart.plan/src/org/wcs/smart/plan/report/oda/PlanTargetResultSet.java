@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
@@ -65,8 +66,6 @@ public class PlanTargetResultSet  implements IResultSet {
 	private PlanTargetResultSetMetadata metadata;
 	
 	private Session session;	//connection session
-	
-	private static GeometryFactory gf = new GeometryFactory();
 	
 	/**
 	 * Creates a new summary results set
@@ -204,7 +203,7 @@ public class PlanTargetResultSet  implements IResultSet {
 					for (SpatialPlanTargetPoint pnt : sp.getPoints()){
 						pnts[i++] = new Coordinate(pnt.getX(), pnt.getY()); 
 					}
-					return gf.createMultiPoint(pnts);
+					return GeometryFactoryProvider.getFactory().createMultiPoint(pnts);
 				}
 				return null;
 			}

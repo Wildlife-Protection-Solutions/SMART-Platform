@@ -33,6 +33,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
@@ -51,9 +52,6 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class SurveyResultItemFeature {
 
-	private static GeometryFactory gf = new GeometryFactory();
-	
-	
 	private static void addQueryColumnData(IResultItem it, SimpleFeatureType ftype, List<QueryColumn> columns, List<Object> data){
 		int i = 0;
 		for (QueryColumn c : columns){
@@ -147,7 +145,7 @@ public class SurveyResultItemFeature {
 		}
 		
 		if (geoms.size() > 0){
-			Geometry g = gf.createMultiLineString(geoms.toArray(new LineString[geoms.size()]));
+			Geometry g = GeometryFactoryProvider.getFactory().createMultiLineString(geoms.toArray(new LineString[geoms.size()]));
 			data[0] = g;
 		}else{
 			data[0] = null;

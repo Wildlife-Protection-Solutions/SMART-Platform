@@ -43,6 +43,7 @@ import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -155,7 +156,7 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 			Integer x2 = fieldToColumn.get(x2Field);
 			Integer y2 = fieldToColumn.get(y2Field);
 			
-			GeometryFactory gf = new GeometryFactory();
+			GeometryFactory gf = GeometryFactoryProvider.getFactory();
 			int cnt = 0;
 			while(true){
 				headers = reader.readNext();

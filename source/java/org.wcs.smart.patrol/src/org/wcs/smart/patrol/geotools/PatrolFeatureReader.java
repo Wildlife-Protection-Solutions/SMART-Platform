@@ -32,6 +32,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -55,7 +56,6 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private Iterator<?> fIterator;
 	
 	private SimpleDateFormat trackDt = new SimpleDateFormat("MMMddyyyy");  //$NON-NLS-1$
-	private static GeometryFactory gf = new GeometryFactory();
 	
 	public PatrolFeatureReader(Patrol patrol,
 			String type, SimpleFeatureType ftype) {
@@ -142,7 +142,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 			data[4] = waypoint.getWaypoint().getObservationsAsString();
 		}
 		data[5] = waypoint.getWaypoint().getComment();
-		data[6] = gf.createPoint(new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()));
+		data[6] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()));
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
 	}
 	

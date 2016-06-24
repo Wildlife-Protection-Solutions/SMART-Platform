@@ -22,14 +22,19 @@
 package org.wcs.smart.util;
 
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
+//import org.wcs.smart.SmartPlugIn;
+//import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
+
+import org.wcs.smart.ca.Area;
+import org.wcs.smart.map.GeometryFactoryProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
@@ -143,7 +148,7 @@ public class ReprojectUtils {
 				return p;
 			}
 		} catch (Exception e) {
-			SmartPlugIn.log("Failed while converting to view projection's CRS", e); //$NON-NLS-1$
+			Logger.getLogger(Area.class.getName()).log(Level.WARNING, "Failed while converting point to projection", e); //$NON-NLS-1$
 		}
 		return point;
 	}

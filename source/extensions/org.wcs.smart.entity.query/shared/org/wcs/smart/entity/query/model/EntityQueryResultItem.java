@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -50,9 +51,7 @@ public class EntityQueryResultItem implements IGeometryResultItem{
 	 * Waypoint point geometry field name
 	 */
 	public static final String WAYPOINT_GEOM_COLUMNKEY = "wp:geometry"; //$NON-NLS-1$
-	
-	private static final GeometryFactory gf = new GeometryFactory();
-	
+		
 	private String caId;
 	private String caName;
 	private String sourceId;
@@ -328,7 +327,7 @@ public class EntityQueryResultItem implements IGeometryResultItem{
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(WAYPOINT_GEOM_COLUMNKEY)){
-			return gf.createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
+			return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
 		}
 		return null;
 	}

@@ -67,6 +67,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.map.location.tool.IMapPointSelectionListener;
 import org.wcs.smart.ui.map.location.tool.SelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;

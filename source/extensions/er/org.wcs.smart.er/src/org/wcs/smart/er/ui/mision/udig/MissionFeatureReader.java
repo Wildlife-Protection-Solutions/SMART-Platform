@@ -34,6 +34,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -49,7 +50,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
 	private SimpleFeatureType featureType;
-	private GeometryFactory gf = new GeometryFactory();
 	private Iterator<SurveyWaypoint> iterator;
 	
 	public MissionFeatureReader(Mission mission, SimpleFeatureType type){
@@ -98,7 +98,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 		}
 		data[4] = point.getWaypoint().getObservationsAsString();
 		data[5] = point.getWaypoint().getComment();
-		data[6] = gf.createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));		
+		data[6] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));		
 		
 		return new SurveyFeature(SimpleFeatureBuilder.build(featureType, data, fid));
 	}

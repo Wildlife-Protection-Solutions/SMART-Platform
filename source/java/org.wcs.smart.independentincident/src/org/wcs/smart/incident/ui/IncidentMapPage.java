@@ -49,10 +49,10 @@ import org.opengis.filter.Filter;
 import org.opengis.style.Style;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
-import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;

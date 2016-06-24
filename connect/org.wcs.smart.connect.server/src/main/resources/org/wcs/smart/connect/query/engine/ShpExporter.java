@@ -45,16 +45,27 @@ import org.geotools.data.FeatureStore;
 import org.geotools.data.FileDataStoreFactorySpi;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.graph.util.geom.GeometryUtil;
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.GeometryUtils;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Exports query results to shapefiles.  Query results must extend
@@ -97,36 +108,50 @@ public class ShpExporter {
 		Files.createDirectory(outDirectory);
 		final Path shpfile = outDirectory.resolve(newName+ ".shp"); //$NON-NLS-1$
 		
+		final IProjectionProvider prj = ObservationUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
+		
 		session.doWork(new Work(){
 			@SuppressWarnings("unchecked")
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try{
-					FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
-			        Map<String, Serializable> params = new HashMap<String, Serializable>();
-					params.put(ShapefileDataStoreFactory.URLP.key, shpfile.toUri().toURL());
-					
-					List<QueryColumn> columns = query.getQueryColumns(l, session);
-					DataStore shapefile = factory.createNewDataStore(params);
+					List<QueryColumn> columns = query.computeQueryColumns(l, session, prj);
 					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false)); //$NON-NLS-1$
-					
 					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
-					
 					IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
-					
 					for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
-						IResultItem resultItem = (IResultItem) iterator.next();
-						
+						IResultItem resultItem = (IResultItem) iterator.next();	
 						SimpleFeature sf = results.toFeature(resultItem, columns, session, type);
 						features.add(sf);
 					}
 					
-					shapefile.createSchema(type);
+					
+					FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
+			        Map<String, Serializable> params = new HashMap<String, Serializable>();
+					params.put(ShapefileDataStoreFactory.URLP.key, shpfile.toUri().toURL());
+					DataStore shapefile = factory.createNewDataStore(params);
+					
+					
+					//retype 
+					List<SimpleFeature> reprojected = new ArrayList<SimpleFeature>();
+					if (prj == null || CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, prj.getProjection().getParsedCoordinateReferenceSystem())){
+						reprojected = features;
+						shapefile.createSchema(type);
+					}else{
+						SimpleFeatureType reprojectedType = SimpleFeatureTypeBuilder.retype(type, prj.getProjection().getParsedCoordinateReferenceSystem());
+						shapefile.createSchema(reprojectedType);
+						MathTransform transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, prj.getProjection().getParsedCoordinateReferenceSystem(), true);
+						for (SimpleFeature f : features){
+							SimpleFeature copy = SimpleFeatureBuilder.copy(f);
+							copy.setDefaultGeometry(JTS.transform((Geometry)f.getDefaultGeometry(), transform));
+							reprojected.add(copy);
+						}
+					}
 					
 					FeatureStore<SimpleFeatureType, SimpleFeature> fs = 
 							(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource(shapefile.getTypeNames()[0]);
 					fs.setTransaction(new DefaultTransaction());
-					fs.addFeatures( DataUtilities.collection(features) );
+					fs.addFeatures( DataUtilities.collection(reprojected) );
 					fs.getTransaction().commit();
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);

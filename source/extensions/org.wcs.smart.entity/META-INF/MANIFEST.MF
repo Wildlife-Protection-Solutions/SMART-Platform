@@ -18,3 +18,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.entity,
  org.wcs.smart.entity.event,
  org.wcs.smart.entity.model
+Import-Package: org.wcs.smart.map

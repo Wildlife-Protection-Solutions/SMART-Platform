@@ -33,7 +33,7 @@ import org.locationtech.udig.project.ui.render.displayAdapter.ViewportPane;
 import org.locationtech.udig.project.ui.tool.AbstractModalTool;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;

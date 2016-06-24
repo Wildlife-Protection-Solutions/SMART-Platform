@@ -48,6 +48,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.GeometryUtils;
@@ -66,7 +67,6 @@ public class LocationComposite extends AbstractIncidentComposite {
 
 	public static final String ID = "incident.location"; //$NON-NLS-1$
 
-	private final GeometryFactory gf = new GeometryFactory();
 	private Projection currentProjection;
 	private Projection dbProjection;
 
@@ -173,7 +173,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 	private void transformInput(final Projection source, final Projection target) {
 		try {
 			//reproject
-			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
+			Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
 			Point p = (Point) JTS.transform(point, CRS.findMathTransform(
 					ReprojectUtils.stringToCrs(source.getDefinition()),
 					ReprojectUtils.stringToCrs(target.getDefinition())));

@@ -39,6 +39,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -53,8 +54,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  */
 public class IntelligencePointsResultSet implements IResultSet {
 
-	private static final GeometryFactory gf = new GeometryFactory();
-	
 	public static final String GEOM_COLUMN_NAME = "geometry"; //$NON-NLS-1$
 	
 	private int m_maxRows = -1;
@@ -165,7 +164,7 @@ public class IntelligencePointsResultSet implements IResultSet {
 		switch (colIndex) {
 			case 1: return ReprojectUtils.transform(pt.getX(), pt.getY(), crs).getX();
 			case 2: return ReprojectUtils.transform(pt.getX(), pt.getY(), crs).getY();
-			case 3: return gf.createPoint(new Coordinate(pt.getX(), pt.getY()));
+			case 3: return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(pt.getX(), pt.getY()));
 		}
 		return ""; //$NON-NLS-1$
 	}

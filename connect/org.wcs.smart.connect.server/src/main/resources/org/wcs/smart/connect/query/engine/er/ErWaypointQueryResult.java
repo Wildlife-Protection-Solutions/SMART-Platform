@@ -94,7 +94,7 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet {
 	@Override
 	public Geometry createGeometry(IResultItem rs) throws Exception {
 		SurveyQueryResultItem i = ((SurveyQueryResultItem)rs);
-		return gf.createPoint(new Coordinate(i.getWaypointX(), i.getWaypointY())); 
+		return gf.createPoint(new Coordinate(i.getWaypointX(null), i.getWaypointY(null))); 
 	}
 
 	@Override

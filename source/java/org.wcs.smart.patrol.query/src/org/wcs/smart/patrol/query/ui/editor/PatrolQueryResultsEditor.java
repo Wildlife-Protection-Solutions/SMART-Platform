@@ -49,6 +49,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
@@ -163,12 +164,12 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				projection = ObservationHibernateManager.createProjectionProvider(session).getProjection();
 				
 				Query tquery = (PatrolQuery) session.load(PatrolQuery.class, input.getUuid());
 				query = new QueryProxy(tquery);
 				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 				
+				projection = ObservationUtils.INSTANCE.createProjectionProvider(session, tquery.getConservationArea()).getProjection();
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(
 						MessageFormat.format(Messages.PatrolQueryResultsEditor_CouldNotParseQueryError, new Object[]{ input.getName() }) + ex.getLocalizedMessage(), ex);

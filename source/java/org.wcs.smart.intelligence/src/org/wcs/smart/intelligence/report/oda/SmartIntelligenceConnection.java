@@ -31,8 +31,9 @@ import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.report.execute.SmartReportRunner;
 
 import com.ibm.icu.util.ULocale;
@@ -87,7 +88,7 @@ public class SmartIntelligenceConnection implements IConnection {
 			value = (IProjectionProvider) appContext.get(PROJECTION_PROVIDER_CONTEXT_VAR);	
 		}
 		if (value == null){
-			value = ObservationHibernateManager.createProjectionProvider(getSession());
+			value = ObservationUtils.INSTANCE.createProjectionProvider(getSession(), SmartDB.getCurrentConservationArea());
 			if (appContext != null) appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, value);
 		}
 		return value;		

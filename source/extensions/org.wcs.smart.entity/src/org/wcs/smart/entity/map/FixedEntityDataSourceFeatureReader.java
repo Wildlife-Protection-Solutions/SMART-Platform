@@ -41,10 +41,10 @@ import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * Feature Reader for reading fixed entity type entity features.
@@ -57,7 +57,6 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 	
 	private Iterator<?> fIterator;
 	private EntityType entityType;
-	private static GeometryFactory gf = new GeometryFactory();
 	
 	private Session s;
 	
@@ -135,7 +134,7 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 				}
 			}
 		}
-		data[data.length - 1] = gf.createPoint(new Coordinate(entity.getX(), entity.getY()));
+		data[data.length - 1] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(entity.getX(), entity.getY()));
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
 	}
 	

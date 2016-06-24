@@ -28,8 +28,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.wcs.smart.map.GeometryFactoryProvider;
+
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
@@ -59,7 +60,7 @@ public class TrackUtil {
 		for (int i = 0; i < coordinates.size(); i ++){
 			coordinates.set(i, new Coordinate(coordinates.get(i)));
 		}
-		GeometryFactory gf = new GeometryFactory();
+		
 		Collections.sort(coordinates, new Comparator<Coordinate>() {
 			@Override
 			public int compare(Coordinate o1, Coordinate o2) {
@@ -82,7 +83,7 @@ public class TrackUtil {
 			c.z = c2.getTime().getTime();
 
 		}
-		LineString track = gf.createLineString(coordinates
+		LineString track = GeometryFactoryProvider.getFactory().createLineString(coordinates
 				.toArray(new Coordinate[coordinates.size()]));
 		return track;
 	}

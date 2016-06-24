@@ -45,6 +45,7 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -65,7 +66,8 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class AddWaypointDialog extends TitleAreaDialog{
 
-	private static final GeometryFactory gf = new GeometryFactory();
+	private static final GeometryFactory gf = GeometryFactoryProvider.getFactory();
+	
 	private Text txtWaypointId;
 	private Text txtX;
 	private Text txtY;

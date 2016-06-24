@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -44,9 +45,7 @@ public class IntelligenceRecordResultItem implements IGeometryResultItem {
 	 * Intelligence point geometry field name
 	 */
 	public static final String GEOMCOLUMN_KEY = "intel:geometry"; //$NON-NLS-1$
-	
-	private static final GeometryFactory gf = new GeometryFactory();
-	
+		
 	private String conservationAreaName;
 	private String conservationAreaId;
 	private UUID uuid;
@@ -142,7 +141,7 @@ public class IntelligenceRecordResultItem implements IGeometryResultItem {
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(GEOMCOLUMN_KEY)){
-			return gf.createMultiPoint(positions.toArray(new Coordinate[positions.size()]));
+			return GeometryFactoryProvider.getFactory().createMultiPoint(positions.toArray(new Coordinate[positions.size()]));
 		}
 		return null;
 	}

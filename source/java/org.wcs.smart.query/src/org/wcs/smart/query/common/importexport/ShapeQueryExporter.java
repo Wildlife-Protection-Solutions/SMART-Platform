@@ -124,8 +124,6 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void finish() throws Exception {
-		//TODO: sort out schema crs - that will likely be wrong
-		
 		URL shpFileURL = URLUtils.fileToURL(this.outputFile);
 		
 		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$

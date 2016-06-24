@@ -47,7 +47,8 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
@@ -238,7 +239,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 
 	
 	private void loadProjection(Session session){
-		prj = ObservationHibernateManager.createProjectionProvider(session).getProjection();
+		prj = ObservationUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea()).getProjection();
 	}
 	
 	/**

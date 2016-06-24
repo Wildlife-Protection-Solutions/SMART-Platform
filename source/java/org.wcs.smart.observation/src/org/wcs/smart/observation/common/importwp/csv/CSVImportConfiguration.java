@@ -38,6 +38,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
@@ -109,7 +110,6 @@ public class CSVImportConfiguration {
 	 */
 	public List<Waypoint> getWaypoints(IProgressMonitor monitor, Date singleDay) throws Exception {
 	
-		GeometryFactory gf = new GeometryFactory();
 		List<Waypoint> allPoints = new ArrayList<Waypoint>();
 		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
 		
@@ -143,7 +143,7 @@ public class CSVImportConfiguration {
 				if(singleDay == null ||  day0.equals(day1)){
 					Waypoint curWP = new Waypoint();
 					//reproject
-					Point point = gf.createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") ))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") ))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 
 					if(p.getX() > 180 || p.getX() < -180){

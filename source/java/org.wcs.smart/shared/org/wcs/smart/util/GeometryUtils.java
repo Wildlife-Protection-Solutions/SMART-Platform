@@ -52,12 +52,12 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.GeodeticCalculator;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
+import org.wcs.smart.map.GeometryFactoryProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
@@ -85,7 +85,6 @@ import com.vividsolutions.jts.linearref.LocationIndexedLine;
  */
 public class GeometryUtils {
 	private static Double MILLISEC_PER_HOUR = 3600000.0;
-	private static GeometryFactory geomFactory = new GeometryFactory();
 	
 	public static CoordinateReferenceSystem SMART_CRS;
 	static{
@@ -97,7 +96,7 @@ public class GeometryUtils {
 	} 
 	
 	private static WKBReader wkbreader(){
-		return new WKBReader(geomFactory);
+		return new WKBReader(GeometryFactoryProvider.getFactory());
 	}
 	
 	private static WKBWriter wkbwriter(){
@@ -138,7 +137,7 @@ public class GeometryUtils {
 	public static boolean pointInPolygon(Double x, Double y, byte[] wkb){
 		if (wkb == null || x == null || y == null) return false;
 		Geometry geom = gFromWKB(wkb);
-		return geom.intersects(geomFactory.createPoint(new Coordinate(x,y)));
+		return geom.intersects(GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x,y)));
 	}
 	
 	/**
@@ -267,7 +266,7 @@ public class GeometryUtils {
 					//outside envelop
 					continue;
 				}
-				LineString temp = geomFactory.createLineString(new Coordinate[]{c1, c2});
+				LineString temp = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[]{c1, c2});
 				if (pg.containsProperly(temp)){
 					//entirely contained within
 					value += (c2.z - c1.z);
@@ -441,10 +440,7 @@ public class GeometryUtils {
         LocationIndexedLine li = new LocationIndexedLine(ls);
         LinearLocation loc = li.project(p.getCoordinate());
         Coordinate c = li.extractPoint(loc);
-       
-        GeometryFactory fact = new GeometryFactory();
-        Point closestPoint = fact.createPoint(c);
-
+        Point closestPoint = GeometryFactoryProvider.getFactory().createPoint(c);
 		return distanceInMeters(closestPoint, p);
 	}
 

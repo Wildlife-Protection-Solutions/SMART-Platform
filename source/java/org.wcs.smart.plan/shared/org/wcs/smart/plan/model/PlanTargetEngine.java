@@ -30,6 +30,7 @@ import java.util.Locale;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.plan.model.NumericPlanTarget.Operator;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
@@ -176,7 +177,7 @@ public class PlanTargetEngine {
 
 
 	private boolean pointHasBeenVisited(int distanceForCompletion, Plan plan, SpatialPlanTargetPoint spt, Session session) throws Exception {
-		GeometryFactory fact = new GeometryFactory();
+		GeometryFactory fact = GeometryFactoryProvider.getFactory();
 		Coordinate c = new Coordinate(spt.getX(), spt.getY());
         Point point = fact.createPoint(c);
         

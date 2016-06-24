@@ -200,7 +200,7 @@ public class ReportApi extends HttpServlet{
 		
 						Map<Object,Object> items = task.getAppContext();
 						items.put(SmartReportRunner.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
-						items.put(SmartConnection.LOCAL_CONTEXT_VAR, request.getLocale());
+						items.put(SmartConnection.LOCALE_CONTEXT_VAR, request.getLocale());
 						items.put(SmartReportRunner.CA_PARAM, report.getConservationArea());
 						items.put(ServerSmartConnection.CCAA_FILTER_KEY, conservationAreas);
 						

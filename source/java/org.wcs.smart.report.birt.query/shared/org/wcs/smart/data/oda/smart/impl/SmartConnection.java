@@ -40,10 +40,11 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.report.execute.SmartReportRunner;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.ibm.icu.util.ULocale;
 
@@ -73,8 +74,8 @@ public abstract class SmartConnection implements IConnection {
 		public Projection getProjection() {
 			if (p == null){
 				p = new Projection();
-				p.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-				p.setName(SmartDB.DATABASE_CRS.getName().toString());
+				p.setParsedCoordinateReferenceSystem(GeometryUtils.SMART_CRS);
+				p.setName(GeometryUtils.SMART_CRS.getName().toString());
 			}
 			return p;
 		}
@@ -141,8 +142,11 @@ public abstract class SmartConnection implements IConnection {
 		if (appContext != null){
 			value = (IProjectionProvider) appContext.get(PROJECTION_PROVIDER_CONTEXT_VAR);	
 			if (value == null){
-				value = ObservationHibernateManager.createProjectionProvider(getSession());
-				appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, value);
+				ConservationArea reportca = (ConservationArea) appContext.get(SmartReportRunner.CA_PARAM);
+				if (reportca != null){
+					value = ObservationUtils.INSTANCE.createProjectionProvider(getSession(), reportca);
+					appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, value);
+				}
 			}
 		}
 		return value;		

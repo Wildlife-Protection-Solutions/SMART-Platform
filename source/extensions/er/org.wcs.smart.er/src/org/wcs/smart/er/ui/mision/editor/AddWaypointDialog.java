@@ -55,6 +55,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.samplingunit.SamplingUnitLabelProvider;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.ProjectionLabelProvider;
@@ -74,7 +75,7 @@ import com.vividsolutions.jts.linearref.LengthIndexedLine;
  */
 public class AddWaypointDialog extends TitleAreaDialog{
 
-	private static final GeometryFactory gf = new GeometryFactory();
+	private GeometryFactory gf = GeometryFactoryProvider.getFactory();
 	private Text txtWaypointId;
 	private Text txtX;
 	private Text txtY;

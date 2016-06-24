@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -59,8 +60,6 @@ public class SurveyQueryResultItem implements IGeometryResultItem{
 	 */
 	public static final String TRACK_GEOMCOLUMN_KEY = "track:geometry"; //$NON-NLS-1$
 	
-	private static final GeometryFactory gf = new GeometryFactory();
-
 	private String caId;
 	private String caName;
 	
@@ -533,12 +532,12 @@ public class SurveyQueryResultItem implements IGeometryResultItem{
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(WAYPOINT_GEOMCOLUMN_KEY)){
-			return gf.createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
+			return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
 		}else if (columnName.equals(TRACK_GEOMCOLUMN_KEY)){
 			if (getTracks() == null){
-				return gf.createMultiLineString(new LineString[]{});
+				return GeometryFactoryProvider.getFactory().createMultiLineString(new LineString[]{});
 			}
-			return gf.createMultiLineString(getTracks().toArray(new LineString[getTracks().size()]));
+			return GeometryFactoryProvider.getFactory().createMultiLineString(getTracks().toArray(new LineString[getTracks().size()]));
 		}
 		return null;
 	}

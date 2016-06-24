@@ -37,6 +37,11 @@
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.observation</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
     			<groupId>org.eclipse.birt.runtime</groupId>
     			<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
     			<version>3.4.3.v201405301249</version>

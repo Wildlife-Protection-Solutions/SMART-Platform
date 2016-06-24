@@ -32,6 +32,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.query.SightingResultItem;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
@@ -41,7 +42,6 @@ import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 /**
  * Entity sightings query feature reader.
  * 
@@ -131,9 +131,8 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 	 */
 	public static SimpleFeature createSightingResult(SightingResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
-		GeometryFactory gf = new GeometryFactory();
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(null), it.getWaypointY(null)));
+		data[0] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(it.getWaypointX(null), it.getWaypointY(null)));
 		data[1] = it.getEntityId() + "." + UuidUtils.uuidToString(it.getWaypointUuid()); //$NON-NLS-1$ 
 		for (int i = 0; i < columns.size(); i ++){
 			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
