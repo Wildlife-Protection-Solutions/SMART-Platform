@@ -488,6 +488,43 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 							AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType);
 							columns = qq.getGeometryColumns(queryType, Locale.getDefault());
 
+							//gridded queries we need to add aliases to hints as
+							//we renamed the tile_x columns
+							if (queryType.equalsIgnoreCase("entitygrid") || //$NON-NLS-1$
+								queryType.equalsIgnoreCase("observationgrid") ||//$NON-NLS-1$ 
+								queryType.equalsIgnoreCase("patrolgrid") || //$NON-NLS-1$
+								queryType.equalsIgnoreCase("surveygrid")) { //$NON-NLS-1$
+								
+								for (int x = 0; x < hints.getChildNodes().getLength(); x++) {
+									Node structure = hints.getChildNodes().item(x);
+									
+									if (structure.getNodeName().equalsIgnoreCase(STRUCTURE_TAG_NAME)){
+										boolean alais = false;
+										String heading = null;
+										for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
+											Node kid = structure.getChildNodes().item(y);
+											if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) &&
+													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("alias")) {
+												alais = true;
+											}
+											if (kid.getNodeName().equalsIgnoreCase("text-property") &&
+													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("displayName")) {
+												heading = kid.getTextContent();
+											}
+										}
+										if (!alais){
+											Node propNode = doc.createElement(PROPERTY_TAG_NAME);
+											Attr attribute = doc.createAttribute(NAME_ATT_NAME);
+											attribute.setValue("alias");
+											propNode.getAttributes().setNamedItem(attribute);
+											propNode.setTextContent(heading);
+											structure.appendChild(propNode); 
+										}
+											
+									}
+								}
+							}
+							
 							// for patrol queries we need to remove observer column as
 							// this is not valid in the new query but is in old query
 							// type

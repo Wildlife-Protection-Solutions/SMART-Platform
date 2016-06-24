@@ -202,7 +202,9 @@ public class DatasetComobInputDialog extends Dialog {
 		// do this here because setting the text will set enablement on the ok
 		// button
 		combo.getCombo().setFocus();
-		combo.setSelection(new StructuredSelection(mapOptions.get(0)));
+		if (mapOptions.size() > 0){
+			combo.setSelection(new StructuredSelection(mapOptions.get(0)));
+		}
 	}
 
 	/*

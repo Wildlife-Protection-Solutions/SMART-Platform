@@ -59,6 +59,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
+		queryTypeKey = QueryTypeManager.INSTANCE.findDeprecatedQueryTypeString(queryTypeKey);
 		if (queryTypeKey.equals(PatrolWaypointQuery.KEY) ||
 				queryTypeKey.equals(PatrolObservationQuery.KEY)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, PatrolQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY);

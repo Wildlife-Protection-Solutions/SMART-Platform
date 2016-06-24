@@ -115,7 +115,7 @@ public class ReportListView {
 	@Inject private ESelectionService selService;
 	@Inject private UISynchronize ui;
 	/*
-	 * listener for report chaning events
+	 * listener for report changing events
 	 */
 	private IReportListener listener = new IReportListener() {
 		@Override
@@ -146,7 +146,14 @@ public class ReportListView {
 				public void run() {
 					reportList.update(o, null);
 					if (o instanceof Report){
-						reportList.refresh(((Report)o).getFolder());
+						Report r = (Report)o;
+						if (r.getFolder() != null){
+							reportList.refresh(((Report)o).getFolder());
+						}else if (r.getShared()){
+							reportList.refresh(RootReportFolder.CA_ROOT_FOLDER);
+						}else if (!r.getShared()){
+							reportList.refresh(RootReportFolder.USER_ROOT_FOLDER);
+						}
 					}else if (o instanceof ReportFolder){
 						reportList.refresh(((ReportFolder)o).getParentFolder());
 					}
@@ -389,7 +396,7 @@ public class ReportListView {
 		@Override
 		public boolean performDrop(Object data) {
 			
-			StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
+			final StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
 			if (selection == null){
 				return false;
 			}
@@ -398,7 +405,9 @@ public class ReportListView {
 			if (!(currentTarget instanceof ReportFolder || currentTarget instanceof RootReportFolder)) return false;
 
 			final TreePath[] expanded = ((TreeViewer)ReportListDropListener.this.getViewer()).getExpandedTreePaths();
-			final Set<Job> jobs = Collections.synchronizedSet(new HashSet<Job>());
+			
+			
+			//close any open reports
 			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 				Object select = (Object) iterator.next();
 				if (select instanceof Report){
@@ -409,18 +418,27 @@ public class ReportListView {
 						if (!PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeEditor(editor, true)){
 							continue;
 						}
-					}
+					}	
+				}
+			}
+			
+				
+					
 					//run job to update query folder
-					Job internalUpdate = new Job("Update Query Folder"){ //$NON-NLS-1$
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
+			Job internalUpdate = new Job("Move Reports Job"){ //$NON-NLS-1$
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
 							
-							Session s = HibernateManager.openSession();
-							Report r = null;
-							boolean isChanged = false;
-							try{
-								s.beginTransaction();
-								r = (Report) s.load(Report.class, report.getUuid());
+					Session s = HibernateManager.openSession();
+					s.beginTransaction();
+					try{
+						for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+							Object select = (Object) iterator.next();
+							if (select instanceof Report){
+								Report r = null;
+								boolean isChanged = false;
+								
+								r = (Report) s.load(Report.class, ((Report)select).getUuid());
 								ReportFolder targetFolder = null;
 								boolean isShared = false;
 								if (currentTarget instanceof ReportFolder){
@@ -434,64 +452,47 @@ public class ReportListView {
 										r.getFolder() != null && targetFolder == null ||
 										r.getFolder() != null && !r.getFolder().equals(targetFolder) ||
 										r.getShared() != isShared){
-								
+									
 									isChanged = true;
 									r.setFolder(targetFolder);
 									r.setShared(isShared);
 								}
-								s.getTransaction().commit();
-							}catch (Exception ex){
-								if (s.getTransaction().isActive()) s.getTransaction().rollback();
-								ReportPlugIn.log(ex.getMessage(), ex);
-								return Status.OK_STATUS;
-							}finally{
-								s.close();
+									
+								if (isChanged){
+									final Report fr = r;
+									Display.getDefault().syncExec(new Runnable(){
+										@Override
+										public void run() {
+											ReportEventManager.getInstance().fireReportUpdated(fr);
+										}
+									});
+								}
 							}
-							// fire changed event if folder was changed
-							if (isChanged){
-								final Report fr = r;
-								Display.getDefault().syncExec(new Runnable(){
-									@Override
-									public void run() {
-										ReportEventManager.getInstance().fireReportUpdated(fr);
-										//this reopens in the wrong perspective which we don't want, so we just won't open for now
-//										if (editor != null){
-//											//reopen the editor
-//											try {
-//												PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editor.getEditorInput(), editor.getSite().getId());
-//											} catch (PartInitException e) {
-//												ReportPlugIn.log(e.getMessage(), e);
-//											}
-//										}
-									}
-								});
-							}
-							return Status.OK_STATUS;
-							
 						}
-						
-					};
-					internalUpdate.setSystem(true);
-					jobs.add(internalUpdate);
-					internalUpdate.schedule();
-					internalUpdate.addJobChangeListener(new JobChangeAdapter() {
-						@Override
-						public void done(IJobChangeEvent event) {
-							jobs.remove(event.getJob());
-							if (jobs.size() == 0){
-								//refresh viewer
-								Display.getDefault().syncExec(new Runnable(){
-									@Override
-									public void run() {
-										((LazyReportContentProvider)((TreeViewer)ReportListDropListener.this.getViewer()).getContentProvider()).setInitialExpandedPath(expanded);
-										ReportListDropListener.this.getViewer().refresh();							
-									}});
-							}							
-						}
-					});
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						ReportPlugIn.log(ex.getMessage(), ex);
+						return Status.OK_STATUS;
+					}finally{
+						s.close();
+					}
 					
-				};
-			}
+					//update ui 
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							((LazyReportContentProvider)((TreeViewer)ReportListDropListener.this.getViewer()).getContentProvider()).setInitialExpandedPath(expanded);
+							ReportListDropListener.this.getViewer().refresh();							
+						}});
+					
+					return Status.OK_STATUS;
+						
+				}
+						
+			};
+			internalUpdate.setSystem(true);
+			internalUpdate.schedule();
 			
 			return true;
 		}
