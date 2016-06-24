@@ -92,10 +92,10 @@ public class GridTiffImageExporter implements IQueryExporter {
 	}
 
 	/**
-	 * Tiff exports support reprojection
+	 * Tiff exports do not support reprojection
 	 */
 	@Override
 	public boolean supportsProjection() {
-		return true;
+		return false;
 	}
 }

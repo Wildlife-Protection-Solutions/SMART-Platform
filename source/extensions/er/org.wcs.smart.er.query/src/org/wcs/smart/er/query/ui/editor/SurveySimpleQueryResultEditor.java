@@ -154,7 +154,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	@Override
 	public IQueryService createQueryService() {
-		return new QueryService(getQuery());
+		return new QueryService(getQuery(), this);
 	}
 	
 	@Override

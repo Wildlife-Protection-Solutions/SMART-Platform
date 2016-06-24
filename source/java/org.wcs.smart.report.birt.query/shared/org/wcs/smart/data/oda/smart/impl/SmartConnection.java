@@ -36,7 +36,6 @@ import org.eclipse.datatools.connectivity.oda.util.manifest.ExtensionManifest;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
@@ -45,7 +44,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.util.ReprojectUtils;
 
 import com.ibm.icu.util.ULocale;
 
@@ -133,29 +131,21 @@ public abstract class SmartConnection implements IConnection {
 		return l;
 	}
 	
+	/**
+	 * 
+	 * @return the projection provider for the current app context
+	 * @throws Exception
+	 */
 	public IProjectionProvider getProjectionProvider() throws Exception{
+		IProjectionProvider value = defaultProjectionProvider;
 		if (appContext != null){
-			IProjectionProvider value = (IProjectionProvider) appContext.get(PROJECTION_PROVIDER_CONTEXT_VAR);	
+			value = (IProjectionProvider) appContext.get(PROJECTION_PROVIDER_CONTEXT_VAR);	
 			if (value == null){
-				final Projection prj = ObservationHibernateManager.getCurrentViewProjection(getSession());
-				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
-				if (prj != null){
-					IProjectionProvider provider  = new IProjectionProvider() {
-						@Override
-						public Projection getProjection() {
-							return prj;
-						}
-					};
-					appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, provider);
-					return provider;
-				}else{
-					appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, defaultProjectionProvider);
-				}
-			}else{
-				return value;
+				value = ObservationHibernateManager.createProjectionProvider(getSession());
+				appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, value);
 			}
 		}
-		return defaultProjectionProvider;		
+		return value;		
 	}
 	
 	/**

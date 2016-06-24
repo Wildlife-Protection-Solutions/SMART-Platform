@@ -22,6 +22,8 @@
 package org.wcs.smart.observation;
 
 import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ProjectionProvider;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -31,6 +33,7 @@ import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Extension of the smart hibernate manager for observation related data.
@@ -107,7 +110,32 @@ public class ObservationHibernateManager extends HibernateManager{
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Creates a projection provider that returns the
+	 * observation view projection if defined.  If not defined
+	 * then projection provider returns the database default projection.
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static IProjectionProvider createProjectionProvider(Session session){
+		Projection prj = ObservationHibernateManager.getCurrentViewProjection(session);
+		if (prj != null){
+			try{
+				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+			}catch (Exception ex){
+				ObservationPlugIn.log(ex.getMessage(), ex);
+				prj = null;
+			}
+		}
+		if (prj == null){
+			prj = new Projection();
+			prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+			prj.setName(SmartDB.DATABASE_CRS.getName().toString());
+		}
+		return new ProjectionProvider(prj);
+	}
 	/**
 	 * Creates new patrol options for a given conservation area and saves it to the database.
 	 * 

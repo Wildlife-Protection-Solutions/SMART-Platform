@@ -95,7 +95,7 @@ public class IntelligencePointsQuery implements IQuery {
 	 */
 	public IResultSet executeQuery() throws OdaException {
 		String[] uuids = ((String)parameters.get(1)).split(","); //$NON-NLS-1$
-		return new IntelligencePointsResultSet(uuids, (IntelligencePointsResultSetMetadata)getMetaData(), connection.getSession());
+		return new IntelligencePointsResultSet(uuids, (IntelligencePointsResultSetMetadata)getMetaData(), connection);
 	}
 
 	/**

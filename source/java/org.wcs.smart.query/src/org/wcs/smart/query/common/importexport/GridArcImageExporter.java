@@ -91,11 +91,11 @@ public class GridArcImageExporter implements IQueryExporter {
 	}
 	
 	/**
-	 * Grid exports support reprojection
+	 * Grid exports do not support reprojection
 	 */
 	@Override
 	public boolean supportsProjection() {
-		return true;
+		return false;
 	}
 
 }

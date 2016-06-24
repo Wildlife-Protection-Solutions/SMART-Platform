@@ -37,6 +37,7 @@ import org.geotools.data.DataStore;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.patrol.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSourceFactory;
@@ -70,6 +71,7 @@ public class QueryService extends IQueryService {
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
 	private Query query = null;
+	private IProjectionProvider prjProvider;
 	
 	/**
 	 * Creates a new query service 
@@ -86,8 +88,9 @@ public class QueryService extends IQueryService {
 	 * 
 	 * @param query waypoint query
 	 */
-	public QueryService(Query query){
+	public QueryService(Query query, IProjectionProvider prjProvider){
 		this.query = query;
+		this.prjProvider = prjProvider;
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
 		this.url = QueryServiceExtension.createURL(this.params);
@@ -227,11 +230,11 @@ public class QueryService extends IQueryService {
                 if (ds == null) {
                 	if (query != null){
                 		if (query.getTypeKey().equals(PatrolObservationQuery.KEY) ){
-                			ds = new QueryDataSource((PatrolObservationQuery)query);
+                			ds = new QueryDataSource((PatrolObservationQuery)query, prjProvider);
                 		}else if (query.getTypeKey().equals(PatrolWaypointQuery.KEY) ){
-                    		ds = new QueryDataSource((PatrolWaypointQuery)query);
+                    		ds = new QueryDataSource((PatrolWaypointQuery)query, prjProvider);
                 		}else if (query.getTypeKey().equals(PatrolQuery.KEY) ){
-                			ds = new PatrolQueryDataSource((PatrolQuery)query);
+                			ds = new PatrolQueryDataSource((PatrolQuery)query, prjProvider);
                 		}
                 	}else{
                 		//use factory

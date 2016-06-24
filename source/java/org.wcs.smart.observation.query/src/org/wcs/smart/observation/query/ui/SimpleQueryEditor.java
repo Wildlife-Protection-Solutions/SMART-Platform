@@ -57,7 +57,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 
 	@Override
 	public IQueryService createQueryService() {
-		return new QueryService(query.getQuery());
+		return new QueryService(query.getQuery(), this);
 	}
 
 	@Override

@@ -135,7 +135,8 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query instanceof SimpleQuery && (query instanceof IPagedQuery || query instanceof IMemoryQuery)){
+		if (query instanceof SimpleQuery 
+				&& (query instanceof IPagedQuery || query instanceof IMemoryQuery)){
 			return true;
 		}
 		return false;

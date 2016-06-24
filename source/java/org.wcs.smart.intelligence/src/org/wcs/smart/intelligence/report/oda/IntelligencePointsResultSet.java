@@ -33,12 +33,13 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
+import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -62,16 +63,23 @@ public class IntelligencePointsResultSet implements IResultSet {
 	private Object lastObject = null;
 	private List<IntelligencePoint> points;
 	private IntelligencePointsResultSetMetadata metadata;
-		
+	private CoordinateReferenceSystem crs = null;
+	
 	public IntelligencePointsResultSet(String[] uuids, 
 			IntelligencePointsResultSetMetadata metaData,
-			Session session) {
+			SmartIntelligenceConnection connection) {
 		this.metadata = metaData;
 		points = new ArrayList<IntelligencePoint>();
-
+		try{
+			this.crs = connection.getProjectionProvider().getProjection().getParsedCoordinateReferenceSystem();
+		}catch (Exception ex){
+			this.crs = SmartDB.DATABASE_CRS;
+		}
+		
+		
 		for (int i = 0; i < uuids.length; i ++){
 			try{
-				Intelligence p = (Intelligence)session.createCriteria(Intelligence.class)
+				Intelligence p = (Intelligence)connection.getSession().createCriteria(Intelligence.class)
 						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 						.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(uuids[i]))).list().get(0); //$NON-NLS-1$
 				if (p != null) {
@@ -155,8 +163,8 @@ public class IntelligencePointsResultSet implements IResultSet {
 		IntelligencePoint pt = points.get(currentRow);
 		
 		switch (colIndex) {
-			case 1: return pt.getX();
-			case 2: return pt.getY();
+			case 1: return ReprojectUtils.transform(pt.getX(), pt.getY(), crs).getX();
+			case 2: return ReprojectUtils.transform(pt.getX(), pt.getY(), crs).getY();
 			case 3: return gf.createPoint(new Coordinate(pt.getX(), pt.getY()));
 		}
 		return ""; //$NON-NLS-1$

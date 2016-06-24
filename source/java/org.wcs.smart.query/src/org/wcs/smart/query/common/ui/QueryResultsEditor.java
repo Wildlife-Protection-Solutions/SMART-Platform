@@ -23,7 +23,6 @@ package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -48,7 +47,6 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
@@ -77,7 +75,6 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
-import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -241,20 +238,9 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 
 	
 	private void loadProjection(Session session){
-		prj = ObservationHibernateManager.getCurrentViewProjection(session);
-		try{
-			if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
-				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
-			}
-		}catch (Exception ex){
-			prj = null;
-		}
-		if (prj == null){
-			prj = new Projection();
-			prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-			prj.setName(SmartDB.DATABASE_CRS.getName().toString());
-		}
+		prj = ObservationHibernateManager.createProjectionProvider(session).getProjection();
 	}
+	
 	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#dispose()
 	 */

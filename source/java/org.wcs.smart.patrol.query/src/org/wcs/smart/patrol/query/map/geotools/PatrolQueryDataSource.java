@@ -32,6 +32,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -55,14 +56,16 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	private PatrolQuery query;
 	private List<QueryColumn> queryColumns;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
+	private IProjectionProvider prjProvider;
 	
 	/**
 	 * Creates a new data source from the give query.
 	 * 
 	 * @param query
 	 */
-	public PatrolQueryDataSource(PatrolQuery query){
+	public PatrolQueryDataSource(PatrolQuery query, IProjectionProvider prjProvider){
 		this.query = query;
+		this.prjProvider = prjProvider;
 	}
 
 	/**
@@ -87,7 +90,6 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	 */
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		this.queryColumns = query.computeQueryColumns(Locale.getDefault(),  null, null);
 		return new PatrolQueryFeatureReader(this.query, getSchema(typeName), queryColumns);
 	}
 
@@ -127,6 +129,7 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createPatrolSchema() throws SchemaException{
+		this.queryColumns = query.computeQueryColumns(Locale.getDefault(),  null, prjProvider);
 		SimpleFeatureType type =  DataUtilities.createType("smart." + PATROL_TYPE, getFeatureSchemaDef(queryColumns, true, false)); //$NON-NLS-1$
 		return type;
 	}

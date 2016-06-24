@@ -32,6 +32,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
@@ -54,6 +55,7 @@ public class QueryDataSource extends AbstractDataStore{
 	
 	private SimpleQuery query;
 	private List<QueryColumn> columns;
+	private IProjectionProvider prjProvider;
 	
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
@@ -62,8 +64,9 @@ public class QueryDataSource extends AbstractDataStore{
 	 * 
 	 * @param query
 	 */
-	public QueryDataSource(PatrolObservationQuery query){
+	public QueryDataSource(PatrolObservationQuery query, IProjectionProvider prjProvider){
 		this.query = query;
+		this.prjProvider = prjProvider;
 	}
 
 	
@@ -72,8 +75,9 @@ public class QueryDataSource extends AbstractDataStore{
 	 * 
 	 * @param query
 	 */
-	public QueryDataSource(PatrolWaypointQuery query){
+	public QueryDataSource(PatrolWaypointQuery query, IProjectionProvider prjProvider){
 		this.query = query;
+		this.prjProvider = prjProvider;
 	}
 	
 	public void reset(){
@@ -141,7 +145,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		this.columns = query.computeQueryColumns(Locale.getDefault(),  null, null);
+		this.columns = query.computeQueryColumns(Locale.getDefault(),  null, prjProvider);
 		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(columns, true, false)); //$NON-NLS-1$
 		return type;
 	}

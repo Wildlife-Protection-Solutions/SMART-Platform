@@ -37,6 +37,7 @@ import org.geotools.data.DataStore;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.er.query.map.geotools.SurveyDataSourceFactory;
 import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
 import org.wcs.smart.er.query.model.MissionQuery;
@@ -69,7 +70,7 @@ public class QueryService extends IQueryService {
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
 	private Query query = null;
-	
+	private IProjectionProvider prjProvider = null;
 	/**
 	 * Creates a new query service 
 	 * @param params service parameters
@@ -85,8 +86,9 @@ public class QueryService extends IQueryService {
 	 * 
 	 * @param query waypoint query
 	 */
-	public QueryService(Query query){
+	public QueryService(Query query, IProjectionProvider prjProvider){
 		this.query = query;
+		this.prjProvider = prjProvider;
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(SurveyDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
 		this.url = QueryServiceExtension.createURL(this.params);
@@ -231,7 +233,7 @@ public class QueryService extends IQueryService {
                 			query.getTypeKey().equals(SurveyWaypointQuery.KEY) ||
                 				query.getTypeKey().equals(MissionQuery.KEY) || 
                 				query.getTypeKey().equals(MissionTrackQuery.KEY)){
-                			ds = new SurveyQueryDataSource((SimpleQuery)query);
+                			ds = new SurveyQueryDataSource((SimpleQuery)query, prjProvider);
                 		}
                 	}else{
                 		//use factory

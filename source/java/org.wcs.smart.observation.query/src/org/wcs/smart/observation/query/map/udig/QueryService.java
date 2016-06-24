@@ -37,6 +37,7 @@ import org.geotools.data.DataStore;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.observation.query.map.geotools.QueryDataSource;
 import org.wcs.smart.observation.query.map.geotools.QueryDataSourceFactory;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
@@ -68,7 +69,7 @@ public class QueryService extends IQueryService {
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
 	private Query query = null;
-	
+	private IProjectionProvider prjProvider = null;
 	/**
 	 * Creates a new query service 
 	 * @param params service parameters
@@ -84,8 +85,9 @@ public class QueryService extends IQueryService {
 	 * 
 	 * @param query waypoint query
 	 */
-	public QueryService(Query query){
+	public QueryService(Query query, IProjectionProvider projProvider){
 		this.query = query;
+		this.prjProvider = projProvider;
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
 		this.url = QueryServiceExtension.createURL(this.params);
@@ -223,9 +225,9 @@ public class QueryService extends IQueryService {
                 if (ds == null) {
                 	if (query != null){
                 		if (query.getTypeKey().equals(ObsObservationQuery.KEY) ){
-                			ds = new QueryDataSource((ObsObservationQuery)query);
+                			ds = new QueryDataSource((ObsObservationQuery)query, prjProvider);
                 		}else if (query.getTypeKey().equals(ObservationWaypointQuery.KEY) ){
-                    		ds = new QueryDataSource((ObservationWaypointQuery)query);
+                    		ds = new QueryDataSource((ObservationWaypointQuery)query, prjProvider);
                 		}
                 	}else{
                 		//use factory

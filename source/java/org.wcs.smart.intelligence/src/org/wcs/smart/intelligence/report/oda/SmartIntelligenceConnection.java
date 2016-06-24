@@ -30,7 +30,9 @@ import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.report.execute.SmartReportRunner;
 
 import com.ibm.icu.util.ULocale;
@@ -43,6 +45,11 @@ import com.ibm.icu.util.ULocale;
  */
 public class SmartIntelligenceConnection implements IConnection {
 
+	/**
+	 * App context projection provider variable
+	 */
+	public static final String PROJECTION_PROVIDER_CONTEXT_VAR = "org.wcs.smart.report.crs"; //$NON-NLS-1$
+	
 	private boolean m_isOpen = false;
 	protected Session localSession;
 	protected Map<Object,Object> appContext;
@@ -67,6 +74,23 @@ public class SmartIntelligenceConnection implements IConnection {
 
 	public Session getSession(){
 		return this.localSession;
+	}
+	
+	/**
+	 * 
+	 * @return the projection provider for the current app context
+	 * @throws Exception
+	 */
+	public IProjectionProvider getProjectionProvider() throws Exception{
+		IProjectionProvider value = null;
+		if (appContext != null){
+			value = (IProjectionProvider) appContext.get(PROJECTION_PROVIDER_CONTEXT_VAR);	
+		}
+		if (value == null){
+			value = ObservationHibernateManager.createProjectionProvider(getSession());
+			if (appContext != null) appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, value);
+		}
+		return value;		
 	}
 	
 	/**

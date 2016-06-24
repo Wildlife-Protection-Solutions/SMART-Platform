@@ -205,7 +205,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			};
 			runQueryJob.schedule();
 			//add pq to map
-			IService service = QueryServiceFactory.generateQueryService(pq);
+			IService service = QueryServiceFactory.generateQueryService(pq, parentEditor);
 			@SuppressWarnings("unchecked")
 			List<IGeoResource> layers = (List<IGeoResource>) service.resources(monitor);
 			if (layers.size() > 0){

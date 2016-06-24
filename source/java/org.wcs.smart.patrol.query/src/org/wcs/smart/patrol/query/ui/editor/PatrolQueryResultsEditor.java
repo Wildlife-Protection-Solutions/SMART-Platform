@@ -163,19 +163,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				projection = ObservationHibernateManager.getCurrentViewProjection(session);
-				try{
-					if (projection != null && projection.getParsedCoordinateReferenceSystem() == null){
-						projection.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(projection.getDefinition()));
-					}
-				}catch (Exception ex){
-					projection = null;
-				}
-				if (projection == null){
-					projection = new Projection();
-					projection.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-					projection.setName(SmartDB.DATABASE_CRS.getName().toString());
-				}
+				projection = ObservationHibernateManager.createProjectionProvider(session).getProjection();
 				
 				Query tquery = (PatrolQuery) session.load(PatrolQuery.class, input.getUuid());
 				query = new QueryProxy(tquery);
@@ -544,6 +532,6 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 
 	@Override
 	public IQueryService createQueryService() {
-		return new QueryService(getQuery());
+		return new QueryService(getQuery(), this);
 	}
 }

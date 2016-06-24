@@ -35,7 +35,6 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
@@ -43,8 +42,6 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.observation.ObservationHibernateManager;
-import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * The Intelligence Editor
@@ -129,20 +126,8 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart, 
 			//load patrol items so don't have lazy loading issues later.
 			session.beginTransaction();
 			try{
-				viewProjection = ObservationHibernateManager.getCurrentViewProjection(session);
-				if (viewProjection != null && viewProjection.getParsedCoordinateReferenceSystem() == null){
-					try{
-						viewProjection.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(viewProjection.getDefinition()));
-					}catch (Exception ex){
-						viewProjection = null;
-					}
-				}
-				if (viewProjection == null){
-					viewProjection = new Projection();
-					viewProjection.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-					viewProjection.setName(SmartDB.DATABASE_CRS.getName().toString());
-				}
-				
+				viewProjection = ObservationHibernateManager.createProjectionProvider(session).getProjection();
+
 				intelligence = (Intelligence) session.load(Intelligence.class, puuid);
 				if (intelligence.getPatrol() != null) {
 					intelligence.getPatrol().getId();

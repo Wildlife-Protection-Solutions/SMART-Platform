@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.query.map.udig;
 
 import org.locationtech.udig.catalog.IService;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;
@@ -43,10 +44,10 @@ public class QueryServiceFactory {
 	 * @param query
 	 * @return
 	 */
-	public static IService generateQueryService(Query query){
+	public static IService generateQueryService(Query query, IProjectionProvider prjProvider){
 		
 		if (query instanceof SimpleQuery){
-			return new QueryService((SimpleQuery)query);
+			return new QueryService((SimpleQuery)query, prjProvider);
 		}else if (query instanceof GriddedQuery ){
 			return new RasterService((GriddedQuery)query);
 		}

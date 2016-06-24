@@ -32,6 +32,7 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
@@ -65,6 +66,7 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	
 	private SimpleQuery query;
 	private List<QueryColumn> cachedColumns;
+	private IProjectionProvider prjProvider;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	/**
@@ -72,8 +74,9 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	 * 
 	 * @param query
 	 */
-	public SurveyQueryDataSource(SimpleQuery query){
+	public SurveyQueryDataSource(SimpleQuery query, IProjectionProvider prjProvider){
 		this.query = query;
+		this.prjProvider = prjProvider;
 	}
 
 	/**
@@ -152,19 +155,19 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  null);
+		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  prjProvider);
 		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(cachedColumns, true, false)); //$NON-NLS-1$
 		return type;
 	}
 	
 	private SimpleFeatureType createMissionTrackSchema() throws SchemaException{
-		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  null);
+		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  prjProvider);
 		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_MISSION_TRACK_TYPE, getMissionTrackFeatureSchemaDef()); //$NON-NLS-1$
 		return type;
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  null);
+		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  prjProvider);
 		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(cachedColumns, true, false)); //$NON-NLS-1$
 		return type;
 	}
