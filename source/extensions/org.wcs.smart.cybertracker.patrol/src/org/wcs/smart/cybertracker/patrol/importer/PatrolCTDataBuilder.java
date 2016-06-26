@@ -50,6 +50,8 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.Team;
 
+import com.google.gson.JsonSyntaxException;
+
 /**
  * Builds specific patrol objects that suitable for further import
  * 
@@ -159,14 +161,11 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 	private void recordPatrolData(CyberTrackerPatrol ctPatrol, E i, String v, Map<String, E> eMap, Session session) {
 		String n = i.getN();
 		if (ScreensUtil.RESULT_DEFAULT_META_VALUES.equals(n)) {
-			String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
-			for (String ctid : ctIdArray) {
-				E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
-				if (di != null) {
-					recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
-				} else {
-					ctPatrol.addError(PatrolMeta.GENERAL, MessageFormat.format(Messages.PatrolCTDataBuilder_Error_DefaultValue, ctid));
-				}
+			if (isCtIdsList(v)) {
+				//import for old versions (4.0.0 or lower)
+				recordBefore401DefaultMetaValues(ctPatrol, v, eMap, session);
+			} else {
+				recordAfter400DefaultMetaValues(ctPatrol, v, eMap, session);
 			}
 		} else if (ScreensUtil.RESULT_ID.equals(n)) {
 			ctPatrol.setId(v);
@@ -237,5 +236,29 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 		}		
 	}
-	
+
+	private void recordAfter400DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) {
+		try {
+			List<E> values = extractJsonDefaultMetaValues(v, eMap);
+			for (E di : values) {
+				recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
+			}
+		} catch (JsonSyntaxException e) {
+			ctPatrol.addError(PatrolMeta.GENERAL, Messages.PatrolCTDataBuilder_Error_JsonDefaultValue);
+		}
+	}
+
+	private void recordBefore401DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) {
+		//import for old versions (4.0.0 or lower)
+		String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
+		for (String ctid : ctIdArray) {
+			E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
+			if (di != null) {
+				recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
+			} else {
+				ctPatrol.addError(PatrolMeta.GENERAL, MessageFormat.format(Messages.PatrolCTDataBuilder_Error_DefaultValue, ctid));
+			}
+		}
+	}
+
 }

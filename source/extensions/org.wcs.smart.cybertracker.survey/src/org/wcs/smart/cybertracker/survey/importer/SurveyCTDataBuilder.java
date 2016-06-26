@@ -52,6 +52,8 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 
+import com.google.gson.JsonSyntaxException;
+
 /**
  * Builds specific survey objects that suitable for further import
  * 
@@ -173,14 +175,11 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 	private void recordSurveyData(CyberTrackerSurvey ctSurvey, E i, String v, Map<String, E> eMap, Session session) {
 		String n = i.getN();
 		if (ScreensUtil.RESULT_DEFAULT_META_VALUES.equals(n)) {
-			String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
-			for (String ctid : ctIdArray) {
-				E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
-				if (di != null) {
-					recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
-				} else {
-					ctSurvey.addError(SurveyMeta.GENERAL, MessageFormat.format(Messages.SurveyCTDataBuilder_Error_DefaultValue, ctid));
-				}
+			if (isCtIdsList(v)) {
+				//import for old versions (4.0.0 or lower)
+				recordBefore401DefaultMetaValues(ctSurvey, v, eMap, session);
+			} else {
+				recordAfter400DefaultMetaValues(ctSurvey, v, eMap, session);
 			}
 		} else if (ScreensUtil.RESULT_ID.equals(n)) {
 			ctSurvey.setId(v);
@@ -264,6 +263,30 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 				}
 			}
 			ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_UnsupportedAttribute, ma.getType(), tag0));
+		}
+	}
+
+	private void recordAfter400DefaultMetaValues(CyberTrackerSurvey ctSurvey, String v, Map<String, E> eMap, Session session) {
+		try {
+			List<E> values = extractJsonDefaultMetaValues(v, eMap);
+			for (E di : values) {
+				recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
+			}
+		} catch (JsonSyntaxException e) {
+			ctSurvey.addError(SurveyMeta.GENERAL, Messages.SurveyCTDataBuilder_Error_JsonDefaultValue);
+		}
+	}
+
+	private void recordBefore401DefaultMetaValues(CyberTrackerSurvey ctSurvey, String v, Map<String, E> eMap, Session session) {
+		//import for old versions (4.0.0 or lower)
+		String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
+		for (String ctid : ctIdArray) {
+			E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
+			if (di != null) {
+				recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
+			} else {
+				ctSurvey.addError(SurveyMeta.GENERAL, MessageFormat.format(Messages.SurveyCTDataBuilder_Error_DefaultValue, ctid));
+			}
 		}
 	}
 }

@@ -46,6 +46,7 @@ import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
+import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -133,8 +134,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 		} else {
 			boolean value = Boolean.TRUE.equals(so.getBooleanValue());
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, "", elId, Boolean.toString(value)); //$NON-NLS-1$
-			result.defaultValues.add(createDefaultResultElement(RESULT_ARMED, elements, elId));
+			Elements.List.Items.Item aValue = ElementsUtil.addElementsItem(elements, "", elId, Boolean.toString(value)); //$NON-NLS-1$
+			result.defaultValues.add(createDefaultResultRecord(RESULT_ARMED, elements, aValue));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.TEAM);
@@ -149,8 +150,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, ctUtil.getName(team), elId, UuidUtils.uuidToString(team.getUuid()));
-			result.defaultValues.add(createDefaultResultElement(RESULT_TEAM, elements, elId));
+			Elements.List.Items.Item teamValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(team), elId, UuidUtils.uuidToString(team.getUuid()));
+			result.defaultValues.add(createDefaultResultRecord(RESULT_TEAM, elements, teamValue));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.STATION);
@@ -165,8 +166,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, ctUtil.getName(station), elId, UuidUtils.uuidToString(station.getUuid()));
-			result.defaultValues.add(createDefaultResultElement(RESULT_STATION, elements, elId));
+			Elements.List.Items.Item stValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(station), elId, UuidUtils.uuidToString(station.getUuid()));
+			result.defaultValues.add(createDefaultResultRecord(RESULT_STATION, elements, stValue));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.MANDATE);
@@ -182,22 +183,22 @@ public class PatrolScreensUtil extends ScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, ctUtil.getName(mandate), elId, UuidUtils.uuidToString(mandate.getUuid()));
-			result.defaultValues.add(createDefaultResultElement(RESULT_MANDATE, elements, elId));
+			Elements.List.Items.Item mndValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(mandate), elId, UuidUtils.uuidToString(mandate.getUuid()));
+			result.defaultValues.add(createDefaultResultRecord(RESULT_MANDATE, elements, mndValue));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.OBJECTIVE);
 		if (so == null || so.isVisible()) {
 			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE, Patrol.MAX_OBJECTIVE_LENGTH);
 		} else {
-			result.defaultValues.add(createDefaultResultElement(RESULT_OBJECTIVE, elements, so.getStringValue()));
+			result.defaultValues.add(createDefaultResultRecord(RESULT_OBJECTIVE, elements, so.getStringValue()));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.COMMENT);
 		if (so == null || so.isVisible()) {
 			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS, Patrol.MAX_COMMENT_LENGTH);
 		} else {
-			result.defaultValues.add(createDefaultResultElement(RESULT_COMMENTS, elements, so.getStringValue()));
+			result.defaultValues.add(createDefaultResultRecord(RESULT_COMMENTS, elements, so.getStringValue()));
 		}
 
 		List<Employee> employees = HibernateManager.getActiveEmployees(ca, session);
@@ -235,20 +236,20 @@ public class PatrolScreensUtil extends ScreensUtil {
 			ScreenOption leader_so = screenOptions.get(PatrolScreenOptionMeta.LEADER);
 			ScreenOption pilot_so = screenOptions.get(PatrolScreenOptionMeta.PILOT);
 			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
-			CyberTrackerId leaderCtId = null;
-			CyberTrackerId pilotCtId = null;
+			Elements.List.Items.Item leaderItem = null;
+			Elements.List.Items.Item pilotItem = null;
 			for (ScreenOptionUuid sou : so.getUuidList()) {
 				for (Employee e : employees) {
 					if (sou.getUuidValue().equals(e.getUuid())) {
 						CyberTrackerId mctid = new CyberTrackerId();
-						ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
-						result.defaultValues.add(mctid.getItemId());
+						Elements.List.Items.Item memberValue = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+						result.defaultValues.add(new CtDataKeyValueRecord(memberValue, ICyberTrackerConstants.STR_TRUE));
 						memberIds.add(mctid);
 						if (leader_so.getUuidValue() != null && leader_so.getUuidValue().equals(e.getUuid())) {
-							leaderCtId = mctid;
+							leaderItem = memberValue;
 						}
 						if (pilot_so.getUuidValue() != null && pilot_so.getUuidValue().equals(e.getUuid())) {
-							pilotCtId = mctid;
+							pilotItem = memberValue;
 						}
 					}
 				}
@@ -257,21 +258,21 @@ public class PatrolScreensUtil extends ScreensUtil {
 			if (leader_so == null || leader_so.isVisible()) {
 				id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_LEADER, memberIds, false);
 			} else {
-				if (leaderCtId == null) {
+				if (leaderItem == null) {
 					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Leader, null);
 					return null;
 				}
-				result.defaultValues.add(createDefaultResultElement(RESULT_LEADER, elements, leaderCtId.getItemId()));
+				result.defaultValues.add(createDefaultResultRecord(RESULT_LEADER, elements, leaderItem));
 			}
 
 			if (pilot_so == null || pilot_so.isVisible()) {
 				id = addPilotScreen(id, result, elements, screenOptions, memberIds, patrolTypes, null);
 			} else {
-				if (pilotCtId == null) {
+				if (pilotItem == null) {
 					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Pilot, null);
 					return null;
 				}
-				result.defaultValues.add(createDefaultResultElement(RESULT_PILOT, elements, pilotCtId.getItemId()));
+				result.defaultValues.add(createDefaultResultRecord(RESULT_PILOT, elements, pilotItem));
 			}
 			
 		}
@@ -434,8 +435,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, "", elId, value.name()); //$NON-NLS-1$
-			container.defaultValues.add(createDefaultResultElement(RESULT_PATROL_TYPE, elements, elId));
+			Elements.List.Items.Item tValue = ElementsUtil.addElementsItem(elements, "", elId, value.name()); //$NON-NLS-1$
+			container.defaultValues.add(createDefaultResultRecord(RESULT_PATROL_TYPE, elements, tValue));
 			
 			ScreenOption trOption = screenOptions.get(PatrolScreenOptionMeta.TRANSPORT);
 			if (trOption == null || trOption.isVisible()) {
@@ -459,8 +460,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 					return null;
 				}
 				String trElId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, UuidUtils.uuidToString(transport.getUuid()));
-				container.defaultValues.add(createDefaultResultElement(RESULT_TRANSPORT, elements, trElId));
+				Elements.List.Items.Item trValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, UuidUtils.uuidToString(transport.getUuid()));
+				container.defaultValues.add(createDefaultResultRecord(RESULT_TRANSPORT, elements, trValue));
 				return id;
 			}
 			

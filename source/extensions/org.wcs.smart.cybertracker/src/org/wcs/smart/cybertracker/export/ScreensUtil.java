@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.export;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -36,10 +35,12 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
+import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 import org.wcs.smart.cybertracker.model.filter.Categories;
 import org.wcs.smart.cybertracker.model.filter.ElementFilters;
 import org.wcs.smart.cybertracker.model.filter.Filter;
@@ -48,6 +49,8 @@ import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.util.UuidUtils;
+
+import com.google.gson.Gson;
 
 /**
  * Util for creating screens based on metadata for CyberTracker.
@@ -143,13 +146,8 @@ public class ScreensUtil {
 		if (nextTaskOptions.size() != nodeIds.size()) {
 			throw new IllegalArgumentException("Unable to build next task node. Number of task options is not equal to the number of referenced nodes."); //$NON-NLS-1$
 		}
-		StringBuilder defaults = new StringBuilder();
-		for (Iterator<String> i = container.defaultValues.iterator(); i.hasNext();) {
-			defaults.append(i.next());
-			if (i.hasNext())
-				defaults.append(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
-		}
-		String defaultValues = defaults.toString();
+		Gson gson = new Gson();
+		String defaultValues = gson.toJson(container.defaultValues);
 		
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, nextTaskOptions.toArray(new String[nextTaskOptions.size()]));
 		List<String> values = ctUtil.listItemIds(ids);
@@ -243,10 +241,16 @@ public class ScreensUtil {
 		return resultId.getItemId();
 	}
 	
-	protected String createDefaultResultElement(String name, Elements elements, String defaultValue) {
+	protected CtDataKeyValueRecord createDefaultResultRecord(String name, Elements elements, Item valueItem) {
 		CyberTrackerId resultId = new CyberTrackerId();
-		ElementsUtil.addElementsItem(elements, name, resultId.getItemId(), null, null, defaultValue);
-		return resultId.getItemId();
+		Item item = ElementsUtil.addElementsItem(elements, name, resultId.getItemId(), null, null, valueItem.getId());
+		return new CtDataKeyValueRecord(item, valueItem);
+	}
+
+	protected CtDataKeyValueRecord createDefaultResultRecord(String name, Elements elements, String valueString) {
+		CyberTrackerId resultId = new CyberTrackerId();
+		Item item = ElementsUtil.addElementsItem(elements, name, resultId.getItemId(), null, null, valueString);
+		return new CtDataKeyValueRecord(item, valueString);
 	}
 	
 	protected CyberTrackerId toNextScreen(Node node) {

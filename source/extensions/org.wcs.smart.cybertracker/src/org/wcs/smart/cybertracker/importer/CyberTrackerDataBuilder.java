@@ -30,10 +30,13 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.ElementsUtil;
+import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.model.CyberTrackerRawData;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
@@ -42,6 +45,9 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.util.SightsUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.vividsolutions.jts.geom.Coordinate;
 
 
@@ -53,7 +59,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @since 4.0.0
  */
 public abstract class CyberTrackerDataBuilder {
-
+	
 	public List<ICyberTrackerData> buildRecords(CyberTrackerRawData rawData) {
 		List<ICyberTrackerData> records = new ArrayList<ICyberTrackerData>();
 		Session session = HibernateManager.openSession();
@@ -134,4 +140,32 @@ public abstract class CyberTrackerDataBuilder {
 		
 		return new Coordinate(x, y, AbstractSmartImporter.combine(date, time).getTime());
 	}
+	
+	protected boolean isCtIdsList(String value) {
+    	//this pattern checks that it is a list of CtIds separated with ";"
+		Pattern oldDefaultValuesPattern = Pattern.compile("(\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\};)*\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\}"); //$NON-NLS-1$
+		return oldDefaultValuesPattern.matcher(value).matches();
+	}
+
+	protected List<E> extractJsonDefaultMetaValues(String v, Map<String, E> eMap) throws JsonSyntaxException {
+		List<E> result = new ArrayList<>();
+		java.lang.reflect.Type listType = new TypeToken<ArrayList<CtDataKeyValueRecord>>(){}.getType();
+		List<CtDataKeyValueRecord> defaultValues = new Gson().fromJson(v, listType);
+		for (CtDataKeyValueRecord defV : defaultValues) {
+			E keyE = ElementsUtil.itemToE(defV.getKeyItem());
+			if (!eMap.containsKey(keyE.getI())) {
+				eMap.put(keyE.getI(), keyE);
+			}
+			if (defV.getValueItem() != null) {
+				String valueId = defV.getValueItem().getId();
+				if(!eMap.containsKey(valueId)) {
+					E valueE = ElementsUtil.itemToE(defV.getValueItem());
+					eMap.put(valueE.getI(), valueE);
+				}
+			}
+			result.add(keyE);
+		}
+		return result;
+	}
+
 }

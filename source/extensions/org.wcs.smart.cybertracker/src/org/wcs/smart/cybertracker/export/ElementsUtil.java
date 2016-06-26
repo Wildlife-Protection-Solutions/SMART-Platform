@@ -217,4 +217,17 @@ public class ElementsUtil {
 	public static boolean isCategoryMultiObsMultiGps(E e) {
 		return e != null && ElementsUtil.CATEGORY_MULTI_OBS_MULTI_GPS.equals(e.getTag5());
 	}
+
+	public static E itemToE(Elements.List.Items.Item item) {
+		E e = new E();
+		e.setI(item.getId());
+		e.setN(item.getName());
+		e.setTag0(item.getTag0());
+		e.setTag1(item.getTag1());
+		e.setTag2(item.getTag2());
+		e.setTag3(item.getTag3());
+		e.setTag4(item.getTag4());
+		e.setTag5(item.getTag5());
+		return e;
+	}
 }

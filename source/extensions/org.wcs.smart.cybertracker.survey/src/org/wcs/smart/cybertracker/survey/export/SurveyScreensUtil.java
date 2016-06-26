@@ -36,6 +36,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
+import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
@@ -43,6 +44,7 @@ import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
@@ -133,16 +135,16 @@ public class SurveyScreensUtil extends ScreensUtil {
 		} else {
 			//adding default members
 			ScreenOption leader_so = screenOptions.get(MissionScreenOptionMeta.LEADER);
-			CyberTrackerId leaderCtId = null;
+			Elements.List.Items.Item leaderItem = null;
 			for (ScreenOptionUuid sou : so.getUuidList()) {
 				for (Employee e : employees) {
 					if (e.getUuid().equals(sou.getUuidValue())) {
 						CyberTrackerId mctid = new CyberTrackerId();
-						ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
-						result.defaultValues.add(mctid.getItemId());
+						Elements.List.Items.Item memberValue = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+						result.defaultValues.add(new CtDataKeyValueRecord(memberValue, ICyberTrackerConstants.STR_TRUE));
 						memberIds.add(mctid);
 						if (leader_so.getUuidValue() != null && leader_so.getUuidValue().equals(e.getUuid())) {
-							leaderCtId = mctid;
+							leaderItem = memberValue;
 						}
 					}
 				}
@@ -151,11 +153,11 @@ public class SurveyScreensUtil extends ScreensUtil {
 			if (leader_so == null || leader_so.isVisible()) {
 				id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, RESULT_MISSION_LEADER, memberIds, false);
 			} else {
-				if (leaderCtId == null) {
+				if (leaderItem == null) {
 					CyberTrackerPlugIn.displayError(Messages.SurveyScreensUtil_ErrorDialog_Title, Messages.SurveyScreensUtil_Error_Leader, null);
 					return null;
 				}
-				result.defaultValues.add(createDefaultResultElement(RESULT_MISSION_LEADER, elements, leaderCtId.getItemId()));
+				result.defaultValues.add(createDefaultResultRecord(RESULT_MISSION_LEADER, elements, leaderItem));
 			}
 		}
 
@@ -163,7 +165,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		if (so == null || so.isVisible()) {
 			id = addNoteNextNode(id, result, elements, Messages.SurveyScreensUtil_Comments, RESULT_MISSION_COMMENTS, Mission.MAX_LENGTH_COMMENT);
 		} else {
-			result.defaultValues.add(createDefaultResultElement(RESULT_MISSION_COMMENTS, elements, so.getStringValue()));
+			result.defaultValues.add(createDefaultResultRecord(RESULT_MISSION_COMMENTS, elements, so.getStringValue()));
 		}
 
 		String sdKey = getSurveyDesignKeyId(elements);

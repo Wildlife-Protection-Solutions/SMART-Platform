@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
+import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.model.screens.Node;
 
 /**
@@ -12,10 +13,10 @@ import org.wcs.smart.cybertracker.model.screens.Node;
  * @since 4.0.0
  */
 public class MetaExportResult {
-	public List<Node> screenNodes = new ArrayList<Node>();
-	public List<IdNamePair> resultElements = new ArrayList<IdNamePair>();
+	public List<Node> screenNodes = new ArrayList<>();
+	public List<IdNamePair> resultElements = new ArrayList<>();
 	public CyberTrackerId rootId = null;
-	public List<String> defaultValues = new ArrayList<String>();
+	public List<CtDataKeyValueRecord> defaultValues = new ArrayList<>();
 	public String tripUniqueElementId;
 
 	public static class IdNamePair {
