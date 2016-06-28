@@ -94,6 +94,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private MissionMapPage mapPage;
 	
 	private Projection[] projections;
+	private Projection viewProjection;
 	private Boolean trackDistanceDirection = null;
 	private Boolean trackObserver = null;
 	private ConfigurableModel configurableModel = null;
@@ -256,10 +257,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				this.projections = tmp.toArray(new Projection[tmp.size()]);
 			
 				this.options = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-				if (options.getViewProjection() != null) {
-					options.getViewProjection().getDefinition(); //load lazy items
-				}
-				
+				this.viewProjection = HibernateManager.getCurrentViewProjection(session);
+
 				this.sUnits = SurveyHibernateManager.getInstance().getSamplingUnits(mission.getSurvey().getSurveyDesign(), session, null);
 				for (SamplingUnit s : sUnits){
 					s.getId();
@@ -403,8 +402,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 * Current observation options as of time of editor load
 	 * @return
 	 */
-	public ObservationOptions getObservationOptions(){
-		return this.options;
+	public Projection getViewProjection(){
+		return this.viewProjection;
 	}
 	
 	/**

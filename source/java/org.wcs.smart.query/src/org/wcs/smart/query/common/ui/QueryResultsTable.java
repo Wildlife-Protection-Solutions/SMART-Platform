@@ -101,6 +101,7 @@ public abstract class QueryResultsTable {
 			//columns already created; lets update visibility
 			List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
 			for (QueryTableViewerColumn column : tableViewerColumns){
+				column.getColumn().setProjectionProvider(prjProvider);
 				for (QueryColumn c : cols){
 					if (column.getColumn().equals(c)){
 						if (c.isVisible()){

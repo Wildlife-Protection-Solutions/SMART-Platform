@@ -112,6 +112,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -184,8 +185,10 @@ public class MissionDayComposite {
 	public MissionDayComposite(MissionDayPage editor) {
 		this.editor = editor;
 		try{
-			if (editor.getMissionEditor().getObservationOptions().getViewProjection() != null){
-				lcrs = ReprojectUtils.stringToCrs(editor.getMissionEditor().getObservationOptions().getViewProjection().getDefinition());
+			if (editor.getMissionEditor().getViewProjection() != null){
+				lcrs = ReprojectUtils.stringToCrs(editor.getMissionEditor().getViewProjection().getDefinition());
+			}else{
+				lcrs = GeometryUtils.SMART_CRS;
 			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
@@ -530,9 +533,8 @@ public class MissionDayComposite {
 			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH) {
 				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
 			}else{
-				if (editor.getMissionEditor().getObservationOptions() != null && 
-						editor.getMissionEditor().getObservationOptions().getViewProjection() != null){
-					column.getColumn().setToolTipText(editor.getMissionEditor().getObservationOptions().getViewProjection().getName());
+				if (editor.getMissionEditor().getViewProjection() != null){
+					column.getColumn().setToolTipText(editor.getMissionEditor().getViewProjection().getName());
 				}else{
 					column.getColumn().setToolTipText( lcrs.getName().toString());
 				}

@@ -47,8 +47,8 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 
 	private SimpleFeatureType ftype;
 	private IQueryResultSetIterator<? extends IResultItem> fIterator;
-	private SimpleQuery query;
 	private List<QueryColumn> columns;
+
 	/**
 	 * Creates a new feature reader.
 	 * 

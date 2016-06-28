@@ -28,6 +28,7 @@ import java.util.List;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -35,6 +36,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -70,8 +72,8 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 	private Button btnAdd;
 	private Button btnRemove;
 	private Button btnEdit;
-	private Button btnDefault;
 	
+	private ComboViewer projectionViewer = null;
 	private Transaction currentTransaction = null;
 	
 	public ProjectionPropertyDialog(Shell parent) {
@@ -97,27 +99,22 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.ProjectionPropertyDialog_ProjectionList_Label);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		
+				
 		lstViewer = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstViewer.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getList().getLayoutData()).widthHint = 350;
 		((GridData)lstViewer.getList().getLayoutData()).heightHint = 100;
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-		lstViewer.setLabelProvider(new LabelProvider(){
-			
+		LabelProvider prjLabelProvider = new LabelProvider(){
 			@Override
 			public String getText(Object element){
 				if (element instanceof Projection){
-					String text = ((Projection)element).getName();
-					if (((Projection) element).getIsDefault()){
-						text += Messages.ProjectionPropertyDialog_DefaultProjection_text;
-					}
-					return text;
+					return ((Projection)element).getName();
 				}
 				return super.getText(element);
 			}
-		});
+		};
+		lstViewer.setLabelProvider(prjLabelProvider);
 		lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -128,7 +125,6 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				}
 				btnEdit.setEnabled(enabled);
 				btnRemove.setEnabled(enabled);
-				btnDefault.setEnabled(enabled);
 			}
 		});
 		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -137,8 +133,8 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				editSelected();
 			}
 		});
-		projections = new ArrayList<Projection>(HibernateManager.getCaProjectionList(getSession()));
-		lstViewer.setInput(projections);
+		
+		
 		
 		Composite buttonPnl = new Composite(main, SWT.NONE);
 		GridLayout gl = new GridLayout(1, false);
@@ -162,14 +158,55 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		btnEdit.addSelectionListener(this);
 		btnEdit.setEnabled(false);
 		
-		btnDefault = new Button(buttonPnl, SWT.PUSH);
-		btnDefault.setText(Messages.ProjectionPropertyDialog_SetDefault_Button);
-		btnDefault.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnDefault.addSelectionListener(this);
-		btnDefault.setEnabled(false);
+		Composite prjComp = new Composite(main, SWT.NONE);
+		GridLayout pgl = new GridLayout(2, false);
+		pgl.marginWidth = 0;
+		pgl.marginHeight = 10;
+		prjComp.setLayout(pgl);
+		prjComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		lbl = new Label(prjComp, SWT.NONE);
+		lbl.setText(Messages.ProjectionPropertyDialog_ViewProjectionLbl);
+		lbl.setToolTipText(Messages.ProjectionPropertyDialog_ViewProjectionToolip);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		projectionViewer = new ComboViewer(prjComp, SWT.READ_ONLY);
+		projectionViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		projectionViewer.setLabelProvider(prjLabelProvider);
+		
+		projectionViewer.setContentProvider(ArrayContentProvider.getInstance());
+		projectionViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				StructuredSelection sel = ((StructuredSelection)projectionViewer.getSelection());
+				if (!sel.isEmpty()){
+					Projection prj = (Projection)sel.getFirstElement();
+					if (!prj.getIsDefault()){
+						for (Projection p : projections){
+							if (!p.equals(prj) && p.getIsDefault()){
+								p.setIsDefault(false);
+							}
+						}
+						prj.setIsDefault(true);
+						ProjectionPropertyDialog.this.setChangesMade(true);
+					}
+				}
+			}
+		});
+		
+		//init data 
+		projections = new ArrayList<Projection>(HibernateManager.getCaProjectionList(getSession()));
+		lstViewer.setInput(projections);
+		projectionViewer.setInput(projections);
+		for (Projection p : projections){
+			if (p.getIsDefault()){
+				projectionViewer.setSelection(new StructuredSelection(p));
+				break;
+			}
+		}
 		
 		getShell().setText(Messages.ProjectionPropertyDialog_Dialog_Name);
-		setTitle(Messages.ProjectionPropertyDialog_PageTitle);
+		setTitle(Messages.ProjectionPropertyDialog_PageTitle1);
 		setMessage(Messages.ProjectionPropertyDialog_Dialog_Message);
 		return main;
 	}
@@ -200,7 +237,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(enabled);		
 		lstViewer.refresh();
-		
+		projectionViewer.refresh();
 	}
 	
 	
@@ -238,6 +275,9 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 			if (Projection.class.isAssignableFrom(type.getClass())){
 				Projection p = (Projection)type;
 				projections.remove(p);
+				if (p.getIsDefault()){
+					projectionViewer.setSelection(null);
+				}
 				getSession().delete(p);
 			}
 		}
@@ -257,26 +297,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				lstViewer.refresh(toEdit);
 				listModified();
 			}
-		}
-		
-	}
-
-	private void setDefault(){
-		IStructuredSelection selection= (IStructuredSelection) lstViewer.getSelection();
-		if (selection.isEmpty()){
-			return;
-		}
-		for (Iterator<?> iterator = projections.iterator(); iterator.hasNext();) {
-			Projection p = (Projection) iterator.next();
-			p.setIsDefault(false);
-		}
-		
-		Object element = selection.getFirstElement();
-		if (Projection.class.isAssignableFrom(element.getClass())){
-			((Projection)element).setIsDefault(true);
-		}
-		lstViewer.refresh();
-		listModified();
+		}		
 	}
 	
 	@Override
@@ -287,8 +308,6 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 			add();
 		}else if (e.widget == btnEdit){
 			editSelected();
-		}else if (e.widget == btnDefault){
-			setDefault();
 		}
 	}
 

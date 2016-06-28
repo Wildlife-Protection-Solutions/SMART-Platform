@@ -22,18 +22,13 @@
 package org.wcs.smart.observation;
 
 import org.hibernate.Session;
-import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.ProjectionProvider;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Extension of the smart hibernate manager for observation related data.
@@ -88,29 +83,6 @@ public class ObservationHibernateManager extends HibernateManager{
 			}
 		}
 	}
-		
-		
-	public static Projection getCurrentViewProjection() {
-		Session s = HibernateManager.openSession();
-		try {
-			return getCurrentViewProjection(s);
-		} finally {
-			s.close();
-		}
-	}
-
-	public static Projection getCurrentViewProjection(Session s) {
-		ObservationOptions observationOptions = getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
-		if (observationOptions != null) {
-			Projection p = observationOptions.getViewProjection();
-			if (p != null) {
-				p.getDefinition(); //lazy load
-			}
-			return p;
-		}
-		return null;
-	}
-
 	
 	/**
 	 * Creates new patrol options for a given conservation area and saves it to the database.

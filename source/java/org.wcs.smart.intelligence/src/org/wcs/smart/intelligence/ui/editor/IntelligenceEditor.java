@@ -32,6 +32,7 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -42,7 +43,6 @@ import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventLis
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.observation.ObservationUtils;
 
 /**
  * The Intelligence Editor
@@ -127,7 +127,7 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart, 
 			//load patrol items so don't have lazy loading issues later.
 			session.beginTransaction();
 			try{
-				viewProjection = ObservationUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea()).getProjection();
+				viewProjection = ProjectionUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea()).getProjection();
 
 				intelligence = (Intelligence) session.load(Intelligence.class, puuid);
 				if (intelligence.getPatrol() != null) {

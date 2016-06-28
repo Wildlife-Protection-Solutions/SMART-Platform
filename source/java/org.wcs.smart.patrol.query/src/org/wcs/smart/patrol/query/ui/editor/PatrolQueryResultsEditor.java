@@ -42,14 +42,12 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
-import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
@@ -71,7 +69,6 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
-import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -169,7 +166,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				query = new QueryProxy(tquery);
 				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 				
-				projection = ObservationUtils.INSTANCE.createProjectionProvider(session, tquery.getConservationArea()).getProjection();
+				projection = ProjectionUtils.INSTANCE.createProjectionProvider(session, tquery.getConservationArea()).getProjection();
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(
 						MessageFormat.format(Messages.PatrolQueryResultsEditor_CouldNotParseQueryError, new Object[]{ input.getName() }) + ex.getLocalizedMessage(), ex);

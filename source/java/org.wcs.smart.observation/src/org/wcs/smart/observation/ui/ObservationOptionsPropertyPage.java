@@ -22,18 +22,10 @@
 package org.wcs.smart.observation.ui;
 
 import java.text.MessageFormat;
-import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -53,8 +45,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Projection;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
@@ -76,7 +66,6 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	private ControlDecoration cdEditTime;
 	private Button btnTrackDistanceDirection;
 	private Button btnTrackObserver;
-	private ComboViewer projectionViewer;
 	
 	private Font boldFont;
 	
@@ -183,63 +172,6 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DaysLabel);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
-		g = new Group(container, SWT.NONE);
-		g.setText(Messages.ObservationOptionsPropertyPage_ViewProjectionGroupTitle);
-		g.setLayout(new GridLayout(2, false));
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setFont(boldFont);
-
-		lbl = new Label(g, SWT.WRAP);
-		lbl.setText(Messages.ObservationOptionsPropertyPage_ViewProjectionDescr);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		((GridData)lbl.getLayoutData()).widthHint = 350;
-
-		projectionViewer = new ComboViewer(g, SWT.READ_ONLY);
-		projectionViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		projectionViewer.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof Projection) {
-					return ((Projection)element).getName();
-				}
-				return super.getText(element);
-			}
-		});
-		projectionViewer.setContentProvider(ArrayContentProvider.getInstance());
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			List<Object> ps = (List<Object>)(List<?>)HibernateManager.getCaProjectionList(s);
-			
-			Object selection = null;
-			for (Object x : ps) {
-				if (x instanceof Projection && x.equals(patrolOption.getViewProjection())) {
-					selection = (Projection) x;
-					break;
-				}
-			}
-			if (selection == null || ps.size() == 0) {
-				selection = Messages.ObservationOptionsPropertyPage_NotSetOption;
-				ps.add(0, (Object)selection);
-			}
-			projectionViewer.setInput(ps);
-			if (selection != null){
-				projectionViewer.setSelection(new StructuredSelection(selection));
-			}
-		}catch (final Exception ex){
-			ObservationPlugIn.displayLog(Messages.ObservationOptionsPropertyPage_Projection_LoadError + ex.getLocalizedMessage(), ex);							
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
-		}
-		projectionViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				setChangesMade(true);
-			}
-		});
-		
-		
 		//init values
 		if (patrolOption != null){
 			btnTrackDistanceDirection.setSelection(patrolOption.getTrackDistanceDirection());
@@ -318,14 +250,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		patrolOption.setTrackDistanceDirection(btnTrackDistanceDirection.getSelection());
 		patrolOption.setTrackObserver(btnTrackObserver.getSelection());
 		patrolOption.setEditTime(Integer.parseInt(txtEditTime.getText()));
-		
-		Object prjSelection = ((IStructuredSelection)projectionViewer.getSelection()).getFirstElement();
-		if (prjSelection instanceof Projection) {
-			patrolOption.setViewProjection((Projection)prjSelection);
-		}else{
-			patrolOption.setViewProjection(null);
-		}
-		
+	
 		Session s = getSession();
 		s.beginTransaction();
 		try{

@@ -19,17 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation;
+package org.wcs.smart;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
-import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.ProjectionProvider;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
-import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -38,7 +36,7 @@ import org.wcs.smart.util.ReprojectUtils;
  * @author Emily
  *
  */
-public enum ObservationUtils {
+public enum ProjectionUtils {
 	
 	INSTANCE;
 	
@@ -56,7 +54,7 @@ public enum ObservationUtils {
 			try{
 				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
 			}catch (Exception ex){
-				Logger.getLogger(ObservationUtils.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+				Logger.getLogger(ProjectionUtils.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 				prj = null;
 			}
 		}
@@ -68,15 +66,16 @@ public enum ObservationUtils {
 		return new ProjectionProvider(prj);
 	}
 	
-	private Projection getCurrentViewProjection(Session s, ConservationArea ca) {
-		ObservationOptions observationOptions = (ObservationOptions) s.get(ObservationOptions.class, ca.getUuid());
-		if (observationOptions != null) {
-			Projection p = observationOptions.getViewProjection();
-			if (p != null) {
-				p.getDefinition(); //lazy load
-			}
-			return p;
-		}
-		return null;
+	/**
+	 * Gets the current view projection for the provided Conservation Area
+	 * @param s
+	 * @param ca
+	 * @return
+	 */
+	public Projection getCurrentViewProjection(Session s, ConservationArea ca) {
+		return (Projection)s.createCriteria(Projection.class)
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+			.add(Restrictions.eq("isDefault",true)) //$NON-NLS-1$
+			.uniqueResult();
 	}
 }

@@ -21,10 +21,7 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

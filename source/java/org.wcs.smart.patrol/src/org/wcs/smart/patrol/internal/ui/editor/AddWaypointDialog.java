@@ -44,9 +44,9 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -151,7 +151,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lstProjections.setLabelProvider(ProjectionLabelProvider.getInstance());
 		lstProjections.setContentProvider(ArrayContentProvider.getInstance());
 		lstProjections.setInput(projections);
-		currentProjection = ObservationHibernateManager.getCurrentViewProjection();
+		currentProjection = HibernateManager.getCurrentViewProjection();
 		if (currentProjection == null) {
 			currentProjection = projections.length > 0 ? projections[0] : null;
 			for (int i = 0; i < projections.length; i ++){

@@ -125,6 +125,8 @@ public class Messages extends NLS {
 	public static String ExportQueryLocationPage_FileLabel;
 	public static String ExportQueryLocationPage_PageName;
 	public static String ExportQueryLocationPage_PageTitle;
+	public static String ExportQueryLocationPage_ProjectionLbl;
+	public static String ExportQueryLocationPage_ProjectionTooltip;
 	public static String ExportQueryTypePage_DialogMessage;
 	public static String ExportQueryTypePage_PageName;
 	public static String ExportQueryTypePage_SelectFormatLabel;

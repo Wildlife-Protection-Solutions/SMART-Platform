@@ -31,7 +31,6 @@ import org.wcs.smart.query.common.engine.IGeometryResultItem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * Query result item for storing intelligence record query results.

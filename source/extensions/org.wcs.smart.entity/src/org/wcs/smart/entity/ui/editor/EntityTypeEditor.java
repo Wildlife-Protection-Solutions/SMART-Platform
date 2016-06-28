@@ -60,8 +60,6 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
-import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**
@@ -242,10 +240,10 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					entityType.getNames().size();
 					
 					try{
-						ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
-						if (observationOptions.getViewProjection() != null){
-							currentPrj = observationOptions.getViewProjection();
-							currentPrj.setParsedCoordinateReferenceSystem( ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition()) );
+						Projection viewProjection = HibernateManager.getCurrentViewProjection(s);
+						if (viewProjection != null){
+							currentPrj = viewProjection;
+							currentPrj.setParsedCoordinateReferenceSystem( ReprojectUtils.stringToCrs(viewProjection.getDefinition()) );
 						}else{
 							currentPrj = new Projection();
 							currentPrj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
@@ -255,7 +253,8 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 						EntityPlugIn.displayLog(ex.getMessage(), ex);
 					}
 					
-					availablePrj = s.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", entityType.getConservationArea())).list();
+					availablePrj = s.createCriteria(Projection.class)
+							.add(Restrictions.eq("conservationArea", entityType.getConservationArea())).list(); //$NON-NLS-1$
 					
 					Display.getDefault().syncExec(new Runnable(){
 

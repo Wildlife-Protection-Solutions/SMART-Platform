@@ -49,7 +49,7 @@ public class UpgradeEngine {
 
 	private static final String EXTENSION_ID = "org.wcs.smart.dbUpgrage"; //$NON-NLS-1$
 	
-	private enum UpgradeFromVersion {
+	public enum UpgradeFromVersion {
 		V112("1.1.2", "2.0.0", Upgrader112To200.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V200("2.0.0", "3.0.0", Upgrader200To300.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V300("3.0.0", "3.0.2", Upgrader300To302.class), //$NON-NLS-1$ //$NON-NLS-2$
@@ -58,7 +58,8 @@ public class UpgradeEngine {
 		V320("3.2.0", "3.2.1", Upgrader320To321.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V330("3.2.1", "3.3.0", Upgrader321To330.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V331("3.3.0", "3.3.1", Upgrader330To331.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V400("3.3.1", "4.0.0", Upgrader331To400.class); //$NON-NLS-1$ //$NON-NLS-2$
+		V400("3.3.1", "4.0.0", Upgrader331To400.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V401("4.0.0", "4.0.1", Upgrader331To400.class); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		public String fromVersion;
 		public String toVersion;
@@ -298,8 +299,8 @@ public class UpgradeEngine {
 		try {
 			for (IConfigurationElement e : config) {
 				if (e.getName().equals("coreUpgrader")){ //$NON-NLS-1$
-					String efromVersion = e.getAttribute("fromVersion");
-					String etoVersion = e.getAttribute("toVersion");
+					String efromVersion = e.getAttribute("fromVersion"); //$NON-NLS-1$
+					String etoVersion = e.getAttribute("toVersion"); //$NON-NLS-1$
 					if (efromVersion.equals(fromVersion) && etoVersion.equals(toVersion)){
 						items.add((IDatabaseUpgrader)e.createExecutableExtension("upgrader")); //$NON-NLS-1$
 					}

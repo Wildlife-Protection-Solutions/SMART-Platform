@@ -320,7 +320,7 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	protected boolean performSave() {
 		String error = validateTabs();
 		if (error != null) {
-			MessageDialog.openError(getShell(), "Error", "Unable to save changes. Some data is invalid. Fix error and try again." + SharedUtils.LINE_SEPARATOR + error);
+			MessageDialog.openError(getShell(), Messages.ConfigurableModelEditDialog_ErrorTitle, Messages.ConfigurableModelEditDialog_ErrorMsg + SharedUtils.LINE_SEPARATOR + error);
 			return false;
 		}
 		final boolean[] ret = new boolean[]{false};

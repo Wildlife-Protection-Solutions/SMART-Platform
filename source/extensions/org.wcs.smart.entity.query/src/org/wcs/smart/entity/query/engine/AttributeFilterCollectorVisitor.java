@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
-import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.IFilter;

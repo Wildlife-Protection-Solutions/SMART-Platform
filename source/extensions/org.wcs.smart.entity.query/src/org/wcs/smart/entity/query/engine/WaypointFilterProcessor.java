@@ -41,7 +41,6 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.engine.visitor.AreaFilterVisitor;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
-import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;

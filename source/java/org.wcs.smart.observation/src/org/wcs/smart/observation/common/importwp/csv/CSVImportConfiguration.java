@@ -49,7 +49,6 @@ import org.wcs.smart.util.SmartUtils;
 import au.com.bytecode.opencsv.CSVReader;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 /**
  * 

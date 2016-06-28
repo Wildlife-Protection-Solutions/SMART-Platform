@@ -34,8 +34,8 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GridResultItem;
@@ -88,7 +88,7 @@ public class CsvExporter {
 	              new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8)
 				,delimiter)) {
 				
-				IProjectionProvider prj = ObservationUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
+				IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
 				List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
 				
 				//headers
@@ -166,7 +166,7 @@ public class CsvExporter {
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
 				new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
 
-			IProjectionProvider prj = ObservationUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
+			IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
 			List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
 
 			String[] data = new String[cols.size()];

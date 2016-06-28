@@ -53,7 +53,6 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -106,8 +105,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		
 		Session s = HibernateManager.openSession();
 		try{
-			supportedProjections = s.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-			defaultProjection = ObservationHibernateManager.getCurrentViewProjection(s);
+			supportedProjections = s.createCriteria(Projection.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+			defaultProjection = HibernateManager.getCurrentViewProjection(s);
 		}finally{
 			s.close();
 		}

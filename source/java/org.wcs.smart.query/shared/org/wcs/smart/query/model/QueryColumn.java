@@ -98,7 +98,7 @@ public abstract class QueryColumn implements Cloneable{
 	}
 	
 	protected String getProjectionTooltip(){
-		if (prjProvider != null) return prjProvider.getProjection().getName();
+		if (prjProvider != null && prjProvider.getProjection() != null) return prjProvider.getProjection().getName();
 		return GeometryUtils.SMART_CRS.getName().toString();
 	}
 	

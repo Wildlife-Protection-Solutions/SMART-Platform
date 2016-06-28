@@ -85,7 +85,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		}else if (value instanceof AreaType){
 			return getAreaTypeName((AreaType)value);
 		}
-		if (value.equals(GEOMETRY_LABEL)) return "Geometry";
+		if (value.equals(GEOMETRY_LABEL)) return Messages.SmartLabelProvider_GeometryLabel;
 		if (value.equals(AGENCY_NAME_KEY)) return Messages.Agency_AgencyName;
 		if (value.equals(RANK_NAME_KEY)) return Messages.Rank_Label;
 		if (value.equals(EMP_AGENCY_KEY)) return Messages.Employee_Agency_Label;

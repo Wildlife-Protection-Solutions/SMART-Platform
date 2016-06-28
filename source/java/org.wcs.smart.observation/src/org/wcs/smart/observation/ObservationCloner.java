@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 /**
@@ -68,7 +67,7 @@ public class ObservationCloner implements IConservationAreaTemplateCloner {
 			newOp.setEditTime(tempOp.getEditTime());
 			newOp.setTrackDistanceDirection(tempOp.getTrackDistanceDirection());
 			newOp.setTrackObserver(tempOp.getTrackObserver());
-			newOp.setViewProjection((Projection)engine.getNewConservationItem(tempOp.getViewProjection()));
+			
 		}
 		engine.getSession().save(newOp);
 		engine.getSession().flush();

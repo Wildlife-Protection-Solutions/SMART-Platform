@@ -54,9 +54,9 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.samplingunit.SamplingUnitLabelProvider;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.ProjectionLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
@@ -217,7 +217,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lstProjections.setLabelProvider(ProjectionLabelProvider.getInstance());
 		lstProjections.setContentProvider(ArrayContentProvider.getInstance());
 		lstProjections.setInput(projections);
-		currentProjection = ObservationHibernateManager.getCurrentViewProjection();
+		currentProjection = HibernateManager.getCurrentViewProjection();
 		if (currentProjection == null) {
 			currentProjection = projections.length > 0 ? projections[0] : null;
 			for (int i = 0; i < projections.length; i ++){

@@ -41,7 +41,6 @@ import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * SMART spaital plan target feature reader.

@@ -198,8 +198,8 @@ public class ExportQueryLocationPage extends WizardPage {
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
 		
 		lblProjection = new Label(main, SWT.NONE);
-		lblProjection.setText("Projection:");
-		lblProjection.setToolTipText("Export projection");
+		lblProjection.setText(Messages.ExportQueryLocationPage_ProjectionLbl);
+		lblProjection.setToolTipText(Messages.ExportQueryLocationPage_ProjectionTooltip);
 		
 		cmbProjection = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbProjection.setContentProvider(ArrayContentProvider.getInstance());

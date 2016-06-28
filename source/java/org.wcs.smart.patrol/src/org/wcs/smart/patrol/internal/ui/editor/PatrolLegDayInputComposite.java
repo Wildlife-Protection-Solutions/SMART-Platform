@@ -95,7 +95,6 @@ import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
-import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
@@ -201,11 +200,11 @@ public class PatrolLegDayInputComposite {
 	}
 
 	
-	public PatrolLegDayInputComposite(PatrolDayEditor editor, ObservationOptions observationOptions) {
+	public PatrolLegDayInputComposite(PatrolDayEditor editor, Projection viewProjection) {
 		this.editor = editor;
 		try{
-			if (observationOptions != null) {
-				prj = observationOptions.getViewProjection();
+			if (viewProjection != null) {
+				prj = viewProjection;
 				if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
 					prj.setParsedCoordinateReferenceSystem( ReprojectUtils.stringToCrs(prj.getDefinition()) );
 				}

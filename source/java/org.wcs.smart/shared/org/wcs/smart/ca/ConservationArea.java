@@ -77,6 +77,7 @@ public class ConservationArea extends UuidItem {
 	private List<Agency> agencies;
 	private Set<Language> languages;
 	
+	
 	public ConservationArea(){
 		employees = new ArrayList<Employee>();
 		languages = new HashSet<Language>();
@@ -174,7 +175,6 @@ public class ConservationArea extends UuidItem {
 	public String getFileDataStoreLocation(){
 		return SmartContext.INSTANCE.getFilestoreLocation() + File.separator + UuidUtils.getDirectoryPath(getUuid());
 	}
-
-
+	
 }
 

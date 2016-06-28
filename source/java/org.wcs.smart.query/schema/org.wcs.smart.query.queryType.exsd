@@ -50,8 +50,8 @@
 
    <element name="QueryType">
       <complexType>
-         <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="DefinitionPanel"/>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="DefinitionPanel" minOccurs="0" maxOccurs="1"/>
          </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>

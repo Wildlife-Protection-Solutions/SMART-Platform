@@ -36,11 +36,11 @@ import org.eclipse.datatools.connectivity.oda.util.manifest.ExtensionManifest;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
-import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.execute.SmartReportRunner;
@@ -144,7 +144,7 @@ public abstract class SmartConnection implements IConnection {
 			if (value == null){
 				ConservationArea reportca = (ConservationArea) appContext.get(SmartReportRunner.CA_PARAM);
 				if (reportca != null){
-					value = ObservationUtils.INSTANCE.createProjectionProvider(getSession(), reportca);
+					value = ProjectionUtils.INSTANCE.createProjectionProvider(getSession(), reportca);
 					appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, value);
 				}
 			}

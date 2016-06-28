@@ -48,10 +48,8 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
-import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -109,12 +107,8 @@ public class PatrolDayEditor extends EditorPart {
 		
 		Session session = HibernateManager.openSession();
 		try{
-			ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-			if (observationOptions.getViewProjection() != null) {
-				observationOptions.getViewProjection().getDefinition(); //load lazy items
-			}
-	
 			session.beginTransaction();
+			Projection viewProjection = HibernateManager.getCurrentViewProjection(session);
 			session.update(editor.getPatrol());
 			frmSummary = toolkit.createScrolledForm(parent);
 			
@@ -173,7 +167,7 @@ public class PatrolDayEditor extends EditorPart {
 				
 			}else if (plds.size() == 1){
 				children = new PatrolLegDayInputComposite[1];
-				PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, observationOptions);
+				PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
 				comp.createComposite(frmSummary.getBody(), toolkit);
 				comp.setData((PatrolLegDay)plds.get(0));
 				children[0] = comp;
@@ -217,7 +211,7 @@ public class PatrolDayEditor extends EditorPart {
 					});
 					
 					sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
-					PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, observationOptions);
+					PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
 					Composite comp2 = comp.createComposite(sec, toolkit);
 					comp.setData(pld);
 					sec.setClient(comp2);

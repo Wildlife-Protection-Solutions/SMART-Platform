@@ -71,6 +71,7 @@ import org.hibernate.Session;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
@@ -193,13 +194,13 @@ public class IncidentSummaryPage extends EditorPart {
 			this.txtIncidentId.setText(String.valueOf(incident.getId()));
 			this.txtDate.setText(DateFormat.getDateInstance().format(incident.getDateTime()));
 			this.txtTime.setText(DateFormat.getTimeInstance().format(incident.getDateTime()));
-			ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+			Projection viewProjection = HibernateManager.getCurrentViewProjection(session);
 			CoordinateReferenceSystem crs = null;
 			try{
-				if (observationOptions.getViewProjection() != null){
-					crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
-					txtLocation.setToolTipText(observationOptions.getViewProjection().getName());
-					lblLocation.setToolTipText(observationOptions.getViewProjection().getName());
+				if (viewProjection != null){
+					crs = ReprojectUtils.stringToCrs(viewProjection.getDefinition());
+					txtLocation.setToolTipText(viewProjection.getName());
+					lblLocation.setToolTipText(viewProjection.getName());
 				}else{
 					crs = SmartDB.DATABASE_CRS;
 					txtLocation.setToolTipText(crs.getName().toString());

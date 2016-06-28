@@ -83,6 +83,8 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_Saving;
 	public static String ConfigurableModelEditDialog_CloseMessage;
 	public static String ConfigurableModelEditDialog_CloseTitle;
+	public static String ConfigurableModelEditDialog_ErrorMsg;
+	public static String ConfigurableModelEditDialog_ErrorTitle;
 	public static String ConfigurableModelEditDialog_LoadExtensionError;
 	public static String ConfigurableModelEditDialog_Message;
 	public static String ConfigurableModelEditDialog_PropertiesLabel;

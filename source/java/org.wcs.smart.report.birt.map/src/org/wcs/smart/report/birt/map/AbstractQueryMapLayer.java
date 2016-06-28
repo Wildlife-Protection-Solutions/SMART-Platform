@@ -28,7 +28,6 @@ import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
-import org.wcs.smart.query.QueryTypeManager;
 
 /**
  * Abstract map layer for linking a SMART query to a BIRT map layer.  This

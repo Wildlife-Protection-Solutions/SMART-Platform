@@ -53,6 +53,7 @@ import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.Joinable;
 import org.mindrot.jbcrypt.BCrypt;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
@@ -912,7 +913,28 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 	}
 	
+	/**
+	 * Get the current viewing projection for the current Conservation
+	 * Area
+	 * @return
+	 */
+	public static Projection getCurrentViewProjection() {
+		Session s = HibernateManager.openSession();
+		try {
+			return getCurrentViewProjection(s);
+		} finally {
+			s.close();
+		}
+	}
 
+	/**
+	 * Get the current viewing projection for the current Conservation
+	 * Area
+	 * @return
+	 */
+	public static Projection getCurrentViewProjection(Session s) {
+		return ProjectionUtils.INSTANCE.getCurrentViewProjection(s, SmartDB.getCurrentConservationArea());
+	}
 	
 	/**
 	 * Evicts all names from the given session

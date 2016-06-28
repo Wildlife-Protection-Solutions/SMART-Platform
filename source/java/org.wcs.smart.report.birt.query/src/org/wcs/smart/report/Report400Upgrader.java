@@ -92,14 +92,14 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 				try{
 					upgradePlan(ca);
 				} catch (Exception ex) {
-					warnings.add(MessageFormat.format("Could not upgrade customized Plan pdf template for Conservation Area ''{0}''", ca.getName()));
+					warnings.add(MessageFormat.format(Messages.Report400Upgrader_PlanTemplateError, ca.getName()));
 					ReportPlugIn.log(ex.getMessage(), ex);
 				}
 				
 				try{
 					upgradeIntelligence(ca);
 				} catch (Exception ex) {
-					warnings.add(MessageFormat.format("Could not upgrade customized Intelligence pdf template for Conservation Area ''{0}''", ca.getName()));
+					warnings.add(MessageFormat.format(Messages.Report400Upgrader_IntelTemplateError, ca.getName()));
 					ReportPlugIn.log(ex.getMessage(), ex);
 				}
 				
@@ -111,7 +111,7 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.Report400Upgrader_ErrorTitle, "The following templates could not be updated.  Items using these templates may not work as expected.", warnings);
+						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.Report400Upgrader_ErrorTitle, Messages.Report400Upgrader_TemplateUpdateError, warnings);
 						wd.open();
 					}});
 			}
@@ -504,18 +504,18 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 										for (int y = 0; y < structure.getChildNodes().getLength(); y++) {
 											Node kid = structure.getChildNodes().item(y);
 											if (kid.getNodeName().equalsIgnoreCase(PROPERTY_TAG_NAME) &&
-													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("alias")) {
+													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("alias")) { //$NON-NLS-1$
 												alais = true;
 											}
-											if (kid.getNodeName().equalsIgnoreCase("text-property") &&
-													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("displayName")) {
+											if (kid.getNodeName().equalsIgnoreCase("text-property") && //$NON-NLS-1$
+													kid.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equalsIgnoreCase("displayName")) { //$NON-NLS-1$
 												heading = kid.getTextContent();
 											}
 										}
 										if (!alais){
 											Node propNode = doc.createElement(PROPERTY_TAG_NAME);
 											Attr attribute = doc.createAttribute(NAME_ATT_NAME);
-											attribute.setValue("alias");
+											attribute.setValue("alias"); //$NON-NLS-1$
 											propNode.getAttributes().setNamedItem(attribute);
 											propNode.setTextContent(heading);
 											structure.appendChild(propNode); 

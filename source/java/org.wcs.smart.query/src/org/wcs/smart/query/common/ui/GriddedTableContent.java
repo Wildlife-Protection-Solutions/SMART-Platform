@@ -23,7 +23,6 @@ package org.wcs.smart.query.common.ui;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.CellLabelProvider;

@@ -47,12 +47,12 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationUtils;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.model.Team;
@@ -308,7 +308,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		//load parent plan so don't have lazy loading issues later.
 		session.beginTransaction();
 		try{
-			prjProvider = ObservationUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea());
+			prjProvider = ProjectionUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea());
 			
 			p = (Plan) session.load(Plan.class, puuid);
 			if (p.getParent() != null) {

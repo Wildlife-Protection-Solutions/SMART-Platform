@@ -42,7 +42,7 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 public class MissionTrackResultItem implements IGeometryResultItem{
 
-	public static final String TRACK_GEOMCOLUMN_KEY = "TrackGeomtry";
+	public static final String TRACK_GEOMCOLUMN_KEY = "TrackGeomtry"; //$NON-NLS-1$
 	
 	private String caId;
 	private String caName;

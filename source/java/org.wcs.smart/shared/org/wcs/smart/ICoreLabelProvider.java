@@ -30,7 +30,8 @@ package org.wcs.smart;
  *
  */
 public interface ICoreLabelProvider extends ISharedLabelProvider {
-	public static final String GEOMETRY_LABEL = "geometrylabelkey"; 
+	
+	public static final String GEOMETRY_LABEL = "geometrylabelkey";  //$NON-NLS-1$
 	public static final String CA_NAME_KEY = "conservationareanamekey"; //$NON-NLS-1$
 	public static final String AGENCY_NAME_KEY = "agencynamekey"; //$NON-NLS-1$
 	public static final String RANK_NAME_KEY = "ranknamekey"; //$NON-NLS-1$

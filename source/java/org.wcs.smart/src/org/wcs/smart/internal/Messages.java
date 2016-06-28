@@ -846,11 +846,13 @@ public class Messages extends NLS {
 	public static String ProjectionPropertyDialog_Dialog_Title;
 	public static String ProjectionPropertyDialog_Error_AtLeastOneProjectionRequired;
 	public static String ProjectionPropertyDialog_Error_CouldNotSave;
-	public static String ProjectionPropertyDialog_PageTitle;
+	public static String ProjectionPropertyDialog_PageTitle1;
 	public static String ProjectionPropertyDialog_ProjectionList_Label;
 	public static String ProjectionPropertyDialog_ProjectionParseError;
 	public static String ProjectionPropertyDialog_SetDefault_Button;
 	public static String ProjectionPropertyDialog_UnknownCode;
+	public static String ProjectionPropertyDialog_ViewProjectionLbl;
+	public static String ProjectionPropertyDialog_ViewProjectionToolip;
 	public static String Rank_Label;
 	public static String RankDeleteAdvisor_Error_NotRank;
 	public static String RankDeleteAdvisor_Error_RankReferenced;
@@ -925,6 +927,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_DescriptionColumnName;
 	public static String SmartLabelProvider_DesignationColumnName;
 	public static String SmartLabelProvider_EmployeeTableName;
+	public static String SmartLabelProvider_GeometryLabel;
 	public static String SmartLabelProvider_StationActiveColumnName;
 	public static String SmartLabelProvider_StationsTableName;
 	public static String SmartLayerStyleInterceptor_StyleError;
@@ -1097,8 +1100,12 @@ public class Messages extends NLS {
 	public static String Upgrader320To321_UpdateDbStructure;
 	public static String Upgrader321To330_Error;
 	public static String Upgrader321To330_ProcessMessage;
+	public static String Upgrader330To331_UpgradeError;
+	public static String Upgrader330To331_UpgradeMsg;
 	public static String Upgrader330To400_Error;
 	public static String Upgrader330To400_ProcessMessage;
+	public static String Upgrader400To401_UpgradeError;
+	public static String Upgrader400To401_UpgradeMsg;
 	public static String UserLoginInfo_ReadError;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;

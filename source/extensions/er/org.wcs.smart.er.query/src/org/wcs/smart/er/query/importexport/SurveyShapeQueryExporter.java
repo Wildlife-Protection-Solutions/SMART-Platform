@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.importexport;
 
 import org.geotools.data.DataUtilities;
-import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
@@ -33,7 +32,6 @@ import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;

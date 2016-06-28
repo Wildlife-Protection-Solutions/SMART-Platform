@@ -9,6 +9,12 @@ public class Messages extends NLS {
 
 	public static String Report400Upgrader_ErrorTitle;
 
+	public static String Report400Upgrader_IntelTemplateError;
+
+	public static String Report400Upgrader_PlanTemplateError;
+
+	public static String Report400Upgrader_TemplateUpdateError;
+
 	public static String Report400Upgrader_UpgradeError;
 
 	public static String ReportQueryListener_BeforeSave_QueryUsedWarning;

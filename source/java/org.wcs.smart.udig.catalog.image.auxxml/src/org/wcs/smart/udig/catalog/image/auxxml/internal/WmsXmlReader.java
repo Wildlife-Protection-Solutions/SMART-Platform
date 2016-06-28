@@ -87,10 +87,10 @@ public class WmsXmlReader {
 	}
 	
 	public static File findFile(File root){
-		File tmp = new File(root.toString() + ".aux.xml");
+		File tmp = new File(root.toString() + ".aux.xml"); //$NON-NLS-1$
 		if (tmp.exists()) return tmp;
 		
-		File[] files = URLUtils.findRelatedFiles(tmp, ".aux.xml");
+		File[] files = URLUtils.findRelatedFiles(tmp, ".aux.xml"); //$NON-NLS-1$
 		for (File f : files){
 			if (f.exists()) return f;
 		}
@@ -98,7 +98,7 @@ public class WmsXmlReader {
 	}
 	
 	public static String findPrjFile(File basefile){
-        File[] f = URLUtils.findRelatedFiles(basefile, ".prj");
+        File[] f = URLUtils.findRelatedFiles(basefile, ".prj"); //$NON-NLS-1$
         if (f.length > 0){
         	File prj = f[0];
         	if (prj.exists()){
@@ -106,7 +106,7 @@ public class WmsXmlReader {
         		try{
         			PrjFileReader prjReader = new PrjFileReader(Files.newByteChannel(prj.toPath()));
         			prjReader.getCoordinateReferenceSystem();
-        			return "Prj file exists and should be used.";
+        			return "Prj file exists and should be used."; //$NON-NLS-1$
         		}catch (Exception ex){
         			///could not read file; lets assume no valid prj files
         		}

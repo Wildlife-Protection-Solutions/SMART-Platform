@@ -43,7 +43,7 @@ public class Projection extends UuidItem {
 	private String name;
 	private String definition;
 	private boolean isDefault;
-
+	
 	private CoordinateReferenceSystem parsedCrs;
 	
 	/**
@@ -103,7 +103,8 @@ public class Projection extends UuidItem {
 	}
 	
 	/**
-	 * 
+	 * The viewing projection is the projection the system 
+	 * displays all data in.
 	 * @return if this is the default projection for ca
 	 */
 	@Column(name="is_default")

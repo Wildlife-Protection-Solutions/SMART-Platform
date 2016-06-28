@@ -47,12 +47,6 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationUtils;
-import org.wcs.smart.observation.events.IWaypointEventListener;
-import org.wcs.smart.observation.events.WaypointEventManager;
-import org.wcs.smart.observation.events.WaypointEventManager.EventType;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
@@ -76,6 +70,7 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -90,21 +85,13 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	protected QueryResultsTablePage page1;
 	protected QueryMapPageEditor page2;
 	private boolean isDirty = false;
-	
-	private Projection prj = null;
-	private boolean reloadPrj = false;
+	private Projection currentPrj = null;
 	
 	/*
 	 * Listener for changes to area names/ids
 	 */
 	private IAreaModifiedListener areaListener = null;
 	
-	private IWaypointEventListener optionsMpd = new IWaypointEventListener() {
-		@Override
-		public void handleEvent(Waypoint wp) {
-			reloadPrj = true;
-		}
-	};
 	/**
 	 * Job to run the query and refresh the results
 	 */
@@ -113,18 +100,16 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			runQueryJob.setName(Messages.QueryResultsEditor_RunQueryJobName + getQuery().getName());
-			if (reloadPrj){
-				Session session = HibernateManager.openSession();
-				
-				try{			
-					loadProjection(session);
-				}finally{
-					session.close();
-				}
-				
-				reloadPrj = false;
-			}
 			
+			//load the current view projection
+			currentPrj = HibernateManager.getCurrentViewProjection();
+			if (currentPrj != null && currentPrj.getParsedCoordinateReferenceSystem() == null){
+				try{
+					currentPrj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(currentPrj.getDefinition()));
+				}catch (Exception ex){
+					//eat me
+				}
+			}
 			final IProgressMonitor mymonitor = page1.createProgressMonitor();
 			try {
 				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor); 
@@ -198,7 +183,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				loadProjection(session);
 				Query squery = (SimpleQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
 				query = new QueryProxy(squery);
 				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
@@ -233,13 +217,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	
 		areaListener = new QueryAreaModifiedListener(this);
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
-		
-		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_OPTIONS_MODIFIED, optionsMpd);
-	}
-
-	
-	private void loadProjection(Session session){
-		prj = ObservationUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea()).getProjection();
 	}
 	
 	/**
@@ -251,7 +228,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		
 		query.dispose();
 		QueryEventManager.getInstance().removeListener(qListener);
-		WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_OPTIONS_MODIFIED, optionsMpd);
 		if (areaListener != null){
 			ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
 		}
@@ -273,12 +249,6 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				//create a new query
 				this.query = new QueryProxy(createNewQuery(input2.getType()));
 				setDirty(false);
-				Session s = HibernateManager.openSession();
-				try{
-					loadProjection(s);
-				}finally{
-					s.close();
-				}
 			}else{
 				loadQueryLoad.schedule();
 			}
@@ -374,9 +344,9 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			Job j = new Job(Messages.QueryResultsEditor_initquerylobname){
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					SimpleQuery q = getQueryInternal();
+//					SimpleQuery q = getQueryInternal();
 //					q.getQueryColumns(Locale.getDefault(), null, QueryResultsEditor.this);
-					
+//					
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 
 						@Override
@@ -622,7 +592,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 */
 	@Override
 	public Projection getProjection(){
-		return this.prj;
+		return this.currentPrj;
 	}
 	
 	

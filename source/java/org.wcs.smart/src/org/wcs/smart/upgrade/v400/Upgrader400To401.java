@@ -19,30 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.upgrade.v330;
+package org.wcs.smart.upgrade.v400;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
- * Upgrades from database version 330 to 331
+ * Upgrade from 4.0.0 to 4.0.1
  * 
- * @author elitvin
- * @since 3.3.0
+ * @author Emily
+ *
  */
-public class Upgrader330To331 implements IDatabaseUpgrader {
-
-	public void upgrade(final IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader330To331_UpgradeMsg);
+public class Upgrader400To401 implements IDatabaseUpgrader {
+	
+	private Exception thrownException = null;
+	
+	@Override
+	public void upgrade(final IProgressMonitor monitor) throws Exception{
+		monitor.beginTask(Messages.Upgrader400To401_UpgradeMsg, 1);
+		thrownException = null;
 		final Session s = HibernateManager.openSession();
 		try{
 			s.doWork(new Work() {
@@ -51,15 +55,9 @@ public class Upgrader330To331 implements IDatabaseUpgrader {
 					try {
 						c.setAutoCommit(false);
 						upgrade(c, s, monitor);
-					} catch (final Exception e) {
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(Messages.Upgrader330To331_UpgradeError, e);
-							}
-						});
-					} finally {
 						c.setAutoCommit(true);
+					} catch (final Exception e) {
+						thrownException = new Exception(Messages.Upgrader400To401_UpgradeError, e);
 					}
 				}
 			});
@@ -67,28 +65,29 @@ public class Upgrader330To331 implements IDatabaseUpgrader {
 		}finally{
 			s.close();
 		}
+		if (thrownException != null) throw thrownException;
+		
+		
+		monitor.done();
 	}
-
+	
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
+		@SuppressWarnings("nls")
 		String[] sql = new String[]{
-				"GRANT EXECUTE ON FUNCTION smart.trimhkeytolevel TO analyst", //$NON-NLS-1$
-				"GRANT EXECUTE ON FUNCTION smart.trimhkeytolevel TO data_entry", //$NON-NLS-1$
-				"GRANT EXECUTE ON FUNCTION smart.trimhkeytolevel TO manager", //$NON-NLS-1$
-				
-				"GRANT EXECUTE ON FUNCTION smart.hkeylength TO analyst", //$NON-NLS-1$
-				"GRANT EXECUTE ON FUNCTION smart.hkeylength TO data_entry", //$NON-NLS-1$
-				"GRANT EXECUTE ON FUNCTION smart.hkeylength TO manager", //$NON-NLS-1$
+			"UPDATE smart.ca_projection set IS_DEFAULT = 'false' WHERE ca_uuid in (SELECT ca_uuid FROM smart.observation_options)",
+			"UPDATE smart.ca_projection set IS_DEFAULT = 'true' WHERE uuid IN (SELECT view_projection_uuid FROM smart.observation_options)",
+			"ALTER TABLE smart.observation_options DROP column view_projection_uuid"
 		};
 		
 		for (String s : sql){
+			SmartPlugIn.logInfo(s);
 			c.createStatement().execute(s);
 		}
-				
-		/* VERSION UDATE */ 
-		String ssql = "update smart.db_version set version = '3.3.1' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
-		c.createStatement().execute(ssql);
 		
+		/* VERSION UDATE */ 
+		String ssql = "update smart.db_version set version = '" + UpgradeEngine.UpgradeFromVersion.V401.toVersion + "' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$ //$NON-NLS-2$
+		c.createStatement().execute(ssql);
 		c.commit();
 	}
-	
+
 }

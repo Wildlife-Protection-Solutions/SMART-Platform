@@ -3,7 +3,6 @@ package org.wcs.smart.query.common.engine;
 import java.sql.SQLException;
 
 import org.hibernate.Session;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public interface IQueryResult {
 
