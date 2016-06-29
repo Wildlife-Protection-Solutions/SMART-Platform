@@ -37,6 +37,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.SurveyWaypoint;
 
 /**
  * Mission Day Page. It represents one day within a mission.
@@ -112,6 +113,10 @@ public class MissionDayPage extends EditorPart {
 		dayComposite.initData();
 	}
 
+	public void findAndGoTo(SurveyWaypoint pw){
+		dayComposite.selectWaypoint(pw);
+	}
+	
 	public void refresh(){
 		dayComposite.initData();
 	}

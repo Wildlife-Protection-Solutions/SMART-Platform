@@ -13,4 +13,5 @@ Require-Bundle: org.wcs.smart,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.incident.event,
+ org.wcs.smart.incident.ui,
  org.wcs.smart.incident.xml

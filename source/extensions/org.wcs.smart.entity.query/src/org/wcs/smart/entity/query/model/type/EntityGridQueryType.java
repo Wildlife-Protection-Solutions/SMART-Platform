@@ -38,6 +38,7 @@ import org.wcs.smart.entity.query.ui.EntityGriddedQueryEditor;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -210,5 +211,10 @@ public class EntityGridQueryType implements IQueryType {
 	public URL getDescription() {
 		IPath path = new Path("src/org/wcs/smart/entity/query/model/type/grid.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, EntityQueryPlugIn.getDefault().getBundle());
+	}
+	
+	@Override
+	public IQueryResultInfoProvider[] getResultProviders(){
+		return new IQueryResultInfoProvider[]{};
 	}
 }

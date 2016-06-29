@@ -746,6 +746,8 @@ public class Messages extends NLS {
 	public static String SurveyPermissionManager_MissionToOld;
 	public static String SurveyPermissionManager_SurveyToOld;
 	public static String SurveyWaypointSource_Name;
+
+	public static String SurveyWaypointSourceUiProvider_WaypointNotFound;
 	public static String TemplateWizardPage_BlankDesign;
 	public static String TemplateWizardPage_ConservationArea;
 

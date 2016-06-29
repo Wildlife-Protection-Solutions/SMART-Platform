@@ -31,14 +31,22 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -115,26 +123,38 @@ public abstract class QueryResultsTable {
 			}
 			return;
 		}
-//		Job job = new Job(INITQUERYTABLE_JOBNAME){
-//			@Override
-//			protected IStatus run(IProgressMonitor monitor) {
-//				// in display thread update table
-//				table.getControl().getDisplay().asyncExec(new Runnable() {
-//					@Override
-//					public void run() {
-//						if (table.getTable().isDisposed()){
-//							return;
-//						}
-						List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
-						tableViewerColumns = createColumns(table,cols);
-						table.refresh(true);
-//					}
-//				});
-//				return Status.OK_STATUS;
-//			}
-//		};
-//		
-//		job.schedule();
+
+		List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
+		tableViewerColumns = createColumns(table,cols);
+		table.refresh(true);
+						
+
+		IQueryType queryType = QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey());
+		if (queryType.getResultProviders().length > 0) {
+			Menu menuTable = new Menu(table.getControl());
+			table.getControl().setMenu(menuTable);
+
+			for (final IQueryResultInfoProvider item : queryType.getResultProviders()) {
+				// Create menu item
+				MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
+				if (item.getImage() != null){
+					miTest.setImage(item.getImage());
+				}
+				miTest.setText(item.getName());
+				miTest.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						IStructuredSelection selection = (IStructuredSelection) table.getSelection();
+						if (!selection.isEmpty()) {
+							Object x = selection.getFirstElement();
+							item.doWork(x);
+						}
+					}
+				});
+			}
+		}
+					
+
 	}
 	
 	public void initQuery(final GriddedQuery query){

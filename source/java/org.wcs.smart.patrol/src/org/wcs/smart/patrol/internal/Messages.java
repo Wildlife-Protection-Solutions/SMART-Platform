@@ -556,6 +556,7 @@ public class Messages extends NLS {
 	public static String PatrolViewFilter_PatrolIdSort;
 	public static String PatrolViewFilter_StartDateSort;
 	public static String PatrolWaypointSource_PatrolWaypointSourceName;
+	public static String PatrolWaypointSourceUiProvider_WaypointNotFound;
 	public static String PatrolXmlImportDialog_AutoGenerateIdsTooltip;
 	public static String PatrolXmlImportDialog_IdsOptionLabel;
 	public static String PatrolXmlImportDialog_IgnoreWarningOp;

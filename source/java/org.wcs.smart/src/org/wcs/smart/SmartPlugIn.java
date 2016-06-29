@@ -188,6 +188,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String BROWSER_HOME = "org.wsc.smart.browser.home"; //$NON-NLS-1$
 	public static final String BROWSER_STOP = "org.wsc.smart.browser.stop"; //$NON-NLS-1$
 	
+	/**
+	 * Goto Icon
+	 */
+	public static final String GOTO_ICON = "org.wsc.smart.GOTO"; //$NON-NLS-1$
+	
 	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
@@ -383,6 +388,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(ZOOM_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/elcl16/zoom_tool.png")); //$NON-NLS-1$
 	 
+	     reg.put(GOTO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
 	}
 	
 	/**

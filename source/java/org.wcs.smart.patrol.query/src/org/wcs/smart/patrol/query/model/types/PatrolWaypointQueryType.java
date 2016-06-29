@@ -39,6 +39,7 @@ import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -196,5 +197,11 @@ public class PatrolWaypointQueryType implements IQueryType {
 	public URL getDescription() {
 		IPath path = new Path("src/org/wcs/smart/patrol/query/model/types/patrolincident.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, PatrolQueryPlugIn.getDefault().getBundle());
+	}
+	@Override
+	public IQueryResultInfoProvider[] getResultProviders(){
+		return new IQueryResultInfoProvider[]{
+				new PatrolResultInfoProvider()
+		};
 	}
 }

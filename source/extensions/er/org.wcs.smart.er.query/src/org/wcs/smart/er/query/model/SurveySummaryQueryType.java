@@ -48,6 +48,7 @@ import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
@@ -332,5 +333,10 @@ public class SurveySummaryQueryType implements IQueryType {
 	public URL getDescription() {
 		IPath path = new Path("src/org/wcs/smart/er/query/model/types/surveysummary.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, ERQueryPlugIn.getDefault().getBundle());
+	}
+	
+	@Override
+	public IQueryResultInfoProvider[] getResultProviders(){
+		return new IQueryResultInfoProvider[]{};
 	}
 }

@@ -39,6 +39,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -56,6 +57,7 @@ public class PerspectiveEditorTracker implements EventHandler {
 	public static final String EDITOR_TAG = "Editor"; //$NON-NLS-1$
 	
 	@Inject private EModelService mService;
+	@Inject private EPartService pService;
 
 	@Inject private MApplication app;
 
@@ -136,9 +138,10 @@ public class PerspectiveEditorTracker implements EventHandler {
 			pstack.getTags().add(IPresentationEngine.NO_AUTO_COLLAPSE);
 		}
 		
-		pstack.setSelectedElement(null);
 		if (activate != null && activate.getWidget() == null) return;
-		pstack.setSelectedElement(activate);
+		if (activate != null){
+			pService.activate(activate);
+		}
 	}
 
 }

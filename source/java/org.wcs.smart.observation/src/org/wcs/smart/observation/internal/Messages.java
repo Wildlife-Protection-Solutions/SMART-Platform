@@ -138,6 +138,8 @@ public class Messages extends NLS {
 	public static String ImportWpTypeWizardPage_PageName;
 	public static String ImportWpTypeWizardPage_PageTitle;
 
+	public static String IWaypointSourceUiProvider_ErrorString;
+
 	public static String GPSBabel_Error_CouldNotImport;
 	public static String GPSBabel_Error_ProcessTerminatedTooLong;
 	public static String GPSBabel_Error_ReadingBabelOps;

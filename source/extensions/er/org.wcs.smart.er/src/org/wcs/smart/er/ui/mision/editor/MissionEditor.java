@@ -41,11 +41,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -393,6 +396,66 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	}
 	
 
+	/**
+	 * Finds and highlights the given waypoint 
+	 * @param wp
+	 */
+	public void findAndShow(UUID waypointUuid){
+		SurveyWaypoint wp = null;
+		Session s = HibernateManager.openSession();
+		
+		try{
+			wp = (SurveyWaypoint) s.createCriteria(SurveyWaypoint.class)
+					.add(Restrictions.eq("id.waypoint.uuid", waypointUuid)) //$NON-NLS-1$
+					.uniqueResult();
+			if (wp == null) return;
+			
+			wp.getMissionDay().getDate();
+		}finally{
+			s.close();
+		}
+		
+		final SurveyWaypoint wp2 = wp;
+		for (int i = 0; i < getPageCount(); i++){
+			IEditorPart part = getEditor(i);
+			if (part instanceof MissionDayPage){
+				final MissionDayPage pde = (MissionDayPage)part;			
+				if ( ((MissionDayPageEditorInput)pde.getEditorInput()).getDay().getTime() == wp.getMissionDay().getDate().getTime()  ){
+					setActivePage(i);
+						
+					Display.getDefault().asyncExec(new Runnable(){
+						//do this as a job in the display thread so the ui
+						//has a chance to change pages, before it attempts
+						//to scroll to the correct controls
+						@Override
+						public void run() {
+							pde.findAndGoTo(wp2);	
+						}
+					});
+					return;
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * Finds and highlights the mission day page for the given day 
+	 * @param wp
+	 */
+	public void findAndShow(Date missionDay){
+		for (int i = 0; i < getPageCount(); i++){
+			IEditorPart part = getEditor(i);
+			if (part instanceof MissionDayPage){
+				final MissionDayPage pde = (MissionDayPage)part;			
+				if ( ((MissionDayPageEditorInput)pde.getEditorInput()).getDay().getTime() == missionDay.getTime()  ){
+					setActivePage(i);
+					return;
+				}
+			}
+		}
+	}
+	
 	@Override
 	public boolean isSaveAsAllowed() {
 		return false;

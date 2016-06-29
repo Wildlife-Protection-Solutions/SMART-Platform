@@ -42,6 +42,7 @@ import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.editor.PatrolGriddedEditor;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -227,4 +228,8 @@ public class PatrolGridQueryType implements IQueryType {
 		return QueryPlugIn.findHelpURL(path, PatrolQueryPlugIn.getDefault().getBundle());
 	}
 
+	@Override
+	public IQueryResultInfoProvider[] getResultProviders(){
+		return new IQueryResultInfoProvider[]{};
+	}
 }

@@ -81,6 +81,19 @@ public class PatrolWaypoint {
 		this.getId().setPatrolLegDay(pld);
 	}
 		
+	@Override
+	public boolean equals(Object other){
+		if (other instanceof PatrolWaypoint){
+			return this.id.equals(((PatrolWaypoint) other).id);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return this.id.hashCode();
+	}
+	
 	@Embeddable
 	private static class PatrolWaypointPk implements Serializable{
 		/**
@@ -109,6 +122,19 @@ public class PatrolWaypoint {
 		}
 		public void setWaypoint(Waypoint wp){
 			this.wp  = wp;
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (other instanceof PatrolWaypointPk){
+				return this.wp.equals(((PatrolWaypointPk) other).wp);
+			}
+			return false;
+		}
+		
+		@Override
+		public int hashCode(){
+			return this.wp.hashCode() * 31 + pld.hashCode();
 		}
 	}
 }

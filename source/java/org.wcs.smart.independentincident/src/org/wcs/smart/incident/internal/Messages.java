@@ -119,6 +119,7 @@ public class Messages extends NLS {
 	public static String IndepedentIncidentSource_IndIncidentWaypointsourceName;
 	public static String IndIncidentListView_LoadingLabel;
 	public static String IndIncidentListView_UpdateJobName;
+	public static String IndIncidentSourceUiProvider_WaypointNotFound;
 	public static String LocationComposite_CoordinatesNotValid;
 	public static String LocationComposite_Description;
 	public static String LocationComposite_Error1;

@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.patrol.ui;
 
+import java.util.UUID;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -43,9 +46,11 @@ import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
 public class OpenPatrolHandler {
 
 	public static final String PATROL_PARAM = "patrolinput"; //$NON-NLS-1$
+	public static final String INIT_SELECTION_WP_UUID = "waypointuuid"; //$NON-NLS-1$
 	
 	@Execute
 	public void openPatrol(@Optional @Named(PATROL_PARAM) PatrolEditorInput patrolInput,
+			@Optional @Named(INIT_SELECTION_WP_UUID) UUID initSelection,
 			MWindow activeWindow){
 		
 		if (patrolInput == null) return;
@@ -55,9 +60,17 @@ public class OpenPatrolHandler {
 		try {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			IWorkbenchPage page = window.getActivePage();
-			page.openEditor(patrolInput, PatrolEditor.ID);
+			IEditorPart part = page.openEditor(patrolInput, PatrolEditor.ID);
+			if (part instanceof PatrolEditor && initSelection != null){
+				((PatrolEditor)part).findAndShow(initSelection);
+			}
 		} catch (PartInitException e) {
 			SmartPatrolPlugIn.displayLog(Messages.OpenPatrolHandler_OpenPatrolError + e.getLocalizedMessage(), e);
 		}
+	}
+	
+	public void openPatrol(@Optional @Named(PATROL_PARAM) PatrolEditorInput patrolInput,
+			MWindow activeWindow){
+		openPatrol(patrolInput, null, activeWindow);
 	}
 }

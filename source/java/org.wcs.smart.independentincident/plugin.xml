@@ -32,7 +32,8 @@
    <extension
          point="org.wcs.smart.observation.ObservationSource">
       <ObservationSource
-            class="org.wcs.smart.incident.IndepedentIncidentSource">
+            class="org.wcs.smart.incident.IndepedentIncidentSource"
+            ui_provider="org.wcs.smart.incident.ui.IndIncidentSourceUiProvider">
       </ObservationSource>
    </extension>
    <extension

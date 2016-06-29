@@ -52,10 +52,20 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Class that provides the necessary waypoint source information.  This class is shared with connect and should be in the shared folder.
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.observation.model.IWaypointSource"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="ui_provider" type="string">
+            <annotation>
+               <documentation>
+                  Class the provides the ui when details on how to open the source location for the waypoint.  Not shared with Connect.
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.observation.model.IWaypointSourceUiProvider"/>
                </appinfo>
             </annotation>
          </attribute>

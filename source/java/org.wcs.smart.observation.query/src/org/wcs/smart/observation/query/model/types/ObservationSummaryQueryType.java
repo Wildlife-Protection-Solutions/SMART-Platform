@@ -41,6 +41,7 @@ import org.wcs.smart.observation.query.ui.definition.ObservationValueRateFilterP
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -207,5 +208,10 @@ public class ObservationSummaryQueryType implements IQueryType {
 	public URL getDescription() {
 		IPath path = new Path("src/org/wcs/smart/observation/query/model/types/summary.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, ObservationQueryPlugIn.getDefault().getBundle());
+	}
+	
+	@Override
+	public IQueryResultInfoProvider[] getResultProviders(){
+		return new IQueryResultInfoProvider[]{};
 	}
 }

@@ -39,8 +39,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -264,6 +267,47 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		super.setPartName(Messages.PatrolEditor_EditorName_Prefix + getPatrol().getId());
 	}
 	
+	/**
+	 * Finds and displays the given waypoint uuid.
+	 * 
+	 * @param waypointUuid
+	 */
+	public void findAndShow(UUID waypointUuid){
+		PatrolWaypoint wp = null;
+		Session s = HibernateManager.openSession();
+		
+		try{
+			wp = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
+					.add(Restrictions.eq("id.waypoint.uuid", waypointUuid)) //$NON-NLS-1$
+					.uniqueResult();
+			if (wp == null) return;
+			wp.getPatrolLegDay().getDate();
+		}finally{
+			s.close();
+		}
+		
+		final PatrolWaypoint wp2 = wp;
+		for (int i = 0; i < getPageCount(); i++){
+			IEditorPart part = getEditor(i);
+			if (part instanceof PatrolDayEditor){
+				final PatrolDayEditor pde = (PatrolDayEditor)part;			
+				if ( ((PatrolDayEditorInput)pde.getEditorInput()).getPatrolDay().getTime() == wp.getPatrolLegDay().getDate().getTime()  ){
+					setActivePage(i);
+						
+					Display.getDefault().asyncExec(new Runnable(){
+						//do this as a job in the display thread so the ui
+						//has a chance to change pages, before it attempts
+						//to scroll to the correct controls
+						@Override
+						public void run() {
+							pde.findAndGoTo(wp2);	
+						}
+					});
+					return;
+				}
+			}
+		}
+	}
 	
 	@Override
 	protected void createPages() {

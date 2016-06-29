@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.handlers;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -32,6 +33,7 @@ import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -97,16 +99,48 @@ public class EditSurveyElementHandler {
 	 * @param missionUuid
 	 * @param name
 	 */
-	public static final void editMission(Shell parentShell, UUID missionUuid, String name){
+	public static final IEditorPart editMission(Shell parentShell, UUID missionUuid, String name){
 		MissionEditorInput in = new MissionEditorInput(name, missionUuid);
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(in, MissionEditor.ID);
+			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(in, MissionEditor.ID);
 		} catch (PartInitException e) {
 			EcologicalRecordsPlugIn.displayLog(Messages.EditSurveyElementHandler_MissionError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 		}
+		return null;
 	}
 
-
+	/**
+	 * Opens the mission editor for the given mission with the
+	 * given waypoint highlighted
+	 * @param parentShell
+	 * @param missionUuid
+	 * @param name
+	 */
+	public static final IEditorPart editMission(Shell parentShell, UUID missionUuid, String name, UUID wpUuid){
+		IEditorPart editor = editMission(parentShell, missionUuid, name);
+		if (editor == null || wpUuid == null) return editor; 
+		if (editor instanceof MissionEditor ){
+			((MissionEditor) editor).findAndShow(wpUuid);
+		}
+		return editor;
+	}
+	
+	/**
+	 * Opens the mission editor for the given mission with the
+	 * given mission day page selected 
+	 * @param parentShell
+	 * @param missionUuid
+	 * @param name
+	 */
+	public static final IEditorPart editMission(Shell parentShell, UUID missionUuid, String name, Date missionDay){
+		IEditorPart editor = editMission(parentShell, missionUuid, name);
+		if (editor == null || missionDay == null) return editor; 
+		if (editor instanceof MissionEditor ){
+			((MissionEditor) editor).findAndShow(missionDay);
+		}
+		return editor;
+	}
+	
 	/**
 	 * Opens the survey design editor for the given survey design
 	 * @param parentShell

@@ -20,5 +20,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.intelligence,
  org.wcs.smart.intelligence.model,
+ org.wcs.smart.intelligence.ui.handlers,
  org.wcs.smart.intelligence.updatesite
 Bundle-Vendor: org.wcs.smart

@@ -55,6 +55,7 @@ import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
@@ -78,6 +79,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -953,7 +955,7 @@ public class PatrolLegDayInputComposite {
 	
 		return ""; //$NON-NLS-1$
 	}
-	
+		
 	private String getWaypointValueAsString(PatrolWaypoint element, OtColumn column) {
 
 		Waypoint wp = ((PatrolWaypoint) element).getWaypoint();
@@ -1075,6 +1077,23 @@ public class PatrolLegDayInputComposite {
 			editor.getPatrolEditor().save(Collections.singleton(wp));
 			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
 		}
+	}
+	
+	/**
+	 * If the patrol waypoint applies to the patrol leg day
+	 * associated with this composite, it selects it in the table
+	 * and returns the table control.  Otherwise returns null; 
+	 * @param pw
+	 * @return
+	 */
+	public Control selectWaypoint(PatrolWaypoint pw){
+		if (pw.getPatrolLegDay().equals(patrolLegDate)){
+			observationTable.getTable().setFocus();
+			observationTable.setSelection(new StructuredSelection(pw));
+			observationTable.getTable().showSelection();
+			return observationTable.getControl();
+		}
+		return null;
 	}
 
 	class ObsrvationTableLabelProvider extends ColumnLabelProvider {

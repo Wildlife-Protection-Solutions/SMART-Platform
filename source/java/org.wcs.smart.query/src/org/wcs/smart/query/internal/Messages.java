@@ -235,6 +235,9 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_ImportingProgress;
 	public static String ImportQueryWizard_ImportingTaskName;
 	public static String ImportQueryWizard_Title1;
+	public static String IQueryResultInfoProvider_ErrorLabel;
+	public static String IQueryResultInfoProvider_GoToLabel;
+	public static String IQueryResultInfoProvider_OpNotSupported;
 	public static String ItemTreeNodeTree_Loading;
 	public static String MonthDateGroupBy_MonthGroupByName;
 	public static String MultiCaDataModelManagerImpl_MergeError;

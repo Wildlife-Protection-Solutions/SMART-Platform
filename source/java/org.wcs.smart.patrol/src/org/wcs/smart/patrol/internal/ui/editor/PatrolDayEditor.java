@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -95,6 +96,16 @@ public class PatrolDayEditor extends EditorPart {
 			}
 		}
 		super.dispose();
+	}
+	
+	public void findAndGoTo(PatrolWaypoint pw){
+		for (PatrolLegDayInputComposite c : children){
+			Control table = c.selectWaypoint(pw);
+			if (table != null){
+				frmSummary.showControl(table);
+				return;
+			}
+		}
 	}
 	
 	/**

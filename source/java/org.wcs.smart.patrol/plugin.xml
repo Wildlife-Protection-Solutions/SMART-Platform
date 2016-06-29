@@ -541,7 +541,8 @@
    <extension
          point="org.wcs.smart.observation.ObservationSource">
       <ObservationSource
-            class="org.wcs.smart.patrol.model.PatrolWaypointSource">
+            class="org.wcs.smart.patrol.model.PatrolWaypointSource"
+            ui_provider="org.wcs.smart.patrol.ui.PatrolWaypointSourceUiProvider">
       </ObservationSource>
    </extension>
    <extension

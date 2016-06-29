@@ -24,6 +24,8 @@ package org.wcs.smart.query.model;
 import java.net.URL;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
@@ -115,5 +117,15 @@ public interface IQueryType {
 	 * a description of the query type; can return null
 	 */
 	public URL getDescription();
+	
+	/**
+	 * Providers a list of info providers that can be execute
+	 * against a query results record. Can return an 
+	 * empty array but should never return null.
+	 * 
+	 * @return array of result providers.  
+	 */
+	@Nonnull
+	public IQueryResultInfoProvider[] getResultProviders();
 	
 }

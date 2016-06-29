@@ -39,6 +39,7 @@ import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.editor.SurveySimpleQueryResultEditor;
 import org.wcs.smart.er.query.ui.panels.definition.TrackFilterDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -152,5 +153,11 @@ public class MissionTrackQueryType implements IQueryType {
 	public static IDateFieldFilter[] validDateFields(){
 		return new IDateFieldFilter[]{MissionTrackDateField.INSTANCE, MissionStartDateField.INSTANCE, MissionEndDateField.INSTANCE};
 	}
-
+	
+	@Override
+	public IQueryResultInfoProvider[] getResultProviders(){
+		return new IQueryResultInfoProvider[]{
+				new SurveyResultInfoProvider()
+		};
+	}
 }

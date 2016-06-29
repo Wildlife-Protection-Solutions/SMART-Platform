@@ -438,7 +438,7 @@ public class MapSettings {
 
 			for (ILayer layer : basemapLayers) {
 				LayerRegister info = definitionMap.get(layer.getID());
-
+				if (currentMap.getRenderManager() == null) return;	//map was closed
 				((Layer) layer).setVisible(info.getVisible());
 				((Layer) layer).eSetDeliver(false);
 				updateLayer(((Layer) layer), info);

@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
+import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
 /**
  * Manager for dealing with waypoint
  * sources.
@@ -46,6 +47,10 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 	 * Cached sources
 	 */
 	private Map<String,IWaypointSource> supportedSources = null;
+	/**
+	 * Cached sources
+	 */
+	private Map<String,IWaypointSourceUiProvider> supportedUiSources = null;
 	
 	/**
 	 * private constructor
@@ -77,16 +82,34 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 		return supportedSources.get(sourceKey);
 	}
 	
+	/**
+	 * Gets the ui provider for a given source key
+	 * @param sourceKey
+	 * @return
+	 */
+	public IWaypointSourceUiProvider findUiProvider(String sourceKey){
+		IWaypointSource source = getSource(sourceKey);
+		if (source == null) return null;
+		String key = getSource(sourceKey).getKey();
+		if (key == null) return null;
+		return supportedUiSources.get(key);
+	}
+	
 	/*
 	 * Load source extension points
 	 */
 	private void loadWaypointSources() {
 		supportedSources = new HashMap<String, IWaypointSource>();
+		supportedUiSources = new HashMap<String, IWaypointSourceUiProvider>();
 		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(SOURCE_EXTENSION_ID);
 		for (IConfigurationElement element : elements){
 			try{
 				IWaypointSource source = (IWaypointSource) element.createExecutableExtension("class"); //$NON-NLS-1$
 				supportedSources.put(source.getKey(), source);
+				
+				if (element.getAttribute("ui_provider") != null){ //$NON-NLS-1$
+					supportedUiSources.put(source.getKey(), (IWaypointSourceUiProvider)element.createExecutableExtension("ui_provider")); //$NON-NLS-1$
+				}
 			}catch (Exception ex){
 				ObservationPlugIn.log("Error loading all waypoint sources", ex); //$NON-NLS-1$
 			}

@@ -38,6 +38,7 @@ import org.wcs.smart.entity.query.ui.SimpleQueryEditor;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.WaypointQuery;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -192,5 +193,12 @@ public class EntityWaypointQueryType implements IQueryType {
 	public URL getDescription() {
 		IPath path = new Path("src/org/wcs/smart/entity/query/model/type/incident.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, EntityQueryPlugIn.getDefault().getBundle());
+	}
+	
+	@Override
+	public IQueryResultInfoProvider[] getResultProviders(){
+		return new IQueryResultInfoProvider[]{
+			new EntityResultItemProvider()
+		};
 	}
 }

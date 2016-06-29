@@ -113,7 +113,8 @@
    <extension
          point="org.wcs.smart.observation.ObservationSource">
       <ObservationSource
-            class="org.wcs.smart.er.model.SurveyWaypointSource">
+            class="org.wcs.smart.er.model.SurveyWaypointSource"
+            ui_provider="org.wcs.smart.er.ui.SurveyWaypointSourceUiProvider">
       </ObservationSource>
    </extension>
    <extension

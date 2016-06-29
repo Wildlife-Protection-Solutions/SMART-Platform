@@ -55,6 +55,7 @@ import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
@@ -691,6 +692,11 @@ public class MissionDayComposite {
 		
 	}
 
+	public void selectWaypoint(SurveyWaypoint wp){
+		observationTable.setSelection(new StructuredSelection(wp));
+		observationTable.getTable().showSelection();
+	}
+	
 	private void resize(){
 		if (observationTableColumns == null){
 			return ;
