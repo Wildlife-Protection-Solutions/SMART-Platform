@@ -19,26 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.editor;
+package org.wcs.smart.er.query.model;
 
-import org.wcs.smart.query.common.model.udig.IQueryService;
+import java.text.MessageFormat;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
 
 /**
- * Query editors that include a map page.
+ * Zoom to provider for survey data queries.
  * 
  * @author Emily
  *
  */
-public interface IMapQueryEditor extends IQueryEditor {
+public class SurveyZoomToResultProvider extends AbstractZoomToInfoProvider {
 
-	/**
-	 * Creates a query service for the map 
-	 * @return
-	 */
-	public abstract IQueryService createQueryService();
+	@Override
+	public void doWork(Object resultItem) {
+		if (resultItem instanceof SurveyQueryResultItem) {
+			SurveyQueryResultItem item = (SurveyQueryResultItem) resultItem;
+			
+			if (item.getWaypointUuid() != null){
+				zoomTo(item.getWaypointX(null), item.getWaypointY(null));
+			}else{
+				zoomTo(item.asGeometry(SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY));
+			}
+			return;
+		} 
+		if (resultItem instanceof MissionTrackResultItem){
+			zoomTo(((MissionTrackResultItem) resultItem).asGeometry(MissionTrackResultItem.TRACK_GEOMCOLUMN_KEY));
+			return;
+		}
+		
 	
-	/**
-	 * Activate the map page of the editor
-	 */
-	public void showMapPage();
+		MessageDialog.openError(
+				Display.getDefault().getActiveShell(),
+				ERROR_STR,
+				MessageFormat.format(OP_NOT_SUPPORTED_STR,resultItem.getClass().getName()));
+	}
 }

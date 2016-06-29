@@ -27,8 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -48,7 +50,7 @@ import com.vividsolutions.jts.geom.LineString;
  * @author Emily
  * @since 1.0.0
  */
-public class SurveyQueryResultItem implements IGeometryResultItem{
+public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	
 	/**
 	 * Waypoint geometry field name
@@ -537,6 +539,16 @@ public class SurveyQueryResultItem implements IGeometryResultItem{
 				return GeometryFactoryProvider.getFactory().createMultiLineString(new LineString[]{});
 			}
 			return GeometryFactoryProvider.getFactory().createMultiLineString(getTracks().toArray(new LineString[getTracks().size()]));
+		}
+		return null;
+	}
+	
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(Waypoint.class) && getWaypointUuid() != null){
+			Waypoint wp = new Waypoint();
+			wp.setUuid(getWaypointUuid());
+			return wp;
 		}
 		return null;
 	}

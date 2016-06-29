@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.wcs.smart.observation.ui.WaypointInfoView;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.itempanel.QueryItemView;
 import org.wcs.smart.query.ui.querylist.QueryListView;
@@ -54,6 +55,7 @@ public class QueryPerspective implements IPerspectiveFactory {
 		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.query.queryFolder1", IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		folder1.addView(QueryItemView.ID);
 		folder1.addView("org.locationtech.udig.project.ui.layerManager"); //$NON-NLS-1$
+		folder1.addView(WaypointInfoView.ID); 
 		
 		//bottom query and info view
 		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$

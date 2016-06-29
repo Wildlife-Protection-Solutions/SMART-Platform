@@ -201,7 +201,8 @@ public class PatrolWaypointQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-				new PatrolResultInfoProvider()
+				new PatrolResultInfoProvider(),
+				new PatrolZoomToResultProvider()
 		};
 	}
 }

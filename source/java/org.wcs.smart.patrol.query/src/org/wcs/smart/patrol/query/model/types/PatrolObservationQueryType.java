@@ -206,7 +206,8 @@ public class PatrolObservationQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-				new PatrolResultInfoProvider()
+				new PatrolResultInfoProvider(),
+				new PatrolZoomToResultProvider()
 		};
 	}
 }

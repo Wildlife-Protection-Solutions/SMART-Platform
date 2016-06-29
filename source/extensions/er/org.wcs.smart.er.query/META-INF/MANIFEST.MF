@@ -21,3 +21,4 @@ Export-Package: org.wcs.smart.er.query.engine,
  org.wcs.smart.er.query.map.udig,
  org.wcs.smart.er.query.model
 Bundle-Vendor: org.wcs.smart
+Import-Package: org.wcs.smart.observation.query.model.types

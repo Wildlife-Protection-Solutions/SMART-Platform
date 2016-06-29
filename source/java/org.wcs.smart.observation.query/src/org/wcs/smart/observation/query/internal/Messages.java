@@ -7,6 +7,8 @@ public class Messages extends NLS {
 	public static String AbstractObservationInfoProvider_ProviderNotFound;
 	public static String AbstractObservationInfoProvider_SourceNull;
 	public static String AbstractObservationInfoProvider_WaypointNull;
+	public static String AbstractZoomToInfoProvider_Name;
+	public static String AbstractZoomToInfoProvider_NoGeometryFound;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
 	public static String DerbyGridEngine_Progress_CreatingObservationTable;
 	public static String DerbyGridEngine_Progress_RunningQuery;

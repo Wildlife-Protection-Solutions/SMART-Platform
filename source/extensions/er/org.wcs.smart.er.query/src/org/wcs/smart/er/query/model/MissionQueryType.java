@@ -176,7 +176,8 @@ public class MissionQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-				new SurveyResultInfoProvider()
+				new SurveyResultInfoProvider(),
+				new SurveyZoomToResultProvider()
 		};
 	}
 }

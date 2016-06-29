@@ -157,7 +157,8 @@ public class MissionTrackQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-				new SurveyResultInfoProvider()
+				new SurveyResultInfoProvider(),
+				new SurveyZoomToResultProvider()
 		};
 	}
 }

@@ -152,6 +152,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryQueryType_SummaryQueryTypeName;
 	public static String PatrolValueTreeItem_PatrolValuesNodeLabel;
 	public static String PatrolWaypointQueryType_WaypointQueryTypeName;
+	public static String PatrolZoomToResultProvider_TrackGeomNotFound;
 	public static String Query_DefaultQueryName;
 	public static String QueryColumn_LoadingObservationColumnJobName;
 	public static String QueryColumn_LoadingPatrolColumnJobName;

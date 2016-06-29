@@ -202,7 +202,8 @@ public class EntityObservationQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-			new EntityResultItemProvider()
+			new EntityResultItemProvider(),
+			new EntityZoomToResultProvider()
 		};
 	}
 }

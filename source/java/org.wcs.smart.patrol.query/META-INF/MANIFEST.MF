@@ -23,3 +23,4 @@ Export-Package: org.wcs.smart.patrol.query,
  org.wcs.smart.patrol.query.parser.internal.summary;x-friends:="org.wcs.smart.query.test",
  org.wcs.smart.patrol.query.ui
 Bundle-Vendor: org.wcs.smart
+Import-Package: org.wcs.smart.observation.query.model.types

@@ -19,26 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.editor;
+package org.wcs.smart.observation.query.model.types;
 
-import org.wcs.smart.query.common.model.udig.IQueryService;
+import java.text.MessageFormat;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 
 /**
- * Query editors that include a map page.
+ * Zoom to provider for all data queries.
  * 
  * @author Emily
  *
  */
-public interface IMapQueryEditor extends IQueryEditor {
+public class ObservationZoomToResultProvider extends AbstractZoomToInfoProvider {
 
-	/**
-	 * Creates a query service for the map 
-	 * @return
-	 */
-	public abstract IQueryService createQueryService();
-	
-	/**
-	 * Activate the map page of the editor
-	 */
-	public void showMapPage();
+	@Override
+	public void doWork(Object resultItem) {
+		if (resultItem instanceof ObservationQueryResultItem) {
+			ObservationQueryResultItem item = (ObservationQueryResultItem) resultItem;
+			zoomTo(item.getWaypointX(null), item.getWaypointY(null));
+		} else {
+			MessageDialog
+					.openError(
+							Display.getDefault().getActiveShell(),
+							ERROR_STR,
+							MessageFormat.format(OP_NOT_SUPPORTED_STR,resultItem.getClass().getName()));
+		}
+	}
+
 }

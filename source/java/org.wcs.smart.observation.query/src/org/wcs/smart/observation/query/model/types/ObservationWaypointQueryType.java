@@ -198,7 +198,8 @@ public class ObservationWaypointQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-				new ObservationResultInfoProvider()
+				new ObservationResultInfoProvider(),
+				new ObservationZoomToResultProvider()
 		};
 	}
 }

@@ -198,7 +198,8 @@ public class EntityWaypointQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-			new EntityResultItemProvider()
+			new EntityResultItemProvider(),
+			new EntityZoomToResultProvider()
 		};
 	}
 }

@@ -25,8 +25,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -43,7 +45,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Emily
  * @since 1.0.0
  */
-public class ObservationQueryResultItem implements IGeometryResultItem{
+public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptable{
 	/**
 	 * Waypoint geometry field name
 	 */
@@ -298,6 +300,16 @@ public class ObservationQueryResultItem implements IGeometryResultItem{
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(GEOMCOLUMN_KEY))
 			return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
+		return null;
+	}
+
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(Waypoint.class) && getWaypointUuid() != null){
+			Waypoint wp = new Waypoint();
+			wp.setUuid(getWaypointUuid());
+			return wp;
+		}
 		return null;
 	}
 }

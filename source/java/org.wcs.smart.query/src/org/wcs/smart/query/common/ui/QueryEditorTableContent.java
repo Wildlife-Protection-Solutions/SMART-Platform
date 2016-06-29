@@ -93,7 +93,6 @@ public class QueryEditorTableContent {
 		if (stackComposite.isDisposed()) return;
 		setQueryName(query);
 		resultsTable.initQuery(query, editor);
-//		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null, editor));
 	}
 
 	/**
@@ -302,6 +301,8 @@ public class QueryEditorTableContent {
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(viewer.getTable());
 
+		editor.getSite().setSelectionProvider(viewer);
+		
 		return main;
 	}
 	

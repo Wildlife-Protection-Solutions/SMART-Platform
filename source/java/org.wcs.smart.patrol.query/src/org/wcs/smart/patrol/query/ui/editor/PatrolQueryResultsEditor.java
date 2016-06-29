@@ -201,6 +201,16 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 
 	@Override
+	public void showMapPage() {
+		for (int i = 0; i < getPageCount(); i ++){
+			if (getEditor(i) == page2){
+				setActivePage(i);
+				return;
+			}
+		}
+	}
+	
+	@Override
 	public Projection getProjection(){
 		return this.projection;
 	}

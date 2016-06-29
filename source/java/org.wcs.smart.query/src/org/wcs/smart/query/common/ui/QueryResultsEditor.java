@@ -219,6 +219,16 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
 	}
 	
+	@Override
+	public void showMapPage() {
+		for (int i = 0; i < getPageCount(); i ++){
+			if (getEditor(i) == page2){
+				setActivePage(i);
+				return;
+			}
+		}
+	}
+	
 	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#dispose()
 	 */

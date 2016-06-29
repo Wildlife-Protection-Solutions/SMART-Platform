@@ -29,8 +29,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
@@ -53,7 +55,7 @@ import com.vividsolutions.jts.io.WKBReader;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolQueryResultItem implements IGeometryResultItem{
+public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 
 	/**
 	 * Waypoint geometry field name
@@ -559,6 +561,16 @@ public class PatrolQueryResultItem implements IGeometryResultItem{
 					return gf.createMultiLineString(new LineString[]{});
 				}
 			}
+		}
+		return null;
+	}
+	
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(Waypoint.class) && getWaypointUuid() != null){
+			Waypoint wp = new Waypoint();
+			wp.setUuid(getWaypointUuid());
+			return wp;
 		}
 		return null;
 	}
