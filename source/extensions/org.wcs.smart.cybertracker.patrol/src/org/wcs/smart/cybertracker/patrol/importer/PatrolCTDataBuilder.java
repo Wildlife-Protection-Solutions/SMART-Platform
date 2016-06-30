@@ -161,7 +161,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 	private void recordPatrolData(CyberTrackerPatrol ctPatrol, E i, String v, Map<String, E> eMap, Session session) {
 		String n = i.getN();
 		if (ScreensUtil.RESULT_DEFAULT_META_VALUES.equals(n)) {
-			if (isCtIdsList(v)) {
+			if (ElementsUtil.isCtIdsList(v)) {
 				//import for old versions (4.0.0 or lower)
 				recordBefore401DefaultMetaValues(ctPatrol, v, eMap, session);
 			} else {
@@ -239,7 +239,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 
 	private void recordAfter400DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) {
 		try {
-			List<E> values = extractJsonDefaultMetaValues(v, eMap);
+			List<E> values = ElementsUtil.extractJsonDefaulValues(v, eMap);
 			for (E di : values) {
 				recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
 			}

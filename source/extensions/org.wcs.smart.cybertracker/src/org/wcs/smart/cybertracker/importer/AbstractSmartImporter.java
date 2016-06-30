@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
@@ -289,15 +290,21 @@ public abstract class AbstractSmartImporter {
 				if (avList.size() > 1) {
 					addWarning(MessageFormat.format(Messages.AbstractSmartImporter_MultipleDefaultAttributesRecords, avList.size()));
 				}
-				String[] ctIdArray = avList.get(avList.size()-1).split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
-				for (String ctid : ctIdArray) {
-					E de = eMap.get(ctid);
-					String tag2 = de.getTag2();
-					WaypointObservationAttribute wpoa = createWaypointObservationAttribute(de, Arrays.asList(tag2), eMap, session);
-					if (wpoa == null)
-						continue;
-					wpoa.setObservation(obs);
-					result.add(wpoa);
+				String defaultData = avList.get(avList.size()-1);
+				
+				//import either old version style data (4.0.0 or lower) or new 4.0.1 or higher
+				List<E> eLst = ElementsUtil.isCtIdsList(defaultData) ? getBefore401DefaultEValues(defaultData, eMap) : ElementsUtil.extractJsonDefaulValues(defaultData, eMap);
+				for (E de : eLst) {
+					if (de != null) {
+						String tag2 = de.getTag2();
+						WaypointObservationAttribute wpoa = createWaypointObservationAttribute(de, Arrays.asList(tag2), eMap, session);
+						if (wpoa == null)
+							continue;
+						wpoa.setObservation(obs);
+						result.add(wpoa);
+					} else {
+						addWarning(Messages.AbstractSmartImporter_MissingDefaultAttributeRecord);
+					}
 				}
 				continue;
 			}
@@ -312,6 +319,11 @@ public abstract class AbstractSmartImporter {
 			result.add(wpoa);
 		}	
 		return result;
+	}
+
+	private List<E> getBefore401DefaultEValues(String defaultData, Map<String, E> eMap) {
+		List<String> ctidLst = Arrays.asList(defaultData.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR));
+		return ctidLst.stream().map(ctid -> eMap.get(ctid)).collect(Collectors.toList());
 	}
 
 	private WaypointObservationAttribute createWaypointObservationAttribute(E e, List<String> avList, Map<String, E> eMap, Session session) {

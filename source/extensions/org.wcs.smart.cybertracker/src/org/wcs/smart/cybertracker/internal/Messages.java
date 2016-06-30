@@ -8,6 +8,7 @@ public class Messages extends NLS {
 	public static String AddCyberTrackerJob_ErrorTitle;
 	public static String AbstractSmartImporter_ElementMissing;
 	public static String AbstractSmartImporter_InvalidTimeFrame;
+	public static String AbstractSmartImporter_MissingDefaultAttributeRecord;
 	public static String AbstractSmartImporter_MissingMandatoryField;
 	public static String AbstractSmartImporter_MissingTreeItemDetails;
 	public static String AbstractSmartImporter_MultipleDefaultAttributesRecords;

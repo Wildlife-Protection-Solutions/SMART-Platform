@@ -29,10 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
+import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -41,6 +43,10 @@ import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Util for manipulations with {@link Elements} object
@@ -218,6 +224,33 @@ public class ElementsUtil {
 		return e != null && ElementsUtil.CATEGORY_MULTI_OBS_MULTI_GPS.equals(e.getTag5());
 	}
 
+	public static boolean isCtIdsList(String value) {
+    	//this pattern checks that it is a list of CtIds separated with ";"
+		Pattern oldDefaultValuesPattern = Pattern.compile("(\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\};)*\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\}"); //$NON-NLS-1$
+		return oldDefaultValuesPattern.matcher(value).matches();
+	}
+
+	public static List<E> extractJsonDefaulValues(String v, Map<String, E> eMap) throws JsonSyntaxException {
+		List<E> result = new ArrayList<>();
+		java.lang.reflect.Type listType = new TypeToken<ArrayList<CtDataKeyValueRecord>>(){}.getType();
+		List<CtDataKeyValueRecord> defaultValues = new Gson().fromJson(v, listType);
+		for (CtDataKeyValueRecord defV : defaultValues) {
+			E keyE = ElementsUtil.itemToE(defV.getKeyItem());
+			if (!eMap.containsKey(keyE.getI())) {
+				eMap.put(keyE.getI(), keyE);
+			}
+			if (defV.getValueItem() != null) {
+				String valueId = defV.getValueItem().getId();
+				if(!eMap.containsKey(valueId)) {
+					E valueE = ElementsUtil.itemToE(defV.getValueItem());
+					eMap.put(valueE.getI(), valueE);
+				}
+			}
+			result.add(keyE);
+		}
+		return result;
+	}
+	
 	public static E itemToE(Elements.List.Items.Item item) {
 		E e = new E();
 		e.setI(item.getId());

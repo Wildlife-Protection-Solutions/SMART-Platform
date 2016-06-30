@@ -175,7 +175,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 	private void recordSurveyData(CyberTrackerSurvey ctSurvey, E i, String v, Map<String, E> eMap, Session session) {
 		String n = i.getN();
 		if (ScreensUtil.RESULT_DEFAULT_META_VALUES.equals(n)) {
-			if (isCtIdsList(v)) {
+			if (ElementsUtil.isCtIdsList(v)) {
 				//import for old versions (4.0.0 or lower)
 				recordBefore401DefaultMetaValues(ctSurvey, v, eMap, session);
 			} else {
@@ -268,7 +268,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 
 	private void recordAfter400DefaultMetaValues(CyberTrackerSurvey ctSurvey, String v, Map<String, E> eMap, Session session) {
 		try {
-			List<E> values = extractJsonDefaultMetaValues(v, eMap);
+			List<E> values = ElementsUtil.extractJsonDefaulValues(v, eMap);
 			for (E di : values) {
 				recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
 			}

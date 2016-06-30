@@ -57,6 +57,7 @@ import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.export.alert.AlertExportDataProvider;
+import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.export.data.IAttributeListItemProxy;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.export.data.ListItemsDataProvider;
@@ -81,6 +82,8 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.UuidUtils;
+
+import com.google.gson.Gson;
 
 /**
  * Exporter from {@link ConfigurableModel} to CyberTracker application
@@ -441,7 +444,7 @@ public class CyberTrackerConfExporter {
 	}
 
 	private String recordDefaultValues(List<CmAttribute> invisibleList) {
-		String defaultValues = ""; //$NON-NLS-1$
+		List<CtDataKeyValueRecord> data = new ArrayList<>();
 		for (int i = 0; i < invisibleList.size(); i++) {
 			CmAttribute cmAttr = invisibleList.get(i);
 			if (cmAttr.isVisible()) {
@@ -450,13 +453,14 @@ public class CyberTrackerConfExporter {
 			}
 			//this attributes are configured as invisible
 			//record "default value" data
-			String newData = recordDefaultValue(cmAttr);
-			if (newData != null && !newData.isEmpty()) {
-				if (!defaultValues.isEmpty())
-					defaultValues += ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR;
-				defaultValues += newData;
+			
+			CtDataKeyValueRecord newData = recordDefaultValue(cmAttr);
+			if (newData != null) {
+				data.add(newData);
 			}
 		}
+		Gson gson = new Gson();
+		String defaultValues = gson.toJson(data);
 		return defaultValues;
 	}
 	
@@ -652,7 +656,7 @@ public class CyberTrackerConfExporter {
 		return result;
 	}
 	
-	private String recordDefaultValue(CmAttribute cmAttr) {
+	private CtDataKeyValueRecord recordDefaultValue(CmAttribute cmAttr) {
 		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
 		Map<String, CmAttributeOption> options = cmAttr.getCmAttributeOptions();
 		CmAttributeOption defaultValueOption = options.get(CmAttributeOption.ID_DEFAULT_VALUE);
@@ -688,8 +692,8 @@ public class CyberTrackerConfExporter {
 					return null;
 				}
 				String elId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
-				return recordDefaultValue(attribute, elId);
+				Elements.List.Items.Item valueItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
+				return recordDefaultValue(attribute, valueItem);
 			}
 			break;
 		}
@@ -714,8 +718,8 @@ public class CyberTrackerConfExporter {
 					return null;
 				}
 				String elId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
-				return recordDefaultValue(attribute, elId);
+				Elements.List.Items.Item valueItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
+				return recordDefaultValue(attribute, valueItem);
 			}
 			break;
 		}
@@ -747,11 +751,18 @@ public class CyberTrackerConfExporter {
 		return result;
 	}
 	
-	private String recordDefaultValue(Attribute attribute, String defaultValue) {
+	private CtDataKeyValueRecord recordDefaultValue(Attribute attribute, Elements.List.Items.Item valueItem) {
 		//tag0 - key (attribute uuid); tag2 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
-		ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, defaultValue);
-		return ctid;
+		Elements.List.Items.Item keyItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, valueItem.getId());
+		return new CtDataKeyValueRecord(keyItem, valueItem);
+	}
+
+	private CtDataKeyValueRecord recordDefaultValue(Attribute attribute, String valueStr) {
+		//tag0 - key (attribute uuid); tag2 - value (default value for this attribute in given observation)
+		String ctid = (new CyberTrackerId()).getItemId();
+		Elements.List.Items.Item keyItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, valueStr);
+		return new CtDataKeyValueRecord(keyItem, valueStr);
 	}
 	
 	private List<CyberTrackerId> createNewWpElementsIds(Elements elements2) {
