@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -56,7 +55,6 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
@@ -113,13 +111,8 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				defaultValueTreeField.setLanguage(language);
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 				if (option != null && option.getUuidValue() != null){
-					Session s = HibernateManager.openSession();
-					try{
-						AttributeTreeNode defaultNode = (AttributeTreeNode) s.load(AttributeTreeNode.class, option.getUuidValue());
-						defaultValueTreeField.setValue(defaultNode);
-					}finally{
-						s.close();
-					}
+					AttributeTreeNode defaultNode = (AttributeTreeNode) dialog.getSession().load(AttributeTreeNode.class, option.getUuidValue());
+					defaultValueTreeField.setValue(defaultNode);
 				}
 				
 				CmTreeLabelProvider cmTreeLabelProvider = (CmTreeLabelProvider)attributeTreeViewer.getLabelProvider();
