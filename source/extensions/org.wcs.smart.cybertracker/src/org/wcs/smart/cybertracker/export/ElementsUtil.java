@@ -235,14 +235,14 @@ public class ElementsUtil {
 		java.lang.reflect.Type listType = new TypeToken<ArrayList<CtDataKeyValueRecord>>(){}.getType();
 		List<CtDataKeyValueRecord> defaultValues = new Gson().fromJson(v, listType);
 		for (CtDataKeyValueRecord defV : defaultValues) {
-			E keyE = ElementsUtil.itemToE(defV.getKeyItem());
+			E keyE = defV.getKeyE();
 			if (!eMap.containsKey(keyE.getI())) {
 				eMap.put(keyE.getI(), keyE);
 			}
-			if (defV.getValueItem() != null) {
-				String valueId = defV.getValueItem().getId();
+			if (defV.getValueE() != null) {
+				String valueId = defV.getValueE().getI();
 				if(!eMap.containsKey(valueId)) {
-					E valueE = ElementsUtil.itemToE(defV.getValueItem());
+					E valueE = defV.getValueE();
 					eMap.put(valueE.getI(), valueE);
 				}
 			}

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.export.data;
 
+import org.wcs.smart.cybertracker.export.ElementsUtil;
+import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 
 /**
@@ -31,8 +33,8 @@ import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
  */
 public class CtDataKeyValueRecord {
 	
-	private Item keyItem;
-	private Item valueItem;
+	private E keyE;
+	private E valueE;
 	private String valueString;
 	
 	public CtDataKeyValueRecord() {
@@ -41,28 +43,28 @@ public class CtDataKeyValueRecord {
 	
 	public CtDataKeyValueRecord(Item keyItem, Item valueItem) {
 		super();
-		this.keyItem = keyItem;
-		this.valueItem = valueItem;
+		this.keyE = ElementsUtil.itemToE(keyItem);
+		this.valueE = ElementsUtil.itemToE(valueItem);
 	}
 
 	public CtDataKeyValueRecord(Item keyItem, String valueString) {
 		super();
-		this.keyItem = keyItem;
+		this.keyE = ElementsUtil.itemToE(keyItem);
 		this.valueString = valueString;
 	}
 
-	public Item getKeyItem() {
-		return keyItem;
+	public E getKeyE() {
+		return keyE;
 	}
-	public void setKeyItem(Item keyItem) {
-		this.keyItem = keyItem;
+	public void setKeyE(E keyE) {
+		this.keyE = keyE;
 	}
 	
-	public Item getValueItem() {
-		return valueItem;
+	public E getValueE() {
+		return valueE;
 	}
-	public void setValueItem(Item valueItem) {
-		this.valueItem = valueItem;
+	public void setValueE(E valueE) {
+		this.valueE = valueE;
 	}
 
 	public String getValueString() {
