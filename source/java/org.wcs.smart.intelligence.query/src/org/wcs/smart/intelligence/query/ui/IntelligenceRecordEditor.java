@@ -25,17 +25,13 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
-import org.wcs.smart.intelligence.query.map.udig.QueryService;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
-import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
-import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
  * Intelligence record query editor.
@@ -52,16 +48,6 @@ public class IntelligenceRecordEditor extends QueryResultsEditor {
 			return IntelligenceQueryFactory.createIntelligenceRecordQuery();
 		}
 		return null;
-	}
-
-	@Override
-	public IQueryService createQueryService() {
-		return new QueryService((Query)getQueryInternal());
-	}
-
-	@Override
-	protected IDateFieldFilter[] getDateFilterOptions() {
-		return new IDateFieldFilter[]{ReceivedDateFilter.INSTANCE};
 	}
 
 	@Override

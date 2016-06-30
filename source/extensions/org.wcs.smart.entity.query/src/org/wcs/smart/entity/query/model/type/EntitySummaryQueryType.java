@@ -199,10 +199,6 @@ public class EntitySummaryQueryType implements IQueryType {
 		return null;
 	}
 
-	public static IDateFieldFilter[] validDateFields(){
-		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
-	}
-	
 	public URL getDescription() {
 		IPath path = new Path("src/org/wcs/smart/entity/query/model/type/summary.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, EntityQueryPlugIn.getDefault().getBundle());
@@ -211,5 +207,13 @@ public class EntitySummaryQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{};
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.IQueryType#getDateFilterOptions()
+	 */
+	@Override
+	public IDateFieldFilter[] getDateFilterOptions() {
+		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
 	}
 }

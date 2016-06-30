@@ -24,16 +24,12 @@ package org.wcs.smart.patrol.query.ui.editor;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
-import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -56,16 +52,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 		return PatrolQueryFactory.createQuery(type);
 	}
 	
-	protected IDateFieldFilter[] getDateFilterOptions(){
-		return PatrolObservationQueryType.validDateFields();
-	}
-	
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
 		return PatrolTableColumn.getLabelProvider(column, allColumns);
-	}
-
-	@Override
-	public IQueryService createQueryService() {
-		return new QueryService(getQuery(), this);
 	}
 }

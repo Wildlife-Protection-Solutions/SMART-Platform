@@ -61,11 +61,11 @@ import org.wcs.smart.query.event.QueryAreaModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
@@ -617,13 +617,14 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 * Creates a query service for the map 
 	 * @return
 	 */
-	public abstract IQueryService createQueryService();
+	public IQueryService createQueryService(){
+		IQueryType type = ((QueryEditorInput)getEditorInput()).getType();
+		if (type instanceof IMappableQueryType){
+			return ((IMappableQueryType)type).createQueryService(getQuery(), this);
+		}
+		return null;
+	}
 	
-	/**
-	 * 
-	 * @return valid date filters for query
-	 */
-	protected abstract IDateFieldFilter[] getDateFilterOptions();
 	
 	/**
 	 * Column label provider

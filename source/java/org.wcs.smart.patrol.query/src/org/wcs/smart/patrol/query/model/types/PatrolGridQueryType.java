@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
@@ -42,8 +43,11 @@ import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.editor.PatrolGriddedEditor;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.model.udig.RasterService;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -59,7 +63,11 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  * @author Emily
  *
  */
-public class PatrolGridQueryType implements IQueryType {
+/**
+ * @author Emily
+ *
+ */
+public class PatrolGridQueryType implements IMappableQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
 	
@@ -212,16 +220,6 @@ public class PatrolGridQueryType implements IQueryType {
 	}
 
 
-	/**
-	 * Valid filter fields for query type
-	 * @return
-	 */
-	public static IDateFieldFilter[] validDateFields(){
-		return new IDateFieldFilter[]{WaypointDateField.INSTANCE,
-				PatrolStartDateField.INSTANCE,
-				PatrolEndDateField.INSTANCE};
-	}
-
 	@Override
 	public URL getDescription() {
 		IPath path = new Path("src/org/wcs/smart/patrol/query/model/types/patrolgrid.html"); //$NON-NLS-1$
@@ -231,5 +229,24 @@ public class PatrolGridQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{};
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.IQueryType#getDateFilterOptions()
+	 */
+	@Override
+	public IDateFieldFilter[] getDateFilterOptions() {
+		return new IDateFieldFilter[]{WaypointDateField.INSTANCE,
+				PatrolStartDateField.INSTANCE,
+				PatrolEndDateField.INSTANCE};
+	}
+	
+	
+	/**
+	 * @see org.wcs.smart.query.model.IMappableQueryType#createQueryService(org.wcs.smart.query.model.Query)
+	 */
+	@Override
+	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
+		return new RasterService((GriddedQuery)query);
 	}
 }

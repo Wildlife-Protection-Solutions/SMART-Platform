@@ -22,10 +22,8 @@
 package org.wcs.smart.patrol.query.ui.editor;
 
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.ui.GriddedEditor;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
  * Editor for displaying query results. The editor includes two pages a tabular
@@ -49,11 +47,6 @@ public class PatrolGriddedEditor extends GriddedEditor  {
 	@Override
 	public GriddedQuery createQuery(){
 		return PatrolQueryFactory.createGriddedQuery();
-	}
-	
-	@Override
-	protected IDateFieldFilter[] getDateFilterOptions(){
-		return PatrolGridQueryType.validDateFields();
 	}
 }
 

@@ -43,6 +43,7 @@ import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
@@ -245,7 +246,8 @@ public class QueryEditorTableContent {
 		queryProp.setLayout(layout);
 		queryProp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		dateComposite = new QueryDateFilterComposite(queryProp, editor.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
+		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(editor.getQuery().getTypeKey());
+		dateComposite = new QueryDateFilterComposite(queryProp, type.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
 		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		dateComposite.adapt(toolkit);
 		

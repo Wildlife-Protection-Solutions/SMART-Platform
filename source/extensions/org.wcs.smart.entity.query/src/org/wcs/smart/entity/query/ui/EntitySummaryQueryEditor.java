@@ -22,10 +22,8 @@
 package org.wcs.smart.entity.query.ui;
 
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
-import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.ui.SummaryEditor;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 /**
  * Summary editor for observation summary queries
  * @author Emily
@@ -39,10 +37,4 @@ public class EntitySummaryQueryEditor extends SummaryEditor {
 	public SummaryQuery createNewQuery() {
 		return EntityQueryFactory.createSummaryQuery();
 	}
-
-	@Override
-	protected IDateFieldFilter[] getValidDateFilters() {
-		return EntitySummaryQueryType.validDateFields();
-	}
-
 }

@@ -29,16 +29,20 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.internal.Messages;
+import org.wcs.smart.intelligence.query.map.udig.QueryService;
 import org.wcs.smart.intelligence.query.parser.Parser;
 import org.wcs.smart.intelligence.query.ui.DefinitionPanel;
 import org.wcs.smart.intelligence.query.ui.IntelligenceRecordEditor;
 import org.wcs.smart.intelligence.query.ui.dropitem.IntelligenceDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
@@ -49,7 +53,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  * @author Emily
  *
  */
-public class IntelligenceRecordQueryType implements IQueryType {
+public class IntelligenceRecordQueryType implements IMappableQueryType {
 
 	@Override
 	public Class<? extends Query> getHibernateClass() {
@@ -145,5 +149,21 @@ public class IntelligenceRecordQueryType implements IQueryType {
 		return new IQueryResultInfoProvider[]{
 				new IntellInfoProvider()
 		};
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.IQueryType#getDateFilterOptions()
+	 */
+	@Override
+	public IDateFieldFilter[] getDateFilterOptions() {
+		return new IDateFieldFilter[]{ReceivedDateFilter.INSTANCE};
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.IMappableQueryType#createQueryService(org.wcs.smart.query.model.Query)
+	 */
+	@Override
+	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider){
+		return new QueryService(query);
 	}
 }

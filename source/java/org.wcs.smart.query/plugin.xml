@@ -779,6 +779,36 @@
                visible="true">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/compound_query.png"
+               label="New Compound Query"
+               style="pulldown"
+               tooltip="Creates a new compound query">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="compound">
+            </parameter>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/compound_query.png"
+               label="New Compound Query"
+               style="pulldown"
+               tooltip="Creates a new compound query">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="compound">
+            </parameter>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -1016,6 +1046,15 @@
             class="org.wcs.smart.query.model.Query"
             supportsCcaa="true">
       </class>
+      <class
+            class="org.wcs.smart.query.common.model.CompoundMapQuery"
+            supportsCcaa="true">
+      </class>
+      <class
+            ca_property=".mapQuery.conservationArea"
+            class="org.wcs.smart.query.common.model.CompoundMapQueryLayer"
+            supportsCcaa="true">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.ca.deleteAdvisor">
@@ -1069,6 +1108,49 @@
             requires="org.wcs.smart.query.common.model.GriddedQuery"
             styleId="org.locationtech.udig.style.sld">
       </styleConfigurator>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryType">
+      <QueryCategory
+            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Compound Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Displays results of multiple existing queries on a single map.  Date ranges and styles of individual queries are customizable.&lt;/p&gt;&lt;/p&gt;"
+            id="org.wcs.smart.query.type.compound"
+            name="Compound Query">
+      </QueryCategory>
+      <QueryType
+            QueryCategory="org.wcs.smart.query.type.compound"
+            class="org.wcs.smart.query.model.types.CompoundMapQueryType"
+            executor="org.wcs.smart.query.compound.engine.CompoundQueryEngine">
+         <DefinitionPanel
+               id="org.wcs.smart.query.compound.definition"
+               itemPanelId="org.wcs.smart.query.compound.querylist">
+         </DefinitionPanel>
+      </QueryType>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryDefinitionPanel">
+      <QueryDefinitionPanel
+            id="org.wcs.smart.query.compound.definition"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.query.compound.ui.CompoundDefinitionPanel">
+      </QueryDefinitionPanel>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.query.ui.editor.CompoundQueryEditor"
+            default="false"
+            icon="images/icons/obj16/compound_query.png"
+            id="org.wcs.smart.query.editor.compound"
+            name="Compound Query Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryItemPanel">
+      <QueryItemPanel
+            id="org.wcs.smart.query.compound.querylist"
+            panel="org.wcs.smart.query.compound.ui.QueryListItemPanel">
+      </QueryItemPanel>
    </extension>
 
 

@@ -218,12 +218,6 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 	public abstract GriddedQuery createQuery();
 	
 	/**
-	 * 
-	 * @return date filter options for query
-	 */
-	protected abstract IDateFieldFilter[] getDateFilterOptions();
-	
-	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#dispose()
 	 */
 	@Override

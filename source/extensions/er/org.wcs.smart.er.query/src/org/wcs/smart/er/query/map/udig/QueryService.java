@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.geotools.data.DataStore;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.IProjectionProvider;
@@ -56,7 +57,7 @@ import org.wcs.smart.query.model.Query;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryService extends IQueryService {
+public class QueryService extends IService implements IQueryService {
 
 	/**
 	 * The query service id

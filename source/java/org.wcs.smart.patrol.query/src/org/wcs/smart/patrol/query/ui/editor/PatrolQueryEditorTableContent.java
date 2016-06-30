@@ -46,10 +46,10 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.ui.QueryResultsTable;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
@@ -265,7 +265,8 @@ public class PatrolQueryEditorTableContent {
 		queryProp.setLayout(layout);
 		queryProp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		dateComposite = new QueryDateFilterComposite(queryProp, PatrolQueryType.validDateFields(), IDateFilter.DATE_FILTERS);
+		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(editor.getQuery().getTypeKey());
+		dateComposite = new QueryDateFilterComposite(queryProp, type.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
 		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 
 		dateComposite.adapt(toolkit);

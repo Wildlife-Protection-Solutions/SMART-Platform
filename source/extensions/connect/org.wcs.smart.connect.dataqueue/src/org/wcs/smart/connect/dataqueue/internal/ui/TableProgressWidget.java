@@ -45,8 +45,6 @@ public class TableProgressWidget extends Composite{
 	private LocalDataQueueItem item;
 	private TableViewer viewer;
 	
-	
-	
 	public TableProgressWidget(Composite parent, LocalDataQueueItem item, TableViewer viewer) {
 		super(parent, SWT.TRANSPARENT);
 		this.item = item;

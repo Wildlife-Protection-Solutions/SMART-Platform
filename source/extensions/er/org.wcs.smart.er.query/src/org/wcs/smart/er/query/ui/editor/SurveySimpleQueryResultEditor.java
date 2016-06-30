@@ -32,25 +32,16 @@ import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.query.map.udig.QueryService;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.MissionQuery;
-import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyObservationQuery;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
-import org.wcs.smart.er.query.model.SurveyWaypointQuery;
-import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
-import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.ISummaryInfo;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
  * Editor for displaying survey query results.  The editor includes two pages
@@ -134,28 +125,10 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	}
 	
 	@Override
-	protected IDateFieldFilter[] getDateFilterOptions(){
-		if (isQueryType(SurveyObservationQuery.KEY)){
-			return SurveyObservationQueryType.validDateFields();
-		}else if (isQueryType(MissionQuery.KEY)){
-			return MissionQueryType.validDateFields();
-		}else if (isQueryType(SurveyWaypointQuery.KEY)){
-			return SurveyWaypointQueryType.validDateFields();
-		}else if (isQueryType(MissionTrackQuery.KEY)){
-			return MissionTrackQueryType.validDateFields();
-		}
-		return null;
-	}
-	
-	@Override
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
 		return SurveyQueryColumnManager.getLabelProvider(column, allColumns, this);
 	}
 
-	@Override
-	public IQueryService createQueryService() {
-		return new QueryService(getQuery(), this);
-	}
 	
 	@Override
 	public void init(IEditorSite site, IEditorInput input)

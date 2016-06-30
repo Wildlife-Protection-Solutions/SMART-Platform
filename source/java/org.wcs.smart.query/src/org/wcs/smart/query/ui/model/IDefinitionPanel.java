@@ -94,7 +94,7 @@ public interface IDefinitionPanel {
 	
 	/**
 	 * Saves the current items in the definition.
-	 * This is called when the before query editor changes.  Any
+	 * This is called before query editor changes.  Any
 	 * items required to restore the query definition should be cached
 	 * somewhere.  When coming back to the query editor the init() function
 	 * will be called to reset the state.  

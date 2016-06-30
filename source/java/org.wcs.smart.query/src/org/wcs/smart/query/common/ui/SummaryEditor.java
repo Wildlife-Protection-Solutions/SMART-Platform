@@ -61,9 +61,9 @@ import org.wcs.smart.query.event.QueryAreaModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryEditorUtils;
@@ -249,11 +249,6 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 	 */
 	public abstract Query createNewQuery();
 	
-	/**
-	 * Get date filters
-	 * @return
-	 */
-	protected abstract IDateFieldFilter[] getValidDateFilters();
 	
 	private void initQuery(){
 		compQueryName.setText(getQuery().getName(), getQuery().getId(), 
@@ -421,7 +416,8 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		queryProp.setLayout(layout);
 		queryProp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		dateFilterComposite = new QueryDateFilterComposite(queryProp, getValidDateFilters(), IDateFilter.DATE_FILTERS);
+		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(getQuery().getTypeKey());
+		dateFilterComposite = new QueryDateFilterComposite(queryProp, type.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
 		dateFilterComposite.adapt(toolkit);
 		dateFilterComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		

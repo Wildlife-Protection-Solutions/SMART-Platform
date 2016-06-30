@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.engine.visitors.HasTrackFilterVisitor;
 import org.wcs.smart.er.query.engine.visitors.SurveyHasObservationFilterVisitor;
@@ -43,8 +44,11 @@ import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
+import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.model.udig.RasterService;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
@@ -60,7 +64,7 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  * @author Emily
  *
  */
-public class SurveyGridQueryType implements IQueryType {
+public class SurveyGridQueryType implements IMappableQueryType {
 
 	
 	private static IDropItemFactory dropItemFactory;
@@ -249,15 +253,15 @@ public class SurveyGridQueryType implements IQueryType {
 		}
 		return null;
 	}
-
-
+	
 	/**
-	 * Valid filter fields for query type
-	 * @return
+	 * @see org.wcs.smart.query.model.IQueryType#getDateFilterOptions()
 	 */
-	public static IDateFieldFilter[] validDateFields(){
+	@Override
+	public IDateFieldFilter[] getDateFilterOptions() {
 		return new IDateFieldFilter[]{WaypointDateField.INSTANCE, 
-				MissionStartDateField.INSTANCE, MissionEndDateField.INSTANCE};
+				MissionStartDateField.INSTANCE,
+				MissionEndDateField.INSTANCE};
 	}
 
 	@Override
@@ -269,5 +273,13 @@ public class SurveyGridQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{};
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.IMappableQueryType#createQueryService(org.wcs.smart.query.model.Query)
+	 */
+	@Override
+	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
+		return new RasterService((GriddedQuery)query);
 	}
 }

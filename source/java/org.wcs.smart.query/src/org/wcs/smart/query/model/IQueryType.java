@@ -27,6 +27,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 /**
@@ -128,4 +129,9 @@ public interface IQueryType {
 	@Nonnull
 	public IQueryResultInfoProvider[] getResultProviders();
 	
+	/**
+	 * Returns a list of date filter options for the given query type.
+	 * @return
+	 */
+	public IDateFieldFilter[] getDateFilterOptions();
 }

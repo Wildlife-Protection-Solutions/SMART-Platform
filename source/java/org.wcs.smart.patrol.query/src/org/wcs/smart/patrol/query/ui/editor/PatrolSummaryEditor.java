@@ -22,10 +22,8 @@
 package org.wcs.smart.patrol.query.ui.editor;
 
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.ui.SummaryEditor;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
  * Editor for displaying query results. The editor includes two pages a tabular
@@ -41,10 +39,4 @@ public class PatrolSummaryEditor extends SummaryEditor{
 	public SummaryQuery createNewQuery(){
 		return PatrolQueryFactory.createSummaryQuery();
 	}
-
-	@Override
-	protected IDateFieldFilter[] getValidDateFilters() {
-		return PatrolSummaryQueryType.validDateFields();
-	}
-	
 }

@@ -27,10 +27,8 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
-import org.wcs.smart.er.query.model.SurveySummaryQueryType;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.ui.SummaryEditor;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
  * Editor for displaying query results. The editor includes two pages a tabular
@@ -75,11 +73,6 @@ public class SurveySummaryEditor extends SummaryEditor{
 	
 	public SummaryQuery createNewQuery(){
 		return SurveyQueryFactory.createSummaryQuery();
-	}
-
-	@Override
-	protected IDateFieldFilter[] getValidDateFilters() {
-		return SurveySummaryQueryType.validDateFields();
 	}
 	
 }

@@ -35,6 +35,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 
@@ -105,5 +106,13 @@ public class IntelligenceSummaryQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{};
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.IQueryType#getDateFilterOptions()
+	 */
+	@Override
+	public IDateFieldFilter[] getDateFilterOptions() {
+		return new IDateFieldFilter[]{ReceivedDateFilter.INSTANCE};
 	}
 }

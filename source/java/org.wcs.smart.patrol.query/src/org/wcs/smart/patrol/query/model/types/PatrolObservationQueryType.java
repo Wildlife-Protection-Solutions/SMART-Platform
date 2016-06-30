@@ -29,9 +29,11 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
@@ -39,8 +41,9 @@ import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -56,7 +59,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  * @author Emily
  *
  */
-public class PatrolObservationQueryType implements IQueryType {
+public class PatrolObservationQueryType implements IMappableQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
 	
@@ -188,10 +191,10 @@ public class PatrolObservationQueryType implements IQueryType {
 
 
 	/**
-	 * Valid filter fields for query type
-	 * @return
+	 * @see org.wcs.smart.query.model.IQueryType#getDateFilterOptions()
 	 */
-	public static IDateFieldFilter[] validDateFields(){
+	@Override
+	public IDateFieldFilter[] getDateFilterOptions() {
 		return new IDateFieldFilter[]{WaypointDateField.INSTANCE,
 				PatrolStartDateField.INSTANCE,
 				PatrolEndDateField.INSTANCE};
@@ -209,5 +212,13 @@ public class PatrolObservationQueryType implements IQueryType {
 				new PatrolResultInfoProvider(),
 				new PatrolZoomToResultProvider()
 		};
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.IMappableQueryType#createQueryService(org.wcs.smart.query.model.Query)
+	 */
+	@Override
+	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider){
+		return new QueryService(query, prjProvider);
 	}
 }

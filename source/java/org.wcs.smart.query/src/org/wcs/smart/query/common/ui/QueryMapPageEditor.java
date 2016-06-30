@@ -66,7 +66,7 @@ import org.wcs.smart.util.JobUtil;
 public class QueryMapPageEditor extends SmartMapEditorPart{
 	
 	private IMapQueryEditor parentEditor;
-	private IQueryService queryService = null;
+	private IService queryService = null;
 	private LoadDefaultLayersJob loadDefaultLayers = null;
 	
 	private ILayerListener styleListener = new ILayerListener() {
@@ -104,7 +104,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			queryService = parentEditor.createQueryService();
+			queryService = (IService) parentEditor.createQueryService();
 			if (queryService == null){
 				return Status.OK_STATUS;
 			}
@@ -160,7 +160,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 		protected IStatus run(IProgressMonitor monitor) {
 			if (queryService != null){
 				try {
-					queryService.refresh(null);
+					((IQueryService)queryService).refresh(null);
 					List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
 					boolean found = false;
 					for (IGeoResource w : layers){
@@ -266,6 +266,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
     	}
     }
 
+    
     /**
      * Dispose of current query service
      * and refresh to create a new one as required.

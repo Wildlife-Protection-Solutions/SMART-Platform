@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
@@ -39,8 +40,10 @@ import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
 import org.wcs.smart.observation.query.ui.definition.ObservationValueRateFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.model.udig.RasterService;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -57,7 +60,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  * @author Emily
  *
  */
-public class ObservationGridQueryType implements IQueryType {
+public class ObservationGridQueryType implements IMappableQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
 	
@@ -205,14 +208,6 @@ public class ObservationGridQueryType implements IQueryType {
 	}
 
 
-	/**
-	 * Valid filter fields for query type
-	 * @return
-	 */
-	public static IDateFieldFilter[] validDateFields(){
-		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
-	}
-
 	public URL getDescription() {
 		IPath path = new Path("src/org/wcs/smart/observation/query/model/types/grid.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, ObservationQueryPlugIn.getDefault().getBundle());
@@ -221,5 +216,18 @@ public class ObservationGridQueryType implements IQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{};
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.model.IQueryType#getDateFilterOptions()
+	 */
+	@Override
+	public IDateFieldFilter[] getDateFilterOptions() {
+		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
+	}
+	
+	@Override
+	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
+		return new RasterService((GriddedQuery)query);
 	}
 }

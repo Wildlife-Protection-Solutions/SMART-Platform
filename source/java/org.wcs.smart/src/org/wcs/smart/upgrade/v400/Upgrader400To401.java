@@ -76,7 +76,22 @@ public class Upgrader400To401 implements IDatabaseUpgrader {
 		String[] sql = new String[]{
 			"UPDATE smart.ca_projection set IS_DEFAULT = 'false' WHERE ca_uuid in (SELECT ca_uuid FROM smart.observation_options)",
 			"UPDATE smart.ca_projection set IS_DEFAULT = 'true' WHERE uuid IN (SELECT view_projection_uuid FROM smart.observation_options)",
-			"ALTER TABLE smart.observation_options DROP column view_projection_uuid"
+			"ALTER TABLE smart.observation_options DROP column view_projection_uuid",
+			
+			//TODO: need to configure triggers
+			//new compound query tables
+			"CREATE TABLE smart.compound_query(uuid char(16) for bit data not null, creator_uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, ca_filter varchar(32672), folder_uuid char(16) for bit data, shared boolean, id varchar(6), primary key (uuid))",
+			"CREATE TABLE smart.compound_query_layer(uuid char(16) for bit data not null, compound_query_uuid char(16) for bit data not null, query_uuid char(16) for bit data not null, query_type varchar(32), style long varchar, primary key (uuid))",
+			
+			"ALTER TABLE SMART.COMPOUND_QUERY ADD CONSTRAINT COMPOUNDQUERY_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+			"ALTER TABLE SMART.COMPOUND_QUERY ADD CONSTRAINT COMPOUNDQUERY_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+			"ALTER TABLE SMART.COMPOUND_QUERY ADD CONSTRAINT COMPOUNDQUERY_CREATOR_UUID_FK FOREIGN KEY (CREATOR_UUID) REFERENCES SMART.EMPLOYEE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",			
+			"ALTER TABLE SMART.COMPOUND_QUERY_LAYER ADD CONSTRAINT COMPOUNDQUERYLAYER_PARENT_UUID_FK FOREIGN KEY (COMPOUND_QUERY_UUID) REFERENCES SMART.COMPOUND_QUERY(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+			
+			"GRANT ALL PRIVILEGES ON SMART.COMPOUND_QUERY_LAYER TO manager", //$NON-NLS-1$
+			"GRANT SELECT ON SMART.COMPOUND_QUERY_LAYER TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON SMART.COMPOUND_QUERY_LAYER TO analyst", //$NON-NLS-1$
+			
 		};
 		
 		for (String s : sql){

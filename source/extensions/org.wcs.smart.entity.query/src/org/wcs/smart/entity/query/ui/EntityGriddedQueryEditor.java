@@ -22,10 +22,8 @@
 package org.wcs.smart.entity.query.ui;
 
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
-import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.ui.GriddedEditor;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 /**
  * Gridded query editor for observation queries.
  * 
@@ -40,10 +38,4 @@ public class EntityGriddedQueryEditor extends GriddedEditor {
 	public GriddedQuery createQuery() {
 		return EntityQueryFactory.createGriddedQuery();
 	}
-
-	@Override
-	protected IDateFieldFilter[] getDateFilterOptions() {
-		return EntityGridQueryType.validDateFields();
-	}
-
 }

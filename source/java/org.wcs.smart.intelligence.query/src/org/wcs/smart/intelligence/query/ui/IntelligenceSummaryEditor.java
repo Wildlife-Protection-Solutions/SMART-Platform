@@ -22,10 +22,8 @@
 package org.wcs.smart.intelligence.query.ui;
 
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
-import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 import org.wcs.smart.query.common.ui.SummaryEditor;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
  * Editor for intelligence summary queries.
@@ -40,10 +38,5 @@ public class IntelligenceSummaryEditor extends SummaryEditor{
 	@Override
 	public Query createNewQuery() {
 		return IntelligenceQueryFactory.createIntelligenceSummaryQuery();
-	}
-
-	@Override
-	protected IDateFieldFilter[] getValidDateFilters() {
-		return new IDateFieldFilter[]{ReceivedDateFilter.INSTANCE};
 	}
 }

@@ -22,10 +22,8 @@
 package org.wcs.smart.observation.query.ui;
 
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
-import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.ui.GriddedEditor;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 /**
  * Gridded query editor for observation queries.
  * 
@@ -40,10 +38,4 @@ public class ObservationGriddedQueryEditor extends GriddedEditor {
 	public GriddedQuery createQuery() {
 		return ObservationQueryFactory.createGriddedQuery();
 	}
-
-	@Override
-	protected IDateFieldFilter[] getDateFilterOptions() {
-		return ObservationGridQueryType.validDateFields();
-	}
-
 }

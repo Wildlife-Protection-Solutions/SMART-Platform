@@ -24,14 +24,15 @@ package org.wcs.smart.query.common.model.udig;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.locationtech.udig.catalog.IService;
 
 /**
- * Smart query service
+ * Smart query service.  Any implementation must also implement
+ * IService.
+ * 
  * @author Emily
  *
  */
-public abstract class IQueryService extends IService{
+public interface IQueryService {
 
-	public abstract void refresh(IProgressMonitor monitor) throws IOException;
+	public void refresh(IProgressMonitor monitor) throws IOException;
 }

@@ -73,7 +73,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class RasterService extends AbstractRasterService {
+public class RasterService extends AbstractRasterService implements IQueryService{
 
 	public static final String GRIDDED_TYPE = "Gridded";  //$NON-NLS-1$
 	
@@ -358,7 +358,7 @@ public class RasterService extends AbstractRasterService {
 	 * @param monitor
 	 * @throws IOException
 	 */
-	public void refresh(IProgressMonitor monitor) throws Exception{
+	public void refresh(IProgressMonitor monitor) throws IOException{
 		//clean up old files
 		cleanTemporaryDirectory();
 		

@@ -24,23 +24,16 @@ package org.wcs.smart.observation.query.ui;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.wcs.smart.observation.query.map.udig.QueryService;
-import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
-import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
-import org.wcs.smart.observation.query.model.types.ObservationQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
-import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 /**
  * Query editor for simple observation queries
  * @author Emily
@@ -55,20 +48,6 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 		return ObservationQueryFactory.createQuery(type);
 	}
 
-	@Override
-	public IQueryService createQueryService() {
-		return new QueryService(query.getQuery(), this);
-	}
-
-	@Override
-	protected IDateFieldFilter[] getDateFilterOptions() {
-		if (getInputInternal().getType().getKey().equals(ObsObservationQuery.KEY)){
-			return ObservationQueryType.validDateFields();
-		}else if (getInputInternal().getType().getKey().equals(ObservationWaypointQuery.KEY)){
-			return ObservationWaypointQueryType.validDateFields();
-		}
-		return null;
-	}
 
 	@Override
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {

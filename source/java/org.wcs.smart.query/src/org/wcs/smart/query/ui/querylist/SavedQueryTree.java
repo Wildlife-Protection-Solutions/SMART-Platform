@@ -280,7 +280,7 @@ public class SavedQueryTree {
 	 * @author egouge
 	 * @since 1.0.0
 	 */
-	interface ISourceChangedListener{
+	public interface ISourceChangedListener{
 		/**
 		 * 
 		 * @param eventType the type of event that caused the change 

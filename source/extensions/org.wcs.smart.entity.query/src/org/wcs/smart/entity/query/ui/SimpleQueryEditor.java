@@ -31,25 +31,19 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.internal.Messages;
-import org.wcs.smart.entity.query.map.udig.QueryService;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
-import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EtAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EtCategoryQueryColumn;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
-import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 /**
  * Query editor for simple observation queries
  * @author Emily
@@ -62,21 +56,6 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 	@Override
 	public Query createNewQuery(IQueryType type) {
 		return EntityQueryFactory.createQuery(type);
-	}
-
-	@Override
-	public IQueryService createQueryService() {
-		return new QueryService(query.getQuery(), this);
-	}
-
-	@Override
-	protected IDateFieldFilter[] getDateFilterOptions() {
-		if (getInputInternal().getType().getKey().equals(EntityObservationQuery.KEY)){
-			return EntityObservationQueryType.validDateFields();
-		}else if (getInputInternal().getType().getKey().equals(EntityWaypointQuery.KEY)){
-			return EntityWaypointQueryType.validDateFields();
-		}
-		return null;
 	}
 
 	@Override

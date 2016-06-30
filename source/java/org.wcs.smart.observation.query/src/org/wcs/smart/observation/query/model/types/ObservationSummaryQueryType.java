@@ -200,8 +200,12 @@ public class ObservationSummaryQueryType implements IQueryType {
 		}
 		return null;
 	}
-
-	public static IDateFieldFilter[] validDateFields(){
+	
+	/**
+	 * @see org.wcs.smart.query.model.IQueryType#getDateFilterOptions()
+	 */
+	@Override
+	public IDateFieldFilter[] getDateFilterOptions() {
 		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
 	}
 	
