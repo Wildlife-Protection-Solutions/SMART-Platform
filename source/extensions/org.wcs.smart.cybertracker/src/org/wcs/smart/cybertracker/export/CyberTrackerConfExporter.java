@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -306,8 +305,9 @@ public class CyberTrackerConfExporter {
 		Gson gson = new Gson();
 		for (Item item : elems.getList().getItems().getItem()) {
 			String json = gson.toJson(ElementsUtil.itemToE(item));
-			//TODO: it this type of encoding ok? do we need encoding at all?
-			item.setJsonId(Base64.getEncoder().encodeToString(json.getBytes()));
+			//TODO: do we need encoding at all? it this type of encoding ok?
+			//item.setJsonId(Base64.getEncoder().encodeToString(json.getBytes()));
+			item.setJsonId(json);
 		}
 	}
 
