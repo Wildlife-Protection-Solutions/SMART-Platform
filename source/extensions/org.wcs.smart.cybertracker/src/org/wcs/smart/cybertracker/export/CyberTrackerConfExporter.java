@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -66,6 +67,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 import org.wcs.smart.cybertracker.model.reports.Items;
 import org.wcs.smart.cybertracker.model.reports.Reports;
 import org.wcs.smart.cybertracker.model.screens.Controls;
@@ -251,6 +253,7 @@ public class CyberTrackerConfExporter {
 			//----------------creating Elements.xml----------------
 			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
 			ElementsUtil.addNodeElements(elements, keyMap, currentLanguage);
+			addJsonIds(elements);
 			
 			try (BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_ELEMENTS))){ 
 				writeDataModel(elements, outE, Elements.class);
@@ -297,6 +300,15 @@ public class CyberTrackerConfExporter {
 		}
 
 		return new File(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME); //$NON-NLS-1$
+	}
+
+	private void addJsonIds(Elements elems) {
+		Gson gson = new Gson();
+		for (Item item : elems.getList().getItems().getItem()) {
+			String json = gson.toJson(ElementsUtil.itemToE(item));
+			//TODO: it this type of encoding ok? do we need encoding at all?
+			item.setJsonId(Base64.getEncoder().encodeToString(json.getBytes()));
+		}
 	}
 
 	private List<Node> buildCategoryNodes(CmNode node, Map<CmNode, CyberTrackerId> keyMap, Integer level) throws Exception {
