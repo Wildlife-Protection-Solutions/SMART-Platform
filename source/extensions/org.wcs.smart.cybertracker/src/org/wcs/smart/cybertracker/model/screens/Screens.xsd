@@ -184,6 +184,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:int" name="PingFrequency"  minOccurs="0"/>
 						<xs:element type="xs:string" name="Translate__PatrolElementId" />
 						<xs:element type="xs:string" name="PingOnly" />
+						<xs:element type="xs:int" name="Protocol"  minOccurs="0"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
