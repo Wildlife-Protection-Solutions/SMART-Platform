@@ -31,6 +31,7 @@ import java.util.UUID;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.map.udig.QueryServiceExtension;
 
 /**
  * Smart query data source factor.  
@@ -43,14 +44,16 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	/**
 	 * query uuid parameter
 	 */
-	public static final Param QUERY_UUID = new Param("queryuuid", UUID.class, Messages.QueryDataSourceFactory_queryUuidParameterName, true);  //$NON-NLS-1$
+	public static final Param QUERY_UUID = new Param(QueryServiceExtension.QUERY_UUID_KEY, UUID.class, Messages.QueryDataSourceFactory_queryUuidParameterName, true);  
+	public static final Param DATE_UUID = new Param(QueryServiceExtension.DATE_KEY, String.class, "Date Filter", true);  
 	  
 	/**
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
 	 */
 	@Override
 	public boolean canProcess(Map<String, Serializable> params) {
-		if (params.containsKey(QUERY_UUID.key)){
+		if (params.containsKey(QUERY_UUID.key) &&
+			params.containsKey(DATE_UUID)){
 			return true;
 		}
 		return false;
@@ -77,7 +80,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public Param[] getParametersInfo() {
-		return new Param[]{QUERY_UUID };
+		return new Param[]{QUERY_UUID, DATE_UUID };
 	}
 
 	/**

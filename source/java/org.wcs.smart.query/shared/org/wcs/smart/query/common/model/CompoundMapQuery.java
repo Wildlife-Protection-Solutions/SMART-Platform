@@ -26,15 +26,21 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
+
+/**
+ * Compound query entity
+ * 
+ * @author Emily
+ *
+ */
 @Entity
 @Table(name="smart.compound_query")
 public class CompoundMapQuery extends Query{
@@ -45,6 +51,7 @@ public class CompoundMapQuery extends Query{
 	private List<CompoundMapQueryLayer> queries;
 	
 	@OneToMany(cascade = {CascadeType.ALL}, mappedBy="mapQuery")
+	@OrderBy("order")
 	public List<CompoundMapQueryLayer> getLayers(){
 		return queries;
 	}
@@ -68,7 +75,9 @@ public class CompoundMapQuery extends Query{
 				for (CompoundMapQueryLayer layer : queries){
 					boolean found = false;
 					for (CompoundMapQueryLayer layer2 : mq.getLayers()){
-						if (layer.areequals(layer2)){
+						if (layer.getQueryUuid().equals(layer2.getQueryUuid()) &&
+								layer.getOrder() == layer2.getOrder() &&
+								layer.getDateFilter().equalsIgnoreCase(layer2.getDateFilter())){
 							found = true;
 							break;
 						}

@@ -90,8 +90,8 @@ public class PatrolQueryEditorTableContent {
 	 * @param toolkit page formtoolkit
 	 */
 	public PatrolQueryEditorTableContent(Composite parent, PatrolQueryResultsEditor editor, FormToolkit toolkit) {
-		createContent(parent, toolkit);
 		this.editor = editor;
+		createContent(parent, toolkit);
 	}
 
 	/**

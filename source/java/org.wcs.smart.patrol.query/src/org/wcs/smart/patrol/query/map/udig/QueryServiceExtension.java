@@ -45,6 +45,7 @@ public class QueryServiceExtension implements ServiceExtension {
      * Service parameter conservation area uuid key
      */
     public static final String QUERY_UUID_KEY = "queryuuid"; //$NON-NLS-1$
+    public static final String DATE_KEY = "date"; //$NON-NLS-1$
    
 	
     /**
@@ -54,15 +55,7 @@ public class QueryServiceExtension implements ServiceExtension {
 	public IService createService(URL id, Map<String, Serializable> params) {
         if (params == null)
             return null;
-            
-        //check for the property service key
-        if (params.containsKey(QUERY_UUID_KEY) && 
-        		params.get(QUERY_UUID_KEY) instanceof UUID) {
-            //found it, create the service handle
-        	return  new QueryService(params);
-        }
-        
-		return null;
+        throw new UnsupportedOperationException("Cannot create query service from parameters");
 	}
 
 	/**
@@ -86,14 +79,18 @@ public class QueryServiceExtension implements ServiceExtension {
 			return null;
 		}
 		int pos = quuid.lastIndexOf('/');
-		if (pos < 0){
-			pos = 0;
-		}
+		if (pos < 0) pos = 0;
 		
-		quuid = quuid.substring(pos);
+		int endpos = quuid.indexOf('#');
+		if (endpos < 0 ) endpos = quuid.length();
+		
+		quuid = quuid.substring(pos, endpos);
+		String date = quuid.substring(endpos);
+		
 		UUID buuid = UuidUtils.stringToUuid(quuid);
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(QUERY_UUID_KEY, buuid);
+		params.put(DATE_KEY, date);
 		return params;
 	}
 
@@ -110,6 +107,8 @@ public class QueryServiceExtension implements ServiceExtension {
 		}else{
 			url += UuidUtils.uuidToString((UUID)params.get(QUERY_UUID_KEY)) ;
 		}
+		
+		url += "/" + params.get(DATE_KEY); //$NON-NLS-1$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

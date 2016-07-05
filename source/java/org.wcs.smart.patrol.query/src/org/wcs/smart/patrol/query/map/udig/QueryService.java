@@ -47,6 +47,7 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.model.Query;
@@ -75,25 +76,16 @@ public class QueryService extends IService implements IQueryService {
 	private IProjectionProvider prjProvider;
 	
 	/**
-	 * Creates a new query service 
-	 * @param params service parameters
-	 */
-	public QueryService(Map<String, Serializable> params) {
-		this.params = params;
-		this.url = QueryServiceExtension.createURL(this.params);
-		this.query = null;
-	}
-	
-	/**
 	 * Creates a new query service .
 	 * 
 	 * @param query waypoint query
 	 */
-	public QueryService(Query query, IProjectionProvider prjProvider){
+	public QueryService(SimpleQuery query, IProjectionProvider prjProvider){
 		this.query = query;
 		this.prjProvider = prjProvider;
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
+		this.params.put(QueryDataSourceFactory.DATE_UUID.key, query.getDateFilter().asString());
 		this.url = QueryServiceExtension.createURL(this.params);
 		
 	}

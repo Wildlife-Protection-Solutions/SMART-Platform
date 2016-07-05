@@ -22,6 +22,7 @@
 package org.wcs.smart.query.model;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.ui.WorkbenchException;
@@ -66,13 +67,38 @@ public enum QueryStyleParser {
 		query.setStyle(StyleManager.INSTANCE.asString(queryStyles));
 	}
 	
+	/**
+	 * Converts the blackboard to a style string that can be saved
+	 * to the database and parsed using the applyStyle functions
+	 * 
+	 * @param geoResourceKey
+	 * @param blackboard
+	 * @throws IOException
+	 * @throws WorkbenchException
+	 */
+	public String getStyle(String geoResourceKey, StyleBlackboard blackboard) throws IOException, WorkbenchException{
+		Map<String, StyleBlackboard> queryStyles = new HashMap<String, StyleBlackboard>();
+		if (blackboard == null){
+			queryStyles.remove(geoResourceKey);
+		}else{
+			queryStyles.put(geoResourceKey, blackboard);
+		}
+		return StyleManager.INSTANCE.asString(queryStyles);
+	}
 	
 	/**
 	 * Applies the current query style to the given style blackboard
 	 * @param toUpdate
 	 */
 	public void applyStyle(StyledQuery query, String geoResourceKey, StyleBlackboard toUpdate) throws IOException, WorkbenchException{
-		Map<String, StyleBlackboard> queryStyles = StyleManager.INSTANCE.fromStringMap(query.getStyle());
+		applyStyle(query.getStyle(), geoResourceKey, toUpdate);
+	}
+	/**
+	 * Applies the style represented by the style string to the given style blackboard
+	 * @param toUpdate
+	 */
+	public void applyStyle(String styleString, String geoResourceKey, StyleBlackboard toUpdate) throws IOException, WorkbenchException{
+		Map<String, StyleBlackboard> queryStyles = StyleManager.INSTANCE.fromStringMap(styleString);
 		StyleBlackboard local = queryStyles.get(geoResourceKey);
 		if (local != null){
 			toUpdate.clear();

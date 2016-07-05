@@ -69,6 +69,17 @@ public class Messages extends NLS {
 	public static String CategoryValueItem_categorynotfound;
 	public static String CategoryValueItem_CountIncidentLabel;
 	public static String CategoryValueItem_CountObservationLabel;
+	public static String CompoundDefinitionPanel_TabName;
+	public static String CompoundMapQueryType_MapQueryName;
+	public static String CompoundQueryEditor_NewCompoundQueryName;
+	public static String CompoundQueryEditor_SummariesTabName;
+	public static String CompoundQueryInfoPage_CompleteMessage;
+	public static String CompoundQueryInfoPage_DateFilterColName;
+	public static String CompoundQueryInfoPage_ErrorMessage;
+	public static String CompoundQueryInfoPage_QueryColumnName;
+	public static String CompoundQueryInfoPage_ResultsColName;
+	public static String CompoundQueryInfoPage_TotalMessage;
+	public static String CompoundQueryLayerJob_JobName;
 	public static String ConservationAreaFilterPanel_CaFilterError;
 	public static String ConservationAreaFilterPanel_CaFilterPanelTitle;
 	public static String ConservationAreaFilterPanel_Error_NoCas;

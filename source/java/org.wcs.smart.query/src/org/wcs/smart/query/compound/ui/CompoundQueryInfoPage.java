@@ -1,6 +1,29 @@
-package org.wcs.smart.query.ui.editor;
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.compound.ui;
 
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -30,11 +53,19 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.compound.ui.QueryItem.Status;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
 import org.wcs.smart.query.ui.QueryPropertiesDialog;
 
+/**
+ * Compound query editor info page.  Lists all queries
+ * selected and the date filters.
+ * @author Emily
+ *
+ */
 public class CompoundQueryInfoPage extends EditorPart  {
 
 	private CompoundQueryEditor parentEditor;
@@ -52,8 +83,6 @@ public class CompoundQueryInfoPage extends EditorPart  {
 	public CompoundQueryInfoPage(CompoundQueryEditor parent) {
 		this.parentEditor = parent;
 	}
-
-
 	
 	/**
 	 * Does nothing.
@@ -94,7 +123,6 @@ public class CompoundQueryInfoPage extends EditorPart  {
 	 */
 	public void initPage(){
 		updateQueryName();
-//		content.initValues(parentEditor.getQueryInternal());
 	}
 	
 	
@@ -222,7 +250,7 @@ public class CompoundQueryInfoPage extends EditorPart  {
 		resultsTable.getTable().setLinesVisible(true);
 		
 		TableViewerColumn tableColumn = new TableViewerColumn(resultsTable, SWT.NONE);
-		tableColumn.getColumn().setText("Query");
+		tableColumn.getColumn().setText(Messages.CompoundQueryInfoPage_QueryColumnName);
 		tableColumn.getColumn().setWidth( 200 );
 		tableColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -235,20 +263,29 @@ public class CompoundQueryInfoPage extends EditorPart  {
 		});
 		
 		tableColumn = new TableViewerColumn(resultsTable, SWT.NONE);
-		tableColumn.getColumn().setText("Date Field");
+		tableColumn.getColumn().setText(Messages.CompoundQueryInfoPage_DateFilterColName);
 		tableColumn.getColumn().setWidth( 200 );
 		tableColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof QueryItem){
-					return ((QueryItem)element).getDateFilter().asString();
+					DateFilter filter = ((QueryItem)element).getCompoundMapQueryLayer().getDateFilterAsFilter();
+					StringBuilder sb = new StringBuilder();
+					
+					sb.append(filter.getDateFilterOption().getGuiName(Locale.getDefault()));
+					sb.append(" "); //$NON-NLS-1$
+					sb.append(filter.getDateFilterOption().getLabel());
+					sb.append(" - "); //$NON-NLS-1$
+					sb.append(filter.getDateFieldOption().getGuiName(Locale.getDefault()));
+					
+					return sb.toString();
 				}
 				return super.getText(element);
 			}
 		});
 		
 		TableViewerColumn progressColumn = new TableViewerColumn(resultsTable, SWT.NONE);
-		progressColumn.getColumn().setText("Progress/Results");
+		progressColumn.getColumn().setText(Messages.CompoundQueryInfoPage_ResultsColName);
 		progressColumn.getColumn().setWidth( 200 );
 		progressColumn.setLabelProvider(new ColumnLabelProvider() {
 			 //make sure you dispose these buttons when viewer input changes
@@ -259,33 +296,48 @@ public class CompoundQueryInfoPage extends EditorPart  {
 //                
                 if (item.getData() instanceof QueryItem){
                 	QueryItem qi = (QueryItem) item.getData();
-                	if (qi.gettotalCnt() != null){
+                	if (qi.getStatus() == Status.DONE){
+                		
                 		if (qi.getProgressBar() != null){
+                			//dispose of progress bar
                 			qi.getProgressBar().dispose();
                 			qi.setProgressBar(null);
                 		}
+                		//create label widget
                 		if (qi.getTotalWidget() == null){
                 			Label l = new Label((Composite)cell.getViewerRow().getControl(), SWT.NONE);
+                			l.setBackground(cell.getBackground());
                 			qi.setTotalWidget(l);
-                			
                 			qi.getTableEditor().setEditor(l, item, cell.getColumnIndex());
+                			
                 		}
-                		if (qi.gettotalCnt() >= 0){
-                			qi.getTotalWidget().setText("Total Records Returned:" + qi.gettotalCnt());
-                		}else{
-                			qi.getTotalWidget().setText("ERROR");
+                		
+                		//configure table widget
+                		if (qi.getStatus() == Status.DONE){
+                			if (qi.getTotalCount() >= 0){
+                				qi.getTotalWidget().setText(MessageFormat.format(Messages.CompoundQueryInfoPage_TotalMessage, qi.getTotalCount()));
+                			}else{
+                				qi.getTotalWidget().setText(Messages.CompoundQueryInfoPage_CompleteMessage);
+                			}
+                		}else if (qi.getStatus() == Status.ERROR){
+                			qi.getTotalWidget().setText(MessageFormat.format(Messages.CompoundQueryInfoPage_ErrorMessage, qi.getErrorMessage()));
                 		}
-                	}else{
+                	}else if (qi.getStatus() == Status.PROCESSING || qi.getStatus() == Status.UNKNOWN){
                 		if (qi.getProgressBar() == null){
+                			if (qi.getTotalWidget() != null){
+                				qi.getTotalWidget().dispose();
+                				qi.setTotalWidget(null);
+                			}
                 			ProgressBar pbar = new ProgressBar((Composite)cell.getViewerRow().getControl(), SWT.SMOOTH | SWT.HORIZONTAL);
                    			qi.setProgressBar(pbar);
-                			
-                			TableEditor editor = new TableEditor(item.getParent());
-		                    editor.grabHorizontal  = true;
-		                    editor.grabVertical = true;
-		                    editor.setEditor(pbar, item, cell.getColumnIndex());
-		                    editor.layout();
-		                    qi.setTableEditor(editor);
+                			if (qi.getTableEditor() == null){
+                				TableEditor editor = new TableEditor(item.getParent());
+                				editor.grabHorizontal  = true;
+                				editor.grabVertical = true;
+                				editor.layout();
+                				qi.setTableEditor(editor);
+                			}
+                			qi.getTableEditor().setEditor(pbar, item, cell.getColumnIndex());
                 		}
                 	}
                 }
@@ -298,14 +350,27 @@ public class CompoundQueryInfoPage extends EditorPart  {
 	}
 	
 	public void clearTable(){
+		disposeItems();
 		resultsTable.setInput(new Object[]{});
 		resultsTable.refresh();
 	}
+	
+	private void disposeItems(){
+		Object old = resultsTable.getInput();
+		if (old instanceof List){
+			List<?> oldlist = (List<?>)old;
+			for (Object x : oldlist){
+				if (x instanceof QueryItem){
+					((QueryItem)x).dispose();
+				}
+			}
+		}
+	}
 	public void setupTable(List<QueryItem> items){
 		Display.getDefault().syncExec(new Runnable(){
-
 			@Override
 			public void run() {
+				disposeItems();
 				resultsTable.setInput(items);
 				resultsTable.refresh();		
 			}

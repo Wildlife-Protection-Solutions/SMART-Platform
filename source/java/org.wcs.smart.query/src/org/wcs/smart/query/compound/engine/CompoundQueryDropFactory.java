@@ -10,6 +10,7 @@ import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.compound.ui.CompoundDefinitionPanel;
 import org.wcs.smart.query.compound.ui.QueryDropItem;
+import org.wcs.smart.query.compound.ui.QueryListItemPanel;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
@@ -45,7 +46,10 @@ public class CompoundQueryDropFactory implements IDropItemFactory{
 			IQueryType type = QueryTypeManager.INSTANCE.findQueryType(layer.getQueryType());
 					
 			Query childquery = QueryHibernateManager.getInstance().findQuery(session, layer.getQueryUuid(), type);
-			items.add(generateDropItem(childquery, null)[0]);
+			//TODO: deal with custom date filter
+			DropItem di = generateDropItem(childquery, QueryListItemPanel.ID)[0];
+			di.initializeData(layer);
+			items.add(di);
 		}
 		q.setDropItems(CompoundDefinitionPanel.ID, items);
 		

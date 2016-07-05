@@ -1,6 +1,31 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.compound.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -18,11 +43,19 @@ import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IMappableQueryType;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 import org.wcs.smart.query.ui.querylist.QueryListContentProvider;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
 import org.wcs.smart.query.ui.querylist.SavedQueryTree;
 
+/**
+ * Item panels that lists all mappable queries.  Mappable queries types
+ * must implement IMappableQueryType
+ * @author Emily
+ *
+ */
 public class QueryListItemPanel extends AbstractQueryItemPanel{
 
 	public static final String ID = "org.wcs.smart.query.compound.querylist"; //$NON-NLS-1$
@@ -47,11 +80,36 @@ public class QueryListItemPanel extends AbstractQueryItemPanel{
 		}
 	};
 	
+	private QueryListenerAdapter queryListener = new QueryListenerAdapter() {
+		@Override
+		public void queryModified(int eventType, Object object) {
+			if (eventType == QueryListenerAdapter.QUERY_NAME_MODIFIED){
+				queryList.refresh();
+			}
+		}
+	};
+	
 	private Job loadQueriesJob = new Job(Messages.QueryListView_LoadQueryJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			//load queries and filter out mappable query objects
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
-			data.put(QueryListContentProvider.QUERY_KEY, SavedQueryTree.getInstance().getQueries());
+			HashMap<UUID, List<QueryEditorInput>> queries = SavedQueryTree.getInstance().getQueries();
+			HashMap<UUID, List<QueryEditorInput>> queriescopy = new HashMap<UUID, List<QueryEditorInput>>(); 
+			for(Entry<UUID, List<QueryEditorInput>> qs : queries.entrySet()){
+				List<QueryEditorInput> newInput = new ArrayList<QueryEditorInput>();
+				for(QueryEditorInput in: qs.getValue()){
+					if (in.getType() instanceof IMappableQueryType){
+						newInput.add(in);
+					}
+				}
+				if (!newInput.isEmpty()){
+					queriescopy.put(qs.getKey(), newInput);
+				}	
+			}
+			
+			//set input and expand
+			data.put(QueryListContentProvider.QUERY_KEY, queriescopy);
 			data.put(QueryListContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
 			
 			if (queryList != null && !queryList.getTree().isDisposed()){
@@ -99,24 +157,16 @@ public class QueryListItemPanel extends AbstractQueryItemPanel{
 		});
 		queryList.setInput(Messages.QueryListView_LoadingLabel);
 		
-	loadQueriesJob.schedule();
-		
-		//TODO dispose this listener
-		QueryEventManager.getInstance().addListener(new QueryListenerAdapter() {
-			@Override
-			public void queryModified(int eventType, Object object) {
-				if (eventType == QueryListenerAdapter.QUERY_NAME_MODIFIED){
-					queryList.refresh();
-				}
-			}
-		});
-		//and this one:
+		loadQueriesJob.schedule();
+	
+		//these are never disposed
+		QueryEventManager.getInstance().addListener(queryListener);
 		SavedQueryTree.getInstance().addListener(listener);
-		
 		
 		return main;
 	}
 
+	
 	@Override
 	public void refreshPanel() {
 		queryList.refresh();

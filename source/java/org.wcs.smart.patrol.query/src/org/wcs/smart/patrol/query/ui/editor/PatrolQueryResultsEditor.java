@@ -56,6 +56,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryMapPageEditor;
 import org.wcs.smart.query.common.ui.QueryResultsTable;
@@ -540,6 +541,6 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 
 	@Override
 	public IQueryService createQueryService() {
-		return new QueryService(getQuery(), this);
+		return new QueryService((SimpleQuery)getQuery(), this);
 	}
 }

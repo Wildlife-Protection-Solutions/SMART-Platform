@@ -28,11 +28,22 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import org.hibernate.hql.internal.ast.QuerySyntaxException;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.date.AllDatesFilter;
+
+/**
+ * Compound query layer 
+ * 
+ * @author Emily
+ *
+ */
 @Entity
 @Table(name="smart.compound_query_layer")
 public class CompoundMapQueryLayer extends UuidItem{
@@ -43,9 +54,18 @@ public class CompoundMapQueryLayer extends UuidItem{
 	private UUID queryUuid;
 	//query type
 	private String queryType;
+	//date filter string representation
+	private String strDateFilter;
 	//optional style
 	private String queryStyle;
+	//layer order - required and managed by system
+	private int order;
 
+	//parsed date filter
+	@Transient
+	private DateFilter dateFilter;
+	
+	
 	@ManyToOne(cascade = {CascadeType.ALL})
 	@JoinColumn(name="compound_query_uuid", referencedColumnName="uuid", nullable=false)
 	public CompoundMapQuery getMapQuery() {
@@ -79,12 +99,41 @@ public class CompoundMapQueryLayer extends UuidItem{
 		this.queryStyle = queryStyle;
 	}
 	
-	public boolean areequals(CompoundMapQueryLayer other){
-		if (other.getQueryUuid().equals(queryUuid) &&
-				other.getQueryType().equals(queryType)){
-			if (queryStyle == null && other.getQueryStyle() == null) return true;
-			if (queryStyle != null && other.getQueryStyle() != null) return queryStyle.equals(other.getQueryStyle());
+	@Column(name="layer_order")
+	public int getOrder(){
+		return this.order;
+	}
+	
+	public void setOrder(int order){
+		this.order = order;
+	}
+	
+	@Column(name="date_filter")
+	public String getDateFilter(){
+		return this.strDateFilter;
+	}
+	
+	public void setDateFilter(String dateFilter){
+		this.strDateFilter = dateFilter;
+		this.dateFilter = null;
+	}
+	
+	@Transient
+	public DateFilter getDateFilterAsFilter(){
+		if (this.dateFilter == null){
+			IQueryType type = QueryTypeManager.INSTANCE.findQueryType(queryType);
+			try{
+				dateFilter = DateFilter.fromString(strDateFilter, type);
+			}catch (Exception ex){
+				QueryPlugIn.log(ex.getMessage(), ex);
+				dateFilter = new DateFilter(type.getDateFilterOptions()[0], AllDatesFilter.INSTANCE);
+			}
 		}
-		return false;
+		return this.dateFilter;
+	}
+	
+	public void setDateFilter(DateFilter dateFilter){
+		this.dateFilter = dateFilter;
+		this.strDateFilter = dateFilter.toString();
 	}
 }

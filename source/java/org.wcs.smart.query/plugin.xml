@@ -1138,7 +1138,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.query.ui.editor.CompoundQueryEditor"
+            class="org.wcs.smart.query.compound.ui.CompoundQueryEditor"
             default="false"
             icon="images/icons/obj16/compound_query.png"
             id="org.wcs.smart.query.editor.compound"

@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.query.ui;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -33,6 +36,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -74,6 +80,15 @@ public class QueryDateFilterComposite extends Composite {
 	private IDateFieldFilter[] fieldOps;
 	private IDateFilter[] filterOps;
 	private boolean showLabel;
+	
+	private List<ISelectionChangedListener> listeners;
+	private ISelectionChangedListener fireListener = new ISelectionChangedListener() {
+		@Override
+		public void selectionChanged(SelectionChangedEvent event) {
+			fireListeners(event);
+		}
+	};
+	
 	/**
 	 * create new composite
 	 * @param parent parent composite
@@ -99,6 +114,7 @@ public class QueryDateFilterComposite extends Composite {
 			IDateFilter[] filterOps, boolean includeLabel) {
 		
 		super(parent, SWT.NONE);
+		this.listeners = new ArrayList<ISelectionChangedListener>();
 		this.showLabel = includeLabel;
 		this.fieldOps = fieldOps;
 		this.filterOps = filterOps;
@@ -114,6 +130,21 @@ public class QueryDateFilterComposite extends Composite {
 		
 		createComponent();
 	}
+	
+	public void addChangeListener(ISelectionChangedListener listener){
+		this.listeners.add(listener);
+	}
+	
+	public void removeChangeListener(ISelectionChangedListener listener){
+		this.listeners.remove(listener);
+	}
+	
+	private void fireListeners(SelectionChangedEvent event){
+		for (ISelectionChangedListener listener: listeners){
+			listener.selectionChanged(event);
+		}
+	}
+	
 	/**
 	 * Adapts the components of the composite to the given
 	 * form toolkit.
@@ -142,7 +173,9 @@ public class QueryDateFilterComposite extends Composite {
 	private void createComponent(){
 		main = new Composite(this, SWT.NONE);
 		
-		GridLayout layout = new GridLayout(7, false);
+		int cols = 6;
+		if (showLabel) cols = 7;
+		GridLayout layout = new GridLayout(cols, false);
 		//layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 0;
@@ -156,7 +189,7 @@ public class QueryDateFilterComposite extends Composite {
 		}
 		
 		if (fieldOps != null){
-			cmbDateField = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbDateField = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			cmbDateField.setContentProvider(ArrayContentProvider.getInstance());
 			cmbDateField.setLabelProvider(new LabelProvider(){
 				@Override
@@ -170,10 +203,11 @@ public class QueryDateFilterComposite extends Composite {
 	
 			cmbDateField.setInput(fieldOps);
 			cmbDateField.getCombo().select(0);
+			cmbDateField.addSelectionChangedListener(fireListener);
 		}
 		
 		
-		cmbFilterOptions = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbFilterOptions = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		cmbFilterOptions.setContentProvider(ArrayContentProvider.getInstance());
 		cmbFilterOptions.setLabelProvider(new LabelProvider(){
 			@Override
@@ -192,31 +226,34 @@ public class QueryDateFilterComposite extends Composite {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				
-				lbl1.setText(""); //$NON-NLS-1$
-				
 				IDateFilter filter = (IDateFilter) ((IStructuredSelection)cmbFilterOptions.getSelection()).getFirstElement();
-				setCustom(filter instanceof CustomDateFilter);
 				lbl1.setText(filter.getLabel());
-			
+				setCustom(filter instanceof CustomDateFilter);
 				main.layout();
-				
 				validate();
 			}
 		});
+		cmbFilterOptions.addSelectionChangedListener(fireListener);
+		
 		lbl1 = new Label(main, SWT.NONE);
 		lbl1.setText(Messages.QueryDateFilterComposite_BetweenLabel);
+		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
 		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
+		dtStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		Listener validateListener = new Listener(){
 			@Override
 			public void handleEvent(Event event) {
 				validate();
 			}};
-			
 		dtStart.addListener(SWT.Selection, validateListener);
+		
 		lbl2 = new Label(main, SWT.NONE);
 		lbl2.setText(Messages.QueryDateFilterComposite_AndLabel);
+		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
 		dtEnd = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
+		dtEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		dtEnd.addListener(SWT.Selection, validateListener);
 		
 		cdEndDate = new ControlDecoration(dtEnd, SWT.RIGHT | SWT.TOP);
@@ -233,6 +270,15 @@ public class QueryDateFilterComposite extends Composite {
 			}
 		}
 		cmbFilterOptions.setSelection(new StructuredSelection(sel));
+		
+		SelectionListener dSelection = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				fireListeners(null);
+			}
+		};
+		dtStart.addSelectionListener(dSelection);
+		dtEnd.addSelectionListener(dSelection);
 	}
 
 	
@@ -243,12 +289,23 @@ public class QueryDateFilterComposite extends Composite {
 	 * @param isCustom
 	 */
 	private void setCustom(boolean isCustom){
+		if (isCustom){
+			((GridData)dtStart.getLayoutData()).widthHint = dtStart.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			((GridData)dtEnd.getLayoutData()).widthHint = dtEnd.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			((GridData)lbl2.getLayoutData()).widthHint = lbl2.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		}else{
+			((GridData)dtStart.getLayoutData()).widthHint = 0;
+			((GridData)dtEnd.getLayoutData()).widthHint = 0;
+			((GridData)lbl2.getLayoutData()).widthHint = 0;
+		}
 		dtEnd.setVisible(isCustom);
 		dtStart.setVisible(isCustom);
 		lbl2.setVisible(isCustom);
+		
 		if (isCustom){
 			lbl1.setText(Messages.QueryDateFilterComposite_BetweenLabel2);
 		}
+		((GridData)lbl1.getLayoutData()).widthHint = lbl1.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 	}
 	
 	/**
@@ -271,6 +328,20 @@ public class QueryDateFilterComposite extends Composite {
 		}
 	}
 	
+	public void setDateFilter(DateFilter filter){
+		cmbDateField.setSelection(new StructuredSelection(filter.getDateFieldOption()));
+		if (filter.getDateFilterOption() instanceof CustomDateFilter){
+			CustomDateFilter custom = (CustomDateFilter)filter.getDateFilterOption();
+			Date start = custom.getDates()[0];
+			Date end = custom.getDates()[1];
+			SmartUtils.initDateDateTimeWidget(dtStart, start);
+			SmartUtils.initDateDateTimeWidget(dtEnd, end);
+		}
+		//this resets the dates associated with the filter so we do it after we get the dates from the filter
+		cmbFilterOptions.setSelection(new StructuredSelection(filter.getDateFilterOption()));
+	}
+	
+	
 	public void validate(){
 		String error = null;
 		
@@ -284,6 +355,9 @@ public class QueryDateFilterComposite extends Composite {
 			cdEndDate.hide();
 		}
 		
+		//eg: I think this is a bug, but this ensures the x disappears when hidden;
+		//without it the x stays visible in some situations 
+		cdEndDate.getControl().getParent().getParent().getParent().layout();
 		QuerySourceProvider.getSourceProviderFromContext().setQueryDateValid(error == null, error);
 	}
 	

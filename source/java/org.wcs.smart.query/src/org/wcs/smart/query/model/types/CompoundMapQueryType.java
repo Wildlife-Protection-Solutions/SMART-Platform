@@ -1,10 +1,29 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.model.types;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -14,15 +33,22 @@ import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.compound.engine.CompoundQueryDropFactory;
 import org.wcs.smart.query.compound.ui.CompoundDefinitionPanel;
+import org.wcs.smart.query.compound.ui.CompoundQueryEditor;
+import org.wcs.smart.query.compound.ui.QueryDropItem;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.ui.editor.CompoundQueryEditor;
+import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
-import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Query type repesentation for Compound Map Queries
+ * @author Emily
+ *
+ */
 public class CompoundMapQueryType implements IQueryType {
 
 	@Override
@@ -37,7 +63,7 @@ public class CompoundMapQueryType implements IQueryType {
 
 	@Override
 	public String getGuiName() {
-		return "Compound Map Query";
+		return Messages.CompoundMapQueryType_MapQueryName;
 	}
 
 	@Override
@@ -74,57 +100,50 @@ public class CompoundMapQueryType implements IQueryType {
 		}
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(CompoundDefinitionPanel.ID)){
-				HashMap<UUID,CompoundMapQueryLayer> newLayers = new HashMap<UUID, CompoundMapQueryLayer>();
+				List<CompoundMapQueryLayer> newLayers = new ArrayList<CompoundMapQueryLayer>();
 				
-				if (!p.getQueryPart().trim().isEmpty()){
-					String parts[] = p.getQueryPart().split(",");
-					for (String layer : parts){
-						String[] bits = layer.split(":");
-						CompoundMapQueryLayer newlayer = new CompoundMapQueryLayer();
-						newlayer.setQueryType(bits[0]);
-						newlayer.setQueryUuid(UuidUtils.stringToUuid(bits[1]));
-						newLayers.put(newlayer.getQueryUuid(), newlayer);
-						
-					}
-					List<CompoundMapQueryLayer> toDelete = new ArrayList<CompoundMapQueryLayer>();
-					for (CompoundMapQueryLayer existing : cq.getLayers()){
-						if (!newLayers.containsKey(existing.getQueryUuid())){
-							toDelete.add(existing);
-						}
-					}
-					for (CompoundMapQueryLayer delete : toDelete){
-						delete.getMapQuery().getLayers().remove(delete);
-						delete.setMapQuery(null);
-					}
-					
-					//update or add all new layers
-					for (CompoundMapQueryLayer newLayer : newLayers.values()){
-						CompoundMapQueryLayer toUpdate = null;
-						for (CompoundMapQueryLayer oldLayer : cq.getLayers()){
-							if (oldLayer.getQueryUuid().equals(newLayer.getQueryUuid())){
-								toUpdate = oldLayer;
-								break;
-							}
-						}
-						if (toUpdate == null){
-							cq.getLayers().add(newLayer);
-							newLayer.setMapQuery(cq);
+				for (DropItem it : ((CompoundDefinitionPanel)p).getItems()){
+					if (it instanceof QueryDropItem){
+						QueryDropItem qitem = (QueryDropItem)it;
+						if (qitem.getLayer() != null){
+							qitem.getLayer().setDateFilter(qitem.getDateField());
+							newLayers.add(qitem.getLayer());
+						}else{
+							CompoundMapQueryLayer newlayer = new CompoundMapQueryLayer();
+							newlayer.setQueryType(qitem.getQueryType().getKey());
+							newlayer.setQueryUuid(qitem.getQueryUuid());
+							newlayer.setDateFilter(qitem.getDateField());
+							qitem.initializeData(newlayer);
+							newLayers.add(newlayer);
 						}
 					}
 				}
+				for (int i = 0; i < newLayers.size(); i ++){
+					newLayers.get(i).setOrder(i+1);
+				}
+				
+				cq.getLayers().clear();
+				cq.getLayers().addAll(newLayers);
 			}
 		}
 	}
 
 	@Override
 	public String validateQuery(List<IDefinitionPanel> components) {
-		//could potentially validate each individual query
+		String error = null;
+		for (IDefinitionPanel p : components){
+			error = p.validate();
+		}
+		if (error != null){
+			return error;
+		}
+		//TODO: could potentially validate each individual query
 		return null;
 	}
 
 	@Override
 	public URL getDescription() {
-		IPath path = new Path("src/org/wcs/smart/query/model/types/compound.html"); //$NON-NLS-1$
+		IPath path = new Path("src/org/wcs/smart/query/model/types/compound.html");  //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, QueryPlugIn.getDefault().getBundle());
 	}
 

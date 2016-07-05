@@ -41,6 +41,7 @@ import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
@@ -219,6 +220,6 @@ public class PatrolObservationQueryType implements IMappableQueryType {
 	 */
 	@Override
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider){
-		return new QueryService(query, prjProvider);
+		return new QueryService((SimpleQuery) query, prjProvider);
 	}
 }
