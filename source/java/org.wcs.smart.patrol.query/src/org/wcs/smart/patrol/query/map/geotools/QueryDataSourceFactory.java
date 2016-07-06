@@ -45,15 +45,14 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 * query uuid parameter
 	 */
 	public static final Param QUERY_UUID = new Param(QueryServiceExtension.QUERY_UUID_KEY, UUID.class, Messages.QueryDataSourceFactory_queryUuidParameterName, true);  
-	public static final Param DATE_UUID = new Param(QueryServiceExtension.DATE_KEY, String.class, "Date Filter", true);  
+ 
 	  
 	/**
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
 	 */
 	@Override
 	public boolean canProcess(Map<String, Serializable> params) {
-		if (params.containsKey(QUERY_UUID.key) &&
-			params.containsKey(DATE_UUID)){
+		if (params.containsKey(QUERY_UUID.key)){
 			return true;
 		}
 		return false;
@@ -80,7 +79,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public Param[] getParametersInfo() {
-		return new Param[]{QUERY_UUID, DATE_UUID };
+		return new Param[]{QUERY_UUID};
 	}
 
 	/**

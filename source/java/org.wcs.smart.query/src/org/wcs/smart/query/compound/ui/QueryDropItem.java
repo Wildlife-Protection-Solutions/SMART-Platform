@@ -25,14 +25,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.e4.ui.model.application.ui.menu.impl.ToolBarImpl;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.model.IQueryType;
@@ -57,6 +64,7 @@ public class QueryDropItem extends DropItem {
 	
 	private QueryDateFilterComposite dateFilter;
 	private CompoundMapQueryLayer mapLayer;
+	
 	
 	public QueryDropItem(Query query){
 		this.query = query.getUuid();
@@ -105,8 +113,12 @@ public class QueryDropItem extends DropItem {
 	 * the date filter
 	 * @return
 	 */
-	public DateFilter getDateField(){
+	public DateFilter getDateFilter(){
 		return dateFilter.getDateFilter();
+	}
+	
+	public void setDateFilter(DateFilter df){
+		this.dateFilter.setDateFilter(df);
 	}
 	
 	@Override
@@ -143,7 +155,7 @@ public class QueryDropItem extends DropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
-		GridLayout gl = new GridLayout(2, false);
+		GridLayout gl = new GridLayout(3, false);
 		gl.marginWidth = gl.marginHeight = 0;
 		main.setLayout(gl);
 		
@@ -161,7 +173,33 @@ public class QueryDropItem extends DropItem {
 			public void selectionChanged(SelectionChangedEvent event) {
 				queryChanged();
 				getWidget().pack(true);
-				getWidget().getParent().getParent().getParent().layout(true);
+				getTargetPanel().getDropTargetComposite().pack(true);
+			}
+		});
+	
+		ToolBar temp = new ToolBar(main, SWT.FLAT);
+		
+		ToolItem applyAll = new ToolItem(temp, SWT.PUSH  | SWT.FLAT );
+		applyAll.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.DATE_APPLY_ALL));
+		applyAll.setToolTipText("apply date filter to all layers");
+		applyAll.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				for (DropItem di : ((CompoundDefinitionPanel)getTargetPanel()).getItems()){
+					if (di instanceof QueryDropItem){
+						((QueryDropItem) di).setDateFilter(getDateFilter());
+					}
+				}
+				queryChanged();
+			}
+		});
+		
+		ToolItem clearStyle = new ToolItem(temp, SWT.PUSH  | SWT.FLAT );
+		clearStyle.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CLEAR_STYLE));
+		clearStyle.setToolTipText("clear style");
+		clearStyle.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				mapLayer.setQueryStyle(null);
+				queryChanged();
 			}
 		});
 		

@@ -22,8 +22,6 @@
 package org.wcs.smart.query.compound.ui;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -47,16 +45,13 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
-import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryMapPageEditor;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -64,7 +59,6 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
-import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Editor for compound queries.
@@ -83,53 +77,7 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 	private boolean isDirty = false;
 	private Projection currentPrj = null;
 	
-	private Job runQueryJob = new Job(Messages.QueryResultsEditor_RunQueryJobName){
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			runQueryJob.setName(Messages.QueryResultsEditor_RunQueryJobName + getQueryProxy().getQuery().getName());
-			
-			//load the current view projection
-			currentPrj = HibernateManager.getCurrentViewProjection();
-			if (currentPrj != null && currentPrj.getParsedCoordinateReferenceSystem() == null){
-				try{
-					currentPrj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(currentPrj.getDefinition()));
-				}catch (Exception ex){
-					//eat me
-				}
-			}
-			
-			CompoundMapQuery query = (CompoundMapQuery) getQueryProxy().getQuery();
-			List<QueryItem> items = new ArrayList<QueryItem>();
-			
-			//configure query items for processing
-			Session s = HibernateManager.openSession();
-			try{
-				for (CompoundMapQueryLayer layer : query.getLayers()){
-					IQueryType type =  QueryTypeManager.INSTANCE.findQueryType(layer.getQueryType());
-					Query q = QueryHibernateManager.getInstance().findQuery(s, layer.getQueryUuid(),type);
-					if (q != null){
-						QueryItem qi = new QueryItem(layer, q, type);
-						qi.setStatus(QueryItem.Status.PROCESSING);
-						items.add(qi);
-					}
-				}
-			}finally{
-				s.close();
-			}
-			
-			//update table
-			page1.setupTable(items);
-			
-			//create jobs
-			for (final QueryItem i : items){
-				CompoundQueryLayerJob job = new CompoundQueryLayerJob(i, CompoundQueryEditor.this);
-				job.schedule();
-			}
-			
-			return Status.OK_STATUS;
-		}
-	};
+	private RunCompoundQueryJob runQueryJob;
 	
 	private Job loadQueryLoad = new Job(Messages.QueryResultsEditor_LoadQueryJobName){
 		@Override
@@ -187,7 +135,7 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 		@Override
 		public void queryRun(Query query) {
 			if (query != null && query.equals(CompoundQueryEditor.this.query.getQuery())){
-				refreshQuery();
+				executeQuery();
 			}
 		}	
 	};
@@ -213,7 +161,7 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 	/**
 	 * Re-run the query and refresh the results.
 	 */
-	public void refreshQuery(){
+	public void executeQuery(){
 		runQueryJob.cancel();
 		page1.clearTable();
 		runQueryJob.schedule();
@@ -326,6 +274,7 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 	@Override
 	public void dispose() {
 		super.dispose();
+		runQueryJob.dispose();
 		query.dispose();
 		QueryEventManager.getInstance().removeListener(qListener);
 		runQueryJob.cancel();
@@ -337,8 +286,6 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 	 */
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		boolean newQuery = getQueryProxy().getQuery().getUuid() == null;
-		
 		Query savedQuery = QueryEditorUtils.doSave(this, monitor);
 		if (savedQuery == null){
 			//error 
@@ -348,11 +295,6 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 			//saved as new query
 			this.query = new QueryProxy(savedQuery);
 			setInput(new QueryEditorInput(savedQuery));
-			newQuery = true;
-		}
-		
-		if (newQuery){
-			page1.clearTable();
 		}
 		updatePartName();
 		setDirty(false);
@@ -406,9 +348,14 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 			super.setTitleImage(input2.getType().getImage());
 		}
 		
+		runQueryJob = new RunCompoundQueryJob(this);
 		QueryEventManager.getInstance().addListener(qListener);
 	}
 
+	public void setProjection(Projection currentProjection){
+		this.currentPrj = currentProjection;
+	}
+	
 	@Override
 	public boolean isDirty() {
 		return isDirty;

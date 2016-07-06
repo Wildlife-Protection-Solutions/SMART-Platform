@@ -29,6 +29,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -44,17 +45,18 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 public class OpenQueryHandler {
 
 	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection) {
+	public IEditorPart execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection) {
 		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) 
 				|| ((IStructuredSelection)thisSelection).isEmpty() ){
-			return;
+			return null;
 		}
 		for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
 			Object o = (Object) iterator.next();
 			if (o instanceof QueryEditorInput){
-				openQuery((QueryEditorInput) o);
+				return openQuery((QueryEditorInput) o);
 			}	
 		}
+		return null;
 		
 	}
 	
@@ -64,16 +66,17 @@ public class OpenQueryHandler {
 	 * 
 	 * @param input
 	 */
-	public void openQuery(QueryEditorInput input){
+	public IEditorPart openQuery(QueryEditorInput input){
 		try {
 			if (SmartDB.isMultipleAnalysis()){
 				//ensure data model is loaded; otherwise end up with deadlocking issues
 				QueryDataModelManager.getInstance().getDataModel();
 			}
 			 
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, input.getType().getEditorId());	
+			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, input.getType().getEditorId());	
 		} catch (Throwable t) {
 			QueryPlugIn.displayLog(t.getLocalizedMessage(), t);
+			return null;
 		}
 	}
 

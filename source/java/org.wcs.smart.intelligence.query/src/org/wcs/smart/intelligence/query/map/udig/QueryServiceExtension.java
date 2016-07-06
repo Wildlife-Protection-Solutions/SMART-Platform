@@ -108,6 +108,8 @@ public class QueryServiceExtension implements ServiceExtension {
 			url += System.nanoTime();
 		}else{
 			url += UuidUtils.uuidToString((UUID)params.get(QUERY_UUID_KEY)) ;
+			//we want each service to have a unique identifier
+			url += "/" + System.nanoTime(); //$NON-NLS-1$
 		}
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);

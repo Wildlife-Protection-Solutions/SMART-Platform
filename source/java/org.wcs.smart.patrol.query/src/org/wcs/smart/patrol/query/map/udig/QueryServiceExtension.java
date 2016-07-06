@@ -39,14 +39,13 @@ import org.wcs.smart.util.UuidUtils;
  * @since 1.0.0
  */
 public class QueryServiceExtension implements ServiceExtension {
+	
     public static final String KEY = "org.wcs.smart.udig.catalog.SmartQueryService"; //$NON-NLS-1$
    
     /**
      * Service parameter conservation area uuid key
      */
-    public static final String QUERY_UUID_KEY = "queryuuid"; //$NON-NLS-1$
-    public static final String DATE_KEY = "date"; //$NON-NLS-1$
-   
+    public static final String QUERY_UUID_KEY = "queryuuid"; //$NON-NLS-1$ 
 	
     /**
      * @see org.locationtech.udig.catalog.ServiceExtension#createService(java.net.URL, java.util.Map)
@@ -55,7 +54,7 @@ public class QueryServiceExtension implements ServiceExtension {
 	public IService createService(URL id, Map<String, Serializable> params) {
         if (params == null)
             return null;
-        throw new UnsupportedOperationException("Cannot create query service from parameters");
+        throw new UnsupportedOperationException("Cannot create query service from parameters"); //$NON-NLS-1$
 	}
 
 	/**
@@ -81,16 +80,11 @@ public class QueryServiceExtension implements ServiceExtension {
 		int pos = quuid.lastIndexOf('/');
 		if (pos < 0) pos = 0;
 		
-		int endpos = quuid.indexOf('#');
-		if (endpos < 0 ) endpos = quuid.length();
-		
-		quuid = quuid.substring(pos, endpos);
-		String date = quuid.substring(endpos);
+		quuid = quuid.substring(pos);
 		
 		UUID buuid = UuidUtils.stringToUuid(quuid);
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(QUERY_UUID_KEY, buuid);
-		params.put(DATE_KEY, date);
 		return params;
 	}
 
@@ -106,9 +100,10 @@ public class QueryServiceExtension implements ServiceExtension {
 			url += System.nanoTime();
 		}else{
 			url += UuidUtils.uuidToString((UUID)params.get(QUERY_UUID_KEY)) ;
+			//we want each service to have a unique identifier
+			url += "/" + System.nanoTime(); //$NON-NLS-1$
 		}
 		
-		url += "/" + params.get(DATE_KEY); //$NON-NLS-1$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

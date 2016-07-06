@@ -364,6 +364,30 @@
                </with>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/compound_query.png"
+               label="New Compound Query..."
+               style="pulldown"
+               tooltip="Creates a new compound query">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="compound">
+            </parameter>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <adapt
+                           type="org.wcs.smart.query.model.IMappableQueryType">
+                     </adapt>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
          <separator
                name="org.wcs.smart.query.separator2"
                visible="true">

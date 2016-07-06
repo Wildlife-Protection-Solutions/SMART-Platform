@@ -197,6 +197,17 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String COMPOUND_ICON = "org.wcs.smart.query.compoundquery"; //$NON-NLS-1$
 	
+	/**
+	 * Apply all dates
+	 */
+	public static final String DATE_APPLY_ALL = "org.wcs.smart.query.dateapplyall"; //$NON-NLS-1$
+	
+	/**
+	 * clear style icon
+	 */
+	public static final String CLEAR_STYLE = "org.wcs.smart.query.clearstyle"; //$NON-NLS-1$
+	
+	
 	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
 	private QueryEmployeeListener employeeListener = new QueryEmployeeListener();
 	
@@ -287,6 +298,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(END_HOUR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/endhour.png"));//$NON-NLS-1$
 		reg.put(TABLE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/table_icon.png"));//$NON-NLS-1$)
 		reg.put(COMPOUND_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/compound_query.png"));//$NON-NLS-1$)
+		reg.put(DATE_APPLY_ALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/date_apply_all.png")); //$NON-NLS-1$
+		reg.put(CLEAR_STYLE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/clearstyle.png")); //$NON-NLS-1$
 		super.initializeImageRegistry(reg);
 		
 	}

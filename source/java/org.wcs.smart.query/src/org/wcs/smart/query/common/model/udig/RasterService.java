@@ -60,6 +60,7 @@ import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -111,6 +112,8 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 			url += System.nanoTime();
 		}else{
 			url += UuidUtils.uuidToString(queryId) ;
+			//we want each service to have a unique identifier
+			url += "/" + System.nanoTime(); //$NON-NLS-1$
 		}
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
@@ -120,6 +123,10 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 		}
 	}
 	
+	@Override
+	public Query getQuery(){
+		return query;
+	}
 	
 	/**
      * Finds or creates a GeoTiffFormatFactorySpi.

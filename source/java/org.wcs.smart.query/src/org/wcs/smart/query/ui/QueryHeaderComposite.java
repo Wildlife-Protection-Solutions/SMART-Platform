@@ -106,7 +106,7 @@ public class QueryHeaderComposite extends Composite {
 		gl.verticalSpacing = 0;
 		setLayout(gl);
 		lblType = toolkit.createLabel(this, ""); //$NON-NLS-1$
-		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		lblType.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 3, 1));
 		FontData[] fd = lblType.getFont().getFontData();
 		fd[0].setHeight(fd[0].getHeight()-1);
 		final Font f = new Font(lblType.getDisplay(), fd[0]);

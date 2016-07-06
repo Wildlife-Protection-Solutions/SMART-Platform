@@ -85,14 +85,13 @@ public class QueryService extends IService implements IQueryService {
 		this.prjProvider = prjProvider;
 		this.params = new HashMap<String, Serializable>();
 		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
-		this.params.put(QueryDataSourceFactory.DATE_UUID.key, query.getDateFilter().asString());
-		this.url = QueryServiceExtension.createURL(this.params);
-		
+		this.url = QueryServiceExtension.createURL(this.params);		
 	}
 
 	/**
 	 * @return the query 
 	 */
+	@Override
 	public Query getQuery(){
 		return this.query;
 	}
@@ -136,6 +135,8 @@ public class QueryService extends IService implements IQueryService {
 	 */
 	@Override
 	public URL getIdentifier() {
+		//if we create a new service it needs to have a unique
+		//identifier
 		return this.url;
 	}
 

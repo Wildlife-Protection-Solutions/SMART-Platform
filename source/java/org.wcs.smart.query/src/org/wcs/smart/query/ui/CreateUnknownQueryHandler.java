@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.query.ui;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.inject.Named;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -31,13 +35,20 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.CompoundMapQuery;
+import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
+import org.wcs.smart.query.compound.ui.CompoundQueryEditor;
+import org.wcs.smart.query.event.QueryEventManager;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.newwizard.NewQueryWizard;
@@ -55,7 +66,8 @@ public class CreateUnknownQueryHandler {
 	private static final String QUERY_TYPE_KEY = "org.wcs.smart.query.type"; //$NON-NLS-1$
 	
 	@Execute
-	public void execute(@Optional @Named(QUERY_TYPE_KEY) String queryType, Shell activeShell, IEclipseContext context){
+	public void execute(@Optional @Named(QUERY_TYPE_KEY) String queryType, Shell activeShell, 
+			IEclipseContext context){
 		
 		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), 
 				context.get(MWindow.class));
@@ -63,18 +75,51 @@ public class CreateUnknownQueryHandler {
 		if (queryType != null){
 			IQueryType type = QueryTypeManager.INSTANCE.findQueryType(queryType);
 			if (type != null){
+				
+				if (type.getKey().equalsIgnoreCase(CompoundMapQuery.TYPE_KEY)){
+				
+					List<QueryEditorInput> queries = new ArrayList<QueryEditorInput>();
+					ESelectionService service = context.get(ESelectionService.class);
+					if (service.getSelection() instanceof StructuredSelection){
+						StructuredSelection sel = (StructuredSelection)service.getSelection();
+						for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+							Object select = (Object) iterator.next();
+							if (select instanceof QueryEditorInput &&
+									((QueryEditorInput)select).getType() instanceof IMappableQueryType){
+								queries.add((QueryEditorInput)select);
+							}
+							
+						}
+					}
+					if (queries.size() > 0){
+						IEditorPart part = createQuery(type);
+						if (part instanceof CompoundQueryEditor){
+							CompoundMapQuery query = (CompoundMapQuery) ((CompoundQueryEditor) part).getQueryProxy().getQuery();
+							if (query.getLayers() == null) query.setLayers(new ArrayList<CompoundMapQueryLayer>());
+							int order = 0;
+							for (QueryEditorInput in : queries){
+								CompoundMapQueryLayer layer = new CompoundMapQueryLayer();
+								layer.setMapQuery(query);
+								layer.setOrder(order++);
+								layer.setQueryType(in.getType().getKey());
+								layer.setQueryUuid(in.getUuid());
+								query.getLayers().add(layer);
+							}
+							((CompoundQueryEditor)part).reparseQuery();
+							return;
+						}
+					}
+				}
+				
 				createQuery(type);
 				return;
 			}
 		}
 		createUnknownQuery(activeShell);
-		
 	}
-
 	
-	
-	private void createQuery(IQueryType qtype){
-		(new OpenQueryHandler()).execute(new StructuredSelection(new QueryEditorInput(qtype)));
+	private IEditorPart createQuery(IQueryType qtype){
+		return (new OpenQueryHandler()).execute(new StructuredSelection(new QueryEditorInput(qtype)));
 	}
 
 	

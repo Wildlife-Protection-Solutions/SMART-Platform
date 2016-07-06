@@ -24,12 +24,14 @@ package org.wcs.smart.query.ui.editor;
 import java.text.MessageFormat;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 
@@ -150,6 +152,9 @@ public class QueryEditorInput implements IEditorInput {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
+		if (adapter == IMappableQueryType.class && type instanceof IMappableQueryType){
+			return type;
+		}
 		return null;
 	}
 

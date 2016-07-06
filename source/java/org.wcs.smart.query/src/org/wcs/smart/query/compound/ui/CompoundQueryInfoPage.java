@@ -73,8 +73,11 @@ public class CompoundQueryInfoPage extends EditorPart  {
 	
 	private Form frmQueryArea;
 	private QueryHeaderComposite compQueryName;
+	private Composite runQueryComp;
 	
 	private TableViewer resultsTable;
+	private Hyperlink runQueryLink ;
+	private Composite mainArea;
 	
 	/**
 	 * Creates new editor page
@@ -215,7 +218,7 @@ public class CompoundQueryInfoPage extends EditorPart  {
 		Composite queryProp = toolkit.createComposite(frmQueryArea.getBody(), SWT.NONE);
 		layout = new GridLayout(2, false);
 		layout.marginWidth = 0;
-		layout.marginHeight = 10;
+		layout.marginHeight = 5;
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		layout.marginRight = 5;
@@ -237,8 +240,17 @@ public class CompoundQueryInfoPage extends EditorPart  {
 			}
 		});
 		
+		// --- Stack Panel ---
+				// Here we either show the table or the progress dialog
+		Composite bits = toolkit.createComposite(frmQueryArea.getBody(), SWT.NONE);
+		GridLayout gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
+		bits.setLayout(gl);
+		bits.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite mainArea = toolkit.createComposite(frmQueryArea.getBody());
+		runQueryComp = createRunQueryComp(bits, toolkit);
+			
+		mainArea = toolkit.createComposite(bits);
 		
 		mainArea.setLayout(new GridLayout());
 		mainArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -343,6 +355,7 @@ public class CompoundQueryInfoPage extends EditorPart  {
                 }
             }
 		});
+		mainArea.setVisible(false);
 	}
 	
 	public void refreshTable(){
@@ -370,6 +383,12 @@ public class CompoundQueryInfoPage extends EditorPart  {
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
+				if (!runQueryComp.isDisposed()){
+					runQueryComp.dispose();
+					mainArea.setVisible(true);
+					mainArea.getParent().layout(true, true);
+				}
+				
 				disposeItems();
 				resultsTable.setInput(items);
 				resultsTable.refresh();		
@@ -389,6 +408,28 @@ public class CompoundQueryInfoPage extends EditorPart  {
 				parentEditor.setDirty(true);
 			}});
 	}
+	
+	/**
+	 * Creates the initial composite that prompts users
+	 * to run query.
+	 * 
+	 * @param parent
+	 * @return
+	 */
+	private Composite createRunQueryComp(Composite parent, FormToolkit toolkit){
+		Composite main = toolkit.createComposite(parent, SWT.NONE);
+		main.setLayout(new GridLayout(1, false));
+		
+		runQueryLink = toolkit.createHyperlink(main, Messages.QueryEditorTableContent_RunQueryLink, SWT.NONE);
+		runQueryLink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				parentEditor.executeQuery();
+			}
+		});
+		return main;
+	}
+	
 	
 	
 }

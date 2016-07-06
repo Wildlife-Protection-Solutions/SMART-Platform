@@ -31,8 +31,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.locationtech.udig.catalog.CatalogPlugin;
-import org.locationtech.udig.catalog.ICatalog;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.ILayer;
@@ -49,6 +47,7 @@ import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
+import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.QueryStyleParser;
@@ -61,10 +60,11 @@ import org.wcs.smart.query.model.StyledQuery;
  * @author Emily
  *
  */
-public class CompoundQueryLayerJob extends Job{
+public class RunCompoundQueryLayerJob extends Job{
 	
 	private QueryItem item;
 	private CompoundQueryEditor mapEditor;
+	private MapLayerTracker tracker;
 	
 	private ILayerListener styleListener = new ILayerListener() {
 		
@@ -96,30 +96,23 @@ public class CompoundQueryLayerJob extends Job{
 		}
 	};
 	
-	public CompoundQueryLayerJob(QueryItem item, CompoundQueryEditor mapEditor){
+	public RunCompoundQueryLayerJob(QueryItem item, CompoundQueryEditor mapEditor, MapLayerTracker tracker){
 		super(MessageFormat.format(Messages.CompoundQueryLayerJob_JobName, item.getQueryName()));
 		this.item = item;
+		this.tracker = tracker;
 		this.mapEditor = mapEditor;
 	}
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		
 		Session s = HibernateManager.openSession();
 		try{
 			item.getQuery().setDateFilter(item.getCompoundMapQueryLayer().getDateFilterAsFilter());
 			ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(monitor, item.getProgressBar());
 			IQueryResult results = QueryExecutor.INSTANCE.executeQuery(item.getQuery(), s, wrapper);
 			item.getQuery().setCachedResults(results);
-			item.setStatus(QueryItem.Status.DONE);			
-			if (item.getQueryType() instanceof IMappableQueryType){
-				IService qService = (IService)((IMappableQueryType)item.getQueryType()).createQueryService(item.getQuery(), mapEditor);
-//				CatalogPlugin.getDefault().getLocalCatalog().remove(service);
-				try{
-					addLayers(qService, monitor);
-				}catch (Exception ex){
-					ex.printStackTrace();
-				}
-			}
+			
 			if (results instanceof IPagedQueryResultSet){
 				item.setTotalCount(((IPagedQueryResultSet) results).getItemCount());
 			}else if (results instanceof MemoryQueryResult<?>){
@@ -127,31 +120,53 @@ public class CompoundQueryLayerJob extends Job{
 			}else{
 				item.setTotalCount(-1);
 			}
+			item.setStatus(QueryItem.Status.DONE);
+			
 		}catch(Exception ex){
 			item.setStatus(QueryItem.Status.ERROR);
 			item.setErrorMessage(ex.getMessage());
-			ex.printStackTrace();
+			QueryPlugIn.log(ex.getMessage(), ex);
+			
 		}finally{
 			s.close();
+		}
+		try{		
+			if (item.getQueryType() instanceof IMappableQueryType){
+				IQueryService service = tracker.getService(item.getQuery().getUuid());
+//				if (service != null){
+//					//TODO: we might want to update the style here as well
+//					service.refresh(item.getQuery(), monitor);
+//				}else{
+					IService qService = (IService)((IMappableQueryType)item.getQueryType()).createQueryService(item.getQuery(), mapEditor);
+					tracker.setService(item.getQuery(), (IQueryService) qService);
+					addLayers(qService, tracker, monitor);
+//				}
+			}
+		}catch (Exception ex){
+			QueryPlugIn.displayLog(MessageFormat.format("Error creating map layers for: {0}",  item.getQueryName()), ex);
 		}
 		
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
 				mapEditor.refreshQueryTable();
+				mapEditor.getMap().getRenderManager().refresh(null);
 			}
 			
 		});
 		return Status.OK_STATUS;
 	}
 	
-	private void addLayers(IService service, IProgressMonitor monitor) throws IOException{
+	private void addLayers(IService service, MapLayerTracker tracker, IProgressMonitor monitor) throws IOException{
 		List<IGeoResource> layers = (List<IGeoResource>) service.resources(monitor);
 		
 		AddLayersCommand command = new AddLayersCommand(layers) {
 			@Override
 			public void run(IProgressMonitor monitor) throws Exception {
 				super.run(monitor);
+				for (ILayer layer : getLayers()){
+					((Layer)layer).setName(item.getQueryName() + " (" + layer.getName() + ")");
+				}
 				if (item.getQuery() instanceof StyledQuery){
 					String styleString = item.getCompoundMapQueryLayer().getQueryStyle();
 					if (styleString == null){
@@ -176,7 +191,7 @@ public class CompoundQueryLayerJob extends Job{
 					//add style listeners
 					for (final ILayer layer : getLayers()){
 						layer.addListener(styleListener);
-						item.addLayer(layer);
+						tracker.addLayer((IQueryService) service, layer);
 					}
 				}
 			}

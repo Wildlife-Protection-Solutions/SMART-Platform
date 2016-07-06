@@ -124,8 +124,6 @@ public class QueryDateFilterComposite extends Composite {
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
-		layout.marginTop = 0;
-		layout.marginBottom = 0;
 		setLayout(layout);
 		
 		createComponent();

@@ -469,6 +469,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 				}
 				for (Category cat: dm.getActiveCategories()){
 					cat.getName();
+//					visitCategory(cat);
 				}
 				for (Attribute att: dm.getAttributes()){
 					att.getAggregations().size();

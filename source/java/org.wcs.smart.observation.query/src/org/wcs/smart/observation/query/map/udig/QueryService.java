@@ -98,6 +98,7 @@ public class QueryService extends IService implements IQueryService {
 	/**
 	 * @return the query 
 	 */
+	@Override
 	public Query getQuery(){
 		return this.query;
 	}

@@ -24,6 +24,7 @@ package org.wcs.smart.query.common.model.udig;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.query.model.Query;
 
 /**
  * Smart query service.  Any implementation must also implement
@@ -35,4 +36,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public interface IQueryService {
 
 	public void refresh(IProgressMonitor monitor) throws IOException;
+	
+	public Query getQuery();
 }
