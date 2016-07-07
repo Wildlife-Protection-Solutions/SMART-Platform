@@ -52,6 +52,11 @@ public class SurveyResultInfoProvider implements IQueryResultInfoProvider {
 	}
 
 	@Override
+	public boolean supportsCcaa() {
+		return false;
+	}
+	
+	@Override
 	public void doWork(Object resultItem) {
 		UUID missionUuid = null;
 		String missionId = null;

@@ -1060,6 +1060,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 				}
 				
 				ss.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
+				ss.updateName(SmartDB.getCurrentLanguage(), name);
 				ss.setName(name);
 			}
 			

@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -40,6 +44,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -175,21 +180,34 @@ public class SelectCaDialog extends TitleAreaDialog {
 		setTitle(Messages.SelectCaDialog_DialogTitle);
 		getShell().setText(Messages.SelectCaDialog_ShellTitle);
 		
+		caList.setInput(new String[]{Messages.SelectCaDialog_Loading});
 		
-		try {
-			List<ConservationArea> cas = HibernateManager
-					.findConservationAreas(SmartDB.getCurrentEmployee().getSmartUserId(),  SmartDB.getPlainTextPassword());
-			caList.setInput(cas);
-		} catch (Exception e) {
-			SmartPlugIn.log(e.getMessage(), e);
-		}
-		
-		caList.setAllChecked(false);
-		for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-			caList.setChecked(ca, true);
-		}
-		
-		
+		Job getCaJob = new Job("get ca list job"){ //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					List<ConservationArea> cas = HibernateManager
+							.findConservationAreas(SmartDB.getCurrentEmployee().getSmartUserId(),  SmartDB.getPlainTextPassword());
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							if (caList.getControl().isDisposed()) return;
+							caList.setInput(cas);
+							caList.setAllChecked(false);
+							for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+								caList.setChecked(ca, true);
+							}
+						}
+					});	
+				} catch (Exception e) {
+					SmartPlugIn.log(e.getMessage(), e);
+				}
+				return Status.OK_STATUS;
+			}
+			
+		};
+		getCaJob.setSystem(true);
+		getCaJob.schedule();
 		return comp;
 	}
 	

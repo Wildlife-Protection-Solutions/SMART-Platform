@@ -899,6 +899,7 @@ public class Messages extends NLS {
 	public static String SelectCaDialog_DeselectAllOption;
 	public static String SelectCaDialog_DialogTitle;
 	public static String SelectCaDialog_ErrorDialogtitle;
+	public static String SelectCaDialog_Loading;
 	public static String SelectCaDialog_SelectAllOption;
 	public static String SelectCaDialog_SelectLabel;
 	public static String SelectCaDialog_ShellTitle;
