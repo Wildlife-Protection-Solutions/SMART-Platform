@@ -22,9 +22,7 @@
 package org.wcs.smart.query.compound.ui;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,8 +31,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.project.ILayer;
-import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -71,12 +67,9 @@ public class RunCompoundQueryJob extends Job{
 	 * Disposes of all services added to map as part of running queries.
 	 */
 	public void dispose(){
-		for (UUID toRemove : mapLayerTracker.getQueries()){
-			IQueryService service = mapLayerTracker.getService(toRemove);
-			if (service != null){
-				CatalogPlugin.getDefault().getLocalCatalog().remove((IService)service);
-				((IService)service).dispose(null);
-			}
+		for (IQueryService service : mapLayerTracker.getServices()){
+			CatalogPlugin.getDefault().getLocalCatalog().remove((IService)service);
+			((IService)service).dispose(null);
 		}
 	}
 	
@@ -105,10 +98,15 @@ public class RunCompoundQueryJob extends Job{
 				IQueryType type =  QueryTypeManager.INSTANCE.findQueryType(layer.getQueryType());
 				//always reload query here so we have the latest query definition
 				Query q = QueryHibernateManager.getInstance().findQuery(s, layer.getQueryUuid(),type);
+				
+				//we want the ability to run with different date filters
+				//so we need to clone the query here
+				Query clone = q.clone(null);
+				clone.setId(q.getId());
 				if (q != null){
 					try{
-						//we want the ability to run with different date filters; so we need to clone the query here
-						QueryItem qi = new QueryItem(layer, q.clone(null), type);
+
+						QueryItem qi = new QueryItem(layer, clone, type);
 						qi.setStatus(QueryItem.Status.PROCESSING);
 						items.add(qi);
 					}catch (Exception ex){
@@ -124,21 +122,7 @@ public class RunCompoundQueryJob extends Job{
 		//that need to be removed from the map
 		//we don't reuse because the query object may have be updated
 		//with a new definition when reloaded previously
-		List<UUID> allItems = new ArrayList<UUID>(mapLayerTracker.getQueries());
-		for (UUID toRemove : allItems){
-			IQueryService service = mapLayerTracker.getService(toRemove);
-			if (service != null){
-				Collection<ILayer> layers = mapLayerTracker.getLayers(service);
-				if (layers != null){
-					DeleteLayersCommand cmd = new DeleteLayersCommand(layers.toArray(new ILayer[layers.size()]));
-					editor.getMap().executeSyncWithoutUndo(cmd);
-				}
-				CatalogPlugin.getDefault().getLocalCatalog().remove((IService)service);
-				((IService)service).dispose(monitor);
-			}
-				
-			mapLayerTracker.clearAll(toRemove);
-		}
+		mapLayerTracker.clearAll(editor.getMap(), monitor);
 		
 		//update table
 		editor.page1.setupTable(items);

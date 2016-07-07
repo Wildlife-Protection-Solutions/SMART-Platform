@@ -30,7 +30,7 @@ public class CompoundQueryDropFactory implements IDropItemFactory{
 		}
 		if (source instanceof QueryEditorInput){
 			QueryEditorInput in = (QueryEditorInput)source;
-			return new DropItem[]{ new QueryDropItem(in.getUuid(), in.getType(), in.getName())};
+			return new DropItem[]{ new QueryDropItem(in.getUuid(), in.getType(), in.getName() + " [" + in.getId() + "]")}; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return null;
 	}

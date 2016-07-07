@@ -23,13 +23,15 @@ package org.wcs.smart.query.compound.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.UUID;
+import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.query.common.model.udig.IQueryService;
-import org.wcs.smart.query.model.Query;
 
 /**
  * Tracks services and layers added to a map.
@@ -39,44 +41,34 @@ import org.wcs.smart.query.model.Query;
  */
 public class MapLayerTracker {
 
-	private HashMap<UUID, IQueryService> services;
-	private HashMap<IQueryService, Collection<ILayer>> layers;
+	private List<IQueryService> services;
+	private Collection<ILayer> layers;
 	
 	public MapLayerTracker(){
-		services = new HashMap<UUID, IQueryService>();
-		layers = new HashMap<IQueryService, Collection<ILayer>>();
-	}
-	public void setService(Query query, IQueryService service){
-		services.put(query.getUuid(), service);
+		services = new ArrayList<IQueryService>();
+		layers = new ArrayList<ILayer>();
 	}
 	
-	public IQueryService getService(UUID query){
-		return services.get(query);
+	public void addService(IQueryService service){
+		services.add(service);
+	}
+
+	public Collection<IQueryService> getServices(){
+		return this.services;
 	}
 	
-	public Set<UUID> getQueries(){
-		return services.keySet();
+	public void clearAll(Map map, IProgressMonitor monitor){
+		DeleteLayersCommand cmd = new DeleteLayersCommand(layers.toArray(new ILayer[layers.size()]));
+		map.sendCommandASync(cmd);
 		
-	}
-	
-	public void clearAll(UUID queryUuid){
-		IQueryService s = services.get(queryUuid);
-		if (s != null){
-			layers.remove(s);
+		layers.clear();
+		for (IQueryService s : services){
+			CatalogPlugin.getDefault().getLocalCatalog().remove((IService)s);
+			((IService)s).dispose(monitor);
 		}
-		services.remove(queryUuid);
-		
+		services.clear();
 	}
-	public void addLayer(IQueryService service, ILayer layer){
-		Collection<ILayer> ls = layers.get(service);
-		if (ls == null){
-			ls = new ArrayList<ILayer>();
-			layers.put(service, ls);
-		}
-		ls.add(layer);
-	}
-	
-	public Collection<ILayer> getLayers(IQueryService service){
-		return layers.get(service);
+	public void addLayer(ILayer layer){
+		layers.add(layer);
 	}
 }

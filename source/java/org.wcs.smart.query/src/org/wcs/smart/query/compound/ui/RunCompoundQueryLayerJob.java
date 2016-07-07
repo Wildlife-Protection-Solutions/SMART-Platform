@@ -145,7 +145,7 @@ public class RunCompoundQueryLayerJob extends Job{
 			if (item.getQueryType() instanceof IMappableQueryType){
 				//always create new service as query object will have changed
 				IService qService = (IService)((IMappableQueryType)item.getQueryType()).createQueryService(item.getQuery(), mapEditor);
-				tracker.setService(item.getQuery(), (IQueryService) qService);
+				tracker.addService((IQueryService) qService);
 				addLayers(qService, tracker, monitor);
 			}
 		}catch (Exception ex){
@@ -197,7 +197,7 @@ public class RunCompoundQueryLayerJob extends Job{
 					//add style listeners
 					for (final ILayer layer : getLayers()){
 						layer.addListener(styleListener);
-						tracker.addLayer((IQueryService) service, layer);
+						tracker.addLayer(layer);
 					}
 				}
 			}

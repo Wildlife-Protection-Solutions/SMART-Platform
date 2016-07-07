@@ -36,8 +36,11 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryEventManager;
@@ -156,6 +159,16 @@ public class QueryListItemPanel extends AbstractQueryItemPanel{
 			}
 		});
 		queryList.setInput(Messages.QueryListView_LoadingLabel);
+		
+		
+		Button btnAdd = new Button(main, SWT.PUSH);
+		btnAdd.setText(Messages.QueryListItemPanel_AddToQuery);
+		btnAdd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addQueryItem((IStructuredSelection)queryList.getSelection());
+			}
+		});
 		
 		loadQueriesJob.schedule();
 	

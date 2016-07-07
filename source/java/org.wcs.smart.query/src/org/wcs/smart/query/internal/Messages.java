@@ -338,6 +338,7 @@ public class Messages extends NLS {
 	public static String QueryListDialog_LoadingLabel;
 	public static String QueryListDialog_Message;
 	public static String QueryListDialog_Title;
+	public static String QueryListItemPanel_AddToQuery;
 	public static String QueryListView_LoadingLabel;
 	public static String QueryListView_LoadQueryJobName;
 	public static String QueryListViewContentProvider_LoadingLabel;
