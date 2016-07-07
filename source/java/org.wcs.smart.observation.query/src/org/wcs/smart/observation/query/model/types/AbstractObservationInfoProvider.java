@@ -88,5 +88,9 @@ public abstract class AbstractObservationInfoProvider implements IQueryResultInf
 				ERROR_STR,message);
 	}
 
+	@Override
+	public boolean supportsCcaa() {
+		return false;
+	}
 
 }

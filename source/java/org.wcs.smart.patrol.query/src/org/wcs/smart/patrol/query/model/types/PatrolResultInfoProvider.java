@@ -51,6 +51,11 @@ public class PatrolResultInfoProvider implements IQueryResultInfoProvider {
 	}
 
 	@Override
+	public boolean supportsCcaa() {
+		return false;
+	}
+	
+	@Override
 	public void doWork(Object resultItem) {
 		if (resultItem instanceof PatrolQueryResultItem) {
 			PatrolQueryResultItem it = (PatrolQueryResultItem)resultItem;

@@ -50,6 +50,11 @@ public class IntellInfoProvider implements IQueryResultInfoProvider {
 	}
 
 	@Override
+	public boolean supportsCcaa() {
+		return false;
+	}
+	
+	@Override
 	public void doWork(Object resultItem) {
 		if (resultItem instanceof IntelligenceRecordResultItem){
 			UUID intellUuid = ((IntelligenceRecordResultItem)resultItem).getUuid();

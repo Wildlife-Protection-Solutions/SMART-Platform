@@ -60,6 +60,11 @@ public abstract class AbstractZoomToInfoProvider implements IQueryResultInfoProv
 		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ZOOM_IMAGE);
 	}
 	
+	@Override
+	public boolean supportsCcaa() {
+		return true;
+	}
+	
 	/**
 	 * Users must override.  Call showItem to display
 	 * a given waypoint.

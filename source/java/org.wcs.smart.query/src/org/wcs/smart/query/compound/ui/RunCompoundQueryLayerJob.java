@@ -53,7 +53,6 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.model.StyledQuery;
-import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**

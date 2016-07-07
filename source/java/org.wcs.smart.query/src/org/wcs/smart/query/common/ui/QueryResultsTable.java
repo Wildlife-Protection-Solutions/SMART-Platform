@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -136,21 +137,23 @@ public abstract class QueryResultsTable {
 
 			for (final IQueryResultInfoProvider item : queryType.getResultProviders()) {
 				// Create menu item
-				MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
-				if (item.getImage() != null){
-					miTest.setImage(item.getImage());
-				}
-				miTest.setText(item.getName());
-				miTest.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						IStructuredSelection selection = (IStructuredSelection) table.getSelection();
-						if (!selection.isEmpty()) {
-							Object x = selection.getFirstElement();
-							item.doWork(x);
-						}
+				if (!SmartDB.isMultipleAnalysis() || item.supportsCcaa()){
+					MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
+					if (item.getImage() != null){
+						miTest.setImage(item.getImage());
 					}
-				});
+					miTest.setText(item.getName());
+					miTest.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							IStructuredSelection selection = (IStructuredSelection) table.getSelection();
+							if (!selection.isEmpty()) {
+								Object x = selection.getFirstElement();
+								item.doWork(x);
+							}
+						}
+					});
+				}
 			}
 		}
 					
