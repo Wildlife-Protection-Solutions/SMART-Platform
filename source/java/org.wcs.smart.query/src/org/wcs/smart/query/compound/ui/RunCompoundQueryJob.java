@@ -107,7 +107,8 @@ public class RunCompoundQueryJob extends Job{
 				Query q = QueryHibernateManager.getInstance().findQuery(s, layer.getQueryUuid(),type);
 				if (q != null){
 					try{
-						QueryItem qi = new QueryItem(layer, q, type);
+						//we want the ability to run with different date filters; so we need to clone the query here
+						QueryItem qi = new QueryItem(layer, q.clone(null), type);
 						qi.setStatus(QueryItem.Status.PROCESSING);
 						items.add(qi);
 					}catch (Exception ex){
