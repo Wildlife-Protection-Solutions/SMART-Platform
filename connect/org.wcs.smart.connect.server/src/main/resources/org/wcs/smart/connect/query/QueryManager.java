@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.query;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.hibernate.internal.util.ReflectHelper;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
@@ -81,6 +84,7 @@ import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -123,6 +127,8 @@ public enum QueryManager {
 		
 		queryClasses.add(IntelligenceRecordQuery.class);
 		queryClasses.add(IntelligenceSummaryQuery.class);
+		
+		queryClasses.add(CompoundMapQuery.class);
 	}
 	
 	private static final IQueryEngine[] engines = new IQueryEngine[]{
@@ -273,6 +279,37 @@ public enum QueryManager {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 *Determines if the given query type has an associated query engine
+	 * 
+	 * @return true if the given query type has an associated query
+	 * engine
+	 */
+	public boolean hasQueryEngine(String queryTypeKey){
+		for (IQueryEngine e : engines){
+			if (e.canExecute(queryTypeKey)) return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @return array of all supported query type keys
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 */
+	public String[] getQueryTypes() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		String[] types = new String[queryClasses.size()];
+		for (int i = 0; i < queryClasses.size(); i ++){
+			Constructor<?> c = ReflectHelper.getDefaultConstructor(queryClasses.get(i));
+			Query q = (Query)c.newInstance( );
+			types[i] = q.getTypeKey();
+		}
+		return types;
 	}
 	
 	/**

@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.CsvExporter;
@@ -63,11 +64,25 @@ public class QueryServlet extends HttpServlet {
 				{ShpExporter.FORMAT_KEY, ShpExporter.getName(request.getLocale())},
 				{TiffRasterExporter.FORMAT_KEY, TiffRasterExporter.getName(request.getLocale())}};
 		
+		
+		List<String> executableQueryTypes = new ArrayList<String>();
+		try{
+			for (String type : QueryManager.INSTANCE.getQueryTypes()){
+				if (QueryManager.INSTANCE.hasQueryEngine(type)){
+					executableQueryTypes.add(type.toLowerCase());
+				}
+			}
+		}catch (Exception ex){
+			//TODO: log me
+			ex.printStackTrace();
+		}
+		
 		//date filters with name
 		request.setAttribute("datefilters", dateFilters); //$NON-NLS-1$
 		//date filters associated with query types
 		request.setAttribute("qdatefilters", QueryManager.DATE_FILTERS); //$NON-NLS-1$
 		request.setAttribute("exporters", exporters); //$NON-NLS-1$
+		request.setAttribute("executabletypes", executableQueryTypes.toArray(new String[executableQueryTypes.size()])); //$NON-NLS-1$
 		request.setAttribute("search", request.getParameter("search")); //$NON-NLS-1$ //$NON-NLS-2$
 		request.getRequestDispatcher("/WEB-INF/query.jsp").forward(request, response); //$NON-NLS-1$
 	}

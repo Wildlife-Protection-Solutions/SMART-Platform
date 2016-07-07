@@ -71,6 +71,10 @@ window.onload = function(){
 	
 }
 
+function canExecute(queryType){
+	return executeableTypes.indexOf(queryType.toLowerCase())>=0;
+}
+
 function selectCustom(){
 	if (isDateChanging) return;
 	var selectdiv = document.getElementById("defineddates");
@@ -202,32 +206,39 @@ function createQueryTable(){
 		ele.parentElement.removeChild(ele);
 	}
 	var drawnRowCount = 0;
-	var selectedCa = document.getElementById('caselect').value; 
+	var selectedCa = document.getElementById('caselect').value;
+	
+	var hide = document.getElementById('qhideexe').checked;
  	for (var i = 0; i < queries.length; i ++){
  		if(selectedCa == 'allcas' || selectedCa == queries[i].caUuid){
- 		 if(search == "" || isFoundInRow(queries[i]) ){
- 			drawnRowCount++;
-	 		var row = tableCreateRow(parent, 
-	 				[queries[i].conservationArea, queries[i].id, queries[i].name, queries[i].type,  null], 
-	 				"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 			if(search == "" || isFoundInRow(queries[i]) ){
+ 				if (!hide || canExecute(queries[i].typeKey)){
+ 			 
+ 					drawnRowCount++;
+ 					var row = tableCreateRow(parent, 
+ 							[queries[i].conservationArea, queries[i].id, queries[i].name, queries[i].type,  null], 
+ 							"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 	 		
-	 		row.dataset.queryuuid = queries[i].uuid;
-	 		row.dataset.queryname = queries[i].name;
-	 		row.dataset.querytype = queries[i].typeKey;
-	 		row.dataset.isccaa = queries[i].isCcaa;
+ 					row.dataset.queryuuid = queries[i].uuid;
+ 					row.dataset.queryname = queries[i].name;
+ 					row.dataset.querytype = queries[i].typeKey;
+ 					row.dataset.isccaa = queries[i].isCcaa;
 	 		
-	 		var runicon = document.createElement("a");
-	 		runicon.className="run-icon";
-	 		runicon.title= i18n("query.runquery");
-	 		runicon.onclick = showQueryOptions;
-	 		row.childNodes[4].appendChild(runicon);
+ 					if (canExecute(queries[i].typeKey)){
+ 						var runicon = document.createElement("a");
+ 						runicon.className="run-icon";
+ 						runicon.title= i18n("query.runquery");
+ 						runicon.onclick = showQueryOptions;
+ 						row.childNodes[4].appendChild(runicon);
+ 					}
 	 		
 //	 		var filter = qdatefilter[queries[i].typeKey][0];
 //	 		var csvlink = document.createElement("a");
 //	 		csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=" + filter;
 //	 		csvlink.innerHTML = "csv";
 //	 		row.childNodes[5].appendChild(csvlink);
- 		 }
+ 				}
+ 			}
  		}
  	}
  	

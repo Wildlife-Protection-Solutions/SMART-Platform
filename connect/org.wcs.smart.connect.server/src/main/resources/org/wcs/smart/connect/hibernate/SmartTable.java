@@ -133,6 +133,8 @@ import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
+import org.wcs.smart.query.common.model.CompoundMapQuery;
+import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.SummaryQuery;
@@ -177,6 +179,8 @@ public enum SmartTable {
 	CONNECTSERVER(ConnectServer.class, null),
 	CONNECTSERVEROPTION(ConnectServerOption.class, ".id.server.conservationArea"),
 	CONNECTUSER(ConnectUser.class, ".server.conservationArea"),
+	COMPOUNDMAPQUERY(CompoundMapQuery.class, null),
+	COMPOUNDMAPQUERYLAYER(CompoundMapQueryLayer.class, ".mapQuery.conservationArea"),
 	CONSERVATIONAREA(ConservationArea.class,".uuid"),
 	CYBERTRACKERPROPERTIESOPTION(CyberTrackerPropertiesOption.class, null),
 	CYBERTRACKERPROPERTIESPROFILE(CyberTrackerPropertiesProfile.class, null),

@@ -33,6 +33,12 @@
 				    ],
 				</c:forEach>
 				};
+		var executeableTypes = [
+			<c:forEach var="type" items="${executabletypes}">
+		    	'${type}',
+		    </c:forEach>
+		];
+		
 	</script>
 		
 	<title><fmt:message key="query.pagetitle"/></title>	
@@ -54,6 +60,9 @@
 	<select id="caselect" onchange="searchChanged()" style="max-width:24em">
 	<option value="allcas"><fmt:message key="query.allcas" /></option>
 	</select>
+</div>
+<div>
+<input type="checkbox" id="qhideexe" checked onchange="searchChanged()">Hide Non-executable Queries</input>
 </div>
 
 <div class="top-spacer"  style="margin-left: -20px" >
