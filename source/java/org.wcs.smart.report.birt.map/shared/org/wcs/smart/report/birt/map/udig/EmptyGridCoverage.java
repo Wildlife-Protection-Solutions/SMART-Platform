@@ -47,8 +47,8 @@ import org.opengis.parameter.GeneralParameterValue;
  */
 public class EmptyGridCoverage {
 
-	private static GridCoverage2D coverage;
-	private static GridCoverage2DReader reader;
+	private static volatile GridCoverage2D coverage;
+	private static volatile GridCoverage2DReader reader;
 	
 	private static Object LOCK = new Object();
 	

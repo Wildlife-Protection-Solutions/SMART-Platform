@@ -38,10 +38,10 @@ import org.wcs.smart.query.model.QueryColumn;
  *
  */
 public class IntelligenceQueryColumnCache {
-	private static IntelligenceQueryColumnCache instance = null;
+	private static volatile IntelligenceQueryColumnCache instance = null;
 	private static Object INSTANCE_LOCK = new Object();
 	
-	private QueryColumn[] fixedRecordColumns;
+	private volatile QueryColumn[] fixedRecordColumns;
 	
 	/**
 	 * 

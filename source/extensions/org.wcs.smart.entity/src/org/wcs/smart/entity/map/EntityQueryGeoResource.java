@@ -51,7 +51,7 @@ import org.wcs.smart.entity.internal.Messages;
  */
 public class EntityQueryGeoResource  extends IGeoResource {
 
-	private EntityQueryGeoResourceInfo info;
+	private volatile EntityQueryGeoResourceInfo info;
 	private URL url;
 	
 	

@@ -60,7 +60,7 @@ import org.wcs.smart.query.QueryDataModelManager;
 public class EntityTypeCcaaManager {
 
 	private final static Object LOCK = new Object();
-	private static EntityTypeCcaaManager instance;
+	private static volatile EntityTypeCcaaManager instance;
 	
 	private List<EntityType> mergedTypes;
 	

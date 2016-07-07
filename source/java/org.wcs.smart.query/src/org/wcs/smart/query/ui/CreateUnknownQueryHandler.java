@@ -47,7 +47,6 @@ import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.compound.ui.CompoundQueryEditor;
-import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
@@ -77,7 +76,9 @@ public class CreateUnknownQueryHandler {
 			if (type != null){
 				
 				if (type.getKey().equalsIgnoreCase(CompoundMapQuery.TYPE_KEY)){
-				
+					//specific to compound query if there are a bunch of query
+					//editors selected then we should create a new query and
+					//initialize it with the selected queries
 					List<QueryEditorInput> queries = new ArrayList<QueryEditorInput>();
 					ESelectionService service = context.get(ESelectionService.class);
 					if (service.getSelection() instanceof StructuredSelection){

@@ -45,7 +45,7 @@ public class BirtDataStore extends ContentDataStore{
 	private Name typeName;
 	private MapLayerInfo mapInfo;
 	
-	private ContentFeatureSource source;
+	private volatile ContentFeatureSource source;
 	private OdaDataSetHandle dataSetHandle;
 	/**
 	 * Creates a new data source from the give query.

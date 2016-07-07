@@ -34,7 +34,6 @@ import javax.persistence.Transient;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;

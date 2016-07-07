@@ -214,7 +214,10 @@ public enum QueryTypeManager {
 							isValid = true;
 						}
 					}
-					executors.put(qType, (Class<? extends IQueryEngine>)e.createExecutableExtension("executor").getClass()); //$NON-NLS-1$
+					if (e.getAttribute("executor") != null && !e.getAttribute("executor").isEmpty()){ //$NON-NLS-1$ //$NON-NLS-2$
+						executors.put(qType, (Class<? extends IQueryEngine>)e.createExecutableExtension("executor").getClass()); //$NON-NLS-1$
+					}
+					
 					if (isValid){
 						aTypes.add(qType);
 					

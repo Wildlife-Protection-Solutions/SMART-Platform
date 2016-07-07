@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.e4.ui.model.application.ui.menu.impl.ToolBarImpl;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -33,7 +32,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -42,6 +40,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -181,7 +180,7 @@ public class QueryDropItem extends DropItem {
 		
 		ToolItem applyAll = new ToolItem(temp, SWT.PUSH  | SWT.FLAT );
 		applyAll.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.DATE_APPLY_ALL));
-		applyAll.setToolTipText("apply date filter to all layers");
+		applyAll.setToolTipText(Messages.QueryDropItem_dateapplyalltooltip);
 		applyAll.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				for (DropItem di : ((CompoundDefinitionPanel)getTargetPanel()).getItems()){
@@ -195,7 +194,7 @@ public class QueryDropItem extends DropItem {
 		
 		ToolItem clearStyle = new ToolItem(temp, SWT.PUSH  | SWT.FLAT );
 		clearStyle.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CLEAR_STYLE));
-		clearStyle.setToolTipText("clear style");
+		clearStyle.setToolTipText(Messages.QueryDropItem_clearstyletooltip);
 		clearStyle.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				mapLayer.setQueryStyle(null);

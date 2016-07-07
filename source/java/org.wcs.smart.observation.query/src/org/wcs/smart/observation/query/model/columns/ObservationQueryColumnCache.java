@@ -38,7 +38,7 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class ObservationQueryColumnCache {
 
-	private static ObservationQueryColumnCache instance = null;
+	private static volatile ObservationQueryColumnCache instance = null;
 	private static Object INSTANCE_LOCK = new Object();
 	
 	public static ObservationQueryColumnCache getInstance(){
@@ -52,9 +52,9 @@ public class ObservationQueryColumnCache {
 		return instance;
 	}
 	
-	private QueryColumn[] queryColumns = null;
-	private QueryColumn[] waypointQueryColumns = null;
-	private QueryColumn[] gridQueryColumns = null;
+	private volatile QueryColumn[] queryColumns = null;
+	private volatile QueryColumn[] waypointQueryColumns = null;
+	private volatile QueryColumn[] gridQueryColumns = null;
 	
 	private final Object GRIDLOCK = new Object();
 	private final Object OBSERVATIONLOCK = new Object();

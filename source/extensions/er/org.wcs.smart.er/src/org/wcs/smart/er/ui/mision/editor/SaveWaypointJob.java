@@ -48,7 +48,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
  *
  */
 public class SaveWaypointJob extends Job {
-	private Collection<SurveyWaypoint> waypoints;
+	private volatile Collection<SurveyWaypoint> waypoints;
 
 	public SaveWaypointJob() {
 		super(Messages.SaveWaypointJob_Title);

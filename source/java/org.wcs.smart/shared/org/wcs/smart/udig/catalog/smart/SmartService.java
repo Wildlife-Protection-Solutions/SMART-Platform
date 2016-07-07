@@ -60,7 +60,7 @@ public class SmartService extends ISessionService {
 	private Map<String, Serializable> params;
 	private URL url;
 	
-	private List<SmartGeoResource> members;
+	private volatile  List<SmartGeoResource> members;
 	private SmartDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	

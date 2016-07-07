@@ -7,8 +7,25 @@ import org.wcs.smart.query.model.Query;
 
 public interface IQueryEngine {
 	
+	/**
+	 * Executes the query with the set of parameters provided.
+	 * Parameters required are specific to query type and engine and
+	 * may include items such as current local, hibernate database session
+	 * etc.
+	 * 
+	 * @param query
+	 * @param parameters
+	 * @return
+	 * @throws SQLException
+	 */
 	public IQueryResult executeQuery(Query query, HashMap<String, Object> parameters) throws SQLException;
 	
+	/**
+	 * Returns true if the engine can execute the given
+	 * query type.  False otherwise
+	 * @param queryTypeKey
+	 * @return
+	 */
 	public boolean canExecute(String queryTypeKey);
 	
 	/**

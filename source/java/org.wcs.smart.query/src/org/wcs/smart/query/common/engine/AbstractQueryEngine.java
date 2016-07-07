@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -60,6 +61,8 @@ import org.wcs.smart.util.UuidUtils;
 public abstract class AbstractQueryEngine implements IQueryEngine {
 
 	protected Map<String, Object> currentParameters = new HashMap<String, Object>();
+
+	private static AtomicLong tableCnter = new AtomicLong();
 	
 	/**
 	 * Maps database tables to a prefix to use in the query.
@@ -119,8 +122,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * 
 	 * @return
 	 */
-	public String createTempTableName(){
-		return "query_temp_" + System.nanoTime(); //$NON-NLS-1$
+	public synchronized String createTempTableName(){
+		return "query_temp_" + tableCnter.incrementAndGet();//$NON-NLS-1$ 
 	}
 
 	
@@ -262,6 +265,13 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		currentParameters.clear();
 	}
 	
+	/**
+	 * Users must close the prepared statement when they are done with it.
+	 * @param connection
+	 * @param query
+	 * @return
+	 * @throws SQLException
+	 */
 	public PreparedStatement parseQueryString(Connection connection, String query) throws SQLException{
 		NamedPreparedStatement pp = new NamedPreparedStatement(connection, query);
 		StringBuilder log = new StringBuilder();

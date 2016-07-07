@@ -52,7 +52,7 @@ public class FixedEntityGeoResource extends IGeoResource {
 	private URL url = null;
 	protected String entityTypeKey;
 	protected String entityName;
-	private FixedEntityGeoResourceInfo info;
+	private volatile FixedEntityGeoResourceInfo info;
 	
 	public FixedEntityGeoResource(FixedEntityService service, String entityName, String entityTypeKey ){
 		this.service = service;

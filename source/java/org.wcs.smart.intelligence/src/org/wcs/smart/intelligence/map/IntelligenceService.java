@@ -52,7 +52,7 @@ public class IntelligenceService extends IService{
 	private Map<String, Serializable> params;
 	private URL url;
 	
-	private List<IntelligenceGeoResource> members;
+	private volatile List<IntelligenceGeoResource> members;
 	private IntelligenceDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	private Intelligence intelligence = null;

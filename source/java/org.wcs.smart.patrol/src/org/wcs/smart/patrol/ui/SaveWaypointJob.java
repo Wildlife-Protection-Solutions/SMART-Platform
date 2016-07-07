@@ -49,7 +49,8 @@ import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
  *
  */
 public class SaveWaypointJob extends Job {
-	private Collection<PatrolWaypoint> waypoints;
+	
+	private volatile Collection<PatrolWaypoint> waypoints;
 
 	public SaveWaypointJob() {
 		super(Messages.PatrolEditor_SaveWaypoints_JobName);

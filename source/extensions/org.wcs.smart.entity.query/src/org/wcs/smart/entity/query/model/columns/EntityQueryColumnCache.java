@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.entity.query.model.columns;
 
 import java.text.Collator;
@@ -30,13 +51,18 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
+/**
+ * Entity query column cache
+ * @author Emily
+ *
+ */
 public class EntityQueryColumnCache {
-	private static EntityQueryColumnCache instance = null;
-	private static Object INSTANCE_LOCK = new Object();
+	
+	private static volatile EntityQueryColumnCache instance = null;
 
 	public static EntityQueryColumnCache getInstance() {
 		if (instance == null) {
-			synchronized (INSTANCE_LOCK) {
+			synchronized (EntityQueryColumnCache.class) {
 				if (instance == null) {
 					instance = new EntityQueryColumnCache();
 				}
@@ -45,9 +71,9 @@ public class EntityQueryColumnCache {
 		return instance;
 	}
 
-	private QueryColumn[] queryColumns = null;
-	private QueryColumn[] waypointQueryColumns = null;
-	private QueryColumn[] gridQueryColumns = null;
+	private volatile QueryColumn[] queryColumns = null;
+	private volatile QueryColumn[] waypointQueryColumns = null;
+	private volatile QueryColumn[] gridQueryColumns = null;
 
 	private final Object GRIDLOCK = new Object();
 	private final Object OBSERVATIONLOCK = new Object();

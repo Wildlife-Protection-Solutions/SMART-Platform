@@ -43,7 +43,7 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
  */
 public class SurveyDesignLabelProvider extends LabelProvider {
 
-	private static SurveyDesignLabelProvider instance;
+	private static volatile SurveyDesignLabelProvider instance;
 	
 	public static SurveyDesignLabelProvider getInstance(){
 		synchronized (SurveyDesignLabelProvider.class) {

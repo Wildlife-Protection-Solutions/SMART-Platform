@@ -43,7 +43,7 @@ public enum BirtStyleManager {
 
 	INSTANCE;
 	
-	private List<IBirtLayerStyleProvider> styleProviders = null;
+	private volatile List<IBirtLayerStyleProvider> styleProviders = null;
 	
 	public StyleBlackboard getStyle(String extensionId, String queryText, Session session) throws Exception{
 		if (styleProviders == null){

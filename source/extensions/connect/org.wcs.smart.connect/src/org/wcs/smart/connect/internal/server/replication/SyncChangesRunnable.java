@@ -46,7 +46,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 public class SyncChangesRunnable implements IRunnableWithProgress{
 	
 	private final Object lock = new Object();
-	private Boolean isComplete = new Boolean(false);
+	private volatile boolean isComplete = false;
 	
 	
 	private boolean upload;

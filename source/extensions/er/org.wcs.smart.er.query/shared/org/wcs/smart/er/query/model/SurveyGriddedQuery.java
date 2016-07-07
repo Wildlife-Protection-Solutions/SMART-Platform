@@ -109,10 +109,6 @@ public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 	 */
 	public void setSurveyDesign(String key){
 		this.surveyDesignKey = key;
-//		synchronized (this) {
-//			this.queryColumns = null;	
-//		}
-		
 	}
 	
 	/**

@@ -60,7 +60,7 @@ public class SamplingUnitService extends IService {
 	
 	private Map<String, Serializable> params;
 	private URL url;	
-	private List<SamplingUnitGeoResource> members;
+	private volatile List<SamplingUnitGeoResource> members;
 	private SamplingUnitDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	

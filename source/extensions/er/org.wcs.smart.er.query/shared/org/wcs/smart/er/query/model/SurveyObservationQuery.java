@@ -125,10 +125,6 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 		}
 		this.surveyDesignKey = key;
 		this.surveyDesign = null;
-//		synchronized (this) {
-//			this.queryColumns = null;	
-//		}
-		
 	}
 	
 	/**

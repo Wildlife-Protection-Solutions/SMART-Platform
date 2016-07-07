@@ -61,13 +61,10 @@ public class QueryItem {
 	private Integer totalCnt = null;
 	private String errorMessage;
 	
-//	private List<ILayer> layers;
-	
 	public QueryItem(CompoundMapQueryLayer layer, Query query, IQueryType type){
 		this.layer = layer;
 		this.query = query;
 		this.type = type;
-//		this.layers = new ArrayList<ILayer>();
 	}
 	
 	public IQueryType getQueryType(){
@@ -82,25 +79,10 @@ public class QueryItem {
 	}
 	
 	public String getQueryName(){
-		return query.getName() + " [" + query.getId() + "]";
+		return query.getName() + " [" + query.getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-//	public void addLayer(ILayer layer){
-//		layers.add(layer);
-//	}
 	public void dispose(){
-//		if (layers != null && !layers.isEmpty()){
-//			try {
-//				IService service = layers.get(0).getGeoResource().resolve(IService.class, null);
-//				CatalogPlugin.getDefault().getLocalCatalog().remove(service);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			
-//			DeleteLayersCommand cmd = new DeleteLayersCommand(layers.toArray(new ILayer[layers.size()]));
-//			layers.get(0).getMap().executeSyncWithoutUndo(cmd);
-//		}
 		if (pbar != null){
 			pbar.dispose();
 			pbar = null;

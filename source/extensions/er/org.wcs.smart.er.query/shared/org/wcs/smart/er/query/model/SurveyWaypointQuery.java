@@ -122,10 +122,6 @@ public class SurveyWaypointQuery extends WaypointQuery implements ISurveyQuery{
 			return;
 		}
 		this.surveyDesignKey = key;
-//		synchronized (this) {
-//			this.queryColumns = null;	
-//		}
-		
 	}
 	
 	/**

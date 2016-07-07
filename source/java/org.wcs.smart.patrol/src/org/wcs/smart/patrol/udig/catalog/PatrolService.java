@@ -58,9 +58,8 @@ public class PatrolService extends IService {
 	public static final String SERVICE_ID = "org.wcs.smart.patrol.udig.catalog.patrolService"; //$NON-NLS-1$
 	private Map<String, Serializable> params;
 	private URL url;
-//	private Session session = null;
 	
-	private List<PatrolGeoResource> members;
+	private volatile List<PatrolGeoResource> members;
 	private PatrolDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	private Patrol patrol = null;

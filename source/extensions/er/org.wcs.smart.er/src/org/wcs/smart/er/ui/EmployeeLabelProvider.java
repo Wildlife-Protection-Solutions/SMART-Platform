@@ -35,7 +35,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  */
 public class EmployeeLabelProvider extends LabelProvider {
 
-	private static EmployeeLabelProvider instance = null;
+	private static volatile EmployeeLabelProvider instance = null;
 	
 	public static EmployeeLabelProvider getInstance(){
 		synchronized (EmployeeLabelProvider.class) {

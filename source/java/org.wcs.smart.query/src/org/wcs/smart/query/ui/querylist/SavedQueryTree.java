@@ -54,7 +54,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  */
 public class SavedQueryTree {
 
-	private static SavedQueryTree instance = null;
+	private static volatile SavedQueryTree instance = null;
 	
 	private List<QueryFolder> folders = null;
 	private HashMap<UUID, List<QueryEditorInput>> queries = null;
@@ -243,10 +243,8 @@ public class SavedQueryTree {
 	}
 	
 	public synchronized void clearData(){
-		synchronized (instance) {
-			folders = null;
-			queries = null;	
-		}
+		folders = null;
+		queries = null;	
 	}
 	
 	/**

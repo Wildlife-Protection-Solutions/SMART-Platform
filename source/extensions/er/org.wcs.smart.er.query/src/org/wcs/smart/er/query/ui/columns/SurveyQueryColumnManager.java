@@ -68,7 +68,7 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class SurveyQueryColumnManager {
 
-	private static SurveyQueryColumnManager instance = null;
+	private static volatile SurveyQueryColumnManager instance = null;
 	/**
 	 * 
 	 * @return the manager instance
@@ -85,7 +85,7 @@ public class SurveyQueryColumnManager {
 	}
 	
 	
-	private QueryColumn[] dataModelColumns = null;
+	private volatile QueryColumn[] dataModelColumns = null;
 	
 	private final Object DATAMODELLOCK = new Object();
 	

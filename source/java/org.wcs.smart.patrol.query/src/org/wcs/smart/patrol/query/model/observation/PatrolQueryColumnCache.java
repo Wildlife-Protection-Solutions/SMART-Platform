@@ -39,12 +39,11 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class PatrolQueryColumnCache {
 
-	private static PatrolQueryColumnCache instance = null;
-	private static Object INSTANCE_LOCK = new Object();
+	private static volatile PatrolQueryColumnCache instance = null;
 	
 	public static PatrolQueryColumnCache getInstance(){
 		if (instance == null){
-			synchronized (INSTANCE_LOCK) {
+			synchronized (PatrolQueryColumnCache.class) {
 				if (instance == null){
 					instance = new PatrolQueryColumnCache();
 				}
@@ -53,10 +52,10 @@ public class PatrolQueryColumnCache {
 		return instance;
 	}
 	
-	private QueryColumn[] queryColumns = null;
-	private QueryColumn[] patrolQueryColumns = null;
-	private QueryColumn[] waypointQueryColumns = null;
-	private QueryColumn[] gridQueryColumns = null;
+	private volatile QueryColumn[] queryColumns = null;
+	private volatile QueryColumn[] patrolQueryColumns = null;
+	private volatile QueryColumn[] waypointQueryColumns = null;
+	private volatile QueryColumn[] gridQueryColumns = null;
 	
 	private final Object GRIDLOCK = new Object();
 	private final Object PATROLLOCK = new Object();

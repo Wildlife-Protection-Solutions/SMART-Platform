@@ -53,7 +53,7 @@ public class MissionService extends IService {
 	private Map<String, Serializable> params;
 	private URL url;
 	
-	private List<MissionGeoResource> members;
+	private volatile List<MissionGeoResource> members;
 	private MissionDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	private Mission mission = null;

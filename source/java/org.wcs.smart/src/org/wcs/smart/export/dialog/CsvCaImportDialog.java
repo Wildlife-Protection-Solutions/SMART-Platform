@@ -233,10 +233,8 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			Session session = HibernateManager.openSession();
 			try {
-				synchronized (this) {
-					areas = HibernateManager.getConservationAreas(session);
-					areas.remove(SmartDB.getCurrentConservationArea());
-				}
+				areas = HibernateManager.getConservationAreas(session);
+				areas.remove(SmartDB.getCurrentConservationArea());
 			} finally {
 				session.close();
 			}

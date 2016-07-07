@@ -36,8 +36,8 @@ import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
  */
 public class QueryDatasetExtensionManager {
 
-	private static QueryDatasetExtensionManager instance = null;
-	private static final Object LOCK = new Object();
+	private static volatile QueryDatasetExtensionManager instance = null;
+	
 	/**
 	 * Mapping from query type key to smart dataset
 	 */
@@ -47,14 +47,13 @@ public class QueryDatasetExtensionManager {
 		
 	}
 	
-	
 	/**
 	 * 
 	 * @return manager instance
 	 */
 	public static QueryDatasetExtensionManager getInstance(){
 		if (instance == null){
-			synchronized (LOCK) {
+			synchronized (QueryDatasetExtensionManager.class) {
 				if (instance == null){
 					instance = new QueryDatasetExtensionManager();
 				}

@@ -37,7 +37,7 @@ import org.wcs.smart.SmartContext;
 public class ReportEngineManager {
 
 
-	private static IReportEngine reportEngine;
+	private static volatile IReportEngine reportEngine;
 	private static final Object lock = new Object(); 
 	
 	@SuppressWarnings("unchecked")

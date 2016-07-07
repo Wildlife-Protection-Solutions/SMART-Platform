@@ -314,8 +314,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 				}
 			}
 		}catch (Exception ex){
-			//we cannot dermine db version so we don't let the user login
-			throw new Exception(MessageFormat.format(Messages.SmartPlugIn_VersionErrorMessage, new Object[]{dbVersion, smartDbVersion}), ex);
+			//we cannot determine db version so we don't let the user login
+			throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);
 			
 		}finally{
 			s.close();

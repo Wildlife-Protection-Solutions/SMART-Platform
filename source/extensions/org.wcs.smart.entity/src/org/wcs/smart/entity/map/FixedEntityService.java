@@ -60,7 +60,7 @@ public class FixedEntityService extends IService {
 	private Map<String, Serializable> params;
 	private URL url;
 	
-	private List<FixedEntityGeoResource> members;
+	private volatile List<FixedEntityGeoResource> members;
 	private FixedEntityDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 
@@ -172,25 +172,11 @@ public class FixedEntityService extends IService {
 						
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-//							Session s = HibernateManager.openSession();
-//							try{
 								for (EntityType et : EntityHibernateManager.getInstance().getActiveEntityTypes()){
 									if (et.getType() == EntityType.Type.FIXED){
 										members.add(new FixedEntityGeoResource(FixedEntityService.this, et.getName(), et.getKeyId()));
 									}
 								}
-//								Query q = s.createQuery("FROM EntityType WHERE conservationArea = :ca and type = :type"); //$NON-NLS-1$
-//								q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-//								q.setParameter("type", EntityType.Type.FIXED); //$NON-NLS-1$
-//								List<?> data = q.list();
-//								for (int i = 0; i < data.size(); i++){
-//									EntityType type = (EntityType) data.get(i);
-//									members.add(new FixedEntityGeoResource(FixedEntityService.this, type.getName(), type.getKeyId()));
-//								}
-//							}finally{
-//								s.close();
-//							}
-							
 							return org.eclipse.core.runtime.Status.OK_STATUS;
 						}
 					};

@@ -65,8 +65,8 @@ public class SmartHibernateManager {
 
 	private static final String MAPPING_ID = "org.wcs.smart.hibernate.mapping"; //$NON-NLS-1$
 	
-	private static  String userName = "login"; //$NON-NLS-1$
-	private static  String passWord = "smrt"; //$NON-NLS-1$
+	private static String userName = "login"; //$NON-NLS-1$
+	private static String passWord = "smrt"; //$NON-NLS-1$
 	private static String databaseLocation = ""; //$NON-NLS-1$
 	
 	private static ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();

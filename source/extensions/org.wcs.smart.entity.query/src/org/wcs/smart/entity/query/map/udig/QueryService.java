@@ -65,7 +65,7 @@ public class QueryService extends IService implements IQueryService {
 	
 	private Map<String, Serializable> params;
 	private URL url;	
-	private List<QueryGeoResource> members;
+	private volatile List<QueryGeoResource> members;
 	private DataStore ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	

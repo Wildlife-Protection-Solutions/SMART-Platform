@@ -55,7 +55,7 @@ public class EntityQueryService extends IService {
 	private EntitySightingQuery query;
 	private URL url;
 	
-	private List<EntityQueryGeoResource> members;
+	private volatile List<EntityQueryGeoResource> members;
 	private EntityQueryDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 

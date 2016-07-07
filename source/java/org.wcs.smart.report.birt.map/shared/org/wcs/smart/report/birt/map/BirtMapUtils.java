@@ -178,34 +178,7 @@ public class BirtMapUtils {
 				.getMeasure();
 			value = (int) (w1 * dpi);
 		}
-		return value;
-		
+		return value;	
 	}
 	
-//	private static List<IBirtMapLayerManager> layerExtensions = null;
-//	private static Object lock = new Object();
-//	public static List<IBirtMapLayerManager> getMapLayerExtensions(){
-//		if (layerExtensions != null){
-//			return layerExtensions;
-//		}
-//		synchronized (lock) {
-//			if (layerExtensions == null){
-//				String maplayer = "org.wcs.smart.report.birt.maplayer"; //$NON-NLS-1$
-//				List<IBirtMapLayerManager> items = new ArrayList<IBirtMapLayerManager>();
-//				if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-//				IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(maplayer);
-//				try {
-//					for (IConfigurationElement e : config) {
-//						IBirtMapLayerManager mapLayer = (IBirtMapLayerManager) e.createExecutableExtension("maplayer"); //$NON-NLS-1$
-//						items.add(mapLayer);
-//					}
-//				}catch (Exception ex){
-//					SmartMapItemPlugIn.log(ex.getMessage(), ex);
-//				}
-//				layerExtensions = items;
-//			}
-//		}
-//		
-//		return layerExtensions;
-//	}
 }

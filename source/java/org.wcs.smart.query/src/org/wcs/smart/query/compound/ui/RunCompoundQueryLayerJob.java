@@ -23,6 +23,7 @@ package org.wcs.smart.query.compound.ui;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,6 +53,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.model.StyledQuery;
+import org.wcs.smart.udig.style.StyleManager;
 
 /**
  * Job for executing a query from a compound query and adding
@@ -85,8 +87,16 @@ public class RunCompoundQueryLayerJob extends Job{
 			if (dataType == null){
 				dataType = layer.getGeoResource().getID().toString();
 			}
-			String newStyle = QueryStyleParser.INSTANCE.getStyle(dataType, (StyleBlackboard) layer.getStyleBlackboard());
-			item.getCompoundMapQueryLayer().setQueryStyle(newStyle);
+			
+			String currentStyle = item.getCompoundMapQueryLayer().getQueryStyle();
+			java.util.Map<String, StyleBlackboard> queryStyles = null;
+			if (currentStyle != null){
+				queryStyles = StyleManager.INSTANCE.fromStringMap(currentStyle);
+			}else{
+				queryStyles = new HashMap<String, StyleBlackboard>();
+			}
+			queryStyles.put(dataType, (StyleBlackboard) layer.getStyleBlackboard());
+			item.getCompoundMapQueryLayer().setQueryStyle(StyleManager.INSTANCE.asString(queryStyles));
 			
 			mapEditor.getSite().getShell().getDisplay().syncExec(new Runnable(){
 				@Override
@@ -130,20 +140,16 @@ public class RunCompoundQueryLayerJob extends Job{
 		}finally{
 			s.close();
 		}
+		
 		try{		
 			if (item.getQueryType() instanceof IMappableQueryType){
-				IQueryService service = tracker.getService(item.getQuery().getUuid());
-//				if (service != null){
-//					//TODO: we might want to update the style here as well
-//					service.refresh(item.getQuery(), monitor);
-//				}else{
-					IService qService = (IService)((IMappableQueryType)item.getQueryType()).createQueryService(item.getQuery(), mapEditor);
-					tracker.setService(item.getQuery(), (IQueryService) qService);
-					addLayers(qService, tracker, monitor);
-//				}
+				//always create new service as query object will have changed
+				IService qService = (IService)((IMappableQueryType)item.getQueryType()).createQueryService(item.getQuery(), mapEditor);
+				tracker.setService(item.getQuery(), (IQueryService) qService);
+				addLayers(qService, tracker, monitor);
 			}
 		}catch (Exception ex){
-			QueryPlugIn.displayLog(MessageFormat.format("Error creating map layers for: {0}",  item.getQueryName()), ex);
+			QueryPlugIn.displayLog(MessageFormat.format(Messages.RunCompoundQueryLayerJob_MapLayerError,  item.getQueryName()), ex);
 		}
 		
 		Display.getDefault().asyncExec(new Runnable(){
@@ -165,7 +171,7 @@ public class RunCompoundQueryLayerJob extends Job{
 			public void run(IProgressMonitor monitor) throws Exception {
 				super.run(monitor);
 				for (ILayer layer : getLayers()){
-					((Layer)layer).setName(item.getQueryName() + " (" + layer.getName() + ")");
+					((Layer)layer).setName(item.getQueryName() + " (" + layer.getName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				if (item.getQuery() instanceof StyledQuery){
 					String styleString = item.getCompoundMapQueryLayer().getQueryStyle();

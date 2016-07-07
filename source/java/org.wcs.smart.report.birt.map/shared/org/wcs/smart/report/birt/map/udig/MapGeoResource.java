@@ -71,7 +71,7 @@ public class MapGeoResource extends IGeoResource {
 	private MapLayerInfo mapInfo;
 	private OdaDataSetHandle dataSetHandle;
 	
-	private GridCoverage2DReader reader;
+	private volatile GridCoverage2DReader reader;
 	
 	private String id;
 	

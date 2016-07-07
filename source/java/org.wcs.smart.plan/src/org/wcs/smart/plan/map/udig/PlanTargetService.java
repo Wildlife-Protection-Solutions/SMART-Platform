@@ -57,7 +57,7 @@ public class PlanTargetService extends IService {
 	private Map<String, Serializable> params;
 	private URL url;
 	
-	private List<PlanTargetGeoResource> members;
+	private volatile List<PlanTargetGeoResource> members;
 	private PlanTargetDataSource ds = null;
 	
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();

@@ -120,8 +120,8 @@ public class DateFilter implements IFilter {
 
 		
 		//default to all
-		if (filter == null) throw new Exception(MessageFormat.format("Date filter part could not be parsed from date filter string: {0}", filterString)); 
-		if (field == null)   throw new Exception(MessageFormat.format("Date field part could not be parsed from date filter string: {0}", filterString));
+		if (filter == null) throw new Exception(MessageFormat.format("Date filter part could not be parsed from date filter string: {0}", filterString));  //$NON-NLS-1$
+		if (field == null) throw new Exception(MessageFormat.format("Date field part could not be parsed from date filter string: {0}", filterString)); //$NON-NLS-1$
 		return new DateFilter(field, filter);
 	}
 }

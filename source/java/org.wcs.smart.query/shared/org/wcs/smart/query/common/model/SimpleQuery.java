@@ -237,34 +237,29 @@ public abstract class SimpleQuery extends StyledQuery {
 	 */
 	@Transient
 	public List<QueryColumn> computeQueryColumns(Locale l, Session session, IProjectionProvider prjProvider){
-//		if (queryColumns != null) return queryColumns;
-//		
-//		synchronized (this) {
-//			if (queryColumns != null) return queryColumns;
-//			
-			QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, session);
-			
-			List<QueryColumn> queryColumns = new ArrayList<QueryColumn>();
-			HashSet<String> visible = null;
-			if (visibleColumns != null){
-				String[] bits = visibleColumns.split(COLUMN_SPLITTER);
-				visible = new HashSet<String>();
-				for (int i = 0; i < bits.length; i ++){
-					visible.add(bits[i]);
-				}
+		
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, session);
+		
+		List<QueryColumn> queryColumns = new ArrayList<QueryColumn>();
+		HashSet<String> visible = null;
+		if (visibleColumns != null){
+			String[] bits = visibleColumns.split(COLUMN_SPLITTER);
+			visible = new HashSet<String>();
+			for (int i = 0; i < bits.length; i ++){
+				visible.add(bits[i]);
 			}
-			for (int i = 0; i < cols.length; i ++){
-				queryColumns.add(cols[i]);
-				if (visible == null){
-					cols[i].setVisible(true);
-				}else if (visible.contains(cols[i].getKey())){
-					cols[i].setVisible(true);
-				}else{
-					cols[i].setVisible(false);
-				}
-				cols[i].setProjectionProvider(prjProvider);
+		}
+		for (int i = 0; i < cols.length; i ++){
+			queryColumns.add(cols[i]);
+			if (visible == null){
+				cols[i].setVisible(true);
+			}else if (visible.contains(cols[i].getKey())){
+				cols[i].setVisible(true);
+			}else{
+				cols[i].setVisible(false);
 			}
-//		}
+			cols[i].setProjectionProvider(prjProvider);
+		}
 		return queryColumns;
 		
 	}

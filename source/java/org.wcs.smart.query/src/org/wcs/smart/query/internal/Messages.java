@@ -301,6 +301,8 @@ public class Messages extends NLS {
 	public static String QueryDateLabelProvider_SummaryDateGroupByError;
 	public static String QueryDefinitionValidator_AggregationNotSupported;
 	public static String QueryDefPanel_QueryTypeNotSupported;
+	public static String QueryDropItem_clearstyletooltip;
+	public static String QueryDropItem_dateapplyalltooltip;
 	public static String QueryEditorUtils_BlankNameError;
 	public static String QueryEditorUtils_CopyOfLabel;
 	public static String QueryEditorUtils_CreateNewButton;
@@ -454,6 +456,7 @@ public class Messages extends NLS {
 	public static String RasterService_Progress_CreatingInfo;
 	public static String RasterService_QueryNotRunErr;
 	public static String RasterService_urlError;
+	public static String RunCompoundQueryLayerJob_MapLayerError;
 	public static String SummaryEditor_ErrorDialogTitle;
 	public static String SummaryEditor_ErrorLoadingQuery;
 	public static String SummaryEditor_ErrorParsingQuery;

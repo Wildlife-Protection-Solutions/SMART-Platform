@@ -1143,7 +1143,7 @@
       <QueryType
             QueryCategory="org.wcs.smart.query.type.compound"
             class="org.wcs.smart.query.model.types.CompoundMapQueryType"
-            executor="org.wcs.smart.query.compound.engine.CompoundQueryEngine">
+            executor = "">
          <DefinitionPanel
                id="org.wcs.smart.query.compound.definition"
                itemPanelId="org.wcs.smart.query.compound.querylist">

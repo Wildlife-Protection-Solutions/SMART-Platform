@@ -931,6 +931,7 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_StationActiveColumnName;
 	public static String SmartLabelProvider_StationsTableName;
 	public static String SmartLayerStyleInterceptor_StyleError;
+	public static String SmartPlugIn_CouldNotconnect;
 	public static String SmartPlugIn_Error_Dialog_Title;
 	public static String SmartPlugIn_UnknownVersion;
 	public static String SmartPlugIn_VersionErrorMessage;

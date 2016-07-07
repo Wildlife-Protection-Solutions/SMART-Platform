@@ -42,7 +42,7 @@ import org.wcs.smart.observation.events.WaypointEventManager;
  *
  */
 public class DeleteWaypointJob extends Job {
-	private Collection<SurveyWaypoint> waypoints;
+	private volatile Collection<SurveyWaypoint> waypoints;
 
 	public DeleteWaypointJob() {
 		super(Messages.DeleteWaypointJob_Title);
