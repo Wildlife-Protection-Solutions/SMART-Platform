@@ -165,7 +165,11 @@ public class QueryDropItem extends DropItem {
 				IDateFilter.DATE_FILTERS, false);
 		dateFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if (mapLayer != null && mapLayer.getDateFilter() != null){
-			dateFilter.setDateFilter(mapLayer.getDateFilterAsFilter());
+			try{
+				dateFilter.setDateFilter(DateFilter.fromString(mapLayer.getDateFilter(), queryType.getDateFilterOptions()));
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(ex.getMessage(), ex);
+			}
 		}
 		dateFilter.addChangeListener(new ISelectionChangedListener() {
 			@Override

@@ -38,6 +38,7 @@ import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
@@ -105,9 +106,13 @@ public class RunCompoundQueryJob extends Job{
 				//always reload query here so we have the latest query definition
 				Query q = QueryHibernateManager.getInstance().findQuery(s, layer.getQueryUuid(),type);
 				if (q != null){
-					QueryItem qi = new QueryItem(layer, q, type);
-					qi.setStatus(QueryItem.Status.PROCESSING);
-					items.add(qi);
+					try{
+						QueryItem qi = new QueryItem(layer, q, type);
+						qi.setStatus(QueryItem.Status.PROCESSING);
+						items.add(qi);
+					}catch (Exception ex){
+						QueryPlugIn.displayLog(ex.getMessage(), ex);
+					}
 				}
 			}
 		}finally{

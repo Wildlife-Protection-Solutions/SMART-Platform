@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.ProgressBar;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.DateFilter;
 
 /**
  * Query item used for displaying display results 
@@ -61,10 +62,17 @@ public class QueryItem {
 	private Integer totalCnt = null;
 	private String errorMessage;
 	
-	public QueryItem(CompoundMapQueryLayer layer, Query query, IQueryType type){
+	private DateFilter dFilter = null;
+	
+	public QueryItem(CompoundMapQueryLayer layer, Query query, IQueryType type) throws Exception{
 		this.layer = layer;
 		this.query = query;
 		this.type = type;
+		this.dFilter = DateFilter.fromString(layer.getDateFilter(), type.getDateFilterOptions());
+	}
+	
+	public DateFilter getDateFilter(){
+		return this.dFilter;
 	}
 	
 	public IQueryType getQueryType(){

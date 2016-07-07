@@ -24,7 +24,6 @@ package org.wcs.smart.query.model.filter;
 import java.text.MessageFormat;
 import java.util.Date;
 
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
@@ -91,13 +90,12 @@ public class DateFilter implements IFilter {
 	 * Converts a string to a date filter.  If cannot parse
 	 * the filter components an exception is thrown.
 	 * @param filterString
+	 * @param ops the possible date fields for the given query type associated with the filter string
 	 * @return
 	 */
-	public static DateFilter fromString(String filterString, IQueryType queryType) throws Exception{
+	public static DateFilter fromString(String filterString, IDateFieldFilter[] ops) throws Exception{
 		IDateFieldFilter field = null;
 		IDateFilter filter = null;
-		IDateFieldFilter[] ops = queryType.getDateFilterOptions();
-		
 		
 		String[] bits = filterString.split(","); //$NON-NLS-1$
 		//field

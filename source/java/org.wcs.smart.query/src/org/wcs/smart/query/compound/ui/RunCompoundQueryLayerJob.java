@@ -53,6 +53,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.model.StyledQuery;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -118,7 +119,7 @@ public class RunCompoundQueryLayerJob extends Job{
 		
 		Session s = HibernateManager.openSession();
 		try{
-			item.getQuery().setDateFilter(item.getCompoundMapQueryLayer().getDateFilterAsFilter());
+			item.getQuery().setDateFilter(item.getDateFilter());
 			ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(monitor, item.getProgressBar());
 			IQueryResult results = QueryExecutor.INSTANCE.executeQuery(item.getQuery(), s, wrapper);
 			item.getQuery().setCachedResults(results);

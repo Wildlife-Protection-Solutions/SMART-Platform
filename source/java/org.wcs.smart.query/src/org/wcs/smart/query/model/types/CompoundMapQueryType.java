@@ -107,13 +107,13 @@ public class CompoundMapQueryType implements IQueryType {
 						QueryDropItem qitem = (QueryDropItem)it;
 						if (qitem.getLayer() != null){
 							//update date filter
-							qitem.getLayer().setDateFilter(qitem.getDateFilter());
+							qitem.getLayer().setDateFilter(qitem.getDateFilter().asString());
 							newLayers.add(qitem.getLayer());
 						}else{
 							CompoundMapQueryLayer newlayer = new CompoundMapQueryLayer();
 							newlayer.setQueryType(qitem.getQueryType().getKey());
 							newlayer.setQueryUuid(qitem.getQueryUuid());
-							newlayer.setDateFilter(qitem.getDateFilter());
+							newlayer.setDateFilter(qitem.getDateFilter().asString());
 							newlayer.setMapQuery(cq);
 							qitem.initializeData(newlayer);
 							newLayers.add(newlayer);

@@ -281,7 +281,7 @@ public class CompoundQueryInfoPage extends EditorPart  {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof QueryItem){
-					DateFilter filter = ((QueryItem)element).getCompoundMapQueryLayer().getDateFilterAsFilter();
+					DateFilter filter = ((QueryItem)element).getDateFilter();
 					StringBuilder sb = new StringBuilder();
 					
 					sb.append(filter.getDateFilterOption().getGuiName(Locale.getDefault()));
