@@ -117,7 +117,9 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 	@Override
 	public void dispose(){
 		super.dispose();
-		session.close();
+		if (session.isOpen()){
+			session.close();
+		}
 	}
 	
 	@Override
@@ -281,6 +283,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		if (!session.isOpen()){
 			session = HibernateManager.openSession();
 			this.parentDesign = (SurveyDesign) session.merge(parentDesign);
+			newMission.getSurvey().setSurveyDesign(parentDesign);
 		}
 		
 		//update design with page values

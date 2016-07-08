@@ -8,7 +8,8 @@ Require-Bundle: org.wcs.smart,
  org.wcs.smart.query,
  org.eclipse.ui.forms,
  org.wcs.smart.patrol,
- org.locationtech.udig.catalog.rasterings;bundle-version="1.2.0"
+ org.locationtech.udig.catalog.rasterings;bundle-version="1.2.0",
+ org.wcs.smart.observation.query;bundle-version="4.0.1"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.wcs.smart.patrol.query,
@@ -23,4 +24,3 @@ Export-Package: org.wcs.smart.patrol.query,
  org.wcs.smart.patrol.query.parser.internal.summary;x-friends:="org.wcs.smart.query.test",
  org.wcs.smart.patrol.query.ui
 Bundle-Vendor: org.wcs.smart
-Import-Package: org.wcs.smart.observation.query.model.types

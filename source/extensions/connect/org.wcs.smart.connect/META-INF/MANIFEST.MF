@@ -8,7 +8,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart;bundle-version="3.2.1",
  org.wcs.smart.hibernate.libs,
- org.wcs.smart.p2;bundle-version="3.2.1"
+ org.wcs.smart.p2;bundle-version="3.2.1",
+ org.apache.commons.codec;bundle-version="1.6.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: javax.ws.rs,
@@ -41,4 +42,3 @@ Bundle-ClassPath: .,
  lib/resteasy-jaxrs-3.0.13.Final.jar
 Eclipse-BuddyPolicy: global
 Bundle-Vendor: org.wcs.smart
-Import-Package: org.apache.commons.codec.binary

@@ -39,6 +39,7 @@ import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -50,6 +51,8 @@ import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
 import org.wcs.smart.util.UuidUtils;
+
+import com.ibm.icu.util.ULocale;
 
 /**
  * Report template cloner that copies report information
@@ -196,7 +199,10 @@ public class ReportTemplateCloner implements
 	}
 	
 	private void updateReportFile(Report report, File dest, ConservationAreaClonerEngine engine) throws Exception{
-		SessionHandle session = new DesignEngine(new DesignConfig()).newSessionHandle(null);
+
+		DesignConfig config = new DesignConfig();
+		config.setResourceLocator(BirtResourceLocator.INSTANCE);
+		SessionHandle session = new DesignEngine( config ).newSessionHandle( ULocale.getDefault( ) );
 		ReportDesignHandle rdh = session.openDesign(dest.getAbsolutePath());
 		
 		//update library reference
@@ -204,7 +210,7 @@ public class ReportTemplateCloner implements
 		//and replace it with the newuuid
 		LibraryHandle library = rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 		rdh.dropLibraryAndBreakExtends(library);
-		String newLibraryLocation = engine.getNewCa().getFileDataStoreLocation() + File.separator + Report.REPORT_DIR + File.separator + SmartBirtLibrary.LIBRARY_DIR + File.separator + SmartBirtLibrary.LIBRARY_FILENAME;
+		String newLibraryLocation = UuidUtils.getDirectoryPath(engine.getNewCa().getUuid()) + File.separator + Report.REPORT_DIR + File.separator + SmartBirtLibrary.LIBRARY_DIR + File.separator + SmartBirtLibrary.LIBRARY_FILENAME;
 		rdh.includeLibrary(newLibraryLocation, SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 		
 		//updates query references

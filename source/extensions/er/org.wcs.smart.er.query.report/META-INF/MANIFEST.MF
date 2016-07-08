@@ -13,8 +13,8 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart,
  org.wcs.smart.report.birt.map,
  org.wcs.smart.report,
- org.wcs.smart.er
+ org.wcs.smart.er,
+ org.locationtech.udig.style.sld;bundle-version="2.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart
-Import-Package: org.locationtech.udig.style.sld

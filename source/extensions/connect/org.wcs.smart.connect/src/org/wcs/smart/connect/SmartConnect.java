@@ -48,6 +48,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -684,8 +685,12 @@ public class SmartConnect {
 		}
 	}
 
-	private String processException (Throwable ex){
+	private String processException (Throwable root){
 		String msg = null;
+		Throwable ex = root;
+		if (ex instanceof ProcessingException){
+			ex = root.getCause();
+		}
 		if (ex instanceof NotFoundException){
 			msg = MessageFormat.format(Messages.SmartConnect_ConnectionError, new Object[]{server.getServerUrl()});
 		}else if (ex instanceof NotAuthorizedException){
@@ -697,7 +702,7 @@ public class SmartConnect {
 		}else{
 			msg = Messages.SmartConnect_GeneralError + ex.getMessage();
 		}
-		ConnectPlugIn.log(msg, ex);
+		ConnectPlugIn.log(msg, root);
 		return msg;
 	}
 	

@@ -35,12 +35,15 @@ import org.eclipse.birt.report.model.core.DesignElement;
 import org.eclipse.birt.report.model.elements.ExtendedItem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
+
+import com.ibm.icu.util.ULocale;
 
 /**
  * This template cloner fixes up the query references
@@ -78,7 +81,9 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 	 * @throws Exception
 	 */
 	private void updateReportFile(Report report, File dest, ConservationAreaClonerEngine engine) throws Exception{
-		SessionHandle session = new DesignEngine(new DesignConfig()).newSessionHandle(null);
+		DesignConfig config = new DesignConfig();
+		config.setResourceLocator(BirtResourceLocator.INSTANCE);
+		SessionHandle session = new DesignEngine( config ).newSessionHandle( ULocale.getDefault( ) );
 		ReportDesignHandle rdh = session.openDesign(dest.getAbsolutePath());
 		
 		rdh.getRoot().getComponents();
