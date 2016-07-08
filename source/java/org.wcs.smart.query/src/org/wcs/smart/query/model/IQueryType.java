@@ -91,6 +91,13 @@ public interface IQueryType {
 	
 	/**
 	 * 
+	 * @return true if query type is supported in reports;
+	 * false otherwise
+	 */
+	public boolean supportsReports();
+	
+	/**
+	 * 
 	 * @return drop item factory for query type
 	 */
 	public IDropItemFactory getDropItemFactory();

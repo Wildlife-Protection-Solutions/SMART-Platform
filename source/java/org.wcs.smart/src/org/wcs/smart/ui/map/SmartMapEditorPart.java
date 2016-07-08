@@ -422,8 +422,6 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
        	mapViewer.getRenderManager().dispose();
 
         mapViewer.dispose();
-        
-        
     }
 
     public void openContextMenu() {

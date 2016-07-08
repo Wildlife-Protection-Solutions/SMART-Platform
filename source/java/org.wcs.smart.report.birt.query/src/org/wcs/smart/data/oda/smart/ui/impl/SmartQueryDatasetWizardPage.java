@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -94,10 +95,23 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		@SuppressWarnings("unchecked")
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
-			data.put(QueryListContentProvider.QUERY_KEY, SavedQueryTree
-					.getInstance().getQueries());
-			data.put(QueryListContentProvider.FOLDER_KEY, SavedQueryTree
-					.getInstance().getFolders());
+			
+			HashMap<UUID, List<QueryEditorInput>> queries = SavedQueryTree.getInstance().getQueries();
+			HashMap<UUID, List<QueryEditorInput>> queriescopy = new HashMap<UUID, List<QueryEditorInput>>(); 
+			for(Entry<UUID, List<QueryEditorInput>> qs : queries.entrySet()){
+				List<QueryEditorInput> newInput = new ArrayList<QueryEditorInput>();
+				for(QueryEditorInput in: qs.getValue()){
+					if (in.getType().supportsReports()){
+						newInput.add(in);
+					}
+				}
+				if (!newInput.isEmpty()){
+					queriescopy.put(qs.getKey(), newInput);
+				}	
+			}
+			
+			data.put(QueryListContentProvider.QUERY_KEY, queriescopy);
+			data.put(QueryListContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
 
 			//find the query to select by default
 			QueryEditorInput initialValue = null;

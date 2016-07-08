@@ -230,4 +230,13 @@ public class ObservationGridQueryType implements IMappableQueryType {
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
 		return new RasterService((GriddedQuery)query);
 	}
+	
+	/**
+	 * 
+	 * @return true if query type is supported in reports;
+	 * false otherwise
+	 */
+	public boolean supportsReports(){
+		return true;
+	}
 }

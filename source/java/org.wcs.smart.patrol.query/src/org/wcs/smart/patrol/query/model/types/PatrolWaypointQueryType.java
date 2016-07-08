@@ -222,4 +222,13 @@ public class PatrolWaypointQueryType implements IMappableQueryType {
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider){
 		return new QueryService((SimpleQuery) query, prjProvider);
 	}
+	
+	/**
+	 * 
+	 * @return true if query type is supported in reports;
+	 * false otherwise
+	 */
+	public boolean supportsReports(){
+		return true;
+	}
 }

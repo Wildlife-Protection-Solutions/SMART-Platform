@@ -218,4 +218,13 @@ public class ObservationSummaryQueryType implements IQueryType {
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{};
 	}
+	
+	/**
+	 * 
+	 * @return true if query type is supported in reports;
+	 * false otherwise
+	 */
+	public boolean supportsReports(){
+		return true;
+	}
 }

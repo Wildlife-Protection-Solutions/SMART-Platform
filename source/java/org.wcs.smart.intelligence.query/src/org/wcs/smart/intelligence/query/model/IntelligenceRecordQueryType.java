@@ -166,4 +166,13 @@ public class IntelligenceRecordQueryType implements IMappableQueryType {
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider){
 		return new QueryService(query);
 	}
+	
+	/**
+	 * 
+	 * @return true if query type is supported in reports;
+	 * false otherwise
+	 */
+	public boolean supportsReports(){
+		return true;
+	}
 }

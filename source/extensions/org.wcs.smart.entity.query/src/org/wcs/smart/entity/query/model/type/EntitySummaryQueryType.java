@@ -216,4 +216,13 @@ public class EntitySummaryQueryType implements IQueryType {
 	public IDateFieldFilter[] getDateFilterOptions() {
 		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
 	}
+	
+	/**
+	 * 
+	 * @return true if query type is supported in reports;
+	 * false otherwise
+	 */
+	public boolean supportsReports(){
+		return true;
+	}
 }
