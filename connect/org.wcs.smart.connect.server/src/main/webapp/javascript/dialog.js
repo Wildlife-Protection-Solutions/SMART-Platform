@@ -56,6 +56,29 @@ function displayConfirmDialog(title, message, onOkay){
 	displayDialogLocation(dialogDiv.id, window.innerWidth / 2 - 150 + window.pageXOffset,   ((window.innerHeight / 2)) - 100 + window.pageYOffset);
 }
 
+function displayDialogCenter(divId){
+	var w = window.innerWidth;
+	var h = window.innerHeight;
+	var dialog = document.querySelector("#" + divId);
+	
+	dialog.style.display="table";
+	dialog.style.position="absolute";
+	
+	var divW = dialog.offsetWidth;
+	var divH = dialog.offsetHeight;
+	
+	var top = h/2 - divH/2 + window.pageYOffset;
+	if (top < 0) top = 0;
+	var left = w/2 - divW/2 + window.pageXOffset;
+	if (left < 0) left = 0;
+	dialog.style.top = top + "px" ;
+	dialog.style.left = left + "px";
+	
+	var overlaydiv = document.createElement('div');
+	overlaydiv.setAttribute("class", "overlay-widget");
+	document.body.appendChild(overlaydiv);
+}
+
 /*
  * Displays the dialog represented by divId at
  * the x, y position

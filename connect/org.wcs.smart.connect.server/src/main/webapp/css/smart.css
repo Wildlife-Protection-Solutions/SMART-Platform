@@ -225,7 +225,7 @@ h2{
 	padding: 10px 20px 10px 10px;
 	background: white;
 	z-index:101;
-	width: 300px;
+	width: 400px;
 }
 
 .dialog-title{
@@ -256,16 +256,21 @@ h2{
 .top-spacer{
 	margin-top: 10px;
 }
-
+.warn-icon{
+	background-image: url("images/warn.png");
+    width:16px;
+    height: 16px;
+    background-repeat: no-repeat;
+}
 .info-icon{
-	background-image: url("information.png");
+	background-image: url("images/information.png");
     width:16px;
     height: 16px;
     background-repeat: no-repeat;
     display: block;
 }
 .download-icon{
-    background-image: url("download.png");
+    background-image: url("images/download.png");
     width:16px;
     height: 16px;
     background-repeat: no-repeat;
@@ -273,7 +278,7 @@ h2{
 } 
 
 .run-icon{
-	background-image: url("run.png");
+	background-image: url("images/run.png");
 	width:16px;
 	height: 16px;
 	background-repeat: no-repeat;
@@ -282,7 +287,7 @@ h2{
 }
 
 .delete-icon{
-	background-image: url("delete.png");
+	background-image: url("images/delete.png");
 	width:16px;
 	height: 16px;
 	background-repeat: no-repeat;
@@ -291,7 +296,7 @@ h2{
 }
 
 .update-icon{
-	background-image: url("edit.png");
+	background-image: url("images/edit.png");
 	width:16px;
 	height: 16px;
 	background-repeat: no-repeat;
@@ -340,14 +345,14 @@ h2{
 
 /*Mozilla specific*/
 #filter-button:before{
-    background-image: url("hourglass.png");
+    background-image: url("images/hourglass.png");
     display: block;
     width: 15px;
     height: 16px;
     float: left;
 }
 #filter-button{
-    content: url("hourglass.png");
+    content: url("images/hourglass.png");
     display: block;
     width: 15px;
     height: 16px;

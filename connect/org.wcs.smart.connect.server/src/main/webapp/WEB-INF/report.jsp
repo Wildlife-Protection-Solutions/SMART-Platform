@@ -77,9 +77,9 @@
 		     	  <select style="width:100%" id="defineddates"></select>
 		     	</p>
 	     		
-	     		<div style="margin-left:20px">
-		     		<p><fmt:message key="report.startdate" /> <input id="Start Date" type="text" name="startdate" class="date-input" style="float:none;"/></p>
-		     		<p><fmt:message key="report.enddate" /> <input id="End Date" type="text" name="enddate" class="date-input" style="float:none;"/></p>
+	     		<div>
+		     		<p><fmt:message key="report.startdate" /> <input id="Start Date" type="text" name="startdate" class="date-input" style="float:none; margin-top:5px"/>
+		     		<fmt:message key="report.enddate" /> <input id="End Date" type="text" name="enddate" class="date-input" style="float:none; margin-top:5px"/></p>
 	     		</div>
      		</fieldset>
      		
@@ -94,6 +94,11 @@
      		
      		<fieldset id="cafilter">
 	     		<legend><fmt:message key="report.cafilters"/></legend>
+	     		<div style="font-size:0.9em; margin-bottom:3px">
+	     			<div class="warn-icon" style="display:inline-block; float:left"></div>
+	     			<div><fmt:message key="report.ccaabindingwarn"/></div>
+	     		</div>
+	     		
 	     		<div id="cafilteroptions"></div>
      		</fieldset>
      		<div style="text-align: right">

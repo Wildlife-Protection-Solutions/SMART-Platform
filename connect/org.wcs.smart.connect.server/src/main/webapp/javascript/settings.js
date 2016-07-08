@@ -45,7 +45,7 @@ window.onload = function(){
 	
 	//new Layers dialog
 	document.getElementById("btnNewLayer").onclick = function(){
-	 	displayDialog('layerDialog', 'layertable');
+		displayDialogCenter('layerDialog');
 	 	document.getElementById("updateLayerButton").classList.remove("show");
 		document.getElementById("updateLayerButton").classList.add("hide");
 		document.getElementById("newLayerButton").classList.remove("hide");
@@ -60,7 +60,7 @@ window.onload = function(){
 	document.getElementById("iconOveride").addEventListener("change", updateExampleIconCustom);
 	
 	document.getElementById("btnNewType").onclick = function(){
-	 	displayDialog('typeDialog', 'btnNewType');
+		displayDialogCenter('typeDialog');
 	 	document.getElementById("updateTypeButton").classList.remove("show");
 		document.getElementById("updateTypeButton").classList.add("hide");
 		document.getElementById("newTypeButton").classList.remove("hide");
@@ -85,7 +85,7 @@ window.onload = function(){
 
 function clearAndShowNewStyleDialog(){
  	document.querySelector("#dialogerror").style.display = "none";
- 	displayDialog('newStyleDialog', 'btnNewType');
+ 	displayDialogCenter('newStyleDialog');
 }
 
 
@@ -333,7 +333,7 @@ function showCurrentLayer() {
 	document.getElementById("newLayerButton").classList.remove("show");
 	document.getElementById("newLayerButton").classList.add("hide");
 	
-	displayDialog('layerDialog', 'layertable');
+	displayDialogCenter('layerDialog');
 }
 
 
@@ -523,8 +523,7 @@ function showCurrentType() {
 	document.getElementById("newTypeButton").classList.add("hide");
 	
 	//update the sample icon
-
-	displayDialog('typeDialog', 'btnNewType');
+	displayDialogCenter('typeDialog');
 }
 
 function deleteType(){
@@ -926,7 +925,7 @@ function showCurrentStyle() {
 	form.footer_text.value = r.footerText;
 	form.server_name.value = r.serverName;
 
-	displayDialog('updateStyleDialog', 'btnNewType');
+	displayDialogCenter('updateStyleDialog');//'btnNewType');
 }
 
 

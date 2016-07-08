@@ -6,7 +6,7 @@
 
 <div id="footerid" class="float">
 	<c:if test="${empty style_footername }">
-  		<img class="float " src="${pageContext.request.contextPath}/css/smart_logo.png">
+  		<img class="float " src="${pageContext.request.contextPath}/css/images/smart_logo.png">
   		<p class="float"> Copyright 2015-2016</p>
 	</c:if>
 	<c:if test="${not empty style_footername }">

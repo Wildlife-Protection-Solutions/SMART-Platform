@@ -6,9 +6,9 @@
 
 <%@include file="includes.jsp" %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/leaflet.css"/>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/leaflet/leaflet.css"/>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/leaflet.awesome-markers.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/leaflet/leaflet.awesome-markers.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-src.js"></script>
 <script type="text/javascript" src='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js'></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet.awesome-markers.js"></script>

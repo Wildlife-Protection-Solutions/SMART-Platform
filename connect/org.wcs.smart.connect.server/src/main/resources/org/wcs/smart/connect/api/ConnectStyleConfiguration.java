@@ -131,7 +131,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
 	 * SMART Connect <img src='https://smartconservationsoftware.org/photos/smart_logo_96.png'>
 	 * ------WebKitFormBoundaryAxRJfYeZhy4BeRWV
 	 * Content-Disposition: form-data; name="footer_text"
-	 * <img src='../css/smart_logo.png'> Copyright 2015, 2016
+	 * <img src='../css/images/smart_logo.png'> Copyright 2015, 2016
 	 * ------WebKitFormBoundaryAxRJfYeZhy4BeRWV
 	 * Content-Disposition: form-data; name="header_style"
 	 * 
