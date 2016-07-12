@@ -38,6 +38,8 @@ import org.locationtech.udig.project.render.RenderException;
 import org.locationtech.udig.render.internal.gridcoverage.basic.MemoryGridCoverageRenderer;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.coverage.grid.GridGeometry;
+import org.opengis.geometry.BoundingBox;
+import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.udig.style.SmartGridCellStyleContent;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -60,6 +62,17 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
 	public synchronized void render( Graphics2D graphics, IProgressMonitor monitor )
             throws RenderException {
     	
+		BoundingBox layerBounds = getContext().getLayer().getBounds(monitor, getContext().getCRS());
+		try {
+			layerBounds = layerBounds.toBounds(getContext().getImageBounds().getCoordinateReferenceSystem());
+		} catch (TransformException e1) {
+			throw new RenderException(e1);
+		}
+		if (!getContext().getImageBounds().intersects((BoundingBox)layerBounds)){
+			//does not overlap image bounds do not render;  otherwise a npe exception is thrown
+			return;
+		}
+		
     	super.render(graphics, monitor);
     	
     	//now try to render grid around points    	
@@ -73,8 +86,7 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
 			return;
          
          
-		ReferencedEnvelope bounds = getContext().getLayer().getBounds(monitor,
-				getContext().getCRS());
+
 		try {
 			
 			GridCoverage gc = getContext().getLayer().getGeoResource().resolve(GridCoverage.class, monitor);
@@ -85,23 +97,23 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
 			GridGeometry ggc = gc.getGridGeometry();
 			int numXCells = ggc.getGridRange().getHigh(0) - ggc.getGridRange().getLow(0) + 1;
 			int numYCells = ggc.getGridRange().getHigh(1) - ggc.getGridRange().getLow(1) + 1;
-			double cellXSize = bounds.getWidth() / numXCells;
-			double cellYSize = bounds.getHeight() / numYCells;
+			double cellXSize = layerBounds.getWidth() / numXCells;
+			double cellYSize = layerBounds.getHeight() / numYCells;
 
 			graphics.setColor(SLD.lineColor(ls));
 			graphics.setStroke(new BasicStroke(SLD.lineWidth(ls), 0, 0, 1, SLD.lineDash(ls), 0));
 			
 			for (int i = 0; i <= numXCells; i++) {
-				Coordinate start = new Coordinate(bounds.getMinimum(0) + i * cellXSize, bounds.getMinimum(1));
-				Coordinate end = new Coordinate(bounds.getMinimum(0) + i * cellXSize, bounds.getMaximum(1));
+				Coordinate start = new Coordinate(layerBounds.getMinimum(0) + i * cellXSize, layerBounds.getMinimum(1));
+				Coordinate end = new Coordinate(layerBounds.getMinimum(0) + i * cellXSize, layerBounds.getMaximum(1));
 				Point s = getContext().getViewportModel().worldToPixel(start);
 				Point e = getContext().getViewportModel().worldToPixel(end);
 				graphics.drawLine(s.x, s.y, e.x, e.y);
 			}
 
 			for (int i = 0; i <= numYCells; i++) {
-				Coordinate start = new Coordinate(bounds.getMinimum(0), bounds.getMinimum(1) + i * cellYSize);
-				Coordinate end = new Coordinate(bounds.getMaximum(0), bounds.getMinimum(1) + i * cellYSize);
+				Coordinate start = new Coordinate(layerBounds.getMinimum(0), layerBounds.getMinimum(1) + i * cellYSize);
+				Coordinate end = new Coordinate(layerBounds.getMaximum(0), layerBounds.getMinimum(1) + i * cellYSize);
 				Point s = getContext().getViewportModel().worldToPixel(start);
 				Point e = getContext().getViewportModel().worldToPixel(end);
 				graphics.drawLine(s.x, s.y, e.x, e.y);
