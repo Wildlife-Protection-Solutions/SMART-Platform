@@ -29,8 +29,10 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.query.model.Query;
 
 /**
  * Compound query layer 
@@ -54,7 +56,6 @@ public class CompoundMapQueryLayer extends UuidItem{
 	private String queryStyle;
 	//layer order - required and managed by system
 	private int order;
-
 	
 	@ManyToOne(cascade = {CascadeType.ALL})
 	@JoinColumn(name="compound_query_uuid", referencedColumnName="uuid", nullable=false)
@@ -106,5 +107,4 @@ public class CompoundMapQueryLayer extends UuidItem{
 	public void setDateFilter(String dateFilter){
 		this.strDateFilter = dateFilter;
 	}
-	
 }

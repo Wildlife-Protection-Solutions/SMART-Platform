@@ -68,7 +68,7 @@ public interface IQueryExporter {
 	public String getName();
 
 	/**
-	 * @return the default file extension for the exporter
+	 * @return the default file extension for the exporter; return null if exporting to directory
 	 */
 	String getDefaultExtension();
 	

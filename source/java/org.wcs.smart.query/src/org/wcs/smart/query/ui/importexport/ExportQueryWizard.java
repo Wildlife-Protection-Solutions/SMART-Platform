@@ -246,9 +246,13 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	private boolean exportSingleFile(IQueryExporter exporter, IProgressMonitor monitor) throws Exception{
 		File outputFile = page2.getFile();
-		getDialogSettings().put(LAST_DIR_KEY, outputFile.getParent().toString());
+		if (exporter.getDefaultExtension() == null){
+			getDialogSettings().put(LAST_DIR_KEY, outputFile.toString());
+		}else{
+			getDialogSettings().put(LAST_DIR_KEY, outputFile.getParent().toString());
+		}
 		
-		if (!outputFile.getParentFile().exists()){
+		if (outputFile.isFile() && !outputFile.getParentFile().exists()){
 			boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputFile.getParent()}));
 			if (!create){
 				return false;
@@ -259,7 +263,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			}
 		}
 		
-		if (outputFile.exists()){
+		if (outputFile.isFile() && outputFile.exists()){
 			if (!MessageDialog.openConfirm(getShell(), 
 					Messages.ExportQueryWizard_OverwriteDialogTitle, 
 					MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMessage, new Object[]{outputFile.toString()}))){

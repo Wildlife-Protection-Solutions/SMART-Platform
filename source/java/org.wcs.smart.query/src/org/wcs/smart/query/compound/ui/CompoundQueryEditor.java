@@ -47,6 +47,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.CleanUpQueryJob;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryMapPageEditor;
@@ -284,6 +285,11 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 		query.dispose();
 		QueryEventManager.getInstance().removeListener(qListener);
 		runQueryJob.cancel();
+		
+		if (query.getQuery().getCachedResults() != null && !query.getQuery().getCachedResults().isDisposed()){
+			CleanUpQueryJob cleanUp = new CleanUpQueryJob(query.getQuery().getCachedResults());
+			cleanUp.schedule();
+		}
 	}
 	
 	/**

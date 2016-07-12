@@ -58,8 +58,10 @@ public class MapLayerTracker {
 	}
 	
 	public void clearAll(Map map, IProgressMonitor monitor){
-		DeleteLayersCommand cmd = new DeleteLayersCommand(layers.toArray(new ILayer[layers.size()]));
-		map.sendCommandASync(cmd);
+		if (!layers.isEmpty()){
+			DeleteLayersCommand cmd = new DeleteLayersCommand(layers.toArray(new ILayer[layers.size()]));
+			map.sendCommandASync(cmd);
+		}
 		
 		layers.clear();
 		for (IQueryService s : services){

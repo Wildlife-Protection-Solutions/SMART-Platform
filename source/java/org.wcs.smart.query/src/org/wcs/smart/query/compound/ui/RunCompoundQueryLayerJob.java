@@ -48,6 +48,8 @@ import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
+import org.wcs.smart.query.common.model.CompoundMapQuery;
+import org.wcs.smart.query.common.model.CompoundMapQueryResults;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMappableQueryType;
@@ -122,6 +124,7 @@ public class RunCompoundQueryLayerJob extends Job{
 			ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(monitor, item.getProgressBar());
 			IQueryResult results = QueryExecutor.INSTANCE.executeQuery(item.getQuery(), s, wrapper);
 			item.getQuery().setCachedResults(results);
+			((CompoundMapQueryResults)mapEditor.getQueryProxy().getQuery().getCachedResults()).addResults(item.getQuery().getUuid(), results);
 			
 			if (results instanceof IPagedQueryResultSet){
 				item.setTotalCount(((IPagedQueryResultSet) results).getItemCount());

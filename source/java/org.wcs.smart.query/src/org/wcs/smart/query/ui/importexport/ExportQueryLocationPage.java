@@ -39,6 +39,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -94,11 +95,16 @@ public class ExportQueryLocationPage extends WizardPage {
 		if (wizard.getQuery().getId() != null){
 			initFile = initFile + "_" + wizard.getQuery().getId(); //$NON-NLS-1$
 		}
-		initFile = location + File.separator + URLUtils.cleanFilename(initFile) + "." ; //$NON-NLS-1$ 
+		initFile = location + File.separator + URLUtils.cleanFilename(initFile) + "." ; //$NON-NLS-1$
+		
 		if (exporter == null){
 			initFile += ".txt"; //$NON-NLS-1$
 		}else{
-			initFile += exporter.getDefaultExtension();
+			if (exporter.getDefaultExtension() != null){
+				initFile += exporter.getDefaultExtension();
+			}else{
+				initFile = location;
+			}
 		}
 		txtFile.setText( initFile );
 
@@ -154,23 +160,32 @@ public class ExportQueryLocationPage extends WizardPage {
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog fd = new FileDialog(ExportQueryLocationPage.this.getShell(), SWT.SAVE);
-				
 				String ext = ((ExportQueryWizard)getWizard()).getQueryExporter().getDefaultExtension();
 				String name= ((ExportQueryWizard)getWizard()).getQueryExporter().getName();
-				
-				String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
-				String[] names = new String[]{name + " (*." + ext + ")", Messages.ExportQueryLocationPage_AllFilesFilterName}; //$NON-NLS-1$ //$NON-NLS-2$
-				
-				fd.setFilterExtensions(extensions);
-				fd.setFilterNames(names);
-				
-				fd.setFilterPath(txtFile.getText());
-				fd.setFileName(txtFile.getText());
-				
-				String f = fd.open();
-				if (f != null) {
-					txtFile.setText(f);
+				if (ext != null){
+					FileDialog fd = new FileDialog(ExportQueryLocationPage.this.getShell(), SWT.SAVE);
+					
+					String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
+					String[] names = new String[]{name + " (*." + ext + ")", Messages.ExportQueryLocationPage_AllFilesFilterName}; //$NON-NLS-1$ //$NON-NLS-2$
+					
+					fd.setFilterExtensions(extensions);
+					fd.setFilterNames(names);
+					
+					fd.setFilterPath(txtFile.getText());
+					fd.setFileName(txtFile.getText());
+					
+					String f = fd.open();
+					if (f != null) {
+						txtFile.setText(f);
+					}
+				}else{
+					DirectoryDialog fd = new DirectoryDialog(ExportQueryLocationPage.this.getShell());
+					fd.setFilterPath(txtFile.getText());
+					
+					String f = fd.open();
+					if (f != null){
+						txtFile.setText(f);
+					}
 				}
 			}
 		});

@@ -61,6 +61,7 @@ public class ExportQueryDefHandler {
 				}
 			}
 		}
+
 		ExportQueryWizard wizard = new ExportQueryWizard(selectedQueries);
 		WizardDialog wd = new WizardDialog(activeShell, wizard);
 		wd.open();

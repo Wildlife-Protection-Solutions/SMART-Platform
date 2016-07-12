@@ -73,6 +73,12 @@ public class Messages extends NLS {
 	public static String CompoundMapQueryType_MapQueryName;
 	public static String CompoundQueryEditor_NewCompoundQueryName;
 	public static String CompoundQueryEditor_SummariesTabName;
+	public static String CompoundQueryExporter_DirectoryRequired;
+	public static String CompoundQueryExporter_ExporterName;
+	public static String CompoundQueryExporter_NoExporter;
+	public static String CompoundQueryExporter_NoResults;
+	public static String CompoundQueryExporter_TaskName;
+	public static String CompoundQueryExporter_WarningsLabel;
 	public static String CompoundQueryInfoPage_CompleteMessage;
 	public static String CompoundQueryInfoPage_DateFilterColName;
 	public static String CompoundQueryInfoPage_ErrorMessage;
@@ -330,8 +336,9 @@ public class Messages extends NLS {
 	public static String QueryHibernateManager_CaQueryFolderName;
 	public static String QueryHibernateManager_CouldNotSaveQueryError;
 	public static String QueryHibernateManager_MyQueryFolderName;
-	public static String QueryImportEngine_QueryImporterNotFound;
-	public static String QueryImporter_InvalidQueryType;
+	public static String QueryImportEngine_QueryImporterNotFound1;
+	public static String QueryImporter_InvalidQueryType1;
+	public static String QueryImporter_InvalidQueryType2;
 	public static String QueryInput_EditorNameNoQuery;
 	public static String QueryInput_EditorNameQuery;
 	public static String QueryInput_NullQueryName;

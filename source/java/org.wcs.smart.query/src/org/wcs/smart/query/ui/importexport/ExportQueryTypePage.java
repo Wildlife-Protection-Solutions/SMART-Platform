@@ -85,7 +85,13 @@ public class ExportQueryTypePage extends WizardPage {
 		outputOptions.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof IQueryExporter){
-					return ((IQueryExporter) element).getName() + " (*." + ((IQueryExporter) element).getDefaultExtension() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+					IQueryExporter exp = (IQueryExporter) element;
+					String name = exp.getName();
+					String ext = exp.getDefaultExtension();
+					if (ext != null){
+						name = name  + " (*." + ext + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					return name;					
 				}
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}

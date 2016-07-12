@@ -38,6 +38,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
+import org.wcs.smart.query.common.model.CompoundMapQueryResults;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
@@ -77,6 +78,22 @@ public class RunCompoundQueryJob extends Job{
 	protected IStatus run(IProgressMonitor monitor) {
 		CompoundMapQuery query = (CompoundMapQuery) editor.getQueryProxy().getQuery();
 		
+		//TODO thread safe results
+		CompoundMapQueryResults results = (CompoundMapQueryResults) query.getCachedResults();
+		if (results == null || results.isDisposed()){
+			results = new CompoundMapQueryResults();
+			query.setCachedResults(results);
+		}else{
+			Session session  = HibernateManager.openSession();
+			try{
+				results.clear(session);
+			}catch (Exception ex){
+				ex.printStackTrace();
+			}finally{
+				session.close();
+			}
+		}
+
 		setName(Messages.QueryResultsEditor_RunQueryJobName + query.getName());
 			
 		//load the current view projection
@@ -103,6 +120,7 @@ public class RunCompoundQueryJob extends Job{
 				//so we need to clone the query here
 				Query clone = q.clone(null);
 				clone.setId(q.getId());
+				clone.setUuid(q.getUuid());
 				if (q != null){
 					try{
 

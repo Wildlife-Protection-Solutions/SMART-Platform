@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.query.importexport;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.xml.model.QueryType;
 
 /**
  * Interface for query importer.  Different query
@@ -42,13 +42,12 @@ import org.wcs.smart.query.xml.model.QueryType;
  */
 public interface IQueryImporter {
 
+
 	/**
-	 * Determines if the importer can import the given query type.
+	 * Determines if the importer can import the given file
 	 * 
-	 * @param qt
-	 * @return
 	 */
-	public boolean canImport(IQueryType qt);
+	public boolean canImport(File file);
 	
 	/**
 	 * Imports the given xml query.  This function is responsible
@@ -61,7 +60,7 @@ public interface IQueryImporter {
 	 * @return the imported query definition
 	 * @throws Exception if the query cannot be imported
 	 */
-	public Query importQuery(QueryType xmlQuery, ConservationArea ca) throws Exception;
+	public List<Query> importQuery(File file, ConservationArea ca) throws Exception;
 	
 	/**
 	 * Warnings are displayed to the user and the user is allowed to choose
@@ -75,4 +74,6 @@ public interface IQueryImporter {
 	 * @return warnings generated during import process
 	 */
 	public ArrayList<String> getWarnings();
+	
+	public void beforeCommit() throws Exception;
 }

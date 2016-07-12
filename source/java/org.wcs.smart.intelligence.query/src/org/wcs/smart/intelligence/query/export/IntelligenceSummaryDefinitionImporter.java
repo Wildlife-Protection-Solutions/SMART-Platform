@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
-import org.wcs.smart.query.importexport.IQueryImporter;
+import org.wcs.smart.query.importexport.AbstractXmlQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -41,7 +41,7 @@ import org.wcs.smart.query.xml.model.QueryType;
  * @author Emily
  *
  */
-public class IntelligenceSummaryDefinitionImporter implements IQueryImporter{
+public class IntelligenceSummaryDefinitionImporter extends AbstractXmlQueryImporter{
 
 	/*
 	 * list of warnings generated during import process

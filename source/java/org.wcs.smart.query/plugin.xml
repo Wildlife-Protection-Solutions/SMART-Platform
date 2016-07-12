@@ -1176,6 +1176,21 @@
             panel="org.wcs.smart.query.compound.ui.QueryListItemPanel">
       </QueryItemPanel>
    </extension>
+   <extension
+         point="org.wcs.smart.query.export.format">
+      <Exporter
+            class="org.wcs.smart.query.compound.ui.CompoundQueryExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.query.compound.ui.CompoundQueryDefinitionExporter">
+      </Exporter>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.import">
+      <QueryImporter
+            class="org.wcs.smart.query.compound.ui.CompoundQueryDefinitionImporter">
+      </QueryImporter>
+   </extension>
 
 
 </plugin>

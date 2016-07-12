@@ -28,7 +28,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.GriddedQuery;
-import org.wcs.smart.query.importexport.IQueryImporter;
+import org.wcs.smart.query.importexport.AbstractXmlQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -45,7 +45,7 @@ import org.wcs.smart.query.xml.model.UuidItemType;
  * @author Emily
  *
  */
-public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
+public abstract class GriddedQueryDefinitionImporter extends AbstractXmlQueryImporter{
 
 	/*
 	 * list of warnings generated during import process

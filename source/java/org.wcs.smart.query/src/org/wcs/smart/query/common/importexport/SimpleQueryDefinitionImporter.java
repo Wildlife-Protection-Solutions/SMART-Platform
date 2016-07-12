@@ -29,7 +29,7 @@ import org.wcs.smart.ca.ConservationArea;
 //import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.importexport.IQueryImporter;
+import org.wcs.smart.query.importexport.AbstractXmlQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
@@ -47,7 +47,7 @@ import org.wcs.smart.query.xml.model.UuidItemType;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
+public abstract class SimpleQueryDefinitionImporter extends AbstractXmlQueryImporter {
 
 	/*
 	 * list of warnings generated during import process

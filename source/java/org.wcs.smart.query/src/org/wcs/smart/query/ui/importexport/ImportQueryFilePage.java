@@ -105,8 +105,8 @@ public class ImportQueryFilePage extends WizardPage {
 				FileDialog fd = new FileDialog(ImportQueryFilePage.this.getShell(), 
 						SWT.OPEN | SWT.MULTI);
 				
-				String[] extensions = new String[]{"*.xml", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
-				String[] names = new String[]{Messages.ImportQueryFilePage_xmlFilterName, Messages.ImportQueryFilePage_AllFilesFilterName};
+				String[] extensions = new String[]{"*.xml;*.zip", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
+				String[] names = new String[]{Messages.ImportQueryFilePage_xmlFilterName + ": ZIP (*.zip)", Messages.ImportQueryFilePage_AllFilesFilterName}; //$NON-NLS-1$
 				
 				fd.setFilterExtensions(extensions);
 				fd.setFilterNames(names);

@@ -14,6 +14,7 @@ import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
 public class CompoundQueryDropFactory implements IDropItemFactory{
 
@@ -43,10 +44,13 @@ public class CompoundQueryDropFactory implements IDropItemFactory{
 			IQueryType type = QueryTypeManager.INSTANCE.findQueryType(layer.getQueryType());
 					
 			Query childquery = QueryHibernateManager.getInstance().findQuery(session, layer.getQueryUuid(), type);
-			//TODO: deal with custom date filter
-			DropItem di = generateDropItem(childquery, QueryListItemPanel.ID)[0];
-			di.initializeData(layer);
-			items.add(di);
+			if (childquery == null){
+				items.add(new ErrorDropItem("Query not found."));
+			}else{
+				DropItem di = generateDropItem(childquery, QueryListItemPanel.ID)[0];
+				di.initializeData(layer);
+				items.add(di);
+			}
 		}
 		q.setDropItems(CompoundDefinitionPanel.ID, items);
 		

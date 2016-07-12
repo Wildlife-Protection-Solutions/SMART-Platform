@@ -94,9 +94,9 @@ public class ImportQueryUtil {
 	 * provided ConservationArea and the associated query folder.
 	 * 
 	 */
-	public static Query importQuery(File file, QueryFolder qf, ConservationArea ca, Shell shell) throws Exception{
+	public static List<Query> importQuery(File file, QueryFolder qf, ConservationArea ca, Shell shell) throws Exception{
 		QueryImportEngine importer = new QueryImportEngine();
-		Query query = importer.importQuery(file, ca);
+		List<Query> queries = importer.importQuery(file, ca);
 		
 		List<String> warnings = importer.getWarnings();
 		if (warnings.size() > 0){
@@ -118,26 +118,31 @@ public class ImportQueryUtil {
 			}	
 		}
 	
-	
-		if (!qf.isRootFolder()){
-			query.setFolder(qf);
-			query.setIsShared(qf.getEmployee() == null);
-		}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
-			query.setIsShared(true);
-		}
-	
-		//set the owner
-		if (query.getIsShared() && ca.getIsCcaa()){
-			//shared queries in the cross-ca analysis do not have a user
-			query.setOwner(SmartDB.getSharedEmployee());
+		for (Query query: queries){
+			if (!qf.isRootFolder()){
+				query.setFolder(qf);
+				query.setIsShared(qf.getEmployee() == null);
+			}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
+				query.setIsShared(true);
+			}
+		
+			//set the owner
+			if (query.getIsShared() && ca.getIsCcaa()){
+				//shared queries in the cross-ca analysis do not have a user
+				query.setOwner(SmartDB.getSharedEmployee());
+			}
 		}
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
-			//generate id
-			query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
-			session.save(query);
+			for (Query query : queries){
+				//generate id
+				query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
+				session.save(query);
+			}
+			session.flush();
+			importer.beforeCommit();
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			session.getTransaction().rollback();
@@ -146,6 +151,6 @@ public class ImportQueryUtil {
 			session.close();
 		}				
 		
-		return query;
+		return queries;
 	}
 }

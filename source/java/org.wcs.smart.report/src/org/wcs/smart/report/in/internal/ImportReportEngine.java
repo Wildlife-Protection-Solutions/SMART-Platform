@@ -611,7 +611,7 @@ public class ImportReportEngine {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try{
-					importedQuery = qi.importQuery(queryFile, importCa);
+					importedQuery = qi.importQuery(queryFile, importCa).get(0);
 					queryWarnings.addAll( qi.getWarnings());
 					return Status.OK_STATUS;
 				}catch (Exception ex){

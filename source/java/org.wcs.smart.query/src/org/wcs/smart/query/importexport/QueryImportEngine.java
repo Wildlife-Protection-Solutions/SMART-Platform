@@ -21,10 +21,7 @@
  */
 package org.wcs.smart.query.importexport;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,11 +38,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.xml.QueryXmlManager;
-import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryName;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.util.SmartUtils;
@@ -71,21 +64,23 @@ public class QueryImportEngine {
 	 * @param query
 	 * @return
 	 */
-	public static final IQueryImporter getQueryImporter(IQueryType query){
+	public static final IQueryImporter getQueryImporter(File f){
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
 		
 		for (IConfigurationElement e : config) {
 			try{
 				IQueryImporter importer = (IQueryImporter) e.createExecutableExtension("class"); //$NON-NLS-1$
-				if (importer.canImport(query)) {
+				if (importer.canImport(f)) {
 					return importer;
 				}
 			}catch (Exception ex){
-				QueryPlugIn.log(MessageFormat.format(Messages.QueryImportEngine_QueryImporterNotFound, new Object[]{query.getGuiName()}),ex);
+				QueryPlugIn.log(MessageFormat.format(Messages.QueryImportEngine_QueryImporterNotFound1, new Object[]{f.getAbsolutePath()}),ex);
 			}
 		}
 		return null;
 	}
+	
+	private IQueryImporter importer = null;
 	
 	/**
 	 * Imports the given definition file.
@@ -101,32 +96,26 @@ public class QueryImportEngine {
 	 * @throws Exception if the file cannot be converted to a query.
 	 * 
 	 */
-	public org.wcs.smart.query.model.Query importQuery(File file, ConservationArea importCa) throws Exception{
+	public List<org.wcs.smart.query.model.Query> importQuery(File file, ConservationArea importCa) throws Exception{
 		warnings.clear();
-		
-		Query q = null;
-		try(InputStream fin = new BufferedInputStream(new FileInputStream(file))){
-			q = QueryXmlManager.readQueryFile(fin);
-		}
-		
-		QueryType qt = q.getQuery();
-		IQueryType lQueryType = QueryTypeManager.INSTANCE.findQueryType(qt.getQueryType());
-		if (lQueryType == null){
-			lQueryType = QueryTypeManager.INSTANCE.findDeprecatedQueryType(qt.getQueryType());
-		}
-		if (lQueryType == null){
-			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType, new Object[]{ qt.getQueryType()}));
-		}
-		
-		IQueryImporter importer = getQueryImporter(lQueryType);
+
+		importer = getQueryImporter(file);
 		if (importer == null){
-			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType, new Object[]{ qt.getQueryType()}));
+			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType1, new Object[]{ file.getAbsolutePath()}));
 		}
 		
-		org.wcs.smart.query.model.Query importedQuery = importer.importQuery(qt, importCa);
+		List<org.wcs.smart.query.model.Query> importedQuery = importer.importQuery(file, importCa);
 		warnings.addAll(importer.getWarnings());
 		return importedQuery;
 		
+	}
+	
+	/**
+	 * Executes before commit after flush to database
+	 * @throws Exception
+	 */
+	public void beforeCommit() throws Exception{
+		importer.beforeCommit();
 	}
 	
 	/**

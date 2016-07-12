@@ -177,14 +177,15 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						HashMap<String, Object> params = new HashMap<String, Object>();
 						def.export(query, null, outputFile, params, monitor);
 						
-						Query q = importQuery(outputFile, qf);
-						if (q != null){
+						List<Query> q = importQuery(outputFile, qf);
+						if (q != null && !q.isEmpty()){
 							if (firstQuery == null){
-								firstQuery = q;
+								firstQuery = q.get(0);
 							}
-							importCnt++;
-						
-							QueryEventManager.getInstance().fireQueryAdded(q);
+							importCnt+=q.size();
+							for(Query query1 : q){
+								QueryEventManager.getInstance().fireQueryAdded(query1);
+							}
 						}
 					}catch (Throwable ex){
 						MessageDialog.openError(getShell(), 
@@ -229,14 +230,15 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 					monitor.subTask(MessageFormat.format(Messages.ImportQueryWizard_ImportingProgress, new Object[]{f.getName()}));
 					monitor.worked(1);
 					try{
-						Query q = importQuery(f, qf);
-						if (q != null){
+						List<Query> q = importQuery(f, qf);
+						if (q != null && !q.isEmpty()){
 							if (firstQuery == null){
-								firstQuery = q;
+								firstQuery = q.get(0);
 							}
-							importCnt++;
-						
-							QueryEventManager.getInstance().fireQueryAdded(q);
+							importCnt+= q.size();
+							for(Query query : q){
+								QueryEventManager.getInstance().fireQueryAdded(query);
+							}
 						}
 					}catch (Exception ex){
 						QueryPlugIn.displayLog(MessageFormat.format(Messages.ImportQueryWizard_ErrorImportingFile, new Object[]{f.getAbsolutePath()}) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
@@ -255,9 +257,9 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 		});
 	}
 	
-	private Query importQuery(File file, QueryFolder qf) throws Exception{
+	private List<Query> importQuery(File file, QueryFolder qf) throws Exception{
 		QueryImportEngine importer = new QueryImportEngine();
-		Query query = importer.importQuery(file, SmartDB.getCurrentConservationArea());
+		List<Query> queries = importer.importQuery(file, SmartDB.getCurrentConservationArea());
 		
 		List<String> warnings = importer.getWarnings();
 		if (warnings.size() > 0){
@@ -279,29 +281,33 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 			}	
 		}
 	
-	
-		if (!qf.isRootFolder()){
-			query.setFolder(qf);
-			query.setIsShared(qf.getEmployee() == null);
-		}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
-			query.setIsShared(true);
-		}
-	
-		//set the owner
-		if (query.getIsShared() && SmartDB.isMultipleAnalysis()){
-			//shared queries in the cross-ca analysis do not have a user
-			query.setOwner(SmartDB.getSharedEmployee());
-		}else{
-			query.setOwner(SmartDB.getCurrentEmployee());
-		}
+		for (Query query : queries){
+			if (!qf.isRootFolder()){
+				query.setFolder(qf);
+				query.setIsShared(qf.getEmployee() == null);
+			}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
+				query.setIsShared(true);
+			}
 		
+			//set the owner
+			if (query.getIsShared() && SmartDB.isMultipleAnalysis()){
+				//shared queries in the cross-ca analysis do not have a user
+				query.setOwner(SmartDB.getSharedEmployee());
+			}else{
+				query.setOwner(SmartDB.getCurrentEmployee());
+			}
+		}
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
 			//generate id
-			query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
-			session.save(query);
+			for (Query query : queries){
+				query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
+				session.saveOrUpdate(query);
+			}
+			session.flush();
+			importer.beforeCommit();
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			session.getTransaction().rollback();
@@ -310,7 +316,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 			session.close();
 		}				
 		
-		return query;
+		return queries;
 	}
 	/**
 	 * @see org.eclipse.jface.dialogs.IPageChangingListener#handlePageChanging(org.eclipse.jface.dialogs.PageChangingEvent)
