@@ -111,13 +111,12 @@ public abstract class AbstractZoomToInfoProvider implements IQueryResultInfoProv
 				}else{
 					src = p.getObject();
 				}
-				if (src instanceof MapPart){
-					Map map = ((MapPart)src).getMap();
-					SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(env, true);
-					map.sendCommandASync(cmd);
-				}
 				if (src instanceof IMapQueryEditor){
-					((IMapQueryEditor) src).showMapPage();
+					((IMapQueryEditor) src).showMapPage(env);
+				}else if (src instanceof MapPart){
+					final Map map = ((MapPart)src).getMap();
+					SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(env, true);
+					map.sendCommandASync(cmd);					
 				}
 			}
 		}

@@ -128,6 +128,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 					}
 					rasterService = new RasterService(query);
 				}
+				//TODO: sync access to raster service to fix npe
 				rasterService.getReader(monitor); // this will create the raster & validate size
 				if (rasterService.getMessage() != null) {
 					QueryPlugIn

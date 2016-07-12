@@ -66,6 +66,7 @@ public class LoadDefaultLayersJob extends Job{
 	private static final String JOB_NAME = Messages.LoadDefaultLayersJob_JobName;
 	private IMap map;
 	private UUID basemapUuid = null;
+	private boolean zoomExtents;
 	
 	/**
 	 * Creates a new job that loads the the session
@@ -75,7 +76,20 @@ public class LoadDefaultLayersJob extends Job{
 	 * @param map the map to apply the default basemap too
 	 */
 	public LoadDefaultLayersJob(IMap map){
+		this(map, true);
+	}
+	
+	/**
+	 * Creates a new job that loads the the session
+	 * basemap (if defined), or the default basemap (if defined)
+	 * or the default SMART basemap.
+	 * 
+	 * @param map the map to apply the default basemap too
+	 * @param zoomExtends if the map should zoom to extents after loaded
+	 */
+	public LoadDefaultLayersJob(IMap map, boolean zoomExtends){
 		this(map, null);
+		this.zoomExtents = zoomExtends;
 	}
 	
 	/**
@@ -92,6 +106,7 @@ public class LoadDefaultLayersJob extends Job{
 		super(JOB_NAME);
 		this.map = map;
 		this.basemapUuid = basemapUuid;
+		this.zoomExtents = true;
 	}
 	
 	@Override
@@ -113,8 +128,9 @@ public class LoadDefaultLayersJob extends Job{
     			if (mapDef != null){
     				MapSettings settings = MapSettings.getInstance(mapDef);
     				settings.applyTo((Map) map);
-    				
-    				map.sendCommandASync(new ZoomExtentCommand());
+    				if (zoomExtents){
+    					map.sendCommandASync(new ZoomExtentCommand());
+    				}
     			}else{
 					@SuppressWarnings("unchecked")
 					List<IGeoResource> layers = (List<IGeoResource>) ss.resources(null);

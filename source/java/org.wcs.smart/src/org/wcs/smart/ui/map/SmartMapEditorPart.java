@@ -61,10 +61,12 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.internal.ui.IDropTargetProvider;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.render.RenderPackage;
@@ -534,25 +536,38 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         }
     }
 	
-	protected void addInitialZoomFunction(){
-		getParentEditor().addPageChangedListener(new IPageChangedListener() {
-			@Override
-			public void pageChanged(PageChangedEvent event) {
-				if (event.getSelectedPage() == SmartMapEditorPart.this){
-					getParentEditor().removePageChangedListener(this);
-		
-					getMap().getViewportModel().addViewportModelListener(new IViewportModelListener() {
-						
-						@Override
-						public void changed(ViewportModelEvent event) {
-							getMap().getViewportModel().removeViewportModelListener(this);
+	/* initial zoom function */
+	protected ReferencedEnvelope initialZoom = null;
+	
+	public void setInitialZoom(ReferencedEnvelope zoom){
+		this.initialZoom = zoom;
+	}
+	
+	protected IPageChangedListener initialZoomListener = new IPageChangedListener() {
+		@Override
+		public void pageChanged(PageChangedEvent event) {
+			if (event.getSelectedPage() == SmartMapEditorPart.this){
+				getParentEditor().removePageChangedListener(this);
+	
+				getMap().getViewportModel().addViewportModelListener(new IViewportModelListener() {
+					
+					@Override
+					public void changed(ViewportModelEvent event) {
+						getMap().getViewportModel().removeViewportModelListener(this);
+						if (initialZoom == null){
 							getMap().sendCommandSync(new ZoomExtentCommand());
+						}else{
+							getMap().sendCommandSync(new SetViewportBBoxCommand(initialZoom));
 						}
-					});
-				}
-				
+					}
+				});
 			}
-		});
+			
+		}
+	};
+	
+	protected void addInitialZoomFunction(){
+		getParentEditor().addPageChangedListener(initialZoomListener);
 	}
 
 }

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.editor;
 
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 
 /**
@@ -38,7 +39,9 @@ public interface IMapQueryEditor extends IQueryEditor {
 	public abstract IQueryService createQueryService();
 	
 	/**
-	 * Activate the map page of the editor
+	 * Activate the map page of the editor and zooms 
+	 * to the given envelope. Envelope can be null if
+	 * should not zoom.
 	 */
-	public void showMapPage();
+	public void showMapPage(ReferencedEnvelope env);
 }

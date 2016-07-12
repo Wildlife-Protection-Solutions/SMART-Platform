@@ -37,8 +37,10 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
@@ -220,7 +222,11 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 	
 	@Override
-	public void showMapPage() {
+	public void showMapPage(ReferencedEnvelope env) {
+		if (env != null){
+			page2.setInitialZoom(env);
+			getMap().sendCommandSync(new SetViewportBBoxCommand(env));
+		}
 		for (int i = 0; i < getPageCount(); i ++){
 			if (getEditor(i) == page2){
 				setActivePage(i);
