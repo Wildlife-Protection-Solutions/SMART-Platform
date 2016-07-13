@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -67,7 +66,10 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 
 	private ConservationArea ca = null;
 	
-	public ConnectCtAlertProvider(ConfigurableModel model) {
+	private ConnectConfigurationExtension ext;
+	
+	public ConnectCtAlertProvider(ConfigurableModel model, ConnectConfigurationExtension ext) {
+		this.ext = ext;
 		init(model);
 	}
 
@@ -107,34 +109,27 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 			//this case we are using the data model which has no alerts
 			lookup = new AlertLookup(Collections.emptyList());
 			properties = new ConnectCtProperties();
-			properties.setPingFrequency(ConnectCtProperties.PING_FREQUENCY_DEFAULT_VALUE);
+			properties.setPingFrequency(ConnectCtProperties.FREQUENCY_DEFAULT_VALUE);
 		}
 
 	}
 	
 	private void initConnectFields() {
-		Display.getDefault().syncExec(new Runnable(){
-			@Override
-			public void run() {
-				ConnectAlertConfigDialog cd = new ConnectAlertConfigDialog(Display.getDefault().getActiveShell());
-				if (cd.open() != Window.CANCEL) {
-					url = cd.getServerUrl();
-					url += SmartConnect.API_URL + "/connectalert"; //$NON-NLS-1$
-					username = cd.getUsername();
-					password = cd.getPassword();
-				} else {
-					//we don't now server configuration -> alerts will be ignored
-					isServerConfigured = false;
-					lookup.clear();
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ConnectCtAlertProvider_NoAlertConfigInfo_Title, Messages.ConnectCtAlertProvider_NoAlertConfigInfo_Message);
-						}
-					});
+		String[] data = ext.getConnectData();
+		if (data.length == 3){
+			url = data[0] + SmartConnect.API_URL + "/connectalert"; //$NON-NLS-1$
+			username = data[1];
+			password = data[2];
+		}else{
+			isServerConfigured = false;
+			lookup.clear();
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ConnectCtAlertProvider_NoAlertConfigInfo_Title, Messages.ConnectCtAlertProvider_NoAlertConfigInfo_Message);
 				}
-			}
-		});
+			});
+		}
 	}
 
 	@Override

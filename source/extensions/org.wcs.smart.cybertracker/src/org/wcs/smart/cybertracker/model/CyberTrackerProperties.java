@@ -34,6 +34,18 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
  */
 public class CyberTrackerProperties {
 
+	public enum Protocol{
+		GEOJSON(4),
+		GEOJSON_COMPRESSED(6);
+//		ERSIJSON(7);
+		
+		public int ctValue;
+		
+		private Protocol(int ctValue){
+			this.ctValue = ctValue;
+		}
+	}
+	
 	public static final int STORAGE_TIME_MIN_VALUE = 0;
 	public static final int STORAGE_TIME_MAX_VALUE = 365;
 	public static final int STORAGE_TIME_DEFAULT_VALUE = 30;

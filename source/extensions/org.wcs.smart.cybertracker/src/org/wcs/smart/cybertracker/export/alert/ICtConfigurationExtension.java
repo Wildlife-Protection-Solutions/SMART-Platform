@@ -19,23 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.cybertracker.alert;
+package org.wcs.smart.cybertracker.export.alert;
 
-import org.wcs.smart.cybertracker.export.alert.IAlertProvider;
-import org.wcs.smart.cybertracker.export.alert.ICtAlertExtension;
+import org.hibernate.Session;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
- * Alert extension by Connect for CyberTracker.
+ * Interface that must be implemented if a plugin wants to provide alert configuration
+ * of data target configuration for CyberTracker.
+ * 
+ * Each CT export will create a single new instance of this class.
  * 
  * @author elitvin
  * @since 4.0.0
  */
-public class ConnectCtAlertExtension implements ICtAlertExtension {
+public interface ICtConfigurationExtension {
+	
+	/**
+	 * Gets the alert provider for the given configurable model. May return null
+	 * if not applicable
+	 * 
+	 * @param model
+	 * @return
+	 */
+	public IAlertProvider getAlertProvider(ConfigurableModel model, Session session);
 
-	@Override
-	public IAlertProvider createAlertProvider(ConfigurableModel model) {
-		return new ConnectCtAlertProvider(model);
-	}
-
+	/**
+	 * Gets the target provider for the given configurable model.  May return null
+	 * if not applicable.
+	 * 
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	public IDataTargetProvider getDataTargetProvider(ConfigurableModel model, Session session) throws Exception;
 }

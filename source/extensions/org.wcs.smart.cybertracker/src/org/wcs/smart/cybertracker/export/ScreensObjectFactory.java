@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.export;
 import java.util.List;
 
 import org.wcs.smart.cybertracker.export.alert.AlertData;
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.screens.Controls;
@@ -44,6 +45,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class ScreensObjectFactory {
 
+
 	private static final int DEFAULT_NODE_NEXT_ID = 20;
 	
 	private static final int CONTROL_2_INDEX = 0;
@@ -57,10 +59,6 @@ public class ScreensObjectFactory {
 
 	private static final int ATTRIBUTE_IMAGE_1 = 12; //"Image1" for Icon
 
-	private static final int ALERT_PROTOCOL_GEOJSON = 4;
-//	private static final int ALERT_PROTOCOL_GEOJSON_COMPRESSED = 6;
-//	private static final int ALERT_PROTOCOL_ESRIJSON = 7;
-	
 	private CyberTrackerPropertiesProfile ctProperties;
 	
 	public ScreensObjectFactory(CyberTrackerPropertiesProfile properties) {
@@ -1157,7 +1155,7 @@ public class ScreensObjectFactory {
 		control.setTranslatePatrolElementId(patrolId);
 		control.setPingOnly(ctBooleanValue(data.getPingOnly()));
 		control.setTranslateElements(trElements);
-		control.setProtocol(ALERT_PROTOCOL_GEOJSON);
+		control.setProtocol(CyberTrackerProperties.Protocol.GEOJSON.ctValue);
 		return control;
 	}	
 	

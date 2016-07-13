@@ -46,7 +46,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -56,6 +55,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -108,8 +108,11 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	private Button btnEdit;
 	private Button btnDelete;
 	
-	private Text txtPingFrequency;
-	private ControlDecoration pingFrequencyDecoration;
+	private Text txtPosition;
+	private Text txtData;
+	
+	private ControlDecoration cdData;
+	private ControlDecoration cdPosition;
 	
 	private List<ConnectAlert> alertsList;
 	private List<ConnectAlert> dbAlertsList;
@@ -133,20 +136,149 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 
 	@Override
 	public Composite createTabContent(Composite parent) {
+		Composite all = new Composite(parent, SWT.BORDER);
+		all.setLayout(new GridLayout(1, false));
+		all.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		dbAlertsList = loadAlerts(dialog.getModel());
 		properties = ConnectCtHibernateManager.getCtProperties(dialog.getModel(), dialog.getSession());
 		
-		SashForm container = new SashForm(parent, SWT.HORIZONTAL);
+		Group g = new Group(all, SWT.NONE);
+		g.setText("SMART Connect Data Uploads");
+		g.setLayout(new GridLayout(1, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		//controls for position frequence
+		Composite positionComp = new Composite(g, SWT.NONE);
+		positionComp.setLayout(new GridLayout(4, false));
+		positionComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Button btnPosition = new Button(positionComp, SWT.CHECK);
+		
+		Label lbl1 = new Label(positionComp, SWT.NONE);
+		lbl1.setText("Send position updates every");
+		txtPosition = new Text(positionComp, SWT.BORDER);
+		txtPosition.setTextLimit(4);
+		
+		GridData gd2 = new GridData(SWT.FILL, SWT.FILL, false, false);
+		gd2.widthHint = 25;
+		txtPosition.setLayoutData(gd2);
+		Label lbl2 = new Label(positionComp, SWT.NONE);
+		lbl2.setText("minutes");
+		cdPosition = createDecoration(lbl2);
+		String tooltip = "Position updates will appear on the SMART Connect\nweb application Alerts Map. They are only sent\nwhen the mobile device has an internet connection\n(cellular, wifi, etc), and are stored\non the device until a connection is acquired (at\nwhich time they are all sent to SMART Connect).";
+		lbl1.setToolTipText(tooltip);
+		lbl2.setToolTipText(tooltip);
+		txtPosition.setToolTipText(tooltip);
+		btnPosition.setToolTipText(tooltip);
+		
+		btnPosition.addSelectionListener(new SelectionAdapter() {	
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				lbl1.setEnabled(btnPosition.getSelection());
+				lbl2.setEnabled(btnPosition.getSelection());
+				txtPosition.setEnabled(btnPosition.getSelection());
+				updatePositionFrequency();
+				validatePositionFrequency();
+				dialog.notifyChangesMade();
+			}
+		});
+		txtPosition.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				validatePositionFrequency();
+				dialog.notifyChangesMade();
+			}
+		});
+		//intialize controls for position frequency
+		if (properties.getPingFrequency() == null || properties.getPingFrequency() == 0){
+			btnPosition.setSelection(false);
+			txtPosition.setText("0");
+		}else{
+			btnPosition.setSelection(true);
+			txtPosition.setText(properties.getPingFrequency().toString());
+		}
+		lbl1.setEnabled(btnPosition.getSelection());
+		lbl2.setEnabled(btnPosition.getSelection());
+		txtPosition.setEnabled(btnPosition.getSelection());
+		validatePositionFrequency();
+
+		//create data frequency options
+		Composite dataComp = new Composite(g, SWT.NONE);
+		dataComp.setLayout(new GridLayout(4, false));
+		dataComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Button btnData = new Button(dataComp, SWT.CHECK);
+		
+		Label lbl3 = new Label(dataComp, SWT.NONE);
+		lbl3.setText("Upload data automatically every");
+		txtData = new Text(dataComp, SWT.BORDER);
+		txtData.setTextLimit(4);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, false);
+		gd.widthHint = 25;
+		txtData.setLayoutData(gd);
+		Label lbl4 = new Label(dataComp, SWT.NONE);
+		lbl4.setText("minutes");
+		cdData = createDecoration(lbl4);
+		txtData.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				validateDataFrequency();
+				dialog.notifyChangesMade();
+			}
+		});
+
+		String tooltip2 = "When using this option, users cannot plug the mobile device\ninto the SMART Desktop to download data.  All data must\nbe sent to a SMART Connect server via an\ninternet connection (the downloaded and processed by\na SMART Desktop instance).  Observation data will stay\non the device until an internet connection is acquired at\nwhich time it will be sent to SMART Connect.";
+		lbl3.setToolTipText(tooltip2);
+		lbl4.setToolTipText(tooltip2);
+		txtData.setToolTipText(tooltip2);
+		btnData.setToolTipText(tooltip2);
+		btnData.addSelectionListener(new SelectionAdapter() {	
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				lbl3.setEnabled(btnData.getSelection());
+				lbl4.setEnabled(btnData.getSelection());
+				txtData.setEnabled(btnData.getSelection());
+				updateDataFrequency();
+				validateDataFrequency();
+				dialog.notifyChangesMade();
+			}
+		});
+		
+		//intialize controls for data frequency
+		if (properties.getDataFrequency() == null || properties.getDataFrequency() == 0){
+			btnData.setSelection(false);
+			txtData.setText("0");
+		}else{
+			btnData.setSelection(true);
+			txtData.setText(properties.getDataFrequency().toString());
+		}
+		lbl3.setEnabled(btnData.getSelection());
+		lbl4.setEnabled(btnData.getSelection());
+		txtData.setEnabled(btnData.getSelection());
+		validateDataFrequency();
+		
+		Group g2 = new Group(all, SWT.NONE);
+		g2.setText("Alert Configuration");
+		g2.setLayout(new GridLayout(1, false));
+		g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+//		SashForm container = new SashForm(g2, SWT.HORIZONTAL);
+//		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
+		Composite container = new Composite(g2, SWT.NONE);
+		container.setLayout(new GridLayout(2, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite innerLeft = new Composite(container, SWT.NONE);
 		innerLeft.setLayout(new GridLayout());
+		innerLeft.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)innerLeft.getLayout()).marginHeight = 0;
 		
-		modelTreeViewer = new TreeViewer(innerLeft, SWT.V_SCROLL | SWT.H_SCROLL| SWT.BORDER);
+		modelTreeViewer = new TreeViewer(innerLeft, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		modelTreeViewer.setLabelProvider(new ConnectCmTreeLabelProvider(dialog.getModel()));
 		modelTreeViewer.setContentProvider(new ConnectCmTreeContentProvider(false));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)modelTreeViewer.getControl().getLayoutData()).widthHint = 100;
+	
 		((GridData)modelTreeViewer.getControl().getLayoutData()).heightHint = 100;
 		modelTreeViewer.setInput(dialog.getModel());
 		modelTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -182,43 +314,11 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
-
-		Composite topPanel = new Composite(rightPanel, SWT.NONE);
-		topPanel.setLayout(new GridLayout(2, false));
-		((GridLayout)topPanel.getLayout()).marginHeight = 0;
-		((GridLayout)topPanel.getLayout()).marginWidth = 0;
-		topPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Label lblPing = new Label(topPanel, SWT.NONE);
-		lblPing.setText(Messages.ConfigurableModelEditorConnectTab_PingFrequency);
-		lblPing.setToolTipText(Messages.ConfigurableModelEditorConnectTab_PingFrequency_Tooltip);
-		
-		txtPingFrequency = new Text(topPanel, SWT.BORDER);
-		txtPingFrequency.setToolTipText(Messages.ConfigurableModelEditorConnectTab_PingFrequency_Tooltip);
-		txtPingFrequency.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtPingFrequency.setText(properties.getPingFrequency() != null ? String.valueOf(properties.getPingFrequency()) : ""); //$NON-NLS-1$
-		txtPingFrequency.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (isPingFrequencyValid()) {
-					pingFrequencyDecoration.hide();
-					properties.setPingFrequency(Integer.valueOf(txtPingFrequency.getText()));
-				} else {
-					pingFrequencyDecoration.show();
-				}
-				dialog.notifyChangesMade();
-			}
-		});
-
-		pingFrequencyDecoration = new ControlDecoration(txtPingFrequency, SWT.LEFT);
-		pingFrequencyDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		pingFrequencyDecoration.setShowHover(true);
-		pingFrequencyDecoration.setDescriptionText(MessageFormat.format(Messages.ConfigurableModelEditorConnectTab_PingFrequency_Error, ConnectCtProperties.PING_FREQUENCY_MIN_VALUE, ConnectCtProperties.PING_FREQUENCY_MAX_VALUE));
-		pingFrequencyDecoration.hide();
-		
+		rightPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)rightPanel.getLayout()).marginHeight = 0;
 		
 		alertTable = createAlertsTable(rightPanel);
+		alertTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		alertTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -269,7 +369,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			}
 		});
 		
-		container.setWeights(new int[]{40,60});
+		//container.setWeights(new int[]{40,60});
 
 		modelTreeViewer.refresh();
 		dialog.addModelChangedListener(new IConfigurableModelChangeListener() {
@@ -283,18 +383,19 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		
 		updateNewButtonState();
 		updateEditDeleteButtonState();
-		return container;
+		return all;
 	}
 
-	private boolean isPingFrequencyValid() {
-		if (txtPingFrequency == null || txtPingFrequency.getText() == null || txtPingFrequency.getText().isEmpty())
-			return false;
-		try {
-			Integer result = Integer.valueOf(txtPingFrequency.getText());
-			return result >= ConnectCtProperties.PING_FREQUENCY_MIN_VALUE && result <= ConnectCtProperties.PING_FREQUENCY_MAX_VALUE;
-		} catch (NumberFormatException e) {
-			return false;
-		}
+	protected ControlDecoration createDecoration(Control control){
+		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		return cd;
+	}
+	
+	private boolean areFrequencyValid() {
+		return !cdData.isVisible() && !cdPosition.isVisible();
 	}
 
 	/**
@@ -606,8 +707,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	}
 	@Override
 	public String validate() {
-		if (!isPingFrequencyValid()) {
-			return MessageFormat.format(Messages.ConfigurableModelEditorConnectTab_PingFrequency_Error, ConnectCtProperties.PING_FREQUENCY_MIN_VALUE, ConnectCtProperties.PING_FREQUENCY_MAX_VALUE);
+		if (!areFrequencyValid()) {
+			return "Invalid configuration";
 		}
 		return null;
 	}
@@ -644,4 +745,73 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		return 200;
 	}
 
+	private void updateDataFrequency(){
+		properties.setDataFrequency(0);
+		if (txtData.isEnabled()){
+			try{
+				int x = Integer.parseInt(txtData.getText());
+				if (x >= 0){
+					properties.setDataFrequency(x);
+				}
+			}catch (Exception ex){
+				
+			}
+		}
+	}
+	
+	private void updatePositionFrequency(){
+		properties.setPingFrequency(0);
+		if (txtPosition.isEnabled()){
+			try{
+				int x = Integer.parseInt(txtPosition.getText());
+				if (x >= 0){
+					properties.setPingFrequency(x);
+				}
+			}catch (Exception ex){
+				
+			}
+		}
+	}
+	
+	private void validateDataFrequency() {
+		if (!txtData.isEnabled()){
+			cdData.hide();
+			return;
+		}
+		try{
+			Integer i = Integer.parseInt(txtData.getText());
+			if (i <= 0 || i > ConnectCtProperties.FREQUENCY_MAX_VALUE){
+				cdData.setDescriptionText(MessageFormat.format("Not a valid integer.  Must be a valid integer between 0 and {0}", ConnectCtProperties.FREQUENCY_MAX_VALUE));
+				cdData.show();
+			}else{
+				updateDataFrequency();
+				cdData.hide();
+			}
+		}catch (Exception ex){
+			cdData.show();
+			cdData.setDescriptionText("Not a valid integer.  Must be a valid integer > 0");
+			
+		}
+	}
+	
+	private void validatePositionFrequency(){
+		if (!txtPosition.isEnabled()){
+			cdPosition.hide();
+			return;
+		}
+		try{
+			Integer i = Integer.parseInt(txtPosition.getText());
+			if (i <= 0 || i > ConnectCtProperties.FREQUENCY_MAX_VALUE){
+				cdPosition.setDescriptionText(MessageFormat.format("Not a valid integer.  Must be a valid integer between 0 and {0}", ConnectCtProperties.FREQUENCY_MAX_VALUE));
+				cdPosition.show();
+			}else{
+				cdPosition.hide();
+				updatePositionFrequency();
+			}
+		}catch (Exception ex){
+			cdPosition.show();
+			cdPosition.setDescriptionText("Not a valid integer.  Must be a valid integer > 0");
+			
+		}
+	}
 }

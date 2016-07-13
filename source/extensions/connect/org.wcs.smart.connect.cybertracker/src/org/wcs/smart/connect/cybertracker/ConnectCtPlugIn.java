@@ -12,7 +12,8 @@ public class ConnectCtPlugIn extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.wcs.smart.connect.cybertracker"; //$NON-NLS-1$
 
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_1; //current version
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_2; //current version
 	
 	// The shared instance
 	private static ConnectCtPlugIn plugin;

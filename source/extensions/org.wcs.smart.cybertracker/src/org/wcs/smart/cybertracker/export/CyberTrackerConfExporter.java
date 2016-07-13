@@ -22,8 +22,10 @@
 package org.wcs.smart.cybertracker.export;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
@@ -56,7 +58,8 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
-import org.wcs.smart.cybertracker.export.alert.AlertExportDataProvider;
+import org.wcs.smart.cybertracker.export.alert.ConfigurationDataProvider;
+import org.wcs.smart.cybertracker.export.alert.IDataTargetProvider;
 import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.export.data.IAttributeListItemProxy;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
@@ -125,7 +128,7 @@ public class CyberTrackerConfExporter {
 	private Language currentLanguage;
 	private CyberTrackerPropertiesProfile ctProperties;
 	
-	private AlertExportDataProvider alertDataProvider;
+	private ConfigurationDataProvider alertDataProvider;
 	
 	public void setCurrentLanguage(Language currentLanguage) {
 		this.currentLanguage = currentLanguage;
@@ -150,7 +153,7 @@ public class CyberTrackerConfExporter {
 			monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
 
 			monitor.subTask(Messages.CyberTrackerConfExporter_Progress_AlertsConfig);
-			alertDataProvider = new AlertExportDataProvider(configurableModel);
+			alertDataProvider = new ConfigurationDataProvider(configurableModel, session);
 
 			elements = ElementsUtil.buildEmptyElements();
 			newWpResultId = new CyberTrackerId();
@@ -281,6 +284,29 @@ public class CyberTrackerConfExporter {
 			
 			try (BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_REPORTS))){
 				writeDataModel(reports, outR, Reports.class);
+			}
+			
+			//----------------creating Globals.xml----------------
+			//TODO: this is currently not work; likely a CT bug.  
+			try{
+			IDataTargetProvider.DataTarget target = alertDataProvider.getDataTarget();
+			if (target != null){
+				try (BufferedWriter outR = new BufferedWriter(new FileWriter(file.getAbsolutePath() + File.separator + "Globals.xml"))){ //$NON-NLS-1$
+					outR.write("<Globals>\n"); //$NON-NLS-1$
+					outR.write("<Transfer>\n"); //$NON-NLS-1$
+					outR.write("<UploadProtocol>" + target.getProtocol().ctValue + "</UploadProtocol>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					outR.write("<UploadUrl>" + target.getUrl() + "</UploadUrl>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					outR.write("<UploadUsername>" + target.getUsername() + "</UploadUsername>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					outR.write("<UploadPassword>" + target.getPassword() + "</UploadPassword>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					outR.write("<ClearDataOnSend>True</ClearDataOnSend>\n"); //$NON-NLS-1$
+					outR.write("<AutoSendtimeout>" + target.getFrequency() + "</AutoSendtimeout>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					outR.write("</Transfer>\n"); //$NON-NLS-1$
+					outR.write("</Globals>\n"); //$NON-NLS-1$
+				}
+			}
+			}catch (Exception ex){
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, ex.getMessage(), ex);
+				return null;
 			}
 		} catch (Exception e) {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_WriteXMmlFail, e);

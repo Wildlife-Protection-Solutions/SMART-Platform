@@ -53,7 +53,7 @@
    <extension
          point="org.wcs.smart.cybertracker.alert">
       <alertExtension
-            clazz="org.wcs.smart.connect.cybertracker.alert.ConnectCtAlertExtension">
+            clazz="org.wcs.smart.connect.cybertracker.alert.ConnectConfigurationExtension">
       </alertExtension>
    </extension>
    <extension

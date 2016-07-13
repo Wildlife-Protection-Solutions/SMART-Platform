@@ -35,8 +35,19 @@ import org.wcs.smart.dataentry.model.CmAttribute;
  */
 public interface IAlertProvider {
 
+	/**
+	 * Returns the list of items that should generate alerts.
+	 * 
+	 * @param item
+	 * @param attribute
+	 * @return
+	 */
 	public List<AlertData> getAlertData(UuidItem item, CmAttribute attribute);
 
+	/**
+	 * Returns position alert information
+	 * @return
+	 */
 	public AlertData getPingAlertData();
 
 }

@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.connect.cybertracker.upgrade;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.updatesite.AddConnectCtJob;
@@ -70,6 +73,21 @@ public class ConnectCtDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param session in active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
+		if (currentVersion.equalsIgnoreCase(ConnectCtPlugIn.DB_VERSION_1)){
+			String[] sql = new String[]{
+					"ALTER TABLE smart.connect_ct_properties add column data_frequency INTEGER" //$NON-NLS-1$
+			};
+			
+			session.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+					for (int i = 0; i < sql.length; i ++){
+						c.createStatement().execute(sql[i]);
+					}
+				}
+			});
+			HibernateManager.setPlugInVersion(ConnectCtPlugIn.PLUGIN_ID, ConnectCtPlugIn.DB_VERSION_2, session);
+		}
 	}
 
 }

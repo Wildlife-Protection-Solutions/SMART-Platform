@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -40,38 +41,56 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  * @author elitvin
  * @since 4.0.0
  */
-public class AlertExportDataProvider {
+public class ConfigurationDataProvider {
 	
-	private List<IAlertProvider> providers = new ArrayList<>();
+	private List<ICtConfigurationExtension> providers = new ArrayList<>();
 	
-	public AlertExportDataProvider(ConfigurableModel model) {
+	private ConfigurableModel model;
+	private Session session;
+	
+	public ConfigurationDataProvider(ConfigurableModel model, Session session) {
+		this.model = model;
+		this.session = session;
+		
 		if (Platform.getExtensionRegistry() != null) {
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(CyberTrackerPlugIn.ALERT_EXTENSION_ID);
 			try {
 				for (IConfigurationElement e : config) {
-					ICtAlertExtension ext = (ICtAlertExtension) e.createExecutableExtension("clazz"); //$NON-NLS-1$
-					providers.add(ext.createAlertProvider(model));
+					ICtConfigurationExtension ext = (ICtConfigurationExtension) e.createExecutableExtension("clazz"); //$NON-NLS-1$
+					providers.add(ext);
 				}
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.AlertExportDataProvider_Error, ex);
 			}
 		}
 	}
+	
+	public IDataTargetProvider.DataTarget getDataTarget() throws Exception{
+		for (ICtConfigurationExtension provider : providers){
+			IDataTargetProvider.DataTarget target = provider.getDataTargetProvider(model, session).getTarget();
+			if (target != null) return target;
+		}
+		return null;
+	}
 
 	public List<AlertData> getAlertData(UuidItem item, CmAttribute attribute) {
 		List<AlertData> result = new ArrayList<>();
-		for (IAlertProvider p : providers) {
-			result.addAll(p.getAlertData(item, attribute));
+		for (ICtConfigurationExtension p : providers) {
+			IAlertProvider provider = p.getAlertProvider(model, session);
+			if (provider != null) result.addAll(provider.getAlertData(item, attribute));
 		}
 		return result;
 	}
 
 	public List<AlertData> getPingAlertData() {
 		List<AlertData> result = new ArrayList<>();
-		for (IAlertProvider p : providers) {
-			AlertData pingAlertData = p.getPingAlertData();
-			if (pingAlertData != null) {
-				result.add(pingAlertData);
+		for (ICtConfigurationExtension p : providers) {
+			IAlertProvider provider = p.getAlertProvider(model, session);
+			if (provider != null){
+				AlertData pingAlertData = provider.getPingAlertData();
+				if (pingAlertData != null) {
+					result.add(pingAlertData);
+				}
 			}
 		}
 		return result;

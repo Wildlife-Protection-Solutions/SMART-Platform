@@ -41,12 +41,13 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 @Table(name="smart.connect_ct_properties")
 public class ConnectCtProperties extends UuidItem {
 	
-	public static final int PING_FREQUENCY_MIN_VALUE = 0;
-	public static final int PING_FREQUENCY_MAX_VALUE = 999999999;
-	public static final int PING_FREQUENCY_DEFAULT_VALUE = 0;
+	public static final int FREQUENCY_MIN_VALUE = 0;
+	public static final int FREQUENCY_MAX_VALUE = 999999999;
+	public static final int FREQUENCY_DEFAULT_VALUE = 0;
 
 	private ConfigurableModel model;
 	private Integer pingFrequency;
+	private Integer dataFrequency;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -63,6 +64,14 @@ public class ConnectCtProperties extends UuidItem {
 	}
 	public void setPingFrequency(Integer pingFrequency) {
 		this.pingFrequency = pingFrequency;
+	}
+	
+	@Column(name="data_frequency")
+	public Integer getDataFrequency() {
+		return dataFrequency;
+	}
+	public void setDataFrequency(Integer dataFrequency) {
+		this.dataFrequency = dataFrequency;
 	}
 	
 }

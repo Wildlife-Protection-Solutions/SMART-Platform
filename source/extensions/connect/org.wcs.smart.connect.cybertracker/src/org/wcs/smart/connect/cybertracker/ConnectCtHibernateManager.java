@@ -76,7 +76,7 @@ public class ConnectCtHibernateManager {
 	public static ConnectCtProperties createDefaultProperties(ConfigurableModel cm) {
 		ConnectCtProperties p = new ConnectCtProperties();
 		p.setModel(cm);
-		p.setPingFrequency(ConnectCtProperties.PING_FREQUENCY_DEFAULT_VALUE);
+		p.setPingFrequency(ConnectCtProperties.FREQUENCY_DEFAULT_VALUE);
 		return p;
 	}
 	
