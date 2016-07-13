@@ -66,6 +66,8 @@ import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
+import com.ibm.icu.util.TimeZone;
+
 
 /**
  * Smart Connect REST API for Alerts and alert types.
@@ -622,6 +624,7 @@ public class ConnectAlert extends HttpServlet {
 		return toDelete;
     }
  
+
     private String validateAlertType(UUID typeUuid) {
 		Session s = HibernateManager.getSession(context);
 		AlertType at = new AlertType();
@@ -719,6 +722,10 @@ public class ConnectAlert extends HttpServlet {
 		return false;
 	}
     
+    //outputs two features, one is used for the JSON information, the other is used as the track, even if it is just one point, to draw on the map.
+    //It was easier to duplicate the data since it is being drawn directly. Otherwise the javascript would have to process the data etc, which didn't work well with leaflet.
+    
+    //I also add the timezone offset of server -> GMT, because that is best way I can figure out to deal with annoying timezone issues without converting everything to new date types. 
     private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
     	 JSONObject featureCollection = new JSONObject();
     	    try {
@@ -740,6 +747,7 @@ public class ConnectAlert extends HttpServlet {
     	            properties.put("cauuid", obj.getCaUuid()); //$NON-NLS-1$
     	            properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
     	            properties.put("date", obj.getDate()); //$NON-NLS-1$
+    	            //properties.put("date", convertTimeToGMT(obj.getDate())); //$NON-NLS-1$
     	            properties.put("desc", obj.getDescription()); //$NON-NLS-1$
     	            properties.put("level", obj.getLevel()); //$NON-NLS-1$
     	            properties.put("status", obj.getStatus().getGuiName(SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -751,6 +759,10 @@ public class ConnectAlert extends HttpServlet {
     	            properties.put("id", obj.getUserGeneratedId()); //$NON-NLS-1$
     	            properties.put("x", obj.getX()); //$NON-NLS-1$
     	            properties.put("y", obj.getY()); //$NON-NLS-1$
+    	            
+    	            //add timezone offset
+    	            TimeZone tz = TimeZone.getDefault();
+    	    		properties.put("timezoneOffset", tz.getOffset(new Date().getTime()) / 1000 / 60);
 
     	            feature.put("properties", properties); //$NON-NLS-1$
     	            feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -760,7 +772,8 @@ public class ConnectAlert extends HttpServlet {
     	            JSONObject propertiesTrack = new JSONObject();
     	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
     	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups //$NON-NLS-1$
-    	            propertiesTrack.put("date", obj.getDate()); //$NON-NLS-1$
+    	            propertiesTrack.put("date", obj.getDate() ); //$NON-NLS-1$
+    	            //propertiesTrack.put("date", convertTimeToGMT(obj.getDate()) ); //$NON-NLS-1$
     	            propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
     	            propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
     	            JSONObject line = new JSONObject();
@@ -781,6 +794,14 @@ public class ConnectAlert extends HttpServlet {
     	    }
     	 return featureCollection;
     }
+
+	private Date convertTimeToGMT(Date date) {
+		@SuppressWarnings("deprecation")
+		int offset = date.getTimezoneOffset();
+		final long ONE_MINUTE_IN_MILLIS=60000;//millisecs
+		Date dateInGMT = new Date(date.getTime() + (offset * ONE_MINUTE_IN_MILLIS));
+		return dateInGMT;
+	}
     
     private Alert updateAndEditAlert(String oldAlertId, Alert newAlert, boolean keepPoint){
     	validateAlertValues(newAlert);

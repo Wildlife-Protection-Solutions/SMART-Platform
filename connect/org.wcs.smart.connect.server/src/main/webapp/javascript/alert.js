@@ -441,11 +441,11 @@ function createAlertTable(){
 		 		if(alerts[i].geometry.type == "LineString"){
 		 			continue; //This is a track feature, ignore it for drawing the table of alerts.
 		 		}
-		 		var date = alerts[i].properties.date;
-		 		var d = date.substr(0, date.length -4);
+		 		
+		 		var date = offsetDateFromServer(alerts[i].properties.date, alerts[i].properties.timezoneOffset);
 
 		 		var row = tableCreateRowTDs(parent,
-		 				[alerts[i].properties.type, alerts[i].properties.id, d , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
+		 				[alerts[i].properties.type, alerts[i].properties.id, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
 		 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
@@ -676,9 +676,8 @@ function updateRealtimeLayer(updatedUrl){
             	
                 var feature = e.features[fId];
                 var c = feature.geometry.coordinates;
-   //             var date = new Date(feature.properties.date);
-                var date = feature.properties.date;
- //               var date = date.substr(0, feature.properties.date.length -4);
+
+                d = offsetDateFromServer(feature.properties.date, feature.properties.timezoneOffset);
                 
                 
                 if(feature.properties.type == undefined){
@@ -696,7 +695,7 @@ function updateRealtimeLayer(updatedUrl){
                 }
                 	
                 text = text + "<br>" + i18n("alert.alertid") + feature.properties.id +
-                	"<br>" + i18n("alert.reportedtime") + date +
+                	"<br>" + i18n("alert.reportedtime") + d +
                 	"<br>" + i18n("alert.location") +
                     coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW') +
                     "<br>" +i18n("alert.description") + feature.properties.desc + 
@@ -987,4 +986,10 @@ function sort(str){
 	refreshAlerts();
 }
 
-
+function offsetDateFromServer(date, offset){
+	var millisec = Date.parse(date);
+	var d = new Date()
+	var differenceInOffsets = offset + d.getTimezoneOffset();
+	millisec = millisec - (differenceInOffsets * 60 * 1000); //subtract the difference in timezone between the Connect server and the viewing client to get the proper client-based timezone. Why? Because timezones suck and we aren't using moderm Date objects in Java... 
+	return new Date(millisec);
+}
