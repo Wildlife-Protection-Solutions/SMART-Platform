@@ -48,7 +48,8 @@ ALTER TABLE SMART.COMPOUND_QUERY_LAYER
 ADD CONSTRAINT COMPOUNDQUERYLAYER_PARENT_UUID_FK 
 FOREIGN KEY (COMPOUND_QUERY_UUID) 
 REFERENCES SMART.COMPOUND_QUERY(UUID) ON DELETE CASCADE DEFERRABLE;
-			
+
+ALTER TABLE CONNECT.ALERTS ADD CONSTRAINT valid_level CHECK (level > 0 AND level < 6);
 			
 update connect.connect_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';

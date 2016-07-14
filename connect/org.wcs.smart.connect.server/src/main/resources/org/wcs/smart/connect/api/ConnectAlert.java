@@ -483,43 +483,13 @@ public class ConnectAlert extends HttpServlet {
 	
 	@POST
     @Path("/{usergenid}")
-    public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newAlert) {
-		boolean error = validateAlertValues(newAlert);
-		
-		validateUser(AlertAction.CREATE_ALERTS_KEY, newAlert.getCaUuid());
-		
-		Alert a = new Alert();
-		
+    public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newGeoJsonAlert) {
+		Alert a;
+		a = validateAlertValues(newGeoJsonAlert);
 		a.setUserGeneratedId(userGenId);
+		
+		validateUser(AlertAction.CREATE_ALERTS_KEY, newGeoJsonAlert.getCaUuid());
 
-		//default to now if no date given 
-		if(newAlert.getDateTime() == null){
-			a.setDate(new Date());
-		}else{
-			a.setDate(newAlert.getDateTime());
-		}
-		
-		//default to Active for new alerts 
-		a.setStatus(AlertStatusEnum.ACTIVE);
-		a.setDescription(newAlert.getDescription());
-		a.setLevel(newAlert.getLevel());
-
-		a.setUserGeneratedId(userGenId);
-		a.setX(newAlert.getLongitude());
-		a.setY(newAlert.getLatitude());
-		String track = "[ [" +newAlert.getLongitude() + " , " + newAlert.getLatitude() + "]" + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		a.setTrack(track);
-		
-		a.setCaUuid(newAlert.getCaUuid());
-		
-		if(error){
-			a.setDescription(newAlert.getDescription() + Messages.getString("ConnectAlert.UnknownAlertTypeDescription",SmartUtils.getRequestLocale(request)) ); //$NON-NLS-1$
-			a.setTypeUuid(AlertType.NULL_TYPE);
-		}else{
-			a.setTypeUuid(newAlert.getTypeUuid());
-		}
-	
-		a.setCreatorUuid(getCreatorUuid());
 		
 		//validate usergenid, is it unique? If so, update the existing one and return instead of saving a new one.
 		String err = validateGeneratedId(userGenId);
@@ -686,22 +656,41 @@ public class ConnectAlert extends HttpServlet {
 		return user.getUuid();
 	}
 
-    private boolean validateAlertValues(GeoJsonAlert newAlert) {
+    private Alert validateAlertValues(GeoJsonAlert newGeoJsonAlert) {
     	Alert a = new Alert();
-    	a.setCaUuid(newAlert.getCaUuid());
-    	a.setX(newAlert.getLongitude());
-    	a.setY(newAlert.getLatitude());
-    	a.setTypeUuid(newAlert.getTypeUuid());
-    	a.setLevel(newAlert.getLevel());
+    	
+		a.setCreatorUuid(getCreatorUuid());
+    	a.setCaUuid(newGeoJsonAlert.getCaUuid());
+    	a.setX(newGeoJsonAlert.getLongitude());
+    	a.setY(newGeoJsonAlert.getLatitude());
+    	a.setTypeUuid(newGeoJsonAlert.getTypeUuid());
+    	a.setLevel(newGeoJsonAlert.getLevel());
+
+
+		//default to now if no date given 
+		if(newGeoJsonAlert.getDateTime() == null){
+			a.setDate(new Date());
+		}else{
+			a.setDate(newGeoJsonAlert.getDateTime());
+		}
+		
+		//default to Active for new alerts 
+		a.setStatus(AlertStatusEnum.ACTIVE);
+		a.setDescription(newGeoJsonAlert.getDescription());
+
+		String track = "[ [" +newGeoJsonAlert.getLongitude() + " , " + newGeoJsonAlert.getLatitude() + "]" + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		a.setTrack(track);
+		
     	return validateAlertValues(a); 
     }
     
-    private boolean validateAlertValues(Alert newAlert) {
+    private Alert validateAlertValues(Alert newAlert) {
 		//validate type
 		String err = validateAlertType(newAlert.getTypeUuid());
 		if (err != null){
+			newAlert.setDescription(newAlert.getDescription() + Messages.getString("ConnectAlert.UnknownAlertTypeDescription",SmartUtils.getRequestLocale(request)) ); //$NON-NLS-1$
+			newAlert.setTypeUuid(AlertType.NULL_TYPE);
 			//we don't want to throw away alerts that might have old/deleted/invalid types, we want to show them somehow still, with errors noted.
-			return true;
 		}
 		
 		//validate alert CA UUID
@@ -716,16 +705,20 @@ public class ConnectAlert extends HttpServlet {
 		}
 		
 		//validate Level
-		if (newAlert.getLevel() == null || newAlert.getLevel() < -32768 || newAlert.getLevel() > 32767){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConnectAlert.InvalidLevel", SmartUtils.getRequestLocale(request)), newAlert.getLevel())); //$NON-NLS-1$
+		if(newAlert.getLevel() == null || newAlert.getLevel() < 1 || newAlert.getLevel() > 5){
+			newAlert.setLevel(5);//make sure it is a valid level instead of throwing it away.
 		}
-		return false;
+
+//		if (newAlert.getLevel() == null || newAlert.getLevel() < -32768 || newAlert.getLevel() > 32767){
+//			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConnectAlert.InvalidLevel", SmartUtils.getRequestLocale(request)), newAlert.getLevel())); //$NON-NLS-1$
+//		}
+		return newAlert;
 	}
     
     //outputs two features, one is used for the JSON information, the other is used as the track, even if it is just one point, to draw on the map.
     //It was easier to duplicate the data since it is being drawn directly. Otherwise the javascript would have to process the data etc, which didn't work well with leaflet.
     
-    //I also add the timezone offset of server -> GMT, because that is best way I can figure out to deal with annoying timezone issues without converting everything to new date types. 
+    //I also added the timezone offset of server vs GMT, because that is best way I can figure out to deal with annoying timezone issues without converting everything to newer java date objects. 
     private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
     	 JSONObject featureCollection = new JSONObject();
     	    try {
@@ -804,7 +797,7 @@ public class ConnectAlert extends HttpServlet {
 	}
     
     private Alert updateAndEditAlert(String oldAlertId, Alert newAlert, boolean keepPoint){
-    	validateAlertValues(newAlert);
+    	newAlert = validateAlertValues(newAlert);
     	validateUser(AlertAction.UPDATE_ALERTS_KEY, newAlert.getCaUuid());
     	
     	Alert toUpdate = null;
