@@ -49,7 +49,17 @@ ADD CONSTRAINT COMPOUNDQUERYLAYER_PARENT_UUID_FK
 FOREIGN KEY (COMPOUND_QUERY_UUID) 
 REFERENCES SMART.COMPOUND_QUERY(UUID) ON DELETE CASCADE DEFERRABLE;
 
-ALTER TABLE CONNECT.ALERTS ADD CONSTRAINT valid_level CHECK (level > 0 AND level < 6);
-			
+ALTER TABLE smart.connect_ct_properties add column data_frequency INTEGER;
+ALTER TABLE smart.connect_ct_properties add column ping_type UUID;
+
+ALTER TABLE connect.data_queue DROP CONSTRAINT type_chk;
+ALTER TABLE connect.data_queue ADD CONSTRAINT type_chk CHECK (type IN (
+'PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML', 'JSON_CT', 'JSON_ZLIB_CT')); 
+
+ALTER TABLE CONNECT.ALERTS ADD CONSTRAINT valid_level CHECK (level > 0 AND level < 6);		
+		
+update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.connect.cybertracker';
+update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.connect.cybertracker';
+		
 update connect.connect_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';

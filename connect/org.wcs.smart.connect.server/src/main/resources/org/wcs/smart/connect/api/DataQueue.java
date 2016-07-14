@@ -288,14 +288,15 @@ public class DataQueue {
 			ServerDataQueueItem item = (ServerDataQueueItem)s.get(ServerDataQueueItem.class, itemUuid);
 			
 			validateDelete(item.getConservationArea(), s);
-			
-			File toDelete = DataStoreManager.INSTANCE.getFile(item.getFile());
-			if (toDelete.exists()){
-				if (!toDelete.delete()){
-					logger.log(Level.WARNING, "Could not delete data queue file: " + toDelete.toString()); //$NON-NLS-1$
+			if (item.getFile() != null){
+				File toDelete = DataStoreManager.INSTANCE.getFile(item.getFile());
+				if (toDelete.exists()){
+					if (!toDelete.delete()){
+						logger.log(Level.WARNING, "Could not delete data queue file: " + toDelete.toString()); //$NON-NLS-1$
+					}
+				}else{
+					logger.log(Level.WARNING, "Data queue file does not exist to delete: " + toDelete.toString()); //$NON-NLS-1$
 				}
-			}else{
-				logger.log(Level.WARNING, "Data eue file does not exist to delete: " + toDelete.toString()); //$NON-NLS-1$
 			}
 			s.delete(item);
 			
