@@ -37,6 +37,7 @@ import org.wcs.smart.dataentry.model.xml.external.IConvertedCmExtraData;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataIntegerKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataStringKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Wrapper for Connect Alerts CyberTracker extra-data conversion (from XML) result.
@@ -109,16 +110,32 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 
 	private ConnectCtProperties createProperties(CmExtraDataType dataType) {
 		ConnectCtProperties p = new ConnectCtProperties();
+		
 		for (CmExtraDataIntegerKeyType intKeyType : dataType.getIntegerKey()) {
 			if (ConnectCt2CmXmlExtraDataContribution.KEY_PING_FREQUENCY.equals(intKeyType.getKey())) {
 				p.setPingFrequency(intKeyType.getValue());
+			}else if (ConnectCt2CmXmlExtraDataContribution.KEY_DATAUPLOAD_FREQUENCY.equals(intKeyType.getKey())) {
+				p.setDataFrequency(intKeyType.getValue());
 			}
 		}
 		
+		
+		for (CmExtraDataStringKeyType strKeyType : dataType.getStringKey()) {
+			if (ConnectCt2CmXmlExtraDataContribution.KEY_PING_ALERTTYPE.equals(strKeyType.getKey())) {
+				p.setPingType(UuidUtils.stringToUuid(strKeyType.getValue()));
+			}
+		}
 		//validation
 		if (p.getPingFrequency() == null) {
 			warnings.add(Messages.ConvertedConnectCt2CmExtraData_Missing_PingFrequency);
-			return null;
+			p.setPingFrequency(ConnectCtProperties.FREQUENCY_DEFAULT_VALUE);			
+		}
+		if (p.getDataFrequency() == null) {
+			warnings.add(Messages.ConvertedConnectCt2CmExtraData_Missing_DataFrequency);
+			p.setPingFrequency(ConnectCtProperties.FREQUENCY_DEFAULT_VALUE);			
+		}
+		if (p.getPingFrequency() > 0 && p.getPingType() == null){
+			warnings.add(Messages.ConvertedConnectCt2CmExtraData_PositionTypeNotSet);
 		}
 		
 		return p;

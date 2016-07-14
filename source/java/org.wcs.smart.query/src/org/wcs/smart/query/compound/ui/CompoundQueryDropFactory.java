@@ -8,6 +8,7 @@ import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
@@ -45,7 +46,7 @@ public class CompoundQueryDropFactory implements IDropItemFactory{
 					
 			Query childquery = QueryHibernateManager.getInstance().findQuery(session, layer.getQueryUuid(), type);
 			if (childquery == null){
-				items.add(new ErrorDropItem("Query not found."));
+				items.add(new ErrorDropItem(Messages.CompoundQueryDropFactory_NotFound));
 			}else{
 				DropItem di = generateDropItem(childquery, QueryListItemPanel.ID)[0];
 				di.initializeData(layer);

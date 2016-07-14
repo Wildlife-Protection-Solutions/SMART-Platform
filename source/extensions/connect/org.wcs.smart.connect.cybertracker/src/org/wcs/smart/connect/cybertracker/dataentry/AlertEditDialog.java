@@ -50,7 +50,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 	
-	private static Integer[] IMPORTANCE_TYPES = {1, 2, 3, 4, 5};
+	
 	private static int DEFAULT_IMPORTANCE_LEVEL = 3;
 	
 	private Label sourceObj;
@@ -129,9 +129,17 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		importanceViewer = new ComboViewer(main, SWT.READ_ONLY);
 		importanceViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		importanceViewer.setContentProvider(ArrayContentProvider.getInstance());
-		importanceViewer.setLabelProvider(new LabelProvider());
+		importanceViewer.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof ConnectAlert.Level){
+					return String.valueOf(((ConnectAlert.Level) element).value);
+				}
+				return super.getText(element);
+			}
+		});
  
-		importanceViewer.setInput(IMPORTANCE_TYPES);
+		importanceViewer.setInput(ConnectAlert.Level.values());
         if (alert.getLevel() == null) {
         	alert.setLevel(DEFAULT_IMPORTANCE_LEVEL);
         }
@@ -185,7 +193,7 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 
 		IStructuredSelection selLvl = (IStructuredSelection) importanceViewer.getSelection();
 		if (selLvl != null && !selLvl.isEmpty()) {
-			alert.setLevel((Integer) selLvl.getFirstElement());
+			alert.setLevel( ((ConnectAlert.Level) selLvl.getFirstElement()).value);
 		}
 		
 		setChangesMade(false);

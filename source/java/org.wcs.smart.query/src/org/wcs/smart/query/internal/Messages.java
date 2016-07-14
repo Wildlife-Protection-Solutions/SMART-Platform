@@ -71,6 +71,10 @@ public class Messages extends NLS {
 	public static String CategoryValueItem_CountObservationLabel;
 	public static String CompoundDefinitionPanel_TabName;
 	public static String CompoundMapQueryType_MapQueryName;
+	public static String CompoundQueryDefinitionImporter_ImporterNotFound;
+	public static String CompoundQueryDefinitionImporter_QueryNotFound;
+	public static String CompoundQueryDefinitionImporter_SubImporterError;
+	public static String CompoundQueryDropFactory_NotFound;
 	public static String CompoundQueryEditor_NewCompoundQueryName;
 	public static String CompoundQueryEditor_SummariesTabName;
 	public static String CompoundQueryExporter_DirectoryRequired;

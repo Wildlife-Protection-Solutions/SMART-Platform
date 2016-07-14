@@ -36,6 +36,7 @@ import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataIntegerKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataStringKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Connect Alerts CyberTracker contribution for dataentry module to provide ability to 
@@ -50,6 +51,8 @@ public class ConnectCt2CmXmlExtraDataContribution implements IXmlCmExtraDataCont
 	static final String TYPE_ALERT = "connect_ct_alert"; //$NON-NLS-1$
 	
 	static final String KEY_PING_FREQUENCY = "ping_frequency"; //$NON-NLS-1$
+	static final String KEY_PING_ALERTTYPE = "ping_alert_type"; //$NON-NLS-1$
+	static final String KEY_DATAUPLOAD_FREQUENCY = "data_frequence"; //$NON-NLS-1$
 	
 	static final String KEY_ALERT_ITEM = "alert_item"; //$NON-NLS-1$
 	static final String KEY_ALERT_ATTRIBUTE = "attribute"; //$NON-NLS-1$
@@ -88,6 +91,16 @@ public class ConnectCt2CmXmlExtraDataContribution implements IXmlCmExtraDataCont
 		pingKey.setValue(p.getPingFrequency());
 		data.getIntegerKey().add(pingKey);
 
+		CmExtraDataIntegerKeyType dataKey = new CmExtraDataIntegerKeyType();
+		dataKey.setKey(KEY_DATAUPLOAD_FREQUENCY);
+		dataKey.setValue(p.getDataFrequency());
+		data.getIntegerKey().add(dataKey);
+		
+		CmExtraDataStringKeyType pingType = new CmExtraDataStringKeyType();
+		pingType.setKey(KEY_PING_ALERTTYPE);
+		pingType.setValue(UuidUtils.uuidToString(p.getPingType()));
+		data.getStringKey().add(pingType);
+		
 		return data;
 	}
 

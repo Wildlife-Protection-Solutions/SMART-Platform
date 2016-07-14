@@ -74,7 +74,7 @@ public abstract class QueryResultsTable {
 	 * @return the resulting table viewer.
 	 */
 	public TableViewer createTable(Composite parent){
-		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
+		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.SINGLE);
 		table.getTable().setHeaderVisible(true);
 		table.getTable().setLinesVisible(true);
 		table.setContentProvider(ArrayContentProvider.getInstance());

@@ -72,7 +72,7 @@ public class ConnectConfigurationExtension implements ICtConfigurationExtension 
 					if (cd.open() != Window.CANCEL) {
 						connect = new String[]{cd.getServerUrl(), cd.getUsername(), cd.getPassword()};
 					}else{
-//						could not configure for whatever reason;
+						//	could not configure for whatever reason;
 						connect = new String[]{};
 					}
 				}

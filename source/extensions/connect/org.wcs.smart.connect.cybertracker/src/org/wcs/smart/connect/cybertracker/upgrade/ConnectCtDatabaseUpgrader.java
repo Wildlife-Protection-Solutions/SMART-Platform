@@ -75,7 +75,8 @@ public class ConnectCtDatabaseUpgrader implements IDatabaseUpgrader {
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equalsIgnoreCase(ConnectCtPlugIn.DB_VERSION_1)){
 			String[] sql = new String[]{
-					"ALTER TABLE smart.connect_ct_properties add column data_frequency INTEGER" //$NON-NLS-1$
+					"ALTER TABLE smart.connect_ct_properties add column data_frequency INTEGER", //$NON-NLS-1$
+					"ALTER TABLE smart.connect_ct_properties add column ping_type char(16) for bit data" //$NON-NLS-1$
 			};
 			
 			session.doWork(new Work() {

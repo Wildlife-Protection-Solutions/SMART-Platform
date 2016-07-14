@@ -347,7 +347,7 @@ public class ConnectDialog extends TitleAreaDialog {
 								saveUserInfo(user, newPassword);
 							}
 						}else{
-							if (ConnectDialog.this.user.getConnectPassword() != null){
+							if (ConnectDialog.this.user != null && ConnectDialog.this.user.getConnectPassword() != null){
 								//set to null
 								saveUserInfo(user, null);
 							}

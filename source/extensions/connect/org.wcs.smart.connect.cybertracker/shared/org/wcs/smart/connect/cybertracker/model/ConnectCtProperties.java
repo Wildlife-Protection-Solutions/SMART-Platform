@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.cybertracker.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -48,6 +50,7 @@ public class ConnectCtProperties extends UuidItem {
 	private ConfigurableModel model;
 	private Integer pingFrequency;
 	private Integer dataFrequency;
+	private UUID pingAlertType;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -64,6 +67,14 @@ public class ConnectCtProperties extends UuidItem {
 	}
 	public void setPingFrequency(Integer pingFrequency) {
 		this.pingFrequency = pingFrequency;
+	}
+	
+	@Column(name="ping_type")
+	public UUID getPingType() {
+		return pingAlertType;
+	}
+	public void setPingType(UUID pingType) {
+		this.pingAlertType = pingType;
 	}
 	
 	@Column(name="data_frequency")

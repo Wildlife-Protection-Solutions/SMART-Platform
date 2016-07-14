@@ -60,6 +60,13 @@ import org.wcs.smart.util.ZipUtil;
  */
 public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 
+	public static final String SUBFOLDER_NAME = "queries"; //$NON-NLS-1$
+	public static final String MAIN_QUERY_FILE = "query.xml"; //$NON-NLS-1$
+	public static final String STYLE_KEY_PART = "QP_STYLE_"; //$NON-NLS-1$
+	public static final String DATEFILTER_KEY_PART = "QP_DATEFILTER_"; //$NON-NLS-1$
+	public static final String QUERY_TYPE_KEY_PART = "QP_TYPE_"; //$NON-NLS-1$
+	public static final String QUERY_UUID_KEY_PART = "QP_UUID_"; //$NON-NLS-1$
+
 	@Override
 	public boolean canExport(org.wcs.smart.query.model.Query query) {
 		return (query.getTypeKey().equals(CompoundMapQuery.TYPE_KEY));
@@ -126,34 +133,34 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 			for (int order = 0; order < cquery.getLayers().size(); order++ ){
 				CompoundMapQueryLayer l = cquery.getLayers().get(order);
 				QueryPart qp = new QueryPart();
-				qp.setKey("QP_UUID_" + order); //$NON-NLS-1$ 
+				qp.setKey(QUERY_UUID_KEY_PART + order); 
 				qp.setValue(UuidUtils.uuidToString(l.getQueryUuid()));
 				xmlQuery.getQueryPart().add(qp);
 				
 				qp = new QueryPart();
-				qp.setKey("QP_TYPE_" + order); //$NON-NLS-1$
+				qp.setKey(QUERY_TYPE_KEY_PART + order); 
 				qp.setValue(l.getQueryType());
 				xmlQuery.getQueryPart().add(qp);
 				
 				qp = new QueryPart();
-				qp.setKey("QP_DATEFILTER_" + order); //$NON-NLS-1$ 
+				qp.setKey(DATEFILTER_KEY_PART + order); 
 				qp.setValue(l.getDateFilter());
 				xmlQuery.getQueryPart().add(qp);
 				
 				if (l.getQueryStyle() == null){
 					qp = new QueryPart();
-					qp.setKey("QP_STYLE_" + order); //$NON-NLS-1$
+					qp.setKey(STYLE_KEY_PART + order);
 					qp.setValue(l.getQueryStyle());
 					xmlQuery.getQueryPart().add(qp);
 				}
 			}
 			
-			Path queryFile = tempDir.resolve("query.xml"); //$NON-NLS-1$
+			Path queryFile = tempDir.resolve(MAIN_QUERY_FILE); 
 			try(OutputStream fout = new BufferedOutputStream(Files.newOutputStream(queryFile))){
 				QueryXmlManager.writeQuery(wpquery, fout);
 			}
 			
-			Path subDir = tempDir.resolve("queries"); //$NON-NLS-1$
+			Path subDir = tempDir.resolve(SUBFOLDER_NAME); 
 			Files.createDirectories(subDir);
 			
 			for (org.wcs.smart.query.model.Query q : toExport){

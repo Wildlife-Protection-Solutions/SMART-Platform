@@ -86,7 +86,8 @@ public class ConnectCtTemplateCloner implements IConservationAreaTemplateCloner 
 				ConnectCtProperties clone = new ConnectCtProperties();
 				clone.setModel(cmClone);
 				clone.setPingFrequency(p.getPingFrequency());
-
+				clone.setDataFrequency(p.getDataFrequency());
+				clone.setPingType(p.getPingType());
 				engine.getSession().save(clone);
 			}
 			engine.getSession().flush();

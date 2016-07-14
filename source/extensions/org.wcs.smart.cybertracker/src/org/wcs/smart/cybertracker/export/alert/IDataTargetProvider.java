@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.export.alert;
 
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 
 /**
@@ -55,7 +56,7 @@ public interface IDataTargetProvider {
 		private CyberTrackerProperties.Protocol protocol; //data protocol
 		
 		public DataTarget(String url, String username, String password, int frequency){
-			this(url, username, password, frequency, CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED);
+			this(url, username, password, frequency, CyberTrackerPlugIn.getDefault().getDefaultCtEncoding());
 		}
 		
 		public DataTarget(String url, String username, String password, int frequency, CyberTrackerProperties.Protocol protocol){

@@ -24,9 +24,12 @@ package org.wcs.smart.connect.cybertracker.alert;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.cybertracker.export.alert.IDataTargetProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Data target provider that provides a Connect URL as the target.
@@ -64,12 +67,11 @@ public class ConnectCtDataTargetProvider implements IDataTargetProvider {
 	private void initConnectFields() throws Exception {		
 		String[] data = ext.getConnectData();
 		if (data.length == 3){
-			url = data[0] + SmartConnect.API_URL + "/ctdata"; //$NON-NLS-1$
+			url = data[0] + SmartConnect.API_URL + "/ctdata/" + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
 			username = data[1];
 			password = data[2];
 		}else{
-			//TODO: fix this error message
-			throw new Exception("A target Connect server is defined for this configurable model, however we could not connect to the server to valid the connection information.  Either need to remove data sending from configurable model or fix connect server information.");
+			throw new Exception(Messages.ConnectCtDataTargetProvider_NoConnectServer);
 		}
 		
 	}

@@ -152,6 +152,8 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 		}
 		AlertData data = createAlertData(null);
 		data.setPingOnly(true);
+		data.setType(properties.getPingType());
+		data.setLevel(ConnectAlert.Level.FIVE.value);
 		return data;
 	}
 	

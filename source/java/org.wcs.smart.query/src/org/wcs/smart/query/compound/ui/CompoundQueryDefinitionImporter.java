@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.compound.ui;
 
 import java.io.BufferedInputStream;
@@ -22,6 +43,7 @@ import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.importexport.IQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.query.xml.QueryXmlManager;
@@ -30,6 +52,12 @@ import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
+/**
+ * Importer for compound query definitions.
+ * 
+ * @author Emily
+ *
+ */
 public class CompoundQueryDefinitionImporter implements IQueryImporter {
 	
 	private ArrayList<String> warnings = new ArrayList<String>();
@@ -40,11 +68,11 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 	@Override
 	public boolean canImport(File file) {
 		try{
-			Path tempDir = Files.createTempDirectory("smart" + System.nanoTime());
+			Path tempDir = Files.createTempDirectory("smart" + System.nanoTime()); //$NON-NLS-1$
 			try{
 			
 				ZipUtil.unzipFolder(file, tempDir.toFile());
-				Path queryfile = tempDir.resolve("query.xml");
+				Path queryfile = tempDir.resolve(CompoundQueryDefinitionExporter.MAIN_QUERY_FILE);
 				if (Files.exists(queryfile)){
 					org.wcs.smart.query.xml.model.Query q = null;
 					try(InputStream fin = new BufferedInputStream(Files.newInputStream(queryfile))){
@@ -69,11 +97,11 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 		layerQueryMap = new HashMap<Integer, Query>();
 		
 		List<Query> imported = new ArrayList<Query>();
-		Path tempDir = Files.createTempDirectory("smart" + System.nanoTime());
+		Path tempDir = Files.createTempDirectory("smart" + System.nanoTime()); //$NON-NLS-1$
 		try{
 		
 			ZipUtil.unzipFolder(file, tempDir.toFile());
-			Path queryfile = tempDir.resolve("query.xml");
+			Path queryfile = tempDir.resolve(CompoundQueryDefinitionExporter.MAIN_QUERY_FILE); 
 			if (Files.exists(queryfile)){
 				org.wcs.smart.query.xml.model.Query q = null;
 				try(InputStream fin = new BufferedInputStream(Files.newInputStream(queryfile))){
@@ -89,7 +117,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 				
 				int maxorder = -1;
 				for (QueryPart p : qt.getQueryPart()){
-					int order = Integer.parseInt(p.getKey().split("_")[2]);
+					int order = Integer.parseInt(p.getKey().split("_")[2]); //$NON-NLS-1$
 					if (order > maxorder) maxorder = order;
 				}
 				for (int i = 0; i <= maxorder; i ++){
@@ -99,15 +127,15 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 					compoundQuery.getLayers().add(layer);
 				}
 				for (QueryPart p : qt.getQueryPart()){
-					int order = Integer.parseInt(p.getKey().split("_")[2]);
+					int order = Integer.parseInt(p.getKey().split("_")[2]); //$NON-NLS-1$
 					CompoundMapQueryLayer layer = compoundQuery.getLayers().get(order);
-					if (p.getKey().startsWith("QP_UUID_")){
+					if (p.getKey().startsWith(CompoundQueryDefinitionExporter.QUERY_UUID_KEY_PART)){ 
 						layer.setQueryUuid(UuidUtils.stringToUuid(p.getValue()));
-					}else if (p.getKey().startsWith("QP_TYPE_")){
+					}else if (p.getKey().startsWith(CompoundQueryDefinitionExporter.QUERY_TYPE_KEY_PART)){ 
 						layer.setQueryType(p.getValue());
-					}else if (p.getKey().startsWith("QP_DATEFILTER_")){
+					}else if (p.getKey().startsWith(CompoundQueryDefinitionExporter.DATEFILTER_KEY_PART)){ 
 						layer.setDateFilter(p.getValue());
-					}else if (p.getKey().startsWith("QP_STYLE_")){
+					}else if (p.getKey().startsWith(CompoundQueryDefinitionExporter.STYLE_KEY_PART)){ 
 						layer.setQueryStyle(p.getValue());
 					}
 				}
@@ -126,10 +154,10 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 					if (localQuery == null || !localQuery.getConservationArea().equals(ca)){
 					 
 						//need to import query
-						Path queryPath = tempDir.resolve("queries").resolve( UuidUtils.uuidToString(l.getQueryUuid()) + ".xml");
+						Path queryPath = tempDir.resolve(CompoundQueryDefinitionExporter.SUBFOLDER_NAME).resolve( UuidUtils.uuidToString(l.getQueryUuid()) + ".xml"); //$NON-NLS-1$
 						IQueryImporter importer = QueryImportEngine.getQueryImporter(queryPath.toFile());
 						if (importer == null){
-							warnings.add("Could not import sub-query definition.  File importer not found.");
+							warnings.add(Messages.CompoundQueryDefinitionImporter_ImporterNotFound);
 						}else{
 							try{
 								//we only reference a single query
@@ -159,7 +187,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 								}
 								
 							}catch (Exception ex){
-								warnings.add(MessageFormat.format("Could not import sub-query definition.  Error occurred while importing: {0} ", ex.getMessage()));
+								warnings.add(MessageFormat.format(Messages.CompoundQueryDefinitionImporter_SubImporterError, ex.getMessage()));
 								QueryPlugIn.log(ex.getMessage(), ex);
 							}
 						}
@@ -169,7 +197,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 				}
 				return imported;
 			}else{
-				throw new Exception("Could not find compound query definition file in zip file.");
+				throw new Exception(Messages.CompoundQueryDefinitionImporter_QueryNotFound);
 			}
 		}finally{
 			FileUtils.forceDelete(tempDir.toFile());

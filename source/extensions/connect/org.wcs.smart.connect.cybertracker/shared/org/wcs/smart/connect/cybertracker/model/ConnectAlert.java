@@ -45,6 +45,23 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 @Table(name="smart.connect_alert")
 public class ConnectAlert extends UuidItem {
 
+	/*
+	 * Values for connect alert level
+	 */
+	public enum Level{
+		ONE(1),
+		TWO(2),
+		THREE(3),
+		FOUR(4),
+		FIVE(5);
+		
+		public int value;
+		
+		private Level( int value){
+			this.value = value;
+		}
+	}
+	
 	private ConfigurableModel model; 
 	private UuidItem alertItem;
 	private CmAttribute attrubute; 

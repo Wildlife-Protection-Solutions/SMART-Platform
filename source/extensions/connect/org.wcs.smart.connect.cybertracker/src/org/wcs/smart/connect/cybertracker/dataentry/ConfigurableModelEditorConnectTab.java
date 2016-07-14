@@ -35,12 +35,15 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -113,6 +116,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	
 	private ControlDecoration cdData;
 	private ControlDecoration cdPosition;
+	private ComboViewer cmbPositionType;
+	private ControlDecoration cdPositionType;
 	
 	private List<ConnectAlert> alertsList;
 	private List<ConnectAlert> dbAlertsList;
@@ -144,18 +149,18 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		properties = ConnectCtHibernateManager.getCtProperties(dialog.getModel(), dialog.getSession());
 		
 		Group g = new Group(all, SWT.NONE);
-		g.setText("SMART Connect Data Uploads");
+		g.setText(Messages.ConfigurableModelEditorConnectTab_UploadHeader);
 		g.setLayout(new GridLayout(1, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		//controls for position frequence
 		Composite positionComp = new Composite(g, SWT.NONE);
-		positionComp.setLayout(new GridLayout(4, false));
+		positionComp.setLayout(new GridLayout(6, false));
 		positionComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Button btnPosition = new Button(positionComp, SWT.CHECK);
 		
 		Label lbl1 = new Label(positionComp, SWT.NONE);
-		lbl1.setText("Send position updates every");
+		lbl1.setText(Messages.ConfigurableModelEditorConnectTab_PositionUpdateLabel);
 		txtPosition = new Text(positionComp, SWT.BORDER);
 		txtPosition.setTextLimit(4);
 		
@@ -163,20 +168,69 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		gd2.widthHint = 25;
 		txtPosition.setLayoutData(gd2);
 		Label lbl2 = new Label(positionComp, SWT.NONE);
-		lbl2.setText("minutes");
+		lbl2.setText(Messages.ConfigurableModelEditorConnectTab_PositionUpdateTime);
 		cdPosition = createDecoration(lbl2);
-		String tooltip = "Position updates will appear on the SMART Connect\nweb application Alerts Map. They are only sent\nwhen the mobile device has an internet connection\n(cellular, wifi, etc), and are stored\non the device until a connection is acquired (at\nwhich time they are all sent to SMART Connect).";
+		
+		
+		Label lbl3a = new Label(positionComp, SWT.NONE);
+		lbl3a.setText(Messages.ConfigurableModelEditorConnectTab_PositionTypeLabel);
+		
+		cmbPositionType = new ComboViewer(positionComp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbPositionType.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element) {
+				if (element instanceof UUID) {
+					ConnectAlertType alerttype = typeCache.get((UUID)element);
+					if (alerttype == null){
+						return ((UUID)element).toString() + Messages.ConfigurableModelEditorConnectTab_RefreshForLabels;
+					}else{
+						return alerttype.getLabel();
+					}
+				}
+			  	return super.getText(element);
+			}
+		});
+		
+		cmbPositionType.setContentProvider(ArrayContentProvider.getInstance());
+		ArrayList<UUID> types = new ArrayList<UUID>();
+		if (typeCache != null) types.addAll(typeCache.keySet());
+		cmbPositionType.setInput(types);
+		cmbPositionType.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) cmbPositionType.getSelection();
+				if (!selection.isEmpty()){
+					Object x = selection.getFirstElement();
+					if (x instanceof UUID){
+						properties.setPingType((UUID)x);
+						cdPositionType.hide();
+					}
+				}
+				
+			}
+		});
+		cdPositionType = createDecoration(cmbPositionType.getControl());
+		cdPositionType.hide();
+		
+		String tooltip = Messages.ConfigurableModelEditorConnectTab_PositionFreqTooltip;
 		lbl1.setToolTipText(tooltip);
 		lbl2.setToolTipText(tooltip);
 		txtPosition.setToolTipText(tooltip);
 		btnPosition.setToolTipText(tooltip);
+		
+		String alertTooltip = Messages.ConfigurableModelEditorConnectTab_PositionTypeTooltip;
+		lbl3a.setToolTipText(alertTooltip);
+		cmbPositionType.getControl().setToolTipText(alertTooltip);
 		
 		btnPosition.addSelectionListener(new SelectionAdapter() {	
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				lbl1.setEnabled(btnPosition.getSelection());
 				lbl2.setEnabled(btnPosition.getSelection());
+				lbl3a.setEnabled(btnPosition.getSelection());
 				txtPosition.setEnabled(btnPosition.getSelection());
+				cmbPositionType.getControl().setEnabled(btnPosition.getSelection());
 				updatePositionFrequency();
 				validatePositionFrequency();
 				dialog.notifyChangesMade();
@@ -193,14 +247,16 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		//intialize controls for position frequency
 		if (properties.getPingFrequency() == null || properties.getPingFrequency() == 0){
 			btnPosition.setSelection(false);
-			txtPosition.setText("0");
+			txtPosition.setText("0"); //$NON-NLS-1$
 		}else{
 			btnPosition.setSelection(true);
 			txtPosition.setText(properties.getPingFrequency().toString());
 		}
 		lbl1.setEnabled(btnPosition.getSelection());
 		lbl2.setEnabled(btnPosition.getSelection());
+		lbl3a.setEnabled(btnPosition.getSelection());
 		txtPosition.setEnabled(btnPosition.getSelection());
+		cmbPositionType.getControl().setEnabled(btnPosition.getSelection());
 		validatePositionFrequency();
 
 		//create data frequency options
@@ -210,14 +266,14 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		Button btnData = new Button(dataComp, SWT.CHECK);
 		
 		Label lbl3 = new Label(dataComp, SWT.NONE);
-		lbl3.setText("Upload data automatically every");
+		lbl3.setText(Messages.ConfigurableModelEditorConnectTab_DataUploadLabel);
 		txtData = new Text(dataComp, SWT.BORDER);
 		txtData.setTextLimit(4);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, false);
 		gd.widthHint = 25;
 		txtData.setLayoutData(gd);
 		Label lbl4 = new Label(dataComp, SWT.NONE);
-		lbl4.setText("minutes");
+		lbl4.setText(Messages.ConfigurableModelEditorConnectTab_DataUploadTime);
 		cdData = createDecoration(lbl4);
 		txtData.addModifyListener(new ModifyListener() {
 			
@@ -228,7 +284,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			}
 		});
 
-		String tooltip2 = "When using this option, users cannot plug the mobile device\ninto the SMART Desktop to download data.  All data must\nbe sent to a SMART Connect server via an\ninternet connection (the downloaded and processed by\na SMART Desktop instance).  Observation data will stay\non the device until an internet connection is acquired at\nwhich time it will be sent to SMART Connect.";
+		String tooltip2 = Messages.ConfigurableModelEditorConnectTab_DataUploadTooltip;
 		lbl3.setToolTipText(tooltip2);
 		lbl4.setToolTipText(tooltip2);
 		txtData.setToolTipText(tooltip2);
@@ -248,7 +304,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		//intialize controls for data frequency
 		if (properties.getDataFrequency() == null || properties.getDataFrequency() == 0){
 			btnData.setSelection(false);
-			txtData.setText("0");
+			txtData.setText("0"); //$NON-NLS-1$
 		}else{
 			btnData.setSelection(true);
 			txtData.setText(properties.getDataFrequency().toString());
@@ -259,7 +315,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		validateDataFrequency();
 		
 		Group g2 = new Group(all, SWT.NONE);
-		g2.setText("Alert Configuration");
+		g2.setText(Messages.ConfigurableModelEditorConnectTab_AlertConfigTitle);
 		g2.setLayout(new GridLayout(1, false));
 		g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -327,7 +383,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		});
 		alertsList = new ArrayList<ConnectAlert>(dbAlertsList); //this is a copy of db data that can be changes, changes will be persisted on 'Save'
 		alertTable.setInput(alertsList);
-
+		
 		Composite buttonPanel = new Composite(rightPanel, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(3, false));
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
@@ -476,13 +532,41 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		typeCache = new HashMap<UUID, ConnectAlertType>();
 		if (alertTypeList == null){
 			ArrayList<ConnectAlertType> types = getCachedAlertTypes();
-			if (types == null) return;
-			for (ConnectAlertType t : types){
-				typeCache.put(t.getUuid(), t);
+			if (types != null){
+				for (ConnectAlertType t : types){
+					typeCache.put(t.getUuid(), t);
+				}
 			}
 		}else{
 			for (ConnectAlertType t : alertTypeList){
 				typeCache.put(t.getUuid(), t);
+			}
+		}
+		
+		List<UUID> alertTypes = (List<UUID>) cmbPositionType.getInput();
+		alertTypes.clear();
+		alertTypes.addAll(typeCache.keySet());
+		
+		cmbPositionType.refresh();
+		cmbPositionType.getControl().getParent().layout(true);
+		cdPositionType.hide();
+		
+		if (typeCache.isEmpty()){
+			cdPositionType.setDescriptionText(Messages.ConfigurableModelEditorConnectTab_NoTypesFound);
+			cdPositionType.show();
+		}else{
+			if (properties.getPingType() != null){
+				if (!typeCache.containsKey(properties.getPingType())){
+					properties.setPingType(null);
+					cmbPositionType.setSelection(null);
+					cdPositionType.setDescriptionText(Messages.ConfigurableModelEditorConnectTab_TypeNotValid);
+					cdPositionType.show();
+				}else{
+					cmbPositionType.setSelection(new StructuredSelection(properties.getPingType()));
+				}
+			}else{
+				cdPositionType.setDescriptionText(Messages.ConfigurableModelEditorConnectTab_TypeRequired);
+				cdPositionType.show();
 			}
 		}
 	}
@@ -708,7 +792,10 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 	@Override
 	public String validate() {
 		if (!areFrequencyValid()) {
-			return "Invalid configuration";
+			return Messages.ConfigurableModelEditorConnectTab_InvalidConfig;
+		}
+		if (cmbPositionType.getControl().isEnabled() && properties.getPingType() == null){
+			return Messages.ConfigurableModelEditorConnectTab_TypeMustBeSelected; 
 		}
 		return null;
 	}
@@ -781,7 +868,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		try{
 			Integer i = Integer.parseInt(txtData.getText());
 			if (i <= 0 || i > ConnectCtProperties.FREQUENCY_MAX_VALUE){
-				cdData.setDescriptionText(MessageFormat.format("Not a valid integer.  Must be a valid integer between 0 and {0}", ConnectCtProperties.FREQUENCY_MAX_VALUE));
+				cdData.setDescriptionText(MessageFormat.format(Messages.ConfigurableModelEditorConnectTab_InvalidInteger, ConnectCtProperties.FREQUENCY_MAX_VALUE));
 				cdData.show();
 			}else{
 				updateDataFrequency();
@@ -789,7 +876,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			}
 		}catch (Exception ex){
 			cdData.show();
-			cdData.setDescriptionText("Not a valid integer.  Must be a valid integer > 0");
+			cdData.setDescriptionText(Messages.ConfigurableModelEditorConnectTab_InvalidInteger2);
 			
 		}
 	}
@@ -802,7 +889,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		try{
 			Integer i = Integer.parseInt(txtPosition.getText());
 			if (i <= 0 || i > ConnectCtProperties.FREQUENCY_MAX_VALUE){
-				cdPosition.setDescriptionText(MessageFormat.format("Not a valid integer.  Must be a valid integer between 0 and {0}", ConnectCtProperties.FREQUENCY_MAX_VALUE));
+				cdPosition.setDescriptionText(MessageFormat.format(Messages.ConfigurableModelEditorConnectTab_InvalidInteger, ConnectCtProperties.FREQUENCY_MAX_VALUE));
 				cdPosition.show();
 			}else{
 				cdPosition.hide();
@@ -810,7 +897,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			}
 		}catch (Exception ex){
 			cdPosition.show();
-			cdPosition.setDescriptionText("Not a valid integer.  Must be a valid integer > 0");
+			cdPosition.setDescriptionText(Messages.ConfigurableModelEditorConnectTab_InvalidInteger2);
 			
 		}
 	}
