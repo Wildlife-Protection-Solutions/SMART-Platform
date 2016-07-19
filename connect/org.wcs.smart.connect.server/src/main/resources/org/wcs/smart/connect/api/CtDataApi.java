@@ -23,7 +23,8 @@ package org.wcs.smart.connect.api;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
@@ -101,7 +102,7 @@ public class CtDataApi extends HttpServlet {
 	 */
 	@POST
     @Path("/{cauuid}")
-    public void uploadPacket(@PathParam("cauuid") String caUuid, InputStream data){
+    public Response uploadPacket(@PathParam("cauuid") String caUuid, InputStream data){
 		
 		UUID ca = parseUuid(caUuid);
 		
@@ -144,8 +145,9 @@ public class CtDataApi extends HttpServlet {
 		String localName = DataStoreManager.INSTANCE.generateFileName(DataQueue.FILE_STORE_LOCATION 
 				+ File.separator + UuidUtils.uuidToString(item.getUuid()) + ".file"); //$NON-NLS-1$
 		item.setFile(localName);
-		try(OutputStream out = Files.newOutputStream(DataStoreManager.INSTANCE.getFile(item.getFile()).toPath(), StandardOpenOption.CREATE)){ 
-			IOUtils.copy(data, out);
+		
+		try(Writer out = Files.newBufferedWriter(DataStoreManager.INSTANCE.getFile(item.getFile()).toPath(), StandardOpenOption.CREATE)){ 
+			IOUtils.copy(data, out, StandardCharsets.UTF_8);
 			item.setStatus(Status.QUEUED);
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -173,7 +175,9 @@ public class CtDataApi extends HttpServlet {
 		if (thrown != null)
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CtDataApi.WriteError", request.getLocale()) + thrown.getMessage()); //$NON-NLS-1$
 		
-		return;
+		return Response.ok().
+	            build();
+		
 	}
 
 	private UUID parseUuid(String uuid) throws SmartConnectException{

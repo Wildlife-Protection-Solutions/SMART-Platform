@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.util.logging.Logger;
-
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
@@ -44,5 +42,4 @@ public class ConnectRESTApplication extends Application {
 	
 	public static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 	
-	private final static Logger logger = Logger.getLogger(ConnectRESTApplication.class.getName());
 }
