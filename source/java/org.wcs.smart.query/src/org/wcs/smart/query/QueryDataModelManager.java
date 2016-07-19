@@ -43,7 +43,7 @@ public class QueryDataModelManager {
 	 * @return the active data model manager for the
 	 * currnet conservation area
 	 */
-	public static IDataModelManager getInstance(){
+	public static synchronized IDataModelManager getInstance(){
 		if (instance == null){
 			if (SmartDB.isMultipleAnalysis()){
 				instance = new MultiCaDataModelManagerImpl();

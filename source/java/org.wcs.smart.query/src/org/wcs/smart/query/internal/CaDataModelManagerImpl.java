@@ -54,7 +54,7 @@ import org.wcs.smart.query.QueryPlugIn;
  */
 public class CaDataModelManagerImpl implements IDataModelManager {
 
-	private DataModel dm = null;
+	private volatile DataModel dm = null;
 	private Integer dmDepth = null;
 	private ConservationArea conservationArea = null;
 	
@@ -73,8 +73,10 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * Clears the current data model
 	 */
 	public void clearDataModel(){
-		dmDepth = null;
-		dm = null;
+		synchronized (this) {
+			dmDepth = null;
+			dm = null;	
+		}
 	}
 	
 	/**
@@ -85,18 +87,17 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	@Override
 	public DataModel getDataModel(){
 		if (dm == null){
-			Job job = loadDataModelJob;
 			synchronized (this) {
-				if (job.getState() == Job.NONE || job.getState() == Job.SLEEPING){
+				if (dm == null){
+					Job job = loadDataModelJob;
 					job.schedule();
+					try{
+						//wait for the current job to finish
+						job.join();
+					}catch (Exception ex){
+						QueryPlugIn.log(ex.getMessage(), ex);
+					}
 				}
-			}
-			
-			try{
-				//wait for the current job to finish
-				job.join();
-			}catch (Exception ex){
-				QueryPlugIn.log(ex.getMessage(), ex);
 			}
 		}
 		return this.dm;

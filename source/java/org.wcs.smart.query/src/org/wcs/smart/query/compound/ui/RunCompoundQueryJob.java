@@ -22,11 +22,14 @@
 package org.wcs.smart.query.compound.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -59,6 +62,7 @@ public class RunCompoundQueryJob extends Job{
 	
 	private MapLayerTracker mapLayerTracker = new MapLayerTracker();
 	
+
 	public RunCompoundQueryJob(CompoundQueryEditor editor){
 		super(Messages.QueryResultsEditor_RunQueryJobName);
 		this.editor = editor;
@@ -146,12 +150,89 @@ public class RunCompoundQueryJob extends Job{
 		editor.page1.setupTable(items);
 		
 		//create jobs
+		JobQueue queue = new JobQueue();
 		for (final QueryItem i : items){
 			RunCompoundQueryLayerJob job = new RunCompoundQueryLayerJob(i, editor, mapLayerTracker);
-			job.schedule();
+			queue.addJob(job);
 		}
+		queue.start();
 		
 		return Status.OK_STATUS;
+		
+	}
+	
+	/**
+	 * Job queue to only allow a specific number of sub queries to
+	 * run at once.  This prevents these jobs from using up all the database
+	 * connections causing a deadlock.
+	 * 
+	 * @author Emily
+	 *
+	 */
+	/*
+	 * In particular the if the data model has not been loaded the query engine
+	 * requires an additional connection to load the data model.  If query engines
+	 * have consumed all the available database connections we get a deadlock.
+	 * The maximum jobs here is 3; with the database connection pool being 5.
+	 * 
+	 */
+	private class JobQueue {
+		public static final int MAX_JOBS = 3;
+		List<Job> jobs = Collections.synchronizedList(new ArrayList<Job>());
+		
+		/*
+		 * add a job to the job queue
+		 */
+		public void addJob(Job job){
+			this.jobs.add(job);
+		}
+		
+		/*
+		 * start running the jobs
+		 */
+		public void start(){
+			int i = 0;
+			while(!jobs.isEmpty() && i < MAX_JOBS){
+				i++;
+				runNext();
+			}
+		}
+		
+		/*
+		 * run the next job if another job exists in the queue
+		 */
+		private synchronized void runNext(){
+			if (jobs.isEmpty()) return;
+			Job j = jobs.remove(0);
+			j.addJobChangeListener(new IJobChangeListener() {
+				
+				@Override
+				public void sleeping(IJobChangeEvent event) {	
+				}
+				
+				@Override
+				public void scheduled(IJobChangeEvent event) {	
+				}
+				
+				@Override
+				public void running(IJobChangeEvent event) {		
+				}
+				
+				@Override
+				public void done(IJobChangeEvent event) {
+					runNext();
+				}
+				
+				@Override
+				public void awake(IJobChangeEvent event) {
+				}
+				
+				@Override
+				public void aboutToRun(IJobChangeEvent event) {
+				}
+			});
+			j.schedule();
+		}
 		
 	}
 }
