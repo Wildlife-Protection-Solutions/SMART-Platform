@@ -187,9 +187,12 @@ public class QueryDropItem extends DropItem {
 		applyAll.setToolTipText(Messages.QueryDropItem_dateapplyalltooltip);
 		applyAll.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				DateFilter df = getDateFilter();
 				for (DropItem di : ((CompoundDefinitionPanel)getTargetPanel()).getItems()){
 					if (di instanceof QueryDropItem){
-						((QueryDropItem) di).setDateFilter(getDateFilter());
+						if (di != QueryDropItem.this){
+							((QueryDropItem) di).setDateFilter(df);
+						}
 					}
 				}
 				queryChanged();
