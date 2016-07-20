@@ -59,10 +59,9 @@ public class AddConnectDataQueueJob extends Job {
 			monitor.beginTask(Messages.AddConnectDataQueueJob_ProgressTask, 10);
 			String currentVersion = HibernateManager.getPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, session);
 			if (currentVersion == null){
-				session.beginTransaction();
 				try{
-					installPlugin(session, true);
-					HibernateManager.setPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, ConnectDataQueuePlugin.DB_VERSION_1, session);
+					session.beginTransaction();
+					installPlugin(session);
 					session.getTransaction().commit();
 				}catch(Exception ex){
 					session.getTransaction().rollback();
@@ -98,9 +97,16 @@ public class AddConnectDataQueueJob extends Job {
 	 * after all updates/install are completed).
 	 * @throws Exception
 	 */
-	public void installPlugin(Session session, boolean installChangeTracking) throws Exception{
-		createTables(session);
-		HibernateManager.setPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, ConnectDataQueuePlugin.DB_VERSION_1, session);
+	public void installPlugin(Session session) throws Exception{
+		String currentVersion = HibernateManager.getPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, session);
+		if (currentVersion == null){
+			createTables(session);
+			HibernateManager.setPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, ConnectDataQueuePlugin.DB_VERSION_1, session);
+			currentVersion = ConnectDataQueuePlugin.DB_VERSION_1;
+		}
+		
+		//run the upgrader to upgrade to the current version
+		ConnectDataQueueDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	private void createTables(Session session){

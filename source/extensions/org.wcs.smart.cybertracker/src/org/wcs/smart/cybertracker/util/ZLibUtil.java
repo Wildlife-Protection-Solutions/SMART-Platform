@@ -45,13 +45,10 @@ public class ZLibUtil {
     /**
      * Decompresses a zlib compressed file to a json string.
      */
-    public static String decompressFile(File compressed) {
+    public static String decompressFile(File compressed) throws Exception {
     	try (InputStream in = new InflaterInputStream(new FileInputStream(compressed))) {
 			return IOUtils.toString(in, "UTF-8"); //$NON-NLS-1$
-		} catch (Exception e) {
-			SmartPlugIn.displayLog("Faild to decompress data from file.", e);
-	    	return null;
-		}
+		} 
     }
 
     //TODO: all the code below is for testing purposes and should be removed later!!!
@@ -60,7 +57,7 @@ public class ZLibUtil {
 	 * @param args
 	 * @throws FileNotFoundException 
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 //		decompressFile(new File("d:\\SMART\\miniz\\x1.JSON"), new File("d:\\SMART\\miniz\\x1d.JSON"));
 //		compressFile(new File("d:\\SMART\\d64.txt"), new File("d:\\SMART\\d64cmp.cmp"));
 

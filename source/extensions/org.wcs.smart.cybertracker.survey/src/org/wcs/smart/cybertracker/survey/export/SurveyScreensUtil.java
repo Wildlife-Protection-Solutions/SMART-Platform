@@ -34,15 +34,17 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
-import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
 import org.wcs.smart.cybertracker.export.alert.AlertData;
+import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -74,6 +76,19 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class SurveyScreensUtil extends ScreensUtil {
 
+	public static enum JsonSurveyKey {
+		MISSION_ATT_LIST("ml"), //$NON-NLS-1$
+		MISSION_ATT("ma"), //$NON-NLS-1$
+		SAMPLING_UNIT("su"); //$NON-NLS-1$
+		
+		public String key;
+		
+		private JsonSurveyKey(String key){
+			this.key = key;
+		}
+	}
+	
+	
 	public static final String RESULT_SURVEY_DESIGN = ScreensUtil.COMMON_PREFIX + "SurveyDesign"; //$NON-NLS-1$
 
 	public static final String RESULT_MISSION_LEADER = ScreensUtil.COMMON_PREFIX + "Leader"; //$NON-NLS-1$
@@ -92,13 +107,13 @@ public class SurveyScreensUtil extends ScreensUtil {
 
 	@Override
 	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
-		registerDatatype(elements, DATATYPE_SURVEY);
+		CyberTrackerId dataType = registerDatatype(elements, DATATYPE_SURVEY);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
 		ScreenOption so;
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
-		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps);
+		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, dataType, DATATYPE_SURVEY);
 		
 		
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
@@ -121,7 +136,8 @@ public class SurveyScreensUtil extends ScreensUtil {
 			for (Employee i : employees) {
 				members.add(SmartLabelProvider.getShortLabel(i));
 				CyberTrackerId mctid = new CyberTrackerId();
-				ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+				Item employee = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+				employee.setJsonId(JsonKey.EMPLOYEE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(i.getUuid()));
 				memberIds.add(mctid);
 			}
 			
@@ -141,6 +157,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 					if (e.getUuid().equals(sou.getUuidValue())) {
 						CyberTrackerId mctid = new CyberTrackerId();
 						Elements.List.Items.Item memberValue = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+						memberValue.setJsonId(JsonKey.EMPLOYEE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(e.getUuid()));
 						result.defaultValues.add(new CtDataKeyValueRecord(memberValue, ICyberTrackerConstants.STR_TRUE));
 						memberIds.add(mctid);
 						if (leader_so.getUuidValue() != null && leader_so.getUuidValue().equals(e.getUuid())) {
@@ -179,7 +196,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 			if (missionAttribute.getType() != null) {
 				switch (missionAttribute.getType()) {
 				case LIST:
-					cyberTrackerIds = toCyberTrackerIds(elements, missionAttribute.getAttributeList());
+					cyberTrackerIds = toCyberTrackerIds(elements, missionAttribute.getAttributeList(),  JsonSurveyKey.MISSION_ATT_LIST.key);
 					id = addSimpleNextRadioNode(id, result, elements, missionAttribute.getName(), resultElName, tag0, cyberTrackerIds, true);
 					continue;
 				case NUMERIC:
@@ -287,18 +304,21 @@ public class SurveyScreensUtil extends ScreensUtil {
 		return startSuId;
 	}
 	
-	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps) {
-		StartScreensContent content = StartScreensContent.create(elements, Messages.SurveyScreensUtil_StartSurvey, Messages.SurveyScreensUtil_StartSurveyTitle, Messages.SurveyScreensUtil_BeginSurvey);
-		return addStartScreen(id, container, elements, ctProps, content);
+	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, CyberTrackerId dataType, String strType) {
+		StartScreensContent content = StartScreensContent.create(elements, Messages.SurveyScreensUtil_StartSurvey, Messages.SurveyScreensUtil_StartSurveyTitle, Messages.SurveyScreensUtil_BeginSurvey, strType);
+		return addStartScreen(id, container, elements, ctProps, content, dataType);
 	}
 
 	private List<CyberTrackerId> suToCtIds(Elements elements, List<SamplingUnit> items) {
 		List<String> labelValues = new ArrayList<String>();
 		List<String> tag0Values = new ArrayList<String>();
+		List<String> jsonValues = new ArrayList<String>();
 		for (SamplingUnit su : items) {
 			labelValues.add(su.getId());
-			tag0Values.add(UuidUtils.uuidToString(su.getUuid()));
+			String uuid = UuidUtils.uuidToString(su.getUuid());
+			tag0Values.add(uuid);
+			jsonValues.add(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP + uuid);
 		}
-		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values, jsonValues);
 	}
 }

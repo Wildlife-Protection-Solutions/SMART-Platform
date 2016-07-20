@@ -97,6 +97,24 @@ import com.google.gson.Gson;
  */
 public class CyberTrackerConfExporter {
 
+	public static final String KEY_SEP = ":"; //$NON-NLS-1$
+	public static final String NULL_KEY = "null"; //$NON-NLS-1$
+	
+	public static enum JsonKey{
+		CATEGORY("c"), //$NON-NLS-1$
+		ATTRIBUTE("a"), //$NON-NLS-1$
+		EMPLOYEE("e"), //$NON-NLS-1$
+		ATTRIBUTE_LIST("l"), //$NON-NLS-1$
+		ATTRIBUTE_MULTILIST("ml"), //$NON-NLS-1$
+		ATTRIBUTE_TREE("t"); //$NON-NLS-1$
+		
+		public String key;
+		
+		private JsonKey(String key){
+			this.key = key;
+		}
+		
+	}
 	private static final String NODE_DEPTH_RESULT_PREFIX = "node"; //$NON-NLS-1$
 	private static final String NODE_HEADER_COLOR = "0000FF00"; //$NON-NLS-1$
 	
@@ -293,6 +311,8 @@ public class CyberTrackerConfExporter {
 			if (target != null){
 				try (BufferedWriter outR = new BufferedWriter(new FileWriter(file.getAbsolutePath() + File.separator + "Globals.xml"))){ //$NON-NLS-1$
 					outR.write("<Globals>\n"); //$NON-NLS-1$
+					//TODO: how to determine this
+					outR.write("<DatabaseVersion>3420</DatabaseVersion>"); //$NON-NLS-1$
 					outR.write("<Transfer>\n"); //$NON-NLS-1$
 					outR.write("<UploadProtocol>" + target.getProtocol().ctValue + "</UploadProtocol>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 					outR.write("<UploadUrl>" + target.getUrl() + "</UploadUrl>\n"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -333,7 +353,14 @@ public class CyberTrackerConfExporter {
 			String json = gson.toJson(ElementsUtil.itemToE(item));
 			//TODO: do we need encoding at all? it this type of encoding ok?
 			//item.setJsonId(Base64.getEncoder().encodeToString(json.getBytes()));
-			item.setJsonId(json);
+//			item.setJsonId(json);
+//			if (item.getJsonId() == null){
+//			if (item.getTag0() != null){
+//				item.setJsonId(item.getTag0());
+//			}else{
+//				item.setJsonId(item.getName());
+//			}
+//			}
 		}
 	}
 
@@ -453,8 +480,8 @@ public class CyberTrackerConfExporter {
 		Map<CmAttributeListItem, CyberTrackerId> itemsMap = new HashMap<>();
 
 		String tag1 = isMulti ? ElementsUtil.MULISELECT_ELEMENT_TAG : null;
-		String tag3 = isMulti ? getAttributeResultElementId(attribute, 0).getItemId() : null;
-		String tag4 = numAttr != null ? getAttributeResultElementId(numAttr.getAttribute(), 0).getItemId() : null;
+		String tag3 = isMulti ? getAttributeResultElementId(attribute, 0, false).getItemId() : null;
+		String tag4 = numAttr != null ? getAttributeResultElementId(numAttr.getAttribute(), 0, false).getItemId() : null;
 		for (int i = 0; i < activeItems.size(); i++) {
 			IAttributeListItemProxy listItem = activeItems.get(i);
 			String name = listItem.getName();
@@ -462,6 +489,19 @@ public class CyberTrackerConfExporter {
 			String tag2 = isMulti ? String.valueOf(i) : null;
 			CyberTrackerId id = new CyberTrackerId();
 			Elements.List.Items.Item item = ElementsUtil.addElementsItem(elements, name, id.getItemId(), tag0, tag1, tag2, tag3, tag4);
+			if (tag2 == null){
+				if (numAttr != null){
+					item.setJsonId(JsonKey.ATTRIBUTE_MULTILIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(numAttr.getAttribute().getUuid()) + CyberTrackerConfExporter.KEY_SEP + JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
+				}else{
+					item.setJsonId(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
+				}
+			}else{
+				if (numAttr != null){
+					item.setJsonId(JsonKey.ATTRIBUTE_MULTILIST.key + CyberTrackerConfExporter.KEY_SEP +tag2 + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(numAttr.getAttribute().getUuid()) + CyberTrackerConfExporter.KEY_SEP + JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
+				}else{
+					item.setJsonId(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP+ tag2 + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(listItem.getListItem().getListItem().getUuid()));
+				}
+			}
 			ElementsUtil.addElementsItemMedia(item, listItem.getImageFile());
 			ids.add(id);
 			items.add(listItem.getListItem());
@@ -482,7 +522,9 @@ public class CyberTrackerConfExporter {
 	}
 
 	private String recordDefaultValues(List<CmAttribute> invisibleList) {
-		List<CtDataKeyValueRecord> data = new ArrayList<>();
+//		List<CtDataKeyValueRecord> data = new ArrayList<>();
+		
+		HashMap<String, Object> data = new HashMap<>();
 		for (int i = 0; i < invisibleList.size(); i++) {
 			CmAttribute cmAttr = invisibleList.get(i);
 			if (cmAttr.isVisible()) {
@@ -494,7 +536,9 @@ public class CyberTrackerConfExporter {
 			
 			CtDataKeyValueRecord newData = recordDefaultValue(cmAttr);
 			if (newData != null) {
-				data.add(newData);
+//				data.add(newData);
+//				data.add(newData.keyItem.getJsonId() + ":" + );
+				data.put(newData.keyItem.getJsonId(), newData.valueItem != null ? newData.valueItem.getJsonId() : newData.getValueString());
 			}
 		}
 		Gson gson = new Gson();
@@ -509,6 +553,14 @@ public class CyberTrackerConfExporter {
 		
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
 		CyberTrackerId id = startId;
+		
+		int multiSelectIndex = -1;
+		for (int i = 0; i < attrList.size(); i++) {
+			CmAttribute cmAttr = attrList.get(i);
+			if (cmAttr.isMultiselect() && cmAttr.isVisible() && AttributeType.LIST.equals(cmAttr.getAttribute().getType())) {
+				multiSelectIndex = i;
+			}
+		}
 		for (int i = 0; i < attrList.size(); i++) {
 			CmAttribute cmAttr = attrList.get(i);
 			Attribute attribute = cmAttr.getAttribute();
@@ -542,7 +594,12 @@ public class CyberTrackerConfExporter {
 			//end of multi-select / numeric multi-select block
 			
 			boolean linkToNext = terminate || i < attrList.size() - 1;
-			CyberTrackerId resultElementId = getAttributeResultElementId(attribute, index); //id for result element in attribute screen node
+			
+			boolean applyAll = false;
+			if (multiSelectIndex >= 0 && i < multiSelectIndex ){
+				applyAll = true;
+			}
+			CyberTrackerId resultElementId = getAttributeResultElementId(attribute, index, applyAll); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
 			{
@@ -673,6 +730,7 @@ public class CyberTrackerConfExporter {
 			String tag0 = UuidUtils.uuidToString(treeNode.getUuid());
 			CyberTrackerId id = new CyberTrackerId();
 			Elements.List.Items.Item item =  ElementsUtil.addElementsItem(elements, name, id.getItemId(), tag0);
+			item.setJsonId(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(treeNode.getTreeNode().getDmTreeNode().getUuid()));
 			ElementsUtil.addElementsItemMedia(item, treeNode.getImageFile());
 			ids.add(id);
 			items.add(treeNode.getTreeNode());
@@ -731,6 +789,7 @@ public class CyberTrackerConfExporter {
 				}
 				String elId = (new CyberTrackerId()).getItemId();
 				Elements.List.Items.Item valueItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
+				valueItem.setJsonId(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(uuidValue));
 				return recordDefaultValue(attribute, valueItem);
 			}
 			break;
@@ -757,6 +816,7 @@ public class CyberTrackerConfExporter {
 				}
 				String elId = (new CyberTrackerId()).getItemId();
 				Elements.List.Items.Item valueItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
+				valueItem.setJsonId(JsonKey.ATTRIBUTE_TREE + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(uuidValue));
 				return recordDefaultValue(attribute, valueItem);
 			}
 			break;
@@ -793,6 +853,7 @@ public class CyberTrackerConfExporter {
 		//tag0 - key (attribute uuid); tag2 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
 		Elements.List.Items.Item keyItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, valueItem.getId());
+		keyItem.setJsonId(JsonKey.ATTRIBUTE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(attribute.getUuid()));
 		return new CtDataKeyValueRecord(keyItem, valueItem);
 	}
 
@@ -800,6 +861,7 @@ public class CyberTrackerConfExporter {
 		//tag0 - key (attribute uuid); tag2 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
 		Elements.List.Items.Item keyItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, valueStr);
+		keyItem.setJsonId(JsonKey.ATTRIBUTE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(attribute.getUuid()));
 		return new CtDataKeyValueRecord(keyItem, valueStr);
 	}
 	
@@ -810,7 +872,7 @@ public class CyberTrackerConfExporter {
 		List<String> tag0Values = new ArrayList<String>();
 		tag0Values.add(ElementsUtil.BOOL_TRUE);
 		tag0Values.add(ElementsUtil.BOOL_FALSE);
-		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values, tag0Values);
 	}
 
 	private List<CyberTrackerId> createEndWpGroupElementsIds(Elements elements2) {
@@ -820,14 +882,15 @@ public class CyberTrackerConfExporter {
 		List<String> tag0Values = new ArrayList<String>();
 		tag0Values.add(ElementsUtil.BOOL_FALSE);
 		tag0Values.add(ElementsUtil.BOOL_TRUE);
-		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values, tag0Values);
 	}
 
 	private CyberTrackerId getNodeLevelResultElementId(Integer level) {
 		CyberTrackerId id = nodeLevel2resultId.get(level);
 		if (id == null) {
 			id = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, NODE_DEPTH_RESULT_PREFIX+String.valueOf(level), id.getItemId(), String.valueOf(level), ElementsUtil.CATEGORY_ELEMENT_TAG);
+			Item item = ElementsUtil.addElementsItem(elements, NODE_DEPTH_RESULT_PREFIX+String.valueOf(level), id.getItemId(), String.valueOf(level), ElementsUtil.CATEGORY_ELEMENT_TAG);
+			item.setJsonId(JsonKey.CATEGORY.key + CyberTrackerConfExporter.KEY_SEP + level);
 			nodeLevel2resultId.put(level, id);
 		}
 		return id;
@@ -859,7 +922,8 @@ public class CyberTrackerConfExporter {
 	 * multiselect list this attribute belong 
 	 * @return
 	 */
-	private CyberTrackerId getAttributeResultElementId(Attribute attribute, Integer index) {
+	private CyberTrackerId getAttributeResultElementId(Attribute attribute, Integer index, boolean applyAll) {
+		if (applyAll) index = -1;
 		Map<Integer, CyberTrackerId> map = attr2resultId.get(attribute);
 		if (map == null) {
 			map = new HashMap<Integer, CyberTrackerId>();
@@ -869,7 +933,8 @@ public class CyberTrackerConfExporter {
 		if (id == null) {
 			id = new CyberTrackerId();
 			String uuid = UuidUtils.uuidToString(attribute.getUuid());
-			ElementsUtil.addElementsItem(elements, attribute.getKeyId()+"_"+index, id.getItemId(), uuid, ElementsUtil.ATTRIBUTE_ELEMENT_TAG, index.toString()); //$NON-NLS-1$
+			Item it = ElementsUtil.addElementsItem(elements, attribute.getKeyId()+"_"+index, id.getItemId(), uuid, ElementsUtil.ATTRIBUTE_ELEMENT_TAG, index.toString()); //$NON-NLS-1$
+			it.setJsonId(JsonKey.ATTRIBUTE.key + CyberTrackerConfExporter.KEY_SEP + index.toString() + CyberTrackerConfExporter.KEY_SEP + uuid);
 			map.put(index, id);
 		}
 		return id;
@@ -908,6 +973,7 @@ public class CyberTrackerConfExporter {
 		//below is same as ElementsUtil.addElements(elements, map);
 		for (IAttributeTreeNodeProxy treeNode : map.keySet()) {
 			Elements.List.Items.Item item = ElementsUtil.addElementsItem(elements, treeNode.getName(), map.get(treeNode).getItemId(), UuidUtils.uuidToString(treeNode.getUuid()));
+			item.setJsonId(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(treeNode.getTreeNode().getDmTreeNode().getUuid()));
 			ElementsUtil.addElementsItemMedia(item, treeNode.getImageFile());
 		}
 

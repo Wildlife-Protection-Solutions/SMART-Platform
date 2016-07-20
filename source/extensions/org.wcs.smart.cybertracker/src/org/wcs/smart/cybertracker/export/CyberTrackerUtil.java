@@ -29,7 +29,6 @@ import java.util.Map;
 
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
@@ -101,21 +100,21 @@ public class CyberTrackerUtil {
 		return screensFactory.getCtProperties();
 	}
 	
-	public Map<Category, CyberTrackerId> buildMap(Category category) {
-		Map<Category, CyberTrackerId> map = new HashMap<Category, CyberTrackerId>();
-		map.put(category, new CyberTrackerId());
-		mapCategories(category.getActiveChildren(), map);
-		return map;
-	}
-
-	private void mapCategories(List<Category> categories, Map<Category, CyberTrackerId> map) {
-		for (Category category : categories) {
-			map.put(category, new CyberTrackerId());
-			if (category.getActiveChildren() != null) {
-				mapCategories(category.getActiveChildren(), map);
-			}
-		}
-	}
+//	public Map<Category, CyberTrackerId> buildMap(Category category) {
+//		Map<Category, CyberTrackerId> map = new HashMap<Category, CyberTrackerId>();
+//		map.put(category, new CyberTrackerId());
+//		mapCategories(category.getActiveChildren(), map);
+//		return map;
+//	}
+//
+//	private void mapCategories(List<Category> categories, Map<Category, CyberTrackerId> map) {
+//		for (Category category : categories) {
+//			map.put(category, new CyberTrackerId());
+//			if (category.getActiveChildren() != null) {
+//				mapCategories(category.getActiveChildren(), map);
+//			}
+//		}
+//	}
 
 	public Map<IAttributeTreeNodeProxy, CyberTrackerId> buildTreeNodeMap(List<IAttributeTreeNodeProxy> treeNodes) {
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = new HashMap<IAttributeTreeNodeProxy, CyberTrackerId>();

@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.cybertracker.export;
 
-import java.util.List;
-
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 
 /**
  * Class that is responsible for providing content for start screens.
@@ -50,14 +49,23 @@ public class StartScreensContent {
 		return beginScreenItemId;
 	}
 
-	public static StartScreensContent create(Elements elements, String startScreenItemLabel, String beginScreenName, String beginScreenItemLabel) {
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, startScreenItemLabel, beginScreenItemLabel);
-		return create(ids.get(0), beginScreenName, ids.get(1));
+	public static StartScreensContent create(Elements elements, String startScreenItemLabel, String beginScreenName, String beginScreenItemLabel, String dataType) {
+		CyberTrackerId id = new CyberTrackerId();
+		Item item = ElementsUtil.addElementsItem(elements, startScreenItemLabel, id.getItemId());
+		item.setJsonId(dataType);
+
+		CyberTrackerId id2 = new CyberTrackerId();
+		ElementsUtil.addElementsItem(elements, beginScreenItemLabel, id2.getItemId());
+		
+		return create(id, beginScreenName, id2);
 	}
 	
-	public static StartScreensContent create(Elements elements, String startScreenItemLabel, String beginScreenName, CyberTrackerId beginScreenItemId) {
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, startScreenItemLabel);
-		return create(ids.get(0), beginScreenName, beginScreenItemId);
+	public static StartScreensContent create(Elements elements, String startScreenItemLabel, String beginScreenName, CyberTrackerId beginScreenItemId, String dataType) {
+		CyberTrackerId id = new CyberTrackerId();
+		Item item = ElementsUtil.addElementsItem(elements, startScreenItemLabel, id.getItemId());
+		item.setJsonId(dataType);
+		
+		return create(id, beginScreenName, beginScreenItemId);
 	}
 
 	private static StartScreensContent create(CyberTrackerId startScreenItemId, String beginScreenName, CyberTrackerId beginScreenItemId) {

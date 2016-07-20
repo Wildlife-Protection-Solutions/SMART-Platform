@@ -53,7 +53,8 @@ public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.connect.dataqueue"; //$NON-NLS-1$
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_1;
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_2;
 
 	public static final String ERROR_ICON = "org.wcs.smart.connect.dataqueue.icon.error"; //$NON-NLS-1$
 	public static final String QUEUED_ICON = "org.wcs.smart.connect.dataqueue.icon.queued"; //$NON-NLS-1$

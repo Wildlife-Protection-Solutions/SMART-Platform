@@ -99,16 +99,20 @@ public class ScreensUtil {
 	 * @param elements
 	 * @param datatype
 	 */
-	protected void registerDatatype(Elements elements, String datatype) {
+	protected CyberTrackerId registerDatatype(Elements elements, String datatype) {
 		CyberTrackerId id = new CyberTrackerId();
 		ElementsUtil.addElementsItem(elements, RESULT_DATATYPE, id.getItemId(), datatype);
+		return id;
 	}
 	
-	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, StartScreensContent content) {
+	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, StartScreensContent content, CyberTrackerId dataType) {
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
 		ids.add(content.getStartScreenItemId());
 		ids.addAll(ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ExitCyberTracker));
-		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
+		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, dataType.getItemId(), true);
+			
+		//set the target element on nodeMain to the dataType
+		
 		container.screenNodes.add(nodeMain);
 		addGpsConfiguration(nodeMain, ctProps, 0);
 		addBatteryControl(nodeMain);
@@ -116,6 +120,10 @@ public class ScreensUtil {
 		List<CyberTrackerId> idsBegin = new ArrayList<CyberTrackerId>();
 		idsBegin.add(content.getBeginScreenItemId());
 		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), content.getBeginScreenName(), idsBegin, null, true);
+		
+		//set the result type 
+		
+		
 		Control beginControl2 = ScreensObjectFactory.getNavigationControl(nodeBegin);
 		beginControl2.setShowGPS(ICyberTrackerConstants.STR_TRUE);
 		container.screenNodes.add(nodeBegin);
@@ -331,14 +339,17 @@ public class ScreensUtil {
 		return toNextScreen(node);
 	}
 	
-	public List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends NamedItem> items) {
+	public List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends NamedItem> items, String jsonKey) {
 		List<String> labelValues = new ArrayList<String>();
 		List<String> tag0Values = new ArrayList<String>();
+		List<String> jsonValues = new ArrayList<String>();
 		for (NamedItem i : items) {
 			labelValues.add(ctUtil.getName(i));
-			tag0Values.add(UuidUtils.uuidToString(i.getUuid()));
+			String uuid = UuidUtils.uuidToString(i.getUuid());
+			tag0Values.add(uuid);
+			jsonValues.add(jsonKey + ":" + uuid); //$NON-NLS-1$
 		}
-		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values, jsonValues);
 	}
 
 	protected String buildMembersFilter(String memberNodeId, List<CyberTrackerId> memberIds, List<String> memberNames) {

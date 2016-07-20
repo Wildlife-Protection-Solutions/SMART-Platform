@@ -104,9 +104,9 @@ public class ElementsUtil {
 	 * @param elements
 	 * @return
 	 */
-	public static List<CyberTrackerId> addCustomElements(Elements elements, List<String> labels, List<String> tag0Values) {
+	public static List<CyberTrackerId> addCustomElements(Elements elements, List<String> labels, List<String> tag0Values, List<String> jsonValues) {
 		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
-		if (labels.size() != tag0Values.size()) {
+		if (labels.size() != tag0Values.size() || labels.size() != jsonValues.size()) {
 			//development validation
 			throw new IllegalArgumentException("Lables and Tag0 lists are expected to be of an equal size."); //$NON-NLS-1$
 		}
@@ -115,7 +115,8 @@ public class ElementsUtil {
 			String label = labels.get(i);
 			String tag0 = tag0Values.get(i);
 			CyberTrackerId id = new CyberTrackerId();
-			addElementsItem(elements, label, id.getItemId(), tag0);
+			Elements.List.Items.Item item = addElementsItem(elements, label, id.getItemId(), tag0);
+			item.setJsonId(jsonValues.get(i));
 			idList.add(id);
 		}
 		return idList;
@@ -190,7 +191,7 @@ public class ElementsUtil {
 		List<String> tag0Values = new ArrayList<String>();
 		tag0Values.add(BOOL_TRUE);
 		tag0Values.add(BOOL_FALSE);
-		return ElementsUtil.addCustomElements(elements, labels, tag0Values);
+		return ElementsUtil.addCustomElements(elements, labels, tag0Values, tag0Values);
 	}
 	
 	//-------------------------------------------------------
@@ -204,6 +205,11 @@ public class ElementsUtil {
 				tag5 = node.isUseSingleGpsPoint() ? CATEGORY_MULTI_OBS_SINGLE_GPS : CATEGORY_MULTI_OBS_MULTI_GPS;
 			}
 			Elements.List.Items.Item item = addElementsItem(elements, LanguageUtil.getName(node, language), map.get(node).getItemId(), tag0, null, null, null, null, tag5);
+			if (tag0 != null){
+				item.setJsonId(tag0);
+			}else{
+				item.setJsonId(CyberTrackerConfExporter.NULL_KEY);
+			}
 			addElementsItemMedia(item, node.getImageFile());
 		}
 	}

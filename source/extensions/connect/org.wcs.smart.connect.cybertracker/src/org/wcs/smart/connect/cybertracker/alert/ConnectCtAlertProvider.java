@@ -101,7 +101,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 				}
 			});
 			lookup = new AlertLookup(alerts);
-			if (!lookup.isEmpty()) {
+			if (!lookup.isEmpty() || (properties.getPingFrequency() != null && properties.getPingFrequency() > 0)) {
 				//we have at lease one alert configured for this model, so we need to init server related fields
 				initConnectFields();
 			}
@@ -109,7 +109,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 			//this case we are using the data model which has no alerts
 			lookup = new AlertLookup(Collections.emptyList());
 			properties = new ConnectCtProperties();
-			properties.setPingFrequency(ConnectCtProperties.FREQUENCY_DEFAULT_VALUE);
+			properties.setPingFrequency(0);
 		}
 
 	}
@@ -150,10 +150,16 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 		if (!isServerConfigured) {
 			return null;
 		}
+		if (properties.getPingFrequency() == null || properties.getPingFrequency() <= 0) return null;
+		
 		AlertData data = createAlertData(null);
 		data.setPingOnly(true);
+		data.setUrl(url);
+		data.setUsername(username);
+		data.setPassword(password);
 		data.setType(properties.getPingType());
 		data.setLevel(ConnectAlert.Level.FIVE.value);
+		data.setPingFrequency(properties.getPingFrequency());
 		return data;
 	}
 	
@@ -168,7 +174,7 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 			data.setType(a.getType());
 			data.setLevel(a.getLevel());
 		}
-		data.setPingFrequency(properties.getPingFrequency());
+		data.setPingFrequency(0);
 		return data;
 	}
 

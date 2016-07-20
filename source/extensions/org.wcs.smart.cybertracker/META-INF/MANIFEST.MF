@@ -21,5 +21,6 @@ Export-Package: org.wcs.smart.cybertracker,
  org.wcs.smart.cybertracker.model.elements,
  org.wcs.smart.cybertracker.model.screens,
  org.wcs.smart.cybertracker.properties,
- org.wcs.smart.cybertracker.updatesite
+ org.wcs.smart.cybertracker.updatesite,
+ org.wcs.smart.cybertracker.util
 Bundle-Vendor: org.wcs.smart

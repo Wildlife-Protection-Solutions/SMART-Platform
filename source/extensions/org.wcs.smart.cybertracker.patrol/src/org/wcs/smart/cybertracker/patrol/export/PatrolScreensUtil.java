@@ -38,10 +38,12 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
@@ -50,6 +52,7 @@ import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 import org.wcs.smart.cybertracker.model.elements.GpsSightingAccuracy;
 import org.wcs.smart.cybertracker.model.elements.GpsWaypointAccuracy;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
@@ -81,6 +84,20 @@ public class PatrolScreensUtil extends ScreensUtil {
 	
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 
+	public static enum JsonPatrolKey {
+		PATROL_TYPE("pt"), //$NON-NLS-1$
+		TRANSPORT_TYPE("tt"), //$NON-NLS-1$
+		MANDATE("pm"), //$NON-NLS-1$
+		STATION("ps"), //$NON-NLS-1$
+		TEAM("pt"); //$NON-NLS-1$
+		
+		public String key;
+		
+		private JsonPatrolKey(String key){
+			this.key = key;
+		}
+	}
+	
 	public static final String RESULT_PATROL_TYPE = ScreensUtil.COMMON_PREFIX + "PatrolType"; //$NON-NLS-1$
 	public static final String RESULT_TRANSPORT = ScreensUtil.COMMON_PREFIX + "PatrolTransport"; //$NON-NLS-1$
 	public static final String RESULT_ARMED = ScreensUtil.COMMON_PREFIX + "Armed"; //$NON-NLS-1$
@@ -108,7 +125,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 	 */
 	@Override
 	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
-		registerDatatype(elements, DATATYPE_PATROL);
+		CyberTrackerId dataType = registerDatatype(elements, DATATYPE_PATROL);
+		
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
 		ScreenOption so;
@@ -117,7 +135,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		Map<PatrolScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
 		ScreenOption so_type = screenOptions.get(PatrolScreenOptionMeta.TYPE);
-		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, so_type, ca, session);
+		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, so_type, ca, session, dataType, DATATYPE_PATROL);
 		//patrol type & transport
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
 		String errorMsg = validatePatrolTypes(patrolTypes);
@@ -141,7 +159,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		so = screenOptions.get(PatrolScreenOptionMeta.TEAM);
 		if (so == null || so.isVisible()) {
 			List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
-			cyberTrackerIds = toCyberTrackerIds(elements, teams);
+			cyberTrackerIds = toCyberTrackerIds(elements, teams, JsonPatrolKey.TEAM.key);
 			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Team, RESULT_TEAM, cyberTrackerIds, true);
 		} else if (so.getUuidValue() != null) {
 			Team team = CyberTrackerHibernateManager.fetchByUuid(Team.class, so.getUuidValue(), session);
@@ -157,7 +175,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		so = screenOptions.get(PatrolScreenOptionMeta.STATION);
 		if (so == null || so.isVisible()) {
 			List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
-			cyberTrackerIds = toCyberTrackerIds(elements, stations);
+			cyberTrackerIds = toCyberTrackerIds(elements, stations, JsonPatrolKey.STATION.key);
 			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Station, RESULT_STATION, cyberTrackerIds, true);
 		} else if (so.getUuidValue() != null) {
 			Station station = CyberTrackerHibernateManager.fetchByUuid(Station.class, so.getUuidValue(), session);
@@ -173,7 +191,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		so = screenOptions.get(PatrolScreenOptionMeta.MANDATE);
 		if (so == null || so.isVisible()) {
 			List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
-			cyberTrackerIds = toCyberTrackerIds(elements, mandates);
+			cyberTrackerIds = toCyberTrackerIds(elements, mandates, JsonPatrolKey.MANDATE.key);
 			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, cyberTrackerIds, true);
 			
 		} else if (so.getUuidValue() != null) {
@@ -217,7 +235,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 			for (Employee i : employees) {
 				members.add(SmartLabelProvider.getShortLabel(i));
 				CyberTrackerId mctid = new CyberTrackerId();
-				ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+				Item employee = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+				employee.setJsonId(JsonKey.EMPLOYEE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(i.getUuid()));
 				memberIds.add(mctid);
 				
 			}
@@ -243,6 +262,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 					if (sou.getUuidValue().equals(e.getUuid())) {
 						CyberTrackerId mctid = new CyberTrackerId();
 						Elements.List.Items.Item memberValue = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+						memberValue.setJsonId(JsonKey.EMPLOYEE + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(e.getUuid()));
 						result.defaultValues.add(new CtDataKeyValueRecord(memberValue, ICyberTrackerConstants.STR_TRUE));
 						memberIds.add(mctid);
 						if (leader_so.getUuidValue() != null && leader_so.getUuidValue().equals(e.getUuid())) {
@@ -332,7 +352,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		}
 	}
 	
-	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, ScreenOption so_type, ConservationArea ca, Session session) {
+	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, ScreenOption so_type, ConservationArea ca, Session session, CyberTrackerId dataType, String strDataType) {
 		CyberTrackerId elId = null;
 		if (so_type != null  && !so_type.isVisible() && so_type.getStringValue() != null) {
 			//patrol type is configured as a default value, but we still need to force speed limitation
@@ -340,12 +360,13 @@ public class PatrolScreensUtil extends ScreensUtil {
 			Type type = PatrolType.Type.valueOf(so_type.getStringValue());
 			PatrolType pType = PatrolHibernateManager.getPatrolType(ca, session, type);
 			int maxSpeed = getMaxSpeed(pType);
-			elId = addElementsGpsAccuracyItem(elements, Messages.PatrolScreens_Begin, null, ctProps.getDilutionOfPrecision(), maxSpeed);
+			elId = addElementsGpsAccuracyItem(elements, Messages.PatrolScreens_Begin, null, ctProps.getDilutionOfPrecision(), maxSpeed, pType.getType().name());
 		} else {
 			elId = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin).get(0);
+			
 		}
-		StartScreensContent content = StartScreensContent.create(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_Begin_Title, elId);
-		return addStartScreen(id, container, elements, ctProps, content);
+		StartScreensContent content = StartScreensContent.create(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_Begin_Title, elId, strDataType);
+		return addStartScreen(id, container, elements, ctProps, content, dataType);
 	}
 
 	private int getMaxSpeed(PatrolType type) {
@@ -409,7 +430,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 				final String name = type.getGuiName(Locale.getDefault());
 				final String tag0 = type.name();
 				types.add(name);
-				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, ctProps.getDilutionOfPrecision(), getMaxSpeed(patrolType)));
+				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, ctProps.getDilutionOfPrecision(), getMaxSpeed(patrolType), patrolType.getType().name()));
 			}
 			String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
 			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
@@ -421,7 +442,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
 			container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
 			for (int i = 0; i < pTypes.size(); i++) {
-				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pTypes.get(i)));
+				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pTypes.get(i)), JsonPatrolKey.TRANSPORT_TYPE.key);
 				node = ctUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
 				container.screenNodes.add(node);
 				Control control2 = ScreensObjectFactory.getNavigationControl(node);
@@ -445,7 +466,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 					if (value.equals(pt.getType()))
 						pType = pt;
 				}
-				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pType));
+				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pType), JsonPatrolKey.TRANSPORT_TYPE.key);
 				String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
 				Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Transport, trIds, resultTransportId);
 				container.screenNodes.add(node);
@@ -486,7 +507,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		return result;
 	}
 	
-	public static CyberTrackerId addElementsGpsAccuracyItem(Elements elements, String name, String tag0, Integer dop, Integer maxSpeed) {
+	public static CyberTrackerId addElementsGpsAccuracyItem(Elements elements, String name, String tag0, Integer dop, Integer maxSpeed, String jsonValue) {
 		CyberTrackerId elemId = new CyberTrackerId();
 		
 		GpsSightingAccuracy gsa = new GpsSightingAccuracy();
@@ -504,6 +525,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		item.setGpsAccuracyEnabled(ICyberTrackerConstants.STR_TRUE);
 		item.setGpsSightingAccuracy(gsa);
 		item.setGpsWaypointAccuracy(gwa);
+		item.setJsonId(jsonValue);
 		elements.getList().getItems().getItem().add(item);
 		return elemId;
 	}

@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Independent Incident Data Queue Processor
+Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker;singleton:=true
+Bundle-Version: 4.0.1.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.wcs.smart.connect.dataqueue,
+ org.wcs.smart.connect.cybertracker,
+ org.wcs.smart,
+ org.wcs.smart.cybertracker,
+ org.wcs.smart.observation
+Bundle-Vendor: org.wcs.smart
+Export-Package: org.wcs.smart.connect.dataqueue.cybertracker

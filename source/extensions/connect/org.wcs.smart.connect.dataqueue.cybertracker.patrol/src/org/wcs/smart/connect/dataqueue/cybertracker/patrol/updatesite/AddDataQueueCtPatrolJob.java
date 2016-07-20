@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.cybertracker.updatesite;
+package org.wcs.smart.connect.dataqueue.cybertracker.patrol.updatesite;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -33,9 +33,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
-import org.wcs.smart.connect.cybertracker.internal.Messages;
-import org.wcs.smart.connect.cybertracker.upgrade.ConnectCtDatabaseUpgrader;
+import org.wcs.smart.connect.dataqueue.cybertracker.patrol.PlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -44,10 +42,10 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author elitvin
  * @since 3.0.0
  */
-public class AddConnectCtJob extends Job {
+public class AddDataQueueCtPatrolJob extends Job {
 
-	public AddConnectCtJob() {
-		super(Messages.AddConnectCtJob_Title);
+	public AddDataQueueCtPatrolJob() {
+		super("Installing Cybertracker Connect DataQueue Processor");
 	}
 
 	@Override
@@ -57,7 +55,7 @@ public class AddConnectCtJob extends Job {
 						
 		Session session = HibernateManager.openSession();
 		try{
-			monitor.beginTask(Messages.AddConnectCtJob_CreateTablesTaskName, 10);
+			monitor.beginTask("Creating Tables", 10);
 			session.beginTransaction();
 			installPlugin(session);
 			session.getTransaction().commit();
@@ -67,12 +65,12 @@ public class AddConnectCtJob extends Job {
 				@Override
 				public void run() {
 					MessageDialog.openError(Display.getDefault().getActiveShell(),
-							Messages.AddConnectCtJob_ErrorDialogTitle,
-							Messages.AddConnectCtJob_ErrorDialogMessage);
+							"Error",
+							"Could not installed SMART Connect Cybertracker Patrol Data Queue Processor");
 				}
 				
 			});
-			return new Status(Status.ERROR, ConnectCtPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
+			return new Status(Status.ERROR, PlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
 		}finally{
 			session.close();
 		}
@@ -90,33 +88,26 @@ public class AddConnectCtJob extends Job {
 	 * @throws Exception
 	 */
 	public void installPlugin(Session session) throws Exception{
-		String currentVersion = HibernateManager.getPlugInVersion(ConnectCtPlugIn.PLUGIN_ID, session);
+		String currentVersion = HibernateManager.getPlugInVersion(PlugIn.PLUGIN_ID, session);
 		if (currentVersion == null){
 			createTables(session);
-			HibernateManager.setPlugInVersion(ConnectCtPlugIn.PLUGIN_ID, ConnectCtPlugIn.DB_VERSION_1, session);
-			currentVersion = ConnectCtPlugIn.DB_VERSION_1;
+			HibernateManager.setPlugInVersion(PlugIn.PLUGIN_ID, PlugIn.DB_VERSION_1, session);
+			currentVersion = PlugIn.DB_VERSION_1;
 		}
 		
 		//run the upgrader to upgrade to the current version
-		ConnectCtDatabaseUpgrader.upgrade(currentVersion, session);
+		DataQueueCtPatrolDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	private void createTables(Session session){
 		final String[] sql = new String[]{
-			"CREATE TABLE smart.connect_alert ( UUID CHAR(16) for bit data NOT NULL, CM_UUID CHAR(16) for bit data  NOT NULL, ALERT_ITEM_UUID CHAR(16) for bit data  NOT NULL, CM_ATTRIBUTE_UUID CHAR(16) for bit data, LEVEL SMALLINT NOT NULL, TYPE VARCHAR(64), PRIMARY KEY (UUID))", //$NON-NLS-1$
-			"ALTER TABLE smart.connect_alert ADD CONSTRAINT connect_alert_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-			"ALTER TABLE smart.connect_alert ADD CONSTRAINT connect_alert_cm_attribute_uuid_fk FOREIGN KEY (CM_ATTRIBUTE_UUID) REFERENCES smart.cm_attribute(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-
-			"GRANT ALL PRIVILEGES ON smart.connect_alert TO ANALYST", //$NON-NLS-1$
-			"GRANT ALL PRIVILEGES ON smart.connect_alert TO DATA_ENTRY", //$NON-NLS-1$
-			"GRANT ALL PRIVILEGES ON smart.connect_alert TO MANAGER", //$NON-NLS-1$
-
-			"CREATE TABLE smart.connect_ct_properties ( UUID CHAR(16) for bit data NOT NULL, CM_UUID CHAR(16) for bit data  NOT NULL, PING_FREQUENCY INTEGER, PRIMARY KEY (UUID))", //$NON-NLS-1$
-			"ALTER TABLE smart.connect_ct_properties ADD CONSTRAINT connect_ct_properties_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-
-			"GRANT ALL PRIVILEGES ON smart.connect_ct_properties TO ANALYST", //$NON-NLS-1$
-			"GRANT ALL PRIVILEGES ON smart.connect_ct_properties TO DATA_ENTRY", //$NON-NLS-1$
-			"GRANT ALL PRIVILEGES ON smart.connect_ct_properties TO MANAGER" //$NON-NLS-1$
+			"CREATE TABLE smart.ct_patrol_link ( CT_UUID CHAR(16) for bit data NOT NULL, PATROL_LEG_UUID CHAR(16) for bit data  NOT NULL, PRIMARY KEY (CT_UUID))", //$NON-NLS-1$
+			
+			"GRANT ALL PRIVILEGES ON smart.ct_patrol_link TO ANALYST", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.ct_patrol_link TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.ct_patrol_link TO MANAGER", //$NON-NLS-1$
+			
+			"ALTER TABLE smart.ct_patrol_link ADD CONSTRAINT patrol_key_uuid_fk FOREIGN KEY (patrol_leg_uuid) REFERENCES smart.patrol_leg ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE" //$NON-NLS-1$
 		};
 		
 		session.doWork(new Work() {

@@ -37,18 +37,24 @@ public class CtDataKeyValueRecord {
 	private E valueE;
 	private String valueString;
 	
+	public Item keyItem;
+	public Item valueItem;
+	
 	public CtDataKeyValueRecord() {
 		super();
 	}
 	
 	public CtDataKeyValueRecord(Item keyItem, Item valueItem) {
 		super();
+		this.keyItem = keyItem;
+		this.valueItem = valueItem;
 		this.keyE = ElementsUtil.itemToE(keyItem);
 		this.valueE = ElementsUtil.itemToE(valueItem);
 	}
 
 	public CtDataKeyValueRecord(Item keyItem, String valueString) {
 		super();
+		this.keyItem = keyItem;
 		this.keyE = ElementsUtil.itemToE(keyItem);
 		this.valueString = valueString;
 	}

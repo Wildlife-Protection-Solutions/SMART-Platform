@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.wcs.smart.connect.dataqueue.cybertracker.json.processor" name="JSON Cybertracker Data Processor" schema="schema/org.wcs.smart.connect.dataqueue.cybertracker.json.processor.exsd"/>
+   <extension
+         point="org.wcs.smart.connect.dataqueue.processor">
+      <processor
+            class="org.wcs.smart.connect.dataqueue.cybertracker.CybertrackerItemProcessor">
+      </processor>
+   </extension>
+
+</plugin>
