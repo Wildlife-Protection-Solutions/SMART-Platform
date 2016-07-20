@@ -987,6 +987,7 @@ function sort(str){
 }
 
 function offsetDateFromServer(date, offset){
+	date = date.replace(" ","T");
 	var millisec = Date.parse(date);
 	var d = new Date()
 	var differenceInOffsets = offset + d.getTimezoneOffset();
