@@ -138,7 +138,7 @@ public class PatrolLeg extends UuidItem {
 	}
 	
 	@Transient
-	public void addPatrolLegMember(Employee employee){
+	public PatrolLegMember addPatrolLegMember(Employee employee){
 		PatrolLegMember plm = new PatrolLegMember();
 		plm.setMember(employee);
 		plm.setPatrolLeg(this);
@@ -149,6 +149,7 @@ public class PatrolLeg extends UuidItem {
 			this.members = new ArrayList<PatrolLegMember>();
 		}
 		this.members.add(plm);
+		return plm;
 		
 	}
 	@Transient

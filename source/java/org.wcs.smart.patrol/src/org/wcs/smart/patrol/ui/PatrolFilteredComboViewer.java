@@ -80,6 +80,13 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 		createControls();
 	}
 
+	@Override
+	public void setEnabled(boolean enabled){
+		super.setEnabled(enabled);
+		viewer.getControl().setEnabled(enabled);
+		btnFilter.setEnabled(enabled);
+	}
+	
 	private void createControls() {
 		GridLayout layout = new GridLayout(2, false);
 		layout.horizontalSpacing = 0;
