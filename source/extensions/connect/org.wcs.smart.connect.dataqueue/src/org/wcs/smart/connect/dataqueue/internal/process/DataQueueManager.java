@@ -222,7 +222,24 @@ public enum DataQueueManager {
 			
 				if (i.getFullFilePath() != null && Files.exists(i.getFullFilePath())){
 					//copy 
-					Path copy = i.getFullFilePath().getParent().resolve(i.getFullFilePath().getFileName().toString() + ".copy" + System.nanoTime()); //$NON-NLS-1$
+					String fileName = i.getFullFilePath().getFileName().toString();
+					int lastIndex = fileName.lastIndexOf('.');
+					int firstIndex = fileName.indexOf('.');
+					String base = fileName;
+					if (firstIndex > 0){
+						base = fileName.substring(0, firstIndex);
+					}
+					String ext = "file"; //$NON-NLS-1$
+					if (lastIndex > 0){
+						ext = fileName.substring(lastIndex+1);
+					}
+					int counter = 0;
+					Path copy = i.getFullFilePath().getParent().resolve(base + "." + counter+ "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
+					while(Files.exists(copy)){
+						counter++;
+						copy = i.getFullFilePath().getParent().resolve(base + "." + counter+ "." + ext);  //$NON-NLS-1$//$NON-NLS-2$
+					}
+					
 					Files.copy(i.getFullFilePath(), copy);
 					clone.setFile(
 							FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation())
@@ -233,7 +250,7 @@ public enum DataQueueManager {
 			}
 			s.getTransaction().commit();
 		}catch(Exception ex){
-			
+			ConnectDataQueuePlugin.displayLog("Error reprocessing item: " + ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}

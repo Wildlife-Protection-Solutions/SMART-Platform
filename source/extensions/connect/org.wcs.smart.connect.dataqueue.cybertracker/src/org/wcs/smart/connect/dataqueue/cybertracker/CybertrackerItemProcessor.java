@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.ListJoin;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -20,6 +22,7 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueItem.Type;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem.Status;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.util.ZLibUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -58,7 +61,9 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 			List<JSONObject> notProc = new ArrayList<JSONObject>();
 			notProc.addAll(features);
 			
-			for (IJsonProcessor p : getProcessors()){
+			List<IJsonProcessor> processors = getProcessors();
+			for (IJsonProcessor p : processors){
+				
 				List<JSONObject> processed = p.processJson(features, session);
 				notProc.removeAll(processed);
 			}
@@ -92,6 +97,15 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 			session.getTransaction().commit();
 			
 			ProcessingStatus status = new ProcessingStatus(Status.COMPLETE, "Data loaded into SMART");
+			
+			
+			for (IJsonProcessor p : processors){
+				try{
+					p.afterSave();
+				}catch (Throwable t){
+					CyberTrackerPlugIn.displayError("Error", t.getMessage(), t);
+				}
+			}
 			return status;
 		}catch (Exception ex){
 			ex.printStackTrace();
@@ -106,7 +120,7 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 
 	private static volatile List<IJsonProcessor> jsonProcessors;
 	
-	private static List<IJsonProcessor> getProcessors() throws CoreException{
+	private static List<IJsonProcessor> getProcessors() throws Exception{
 		if (jsonProcessors == null){
 			synchronized (CybertrackerItemProcessor.class) {
 				if (jsonProcessors == null){
@@ -124,6 +138,10 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 			}
 			
 		}
-		return jsonProcessors;
+		List<IJsonProcessor> copy = new ArrayList<IJsonProcessor>(jsonProcessors.size());
+		for (IJsonProcessor p : jsonProcessors){
+			copy.add(p.getClass().newInstance());
+		}
+		return copy;
 	}
 }

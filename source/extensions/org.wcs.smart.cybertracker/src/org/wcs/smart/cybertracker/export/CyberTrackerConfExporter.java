@@ -816,7 +816,7 @@ public class CyberTrackerConfExporter {
 				}
 				String elId = (new CyberTrackerId()).getItemId();
 				Elements.List.Items.Item valueItem = ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
-				valueItem.setJsonId(JsonKey.ATTRIBUTE_TREE + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(uuidValue));
+				valueItem.setJsonId(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(uuidValue));
 				return recordDefaultValue(attribute, valueItem);
 			}
 			break;

@@ -1,14 +1,19 @@
 package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 
+import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -21,18 +26,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.hibernate.Session;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -60,12 +59,16 @@ public class PatrolDialog extends TitleAreaDialog {
 	
 	@Override
 	public void okPressed(){
-	
+		if (!validate()){
+			MessageDialog.openError(getShell(), "Error", "Errors exist on page.  Resolve the errors before continuing.");
+			return ;
+		}
 		//validate();
 		try{
 			for (Entry<UUID, UiData> e : uiItems.entrySet()){
 				if (e.getValue().btnExisting.getSelection()){
-					mergePatrol(e.getKey(), patrols.get(e.getValue()), e.getValue().cmbPatrol.getSelection());
+					Patrol addTo = (Patrol)session.get(Patrol.class, e.getValue().cmbPatrol.getSelection().getUuid());
+					mergePatrol(e.getKey(), patrols.get(e.getKey()), addTo);
 				}else{
 					createNewPatrol(e.getKey(), patrols.get(e.getKey()));
 				}
@@ -81,30 +84,15 @@ public class PatrolDialog extends TitleAreaDialog {
 	
 	private void mergePatrol(UUID ctUuid, Patrol newPatrol, Patrol addToPatrol) throws Exception{
 		if (newPatrol.getPatrolType().equals(addToPatrol.getPatrolType())){
-			System.out.println("Cannot merge patrols of different types");
+			throw new Exception(MessageFormat.format("Cannot merge patrols of different types {0} and {1}", newPatrol.getPatrolType().getGuiName(Locale.getDefault()), addToPatrol.getPatrolType().getGuiName(Locale.getDefault())));
 		}
 		
 		PatrolLeg toAdd= newPatrol.getFirstLeg();
 		addToPatrol.getLegs().add(toAdd);
 		toAdd.setPatrol(addToPatrol);
-		
-//		updateReferences(newPatrol);
-		PatrolHibernateManager.savePatrol(newPatrol, session, true);
-		
+		PatrolHibernateManager.savePatrol(addToPatrol, session, true);
 	}
 	
-//	private void updateReferences(Patrol p){
-//		for (PatrolLeg pl : p.getLegs()){
-//			for (PatrolLegDay day : pl.getPatrolLegDays()){
-//				for (PatrolWaypoint wp : day.getWaypoints()){
-//					for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-//						wo.setWaypoint(wp.getWaypoint());
-//					}
-//				}
-//			}
-//		}
-//	}
-
 	private void createNewPatrol(UUID ctUuid, Patrol newPatrol) throws Exception{
 		newPatrol.setConservationArea(SmartDB.getCurrentConservationArea());
 		newPatrol.setStartDate(newPatrol.getFirstLeg().getStartDate());
@@ -115,17 +103,13 @@ public class PatrolDialog extends TitleAreaDialog {
 			if (newPatrol.getFirstLeg().getType() != null){
 				newPatrol.setPatrolType(newPatrol.getFirstLeg().getType().getPatrolType());
 			}else{
-				//TODO: error
-				//no patrol type 
+				throw new Exception("No transport type provided for patrol leg.");
 			}
 		}
-//		updateReferences(newPatrol);
 		PatrolHibernateManager.savePatrol(newPatrol, session, true);
-		
 		CtPatrolLink link = new CtPatrolLink();
 		link.setCtUuid(ctUuid);
 		link.setPatrolLeg(newPatrol.getFirstLeg());
-		
 		session.save(link);
 	}
 	
@@ -140,25 +124,41 @@ public class PatrolDialog extends TitleAreaDialog {
 		Composite main = new Composite(scroll, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
 		
-		
-		
 		uiItems = new HashMap<UUID, PatrolDialog.UiData>();
+		Label header1 = new Label(main, SWT.NONE);
+		header1.setText("Patrol Summary");
+		Label header2 = new Label(main, SWT.NONE);
+		header2.setText("Action");
+		Label spacer = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		for (Entry<UUID, Patrol> e : patrols.entrySet()){
-			Label l = new Label(main, SWT.NONE);
+			Label l = new Label(main, SWT.WRAP);
 			StringBuilder lbl = new StringBuilder();
 			Patrol p = e.getValue();
-			lbl.append(p.getStartDate() == null ? "NO START DATE " : p.getStartDate().toString());
-			lbl.append( " ");
-			lbl.append(p.getPatrolType() == null ? " No Patrol Type " : e.getValue().getPatrolType());
-			lbl.append( " ");
-			lbl.append(p.getFirstLeg() == null || p.getFirstLeg().getType() == null ? " No transport type" : p.getFirstLeg().getType().getName());
-			lbl.append( " ");
-			lbl.append(p.getFirstLeg() == null || p.getFirstLeg().getLeader() == null ? "No Leader" : SmartLabelProvider.getShortLabel(p.getFirstLeg().getLeader().getMember()));
+			lbl.append("Start Date: ");
+			lbl.append(p.getStartDate() == null ? "null" : DateFormat.getDateInstance().format(p.getStartDate()));
+			lbl.append("\n");
+			lbl.append("Type: ");
+			lbl.append(p.getFirstLeg().getType() == null ? "null" : p.getFirstLeg().getType().getName());
+			lbl.append(" (" + (p.getPatrolType() == null ? "null" : p.getPatrolType().getGuiName(Locale.getDefault())) + ")");
+			lbl.append("\n");
+			lbl.append("Leader: ");
+			lbl.append(p.getFirstLeg().getLeader() == null ? "null" : SmartLabelProvider.getShortLabel(p.getFirstLeg().getLeader().getMember()));
 			
 			l.setText(lbl.toString());
+			
+			ControlDecoration cd = new ControlDecoration(l, SWT.RIGHT | SWT.TOP);
+			cd.setImage(FieldDecorationRegistry.getDefault()
+					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+			cd.hide();
+			
+			
 			Composite op= new Composite(main, SWT.NONE);
 			op.setLayout(new GridLayout(3, false));
+			op.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)op.getLayoutData()).horizontalIndent = 2;
+			
 			Button btnNew = new Button(op, SWT.RADIO);
 			btnNew.setText("Create New Patrol");
 			btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
@@ -171,21 +171,28 @@ public class PatrolDialog extends TitleAreaDialog {
 			
 			PatrolFilteredComboViewer viewer = new PatrolFilteredComboViewer(op);
 			viewer.setEnabled(false);
+			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					validate();
+					
+				}
+			});
+			viewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			final Patrol imported = e.getValue();
 			SelectionListener listener = new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					viewer.setEnabled(btnExisting.getSelection());
-//					validate(viewer, imported);
+					validate();
 				}
 			};
 			
 			btnNew.addSelectionListener(listener);
 			btnExisting.addSelectionListener(listener);
 			
-			uiItems.put(e.getKey(), new UiData(btnNew, btnExisting, viewer));
-			Label spacer = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+			uiItems.put(e.getKey(), new UiData(btnNew, btnExisting, viewer, cd));
+			spacer = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 			spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		}
 		scroll.setContent(main);
@@ -203,16 +210,49 @@ public class PatrolDialog extends TitleAreaDialog {
 		return true;
 	}
 	
+	private boolean validate(){
+		boolean error = false;
+		for (Entry<UUID, UiData> entry : uiItems.entrySet()){
+			UUID ctPatrol = entry.getKey();
+			entry.getValue().errItem.hide();
+			if (!entry.getValue().btnExisting.getSelection() && !entry.getValue().btnNew.getSelection()){
+				entry.getValue().errItem.setDescriptionText("Must add to existing or create a new patrol");
+				entry.getValue().errItem.show();
+				error = true;
+			}
+			
+			if (entry.getValue().btnExisting.getSelection()){
+				if (entry.getValue().cmbPatrol.getSelection() == null){
+					entry.getValue().errItem.setDescriptionText("Must select a patrol");
+					entry.getValue().errItem.show();
+					error = true;
+				}else{
+					
+					Patrol p = entry.getValue().cmbPatrol.getSelection();
+					Patrol ctP = patrols.get(ctPatrol);
+					if (!p.getPatrolType().equals(ctP.getPatrolType())){
+						entry.getValue().errItem.setDescriptionText(MessageFormat.format("Cannot merge to a patrol that have different types ({0}, {1}).", p.getPatrolType().getGuiName(Locale.getDefault()), ctP.getPatrolType().getGuiName(Locale.getDefault())));
+						entry.getValue().errItem.show();
+						error = true;
+					}
+				}
+			}
+		}
+		getButton(IDialogConstants.OK_ID).setEnabled(!error);
+		return error;
+	}
 	
 	private class UiData{
 		Button btnNew;
 		Button btnExisting;
 		PatrolFilteredComboViewer cmbPatrol;
+		ControlDecoration errItem;
 		
-		public UiData(Button btnNew, Button btnExisting, PatrolFilteredComboViewer cmbPatrol){
+		public UiData(Button btnNew, Button btnExisting, PatrolFilteredComboViewer cmbPatrol, ControlDecoration errItem){
 			this.btnNew = btnNew;
 			this.btnExisting = btnExisting;
 			this.cmbPatrol = cmbPatrol;
+			this.errItem = errItem;
 		}
 		
 	}

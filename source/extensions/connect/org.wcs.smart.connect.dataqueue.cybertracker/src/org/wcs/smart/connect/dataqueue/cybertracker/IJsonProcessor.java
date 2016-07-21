@@ -14,4 +14,10 @@ public interface IJsonProcessor {
 	 * @return a list of objects that have been processed
 	 */
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception;
+	
+	/**
+	 * Called after save is complete.  This can be used to fire system
+	 * events etc.
+	 */
+	public void afterSave();
 }
