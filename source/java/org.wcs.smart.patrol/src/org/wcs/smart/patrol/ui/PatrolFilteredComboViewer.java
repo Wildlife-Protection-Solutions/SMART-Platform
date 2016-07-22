@@ -218,6 +218,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
                 return Status.OK_STATUS;
             }
             final List<Patrol> data = loadPatrolIds();
+            
             getDisplay().asyncExec(new Runnable(){
                 @Override
                 public void run() {
@@ -229,6 +230,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
                     	setStopSelectionPropogation(true);
                     	viewer.setSelection(new StructuredSelection(preselectedPatrol));
                     }
+                    PatrolFilteredComboViewer.this.getParent().getParent().layout(true);
                 }});
             return Status.OK_STATUS;
         }
@@ -245,6 +247,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         			Patrol p = new Patrol();
         			p.setUuid((UUID)data[0]);
         			p.setId((String)data[1]);
+        			p.setPatrolType((org.wcs.smart.patrol.model.PatrolType.Type)data[2]);
         			defaultPresent = defaultPresent || p.equals(preselectedPatrol);
         			patrols.add(p);
         		}
