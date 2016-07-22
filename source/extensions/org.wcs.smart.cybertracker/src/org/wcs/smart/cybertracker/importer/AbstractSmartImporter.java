@@ -43,6 +43,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -51,6 +53,8 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.JsonUtils;
+import org.wcs.smart.cybertracker.JsonUtils.ParseResult;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -293,17 +297,34 @@ public abstract class AbstractSmartImporter {
 				String defaultData = avList.get(avList.size()-1);
 				
 				//import either old version style data (4.0.0 or lower) or new 4.0.1 or higher
-				List<E> eLst = ElementsUtil.isCtIdsList(defaultData) ? getBefore401DefaultEValues(defaultData, eMap) : ElementsUtil.extractJsonDefaulValues(defaultData, eMap);
-				for (E de : eLst) {
-					if (de != null) {
-						String tag2 = de.getTag2();
-						WaypointObservationAttribute wpoa = createWaypointObservationAttribute(de, Arrays.asList(tag2), eMap, session);
-						if (wpoa == null)
-							continue;
-						wpoa.setObservation(obs);
-						result.add(wpoa);
-					} else {
-						addWarning(Messages.AbstractSmartImporter_MissingDefaultAttributeRecord);
+				//TODO: fix this
+				if(ElementsUtil.isCtIdsList(defaultData)){
+					List<E> eLst = getBefore401DefaultEValues(defaultData, eMap) ;
+					for (E de : eLst) {
+						if (de != null) {
+							String tag2 = de.getTag2();
+							WaypointObservationAttribute wpoa = createWaypointObservationAttribute(de, Arrays.asList(tag2), eMap, session);
+							if (wpoa == null)
+								continue;
+							wpoa.setObservation(obs);
+							result.add(wpoa);
+						} else {
+							addWarning(Messages.AbstractSmartImporter_MissingDefaultAttributeRecord);
+						}
+					}
+				}else{
+					//json attribute values
+					try {
+						ParseResult results = JsonUtils.parseDefaultAttributeValues((JSONObject)(new JSONParser()).parse(defaultData), session);
+						for (String x : results.getWarnings()){
+							addWarning(x);
+						}
+						for (WaypointObservationAttribute aa : results.getAttributes()){
+							aa.setObservation(obs);
+							result.add(aa);
+						}
+					} catch (org.json.simple.parser.ParseException e1) {
+						addWarning("Unable to parse default observation attribute values: " +e1.getMessage());
 					}
 				}
 				continue;

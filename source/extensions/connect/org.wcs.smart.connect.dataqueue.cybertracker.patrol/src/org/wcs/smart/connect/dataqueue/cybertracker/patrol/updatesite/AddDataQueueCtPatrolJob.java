@@ -101,7 +101,7 @@ public class AddDataQueueCtPatrolJob extends Job {
 	
 	private void createTables(Session session){
 		final String[] sql = new String[]{
-			"CREATE TABLE smart.ct_patrol_link ( CT_UUID CHAR(16) for bit data NOT NULL, PATROL_LEG_UUID CHAR(16) for bit data  NOT NULL, PRIMARY KEY (CT_UUID))", //$NON-NLS-1$
+			"CREATE TABLE smart.ct_patrol_link ( CT_UUID CHAR(16) for bit data NOT NULL, PATROL_LEG_UUID CHAR(16) for bit data  NOT NULL, ct_device_id varchar(36) not null, PRIMARY KEY (CT_UUID))", //$NON-NLS-1$
 			
 			"GRANT ALL PRIVILEGES ON smart.ct_patrol_link TO ANALYST", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON smart.ct_patrol_link TO DATA_ENTRY", //$NON-NLS-1$

@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.export;
 
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.model.elements.Elements;
-import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 
 /**
  * Class that is responsible for providing content for start screens.
@@ -49,21 +48,20 @@ public class StartScreensContent {
 		return beginScreenItemId;
 	}
 
-	public static StartScreensContent create(Elements elements, String startScreenItemLabel, String beginScreenName, String beginScreenItemLabel, String dataType) {
+	public static StartScreensContent create(Elements elements, String startScreenItemLabel, String beginScreenName, String beginScreenItemLabel) {
 		CyberTrackerId id = new CyberTrackerId();
-		Item item = ElementsUtil.addElementsItem(elements, startScreenItemLabel, id.getItemId());
-		item.setJsonId(dataType);
-
+		ElementsUtil.addElementsItem(elements, startScreenItemLabel, id.getItemId());
+		
 		CyberTrackerId id2 = new CyberTrackerId();
 		ElementsUtil.addElementsItem(elements, beginScreenItemLabel, id2.getItemId());
+		
 		
 		return create(id, beginScreenName, id2);
 	}
 	
-	public static StartScreensContent create(Elements elements, String startScreenItemLabel, String beginScreenName, CyberTrackerId beginScreenItemId, String dataType) {
+	public static StartScreensContent create(Elements elements, String startScreenItemLabel, String beginScreenName, CyberTrackerId beginScreenItemId) {
 		CyberTrackerId id = new CyberTrackerId();
-		Item item = ElementsUtil.addElementsItem(elements, startScreenItemLabel, id.getItemId());
-		item.setJsonId(dataType);
+		ElementsUtil.addElementsItem(elements, startScreenItemLabel, id.getItemId());
 		
 		return create(id, beginScreenName, beginScreenItemId);
 	}

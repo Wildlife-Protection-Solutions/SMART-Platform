@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
-import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -43,10 +42,6 @@ import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Util for manipulations with {@link Elements} object
@@ -106,17 +101,27 @@ public class ElementsUtil {
 	 */
 	public static List<CyberTrackerId> addCustomElements(Elements elements, List<String> labels, List<String> tag0Values, List<String> jsonValues) {
 		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
-		if (labels.size() != tag0Values.size() || labels.size() != jsonValues.size()) {
+		if ((tag0Values != null && labels.size() != tag0Values.size()) || labels.size() != jsonValues.size()) {
 			//development validation
 			throw new IllegalArgumentException("Lables and Tag0 lists are expected to be of an equal size."); //$NON-NLS-1$
 		}
-		int size = labels.size() > tag0Values.size() ? tag0Values.size() : labels.size(); //size of smallest array (it is expected that arrays are of same size!!!)
+		int size = labels.size(); //size of smallest array (it is expected that arrays are of same size!!!)
 		for (int i = 0; i < size; i++) {
 			String label = labels.get(i);
-			String tag0 = tag0Values.get(i);
+			
 			CyberTrackerId id = new CyberTrackerId();
-			Elements.List.Items.Item item = addElementsItem(elements, label, id.getItemId(), tag0);
-			item.setJsonId(jsonValues.get(i));
+			
+			Elements.List.Items.Item item = null;
+			String tag0 = tag0Values == null ? null : tag0Values.get(i);
+			if (tag0 != null){
+				item = addElementsItem(elements, label, id.getItemId(), tag0);
+			}else{
+				item = addElementsItem(elements, label, id.getItemId());
+			}
+			if (jsonValues.get(i) != null){
+				item.setJsonId(jsonValues.get(i));
+			}
+			
 			idList.add(id);
 		}
 		return idList;
@@ -236,26 +241,6 @@ public class ElementsUtil {
 		return oldDefaultValuesPattern.matcher(value).matches();
 	}
 
-	public static List<E> extractJsonDefaulValues(String v, Map<String, E> eMap) throws JsonSyntaxException {
-		List<E> result = new ArrayList<>();
-		java.lang.reflect.Type listType = new TypeToken<ArrayList<CtDataKeyValueRecord>>(){}.getType();
-		List<CtDataKeyValueRecord> defaultValues = new Gson().fromJson(v, listType);
-		for (CtDataKeyValueRecord defV : defaultValues) {
-			E keyE = defV.getKeyE();
-			if (!eMap.containsKey(keyE.getI())) {
-				eMap.put(keyE.getI(), keyE);
-			}
-			if (defV.getValueE() != null) {
-				String valueId = defV.getValueE().getI();
-				if(!eMap.containsKey(valueId)) {
-					E valueE = defV.getValueE();
-					eMap.put(valueE.getI(), valueE);
-				}
-			}
-			result.add(keyE);
-		}
-		return result;
-	}
 	
 	public static E itemToE(Elements.List.Items.Item item) {
 		E e = new E();

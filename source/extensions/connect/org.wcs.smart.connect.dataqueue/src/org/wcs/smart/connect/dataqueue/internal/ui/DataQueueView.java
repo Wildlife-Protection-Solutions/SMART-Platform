@@ -524,7 +524,7 @@ public class DataQueueView{
 				refreshServerTable();
 			}
 		});
-		tblServer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.NO_FOCUS);
+		tblServer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		tblServer.getTable().setLinesVisible(true);
 		tblServer.getTable().setHeaderVisible(true);
 		tblServer.setContentProvider(ArrayContentProvider.getInstance());

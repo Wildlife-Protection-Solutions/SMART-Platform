@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.connect.dataqueue.cybertracker.patrol.PatrolJsonProcessor.PatrolWrapper;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -37,13 +38,13 @@ import org.wcs.smart.ui.SmartLabelProvider;
 
 public class PatrolDialog extends TitleAreaDialog {
 
-	private HashMap<UUID, Patrol> patrols;
+	private HashMap<UUID, PatrolWrapper> patrols;
 	
 	private HashMap<UUID, UiData> uiItems;
 	
 	private Session session;
 	
-	public PatrolDialog(Shell parentShell, HashMap<UUID, Patrol> patrols, Session session) {
+	public PatrolDialog(Shell parentShell, HashMap<UUID, PatrolWrapper> patrols, Session session) {
 		super(parentShell);
 		this.patrols = patrols;
 		this.session = session;
@@ -59,7 +60,7 @@ public class PatrolDialog extends TitleAreaDialog {
 	
 	@Override
 	public void okPressed(){
-		if (!validate()){
+		if (validate()){
 			MessageDialog.openError(getShell(), "Error", "Errors exist on page.  Resolve the errors before continuing.");
 			return ;
 		}
@@ -68,7 +69,7 @@ public class PatrolDialog extends TitleAreaDialog {
 			for (Entry<UUID, UiData> e : uiItems.entrySet()){
 				if (e.getValue().btnExisting.getSelection()){
 					Patrol addTo = (Patrol)session.get(Patrol.class, e.getValue().cmbPatrol.getSelection().getUuid());
-					mergePatrol(e.getKey(), patrols.get(e.getKey()), addTo);
+					mergePatrol(e.getKey(), patrols.get(e.getKey()).patrol, addTo);
 				}else{
 					createNewPatrol(e.getKey(), patrols.get(e.getKey()));
 				}
@@ -93,7 +94,8 @@ public class PatrolDialog extends TitleAreaDialog {
 		PatrolHibernateManager.savePatrol(addToPatrol, session, true);
 	}
 	
-	private void createNewPatrol(UUID ctUuid, Patrol newPatrol) throws Exception{
+	private void createNewPatrol(UUID ctUuid, PatrolWrapper patrol) throws Exception{
+		Patrol newPatrol = patrol.patrol;
 		newPatrol.setConservationArea(SmartDB.getCurrentConservationArea());
 		newPatrol.setStartDate(newPatrol.getFirstLeg().getStartDate());
 		newPatrol.setEndDate(newPatrol.getFirstLeg().getEndDate());
@@ -110,6 +112,7 @@ public class PatrolDialog extends TitleAreaDialog {
 		CtPatrolLink link = new CtPatrolLink();
 		link.setCtUuid(ctUuid);
 		link.setPatrolLeg(newPatrol.getFirstLeg());
+		link.setDeviceId(patrol.ctDeviceId);
 		session.save(link);
 	}
 	
@@ -132,10 +135,10 @@ public class PatrolDialog extends TitleAreaDialog {
 		Label spacer = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		for (Entry<UUID, Patrol> e : patrols.entrySet()){
+		for (Entry<UUID, PatrolWrapper> e : patrols.entrySet()){
 			Label l = new Label(main, SWT.WRAP);
 			StringBuilder lbl = new StringBuilder();
-			Patrol p = e.getValue();
+			Patrol p = e.getValue().patrol;
 			lbl.append("Start Date: ");
 			lbl.append(p.getStartDate() == null ? "null" : DateFormat.getDateInstance().format(p.getStartDate()));
 			lbl.append("\n");
@@ -229,7 +232,7 @@ public class PatrolDialog extends TitleAreaDialog {
 				}else{
 					
 					Patrol p = entry.getValue().cmbPatrol.getSelection();
-					Patrol ctP = patrols.get(ctPatrol);
+					Patrol ctP = patrols.get(ctPatrol).patrol;
 					if (!p.getPatrolType().equals(ctP.getPatrolType())){
 						entry.getValue().errItem.setDescriptionText(MessageFormat.format("Cannot merge to a patrol that have different types ({0}, {1}).", p.getPatrolType().getGuiName(Locale.getDefault()), ctP.getPatrolType().getGuiName(Locale.getDefault())));
 						entry.getValue().errItem.show();

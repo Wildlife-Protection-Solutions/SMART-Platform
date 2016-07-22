@@ -97,7 +97,7 @@ import com.google.gson.Gson;
  */
 public class CyberTrackerConfExporter {
 
-	public static final String KEY_SEP = ":"; //$NON-NLS-1$
+	public static final Character KEY_SEP = ':'; 
 	public static final String NULL_KEY = "null"; //$NON-NLS-1$
 	
 	public static enum JsonKey{
@@ -273,7 +273,6 @@ public class CyberTrackerConfExporter {
 			//----------------creating Elements.xml----------------
 			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
 			ElementsUtil.addNodeElements(elements, keyMap, currentLanguage);
-			addJsonIds(elements);
 			
 			try (BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_ELEMENTS))){ 
 				writeDataModel(elements, outE, Elements.class);
@@ -305,7 +304,6 @@ public class CyberTrackerConfExporter {
 			}
 			
 			//----------------creating Globals.xml----------------
-			//TODO: this is currently not work; likely a CT bug.  
 			try{
 			IDataTargetProvider.DataTarget target = alertDataProvider.getDataTarget();
 			if (target != null){
@@ -345,23 +343,6 @@ public class CyberTrackerConfExporter {
 		}
 
 		return new File(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME); //$NON-NLS-1$
-	}
-
-	private void addJsonIds(Elements elems) {
-		Gson gson = new Gson();
-		for (Item item : elems.getList().getItems().getItem()) {
-			String json = gson.toJson(ElementsUtil.itemToE(item));
-			//TODO: do we need encoding at all? it this type of encoding ok?
-			//item.setJsonId(Base64.getEncoder().encodeToString(json.getBytes()));
-//			item.setJsonId(json);
-//			if (item.getJsonId() == null){
-//			if (item.getTag0() != null){
-//				item.setJsonId(item.getTag0());
-//			}else{
-//				item.setJsonId(item.getName());
-//			}
-//			}
-		}
 	}
 
 	private List<Node> buildCategoryNodes(CmNode node, Map<CmNode, CyberTrackerId> keyMap, Integer level) throws Exception {

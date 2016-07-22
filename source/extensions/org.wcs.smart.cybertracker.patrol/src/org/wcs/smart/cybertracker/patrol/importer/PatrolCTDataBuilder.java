@@ -25,14 +25,20 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.Session;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
@@ -40,7 +46,9 @@ import org.wcs.smart.cybertracker.importer.CyberTrackerDataBuilder;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
+import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil.JsonPatrolKey;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
@@ -239,11 +247,27 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 
 	private void recordAfter400DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) {
 		try {
-			List<E> values = ElementsUtil.extractJsonDefaulValues(v, eMap);
-			for (E di : values) {
-				recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
+			CyberTrackerPatrol defaultValue = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(v), null, session);
+			ctPatrol.setArmed(defaultValue.isArmed());
+			ctPatrol.setComment(defaultValue.getComment());
+			ctPatrol.setLeader(defaultValue.getLeader());
+			ctPatrol.setMandate(defaultValue.getMandate());
+			ctPatrol.setObjective(defaultValue.getObjective());
+			ctPatrol.setTeam(defaultValue.getTeam());
+			ctPatrol.setCtTeam(defaultValue.getTeam().getName());
+			ctPatrol.setStation(defaultValue.getStation());
+			ctPatrol.setCtStation(defaultValue.getStation().getName());
+			ctPatrol.setMembers(defaultValue.getMembers());
+			ctPatrol.setPilot(defaultValue.getPilot());
+			ctPatrol.setPatrolTransportType(defaultValue.getPatrolTransportType());
+			ctPatrol.setCtTransport(defaultValue.getPatrolTransportType().getName());
+			ctPatrol.setPatrolType(defaultValue.getPatrolType());
+		
+			for(String missing : defaultValue.getMissingKeys()){
+				ctPatrol.addMissingKey(missing);
 			}
-		} catch (JsonSyntaxException e) {
+			
+		} catch (org.json.simple.parser.ParseException e) {
 			ctPatrol.addError(PatrolMeta.GENERAL, Messages.PatrolCTDataBuilder_Error_JsonDefaultValue);
 		}
 	}

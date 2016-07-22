@@ -51,7 +51,7 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 			}
 		}
 
-		List<JSONObject> features = (new JsonParser()).parseFeaturesFromJsonString(json);
+		List<JSONObject> features = (new JsonCtParser()).parseFeaturesFromJsonString(json);
 		
 		
 		Session session = HibernateManager.openSession();

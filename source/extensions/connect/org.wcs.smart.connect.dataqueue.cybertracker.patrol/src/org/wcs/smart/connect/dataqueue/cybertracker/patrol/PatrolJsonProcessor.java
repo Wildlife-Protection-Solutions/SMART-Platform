@@ -2,7 +2,6 @@ package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 
 import java.sql.Time;
 import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,18 +17,19 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.connect.dataqueue.cybertracker.IJsonProcessor;
-import org.wcs.smart.connect.dataqueue.cybertracker.JsonParser;
+import org.wcs.smart.connect.dataqueue.cybertracker.JsonCtParser;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
+import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
-import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil.JsonPatrolKey;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -38,12 +38,8 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
-import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -64,7 +60,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
-		HashMap<UUID, Patrol> patrols = new HashMap<UUID, Patrol>();
+		HashMap<UUID, PatrolWrapper> patrols = new HashMap<UUID, PatrolWrapper>();
+		
 		modifiedPatrols = new HashSet<Patrol>();
 		newPatrols = new HashSet<Patrol>();
 		
@@ -73,16 +70,57 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		for (JSONObject feature : features){
 			try{
-				JSONObject properties = (JSONObject) feature.get(JsonParser.PROPERTIES_KEY);
+				JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
 				if (properties == null) continue;
-				JSONObject sighting = (JSONObject)properties.get(JsonParser.SIGHTINGS_KEY);
+				JSONObject sighting = (JSONObject)properties.get(JsonCtParser.SIGHTINGS_KEY);
 				if (sighting == null) continue;
 				
 				String type = (String) sighting.get(ScreensUtil.RESULT_DATATYPE);
 				
-				if (!PatrolScreensUtil.DATATYPE_PATROL.equalsIgnoreCase(type)) continue;
+				if (!PatrolScreensUtil.DATATYPE_PATROL.equalsIgnoreCase(type)){
+					//not a valid patrol point; skip it
+					continue;
+				}
 				
-				JsonParser parser = new JsonParser();
+				boolean isPatrolEnd = sighting.containsKey(PatrolScreensUtil.END_PATROL_KEY) ;
+				
+				String pid = (String) sighting.get(ScreensUtil.RESULT_ID);
+				UUID ctUuid = UuidUtils.stringToUuid(pid);
+				CtPatrolLink link = (CtPatrolLink) session.get(CtPatrolLink.class, ctUuid);
+				
+				if (isPatrolEnd){
+					//we want to find the patrol and update the end date
+					//add the position to the track, but do not create an observation 
+					//for this patrol
+					Date dt = JsonUtils.JSON_DATE_FORMAT.parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+					
+					PatrolLeg toUpdate = null;
+					if (link != null){
+						toUpdate = link.getPatrolLeg();
+					}else{
+						Patrol temp = patrols.get(ctUuid).patrol;
+						if (temp != null) toUpdate = temp.getFirstLeg();	
+					}
+
+					if (toUpdate == null){
+						warnings.add("End patrol flag found in observation, but no patrol object could be found.");
+					}else{
+						//update patrol end date and end time for last patrol leg day
+						toUpdate.getPatrol().setEndDate(SharedUtils.getDatePart(dt, false));
+						for (PatrolLegDay pd : toUpdate.getPatrolLegDays()){
+							if (areDatesEqual(pd.getDate(), toUpdate.getEndDate())){
+								pd.setEndTime(new Time(dt.getTime()));
+								break;
+							}
+						}
+						//TODO: add waypoint to patrol track
+					}
+					processedFeatures.add(feature);
+					continue;
+				}
+				
+				//create a Waypoint
+				JsonCtParser parser = new JsonCtParser();
 				Waypoint wp = parser.createWaypoint(feature, session);
 				warnings.addAll(parser.getWarnings());
 				
@@ -118,22 +156,19 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
 				Date dStartDate = DATEFORMAT.parse(startDate);
 						
-				String pid = (String) sighting.get(ScreensUtil.RESULT_ID);
-				//merge patrol 
-				UUID ctUuid = UuidUtils.stringToUuid(pid);
-				CtPatrolLink link = (CtPatrolLink) session.get(CtPatrolLink.class, ctUuid);
-				
+				//merge patrol 				
 				if (link != null){
 					//add these observation to the selected patrol leg
 					//TODO: potentially we could validate metadata
 					addToExistingLeg(link.getPatrolLeg(), wp, startTime, session);
 					modifiedPatrols.add(link.getPatrolLeg().getPatrol());
 				}else{
-					Patrol p = patrols.get(ctUuid);
+					Patrol p = patrols.get(ctUuid).patrol;
 					if (p == null){
 						//create a new patrol as we do not have an object for this patrol.
 						p = createPatrolFromSighing(sighting, session);
-						patrols.put(ctUuid, p);
+						String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
+						patrols.put(ctUuid, new PatrolWrapper(p, deviceId));
 						newPatrols.add(p);
 					}
 					
@@ -197,87 +232,39 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	
 	private Patrol createPatrolFromSighing(JSONObject sighting, Session session) throws Exception{
 		Patrol p = new Patrol();
-		String ptype = (String)sighting.get(PatrolScreensUtil.RESULT_PATROL_TYPE);
-		String ptransport = (String)sighting.get(PatrolScreensUtil.RESULT_TRANSPORT);
 		
-		String armed = (String)sighting.get(PatrolScreensUtil.RESULT_ARMED);
-		String team = (String)sighting.get(PatrolScreensUtil.RESULT_TEAM);
-		String station = (String)sighting.get(PatrolScreensUtil.RESULT_STATION);
-		String mandate = (String)sighting.get(PatrolScreensUtil.RESULT_MANDATE);
-		String objective = (String)sighting.get(PatrolScreensUtil.RESULT_OBJECTIVE);
-		String comment = (String)sighting.get(PatrolScreensUtil.RESULT_COMMENTS);
-		String leader = (String)sighting.get(PatrolScreensUtil.RESULT_LEADER);
-		String pilot = (String)sighting.get(PatrolScreensUtil.RESULT_PILOT);
+		String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
+		CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, session);
+		
+		
 		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);
 		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
 		
-		List<String> members = new ArrayList<String>();
-		for (Object x : sighting.keySet()){
-			String key = (String)x;
-			if (startsWith(key, JsonKey.EMPLOYEE.key)) members.add(key);
-		}
-	
-		if (armed != null){
-			p.setArmed(Boolean.valueOf(armed));
-		}
-		
-		if (team != null && startsWith(team, JsonPatrolKey.TEAM.key)){
-			UUID uuid = UuidUtils.stringToUuid(team.substring(JsonPatrolKey.TEAM.key.length() + 1));
-			Team teamObj = (Team) session.get(Team.class, uuid);
-			if (teamObj == null){
-				//TODO: log a warning or error or something
-			}
-			p.setTeam(teamObj);
-		}
-	
-		if (station != null && startsWith(station, JsonPatrolKey.STATION.key)){
-			UUID uuid = UuidUtils.stringToUuid(station.substring(JsonPatrolKey.STATION.key.length() + 1));
-			Station stationObj = (Station) session.get(Station.class, uuid);
-			if (stationObj == null){
-				//TODO: log a warning or error or something
-			}
-			p.setStation(stationObj);
-		}
-		
-		if (mandate != null && startsWith(mandate, JsonPatrolKey.MANDATE.key)){
-			UUID uuid = UuidUtils.stringToUuid(mandate.substring(JsonPatrolKey.MANDATE.key.length() + 1));
-			PatrolMandate mandateObj = (PatrolMandate) session.get(PatrolMandate.class, uuid);
-			if (mandateObj == null){
-				//TODO: log a warning or error or something
-			}
-			p.setMandate(mandateObj);
-		}
-		if (ptype != null){
-			p.setPatrolType(Type.valueOf(ptype));
-		}
-		p.setObjective(objective);
-		p.setComment(comment);
 		
 		Date dStartDate = DATEFORMAT.parse(startDate);
 		p.setEndDate(dStartDate);
 		p.setStartDate(dStartDate);
 		
+		p.setArmed(ct.isArmed());
+		p.setComment(ct.getComment());
+		p.setMandate(ct.getMandate());
+		p.setObjective(ct.getObjective());
+		p.setPatrolType(ct.getPatrolType());
+		p.setStation(ct.getStation());
+		p.setTeam(ct.getTeam());
+		
 		// create new leg and add members and set transport type
 		PatrolLeg pl = p.addLeg();
 		pl.setPatrolLegDays(new ArrayList<PatrolLegDay>());
-		for (String member: members){
-			UUID uuid = UuidUtils.stringToUuid(member.substring(JsonKey.EMPLOYEE.key.length() + 1));
-			Employee employee = (Employee) session.get(Employee.class, uuid);
-			PatrolLegMember item = pl.addPatrolLegMember(employee);
-			
-			if (member.equals(leader)) item.setIsLeader(true);
-			if (member.equals(pilot)) item.setIsPilot(true);
+		
+		for (Employee member: ct.getMembers()){
+			PatrolLegMember item = pl.addPatrolLegMember(member);
+			if (member.equals(ct.getPilot())) item.setIsPilot(true);
+			if (member.equals(ct.getLeader())) item.setIsLeader(true);
 		}
 	
-		if (ptransport != null && startsWith(ptransport, JsonPatrolKey.TRANSPORT_TYPE.key)){
-			UUID uuid = UuidUtils.stringToUuid(ptransport.substring(JsonPatrolKey.TRANSPORT_TYPE.key.length() + 1));
-			PatrolTransportType transportObj = (PatrolTransportType) session.get(PatrolTransportType.class, uuid);
-			if (transportObj == null){
-				throw new Exception(MessageFormat.format("Could not find patrol transport type for uuid {0}.", uuid));
-			}
-			pl.setType(transportObj);
-			p.setPatrolType(transportObj.getPatrolType());
-		}
+		pl.setType(ct.getPatrolTransportType());
+		
 		return p;
 	}
 	
@@ -326,6 +313,10 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	private void addToExistingLeg(PatrolLeg addTo, Waypoint wp, String startTime, Session session)
 			throws ParseException {
 
+		session.flush();
+		session.saveOrUpdate(wp);
+		session.flush();
+		
 		PatrolLegDay addToD = null;
 		for (PatrolLegDay pld : addTo.getPatrolLegDays()){
 			if (areDatesEqual(pld.getDate(), wp.getDateTime())){
@@ -334,14 +325,12 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			}
 		}
 		
-		session.saveOrUpdate(wp);
-		session.flush();
-		
 		if (addToD == null){
 			//need to create a new patrol leg day for this day
 			//also need to check patrol dates
 			addToD = createPatrolLegDay(addTo, wp.getDateTime(), startTime);
 		}
+		
 		
 		PatrolWaypoint pw = new PatrolWaypoint();
 		pw.setPatrolLegDay(addToD);
@@ -371,6 +360,16 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			}catch (Exception ex){
 				CyberTrackerPlugIn.displayError("Importing JSON Data", ex.getMessage(), ex);
 			}
+		}
+	}
+	
+	public class PatrolWrapper{
+		public Patrol patrol;
+		public String ctDeviceId;
+		
+		public PatrolWrapper(Patrol patrol, String ctDeviceId){
+			this.patrol =  patrol;
+			this.ctDeviceId = ctDeviceId;
 		}
 	}
 }

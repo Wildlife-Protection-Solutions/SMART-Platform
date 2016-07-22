@@ -268,10 +268,11 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 
 	private void recordAfter400DefaultMetaValues(CyberTrackerSurvey ctSurvey, String v, Map<String, E> eMap, Session session) {
 		try {
-			List<E> values = ElementsUtil.extractJsonDefaulValues(v, eMap);
-			for (E di : values) {
-				recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
-			}
+			//TODO:
+//			List<E> values = ElementsUtil.extractJsonDefaulValues(v, eMap);
+//			for (E di : values) {
+//				recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
+//			}
 		} catch (JsonSyntaxException e) {
 			ctSurvey.addError(SurveyMeta.GENERAL, Messages.SurveyCTDataBuilder_Error_JsonDefaultValue);
 		}

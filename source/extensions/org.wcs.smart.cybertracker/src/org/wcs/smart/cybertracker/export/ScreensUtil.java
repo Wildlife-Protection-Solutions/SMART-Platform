@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.export;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -30,6 +31,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.hibernate.Session;
+import org.json.simple.JSONObject;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
@@ -49,8 +51,6 @@ import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.util.UuidUtils;
-
-import com.google.gson.Gson;
 
 /**
  * Util for creating screens based on metadata for CyberTracker.
@@ -105,11 +105,11 @@ public class ScreensUtil {
 		return id;
 	}
 	
-	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, StartScreensContent content, CyberTrackerId dataType) {
+	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, StartScreensContent content, CyberTrackerId dataTypeElement, String dataType) {
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
 		ids.add(content.getStartScreenItemId());
 		ids.addAll(ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ExitCyberTracker));
-		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, dataType.getItemId(), true);
+		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 			
 		//set the target element on nodeMain to the dataType
 		
@@ -130,6 +130,10 @@ public class ScreensUtil {
 		
 		String resultId = createResultElement(RESULT_ID, elements);
 		addUniqueAttrubute(nodeBegin, resultId);
+		
+		Control uniqueAttr = screensFactory.createAttrubuteControl14(dataTypeElement.getItemId(), false,  dataType);
+		ScreensObjectFactory.addControlToNode(nodeBegin, uniqueAttr);
+		
 		container.tripUniqueElementId = resultId;
 		String resultDateId = createResultElement(RESULT_START_DATE, elements);
 		String resultTimeId = createResultElement(RESULT_START_TIME, elements);
@@ -150,14 +154,30 @@ public class ScreensUtil {
 		return idsBegin.get(0);
 	}
 
-	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, List<CyberTrackerId> nodeIds, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
+	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, 
+			List<CyberTrackerId> nodeIds, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData,
+			List<String>  jsonValues) {
 		if (nextTaskOptions.size() != nodeIds.size()) {
 			throw new IllegalArgumentException("Unable to build next task node. Number of task options is not equal to the number of referenced nodes."); //$NON-NLS-1$
 		}
-		Gson gson = new Gson();
-		String defaultValues = gson.toJson(container.defaultValues);
+		//build json string
+		JSONObject obj = new JSONObject();
+		for (CtDataKeyValueRecord value : container.defaultValues){
+			String name = value.getKeyE().getN();
+			if (value.keyItem.getJsonId() != null){
+				name = value.keyItem.getJsonId();
+			}
+			String val = null;
+			if (value.valueItem != null){
+				val = value.valueItem.getJsonId();
+			}else{
+				val = value.getValueString();
+			}
+			obj.put(name, val);
+		}
+		String defaultValues = obj.toJSONString();
 		
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, nextTaskOptions.toArray(new String[nextTaskOptions.size()]));
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, nextTaskOptions, null,  jsonValues);
 		List<String> values = ctUtil.listItemIds(ids);
 		String trElements = ctUtil.translateElements(ids);
 		//custom translate links logic
@@ -415,9 +435,10 @@ public class ScreensUtil {
 		node.getData().getControls().getControl().add(gpsConf);
 	}
 	
-	protected void addUniqueAttrubute(Node node, String resultElementId) {
+	protected Control addUniqueAttrubute(Node node, String resultElementId) {
 		Control uniqueAttr = screensFactory.createAttrubuteControl14(resultElementId, true, null);
 		ScreensObjectFactory.addControlToNode(node, uniqueAttr);
+		return uniqueAttr;
 	}
 
 	protected void addStartTimeAttrubute(Node node, String resultDateId, String resultTimeId) {

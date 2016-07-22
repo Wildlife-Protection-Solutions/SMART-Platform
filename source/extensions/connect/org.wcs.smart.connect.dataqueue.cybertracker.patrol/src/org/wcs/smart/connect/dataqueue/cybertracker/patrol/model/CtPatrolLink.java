@@ -20,6 +20,8 @@ public class CtPatrolLink {
 	
 	private PatrolLeg patrolLeg;
 	
+	private String deviceId;
+	
 	@Id
 	@Column(name="ct_uuid")
 	public UUID getCtUuid(){
@@ -38,5 +40,14 @@ public class CtPatrolLink {
 	
 	public void setPatrolLeg(PatrolLeg patrolLeg){
 		this.patrolLeg = patrolLeg;
+	}
+	
+	@Column(name="ct_device_id")
+	public String getDeviceId(){
+		return this.deviceId;
+	}
+	
+	public void setDeviceId(String deviceId){
+		this.deviceId = deviceId;
 	}
 }

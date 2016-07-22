@@ -22,15 +22,20 @@
 package org.wcs.smart.cybertracker.patrol.export;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.hibernate.Session;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -58,6 +63,7 @@ import org.wcs.smart.cybertracker.model.elements.GpsWaypointAccuracy;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -65,6 +71,9 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -108,6 +117,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 	public static final String RESULT_COMMENTS = ScreensUtil.COMMON_PREFIX + "Comments"; //$NON-NLS-1$
 	public static final String RESULT_LEADER = ScreensUtil.COMMON_PREFIX + "Leader"; //$NON-NLS-1$
 	public static final String RESULT_PILOT = ScreensUtil.COMMON_PREFIX + "Pilot"; //$NON-NLS-1$
+	
+	public static final String END_PATROL_KEY = "SMART_EndPatrol"; //$NON-NLS-1$
 	
 	public static final String DATATYPE_PATROL = "patrol"; //$NON-NLS-1$
 
@@ -153,6 +164,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			boolean value = Boolean.TRUE.equals(so.getBooleanValue());
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item aValue = ElementsUtil.addElementsItem(elements, "", elId, Boolean.toString(value)); //$NON-NLS-1$
+			aValue.setJsonId(Boolean.toString(value));
 			result.defaultValues.add(createDefaultResultRecord(RESULT_ARMED, elements, aValue));
 		}
 
@@ -169,6 +181,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item teamValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(team), elId, UuidUtils.uuidToString(team.getUuid()));
+			teamValue.setJsonId(JsonPatrolKey.TEAM.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(team.getUuid()));
 			result.defaultValues.add(createDefaultResultRecord(RESULT_TEAM, elements, teamValue));
 		}
 
@@ -185,6 +198,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item stValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(station), elId, UuidUtils.uuidToString(station.getUuid()));
+			stValue.setJsonId(JsonPatrolKey.STATION.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(station.getUuid()));
 			result.defaultValues.add(createDefaultResultRecord(RESULT_STATION, elements, stValue));
 		}
 
@@ -202,6 +216,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item mndValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(mandate), elId, UuidUtils.uuidToString(mandate.getUuid()));
+			mndValue.setJsonId(JsonPatrolKey.MANDATE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(mandate.getUuid()));
 			result.defaultValues.add(createDefaultResultRecord(RESULT_MANDATE, elements, mndValue));
 		}
 
@@ -262,7 +277,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 					if (sou.getUuidValue().equals(e.getUuid())) {
 						CyberTrackerId mctid = new CyberTrackerId();
 						Elements.List.Items.Item memberValue = ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
-						memberValue.setJsonId(JsonKey.EMPLOYEE + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(e.getUuid()));
+						memberValue.setJsonId(JsonKey.EMPLOYEE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(e.getUuid()));
 						result.defaultValues.add(new CtDataKeyValueRecord(memberValue, ICyberTrackerConstants.STR_TRUE));
 						memberIds.add(mctid);
 						if (leader_so.getUuidValue() != null && leader_so.getUuidValue().equals(e.getUuid())) {
@@ -305,15 +320,19 @@ public class PatrolScreensUtil extends ScreensUtil {
 	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
+		List<String> jsonValues = new ArrayList<String>();
 		
 		nextTaskOptions.add(Messages.PatrolScreens_NewObservation);
+		jsonValues.add(null);
 		nodeIds.add(dmRootId);
 		
 		nextTaskOptions.add(Messages.PatrolScreens_EndPatrol);
+		jsonValues.add(END_PATROL_KEY);
 		nodeIds.add(createEndTripNodes(container, startId, Messages.PatrolScreens_ConfirmMessage));
 		
 		if (ctProps.isCanPause()) {
 			nextTaskOptions.add(Messages.PatrolScreens_PausePatrol);
+			jsonValues.add(null);
 			PauseNodesLabels labels = new PauseNodesLabels();
 			labels.pauseScreenTitle = Messages.PatrolScreensUtil_PauseScreen_Title;
 			labels.pauseScreenMessage = Messages.PatrolScreensUtil_PauseScreen_Message;
@@ -322,7 +341,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
 		}
 		
-		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData);
+		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData, jsonValues);
 	}
 	
 	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {
@@ -365,8 +384,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 			elId = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin).get(0);
 			
 		}
-		StartScreensContent content = StartScreensContent.create(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_Begin_Title, elId, strDataType);
-		return addStartScreen(id, container, elements, ctProps, content, dataType);
+		StartScreensContent content = StartScreensContent.create(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_Begin_Title, elId);
+		return addStartScreen(id, container, elements, ctProps, content, dataType, strDataType);
 	}
 
 	private int getMaxSpeed(PatrolType type) {
@@ -457,6 +476,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item tValue = ElementsUtil.addElementsItem(elements, "", elId, value.name()); //$NON-NLS-1$
+			tValue.setJsonId(JsonPatrolKey.PATROL_TYPE.key + CyberTrackerConfExporter.KEY_SEP + value.name());
 			container.defaultValues.add(createDefaultResultRecord(RESULT_PATROL_TYPE, elements, tValue));
 			
 			ScreenOption trOption = screenOptions.get(PatrolScreenOptionMeta.TRANSPORT);
@@ -482,6 +502,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 				}
 				String trElId = (new CyberTrackerId()).getItemId();
 				Elements.List.Items.Item trValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, UuidUtils.uuidToString(transport.getUuid()));
+				trValue.setJsonId(JsonPatrolKey.TRANSPORT_TYPE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(transport.getUuid()));
 				container.defaultValues.add(createDefaultResultRecord(RESULT_TRANSPORT, elements, trValue));
 				return id;
 			}
@@ -529,5 +550,6 @@ public class PatrolScreensUtil extends ScreensUtil {
 		elements.getList().getItems().getItem().add(item);
 		return elemId;
 	}
-
+	
+	
 }

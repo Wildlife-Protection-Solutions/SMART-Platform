@@ -92,14 +92,18 @@ public class SurveyScreensUtil extends ScreensUtil {
 	public static final String RESULT_SURVEY_DESIGN = ScreensUtil.COMMON_PREFIX + "SurveyDesign"; //$NON-NLS-1$
 
 	public static final String RESULT_MISSION_LEADER = ScreensUtil.COMMON_PREFIX + "Leader"; //$NON-NLS-1$
+	
 	public static final String RESULT_MISSION_COMMENTS = ScreensUtil.COMMON_PREFIX + "Comments"; //$NON-NLS-1$
 	
 	public static final String RESULT_MISSION_START_SAMPLING_UNIT = ScreensUtil.COMMON_PREFIX + "StartSamplingUnit"; //$NON-NLS-1$
+	
 	public static final String RESULT_MISSION_SAMPLING_UNIT = ScreensUtil.COMMON_PREFIX + "SamplingUnit"; //$NON-NLS-1$
 
 	public static final String RESULT_MISSION_PROPETY_PREFIX = ScreensUtil.COMMON_PREFIX + "MP_"; //$NON-NLS-1$
 	
 	public static final String DATATYPE_SURVEY = "survey"; //$NON-NLS-1$
+	
+	public static final String END_MISSION_KEY = "SMART_EndMission"; //$NON-NLS-1$
 
 	protected SurveyScreensUtil(CyberTrackerUtil ctUtil) {
 		super(ctUtil);
@@ -227,19 +231,24 @@ public class SurveyScreensUtil extends ScreensUtil {
 	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
+		List<String> jsonIds = new ArrayList<String>();
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_NewObservation);
 		nodeIds.add(createPreDatamodelNodes(container, elements, dmRootId, trackObserver, memberIds, membersFilter));
+		jsonIds.add(null);
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_NewSamplingUnit);
 		CyberTrackerId suId = createSamplingUnitNodes(container, elements, id, ctElemIds);
 		nodeIds.add(suId);
+		jsonIds.add(END_MISSION_KEY);
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSamplingUnitOption);
 		nodeIds.add(createEndSamplingUnitNodes(container, elements, suId, ctProps));
+		jsonIds.add(null);
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSurvey);
 		nodeIds.add(createEndTripNodes(container, startId, Messages.SurveyScreensUtil_EndSurveyMessage));
+		jsonIds.add(null);
 		
 		if (ctProps.isCanPause()) {
 			nextTaskOptions.add(Messages.SurveyScreensUtil_PauseSurvey);
@@ -250,9 +259,10 @@ public class SurveyScreensUtil extends ScreensUtil {
 			labels.resumeScreenMessage = Messages.SurveyScreensUtil_ResumeScreen_Message;
 
 			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
+			jsonIds.add(null);
 		}
 		
-		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData);
+		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData, jsonIds);
 	}
 	
 	//Not the best design, but we can obtain required data from Elements in this case
@@ -305,8 +315,8 @@ public class SurveyScreensUtil extends ScreensUtil {
 	}
 	
 	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, CyberTrackerId dataType, String strType) {
-		StartScreensContent content = StartScreensContent.create(elements, Messages.SurveyScreensUtil_StartSurvey, Messages.SurveyScreensUtil_StartSurveyTitle, Messages.SurveyScreensUtil_BeginSurvey, strType);
-		return addStartScreen(id, container, elements, ctProps, content, dataType);
+		StartScreensContent content = StartScreensContent.create(elements, Messages.SurveyScreensUtil_StartSurvey, Messages.SurveyScreensUtil_StartSurveyTitle, Messages.SurveyScreensUtil_BeginSurvey);
+		return addStartScreen(id, container, elements, ctProps, content, dataType, strType);
 	}
 
 	private List<CyberTrackerId> suToCtIds(Elements elements, List<SamplingUnit> items) {
