@@ -102,13 +102,13 @@ public class PatrolDataSource extends AbstractDataStore{
 	}
 
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		String spec = "fid:String,id:Integer,date:Date,time:Date,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
+		String spec = "the_geom:Point:srid=4326,fid:String,id:Integer,date:Date,time:Date,observation:String,comment:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType(WAYPOINT_TYPE, spec);
 		return type;
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "fid:String,distance:Double,day:Date,leg:String,geom:LineString:srid=4326"; //$NON-NLS-1$
+		String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType(TRACK_TYPE, spec);
 		return type;
 	}

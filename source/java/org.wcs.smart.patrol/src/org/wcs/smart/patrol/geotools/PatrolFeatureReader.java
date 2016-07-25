@@ -129,36 +129,37 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	
 	
 	private SimpleFeature getWaypointAsFeature(PatrolWaypoint waypoint){
-		//String spec = "fid:String,id:integer,date:Date,time:Time,comment:String,geom:Point:srid=4326";
+		//String spec = "geom:Point:srid=4326,fid:String,id:integer,date:Date,time:Time,comment:String";
 		Object data[] = new Object[7];
-		data[0] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + UuidUtils.uuidToString(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
-		data[1] = waypoint.getWaypoint().getId();
-		data[2] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
-		data[3] = waypoint.getWaypoint().getDateTime();
+		data[0] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()));
+		data[1] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + UuidUtils.uuidToString(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		data[2] = waypoint.getWaypoint().getId();
+		data[3] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
+		data[4] = waypoint.getWaypoint().getDateTime();
 		if (waypoint.getWaypoint().getObservations() == null || waypoint.getWaypoint().getObservations().size() == 0){
-			data[4] = ""; //$NON-NLS-1$
+			data[5] = ""; //$NON-NLS-1$
 		}else{ 
-			data[4] = waypoint.getWaypoint().getObservationsAsString();
+			data[5] = waypoint.getWaypoint().getObservationsAsString();
 		}
-		data[5] = waypoint.getWaypoint().getComment();
-		data[6] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()));
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		data[6] = waypoint.getWaypoint().getComment();
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 	
 	private SimpleFeature getTrackAsFeature(Track track){
-		//String spec = "fid:String,distance:Double,day:Date,leg:String,geom:LineString:srid=4326";
+		//String spec = "geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String";
 		String fid = ftype.getName() + "." + trackDt.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId();  //$NON-NLS-1$ //$NON-NLS-2$
 		Object data[] = new Object[5];
-		data[0] = fid;
-		data[1] = track.getDistance();
-		data[2] = track.getPatrolLegDay().getDate();
-		data[3] = track.getPatrolLegDay().getPatrolLeg().getId();
 		try{
-			data[4] = track.getLineString();
+			data[0] = track.getLineString();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.log(ex.getMessage(), ex);
 		}
+		data[1] = fid;
+		data[2] = track.getDistance();
+		data[3] = track.getPatrolLegDay().getDate();
+		data[4] = track.getPatrolLegDay().getPatrolLeg().getId();
 		
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 }
