@@ -2,6 +2,7 @@ package org.wcs.smart.connect.dataqueue.cybertracker;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,13 +28,19 @@ import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 public class JsonCtParser {
 
 	public static final String SIGHTINGS_KEY = "sighting"; //$NON-NLS-1$
 	public static final String FEATURE_TYPE_KEY = "type"; //$NON-NLS-1$
 	public static final String PROPERTIES_KEY = "properties"; //$NON-NLS-1$
+	public static final String GEOMETRY_KEY = "geometry"; //$NON-NLS-1$
+	public static final String GEOMETRY_TYPE_KEY = "type"; //$NON-NLS-1$
+	public static final String GEOMETRY_COORDINATE_KEY = "coordinates"; //$NON-NLS-1$
 	public static final String LONGITUDE_KEY = "longitude"; //$NON-NLS-1$
 	public static final String LATITUDE_KEY = "latitude"; //$NON-NLS-1$
 	public static final String DATETIME_KEY = "dateTime"; //$NON-NLS-1$
@@ -63,6 +70,62 @@ public class JsonCtParser {
 		return features;
 	}
 
+	/**
+	 * Compares the year, month and date part of the dates
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	public static boolean areDatesEqual(Date date1, Date date2){
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date1);
+		
+		
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(date2);
+		
+		int[] fields = new int[]{Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH};
+		for (int field : fields){
+			if (cal.get(field) != cal2.get(field)) return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Determines if the time represented by date1 is between the times
+	 * represented by date2 and date3.  Only compares time parts not
+	 * date parts.
+	 * @return
+	 */
+	public static boolean isTimeBetween(Date date1, Date date2, Date date3){
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date1);
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(date2);
+		Calendar cal3 = Calendar.getInstance();
+		cal3.setTime(date3);
+		
+		int cal1seconds = cal.get(Calendar.SECOND) + cal.get(Calendar.MINUTE) * 60  + cal.get(Calendar.HOUR_OF_DAY) * 60 * 60;
+		int cal2seconds = cal2.get(Calendar.SECOND) + cal2.get(Calendar.MINUTE) * 60  + cal2.get(Calendar.HOUR_OF_DAY) * 60 * 60;
+		int cal3seconds = cal3.get(Calendar.SECOND) + cal3.get(Calendar.MINUTE) * 60  + cal3.get(Calendar.HOUR_OF_DAY) * 60 * 60;
+		
+		return cal1seconds >= cal2seconds && cal1seconds <= cal3seconds;
+	}
+	
+	/**
+	 * Determines if the date represented by date1 is between the date
+	 * represented by date2 and date3.  Only compares date parts not time
+	 * 
+	 * @return
+	 */
+	public static boolean isDateBetween(Date date1, Date date2, Date date3){
+		Date d1 = SharedUtils.getDatePart(date1, false);
+		Date d2 = SharedUtils.getDatePart(date2, false);
+		Date d3 = SharedUtils.getDatePart(date3, false);
+		
+		return ((areDatesEqual(d1, d2) || d1.after(d2)) && 
+				(areDatesEqual(d1, d3) || d1.before(d3)));
+	}
 	
 	private JSONParser parser = new JSONParser();
 	
@@ -73,6 +136,14 @@ public class JsonCtParser {
 		return this.warnings;
 	}
 	
+	public Coordinate readXYFromProperties(JSONObject feature){
+		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
+		Double x = (Double)properties.get(LONGITUDE_KEY);
+		Double y = (Double)properties.get(LATITUDE_KEY);
+		if (x == null || y == null) return null;
+		return new Coordinate(x,y);
+		
+	}
 	/**
 	 * Creates a waypoint from the JSON feature object
 	 * 
