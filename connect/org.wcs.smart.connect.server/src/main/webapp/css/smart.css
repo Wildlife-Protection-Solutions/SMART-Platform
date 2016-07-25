@@ -563,7 +563,7 @@ article.tabs section:target h2
 
 .selectedTab{
 	color: #324A73;
-	background-color: #fff;
+	background-color: #ddd;
 }
 
 article.tabs section,

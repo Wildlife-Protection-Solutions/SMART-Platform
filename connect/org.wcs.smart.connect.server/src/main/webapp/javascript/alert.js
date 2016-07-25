@@ -441,8 +441,8 @@ function createAlertTable(){
 		 		if(alerts[i].geometry.type == "LineString"){
 		 			continue; //This is a track feature, ignore it for drawing the table of alerts.
 		 		}
-		 		
-		 		var date = offsetDateFromServer(alerts[i].properties.date, alerts[i].properties.timezoneOffset);
+ 
+		 		date = new Date(Date.parse(alerts[i].properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
 
 		 		var row = tableCreateRowTDs(parent,
 		 				[alerts[i].properties.type, alerts[i].properties.id, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
@@ -677,14 +677,12 @@ function updateRealtimeLayer(updatedUrl){
                 var feature = e.features[fId];
                 var c = feature.geometry.coordinates;
 
-                d = offsetDateFromServer(feature.properties.date, feature.properties.timezoneOffset);
-                
+                d = new Date(Date.parse(feature.properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
                 
                 if(feature.properties.type == undefined){
                 	return "Track Selected - Please click an alert for alert details.";
             	}
-                
-            	//date = date.tostring();
+
                 var text = i18n("alert.event");
                 if(feature.properties.type == 'Unknown Type'){
                 	text = text + "<font color='red'>"
@@ -984,13 +982,4 @@ function sort(str){
 	}
 	
 	refreshAlerts();
-}
-
-function offsetDateFromServer(date, offset){
-	date = date.replace(" ","T");
-	var millisec = Date.parse(date);
-	var d = new Date()
-	var differenceInOffsets = offset + d.getTimezoneOffset();
-	millisec = millisec - (differenceInOffsets * 60 * 1000); //subtract the difference in timezone between the Connect server and the viewing client to get the proper client-based timezone. Why? Because timezones suck and we aren't using moderm Date objects in Java... 
-	return new Date(millisec);
 }

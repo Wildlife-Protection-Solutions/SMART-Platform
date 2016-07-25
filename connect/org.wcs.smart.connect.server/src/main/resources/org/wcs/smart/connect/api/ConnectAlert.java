@@ -739,7 +739,8 @@ public class ConnectAlert extends HttpServlet {
     	            properties.put("uuid", obj.getUuid()); //$NON-NLS-1$
     	            properties.put("cauuid", obj.getCaUuid()); //$NON-NLS-1$
     	            properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
-    	            properties.put("date", obj.getDate()); //$NON-NLS-1$
+    	            String utcDate = obj.getDate().toGMTString();
+    	            properties.put("date", utcDate); //$NON-NLS-1$
     	            //properties.put("date", convertTimeToGMT(obj.getDate())); //$NON-NLS-1$
     	            properties.put("desc", obj.getDescription()); //$NON-NLS-1$
     	            properties.put("level", obj.getLevel()); //$NON-NLS-1$
