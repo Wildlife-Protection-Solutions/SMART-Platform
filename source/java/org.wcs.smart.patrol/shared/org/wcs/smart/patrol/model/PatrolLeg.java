@@ -301,6 +301,14 @@ public class PatrolLeg extends UuidItem {
 			this.days.remove(day);
 		}
 		
+		//sort 
+		Collections.sort(this.days, new Comparator<PatrolLegDay>() {
+			@Override
+			public int compare(PatrolLegDay o1, PatrolLegDay o2) {
+				return o1.getDate().compareTo(o2.getDate());
+			}
+		});
+		
 		//update the end time of the last day
 		this.days.get(0).setStartTime(convertDateToTime(getStartDate()));
 		this.days.get(this.days.size() - 1).setEndTime(convertDateToTime(getEndDate()));
@@ -330,13 +338,7 @@ public class PatrolLeg extends UuidItem {
 		}
 		
 
-		//sort 
-		Collections.sort(this.days, new Comparator<PatrolLegDay>() {
-			@Override
-			public int compare(PatrolLegDay o1, PatrolLegDay o2) {
-				return o1.getDate().compareTo(o2.getDate());
-			}
-		});
+	
 	}
 	
 }
