@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 
 import java.util.ArrayList;
@@ -18,12 +39,14 @@ import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.util.SharedUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * For processing track log points:
+ * For processing track log points.  This attempts to find a patrol
+ * with appropriate deviceID and leg/day and adds point to that patrol. 
  * 
  * { "type": "Feature",
   "geometry": { "type": "Point", "coordinates": [-0.006034, 0.006701] },
@@ -42,6 +65,8 @@ import com.vividsolutions.jts.geom.LineString;
 public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 
 	private Set<Patrol> modifiedPatrols;
+	private List<String> warnings;
+	
 	public PatrolJsonTrackProcessor() {
 		
 	}
@@ -53,22 +78,15 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
 		modifiedPatrols = new HashSet<Patrol>();
+		warnings = new ArrayList<>();
 		
 		List<JSONObject> processed = new ArrayList<JSONObject>();
 		
 		for (JSONObject feature : features){
-			//only want to process features with no sighting data
+			if (!JsonCtParser.isTrackPoint(feature)) continue;
+
 			JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
-			if (properties == null) continue;
-			JSONObject sighting = (JSONObject)properties.get(JsonCtParser.SIGHTINGS_KEY);
-			if (sighting != null) continue;
-			
 			JSONObject geom = (JSONObject) feature.get(JsonCtParser.GEOMETRY_KEY);
-			if (!"Point".equalsIgnoreCase((String)geom.get(JsonCtParser.GEOMETRY_TYPE_KEY))){
-				//only parse points
-				continue;
-			}
-			
 			JSONArray pntArray = (JSONArray) geom.get(JsonCtParser.GEOMETRY_COORDINATE_KEY);
 			if (pntArray.size() < 2 || pntArray.get(0) == null || pntArray.get(1) == null) continue;
 			
@@ -90,7 +108,7 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 					
 					//lets look for a patrol leg day that matches
 					for (PatrolLegDay pld : link.getPatrolLeg().getPatrolLegDays()){
-						if (JsonCtParser.areDatesEqual(pld.getDate(), dt) &&
+						if (SharedUtils.isSameDate(pld.getDate(), dt) &&
 								JsonCtParser.isTimeBetween(dt, pld.getStartTime(), pld.getEndTime())){
 							matches.add(pld);
 						}
@@ -100,14 +118,6 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 			}
 
 			if (matches.isEmpty()){
-				//there is no link in the database for this patrol that 
-				//matches the device id and the date/time
-				//this could be due to a number of reasons.  Perhaps the patrol
-				//has not yet been created, or the patrol leg day has not yet been created
-				//or perhaps this point belongs to a mission track
-				
-				//TODO:
-				System.out.println("no patrols to add track to");
 				continue;
 			}else{
 				if (matches.size() == 1){
@@ -126,22 +136,25 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 					
 					modifiedPatrols.add(pld.getPatrolLeg().getPatrol());
 				}else{
-					//there is more than one possible match.  We need to do
-					//something here; pick one? let the user pick?
-					//
-					//TODO:
-					System.out.println("more than one possible track");
+					warnings.add("Multiple patrol options for adding track point.  Point will not be processed.");
 				}
 				
 			}
 		}
-		return features;
+		return processed;
 
 	}
 
 	@Override
 	public void afterSave() {
-		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	public String getStatusMessage() {
+		return null;
+	}
+	
+	public List<String> getWarnings(){
+		return this.warnings;
 	}
 }

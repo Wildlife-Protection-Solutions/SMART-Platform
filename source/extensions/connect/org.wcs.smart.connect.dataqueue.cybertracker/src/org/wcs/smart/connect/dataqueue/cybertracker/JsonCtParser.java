@@ -1,5 +1,27 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.dataqueue.cybertracker;
 
+import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,6 +55,12 @@ import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+/**
+ * Parses sighting data from cybertracker JSON data.
+ * 
+ * @author Emily
+ *
+ */
 public class JsonCtParser {
 
 	public static final String SIGHTINGS_KEY = "sighting"; //$NON-NLS-1$
@@ -71,25 +99,46 @@ public class JsonCtParser {
 	}
 
 	/**
-	 * Compares the year, month and date part of the dates
-	 * @param date1
-	 * @param date2
+	 * Determines if the jSONOBject represents a track feature.  We assume
+	 * track points are point features that contain properties but not sighting
+	 * information.
+	 * 
+	 * @param feature
 	 * @return
 	 */
-	public static boolean areDatesEqual(Date date1, Date date2){
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date1);
+	public static boolean isTrackPoint(JSONObject feature){
+		//only want to process features with no sighting data
+		JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
+		if (properties == null) return false;
+		JSONObject sighting = (JSONObject)properties.get(JsonCtParser.SIGHTINGS_KEY);
+		if (sighting != null) return false;
 		
-		
-		Calendar cal2 = Calendar.getInstance();
-		cal2.setTime(date2);
-		
-		int[] fields = new int[]{Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH};
-		for (int field : fields){
-			if (cal.get(field) != cal2.get(field)) return false;
+		JSONObject geom = (JSONObject) feature.get(JsonCtParser.GEOMETRY_KEY);
+		if (!"Point".equalsIgnoreCase((String)geom.get(JsonCtParser.GEOMETRY_TYPE_KEY))){
+			//only parse points
+			return false;
 		}
+		
 		return true;
 	}
+	/**
+	 * Time in seconds
+	 * @param date
+	 * @return
+	 */
+	public static Time getTime(Date d){
+		Calendar c = Calendar.getInstance();
+		c.setTime(d);
+		
+		Calendar c2 = Calendar.getInstance();
+		c2.setTimeInMillis(0);
+		int[] fields = new int[]{Calendar.SECOND, Calendar.MINUTE, Calendar.HOUR_OF_DAY};
+		for (int field : fields){
+			c2.set(field, c.get(field));
+		}
+		return new Time(c2.getTimeInMillis());
+	}
+
 	
 	/**
 	 * Determines if the time represented by date1 is between the times
@@ -123,8 +172,8 @@ public class JsonCtParser {
 		Date d2 = SharedUtils.getDatePart(date2, false);
 		Date d3 = SharedUtils.getDatePart(date3, false);
 		
-		return ((areDatesEqual(d1, d2) || d1.after(d2)) && 
-				(areDatesEqual(d1, d3) || d1.before(d3)));
+		return ((SharedUtils.isSameDate(d1, d2) || d1.after(d2)) && 
+				(SharedUtils.isSameDate(d1, d3) || d1.before(d3)));
 	}
 	
 	private JSONParser parser = new JSONParser();
@@ -317,33 +366,6 @@ public class JsonCtParser {
 				
 			}
 		}
-			
-//			if (newWaypoint.getX() == null){
-//				//no position provided we want to add this to the previous waypoint
-//				//TODO: we could also check the SMART_NewWaypoint sighting attribute:
-//				// "SMART_NewWaypoint": "Save As New Waypoint"
-//				// "SMART_NewWaypoint": "Add To Last Waypoint"
-//				if (waypoints.size() > 0){
-//					waypoints.get(waypoints.size()-1).getObservations().addAll(newWaypoint.getObservations());
-//				}else{
-//					//the previous waypoint to add to was sent in a previous package; we have to deal with this when importing into patrol
-//					waypoints.add(newWaypoint);
-//				}
-//			}else{
-//				waypoints.add(newWaypoint);
-//			}
-		
-		
-//		for (Waypoint wp : waypoints){
-//			System.out.println("WAYPOINT: ( " + wp.getX() + "," + wp.getY() + ", " + wp.getDateTime().toString() + ")");
-//			for (WaypointObservation obs : wp.getObservations()){
-//				System.out.println("observation: " + obs.getCategory().getFullCategoryName());
-//				for (WaypointObservationAttribute a : obs.getAttributes()){
-//					System.out.println(a.getAttribute().getName() + ": " + a.getAttributeValueAsString(Locale.getDefault()));
-//				}
-//			}
-//			System.out.println();
-//		}
 		return newWaypoint;
 	}
 	

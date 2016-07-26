@@ -41,6 +41,7 @@ import org.wcs.smart.connect.dataqueue.internal.server.ConnectDataQueue;
 import org.wcs.smart.connect.dataqueue.internal.server.DataQueueApi;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
+import org.wcs.smart.connect.dataqueue.process.IItemProcessor.ProcessingStatus;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -117,7 +118,7 @@ public class DataQueueItemProcessor extends Job {
 			
 			
 			monitor.setTaskName(Messages.DataQueueItemProcessor_Task2 + item.getName());
-			
+			boolean requeue = false;
 			IItemProcessor.ProcessingStatus processingStatus = null;
 			try{
 				monitor.subTask(Messages.DataQueueItemProcessor_Task3);
@@ -131,6 +132,12 @@ public class DataQueueItemProcessor extends Job {
 				updateLocalStatus(LocalDataQueueItem.Status.PROCESSING, null);
 				processingStatus = processItem(new SubProgressMonitor(monitor, 10));
 				
+				
+				if (processingStatus.getStatus() == LocalDataQueueItem.Status.REQUEUED){
+					requeue = true;
+					processingStatus = new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, "Could not process any of the data.  Item has been requeud on server to try again later.");
+				}
+					
 			}catch (Exception ex){
 				ConnectDataQueuePlugin.log(ex.getMessage(), ex);
 				updateLocalStatus(LocalDataQueueItem.Status.ERROR, ex.getMessage());
@@ -150,7 +157,11 @@ public class DataQueueItemProcessor extends Job {
 			}
 			
 			try{
-				ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.COMPLETE);
+				if (requeue){
+					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.QUEUED);
+				}else{
+					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.COMPLETE);
+				}
 			}catch (Exception ex){
 				ConnectDataQueuePlugin.displayLog(Messages.DataQueueItemProcessor_Error3, ex);
 			}

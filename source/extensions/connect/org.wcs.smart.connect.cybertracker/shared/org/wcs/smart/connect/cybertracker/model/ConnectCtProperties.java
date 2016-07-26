@@ -44,7 +44,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 public class ConnectCtProperties extends UuidItem {
 	
 	public static final int FREQUENCY_MIN_VALUE = 0;
-	public static final int FREQUENCY_MAX_VALUE = 999999999;
+	public static final int FREQUENCY_MAX_VALUE = 9999;
 	public static final int FREQUENCY_DEFAULT_VALUE = 0;
 
 	private ConfigurableModel model;

@@ -48,7 +48,8 @@ public interface IItemProcessor {
 	 * 
 	 * @param item 
 	 * @param monitor
-	 * @return
+	 * @return ProcessingStatus; if processing status is requeue then the item is requeued on the server
+	 * to be processed again later
 	 * @throws Exception
 	 */
 	public ProcessingStatus process(DataQueueItem item, IProgressMonitor monitor) throws Exception;

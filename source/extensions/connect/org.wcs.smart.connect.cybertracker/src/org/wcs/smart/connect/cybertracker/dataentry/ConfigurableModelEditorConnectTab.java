@@ -236,14 +236,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				dialog.notifyChangesMade();
 			}
 		});
-		txtPosition.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				validatePositionFrequency();
-				dialog.notifyChangesMade();
-			}
-		});
+
 		//intialize controls for position frequency
 		if (properties.getPingFrequency() == null || properties.getPingFrequency() == 0){
 			btnPosition.setSelection(false);
@@ -258,7 +251,15 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		txtPosition.setEnabled(btnPosition.getSelection());
 		cmbPositionType.getControl().setEnabled(btnPosition.getSelection());
 		validatePositionFrequency();
-
+		txtPosition.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				validatePositionFrequency();
+				dialog.notifyChangesMade();
+			}
+		});
+		
 		//create data frequency options
 		Composite dataComp = new Composite(g, SWT.NONE);
 		dataComp.setLayout(new GridLayout(4, false));
@@ -275,14 +276,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		Label lbl4 = new Label(dataComp, SWT.NONE);
 		lbl4.setText(Messages.ConfigurableModelEditorConnectTab_DataUploadTime);
 		cdData = createDecoration(lbl4);
-		txtData.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				validateDataFrequency();
-				dialog.notifyChangesMade();
-			}
-		});
+
 
 		String tooltip2 = Messages.ConfigurableModelEditorConnectTab_DataUploadTooltip;
 		lbl3.setToolTipText(tooltip2);
@@ -313,6 +307,14 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		lbl4.setEnabled(btnData.getSelection());
 		txtData.setEnabled(btnData.getSelection());
 		validateDataFrequency();
+		txtData.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				validateDataFrequency();
+				dialog.notifyChangesMade();
+			}
+		});
 		
 		Group g2 = new Group(all, SWT.NONE);
 		g2.setText(Messages.ConfigurableModelEditorConnectTab_AlertConfigTitle);

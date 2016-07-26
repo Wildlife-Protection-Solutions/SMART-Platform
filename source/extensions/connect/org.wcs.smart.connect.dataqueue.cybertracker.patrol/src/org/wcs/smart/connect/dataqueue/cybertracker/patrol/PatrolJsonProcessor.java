@@ -1,7 +1,29 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -24,10 +47,10 @@ import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.connect.dataqueue.cybertracker.IJsonProcessor;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonCtParser;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonTrackUtils;
+import org.wcs.smart.connect.dataqueue.cybertracker.UserCancelledException;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.JsonUtils;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
@@ -50,6 +73,12 @@ import org.wcs.smart.util.UuidUtils;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
+/**
+ * Parser for parsing patrol data from CT JSON data. 
+ * 
+ * @author Emily
+ *
+ */
 public class PatrolJsonProcessor implements IJsonProcessor {
 	
 	private static final DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd");
@@ -59,6 +88,16 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	
 	private Set<Patrol> newPatrols;
 	private Set<Patrol> modifiedPatrols;
+	
+	public class PatrolWrapper{
+		public Patrol patrol;
+		public String ctDeviceId;
+		
+		public PatrolWrapper(Patrol patrol, String ctDeviceId){
+			this.patrol =  patrol;
+			this.ctDeviceId = ctDeviceId;
+		}
+	}
 	
 	public PatrolJsonProcessor() {
 		warnings = new ArrayList<String>();
@@ -106,28 +145,41 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					if (link != null){
 						toUpdate = link.getPatrolLeg();
 					}else{
-						Patrol temp = patrols.get(ctUuid).patrol;
-						if (temp != null) toUpdate = temp.getFirstLeg();	
+						Patrol temp = null;
+						if (patrols.get(ctUuid) != null){
+							temp = patrols.get(ctUuid).patrol;
+							if (temp != null) toUpdate = temp.getFirstLeg();
+						}
 					}
 
 					if (toUpdate == null){
-						warnings.add("End patrol flag found in observation, but no patrol object could be found.");
-					}else{
-						//update patrol end date and end time for last patrol leg day
-						toUpdate.getPatrol().setEndDate(SharedUtils.getDatePart(dt, false));
-						PatrolLegDay pd = findLegDay(toUpdate, toUpdate.getEndDate(), true);
-						pd.setEndTime(new Time(dt.getTime()));
+						//create a new patrol object
+						Patrol p = createPatrolFromSighing(sighting, session);
+						String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
+						PatrolWrapper pwrapper = new PatrolWrapper(p, deviceId);
+						patrols.put(ctUuid, pwrapper);
+						newPatrols.add(p);
 						
-						//add point to track
-						addPointToTrack(pd, parser.readXYFromProperties(feature),dt);
-						
+						p.setEndDate(dt);
+						toUpdate = p.getFirstLeg();
+						toUpdate.setStartDate(SharedUtils.getDatePart(p.getStartDate(), false));
+						toUpdate.setEndDate(SharedUtils.getDatePart(p.getEndDate(), true));
+						p.createLegDays(session);
 					}
+					
+					//update patrol end date and end time for last patrol leg day
+					toUpdate.getPatrol().setEndDate(SharedUtils.getDatePart(dt, false));
+					PatrolLegDay pd = findLegDay(toUpdate, toUpdate.getEndDate(), true, null, session);
+					pd.setEndTime(new Time(dt.getTime()));
+						
+					//add point to track
+					addPointToTrack(pd, parser.readXYFromProperties(feature),dt);
+					
 					processedFeatures.add(feature);
 					continue;
 				}
 				
-				//create a Waypoint
-				
+				//create a Waypoint				
 				Waypoint wp = parser.createWaypoint(feature, session);
 				warnings.addAll(parser.getWarnings());
 				
@@ -135,7 +187,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
 				
 				boolean isNewWaypoint = true;
-				if (wp.getX() == null && wp.getY() == null){
+				boolean addToLast = ((String)sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT)).equalsIgnoreCase("false");
+				if (addToLast){
 					//TODO: add to last waypoint
 					if (lastWaypoint == null){
 						//TODO: we have a problem
@@ -162,7 +215,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);
 				String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
 				Date dStartDate = DATEFORMAT.parse(startDate);
-						
+				
+				
 				//merge patrol 		
 				PatrolLeg addTo = null;
 				if (link != null){
@@ -174,7 +228,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 
 				}else{
 					PatrolWrapper pwrapper = patrols.get(ctUuid);
-					
+					Time dStartTime = null;	
 					if (pwrapper == null){
 						//create a new patrol as we do not have an object for this patrol.
 						Patrol p = createPatrolFromSighing(sighting, session);
@@ -182,40 +236,32 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						pwrapper = new PatrolWrapper(p, deviceId);
 						patrols.put(ctUuid, pwrapper);
 						newPatrols.add(p);
+						
+						dStartTime =new Time( TIMEFORMAT.parse(startTime).getTime());
 					}
 					
 					Patrol p = pwrapper.patrol;
 					//find patrol to add to 
 					addTo = p.getFirstLeg();
-					PatrolLegDay addToD = findLegDay(addTo, dStartDate, true);
+					PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime(), true, dStartTime, session);
 					
-					PatrolWaypoint pw = new PatrolWaypoint();
-					pw.setPatrolLegDay(addToD);
-					pw.setWaypoint(wp);
-					addToD.getWaypoints().add(pw);
+					addWaypointToLegDay(addToD, wp);
 				}
 				
 				//add position to track log
-				addPointToTrack(addTo, new Coordinate(wp.getX(), wp.getY()), wp.getDateTime());
+				addPointToTrack(addTo, new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
 				
 				processedFeatures.add(feature);
 				
 			}catch (Exception ex){
 				//TODO: if there is a session.flush error we have a problem we need to stop and rollback
-				CyberTrackerPlugIn.log(ex.getMessage(), ex);
-				warnings.add("Error parsing feature information: (feature will not be processed)" + ex.getMessage());
+				CyberTrackerPlugIn.log(ex.getMessage() + ": " + feature.toJSONString(), ex);
+				warnings.add("Error parsing feature information (feature will not be processed): " + ex.getMessage());
 			}
 		}
 		
-		if (!warnings.isEmpty()){
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), "Error", "The following warnings were generated while parsing patrol data.", warnings);
-					wd.open();
-				}	
-			});
-		}
+		
+		displayWarnings(warnings);
 		
 		final boolean[] cancel = new boolean[]{false};
 		if (!patrols.isEmpty()){
@@ -231,23 +277,49 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			});
 		}
 		if (cancel[0]){
-			throw new Exception("User cancelled.");
-			//TODO make sure to rollback transaction
+			throw new UserCancelledException("User cancelled operation while assigning observations to patrols.");
 		}
 		
 		//try processing track features
 		PatrolJsonTrackProcessor trackProcessor = new PatrolJsonTrackProcessor();
 		processedFeatures.addAll(trackProcessor.processJson(features, session));
-		
+				
 		modifiedPatrols.addAll(trackProcessor.getModifiedPatrols());
+		displayWarnings(trackProcessor.getWarnings());
 		
 		return processedFeatures;
 	}
 	
+	/*
+	 * displays warning dialog to user allowing them to cancel the processing
+	 */
+	private void displayWarnings(List<String> warnings) throws Exception{
+		 if (!warnings.isEmpty()){
+			 	final boolean[] cont = {false};
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
+								"Warnings", 
+								"The following warnings were generated while parsing patrol data.  Do you want to continue?",
+								warnings,
+								new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
+						if (wd.open() == 0){
+							cont[0] = true;
+						}else{
+							cont[0] = false;
+						}
+					}	
+				});
+				if (!cont[0]){
+					throw new UserCancelledException("User cancelled operation due to warnings.");
+				}
+		 }
+	}
 	
 	private Patrol createPatrolFromSighing(JSONObject sighting, Session session) throws Exception{
 		Patrol p = new Patrol();
-		
+		p.setConservationArea(SmartDB.getCurrentConservationArea());
 		String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
 		CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, session);
 		
@@ -271,7 +343,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		// create new leg and add members and set transport type
 		PatrolLeg pl = p.addLeg();
 		pl.setPatrolLegDays(new ArrayList<PatrolLegDay>());
-		
+		pl.setStartDate(SharedUtils.getDatePart(dStartDate, false));
+		pl.setEndDate(SharedUtils.getDatePart(dStartDate, true));
 		for (Employee member: ct.getMembers()){
 			PatrolLegMember item = pl.addPatrolLegMember(member);
 			if (member.equals(ct.getPilot())) item.setIsPilot(true);
@@ -290,21 +363,68 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		session.saveOrUpdate(wp);
 		session.flush();
 		
-		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime(), true);
+		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime(), true, null, session);
 		
+		PatrolWaypoint pw = addWaypointToLegDay(addToD, wp);
+		session.save(pw);
+		session.saveOrUpdate(addToD.getPatrolLeg().getPatrol());
+	}
+
+	private PatrolWaypoint addWaypointToLegDay(PatrolLegDay addToD, Waypoint wp){
 		PatrolWaypoint pw = new PatrolWaypoint();
 		pw.setPatrolLegDay(addToD);
 		pw.setWaypoint(wp);
-		session.save(pw);
+		if (addToD.getWaypoints() == null) addToD.setWaypoints(new ArrayList<PatrolWaypoint>());
 		addToD.getWaypoints().add(pw);
-
-		session.saveOrUpdate(addTo.getPatrol());
-	}
-
-	private boolean startsWith(String value, String key){
-		return value.startsWith(key + CyberTrackerConfExporter.KEY_SEP);
+		
+		
+//		//update start time
+//		Calendar c = Calendar.getInstance();
+//		c.setTime(pw.getWaypoint().getDateTime());
+//		long sec = c.get(Calendar.SECOND) +c.get(Calendar.MINUTE) * 60 + c.get(Calendar.HOUR_OF_DAY) * 60 * 24; 
+//		c.setTime(addToD.getStartTime());
+//		long legSec = c.get(Calendar.SECOND) +c.get(Calendar.MINUTE) * 60 + c.get(Calendar.HOUR_OF_DAY) * 60 * 24;
+//		
+//		if (isStartOfDay(addToD.getStartTime()) || 
+//				sec < legSec){
+//			addToD.setStartTime( new Time(pw.getWaypoint().getDateTime().getTime()) );
+//			if (SharedUtils.isSameDate(addToD.getDate(), addToD.getPatrolLeg().getStartDate())){
+//				//update start time
+//				addToD.getPatrolLeg().setStartDate(pw.getWaypoint().getDateTime());
+//			}
+//		}
+//						
+//		//update end time
+//		if (sec > legSec || 
+//				  isEndOfDay(addToD.getEndTime())){
+//			addToD.setEndTime(new Time(pw.getWaypoint().getDateTime().getTime()));
+//					
+//			if (SharedUtils.isSameDate(addToD.getDate(), addToD.getPatrolLeg().getEndDate())){
+//				//update start time
+//				addToD.getPatrolLeg().setEndDate(pw.getWaypoint().getDateTime());
+//			}
+//		}
+		
+		
+		return pw;
 	}
 	
+	private boolean isStartOfDay(Date d){
+		Calendar c = Calendar.getInstance();
+		c.setTime(d);
+		
+		int fields[] = {Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND};
+		for (int field : fields){
+			if (c.get(field) != 0) return false;
+		}
+		return true;
+	}
+	private boolean isEndOfDay(Date d){
+		Calendar c = Calendar.getInstance();
+		c.setTime(d);
+		return c.get(Calendar.HOUR_OF_DAY)==23 && c.get(Calendar.MINUTE) == 59 && c.get(Calendar.SECOND) == 59;
+	}
+
 	@Override
 	public void afterSave(){
 		for (Patrol p : modifiedPatrols){
@@ -323,21 +443,13 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 	}
 	
-	public class PatrolWrapper{
-		public Patrol patrol;
-		public String ctDeviceId;
-		
-		public PatrolWrapper(Patrol patrol, String ctDeviceId){
-			this.patrol =  patrol;
-			this.ctDeviceId = ctDeviceId;
-		}
-	}
+
 	
 
 	
-	private static final PatrolLegDay findLegDay(PatrolLeg leg, Date day, boolean create){
+	private static final PatrolLegDay findLegDay(PatrolLeg leg, Date day, boolean create, Time startTime, Session session){
 		for (PatrolLegDay pld : leg.getPatrolLegDays()){
-			if (JsonCtParser.areDatesEqual(pld.getDate(), day)){
+			if (SharedUtils.isSameDate(pld.getDate(), day)){
 				return pld;
 			}
 		}
@@ -354,9 +466,6 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		time.set(Calendar.MINUTE, tmp.get(Calendar.MINUTE));
 		time.set(Calendar.SECOND, tmp.get(Calendar.SECOND));
 		time.set(Calendar.MILLISECOND, 0);
-		
-		pld.setStartTime(new Time(time.getTime().getTime()));
-		pld.setEndTime(new Time(SmartUtils.getMidnight().getTime()- 1));
 
 		pld.setRestMinutes(0);
 		
@@ -370,7 +479,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			leg.setStartDate(pld.getDate());
 		}
 		if (leg.getEndDate().before(pld.getDate())){
-			leg.setEndDate(pld.getDate());
+			leg.setEndDate(SharedUtils.getDatePart(pld.getDate(), true));
 		}
 		if (leg.getPatrol().getStartDate().after(pld.getDate())){
 			leg.getPatrol().setStartDate(pld.getDate());
@@ -379,6 +488,22 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			leg.getPatrol().setEndDate(pld.getDate());
 		}
 		
+		//make sure there is at least one legday for each day between the start and end date
+		leg.createLegDays(session);
+		
+		if (startTime == null){
+			pld.setStartTime(new Time(time.getTime().getTime()));
+		}else{
+			pld.setStartTime(startTime);
+		}
+		pld.setEndTime(new Time(SmartUtils.getMidnight().getTime()- 1));
+		
+		if (SharedUtils.isSameDate(pld.getDate(), leg.getStartDate())){
+			leg.setStartDate( SmartUtils.combineDateTime(leg.getStartDate(), pld.getStartTime()) );
+		}
+		if (SharedUtils.isSameDate(pld.getDate(), leg.getEndDate())){
+			leg.setEndDate( SmartUtils.combineDateTime(leg.getEndDate(), pld.getEndTime()) );
+		}
 		return pld;
 	}
 	
@@ -395,9 +520,39 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		pld.getTrack().setLineString(ll);
 	}
 	
-	public static final void addPointToTrack(PatrolLeg leg, Coordinate pnt, Date time) throws Exception{
+	public static final void addPointToTrack(PatrolLeg leg, Coordinate pnt, Date time, Session session) throws Exception{
 		if (pnt == null) return;
-		PatrolLegDay pld = findLegDay(leg, time, true);
+		PatrolLegDay pld = findLegDay(leg, time, true, null, session);
 		addPointToTrack(pld, pnt, time);
+	}
+
+	@Override
+	public String getStatusMessage() {
+		if (newPatrols.size() == 0 && modifiedPatrols.size() == 0) return null;
+		
+		StringBuilder sb = new StringBuilder();
+		if (newPatrols.size() > 0){
+			sb.append(MessageFormat.format("Create {0} Patrols ", newPatrols.size()));
+			sb.append("(");
+			for(Patrol p : newPatrols){
+				sb.append(p.getId());
+				sb.append(" ");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.append("); ");
+		}
+		HashSet<Patrol> tmp = new HashSet<Patrol>(modifiedPatrols);
+		tmp.removeAll(newPatrols);
+		if (tmp.size() > 0){
+			sb.append(MessageFormat.format("Modified {0} Patrols ", modifiedPatrols.size()));
+			sb.append("(");
+			for(Patrol p : tmp){
+				sb.append(p.getId());
+				sb.append(" ");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.append(")");
+		}
+		return sb.toString();
 	}
 }

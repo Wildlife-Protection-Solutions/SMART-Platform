@@ -15,6 +15,36 @@
             supportsCcaa="false">
       </class>
    </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.dataqueue.cybertracker.patrol.updatesite.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.dataqueue.cybertracker.patrol.updatesite.OnInstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.connect.dataqueue.cybertracker.patrol.updatesite.DataQueueCtPatrolChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.connect.dataqueue.cybertracker.patrol.updatesite.DataQueueCtPatrolDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 
 </plugin>
