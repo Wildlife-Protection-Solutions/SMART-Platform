@@ -260,10 +260,7 @@ public class Patrol extends UuidItem {
 	 */
 	@Transient
 	public boolean hasPilot(){
-		if (patrolType != null && (patrolType == PatrolType.Type.AIR || patrolType == PatrolType.Type.MARINE)){
-			return true;
-		}
-		return false;
+		return patrolType != null && patrolType.requiresPilot();
 	}
 	
 	/**

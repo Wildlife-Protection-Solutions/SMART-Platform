@@ -90,6 +90,10 @@ public class PatrolType {
 			}
 			return MAX_SPEED_MAX_VALUE;
 		}
+		
+		public boolean requiresPilot(){
+			return (this == MARINE || this == AIR);
+		}
 	}
 
 	public static final Integer MAX_TRANSPORT_NAME_LENGTH = 128;
