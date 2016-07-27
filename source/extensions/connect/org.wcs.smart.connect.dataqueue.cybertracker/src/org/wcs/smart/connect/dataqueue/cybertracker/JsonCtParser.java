@@ -76,10 +76,6 @@ public class JsonCtParser {
 	public static final String DEVICE_ID = "deviceId"; //$NON-NLS-1$
 	
 	public static List<JSONObject> parseFeaturesFromJsonString(String json) throws Exception{
-		if (json.charAt(json.length()-1) == 0){
-			json = json.substring(0, json.length() - 1);
-		}
-		
 		JSONObject jsonData = null; 
 		try {
 			Object obj = (new JSONParser()).parse(json);
@@ -180,11 +176,23 @@ public class JsonCtParser {
 	
 	private List<String> warnings = null;
 	
+	private List<WaypointObservationAttribute> applyToAllObservations;
 	
 	public List<String> getWarnings(){
 		return this.warnings;
 	}
 	
+	/**
+	 * returns the observation attributes in the json data that
+	 * should be applied to all observations.  This includes the default
+	 * observation values and any observation values with the multi/select 
+	 * index.
+	 *  
+	 * @return
+	 */
+	public List<WaypointObservationAttribute> getApplyToAdd(){
+		return applyToAllObservations;
+	}
 	public Coordinate readXYFromProperties(JSONObject feature){
 		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
 		Double x = (Double)properties.get(LONGITUDE_KEY);
@@ -311,10 +319,9 @@ public class JsonCtParser {
 		
 		List<WaypointObservationAttribute> defaultAttributes = defaults.getAttributes(); 
 				
-
-		
 		//these attribute values must be applied to all observations
-		List<WaypointObservationAttribute>  applyAllObs = createWaypointObservationAttribute(attributes.get(-1), category, defaultAttributes, session);
+		List<WaypointObservationAttribute>  applyAllObs = createWaypointObservationAttribute(attributes.get(CyberTrackerConfExporter.MULTI_SELECT_INDEX), category, defaultAttributes, session);
+		applyToAllObservations = applyAllObs;
 		
 		if (attributes.entrySet().isEmpty()){
 			//create an observation with only default attribute values
@@ -330,7 +337,7 @@ public class JsonCtParser {
 		}else{
 			for (Entry<Integer, List<ObservationInfo>> e : attributes.entrySet()){
 				int order = e.getKey();
-				if (order == -1) continue; //skip the defaults
+				if (order == CyberTrackerConfExporter.MULTI_SELECT_INDEX) continue; //skip the defaults
 				
 				List<ObservationInfo> values = (List<ObservationInfo>) e.getValue();
 						

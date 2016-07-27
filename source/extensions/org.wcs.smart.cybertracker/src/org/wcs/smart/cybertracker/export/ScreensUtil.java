@@ -68,7 +68,7 @@ public class ScreensUtil {
 	public static final String RESULT_START_TIME = COMMON_PREFIX + "PatrolStartTime"; //$NON-NLS-1$
 
 	public static final String RESULT_NEW_WAYPOINT = COMMON_PREFIX + "NewWaypoint"; //$NON-NLS-1$
-	public static final String RESULT_ENG_WAYPOINT_GROUP = COMMON_PREFIX + "WaypointGroupEnd"; //$NON-NLS-1$
+	public static final String RESULT_END_WAYPOINT_GROUP = COMMON_PREFIX + "WaypointGroupEnd"; //$NON-NLS-1$
 	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = COMMON_PREFIX + "DefaultAttributeValues"; //$NON-NLS-1$
 
 	public static final String RESULT_DEFAULT_META_VALUES = COMMON_PREFIX + "DefaultPatrolValues"; //$NON-NLS-1$
@@ -80,6 +80,8 @@ public class ScreensUtil {
 	public static final String RESULT_DATATYPE = COMMON_PREFIX + "DataType"; //$NON-NLS-1$
 
 	public static final String RESULT_PAUSED = COMMON_PREFIX + "Paused"; //$NON-NLS-1$
+	
+	public static final String RESULT_OBSERVATION_COUNTER = COMMON_PREFIX + "ObsCounter"; //$NON-NLS-1$
 
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
@@ -110,7 +112,12 @@ public class ScreensUtil {
 		ids.add(content.getStartScreenItemId());
 		ids.addAll(ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ExitCyberTracker));
 		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
-			
+		
+		//reset counter when we start new patrol/mission
+		Control obsCounter = getScreensFactory().createFormulaControl12("0"); //$NON-NLS-1$
+		obsCounter.setResultGlobalValue(CyberTrackerUtil.OBSCOUNTER_VARNAME);
+		ScreensObjectFactory.addControlToNode(nodeMain, obsCounter);
+		
 		//set the target element on nodeMain to the dataType
 		
 		container.screenNodes.add(nodeMain);
@@ -221,7 +228,7 @@ public class ScreensUtil {
 	protected CyberTrackerId createEndTripNodes(MetaExportResult container, CyberTrackerId appStartId, String confirmMsg) {
 		CyberTrackerId endId = new CyberTrackerId();
 		//navigate on save to start point
-		Node confirmNode = ctUtil.createSaveNode(endId, appStartId, Messages.PatrolScreens_Confirm, confirmMsg, true);
+		Node confirmNode = ctUtil.createSaveNode(endId, appStartId,  Messages.PatrolScreens_Confirm, confirmMsg, true);
 		container.screenNodes.add(confirmNode);
 		return endId;
 	}

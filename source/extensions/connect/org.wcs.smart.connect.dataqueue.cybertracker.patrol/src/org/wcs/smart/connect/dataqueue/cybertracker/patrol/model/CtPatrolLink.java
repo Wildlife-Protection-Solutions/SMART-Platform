@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.dataqueue.cybertracker.patrol.model;
 
+
+import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -49,6 +51,10 @@ public class CtPatrolLink {
 	
 	private String deviceId;
 	
+	private Integer lastObservation;
+	
+	private Date groupStartTime;
+	
 	@Id
 	@Column(name="ct_uuid")
 	public UUID getCtUuid(){
@@ -76,5 +82,23 @@ public class CtPatrolLink {
 	
 	public void setDeviceId(String deviceId){
 		this.deviceId = deviceId;
+	}
+	
+	@Column(name="last_observation_cnt")
+	public Integer getLastObservationCnt(){
+		return this.lastObservation;
+	}
+	
+	public void setLastObservationCnt(Integer lastObservation){
+		this.lastObservation = lastObservation;
+	}
+	
+	@Column(name="group_start_time")
+	public Date getGroupStartTime(){
+		return groupStartTime;
+	}
+	
+	public void setGroupStartTime(Date startTime){
+		this.groupStartTime = startTime;
 	}
 }

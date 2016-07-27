@@ -51,6 +51,7 @@ import org.wcs.smart.connect.dataqueue.cybertracker.UserCancelledException;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.JsonUtils;
+import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
@@ -58,6 +59,7 @@ import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -89,29 +91,19 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	private Set<Patrol> newPatrols;
 	private Set<Patrol> modifiedPatrols;
 	
-	public class PatrolWrapper{
-		public Patrol patrol;
-		public String ctDeviceId;
-		
-		public PatrolWrapper(Patrol patrol, String ctDeviceId){
-			this.patrol =  patrol;
-			this.ctDeviceId = ctDeviceId;
-		}
-	}
-	
 	public PatrolJsonProcessor() {
 		warnings = new ArrayList<String>();
 	}
 
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
-		HashMap<UUID, PatrolWrapper> patrols = new HashMap<UUID, PatrolWrapper>();
+		HashMap<UUID, CtPatrolLink> patrols = new HashMap<UUID, CtPatrolLink>();
 		
 		modifiedPatrols = new HashSet<Patrol>();
 		newPatrols = new HashSet<Patrol>();
 		
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
-		Waypoint lastWaypoint = null;
+		
 		
 		for (JSONObject feature : features){
 			JsonCtParser parser = new JsonCtParser();
@@ -124,133 +116,163 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				
 				String type = (String) sighting.get(ScreensUtil.RESULT_DATATYPE);
 				
+				// Validate data type
 				if (!PatrolScreensUtil.DATATYPE_PATROL.equalsIgnoreCase(type)){
 					//not a valid patrol point; skip it
 					continue;
 				}
 				
+				//Validate counter
+				if (!sighting.containsKey(ScreensUtil.RESULT_OBSERVATION_COUNTER)){
+					//no observation counter; we cannot process this
+					continue;
+				}
+				Integer observationCounter = ((Double)sighting.get(ScreensUtil.RESULT_OBSERVATION_COUNTER)).intValue();
+				
+				//read cybertracker patrol id and convert to uuid
+				String ctPatrolId = (String) sighting.get(ScreensUtil.RESULT_ID);
+				UUID ctPatrolUuid = UuidUtils.stringToUuid(ctPatrolId);
+				
+				//check the database for link; if not found check local links
+				CtPatrolLink link = (CtPatrolLink) session.get(CtPatrolLink.class, ctPatrolUuid);
+				if (link == null){
+					link = patrols.get(ctPatrolUuid);
+				}
+				
+				//ensure valid observation id
+				if (link == null){
+					//no patrol created yet, observation counter must be 1
+					if (observationCounter != 1) continue;
+				}else{
+					//must be the next observation
+					if (link.getLastObservationCnt()  + 1 != observationCounter) continue;					
+				}
+				
+				//is this the end of the patrol
 				boolean isPatrolEnd = sighting.containsKey(PatrolScreensUtil.END_PATROL_KEY) ;
-				
-				String pid = (String) sighting.get(ScreensUtil.RESULT_ID);
-				UUID ctUuid = UuidUtils.stringToUuid(pid);
-				CtPatrolLink link = (CtPatrolLink) session.get(CtPatrolLink.class, ctUuid);
-				
 				if (isPatrolEnd){
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
 					//for this patrol
 					Date dt = JsonUtils.JSON_DATE_FORMAT.parse((String)properties.get(JsonCtParser.DATETIME_KEY));
 					
-					PatrolLeg toUpdate = null;
-					if (link != null){
-						toUpdate = link.getPatrolLeg();
-					}else{
-						Patrol temp = null;
-						if (patrols.get(ctUuid) != null){
-							temp = patrols.get(ctUuid).patrol;
-							if (temp != null) toUpdate = temp.getFirstLeg();
-						}
-					}
-
-					if (toUpdate == null){
+					if (link == null){
 						//create a new patrol object
 						Patrol p = createPatrolFromSighing(sighting, session);
 						String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
-						PatrolWrapper pwrapper = new PatrolWrapper(p, deviceId);
-						patrols.put(ctUuid, pwrapper);
+						link = new CtPatrolLink();
+						link.setDeviceId(deviceId);
+						link.setCtUuid(ctPatrolUuid);
+						link.setLastObservationCnt(observationCounter);
+						link.setPatrolLeg(p.getFirstLeg());
+						patrols.put(ctPatrolUuid, link);
 						newPatrols.add(p);
 						
 						p.setEndDate(dt);
-						toUpdate = p.getFirstLeg();
-						toUpdate.setStartDate(SharedUtils.getDatePart(p.getStartDate(), false));
-						toUpdate.setEndDate(SharedUtils.getDatePart(p.getEndDate(), true));
+						
+						link.getPatrolLeg().setStartDate(SharedUtils.getDatePart(p.getStartDate(), false));
+						link.getPatrolLeg().setEndDate(SharedUtils.getDatePart(p.getEndDate(), true));
 						p.createLegDays(session);
 					}
 					
 					//update patrol end date and end time for last patrol leg day
-					toUpdate.getPatrol().setEndDate(SharedUtils.getDatePart(dt, false));
-					PatrolLegDay pd = findLegDay(toUpdate, toUpdate.getEndDate(), true, null, session);
+					link.getPatrolLeg().getPatrol().setEndDate(SharedUtils.getDatePart(dt, false));
+					PatrolLegDay pd = findLegDay(link.getPatrolLeg(), link.getPatrolLeg().getEndDate(), true, null, session);
 					pd.setEndTime(new Time(dt.getTime()));
 						
 					//add point to track
 					addPointToTrack(pd, parser.readXYFromProperties(feature),dt);
 					
+					//update last observation count
+					link.setLastObservationCnt(observationCounter);
+					
 					processedFeatures.add(feature);
 					continue;
 				}
 				
-				//create a Waypoint				
+				//Parse the waypoint information 				
 				Waypoint wp = parser.createWaypoint(feature, session);
 				warnings.addAll(parser.getWarnings());
-				
+				wp.setId(observationCounter);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
 				
-				boolean isNewWaypoint = true;
+				if (!sighting.containsKey(ScreensUtil.RESULT_NEW_WAYPOINT)){
+					//assume this is a group attribute
+					
+					if (link == null){
+						//create a new patrol
+						Patrol p = createPatrolFromSighing(sighting, session);
+						String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
+						link = new CtPatrolLink();
+						link.setDeviceId(deviceId);
+						link.setCtUuid(ctPatrolUuid);
+						link.setLastObservationCnt(observationCounter);
+						link.setPatrolLeg(p.getFirstLeg());
+						patrols.put(ctPatrolUuid, link);
+						newPatrols.add(p);
+					}
+
+					Date groupStartTime = link.getGroupStartTime();
+					int groupResult = processGroup(sighting, link.getPatrolLeg(), wp, parser.getApplyToAdd(), groupStartTime, session);
+					if (groupResult > 0){
+						link.setLastObservationCnt(observationCounter);
+						if (groupResult == 2){
+							if (link.getGroupStartTime() == null){
+								link.setGroupStartTime(wp.getDateTime());
+							}
+						}else if (groupResult == 3){
+							link.setGroupStartTime(null);
+						}
+						
+						if(wp.getX() != null && wp.getY() != null){
+							addPointToTrack(link.getPatrolLeg(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+						}
+						processedFeatures.add(feature);
+					}
+					continue;
+				}
+				
+				//Determine if this is a "Add to Last Waypoint" option
 				boolean addToLast = ((String)sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT)).equalsIgnoreCase("false");
 				if (addToLast){
-					//TODO: add to last waypoint
-					if (lastWaypoint == null){
-						//TODO: we have a problem
-						System.out.println("no last waypoint to add to");
-					}else{
-						//merge observations into a single waypoint
-						for (WaypointObservation wo : wp.getObservations()){
-							wo.setWaypoint(lastWaypoint);
-							lastWaypoint.getObservations().add(wo);
-						}
-						wp = lastWaypoint;
-						isNewWaypoint = false;
+					if (link == null){
+						//we have nothing to add this to; this is an error
+						warnings.add("No patrol found for 'add to previous waypoint' observation. ");
+						continue;
 					}
-				}
-				lastWaypoint = wp;
-				
-				if (!isNewWaypoint){
-					session.saveOrUpdate(lastWaypoint);
-					session.flush();
+					
+					if (addWaypointToLastObservation(link.getPatrolLeg(), wp, session) == null) continue;
+					link.setLastObservationCnt(observationCounter);
 					processedFeatures.add(feature);
 					continue;
 				}
 				
-				String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);
-				String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
-				Date dStartDate = DATEFORMAT.parse(startDate);
-				
-				
-				//merge patrol 		
-				PatrolLeg addTo = null;
-				if (link != null){
-					//add these observation to the selected patrol leg
-					//TODO: potentially we could validate metadata
-					addToExistingLeg(link.getPatrolLeg(), wp, session);
-					modifiedPatrols.add(link.getPatrolLeg().getPatrol());
-					addTo = link.getPatrolLeg();
-
-				}else{
-					PatrolWrapper pwrapper = patrols.get(ctUuid);
-					Time dStartTime = null;	
-					if (pwrapper == null){
-						//create a new patrol as we do not have an object for this patrol.
-						Patrol p = createPatrolFromSighing(sighting, session);
-						String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
-						pwrapper = new PatrolWrapper(p, deviceId);
-						patrols.put(ctUuid, pwrapper);
-						newPatrols.add(p);
-						
-						dStartTime =new Time( TIMEFORMAT.parse(startTime).getTime());
-					}
 					
-					Patrol p = pwrapper.patrol;
-					//find patrol to add to 
-					addTo = p.getFirstLeg();
-					PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime(), true, dStartTime, session);
-					
-					addWaypointToLegDay(addToD, wp);
+				//We want to create a new waypoint and add it to the patrol
+				if (link == null){
+					Patrol p = createPatrolFromSighing(sighting, session);
+					String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
+					link = new CtPatrolLink();
+					link.setCtUuid(ctPatrolUuid);
+					link.setDeviceId(deviceId);
+					link.setLastObservationCnt(observationCounter);
+					link.setPatrolLeg(p.getFirstLeg());
+					patrols.put(ctPatrolUuid, link);
+					newPatrols.add(p);
 				}
 				
-				//add position to track log
-				addPointToTrack(addTo, new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
 				
+				//add these observation to the selected patrol leg
+				//TODO: potentially we could validate metadata
+				addToExistingLeg(link.getPatrolLeg(), wp, session);
+				modifiedPatrols.add(link.getPatrolLeg().getPatrol());
+				
+				//add position to track log
+				addPointToTrack(link.getPatrolLeg(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+				
+				//update last observation count
+				link.setLastObservationCnt(observationCounter);
 				processedFeatures.add(feature);
 				
 			}catch (Exception ex){
@@ -260,7 +282,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			}
 		}
 		
-		
+		//display warnings to user; this may throw a cancelled exception if the user doesn't want to proceed
 		displayWarnings(warnings);
 		
 		final boolean[] cancel = new boolean[]{false};
@@ -283,13 +305,132 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		//try processing track features
 		PatrolJsonTrackProcessor trackProcessor = new PatrolJsonTrackProcessor();
 		processedFeatures.addAll(trackProcessor.processJson(features, session));
-				
 		modifiedPatrols.addAll(trackProcessor.getModifiedPatrols());
 		displayWarnings(trackProcessor.getWarnings());
 		
 		return processedFeatures;
 	}
 	
+	/**
+	 * returns 0 if error
+	 * 1 if ok
+	 * 2 if ok, but needs to configure groupWpStartDateTime to waypoint
+	 * 3 if ok but need to clear groupwpstartdatetime
+	 * @param sighting
+	 * @param legToUpdate
+	 * @param wp
+	 * @param applyAll
+	 * @param session
+	 * @return
+	 * @throws ParseException
+	 */
+	private int processGroup(JSONObject sighting, PatrolLeg legToUpdate, Waypoint wp, List<WaypointObservationAttribute> applyAll, Date groupStartTime, Session session) throws ParseException{
+		if (!sighting.containsKey(ScreensUtil.RESULT_END_WAYPOINT_GROUP)){
+			//clear observations associated with 
+			wp.getObservations().clear();
+			addToExistingLeg(legToUpdate, wp, session);
+			
+			return 1;
+		}else{
+			if ("FALSE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){
+				if (wp.getX() == null || wp.getY() == null){
+					//no location; add to previous 
+					if (addWaypointToLastObservation(legToUpdate, wp, session) != null) return 1;
+					return 0;
+				}else{
+					addToExistingLeg(legToUpdate, wp, session);
+					return 2;
+				}
+			}else if ("TRUE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){
+				if (wp.getX() == null || wp.getY() == null){
+					//no location; add to previous 
+					PatrolWaypoint pw = addWaypointToLastObservation(legToUpdate, wp, session);
+					if (pw != null){
+						addAttributesToObservation(pw.getWaypoint().getObservations(), applyAll);
+						return 1;
+					}
+					return 0;
+				}else{
+					addToExistingLeg(legToUpdate, wp, session);
+					//update all waypoints since the start of the group to include the defaults
+					//and the after attributes
+					for (PatrolLegDay pld : legToUpdate.getPatrolLegDays()){
+						for (PatrolWaypoint pw : pld.getWaypoints()){
+							if (pw.getWaypoint().getDateTime().equals(groupStartTime) || 
+									pw.getWaypoint().getDateTime().after(groupStartTime)){
+								addAttributesToObservation(pw.getWaypoint().getObservations(), applyAll);
+							}
+						}
+					}
+					//update groupwpstartdatetime to null
+					return 3;
+				}
+			}
+		}
+		return 0;
+	}
+	
+	private void addAttributesToObservation(List<WaypointObservation> obs, List<WaypointObservationAttribute> attributeValues ){
+		for (WaypointObservation wo : obs){
+			for (WaypointObservationAttribute value : attributeValues){
+				boolean attributeExists = false;
+				for (WaypointObservationAttribute existing : wo.getAttributes()){
+					if (existing.getAttribute().equals(value.getAttribute())){
+						attributeExists = true;
+						break;
+					}
+				}
+				if (!attributeExists){
+					WaypointObservationAttribute toAdd = value.clone();
+					toAdd.setObservation(wo);
+					if (wo.getAttributes() == null) wo.setAttributes(new ArrayList<>());
+					wo.getAttributes().add(toAdd);
+				}
+			}
+		}
+	}
+	
+	private PatrolWaypoint addWaypointToLastObservation(PatrolLeg legToUpdate, Waypoint wp, Session session){
+		//find previous waypoint
+		//find the last waypoint by date/time in the legToUpdate
+		PatrolWaypoint lastWaypoint = null;
+		if (legToUpdate != null){
+			for (PatrolLegDay pld : legToUpdate.getPatrolLegDays()){
+				for (PatrolWaypoint pw: pld.getWaypoints()){
+					if (lastWaypoint == null ||
+							pw.getWaypoint().getDateTime().after(lastWaypoint.getWaypoint().getDateTime())){
+						lastWaypoint = pw;
+					}
+				}
+			}
+		}
+		
+		if (lastWaypoint == null){
+			//we have a problem ; there is no last waypoint to add to
+			//we cannot create a new one because we don't have position
+			
+			//TODO: we probably need to update the last observation count
+			//this observation needs to be lost; otherwise no other observations
+			//can be processed
+			return null;
+		}
+		
+		//merge observations into a single waypoint
+		for (WaypointObservation wo : wp.getObservations()){
+			wo.setWaypoint(lastWaypoint.getWaypoint());
+			lastWaypoint.getWaypoint().getObservations().add(wo);
+		}
+		if (legToUpdate.getUuid() != null){
+			session.saveOrUpdate(lastWaypoint);
+			session.flush();
+		}
+		
+		//update last observation count
+		modifiedPatrols.add(legToUpdate.getPatrol());
+		
+		return lastWaypoint;
+		
+	}
 	/*
 	 * displays warning dialog to user allowing them to cancel the processing
 	 */
@@ -347,7 +488,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		pl.setEndDate(SharedUtils.getDatePart(dStartDate, true));
 		for (Employee member: ct.getMembers()){
 			PatrolLegMember item = pl.addPatrolLegMember(member);
-			if (member.equals(ct.getPilot())) item.setIsPilot(true);
+			if (ct.getPatrolType().requiresPilot()){
+				if (member.equals(ct.getPilot())) item.setIsPilot(true);
+			}
 			if (member.equals(ct.getLeader())) item.setIsLeader(true);
 		}
 	
@@ -359,15 +502,20 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	private void addToExistingLeg(PatrolLeg addTo, Waypoint wp, Session session)
 			throws ParseException {
 
-		session.flush();
-		session.saveOrUpdate(wp);
-		session.flush();
+		if (addTo.getUuid() != null){
+			session.flush();
+			session.saveOrUpdate(wp);
+			session.flush();
+		}
 		
 		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime(), true, null, session);
 		
 		PatrolWaypoint pw = addWaypointToLegDay(addToD, wp);
-		session.save(pw);
-		session.saveOrUpdate(addToD.getPatrolLeg().getPatrol());
+		
+		if (addTo.getUuid() != null){
+			session.save(pw);
+			session.saveOrUpdate(addToD.getPatrolLeg().getPatrol());
+		}
 	}
 
 	private PatrolWaypoint addWaypointToLegDay(PatrolLegDay addToD, Waypoint wp){
@@ -377,53 +525,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		if (addToD.getWaypoints() == null) addToD.setWaypoints(new ArrayList<PatrolWaypoint>());
 		addToD.getWaypoints().add(pw);
 		
-		
-//		//update start time
-//		Calendar c = Calendar.getInstance();
-//		c.setTime(pw.getWaypoint().getDateTime());
-//		long sec = c.get(Calendar.SECOND) +c.get(Calendar.MINUTE) * 60 + c.get(Calendar.HOUR_OF_DAY) * 60 * 24; 
-//		c.setTime(addToD.getStartTime());
-//		long legSec = c.get(Calendar.SECOND) +c.get(Calendar.MINUTE) * 60 + c.get(Calendar.HOUR_OF_DAY) * 60 * 24;
-//		
-//		if (isStartOfDay(addToD.getStartTime()) || 
-//				sec < legSec){
-//			addToD.setStartTime( new Time(pw.getWaypoint().getDateTime().getTime()) );
-//			if (SharedUtils.isSameDate(addToD.getDate(), addToD.getPatrolLeg().getStartDate())){
-//				//update start time
-//				addToD.getPatrolLeg().setStartDate(pw.getWaypoint().getDateTime());
-//			}
-//		}
-//						
-//		//update end time
-//		if (sec > legSec || 
-//				  isEndOfDay(addToD.getEndTime())){
-//			addToD.setEndTime(new Time(pw.getWaypoint().getDateTime().getTime()));
-//					
-//			if (SharedUtils.isSameDate(addToD.getDate(), addToD.getPatrolLeg().getEndDate())){
-//				//update start time
-//				addToD.getPatrolLeg().setEndDate(pw.getWaypoint().getDateTime());
-//			}
-//		}
-		
-		
 		return pw;
 	}
 	
-	private boolean isStartOfDay(Date d){
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);
-		
-		int fields[] = {Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND};
-		for (int field : fields){
-			if (c.get(field) != 0) return false;
-		}
-		return true;
-	}
-	private boolean isEndOfDay(Date d){
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);
-		return c.get(Calendar.HOUR_OF_DAY)==23 && c.get(Calendar.MINUTE) == 59 && c.get(Calendar.SECOND) == 59;
-	}
 
 	@Override
 	public void afterSave(){

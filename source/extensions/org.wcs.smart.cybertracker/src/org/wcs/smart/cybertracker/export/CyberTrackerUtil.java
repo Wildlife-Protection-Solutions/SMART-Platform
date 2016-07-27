@@ -45,6 +45,9 @@ import org.wcs.smart.dataentry.model.DisplayMode;
  * @since 1.0.0
  */
 public class CyberTrackerUtil {
+	
+	public static final String OBSCOUNTER_VARNAME = "OBSCOUNTER"; //$NON-NLS-1$
+	
 	public static class CyberTrackerId {
 		private static String ITEM_PREFIX = "1C640427-4F44-4796-97A6-"; //$NON-NLS-1$
 		private static String TRNS_PREFIX = "2704641C444F964797A6"; //$NON-NLS-1$
@@ -87,9 +90,12 @@ public class CyberTrackerUtil {
 	private ScreensObjectFactory screensFactory;
 	private Language currentLanguage;
 	
-	public CyberTrackerUtil(ScreensObjectFactory screensFactory, Language language) {
+	private CyberTrackerId observationCounter;
+	
+	public CyberTrackerUtil(ScreensObjectFactory screensFactory, Language language, CyberTrackerId obsCounter) {
 		this.screensFactory = screensFactory;
 		currentLanguage = language;
+		this.observationCounter = obsCounter;
 	}
 	
 	public ScreensObjectFactory getScreensFactory() {
@@ -265,6 +271,11 @@ public class CyberTrackerUtil {
 		control2.setShowMajor("True"); //$NON-NLS-1$
 		control2.setTranslateMajorScreenId(saveTargetId.getNodeId());
 		control2.setTakeGPS(takeGpsReading ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Control obsCounter = getScreensFactory().createFormulaControl12(OBSCOUNTER_VARNAME + "+1");
+		obsCounter.setResultGlobalValue(OBSCOUNTER_VARNAME);
+		obsCounter.setTranslateResultElementId(observationCounter.getItemId());
+		ScreensObjectFactory.addControlToNode(saveNode, obsCounter);
 		return saveNode;
 	}
 	

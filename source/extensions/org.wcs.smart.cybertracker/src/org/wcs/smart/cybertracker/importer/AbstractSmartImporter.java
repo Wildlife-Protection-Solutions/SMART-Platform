@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -55,6 +56,7 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.JsonUtils.ParseResult;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -213,7 +215,7 @@ public abstract class AbstractSmartImporter {
 			} else if (ElementsUtil.MULISELECT_ELEMENT_TAG.equals(e.getTag1())) {
 				if (processMultiselect) {
 					processMultiselect = false;
-					preMsAtts = attributes.remove(0); //all previously enter values MUST be here
+					preMsAtts = attributes.remove(CyberTrackerConfExporter.MULTI_SELECT_INDEX); //all previously enter values MUST be here
 					if (preMsAtts == null) {
 						preMsAtts = Collections.emptyList();
 					}
@@ -245,6 +247,15 @@ public abstract class AbstractSmartImporter {
 					fakeA.setValue(""); //$NON-NLS-1$
 					aList.add(fakeA);
 				}
+			}
+		}
+		
+		//-1 index means they are add to all observations
+		List<A> addToAll = attributes.get(CyberTrackerConfExporter.MULTI_SELECT_INDEX);
+		attributes.remove(CyberTrackerConfExporter.MULTI_SELECT_INDEX);
+		if (addToAll != null){
+			for(List<A> attribute: attributes.values()){
+				attribute.addAll(addToAll);
 			}
 		}
 		

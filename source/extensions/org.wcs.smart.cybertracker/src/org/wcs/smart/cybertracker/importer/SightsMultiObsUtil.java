@@ -157,7 +157,7 @@ public class SightsMultiObsUtil {
 	private static boolean isLastInGroup(S s, Map<String, E> eMap) {
 		for (int i = s.getA().size()-1; i >= 0; i--) {
 			A a = s.getA().get(i);
-			if (ScreensUtil.RESULT_ENG_WAYPOINT_GROUP.equals(a.getN())) {
+			if (ScreensUtil.RESULT_END_WAYPOINT_GROUP.equals(a.getN())) {
 				E eV = eMap.get(a.getV());
 				return eV != null && ElementsUtil.BOOL_TRUE.equals(eV.getTag0());
 			}
@@ -170,7 +170,7 @@ public class SightsMultiObsUtil {
 		List<A> list = new ArrayList<A>();
 		for (int i = s.getA().size()-1; i >= 0; i--) {
 			A a = s.getA().get(i);
-			if (ScreensUtil.RESULT_ENG_WAYPOINT_GROUP.equals(a.getN())) {
+			if (ScreensUtil.RESULT_END_WAYPOINT_GROUP.equals(a.getN())) {
 				for (int j = i+1; j < s.getA().size(); j++) {
 					list.add(s.getA().get(j));
 				}

@@ -96,7 +96,8 @@ import com.google.gson.Gson;
  * @since 2.0.0
  */
 public class CyberTrackerConfExporter {
-
+	public static final int MULTI_SELECT_INDEX = -1;
+	
 	public static final Character KEY_SEP = ':'; 
 	public static final String NULL_KEY = "null"; //$NON-NLS-1$
 	
@@ -136,6 +137,7 @@ public class CyberTrackerConfExporter {
 	private List<CyberTrackerId> wpEndGroupElementsIds;
 
 	private CyberTrackerId defaultAttrValuesResultId;
+	private CyberTrackerId observationCounterId;
 	
 	private List<CyberTrackerId> photoResultIds;
 	private List<CyberTrackerId> addPhotoElementIds;
@@ -182,8 +184,11 @@ public class CyberTrackerConfExporter {
 			photoResultIds = new ArrayList<CyberTrackerId>();
 			addPhotoElementIds = ElementsUtil.buildBooleanElements(elements);
 			wpEndGroupResultId = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_ENG_WAYPOINT_GROUP, wpEndGroupResultId.getItemId());
+			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_END_WAYPOINT_GROUP, wpEndGroupResultId.getItemId());
 			wpEndGroupElementsIds = createEndWpGroupElementsIds(elements);
+			observationCounterId = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_OBSERVATION_COUNTER, observationCounterId.getItemId());
+			
 			processExportSource(elements, cmProvider.getExportSource());
 			return performExport(destFolder, monitor);
 		} finally {
@@ -234,7 +239,7 @@ public class CyberTrackerConfExporter {
 			ctProperties = CyberTrackerHibernateManager.getAssociatedCmProfile(session, configurableModel).getProfile();
 		}
 		screensFactory = new ScreensObjectFactory(ctProperties);
-		ctUtil = new CyberTrackerUtil(screensFactory, currentLanguage);
+		ctUtil = new CyberTrackerUtil(screensFactory, currentLanguage, observationCounterId);
 		monitor.worked(10);
 		
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
@@ -417,7 +422,7 @@ public class CyberTrackerConfExporter {
 		}
 		
 		//showOncesAfter will be empty if collectMultipleObservations is not set!!!
-		buildResult = buildBasicAttributeNodes(splitResult.getToShowOncesAfter(), keyMap, nextId, 0, true, null);
+		buildResult = buildBasicAttributeNodes(splitResult.getToShowOncesAfter(), keyMap, nextId, MULTI_SELECT_INDEX, true, null);
 		nodeList.addAll(buildResult.getNodes());
 		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
 		
@@ -535,7 +540,7 @@ public class CyberTrackerConfExporter {
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
 		CyberTrackerId id = startId;
 		
-		int multiSelectIndex = -1;
+		int multiSelectIndex = MULTI_SELECT_INDEX;
 		for (int i = 0; i < attrList.size(); i++) {
 			CmAttribute cmAttr = attrList.get(i);
 			if (cmAttr.isMultiselect() && cmAttr.isVisible() && AttributeType.LIST.equals(cmAttr.getAttribute().getType())) {
@@ -904,7 +909,7 @@ public class CyberTrackerConfExporter {
 	 * @return
 	 */
 	private CyberTrackerId getAttributeResultElementId(Attribute attribute, Integer index, boolean applyAll) {
-		if (applyAll) index = -1;
+		if (applyAll) index = MULTI_SELECT_INDEX;
 		Map<Integer, CyberTrackerId> map = attr2resultId.get(attribute);
 		if (map == null) {
 			map = new HashMap<Integer, CyberTrackerId>();
@@ -954,7 +959,9 @@ public class CyberTrackerConfExporter {
 		//below is same as ElementsUtil.addElements(elements, map);
 		for (IAttributeTreeNodeProxy treeNode : map.keySet()) {
 			Elements.List.Items.Item item = ElementsUtil.addElementsItem(elements, treeNode.getName(), map.get(treeNode).getItemId(), UuidUtils.uuidToString(treeNode.getUuid()));
-			item.setJsonId(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(treeNode.getTreeNode().getDmTreeNode().getUuid()));
+			if (treeNode.getTreeNode().getDmTreeNode() != null){
+				item.setJsonId(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(treeNode.getTreeNode().getDmTreeNode().getUuid()));
+			}
 			ElementsUtil.addElementsItemMedia(item, treeNode.getImageFile());
 		}
 
