@@ -254,7 +254,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	}
 
 	protected void manageProfiles() {
-		Dialog d = new ManageProfilesDialog(dialog.getShell(), dialog.getSession());
+		Dialog d = new ManageProfilesDialog(dialog.getShell());
 		d.open();
 		loadProfile();
 	}

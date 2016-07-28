@@ -133,7 +133,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (isProfileNameValid()) {
-					ctProperties.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), txtProfileName.getText());
+					//update cached name
+					ctProperties.setName(txtProfileName.getText());
+					//update name for current language
+					ctProperties.updateName(SmartDB.getCurrentLanguage(), txtProfileName.getText());
 					profileNameDecoration.hide();
 				} else {
 					profileNameDecoration.show();

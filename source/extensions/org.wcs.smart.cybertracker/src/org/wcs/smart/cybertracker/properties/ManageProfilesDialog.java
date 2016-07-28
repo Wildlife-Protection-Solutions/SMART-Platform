@@ -55,6 +55,7 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -74,11 +75,8 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	private Button btnEdit;
 	private Button btnDelete;
 	
-	private Session session;
-	
-	public ManageProfilesDialog(Shell parent, Session session) {
+	public ManageProfilesDialog(Shell parent) {
 		super(parent, Messages.ManageProfilesDialog_Title);
-		this.session = session;
 	}
 
 	@Override
@@ -160,6 +158,8 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	
 	private void reloadData() {
 		profilesViewer.setInput(getProfilesList());
+		
+		profilesViewer.refresh();
 		updateState();
 	}
 	
@@ -208,14 +208,17 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ManageProfilesDialog_DeleteTask_Name, 1);
-					session.beginTransaction();
+					
+					Session session = HibernateManager.openSession();
 					try {
+						session.beginTransaction();
 						CyberTrackerHibernateManager.deleteProfile(session, p);
 						session.getTransaction().commit();							
 					}catch (Exception ex){
 						session.getTransaction().rollback();
 						SmartPlugIn.displayLog(Messages.ManageProfilesDialog_DeleteTask_Error, ex);
 					} finally {
+						session.close();
 						monitor.done();
 					}
 				}
@@ -241,14 +244,16 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ManageProfilesDialog_LoadProfileList_Task, 1);
-					session.beginTransaction();
+					Session session  = HibernateManager.openSession();
 					try {
+						session.beginTransaction();
 						profileList.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
 						Collections.sort(profileList, new CtProfileDefaultNameComparator());
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(Messages.ManageProfilesDialog_LoadProfileList_Error, ex);
 					} finally {
 						session.getTransaction().rollback();
+						session.close();
 					}
 				}
 			});
