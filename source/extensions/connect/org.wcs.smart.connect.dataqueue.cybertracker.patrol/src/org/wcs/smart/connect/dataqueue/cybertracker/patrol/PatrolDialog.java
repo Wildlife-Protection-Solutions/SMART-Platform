@@ -24,8 +24,10 @@ package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -70,6 +72,9 @@ public class PatrolDialog extends TitleAreaDialog {
 	
 	private Session session;
 	
+	private Set<Patrol> newPatrols;
+	private Set<Patrol> mergedPatrols;
+	
 	public PatrolDialog(Shell parentShell, HashMap<UUID, CtPatrolLink> patrols, Session session) {
 		super(parentShell);
 		this.patrols = patrols;
@@ -84,8 +89,17 @@ public class PatrolDialog extends TitleAreaDialog {
 				IDialogConstants.CANCEL_LABEL, false);
 	}
 	
+	public Set<Patrol> getNewPatrols(){
+		return this.newPatrols;
+	}
+	public Set<Patrol> getMergedPatrols(){
+		return this.mergedPatrols;
+	}
+	
 	@Override
 	public void okPressed(){
+		newPatrols = new HashSet<>();
+		mergedPatrols = new HashSet<>();
 		if (validate()){
 			MessageDialog.openError(getShell(), "Error", "Errors exist on page.  Resolve the errors before continuing.");
 			return ;
@@ -95,9 +109,11 @@ public class PatrolDialog extends TitleAreaDialog {
 			for (Entry<UUID, UiData> e : uiItems.entrySet()){
 				if (e.getValue().btnExisting.getSelection()){
 					Patrol addTo = (Patrol)session.get(Patrol.class, e.getValue().cmbPatrol.getSelection().getUuid());
-					mergePatrol(e.getKey(), patrols.get(e.getKey()).getPatrolLeg().getPatrol(), addTo);
+					mergePatrol(e.getKey(), patrols.get(e.getKey()), addTo);
+					mergedPatrols.add(addTo);
 				}else{
-					createNewPatrol(e.getKey(), patrols.get(e.getKey()));
+					Patrol p = createNewPatrol(e.getKey(), patrols.get(e.getKey()));
+					newPatrols.add(p);
 				}
 			}
 		}catch (Exception ex){
@@ -109,8 +125,9 @@ public class PatrolDialog extends TitleAreaDialog {
 		super.okPressed();
 	}
 	
-	private void mergePatrol(UUID ctUuid, Patrol newPatrol, Patrol addToPatrol) throws Exception{
-		if (newPatrol.getPatrolType().equals(addToPatrol.getPatrolType())){
+	private void mergePatrol(UUID ctUuid, CtPatrolLink newPatrolLink, Patrol addToPatrol) throws Exception{
+		Patrol newPatrol = newPatrolLink.getPatrolLeg().getPatrol();
+		if (!newPatrol.getPatrolType().equals(addToPatrol.getPatrolType())){
 			throw new Exception(MessageFormat.format("Cannot merge patrols of different types {0} and {1}", newPatrol.getPatrolType().getGuiName(Locale.getDefault()), addToPatrol.getPatrolType().getGuiName(Locale.getDefault())));
 		}
 		
@@ -118,9 +135,17 @@ public class PatrolDialog extends TitleAreaDialog {
 		addToPatrol.getLegs().add(toAdd);
 		toAdd.setPatrol(addToPatrol);
 		PatrolHibernateManager.savePatrol(addToPatrol, session, true);
+		
+		CtPatrolLink link = new CtPatrolLink();
+		link.setCtUuid(ctUuid);
+		link.setPatrolLeg(newPatrol.getFirstLeg());
+		link.setDeviceId(newPatrolLink.getDeviceId());
+		link.setLastObservationCnt(newPatrolLink.getLastObservationCnt());
+		link.setGroupStartTime(newPatrolLink.getGroupStartTime());
+		session.save(link);
 	}
 	
-	private void createNewPatrol(UUID ctUuid, CtPatrolLink patrol) throws Exception{
+	private Patrol createNewPatrol(UUID ctUuid, CtPatrolLink patrol) throws Exception{
 		Patrol newPatrol = patrol.getPatrolLeg().getPatrol();
 		newPatrol.setConservationArea(SmartDB.getCurrentConservationArea());
 		newPatrol.setStartDate(newPatrol.getFirstLeg().getStartDate());
@@ -142,6 +167,8 @@ public class PatrolDialog extends TitleAreaDialog {
 		link.setLastObservationCnt(patrol.getLastObservationCnt());
 		link.setGroupStartTime(patrol.getGroupStartTime());
 		session.save(link);
+		
+		return newPatrol;
 	}
 	
 	protected Control createDialogArea(Composite parent) {

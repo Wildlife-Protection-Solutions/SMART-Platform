@@ -22,7 +22,9 @@
 package org.wcs.smart.connect.dataqueue.cybertracker;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.wcs.smart.map.GeometryFactoryProvider;
 
@@ -37,11 +39,14 @@ import com.vividsolutions.jts.geom.LineString;
  *
  */
 public class JsonTrackUtils {
+	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
 	public static LineString addPointToTrack(LineString track, Coordinate pnt, Date pntTime){
+		long z = convertTimeToGMT(pntTime);
+		
 		Coordinate[] c = null;
 		if (track == null){
-			c = new Coordinate[] {new Coordinate(pnt.x, pnt.y, pntTime.getTime())};
+			c = new Coordinate[] {new Coordinate(pnt.x, pnt.y, z)};
 		}else{
 			c = track.getCoordinates();
 			if (c[0].x == c[1].x && c[0].y == c[1].y && c[0].z == c[1].z){
@@ -49,7 +54,7 @@ public class JsonTrackUtils {
 				c = Arrays.copyOfRange(c, 1, c.length);		
 			}
 			for (Coordinate cd : c){
-				if (cd.x == pnt.x && cd.y == pnt.y && cd.z == pntTime.getTime()){
+				if (cd.x == pnt.x && cd.y == pnt.y && cd.z == z){
 					//point already exists; do not duplicate it
 					return track;
 				}
@@ -57,11 +62,21 @@ public class JsonTrackUtils {
 		}
 		
 		c = Arrays.copyOf(c, c.length + 1);
-		c[c.length-1] = new Coordinate(pnt.x, pnt.y, pntTime.getTime());
+		c[c.length-1] = new Coordinate(pnt.x, pnt.y, z);
 		
 		//sort
 		Arrays.sort(c, 0, c.length, (Coordinate c1, Coordinate c2) -> ((Double)c1.z).compareTo(c2.z));
 
 		return (LineString)GeometryFactoryProvider.getFactory().createLineString(c);		
+	}
+	
+	private static Long convertTimeToGMT(Date time){
+		Calendar c1 = Calendar.getInstance();
+		c1.setTimeInMillis(time.getTime());
+		Calendar c2 = Calendar.getInstance();
+		c2.setTimeZone(ZTIMEZONE);
+		c2.setTimeInMillis(0);
+		c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
+		return c2.getTime().getTime();
 	}
 }

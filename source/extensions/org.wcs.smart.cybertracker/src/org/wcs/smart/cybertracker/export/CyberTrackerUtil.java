@@ -272,7 +272,7 @@ public class CyberTrackerUtil {
 		control2.setTranslateMajorScreenId(saveTargetId.getNodeId());
 		control2.setTakeGPS(takeGpsReading ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		Control obsCounter = getScreensFactory().createFormulaControl12(OBSCOUNTER_VARNAME + "+1");
+		Control obsCounter = getScreensFactory().createFormulaControl12(OBSCOUNTER_VARNAME + "+1"); //$NON-NLS-1$
 		obsCounter.setResultGlobalValue(OBSCOUNTER_VARNAME);
 		obsCounter.setTranslateResultElementId(observationCounter.getItemId());
 		ScreensObjectFactory.addControlToNode(saveNode, obsCounter);

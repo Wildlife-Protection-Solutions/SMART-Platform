@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +69,6 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 	private List<String> warnings;
 	
 	public PatrolJsonTrackProcessor() {
-		
 	}
 
 	public Set<Patrol> getModifiedPatrols(){
@@ -99,7 +99,6 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 			List<CtPatrolLink> links = session.createCriteria(CtPatrolLink.class)
 					.add(Restrictions.eq("deviceId", deviceId))
 					.list();
-			
 
 			//we want to find the patrol leg with a day that matches this day and time
 			List<PatrolLegDay> matches = new ArrayList<PatrolLegDay>();
@@ -134,7 +133,7 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 					t.setLineString(newLs);
 					processed.add(feature);
 					
-					modifiedPatrols.add(pld.getPatrolLeg().getPatrol());
+					if (pld.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(pld.getPatrolLeg().getPatrol());
 				}else{
 					warnings.add("Multiple patrol options for adding track point.  Point will not be processed.");
 				}

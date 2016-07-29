@@ -21,6 +21,11 @@
  */
 package org.wcs.smart.connect.dataqueue.cybertracker;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -32,6 +37,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
+import javax.xml.bind.DatatypeConverter;
 
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -47,7 +55,9 @@ import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.util.SharedUtils;
@@ -239,6 +249,7 @@ public class JsonCtParser {
 		
 		//attribute information
 		HashMap<Integer, List<ObservationInfo>> attributes = new HashMap<Integer, List<ObservationInfo>>();
+		List<String> waypointAttachments = new ArrayList<String>();
 		//default values
 		JSONObject defaultValues = null;
 		
@@ -291,7 +302,10 @@ public class JsonCtParser {
 					data.add(new ObservationInfo(JsonKey.ATTRIBUTE_LIST.key, (String)bits[4], JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + (String)bits[4]));
 				}
 			}
-		
+			if (key.startsWith(ScreensUtil.RESULT_PHOTO)){
+				waypointAttachments.add((String)e.getValue());
+			}
+			
 			//default values
 			if (key.equalsIgnoreCase(ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES) ){
 				String jsonDefaults = (String) e.getValue();
@@ -309,7 +323,9 @@ public class JsonCtParser {
 				throw new Exception(MessageFormat.format("Category not found for uuid '{0}'", categoryUuid));
 			}
 		}else{
-			throw new Exception("Invalid JSON observation - no cateogry found.");
+			//no category found, so lets assume no observations
+			//happens on patrol pause/resume
+			return newWaypoint;
 		}
 		
 				
@@ -372,6 +388,16 @@ public class JsonCtParser {
 				}
 				
 			}
+			
+			//parse attachments
+			List<WaypointAttachment> attachments = parseAttachments(waypointAttachments);
+			if (!attachments.isEmpty() && newWaypoint.getAttachments()== null){
+				newWaypoint.setAttachments(new ArrayList<WaypointAttachment>());
+			}
+			for (WaypointAttachment att : attachments){
+				att.setWaypoint(newWaypoint);
+				newWaypoint.getAttachments().add(att);
+			}
 		}
 		return newWaypoint;
 	}
@@ -409,10 +435,46 @@ public class JsonCtParser {
 		return JsonUtils.findAttributeTreeNode(uuid, session);
 	}	
 	
+	
+	private List<WaypointAttachment> parseAttachments(List<String> values) throws Exception{
+		int imagecnt = 0;
+		List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>();
+		
+		for (String value : values){
+			
+			//picture object; create a temporary file add it to waypoint observation
+			String fileName = "ct_photo_" + imagecnt + ".jpeg";
+				
+			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), ".jpeg");
+			BufferedImage image = null;
+			try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value))){
+				image = ImageIO.read(in);					
+			}
+			if (image == null){
+				//TODO: we cannot parse the image
+			}
+			ImageIO.write(image, "JPEG", temp.toFile());
+				
+			WaypointAttachment attachment = new WaypointAttachment();
+			attachment.setCopyFromLocation(temp.toFile());
+			//attachment.setDatastoreFolderExtension(path, ca);
+			attachment.setFilename(fileName);
+			attachments.add(attachment);
+		}
+		return attachments;
+	}
+	/**
+	 * Parses the values into waypoint observation attributes
+	 * @param values
+	 * @param c
+	 * @param defaultAttributes
+	 * @param session
+	 * @return
+	 * @throws Exception
+	 */
 	private List<WaypointObservationAttribute> createWaypointObservationAttribute(List<ObservationInfo> values, Category c, List<WaypointObservationAttribute> defaultAttributes, Session session) throws Exception{
 		
 		List<WaypointObservationAttribute> results = new ArrayList<WaypointObservationAttribute>();
-		
 		List<Attribute> validAttributes = new ArrayList<Attribute>();
 		c.getAllAttribute(validAttributes, null);
 		
@@ -430,8 +492,6 @@ public class JsonCtParser {
 			}
 		}
 		if (values == null) return results;
-		
-		
 		
 		for (ObservationInfo obj : values){
 			if (obj.keyType.equals(JsonKey.ATTRIBUTE_LIST.key)){

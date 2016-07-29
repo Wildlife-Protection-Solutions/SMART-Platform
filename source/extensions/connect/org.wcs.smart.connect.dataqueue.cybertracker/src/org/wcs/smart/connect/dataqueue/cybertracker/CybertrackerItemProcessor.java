@@ -36,6 +36,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem.Type;
@@ -77,7 +78,7 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 		}
 
 		List<JSONObject> features = (new JsonCtParser()).parseFeaturesFromJsonString(json);
-		Session session = HibernateManager.openSession();
+		Session session = HibernateManager.openSession(new AttachmentInterceptor());
 		try{
 			session.beginTransaction();
 			

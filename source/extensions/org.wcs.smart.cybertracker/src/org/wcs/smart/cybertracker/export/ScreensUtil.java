@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.export;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -113,13 +112,16 @@ public class ScreensUtil {
 		ids.addAll(ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ExitCyberTracker));
 		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		
+		Control navControl = ScreensObjectFactory.getNavigationControl(nodeMain);
+		//this is done to allow users to send data after they end a patrol
+		navControl.setShowEdit("True"); //$NON-NLS-1$
+		
 		//reset counter when we start new patrol/mission
 		Control obsCounter = getScreensFactory().createFormulaControl12("0"); //$NON-NLS-1$
 		obsCounter.setResultGlobalValue(CyberTrackerUtil.OBSCOUNTER_VARNAME);
 		ScreensObjectFactory.addControlToNode(nodeMain, obsCounter);
 		
 		//set the target element on nodeMain to the dataType
-		
 		container.screenNodes.add(nodeMain);
 		addGpsConfiguration(nodeMain, ctProps, 0);
 		addBatteryControl(nodeMain);
