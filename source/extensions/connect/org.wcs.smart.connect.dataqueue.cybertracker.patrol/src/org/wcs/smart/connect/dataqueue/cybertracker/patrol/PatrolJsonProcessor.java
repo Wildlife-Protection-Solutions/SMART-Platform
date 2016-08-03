@@ -25,7 +25,6 @@ import java.io.File;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,10 +49,10 @@ import org.wcs.smart.connect.dataqueue.cybertracker.IJsonProcessor;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonCtParser;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonTrackUtils;
 import org.wcs.smart.connect.dataqueue.cybertracker.UserCancelledException;
+import org.wcs.smart.connect.dataqueue.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.JsonUtils;
-import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
@@ -89,8 +88,8 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class PatrolJsonProcessor implements IJsonProcessor {
 	
-	private static final DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd");
-	private static final DateFormat TIMEFORMAT = new SimpleDateFormat("HH:mm:ss");
+	private static final DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd"); //$NON-NLS-1$
+	private static final DateFormat TIMEFORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
 	
 	private static final IWaypointSource PATROL_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
 			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -244,11 +243,11 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				}
 				
 				//Determine if this is a "Add to Last Waypoint" option
-				boolean addToLast = ((String)sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT)).equalsIgnoreCase("false");
+				boolean addToLast = ((String)sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT)).equalsIgnoreCase("false"); //$NON-NLS-1$
 				if (addToLast){
 					if (link == null){
 						//we have nothing to add this to; this is an error
-						warnings.add("No patrol found for 'add to previous waypoint' observation. ");
+						warnings.add(Messages.PatrolJsonProcessor_NoPatrolFound);
 						continue;
 					}
 					
@@ -281,8 +280,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				
 			}catch (Exception ex){
 				//TODO: if there is a session.flush error we have a problem we need to stop and rollback
-				CyberTrackerPlugIn.log(ex.getMessage() + ": " + feature.toJSONString(), ex);
-				warnings.add("Error parsing feature information (feature will not be processed): " + ex.getMessage());
+				CyberTrackerPlugIn.log(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
+				warnings.add(Messages.PatrolJsonProcessor_ParseError + ex.getMessage());
 			}
 		}
 		
@@ -306,7 +305,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			});
 		}
 		if (cancel[0]){
-			throw new UserCancelledException("User cancelled operation while assigning observations to patrols.");
+			throw new UserCancelledException(Messages.PatrolJsonProcessor_UserCancelled);
 		}
 		
 		//try processing track features
@@ -339,7 +338,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			
 			return 1;
 		}else{
-			if ("FALSE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){
+			if ("FALSE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){ //$NON-NLS-1$
 				if (wp.getX() == null || wp.getY() == null){
 					//no location; add to previous 
 					if (addWaypointToLastObservation(legToUpdate, wp, session) != null) return 1;
@@ -348,7 +347,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					addToExistingLeg(legToUpdate, wp, session);
 					return 2;
 				}
-			}else if ("TRUE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){
+			}else if ("TRUE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){ //$NON-NLS-1$
 				if (wp.getX() == null || wp.getY() == null){
 					//no location; add to previous 
 					PatrolWaypoint pw = addWaypointToLastObservation(legToUpdate, wp, session);
@@ -456,8 +455,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					@Override
 					public void run() {
 						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
-								"Warnings", 
-								"The following warnings were generated while parsing patrol data.  Do you want to continue?",
+								Messages.PatrolJsonProcessor_WarningsLabel, 
+								Messages.PatrolJsonProcessor_WarningsMsg,
 								warnings,
 								new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
 						if (wd.open() == 0){
@@ -468,7 +467,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					}	
 				});
 				if (!cont[0]){
-					throw new UserCancelledException("User cancelled operation due to warnings.");
+					throw new UserCancelledException(Messages.PatrolJsonProcessor_UserCancelled2);
 				}
 		 }
 	}
@@ -575,14 +574,14 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			try{
 				PatrolEventManager.getInstance().patrolSaved(p, true);
 			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError("Importing JSON Data", ex.getMessage(), ex);
+				CyberTrackerPlugIn.displayError(Messages.PatrolJsonProcessor_ErrorTitle, ex.getMessage(), ex);
 			}
 		}
 		for (Patrol p : newPatrols){
 			try{
 				PatrolEventManager.getInstance().patrolAdded(p);
 			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError("Importing JSON Data", ex.getMessage(), ex);
+				CyberTrackerPlugIn.displayError(Messages.PatrolJsonProcessor_ErrorTitle, ex.getMessage(), ex);
 			}
 		}
 	}
@@ -676,26 +675,26 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		StringBuilder sb = new StringBuilder();
 		if (!newPatrols.isEmpty()){
-			sb.append(MessageFormat.format("Created {0} Patrols ", newPatrols.size()));
-			sb.append("(");
+			sb.append(MessageFormat.format(Messages.PatrolJsonProcessor_CreatedMsg, newPatrols.size()));
+			sb.append("("); //$NON-NLS-1$
 			for(Patrol p : newPatrols){
 				sb.append(p.getId());
-				sb.append(" ");
+				sb.append(" "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
-			sb.append(")");
+			sb.append(")"); //$NON-NLS-1$
 		}
 		HashSet<Patrol> tmp = new HashSet<Patrol>(modifiedPatrols);
 		tmp.removeAll(newPatrols);
 		if (tmp.size() > 0){
-			sb.append(MessageFormat.format("Modified {0} Patrols ", tmp.size()));
-			sb.append("(");
+			sb.append(MessageFormat.format(Messages.PatrolJsonProcessor_ModifiedMsg, tmp.size()));
+			sb.append("("); //$NON-NLS-1$
 			for(Patrol p : tmp){
 				sb.append(p.getId());
-				sb.append(" ");
+				sb.append(" "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
-			sb.append(")");
+			sb.append(")"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}

@@ -34,6 +34,7 @@ public class Messages extends NLS {
 	public static String DataQueueItemProcessor_Error3;
 	public static String DataQueueItemProcessor_Error4;
 	public static String DataQueueItemProcessor_JobName;
+	public static String DataQueueItemProcessor_RequeueOnServer;
 	public static String DataQueueItemProcessor_Task1;
 	public static String DataQueueItemProcessor_Task2;
 	public static String DataQueueItemProcessor_Task3;
@@ -47,6 +48,7 @@ public class Messages extends NLS {
 	public static String DataQueueManager_Error4;
 	public static String DataQueueManager_InQueueError;
 	public static String DataQueueManager_ItemServerError;
+	public static String DataQueueManager_ProcessingError;
 	public static String DataQueueManager_ReQueuedMessage;
 	public static String DataQueueOptionPanel_AuotStartLabel;
 	public static String DataQueueOptionPanel_AutoGroupLabel;

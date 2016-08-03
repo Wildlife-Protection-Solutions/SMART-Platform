@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 
+import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.connect.dataqueue.cybertracker.IJsonProcessor;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonCtParser;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonTrackUtils;
+import org.wcs.smart.connect.dataqueue.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.patrol.model.Patrol;
@@ -75,6 +77,7 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 		return modifiedPatrols;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
 		modifiedPatrols = new HashSet<Patrol>();
@@ -97,7 +100,7 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 			
 			List<CtPatrolLink> links = session.createCriteria(CtPatrolLink.class)
-					.add(Restrictions.eq("deviceId", deviceId))
+					.add(Restrictions.eq("deviceId", deviceId)) //$NON-NLS-1$
 					.list();
 
 			//we want to find the patrol leg with a day that matches this day and time
@@ -135,7 +138,14 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 					
 					if (pld.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(pld.getPatrolLeg().getPatrol());
 				}else{
-					warnings.add("Multiple patrol options for adding track point.  Point will not be processed.");
+					StringBuilder sb = new StringBuilder();
+					for (PatrolLegDay pld : matches){
+						sb.append(pld.getPatrolLeg().getPatrol() + "(" + DateFormat.getDateInstance().format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					sb.deleteCharAt(sb.length() - 1);
+					sb.deleteCharAt(sb.length() - 1);
+					
+					warnings.add(MessageFormat.format(Messages.PatrolJsonTrackProcessor_MultiplePnts, DateFormat.getDateTimeInstance().format(dt), sb.toString()));
 				}
 				
 			}

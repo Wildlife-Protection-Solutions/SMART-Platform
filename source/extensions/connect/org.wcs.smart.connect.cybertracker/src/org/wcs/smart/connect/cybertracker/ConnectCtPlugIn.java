@@ -2,7 +2,6 @@ package org.wcs.smart.connect.cybertracker;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.wcs.smart.SmartPlugIn;
 
 /**
  * The activator class controls the plug-in life cycle

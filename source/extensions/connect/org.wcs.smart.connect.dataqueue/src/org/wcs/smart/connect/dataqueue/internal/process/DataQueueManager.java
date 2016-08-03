@@ -250,7 +250,7 @@ public enum DataQueueManager {
 			}
 			s.getTransaction().commit();
 		}catch(Exception ex){
-			ConnectDataQueuePlugin.displayLog("Error reprocessing item: " + ex.getMessage(), ex);
+			ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_ProcessingError,ex.getMessage()), ex);
 		}finally{
 			s.close();
 		}
@@ -281,6 +281,7 @@ public enum DataQueueManager {
 			
 			item.setDateProcessed(new Date());
 			//check status on server
+			item.setCheckOutStatus(item.getStatus());
 			if (item.getStatus() != LocalDataQueueItem.Status.REQUEUED){
 				try{
 					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.PROCESSING);
@@ -378,6 +379,7 @@ public enum DataQueueManager {
 	 *  
 	 * @param toDelete
 	 */
+	@SuppressWarnings("unchecked")
 	public synchronized void deleteOldItems(int numDays){
 		if (numDays < 0) return;
 		

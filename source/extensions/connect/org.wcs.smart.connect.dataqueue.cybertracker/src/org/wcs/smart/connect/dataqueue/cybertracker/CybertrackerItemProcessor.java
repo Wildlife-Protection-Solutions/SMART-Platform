@@ -38,6 +38,7 @@ import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
+import org.wcs.smart.connect.dataqueue.cybertracker.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem.Type;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
@@ -77,7 +78,7 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 			}
 		}
 
-		List<JSONObject> features = (new JsonCtParser()).parseFeaturesFromJsonString(json);
+		List<JSONObject> features = JsonCtParser.parseFeaturesFromJsonString(json);
 		Session session = HibernateManager.openSession(new AttachmentInterceptor());
 		try{
 			session.beginTransaction();
@@ -100,7 +101,7 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 				//nothing has been processed perhaps we re-queue this item
 				//for later as maybe something else needs to be processed first
 				session.getTransaction().rollback();
-				ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, "Could not process any of the data, requeueing on server.");
+				ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_NoData);
 				return status;
 			}
 			
@@ -114,8 +115,8 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						String message = MessageFormat.format("{0} of {1} features where processed. The following {2} features could not be processed.  If you continue this data will NOT be imported into SMART. Do you want to continue?", features.size() - notProc.size(), features.size(), notProc.size() );
-						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), "Warning",message,
+						String message = MessageFormat.format(Messages.CybertrackerItemProcessor_ProcessedMsg, features.size() - notProc.size(), features.size(), notProc.size() );
+						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.CybertrackerItemProcessor_WarningTitle,message,
 								warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 						if (wd.open() == 0){
 							cont[0] = true;
@@ -128,33 +129,33 @@ public class CybertrackerItemProcessor implements IItemProcessor {
 			}
 			if (!cont[0]){
 				session.getTransaction().rollback();
-				ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, "User Cancelled: Item to be rescheduled.  User cancelled because not all data could be processed.");
+				ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_CancelledMsg);
 				return status;
 			}
 			
 			session.getTransaction().commit();
 			
-			ProcessingStatus status = new ProcessingStatus(Status.COMPLETE, "Complete: " + statusMsg.toString());
+			ProcessingStatus status = new ProcessingStatus(Status.COMPLETE, MessageFormat.format(Messages.CybertrackerItemProcessor_CompleteMsg, statusMsg.toString()));
 			
 			
 			for (IJsonProcessor p : processors){
 				try{
 					p.afterSave();
 				}catch (Throwable t){
-					CyberTrackerPlugIn.displayError("Error", t.getMessage(), t);
+					CyberTrackerPlugIn.displayError(Messages.CybertrackerItemProcessor_ErrorTitle, t.getMessage(), t);
 				}
 			}
 			return status;
 		}catch (UserCancelledException ex){
 			session.getTransaction().rollback();
-			ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, "User cancelled, item should be requeue on server." + ex.getMessage());
+			ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_Cancelled2 + ex.getMessage());
 			return status;
 
 		}catch (Exception ex){
 			CyberTrackerPlugIn.log(ex.getMessage(), ex);
 			session.getTransaction().rollback();
 			
-			ProcessingStatus status = new ProcessingStatus(Status.ERROR, "Error processing data: " + ex.getMessage());
+			ProcessingStatus status = new ProcessingStatus(Status.ERROR, MessageFormat.format(Messages.CybertrackerItemProcessor_DataProcessingError, ex.getMessage()));
 			return status;
 		}finally{
 			session.close();

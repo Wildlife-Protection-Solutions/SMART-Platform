@@ -135,7 +135,7 @@ public class DataQueueItemProcessor extends Job {
 				
 				if (processingStatus.getStatus() == LocalDataQueueItem.Status.REQUEUED){
 					requeue = true;
-					processingStatus = new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, "Could not process any of the data.  Item has been requeud on server to try again later.");
+					processingStatus = new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, Messages.DataQueueItemProcessor_RequeueOnServer);
 				}
 					
 			}catch (Exception ex){
@@ -158,7 +158,12 @@ public class DataQueueItemProcessor extends Job {
 			
 			try{
 				if (requeue){
-					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.QUEUED);
+					if (item.getCheckOutStatus() == LocalDataQueueItem.Status.REQUEUED){
+						//this is a local item that was requeued so we do not want to requeue it on the server
+					}else{
+						//this was downloaded from the server; so lets requeue it on the server
+						ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.QUEUED);
+					}
 				}else{
 					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.COMPLETE);
 				}

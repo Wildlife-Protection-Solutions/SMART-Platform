@@ -136,6 +136,7 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 		return main;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void initControls(){
 
 		HashMap<String, DataQueueProcessingOption> optionMap = new HashMap<String, DataQueueProcessingOption>();

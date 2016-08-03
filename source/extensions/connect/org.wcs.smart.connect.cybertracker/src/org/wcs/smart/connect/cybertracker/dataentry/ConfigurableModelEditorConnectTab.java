@@ -530,6 +530,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		return table;
 	}
 
+	@SuppressWarnings("unchecked")
 	private synchronized void updateTypeCache(){
 		typeCache = new HashMap<UUID, ConnectAlertType>();
 		if (alertTypeList == null){

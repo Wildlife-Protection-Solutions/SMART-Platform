@@ -127,8 +127,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 						items.put(it.getTileId(), it);
 					}
 
-					myResults = new GridQueryResult(items.values());
-					
+					myResults = new GridQueryResult(items.values());					
 					monitor.worked(1);
 				}catch (Exception ex){
 					throw new SQLException(ex);

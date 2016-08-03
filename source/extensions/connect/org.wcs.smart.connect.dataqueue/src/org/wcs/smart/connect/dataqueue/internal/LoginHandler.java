@@ -202,6 +202,7 @@ public class LoginHandler implements ILoginHandler {
 	 * are not associated with a localdataqueue item for the given conservation
 	 * area.
 	 */
+	@SuppressWarnings("unchecked")
 	private void cleanUpFilestore(){
 		List<String> files = null;
 		Session s = HibernateManager.openSession();

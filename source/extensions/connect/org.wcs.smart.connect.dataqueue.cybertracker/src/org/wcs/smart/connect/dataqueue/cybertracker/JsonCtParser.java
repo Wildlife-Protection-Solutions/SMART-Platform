@@ -48,14 +48,13 @@ import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.dataqueue.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
-import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -85,6 +84,9 @@ public class JsonCtParser {
 
 	public static final String DEVICE_ID = "deviceId"; //$NON-NLS-1$
 	
+	private static final String JPEG_EXT = "jpeg"; //$NON-NLS-1$
+	private static final String PHOTO_KEY = "ct_photo"; //$NON-NLS-1$
+	
 	public static List<JSONObject> parseFeaturesFromJsonString(String json) throws Exception{
 		JSONObject jsonData = null; 
 		try {
@@ -92,7 +94,7 @@ public class JsonCtParser {
 			jsonData = (JSONObject) obj;
 		}catch (Exception ex){
 			ex.printStackTrace();
-			throw new Exception("Unable to parse json text.");
+			throw new Exception(Messages.JsonCtParser_ParseError);
 		}
 		
 		JSONArray jsFeatures = (JSONArray) jsonData.get("features"); //$NON-NLS-1$
@@ -120,7 +122,7 @@ public class JsonCtParser {
 		if (sighting != null) return false;
 		
 		JSONObject geom = (JSONObject) feature.get(JsonCtParser.GEOMETRY_KEY);
-		if (!"Point".equalsIgnoreCase((String)geom.get(JsonCtParser.GEOMETRY_TYPE_KEY))){
+		if (!"Point".equalsIgnoreCase((String)geom.get(JsonCtParser.GEOMETRY_TYPE_KEY))){ //$NON-NLS-1$
 			//only parse points
 			return false;
 		}
@@ -217,12 +219,13 @@ public class JsonCtParser {
 	 * @param sighting
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Waypoint createWaypoint(JSONObject feature, Session session) throws Exception{
 		
 		warnings = new ArrayList<String>();
 		
 		if (!((String)feature.get(FEATURE_TYPE_KEY)).equalsIgnoreCase("feature")){ //$NON-NLS-1$
-			throw new Exception("Feature object does not have type 'feature'");
+			throw new Exception(Messages.JsonCtParser_NoFeatureFound);
 		}
 		
 		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
@@ -253,7 +256,7 @@ public class JsonCtParser {
 		//default values
 		JSONObject defaultValues = null;
 		
-		for (Entry e : (Set<Entry>)observations.entrySet()){
+		for (Entry<?,?> e : (Set<Entry<?,?>>)observations.entrySet()){
 			String key = (String)e.getKey();
 			if (key.startsWith(JsonKey.CATEGORY.key + CyberTrackerConfExporter.KEY_SEP)){
 				//cateogries; if set to null this was a group from the configurable model
@@ -320,7 +323,7 @@ public class JsonCtParser {
 		if (categoryUuid != null ){
 			category = (Category) session.get(Category.class, UuidUtils.stringToUuid(categoryUuid));
 			if (category == null){
-				throw new Exception(MessageFormat.format("Category not found for uuid '{0}'", categoryUuid));
+				throw new Exception(MessageFormat.format(Messages.JsonCtParser_NoCateogyr, categoryUuid));
 			}
 		}else{
 			//no category found, so lets assume no observations
@@ -424,18 +427,16 @@ public class JsonCtParser {
 		return JsonUtils.findAttributeListItem(uuid, session);
 	}
 	
-	/**
-	 * Can return null if the tree node is not found
-	 * @param uuid
-	 * @param session
-	 * @return
-	 * @throws Exception
-	 */
-	private AttributeTreeNode findAttributeTreeNode(String uuid, Session session) throws Exception{
-		return JsonUtils.findAttributeTreeNode(uuid, session);
-	}	
-	
-	
+//	/**
+//	 * Can return null if the tree node is not found
+//	 * @param uuid
+//	 * @param session
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	private AttributeTreeNode findAttributeTreeNode(String uuid, Session session) throws Exception{
+//		return JsonUtils.findAttributeTreeNode(uuid, session);
+//	}	
 	private List<WaypointAttachment> parseAttachments(List<String> values) throws Exception{
 		int imagecnt = 0;
 		List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>();
@@ -443,23 +444,22 @@ public class JsonCtParser {
 		for (String value : values){
 			
 			//picture object; create a temporary file add it to waypoint observation
-			String fileName = "ct_photo_" + imagecnt + ".jpeg";
+			String fileName = PHOTO_KEY + "_" + imagecnt + "." + JPEG_EXT;   //$NON-NLS-1$//$NON-NLS-2$
 				
-			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), ".jpeg");
+			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + JPEG_EXT);   //$NON-NLS-1$//$NON-NLS-2$
 			BufferedImage image = null;
 			try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value))){
 				image = ImageIO.read(in);					
 			}
 			if (image == null){
-				//TODO: we cannot parse the image
+				warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, value));
+			}else{
+				ImageIO.write(image, JPEG_EXT.toUpperCase(), temp.toFile());	
+				WaypointAttachment attachment = new WaypointAttachment();
+				attachment.setCopyFromLocation(temp.toFile());
+				attachment.setFilename(fileName);
+				attachments.add(attachment);
 			}
-			ImageIO.write(image, "JPEG", temp.toFile());
-				
-			WaypointAttachment attachment = new WaypointAttachment();
-			attachment.setCopyFromLocation(temp.toFile());
-			//attachment.setDatastoreFolderExtension(path, ca);
-			attachment.setFilename(fileName);
-			attachments.add(attachment);
 		}
 		return attachments;
 	}
@@ -498,7 +498,7 @@ public class JsonCtParser {
 				//this identifies this list element occur; switch to attribute=element format
 				AttributeListItem li =  findAttributeListItem(obj.uuid, session);
 				if (li == null){
-					warnings.add(MessageFormat.format("No attribute list item found for uuid {0}.  This attribute will be not imported.", obj.uuid));
+					warnings.add(MessageFormat.format(Messages.JsonCtParser_ListAttributeNotFound, obj.uuid));
 				}else{
 					obj.keyType = JsonKey.ATTRIBUTE.key;
 					obj.uuid = UuidUtils.uuidToString( li.getAttribute().getUuid() );
@@ -508,10 +508,10 @@ public class JsonCtParser {
 			if (obj.keyType.equals(JsonKey.ATTRIBUTE.key)){
 				Attribute att = findAttribute( obj.uuid, session);
 				if (att == null){
-					warnings.add(MessageFormat.format("No attribute found for uuid {0}.  This attribute will be not imported.", obj.uuid));
+					warnings.add(MessageFormat.format(Messages.JsonCtParser_AttributeNotFound, obj.uuid));
 					continue;
 				}
-				if (!validAttributes.contains(att)) throw new Exception("Attribute " + att.getName() + " not associated with category " + c.getName());
+				if (!validAttributes.contains(att)) throw new Exception(MessageFormat.format(Messages.JsonCtParser_CatAttributeNotFound, att.getName(), c.getName()));
 				
 				boolean add = true;
 				WaypointObservationAttribute wpatt = new WaypointObservationAttribute();
@@ -535,7 +535,7 @@ public class JsonCtParser {
 									wpatt.setStringValue(null);
 								}else{
 									if (wpa.getAttribute().getType()!=AttributeType.TREE){
-										warnings.add(MessageFormat.format("The same attribute ({0}) cannot be specified twice for a single observation.", att.getName()));
+										warnings.add(MessageFormat.format(Messages.JsonCtParser_MultiValuesSameAttribute, att.getName()));
 										add = false;
 									}
 									//trees can be specified as each node is specified; we want to pick the longest one
@@ -551,7 +551,7 @@ public class JsonCtParser {
 					}
 				}catch (Exception ex){
 					CyberTrackerPlugIn.log(ex.getMessage(), ex);
-					warnings.add(MessageFormat.format("Could not parse value for attribute {0}: {1}. {2}", att.getName(), obj.value, ex.getMessage()));				
+					warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotParseValue, att.getName(), obj.value, ex.getMessage()));				
 					add = false;
 				}
 				if (add) results.add(wpatt);

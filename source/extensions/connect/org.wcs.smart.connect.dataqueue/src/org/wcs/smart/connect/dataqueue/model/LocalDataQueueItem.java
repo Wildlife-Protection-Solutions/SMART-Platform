@@ -89,6 +89,7 @@ public class LocalDataQueueItem extends DataQueueItem{
 	private Integer order;
 	private String errorMessage;
 	private Date dateProcessed;
+	private Status checkOutStatus;
 	
 	@Column(name="date_processed")
 	public Date getDateProcessed(){
@@ -151,5 +152,14 @@ public class LocalDataQueueItem extends DataQueueItem{
 	
 	public void setErrorMessage(String message){
 		this.errorMessage = message;
+	}
+	
+	@Transient
+	public Status getCheckOutStatus(){
+		return this.checkOutStatus;
+	}
+	
+	public void setCheckOutStatus(Status checkOutStatus){
+		this.checkOutStatus = checkOutStatus;
 	}
 }
