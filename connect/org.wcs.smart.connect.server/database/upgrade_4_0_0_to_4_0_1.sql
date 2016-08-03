@@ -24,11 +24,6 @@ CREATE TABLE smart.compound_query_layer(
 	date_filter varchar(256), 
 	primary key (uuid));
 		
-ALTER TABLE smart.PLAN
-ADD CONSTRAINT PLAN_CA_UUID_FK
-FOREIGN KEY (CA_UUID)
-REFERENCES smart.CONSERVATION_AREA(UUID) ON DELETE CASCADE DEFERRABLE;
-
 ALTER TABLE SMART.COMPOUND_QUERY 
 ADD CONSTRAINT COMPOUNDQUERY_CA_UUID_FK 
 FOREIGN KEY (CA_UUID) 
@@ -57,9 +52,30 @@ ALTER TABLE connect.data_queue ADD CONSTRAINT type_chk CHECK (type IN (
 'PATROL_XML', 'INCIDENT_XML', 'MISSION_XML', 'INTELL_XML', 'JSON_CT', 'JSON_ZLIB_CT')); 
 
 ALTER TABLE CONNECT.ALERTS ADD CONSTRAINT valid_level CHECK (level > 0 AND level < 6);		
-		
+
+-- Cybertracker patrol data queue plugin
+CREATE TABLE smart.ct_patrol_link ( 
+	CT_UUID UUID NOT NULL, 
+	PATROL_LEG_UUID UUID NOT NULL,
+	CT_DEVICE_ID VARCHAR(36) NOT NULL,
+	LAST_OBSERVATION_CNT integer,
+	GROUP_START_TIME timestamp,
+	PRIMARY KEY (CT_UUID)
+);
+
+ALTER TABLE smart.ct_patrol_link 
+ADD CONSTRAINT patrol_key_uuid_fk 
+FOREIGN KEY (patrol_leg_uuid) 
+REFERENCES smart.patrol_leg ON DELETE cascade DEFERRABLE;
+
+insert into connect.connect_plugin_version (version, plugin_id) values('1.0', 'org.wcs.smart.connect.dataqueue.cybertracker.patrol');
+
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.connect.cybertracker';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.connect.cybertracker';
+
+update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.connect.dataqueue';
+update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.connect.dataqueue';
 		
 update connect.connect_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';
+

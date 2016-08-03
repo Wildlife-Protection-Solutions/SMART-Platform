@@ -15,6 +15,10 @@ window.onload = function(){
 	document.getElementById("btnUploadFile").onclick = createItemOnServer;
 	document.getElementById("btnUpdateFile").onclick = updateItemOnServer;
 	
+	document.getElementById("btnDeleteSelected").onclick = deleteSelected;
+	document.getElementById("selectCompleted").onclick = checkCompleted;
+	document.getElementById("selectNone").onclick = checkNone;
+	
 	document.getElementById("refreshnow").onclick = refreshFileList;
 
 	
@@ -129,6 +133,8 @@ function refreshFileList(){
  	oReq.onload = createFileTable;
  	oReq.open("Get", fileUrl , true);
  	oReq.send();
+ 	
+ 	return false;
 }
 	
 function createFileTable(){
@@ -178,21 +184,32 @@ function createFileTable(){
 		 		var uploadedBy = files[i].uploadedBy; 
 
 		 		var row = tableCreateRow(parent,
-		 				[ca, name, type , status, lastModified, uploadedDate, uploadedBy, null], 
+		 				[null, ca, name, type , status, lastModified, uploadedDate, uploadedBy, null], 
 		 				"filerow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "fileRow" + i;
 		 		row.dataset.uuid = uuid;
 		 		row.dataset.status = status;
 		 		row.dataset.type = type;
 	
+		 		var checkbox = document.createElement("input");
+		 		checkbox.type="checkbox";
+		 		checkbox.name="dataqueueitem";
+		 		checkbox.dataset.status = status;
+		 		checkbox.value = uuid;
+		 		row.childNodes[0].style.verticalAlign ="middle";
+		 		
+		 		row.childNodes[0].appendChild(checkbox);
+		 		
 		 		//TODO - should we check for permissions for update/delete, or assume any data queue permission = all data queue permission
 //		 		if(canupdate){
+	 			
+		 		
 		 			var updateicon = document.createElement("a");
 			 		updateicon.className="update-icon";
 			 		updateicon.title="update status";
 			 		updateicon.onclick = updateFile;
 			 		updateicon.href="";
-			 		row.childNodes[7].appendChild(updateicon);
+			 		row.childNodes[row.childNodes.length - 1].appendChild(updateicon);
 //		 		}
 //		 		if(candelete){
 			 		var deleteicon = document.createElement("a");
@@ -200,7 +217,7 @@ function createFileTable(){
 			 		deleteicon.title="delete file";
 			 		deleteicon.onclick = deleteFile;
 			 		deleteicon.href="";
-			 		row.childNodes[7].appendChild(deleteicon);
+			 		row.childNodes[row.childNodes.length - 1].appendChild(deleteicon);
 //		 		}
 		 	}
 	 	}
@@ -223,6 +240,44 @@ function updateFile(){
 	document.querySelector("select[name=newStatus]").value = status;
 	document.querySelector("select[name=updateType]").value = fileType;
 	displayDialog('updateFileDialog', 'main');
+	return false;
+}
+
+function deleteSelected(){
+	
+	var checkedBoxes = document.querySelectorAll('input[name=dataqueueitem]:checked');
+	if (checkedBoxes.length == 0) return false;
+	
+	displayConfirmDialog("Confirm Delete", "Are you sure you want to delete the selected items?", function(){
+		hideInfo();	
+		for (var i = 0; i < checkedBoxes.length; i ++){
+			var uuid = checkedBoxes[i].value;
+			var oReq = new XMLHttpRequest();
+			oReq.onload = fileDeleted;
+			
+			oReq.open("DELETE", DATAQUEUEURL  + "/items/" + encodeURIComponent(uuid), true);
+			oReq.send();
+		};
+		
+	});
+	return false;	
+}
+
+function checkNone(){
+	var checkedBoxes = document.querySelectorAll('input[name=dataqueueitem]');
+	for (var i = 0; i< checkedBoxes.length; i ++){
+		checkedBoxes[i].checked = false;
+	}
+	return false;
+}
+function checkCompleted(){
+	
+	var checkedBoxes = document.querySelectorAll('input[name=dataqueueitem]');
+	for (var i = 0; i< checkedBoxes.length; i ++){
+		if (checkedBoxes[i].dataset.status == "COMPLETE"){
+			checkedBoxes[i].checked = true;
+		}
+	}
 	return false;
 }
 

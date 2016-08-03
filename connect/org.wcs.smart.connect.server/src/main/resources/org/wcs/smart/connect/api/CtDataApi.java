@@ -27,6 +27,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -42,6 +43,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -115,11 +117,12 @@ public class CtDataApi extends HttpServlet {
 			validateUpload(ca, s);
 			
 			item.setConservationArea(ca);
-			item.setName("CyberTracker"); //$NON-NLS-1$
-			//TODO: i have a question into justin to set the content type
-			//header differently for json vs compressed json data
-			//we can then update this accordingly
-			item.setType(DataQueueItem.Type.JSON_CT);
+			item.setName("CyberTracker " + DateFormat.getDateTimeInstance().format(new Date())); //$NON-NLS-1$
+			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){
+				item.setType(DataQueueItem.Type.JSON_ZLIB_CT);
+			}else{
+				item.setType(DataQueueItem.Type.JSON_CT);
+			}
 			item.setFile(null);
 			item.setStatus(Status.UPLOADING);
 			item.setStatusMessage(null);

@@ -261,6 +261,7 @@ public class DataQueue {
 					//no access; this is okay do not add these items
 				}
 			}
+			proxyitems.sort((ServerDataQueueItemProxy d1, ServerDataQueueItemProxy d2) -> d1.getUploadedDate().compareTo(d2.getUploadedDate()));
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Error reading data queue items.", ex); //$NON-NLS-1$
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("DataQueue.ReadError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$

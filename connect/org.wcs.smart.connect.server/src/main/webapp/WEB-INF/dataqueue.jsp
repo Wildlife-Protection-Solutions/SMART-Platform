@@ -28,6 +28,7 @@
 		<div  style="margin-left: -20px" >
 			<div id="fileTable" class="catable table-cell smart-table">
 			  	<div class="table-row smart-table-header">
+			  		<div class="table-cell smart-table-cell"></div>
 					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.calabel"/></div>
 					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.namelabel"/></div>
 					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.typelabel"/></div>
@@ -38,6 +39,12 @@
 					<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
 				</div>
   			</div>  
+		</div>
+		<div><a class="link_small" id="selectNone" href="#">check none</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="link_small" id="selectCompleted" href="#">check completed</a></div>
+		
+		<div class="top-spacer">
+		
+		<input type="button" class="button" value="Delete Selected" id="btnDeleteSelected"/>
 		</div>
 	</div>
 <%@include file="footer.jsp" %>
