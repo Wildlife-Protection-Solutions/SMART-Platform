@@ -28,11 +28,11 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -74,17 +74,23 @@ public class Csv2DbLoader {
 			String[] data = reader.readNext(); //read column names
 			StringBuilder sbColumns = new StringBuilder();
 			StringBuilder sbValues = new StringBuilder();
-			int i;
+			Set<Integer> rowsToIgnore = new TreeSet<Integer>();
+			int i, attrId;
 			for (i = 0; i < data.length; i++) {
+				attrId = i+1;
 				sbColumns.append(", a"); //$NON-NLS-1$
-				sbColumns.append(i+1);
+				sbColumns.append(attrId);
 
 				sbValues.append(", ?"); //$NON-NLS-1$
 				
-				stAttribute.setInt(1, i+1);
+				stAttribute.setInt(1, attrId);
 				stAttribute.setString(2, data[i]);
 				stAttribute.executeUpdate();
-				c.createStatement().execute("alter table csv_to_smart.csv add column a" + (i+1) + " varchar(1024)");  //$NON-NLS-1$//$NON-NLS-2$
+				c.createStatement().execute("alter table csv_to_smart.csv add column a" + attrId + " varchar(1024)");  //$NON-NLS-1$//$NON-NLS-2$
+				
+				if (data[i] == null || data[i].trim().isEmpty()) {
+					rowsToIgnore.add(attrId);
+				}
 			}
 			c.commit();
 			
@@ -104,6 +110,22 @@ public class Csv2DbLoader {
 			}		
 			
 			c.commit();
+			
+			//removing columns that need to be ignored (empty columns - see #1644)
+			if (!rowsToIgnore.isEmpty()) {
+				logger.debug("removing columns that need to be ignored (empty columns)"); //$NON-NLS-1$
+				StringBuilder sbIds = new StringBuilder();
+				for (Integer x : rowsToIgnore) {
+					if (sbIds.length() > 0) {
+						sbIds.append(',');
+					}
+					sbIds.append(x);
+					c.createStatement().execute("alter table csv_to_smart.csv drop column a" + x);  //$NON-NLS-1$
+				}
+				c.createStatement().execute("delete from csv_to_smart.attributes where id in (" + sbIds + ")");  //$NON-NLS-1$//$NON-NLS-2$
+				c.commit();
+			}
+			
 			c.setAutoCommit(autoCommit);
 		}
 	}
