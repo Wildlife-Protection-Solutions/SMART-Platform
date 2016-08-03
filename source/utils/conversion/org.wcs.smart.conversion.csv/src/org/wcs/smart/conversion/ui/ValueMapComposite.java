@@ -22,9 +22,8 @@
 package org.wcs.smart.conversion.ui;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -135,7 +134,7 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 			CSVWriter writer = null;
 			File file = new File(fn);
 			try {
-				writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), ',', '"',System.getProperty("line.separator")); //$NON-NLS-1$ //$NON-NLS-2$
+				writer = new CSVWriter(new FileWriter(file), ',', '"',System.getProperty("line.separator")); //$NON-NLS-1$ //$NON-NLS-2$
 
 				// WriteHeaders
 				String[] headerColumns = new String[] {"Datafile Value", "SMART Value", "SMART key", "Ignore"};

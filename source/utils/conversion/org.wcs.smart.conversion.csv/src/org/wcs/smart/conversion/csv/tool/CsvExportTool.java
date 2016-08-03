@@ -23,9 +23,8 @@ package org.wcs.smart.conversion.csv.tool;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -44,7 +43,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class CsvExportTool {
 	
 	public void export(File file, Connection c) throws SQLException, UnsupportedEncodingException, FileNotFoundException, IOException {
-		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), ',', '"',System.getProperty("line.separator"))) { //$NON-NLS-1$ //$NON-NLS-2$ 
+		try (CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '"',System.getProperty("line.separator"))) { //$NON-NLS-1$ //$NON-NLS-2$ 
 			// WriteHeaders
 			List<String> headerColumns = new ArrayList<>();
 			ResultSet rs = c.createStatement().executeQuery("select n, id from csv_to_smart.attributes order by id"); //$NON-NLS-1$

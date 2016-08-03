@@ -22,9 +22,8 @@
 package org.wcs.smart.conversion.csv.tool;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -65,7 +64,7 @@ public class Csv2DbLoader {
 	}
 
 	private void parseFile(File file, Connection c) throws SQLException, IOException {
-		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), DELIMETER)) { //$NON-NLS-1$
+		try(CSVReader reader = new CSVReader(new FileReader(file), DELIMETER)) { //$NON-NLS-1$
 			boolean autoCommit = c.getAutoCommit();
 			c.setAutoCommit(false);
 

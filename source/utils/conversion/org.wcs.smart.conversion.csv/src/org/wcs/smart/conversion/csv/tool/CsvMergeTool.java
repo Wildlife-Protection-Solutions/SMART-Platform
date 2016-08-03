@@ -22,10 +22,9 @@
 package org.wcs.smart.conversion.csv.tool;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,7 +54,7 @@ public class CsvMergeTool {
 	public CsvMergeResult merge(File file, Connection c) throws SQLException, UnsupportedEncodingException, FileNotFoundException, IOException {
 		List<String> messages = new ArrayList<String>();
 		
-		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), DELIMETER)) { //$NON-NLS-1$
+		try(CSVReader reader = new CSVReader(new FileReader(file), DELIMETER)) { //$NON-NLS-1$
 			boolean autoCommit = c.getAutoCommit();
 			c.setAutoCommit(false);
 

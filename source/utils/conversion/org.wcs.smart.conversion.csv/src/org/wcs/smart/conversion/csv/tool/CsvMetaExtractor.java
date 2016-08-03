@@ -22,9 +22,8 @@
 package org.wcs.smart.conversion.csv.tool;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -92,10 +91,7 @@ public class CsvMetaExtractor {
 			}
 		}
 		
-		try (CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-				',', '"',System.getProperty("line.separator"))) {  //$NON-NLS-1$
-
+		try (CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '"',System.getProperty("line.separator"))) { //$NON-NLS-1$ //$NON-NLS-2$
 			// WriteHeaders
 			String[] headerColumns = new String[] {"ID","GIVEN NAME","FAMILY NAME","BIRTHDATE","GENDER","START EMPLOYMENT","END EMPLOYMENT","AGENCY","RANK"};
 			writer.writeNext(headerColumns);
@@ -145,10 +141,7 @@ public class CsvMetaExtractor {
 			}
 		}
 		
-		try (CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-				',', '"',System.getProperty("line.separator"))) {  //$NON-NLS-1$
-
+		try (CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '"',System.getProperty("line.separator"))) { //$NON-NLS-1$ //$NON-NLS-2$
 			//for each row write one record
 			for (String m : mandates) {
 				String csvout[] = new String[1];
@@ -207,6 +200,10 @@ public class CsvMetaExtractor {
 		}
 		
 		int outSize = attributes.size();
+		if (ids.isEmpty()) {
+			logger.info("No transects data configured to export."); //$NON-NLS-1$
+			return true;
+		}
 		if (ids.size() != 5 ) {
 			//not enough transact information to export.  we need all five  fields
 			//no transects to export
@@ -237,10 +234,7 @@ public class CsvMetaExtractor {
 			return false;
 		}
 
-		try (CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-				',', '"',System.getProperty("line.separator"))) {  //$NON-NLS-1$
-
+		try (CSVWriter writer = new CSVWriter(new FileWriter(file), ',', '"',System.getProperty("line.separator"))) { //$NON-NLS-1$ //$NON-NLS-2$
 			// write headers
 			writer.writeNext(colNames.toArray(new String[colNames.size()]));
 			
