@@ -73,7 +73,10 @@ public abstract class ExtraAttributeComposite extends Composite implements ILang
 		gd.marginTop = 0;
 		gd.marginWidth = 0;
 		this.setLayout(gd);
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData ea_gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		ea_gd.minimumHeight = 60;
+		ea_gd.heightHint = 70;
+		this.setLayoutData(ea_gd);
 
 		viewer = new TableViewer(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		createColumns();
@@ -83,7 +86,7 @@ public abstract class ExtraAttributeComposite extends Composite implements ILang
 		table.setLinesVisible(true); 
 
 		viewer.setContentProvider(new ArrayContentProvider());
-		GridData tgridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		GridData tgridData = ea_gd;
 		tgridData.heightHint = 50;
 		viewer.getControl().setLayoutData(tgridData);
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {

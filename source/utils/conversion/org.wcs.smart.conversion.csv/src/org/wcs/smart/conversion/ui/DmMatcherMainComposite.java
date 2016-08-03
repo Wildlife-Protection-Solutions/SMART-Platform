@@ -81,7 +81,7 @@ public class DmMatcherMainComposite extends Composite {
 
 	private static final Logger logger = LogManager.getLogger(DmMatcherMainComposite.class); 
 	
-	private static final int TABLE_HEIGHT_HINT = 350;
+	private static final int TABLE_HEIGHT_HINT = 300;
 
 	private MatchSession session;
 	
@@ -113,7 +113,8 @@ public class DmMatcherMainComposite extends Composite {
 		this.setLayout(layout);
 
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = 1200;
+		gridData.widthHint = 1024;
+		gridData.heightHint = 760;
 		this.setLayoutData(gridData);
 
 		this.setSize(840, 640);
@@ -345,14 +346,14 @@ public class DmMatcherMainComposite extends Composite {
 		col.setLabelProvider(new Ct2AttributeTypeLabelProvider());
 		col.setEditingSupport(new Ct2AttributeTypeTableEditor(viewer));
 
-		col = createTableViewerColumn("SMART Attribute", 220);
+		col = createTableViewerColumn("SMART Attribute", 200);
 		SmartAttributeLabelProvider attrLabelProvider = new SmartAttributeLabelProvider(dmLookup);
 		col.setLabelProvider(attrLabelProvider);
 		addLanguageChangedListener(attrLabelProvider);
 		List<AttributeType> attributes = session.getDataModel().getAttributes().getAttributes();
 		col.setEditingSupport(new SmartAttributeEditingSupport(viewer, attributes, attrLabelProvider));
 
-		col = createTableViewerColumn("SMART Category", 220);
+		col = createTableViewerColumn("SMART Category", 200);
 		SmartCategoryLabelProvider catLabelProvider = new SmartCategoryLabelProvider(dmLookup);
 		col.setLabelProvider(catLabelProvider);
 		addLanguageChangedListener(catLabelProvider);
