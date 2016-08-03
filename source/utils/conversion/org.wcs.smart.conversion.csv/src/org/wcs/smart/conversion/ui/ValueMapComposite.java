@@ -29,7 +29,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -165,6 +167,19 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 	}
 
 	protected void reloadValues() {
+		boolean reloaded = doValueReloading(false);
+		if (reloaded) {
+			MessageDialog.openInformation(getShell(), "Reload values", "Values sucessfully reloaded.");
+		} else {
+			MessageDialog.openError(getShell(), "Reload values", "Failed to reloaded attribute values. See log for details.");
+		}
+		setInput(attribute);
+	}
+
+	protected boolean doValueReloading(boolean preserveMapping) {
+		if (attribute == null) {
+			return false;
+		}
 		List<MappedAttributeValue> valuesBackup = new ArrayList<MappedAttributeValue>(attribute.getMappedAttributeValue());
 		attribute.getMappedAttributeValue().clear();
 		try {
@@ -182,19 +197,37 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 					ctAttrValue.setMapTo(""); //$NON-NLS-1$
 					attribute.getMappedAttributeValue().add(ctAttrValue);
 				}
-				MessageDialog.openInformation(getShell(), "Reload values", "Values sucessfully reloaded.");
+				if (preserveMapping) {
+					preserveMapping(attribute.getMappedAttributeValue(), valuesBackup);
+				}
+				return true;
 			}
 		} catch (SQLException e) {
 			attribute.getMappedAttributeValue().clear();
 			attribute.getMappedAttributeValue().addAll(valuesBackup);
 			logger.error("Failed to reloaded attribute values.", e); //$NON-NLS-1$
-			MessageDialog.openError(getShell(), "Reload values", "Failed to reloaded attribute values. See log for details.");
 		}
-		setInput(attribute);
+		return false;
+	}
+	
+	private void preserveMapping(List<MappedAttributeValue> target, List<MappedAttributeValue> source) {
+		Map<String, MappedAttributeValue> srcMap = new HashMap<String, MappedAttributeValue>();
+		for (MappedAttributeValue v : source) {
+			srcMap.put(v.getI(), v);
+		}
+		for (MappedAttributeValue v : target) {
+			MappedAttributeValue match = srcMap.get(v.getI());
+			if (match != null) {
+				v.setIgnore(match.isIgnore());
+				v.setMapTo(match.getMapTo());
+//				v.setN(match.getN());
+			}
+		}
 	}
 
 	public void setInput(MappedAttribute attribute) {
 		this.attribute = attribute;
+		doValueReloading(true);
 		viewer.setInput(attribute.getMappedAttributeValue());
 	}
 	
