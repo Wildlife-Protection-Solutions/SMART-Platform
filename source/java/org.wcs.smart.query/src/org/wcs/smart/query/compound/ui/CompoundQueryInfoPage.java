@@ -308,7 +308,7 @@ public class CompoundQueryInfoPage extends EditorPart  {
 //                
                 if (item.getData() instanceof QueryItem){
                 	QueryItem qi = (QueryItem) item.getData();
-                	if (qi.getStatus() == Status.DONE){
+                	if (qi.getStatus() == Status.DONE || qi.getStatus() == Status.ERROR){
                 		
                 		if (qi.getProgressBar() != null){
                 			//dispose of progress bar
@@ -359,6 +359,7 @@ public class CompoundQueryInfoPage extends EditorPart  {
 	}
 	
 	public void refreshTable(){
+		if (resultsTable.getTable().isDisposed()) return;
 		resultsTable.refresh();
 	}
 	

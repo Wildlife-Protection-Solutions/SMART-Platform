@@ -158,6 +158,7 @@ public class RunCompoundQueryLayerJob extends Job{
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
+				if (mapEditor == null || mapEditor.getMap() == null) return;
 				mapEditor.refreshQueryTable();
 				mapEditor.getMap().getRenderManager().refresh(null);
 			}

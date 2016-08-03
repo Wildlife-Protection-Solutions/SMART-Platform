@@ -57,8 +57,8 @@ public class CompoundMapQueryLayer extends UuidItem{
 	//layer order - required and managed by system
 	private int order;
 	
-	@ManyToOne(cascade = {CascadeType.ALL})
-	@JoinColumn(name="compound_query_uuid", referencedColumnName="uuid", nullable=false)
+	@ManyToOne()
+	@JoinColumn(name="compound_query_uuid")
 	public CompoundMapQuery getMapQuery() {
 		return mapQuery;
 	}

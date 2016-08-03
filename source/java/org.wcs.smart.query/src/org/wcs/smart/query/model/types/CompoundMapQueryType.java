@@ -23,6 +23,9 @@ package org.wcs.smart.query.model.types;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -117,14 +120,25 @@ public class CompoundMapQueryType implements IQueryType {
 							newlayer.setMapQuery(cq);
 							qitem.initializeData(newlayer);
 							newLayers.add(newlayer);
+							cq.getLayers().add(newlayer);
 						}
 					}
 				}
 				for (int i = 0; i < newLayers.size(); i ++){
 					newLayers.get(i).setOrder(i+1);
 				}
-				cq.getLayers().clear();
-				cq.getLayers().addAll(newLayers);
+				
+				Collection<CompoundMapQueryLayer> toDelete = new ArrayList<CompoundMapQueryLayer>(); 
+				for (CompoundMapQueryLayer l : cq.getLayers()){
+					if (!newLayers.contains(l)){
+						toDelete.add(l);
+					}
+				}
+				for (CompoundMapQueryLayer d : toDelete){
+					cq.getLayers().remove(d);
+				}
+				
+				cq.getLayers().sort((CompoundMapQueryLayer l1, CompoundMapQueryLayer l2) -> ((Integer)l1.getOrder()).compareTo(l2.getOrder()) );
 			}
 		}
 	}

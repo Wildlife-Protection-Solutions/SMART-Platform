@@ -281,10 +281,10 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 	@Override
 	public void dispose() {
 		super.dispose();
+		runQueryJob.cancel();
 		runQueryJob.dispose();
 		query.dispose();
 		QueryEventManager.getInstance().removeListener(qListener);
-		runQueryJob.cancel();
 		
 		if (query.getQuery().getCachedResults() != null && !query.getQuery().getCachedResults().isDisposed()){
 			CleanUpQueryJob cleanUp = new CleanUpQueryJob(query.getQuery().getCachedResults());

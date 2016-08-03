@@ -317,10 +317,11 @@ public class QueryDateFilterComposite extends Composite {
 		}
 		
 		if (filter instanceof CustomDateFilter){
+			CustomDateFilter clone = new CustomDateFilter();
 			java.sql.Date start = new java.sql.Date(SmartUtils.getDate(dtStart).getTime());
 			java.sql.Date end = new java.sql.Date(SmartUtils.getDate(dtEnd).getTime());
-			((CustomDateFilter) filter).setDates(start, end);
-			return new DateFilter(field, filter);
+			clone.setDates(start, end);
+			return new DateFilter(field, clone);
 		}else{
 			return new DateFilter(field, filter);
 		}
@@ -328,15 +329,24 @@ public class QueryDateFilterComposite extends Composite {
 	
 	public void setDateFilter(DateFilter filter){
 		cmbDateField.setSelection(new StructuredSelection(filter.getDateFieldOption()));
+		
 		if (filter.getDateFilterOption() instanceof CustomDateFilter){
 			CustomDateFilter custom = (CustomDateFilter)filter.getDateFilterOption();
+			for( IDateFilter x : filterOps){
+				if (x instanceof CustomDateFilter){
+					cmbFilterOptions.setSelection(new StructuredSelection(x));
+					break;
+				}
+			}
 			Date start = custom.getDates()[0];
 			Date end = custom.getDates()[1];
 			SmartUtils.initDateDateTimeWidget(dtStart, start);
 			SmartUtils.initDateDateTimeWidget(dtEnd, end);
+		}else{
+			//this resets the dates associated with the filter so we do it after we get the dates from the filter
+			cmbFilterOptions.setSelection(new StructuredSelection(filter.getDateFilterOption()));			
 		}
-		//this resets the dates associated with the filter so we do it after we get the dates from the filter
-		cmbFilterOptions.setSelection(new StructuredSelection(filter.getDateFilterOption()));
+
 	}
 	
 	

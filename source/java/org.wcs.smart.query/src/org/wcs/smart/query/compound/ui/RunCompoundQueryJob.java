@@ -150,7 +150,7 @@ public class RunCompoundQueryJob extends Job{
 		editor.page1.setupTable(items);
 		
 		//create jobs
-		JobQueue queue = new JobQueue();
+		JobQueue queue = new JobQueue(monitor);
 		for (final QueryItem i : items){
 			RunCompoundQueryLayerJob job = new RunCompoundQueryLayerJob(i, editor, mapLayerTracker);
 			queue.addJob(job);
@@ -178,8 +178,13 @@ public class RunCompoundQueryJob extends Job{
 	 */
 	private class JobQueue {
 		public static final int MAX_JOBS = 3;
-		List<Job> jobs = Collections.synchronizedList(new ArrayList<Job>());
+		public List<Job> jobs = Collections.synchronizedList(new ArrayList<Job>());
 		
+		private IProgressMonitor parent;
+		
+		public JobQueue(IProgressMonitor parent){
+			this.parent = parent;
+		}
 		/*
 		 * add a job to the job queue
 		 */
@@ -202,7 +207,7 @@ public class RunCompoundQueryJob extends Job{
 		 * run the next job if another job exists in the queue
 		 */
 		private synchronized void runNext(){
-			if (jobs.isEmpty()) return;
+			if (jobs.isEmpty() || parent.isCanceled()) return;
 			Job j = jobs.remove(0);
 			j.addJobChangeListener(new IJobChangeListener() {
 				

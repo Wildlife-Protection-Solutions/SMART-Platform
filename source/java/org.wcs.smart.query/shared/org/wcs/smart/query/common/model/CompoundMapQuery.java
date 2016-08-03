@@ -50,7 +50,7 @@ public class CompoundMapQuery extends Query{
 	private DateFilter dateFilter;
 	private List<CompoundMapQueryLayer> queries;
 	
-	@OneToMany(cascade = {CascadeType.ALL}, mappedBy="mapQuery")
+	@OneToMany(cascade = {CascadeType.ALL}, mappedBy="mapQuery", orphanRemoval=true)
 	@OrderBy("order")
 	public List<CompoundMapQueryLayer> getLayers(){
 		return queries;

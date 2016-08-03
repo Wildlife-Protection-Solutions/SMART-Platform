@@ -141,12 +141,15 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 				}
 				imported.add(compoundQuery);
 				
+				List<CompoundMapQueryLayer> toDelete = new ArrayList<CompoundMapQueryLayer>();
+				
 				for (CompoundMapQueryLayer l : compoundQuery.getLayers()){
 					Query localQuery = null;
 				
 					Session s = HibernateManager.openSession();
 					try{
 						localQuery = QueryHibernateManager.getInstance().findQuery(s, l.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()));
+						localQuery.getConservationArea().equals(ca);
 					}finally{
 						s.close();
 					}
@@ -164,6 +167,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 								List<Query> importedQuery = importer.importQuery(queryPath.toFile(), ca);
 								Query importedQueryMain = importedQuery.get(0);
 								//lets find the same query in the current database 
+								
 								
 								localQuery = null;
 								s = HibernateManager.openSession();
@@ -187,6 +191,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 								}
 								
 							}catch (Exception ex){
+								toDelete.add(l);
 								warnings.add(MessageFormat.format(Messages.CompoundQueryDefinitionImporter_SubImporterError, ex.getMessage()));
 								QueryPlugIn.log(ex.getMessage(), ex);
 							}
@@ -195,6 +200,8 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 						//could potentially validate the query definitions here ,but seems unnecessary
 					}
 				}
+				compoundQuery.getLayers().removeAll(toDelete);
+				
 				return imported;
 			}else{
 				throw new Exception(Messages.CompoundQueryDefinitionImporter_QueryNotFound);
