@@ -124,7 +124,7 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 	}
 
 	protected void exportCsv() {
-		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+		FileDialog dlg = new FileDialog(getShell(), SWT.SAVE);
 		dlg.setFilterNames(new String[] {"CSV file"});
 		dlg.setFilterExtensions(new String[] {"*.csv"}); //$NON-NLS-1$
 		String fn = dlg.open();
