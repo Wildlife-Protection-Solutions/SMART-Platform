@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.Validate;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
