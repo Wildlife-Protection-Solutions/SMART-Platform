@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Session;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
@@ -40,6 +42,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.survey.export.SurveyJsonUtils;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
@@ -51,8 +54,6 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
-
-import com.google.gson.JsonSyntaxException;
 
 /**
  * Builds specific survey objects that suitable for further import
@@ -268,12 +269,18 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 
 	private void recordAfter400DefaultMetaValues(CyberTrackerSurvey ctSurvey, String v, Map<String, E> eMap, Session session) {
 		try {
-			//TODO:
-//			List<E> values = ElementsUtil.extractJsonDefaulValues(v, eMap);
-//			for (E di : values) {
-//				recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
-//			}
-		} catch (JsonSyntaxException e) {
+			CyberTrackerSurvey defaultValue = SurveyJsonUtils.parseSurveyMetadata((JSONObject) (new JSONParser()).parse(v), null, session);
+			if (ctSurvey.getComment() == null) ctSurvey.setComment(defaultValue.getComment());
+			if (ctSurvey.getMembers() == null){
+				ctSurvey.setMembers(defaultValue.getMembers());
+			}
+			if (ctSurvey.getLeader() == null) ctSurvey.setLeader(defaultValue.getLeader());
+			
+			for(String missing : defaultValue.getMissingKeys()){
+				ctSurvey.addMissingKey(missing);
+			}
+		
+		} catch (org.json.simple.parser.ParseException e) {
 			ctSurvey.addError(SurveyMeta.GENERAL, Messages.SurveyCTDataBuilder_Error_JsonDefaultValue);
 		}
 	}

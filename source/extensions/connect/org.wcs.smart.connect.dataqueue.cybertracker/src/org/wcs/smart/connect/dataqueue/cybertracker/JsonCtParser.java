@@ -45,6 +45,7 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -93,8 +94,8 @@ public class JsonCtParser {
 			Object obj = (new JSONParser()).parse(json);
 			jsonData = (JSONObject) obj;
 		}catch (Exception ex){
-			ex.printStackTrace();
-			throw new Exception(Messages.JsonCtParser_ParseError);
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			throw new Exception(Messages.JsonCtParser_ParseError + ":" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
 		JSONArray jsFeatures = (JSONArray) jsonData.get("features"); //$NON-NLS-1$
@@ -342,9 +343,22 @@ public class JsonCtParser {
 		List<WaypointObservationAttribute>  applyAllObs = createWaypointObservationAttribute(attributes.get(CyberTrackerConfExporter.MULTI_SELECT_INDEX), category, defaultAttributes, session);
 		applyToAllObservations = applyAllObs;
 		
+		
+		Employee observer = null;
+		if (observations.containsKey(ScreensUtil.RESULT_OBSERVER)){
+			String ob = (String) observations.get(ScreensUtil.RESULT_OBSERVER);
+			if (ob.startsWith(JsonKey.EMPLOYEE.key + CyberTrackerConfExporter.KEY_SEP)){
+				String uuid = ob.substring(JsonKey.EMPLOYEE.key.length() + 1);
+				observer = (Employee) session.get(Employee.class, UuidUtils.stringToUuid(uuid));
+				if (observer == null){
+					warnings.add(MessageFormat.format("No observer employee found for uuid {0}.", uuid));
+				}
+			}
+		}
 		if (attributes.entrySet().isEmpty()){
 			//create an observation with only default attribute values
 			WaypointObservation wp = new WaypointObservation();
+			wp.setObserver(observer);
 			wp.setWaypoint(newWaypoint);
 			newWaypoint.getObservations().add(wp);
 			wp.setCategory(category);
@@ -361,6 +375,7 @@ public class JsonCtParser {
 				List<ObservationInfo> values = (List<ObservationInfo>) e.getValue();
 						
 				WaypointObservation wp = new WaypointObservation();
+				wp.setObserver(observer);
 				wp.setWaypoint(newWaypoint);
 				newWaypoint.getObservations().add(wp);
 				wp.setCategory(category);

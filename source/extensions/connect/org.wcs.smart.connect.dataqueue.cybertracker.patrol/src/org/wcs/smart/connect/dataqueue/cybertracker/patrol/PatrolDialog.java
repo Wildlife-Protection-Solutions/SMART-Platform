@@ -214,18 +214,18 @@ public class PatrolDialog extends TitleAreaDialog {
 			
 			
 			Composite op= new Composite(main, SWT.NONE);
-			op.setLayout(new GridLayout(3, false));
+			op.setLayout(new GridLayout(2, false));
 			op.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)op.getLayoutData()).horizontalIndent = 2;
 			
 			Button btnNew = new Button(op, SWT.RADIO);
 			btnNew.setText(Messages.PatrolDialog_NewPatrolLabel);
-			btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+			btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 			btnNew.setSelection(true);
 			
 			Button btnExisting = new Button(op, SWT.RADIO);
 			btnExisting.setText(Messages.PatrolDialog_AddExistingLabel);
-			btnExisting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+			btnExisting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 			btnExisting.setSelection(false);
 			
 			PatrolFilteredComboViewer viewer = new PatrolFilteredComboViewer(op);

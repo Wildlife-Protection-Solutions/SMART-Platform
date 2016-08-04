@@ -1,5 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            ca_property=".mission.conservationArea"
+            class="org.wcs.smart.connect.dataqueue.cybertracker.survey.model.CtMissionLink"
+            supportsCcaa="false">
+      </class>
+   </extension>
+   <extension
+         point="org.wcs.smart.connect.dataqueue.cybertracker.json.processor">
+      <JsonProcessor
+            class="org.wcs.smart.connect.dataqueue.cybertracker.survey.MissionJsonProcessor">
+      </JsonProcessor>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.connect.dataqueue.cybertracker.survey.updatesite.DataQueueCtMissionDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.connect.dataqueue.cybertracker.survey.updatesite.DataQueueCtMissionChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.dataqueue.cybertracker.survey.updatesite.OnInstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.dataqueue.cybertracker.survey.updatesite.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
 
 </plugin>

@@ -62,6 +62,7 @@ public class MissionViewFilter {
 	public void setDefaults(){
 		this.dateFilter = DateFilter.LAST_30_DAYS;
 	}
+	
 	public void setDateFilter(DateFilter dFilter, Date start, Date end){
 		this.dateFilter = dFilter;
 		this.startDate = start;
@@ -75,8 +76,8 @@ public class MissionViewFilter {
 	
 	
 	/**
-	 * Builds a query that returns the following patrol fields:
-	 * patrol uuid, patrol id, patrol type, start date, end date
+	 * Builds a query that returns the following mission fields:
+	 * mission uuid, mission id, mission start date, mission end date, survey id, survey uuid, survey design name
 	 * 
 	 * @param s
 	 * @return

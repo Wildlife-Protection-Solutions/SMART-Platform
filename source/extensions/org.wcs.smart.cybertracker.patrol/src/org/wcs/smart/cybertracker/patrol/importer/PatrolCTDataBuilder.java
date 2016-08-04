@@ -248,20 +248,30 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 	private void recordAfter400DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) {
 		try {
 			CyberTrackerPatrol defaultValue = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(v), null, session);
+			
 			ctPatrol.setArmed(defaultValue.isArmed());
-			ctPatrol.setComment(defaultValue.getComment());
-			ctPatrol.setLeader(defaultValue.getLeader());
-			ctPatrol.setMandate(defaultValue.getMandate());
-			ctPatrol.setObjective(defaultValue.getObjective());
-			ctPatrol.setTeam(defaultValue.getTeam());
-			ctPatrol.setCtTeam(defaultValue.getTeam().getName());
-			ctPatrol.setStation(defaultValue.getStation());
-			ctPatrol.setCtStation(defaultValue.getStation().getName());
-			ctPatrol.setMembers(defaultValue.getMembers());
-			ctPatrol.setPilot(defaultValue.getPilot());
-			ctPatrol.setPatrolTransportType(defaultValue.getPatrolTransportType());
-			ctPatrol.setCtTransport(defaultValue.getPatrolTransportType().getName());
-			ctPatrol.setPatrolType(defaultValue.getPatrolType());
+			if (ctPatrol.getComment() == null) ctPatrol.setComment(defaultValue.getComment());
+			if (ctPatrol.getMandate() == null) ctPatrol.setMandate(defaultValue.getMandate());
+			if (ctPatrol.getObjective() == null) ctPatrol.setObjective(defaultValue.getObjective());
+			
+			if (ctPatrol.getTeam() != null){
+				ctPatrol.setTeam(defaultValue.getTeam());
+				if (defaultValue.getTeam() != null) ctPatrol.setCtTeam(defaultValue.getTeam().getName());
+			}
+			
+			if (ctPatrol.getStation() != null){
+				ctPatrol.setStation(defaultValue.getStation());
+				if (defaultValue.getStation() != null) ctPatrol.setCtStation(defaultValue.getStation().getName());
+			}
+			if (ctPatrol.getMembers() == null) ctPatrol.setMembers(defaultValue.getMembers());
+			if (ctPatrol.getPilot() == null) ctPatrol.setPilot(defaultValue.getPilot());
+			if (ctPatrol.getLeader() == null) ctPatrol.setLeader(defaultValue.getLeader());
+			
+			if (ctPatrol.getPatrolTransportType() == null){
+				ctPatrol.setPatrolTransportType(defaultValue.getPatrolTransportType());
+				if (defaultValue.getPatrolTransportType() != null) ctPatrol.setCtTransport(defaultValue.getPatrolTransportType().getName());
+			}
+			if (ctPatrol.getPatrolType() == null) ctPatrol.setPatrolType(defaultValue.getPatrolType());
 		
 			for(String missing : defaultValue.getMissingKeys()){
 				ctPatrol.addMissingKey(missing);

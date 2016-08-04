@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.connect.dataqueue.cybertracker;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.wcs.smart.map.GeometryFactoryProvider;
@@ -69,8 +71,16 @@ public class JsonTrackUtils {
 
 		return (LineString)GeometryFactoryProvider.getFactory().createLineString(c);		
 	}
+		
+	public static LineString mergeLineStrings(LineString l1, LineString l2){
+		List<Coordinate> all = new ArrayList<>();		
+		Arrays.stream(l1.getCoordinates()).forEach(c -> all.add(c));
+		Arrays.stream(l2.getCoordinates()).forEach(c -> all.add(c));	
+		all.sort((c1, c2) -> ((Double)c1.z).compareTo(c2.z) );
+		return (LineString)GeometryFactoryProvider.getFactory().createLineString(all.toArray(new Coordinate[all.size()]));
+	}
 	
-	private static Long convertTimeToGMT(Date time){
+	public static Long convertTimeToGMT(Date time){
 		Calendar c1 = Calendar.getInstance();
 		c1.setTimeInMillis(time.getTime());
 		Calendar c2 = Calendar.getInstance();

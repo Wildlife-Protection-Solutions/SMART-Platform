@@ -316,7 +316,20 @@ public class SurveyScreensUtil extends ScreensUtil {
 	
 	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, CyberTrackerId dataType, String strType) {
 		StartScreensContent content = StartScreensContent.create(elements, Messages.SurveyScreensUtil_StartSurvey, Messages.SurveyScreensUtil_StartSurveyTitle, Messages.SurveyScreensUtil_BeginSurvey);
-		return addStartScreen(id, container, elements, ctProps, content, dataType, strType);
+		CyberTrackerId startScreen = addStartScreen(id, container, elements, ctProps, content, dataType, strType);
+		
+		//add the survey design to the main screen so its included in the metadata for the JSON objects
+		Node startNode = container.screenNodes.get(1);
+		for (Item item : elements.getList().getItems().getItem()) {
+			if (SurveyScreensUtil.RESULT_SURVEY_DESIGN.equals(item.getName())) {
+				Control ctl = getScreensFactory().createAttrubuteControl14(item.getId(), false, item.getTag0());
+				ScreensObjectFactory.addControlToNode(startNode, ctl);		
+				break;
+			}
+		}
+		
+		
+		return startScreen;
 	}
 
 	private List<CyberTrackerId> suToCtIds(Elements elements, List<SamplingUnit> items) {

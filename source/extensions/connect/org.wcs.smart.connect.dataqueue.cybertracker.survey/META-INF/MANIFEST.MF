@@ -13,3 +13,4 @@ Require-Bundle: org.wcs.smart.connect.dataqueue.cybertracker,
  org.wcs.smart.observation,
  org.wcs.smart.cybertracker.survey
 Bundle-Vendor: org.wcs.smart
+Export-Package: org.wcs.smart.connect.dataqueue.cybertracker.survey.model
