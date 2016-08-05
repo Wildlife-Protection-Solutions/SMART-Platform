@@ -72,8 +72,15 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
     private PatrolViewFilter filter = PatrolViewFilter.newInstance();
 	private LoadPatrolIdJob loadPatrolIdJob = new LoadPatrolIdJob();
 
+	private List<Patrol> newPatrols;
+	
 	private boolean stopSelectionPropogation = false;
 	private List<ISelectionChangedListener> changeListeners = new ArrayList<ISelectionChangedListener>();
+	
+	public PatrolFilteredComboViewer(Composite parent, List<Patrol> newPatrols) {
+		this(parent);
+		this.newPatrols = newPatrols;
+	}
 	
 	public PatrolFilteredComboViewer(Composite parent) {
 		super(parent, SWT.NONE);
@@ -214,11 +221,11 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-            if (viewer == null || viewer.getControl().isDisposed()){
+            if (viewer == null || viewer.getControl().isDisposed() || isDisposed()){
                 return Status.OK_STATUS;
             }
             final List<Patrol> data = loadPatrolIds();
-            
+
             getDisplay().asyncExec(new Runnable(){
                 @Override
                 public void run() {
@@ -250,6 +257,15 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         			p.setPatrolType((org.wcs.smart.patrol.model.PatrolType.Type)data[2]);
         			defaultPresent = defaultPresent || p.equals(preselectedPatrol);
         			patrols.add(p);
+        		}
+        		if (newPatrols != null){
+        			for (Patrol p : newPatrols){
+        				if (preselectedPatrol == p){
+        					defaultPresent = true;
+        					break;
+        				}
+        			}
+        			patrols.addAll(newPatrols);
         		}
         		if (!defaultPresent) {
         			//we don't want to reset selection to null if previously selected patrol is not in filtered list
