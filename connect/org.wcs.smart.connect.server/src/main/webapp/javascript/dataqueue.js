@@ -205,7 +205,7 @@ function createFileTable(){
 	 			
 		 		
 		 			var updateicon = document.createElement("a");
-			 		updateicon.className="update-icon";
+			 		updateicon.className="update-icon marginleftright";
 			 		updateicon.title="update status";
 			 		updateicon.onclick = updateFile;
 			 		updateicon.href="";
@@ -213,12 +213,21 @@ function createFileTable(){
 //		 		}
 //		 		if(candelete){
 			 		var deleteicon = document.createElement("a");
-			 		deleteicon.className="delete-icon";
+			 		deleteicon.className="delete-icon marginleftright";
 			 		deleteicon.title="delete file";
 			 		deleteicon.onclick = deleteFile;
 			 		deleteicon.href="";
 			 		row.childNodes[row.childNodes.length - 1].appendChild(deleteicon);
 //		 		}
+			 	
+
+			 	var downloadicon = document.createElement("a");
+			 	downloadicon.className="download-icon marginleftright";
+			 	downloadicon.title="download file (does not affect processing queue)";
+			 	downloadicon.onclick = downloadFile;
+			 	downloadicon.href="";
+			 	row.childNodes[row.childNodes.length - 1].appendChild(downloadicon);
+			 	
 		 	}
 	 	}
 	}catch(err) {
@@ -292,6 +301,13 @@ function deleteFile(){
 		oReq.open("DELETE", DATAQUEUEURL  + "/items/" + encodeURIComponent(uuid), true);
 		oReq.send();
 	});
+	return false;	
+}
+
+function downloadFile(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	hideInfo();
+	window.open(DATAQUEUEURL  + "/items/" + encodeURIComponent(uuid) + "/file");
 	return false;	
 }
 

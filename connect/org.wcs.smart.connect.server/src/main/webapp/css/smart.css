@@ -275,6 +275,7 @@ h2{
     height: 16px;
     background-repeat: no-repeat;
     display: block;
+    float: right;
 } 
 
 .run-icon{
@@ -293,6 +294,7 @@ h2{
 	background-repeat: no-repeat;
 	display: block;
 	cursor: pointer;
+	float: right;
 }
 
 .update-icon{
@@ -341,6 +343,10 @@ h2{
 	margin-right: 5px;
 	margin-left: 5px;
 	clear:both;
+}
+.marginleftright{
+	margin-right: 5px;
+	margin-left: 5px;
 }
 
 /*Mozilla specific*/
