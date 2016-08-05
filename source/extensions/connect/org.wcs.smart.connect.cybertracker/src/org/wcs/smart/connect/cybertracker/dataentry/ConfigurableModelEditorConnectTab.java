@@ -196,9 +196,9 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		if (typeCache != null) types.addAll(typeCache.keySet());
 		cmbPositionType.setInput(types);
 		cmbPositionType.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				boolean change = !properties.getPingType().equals(((IStructuredSelection)cmbPositionType.getSelection()).getFirstElement());
 				IStructuredSelection selection = (IStructuredSelection) cmbPositionType.getSelection();
 				if (!selection.isEmpty()){
 					Object x = selection.getFirstElement();
@@ -206,6 +206,9 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 						properties.setPingType((UUID)x);
 						cdPositionType.hide();
 					}
+				}
+				if (change){
+					dialog.notifyChangesMade();
 				}
 				
 			}
