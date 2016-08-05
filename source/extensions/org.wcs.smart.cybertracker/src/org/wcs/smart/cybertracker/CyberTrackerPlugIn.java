@@ -57,7 +57,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	/* 
 	 * cybertracker encoding protocol 
 	 */
-	private static final String JSON_ENCODING_TYPE_KEY = "org.wcs.smart.connect.cybertracker.json.protocol";
+	private static final String JSON_ENCODING_TYPE_KEY = "org.wcs.smart.connect.cybertracker.json.protocol"; //$NON-NLS-1$
 	
 	
 	// The shared instance

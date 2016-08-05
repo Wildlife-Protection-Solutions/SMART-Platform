@@ -25,6 +25,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,7 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Builds specific survey objects that suitable for further import
@@ -271,14 +273,23 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 		try {
 			CyberTrackerSurvey defaultValue = SurveyJsonUtils.parseSurveyMetadata((JSONObject) (new JSONParser()).parse(v), null, session);
 			if (ctSurvey.getComment() == null) ctSurvey.setComment(defaultValue.getComment());
-			if (ctSurvey.getMembers() == null){
-				ctSurvey.setMembers(defaultValue.getMembers());
+			if (ctSurvey.getMembers() == null ) ctSurvey.setMembers(new ArrayList<Employee>());
+			if (ctSurvey.getMembers().isEmpty()){
+				ctSurvey.getMembers().addAll(defaultValue.getMembers());
+				List<String> members = new ArrayList<String>();
+				for (Employee e : ctSurvey.getMembers()){
+					members.add(SmartLabelProvider.getShortLabel(e));
+				}
+				ctSurvey.setCtMembers(members);
 			}
-			if (ctSurvey.getLeader() == null) ctSurvey.setLeader(defaultValue.getLeader());
+			if (ctSurvey.getLeader() == null){
+				ctSurvey.setLeader(defaultValue.getLeader());
+				if (ctSurvey.getLeader() != null){
+					ctSurvey.setCtLeader(SmartLabelProvider.getShortLabel(ctSurvey.getLeader()));
+				}
+			}
 			
-			for(String missing : defaultValue.getMissingKeys()){
-				ctSurvey.addMissingKey(missing);
-			}
+			ctSurvey.getProblems().putAll(defaultValue.getProblems());
 		
 		} catch (org.json.simple.parser.ParseException e) {
 			ctSurvey.addError(SurveyMeta.GENERAL, Messages.SurveyCTDataBuilder_Error_JsonDefaultValue);

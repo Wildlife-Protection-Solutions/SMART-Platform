@@ -351,7 +351,7 @@ public class JsonCtParser {
 				String uuid = ob.substring(JsonKey.EMPLOYEE.key.length() + 1);
 				observer = (Employee) session.get(Employee.class, UuidUtils.stringToUuid(uuid));
 				if (observer == null){
-					warnings.add(MessageFormat.format("No observer employee found for uuid {0}.", uuid));
+					warnings.add(MessageFormat.format(Messages.JsonCtParser_ObserverNotFound, uuid));
 				}
 			}
 		}

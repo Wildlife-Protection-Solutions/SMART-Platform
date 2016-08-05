@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -335,7 +334,7 @@ public abstract class AbstractSmartImporter {
 							result.add(aa);
 						}
 					} catch (org.json.simple.parser.ParseException e1) {
-						addWarning("Unable to parse default observation attribute values: " +e1.getMessage());
+						addWarning(Messages.AbstractSmartImporter_ParseError +e1.getMessage());
 					}
 				}
 				continue;

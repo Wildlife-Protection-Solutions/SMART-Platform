@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.PlugIn;
+import org.wcs.smart.connect.dataqueue.cybertracker.survey.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -45,7 +46,7 @@ public class DataQueueCtMissionJob extends Job {
 	};
 	
 	public DataQueueCtMissionJob() {
-		super("Uninstalling Cybertracker Connect Survey DataQueue Processor");
+		super(Messages.DataQueueCtMissionJob_JobName);
 	}
 
 	@Override
@@ -74,7 +75,7 @@ public class DataQueueCtMissionJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog("Error uninstalling Cybertracker Connect DataQueue Processor", e);
+					SmartPlugIn.displayLog(Messages.DataQueueCtMissionJob_ErrorMsg, e);
 				}
 			});
 			return new Status(IStatus.ERROR, PlugIn.PLUGIN_ID, 1, "Error uninstalling Cybertracker Connect DataQueue Processor " + e.getLocalizedMessage(), e);  //$NON-NLS-1$

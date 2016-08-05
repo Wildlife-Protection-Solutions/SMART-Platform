@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.ui.mission.export.IMissionFilteringView;
 import org.wcs.smart.er.ui.mission.export.MissionFilterDialog;
@@ -56,9 +57,17 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
 	private LoadMissionIdJob loadMissionJob;
 
 	private LabelProvider missionLblProvider;
+	private List<Mission> additionalMissions;
 	
-	public MissionFilteredComboViewer(Composite parent) {
+	/**
+	 * 
+	 * @param parent
+	 * @param addMissions list of missions not yet in database that should be
+	 * added to list (irregardless of filter)  Can be null
+	 */
+	public MissionFilteredComboViewer(Composite parent, List<Mission> addMissions) {
 		super(parent);
+		this.additionalMissions = addMissions;
 	}
 	
 	private synchronized LoadMissionIdJob getJob(){
@@ -89,7 +98,7 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
 
 	@Override
 	protected String getTooltip() {
-		return "filter missions displayed in drop down list";
+		return Messages.MissionFilteredComboViewer_tooltip;
 	}
 
 	@Override
@@ -131,16 +140,15 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
         private Mission preselectedMission;
     	
         public LoadMissionIdJob() {
-            super("Load Mission IDs");
+            super("Load Mission IDs"); //$NON-NLS-1$
         }
 
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-            if (viewer == null || viewer.getControl().isDisposed()){
+            final List<Mission> data = loadMissionIds();
+            if (viewer == null || viewer.getControl().isDisposed() || isDisposed()){
                 return Status.OK_STATUS;
             }
-            final List<Mission> data = loadMissionIds();
-            
             getDisplay().asyncExec(new Runnable(){
                 @Override
                 public void run() {
@@ -149,7 +157,7 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
                     }
                     viewer.setInput(data);
                     if (preselectedMission != null) {
-                    	setStopSelectionPropogation(true);
+//                    	setStopSelectionPropogation(true);
                     	viewer.setSelection(new StructuredSelection(preselectedMission));
                     }
                     MissionFilteredComboViewer.this.getParent().getParent().layout(true);
@@ -174,6 +182,15 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
         			defaultPresent = defaultPresent || p.equals(preselectedMission);
         			missions.add(p);
         		}
+        		if (additionalMissions != null){
+        			for (Mission m : additionalMissions){
+        				if (m == preselectedMission){
+        					defaultPresent = true;
+        				}
+        			}
+        			missions.addAll(additionalMissions);
+        		}
+        		
         		if (!defaultPresent) {
         			//we don't want to reset selection to null if previously selected patrol is not in filtered list
         			//this is why we add it to result list

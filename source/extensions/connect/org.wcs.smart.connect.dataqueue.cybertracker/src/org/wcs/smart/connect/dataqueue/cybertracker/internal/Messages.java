@@ -20,6 +20,7 @@ public class Messages extends NLS {
 	public static String JsonCtParser_MultiValuesSameAttribute;
 	public static String JsonCtParser_NoCateogyr;
 	public static String JsonCtParser_NoFeatureFound;
+	public static String JsonCtParser_ObserverNotFound;
 	public static String JsonCtParser_ParseError;
 	static {
 		// initialize resource bundle

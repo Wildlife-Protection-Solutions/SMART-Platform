@@ -230,13 +230,15 @@ public class MissionEmployeeComposite extends MissionComposite {
 		if (warnComp != null){
 			warnComp.setVisible(false);
 			List<Employee> selected =  composite.getSelectedItemsAsList();
-			for (Employee observer : observers){
-				if (!selected.contains(observer)){
-					warnComp.setVisible(true);
-					errorlbl.setText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverError, new Object[]{SmartLabelProvider.getFullLabel(observer)}));
-					errorlbl.setToolTipText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverErrorTooltip, new Object[]{SmartLabelProvider.getFullLabel(observer)}));
-					warnComp.layout(true);
-					return false;
+			if (observers != null){
+				for (Employee observer : observers){
+					if (!selected.contains(observer)){
+						warnComp.setVisible(true);
+						errorlbl.setText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverError, new Object[]{SmartLabelProvider.getFullLabel(observer)}));
+						errorlbl.setToolTipText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverErrorTooltip, new Object[]{SmartLabelProvider.getFullLabel(observer)}));
+						warnComp.layout(true);
+						return false;
+					}
 				}
 			}
 		}

@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.PlugIn;
+import org.wcs.smart.connect.dataqueue.cybertracker.survey.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -40,7 +41,7 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Upgrading Cybertracker Connect Survey Data Queue Processor PlugIn", 1);
+		monitor.beginTask(Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask, 1);
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();

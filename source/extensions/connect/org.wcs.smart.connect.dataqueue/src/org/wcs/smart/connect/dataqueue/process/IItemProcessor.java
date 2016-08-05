@@ -75,5 +75,9 @@ public interface IItemProcessor {
 		public String getMessage(){
 			return this.message;
 		}
+		
+		public void appendToMessage(String append){
+			this.message = message + " " + append; //$NON-NLS-1$
+		}
 	}
 }

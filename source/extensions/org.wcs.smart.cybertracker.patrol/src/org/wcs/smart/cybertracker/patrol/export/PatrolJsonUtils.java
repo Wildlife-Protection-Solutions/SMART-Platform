@@ -32,7 +32,9 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil.JsonPatrolKey;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
@@ -118,7 +120,7 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(team.substring(JsonPatrolKey.TEAM.key.length() + 1));
 			Team teamObj = (Team) session.get(Team.class, uuid);
 			if (teamObj == null){
-				//TODO: log a warning or error or something
+				ctPatrol.addWarning(PatrolMeta.TEAM, Messages.PatrolJsonUtils_TeamNotFound);
 			}
 			ctPatrol.setTeam(teamObj);
 		}
@@ -127,7 +129,7 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(station.substring(JsonPatrolKey.STATION.key.length() + 1));
 			Station stationObj = (Station) session.get(Station.class, uuid);
 			if (stationObj == null){
-				//TODO: log a warning or error or something
+				ctPatrol.addWarning(PatrolMeta.STATION, Messages.PatrolJsonUtils_StationNotFound);
 			}
 			ctPatrol.setStation(stationObj);
 		}
@@ -136,7 +138,7 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(mandate.substring(JsonPatrolKey.MANDATE.key.length() + 1));
 			PatrolMandate mandateObj = (PatrolMandate) session.get(PatrolMandate.class, uuid);
 			if (mandateObj == null){
-				//TODO: log a warning or error or something
+				ctPatrol.addWarning(PatrolMeta.MANDATE, Messages.PatrolJsonUtils_MandatenotFound);
 			}
 			ctPatrol.setMandate(mandateObj);
 		}
@@ -156,7 +158,7 @@ public class PatrolJsonUtils {
 			if (employee != null){
 				ctPatrol.getMembers().add(employee);
 			}else{
-				//TODO: not found
+				ctPatrol.addWarning(PatrolMeta.MEMBERS, Messages.PatrolJsonUtils_MemberNotFound);
 			}
 			
 			if (member.equals(leader)){
@@ -171,8 +173,7 @@ public class PatrolJsonUtils {
 			UUID uuid = UuidUtils.stringToUuid(ptransport.substring(JsonPatrolKey.TRANSPORT_TYPE.key.length() + 1));
 			PatrolTransportType transportObj = (PatrolTransportType) session.get(PatrolTransportType.class, uuid);
 			if (transportObj == null){
-				//TODO:
-//				throw new Exception(MessageFormat.format("Could not find patrol transport type for uuid {0}.", uuid));
+				ctPatrol.addError(PatrolMeta.TRANSPORT, Messages.PatrolJsonUtils_TTNotFound);
 			}else{
 				ctPatrol.setPatrolTransportType(transportObj);
 			}

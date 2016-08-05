@@ -24,10 +24,13 @@ package org.wcs.smart.connect.dataqueue.cybertracker.survey;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -49,9 +52,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.connect.dataqueue.cybertracker.survey.internal.Messages;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
@@ -82,6 +88,8 @@ public class MissionDialog extends TitleAreaDialog {
 	private Set<Mission> newMission;
 	private Set<Mission> mergedMissions;
 	
+	private List<Survey> addedSurveys = new ArrayList<>();
+	
 	public MissionDialog(Shell parentShell, HashMap<UUID, CtMissionLink> missions, Session session) {
 		super(parentShell);
 		this.missions = missions;
@@ -94,6 +102,9 @@ public class MissionDialog extends TitleAreaDialog {
 				true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
+		
+
+		validate();
 	}
 	
 	public Set<Mission> getNewMissions(){
@@ -108,25 +119,35 @@ public class MissionDialog extends TitleAreaDialog {
 		newMission = new HashSet<>();
 		mergedMissions = new HashSet<>();
 		if (validate()){
-			MessageDialog.openError(getShell(), "Error", "Errors exist on page.  Resolve the errors before continuing.");
+			MessageDialog.openError(getShell(), Messages.MissionDialog_ErrorTitle, Messages.MissionDialog_PageErrorMsg);
 			return ;
 		}
 		//validate();
 		try{
+			//process new missions first
+			for (Entry<UUID, UiData> e : uiItems.entrySet()){
+				if (!e.getValue().btnExisting.getSelection()){
+					Survey addTo = e.getValue().cmbSurvey.getSelection();
+					if (addTo.getUuid() != null){
+						addTo = (Survey)session.get(Survey.class, addTo.getUuid());
+					}
+					Mission p = createNewMission(e.getKey(), missions.get(e.getKey()), addTo);
+					newMission.add(p);
+				}
+			}
+			
+			//process new merged options second
 			for (Entry<UUID, UiData> e : uiItems.entrySet()){
 				if (e.getValue().btnExisting.getSelection()){
 					Mission addTo = (Mission)session.get(Mission.class, e.getValue().cmbMission.getSelection().getUuid());
 					mergeMission(e.getKey(), missions.get(e.getKey()), addTo);
 					mergedMissions.add(addTo);
-				}else{
-					Survey addTo = (Survey)session.get(Survey.class, e.getValue().cmbSurvey.getSelection().getUuid());
-					Mission p = createNewMission(e.getKey(), missions.get(e.getKey()), addTo);
-					newMission.add(p);
 				}
+					
 			}
 		}catch (Exception ex){
 			ex.printStackTrace();
-			MessageDialog.openWarning(getShell(), "Error", "Error saving results");
+			MessageDialog.openWarning(getShell(), Messages.MissionDialog_ErrorTitle, Messages.MissionDialog_SaveError);
 			super.cancelPressed();
 			return;
 		}
@@ -158,8 +179,8 @@ public class MissionDialog extends TitleAreaDialog {
 						//create a new empty mission day
 						MissionDay md = new MissionDay();
 						md.setDate(cal.getTime());
-						md.setEndTime(new Time(SmartUtils.getMidnight().getTime()));
-						md.setStartTime(new Time(0));
+						md.setEndTime(new Time(SmartUtils.getMidnight().getTime() - 1));
+						md.setStartTime(new Time(SmartUtils.getMidnight().getTime()));
 						md.setRestMinutes(0);
 						md.setMission(addToMission);
 						addToMission.getMissionDays().add(md);
@@ -176,8 +197,8 @@ public class MissionDialog extends TitleAreaDialog {
 						//create a new empty mission day
 						MissionDay md = new MissionDay();
 						md.setDate(cal.getTime());
-						md.setEndTime(new Time(SmartUtils.getMidnight().getTime()));
-						md.setStartTime(new Time(0));
+						md.setEndTime(new Time(SmartUtils.getMidnight().getTime() - 1));
+						md.setStartTime(new Time(SmartUtils.getMidnight().getTime()));
 						md.setRestMinutes(0);
 						md.setMission(addToMission);
 						addToMission.getMissionDays().add(md);
@@ -186,21 +207,37 @@ public class MissionDialog extends TitleAreaDialog {
 				}
 				addToMission.getMissionDays().sort((MissionDay md1, MissionDay md2) -> md1.getDate().compareTo(md2.getDate()));
 			}else{
+				//update time
+				if (newMissionDay.getStartTime().before(addToDay.getStartTime())){
+					addToDay.setStartTime(newMissionDay.getStartTime());
+				}
+				if (newMissionDay.getEndTime().after(addToDay.getEndTime())){
+					addToDay.setEndTime(newMissionDay.getEndTime());
+				}
 				//merge observations; add all the observations to this date
 				for (SurveyWaypoint sw : newMissionDay.getWaypoints()){
 					addToDay.getWaypoints().add(sw);
 					sw.setMissionDay(addToDay);
 				}
 				
-				//add tracks; we don't merge tracks here
-				//TODO: we probalby want to merge them here otherwise we may end up with a whole bunch of really 
-				//short tracks
+				//add tracks; we don't do any merging; we assume each track is unique as
+				//the user would have to start a new mission to get this case.
 				for (MissionTrack mr : newMissionDay.getTracks()){
 					addToDay.getTracks().add(mr);
 					mr.setMissionDay(addToDay);
 				}
 			}
 			
+		}
+		
+		//update mission start end end days
+		for (MissionDay md : addToMission.getMissionDays()){
+			if (md.getDate().before(addToMission.getStartDate())){
+				addToMission.setStartDate(md.getDate());
+			}
+			if (md.getDate().after(addToMission.getEndDate())){
+				addToMission.setEndDate(md.getDate());
+			}
 		}
 		
 		SurveyHibernateManager.saveMission(addToMission, session, true);
@@ -232,6 +269,8 @@ public class MissionDialog extends TitleAreaDialog {
 		newMission.setStartDate(startDate);
 		newMission.setEndDate(endDate);
 		newMission.setId(SurveyHibernateManager.generateMissionId(session));
+		
+		session.saveOrUpdate(newMission.getSurvey());
 		SurveyHibernateManager.saveMission(newMission, session, true);
 		
 		CtMissionLink link = new CtMissionLink();
@@ -258,23 +297,88 @@ public class MissionDialog extends TitleAreaDialog {
 		
 		uiItems = new HashMap<UUID, MissionDialog.UiData>();
 		Label header1 = new Label(main, SWT.NONE);
-		header1.setText("Mission Summary:");
+		header1.setText(Messages.MissionDialog_SummaryLabel);
 		Label header2 = new Label(main, SWT.NONE);
-		header2.setText("Action:");
+		header2.setText(Messages.MissionDialog_ActionLabel);
 		Label spacer = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		for (Entry<UUID, CtMissionLink> e : missions.entrySet()){
+		ISelectionChangedListener listener = new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validate();
+			}
+		};
+		
+		Listener addSurveyListener = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				addedSurveys.addAll(((SurveyFilteredComboViewer)event.widget).getCreatedSurveys());
+				
+				for(UiData ui: uiItems.values()){
+					ui.cmbSurvey.setAdditionalSurveys(addedSurveys);
+					ui.cmbSurvey.updateContent();
+				}
+			}
+		};
+		
+		List<Mission> moreMissions = new ArrayList<>();
+		int cnt = 1;
+		for (CtMissionLink ll : missions.values()) moreMissions.add(ll.getMission());
+		
+		//sort new missions based on start time
+		moreMissions.sort(new Comparator<Mission>(){
+			@Override
+			public int compare(Mission m1, Mission m2) {
+				if (!SharedUtils.isSameDate(m1.getStartDate(), m2.getStartDate())) return m1.getStartDate().compareTo(m2.getStartDate());
+				
+				for(MissionDay md: m1.getMissionDays()){
+					if (SharedUtils.isSameDate(md.getDate(), m1.getStartDate())){
+						for(MissionDay md2: m2.getMissionDays()){
+							if (SharedUtils.isSameDate(md2.getDate(), m2.getStartDate())){
+								return md.getStartTime().compareTo(md2.getStartTime());
+							}
+						}		
+					}
+				}	
+				return 0;
+			}
+		});
+		//give them a temporary id for user interface purposes
+		for (Mission m : moreMissions){
+			m.setId(MessageFormat.format(Messages.MissionDialog_ImportedLabel, cnt++));
+		}
+		
+		//we want to display these in order; 
+		for (Mission m : moreMissions){
+			Entry<UUID, CtMissionLink> e = null;
+			for (Entry<UUID, CtMissionLink> tmp : missions.entrySet()){
+				if (tmp.getValue().getMission() == m){
+					e = tmp;
+					break;
+				}
+			}
+			
 			Label l = new Label(main, SWT.WRAP);
 			StringBuilder lbl = new StringBuilder();
+			
+			Date startDt= null;
+			for(MissionDay md: e.getValue().getMission().getMissionDays()){
+				if (SharedUtils.isSameDate(md.getDate(), e.getValue().getMission().getStartDate())){
+					startDt = SmartUtils.combineDateTime(md.getDate(), md.getStartTime());
+				}
+			}
+				
 			Mission p = e.getValue().getMission();
-			lbl.append("Start Date:");
-			lbl.append(p.getStartDate() == null ? "" : DateFormat.getDateInstance().format(p.getStartDate())); //$NON-NLS-1$
+			lbl.append(p.getId()); 
 			lbl.append("\n"); //$NON-NLS-1$
-			lbl.append("Survey Design:");
+			lbl.append(Messages.MissionDialog_startdateLabel);
+			lbl.append(DateFormat.getDateTimeInstance().format(startDt));
+			lbl.append("\n"); //$NON-NLS-1$
+			lbl.append(Messages.MissionDialog_surveyDesignLabel);
 			lbl.append(e.getValue().getNewSurveyDesign().getName()); 
 			lbl.append("\n"); //$NON-NLS-1$
-			lbl.append("Leader:");
+			lbl.append(Messages.MissionDialog_leaderLabel);
 			lbl.append(p.getLeader() == null ? "" : SmartLabelProvider.getShortLabel(p.getLeader().getMember())); //$NON-NLS-1$
 			
 			l.setText(lbl.toString());
@@ -291,33 +395,29 @@ public class MissionDialog extends TitleAreaDialog {
 			((GridData)op.getLayoutData()).horizontalIndent = 2;
 			
 			Button btnNew = new Button(op, SWT.RADIO);
-			btnNew.setText("New Mission");
+			btnNew.setText(Messages.MissionDialog_missionLabel);
 			btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 			btnNew.setSelection(true);
 			
 			Label sl = new Label(op, SWT.NONE);
-			sl.setText("Survey:");
+			sl.setText(Messages.MissionDialog_SurveyLabel);
 			sl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 			
-			SurveyFilteredComboViewer surveyViewer = new SurveyFilteredComboViewer(op, e.getValue().getNewSurveyDesign(), true, session);
+			SurveyFilteredComboViewer surveyViewer = new SurveyFilteredComboViewer(op, e.getValue().getNewSurveyDesign(), true);
 			surveyViewer.setEnabled(true);
-			surveyViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					validate();
-					
-				}
-			});
+			surveyViewer.addSelectionChangedListener(listener);
 			surveyViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			
+			surveyViewer.setNewSurveyListener(addSurveyListener);
 			
 			
 			Button btnExisting = new Button(op, SWT.RADIO);
-			btnExisting.setText("Add to Existing Mission");
+			btnExisting.setText(Messages.MissionDialog_addExistingLabel);
 			btnExisting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 			btnExisting.setSelection(false);
 			
-			MissionFilteredComboViewer viewer = new MissionFilteredComboViewer(op);
+			ArrayList<Mission> mm = new ArrayList<>(moreMissions);
+			mm.remove(e.getValue().getMission());
+			MissionFilteredComboViewer viewer = new MissionFilteredComboViewer(op, mm);
 			viewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			viewer.setEnabled(false);
 			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -328,7 +428,7 @@ public class MissionDialog extends TitleAreaDialog {
 				}
 			});
 			
-			SelectionListener listener = new SelectionAdapter() {
+			SelectionListener btnListener = new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					viewer.setEnabled(btnExisting.getSelection());
@@ -337,9 +437,8 @@ public class MissionDialog extends TitleAreaDialog {
 				}
 			};
 			
-			btnNew.addSelectionListener(listener);
-			btnExisting.addSelectionListener(listener);
-			
+			btnNew.addSelectionListener(btnListener);
+			btnExisting.addSelectionListener(btnListener);
 			
 			
 			uiItems.put(e.getKey(), new UiData(btnNew, btnExisting, viewer, surveyViewer, cd));
@@ -349,11 +448,11 @@ public class MissionDialog extends TitleAreaDialog {
 		scroll.setContent(main);
 		scroll.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		setTitle("Import CyberTracker Data");
-		setMessage("The following CyberTracker data needs to be identified as new mission new added to existing mission.");
-		getShell().setText("CyberTracker Data Import");
+		setTitle(Messages.MissionDialog_Title);
+		setMessage(Messages.MissionDialog_Message);
+		getShell().setText(Messages.MissionDialog_ShellTitle);
+		
 		return composite;
-
 	}
 	
 	@Override
@@ -367,14 +466,14 @@ public class MissionDialog extends TitleAreaDialog {
 			UUID ctMission = entry.getKey();
 			entry.getValue().errItem.hide();
 			if (!entry.getValue().btnExisting.getSelection() && !entry.getValue().btnNew.getSelection()){
-				entry.getValue().errItem.setDescriptionText("Must add to existing or create a new mission");
+				entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_MissionOrSurveyRequired);
 				entry.getValue().errItem.show();
 				error = true;
 			}
 			
 			if (entry.getValue().btnExisting.getSelection()){
 				if (entry.getValue().cmbMission.getSelection() == null){
-					entry.getValue().errItem.setDescriptionText("Must select a mission");
+					entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_MissionRequired);
 					entry.getValue().errItem.show();
 					error = true;
 				}else{
@@ -385,15 +484,40 @@ public class MissionDialog extends TitleAreaDialog {
 					double diff = (ctP.getStartDate().getTime() - p.getEndDate().getTime());
 					if (diff > 48*60*60*100.0){
 						//TODO: should be a warning not an error
-						entry.getValue().errItem.setDescriptionText(MessageFormat.format("The start date of the new mission ({0}) is more than 48 hrs from the end date of the selected mission ({1}).", DateFormat.getDateInstance().format(ctP.getStartDate()), DateFormat.getDateInstance().format(p.getEndDate())));
+						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.MissionDialog_DateWarning, DateFormat.getDateInstance().format(ctP.getStartDate()), DateFormat.getDateInstance().format(p.getEndDate())));
 						entry.getValue().errItem.show();
 //						error = true;
+					}
+					
+					if (p.getUuid() == null){
+						//we are merging to missions in the same file.  Make sure the start date and time of the new mission is
+						//after the start date time of the merged mission
+						//p before ctp
+						MissionDay startAddTo = null;
+						for (MissionDay md : p.getMissionDays()){
+							if (startAddTo == null || md.getDate().before(startAddTo.getDate())){
+								startAddTo = md;
+							}
+						}
+						MissionDay startAddFrom = null;
+						for (MissionDay md : ctP.getMissionDays()){
+							if (startAddFrom == null || md.getDate().before(startAddFrom.getDate())){
+								startAddFrom = md;
+							}
+						}
+						Date startAddToDate = SmartUtils.combineDateTime(startAddTo.getDate(), startAddTo.getStartTime());
+						Date startAddToFrom = SmartUtils.combineDateTime(startAddFrom.getDate(), startAddFrom.getStartTime());
+						if (startAddToFrom.before(startAddToDate)){
+							entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_MergeDateError);
+							entry.getValue().errItem.show();
+							error = true;
+						}
 					}
 				}
 			}
 			if (entry.getValue().btnNew.getSelection()){
 				if (entry.getValue().cmbSurvey.getSelection() == null){
-					entry.getValue().errItem.setDescriptionText("Must select a survey to add the new mission to");
+					entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_SurveyRequired);
 					entry.getValue().errItem.show();
 					error = true;
 				}else{
@@ -404,13 +528,18 @@ public class MissionDialog extends TitleAreaDialog {
 							Mission ctP = missions.get(ctMission).getMission();
 							if (ctP.getStartDate().before(selectedSurvey.getStartDate()) ||
 									ctP.getEndDate().after(selectedSurvey.getEndDate())){
-								entry.getValue().errItem.setDescriptionText("Mission dates do not fall within survey dates");
+								entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_MissionDatesInvalid);
 								entry.getValue().errItem.show();
 								error = true;			
 							}
 						}
+						if (!missions.get(ctMission).getNewSurveyDesign().getUuid().equals(selectedSurvey.getSurveyDesign().getUuid())){
+							entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.MissionDialog_DifferentSurveyDesign, missions.get(ctMission).getNewSurveyDesign().getName(), selectedSurvey.getSurveyDesign().getName()));
+							entry.getValue().errItem.show();
+							error = true;
+						}
 					}else{
-						entry.getValue().errItem.setDescriptionText("Must select a survey");
+						entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_SurveyRequired2);
 						entry.getValue().errItem.show();
 						error = true;
 					}

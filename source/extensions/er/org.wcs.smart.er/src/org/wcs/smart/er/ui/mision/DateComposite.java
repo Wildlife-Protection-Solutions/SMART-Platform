@@ -82,20 +82,20 @@ public class DateComposite extends MissionComposite {
 				return false;
 			}
 		}
-		
-		if (dates.getStartDate().before( mission.getSurvey().getStartDate()) ||
-			dates.getEndDate().before(mission.getSurvey().getStartDate()) ||
-			dates.getEndDate().after(mission.getSurvey().getEndDate()) ||
-			dates.getStartDate().after(mission.getSurvey().getEndDate())){
-			
-			dates.setError(MessageFormat.format(
-					Messages.DateComposite_DateError,
-					new Object[]{DateFormat.getDateInstance().format(mission.getSurvey().getStartDate()),
-							DateFormat.getDateInstance().format(mission.getSurvey().getEndDate())}));
-					
-			return false;
+		if (mission.getSurvey().getStartDate() != null && mission.getSurvey().getEndDate() != null){
+			if (dates.getStartDate().before( mission.getSurvey().getStartDate()) ||
+				dates.getEndDate().before(mission.getSurvey().getStartDate()) ||
+				dates.getEndDate().after(mission.getSurvey().getEndDate()) ||
+				dates.getStartDate().after(mission.getSurvey().getEndDate())){
+				
+				dates.setError(MessageFormat.format(
+						Messages.DateComposite_DateError,
+						new Object[]{DateFormat.getDateInstance().format(mission.getSurvey().getStartDate()),
+								DateFormat.getDateInstance().format(mission.getSurvey().getEndDate())}));
+						
+				return false;
+			}
 		}
-		
 		long startD = dates.getStartDate().getTime();
 		long endD = dates.getEndDate().getTime();
 		

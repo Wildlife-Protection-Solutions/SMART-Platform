@@ -34,6 +34,7 @@ import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.PlugIn;
+import org.wcs.smart.connect.dataqueue.cybertracker.survey.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -45,7 +46,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class AddDataQueueCtMissionJob extends Job {
 
 	public AddDataQueueCtMissionJob() {
-		super("Installing Cybertracker Connect Mission DataQueue Processor");
+		super(Messages.AddDataQueueCtMissionJob_MissionInstallProcessor);
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class AddDataQueueCtMissionJob extends Job {
 						
 		Session session = HibernateManager.openSession();
 		try{
-			monitor.beginTask("Creating Tables", 10);
+			monitor.beginTask(Messages.AddDataQueueCtMissionJob_CreateTableTask, 10);
 			session.beginTransaction();
 			installPlugin(session);
 			session.getTransaction().commit();
@@ -65,8 +66,8 @@ public class AddDataQueueCtMissionJob extends Job {
 				@Override
 				public void run() {
 					MessageDialog.openError(Display.getDefault().getActiveShell(),
-							"Error",
-							"Could not installed SMART Connect Cybertracker Mission Data Queue Processor");
+							Messages.AddDataQueueCtMissionJob_ErrorMsg,
+							Messages.AddDataQueueCtMissionJob_InstallError);
 				}
 				
 			});

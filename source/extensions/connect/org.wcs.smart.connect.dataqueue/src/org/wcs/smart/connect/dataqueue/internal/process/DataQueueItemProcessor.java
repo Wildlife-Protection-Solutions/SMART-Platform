@@ -151,6 +151,12 @@ public class DataQueueItemProcessor extends Job {
 			}
 			monitor.subTask(Messages.DataQueueItemProcessor_Task5);
 			try{
+				if (requeue){
+					//requeuing action takes place below
+					if (item.getCheckOutStatus() != LocalDataQueueItem.Status.REQUEUED){
+						processingStatus.appendToMessage(Messages.DataQueueItemProcessor_RequeueMessage);
+					}
+				}
 				updateLocalStatus(processingStatus.getStatus(), processingStatus.getMessage());
 			}catch (Exception ex){
 				ConnectDataQueuePlugin.displayLog(Messages.DataQueueItemProcessor_Error2, ex);

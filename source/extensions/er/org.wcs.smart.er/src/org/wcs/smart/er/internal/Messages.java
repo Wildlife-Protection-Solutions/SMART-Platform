@@ -381,6 +381,8 @@ public class Messages extends NLS {
 	public static String MissionFilterDialog_Dates;
 	public static String MissionFilterDialog_Message;
 	public static String MissionFilterDialog_Title;
+
+	public static String MissionFilteredComboViewer_tooltip;
 	public static String MissionGeoResourceInfo_TracksTitle;
 	public static String MissionGeoResourceInfo_WaypointsTitle;
 	public static String MissionImportDialog_0;
@@ -736,6 +738,14 @@ public class Messages extends NLS {
 	public static String SurveyFilterDialog_WarnInfo;
 
 	public static String SurveyFilterDialog_WarnTitle;
+
+	public static String SurveyFilteredComboViewer_Message;
+
+	public static String SurveyFilteredComboViewer_NewSurveyLabel;
+
+	public static String SurveyFilteredComboViewer_Title;
+
+	public static String SurveyFilteredComboViewer_tooltip;
 
 	public static String SurveyIdPage_IdError;
 	public static String SurveyIdPage_IdLabel;

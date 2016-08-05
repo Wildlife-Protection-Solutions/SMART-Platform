@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
@@ -37,8 +36,6 @@ import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
@@ -48,7 +45,6 @@ import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
-import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil.JsonPatrolKey;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
@@ -57,8 +53,7 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.Team;
-
-import com.google.gson.JsonSyntaxException;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Builds specific patrol objects that suitable for further import
@@ -254,18 +249,28 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			if (ctPatrol.getMandate() == null) ctPatrol.setMandate(defaultValue.getMandate());
 			if (ctPatrol.getObjective() == null) ctPatrol.setObjective(defaultValue.getObjective());
 			
-			if (ctPatrol.getTeam() != null){
+			if (ctPatrol.getTeam() == null){
 				ctPatrol.setTeam(defaultValue.getTeam());
 				if (defaultValue.getTeam() != null) ctPatrol.setCtTeam(defaultValue.getTeam().getName());
 			}
 			
-			if (ctPatrol.getStation() != null){
+			if (ctPatrol.getStation() == null){
 				ctPatrol.setStation(defaultValue.getStation());
 				if (defaultValue.getStation() != null) ctPatrol.setCtStation(defaultValue.getStation().getName());
 			}
-			if (ctPatrol.getMembers() == null) ctPatrol.setMembers(defaultValue.getMembers());
+			if (ctPatrol.getMembers() == null) ctPatrol.setMembers(new ArrayList<Employee>());
+			if (ctPatrol.getMembers().isEmpty()){
+				ctPatrol.getMembers().addAll(defaultValue.getMembers());
+				List<String> members = new ArrayList<String>();
+				for (Employee e : ctPatrol.getMembers()){
+					members.add(SmartLabelProvider.getShortLabel(e));
+				}
+				ctPatrol.setCtMembers(members);
+			}
 			if (ctPatrol.getPilot() == null) ctPatrol.setPilot(defaultValue.getPilot());
+			if (ctPatrol.getPilot() != null) ctPatrol.setCtPilot(SmartLabelProvider.getShortLabel(ctPatrol.getPilot()));
 			if (ctPatrol.getLeader() == null) ctPatrol.setLeader(defaultValue.getLeader());
+			if (ctPatrol.getLeader() != null) ctPatrol.setCtLeader(SmartLabelProvider.getShortLabel(ctPatrol.getLeader()));
 			
 			if (ctPatrol.getPatrolTransportType() == null){
 				ctPatrol.setPatrolTransportType(defaultValue.getPatrolTransportType());
@@ -273,9 +278,8 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 			if (ctPatrol.getPatrolType() == null) ctPatrol.setPatrolType(defaultValue.getPatrolType());
 		
-			for(String missing : defaultValue.getMissingKeys()){
-				ctPatrol.addMissingKey(missing);
-			}
+			ctPatrol.getProblems().putAll(defaultValue.getProblems());
+			
 			
 		} catch (org.json.simple.parser.ParseException e) {
 			ctPatrol.addError(PatrolMeta.GENERAL, Messages.PatrolCTDataBuilder_Error_JsonDefaultValue);

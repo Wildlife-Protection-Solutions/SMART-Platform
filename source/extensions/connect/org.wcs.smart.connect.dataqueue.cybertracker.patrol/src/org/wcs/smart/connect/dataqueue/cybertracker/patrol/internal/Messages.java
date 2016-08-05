@@ -18,6 +18,8 @@ public class Messages extends NLS {
 	public static String PatrolDialog_DifferentType;
 	public static String PatrolDialog_DifferentTypeError;
 	public static String PatrolDialog_ErrorTitle;
+	public static String PatrolDialog_ImportedMessage;
+	public static String PatrolDialog_InvalidMergeDates;
 	public static String PatrolDialog_LeaderLabel;
 	public static String PatrolDialog_NewPatrolLabel;
 	public static String PatrolDialog_NoTransportType;
@@ -30,6 +32,8 @@ public class Messages extends NLS {
 	public static String PatrolDialog_SummaryLabel;
 	public static String PatrolDialog_TypeLabel;
 	public static String PatrolJsonProcessor_CreatedMsg;
+	public static String PatrolJsonProcessor_ErrorDialog;
+	public static String PatrolJsonProcessor_ErrorMesg;
 	public static String PatrolJsonProcessor_ErrorTitle;
 	public static String PatrolJsonProcessor_ModifiedMsg;
 	public static String PatrolJsonProcessor_NoPatrolFound;

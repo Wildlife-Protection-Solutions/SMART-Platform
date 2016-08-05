@@ -294,12 +294,17 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					PatrolDialog pd = new PatrolDialog(Display.getDefault().getActiveShell(), newPatrolLinks, session);
-					if (pd.open() == Window.CANCEL){
+					try{
+						PatrolDialog pd = new PatrolDialog(Display.getDefault().getActiveShell(), newPatrolLinks, session);
+						if (pd.open() == Window.CANCEL){
+							cancel[0] = true;
+						}else{
+							modifiedPatrols.addAll(pd.getMergedPatrols());
+							newPatrols = pd.getNewPatrols();
+						}
+					}catch (Exception ex){
+						CyberTrackerPlugIn.displayError(Messages.PatrolJsonProcessor_ErrorDialog, Messages.PatrolJsonProcessor_ErrorMesg + ex.getMessage(), ex);
 						cancel[0] = true;
-					}else{
-						modifiedPatrols.addAll(pd.getMergedPatrols());
-						newPatrols = pd.getNewPatrols();
 					}
 				}	
 			});

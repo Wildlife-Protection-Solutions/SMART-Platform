@@ -74,6 +74,11 @@ public class Messages extends NLS {
 	public static String PatrolImporter_DuplicateMessage;
 	public static String PatrolImporter_ImportDialogTitle;
 	public static String PatrolImporter_Save_Error;
+	public static String PatrolJsonUtils_MandatenotFound;
+	public static String PatrolJsonUtils_MemberNotFound;
+	public static String PatrolJsonUtils_StationNotFound;
+	public static String PatrolJsonUtils_TeamNotFound;
+	public static String PatrolJsonUtils_TTNotFound;
 	public static String PatrolLegImporter_DuplicateDialogTitle;
 	public static String PatrolLegImporter_DuplicateMessage;
 	public static String PatrolLegImporter_ErrorDialog_Message;

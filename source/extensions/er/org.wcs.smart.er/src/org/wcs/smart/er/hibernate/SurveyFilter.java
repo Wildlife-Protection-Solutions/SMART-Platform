@@ -183,7 +183,7 @@ public class SurveyFilter {
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT s.uuid, s.id, s.startDate, sd.name "); //$NON-NLS-1$
+		str.append("SELECT s.uuid, s.id, s.startDate, sd.name, sd.uuid "); //$NON-NLS-1$
 		str.append("FROM Survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
 		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
 
@@ -230,7 +230,7 @@ public class SurveyFilter {
 				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
-			str.append(" ( s.startDate >= :date1 and s.endDate <= :date2 ) "); //$NON-NLS-1$
+			str.append(" ( (s.startDate >= :date1 and s.endDate <= :date2) or s.startDate is null or s.endDate is null ) "); //$NON-NLS-1$
 		}
 		if (!and){
 			str.append(")"); //$NON-NLS-1$

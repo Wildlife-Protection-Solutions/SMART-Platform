@@ -19,6 +19,7 @@ public class Messages extends NLS {
 	public static String AbstractSmartImporter_Observer_InvalidData;
 	public static String AbstractSmartImporter_Observer_NotFound;
 	public static String AbstractSmartImporter_ParseDateError;
+	public static String AbstractSmartImporter_ParseError;
 	public static String AbstractSmartImporter_PauseRecordedSeveralTimes;
 	public static String AddCyberTrackerJob_InstallCtJobName;
 	public static String AddCyberTrackerJob_Progress1;
@@ -282,6 +283,12 @@ public class Messages extends NLS {
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Yes;
 	public static String ElementsUtil_MediaFileReadError;
+	public static String JsonUtils_AttributeNotFound;
+	public static String JsonUtils_CouldNotParseValue;
+	public static String JsonUtils_InvalidListAttribute;
+	public static String JsonUtils_InvalidTreeAttribute;
+	public static String JsonUtils_ListItemNotFound;
+	public static String JsonUtils_TreeNodeNotFound;
 	public static String ManageProfilesDialog_Button_Create;
 	public static String ManageProfilesDialog_Button_Delete;
 	public static String ManageProfilesDialog_Button_Edit;
