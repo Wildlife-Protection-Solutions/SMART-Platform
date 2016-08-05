@@ -219,7 +219,6 @@ function createFileTable(){
 			 		deleteicon.href="";
 			 		row.childNodes[row.childNodes.length - 1].appendChild(deleteicon);
 //		 		}
-			 	
 
 			 	var downloadicon = document.createElement("a");
 			 	downloadicon.className="download-icon marginleftright";
