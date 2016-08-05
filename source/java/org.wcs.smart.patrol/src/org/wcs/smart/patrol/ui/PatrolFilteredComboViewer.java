@@ -77,6 +77,12 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 	private boolean stopSelectionPropogation = false;
 	private List<ISelectionChangedListener> changeListeners = new ArrayList<ISelectionChangedListener>();
 	
+	/**
+	 * 
+	 * @param parent
+	 * @param newPatrols collection of patrols that don't exist in the database, but should be added to the list
+	 * irregardless of the current filter
+	 */
 	public PatrolFilteredComboViewer(Composite parent, List<Patrol> newPatrols) {
 		this(parent);
 		this.newPatrols = newPatrols;
