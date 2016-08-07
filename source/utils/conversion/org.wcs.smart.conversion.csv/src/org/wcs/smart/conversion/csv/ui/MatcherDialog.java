@@ -53,6 +53,6 @@ public class MatcherDialog extends Window {
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText("Mapping file editor");
-		shell.setMinimumSize(840, 650);
+		shell.setMinimumSize(800, 600);
 	}
 }

@@ -81,7 +81,7 @@ public class DmMatcherMainComposite extends Composite {
 
 	private static final Logger logger = LogManager.getLogger(DmMatcherMainComposite.class); 
 	
-	private static final int TABLE_HEIGHT_HINT = 300;
+	private static final int TABLE_HEIGHT_HINT = 200;
 
 	private MatchSession session;
 	
@@ -117,7 +117,7 @@ public class DmMatcherMainComposite extends Composite {
 		gridData.heightHint = 760;
 		this.setLayoutData(gridData);
 
-		this.setSize(840, 640);
+		this.setSize(800, 600);
 
 		//main composite and layout
 		final Composite main = new Composite(this, SWT.NONE);
