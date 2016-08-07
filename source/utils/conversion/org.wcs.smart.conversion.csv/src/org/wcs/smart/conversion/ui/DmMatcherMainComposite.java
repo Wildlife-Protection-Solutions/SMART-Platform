@@ -117,8 +117,6 @@ public class DmMatcherMainComposite extends Composite {
 		gridData.heightHint = 760;
 		this.setLayoutData(gridData);
 
-		this.setSize(800, 600);
-
 		//main composite and layout
 		final Composite main = new Composite(this, SWT.NONE);
 		GridLayout mlayout = new GridLayout(1, true);
@@ -281,6 +279,7 @@ public class DmMatcherMainComposite extends Composite {
 		addLanguageChangedListener(categoryComposite);
 		
 		langSelector.select(0); //to select default language and fire all listeners
+		this.layout(true, true);
 	}
 
 	protected void performSave() {
