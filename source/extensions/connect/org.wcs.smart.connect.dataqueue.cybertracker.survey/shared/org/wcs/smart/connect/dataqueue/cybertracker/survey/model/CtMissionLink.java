@@ -34,6 +34,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -54,6 +55,8 @@ public class CtMissionLink {
 	
 	private SurveyDesign surveyDesign;
 	
+	private SamplingUnit lastSamplingUnit;
+	
 	@Id
 	@Column(name="ct_uuid")
 	public UUID getCtUuid(){
@@ -72,6 +75,16 @@ public class CtMissionLink {
 	
 	public void setMission(Mission mission){
 		this.mission = mission;
+	}
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="su_uuid")
+	public SamplingUnit getSamplingUnit(){
+		return this.lastSamplingUnit;
+	}
+	
+	public void setSamplingUnit(SamplingUnit su){
+		this.lastSamplingUnit = su;
 	}
 	
 	@Column(name="ct_device_id")

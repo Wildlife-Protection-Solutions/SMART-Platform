@@ -82,8 +82,8 @@ public class ScreensUtil {
 	
 	public static final String RESULT_OBSERVATION_COUNTER = COMMON_PREFIX + "ObsCounter"; //$NON-NLS-1$
 
-	private ScreensObjectFactory screensFactory;
-	private CyberTrackerUtil ctUtil;
+	protected ScreensObjectFactory screensFactory;
+	protected CyberTrackerUtil ctUtil;
 	
 	protected ScreensUtil(CyberTrackerUtil ctUtil) {
 		this.ctUtil = ctUtil;

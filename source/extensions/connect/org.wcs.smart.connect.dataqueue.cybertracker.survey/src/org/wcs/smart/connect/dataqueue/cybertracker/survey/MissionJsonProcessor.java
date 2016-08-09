@@ -163,22 +163,30 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					if (link.getLastObservationCnt()  + 1 != observationCounter) continue;					
 				}
 				
-				//determine the sampling unit
-				SamplingUnit su = null;
-				String suKey = null;
 				if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT)){
-					suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT);
-				}else if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT)){
-					suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT);
-				}
-				if (suKey != null & suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
-					suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
-					if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
-						su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));
-						if (su == null){
-							warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_SuNotFound, suKey));
+					//sampling unit changed
+					//we have a new sampling unit
+					SamplingUnit su = null;
+					String suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT);
+					if (suKey != null & suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
+						suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
+						if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
+							su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));
+							if (su == null){
+								warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_SuNotFound, suKey));
+							}
 						}
 					}
+					link.setSamplingUnit(su);
+					
+					//add this point to track; this is not an observation
+					Date dt = JsonUtils.JSON_DATE_FORMAT.parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+					addPointToTrack(link.getMission(), su, parser.readXYFromProperties(feature), dt, session);
+					
+					//update last observation count
+					link.setLastObservationCnt(observationCounter);
+					processedFeatures.add(feature);
+					continue;
 				}
 				
 				//is this the end of the mission
@@ -204,7 +212,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					md.setEndTime(new Time(dt.getTime()));
 						
 					//add point to track
-					addPointToTrack(md, su, parser.readXYFromProperties(feature),dt);
+					addPointToTrack(md, link.getSamplingUnit(), parser.readXYFromProperties(feature),dt);
 					
 					//update last observation count
 					link.setLastObservationCnt(observationCounter);
@@ -226,7 +234,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					}
 					
 					if (wp.getX() != null && wp.getY() != null){
-						addPointToTrack(link.getMission(), su, new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+						addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
 					}
 					//update last observation count
 					link.setLastObservationCnt(observationCounter);
@@ -244,7 +252,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					}
 
 					Date groupStartTime = link.getGroupStartTime();
-					int groupResult = processGroup(sighting, link.getMission(), wp, su, parser.getApplyToAdd(), groupStartTime, session);
+					int groupResult = processGroup(sighting, link.getMission(), wp, link.getSamplingUnit(), parser.getApplyToAdd(), groupStartTime, session);
 					if (groupResult > 0){
 						
 						if (groupResult == 2){
@@ -256,7 +264,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						}
 						
 						if(wp.getX() != null && wp.getY() != null){
-							addPointToTrack(link.getMission(), su, new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+							addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
 						}
 						link.setLastObservationCnt(observationCounter);
 						processedFeatures.add(feature);
@@ -290,11 +298,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				
 				//add these observation to the selected patrol leg
 				//TODO: potentially we could validate metadata
-				addToExistingMission(link.getMission(), wp, su, session);
+				addToExistingMission(link.getMission(), wp, link.getSamplingUnit(), session);
 				if (link.getMission().getUuid() != null) modifiedMissions.add(link.getMission());
 				
 				//add position to track log
-				addPointToTrack(link.getMission(), su, new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+				addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
 				
 				//update last observation count
 				link.setLastObservationCnt(observationCounter);
@@ -571,12 +579,28 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		mission.setMissionDays(new ArrayList<MissionDay>());
 		mission.getMissionDays().add(md);
 		
+		//find the initial sampling unit
+		SamplingUnit su = null;
+		if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT)){
+			String suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT);
+			if (suKey != null & suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
+				suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
+				if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
+					su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));
+					if (su == null){
+						warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_SuNotFound, suKey));
+					}
+				}
+			}
+		}
+			
 		CtMissionLink link = new CtMissionLink();
 		link.setDeviceId(deviceId);
 		link.setCtUuid(ctUuid);
 		link.setLastObservationCnt(observationCounter);
 		link.setMission(mission);
 		link.setNewSurveyDesign(ct.getSurveyDesign());
+		link.setSamplingUnit(su);
 		
 		newMissionLinks.put(ctUuid, link);
 		return link;

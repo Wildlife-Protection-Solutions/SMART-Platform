@@ -240,6 +240,15 @@ public class MissionDialog extends TitleAreaDialog {
 			}
 		}
 		
+		//update survey dates
+		Survey survey = addToMission.getSurvey();
+		if (survey.getStartDate() == null || newMission.getStartDate().before(survey.getStartDate())){
+			survey.setStartDate(newMission.getStartDate());
+		}
+		if (survey.getEndDate() == null || newMission.getEndDate().after(survey.getEndDate())){
+			survey.setEndDate(newMission.getEndDate());
+		}
+				
 		SurveyHibernateManager.saveMission(addToMission, session, true);
 		
 		CtMissionLink link = new CtMissionLink();
@@ -248,6 +257,7 @@ public class MissionDialog extends TitleAreaDialog {
 		link.setDeviceId(newMissionLink.getDeviceId());
 		link.setLastObservationCnt(newMissionLink.getLastObservationCnt());
 		link.setGroupStartTime(newMissionLink.getGroupStartTime());
+		link.setSamplingUnit(newMissionLink.getSamplingUnit());
 		session.save(link);
 	}
 	
@@ -270,6 +280,14 @@ public class MissionDialog extends TitleAreaDialog {
 		newMission.setEndDate(endDate);
 		newMission.setId(SurveyHibernateManager.generateMissionId(session));
 		
+		//update survey dates
+		if (survey.getStartDate() == null || newMission.getStartDate().before(survey.getStartDate())){
+			survey.setStartDate(newMission.getStartDate());
+		}
+		if (survey.getEndDate() == null || newMission.getEndDate().after(survey.getEndDate())){
+			survey.setEndDate(newMission.getEndDate());
+		}
+		
 		session.saveOrUpdate(newMission.getSurvey());
 		SurveyHibernateManager.saveMission(newMission, session, true);
 		
@@ -279,6 +297,7 @@ public class MissionDialog extends TitleAreaDialog {
 		link.setDeviceId(mission.getDeviceId());
 		link.setLastObservationCnt(mission.getLastObservationCnt());
 		link.setGroupStartTime(mission.getGroupStartTime());
+		link.setSamplingUnit(mission.getSamplingUnit());
 		session.save(link);
 		
 		return newMission;

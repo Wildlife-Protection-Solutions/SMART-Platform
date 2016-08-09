@@ -179,13 +179,13 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			MissionTrack lastTrack = null;
 			double lastTime = -1;
 			for (MissionTrack t: md.getTracks()){
-				if (lastTrack == null || lastTime > t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z){
+				if (lastTrack == null || lastTime < t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z){
 					lastTrack = t;
 					lastTime = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z;
 				}
 			}
 			
-			if (lastTrack.getSamplingUnit().equals(su)){
+			if (isEqual(lastTrack.getSamplingUnit(), su)){
 				//add point to track
 				addTo = lastTrack;
 			}else{
@@ -200,6 +200,12 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 		}
 		LineString newLs = JsonTrackUtils.addPointToTrack(addTo.getLineString(), c, dt);
 		addTo.setLineString(newLs);
+	}
+	
+	private static boolean isEqual(SamplingUnit s1, SamplingUnit s2){
+		if (s1 == null && s2 == null) return true;
+		if (s1 != null && s2 != null) return s1.equals(s2);
+		return false;
 	}
 	
 	/*

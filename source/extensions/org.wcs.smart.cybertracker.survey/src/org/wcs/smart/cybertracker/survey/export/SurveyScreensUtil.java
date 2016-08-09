@@ -297,6 +297,11 @@ public class SurveyScreensUtil extends ScreensUtil {
 		control2.setShowMajor("True"); //$NON-NLS-1$
 		control2.setTranslateMajorScreenId(nextTaskId.getNodeId());
 		control2.setTakeGPS("False"); //$NON-NLS-1$
+		
+		Control obsCounter = getScreensFactory().createFormulaControl12(CyberTrackerUtil.OBSCOUNTER_VARNAME + "+1"); //$NON-NLS-1$
+		obsCounter.setResultGlobalValue(CyberTrackerUtil.OBSCOUNTER_VARNAME);
+		obsCounter.setTranslateResultElementId(ctUtil.getObservationCntId().getItemId());
+		ScreensObjectFactory.addControlToNode(suNode, obsCounter);
 		return id;
 	}
 
