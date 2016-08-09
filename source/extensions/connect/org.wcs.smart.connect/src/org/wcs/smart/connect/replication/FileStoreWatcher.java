@@ -53,7 +53,6 @@ import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -165,24 +164,16 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 
     	Session s = HibernateManager.openSession();
     	try{
-    		if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(caUuid, s)){
-    			SmartHibernateManager.lockDatabase(s);
-    			//this ensures nobody else can be writing to the change log table
-    			//which may cause deadlock issues in derby
-    			try{
-    				s.beginTransaction();
-    			
-	    			ChangeLogItem item = new ChangeLogItem();
-	    	    	item.setAction(type);
-	    	    	item.setConservationArea(caUuid);
-	    	    	item.setFileName(relativeFileName);
-	    	    	item.setSource(Source.LOCAL);
-	    	    	
-	    			ChangeLogTableManager.INSTANCE.addItem(s, item);
-	    			s.getTransaction().commit();
-    			}finally{
-    				SmartHibernateManager.unlockDatabase();
-    			}
+    		if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(caUuid, s)){			
+	    		ChangeLogItem item = new ChangeLogItem();
+	    	    item.setAction(type);
+	    	    item.setConservationArea(caUuid);
+	    	    item.setFileName(relativeFileName);
+	    	    item.setSource(Source.LOCAL);
+	    	    
+	    	    s.beginTransaction();
+	    	    ChangeLogTableManager.INSTANCE.addItem(s, item);
+	    		s.getTransaction().commit();
     		}
     	}catch (Exception ex){
     		ConnectPlugIn.displayLog(MessageFormat.format(Messages.FileStoreWatcher_FilestoreLogError, relativeFileName, ex.getMessage()), ex);

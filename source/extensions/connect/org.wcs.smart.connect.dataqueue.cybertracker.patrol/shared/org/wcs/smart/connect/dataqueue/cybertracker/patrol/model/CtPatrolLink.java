@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.dataqueue.cybertracker.patrol.model;
 
-
 import java.util.Date;
 import java.util.UUID;
 
