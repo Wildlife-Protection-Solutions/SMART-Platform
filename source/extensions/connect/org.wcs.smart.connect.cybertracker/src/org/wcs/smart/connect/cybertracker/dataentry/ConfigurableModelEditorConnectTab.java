@@ -198,7 +198,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		cmbPositionType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				boolean change = !properties.getPingType().equals(((IStructuredSelection)cmbPositionType.getSelection()).getFirstElement());
+				boolean change = properties.getPingType() == null || !properties.getPingType().equals(((IStructuredSelection)cmbPositionType.getSelection()).getFirstElement());
 				IStructuredSelection selection = (IStructuredSelection) cmbPositionType.getSelection();
 				if (!selection.isEmpty()){
 					Object x = selection.getFirstElement();

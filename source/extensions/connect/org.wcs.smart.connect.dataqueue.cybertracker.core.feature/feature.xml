@@ -1,26 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.connect.dataqueue.cybertracker.core.feature"
-      label="SMART CyberTracker DataQueue Processors"
+      id="org.wcs.smart.connect.dataqueue.cybertracker.feature"
+      label="Core SMART CyberTracker DataQueue Processors (Required)"
       version="4.0.1.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature"
       license-feature-version="4.0.0">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description>
+      Core processing tools for processing JSON data sent by CyberTracker to Connect. Includes support for processing Patrol data.
    </description>
-
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
-   </copyright>
 
    <license url="http://www.example.com/license">
       [Enter License Description here.]
    </license>
 
+   <includes
+         id="org.wcs.smart.connect.dataqueue.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.wcs.smart.connect.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.wcs.smart.connect.dataqueue.cybertracker"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.connect.dataqueue.cybertracker.patrol"
          download-size="0"
          install-size="0"
          version="0.0.0"

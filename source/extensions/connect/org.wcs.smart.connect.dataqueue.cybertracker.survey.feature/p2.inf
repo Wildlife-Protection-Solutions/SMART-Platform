@@ -1,8 +1,11 @@
-metaRequirements.0.namespace=org.wcs.smart.connect.dataqueue.cybertracker.surve
+metaRequirements.0.namespace=org.wcs.smart.connect.dataqueue.cybertracker.survey
 metaRequirements.0.name=onInstall
 
-metaRequirements.1.namespace=org.wcs.smart.connect.dataqueue.cybertracker.surve
+metaRequirements.1.namespace=org.wcs.smart.connect.dataqueue.cybertracker.survey
 metaRequirements.1.name=onUninstall
 
-instructions.install=org.wcs.smart.connect.dataqueue.cybertracker.surve.onInstall();
-instructions.uninstall=org.wcs.smart.connect.dataqueue.cybertracker.surve.onUninstall();
+metaRequirements.2.namespace=org.wcs.smart.er
+metaRequirements.2.name=onInstall
+
+instructions.install=org.wcs.smart.er.onInstall();org.wcs.smart.connect.dataqueue.cybertracker.survey.onInstall()
+instructions.uninstall=org.wcs.smart.connect.dataqueue.cybertracker.survey.onUninstall();
