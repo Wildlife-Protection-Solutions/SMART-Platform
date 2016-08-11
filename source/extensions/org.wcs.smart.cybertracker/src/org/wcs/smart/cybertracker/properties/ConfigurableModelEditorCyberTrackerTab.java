@@ -55,6 +55,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.IConfigurableModelEditorTabContent;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -85,12 +86,16 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		return Messages.ConfigurableModelEditorCyberTrackerTab_TabName;
 	}
 
+	private void initProfile() {
+		Session s = dialog.getSession();
+		cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(s, dialog.getModel());
+		loadProfile();
+	}
+
 	private void loadProfile(){
 		CyberTrackerPropertiesProfile prevSelection = getSelectedProfile();
 		
 		Session s = dialog.getSession();
-		cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(s, dialog.getModel());
-			
 		profileList = CyberTrackerHibernateManager.getPropertiesProfiles(s);
 		Collections.sort(profileList, new CtProfileDefaultNameComparator());
 			
@@ -104,6 +109,9 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 					fireEvent = true;
 				}
 			}else{
+				//selected profile was deleted
+				s.evict(cmProfile); //required as actual object in db will be removed by constraint
+				cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(s, dialog.getModel());
 				cbProfile.setSelection(new StructuredSelection(profileList.get(0)));
 			}
 		}else{
@@ -199,7 +207,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 			}
 		});
 		
-		loadProfile();
+		initProfile();
 		return main;
 	}
 
@@ -247,8 +255,8 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		j.setSystem(true);
 		j.schedule();
 		
+		cmProfile.setProfile(p);
 		if (fireEvent){
-			cmProfile.setProfile(p);
 			dialog.notifyChangesMade();
 		}
 	}
