@@ -242,6 +242,7 @@ public class ConfigurableModelFactory {
 			clone.setElement(copyTo);
 			copyTo.getNames().add(clone);
 		}
+		copyTo.setName(copyFrom.getName());
 	}
 
 	private static void loadCategoryInfo(Category c){
@@ -267,13 +268,15 @@ public class ConfigurableModelFactory {
 		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
 		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
 		
+		copyLabels(toCopy, clonedNode);
+		
 		if (toCopy.getCategory() != null){
 			clonedNode.setCategory(toCopy.getCategory());	
 			loadCategoryInfo(toCopy.getCategory());
 		}else{
 			clonedNode.setCategory(null);
 		}
-		copyLabels(toCopy, clonedNode);
+		
 		for (CmAttribute att : toCopy.getCmAttributes()){
 			CmAttribute clonedAtt = cloneAttribute(att, clonedModel);
 			clonedAtt.setNode(clonedNode);
@@ -306,6 +309,7 @@ public class ConfigurableModelFactory {
 			clonedOp.setCmAttribute(clone);
 			clone.getCmAttributeOptions().put(clonedOp.getOptionId(), clonedOp);
 		}
+		
 		copyLabels(attributeToClone, clone);
 		clone.setOrder(attributeToClone.getOrder());
 		clone.setList(cloneCmAttributeList(attributeToClone.getList(), cm, clone));
