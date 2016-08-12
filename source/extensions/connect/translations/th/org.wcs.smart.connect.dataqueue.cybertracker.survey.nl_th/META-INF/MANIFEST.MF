@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CyberTracker Survey/Mission Data Queue Processor Thai Fragment
+Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker.survey.nl_th
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.connect.dataqueue.cybertracker.survey;bundle-version="4.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart

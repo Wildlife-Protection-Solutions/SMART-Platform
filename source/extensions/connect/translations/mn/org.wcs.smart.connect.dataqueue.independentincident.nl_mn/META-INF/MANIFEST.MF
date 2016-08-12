@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Independent Incident Data Queue Processor Mongolian Fragment
+Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.independentincident.nl_mn
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.connect.dataqueue.independentincident;bundle-version="4.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart
