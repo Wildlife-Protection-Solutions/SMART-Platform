@@ -36,9 +36,6 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_NoAlertsMessage;
 	public static String ConfigurableModelEditorConnectTab_NoAlertsTitle;
 	public static String ConfigurableModelEditorConnectTab_NoTypesFound;
-	public static String ConfigurableModelEditorConnectTab_PingFrequency;
-	public static String ConfigurableModelEditorConnectTab_PingFrequency_Error;
-	public static String ConfigurableModelEditorConnectTab_PingFrequency_Tooltip;
 	public static String ConfigurableModelEditorConnectTab_PositionFreqTooltip;
 	public static String ConfigurableModelEditorConnectTab_PositionTypeLabel;
 	public static String ConfigurableModelEditorConnectTab_PositionTypeTooltip;
