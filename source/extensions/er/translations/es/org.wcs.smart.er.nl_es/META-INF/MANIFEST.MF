@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Spanish Ecological Records Fragment
 Bundle-SymbolicName: org.wcs.smart.er.nl_es
-Bundle-Version: 4.0.0
-Fragment-Host: org.wcs.smart.er;bundle-version="4.0.0"
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.er;bundle-version="4.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

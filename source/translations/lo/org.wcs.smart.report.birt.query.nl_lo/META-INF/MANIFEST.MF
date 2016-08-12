@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart.report.birt.query Lao NLS Support
 Bundle-SymbolicName: org.wcs.smart.report.birt.query.nl_lo
-Bundle-Version: 4.0.0
+Bundle-Version: 4.0.1
 Bundle-Vendor: org.wcs.smart
-Fragment-Host: org.wcs.smart.report.birt.query;bundle-version="4.0.0"
+Fragment-Host: org.wcs.smart.report.birt.query;bundle-version="4.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

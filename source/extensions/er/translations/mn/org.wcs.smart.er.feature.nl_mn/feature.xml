@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.er.feature.nl.mn"
+      label="SMART Ecological Records Mongolian Language Pack"
+      version="4.0.1"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.smart.feature">
+
+   <description>
+      The Mongolian translations for the Ecological Records Mongolian plugin.
+   </description>
+
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
+   </copyright>
+
+   <plugin
+         id="org.wcs.smart.er.nl_mn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.er.query.nl_mn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.er.query.report.nl_mn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+</feature>

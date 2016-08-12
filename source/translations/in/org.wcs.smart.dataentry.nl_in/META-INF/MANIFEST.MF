@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Indonesian Dataentry Fragment
 Bundle-SymbolicName: org.wcs.smart.dataentry.nl_in
-Bundle-Version: 4.0.0
-Fragment-Host: org.wcs.smart.dataentry;bundle-version="4.0.0"
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.dataentry;bundle-version="4.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart
