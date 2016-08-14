@@ -89,10 +89,17 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	private void initProfile() {
 		Session s = dialog.getSession();
 		cmProfile = CyberTrackerHibernateManager.getAssociatedCmProfile(s, dialog.getModel());
-		loadProfile();
+
+		ConfigurableModel clonedFrom = dialog.getClonedFrom();
+		if (clonedFrom != null) {
+			ConfigurableModelCtPropertiesProfile profileToClone = CyberTrackerHibernateManager.getAssociatedCmProfile(s, clonedFrom);
+			cmProfile.setProfile(profileToClone.getProfile());
+		}
+
+		loadProfilesList();
 	}
 
-	private void loadProfile(){
+	private void loadProfilesList(){
 		CyberTrackerPropertiesProfile prevSelection = getSelectedProfile();
 		
 		Session s = dialog.getSession();
@@ -264,7 +271,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	protected void manageProfiles() {
 		Dialog d = new ManageProfilesDialog(dialog.getShell());
 		d.open();
-		loadProfile();
+		loadProfilesList();
 	}
 
 	protected void createProfile() {
@@ -286,7 +293,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 			d.open();
 			
 			//refresh list
-			loadProfile();
+			loadProfilesList();
 		}
 	}
 
@@ -295,7 +302,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		if (p != null) {
 			Dialog d = new CyberTrackerPropertiesDialog(dialog.getShell(), p);
 			d.open();
-			loadProfile();
+			loadProfilesList();
 		}
 	}
 

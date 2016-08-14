@@ -23,14 +23,18 @@ package org.wcs.smart.dataentry.dialog;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -73,11 +77,14 @@ public class ConfigurableModelFactory {
 	 * Creates a configurable model using another configurable model as a template.
 	 * @return
 	 */
-	public static ConfigurableModel createConfigurableModelClone(ConfigurableModel cm, String name, IProgressMonitor monitor) {
+	public static ConfigurableModelCloneResult createConfigurableModelClone(ConfigurableModel cm, String name, IProgressMonitor monitor) {
 		monitor.beginTask(Messages.ConfigurableModelFactory_TaskName, 1);
 		
 		monitor.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
 		ConfigurableModel clone = createBlankModel(name);
+		ConfigurableModelCloneResult cloneResult = new ConfigurableModelCloneResult(clone);
+		Map<UUID, UuidItem> o2iMap = cloneResult.getOriginal2CloneItemMap();
+		o2iMap.put(cm.getUuid(), clone);
 		
 		int count = 0;
 		Queue<CmNode> toProcess = new LinkedList<CmNode>();
@@ -91,20 +98,20 @@ public class ConfigurableModelFactory {
 		
 		//clone nodes
 		for(CmNode kid : cm.getNodes()){
-			processNode(null, kid, clone, monitor);
+			processNode(null, kid, clone, o2iMap, monitor);
 		}
 		if (monitor.isCanceled()) return null;
 		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultLists);
 		monitor.worked(1);
-		clone.setDefaultLists(cloneCmAttributeList(cm.getDefaultLists(), clone, null));
+		clone.setDefaultLists(cloneCmAttributeList(cm.getDefaultLists(), clone, null, o2iMap));
 		if (monitor.isCanceled()) return null;
 		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultTrees);
 		monitor.worked(1);
-		clone.setDefaultTrees(cloneCmAttributeTree(cm.getDefaultTrees(), null, clone, null));
+		clone.setDefaultTrees(cloneCmAttributeTree(cm.getDefaultTrees(), null, clone, null, o2iMap));
 
 		if (monitor.isCanceled()) return null;
 		monitor.done();
-		return clone;
+		return cloneResult;
 	}
 	
 	/**
@@ -253,7 +260,7 @@ public class ConfigurableModelFactory {
 	}
 	
 	//this is adopted copy from CmTemplateCloner
-	private static void processNode(CmNode clonedParent, CmNode toCopy, ConfigurableModel clonedModel, IProgressMonitor monitor) {
+	private static void processNode(CmNode clonedParent, CmNode toCopy, ConfigurableModel clonedModel, Map<UUID, UuidItem> o2iMap, IProgressMonitor monitor) {
 		monitor.subTask(MessageFormat.format(Messages.ConfigurableModelFactory_ProcessCmNode, toCopy.getName()));
 		monitor.worked(1);
 		
@@ -276,9 +283,10 @@ public class ConfigurableModelFactory {
 		}else{
 			clonedNode.setCategory(null);
 		}
+		o2iMap.put(toCopy.getUuid(), clonedNode);
 		
 		for (CmAttribute att : toCopy.getCmAttributes()){
-			CmAttribute clonedAtt = cloneAttribute(att, clonedModel);
+			CmAttribute clonedAtt = cloneAttribute(att, clonedModel, o2iMap);
 			clonedAtt.setNode(clonedNode);
 			clonedNode.getCmAttributes().add(clonedAtt);
 		}
@@ -293,11 +301,11 @@ public class ConfigurableModelFactory {
 		
 		//process kids
 		for (CmNode kid : toCopy.getChildren()){
-			processNode(clonedNode,kid,clonedModel, monitor);
+			processNode(clonedNode, kid, clonedModel, o2iMap, monitor);
 		}
 	}
 
-	private static CmAttribute cloneAttribute(CmAttribute attributeToClone, ConfigurableModel cm) {
+	private static CmAttribute cloneAttribute(CmAttribute attributeToClone, ConfigurableModel cm, Map<UUID, UuidItem> o2iMap) {
 		CmAttribute clone = new CmAttribute();
 		
 		clone.setAttribute(attributeToClone.getAttribute());
@@ -312,8 +320,9 @@ public class ConfigurableModelFactory {
 		
 		copyLabels(attributeToClone, clone);
 		clone.setOrder(attributeToClone.getOrder());
-		clone.setList(cloneCmAttributeList(attributeToClone.getList(), cm, clone));
-		clone.setTree(cloneCmAttributeTree(attributeToClone.getTree(), null, cm, clone));
+		o2iMap.put(attributeToClone.getUuid(), clone);
+		clone.setList(cloneCmAttributeList(attributeToClone.getList(), cm, clone, o2iMap));
+		clone.setTree(cloneCmAttributeTree(attributeToClone.getTree(), null, cm, clone, o2iMap));
 		
 		loadAttributeInfo(attributeToClone.getAttribute());
 		return clone;
@@ -346,7 +355,7 @@ public class ConfigurableModelFactory {
 		return cloned;
 	}
 	
-	private static List<CmAttributeListItem> cloneCmAttributeList(List<CmAttributeListItem> srcList, ConfigurableModel cm, CmAttribute cmAttribute) {
+	private static List<CmAttributeListItem> cloneCmAttributeList(List<CmAttributeListItem> srcList, ConfigurableModel cm, CmAttribute cmAttribute, Map<UUID, UuidItem> o2iMap) {
 		List<CmAttributeListItem> clonedList = new ArrayList<CmAttributeListItem>();
 		for (CmAttributeListItem listItem : srcList) {
 			CmAttributeListItem clone = new CmAttributeListItem();
@@ -358,11 +367,12 @@ public class ConfigurableModelFactory {
 			clone.setDmAttribute(listItem.getDmAttribute());
 			clone.setAttribute(cmAttribute);
 			clonedList.add(clone);
+			o2iMap.put(listItem.getUuid(), clone);
 		}
 		return clonedList;
 	}
 
-	private static List<CmAttributeTreeNode> cloneCmAttributeTree(List<CmAttributeTreeNode> srcTree, CmAttributeTreeNode parent, ConfigurableModel cm, CmAttribute cmAttribute) {
+	private static List<CmAttributeTreeNode> cloneCmAttributeTree(List<CmAttributeTreeNode> srcTree, CmAttributeTreeNode parent, ConfigurableModel cm, CmAttribute cmAttribute, Map<UUID, UuidItem> o2iMap) {
 		List<CmAttributeTreeNode> clonedTree = new ArrayList<CmAttributeTreeNode>();
 		for (CmAttributeTreeNode treeItem : srcTree) {
 			CmAttributeTreeNode clone = new CmAttributeTreeNode();
@@ -374,10 +384,36 @@ public class ConfigurableModelFactory {
 			clone.setDmAttribute(treeItem.getDmAttribute());
 			clone.setAttribute(cmAttribute);
 			clone.setParent(parent);
-			clone.setChildren(cloneCmAttributeTree(treeItem.getChildren(), clone, cm, cmAttribute));
+			clone.setChildren(cloneCmAttributeTree(treeItem.getChildren(), clone, cm, cmAttribute, o2iMap));
 			clonedTree.add(clone);
+			o2iMap.put(treeItem.getUuid(), clone);
 		}
 		return clonedTree;
+	}
+
+	/**
+	 * Result of cloning a configurable model.
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	public static class ConfigurableModelCloneResult {
+		
+		private ConfigurableModel modelClone;
+		private Map<UUID, UuidItem> original2CloneItemMap; //mapping of original items to their clones
+
+		
+		private ConfigurableModelCloneResult(ConfigurableModel modelClone) {
+			this.modelClone = modelClone;
+			this.original2CloneItemMap = new HashMap<>();
+		}
+
+		public ConfigurableModel getModelClone() {
+			return modelClone;
+		}
+		
+		public Map<UUID, UuidItem> getOriginal2CloneItemMap() {
+			return original2CloneItemMap;
+		}
 	}
 	
 }

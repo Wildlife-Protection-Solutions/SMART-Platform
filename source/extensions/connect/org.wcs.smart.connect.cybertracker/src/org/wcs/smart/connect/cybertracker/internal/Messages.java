@@ -30,6 +30,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_DataUploadLabel;
 	public static String ConfigurableModelEditorConnectTab_DataUploadTime;
 	public static String ConfigurableModelEditorConnectTab_DataUploadTooltip;
+	public static String ConfigurableModelEditorConnectTab_ErrorInitAlertsFromTemplate;
 	public static String ConfigurableModelEditorConnectTab_InvalidConfig;
 	public static String ConfigurableModelEditorConnectTab_InvalidInteger;
 	public static String ConfigurableModelEditorConnectTab_InvalidInteger2;
