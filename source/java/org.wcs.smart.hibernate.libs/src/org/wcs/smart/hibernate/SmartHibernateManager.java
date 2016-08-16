@@ -179,19 +179,7 @@ public class SmartHibernateManager {
 		}
 		if (allSessions.size() > 0){
 			//TODO: warn users or log???
-			List<Session> toClose = new ArrayList<Session>();
-			synchronized (allSessions) {
-				toClose.addAll(allSessions);
-			}
-			for(Session s : toClose){
-				//a listener on the session removes it from the all
-				//sessions variable
-				if (s.getTransaction().isActive()){
-					//TODO: log this case
-					s.getTransaction().rollback();
-				}
-				s.close();
-			}
+			closeAllSessions();
 		}
 		//ensure all sessions are closed
 		SmartHibernateManager.endSessionFactoryNoLock();
@@ -310,15 +298,34 @@ public class SmartHibernateManager {
 			if (allSessions.size() > 0 && !force){
 				throw new Exception("Could not end current database session.  There are still active transactions.");
 			}else if (force){
-				for (Session s : allSessions){
-					//force close
-					s.close();
-				}
+				closeAllSessions();
 			}
 			
 			endSessionFactoryNoLock();
 		}finally{
 			thisLock.release();
+		}
+	}
+	
+	/**
+	 * closes all database sessions
+	 */
+	private static void closeAllSessions(){
+		//make a copy of the allSessions because causing close
+		//modifies the allSessions list which causes
+		//a concurrent mod exception;
+		List<Session> toClose = new ArrayList<Session>();
+		synchronized (allSessions) {
+			toClose.addAll(allSessions);
+		}
+		for(Session s : toClose){
+			//a listener on the session removes it from the all
+			//sessions variable
+			if (s.getTransaction().isActive()){
+				//TODO: log this case
+				s.getTransaction().rollback();
+			}
+			s.close();
 		}
 	}
 	

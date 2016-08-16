@@ -459,22 +459,25 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			dmDepth = null;
+			dm = null;
+			
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
-				dm = HibernateManager.loadDataModel(conservationArea, session);
+				DataModel tmp = HibernateManager.loadDataModel(conservationArea, session);
 				
 				//load into memory; no-lazy loading here.
-				for (Category cat: dm.getCategories()){
+				for (Category cat: tmp.getCategories()){
 					visitCategory(cat);
 				}
-				for (Category cat: dm.getActiveCategories()){
+				for (Category cat: tmp.getActiveCategories()){
 					cat.getName();
 //					visitCategory(cat);
 				}
-				for (Attribute att: dm.getAttributes()){
+				for (Attribute att: tmp.getAttributes()){
 					att.getAggregations().size();
 				}
+				dm = tmp;
 			}finally{
 				session.getTransaction().rollback();
 				session.close();
