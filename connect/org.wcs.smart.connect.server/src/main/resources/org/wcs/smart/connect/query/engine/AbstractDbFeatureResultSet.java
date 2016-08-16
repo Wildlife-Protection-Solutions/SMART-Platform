@@ -148,12 +148,12 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 
 	@Override
 	public Envelope getEnvelope() {
-		throw new UnsupportedOperationException("Gen envelope not supported for result set.");
+		throw new UnsupportedOperationException("Get envelope not supported for result set."); //$NON-NLS-1$
 	}
 
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pagesize) {
-		throw new UnsupportedOperationException("Can not load all results into memory in this environment");
+		throw new UnsupportedOperationException("Can not load all results into memory in this environment"); //$NON-NLS-1$
 	}
 	
 	public abstract List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
@@ -169,7 +169,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 
 	@Override
 	public IQueryResultSetIterator<? extends IResultItem> iterator(int pagesize) {
-		throw new UnsupportedOperationException("Can not create a result set without a session in this environment");
+		throw new UnsupportedOperationException("Can not create a result set without a session in this environment"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -181,7 +181,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	@Override
 	public void setSorting(QueryColumn arg0, int arg1) {
 		// Does not support sorting
-		throw new UnsupportedOperationException("Resultset sorting not supported");
+		throw new UnsupportedOperationException("Result set sorting not supported."); //$NON-NLS-1$
 	}
 	
 	@Override

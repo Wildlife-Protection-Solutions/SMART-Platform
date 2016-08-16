@@ -62,7 +62,7 @@
 	</select>
 </div>
 <div>
-<input type="checkbox" id="qhideexe" checked onchange="searchChanged()">Hide Non-executable Queries</input>
+<input type="checkbox" id="qhideexe" checked onchange="searchChanged()"><fmt:message key="query.hidenonexecutable"/></input>
 </div>
 
 <div class="top-spacer"  style="margin-left: -20px" >

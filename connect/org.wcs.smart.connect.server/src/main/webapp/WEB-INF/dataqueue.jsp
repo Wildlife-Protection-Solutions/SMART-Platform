@@ -40,11 +40,11 @@
 				</div>
   			</div>  
 		</div>
-		<div><a class="link_small" id="selectNone" href="#">check none</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="link_small" id="selectCompleted" href="#">check completed</a></div>
+		<div><a class="link_small" id="selectNone" href="#"><fmt:message key="dataqueue.checknone"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="link_small" id="selectCompleted" href="#"><fmt:message key="dataqueue.checkcomplete"/></a></div>
 		
 		<div class="top-spacer">
 		
-		<input type="button" class="button" value="Delete Selected" id="btnDeleteSelected"/>
+		<input type="button" class="button" value="<fmt:message key="dataqueue.deletebtn"/>" id="btnDeleteSelected"/>
 		</div>
 	</div>
 <%@include file="footer.jsp" %>

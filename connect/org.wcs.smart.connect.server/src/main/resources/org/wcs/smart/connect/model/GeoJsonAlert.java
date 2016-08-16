@@ -38,9 +38,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GeoJsonAlert{
+	
+	private static final String DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
+	
 	private String type;
 	private ArrayList<GeoJsonFeature> features ;
-	
 	
 	public String getType() {
 		return type;
@@ -64,7 +66,7 @@ public class GeoJsonAlert{
 		if (dateString == null || dateString == "") return null; //$NON-NLS-1$
 
 		try {
-			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+			SimpleDateFormat f = new SimpleDateFormat(DATE_FORMAT_STR);
 			date = f.parse(dateString);
 		} catch (ParseException e) {
 			e.printStackTrace();

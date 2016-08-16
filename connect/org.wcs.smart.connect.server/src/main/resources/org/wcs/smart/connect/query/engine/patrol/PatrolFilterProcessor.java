@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.query.engine.patrol;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;

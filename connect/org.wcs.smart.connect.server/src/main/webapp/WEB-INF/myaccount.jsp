@@ -96,7 +96,7 @@
 
 <%@include file="menu.jsp" %>
 <div id="main">
-<div class="pageheader">My Account</div>
+<div class="pageheader"><fmt:message key="myaccount.sectiontitle"/></div>
 <div id="message" class="msgsection"><fmt:message key="myaccount.accountupdated"/></div>
 
 <p class="infomessage"><fmt:message key="myaccount.info"/></p>

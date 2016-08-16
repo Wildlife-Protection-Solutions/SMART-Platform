@@ -206,7 +206,7 @@ function createFileTable(){
 		 		
 		 			var updateicon = document.createElement("a");
 			 		updateicon.className="update-icon marginleftright";
-			 		updateicon.title="update status";
+			 		updateicon.title=i18n("dataqueue.edittooltip")
 			 		updateicon.onclick = updateFile;
 			 		updateicon.href="";
 			 		row.childNodes[row.childNodes.length - 1].appendChild(updateicon);
@@ -214,7 +214,7 @@ function createFileTable(){
 //		 		if(candelete){
 			 		var deleteicon = document.createElement("a");
 			 		deleteicon.className="delete-icon marginleftright";
-			 		deleteicon.title="delete file";
+			 		deleteicon.title=i18n("dataqueue.deletetooltip");
 			 		deleteicon.onclick = deleteFile;
 			 		deleteicon.href="";
 			 		row.childNodes[row.childNodes.length - 1].appendChild(deleteicon);
@@ -223,7 +223,7 @@ function createFileTable(){
 
 			 	var downloadicon = document.createElement("a");
 			 	downloadicon.className="download-icon marginleftright";
-			 	downloadicon.title="download file (does not affect processing queue)";
+			 	downloadicon.title=i18n("dataqueue.downloadtooltip");
 			 	downloadicon.onclick = downloadFile;
 			 	downloadicon.href="";
 			 	row.childNodes[row.childNodes.length - 1].appendChild(downloadicon);

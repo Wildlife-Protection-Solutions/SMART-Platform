@@ -310,7 +310,7 @@ function setRoleDetails(){
 			actionCnt++;
 			var deleteicon = document.createElement("a");
 			deleteicon.className="delete-icon";
-			deleteicon.title="remove action from role";
+			deleteicon.title=i18n("users.removeactionrole");
 			deleteicon.dataset.roleid = this.roleid;
 			deleteicon.dataset.actionKey = privis[i].key;
 			if (privis[i].resource != null){
@@ -604,7 +604,7 @@ function createRoleTable(){
  	
  		var editicon = document.createElement("a");
  		editicon.className="update-icon";
- 		editicon.title="edit role";
+ 		editicon.title=i18n("users.editrole")
  		editicon.dataset.roleid = allRoles[i].key;
  		editicon.onclick = clearAndShowEditRoleDialog;
  		editicon.href="";
@@ -612,7 +612,7 @@ function createRoleTable(){
  		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
- 		deleteicon.title="delete role";
+ 		deleteicon.title=i18n("users.deleterole")
  		deleteicon.dataset.roleid = allRoles[i].key;
  		deleteicon.dataset.rolename = allRoles[i].name;
  		deleteicon.onclick = deleteRole;
@@ -737,7 +737,7 @@ function deleteRole(){
 	var roleId = this.dataset.roleid;
 	var rolename = this.dataset.rolename;
 	
-	displayConfirmDialog("Delete Role", "Are you sure you want to delete the role " + rolename + "?", function(){
+	displayConfirmDialog(i18n("users.deleteroletitle"), i18n("users.deleterolemessage") + rolename + "?", function(){
 		hideInfo();
 	
 		var oReq = new XMLHttpRequest();
@@ -999,7 +999,7 @@ function clearAndShowEditRoleDialog() {
 	}
 	document.querySelector("input[name=roleid]").value = roleid;
 	document.querySelector("input[name=rolename]").value = rolename;
-	document.querySelector("#createrolebtn").value="Update Role";
+	document.querySelector("#createrolebtn").value=i18n("users.updaterole");
 	document.querySelector("#newroleform").onsubmit = updateRole;
 	document.querySelector("#roledialogerror").style.display = "none";
 	displayDialog('newRoleDialog', 'main');

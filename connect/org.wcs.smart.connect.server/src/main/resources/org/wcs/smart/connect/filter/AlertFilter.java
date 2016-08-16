@@ -64,8 +64,6 @@ public class AlertFilter {
 	
 	private boolean sortAscending; 
 	
-	
-	@SuppressWarnings("deprecation")
 	public AlertFilter(String levelFilter, String typeUuidFilter, 
 			String statusFilter, String caUuidFilter, String startDateFilter, 
 			String endDateFilter, String textSearchFilter, String sortBy, 
@@ -131,9 +129,9 @@ public class AlertFilter {
 		
 		
 		//date filters
-		if(startDateFilter != null && !startDateFilter.equals("")){ //$NON-NLS-1$ 
+		if(startDateFilter != null && !startDateFilter.isEmpty()){ 
 			try {		
-				if(endDateFilter == null || endDateFilter.equals("")){
+				if(endDateFilter == null || endDateFilter.isEmpty()){
 					this.endDateFilter = new Date((System.currentTimeMillis() + (1000 * 60 * 60 * 24 * 365))); //Add lots of time to now, in case clocks are off etc, really annoying to not see 'future' alerts when you select "all alerts".
 				}else{
 					this.endDateFilter = new Date(Long.parseLong(endDateFilter));

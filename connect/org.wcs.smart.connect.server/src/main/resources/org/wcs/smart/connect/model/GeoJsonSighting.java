@@ -21,16 +21,12 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.sql.Date;
-import java.sql.Time;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GeoJsonSighting {
-	private Date date;
-	private Time time;
+
 	private String patrolId;
 	private int observationId;
 	
