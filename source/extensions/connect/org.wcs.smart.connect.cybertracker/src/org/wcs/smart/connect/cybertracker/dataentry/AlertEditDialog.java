@@ -51,7 +51,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 	
 	
-	private static int DEFAULT_IMPORTANCE_LEVEL = 3;
+	private static ConnectAlert.Level DEFAULT_IMPORTANCE_LEVEL = ConnectAlert.Level.THREE;
 	
 	private Label sourceObj;
 	private ComboViewer typeViewer;
@@ -140,10 +140,18 @@ public class AlertEditDialog extends AbstractPropertyJHeaderDialog {
 		});
  
 		importanceViewer.setInput(ConnectAlert.Level.values());
+		ConnectAlert.Level initValue = null;
         if (alert.getLevel() == null) {
-        	alert.setLevel(DEFAULT_IMPORTANCE_LEVEL);
+        	initValue = DEFAULT_IMPORTANCE_LEVEL;
+        }else{
+        	for (ConnectAlert.Level l : ConnectAlert.Level.values()){
+        		if (alert.getLevel() == l.value){
+        			initValue = l;
+        			break;
+        		}
+        	}
         }
-        importanceViewer.setSelection(new StructuredSelection(alert.getLevel()));
+        importanceViewer.setSelection(new StructuredSelection(initValue));
 
         importanceViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
