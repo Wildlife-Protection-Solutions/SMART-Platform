@@ -174,6 +174,7 @@
 "dataqueue.downloadtooltip":"odownload file (does not affect processing queue)",
 "dataqueue.deletetooltip":"odelete file",
 "dataqueue.edittooltip":"oupdate status",
+"dataqueue.fileuploading":"ouploadingo ofileo:",
 "ca.cadeleted":"Los datos de superficie Conservación eliminados.",
 "ca.error":"Error",
 "ca.unauthorized":"No autorizado",

@@ -45,7 +45,7 @@ public class DataQueueServlet extends HttpServlet {
 				return;
 			}
 			canUpload = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), DataQueueAction.ADD_KEY);
-			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(s, true);
+			cas = HibernateManager.getConservationAreaInfosWithoutCCAA(s, false);
 			for (Iterator<ConservationAreaInfo> iterator = cas.iterator(); iterator.hasNext();) {
 				ConservationAreaInfo conservationAreaInfo = (ConservationAreaInfo) iterator.next();
 				if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), DataQueueAction.ADD_KEY, conservationAreaInfo.getUuid())){
@@ -69,6 +69,12 @@ public class DataQueueServlet extends HttpServlet {
 				break;
 			case PATROL_XML:
 				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.PatrolXmlName",l), type.name()}); //$NON-NLS-1$
+				break;
+			case JSON_CT:
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtJsonName",l), type.name()}); //$NON-NLS-1$
+				break;
+			case JSON_ZLIB_CT:
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtZLibJsonName",l), type.name()}); //$NON-NLS-1$
 				break;
 			default:
 				uploadTypes.add(new Object[]{type.name(), type.name()});

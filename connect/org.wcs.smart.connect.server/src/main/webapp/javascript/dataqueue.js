@@ -38,6 +38,8 @@ function createItemOnServer(){
 			"type": type,
 			"name": filename
 			}
+	displayInfo(i18n("dataqueue.fileuploading") + filename);
+	closeDialog('newFileDialog');
 	
 	//First request, Get Upload URL from API
 	oReq = new XMLHttpRequest();
@@ -66,7 +68,7 @@ function uploadFile(){
 }
 
 function uploadComplete(){
-	closeDialog('newFileDialog');
+	
 	if(this.status == 202) {
    		var user = JSON.parse(this.responseText);
   		displayInfo(i18n("dataqueue.fileuploaded"));

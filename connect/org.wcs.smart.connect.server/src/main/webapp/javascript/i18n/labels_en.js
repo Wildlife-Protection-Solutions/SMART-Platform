@@ -176,6 +176,7 @@ labels_en= {
 "dataqueue.downloadtooltip":"download file (does not affect processing queue)",
 "dataqueue.deletetooltip":"delete file",
 "dataqueue.edittooltip":"update status",
+"dataqueue.fileuploading":"uploading file:",
 "ca.cadeleted":"Conservation Area data deleted.",
 "ca.error":"Error",
 "ca.unauthorized":"Unauthorized",
