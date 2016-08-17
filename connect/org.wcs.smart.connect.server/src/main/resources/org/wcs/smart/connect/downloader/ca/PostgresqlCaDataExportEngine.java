@@ -218,8 +218,6 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 				for (int i = 0; i < md.getColumnCount(); i ++){
 					String classname = md.getColumnClassName(i+1);
 					if (classname.equals(UUID.class.getName())){
-//					if (md.getColumnType(i) == -2){
-						//TODO: assume uuid type ?? probably not correct
 						parts[i] = " replace(cast(" + parts[i] + " as varchar), '-', '')";	 //$NON-NLS-1$ //$NON-NLS-2$
 					}else if (classname.equals(Boolean.class.getName())){
 						parts[i] = " case when " + parts[i] + " then 'true' else 'false' end"; //$NON-NLS-1$ //$NON-NLS-2$

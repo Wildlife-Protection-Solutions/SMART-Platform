@@ -475,6 +475,12 @@ public class ConnectUser extends HttpServlet {
 		return toDelete;
     }
  
+    /**
+     * Validates usernames
+     * @param username
+     * @param l
+     * @return
+     */
     public static String validateUserName(String username, Locale l){
     	if (username == null 
     			|| username.length() < SmartUser.MIN_USERNAME_LENGTH 
@@ -484,10 +490,15 @@ public class ConnectUser extends HttpServlet {
     	return null;
     }
     
+    /**
+     * Validates passwords - ensures between required length.
+     * @param password
+     * @param l
+     * @return
+     */
     public static String validatePassword(String password, Locale l){
-    	//TODO: fix me
     	if (password == null 
-    			|| (!password.endsWith("smart") && password.length() < SmartUser.MIN_PASS_LENGTH) //$NON-NLS-1$
+    			|| (password.length() < SmartUser.MIN_PASS_LENGTH)
     			|| password.length() > SmartUser.MAX_PASS_LENGTH){ 
     		return MessageFormat.format(Messages.getString("ConnectUser.PassRequirements", l), SmartUser.MIN_PASS_LENGTH, SmartUser.MAX_PASS_LENGTH); //$NON-NLS-1$
     	}

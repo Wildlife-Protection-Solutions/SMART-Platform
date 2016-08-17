@@ -36,7 +36,7 @@
 						<div class="table-cell smart-table-cell"><a href="" class="info-icon" id="infoca" data-cauuid = "${ca.getUuid()}" title="<fmt:message key="ca.details"/>"></a></div>
 						<div class="table-cell smart-table-cell ">
 							<c:if test="${ca.getStatus() == 'DATA'}">
-								<a href=""  data-cauuid = "${ca.getUuid()}" title="<fmt:message key="ca.downloadtooltip"/>" class="downloadca download-icon"></a>
+								<a href="" data-cauuid="${ca.getUuid()}" title="<fmt:message key="ca.downloadtooltip"/>" class="downloadca download-icon"></a>
 							</c:if>
 						</div>
 						<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="deleteca delete-icon"></a></div>

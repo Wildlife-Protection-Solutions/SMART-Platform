@@ -211,7 +211,6 @@ public class Uploader extends HttpServlet {
 			IOUtils.copy(data, out);
 		}
 
-		//TODO: content range?!?
 		//if start at bytes already provided we should probably either fail or skip 
 		//bytes
 		long newFileSize = Files.size(datastoreFile.toPath());		

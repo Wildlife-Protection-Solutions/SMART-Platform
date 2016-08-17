@@ -75,13 +75,19 @@ CREATE TABLE smart.ct_mission_link (
 	ct_device_id varchar(36) not null, 
 	last_observation_cnt integer, 
 	group_start_time timestamp, 
+	su_uuid uuid,
 PRIMARY KEY (CT_UUID));
 
 ALTER TABLE smart.ct_mission_link 
 ADD CONSTRAINT mission_uuid_fk 
 FOREIGN KEY (mission_uuid) 
 REFERENCES smart.mission ON DELETE cascade DEFERRABLE;
-			
+	
+ALTER TABLE smart.ct_mission_link 
+ADD CONSTRAINT mission_link_su_uuid_fk 
+FOREIGN KEY (su_uuid) 
+REFERENCES smart.sampling_unit ON DELETE cascade DEFERRABLE;
+
 insert into connect.connect_plugin_version (version, plugin_id) values('1.0', 'org.wcs.smart.connect.dataqueue.cybertracker.patrol');
 insert into connect.connect_plugin_version (version, plugin_id) values('1.0', 'org.wcs.smart.connect.dataqueue.cybertracker.survey');
 
