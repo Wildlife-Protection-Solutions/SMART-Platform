@@ -26,10 +26,10 @@
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.wcs.smart" version="4.0.0" match="greaterOrEqual"/>
-      <import plugin="org.wcs.smart.connect" version="4.0.0" match="greaterOrEqual"/>
+      <import plugin="org.wcs.smart"/>
+      <import plugin="org.wcs.smart.connect"/>
       <import plugin="org.wcs.smart.p2"/>
-      <import plugin="org.wcs.smart.patrol" version="4.0.0" match="greaterOrEqual"/>
+      <import plugin="org.wcs.smart.patrol"/>
    </requires>
 
    <plugin

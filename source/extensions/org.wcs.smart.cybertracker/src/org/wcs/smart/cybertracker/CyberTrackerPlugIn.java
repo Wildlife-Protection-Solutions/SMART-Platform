@@ -156,7 +156,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 			
 		}
 		//default to compressed JSON
-//		return CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED;
-		return CyberTrackerProperties.Protocol.GEOJSON;
+		return CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED;
+//		return CyberTrackerProperties.Protocol.GEOJSON;
 	}
 }

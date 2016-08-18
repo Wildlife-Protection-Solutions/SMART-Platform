@@ -25,7 +25,7 @@
       <import plugin="org.wcs.smart"/>
       <import plugin="org.wcs.smart.p2"/>
       <import plugin="org.wcs.smart.cybertracker"/>
-      <import plugin="org.wcs.smart.connect" version="4.0.0" match="greaterOrEqual"/>
+      <import plugin="org.wcs.smart.connect"/>
    </requires>
 
    <plugin

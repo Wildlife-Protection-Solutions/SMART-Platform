@@ -591,10 +591,6 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 	}
 	
-
-	
-
-	
 	private static final PatrolLegDay findLegDay(PatrolLeg leg, Date day, boolean create, Time startTime, Session session){
 		for (PatrolLegDay pld : leg.getPatrolLegDays()){
 			if (SharedUtils.isSameDate(pld.getDate(), day)){
