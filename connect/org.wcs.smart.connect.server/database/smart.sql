@@ -1,4 +1,4 @@
-﻿drop schema smart cascade;
+drop schema If exists smart cascade;
 create schema smart; 
 
 CREATE OR REPLACE FUNCTION smart.trimhkeytolevel(level integer, str varchar) RETURNS VARCHAR AS $$
@@ -2385,16 +2385,16 @@ insert into smart.dm_aggregation(name) values ('var_samp');
 
 insert into smart.dm_aggregation_i18n values ('stddev_samp', 'en', 'standard deviation (samp.)');
 insert into smart.dm_aggregation_i18n values ('var_samp', 'en', 'variance (samp.)');
-insert into smart.dm_aggregation_i18n values ('stddev_samp', 'es', 'Desviación estándar');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'es', 'DesviaciÃ³n estÃ¡ndar');
 insert into smart.dm_aggregation_i18n values ('var_samp', 'es', 'Varianza');
 insert into smart.dm_aggregation_i18n values ('stddev_samp', 'fr', 'Ecart type');
 insert into smart.dm_aggregation_i18n values ('var_samp', 'fr', 'Variance');
-insert into smart.dm_aggregation_i18n values ('stddev_samp', 'vi', 'Độ lệch chuẩn');
-insert into smart.dm_aggregation_i18n values ('var_samp', 'vi', 'Phương sai');
-insert into smart.dm_aggregation_i18n values ('stddev_samp', 'th', 'ส่วนเบี่ยงเบนมาตรฐาน');
-insert into smart.dm_aggregation_i18n values ('var_samp', 'th', 'ค่าความแปรปรวน');
-insert into smart.dm_aggregation_i18n values ('stddev_samp', 'zh', '标准差');
-insert into smart.dm_aggregation_i18n values ('var_samp', 'zh', '方差');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'vi', 'Ä�á»™ lá»‡ch chuáº©n');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'vi', 'PhÆ°Æ¡ng sai');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'th', 'à¸ªà¹ˆà¸§à¸™à¹€à¸šà¸µà¹ˆà¸¢à¸‡à¹€à¸šà¸™à¸¡à¸²à¸•à¸£à¸�à¸²à¸™');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'th', 'à¸„à¹ˆà¸²à¸„à¸§à¸²à¸¡à¹�à¸›à¸£à¸›à¸£à¸§à¸™');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'zh', 'æ ‡å‡†å·®');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'zh', 'æ–¹å·®');
 insert into smart.dm_aggregation_i18n values ('stddev_samp', 'in', 'Standar Deviasi');
 insert into smart.dm_aggregation_i18n values ('var_samp', 'in', 'Varians');		
 
@@ -2408,25 +2408,25 @@ insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min',
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','fr','maximum');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','fr','moyenne');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','es','total');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','es','mínimo');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','es','máximo');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','es','mÃ­nimo');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','es','mÃ¡ximo');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','es','promedio');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','in','jumlah');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','in','minimum');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','in','maksimum');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','in','rata-rata');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','th','ผลรวม');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','th','ค่าต่ำสุด');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','th','ค่าสูงสุด');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','th','ค่าเฉลี่ย');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','zh','合计');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','zh','最小');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','zh','最大');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','zh','平均');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','ru','итога');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','ru','минимальный');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','ru','максимальный');
-insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','ru','средний');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','th','à¸œà¸¥à¸£à¸§à¸¡');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','th','à¸„à¹ˆà¸²à¸•à¹ˆà¸³à¸ªà¸¸à¸”');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','th','à¸„à¹ˆà¸²à¸ªà¸¹à¸‡à¸ªà¸¸à¸”');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','th','à¸„à¹ˆà¸²à¹€à¸‰à¸¥à¸µà¹ˆà¸¢');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','zh','å�ˆè®¡');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','zh','æœ€å°�');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','zh','æœ€å¤§');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','zh','å¹³å�‡');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','ru','Ð¸Ñ‚Ð¾Ð³Ð°');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','ru','Ð¼Ð¸Ð½Ð¸Ð¼Ð°Ð»ÑŒÐ½Ñ‹Ð¹');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','ru','Ð¼Ð°ÐºÑ�Ð¸Ð¼Ð°Ð»ÑŒÐ½Ñ‹Ð¹');
+insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','ru','Ñ�Ñ€ÐµÐ´Ð½Ð¸Ð¹');
 
 
 create table smart.connect_server(
