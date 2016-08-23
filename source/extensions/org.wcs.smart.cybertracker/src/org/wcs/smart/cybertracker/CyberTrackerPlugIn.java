@@ -149,7 +149,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	public CyberTrackerProperties.Protocol getDefaultCtEncoding(){
 		if (getDefault().getPreferenceStore().contains(JSON_ENCODING_TYPE_KEY)){
 			try{
-				CyberTrackerProperties.Protocol.valueOf(getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY));
+				return CyberTrackerProperties.Protocol.valueOf(getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY));
 			}catch (Exception ex){
 				log("Invalid cybertracker protocol: " +getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY), ex); //$NON-NLS-1$
 			}
