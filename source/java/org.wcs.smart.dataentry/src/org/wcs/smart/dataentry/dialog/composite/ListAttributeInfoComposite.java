@@ -140,7 +140,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		btnMulti.setVisible(option != null);
 		btnMulti.setEnabled(isEnabled);
 		btnMulti.setText(disabledText);
-		if (option != null && isEnabled) {
+		if (option != null ) {
 			btnMulti.setSelection(option.getBooleanValue());
 		} else {
 			btnMulti.setSelection(false);
