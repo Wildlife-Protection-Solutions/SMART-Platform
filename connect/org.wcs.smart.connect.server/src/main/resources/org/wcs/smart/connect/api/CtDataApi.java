@@ -23,8 +23,7 @@ package org.wcs.smart.connect.api;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
@@ -118,7 +117,7 @@ public class CtDataApi extends HttpServlet {
 			
 			item.setConservationArea(ca);
 			item.setName("CyberTracker " + DateFormat.getDateTimeInstance().format(new Date())); //$NON-NLS-1$
-			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){
+			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){ //$NON-NLS-1$
 				item.setType(DataQueueItem.Type.JSON_ZLIB_CT);
 			}else{
 				item.setType(DataQueueItem.Type.JSON_CT);
@@ -149,8 +148,8 @@ public class CtDataApi extends HttpServlet {
 				+ File.separator + UuidUtils.uuidToString(item.getUuid()) + ".file"); //$NON-NLS-1$
 		item.setFile(localName);
 		
-		try(Writer out = Files.newBufferedWriter(DataStoreManager.INSTANCE.getFile(item.getFile()).toPath(), StandardOpenOption.CREATE)){ 
-			IOUtils.copy(data, out, StandardCharsets.UTF_8);
+		try(OutputStream out = Files.newOutputStream(DataStoreManager.INSTANCE.getFile(item.getFile()).toPath(), StandardOpenOption.CREATE)){ 
+			IOUtils.copy(data, out);
 			item.setStatus(Status.QUEUED);
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
