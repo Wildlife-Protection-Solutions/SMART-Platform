@@ -111,9 +111,11 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
-		
+		int observationFeatureCount = 0;
 		for (JSONObject feature : features){
 			JsonCtParser parser = new JsonCtParser();
+			
+			if (!JsonCtParser.isTrackPoint(feature)) observationFeatureCount++;
 			
 			try{
 				JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
@@ -187,6 +189,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					//update last observation count
 					link.setLastObservationCnt(observationCounter);
 					processedFeatures.add(feature);
+					if (link.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(link.getPatrolLeg().getPatrol());
 					continue;
 				}
 				
@@ -313,6 +316,13 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			throw new UserCancelledException(Messages.PatrolJsonProcessor_UserCancelled);
 		}
 		
+		if (observationFeatureCount > 0 && processedFeatures.size() == 0){
+			//there is at least one observation feature; but nothing could be processed
+			//then we don't want to process track features because it is likely
+			//these features should not be processed.
+			//see ticket: #1877
+			return processedFeatures;
+		}
 		//try processing track features
 		PatrolJsonTrackProcessor trackProcessor = new PatrolJsonTrackProcessor();
 		processedFeatures.addAll(trackProcessor.processJson(features, session));

@@ -117,9 +117,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
-		
+		int observationFeatureCount = 0;
 		for (JSONObject feature : features){
 			JsonCtParser parser = new JsonCtParser();
+			
+			if (!JsonCtParser.isTrackPoint(feature)) observationFeatureCount++;
 			
 			try{
 				JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
@@ -336,6 +338,14 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		}
 		if (cancel[0]){
 			throw new UserCancelledException(Messages.MissionJsonProcessor_UserCanclled);
+		}
+		
+		if (observationFeatureCount > 0 && processedFeatures.size() == 0){
+			//there is at least one observation feature; but nothing could be processed
+			//then we don't want to process track features because it is likely
+			//these features should not be processed.
+			//see ticket: #1877
+			return processedFeatures;
 		}
 		
 		//try processing track features
