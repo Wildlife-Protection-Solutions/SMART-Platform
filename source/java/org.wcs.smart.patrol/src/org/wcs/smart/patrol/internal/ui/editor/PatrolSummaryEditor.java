@@ -58,6 +58,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
@@ -100,6 +101,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.patrol.ui.StationComposite;
@@ -146,6 +148,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	private PatrolEditor editor;
 	private TableViewer tblPatrolData;
 	private FormToolkit toolkit;
+	
+	private Label lblStats;
 	
 	private boolean isMulti = false;
 	
@@ -440,6 +444,11 @@ public class PatrolSummaryEditor extends EditorPart {
 			}
 		});
 		dataSection.setClient(compData);
+
+		Composite statsCmp = toolkit.createComposite(compData, SWT.NONE );
+		statsCmp.setLayoutData(new GridData(SWT.TRAIL, SWT.TOP, true, false));
+		statsCmp.setLayout(new GridLayout(1, false));
+		lblStats = toolkit.createLabel(statsCmp, ""); //$NON-NLS-1$
 		
 		Point p = top.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolltop.setMinSize(p.x, p.y+20);
@@ -652,6 +661,8 @@ public class PatrolSummaryEditor extends EditorPart {
 				tblPatrolData.refresh();
 			}});
 			
+		updateOverallStatistics();
+
 	}
 	
 	private void updateTableLayout(){
@@ -683,6 +694,34 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		tblPatrolData.getTable().getParent().layout(true,true);
 	}
+
+	private void updateOverallStatistics() {
+		final Patrol patrol = editor.getPatrol();
+		float distance = 0;
+		double totalTime = 0;
+		double activeTime = 0;
+		for (PatrolLeg leg : patrol.getLegs()) {
+			for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+				Track track = pld.getTrack();
+				if (track != null && track.getDistance() != null) {
+					distance += track.getDistance();
+				}
+				totalTime += pld.getPatrolHoursWorked();
+				activeTime += pld.getFieldHoursWorked();
+			}
+		}
+		final String statText = MessageFormat.format(Messages.PatrolSummaryEditor_OverallStatistics, String.valueOf(distance), PatrolEditor.formatTimeRange(totalTime), PatrolEditor.formatTimeRange(activeTime));
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (!lblStats.isDisposed()) {
+					lblStats.setText(statText);
+					lblStats.getParent().layout(true, true);
+				}
+			}
+		});
+	}
+
 	/**
 	 * Refresh the patrol summary table.
 	 * <p>May be called from outside the display thread.</p>
