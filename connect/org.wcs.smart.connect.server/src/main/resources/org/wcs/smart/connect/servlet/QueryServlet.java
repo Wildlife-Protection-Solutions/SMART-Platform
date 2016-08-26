@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.CsvExporter;

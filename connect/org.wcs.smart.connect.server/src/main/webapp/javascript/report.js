@@ -1,6 +1,7 @@
 var reports;
 var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
+var SHARED_LINK_URL = "../api/sharedlink/";
 
 var definedDates = ["report.last30days","report.last60days","report.monthtodate","report.lastmonth","report.yeartodate","report.lastyear","report.alldates","report.custom"];
 var definedDateKeys = ["last30days", "last60days", "monthtodate", "lastmonth", "yeartodate", "lastyear", "alldates", "custom"];
@@ -45,12 +46,30 @@ window.onload = function(){
 			}
 		}
 		
-		closeDialog('reportOptionsDialog');
+		closeDialog('urlOptionsDialog');
 		window.open(generateUrl(REPORTURL));
 	};
 
 	document.getElementById("cancel").onclick = function(){
-		closeDialog('reportOptionsDialog');
+		closeDialog('urlOptionsDialog');
+	};
+	
+	document.getElementById("quickMinSelect").onchange = function(){
+		document.getElementById("expiresAfter").value = document.getElementById("quickMinSelect").value;
+	}
+	document.getElementById("createcustomlinklink").onclick = function(){
+		document.getElementById('createcustomlink').style.display = 'block';
+		document.getElementById('createcustomlinktitle').style.display = 'none';
+		return false;
+	}
+	
+	document.getElementById("createlinkbutton").onclick = createSharedLink;
+	
+	document.getElementById("close").onclick = function(){
+		var overlaydiv = document.querySelector(".overlay-widgetlevel2");
+		overlaydiv.parentNode.removeChild(overlaydiv);
+		resetUrlDialog();
+		closeDialog('SharedLinksDialog');
 	};
 	
 	
@@ -290,7 +309,7 @@ function showReportOptions(){
 
 	
 	document.querySelector("#reportformat").selectedIndex = 0;
-	displayDialogLocation('reportOptionsDialog', pos.x, window.pageYOffset + 20);
+	displayDialogLocation('urlOptionsDialog', pos.x, window.pageYOffset + 20);
 
 }
 
@@ -384,7 +403,7 @@ function getUrlOnly(){
 
 
 
-function generateUrl(root){
+function generateRelativeUrl(root){
 	var uuid = document.getElementById('reportuuid').value;
 	
 	//add the UUID
@@ -418,7 +437,11 @@ function generateUrl(root){
 		}
 	}
 	url = url + "&parameterList=" + csString;
-	return resolve(url);
+	return url;
+}
+
+function generateUrl(root){
+	return resolve(generateRelativeUrl(root));
 }
 
 
@@ -531,4 +554,39 @@ function addTextboxParamater(param, parent, newGroup){
 	f.appendChild(newInput);
 	parent.insertBefore(f, parent.childNodes[4]);
 
+}
+
+function initializeUrlDialog(){
+	displayURLDialog(generateUrl(REPORTURL));
+}
+
+function createSharedLink(){
+	var url = generateRelativeUrl(RELATIVEREPORTLINKURL);
+	var expiresAfter = document.getElementById("expiresAfter").value;
+	var jsonData = {"url": url,
+					"expiresAfter": expiresAfter}
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = linkCreated;
+	oReq.open("POST", SHARED_LINK_URL, true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
+function linkCreated(){
+	var link = JSON.parse(this.responseText);
+	var status = this.status;
+	if(status != 200){
+		if(status == 401){
+			document.getElementById("createdlink").value = "Session has timed out / Unauthorized" + link.error;
+		}else{
+			document.getElementById("createdlink").value = "There was an error creating the link: " + link.error;
+		}
+	}else{
+		document.getElementById("createdlink").value = resolve(SHAREDLINKSERVLETURL) + "?uuid=" + link.uuid;
+	}
+	document.getElementById("createlinkbutton").style.display = "none";
+	document.getElementById("createdlink").style = "display: block; width:100%";
+	document.getElementById("createdlink").select();
 }

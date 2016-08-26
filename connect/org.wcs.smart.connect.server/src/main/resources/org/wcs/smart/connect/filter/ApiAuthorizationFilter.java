@@ -110,6 +110,12 @@ public class ApiAuthorizationFilter implements Filter {
 					}
 				}			
 			}
+			
+			//check for special case of shared links, which don't require authorization
+			if (!isOk){
+			
+			}
+			
 			if (!isOk){
 				logger.finer("Basic authentication not found or invalid"); //$NON-NLS-1$
 				((HttpServletResponse)response).sendError(HttpURLConnection.HTTP_UNAUTHORIZED);

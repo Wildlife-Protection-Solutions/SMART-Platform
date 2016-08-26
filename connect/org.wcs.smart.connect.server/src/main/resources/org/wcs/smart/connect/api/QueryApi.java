@@ -191,9 +191,15 @@ public class QueryApi extends HttpServlet{
 				//we use the ccaafilter; otherwise we ignore it
 				query.setConservationAreaFilter(parseCaFilter(cafilter, s));
 			}
+			String name="";
+			if( request.getUserPrincipal() == null){
+				name = (String)request.getAttribute("j_username");	
+			}else{
+				name = request.getUserPrincipal().getName();
+			}
 			
 			//check for permission to this query for this user.
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid)){
+			if (!SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY, uuid)){
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
 					//access is OK since they have access to All Queries in this CA.
 				}else{

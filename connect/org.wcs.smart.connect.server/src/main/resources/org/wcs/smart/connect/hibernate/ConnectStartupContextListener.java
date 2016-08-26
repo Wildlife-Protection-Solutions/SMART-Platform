@@ -48,6 +48,7 @@ import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConnectUuidItem;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
+import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartRole;
@@ -109,6 +110,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(StyleConfiguration.class);
 		config.addAnnotatedClass(AlertType.class);
 		config.addAnnotatedClass(Alert.class);
+		config.addAnnotatedClass(SharedLink.class);
 		config.addAnnotatedClass(AlertFilterDefault.class);
 		config.addAnnotatedClass(MapLayer.class);
 		config.addAnnotatedClass(CaPluginVersion.class);

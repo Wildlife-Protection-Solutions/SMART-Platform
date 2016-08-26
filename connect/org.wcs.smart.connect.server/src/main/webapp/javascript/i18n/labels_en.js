@@ -155,7 +155,12 @@ labels_en= {
 "report.alldates":"All Dates",
 "report.custom":"Custom",
 "reports.runreport":"Run Report",
-
+"sharedlinks.areyousuredelete":"Are you sure you want to delete this Shared Link?",
+"sharedlink.deleted":"Shared Link Deleted Successfully",
+"sharedlink.errordeleting":"An Error trying to delete Link",
+"sharedlink.unauthorized":"You are Unauthorized to delete this link or your Session has timed out, login and try again",
+"sharedlink.refreshing":"The Shared Link list is being refreshed, please wait.",
+"sharedlink.error":"An error occurred getting the list of Shared Links",
 "users.errorupdatinguser" : " Error updating user information.",
 "dataqueue.fileuploaded":"File Uploaded",
 "dataqueue.fileupdated":"File Status Updated",

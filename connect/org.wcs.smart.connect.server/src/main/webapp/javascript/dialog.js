@@ -125,3 +125,29 @@ function getPosition(element) {
     }
     return { x: xPosition, y: yPosition };
 }
+
+
+function displayURLDialog(url){
+	var overlaydiv = document.createElement('div');
+	overlaydiv.setAttribute("class", "overlay-widgetlevel2");
+	document.body.appendChild(overlaydiv);
+
+	var linktext = document.getElementById('urllink');
+	linktext.value = url;
+	
+	var poselement = document.querySelector("#urlOptionsDialog");
+	var pos = getPosition(poselement);
+	displayDialogLocation('SharedLinksDialog', pos.x +30, window.pageYOffset + 50);
+	
+	linktext.focus();
+	linktext.select();
+}
+
+function resetUrlDialog(){
+	document.getElementById("createlinkbutton").style.display = 'block';
+	document.getElementById("createdlink").value = "";
+	document.getElementById("createdlink").style.display = 'none';
+	
+	document.getElementById('createcustomlink').style.display = 'none';
+	document.getElementById('createcustomlinktitle').style.display = 'block';
+}

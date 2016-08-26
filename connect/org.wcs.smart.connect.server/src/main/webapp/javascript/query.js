@@ -1,3 +1,5 @@
+var SHARED_LINK_URL = "../api/sharedlink/";
+
 var queries;
 var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
@@ -25,14 +27,31 @@ window.onload = function(){
 
 	
 	document.getElementById("runQueryButton").onclick = function(){
-		closeDialog('queryOptionsDialog');
+		closeDialog('urlOptionsDialog');
 		window.open(generateUrl(QUERYLINKURL));
 	};
 
 	document.getElementById("cancel").onclick = function(){
-		closeDialog('queryOptionsDialog');
+		closeDialog('urlOptionsDialog');
 	};
 	
+	document.getElementById("close").onclick = function(){
+		var overlaydiv = document.querySelector(".overlay-widgetlevel2");
+		overlaydiv.parentNode.removeChild(overlaydiv);
+		resetUrlDialog();
+		closeDialog('SharedLinksDialog');
+	};
+	
+	document.getElementById("quickMinSelect").onchange = function(){
+		document.getElementById("expiresAfter").value = document.getElementById("quickMinSelect").value;
+	}
+	document.getElementById("createcustomlinklink").onclick = function(){
+		document.getElementById('createcustomlink').style.display = 'block';
+		document.getElementById('createcustomlinktitle').style.display = 'none';
+		return false;
+	}
+	
+	document.getElementById("createlinkbutton").onclick = createSharedLink;
 	
 	//setup date picker for alert filters
 
@@ -257,7 +276,6 @@ function showQueryOptions(){
 	var isccaa = this.parentElement.parentElement.getAttribute('data-isccaa');
 	var querytype = this.parentElement.parentElement.getAttribute('data-querytype');
 	
-	document.querySelector("#dialogerror").style.display = "none";
 	
 	document.getElementById("runqueryform").uuid.value = uuid;
 	document.getElementById("runqueryform").name.value = name;
@@ -327,7 +345,7 @@ function showQueryOptions(){
 	}
 	document.querySelector("#queryformat").selectedIndex = formatIndex;
 	 
-	displayDialogLocation('queryOptionsDialog', pos.x, window.pageYOffset + 20);
+	displayDialogLocation('urlOptionsDialog', pos.x, window.pageYOffset + 20);
 
 }
 
@@ -371,13 +389,12 @@ function searchChanged(){
 	
 
 }
-function getUrlOnly(){
-	  window.prompt(i18n("query.copytoclipboard"), generateUrl(QUERYLINKURL));
+function initializeUrlDialog(){
+	displayURLDialog(generateUrl(QUERYLINKURL));
 }
 
 
-
-function generateUrl(root){
+function generateRelativeUrl(root){
 	var uuid = document.getElementById('queryuuid').value;
 	var format = document.getElementById('queryformat').value;
 	var dateField = document.getElementById('datefield').value;
@@ -409,8 +426,11 @@ function generateUrl(root){
 			url = url + "&cafilter=" + cafilter.substring(1);
 		}
 	}
+	return url;
+}
 
-	return resolve(url);
+function generateUrl(root){
+	return resolve(generateRelativeUrl(root));
 }
 
 
@@ -484,3 +504,34 @@ function resolve(url) {
 	  return resolved_url;
 }
 
+function createSharedLink(){
+	var url = generateRelativeUrl(RELATIVEQUERYLINKURL);
+	var expiresAfter = document.getElementById("expiresAfter").value;
+	var jsonData = {"url": url,
+					"expiresAfter": expiresAfter}
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = linkCreated;
+	oReq.open("POST", SHARED_LINK_URL, true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
+function linkCreated(){
+	var link = JSON.parse(this.responseText);
+	var status = this.status;
+	if(status != 200){
+		if(status == 401){
+			document.getElementById("createdlink").value = "Session has timed out / Unauthorized" + link.error;
+		}else{
+			document.getElementById("createdlink").value = "There was an error creating the link: " + link.error;
+		}
+	}else{
+		document.getElementById("createdlink").value = resolve(SHAREDLINKSERVLETURL) + "?uuid=" + link.uuid;
+	}
+	document.getElementById("createlinkbutton").style.display = "none";
+	document.getElementById("createdlink").style = "display: block; width:100%";
+	document.getElementById("createdlink").select();
+	
+}

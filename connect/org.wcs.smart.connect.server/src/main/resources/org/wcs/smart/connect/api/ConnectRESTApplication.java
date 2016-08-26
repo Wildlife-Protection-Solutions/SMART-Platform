@@ -40,6 +40,8 @@ public class ConnectRESTApplication extends Application {
 	
 	public static final String SERVLET_PATH = PATH_SEPERATOR + "connect" + PATH_SEPERATOR ; //$NON-NLS-1$
 	
+	public static final String NO_AUTH_PATH = PATH_SEPERATOR + "noa" + PATH_SEPERATOR ; //$NON-NLS-1$
+	
 	public static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 	
 }

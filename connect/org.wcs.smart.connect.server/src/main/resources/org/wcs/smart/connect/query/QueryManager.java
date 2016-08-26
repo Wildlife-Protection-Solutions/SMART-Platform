@@ -35,6 +35,8 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.internal.util.ReflectHelper;
+import org.wcs.smart.connect.model.SharedLink;
+import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
@@ -381,5 +383,14 @@ public enum QueryManager {
 			}
 		}
 		return false;
+	}
+
+	public SharedLink findSharedLink(UUID uuid, Session s) {
+		SharedLink q = (SharedLink) s.get(SharedLink.class, uuid);
+		return q;
+	}
+
+	public SmartUser findUser(UUID uuid, Session s) {
+		return (SmartUser) s.get(SmartUser.class, uuid);
 	}
 }

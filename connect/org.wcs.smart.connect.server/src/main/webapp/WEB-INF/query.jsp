@@ -16,6 +16,8 @@
 		
 		var QUERYURL = "${pageContext.request.contextPath}/api/query/";
 		var QUERYLINKURL = "${pageContext.request.contextPath}/connect/query/api/";
+		var RELATIVEQUERYLINKURL = "/connect/query/api/";
+		var SHAREDLINKSERVLETURL = "${pageContext.request.contextPath}/noa/sharedlink/";
 		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/withdataonly/";
 		
 		var datefilters = {
@@ -82,7 +84,7 @@
 <%@include file="footer.jsp" %>
 
 
-<div id="queryOptionsDialog" style="display: none;" class="dialog">
+<div id="urlOptionsDialog" style="display: none;" class="dialog">
   <div class="dialog-title"><fmt:message key="query.runquery" /></div>
   <div id="dialogerror" class="errorsection"></div>
 	<form id="runqueryform" name="runqueryform">
@@ -127,8 +129,51 @@
 	     		<input id="runQueryButton" class="button top-spacer" type="button" value="  <fmt:message key="query.runbutton"/>  "/>
 	   			<input id="cancel" class="button" type="button" value="<fmt:message key="query.cancelbutton"/>" />
    			</div>
-   			<p class="small"><a title="The link provided is for use in browsers. To call the API programmitcally using HTTP authentication directly, use .../server/api/query/ instead." href="javascript:getUrlOnly()"><fmt:message key="query.geturl" /></a></p>
+   			<p class="small"><a title="Get a direct link for this query" href="javascript:initializeUrlDialog()"><fmt:message key="query.geturl" /></a></p>
     	</form>
-  </div>
+</div>
+
+<div id="SharedLinksDialog" style="display: none;" class="level2dialog">
+  <div class="dialog-title"><fmt:message key="query.sharequery" /></div>
+  	<form id="sharedlinkform" name="sharedlinkform">
+     		<div style="text-align: right">
+     			
+     			<fieldset class="linkdialog">
+     				<fmt:message key="query.sharingDescriptionUsers" />
+					<input id='urllink' type=text name="urllink" class="linkdialog">
+				</fieldset>
+				<center>OR</center>
+				<div id='createcustomlinktitle' style="text-align:center">
+					<a href='' id='createcustomlinklink'><fmt:message key="query.createcustomtitle"/></a>
+				</div>
+				<div id='createcustomlink' style='display:none'>
+					<fieldset class="linkdialog">
+						<p><fmt:message key="query.sharingDescriptionAll" /></p>
+						<p><font color='red'><bold><fmt:message key="query.sharingDescriptionAll2" /></bold></font></p>
+						<br>
+						<p><fmt:message key="query.numminutes" /><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647"><fmt:message key="query.numminutes2" /></p>
+						<p><fmt:message key="query.quickselect" />
+							<select id="quickMinSelect">
+								<option value=60>1 hour</option>
+								<option value=1440>1 day</option>
+								<option value=10080>1 week</option>
+								<option value=43200>1 month</option>
+								<option value=259200>6 months</option>
+								<option value=518400>1 year</option>
+							</select>
+						</p>
+					<input id="createlinkbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" />
+					<input id="createdlink" class="hide" type="text" width="100"/>
+	   				</fieldset>
+	   				
+	   			</div>
+	   			<div>
+	   				<input id="close" class="close" type="button" value="<fmt:message key="query.closebutton"/>" />
+	   			</div>
+   			</div>
+    	</form>
+</div>
+
+
 </body>
 </html>
