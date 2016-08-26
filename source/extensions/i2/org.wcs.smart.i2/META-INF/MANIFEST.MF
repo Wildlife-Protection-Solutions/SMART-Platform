@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: I2
+Bundle-SymbolicName: org.wcs.smart.i2
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.ui.workbench,
+ org.eclipse.core.runtime;bundle-version="3.10.0",
+ org.wcs.smart;bundle-version="4.0.1"
