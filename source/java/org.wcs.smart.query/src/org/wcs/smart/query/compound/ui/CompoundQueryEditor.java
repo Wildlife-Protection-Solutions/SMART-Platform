@@ -182,19 +182,46 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 
 	@Override
 	public void reparseQuery() {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			getQueryProxy().getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
-		} catch (Exception ex) {
-			QueryPlugIn.log(ex.getMessage(), ex);
-		} finally {
-			try{
-				session.getTransaction().rollback();
-			}catch(Exception ex){
-				QueryPlugIn.log(ex.getMessage(), ex);
+		Job j = new Job("reparse compound query job"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session session = HibernateManager.openSession();
+				session.beginTransaction();
+				try {
+					//this must be done in the display thread; but the session needs to be in it's own thread
+					//to not conflict with other operations
+					getSite().getShell().getDisplay().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								getQueryProxy().getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
+							} catch (Exception ex) {
+								QueryPlugIn.log(ex.getMessage(), ex);
+							}
+						}
+					});
+					
+				} catch (Exception ex) {
+					QueryPlugIn.log(ex.getMessage(), ex);
+				} finally {
+					try{
+						session.getTransaction().rollback();
+					}catch(Exception ex){
+						QueryPlugIn.log(ex.getMessage(), ex);
+					}
+					session.close();
+				}
+				return Status.OK_STATUS;
 			}
-			session.close();
+		};
+		
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			QueryPlugIn.log(e.getMessage(), e);
 		}
 		QueryEventManager.getInstance().fireRefreshQuery(getQueryProxy().getQuery());
 	}
