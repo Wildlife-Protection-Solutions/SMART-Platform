@@ -155,7 +155,11 @@ public class QueryImportEngine {
 				if (xmlDefaultName != null){
 					query.updateName(importCa.getDefaultLanguage(), xmlDefaultName);
 				}else{
-					query.updateName(importCa.getDefaultLanguage(), qt.getName().get(0).getName());
+					if (qt.getName().size()>0) {
+						query.updateName(importCa.getDefaultLanguage(), qt.getName().get(0).getName());
+					}else{
+						query.updateName(importCa.getDefaultLanguage(), "(NoName)");
+					}
 				}
 			}
 			String name = query.findNameNull(SmartDB.getCurrentLanguage());

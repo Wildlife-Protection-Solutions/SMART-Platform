@@ -377,6 +377,8 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 				cq.setConservationArea(SmartDB.getCurrentConservationArea());
 				cq.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString() );
 				cq.setName(Messages.CompoundQueryEditor_NewCompoundQueryName);
+				cq.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), Messages.CompoundQueryEditor_NewCompoundQueryName);
+				cq.updateName(SmartDB.getCurrentLanguage(), Messages.CompoundQueryEditor_NewCompoundQueryName);
 				cq.setOwner(SmartDB.getCurrentEmployee());
 				
 				this.query = new QueryProxy(cq);
