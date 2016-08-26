@@ -148,7 +148,7 @@ public class IntelEntity extends UuidItem{
 	 * @param primaryAttachmentUuid
 	 *            primary_attachment_uuid
 	 */
-	public void setPrimaryAttachmentUuid(IntelAttachment attachment) {
+	public void setPrimaryAttachment(IntelAttachment attachment) {
 		this.primaryAttachment = attachment;
 	}
 	
@@ -158,7 +158,9 @@ public class IntelEntity extends UuidItem{
 	 * 
 	 * @return i_entity_type
 	 */
-	public IntelEntityType getEntityTypeIEntityType() {
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid")
+	public IntelEntityType getEntityType() {
 		return this.entityType;
 	}
 	
@@ -168,13 +170,9 @@ public class IntelEntity extends UuidItem{
 	 * @param entityTypeIEntityType
 	 *            i_entity_type
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid")
 	public void setEntityType(IntelEntityType entityType) {
 		this.entityType = entityType;
 	}
-
-	
 
 
 	/**
@@ -244,25 +242,26 @@ public class IntelEntity extends UuidItem{
 
 
 	/**
+	 * Get the set of the i_entity_record.
+	 * 
+	 * @return The set of i_entity_record
+	 */
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
+	public Set<IntelEntityRecord> getIntelligenceRecords() {
+		return this.intelligenceRecords;
+	}
+	
+	/**
 	 * Set the set of the i_entity_record.
 	 * 
 	 * @param iEntityRecordSet
 	 *            The set of i_entity_record
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
 	public void setIntelligenceRecords(Set<IntelEntityRecord> records) {
 		this.intelligenceRecords = records;
 	}
-
-	/**
-	 * Get the set of the i_entity_record.
-	 * 
-	 * @return The set of i_entity_record
-	 */
-	public Set<IntelEntityRecord> getIntelligenceRecords() {
-		return this.intelligenceRecords;
-	}
+	
 
 	/**
 	 * Get the set of the i_entity_location.
@@ -271,7 +270,7 @@ public class IntelEntity extends UuidItem{
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
-	public Set<IntelEntityLocation> getIEntityLocationSet() {
+	public Set<IntelEntityLocation> getLocations() {
 		return this.entityLocations;
 	}
 	
@@ -282,7 +281,7 @@ public class IntelEntity extends UuidItem{
 	 *            The set of i_entity_location
 	 */
 	
-	public void setEntityLocations(Set<IntelEntityLocation> entityLocations) {
+	public void setLocations(Set<IntelEntityLocation> entityLocations) {
 		this.entityLocations = entityLocations;
 	}
 }

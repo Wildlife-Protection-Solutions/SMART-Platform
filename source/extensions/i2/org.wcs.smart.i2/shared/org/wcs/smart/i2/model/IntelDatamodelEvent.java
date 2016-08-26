@@ -47,30 +47,20 @@ public class IntelDatamodelEvent extends UuidItem {
 	/**
 	 * Set the conservation_area.
 	 * 
-	 * @param caConservationArea
+	 * @param ca
 	 *            conservation_area
 	 */
-	public void setConservationArea(ConservationArea caConservationArea) {
-		this.ca = caConservationArea;
+	public void setConservationArea(ConservationArea ca) {
+		this.ca = ca;
 	}
 
-	/**
-	 * Get the conservation_area.
-	 * 
-	 * @return conservation_area
-	 */
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="category_uuid", referencedColumnName="uuid")
 	public Category getDmCategory() {
 		return this.dmCategory;
 	}
-	
-	/**
-	 * Set the conservation_area.
-	 * 
-	 * @param caConservationArea
-	 *            conservation_area
-	 */
+
 	public void setDmCategory(Category dmCategory) {
 		this.dmCategory = dmCategory;
 	}
@@ -87,33 +77,20 @@ public class IntelDatamodelEvent extends UuidItem {
 		return this.dmListItem;
 	}
 	
-	/**
-	 * Set the conservation_area.
-	 * 
-	 * @param caConservationArea
-	 *            conservation_area
-	 */
+
 	public void setAttributeListItem(AttributeListItem dmListItem) {
 		this.dmListItem = dmListItem;
 	}
 
 	/**
 	 * Get the attribute tree node that should trigger event
-	 * 
-	 * @return conservation_area
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="tree_node_uuid", referencedColumnName="uuid")
 	public AttributeTreeNode getAttributeTreeNode() {
 		return this.dmTreeNode;
 	}
-	
-	/**
-	 * Set the conservation_area.
-	 * 
-	 * @param caConservationArea
-	 *            conservation_area
-	 */
+
 	public void setAttributeTreeNode(AttributeTreeNode cmTreeNode) {
 		this.dmTreeNode = cmTreeNode;
 	}

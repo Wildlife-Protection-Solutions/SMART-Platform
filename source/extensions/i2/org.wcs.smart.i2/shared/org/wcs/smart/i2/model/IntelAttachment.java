@@ -47,11 +47,11 @@ public class IntelAttachment extends NamedItem{
 	/**
 	 * Set the conservation_area.
 	 * 
-	 * @param caConservationArea
+	 * @param ca
 	 *            conservation_area
 	 */
-	public void setConservationArea(ConservationArea caConservationArea) {
-		this.ca = caConservationArea;
+	public void setConservationArea(ConservationArea ca) {
+		this.ca = ca;
 	}
 
 	

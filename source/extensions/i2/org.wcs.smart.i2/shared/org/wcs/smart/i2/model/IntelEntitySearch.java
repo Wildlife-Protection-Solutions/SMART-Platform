@@ -57,13 +57,13 @@ public class IntelEntitySearch extends NamedKeyItem {
 	 */
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public ConservationArea getCaConservationArea() {
+	public ConservationArea getConservationArea() {
 		return this.ca;
 	}
 	/**
 	 * Set the conservation_area.
 	 * 
-	 * @param caConservationArea
+	 * @param ca
 	 *            conservation_area
 	 */
 	public void setConservationArea(ConservationArea ca) {

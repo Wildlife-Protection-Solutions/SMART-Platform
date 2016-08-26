@@ -39,7 +39,7 @@ public class IntelObservation extends UuidItem{
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="location_uuid", referencedColumnName="uuid")
-	public IntelLocation getLocationILocation() {
+	public IntelLocation getLocation() {
 		return this.location;
 	}
 	/**
@@ -53,33 +53,25 @@ public class IntelObservation extends UuidItem{
 	}
 
 
-
+	/**
+	 * Get the category_uuid.
+	 * 
+	 * @return category_uuid
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="category_uuid", referencedColumnName="uuid")
+	public Category getCategory() {
+		return this.category;
+	}
 	/**
 	 * Set the category_uuid.
 	 * 
 	 * @param categoryUuid
 	 *            category_uuid
 	 */
-	/**
-	 * Get the i_location.
-	 * 
-	 * @return i_location
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="category_uuid", referencedColumnName="uuid")
 	public void setCategory(Category category) {
 		this.category = category;
 	}
-
-	/**
-	 * Get the category_uuid.
-	 * 
-	 * @return category_uuid
-	 */
-	public Category getCategory() {
-		return this.category;
-	}
-
 
 
 	/**
@@ -98,7 +90,7 @@ public class IntelObservation extends UuidItem{
 	 * @param iObservationAttributeSet
 	 *            The set of i_observation_attribute
 	 */
-	public void setIObservationAttributeSet(Set<IntelObservationAttribute> attributes) {
+	public void setObservationAttributes(Set<IntelObservationAttribute> attributes) {
 		this.attributes = attributes;
 	}
 

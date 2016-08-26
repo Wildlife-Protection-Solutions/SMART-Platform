@@ -1,7 +1,6 @@
 
 /* Drop Tables */
 
-DROP TABLE smart.i_record_location;
 DROP TABLE smart.i_entity_location;
 DROP TABLE smart.i_observation_attribute;
 DROP TABLE smart.i_datamodel_event;
@@ -13,35 +12,25 @@ DROP TABLE smart.i_entity_relationship_attribute;
 DROP TABLE smart.i_attribute_list_item;
 DROP TABLE smart.i_relationship_type_attribute;
 DROP TABLE smart.i_entity_type_attribute;
-DROP TABLE smart.i_attribute;
 DROP TABLE smart.i_entity_record;
 DROP TABLE smart.i_working_set_record;
 DROP TABLE smart.i_record_attachment;
 DROP TABLE smart.i_record;
 DROP TABLE smart.i_entity_relationship;
 DROP TABLE smart.i_working_set_query;
-DROP TABLE smart.i_working_set;
 DROP TABLE smart.i_working_set_entity;
+DROP TABLE smart.i_working_set;
 DROP TABLE smart.i_entity_attachment;
 DROP TABLE smart.i_entity;
 DROP TABLE smart.i_entity_type;
 DROP TABLE smart.i_attachment;
 DROP TABLE smart.i_relationship_type;
 DROP TABLE smart.i_record_query;
+DROP TABLE smart.i_attribute;
 DROP TABLE smart.i_relationship_group;
 
 
-
-
 /* Create Tables */
-CREATE TABLE smart.i_entity_type_relationships
-(
-	entity_type_uuid char(16) for bit data NOT NULL,
-	relationship_type_uuid char(16) for bit data NOT NULL,
-	PRIMARY KEY (entity_type_uuid, relationship_type_uuid)
-);
-
-
 CREATE TABLE smart.i_attachment
 (
 	uuid char(16) for bit data NOT NULL,
@@ -680,13 +669,6 @@ ALTER TABLE smart.i_entity ADD CONSTRAINT ientity_lastmodifiedby_fk
 DEFERRABLE INITIALLY IMMEDIATE;
 
 
-ALTER TABLE smart.i_record_location ADD CONSTRAINT irecordlocation_location_fk
-	FOREIGN KEY (location_uuid)
-	REFERENCES smart.i_location (uuid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
-DEFERRABLE INITIALLY IMMEDIATE;
-
 
 ALTER TABLE smart.i_entity_location ADD CONSTRAINT ientitylocation_location_fk
 	FOREIGN KEY (location_uuid)
@@ -727,14 +709,6 @@ DEFERRABLE INITIALLY IMMEDIATE;
 
 
 ALTER TABLE smart.i_working_set_record ADD CONSTRAINT iworkingsetrecord_record_fk
-	FOREIGN KEY (record_uuid)
-	REFERENCES smart.i_record (uuid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
-DEFERRABLE INITIALLY IMMEDIATE;
-
-
-ALTER TABLE smart.i_record_location ADD CONSTRAINT irecordlocation_record_fk
 	FOREIGN KEY (record_uuid)
 	REFERENCES smart.i_record (uuid)
 	ON UPDATE RESTRICT

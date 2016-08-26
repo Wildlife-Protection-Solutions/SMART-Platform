@@ -50,10 +50,10 @@ public class IntelEntityType extends NamedKeyItem {
 	/**
 	 * Set the conservation_area.
 	 * 
-	 * @param caConservationArea
+	 * @param ca
 	 *            conservation_area
 	 */
-	public void setCaConservationArea(ConservationArea ca) {
+	public void setConservationArea(ConservationArea ca) {
 		this.ca = ca;
 	}
 
@@ -124,7 +124,7 @@ public class IntelEntityType extends NamedKeyItem {
 		return this.attributes;
 	}
 	
-	public void setAttribute(Set<IntelEntityTypeAttribute> attributes){
+	public void setAttributes(Set<IntelEntityTypeAttribute> attributes){
 		this.attributes = attributes;
 	}
 
