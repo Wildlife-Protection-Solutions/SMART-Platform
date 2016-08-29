@@ -4,7 +4,7 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            ca_property=".mission.conservationArea"
+            ca_property=".mission.survey.surveyDesign.conservationArea"
             class="org.wcs.smart.connect.dataqueue.cybertracker.survey.model.CtMissionLink"
             supportsCcaa="false">
       </class>

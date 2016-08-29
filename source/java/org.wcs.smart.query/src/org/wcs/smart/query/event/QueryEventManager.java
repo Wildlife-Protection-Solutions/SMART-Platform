@@ -65,29 +65,28 @@ public class QueryEventManager {
 	}
 	
 	private Collection<IQueryListener> getListeners(){
-		return new ArrayList<IQueryListener>(listeners);
+		synchronized (listeners) {
+			return new ArrayList<IQueryListener>(listeners);
+		}
 	}
 	/**
 	 * fires run query event
 	 * @param query
 	 */
 	public void fireRunQuery(Query query){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.queryRun(query);
-			}	
-		}
+		for (IQueryListener l : getListeners()){
+			l.queryRun(query);
+		}	
 	}
 	
 	/**
 	 * fire refresh query listener
 	 */
 	public void fireRefreshQuery(Query query){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.queryRefreshed(query);
-			}
+		for (IQueryListener l : getListeners()){
+			l.queryRefreshed(query);
 		}
+		
 	}
 	
 	/**
@@ -97,11 +96,9 @@ public class QueryEventManager {
 	 * @return
 	 */
 	public boolean fireBeforeDelete(Query query, Session session){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				if (!l.beforeDelete(query, session)){
-					return false;
-				}
+		for (IQueryListener l : getListeners()){
+			if (!l.beforeDelete(query, session)){
+				return false;
 			}
 		}
 		return true;
@@ -114,11 +111,9 @@ public class QueryEventManager {
 	 * @return
 	 */
 	public boolean fireBeforeSave(Query query, Session session){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				if (!l.beforeSave(query, session)){
-					return false;
-				}
+		for (IQueryListener l : getListeners()){
+			if (!l.beforeSave(query, session)){
+				return false;
 			}
 		}
 		return true;
@@ -131,10 +126,8 @@ public class QueryEventManager {
 	 * @param folder
 	 */
 	public void fireFolderAdded(QueryFolder folder){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.folderModified(IQueryListener.FOLDER_ADDED, folder);
-			}
+		for (IQueryListener l : getListeners()){
+			l.folderModified(IQueryListener.FOLDER_ADDED, folder);
 		}
 	}
 	
@@ -143,10 +136,8 @@ public class QueryEventManager {
 	 * @param folder
 	 */
 	public void fireFolderDeleted(QueryFolder folder){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.folderModified(IQueryListener.FOLDER_DELETED, folder);
-			}
+		for (IQueryListener l : getListeners()){
+			l.folderModified(IQueryListener.FOLDER_DELETED, folder);
 		}
 	}
 	
@@ -155,10 +146,8 @@ public class QueryEventManager {
 	 * @param folder
 	 */
 	public void fireFolderRenamed(QueryFolder folder){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.folderModified(IQueryListener.FOLDER_RENAMED, folder);
-			}
+		for (IQueryListener l : getListeners()){
+			l.folderModified(IQueryListener.FOLDER_RENAMED, folder);
 		}
 	}
 	
@@ -167,10 +156,8 @@ public class QueryEventManager {
 	 * @param object query or queryeditorinput
 	 */
 	public void fireQueryDeleted(Object object){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.queryModified(IQueryListener.QUERY_DELETED, object);
-			}
+		for (IQueryListener l : getListeners()){
+			l.queryModified(IQueryListener.QUERY_DELETED, object);
 		}
 	}
 	
@@ -179,10 +166,8 @@ public class QueryEventManager {
 	 * @param object
 	 */
 	public void fireQueryAdded(Object object){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.queryModified(IQueryListener.QUERY_ADDED, object);
-			}
+		for (IQueryListener l : getListeners()){
+			l.queryModified(IQueryListener.QUERY_ADDED, object);
 		}
 	}
 	
@@ -191,10 +176,8 @@ public class QueryEventManager {
 	 * @param object
 	 */
 	public void fireQuerySaved(Object object){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.queryModified(IQueryListener.QUERY_SAVED, object);
-			}
+		for (IQueryListener l : getListeners()){
+			l.queryModified(IQueryListener.QUERY_SAVED, object);
 		}
 	}
 	
@@ -203,10 +186,8 @@ public class QueryEventManager {
 	 * @param query
 	 */
 	public void fireQueryNameModified(Query query){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.queryModified(IQueryListener.QUERY_NAME_MODIFIED, query);
-			}
+		for (IQueryListener l : getListeners()){
+			l.queryModified(IQueryListener.QUERY_NAME_MODIFIED, query);
 		}
 	}
 	
@@ -215,10 +196,8 @@ public class QueryEventManager {
 	 * @param query
 	 */
 	public void fireQueryDefinitionModified(Query query){
-		synchronized (listeners) {
-			for (IQueryListener l : getListeners()){
-				l.queryModified(IQueryListener.QUERY_DEFINITION_MODIFIED, query);
-			}
+		for (IQueryListener l : getListeners()){
+			l.queryModified(IQueryListener.QUERY_DEFINITION_MODIFIED, query);
 		}
 	}
 }

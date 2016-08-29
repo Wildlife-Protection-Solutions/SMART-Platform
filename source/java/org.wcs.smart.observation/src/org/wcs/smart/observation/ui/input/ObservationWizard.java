@@ -455,7 +455,11 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
     			return false;
     		}
     	}
-    	session.getTransaction().rollback();
+    	try{
+    		session.getTransaction().rollback();
+    	}catch (Exception ex){
+    		ObservationPlugIn.log(ex.getMessage(), ex);
+    	}
         return true;
     }
     

@@ -23,16 +23,10 @@ package org.wcs.smart.cybertracker.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.wcs.smart.SmartPlugIn;
 
 /**
  * Util to decompress compressed json that is sent by CyberTracker.
@@ -51,52 +45,52 @@ public class ZLibUtil {
 		} 
     }
 
-    //TODO: all the code below is for testing purposes and should be removed later!!!
-    
-	/**
-	 * @param args
-	 * @throws FileNotFoundException 
-	 */
-	public static void main(String[] args) throws Exception {
-//		decompressFile(new File("d:\\SMART\\miniz\\x1.JSON"), new File("d:\\SMART\\miniz\\x1d.JSON"));
-//		compressFile(new File("d:\\SMART\\d64.txt"), new File("d:\\SMART\\d64cmp.cmp"));
-
-		System.out.println(decompressFile(new File("d:\\SMART\\miniz\\x1.JSON")));
-	}
-
-    /**
-     * Decompresses a zlib compressed file.
-     */
-    public static void decompressFile(File compressed, File raw) throws IOException {
-        FileInputStream fileIn = new FileInputStream(compressed);
-        //fileIn.skip(13);
-		InputStream in = new InflaterInputStream(fileIn);
-        OutputStream out = new FileOutputStream(raw);
-        shovelInToOut(in, out);
-        in.close();
-        out.close();
-    }
-
-    /**
-     * Compresses a file with zlib compression.
-     */
-    public static void compressFile(File raw, File compressed) throws IOException {
-        InputStream in = new FileInputStream(raw);
-        OutputStream out = new DeflaterOutputStream(new FileOutputStream(compressed));
-        shovelInToOut(in, out);
-        in.close();
-        out.close();
-    }
-    
-    /**
-     * Shovels all data from an input stream to an output stream.
-     */
-    private static void shovelInToOut(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1000];
-        int len;
-        while((len = in.read(buffer)) > 0) {
-            out.write(buffer, 0, len);
-        }
-    }
+//    //TODO: all the code below is for testing purposes and should be removed later!!!
+//    
+//	/**
+//	 * @param args
+//	 * @throws FileNotFoundException 
+//	 */
+//	public static void main(String[] args) throws Exception {
+////		decompressFile(new File("d:\\SMART\\miniz\\x1.JSON"), new File("d:\\SMART\\miniz\\x1d.JSON"));
+////		compressFile(new File("d:\\SMART\\d64.txt"), new File("d:\\SMART\\d64cmp.cmp"));
+//
+//		System.out.println(decompressFile(new File("d:\\SMART\\miniz\\x1.JSON")));
+//	}
+//
+//    /**
+//     * Decompresses a zlib compressed file.
+//     */
+//    public static void decompressFile(File compressed, File raw) throws IOException {
+//        FileInputStream fileIn = new FileInputStream(compressed);
+//        //fileIn.skip(13);
+//		InputStream in = new InflaterInputStream(fileIn);
+//        OutputStream out = new FileOutputStream(raw);
+//        shovelInToOut(in, out);
+//        in.close();
+//        out.close();
+//    }
+//
+//    /**
+//     * Compresses a file with zlib compression.
+//     */
+//    public static void compressFile(File raw, File compressed) throws IOException {
+//        InputStream in = new FileInputStream(raw);
+//        OutputStream out = new DeflaterOutputStream(new FileOutputStream(compressed));
+//        shovelInToOut(in, out);
+//        in.close();
+//        out.close();
+//    }
+//    
+//    /**
+//     * Shovels all data from an input stream to an output stream.
+//     */
+//    private static void shovelInToOut(InputStream in, OutputStream out) throws IOException {
+//        byte[] buffer = new byte[1000];
+//        int len;
+//        while((len = in.read(buffer)) > 0) {
+//            out.write(buffer, 0, len);
+//        }
+//    }
 
 }

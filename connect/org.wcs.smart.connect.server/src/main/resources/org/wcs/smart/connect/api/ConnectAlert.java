@@ -756,7 +756,7 @@ public class ConnectAlert extends HttpServlet {
     	            
     	            //add timezone offset
     	            TimeZone tz = TimeZone.getDefault();
-    	    		properties.put("timezoneOffset", tz.getOffset(new Date().getTime()) / 1000 / 60);
+    	    		properties.put("timezoneOffset", tz.getOffset(new Date().getTime()) / 1000 / 60); //$NON-NLS-1$
 
     	            feature.put("properties", properties); //$NON-NLS-1$
     	            feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$

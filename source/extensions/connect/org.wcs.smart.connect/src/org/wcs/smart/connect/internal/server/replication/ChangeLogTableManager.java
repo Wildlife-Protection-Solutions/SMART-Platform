@@ -31,6 +31,7 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.hibernate.jdbc.Work;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ChangeLogItem;
@@ -102,6 +103,24 @@ public enum ChangeLogTableManager {
 		String tableName = ((AbstractEntityPersister)s.getSessionFactory()
 				.getClassMetadata(ChangeLogItem.class))
 				.getTableName();
+		
+		
+		//wait until we get a lock on this table to
+		//continue
+		s.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				boolean doAgain = true;
+				while(doAgain){
+					try{
+						c.createStatement().execute("LOCK TABLE " + ChangeLogItem.TABLENAME + " IN EXCLUSIVE MODE"); //$NON-NLS-1$ //$NON-NLS-2$
+						doAgain = false;
+					}catch (Exception ex){
+						
+					}
+				}
+				
+			}});
 		
 		
 		StringBuilder sb = new StringBuilder();

@@ -292,7 +292,7 @@
             <command
                   commandId="org.wcs.smart.connect.server.changelog.sync"
                   style="push"
-                  tooltip="Synchronize data with Connect">
+                  tooltip="%sync.command.tooltip">
             </command>
          </toolbar>
       </menuContribution>

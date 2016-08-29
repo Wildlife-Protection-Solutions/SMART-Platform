@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -48,6 +50,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -67,6 +70,9 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	private static final int DIALOG_HEIGHT = 725;
 
 	private ConfigurableModel model;
+	private ConfigurableModel clonedFrom;
+	private Map<UUID, UuidItem> original2CloneItemMap;
+
 	
 	private List<IConfigurableModelEditorTabContent> tabs;
 	private boolean changesMade = false;
@@ -74,8 +80,12 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	private List<IConfigurableModelChangeListener> cmListeners = new ArrayList<IConfigurableModelChangeListener>();
 	
 	private Session session = null;
-	
+
 	public ConfigurableModelEditDialog(ConfigurableModel cm) {
+		this(cm, null, null);
+	}
+	
+	public ConfigurableModelEditDialog(ConfigurableModel cm, ConfigurableModel clonedFrom, Map<UUID, UuidItem> o2iMap) {
 		super(Display.getDefault().getActiveShell());
 		
 		session = HibernateManager.openSession(new AssociatedImageInterceptor());
@@ -84,6 +94,8 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 		}else{
 			this.model = cm;
 		}
+		this.clonedFrom = clonedFrom;
+		this.original2CloneItemMap = o2iMap;
 	}
 	
 	public Session getSession(){
@@ -290,6 +302,14 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	
 	public ConfigurableModel getModel() {
 		return model;
+	}
+	
+	public ConfigurableModel getClonedFrom() {
+		return clonedFrom;
+	}
+	
+	public Map<UUID, UuidItem> getOriginal2CloneItemMap() {
+		return original2CloneItemMap;
 	}
 	
 	protected void fireChangesMade() {

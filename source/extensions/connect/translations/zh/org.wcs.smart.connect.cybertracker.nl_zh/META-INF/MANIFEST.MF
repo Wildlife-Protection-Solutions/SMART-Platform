@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART CONNECT for CyberTracker Chinese Fragment
+Bundle-SymbolicName: org.wcs.smart.connect.cybertracker.nl_zh
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.connect.cybertracker;bundle-version="4.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart

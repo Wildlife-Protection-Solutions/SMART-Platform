@@ -7,9 +7,7 @@
       license-feature="org.wcs.smart.smart.feature">
 
    <description>
-      Adds support for SMART Connect in CyberTracker extension. Allows
-to configure Alerts for Configurable Models and export Alerts
-to CyberTracker applications.
+      Adds support for CyberTracker SMART Connect features.  This include suppport fo configuring alerts in Configurable Models and exporting the alert configuration to CyberTracker applications.
    </description>
 
    <copyright>
@@ -22,6 +20,10 @@ to CyberTracker applications.
 
    <includes
          id="org.wcs.smart.connect.cybertracker.core.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.wcs.smart.connect.feature"
          version="0.0.0"/>
 
 </feature>

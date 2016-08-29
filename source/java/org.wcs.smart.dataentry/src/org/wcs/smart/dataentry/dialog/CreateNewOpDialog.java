@@ -24,6 +24,8 @@ package org.wcs.smart.dataentry.dialog;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -47,7 +49,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelFactory.ConfigurableModelCloneResult;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -73,6 +77,8 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 	private String name = null;
 	private ConfigurableModel cmTemplate = null;
 	private Text txtName;
+
+	private Map<UUID, UuidItem> original2CloneItemMap;
 	
 	protected CreateNewOpDialog(Shell parentShell) {
 		super(parentShell);
@@ -81,7 +87,7 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 	protected void okPressed() {
 		name = txtName.getText();
 		IStructuredSelection selection = (IStructuredSelection)cbCm.getSelection();
-		cmTemplate = !selection.isEmpty() ? (ConfigurableModel) selection.getFirstElement() : null;
+		cmTemplate = CreateCmOption.CM.equals(option) && !selection.isEmpty() ? (ConfigurableModel) selection.getFirstElement() : null;
 		String error = validate();
 		setErrorMessage(error);
 		if (error == null) {
@@ -202,6 +208,7 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 	}
 	
 	public ConfigurableModel getDefaultConfigurableModel() throws Exception {
+		original2CloneItemMap = null;
 		switch (option) {
 		case BLANK:
 			return ConfigurableModelFactory.createBlankModel(name);
@@ -214,7 +221,9 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 					Session s = HibernateManager.openSession();
 					try{
 						ConfigurableModel m = (ConfigurableModel) s.get(ConfigurableModel.class, cmTemplate.getUuid());
-						initModel = ConfigurableModelFactory.createConfigurableModelClone(m, name, monitor);
+						ConfigurableModelCloneResult cloneResult = ConfigurableModelFactory.createConfigurableModelClone(m, name, monitor);
+						initModel = cloneResult.getModelClone();
+						original2CloneItemMap = cloneResult.getOriginal2CloneItemMap();
 					}finally{
 						s.close();
 					}
@@ -247,4 +256,16 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 		throw new IllegalStateException("Unknown template option for creaing a configurable model: " + option); //$NON-NLS-1$
 	}
 	
+	public ConfigurableModel getCmTemplate() {
+		return cmTemplate;
+	}
+	
+	/**
+	 * This will return mapping from original configurable model items to cloned items.
+	 * Map will be not null only in case when creating new model using existing as a template.
+	 */
+	public Map<UUID, UuidItem> getOriginal2CloneItemMap() {
+		return original2CloneItemMap;
+	}
+
 }

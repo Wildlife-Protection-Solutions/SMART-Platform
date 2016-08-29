@@ -33,12 +33,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * 
  * @author elitvin
  * @since 4.0.0
  */

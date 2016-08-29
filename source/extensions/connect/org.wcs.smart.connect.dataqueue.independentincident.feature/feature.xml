@@ -19,6 +19,14 @@
       [Enter License Description here.]
    </license>
 
+   <includes
+         id="org.wcs.smart.connect.dataqueue.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.wcs.smart.independentincident.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.wcs.smart.connect.dataqueue.independentincident"
          download-size="0"

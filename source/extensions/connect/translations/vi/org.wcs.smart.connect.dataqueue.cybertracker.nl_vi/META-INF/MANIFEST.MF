@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CyberTracker Data Queue Processor Vietnamese Fragment
+Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker.nl_vi
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.connect.dataqueue.cybertracker;bundle-version="4.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart

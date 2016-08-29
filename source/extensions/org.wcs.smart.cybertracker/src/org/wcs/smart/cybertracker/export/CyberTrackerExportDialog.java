@@ -345,7 +345,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 			handleExport(btnToDevice.getSelection());
 			super.setReturnCode(IDialogConstants.OK_ID);
 		}
-		session.close();
+		if (session.isOpen()) session.close();
 		close();
 	}
 

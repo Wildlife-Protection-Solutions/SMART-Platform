@@ -34,6 +34,7 @@ import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.PlugIn;
+import org.wcs.smart.connect.dataqueue.cybertracker.survey.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -45,7 +46,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class AddDataQueueCtMissionJob extends Job {
 
 	public AddDataQueueCtMissionJob() {
-		super("Installing Cybertracker Connect Mission DataQueue Processor");
+		super(Messages.AddDataQueueCtMissionJob_MissionInstallProcessor);
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class AddDataQueueCtMissionJob extends Job {
 						
 		Session session = HibernateManager.openSession();
 		try{
-			monitor.beginTask("Creating Tables", 10);
+			monitor.beginTask(Messages.AddDataQueueCtMissionJob_CreateTableTask, 10);
 			session.beginTransaction();
 			installPlugin(session);
 			session.getTransaction().commit();
@@ -65,8 +66,8 @@ public class AddDataQueueCtMissionJob extends Job {
 				@Override
 				public void run() {
 					MessageDialog.openError(Display.getDefault().getActiveShell(),
-							"Error",
-							"Could not installed SMART Connect Cybertracker Mission Data Queue Processor");
+							Messages.AddDataQueueCtMissionJob_ErrorMsg,
+							Messages.AddDataQueueCtMissionJob_InstallError);
 				}
 				
 			});
@@ -101,13 +102,14 @@ public class AddDataQueueCtMissionJob extends Job {
 	
 	private void createTables(Session session){
 		final String[] sql = new String[]{
-			"CREATE TABLE smart.ct_mission_link ( CT_UUID CHAR(16) for bit data NOT NULL, MISSION_UUID CHAR(16) for bit data  NOT NULL, ct_device_id varchar(36) not null, last_observation_cnt integer, group_start_time timestamp, PRIMARY KEY (CT_UUID))", //$NON-NLS-1$
+			"CREATE TABLE smart.ct_mission_link ( CT_UUID CHAR(16) for bit data NOT NULL, MISSION_UUID CHAR(16) for bit data  NOT NULL, ct_device_id varchar(36) not null, last_observation_cnt integer, group_start_time timestamp, su_uuid char(16) for bit data, PRIMARY KEY (CT_UUID))", //$NON-NLS-1$
 			
 			"GRANT ALL PRIVILEGES ON smart.ct_mission_link TO ANALYST", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON smart.ct_mission_link TO DATA_ENTRY", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON smart.ct_mission_link TO MANAGER", //$NON-NLS-1$
 			
-			"ALTER TABLE smart.ct_mission_link ADD CONSTRAINT mission_uuid_fk FOREIGN KEY (mission_uuid) REFERENCES smart.mission ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE" //$NON-NLS-1$
+			"ALTER TABLE smart.ct_mission_link ADD CONSTRAINT mission_uuid_fk FOREIGN KEY (mission_uuid) REFERENCES smart.mission ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.ct_mission_link ADD CONSTRAINT su_uuid_fk FOREIGN KEY (su_uuid) REFERENCES smart.sampling_unit ON UPDATE restrict ON DELETE cascade DEFERRABLE INITIALLY IMMEDIATE" //$NON-NLS-1$
 		};
 		
 		session.doWork(new Work() {

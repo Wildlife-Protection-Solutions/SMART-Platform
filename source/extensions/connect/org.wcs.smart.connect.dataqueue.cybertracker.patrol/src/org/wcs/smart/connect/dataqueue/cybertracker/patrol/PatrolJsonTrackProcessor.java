@@ -140,7 +140,7 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 				}else{
 					StringBuilder sb = new StringBuilder();
 					for (PatrolLegDay pld : matches){
-						sb.append(pld.getPatrolLeg().getPatrol() + "(" + DateFormat.getDateInstance().format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
+						sb.append(pld.getPatrolLeg().getPatrol().getId() + "(" + DateFormat.getDateInstance().format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					sb.deleteCharAt(sb.length() - 1);
 					sb.deleteCharAt(sb.length() - 1);

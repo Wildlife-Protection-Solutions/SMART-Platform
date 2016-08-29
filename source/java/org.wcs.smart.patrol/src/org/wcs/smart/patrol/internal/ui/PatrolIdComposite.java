@@ -145,7 +145,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 	public boolean validate() {
 		boolean isValid = true;
 		errorMessage = null;
-		if (! SmartUtils.isSimpleString(txtPatrolId.getText(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
+		if (! SmartUtils.isSimpleString(txtPatrolId.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
 			cdPatrolId.show();
 			errorMessage = MessageFormat.format(Messages.PatrolIdComposite_Error_InvalidId,
 					new Object[]{Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc});

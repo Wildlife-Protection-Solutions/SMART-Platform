@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart Vietnamese NLS Support
 Bundle-SymbolicName: org.wcs.smart.nl_vi;singleton:=true
-Bundle-Version: 4.0.0
-Fragment-Host: org.wcs.smart;bundle-version="4.0.0"
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart;bundle-version="4.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

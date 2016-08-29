@@ -162,7 +162,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						return;
 					}
 					
-					Dialog dialog = new ConfigurableModelEditDialog(initModel);
+					Dialog dialog = new ConfigurableModelEditDialog(initModel, opDialog.getCmTemplate(), opDialog.getOriginal2CloneItemMap());
 					dialog.open();
 					
 					//refresh list

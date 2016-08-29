@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.patrol.feature.nl.th"
       label="SMART Patrol CyberTracker Thai Language Pack"
-      version="3.2.1"
+      version="4.0.1"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 

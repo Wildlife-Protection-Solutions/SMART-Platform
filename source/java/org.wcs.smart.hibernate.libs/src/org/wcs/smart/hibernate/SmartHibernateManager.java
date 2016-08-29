@@ -155,53 +155,7 @@ public class SmartHibernateManager {
 		return null;
 	}
 	
-	/**
-	 * <p>Attempts to lock the database for the given session.  If it returns
-	 * then you can assume you have the only active session to the database.  
-	 * You need to call unlockDatabase when done. 
-	 * Once locked no other threads will be able to open session until unlockDatabase()
-	 * is called.</p>
-	 * 
-	 * <p>
-	 * This attempts to acquire a lock, if acquired it waits a reasonable amount of time for
-	 * all other session to close.  If they don't close, then it releases the lock, waits briefly 
-	 * then attempts to repeat the process.  It tries 10 times then fails and throws an Exception.
-	 * </p>
-	 *  
-	 * 
-	 * @param currentSession
-	 * @throws Exception
-	 */
-	public static void lockDatabase(Session currentSession) throws Exception{
-		for (int i = 0; i < 10; i ++){
-			//acquire lock
-			thisLock.acquire();
-
-			//wait for all sessions except the current session 
-			int cnt = 0;
-			while(allSessions.size() > 1 && cnt < SESSION_WAIT_COUNT){
-				//wait for thread to be closed
-				try {
-					Thread.sleep( 100 );
-				} catch (InterruptedException e) {}
-				cnt++;
-			}
-			if (allSessions.size() > 1 || allSessions.size() == 0 || allSessions.get(0) != currentSession){
-				//cannot lock the database; lets release the lock giving other threads a chance
-				//to get a session and complete;
-				thisLock.release();
-				Thread.sleep( 100 );
-			}else{
-				return;
-			}
-		}
-		
-		throw new Exception("Cannot acquire database lock."); //$NON-NLS-1$
-	}
 	
-	public static void unlockDatabase(){
-		thisLock.release();
-	}
 	/**
 	 * Locks the database by waiting for active sessions
 	 * to complete or closing them automatically and preventing
@@ -225,19 +179,7 @@ public class SmartHibernateManager {
 		}
 		if (allSessions.size() > 0){
 			//TODO: warn users or log???
-			List<Session> toClose = new ArrayList<Session>();
-			synchronized (allSessions) {
-				toClose.addAll(allSessions);
-			}
-			for(Session s : toClose){
-				//a listener on the session removes it from the all
-				//sessions variable
-				if (s.getTransaction().isActive()){
-					//TODO: log this case
-					s.getTransaction().rollback();
-				}
-				s.close();
-			}
+			closeAllSessions();
 		}
 		//ensure all sessions are closed
 		SmartHibernateManager.endSessionFactoryNoLock();
@@ -356,15 +298,34 @@ public class SmartHibernateManager {
 			if (allSessions.size() > 0 && !force){
 				throw new Exception("Could not end current database session.  There are still active transactions.");
 			}else if (force){
-				for (Session s : allSessions){
-					//force close
-					s.close();
-				}
+				closeAllSessions();
 			}
 			
 			endSessionFactoryNoLock();
 		}finally{
 			thisLock.release();
+		}
+	}
+	
+	/**
+	 * closes all database sessions
+	 */
+	private static void closeAllSessions(){
+		//make a copy of the allSessions because causing close
+		//modifies the allSessions list which causes
+		//a concurrent mod exception;
+		List<Session> toClose = new ArrayList<Session>();
+		synchronized (allSessions) {
+			toClose.addAll(allSessions);
+		}
+		for(Session s : toClose){
+			//a listener on the session removes it from the all
+			//sessions variable
+			if (s.getTransaction().isActive()){
+				//TODO: log this case
+				s.getTransaction().rollback();
+			}
+			s.close();
 		}
 	}
 	

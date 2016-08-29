@@ -4,13 +4,10 @@
       label="SMART Connect for CyberTracker Module"
       version="4.0.1.qualifier"
       provider-name="org.wcs.smart"
-      plugin="org.wcs.smart.connect.cybertracker"
       license-feature="org.wcs.smart.smart.feature">
 
    <description>
-      Adds support for SMART Connect in CyberTracker extension. Allows
-to configure Alerts for Configurable Models and export Alerts
-to CyberTracker applications.
+      Adds support for CyberTracker SMART Connect features.  This include suppport fo configuring alerts in Configurable Models and exporting the alert configuration to CyberTracker applications.
    </description>
 
    <copyright>
@@ -20,6 +17,16 @@ to CyberTracker applications.
    <license url="http://www.example.com/license">
       [Enter License Description here.]
    </license>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.wcs.smart.dataentry"/>
+      <import plugin="org.wcs.smart"/>
+      <import plugin="org.wcs.smart.p2"/>
+      <import plugin="org.wcs.smart.cybertracker"/>
+      <import plugin="org.wcs.smart.connect"/>
+   </requires>
 
    <plugin
          id="org.wcs.smart.connect.cybertracker"

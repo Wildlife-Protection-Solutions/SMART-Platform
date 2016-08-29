@@ -23,8 +23,12 @@ package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -56,8 +60,11 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for linking cybertracker patrols to SMART patrols.
@@ -107,14 +114,19 @@ public class PatrolDialog extends TitleAreaDialog {
 		}
 		//validate();
 		try{
+			//process new patrols
+			for (Entry<UUID, UiData> e : uiItems.entrySet()){
+				if (!e.getValue().btnExisting.getSelection()){
+					Patrol p = createNewPatrol(e.getKey(), patrols.get(e.getKey()));
+					newPatrols.add(p);
+				}
+			}
+			//process merged patrols
 			for (Entry<UUID, UiData> e : uiItems.entrySet()){
 				if (e.getValue().btnExisting.getSelection()){
 					Patrol addTo = (Patrol)session.get(Patrol.class, e.getValue().cmbPatrol.getSelection().getUuid());
 					mergePatrol(e.getKey(), patrols.get(e.getKey()), addTo);
 					mergedPatrols.add(addTo);
-				}else{
-					Patrol p = createNewPatrol(e.getKey(), patrols.get(e.getKey()));
-					newPatrols.add(p);
 				}
 			}
 		}catch (Exception ex){
@@ -191,12 +203,55 @@ public class PatrolDialog extends TitleAreaDialog {
 		Label spacer = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		for (Entry<UUID, CtPatrolLink> e : patrols.entrySet()){
+		List<PatrolLeg> newPatrols = new ArrayList<>();
+		for(CtPatrolLink l : patrols.values()){
+			newPatrols.add(l.getPatrolLeg());
+		}
+		//sort
+		newPatrols.sort(new Comparator<PatrolLeg>() {
+			@Override
+			public int compare(PatrolLeg l1, PatrolLeg l2) {
+				if (!SharedUtils.isSameDate(l1.getStartDate(), l2.getStartDate())) return l1.getStartDate().compareTo(l2.getStartDate());
+				for (PatrolLegDay day1 : l1.getPatrolLegDays()){
+					if (SharedUtils.isSameDate(day1.getDate(), l1.getStartDate())){
+						for (PatrolLegDay day2 : l2.getPatrolLegDays()){
+							if (SharedUtils.isSameDate(day2.getDate(), l2.getStartDate())){
+								return day1.getStartTime().compareTo(day2.getStartTime());
+							}
+						}
+					}
+				}
+				return 0;
+			}
+		});
+		//assign temporary patrol ids
+		int cnt = 1;
+		for (PatrolLeg p : newPatrols){
+			p.getPatrol().setId(MessageFormat.format(Messages.PatrolDialog_ImportedMessage, cnt++));
+		}
+		
+		for (PatrolLeg pl : newPatrols){
+			Entry<UUID, CtPatrolLink> e = null;
+			for (Entry<UUID, CtPatrolLink> temp : patrols.entrySet()){
+				if (temp.getValue().getPatrolLeg() == pl){
+					e = temp;
+					break;
+				}
+			}
 			Label l = new Label(main, SWT.WRAP);
 			StringBuilder lbl = new StringBuilder();
 			Patrol p = e.getValue().getPatrolLeg().getPatrol();
+			Date startDt = null;
+			for (PatrolLegDay day1 : pl.getPatrolLegDays()){
+				if (SharedUtils.isSameDate(day1.getDate(), pl.getStartDate())){
+					startDt = SmartUtils.combineDateTime(day1.getDate(), day1.getStartTime());
+					break;
+				}
+			}
+			lbl.append(p.getId());
+			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.PatrolDialog_StartDateLabel);
-			lbl.append(p.getStartDate() == null ? "" : DateFormat.getDateInstance().format(p.getStartDate())); //$NON-NLS-1$
+			lbl.append(DateFormat.getDateTimeInstance().format(startDt)); 
 			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.PatrolDialog_TypeLabel);
 			lbl.append(p.getFirstLeg().getType() == null ? "" : p.getFirstLeg().getType().getName()); //$NON-NLS-1$
@@ -228,7 +283,10 @@ public class PatrolDialog extends TitleAreaDialog {
 			btnExisting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 			btnExisting.setSelection(false);
 			
-			PatrolFilteredComboViewer viewer = new PatrolFilteredComboViewer(op);
+			List<Patrol> newPs = new ArrayList<Patrol>();
+			newPatrols.stream().forEach(plc -> newPs.add(plc.getPatrol()));
+			newPs.remove(p);
+			PatrolFilteredComboViewer viewer = new PatrolFilteredComboViewer(op, newPs);
 			viewer.setEnabled(false);
 			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
@@ -293,6 +351,30 @@ public class PatrolDialog extends TitleAreaDialog {
 						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.PatrolDialog_DifferentTypeError, p.getPatrolType().getGuiName(Locale.getDefault()), ctP.getPatrolType().getGuiName(Locale.getDefault())));
 						entry.getValue().errItem.show();
 						error = true;
+					}
+					
+					if (p.getUuid() == null){
+						//we are selecting an new patrol to add to; we want to make sure
+						//this new patrol starts before the current patrol
+						Date addtoDate = null;
+						for (PatrolLegDay pld : p.getFirstLeg().getPatrolLegDays()){
+							if ( SharedUtils.isSameDate(pld.getDate(), p.getFirstLeg().getStartDate())){
+								addtoDate = SmartUtils.combineDateTime(pld.getDate(), pld.getStartTime());
+								break;
+							}
+						}
+						Date addfromDate = null;
+						for (PatrolLegDay pld : ctP.getFirstLeg().getPatrolLegDays()){
+							if ( SharedUtils.isSameDate(pld.getDate(), ctP.getFirstLeg().getStartDate())){
+								addfromDate = SmartUtils.combineDateTime(pld.getDate(), pld.getStartTime());
+								break;
+							}
+						}
+						if (addtoDate.after(addfromDate)){
+							entry.getValue().errItem.setDescriptionText(Messages.PatrolDialog_InvalidMergeDates);
+							entry.getValue().errItem.show();
+							error = true;
+						}
 					}
 				}
 			}

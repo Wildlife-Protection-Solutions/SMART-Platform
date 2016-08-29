@@ -240,7 +240,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		nextTaskOptions.add(Messages.SurveyScreensUtil_NewSamplingUnit);
 		CyberTrackerId suId = createSamplingUnitNodes(container, elements, id, ctElemIds);
 		nodeIds.add(suId);
-		jsonIds.add(END_MISSION_KEY);
+		jsonIds.add(null);
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSamplingUnitOption);
 		nodeIds.add(createEndSamplingUnitNodes(container, elements, suId, ctProps));
@@ -248,7 +248,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSurvey);
 		nodeIds.add(createEndTripNodes(container, startId, Messages.SurveyScreensUtil_EndSurveyMessage));
-		jsonIds.add(null);
+		jsonIds.add(END_MISSION_KEY);
 		
 		if (ctProps.isCanPause()) {
 			nextTaskOptions.add(Messages.SurveyScreensUtil_PauseSurvey);
@@ -297,6 +297,11 @@ public class SurveyScreensUtil extends ScreensUtil {
 		control2.setShowMajor("True"); //$NON-NLS-1$
 		control2.setTranslateMajorScreenId(nextTaskId.getNodeId());
 		control2.setTakeGPS("False"); //$NON-NLS-1$
+		
+		Control obsCounter = getScreensFactory().createFormulaControl12(CyberTrackerUtil.OBSCOUNTER_VARNAME + "+1"); //$NON-NLS-1$
+		obsCounter.setResultGlobalValue(CyberTrackerUtil.OBSCOUNTER_VARNAME);
+		obsCounter.setTranslateResultElementId(ctUtil.getObservationCntId().getItemId());
+		ScreensObjectFactory.addControlToNode(suNode, obsCounter);
 		return id;
 	}
 

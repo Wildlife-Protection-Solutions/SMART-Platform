@@ -81,7 +81,7 @@ public class DmMatcherMainComposite extends Composite {
 
 	private static final Logger logger = LogManager.getLogger(DmMatcherMainComposite.class); 
 	
-	private static final int TABLE_HEIGHT_HINT = 300;
+	private static final int TABLE_HEIGHT_HINT = 200;
 
 	private MatchSession session;
 	
@@ -116,8 +116,6 @@ public class DmMatcherMainComposite extends Composite {
 		gridData.widthHint = 1024;
 		gridData.heightHint = 760;
 		this.setLayoutData(gridData);
-
-		this.setSize(840, 640);
 
 		//main composite and layout
 		final Composite main = new Composite(this, SWT.NONE);
@@ -281,6 +279,7 @@ public class DmMatcherMainComposite extends Composite {
 		addLanguageChangedListener(categoryComposite);
 		
 		langSelector.select(0); //to select default language and fire all listeners
+		this.layout(true, true);
 	}
 
 	protected void performSave() {

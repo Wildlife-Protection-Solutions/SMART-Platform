@@ -36,11 +36,13 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.connect.dataqueue.cybertracker.IJsonProcessor;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonCtParser;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonTrackUtils;
+import org.wcs.smart.connect.dataqueue.cybertracker.survey.internal.Messages;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.util.SharedUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -103,7 +105,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 					.list();
 
 			//we want to find the patrol leg with a day that matches this day and time
-			List<MissionDay> matches = new ArrayList<MissionDay>();
+			Set<MissionDay> matches = new HashSet<MissionDay>();
 			for (CtMissionLink link : links){
 				if (JsonCtParser.isDateBetween(dt, link.getMission().getStartDate(), link.getMission().getEndDate())){
 					
@@ -123,7 +125,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			}else{
 				if (matches.size() == 1){
 					//this is simple
-					MissionDay md = matches.get(0);
+					MissionDay md = matches.iterator().next();
 					addPointToMisisonTracks(md, new Coordinate(x,y), dt);
 					processed.add(feature);
 					
@@ -136,7 +138,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 					sb.deleteCharAt(sb.length() - 1);
 					sb.deleteCharAt(sb.length() - 1);
 					
-					warnings.add(MessageFormat.format("The track point {0} matches multiple missions [{1}].  Ensure the missions days and times do not overlap and try again", DateFormat.getDateTimeInstance().format(dt), sb.toString()));
+					warnings.add(MessageFormat.format(Messages.MissionJsonTrackProcessor_MultipleMatched, DateFormat.getDateTimeInstance().format(dt), sb.toString()));
 				}
 				
 			}
@@ -158,6 +160,65 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 		return this.warnings;
 	}
 	
+	
+	public static void addSuPointToMisisonTracks(MissionDay md, SamplingUnit su, Coordinate c, Date dt) throws Exception{
+		if (md.getTracks() == null) md.setTracks(new ArrayList<MissionTrack>());
+		
+		MissionTrack addTo = null;
+		if (md.getTracks().isEmpty()){
+			MissionTrack newTrack = new MissionTrack();
+			md.getTracks().add(newTrack);
+			newTrack.setMissionDay(md);
+			newTrack.setId(MessageFormat.format(Messages.MissionJsonTrackProcessor_TrackLabel,  md.getTracks().size()));
+			newTrack.setSamplingUnit(su);
+			addTo = newTrack;
+			
+		}else{
+			//if the last track point is the same sampling unit then add to that
+			//track; otherwise create a new track with the new sampling unit			
+			MissionTrack lastTrack = null;
+			double lastTime = -1;
+			for (MissionTrack t: md.getTracks()){
+				if (lastTrack == null || lastTime < t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z){
+					lastTrack = t;
+					lastTime = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z;
+				}
+			}
+			
+			if (isEqual(lastTrack.getSamplingUnit(), su)){
+				//add point to track
+				addTo = lastTrack;
+			}else{
+				//create a new track and add to new track
+				MissionTrack newTrack = new MissionTrack();
+				md.getTracks().add(newTrack);
+				newTrack.setMissionDay(md);
+				newTrack.setId(MessageFormat.format(Messages.MissionJsonTrackProcessor_TrackLabel,  md.getTracks().size()));
+				newTrack.setSamplingUnit(su);
+				addTo = newTrack;
+			}
+		}
+		LineString newLs = JsonTrackUtils.addPointToTrack(addTo.getLineString(), c, dt);
+		addTo.setLineString(newLs);
+	}
+	
+	private static boolean isEqual(SamplingUnit s1, SamplingUnit s2){
+		if (s1 == null && s2 == null) return true;
+		if (s1 != null && s2 != null) return s1.equals(s2);
+		return false;
+	}
+	
+	/*
+	 * Searches for track that starts before dt and end after dt.  If found
+	 * then the point is added to that track; if not found then it is added 
+	 * to the last track.
+	 * 
+	 * Assumption are:
+	 * 1. observations are processed first 
+	 * 2. all observations create new track points
+	 * 3. when sampling unit is changed a "observation" is made 
+	 * 
+	 */
 	public static void addPointToMisisonTracks(MissionDay md, Coordinate c, Date dt) throws Exception{
 		if (md.getTracks() == null) md.setTracks(new ArrayList<MissionTrack>());
 		
@@ -166,7 +227,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			MissionTrack newTrack = new MissionTrack();
 			md.getTracks().add(newTrack);
 			newTrack.setMissionDay(md);
-			newTrack.setId("Track1");
+			newTrack.setId(MessageFormat.format(Messages.MissionJsonTrackProcessor_TrackLabel,  md.getTracks().size()));
 			addTo = newTrack;
 			
 		}else{
@@ -175,7 +236,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			for (MissionTrack t : md.getTracks()){
 				double t1 = t.getLineString().getCoordinateN(0).z;
 				double t2 = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z;
-				if (t1 <= z && z <= t1){
+				if (t1 <= z && z <= t2){
 					addTo = t;
 					break;
 				}

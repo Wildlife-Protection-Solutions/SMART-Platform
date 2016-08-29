@@ -1,6 +1,6 @@
 
 /* Drop Tables */
-DROP SCHEMA connect CASCADE;
+DROP SCHEMA If exists connect CASCADE;
 CREATE SCHEMA connect;
 
 DROP TABLE IF EXISTS connect.ca_plug_version;
@@ -229,6 +229,7 @@ CREATE TABLE connect.alert_filter_defaults(
 	starting_long real,
 	starting_lat real
 )WITHOUT OIDS;
+
 
 create table connect.connect_version 
 (version varchar(16), 

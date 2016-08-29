@@ -98,6 +98,10 @@ public class CyberTrackerUtil {
 		this.observationCounter = obsCounter;
 	}
 	
+	public CyberTrackerId getObservationCntId(){
+		return this.observationCounter;
+	}
+	
 	public ScreensObjectFactory getScreensFactory() {
 		return screensFactory;
 	}

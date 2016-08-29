@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GeoJsonFeature{
+	
 	private String type;
 	private GeoJsonGeometry geometry;
 	private GeoJsonProperties properties;
@@ -32,9 +33,11 @@ public class GeoJsonFeature{
 	public String getType() {
 		return type;
 	}
+	
 	public GeoJsonGeometry getGeometry() {
 		return geometry;
 	}
+	
 	public GeoJsonProperties getProperties() {
 		return properties;
 	}

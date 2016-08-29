@@ -30,15 +30,13 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_DataUploadLabel;
 	public static String ConfigurableModelEditorConnectTab_DataUploadTime;
 	public static String ConfigurableModelEditorConnectTab_DataUploadTooltip;
+	public static String ConfigurableModelEditorConnectTab_ErrorInitAlertsFromTemplate;
 	public static String ConfigurableModelEditorConnectTab_InvalidConfig;
 	public static String ConfigurableModelEditorConnectTab_InvalidInteger;
 	public static String ConfigurableModelEditorConnectTab_InvalidInteger2;
 	public static String ConfigurableModelEditorConnectTab_NoAlertsMessage;
 	public static String ConfigurableModelEditorConnectTab_NoAlertsTitle;
 	public static String ConfigurableModelEditorConnectTab_NoTypesFound;
-	public static String ConfigurableModelEditorConnectTab_PingFrequency;
-	public static String ConfigurableModelEditorConnectTab_PingFrequency_Error;
-	public static String ConfigurableModelEditorConnectTab_PingFrequency_Tooltip;
 	public static String ConfigurableModelEditorConnectTab_PositionFreqTooltip;
 	public static String ConfigurableModelEditorConnectTab_PositionTypeLabel;
 	public static String ConfigurableModelEditorConnectTab_PositionTypeTooltip;

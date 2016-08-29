@@ -57,7 +57,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	/* 
 	 * cybertracker encoding protocol 
 	 */
-	private static final String JSON_ENCODING_TYPE_KEY = "org.wcs.smart.connect.cybertracker.json.protocol";
+	private static final String JSON_ENCODING_TYPE_KEY = "org.wcs.smart.connect.cybertracker.json.protocol"; //$NON-NLS-1$
 	
 	
 	// The shared instance
@@ -149,14 +149,14 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	public CyberTrackerProperties.Protocol getDefaultCtEncoding(){
 		if (getDefault().getPreferenceStore().contains(JSON_ENCODING_TYPE_KEY)){
 			try{
-				CyberTrackerProperties.Protocol.valueOf(getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY));
+				return CyberTrackerProperties.Protocol.valueOf(getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY));
 			}catch (Exception ex){
 				log("Invalid cybertracker protocol: " +getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY), ex); //$NON-NLS-1$
 			}
 			
 		}
 		//default to compressed JSON
-//		return CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED;
-		return CyberTrackerProperties.Protocol.GEOJSON;
+		return CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED;
+//		return CyberTrackerProperties.Protocol.GEOJSON;
 	}
 }

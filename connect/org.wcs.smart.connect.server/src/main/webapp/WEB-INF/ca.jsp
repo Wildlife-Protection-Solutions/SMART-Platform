@@ -33,10 +33,10 @@
 					<div data-cauuid ="${ca.getUuid()}" class="carow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 						<div class="table-cell smart-table-cell">${ca.getLabel()}</div>
 						<div class="table-cell smart-table-cell">${ca.getStatus()}</div>
-						<div class="table-cell smart-table-cell"><a href="" class="info-icon" id="infoca" data-cauuid = "${ca.getUuid()}" title="details..."></a></div>
+						<div class="table-cell smart-table-cell"><a href="" class="info-icon" id="infoca" data-cauuid = "${ca.getUuid()}" title="<fmt:message key="ca.details"/>"></a></div>
 						<div class="table-cell smart-table-cell ">
 							<c:if test="${ca.getStatus() == 'DATA'}">
-								<a href=""  data-cauuid = "${ca.getUuid()}" title="downloadca" class="downloadca download-icon"></a>
+								<a href="" data-cauuid="${ca.getUuid()}" title="<fmt:message key="ca.downloadtooltip"/>" class="downloadca download-icon"></a>
 							</c:if>
 						</div>
 						<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="deleteca delete-icon"></a></div>
@@ -81,7 +81,7 @@
   
   
   <div id="caInfoDialog" style="display: none; width:360px" class="dialog">
-    <div class="dialog-title">Conservation Area Details</div>
+    <div class="dialog-title"><fmt:message key="ca.cadetailstitle"/></div>
   	<div class="smart-table">
   	<div class="table-row">
 			<div class="table-cell smart-table-cell"><fmt:message key="ca.label"/>:</div>

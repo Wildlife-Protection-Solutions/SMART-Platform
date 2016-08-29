@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART Mongolian Entity Tracker Report Query Fragment
+Bundle-SymbolicName: org.wcs.smart.entity.query.report.nl_mn
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.entity.query.report;bundle-version="4.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart

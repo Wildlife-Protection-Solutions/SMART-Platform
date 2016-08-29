@@ -50,6 +50,7 @@ import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.connect.dataqueue.cybertracker.IJsonProcessor;
 import org.wcs.smart.connect.dataqueue.cybertracker.JsonCtParser;
 import org.wcs.smart.connect.dataqueue.cybertracker.UserCancelledException;
+import org.wcs.smart.connect.dataqueue.cybertracker.survey.internal.Messages;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.JsonUtils;
@@ -57,6 +58,7 @@ import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.survey.export.SurveyJsonUtils;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
+import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil.JsonSurveyKey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -67,6 +69,7 @@ import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.SmartDB;
@@ -114,9 +117,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
-		
+		int observationFeatureCount = 0;
 		for (JSONObject feature : features){
 			JsonCtParser parser = new JsonCtParser();
+			
+			if (!JsonCtParser.isTrackPoint(feature)) observationFeatureCount++;
 			
 			try{
 				JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
@@ -160,6 +165,32 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					if (link.getLastObservationCnt()  + 1 != observationCounter) continue;					
 				}
 				
+				if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT)){
+					//sampling unit changed
+					//we have a new sampling unit
+					SamplingUnit su = null;
+					String suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT);
+					if (suKey != null & suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
+						suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
+						if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
+							su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));
+							if (su == null){
+								warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_SuNotFound, suKey));
+							}
+						}
+					}
+					link.setSamplingUnit(su);
+					
+					//add this point to track; this is not an observation
+					Date dt = JsonUtils.JSON_DATE_FORMAT.parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+					addPointToTrack(link.getMission(), su, parser.readXYFromProperties(feature), dt, session);
+					
+					//update last observation count
+					link.setLastObservationCnt(observationCounter);
+					processedFeatures.add(feature);
+					continue;
+				}
+				
 				//is this the end of the mission
 				boolean isMissionEnd = sighting.containsKey(SurveyScreensUtil.END_MISSION_KEY) ;
 				if (isMissionEnd){
@@ -183,7 +214,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					md.setEndTime(new Time(dt.getTime()));
 						
 					//add point to track
-					addPointToTrack(md, parser.readXYFromProperties(feature),dt);
+					addPointToTrack(md, link.getSamplingUnit(), parser.readXYFromProperties(feature),dt);
 					
 					//update last observation count
 					link.setLastObservationCnt(observationCounter);
@@ -205,7 +236,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					}
 					
 					if (wp.getX() != null && wp.getY() != null){
-						addPointToTrack(link.getMission(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+						addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
 					}
 					//update last observation count
 					link.setLastObservationCnt(observationCounter);
@@ -223,7 +254,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					}
 
 					Date groupStartTime = link.getGroupStartTime();
-					int groupResult = processGroup(sighting, link.getMission(), wp, parser.getApplyToAdd(), groupStartTime, session);
+					int groupResult = processGroup(sighting, link.getMission(), wp, link.getSamplingUnit(), parser.getApplyToAdd(), groupStartTime, session);
 					if (groupResult > 0){
 						
 						if (groupResult == 2){
@@ -235,7 +266,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						}
 						
 						if(wp.getX() != null && wp.getY() != null){
-							addPointToTrack(link.getMission(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+							addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
 						}
 						link.setLastObservationCnt(observationCounter);
 						processedFeatures.add(feature);
@@ -248,7 +279,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				if (addToLast){
 					if (link == null){
 						//we have nothing to add this to; this is an error
-						warnings.add("No mission found for 'add to previous waypoint' observation.");
+						warnings.add(Messages.MissionJsonProcessor_MissionNotFound);
 						continue;
 					}
 					
@@ -269,11 +300,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				
 				//add these observation to the selected patrol leg
 				//TODO: potentially we could validate metadata
-				addToExistingMission(link.getMission(), wp, session);
+				addToExistingMission(link.getMission(), wp, link.getSamplingUnit(), session);
 				if (link.getMission().getUuid() != null) modifiedMissions.add(link.getMission());
 				
 				//add position to track log
-				addPointToTrack(link.getMission(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+				addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
 				
 				//update last observation count
 				link.setLastObservationCnt(observationCounter);
@@ -282,7 +313,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 			}catch (Exception ex){
 				//TODO: if there is a session.flush error we have a problem we need to stop and rollback
 				CyberTrackerPlugIn.log(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
-				warnings.add("Error parsing feature information (feature will not be processed):" + ex.getMessage());
+				warnings.add(Messages.MissionJsonProcessor_ParseError + ex.getMessage());
 			}
 		}
 		
@@ -306,7 +337,15 @@ public class MissionJsonProcessor implements IJsonProcessor {
 			});
 		}
 		if (cancel[0]){
-			throw new UserCancelledException("User cancelled operation while assigning observations to missions.");
+			throw new UserCancelledException(Messages.MissionJsonProcessor_UserCanclled);
+		}
+		
+		if (observationFeatureCount > 0 && processedFeatures.size() == 0){
+			//there is at least one observation feature; but nothing could be processed
+			//then we don't want to process track features because it is likely
+			//these features should not be processed.
+			//see ticket: #1877
+			return processedFeatures;
 		}
 		
 		//try processing track features
@@ -331,11 +370,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 	 * @return
 	 * @throws Exception 
 	 */
-	private int processGroup(JSONObject sighting, Mission missionToUpdate, Waypoint wp, List<WaypointObservationAttribute> applyAll, Date groupStartTime, Session session) throws Exception{
+	private int processGroup(JSONObject sighting, Mission missionToUpdate, Waypoint wp, SamplingUnit su, List<WaypointObservationAttribute> applyAll, Date groupStartTime, Session session) throws Exception{
 		if (!sighting.containsKey(ScreensUtil.RESULT_END_WAYPOINT_GROUP)){
 			//clear observations associated with 
 			wp.getObservations().clear();
-			addToExistingMission(missionToUpdate, wp, session);
+			addToExistingMission(missionToUpdate, wp, su, session);
 			
 			return 1;
 		}else{
@@ -345,7 +384,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					if (addWaypointToLastObservation(missionToUpdate, wp, session) != null) return 1;
 					return 0;
 				}else{
-					addToExistingMission(missionToUpdate, wp, session);
+					addToExistingMission(missionToUpdate, wp, su, session);
 					return 2;
 				}
 			}else if ("TRUE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){ //$NON-NLS-1$
@@ -358,7 +397,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					}
 					return 0;
 				}else{
-					addToExistingMission(missionToUpdate, wp, session);
+					addToExistingMission(missionToUpdate, wp, su, session);
 					//update all waypoints since the start of the group to include the defaults
 					//and the after attributes
 					for (MissionDay pld : missionToUpdate.getMissionDays()){
@@ -455,8 +494,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					@Override
 					public void run() {
 						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
-								"Warnings", 
-								"The following warnings were generated while parsing mission data.  Do you want to continue?",
+								Messages.MissionJsonProcessor_WarningTitle, 
+								Messages.MissionJsonProcessor_WarningMsg,
 								warnings,
 								new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
 						if (wd.open() == 0){
@@ -467,11 +506,12 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					}	
 				});
 				if (!cont[0]){
-					throw new UserCancelledException("User cancelled operation due to warnings.");
+					throw new UserCancelledException(Messages.MissionJsonProcessor_UserCancelled2);
 				}
 		 }
 	}
 	
+	@SuppressWarnings("unchecked")
 	private CtMissionLink createMissionFromSighting(JSONObject sighting, String deviceId, UUID ctUuid, int observationCounter, Session session) throws Exception{
 		Mission mission = new Mission();
 		
@@ -502,13 +542,13 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				String missionPropKey = key.substring(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX.length());
 				
 				List<MissionAttribute> mas = session.createCriteria(MissionAttribute.class)
-						.add(Restrictions.eq("keyId", missionPropKey))
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+						.add(Restrictions.eq("keyId", missionPropKey)) //$NON-NLS-1$
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 						.list();
 				if (mas.size() == 0){
-					warnings.add(MessageFormat.format("No mission attributes found for key {0}", missionPropKey));
+					warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_MissionAttributeNotFound, missionPropKey));
 				}else if (mas.size() > 1){
-					warnings.add(MessageFormat.format("Multiple mission attributes found for key {0}", missionPropKey));
+					warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_MultipleAttributesFound, missionPropKey));
 				}else{
 					MissionAttribute ma = mas.get(0);
 					
@@ -523,7 +563,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 							String listItemUuid = listItem.substring(SurveyScreensUtil.JsonSurveyKey.MISSION_ATT_LIST.key.length() + 1);
 							value = session.get(MissionAttributeListItem.class, UuidUtils.stringToUuid(listItemUuid));
 							if (value == null){
-								warnings.add(MessageFormat.format("Not mission attribute list item found with uuid {0}", listItemUuid));
+								warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_ListItemNotFound, listItemUuid));
 							}
 						}
 					}
@@ -549,22 +589,38 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		mission.setMissionDays(new ArrayList<MissionDay>());
 		mission.getMissionDays().add(md);
 		
+		//find the initial sampling unit
+		SamplingUnit su = null;
+		if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT)){
+			String suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT);
+			if (suKey != null & suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
+				suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
+				if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
+					su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));
+					if (su == null){
+						warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_SuNotFound, suKey));
+					}
+				}
+			}
+		}
+			
 		CtMissionLink link = new CtMissionLink();
 		link.setDeviceId(deviceId);
 		link.setCtUuid(ctUuid);
 		link.setLastObservationCnt(observationCounter);
 		link.setMission(mission);
 		link.setNewSurveyDesign(ct.getSurveyDesign());
+		link.setSamplingUnit(su);
 		
 		newMissionLinks.put(ctUuid, link);
 		return link;
 	}
 		
-	private void addToExistingMission(Mission addTo, Waypoint wp, Session session)
+	private void addToExistingMission(Mission addTo, Waypoint wp, SamplingUnit su, Session session)
 			throws Exception {
 		
 		MissionDay addToD = findDay(addTo, wp.getDateTime(), true, null, session);
-		SurveyWaypoint pw = addWaypointToMissionDay(addToD, wp);
+		SurveyWaypoint pw = addWaypointToMissionDay(addToD, wp, su);
 		
 		if (addTo.getUuid() != null){
 			if (wp.getAttachments() != null){
@@ -594,10 +650,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		}
 	}
 
-	private SurveyWaypoint addWaypointToMissionDay(MissionDay addToD, Waypoint wp){
+	private SurveyWaypoint addWaypointToMissionDay(MissionDay addToD, Waypoint wp, SamplingUnit su){
 		SurveyWaypoint pw = new SurveyWaypoint();
 		pw.setMissionDay(addToD);
 		pw.setWaypoint(wp);
+		pw.setSamplingUnit(su);
 		if (addToD.getWaypoints() == null) addToD.setWaypoints(new ArrayList<SurveyWaypoint>());
 		addToD.getWaypoints().add(pw);
 		
@@ -611,14 +668,14 @@ public class MissionJsonProcessor implements IJsonProcessor {
 			try{
 				SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, p);
 			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError("Importing JSON Data", ex.getMessage(), ex);
+				CyberTrackerPlugIn.displayError(Messages.MissionJsonProcessor_ErrorTitle, ex.getMessage(), ex);
 			}
 		}
 		for (Mission p : newMissions){
 			try{
 				SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_ADDED, p);
 			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError("Importing JSON Data", ex.getMessage(), ex);
+				CyberTrackerPlugIn.displayError(Messages.MissionJsonProcessor_ErrorTitle, ex.getMessage(), ex);
 			}
 		}
 	}
@@ -691,17 +748,17 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		return md;
 	}
 	
-	public static final void addPointToTrack(MissionDay missionDay, Coordinate pnt, Date time) throws Exception{
+	public static final void addPointToTrack(MissionDay missionDay, SamplingUnit su, Coordinate pnt, Date time) throws Exception{
 		if (pnt == null) return;
 		if (missionDay == null) return;
 		if (missionDay.getTracks() == null) missionDay.setTracks(new ArrayList<MissionTrack>());
-		MissionJsonTrackProcessor.addPointToMisisonTracks(missionDay, pnt, time);
+		MissionJsonTrackProcessor.addSuPointToMisisonTracks(missionDay, su, pnt, time);
 	}
 	
-	public static final void addPointToTrack(Mission mission, Coordinate pnt, Date time, Session session) throws Exception{
+	public static final void addPointToTrack(Mission mission, SamplingUnit su, Coordinate pnt, Date time, Session session) throws Exception{
 		if (pnt == null) return;
 		MissionDay pld = findDay(mission, time, true, null, session);
-		addPointToTrack(pld, pnt, time);
+		addPointToTrack(pld, su, pnt, time);
 	}
 
 	@Override
@@ -710,7 +767,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		
 		StringBuilder sb = new StringBuilder();
 		if (!newMissions.isEmpty()){
-			sb.append(MessageFormat.format("Created {0} missions ", newMissions.size()));
+			sb.append(MessageFormat.format(Messages.MissionJsonProcessor_CreatedMsg, newMissions.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Mission p : newMissions){
 				sb.append(p.getId());
@@ -722,7 +779,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		HashSet<Mission> tmp = new HashSet<Mission>(modifiedMissions);
 		tmp.removeAll(newMissions);
 		if (tmp.size() > 0){
-			sb.append(MessageFormat.format("Modified {0} missions ", tmp.size()));
+			sb.append(MessageFormat.format(Messages.MissionJsonProcessor_ModifiedMsg, tmp.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Mission p : tmp){
 				sb.append(p.getId());

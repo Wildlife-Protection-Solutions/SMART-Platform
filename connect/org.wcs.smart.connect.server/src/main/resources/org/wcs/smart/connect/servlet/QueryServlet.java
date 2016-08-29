@@ -24,6 +24,8 @@ package org.wcs.smart.connect.servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -46,6 +48,8 @@ import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
  */
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "query")
 public class QueryServlet extends HttpServlet {
+	
+	private final Logger logger = Logger.getLogger(QueryServlet.class.getName());
 	
 	private static final long serialVersionUID = 1L;
      
@@ -72,8 +76,7 @@ public class QueryServlet extends HttpServlet {
 				}
 			}
 		}catch (Exception ex){
-			//TODO: log me
-			ex.printStackTrace();
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 		}
 		
 		//date filters with name

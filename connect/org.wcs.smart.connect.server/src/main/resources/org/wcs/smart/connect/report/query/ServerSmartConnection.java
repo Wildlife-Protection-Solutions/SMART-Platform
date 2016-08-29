@@ -107,7 +107,7 @@ public class ServerSmartConnection extends SmartConnection {
 	}
 
 	public String createCaFilter(){
-		if (getConservationAreas() == null ) return "";
+		if (getConservationAreas() == null ) return ""; //$NON-NLS-1$
 		StringBuilder sb = new StringBuilder();
 		for (ConservationArea ca : getConservationAreas()){
 			sb.append(ca.getUuid());

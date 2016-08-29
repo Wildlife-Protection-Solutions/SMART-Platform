@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.connect.dataqueue.cybertracker.survey.core.feature"
+      label="SMART CyberTracker DataQueue Mission Processor"
+      version="4.0.1.qualifier"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.smart.feature">
+
+   <description>
+      Adds support for processing CyberTracker survey(mission) data
+sent via the network to a Connect Server.
+   </description>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <plugin
+         id="org.wcs.smart.connect.dataqueue.cybertracker.survey"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

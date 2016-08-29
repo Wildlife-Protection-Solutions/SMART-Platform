@@ -52,8 +52,9 @@ public class RunQueryServlet extends HttpServlet {
 				+ ConnectRESTApplication.PATH_SEPERATOR 
 				+ QueryApi.PATH 
 				+ request.getPathInfo() + "?" + request.getQueryString(); //$NON-NLS-1$
+		
 		request.getRequestDispatcher(x).forward(request, response);
-		//TODO: 404 or other issues will just return a blank web page
+		//404 or other issues will just return a blank web page
 		//ideally if that happens we show appropriate error web page
 	}
 

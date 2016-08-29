@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -145,8 +146,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		all.setLayout(new GridLayout(1, false));
 		all.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		dbAlertsList = loadAlerts(dialog.getModel());
-		properties = ConnectCtHibernateManager.getCtProperties(dialog.getModel(), dialog.getSession());
+		dbAlertsList = loadInitialAlerts(dialog.getModel());
+		properties = loadInitialProperties();
 		
 		Group g = new Group(all, SWT.NONE);
 		g.setText(Messages.ConfigurableModelEditorConnectTab_UploadHeader);
@@ -196,9 +197,9 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		if (typeCache != null) types.addAll(typeCache.keySet());
 		cmbPositionType.setInput(types);
 		cmbPositionType.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				boolean change = properties.getPingType() == null || !properties.getPingType().equals(((IStructuredSelection)cmbPositionType.getSelection()).getFirstElement());
 				IStructuredSelection selection = (IStructuredSelection) cmbPositionType.getSelection();
 				if (!selection.isEmpty()){
 					Object x = selection.getFirstElement();
@@ -206,6 +207,9 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 						properties.setPingType((UUID)x);
 						cdPositionType.hide();
 					}
+				}
+				if (change){
+					dialog.notifyChangesMade();
 				}
 				
 			}
@@ -668,16 +672,62 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		}
 	}
 
-	private List<ConnectAlert> loadAlerts(final ConfigurableModel cm) {
+	private List<ConnectAlert> loadInitialAlerts(final ConfigurableModel cm) {
 		final List<ConnectAlert> resultList = new ArrayList<ConnectAlert>();
 		if (cm.getUuid() == null) {
+			ConfigurableModel clonedFrom = dialog.getClonedFrom();
+			if (clonedFrom != null) {
+				//this is new cm using another cm as template -> need to clone alerts
+				return cloneAlertsFromTemplate(cm, clonedFrom);
+			}
 			return resultList;
 		}
 		resultList.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, dialog.getSession(), true));
 		return resultList;
 	}
 
-	
+	private ConnectCtProperties loadInitialProperties() {
+		final ConfigurableModel cm = dialog.getModel();
+		ConnectCtProperties p = ConnectCtHibernateManager.getCtProperties(cm, dialog.getSession());
+		if (cm.getUuid() == null) {
+			ConfigurableModel clonedFrom = dialog.getClonedFrom();
+			if (clonedFrom != null) {
+				//this is new cm using another cm as template -> need to clone alerts
+				ConnectCtProperties pFrom = ConnectCtHibernateManager.getCtProperties(clonedFrom, dialog.getSession());
+				p.setPingType(pFrom.getPingType());
+				p.setDataFrequency(pFrom.getDataFrequency());
+				p.setPingFrequency(pFrom.getPingFrequency());
+			}
+		}
+		return p;
+	}
+
+	private List<ConnectAlert> cloneAlertsFromTemplate(ConfigurableModel cm, ConfigurableModel clonedFrom) {
+		final List<ConnectAlert> resultList = new ArrayList<ConnectAlert>();
+		List<ConnectAlert> listToClone = ConnectCtHibernateManager.getConnectAlerts(clonedFrom, dialog.getSession(), false);
+		Map<UUID, UuidItem> o2iMap = dialog.getOriginal2CloneItemMap();
+		if (o2iMap == null) {
+			//this mean that we have error in logic, because this map must present if we clone using template
+			SmartPlugIn.displayError(Messages.ConfigurableModelEditorConnectTab_ErrorInitAlertsFromTemplate, null);
+			return resultList;
+		}
+		for (ConnectAlert a : listToClone) {
+			ConnectAlert clone = new ConnectAlert();
+			clone.setModel(cm);
+			if (a.getAttrubute() != null) {
+				clone.setAttrubute((CmAttribute)o2iMap.get(a.getAttrubute().getUuid()));
+			}
+			if (a.getAlertItem() != null) {
+				clone.setAlertItem(o2iMap.get(a.getAlertItem().getUuid()));
+			}
+			clone.setType(a.getType());
+			clone.setLevel(a.getLevel());
+
+			resultList.add(clone);
+		}
+		return resultList;
+	}
+
 	@SuppressWarnings("unchecked")
 	private List<ConnectAlertType> getAlertTypes() {
 		if (alertTypeList == null) {
@@ -904,4 +954,5 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 			
 		}
 	}
+
 }

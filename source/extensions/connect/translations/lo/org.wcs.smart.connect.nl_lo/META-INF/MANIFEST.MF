@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Connect Laos Fragment
+Bundle-SymbolicName: org.wcs.smart.connect.nl_lo
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.connect;bundle-version="4.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart

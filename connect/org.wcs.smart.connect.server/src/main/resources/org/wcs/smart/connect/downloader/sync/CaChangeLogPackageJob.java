@@ -95,8 +95,9 @@ public class CaChangeLogPackageJob implements Runnable {
 			
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Error creating change package for conservation area. " + ex.getMessage(), ex); //$NON-NLS-1$
-			
-			//TODO: do we want to close and reopen this session here?
+			s.close();	
+			//close and reopen this session here?
+			s = factory.openSession();
 			try{
 				s.beginTransaction();
 				item.setStatus(Status.ERROR);

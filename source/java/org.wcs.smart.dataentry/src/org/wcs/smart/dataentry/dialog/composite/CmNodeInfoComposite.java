@@ -42,6 +42,8 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -178,7 +180,21 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		btnCollectMultiple.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getSourceObject().setCollectMultipleObservations(btnCollectMultiple.getSelection());
+				boolean isMulti = btnCollectMultiple.getSelection();
+				getSourceObject().setCollectMultipleObservations(isMulti);
+				
+				if (isMulti){
+					//ensure non of the attributes are multi-select
+					//for multiple observation categories we do not support multi-selecte lists or numeric lists
+					for (CmAttribute kid : getSourceObject().getCmAttributes()){
+						CmAttributeOption op = kid.getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
+						if (op != null) op.setBooleanValue(false);
+
+						op = kid.getCmAttributeOptions().get(CmAttributeOption.ID_NUMERIC);
+						if (op != null) op.setBooleanValue(false);
+						
+					}
+				}
 				btnSingleGpsPoint.setEnabled(getSourceObject().isCollectMultipleObservations());
 				fireModelChanged();
 			}

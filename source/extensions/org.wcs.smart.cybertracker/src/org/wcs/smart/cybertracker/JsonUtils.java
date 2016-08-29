@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.cybertracker;
 
 import java.text.DateFormat;
@@ -7,24 +28,32 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Utilities for supporting JSON values.
+ * 
+ * @author Emily
+ *
+ */
 public class JsonUtils {
-	public static DateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+	public static DateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"); //$NON-NLS-1$
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ParseResult parseDefaultAttributeValues(JSONObject defaultValues, Session session){
 		if (defaultValues == null) return new ParseResult();
 		List<WaypointObservationAttribute> defaultAttributes = new ArrayList<>();
@@ -40,11 +69,11 @@ public class JsonUtils {
 				try{
 					a = findAttribute(key.substring(part.length()), session);
 				}catch (Exception ex){
-					warnings.add(MessageFormat.format("No attribute found for uuid {0}.  The default setting for this attribute will be ignored: " + ex.getMessage(), key));
+					warnings.add(MessageFormat.format(Messages.JsonUtils_AttributeNotFound + ex.getMessage(), key));
 				}
 				
 				if (a == null){
-					warnings.add(MessageFormat.format("No attribute found for uuid {0}.  The default setting for this attribute will be ignored.", key));
+					warnings.add(MessageFormat.format(Messages.JsonUtils_AttributeNotFound, key));
 				}else{
 					try{
 						WaypointObservationAttribute woa = new WaypointObservationAttribute();
@@ -54,7 +83,7 @@ public class JsonUtils {
 						}
 					}catch (Exception ex){
 						CyberTrackerPlugIn.log(ex.getMessage(), ex);
-						warnings.add(MessageFormat.format("The value for attribute {0} could not be parsed: ''{1}''. {2}", a.getName(), value.toString(), ex.getMessage()));
+						warnings.add(MessageFormat.format(Messages.JsonUtils_CouldNotParseValue, a.getName(), value.toString(), ex.getMessage()));
 					}
 				}
 			}
@@ -77,11 +106,11 @@ public class JsonUtils {
 			
 		}else if (att.getType() == AttributeType.LIST){
 			String listElement = (String) value;
-			if (!listElement.startsWith(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP)) throw new Exception("Invalid value for list attribute: " +listElement);
+			if (!listElement.startsWith(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP)) throw new Exception(Messages.JsonUtils_InvalidListAttribute +listElement);
 			
 			AttributeListItem li = findAttributeListItem(listElement.substring(2), session);	
 			if (li == null){
-				warnings.add(MessageFormat.format("No list item found for uuid {0}.  No value will be set for the attribute {1}.", listElement, toUpdate.getAttribute().getName()));
+				warnings.add(MessageFormat.format(Messages.JsonUtils_ListItemNotFound, listElement, toUpdate.getAttribute().getName()));
 				return false;
 			}
 			toUpdate.setAttributeListItem(li);
@@ -97,10 +126,10 @@ public class JsonUtils {
 			toUpdate.setStringValue((String)value);
 		}else if (att.getType() == AttributeType.TREE){
 			String treeElement = (String)value;
-			if (!treeElement.startsWith(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP)) throw new Exception("Invalid value for tree attribute: " +treeElement);
+			if (!treeElement.startsWith(JsonKey.ATTRIBUTE_TREE.key + CyberTrackerConfExporter.KEY_SEP)) throw new Exception(Messages.JsonUtils_InvalidTreeAttribute +treeElement);
 			AttributeTreeNode li = findAttributeTreeNode(treeElement.substring(2), session);
 			if (li == null){
-				warnings.add(MessageFormat.format("No tree node found for uuid {0}.  No value will be set for the attribute {1}.", treeElement, toUpdate.getAttribute().getName()));
+				warnings.add(MessageFormat.format(Messages.JsonUtils_TreeNodeNotFound, treeElement, toUpdate.getAttribute().getName()));
 				return false;
 			}
 			toUpdate.setAttributeTreeNode(li);

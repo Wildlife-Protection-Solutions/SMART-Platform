@@ -228,7 +228,7 @@ public enum QueryManager {
 		for (Class<? extends Query> q : queryClasses){
 			List<Query> queries = session.createCriteria(q).list();
 			for (Query qq : queries){
-				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName(), q.getSimpleName(), 
+				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName() == null ? "" : qq.getName(), q.getSimpleName(),  //$NON-NLS-1$
 						qq.getConservationArea().getId(), qq.getId(), qq.getIsShared(), 
 						qq.getConservationArea().getUuid(),
 						qq.getConservationArea().getIsCcaa(),

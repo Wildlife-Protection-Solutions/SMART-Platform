@@ -34,6 +34,7 @@ public class Messages extends NLS {
 	public static String DataQueueItemProcessor_Error3;
 	public static String DataQueueItemProcessor_Error4;
 	public static String DataQueueItemProcessor_JobName;
+	public static String DataQueueItemProcessor_RequeueMessage;
 	public static String DataQueueItemProcessor_RequeueOnServer;
 	public static String DataQueueItemProcessor_Task1;
 	public static String DataQueueItemProcessor_Task2;

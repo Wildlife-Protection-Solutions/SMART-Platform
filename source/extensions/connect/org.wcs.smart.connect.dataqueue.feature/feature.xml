@@ -23,4 +23,8 @@
          version="0.0.0"
          optional="true"/>
 
+   <includes
+         id="org.wcs.smart.connect.feature"
+         version="0.0.0"/>
+
 </feature>

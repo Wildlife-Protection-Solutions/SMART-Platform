@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart.report Hindi NLS Support
 Bundle-SymbolicName: org.wcs.smart.report.nl_hi
-Bundle-Version: 4.0.0
-Fragment-Host: org.wcs.smart.report;bundle-version="4.0.0"
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.report;bundle-version="4.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: OSGI-INF/l10n/bundle
 Bundle-Vendor: org.wcs.smart

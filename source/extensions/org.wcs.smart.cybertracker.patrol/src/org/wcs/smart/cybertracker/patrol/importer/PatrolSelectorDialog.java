@@ -166,4 +166,9 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 		return patrol;
 
 	}
+	
+	@Override
+	public boolean isResizable(){
+		return true;
+	}
 }

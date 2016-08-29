@@ -50,6 +50,8 @@
 		<module>../extensions/connect/org.wcs.smart.connect/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect.dataqueue/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect.cybertracker/pom-shared.xml</module>
+		<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.patrol/pom-shared.xml</module>
+		<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.survey/pom-shared.xml</module>
 	</modules>
  
 	<build>

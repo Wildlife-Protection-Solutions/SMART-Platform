@@ -57,6 +57,7 @@ public class Messages extends NLS {
 	public static String SurveyCTImportEditorContent_Task_AddMission;
 	public static String SurveyCTImportEditorContent_TaskName_AddMissions;
 	public static String SurveyCTImportEditorContent_UnableToImport;
+	public static String SurveyJsonUtils_MemberNotFound;
 	public static String SurveyScreensUtil_BeginSurvey;
 	public static String SurveyScreensUtil_Comments;
 	public static String SurveyScreensUtil_EndSamplingUnitOption;

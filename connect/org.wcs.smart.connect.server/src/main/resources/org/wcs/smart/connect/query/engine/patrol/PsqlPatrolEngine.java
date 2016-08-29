@@ -82,7 +82,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT "); //$NON-NLS-1$
 		sb.append(fields.toString());
-		//TODO: I cann't make the 3d geometries work here
+		//TODO: cann't make the 3d geometries work here
 		if (includetrack){
 			sb.append(",st_asbinary(st_force2d(st_collect(st_geomfromwkb(r_track)))) as track "); //$NON-NLS-1$
 		}

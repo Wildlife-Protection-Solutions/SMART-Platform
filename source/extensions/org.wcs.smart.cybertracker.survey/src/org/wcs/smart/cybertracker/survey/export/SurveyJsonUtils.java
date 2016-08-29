@@ -22,22 +22,19 @@
 package org.wcs.smart.cybertracker.survey.export;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.json.simple.JSONObject;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil.JsonSurveyKey;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
-import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartDB;
@@ -57,6 +54,7 @@ public class SurveyJsonUtils {
 	 * @param session
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static CyberTrackerSurvey  parseSurveyMetadata(JSONObject jsonDefaults, JSONObject jsonValues, Session session){
 		
 		if (jsonValues == null) jsonValues = new JSONObject();
@@ -64,8 +62,8 @@ public class SurveyJsonUtils {
 		SurveyDesign design = null;
 		String surveyDesign = (String) jsonValues.get(SurveyScreensUtil.RESULT_SURVEY_DESIGN);
 		List<SurveyDesign> cas = session.createCriteria(SurveyDesign.class)
-				.add(Restrictions.eq("keyId", surveyDesign))
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+				.add(Restrictions.eq("keyId", surveyDesign)) //$NON-NLS-1$
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 		if (cas.size() == 1){
 			design = cas.get(0);
 		}
@@ -114,7 +112,7 @@ public class SurveyJsonUtils {
 			if (employee != null){
 				ctMission.getMembers().add(employee);
 			}else{
-				//TODO: not found
+				ctMission.addWarning(SurveyMeta.MEMBERS, Messages.SurveyJsonUtils_MemberNotFound);
 			}
 			
 			if (member.equals(leader)){

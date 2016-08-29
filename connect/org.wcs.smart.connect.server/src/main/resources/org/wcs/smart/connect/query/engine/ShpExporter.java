@@ -48,7 +48,6 @@ import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.graph.util.geom.GeometryUtil;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;

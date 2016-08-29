@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.ui;
 
 import java.util.ArrayList;
@@ -9,7 +30,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -24,6 +44,14 @@ import org.eclipse.swt.widgets.Control;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 
+/**
+ * Combo viewer with a filter button that can filter what is displayed in the 
+ * drop down.
+ * 
+ * @author Emily
+ *
+ * @param <T>
+ */
 public abstract class FilteredComboViewer<T> extends Composite implements IUpdatableView {
 
     protected ComboViewer viewer;
@@ -31,7 +59,6 @@ public abstract class FilteredComboViewer<T> extends Composite implements IUpdat
 
     protected T currentSelection;
 
-	private boolean stopSelectionPropogation = false;
 	private List<ISelectionChangedListener> changeListeners = new ArrayList<ISelectionChangedListener>();
 	
 	public FilteredComboViewer(Composite parent) {
@@ -46,12 +73,26 @@ public abstract class FilteredComboViewer<T> extends Composite implements IUpdat
 		btnFilter.setEnabled(enabled);
 	}
 	
+	/**
+	 * The tooltip to display on filter button
+	 * @return
+	 */
 	protected abstract String getTooltip();
 	
+	/**
+	 * Combo label provider
+	 * @return
+	 */
 	protected abstract ILabelProvider getLabelProvider();
 	
+	/**
+	 * Displays filter dialog
+	 */
 	protected abstract void showFilterDialog();
 	
+	/**
+	 * Load combo viewer items
+	 */
 	protected abstract void loadListItems();
 	
 	@Override
@@ -73,10 +114,7 @@ public abstract class FilteredComboViewer<T> extends Composite implements IUpdat
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (!isStopSelectionPropogation()) {
-					fireChangeListeners(event);
-				}
-				setStopSelectionPropogation(false);
+				fireChangeListeners(event);
 			}
 		});
 
@@ -109,6 +147,7 @@ public abstract class FilteredComboViewer<T> extends Composite implements IUpdat
     	viewer.setSelection(new StructuredSelection(currentSelection));
 	}    
 
+	@SuppressWarnings("unchecked")
 	public T getSelection() {
 		ISelection selection = viewer.getSelection();
 		if (selection instanceof IStructuredSelection) {
@@ -143,13 +182,5 @@ public abstract class FilteredComboViewer<T> extends Composite implements IUpdat
 			listener.selectionChanged(event);
 		}
 	}
-	
-	protected void setStopSelectionPropogation(boolean stopSelectionPropogation) {
-		this.stopSelectionPropogation = stopSelectionPropogation;
-	}
-	
-	protected boolean isStopSelectionPropogation() {
-		return stopSelectionPropogation;
-	}
-	
+		
 }
