@@ -210,6 +210,11 @@ public class ConservationAreas extends HttpServlet{
 						proxy.setDescriptionDesignation(smartca.getDescription(), smartca.getDesignation());
 					}
 					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
+					if(ca.getVersion()== null){
+						proxy.setVersion(null);
+					}else{
+						proxy.setVersion(ca.getVersion());
+					}
 					conservationAreas.add(proxy);
 				}catch(SmartConnectException ex){
 					//not valid; ignore
@@ -631,7 +636,8 @@ public class ConservationAreas extends HttpServlet{
     public void deleteConservationArea(@PathParam("cauuid") String caUuid, 
     		@QueryParam("dataonly") String dataonly,
     		@QueryParam("username") String username,
-    		@QueryParam("password") String password){
+    		@QueryParam("password") String password,
+    		@QueryParam("version") String version){
 		
 		if (username == null || password == null || username.length() == 0 || password.length() == 0){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.UserAndPasswordRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -672,6 +678,11 @@ public class ConservationAreas extends HttpServlet{
 					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
 			if (serverDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			}
+			if((version.equals(null) || version.equals("")) && serverDelete.getVersion()==null){
+				//no problem, you can delete unversioned CAs without a version paramater.
+			}else if((version == null || version.equals("")) || !(serverDelete.getVersion().equals(UUID.fromString(version))) ){ //null version no longer acceptable at this point, or it doens't match the version
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			validateDelete(serverDelete.getUuid(), s);
 

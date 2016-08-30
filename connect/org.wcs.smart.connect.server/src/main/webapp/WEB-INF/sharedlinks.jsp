@@ -26,7 +26,7 @@
 <%@include file="menu.jsp" %>
 
 <div id="main">
-<div class="pageheader"><fmt:message key="query.queries"/></div>
+<div class="pageheader"><fmt:message key="sharedlinks.title"/></div>
 <div><div id="message" class="msgsection"></div></div>
 <div class="top-spacer"> 
 </div>
