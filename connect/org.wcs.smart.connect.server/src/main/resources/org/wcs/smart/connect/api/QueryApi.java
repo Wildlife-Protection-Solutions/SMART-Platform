@@ -353,7 +353,8 @@ public class QueryApi extends HttpServlet{
 	 * 
 	 * @param typefilter - optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.
 	 * @param cafilter - optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.
-	 * @param isccaaFilter - optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything. 
+	 * @param isccaafilter - optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything.
+	 * @param orderby - optional String - which column to sort the results by, valid values are: name, descendingname, type, descendingtype, ca, descendingca, id, descendingid 
 	 * @return A JSON list of QueryProxy objects. ( https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/query/QueryProxy.java )
 	 */
 	@GET
