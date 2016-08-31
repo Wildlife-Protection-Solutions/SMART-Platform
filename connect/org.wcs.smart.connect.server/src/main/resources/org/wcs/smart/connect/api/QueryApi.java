@@ -23,6 +23,7 @@ package org.wcs.smart.connect.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -69,6 +70,7 @@ import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.query.model.*;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridResultItem;
@@ -83,6 +85,7 @@ import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.util.UuidUtils;
+
 
 /**
  * SMART Connect Query REST API
@@ -348,13 +351,17 @@ public class QueryApi extends HttpServlet{
 	 * URL: ../server/api/query/
 	 * Call Type: GET
 	 * 
+	 * @param typefilter - optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.
+	 * @param cafilter - optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.
+	 * @param isccaaFilter - optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything. 
 	 * @return A JSON list of QueryProxy objects. ( https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/query/QueryProxy.java )
 	 */
-	
 	@GET
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public List<QueryProxy> getAllQueriesForUser( @QueryParam(value="username") String username){
+    public List<QueryProxy> getAllQueriesForUser(@QueryParam("typefilter") String typeFilter,
+			@QueryParam("cafilter") String caFilter,
+			@QueryParam("isccaafilter") Boolean isCcaaFilter){
 		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
 
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
@@ -362,7 +369,8 @@ public class QueryApi extends HttpServlet{
 		try{
 			//Check if they access to All Queries, if so it's simple, return them all
 			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, null)){
-				 return QueryManager.INSTANCE.getQueries(s, request.getLocale());
+				allowed = QueryManager.INSTANCE.getQueries(s, request.getLocale());
+				return filteredQueries(typeFilter, caFilter, isCcaaFilter, allowed);
 			}
 			
 			//short circuit check for access to > 0 queries, if not, return nothing. 
@@ -387,11 +395,54 @@ public class QueryApi extends HttpServlet{
 			s.getTransaction().commit();
 		}
 		
-		return allowed; 
+		return filteredQueries(typeFilter, caFilter, isCcaaFilter, allowed); 
 	}
 	
 	
 	
+	private List<QueryProxy> filteredQueries(String typeFilter, String caFilter, Boolean isCcaaFilter,
+			List<QueryProxy> list) {
+		List<QueryProxy> passed = new ArrayList<QueryProxy>();
+		for (QueryProxy q : list){
+			Boolean pass1 = false;
+			Boolean pass2 = false;
+			Boolean pass3 = false;
+			//type filter
+			if(typeFilter != null && !typeFilter.isEmpty()){
+				if(q.getTypeKey().equals(typeFilter)){
+					pass1 = true;
+				}
+			}else{
+				pass1 = true;
+			}
+			
+			//ca Filter
+			if(caFilter != null && !caFilter.isEmpty()){
+				UUID uuid = UUID.fromString(caFilter);
+				if(q.getCaUuid().equals(uuid)){
+					pass2 = true;
+				}
+			}else{
+				pass2 = true;
+			}
+			
+			//ccaa Filter
+			if(isCcaaFilter != null){
+				if(isCcaaFilter && q.getIsCcaa()){
+					pass3=true;
+				}else if(!isCcaaFilter && !q.getIsCcaa()){
+					pass3=true;
+				}
+			}else{
+				pass3=true;
+			}
+			if(pass1 && pass2 && pass3){
+				passed.add(q);
+			}
+		}
+		return passed;
+	}
+
 	private Response createErrorResponse(Status code, String message){
 		String error = MessageFormat.format("\"status\": {0}, \"error:\": \"" + message + "\"", code.getStatusCode(), message); //$NON-NLS-1$ //$NON-NLS-2$
 		return Response
@@ -400,4 +451,28 @@ public class QueryApi extends HttpServlet{
 				.entity("{" + error +"}") //$NON-NLS-1$ //$NON-NLS-2$
 				.build();
 	}
+	
+	/**
+	 * returns all valid Query types 
+	 * URL: ../server/api/query/types/
+	 * Call Type: GET
+	 * 
+	 * @return A JSON list of query type keys that are valid.
+	 */
+	@GET
+    @Path("/types/")
+	@Produces({ MediaType.APPLICATION_JSON })
+    public String[] getAllQueryTypes(){
+
+		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+		s.beginTransaction();
+		try{
+			return QueryManager.INSTANCE.getQueryTypes();			
+		} catch (Exception e) {
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error getting query types."); //$NON-NLS-1$
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+
 }

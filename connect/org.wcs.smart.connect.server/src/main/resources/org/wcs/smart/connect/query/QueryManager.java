@@ -252,7 +252,7 @@ public enum QueryManager {
 //				r = textCompare.compare(o1.getName(), o2.getName());
 //				return r;
 				
-				//I want to sort by Name only for the user's security page. 
+				//I want to sort by Name only for now 
 				return textCompare.compare(o1.getName(), o2.getName());
 			}
 		});
