@@ -135,5 +135,46 @@
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.wcs.smart.i2.ui.IntelDataAnalysisPerspective"
+            id="org.wcs.smart.i2.IntelDataAnalysisPerspective"
+            name="Intelligence Data Analysis Perspective">
+      </perspective>
+      <perspective
+            class="org.wcs.smart.i2.ui.IntelDataAssessmentPerspective"
+            id="org.wcs.smart.i2.IntelDataAssessmentPerspective"
+            name="Intelligence Data Assessment Perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.i2.toolbar.perspective">
+            <command
+                  commandId="org.wcs.smart.command.showperspective"
+                  label="Data Analysis Mode"
+                  style="radio">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.command.showperspective"
+                  label="Data Assessment Mode"
+                  style="radio">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+               </parameter>
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
 
 </plugin>

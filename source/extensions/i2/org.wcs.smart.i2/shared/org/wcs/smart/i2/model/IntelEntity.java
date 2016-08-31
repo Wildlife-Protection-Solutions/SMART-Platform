@@ -180,7 +180,7 @@ public class IntelEntity extends UuidItem{
 	 * 
 	 * @return The set of i_entity_relationship
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany
 	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
 	public List<IntelEntityAttributeValue> getAttributes() {
 		return this.entityAttributes;
@@ -224,7 +224,7 @@ public class IntelEntity extends UuidItem{
 	 * 
 	 * @return The set of i_entity_attachment
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany
 	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
 	public List<IntelEntityAttachment> getEntityAttachments() {
 		return this.entityAttachments;
@@ -246,7 +246,7 @@ public class IntelEntity extends UuidItem{
 	 * 
 	 * @return The set of i_entity_record
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany
 	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
 	public List<IntelEntityRecord> getIntelligenceRecords() {
 		return this.intelligenceRecords;

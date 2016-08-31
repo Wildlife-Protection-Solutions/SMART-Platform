@@ -79,7 +79,7 @@ public class IntelObservation extends UuidItem{
 	 * 
 	 * @return The set of i_observation_attribute
 	 */
-	@OneToMany(fetch=FetchType.EAGER)
+	@OneToMany
 	@JoinColumn(name="observation_uuid", referencedColumnName="uuid")
 	public List<IntelObservationAttribute> getObservationAttributes() {
 		return this.attributes;
