@@ -91,7 +91,7 @@ public class IntelRecordAttachment {
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
-		@JoinColumn(name="category_uuid")
+		@JoinColumn(name="record_uuid")
 		public IntelRecord getRecord() {
 			return record;
 		}

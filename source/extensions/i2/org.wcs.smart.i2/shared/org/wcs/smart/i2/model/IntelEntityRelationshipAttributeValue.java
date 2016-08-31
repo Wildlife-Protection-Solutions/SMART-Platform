@@ -21,9 +21,9 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name="smart.i_entity_relationship_attribute")
-public class IntelEntityRelationshipAttribute {
+public class IntelEntityRelationshipAttributeValue {
 
-	private IEntityRelationshipAttributePk id = new IEntityRelationshipAttributePk();
+	private IEntityRelationshipAttributeValuePk id = new IEntityRelationshipAttributeValuePk();
 	
 	private String stringValue;
 	private Double doubleValue;
@@ -32,14 +32,14 @@ public class IntelEntityRelationshipAttribute {
 	/**
 	 * Constructor.
 	 */
-	public IntelEntityRelationshipAttribute() {
+	public IntelEntityRelationshipAttributeValue() {
 	}
 
 	@EmbeddedId
-	public IEntityRelationshipAttributePk getId(){
+	public IEntityRelationshipAttributeValuePk getId(){
 		return this.id;
 	}
-	public void setId(IEntityRelationshipAttributePk id){
+	public void setId(IEntityRelationshipAttributeValuePk id){
 		this.id = id;
 	}
 	
@@ -91,8 +91,8 @@ public class IntelEntityRelationshipAttribute {
 	 */
 	@Override
 	public boolean equals(Object o){
-		if (o instanceof IntelEntityRelationshipAttribute){
-			return this.id.equals(((IntelEntityRelationshipAttribute)o).id);
+		if (o instanceof IntelEntityRelationshipAttributeValue){
+			return this.id.equals(((IntelEntityRelationshipAttributeValue)o).id);
 		}
 		return false;
 	}
@@ -110,18 +110,18 @@ public class IntelEntityRelationshipAttribute {
 	 * 
 	 */
 	@Embeddable
-	private static class IEntityRelationshipAttributePk implements Serializable {
+	private static class IEntityRelationshipAttributeValuePk implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		private IntelEntity entity;
 		private IntelAttribute attribute;
 		
-		public IEntityRelationshipAttributePk(){
+		public IEntityRelationshipAttributeValuePk(){
 			
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
-		@JoinColumn(name="category_uuid")
+		@JoinColumn(name="entity_uuid")
 		public IntelEntity getEntity() {
 			return entity;
 		}
@@ -142,10 +142,10 @@ public class IntelEntityRelationshipAttribute {
 		
 		@Override
 		public boolean equals(Object key) {
-			if (! (key instanceof IEntityRelationshipAttributePk)){
+			if (! (key instanceof IEntityRelationshipAttributeValuePk)){
 				return false;
 			}
-			IEntityRelationshipAttributePk p = (IEntityRelationshipAttributePk)key;
+			IEntityRelationshipAttributeValuePk p = (IEntityRelationshipAttributeValuePk)key;
 			
 			if (p.entity == null || this.entity == null ||
 				p.attribute == null || this.attribute == null ){

@@ -1,7 +1,7 @@
 package org.wcs.smart.i2.model;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,6 +38,7 @@ public class IntelRecord extends UuidItem {
 
 	private Date dateCreated;
 	private Date dateModified;
+	private Date dateExported;
 
 	private Employee createdBy;
 	private Employee lastModifiedBy;
@@ -47,9 +48,9 @@ public class IntelRecord extends UuidItem {
 	private String title;
 	private String description;
 
-	private Set<IntelEntityRecord> entities;
-	private Set<IntelLocation> locations;
-	private Set<IntelRecordAttachment> attachments;
+	private List<IntelEntityRecord> entities;
+	private List<IntelLocation> locations;
+	private List<IntelRecordAttachment> attachments;
 
 	/**
 	 * Constructor.
@@ -118,6 +119,25 @@ public class IntelRecord extends UuidItem {
 		return this.dateModified;
 	}
 
+	/**
+	 * Get the date_exported.
+	 * 
+	 * @return dateExported
+	 */
+	@Column(name="date_exported")
+	public Date getDateExported() {
+		return this.dateExported;
+	}
+	/**
+	 * Set the date_exported.
+	 * 
+	 * @param dateExported
+	 *            dateExported
+	 */
+	public void setDateExported(Date dateExported) {
+		this.dateExported = dateExported;
+	}
+	
 	/**
 	 * Get the created_by.
 	 * 
@@ -203,29 +223,29 @@ public class IntelRecord extends UuidItem {
 	
 	@OneToMany
 	@JoinColumn(name="record_uuid", referencedColumnName="uuid")
-	public Set<IntelEntityRecord> getEntities(){
+	public List<IntelEntityRecord> getEntities(){
 		return this.entities;
 	}
-	public void setEntities(Set<IntelEntityRecord> entities){
+	public void setEntities(List<IntelEntityRecord> entities){
 		this.entities = entities;
 	}
 	
 	@OneToMany
 	@JoinColumn(name="record_uuid", referencedColumnName="uuid")
-	public Set<IntelRecordAttachment> getAttachments(){
+	public List<IntelRecordAttachment> getAttachments(){
 		return this.attachments;
 	}
-	public void setAttachments(Set<IntelRecordAttachment> attachments){
+	public void setAttachments(List<IntelRecordAttachment> attachments){
 		this.attachments = attachments;
 	}
 	
 	
 	@OneToMany
 	@JoinColumn(name="location_uuid", referencedColumnName="uuid")
-	public Set<IntelLocation> getLocations(){
+	public List<IntelLocation> getLocations(){
 		return this.locations;
 	}
-	public void setLocations(Set<IntelLocation> locations){
+	public void setLocations(List<IntelLocation> locations){
 		this.locations = locations;
 	}
 }

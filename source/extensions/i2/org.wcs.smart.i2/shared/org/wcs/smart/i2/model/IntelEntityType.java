@@ -1,7 +1,7 @@
 package org.wcs.smart.i2.model;
 
 import java.sql.Blob;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,7 +29,7 @@ public class IntelEntityType extends NamedKeyItem {
 	private Blob icon;
 	private String birtTemplate;
 
-	private Set<IntelEntityTypeAttribute> attributes;
+	private List<IntelEntityTypeAttribute> attributes;
 
 	/**
 	 * Constructor.
@@ -120,11 +120,11 @@ public class IntelEntityType extends NamedKeyItem {
 
 	@OneToMany(fetch=FetchType.LAZY)
 	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid")
-	public Set<IntelEntityTypeAttribute> getAttributes(){
+	public List<IntelEntityTypeAttribute> getAttributes(){
 		return this.attributes;
 	}
 	
-	public void setAttributes(Set<IntelEntityTypeAttribute> attributes){
+	public void setAttributes(List<IntelEntityTypeAttribute> attributes){
 		this.attributes = attributes;
 	}
 

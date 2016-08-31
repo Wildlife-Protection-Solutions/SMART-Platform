@@ -1,6 +1,6 @@
 package org.wcs.smart.i2.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -24,7 +24,7 @@ public class IntelObservation extends UuidItem{
 
 	private IntelLocation location;
 	private Category category;
-	private Set<IntelObservationAttribute> attributes;
+	private List<IntelObservationAttribute> attributes;
 
 	/**
 	 * Constructor.
@@ -81,7 +81,7 @@ public class IntelObservation extends UuidItem{
 	 */
 	@OneToMany(fetch=FetchType.EAGER)
 	@JoinColumn(name="observation_uuid", referencedColumnName="uuid")
-	public Set<IntelObservationAttribute> getObservationAttributes() {
+	public List<IntelObservationAttribute> getObservationAttributes() {
 		return this.attributes;
 	}
 	/**
@@ -90,7 +90,7 @@ public class IntelObservation extends UuidItem{
 	 * @param iObservationAttributeSet
 	 *            The set of i_observation_attribute
 	 */
-	public void setObservationAttributes(Set<IntelObservationAttribute> attributes) {
+	public void setObservationAttributes(List<IntelObservationAttribute> attributes) {
 		this.attributes = attributes;
 	}
 

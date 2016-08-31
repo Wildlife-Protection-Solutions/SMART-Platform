@@ -1,7 +1,7 @@
 package org.wcs.smart.i2.model;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,9 +36,9 @@ public class IntelWorkingSet extends NamedItem{
 
 	private String entityDateFilter;
 
-	private Set<IntelWorkingSetQuery> queries;
-	private Set<IntelWorkingSetRecord> records;
-	private Set<IntelWorkingSetEntity> entities;
+	private List<IntelWorkingSetQuery> queries;
+	private List<IntelWorkingSetRecord> records;
+	private List<IntelWorkingSetEntity> entities;
 
 	/**
 	 * Constructor.
@@ -178,7 +178,7 @@ public class IntelWorkingSet extends NamedItem{
 	 */
 	@OneToMany(fetch=FetchType.LAZY)
 	@JoinColumn(name="working_set_uuid", referencedColumnName="uuid")
-	public Set<IntelWorkingSetQuery> getQueries() {
+	public List<IntelWorkingSetQuery> getQueries() {
 		return this.queries;
 	}
 	
@@ -188,25 +188,25 @@ public class IntelWorkingSet extends NamedItem{
 	 * @param iWorkingSetQuerySet
 	 *            The set of i_working_set_query
 	 */
-	public void setQueries(Set<IntelWorkingSetQuery> queries) {
+	public void setQueries(List<IntelWorkingSetQuery> queries) {
 		this.queries = queries;
 	}
 	
 	@OneToMany(fetch=FetchType.LAZY)
 	@JoinColumn(name="working_set_uuid", referencedColumnName="uuid")
-	public Set<IntelWorkingSetRecord> getRecords() {
+	public List<IntelWorkingSetRecord> getRecords() {
 		return this.records;
 	}
-	public void setRecords(Set<IntelWorkingSetRecord> records) {
+	public void setRecords(List<IntelWorkingSetRecord> records) {
 		this.records = records;
 	}
 	
 	@OneToMany(fetch=FetchType.LAZY)
 	@JoinColumn(name="working_set_uuid", referencedColumnName="uuid")
-	public Set<IntelWorkingSetEntity> getEntities() {
+	public List<IntelWorkingSetEntity> getEntities() {
 		return this.entities;
 	}
-	public void setEntities(Set<IntelWorkingSetEntity> entities) {
+	public void setEntities(List<IntelWorkingSetEntity> entities) {
 		this.entities = entities;
 	}
 }

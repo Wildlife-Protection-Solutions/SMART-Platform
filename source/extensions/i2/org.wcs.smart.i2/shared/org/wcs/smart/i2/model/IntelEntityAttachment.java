@@ -88,7 +88,7 @@ public class IntelEntityAttachment  {
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
-		@JoinColumn(name="category_uuid")
+		@JoinColumn(name="entity_uuid")
 		public IntelEntity getEntity() {
 			return entity;
 		}

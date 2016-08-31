@@ -91,7 +91,7 @@ public class IntelWorkingSetRecord {
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
-		@JoinColumn(name="category_uuid")
+		@JoinColumn(name="record_uuid")
 		public IntelRecord getRecord() {
 			return record;
 		}
@@ -101,7 +101,7 @@ public class IntelWorkingSetRecord {
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
-		@JoinColumn(name="attachment_uuid")
+		@JoinColumn(name="working_set_uuid")
 		public IntelWorkingSet getWorkingSet() {
 			return workingSet;
 		}

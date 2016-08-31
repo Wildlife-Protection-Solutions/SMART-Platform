@@ -12,7 +12,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  * 
  */
 @Entity
-@Table(name="i_attribute_list_item")
+@Table(name="smart.i_attribute_list_item")
 public class IntelAttributeListItem extends NamedKeyItem {
 
 	private IntelAttribute attribute;

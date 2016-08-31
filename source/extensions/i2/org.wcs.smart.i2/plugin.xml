@@ -52,7 +52,7 @@
       </class>
       <class
             ca_property=".id.attribute.conservationArea"
-            class="org.wcs.smart.i2.model.IntelEntityRelationshipAttribute"
+            class="org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue"
             supportsCcaa="false">
       </class>
       <class
@@ -127,6 +127,13 @@
             class="org.wcs.smart.i2.model.IntelWorkingSetRecord"
             supportsCcaa="false">
       </class>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.deleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.handlers.DeleteEmployeeAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
    </extension>
 
 </plugin>

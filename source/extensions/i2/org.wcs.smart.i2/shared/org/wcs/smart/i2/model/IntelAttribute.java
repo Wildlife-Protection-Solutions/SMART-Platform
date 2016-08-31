@@ -1,6 +1,6 @@
 package org.wcs.smart.i2.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -38,7 +38,7 @@ public class IntelAttribute extends NamedKeyItem{
 	private IAttributeType type;
 	private ConservationArea ca;
 
-	private Set<IntelAttributeListItem> listItems;
+	private List<IntelAttributeListItem> listItems;
 	
 	/**
 	 * Constructor.
@@ -98,7 +98,7 @@ public class IntelAttribute extends NamedKeyItem{
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	public Set<IntelAttributeListItem> getAttributeList(){
+	public List<IntelAttributeListItem> getAttributeList(){
 		return this.listItems;
 	}
 	/**
@@ -106,7 +106,7 @@ public class IntelAttribute extends NamedKeyItem{
 	 * 
 	 * @param attributeList the set of valid list elements
 	 */
-	public void setAttributeList(Set<IntelAttributeListItem> listItems){
+	public void setAttributeList(List<IntelAttributeListItem> listItems){
 		this.listItems = listItems;
 	}
 }

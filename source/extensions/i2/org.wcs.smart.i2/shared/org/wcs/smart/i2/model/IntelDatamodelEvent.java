@@ -57,11 +57,11 @@ public class IntelDatamodelEvent extends UuidItem {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="category_uuid", referencedColumnName="uuid")
-	public Category getDmCategory() {
+	public Category getCategory() {
 		return this.dmCategory;
 	}
 
-	public void setDmCategory(Category dmCategory) {
+	public void setCategory(Category dmCategory) {
 		this.dmCategory = dmCategory;
 	}
 
@@ -91,7 +91,7 @@ public class IntelDatamodelEvent extends UuidItem {
 		return this.dmTreeNode;
 	}
 
-	public void setAttributeTreeNode(AttributeTreeNode cmTreeNode) {
-		this.dmTreeNode = cmTreeNode;
+	public void setAttributeTreeNode(AttributeTreeNode dmTreeNode) {
+		this.dmTreeNode = dmTreeNode;
 	}
 }

@@ -1,7 +1,7 @@
 package org.wcs.smart.i2.model;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,11 +34,11 @@ public class IntelEntity extends UuidItem{
 	private IntelAttachment primaryAttachment;
 	private IntelEntityType entityType;
 
-	private Set<IntelEntityAttributeValue> entityAttributes;
-	private Set<IntelEntityAttachment> entityAttachments;
+	private List<IntelEntityAttributeValue> entityAttributes;
+	private List<IntelEntityAttachment> entityAttachments;
 //	private Set<IEntityRelationship> entityRelationships;
-	private Set<IntelEntityRecord> intelligenceRecords;
-	private Set<IntelEntityLocation> entityLocations;
+	private List<IntelEntityRecord> intelligenceRecords;
+	private List<IntelEntityLocation> entityLocations;
 
 	/**
 	 * Constructor.
@@ -182,7 +182,7 @@ public class IntelEntity extends UuidItem{
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
-	public Set<IntelEntityAttributeValue> getAttributes() {
+	public List<IntelEntityAttributeValue> getAttributes() {
 		return this.entityAttributes;
 	}
 	
@@ -192,7 +192,7 @@ public class IntelEntity extends UuidItem{
 	 * @param iEntityRelationshipSet
 	 *            The set of i_entity_relationship
 	 */
-	public void setAttributes(Set<IntelEntityAttributeValue> entityAttributes) {
+	public void setAttributes(List<IntelEntityAttributeValue> entityAttributes) {
 		this.entityAttributes = entityAttributes;
 	}
 //
@@ -226,7 +226,7 @@ public class IntelEntity extends UuidItem{
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
-	public Set<IntelEntityAttachment> getEntityAttachments() {
+	public List<IntelEntityAttachment> getEntityAttachments() {
 		return this.entityAttachments;
 	}
 
@@ -236,7 +236,7 @@ public class IntelEntity extends UuidItem{
 	 * @param iEntityAttachmentSet
 	 *            The set of i_entity_attachment
 	 */
-	public void setEntityAttachments(Set<IntelEntityAttachment> entityAttachments) {
+	public void setEntityAttachments(List<IntelEntityAttachment> entityAttachments) {
 		this.entityAttachments = entityAttachments;
 	}
 
@@ -248,7 +248,7 @@ public class IntelEntity extends UuidItem{
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
-	public Set<IntelEntityRecord> getIntelligenceRecords() {
+	public List<IntelEntityRecord> getIntelligenceRecords() {
 		return this.intelligenceRecords;
 	}
 	
@@ -258,7 +258,7 @@ public class IntelEntity extends UuidItem{
 	 * @param iEntityRecordSet
 	 *            The set of i_entity_record
 	 */
-	public void setIntelligenceRecords(Set<IntelEntityRecord> records) {
+	public void setIntelligenceRecords(List<IntelEntityRecord> records) {
 		this.intelligenceRecords = records;
 	}
 	
@@ -270,7 +270,7 @@ public class IntelEntity extends UuidItem{
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
-	public Set<IntelEntityLocation> getLocations() {
+	public List<IntelEntityLocation> getLocations() {
 		return this.entityLocations;
 	}
 	
@@ -281,7 +281,7 @@ public class IntelEntity extends UuidItem{
 	 *            The set of i_entity_location
 	 */
 	
-	public void setLocations(Set<IntelEntityLocation> entityLocations) {
+	public void setLocations(List<IntelEntityLocation> entityLocations) {
 		this.entityLocations = entityLocations;
 	}
 }

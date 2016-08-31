@@ -1,13 +1,15 @@
 package org.wcs.smart.i2.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 
 /**
@@ -20,8 +22,9 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.i_relationship_group")
 public class IntelRelationshipGroup extends NamedKeyItem{
 
-	private Set<IntelRelationshipType> types;
-
+	private List<IntelRelationshipType> types;
+	private ConservationArea ca;
+	
 	/**
 	 * Constructor.
 	 */
@@ -29,13 +32,34 @@ public class IntelRelationshipGroup extends NamedKeyItem{
 	}
 
 	/**
+	 * Get the conservation_area.
+	 * 
+	 * @return conservation_area
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return this.ca;
+	}
+	
+	/**
+	 * Set the conservation_area.
+	 * 
+	 * @param ca
+	 *            conservation_area
+	 */
+	public void setConservationArea(ConservationArea ca) {
+		this.ca = ca;
+	}
+	
+	/**
 	 * Get the set of the i_relationship_type.
 	 * 
 	 * @return The set of i_relationship_type
 	 */
 	@OneToMany(fetch=FetchType.LAZY)
 	@JoinColumn(name="relationship_group_uuid", referencedColumnName="uuid")
-	public Set<IntelRelationshipType> getRelationshipTypes() {
+	public List<IntelRelationshipType> getRelationshipTypes() {
 		return this.types;
 	}
 	
@@ -45,7 +69,7 @@ public class IntelRelationshipGroup extends NamedKeyItem{
 	 * @param iRelationshipTypeSet
 	 *            The set of i_relationship_type
 	 */
-	public void setRelationshipTypes(Set<IntelRelationshipType> types) {
+	public void setRelationshipTypes(List<IntelRelationshipType> types) {
 		this.types = types;
 	}
 

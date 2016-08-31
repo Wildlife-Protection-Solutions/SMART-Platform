@@ -1,7 +1,7 @@
 package org.wcs.smart.i2.model;
 
 import java.sql.Blob;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +31,7 @@ public class IntelRelationshipType extends NamedKeyItem {
 	private IntelEntityType srcType;
 	private IntelEntityType targetType;
 	
-	private Set<IntelRelationshipTypeAttribute> attributes;
+	private List<IntelRelationshipTypeAttribute> attributes;
 
 	
 	/**
@@ -132,7 +132,7 @@ public class IntelRelationshipType extends NamedKeyItem {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="relationship_type_uuid", referencedColumnName="uuid")
-	public Set<IntelRelationshipTypeAttribute> getAttributes() {
+	public List<IntelRelationshipTypeAttribute> getAttributes() {
 		return this.attributes;
 	}
 	
@@ -142,7 +142,7 @@ public class IntelRelationshipType extends NamedKeyItem {
 	 * @param iRelationshipAttributeSet
 	 *            The set of i_relationship_attribute
 	 */
-	public void setAttributes(Set<IntelRelationshipTypeAttribute> attributes) {
+	public void setAttributes(List<IntelRelationshipTypeAttribute> attributes) {
 		this.attributes = attributes;
 	}
 

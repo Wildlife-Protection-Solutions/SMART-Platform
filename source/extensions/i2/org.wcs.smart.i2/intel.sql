@@ -214,6 +214,7 @@ CREATE TABLE smart.i_record
 	last_modified_date timestamp,
 	created_by char(16) for bit data NOT NULL,
 	last_modified_by char(16) for bit data,
+	last_exported timestamp,
 	status varchar(16) NOT NULL,
 	description long varchar,
 	PRIMARY KEY (uuid)

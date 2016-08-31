@@ -1,6 +1,6 @@
 package org.wcs.smart.i2.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -26,7 +26,7 @@ public class IntelEntityRelationship extends UuidItem{
 	
 	private IntelRelationshipType relationshipType;
 
-	private Set<IntelEntityRelationshipAttribute> attributes;
+	private List<IntelEntityRelationshipAttributeValue> attributes;
 
 	/**
 	 * Constructor.
@@ -104,7 +104,7 @@ public class IntelEntityRelationship extends UuidItem{
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name="entity_relationship_uuid", referencedColumnName="uuid")
-	public Set<IntelEntityRelationshipAttribute> getAttributes() {
+	public List<IntelEntityRelationshipAttributeValue> getAttributes() {
 		return this.attributes;
 	}
 
@@ -115,7 +115,7 @@ public class IntelEntityRelationship extends UuidItem{
 	 * @param iEntityRelationshipAttributeSet
 	 *            The set of i_entity_relationship_attribute
 	 */
-	public void setAttributes(Set<IntelEntityRelationshipAttribute> attributes) {
+	public void setAttributes(List<IntelEntityRelationshipAttributeValue> attributes) {
 		this.attributes = attributes;
 	}
 

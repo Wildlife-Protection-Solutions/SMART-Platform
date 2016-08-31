@@ -19,7 +19,7 @@ import javax.persistence.Transient;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_entity_location")
+@Table(name="smart.i_entity_record")
 public class IntelEntityRecord {
 
 	private IEntityRecordPk id = new IEntityRecordPk();
