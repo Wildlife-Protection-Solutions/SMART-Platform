@@ -176,5 +176,105 @@
          </toolbar>
       </menuContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.i2.ui.views.EntitySearchView$EntitySearchViewWrapper"
+            id="org.wcs.smart.i2.view.entitysearch"
+            name="Entity Search"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.i2.ui.views.WorkingSetView$WorkingSetViewWrapper"
+            id="org.wcs.smart.i2.ui.view.workingset"
+            name="Working Set"
+            restorable="true">
+      </view>
+      <view
+            class="org.wcs.smart.i2.ui.views.RecordsView$RecordsViewWrapper"
+            id="org.wcs.smart.i2.ui.view.records"
+            name="Records"
+            restorable="true">
+      </view>
+      <view
+            class="org.wcs.smart.i2.ui.views.QueryView$QueryViewWrapper"
+            id="org.wcs.smart.i2.ui.view.queries"
+            name="Queries"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.i2.ui.views.IntelligenceMapView$IntelligenceMapViewWrapper"
+            id="org.wcs.smart.i2.view.map"
+            name="Map"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.i2.ui.editors.QueryEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.query"
+            name="Intelligence Query Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.RecordEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.record"
+            name="Intelligence Record Query">
+      </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.EntityEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.entity"
+            name="Entity Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="org.wcs.smart.i2.menu.main"
+               label="Intelligence 2">
+            <command
+                  commandId="org.wcs.smart.i2.command.entitytypelist.show"
+                  label="Entity Types..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.attributelist.show"
+                  label="Intelligence Attributes..."
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.i2.command.entitytypelist.show"
+            name="Entity Types...">
+      </command>
+      <command
+            id="org.wcs.smart.i2.command.attributelist.show"
+            name="Intelligence Attributes...">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowEntityTypeListDialogHandler$ShowEntityTypeListDialogHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.entitytypelist.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowAttributeListDialogHandler$ShowAttributeListDialogHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.attributelist.show">
+      </handler>
+   </extension>
 
 </plugin>

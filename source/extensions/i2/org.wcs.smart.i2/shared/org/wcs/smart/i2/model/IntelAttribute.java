@@ -1,6 +1,7 @@
 package org.wcs.smart.i2.model;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,10 +14,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 
 /**
  * Model class of intelligence attribute for entity types
@@ -29,10 +34,32 @@ public class IntelAttribute extends NamedKeyItem{
 
 	public enum IAttributeType{
 		NUMERIC,
-		STRING, 
+		TEXT, 
 		BOOLEAN,
 		LIST,
-		DATE
+		DATE;
+		
+		public Image getImage(){
+			String key = null;
+			if (this == NUMERIC){
+				key = SmartPlugIn.ATTRIBUTE_NUMBER_ICON;
+			}else if (this == TEXT){
+				key = SmartPlugIn.ATTRIBUTE_TEXT_ICON;
+			}else if (this == BOOLEAN){
+				key = SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON;
+			}else if (this == LIST){
+				key = SmartPlugIn.ATTRIBUTE_LIST_ICON;
+			}else if (this == DATE){
+				key = SmartPlugIn.ATTRIBUTE_DATE_ICON;
+			}
+			if (key == null) return null;
+			return SmartPlugIn.getDefault().getImageRegistry().get(key);
+		}
+		
+		public String getGuiName(Locale l){
+			IIntelligenceLabelProvider provider = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class);
+			return provider.getLabel(this, l);
+		}
 	}
 	
 	private IAttributeType type;

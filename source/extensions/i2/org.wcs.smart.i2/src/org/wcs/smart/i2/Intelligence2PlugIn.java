@@ -28,8 +28,10 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.i2.handlers.DeleteCaHandler;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 
 
 /**
@@ -69,7 +71,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
+	
+		SmartContext.INSTANCE.setClass(IIntelligenceLabelProvider.class, new IntelligenceLabelProviderImpl());
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteCaHandler(), DeleteCaHandler.EXECUTE_ORDER);
 	}
 
