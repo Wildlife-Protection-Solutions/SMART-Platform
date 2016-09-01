@@ -51,6 +51,7 @@ import org.hibernate.criterion.Restrictions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.filter.AlertFilter;
@@ -392,6 +393,7 @@ public class ConnectAlert extends HttpServlet {
 		} catch (NumberFormatException e) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("ConnectAlert.InvalidMaxAlerts",SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}catch (Exception e){
+			e.printStackTrace();
 			throw e;
 		}finally{
 			s.getTransaction().commit();
@@ -420,7 +422,7 @@ public class ConnectAlert extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			
-			if(SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.VIEW_ALERTS_KEY, a.getCaUuid()) ){
+			if(SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.VIEW_ALERTS_KEY, a.getCa().getUuid()) ){
 						return a;
 			}else{
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
@@ -487,6 +489,7 @@ public class ConnectAlert extends HttpServlet {
 		Alert a;
 		a = validateAlertValues(newGeoJsonAlert);
 		a.setUserGeneratedId(userGenId);
+
 		
 		validateUser(AlertAction.CREATE_ALERTS_KEY, newGeoJsonAlert.getCaUuid());
 
@@ -505,6 +508,7 @@ public class ConnectAlert extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			a.setCa((ConservationAreaInfo)s.get(ConservationAreaInfo.class, newGeoJsonAlert.getCaUuid() ));
 			s.save(a);
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
@@ -538,7 +542,7 @@ public class ConnectAlert extends HttpServlet {
 	 * URL: ../server/api/connectalert/{usergenid}
 	 * Call Type: PUT
 	 * Payload: A JSON object of attributes that match the Java attributes you wish to update, EX:
-	 * 		{"caUuid":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce","typeUuid":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50","level":"1","status":"DISABLED","x":"-123.362","y":"48.4","track":"[ [-123.36296859999997 , 48.4307441]]","description":""}
+	 * 		{"typeUuid":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50","level":"1","status":"DISABLED","x":"-123.362","y":"48.4","track":"[ [-123.36296859999997 , 48.4307441]]","description":""}
 	 * 
 	 * attributes that are not going to be updated can be left out entirely if desired.
 	 * 
@@ -574,7 +578,7 @@ public class ConnectAlert extends HttpServlet {
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertNotFound", SmartUtils.getRequestLocale(request)), alertUuid)); //$NON-NLS-1$
 			}
 			
-			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.DELETE_ALERTS_KEY, toDelete.getCaUuid())){
+			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.DELETE_ALERTS_KEY, toDelete.getCa().getUuid())){
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 	    	
@@ -627,21 +631,22 @@ public class ConnectAlert extends HttpServlet {
 		return null; 
 	}
     
-    private String validateCa(UUID caUuid) {
-    	Session s = HibernateManager.getSession(context);
-		ConservationAreaInfo ca = null;
-		s.beginTransaction();
-		try{
-	    	ca = HibernateManager.getConservationAreaInfo(s, caUuid);
-		}finally{
-			s.getTransaction().commit();
-		}
-
-    	if(ca == null){
-    		return Messages.getString("ConnectAlert.InvalidCa", SmartUtils.getRequestLocale(request)); //$NON-NLS-1$
-    	}
-		return null;
-	}
+//    private String validateCa(UUID caUuid) {
+//    	Session s = HibernateManager.getSession(context);
+//		ConservationAreaInfo ca = null;
+//		s.beginTransaction();
+//		try{
+//	    	ca = HibernateManager.getConservationAreaInfo(s, caUuid);
+//		}finally{
+//			s.getTransaction().commit();
+//		}
+//
+//    	if(ca == null){
+//    		return Messages.getString("ConnectAlert.InvalidCa", SmartUtils.getRequestLocale(request)); //$NON-NLS-1$
+//    	}
+//		return null;
+//	}
+    
     private UUID getCreatorUuid() {
     	SmartUser user = null;
     	
@@ -658,9 +663,8 @@ public class ConnectAlert extends HttpServlet {
 
     private Alert validateAlertValues(GeoJsonAlert newGeoJsonAlert) {
     	Alert a = new Alert();
-    	
+
 		a.setCreatorUuid(getCreatorUuid());
-    	a.setCaUuid(newGeoJsonAlert.getCaUuid());
     	a.setX(newGeoJsonAlert.getLongitude());
     	a.setY(newGeoJsonAlert.getLatitude());
     	a.setTypeUuid(newGeoJsonAlert.getTypeUuid());
@@ -692,13 +696,7 @@ public class ConnectAlert extends HttpServlet {
 			newAlert.setTypeUuid(AlertType.NULL_TYPE);
 			//we don't want to throw away alerts that might have old/deleted/invalid types, we want to show them somehow still, with errors noted.
 		}
-		
-		//validate alert CA UUID
-		err = validateCa(newAlert.getCaUuid());
-		if (err != null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
-		}
-		
+	
 		//validate x,y are valid Lat-Long values
 		if (newAlert.getX() > 180 || newAlert.getX() < -180 || newAlert.getY() > 90 || newAlert.getY() < -90 || newAlert.getY() == null || newAlert.getX() == null){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ConnectAlert.InvalidLatLon", SmartUtils.getRequestLocale(request)), newAlert.getX(), newAlert.getY()) ); //$NON-NLS-1$
@@ -737,7 +735,7 @@ public class ConnectAlert extends HttpServlet {
     	            
     	            JSONObject properties = new JSONObject();
     	            properties.put("uuid", obj.getUuid()); //$NON-NLS-1$
-    	            properties.put("cauuid", obj.getCaUuid()); //$NON-NLS-1$
+    	            properties.put("cauuid", obj.getCa().getUuid()); //$NON-NLS-1$
     	            properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
     	            String utcDate = obj.getDate().toGMTString();
     	            properties.put("date", utcDate); //$NON-NLS-1$
@@ -757,6 +755,15 @@ public class ConnectAlert extends HttpServlet {
     	            //add timezone offset
     	            TimeZone tz = TimeZone.getDefault();
     	    		properties.put("timezoneOffset", tz.getOffset(new Date().getTime()) / 1000 / 60); //$NON-NLS-1$
+    	    		
+    	    		//add ca name/label and type label
+    	    		ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, obj.getCa().getUuid());
+    	    		if(ca != null){
+    	    			properties.put("caname", ca.getNameLabel());
+    	    		}else{
+    	    			properties.put("caname", "");
+    	    		}
+    	    		
 
     	            feature.put("properties", properties); //$NON-NLS-1$
     	            feature.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -799,13 +806,12 @@ public class ConnectAlert extends HttpServlet {
     
     private Alert updateAndEditAlert(String oldAlertId, Alert newAlert, boolean keepPoint){
     	newAlert = validateAlertValues(newAlert);
-    	validateUser(AlertAction.UPDATE_ALERTS_KEY, newAlert.getCaUuid());
     	
     	Alert toUpdate = null;
-    	Session s = HibernateManager.getSession(context);
-		s.beginTransaction();
+    	Session s1 = HibernateManager.getSession(context);
+		s1.beginTransaction();
 		try{
-			toUpdate = (Alert)s.createCriteria(Alert.class)
+			toUpdate = (Alert)s1.createCriteria(Alert.class)
 					.add(Restrictions.eq("userGeneratedId", oldAlertId)) //$NON-NLS-1$
 					.uniqueResult();
 			
@@ -813,7 +819,15 @@ public class ConnectAlert extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertNotFound", SmartUtils.getRequestLocale(request)), oldAlertId)); //$NON-NLS-1$
 			}
-			
+		}finally{
+			s1.getTransaction().commit();
+		}
+	
+		validateUser(AlertAction.UPDATE_ALERTS_KEY, toUpdate.getCa().getUuid());
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
 			if (newAlert.getUserGeneratedId() != null && !oldAlertId.equals(newAlert.getUserGeneratedId())){
 				//ensure new usergenID is unique
 				Alert existingAlert = HibernateManager.getAlertByUserId(s,newAlert.getUserGeneratedId());
@@ -825,9 +839,6 @@ public class ConnectAlert extends HttpServlet {
 				toUpdate.setUserGeneratedId(newAlert.getUserGeneratedId());
 			}
 			
-			if (newAlert.getCaUuid() != null){
-				toUpdate.setCaUuid(newAlert.getCaUuid());
-			}
 			if (newAlert.getCreatorUuid() != null){
 				toUpdate.setCreatorUuid(newAlert.getCreatorUuid());
 			}

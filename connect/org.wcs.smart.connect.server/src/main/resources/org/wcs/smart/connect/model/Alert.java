@@ -27,6 +27,9 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
@@ -60,7 +63,6 @@ public class Alert extends ConnectUuidItem{
 		}
 
 	}
-
 	
 	private String userGeneratedId; 
 	private Date date;
@@ -71,8 +73,9 @@ public class Alert extends ConnectUuidItem{
 	private Double y;
 	private String track;
 	public UUID typeUuid;
-	private UUID caUuid;
 	private UUID creatorUuid;
+	
+	private ConservationAreaInfo ca;
 	
 	@Column(name="date")
 	public Date getDate() {
@@ -104,14 +107,6 @@ public class Alert extends ConnectUuidItem{
 	}
 	public void setLevel(Integer level) {
 		this.level = level;
-	}
-	
-	@Column(name="ca_uuid")
-	public UUID getCaUuid() {
-		return caUuid;
-	}
-	public void setCaUuid(UUID ca_uuid) {
-		this.caUuid = ca_uuid;
 	}
 	
 	@Column(name="status")
@@ -161,6 +156,16 @@ public class Alert extends ConnectUuidItem{
 	}
 	public void setTrack(String track) {
 		this.track = track;
+	}
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name="ca_uuid", referencedColumnName="ca_uuid")
+	public ConservationAreaInfo getCa() {
+		return ca;
+	}
+
+	public void setCa(ConservationAreaInfo ca) {
+		this.ca = ca;
 	}
 	
 }
