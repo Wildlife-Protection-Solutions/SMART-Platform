@@ -9,7 +9,7 @@ public class AttributeListItemLabelProvider extends LabelProvider {
 	
 	public String getText(Object element){
 		if (element instanceof IntelAttributeListItem){
-			return ((IntelAttributeListItem) element).getName() + " [" + ((IntelAttributeListItem)element).getKeyId() + "]";
+			return ((IntelAttributeListItem) element).getName();
 		}
 		return super.getText(element);
 	}

@@ -61,15 +61,12 @@ public class AttributeDialog extends TitleAreaDialog {
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
-
 				@Override
 				public void run() {
-					nameKeyInfo.initFields(attribute, attributeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
-					
+					nameKeyInfo.initFields(attribute, attributeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
+					getButton(IDialogConstants.OK_ID).setEnabled(attribute.getUuid() == null);
 				}
-				
 			});
-			
 			return Status.OK_STATUS;
 		}
 		
@@ -107,10 +104,7 @@ public class AttributeDialog extends TitleAreaDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT,true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
-		
-		if (attribute.getUuid() != null){
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-		}
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		
 		initFields();
 	}
@@ -171,15 +165,18 @@ public class AttributeDialog extends TitleAreaDialog {
 		
 		listPanel = new AttributeListPanel(parent, attribute);
 		listPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+		listPanel.addChangeListener(new IChangeListener() {
+			@Override
+			public void itemModified() {
+				modified();
+			}
+		});
 		
 		setTitle("Intelligence Attribute");
 		getShell().setText("Intelligence Attribute");
 		setMessage("Create or edit intelligence attributes.");
 		
-		
-		
 		return parent;
-		
 	}
 	
 	private void initFields(){

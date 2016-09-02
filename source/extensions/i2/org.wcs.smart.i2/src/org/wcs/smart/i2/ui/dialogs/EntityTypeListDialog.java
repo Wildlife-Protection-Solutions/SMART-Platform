@@ -13,9 +13,13 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -28,7 +32,9 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -36,9 +42,10 @@ import org.wcs.smart.ui.properties.FilterComposite;
 
 public class EntityTypeListDialog extends TitleAreaDialog {
 
-	private ListViewer cmbTypes;
+	private TableViewer cmbTypes;
 	private List<IntelEntityType> types = null;
 	private NamedItemViewerFilter filter;
+	private IStructuredSelection currentSelection;
 	
 	private Job loadTypes = new Job("load entity types"){
 
@@ -48,6 +55,17 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 			Session session = HibernateManager.openSession();
 			try{
 				types = EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea());
+				for (IntelEntityType t : types){
+					t.getNames().size();
+					for (IntelEntityTypeAttribute a : t.getAttributes()){
+						a.getAttribute().getNames().size();
+						if (a.getAttribute().getAttributeList() != null){
+							for (IntelAttributeListItem i : a.getAttribute().getAttributeList()){
+								i.getNames().size();
+							}
+						}
+					}
+				}
 			}finally{
 				session.close();
 			}
@@ -56,6 +74,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 				@Override
 				public void run() {
 					cmbTypes.setInput(types);
+					cmbTypes.setSelection(currentSelection);
 				}
 			});
 			return Status.OK_STATUS;
@@ -64,9 +83,13 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 	};
 	public EntityTypeListDialog(Shell parentShell) {
 		super(parentShell);
-		// TODO Auto-generated constructor stub
 	}
 
+	@Override
+	protected Point getInitialSize() {
+		Point p = super.getInitialSize();
+		return new Point(p.x,(int)(p.y*2));
+	}
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -88,7 +111,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		cmbTypes = new ListViewer(parent);
+		cmbTypes = new TableViewer(parent);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTypes.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
 		cmbTypes.setInput(new String[]{"Loading..."});
@@ -103,15 +126,26 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		Button btnNew = new Button(buttonPanel, SWT.PUSH);
-		btnNew.setText("New...");
+		btnNew.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
+		btnNew.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				add();
+			}
+		});
 		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
-		btnEdit.setText("Edit...");
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				edit();
+			}
+		});
 		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
-		btnDelete.setText("Delete...");
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		setTitle("Entity Types");
@@ -126,9 +160,37 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CLOSE_ID, IDialogConstants.CLOSE_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 	
+	private void add(){
+		IntelEntityType type = new IntelEntityType();
+		type.setConservationArea(SmartDB.getCurrentConservationArea());
+		type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
+		
+		EntityTypeDialog ed = new EntityTypeDialog(getShell(), type);
+		ed.open();
+		
+		refresh();
+	}
+	
+	private void edit(){
+		Object x = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
+		if (x instanceof IntelEntityType){
+			IntelEntityType type = (IntelEntityType)x;
+			EntityTypeDialog ed = new EntityTypeDialog(getShell(), type);
+			ed.open();
+			refresh();
+		}
+		
+		
+	}
+	
+	private void refresh(){
+		currentSelection = (IStructuredSelection) cmbTypes.getSelection();
+		cmbTypes.setInput(new String[]{"Loading..."});
+		loadTypes.schedule(0);
+	}
 	
 	@Override
 	public boolean isResizable(){

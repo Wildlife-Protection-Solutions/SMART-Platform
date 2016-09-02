@@ -19,6 +19,8 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -43,7 +45,7 @@ import org.wcs.smart.i2.IntelAttributeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.ui.IntelAttributeLabelProvider;
+import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -116,11 +118,16 @@ public class AttributeListDialog extends TitleAreaDialog {
 		
 		cmbTypes = new TableViewer(parent, SWT.MULTI | SWT.BORDER);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTypes.setLabelProvider(IntelAttributeLabelProvider.INSTANCE);
+		cmbTypes.setLabelProvider(AttributeLabelProvider.INSTANCE);
 		cmbTypes.setInput(new String[]{"Loading..."});
 		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmbTypes.getControl().setFocus();
-		
+		cmbTypes.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				edit();
+			}
+		});
 		filter = new NamedItemViewerFilter(cmbTypes);
 		cmbTypes.setFilters(new ViewerFilter[]{filter});
 		

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,7 +12,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
@@ -30,12 +28,12 @@ public class AttributeListItemDialog extends TitleAreaDialog {
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT,true);
+		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 		
-		if (item.getUuid() != null){
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-		}
+		initFields();
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		
 	}
 	
 	private void modified(){
@@ -69,10 +67,7 @@ public class AttributeListItemDialog extends TitleAreaDialog {
 		getShell().setText("Intelligence Attribute List Item");
 		setMessage("Create or edit intelligence attribute list item.");
 		
-		initFields();
-		
 		return parent;
-		
 	}
 	
 	private void initFields(){

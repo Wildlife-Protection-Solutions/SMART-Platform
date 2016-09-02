@@ -1,8 +1,12 @@
 package org.wcs.smart.i2.model;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.sql.Blob;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -10,9 +14,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 
 /**
  * Model class of i_entity_type.
@@ -26,7 +34,7 @@ public class IntelEntityType extends NamedKeyItem {
 
 	private ConservationArea ca;
 	private IntelAttribute idAttribute;
-	private Blob icon;
+	private byte[] icon;
 	private String birtTemplate;
 
 	private List<IntelEntityTypeAttribute> attributes;
@@ -85,7 +93,7 @@ public class IntelEntityType extends NamedKeyItem {
 	 * 
 	 * @return icon
 	 */
-	public Blob getIcon() {
+	public byte[] getIcon() {
 		return this.icon;
 	}
 	/**
@@ -94,7 +102,7 @@ public class IntelEntityType extends NamedKeyItem {
 	 * @param icon
 	 *            icon
 	 */
-	public void setIcon(Blob icon) {
+	public void setIcon(byte[] icon) {
 		this.icon = icon;
 	}
 
@@ -118,14 +126,22 @@ public class IntelEntityType extends NamedKeyItem {
 		this.birtTemplate = birtTemplate;
 	}
 
-	@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch=FetchType.LAZY, cascade={CascadeType.ALL})
+	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid" )
 	public List<IntelEntityTypeAttribute> getAttributes(){
 		return this.attributes;
 	}
 	
 	public void setAttributes(List<IntelEntityTypeAttribute> attributes){
 		this.attributes = attributes;
+	}
+	
+	@Transient
+	public BufferedImage getIconAsImage() throws Exception{
+		if (getIcon() == null) return null;
+		try(ByteArrayInputStream in = new ByteArrayInputStream(getIcon())){
+			return ImageIO.read(in);
+		}
 	}
 
 }
