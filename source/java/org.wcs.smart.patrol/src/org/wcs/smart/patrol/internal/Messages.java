@@ -301,8 +301,8 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_Button_UpdateTime_Text;
 	public static String PatrolLegDayInputComposite_Button_UpdateTime_Tooltip;
 	public static String PatrolLegDayInputComposite_Comment_ColumnHeader;
-	public static String PatrolLegDayInputComposite_ConfDialog_UprateTime_Message;
-	public static String PatrolLegDayInputComposite_ConfDialog_UprateTime_Title;
+	public static String PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message;
+	public static String PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_Button;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle;
@@ -451,7 +451,11 @@ public class Messages extends NLS {
 	public static String PatrolObjectiveWizardPage_PageMessage;
 	public static String PatrolObjectiveWizardPage_Title;
 	public static String PatrolSummaryEditor_Armed_Label;
+	public static String PatrolSummaryEditor_Button_UpdateTime;
+	public static String PatrolSummaryEditor_Button_UpdateTime_Tooltip;
 	public static String PatrolSummaryEditor_Comment_Label;
+	public static String PatrolSummaryEditor_ConfDialog_UpdateTime_Message;
+	public static String PatrolSummaryEditor_ConfDialog_UpdateTime_Title;
 	public static String PatrolSummaryEditor_Edit_Tooltip;
 	public static String PatrolSummaryEditor_EndDate_Label;
 	public static String PatrolSummaryEditor_Error_CannotEdit;

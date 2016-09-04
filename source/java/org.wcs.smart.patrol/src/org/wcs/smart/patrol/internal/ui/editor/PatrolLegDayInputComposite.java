@@ -184,6 +184,15 @@ public class PatrolLegDayInputComposite {
 			
 		}
 	};
+	private IPatrolEventListener timeListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG && source.equals(patrolLegDate)){
+				updateTimeControls();
+			}
+			
+		}
+	};
 	private Composite mainComposite;
 	private Hyperlink lblImportWaypoints;
 	
@@ -425,7 +434,7 @@ public class PatrolLegDayInputComposite {
 		btnUpdateTime.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UprateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UprateTime_Message)) {
+				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message)) {
 					updateTimeWithWpData();
 				}
 			}
@@ -531,6 +540,7 @@ public class PatrolLegDayInputComposite {
 		
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, waypointListener);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, timeListener);
 		updateTotalHours();
 		return mainComposite;
 	}
@@ -578,6 +588,9 @@ public class PatrolLegDayInputComposite {
 		mainComposite = null;
 	}
 
+	/**
+	 * NOTE: Similar logic for all legs is located in {@link PatrolSummaryEditor} page
+	 */
 	protected void updateTimeWithWpData() {
 		List<PatrolWaypoint> wps = patrolLegDate.getWaypoints();
 		if (wps.isEmpty()) return;
@@ -587,15 +600,19 @@ public class PatrolLegDayInputComposite {
 		Date mmaxDate = Collections.max(dates);
 		patrolLegDate.setStartTime(new Time(minDate.getTime()));
 		patrolLegDate.setEndTime(new Time(mmaxDate.getTime()));
+		updateTimeControls();
+		editor.getPatrolEditor().save(patrolLegDate);
+		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
+	}
+
+	protected void updateTimeControls() {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(patrolLegDate.getStartTime());
 		dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
 		cal.setTime(patrolLegDate.getEndTime());
 		dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-		editor.getPatrolEditor().save(patrolLegDate);
-		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 	}
-
+	
 	private void moveSelectedWaypoints(){
 		MoveWaypointDialog dialog = new MoveWaypointDialog(mainComposite.getShell(), patrolLegDate.getPatrolLeg().getPatrol());
 		if (dialog.open() != Window.OK ){

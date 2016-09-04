@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
+import java.sql.Time;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -36,10 +37,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -52,6 +55,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -101,6 +106,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -353,7 +359,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		Composite comp = toolkit.createComposite(compData, SWT.NONE );
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		comp.setLayout(new GridLayout(5, false));
+		comp.setLayout(new GridLayout(6, false));
 		toolkit.createLabel(comp, Messages.PatrolSummaryEditor_StartDate_Label);
 		txtStartDate = toolkit.createText(comp, ""); //$NON-NLS-1$
 		txtStartDate.setEditable(false);
@@ -378,6 +384,18 @@ public class PatrolSummaryEditor extends EditorPart {
 					if (showEditDialog(new PatrolLegsComposite(true))){
 						editor.createDayPages();
 					}
+				}
+			}
+		});
+		
+		Button btnUpdateTime = toolkit.createButton(comp, Messages.PatrolSummaryEditor_Button_UpdateTime, SWT.PUSH);
+		btnUpdateTime.setToolTipText(Messages.PatrolSummaryEditor_Button_UpdateTime_Tooltip);
+		btnUpdateTime.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		btnUpdateTime.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Title, Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Message)) {
+					updateTimeWithWpData();
 				}
 			}
 		});
@@ -523,6 +541,45 @@ public class PatrolSummaryEditor extends EditorPart {
 	@Override
 	public void doSaveAs() {
 		// Do the Save As operation
+	}
+
+	/**
+	 * NOTE: Similar logic for single leg is located in {@link PatrolLegDayInputComposite}
+	 */
+	protected void updateTimeWithWpData() {
+		List<PatrolLegDay> updatedLegDays = new ArrayList<>();
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			Patrol patrol = editor.getPatrol();
+			session.update(patrol);
+			for (PatrolLeg leg : patrol.getLegs()) {
+				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+					List<PatrolWaypoint> wps = pld.getWaypoints();
+					if (wps.isEmpty()) continue;
+					List<Date> dates = wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList());
+					Date minDate = Collections.min(dates);
+					Date mmaxDate = Collections.max(dates);
+					pld.setStartTime(new Time(minDate.getTime()));
+					pld.setEndTime(new Time(mmaxDate.getTime()));
+					session.saveOrUpdate(pld);
+					updatedLegDays.add(pld);
+				}
+			}
+			session.getTransaction().commit();
+		} catch (Exception ex) {
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
+			SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
+			return;
+		} finally {
+			session.close();
+		}
+		//fire events
+		for (PatrolLegDay pld : updatedLegDays) {
+			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, pld);
+		}
 	}
 
 	/**
