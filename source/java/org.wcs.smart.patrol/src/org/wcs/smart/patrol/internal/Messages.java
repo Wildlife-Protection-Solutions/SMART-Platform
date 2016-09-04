@@ -298,7 +298,11 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_AddWaypoint_Button;
 	public static String PatrolLegDayInputComposite_Attachment_ColumnHeader;
 	public static String PatrolLegDayInputComposite_AttachmentColumnLabel;
+	public static String PatrolLegDayInputComposite_Button_UpdateTime_Text;
+	public static String PatrolLegDayInputComposite_Button_UpdateTime_Tooltip;
 	public static String PatrolLegDayInputComposite_Comment_ColumnHeader;
+	public static String PatrolLegDayInputComposite_ConfDialog_UprateTime_Message;
+	public static String PatrolLegDayInputComposite_ConfDialog_UprateTime_Title;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_Button;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle;

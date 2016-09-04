@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -81,6 +82,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -417,6 +419,18 @@ public class PatrolLegDayInputComposite {
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		
+		Button btnUpdateTime = toolkit.createButton(c, Messages.PatrolLegDayInputComposite_Button_UpdateTime_Text, SWT.PUSH);
+		btnUpdateTime.setToolTipText(Messages.PatrolLegDayInputComposite_Button_UpdateTime_Tooltip);
+		btnUpdateTime.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false, 2, 1));
+		btnUpdateTime.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UprateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UprateTime_Message)) {
+					updateTimeWithWpData();
+				}
+			}
+		});
+		
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalPatrolHours_Label);
 		lblTotalPatrolHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalActivePatrolHours_Label);
@@ -562,10 +576,26 @@ public class PatrolLegDayInputComposite {
 		}
 		mainComposite.dispose();
 		mainComposite = null;
-		
-		
 	}
-	
+
+	protected void updateTimeWithWpData() {
+		List<PatrolWaypoint> wps = patrolLegDate.getWaypoints();
+		if (wps.isEmpty()) return;
+		//find min and max time among waypoints
+		List<Date> dates = wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList());
+		Date minDate = Collections.min(dates);
+		Date mmaxDate = Collections.max(dates);
+		patrolLegDate.setStartTime(new Time(minDate.getTime()));
+		patrolLegDate.setEndTime(new Time(mmaxDate.getTime()));
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(patrolLegDate.getStartTime());
+		dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+		cal.setTime(patrolLegDate.getEndTime());
+		dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+		editor.getPatrolEditor().save(patrolLegDate);
+		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
+	}
+
 	private void moveSelectedWaypoints(){
 		MoveWaypointDialog dialog = new MoveWaypointDialog(mainComposite.getShell(), patrolLegDate.getPatrolLeg().getPatrol());
 		if (dialog.open() != Window.OK ){
