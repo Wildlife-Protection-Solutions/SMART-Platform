@@ -187,8 +187,13 @@ public class PatrolLegDayInputComposite {
 	private IPatrolEventListener timeListener = new IPatrolEventListener() {
 		@Override
 		public void eventFired(int attributeChanged, Object source) {
-			if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG && source.equals(patrolLegDate)){
-				updateTimeControls();
+			if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG && source.equals(patrolLegDate) && !mainComposite.isDisposed()){
+				mainComposite.getDisplay().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						setData(patrolLegDate);
+					}
+				});
 			}
 			
 		}
@@ -561,10 +566,10 @@ public class PatrolLegDayInputComposite {
 		return true;
 	}
 	
-	
 	public void dispose(){
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, waypointListener);
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, timeListener);
 		
 		doubleCellEditor.dispose();
 		nullableDoubleCellEditor.dispose();
@@ -600,19 +605,11 @@ public class PatrolLegDayInputComposite {
 		Date mmaxDate = Collections.max(dates);
 		patrolLegDate.setStartTime(new Time(minDate.getTime()));
 		patrolLegDate.setEndTime(new Time(mmaxDate.getTime()));
-		updateTimeControls();
+		setData(patrolLegDate);
 		editor.getPatrolEditor().save(patrolLegDate);
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 	}
 
-	protected void updateTimeControls() {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(patrolLegDate.getStartTime());
-		dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-		cal.setTime(patrolLegDate.getEndTime());
-		dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-	}
-	
 	private void moveSelectedWaypoints(){
 		MoveWaypointDialog dialog = new MoveWaypointDialog(mainComposite.getShell(), patrolLegDate.getPatrolLeg().getPatrol());
 		if (dialog.open() != Window.OK ){
@@ -909,10 +906,9 @@ public class PatrolLegDayInputComposite {
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(LOAD_WIZARD_PROGRESS_MSG);
 					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
-					
-					if (dialog != null) {
-						monitor.setTaskName(SHOW_WIZARD_PROGRESS_MSG);
-						dialog.open();
+					monitor.setTaskName(SHOW_WIZARD_PROGRESS_MSG);
+					if (dialog.open() == Window.OK) {
+						updateTimeWithWpData();
 					}
 				}
 			});
