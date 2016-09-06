@@ -336,9 +336,10 @@ function remove_class(id, classname){
 function deleteAlert(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
 	var date = this.parentElement.parentElement.getAttribute('data-alertdate');
+	date = new Date(Date.parse(date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
 	var type = this.parentElement.parentElement.getAttribute('data-alerttype');
-	
-	displayConfirmDialog("Delete Alert", i18n("alert.areyousuredeletealert") + type + " : " + data + "?"  , function(){
+
+	displayConfirmDialog("Delete Alert",  i18n("alert.areyousuredeletealert") + type + " on " + date + "?"  , function(){
 		hideInfo();
 		
 		var oReq = new XMLHttpRequest();
@@ -451,6 +452,8 @@ function createAlertTable(){
 		 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
+		 		row.dataset.alertdate = alerts[i].properties.date;
+		 		row.dataset.alerttype = alerts[i].properties.type;
 		 		row.dataset.alertid = alerts[i].properties.id;
 	
 		 		if(canupdate){
