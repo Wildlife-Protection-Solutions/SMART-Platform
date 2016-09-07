@@ -757,9 +757,9 @@ public class ConnectAlert extends HttpServlet {
     	    		properties.put("timezoneOffset", tz.getOffset(new Date().getTime()) / 1000 / 60); //$NON-NLS-1$
     	    		
     	    		//add ca name/label and type label
-    	    		ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, obj.getCa().getUuid());
+    	    		ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, obj.getCa().getUuid());
     	    		if(ca != null){
-    	    			properties.put("caname", ca.getNameLabel());
+    	    			properties.put("caname", ca.getLabel());
     	    		}else{
     	    			properties.put("caname", "");
     	    		}
