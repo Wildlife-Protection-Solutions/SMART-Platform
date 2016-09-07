@@ -362,6 +362,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 	
 	public void updateSummaryPage(){
+		if (summaryEditor == null) return;
 		summaryEditor.refreshPatrolSummaryTable();
 	}
 	
