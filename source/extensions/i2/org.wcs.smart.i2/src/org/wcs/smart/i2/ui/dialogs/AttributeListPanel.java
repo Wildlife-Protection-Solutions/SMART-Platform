@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.text.MessageFormat;
@@ -31,6 +52,12 @@ import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Composite for managing the list items for an attribute of type list.
+ * 
+ * @author Emily
+ *
+ */
 public class AttributeListPanel extends Composite {
 
 	private ListViewer items;
@@ -42,6 +69,7 @@ public class AttributeListPanel extends Composite {
 	
 	private MenuItem dItem;
 	private MenuItem eItem;
+	private MenuItem aItem;
 	
 	public AttributeListPanel(Composite parent, IntelAttribute attribute) {
 		super(parent, SWT.NONE);
@@ -86,8 +114,20 @@ public class AttributeListPanel extends Composite {
 		});
 		
 		Menu menu = new Menu(items.getControl());
+		items.getControl().setMenu(menu);
+		aItem = new MenuItem(menu, SWT.DEFAULT);
+		aItem.setText(DialogConstants.ADD_BUTTON_TEXT);
+		aItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		aItem.setEnabled(true);
+		aItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				add();
+			}
+		});
 		eItem = new MenuItem(menu, SWT.DEFAULT);
 		eItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		eItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RENAME_ICON));
 		eItem.setEnabled(false);
 		eItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -105,7 +145,7 @@ public class AttributeListPanel extends Composite {
 				delete();
 			}
 		});
-		items.getControl().setMenu(menu);
+	
 		
 		
 		Composite btnPanel = new Composite(this, SWT.NONE);
@@ -149,7 +189,6 @@ public class AttributeListPanel extends Composite {
 	private void add(){
 		IntelAttributeListItem it = new IntelAttributeListItem();
 		it.setAttribute(attribute);
-		if (attribute.getAttributeList() == null) attribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
 		attribute.getAttributeList().add(it);
 		
 		AttributeListItemDialog d = new AttributeListItemDialog(getShell(), it);

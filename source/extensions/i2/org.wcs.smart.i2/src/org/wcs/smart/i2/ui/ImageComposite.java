@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui;
 
 import java.awt.Image;
@@ -26,6 +47,13 @@ import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 
+/**
+ * Simple composite that allows users to select an icon.  The image is 
+ * resized to 16x16.
+ * 
+ * @author Emily
+ *
+ */
 public class ImageComposite extends Composite {
 
 	private Label image;
@@ -63,15 +91,15 @@ public class ImageComposite extends Composite {
 		((GridData)image.getLayoutData()).heightHint = 16;
 		
 		btnBrowse = new Button(this, SWT.PUSH);
-		btnBrowse.setText("...");
+		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fileChooser = new FileDialog(getShell(), SWT.OPEN);
 		        fileChooser.setText("Select image icon");
 		        fileChooser.setFilterPath(lastDir);
-		        fileChooser.setFilterExtensions(new String[] { "*.gif; *.jpg; *.png; *.ico; *.bmp" });
-		        fileChooser.setFilterNames(new String[] { "image" + " (gif, jpeg, png, ico, bmp)" });
+		        fileChooser.setFilterExtensions(new String[] { "*.gif; *.jpg; *.png; *.ico; *.bmp" }); //$NON-NLS-1$
+		        fileChooser.setFilterNames(new String[] { "images " + " (gif, jpeg, png, ico, bmp)" });
 		        String filename = fileChooser.open();
 		        if (filename != null){
 		        	loadImage(filename);
@@ -97,7 +125,7 @@ public class ImageComposite extends Composite {
 			}
 		
 			try(ByteArrayOutputStream stream = new ByteArrayOutputStream()){
-				ImageIO.write(img, "png", stream);
+				ImageIO.write(img, "png", stream); //$NON-NLS-1$
 				imageData = stream.toByteArray();
 			}
 			image.setImage(AWTSWTImageUtils.convertToSWTImage(img));

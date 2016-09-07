@@ -1,5 +1,27 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,12 +35,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -41,14 +68,20 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
-import org.wcs.smart.i2.IntelAttributeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
@@ -59,17 +92,33 @@ import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
+/**
+ * Dialog for editing entity types.
+ * 
+ * @author Emily
+ *
+ */
 public class EntityTypeDialog extends TitleAreaDialog {
 
 	private IntelEntityType type;
 	private NameKeyComposite nameKeyInfo;
 	private ImageComposite icon;
 	private List<IntelEntityType> entityTypeSiblings;
-	private TableViewer attributeList;
+	private TableViewer tblAttributes;
 	private ComboViewer idAttribute;
+	
+	private MenuItem editItem;
+	private MenuItem deleteItem;
+	private MenuItem addItem;
+	
+	private Button btnAdd;
+	private Button btnDelete;
+	private Button btnEdit;
 	
 	private ControlDecoration cdList;
 	private ControlDecoration cdId;
+	
+	private List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
 	
 	public EntityTypeDialog(Shell parentShell, IntelEntityType type) {
 		super(parentShell);
@@ -98,7 +147,28 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		try{
 			s.beginTransaction();
 			s.saveOrUpdate(type);
+			
+			for (IntelEntityTypeAttribute a : attributeList){
+				if (!type.getAttributes().contains(a)){
+					s.saveOrUpdate(a);
+					type.getAttributes().add(a);
+				}
+			}
+			
+			for (IntelEntityTypeAttribute a : type.getAttributes()){
+				if (!attributeList.contains(a)){
+					//delete any entity attribute value associations
+					Query qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att"); //$NON-NLS-1$
+					qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
+					qDelete.executeUpdate();
+							
+					s.delete(a);
+				}
+			}
+			
+			
 			s.getTransaction().commit();
+			
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog("Unable to save changes: " +ex.getMessage(), ex);
@@ -119,14 +189,23 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		initFields();
 	}
 	
+	private void attributeSelectionModified(){
+		btnEdit.setEnabled(!tblAttributes.getSelection().isEmpty());
+		btnDelete.setEnabled(!tblAttributes.getSelection().isEmpty());
+		editItem.setEnabled(!tblAttributes.getSelection().isEmpty());
+		deleteItem.setEnabled(!tblAttributes.getSelection().isEmpty());
+	}
+	
 	private void modified(){
+		
+		
 		boolean isError = false;
 		if (nameKeyInfo.validate()){
 			isError = true;
 		}
 		
 		cdList.hide();
-		if (type.getAttributes().isEmpty()){
+		if (attributeList.isEmpty()){
 			isError = true;
 			cdList.setDescriptionText("At least one attribute must exist.");
 			cdList.show();
@@ -189,6 +268,8 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				Object x = ((IStructuredSelection)idAttribute.getSelection()).getFirstElement();
 				if (x instanceof IntelEntityTypeAttribute){
 					type.setIdAttribute(((IntelEntityTypeAttribute) x).getAttribute());
+				}else if (x instanceof IntelAttribute){
+					type.setIdAttribute(((IntelAttribute) x));
 				}
 				modified();
 			}
@@ -204,17 +285,67 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		attributeComp.setLayout(new GridLayout(2, false));
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 				
-		attributeList = new TableViewer(attributeComp, SWT.BORDER | SWT.MULTI);
-		attributeList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		attributeList.setContentProvider(ArrayContentProvider.getInstance());
-		attributeList.setLabelProvider(AttributeLabelProvider.INSTANCE);
-		cdList = createDecoration(attributeList.getControl());
+		tblAttributes = new TableViewer(attributeComp, SWT.BORDER | SWT.MULTI);
+		tblAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblAttributes.setContentProvider(ArrayContentProvider.getInstance());
+		tblAttributes.setLabelProvider(AttributeLabelProvider.INSTANCE);
+		tblAttributes.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				attributeSelectionModified();
+			}
+		});
+		tblAttributes.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				editAttribute();
+				
+			}
+		});
+		cdList = createDecoration(tblAttributes.getControl());
+		
+		Menu listMenu = new Menu(tblAttributes.getControl());
+		tblAttributes.getControl().setMenu(listMenu);
+		
+		addItem = new MenuItem(listMenu, SWT.DEFAULT);
+		addItem.setText(DialogConstants.ADD_BUTTON_TEXT);
+		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addItem.setEnabled(true);
+		addItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addAttribute();
+			}
+		});
+		
+		editItem = new MenuItem(listMenu, SWT.DEFAULT);
+		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RENAME_ICON));
+		editItem.setEnabled(false);
+		editItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				editAttribute();	
+			}
+		});		
+		
+		deleteItem = new MenuItem(listMenu, SWT.DEFAULT);
+		deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		deleteItem.setEnabled(false);
+		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		deleteItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				removeAttributes();	
+			}
+		});
+		
 		
 		Composite buttonComp = new Composite(attributeComp, SWT.NONE);
 		buttonComp.setLayout(new GridLayout());
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		Button btnAdd = new Button(buttonComp, SWT.NONE);
+		btnAdd = new Button(buttonComp, SWT.NONE);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -224,9 +355,10 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Button btnEdit = new Button(buttonComp, SWT.NONE);
+		btnEdit = new Button(buttonComp, SWT.NONE);
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnEdit.setEnabled(false);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -234,9 +366,10 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Button btnDelete = new Button(buttonComp, SWT.NONE);
+		btnDelete = new Button(buttonComp, SWT.NONE);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnDelete.setEnabled(false);
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -251,16 +384,16 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	}
 	
 	private void addAttribute(){
-		AttributeListDialog dialog = new AttributeListDialog(getShell(), type);
+		AttributeListDialog dialog = new AttributeListDialog(getShell());
 		if (dialog.open() == Window.OK){
-			attributeList.refresh();
-			idAttribute.refresh();
+			tblAttributes.refresh();
+			refreshAttributeList();
 			modified();
 		}
 	}
 	
 	private void editAttribute(){
-		Object x = ((IStructuredSelection)attributeList.getSelection()).getFirstElement();
+		Object x = ((IStructuredSelection)tblAttributes.getSelection()).getFirstElement();
 		if (x instanceof IntelEntityTypeAttribute){
 			IntelEntityTypeAttribute attribute = (IntelEntityTypeAttribute)x;
 			
@@ -268,24 +401,106 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			ad.open();
 			
 			//refresh
-			attributeList.refresh();
+			tblAttributes.refresh();
+			refreshAttributeList();
 		}
 	}
+
 	
 	private void removeAttributes(){
+		IStructuredSelection items = (IStructuredSelection)tblAttributes.getSelection();
+		final List<IntelEntityTypeAttribute> toDelete = new ArrayList<IntelEntityTypeAttribute>();
+		for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();
+			if (x instanceof IntelEntityTypeAttribute){
+				toDelete.add((IntelEntityTypeAttribute) x);
+			}
+		}
 		
+		final List<String> warnings = new ArrayList<String>();
+		final List<IntelEntityTypeAttribute> aToDelete = new ArrayList<IntelEntityTypeAttribute>();
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress(){
+	
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					Session session = HibernateManager.openSession();
+					try{
+						for (IntelEntityTypeAttribute x : toDelete){
+							try{
+								DeleteManager.canDelete(x, session);
+								aToDelete.add(x);
+							}catch (Exception ex){
+								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", ((IntelEntityTypeAttribute) x).getAttribute().getName(), ex.getMessage()));
+							}
+						}	
+					}finally{
+						session.close();
+					}
+				}
+				
+			});
+		}catch (Exception ex){
+			Intelligence2PlugIn.log(ex.getMessage(), ex);
+			warnings.add(ex.getMessage());
+		}
+		if(!warnings.isEmpty()){
+			WarningDialog wd = new WarningDialog(getShell(), "Warnings","Cannot remove selected attributes.", warnings);
+			wd.open();
+		}
+		
+		if (aToDelete.size() > 0){
+			StringBuilder sb = new StringBuilder();
+			for (IntelEntityTypeAttribute d: aToDelete){
+				sb.append(d.getAttribute().getName());
+				sb.append(", ");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
+			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? \n All attribute information associated with entities will also be removed.", sb.toString()))){
+				attributeList.removeAll(aToDelete);
+			}
+		}
+		
+		tblAttributes.refresh();
+		refreshAttributeList();
+	}
+	
+	private void refreshAttributeList(){
+		List<IntelAttribute> idAttributes = new ArrayList<IntelAttribute>();
+		for (IntelEntityTypeAttribute a : attributeList){
+			idAttributes.add(a.getAttribute());
+		}
+		idAttribute.setInput(idAttributes);
+		if (type.getIdAttribute() != null){
+			boolean contains = false;
+			for (IntelEntityTypeAttribute a : attributeList){
+				if (a.getAttribute().equals(type.getIdAttribute())){
+					contains = true;
+					break;
+				}
+			}
+			if (!contains){
+				type.setIdAttribute(null);
+				idAttribute.setSelection(null);
+				modified();
+			}else{
+				idAttribute.setSelection(new StructuredSelection(type.getIdAttribute()));
+			}
+		}else{
+			idAttribute.setSelection(null);
+		}
 	}
 	private void initFields(){
 		if (type.getIcon() != null){
 			icon.setImage(type.getIcon());
 		}
-		attributeList.setInput(type.getAttributes());
-		List<IntelAttribute> idAttributes = new ArrayList<IntelAttribute>();
-		for (IntelEntityTypeAttribute a : type.getAttributes()){
-			idAttributes.add(a.getAttribute());
-		}
-		idAttribute.setInput(idAttributes);
-		idAttribute.setSelection(new StructuredSelection(type.getIdAttribute()));
+		attributeList.addAll(type.getAttributes());
+		tblAttributes.setInput(attributeList);
+		
+		refreshAttributeList();
 		siblingsJob.setSystem(true);
 		siblingsJob.schedule(0);
 	}
@@ -296,7 +511,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	}
 	
 	
-	private Job siblingsJob = new Job("get siblings"){
+	private Job siblingsJob = new Job("get siblings"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -323,34 +538,23 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	
 	
 	private class AttributeListDialog extends TitleAreaDialog{
-		private IntelEntityType type;
 		private CheckboxTableViewer attributeList;
 		private NamedItemViewerFilter filter;
 		
-		private Job loadAttributes = new Job("load attributes"){
-
-			private List<IntelAttribute> attributes;
+		private Job loadAttributes = new LoadAttributesJob(){
 			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
-					attributes = IntelAttributeManager.INSTANCE.getAttributes(s, type.getConservationArea());
-				}finally{
-					s.close();
-				}
+			public void afterLoad() {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
 						attributeList.setInput(attributes);
 					}					
 				});
-				return Status.OK_STATUS;
 			}
 			
 		};
-		public AttributeListDialog(Shell parentShell, IntelEntityType type) {
+		public AttributeListDialog(Shell parentShell) {
 			super(parentShell);
-			this.type = type;
 		}
 
 		@Override
@@ -365,15 +569,15 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				if (selection instanceof IntelAttribute){
 					IntelEntityTypeAttribute a  = new IntelEntityTypeAttribute();
 					a.setAttribute((IntelAttribute) selection);
-					a.setEntityType(type);
-					type.getAttributes().add(a);
+					a.setEntityType(EntityTypeDialog.this.type);
+					if (!EntityTypeDialog.this.attributeList.contains(a)) EntityTypeDialog.this.attributeList.add(a);
 				}
 			}
 			super.okPressed();
 		}
 
 		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT,true);
+			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,true);
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 		}
 		
@@ -397,7 +601,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			attributeList = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
 			attributeList.setContentProvider(ArrayContentProvider.getInstance());
 			attributeList.setLabelProvider(AttributeLabelProvider.INSTANCE);
-			attributeList.setInput(new String[]{"Loading..."});
+			attributeList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 			attributeList.getControl().setFocus();
 			attributeList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			attributeList.getTable().addKeyListener(new KeyAdapter() {
@@ -424,7 +628,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			filter = new NamedItemViewerFilter(attributeList);
 			attributeList.setFilters(new ViewerFilter[]{filter});
 			
-			
 			Button btnNew = new Button(parent, SWT.PUSH);
 			btnNew.setText("Create New Attribute");
 			btnNew.addSelectionListener(new SelectionAdapter() {
@@ -449,7 +652,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		private boolean newAttribute(){
 			IntelAttribute attribute = new IntelAttribute();
 			attribute.setConservationArea(SmartDB.getCurrentConservationArea());
-			
+			attribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
 			if (type.getAttributes() == null) type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
 			AttributeDialog ad = new AttributeDialog(getShell(), attribute);
 			ad.open();

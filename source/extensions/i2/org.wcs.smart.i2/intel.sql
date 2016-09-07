@@ -8,7 +8,7 @@ DROP TABLE smart.i_observation;
 DROP TABLE smart.i_location;
 DROP TABLE smart.i_entity_search;
 DROP TABLE smart.i_entity_attribute_value;
-DROP TABLE smart.i_entity_relationship_attribute;
+DROP TABLE smart.i_entity_relationship_attribute_value;
 DROP TABLE smart.i_attribute_list_item;
 DROP TABLE smart.i_relationship_type_attribute;
 DROP TABLE smart.i_entity_type_attribute;
@@ -131,7 +131,7 @@ CREATE TABLE smart.i_entity_relationship
 );
 
 
-CREATE TABLE smart.i_entity_relationship_attribute
+CREATE TABLE smart.i_entity_relationship_attribute_value
 (
 	entity_relationship_uuid char(16) for bit data NOT NULL,
 	attribute_uuid char(16)for bit data NOT NULL,
@@ -549,7 +549,7 @@ ALTER TABLE smart.i_entity_type_attribute ADD CONSTRAINT ientitytypeattribute_at
 DEFERRABLE INITIALLY IMMEDIATE;
 
 
-ALTER TABLE smart.i_entity_relationship_attribute ADD CONSTRAINT ientityrelationshipattribute_attribute_fk
+ALTER TABLE smart.i_entity_relationship_attribute_value ADD CONSTRAINT ientityrelationshipattribute_attribute_fk
 	FOREIGN KEY (attribute_uuid)
 	REFERENCES smart.i_attribute (uuid)
 	ON UPDATE RESTRICT
@@ -557,7 +557,7 @@ ALTER TABLE smart.i_entity_relationship_attribute ADD CONSTRAINT ientityrelation
 DEFERRABLE INITIALLY IMMEDIATE;
 
 
-ALTER TABLE smart.i_entity_relationship_attribute ADD CONSTRAINT ientityrelationshipattribute_list_fk
+ALTER TABLE smart.i_entity_relationship_attribute_value ADD CONSTRAINT ientityrelationshipattribute_list_fk
 	FOREIGN KEY (list_item_uuid)
 	REFERENCES smart.i_attribute_list_item (uuid)
 	ON UPDATE RESTRICT
@@ -629,7 +629,7 @@ ALTER TABLE smart.i_entity_location ADD CONSTRAINT ientitylocation_entity_fk
 DEFERRABLE INITIALLY IMMEDIATE;
 
 
-ALTER TABLE smart.i_entity_relationship_attribute ADD CONSTRAINT ientityrelationshipattribute_entityrelationship_fk
+ALTER TABLE smart.i_entity_relationship_attribute_value ADD CONSTRAINT ientityrelationshipattribute_entityrelationship_fk
 	FOREIGN KEY (entity_relationship_uuid)
 	REFERENCES smart.i_entity_relationship (uuid)
 	ON UPDATE RESTRICT

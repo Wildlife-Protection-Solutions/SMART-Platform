@@ -134,6 +134,14 @@
             advisor="org.wcs.smart.i2.handlers.DeleteEmployeeAdvisor"
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.handlers.DeleteIntelAttributeAdvisor"
+            class="org.wcs.smart.i2.model.IntelAttribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.handlers.DeleteIntelAttributeListItemAdvisor"
+            class="org.wcs.smart.i2.model.IntelAttributeListItem">
+      </DeleteAdvisor>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">

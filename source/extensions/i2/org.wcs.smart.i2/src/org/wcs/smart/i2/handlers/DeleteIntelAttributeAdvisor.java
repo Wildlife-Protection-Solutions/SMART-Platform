@@ -19,39 +19,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui;
+package org.wcs.smart.i2.handlers;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.graphics.Image;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 
 /**
- * Label provider for intelligence attributes
+ * Checks for attribute relationships that prevent deletion.
  * 
  * @author Emily
  *
  */
-public class AttributeLabelProvider extends LabelProvider {
+public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 
-	public static AttributeLabelProvider INSTANCE = new AttributeLabelProvider();
-	
-	public String getText(Object element){
-		if (element instanceof IntelAttribute){
-			return ((IntelAttribute) element).getName();
-		}else if (element instanceof IntelEntityTypeAttribute){
-			return ((IntelEntityTypeAttribute)element).getAttribute().getName();
-		}
-		return super.getText(element);
+	public DeleteIntelAttributeAdvisor() {
 	}
-	
-	public Image getImage(Object element){
-		if (element instanceof IntelAttribute){
-			IntelAttribute a = (IntelAttribute)element;
-			return a.getType().getImage();
-		}else if (element instanceof IntelEntityTypeAttribute){
-			return ((IntelEntityTypeAttribute)element).getAttribute().getType().getImage();
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public String canDelete(Object object, Session session) {
+		if (!(object instanceof IntelAttribute)){
+			return "Object not an IntelAttribute object.  Cannot delete.";
 		}
-		return super.getImage(element);
+		IntelAttribute attribute = (IntelAttribute) object;
+		List<IntelEntityTypeAttribute> links = 
+				session.createCriteria(IntelEntityTypeAttribute.class)
+			.add(Restrictions.eq("id.attribute", attribute)) //$NON-NLS-1$
+			.list();
+		
+		if (!links.isEmpty()){
+			StringBuilder sb = new StringBuilder();
+			sb.append("The following entity types reference the intelligence attribute.  That link must be removed first: ");
+			for (IntelEntityTypeAttribute a : links){
+				sb.append(a.getEntityType().getName());
+				sb.append(", ");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
+			sb.append(".");
+			return sb.toString();
+		}
+		
+		//TODO: relationships
+		return null;
 	}
+
 }

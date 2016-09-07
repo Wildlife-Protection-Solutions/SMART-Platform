@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
@@ -20,7 +41,7 @@ import javax.persistence.Transient;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_entity_relationship_attribute")
+@Table(name="smart.i_entity_relationship_attribute_value")
 public class IntelEntityRelationshipAttributeValue {
 
 	private IEntityRelationshipAttributeValuePk id = new IEntityRelationshipAttributeValuePk();
@@ -44,11 +65,11 @@ public class IntelEntityRelationshipAttributeValue {
 	}
 	
 	@Transient
-	public IntelEntity getEntity(){
-		return id.getEntity();
+	public IntelEntityRelationship getRelationship(){
+		return id.getRelationship();
 	}
-	public void setEntity(IntelEntity entity){
-		id.setEntity(entity);
+	public void setRelationship(IntelEntityRelationship entity){
+		id.setRelationship(entity);
 	}
 	
 	@Transient
@@ -113,7 +134,7 @@ public class IntelEntityRelationshipAttributeValue {
 	private static class IEntityRelationshipAttributeValuePk implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
-		private IntelEntity entity;
+		private IntelEntityRelationship relationship;
 		private IntelAttribute attribute;
 		
 		public IEntityRelationshipAttributeValuePk(){
@@ -121,13 +142,13 @@ public class IntelEntityRelationshipAttributeValue {
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
-		@JoinColumn(name="entity_uuid")
-		public IntelEntity getEntity() {
-			return entity;
+		@JoinColumn(name="entity_relationship_uuid")
+		public IntelEntityRelationship getRelationship() {
+			return relationship;
 		}
 
-		public void setEntity(IntelEntity entity) {
-			this.entity = entity;
+		public void setRelationship(IntelEntityRelationship relationship) {
+			this.relationship = relationship;
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
@@ -147,24 +168,24 @@ public class IntelEntityRelationshipAttributeValue {
 			}
 			IEntityRelationshipAttributeValuePk p = (IEntityRelationshipAttributeValuePk)key;
 			
-			if (p.entity == null || this.entity == null ||
+			if (p.relationship == null || this.relationship == null ||
 				p.attribute == null || this.attribute == null ){
 				
-				if (p.entity == null && this.entity == null && 
+				if (p.relationship == null && this.relationship == null && 
 					p.attribute == null && this.attribute == null){
 						return true;
 				}
 				return false;
 			}
 			
-			return p.entity.equals(this.entity) &&
+			return p.relationship.equals(this.relationship) &&
 					p.attribute.equals(this.attribute);
 		}
 		
 		@Override
 		public int hashCode() {
 		    int code = 0;
-		    if (entity != null) {code += entity.hashCode();}
+		    if (relationship != null) {code += relationship.hashCode();}
 		    code *= 31;
 		    if (attribute != null) {code += attribute.hashCode(); }
 		    return code;

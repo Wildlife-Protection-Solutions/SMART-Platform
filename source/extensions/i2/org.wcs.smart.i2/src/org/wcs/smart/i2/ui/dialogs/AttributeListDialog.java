@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
@@ -10,8 +31,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -21,9 +40,10 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -36,8 +56,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -50,6 +73,12 @@ import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
+/**
+ * Dialog for listing all attributes.
+ * 
+ * @author Emily
+ *
+ */
 public class AttributeListDialog extends TitleAreaDialog {
 
 	private TableViewer cmbTypes;
@@ -58,27 +87,18 @@ public class AttributeListDialog extends TitleAreaDialog {
 	
 	private IStructuredSelection currentSelection = null;
 	
-	private Job loadTypes = new Job("load attributes types"){
-
+	private Button btnEdit;
+	private Button btnNew;
+	private Button btnDelete;
+	
+	private MenuItem mnuEdit;
+	private MenuItem mnuNew;
+	private MenuItem mnuDelete;
+	
+	private Job loadTypes = new LoadAttributesJob(){
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			types = null;
-			Session session = HibernateManager.openSession();
-			try{
-				types = IntelAttributeManager.INSTANCE.getAttributes(session, SmartDB.getCurrentConservationArea());
-				for (IntelAttribute ia : types){
-					ia.getNames().size();
-					if (ia.getAttributeList() != null){
-						for (IntelAttributeListItem item : ia.getAttributeList()){
-							item.getNames().size();
-						}
-					}
-				}
-				
-			}finally{
-				session.close();
-			}
-			
+		public void afterLoad() {
+			types = attributes;
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -86,7 +106,6 @@ public class AttributeListDialog extends TitleAreaDialog {
 					if (currentSelection != null) cmbTypes.setSelection(currentSelection);
 				}
 			});
-			return Status.OK_STATUS;
 		}
 		
 	};
@@ -119,7 +138,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 		cmbTypes = new TableViewer(parent, SWT.MULTI | SWT.BORDER);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTypes.setLabelProvider(AttributeLabelProvider.INSTANCE);
-		cmbTypes.setInput(new String[]{"Loading..."});
+		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmbTypes.getControl().setFocus();
 		cmbTypes.addDoubleClickListener(new IDoubleClickListener() {
@@ -128,14 +147,56 @@ public class AttributeListDialog extends TitleAreaDialog {
 				edit();
 			}
 		});
+		cmbTypes.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				btnDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
+				btnEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
+				mnuEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
+				mnuDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
+			}
+		});
 		filter = new NamedItemViewerFilter(cmbTypes);
 		cmbTypes.setFilters(new ViewerFilter[]{filter});
+		
+		Menu typesMenu = new Menu(cmbTypes.getControl());
+		cmbTypes.getControl().setMenu(typesMenu);
+		
+		mnuNew = new MenuItem(typesMenu, SWT.DEFAULT);
+		mnuNew.setText(DialogConstants.ADD_BUTTON_TEXT);
+		mnuNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		mnuNew.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				add();
+			}
+		});
+		
+		mnuEdit = new MenuItem(typesMenu, SWT.DEFAULT);
+		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RENAME_ICON));
+		mnuEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				edit();
+			}
+		});
+		mnuDelete = new MenuItem(typesMenu, SWT.DEFAULT);
+		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		mnuDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				delete();
+			}
+		});
 		
 		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		Button btnNew = new Button(buttonPanel, SWT.PUSH);
+		btnNew = new Button(buttonPanel, SWT.PUSH);
 		btnNew.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnNew.addSelectionListener(new SelectionAdapter(){
@@ -145,7 +206,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
+		btnEdit = new Button(buttonPanel, SWT.PUSH);
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.addSelectionListener(new SelectionAdapter(){
@@ -154,7 +215,8 @@ public class AttributeListDialog extends TitleAreaDialog {
 				edit();
 			}
 		});
-		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
+		
+		btnDelete = new Button(buttonPanel, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {
@@ -163,6 +225,15 @@ public class AttributeListDialog extends TitleAreaDialog {
 				delete();
 			}
 		});
+		
+		
+		btnEdit.setEnabled(false);
+		btnDelete.setEnabled(false);
+		btnNew.setEnabled(true);
+		mnuEdit.setEnabled(false);
+		mnuDelete.setEnabled(false);
+		mnuNew.setEnabled(true);
+		
 		setTitle("Intelligence Attributes");
 		getShell().setText("Intelligence Attributes");
 		setMessage("Manage the attributes in the system.");
@@ -192,6 +263,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 	private void add(){
 		IntelAttribute newAttribute = new IntelAttribute();
 		newAttribute.setConservationArea(SmartDB.getCurrentConservationArea());
+		newAttribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
 		
 		AttributeDialog ad = new AttributeDialog(getShell(), newAttribute);
 		ad.open();
@@ -277,7 +349,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 	
 	private void refresh(){
 		currentSelection = (IStructuredSelection) cmbTypes.getSelection();
-		cmbTypes.setInput(new String[]{"Loading..."});
+		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		loadTypes.schedule(0);
 	}
 }
