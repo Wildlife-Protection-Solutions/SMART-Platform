@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -230,7 +231,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of active and in-active patrol types
 	 */
 	public static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s){
-		return getPatrolTypes(ca, s, false);
+		return getPatrolTypes(ca, s, false, true);
 	}
 	
 	/**
@@ -256,7 +257,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of patrol types
 	 */
 	@SuppressWarnings("unchecked")
-	private static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s, boolean onlyActive){
+	private static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s, boolean onlyActive, boolean excludeHidden){
 		s.beginTransaction();
 		List<PatrolType> types = null;
 		try{
@@ -275,6 +276,9 @@ public class PatrolHibernateManager extends HibernateManager{
 		
 		if (types.size() == 0){
 			types = createPatrolTypes(ca, s);
+		}
+		if (excludeHidden) {
+			types = types.stream().filter(pt -> !Type.MIXED.equals(pt.getType())).collect(Collectors.toList());
 		}
 		return types;
 	}

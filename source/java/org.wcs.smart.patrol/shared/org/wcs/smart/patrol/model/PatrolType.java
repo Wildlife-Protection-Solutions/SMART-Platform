@@ -76,7 +76,8 @@ public class PatrolType {
 	public enum Type {
 		GROUND, 
 		MARINE, 
-		AIR;
+		AIR,
+		MIXED;
 		
 		public String getGuiName(Locale l){
 			return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, Locale.getDefault());
@@ -87,12 +88,13 @@ public class PatrolType {
 			case GROUND: return MAX_SPEED_GROUND_DEFAULT;
 			case MARINE: return MAX_SPEED_MARINE_DEFAULT;
 			case AIR: return MAX_SPEED_AIR_DEFAULT;
+			case MIXED: return MAX_SPEED_MAX_VALUE;
 			}
 			return MAX_SPEED_MAX_VALUE;
 		}
 		
 		public boolean requiresPilot(){
-			return (this == MARINE || this == AIR);
+			return (this == MARINE || this == AIR || this == MIXED);
 		}
 	}
 

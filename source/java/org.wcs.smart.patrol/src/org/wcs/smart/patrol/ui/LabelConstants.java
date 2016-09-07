@@ -22,6 +22,7 @@ public class LabelConstants {
 	public static final String GROUND_NAME = Messages.PatrolType_GroundName;
 	public static final String MARINE_NAME = Messages.PatrolType_WaterName;
 	public static final String AIR_NAME = Messages.PatrolType_AirName;
+	public static final String MIXED_NAME =Messages.PatrolType_MixedName;
 	
 	
 	public static final String SC_OP_TYPE =Messages.ScreenOption_PatrolType;
@@ -45,6 +46,7 @@ public class LabelConstants {
 			case AIR: return AIR_NAME;
 			case GROUND: return GROUND_NAME;
 			case MARINE: return MARINE_NAME;
+			case MIXED: return MIXED_NAME;
 		}
 		return null;
 	}
