@@ -1035,6 +1035,11 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId addToLastId = new CyberTrackerId();
 		Node addToLastNode = ctUtil.createSaveNode(addToLastId, rootId, Messages.CyberTrackerExporter_Waypoint_AddToLast, Messages.CyberTrackerConfExporter_SaveWithoutGps, false);
 
+		//add snap to last waypoint control to page so that alerts come through with valid
+		//locations
+		Controls.Control snapToLast = ctUtil.getScreensFactory().createSnapLastGpsPosition();
+		ScreensObjectFactory.addControlToNode(addToLastNode, snapToLast);
+		
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
 		ids.add(new CyberTrackerIdMap(saveAsNewId, newWpElementsIds.get(0)));
 		ids.add(new CyberTrackerIdMap(addToLastId, newWpElementsIds.get(1)));
