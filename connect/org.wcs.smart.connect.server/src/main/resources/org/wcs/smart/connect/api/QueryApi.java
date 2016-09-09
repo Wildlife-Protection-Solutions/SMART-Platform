@@ -374,9 +374,9 @@ public class QueryApi extends HttpServlet{
 				return filteredQueries(typeFilter, caFilter, isCcaaFilter, allowed);
 			}
 			
-			//short circuit check for access to > 0 queries, if not, return nothing. 
+			//short circuit check for access to > 0 queries 
 			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY)){
-				 return allowed;
+				 return allowed; //allowed is empty at this point
 			}
 			
 			//Get all Queries and check each one for specific permission to this user.

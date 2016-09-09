@@ -21,12 +21,9 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -35,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,25 +46,23 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.model.Alert;
-import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.security.AdminAccountAction;
-import org.wcs.smart.connect.security.AlertAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
@@ -104,15 +98,35 @@ public class SharedLinkApi extends HttpServlet{
 	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
-    public List<SharedLink> getConservationAreas(){
-		List<SharedLink> links;
+    public List<SharedLink> getSharedLinks(){
+		List<SharedLink> links = new ArrayList<SharedLink>();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
-				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			
+			if(SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY)){
+				//only return links from the CA(s) they are CaAdmin users for
+				Criteria c = s.createCriteria(SmartUserAction.class)
+						.add(Restrictions.eq("username", request.getUserPrincipal().getName() ))
+						.add(Restrictions.eq("action", CaAdminAccountAction.KEY));
+				
+				List<SmartUserAction> list = (ArrayList<SmartUserAction>)c.list();
+				
+				for(SmartUserAction a : list ){//loop over each CA they are admins of
+					UUID caUuid = a.getResource();
+					
+					List<SharedLink> temp = s.createCriteria(SharedLink.class).add(Restrictions.eq("caUuid", caUuid)).list(); 
+					for(SharedLink t : temp){//add all shared links from this CA
+						links.add(t);
+					}
+				}
+				return links;
 			}
-			links = s.createCriteria(SharedLink.class).list();
+			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			}else{
+				return s.createCriteria(SharedLink.class).list();	
+			}
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
@@ -120,7 +134,6 @@ public class SharedLinkApi extends HttpServlet{
 		}finally{
 			s.getTransaction().commit();
 		}
-		return links;
 	}
 	
 	/**
@@ -164,7 +177,15 @@ public class SharedLinkApi extends HttpServlet{
 				
 				boolean hasAccessQuery = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid);
 				boolean hasAccessReport = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, uuid);
-				if(!hasAccessQuery && !hasAccessReport){
+				boolean hasAccessAllReports = false;
+				boolean hasAccessAllQueries = false;
+				if(query != null){
+					hasAccessAllQueries = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, query.getConservationArea().getUuid());
+				}
+				if(report != null){
+					hasAccessAllReports = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid());
+				}
+				if(!hasAccessQuery && !hasAccessReport && !hasAccessAllQueries && !hasAccessAllReports){
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid link requested, must have user-access to the report or query requested.");
 				}
 				
@@ -198,11 +219,10 @@ public class SharedLinkApi extends HttpServlet{
 			newLink.setOwnerUuid(user.getUuid());
 			
 			
-			
-			
 			s.save(newLink);
 			
 		}catch(Exception e){
+			e.printStackTrace();
 			throw e;
 		}finally{
 			s.getTransaction().commit();

@@ -95,6 +95,21 @@ public enum SecurityManager {
 		if (cnt2 > 0){
 			return true;
 		}
+		
+		//if we are checking specifically for Administrator(the real-one, not a CA admin), don't do this check since it will pass when resource = null;
+		if(action.equals(AdminAccountAction.KEY)){
+			return false;
+		}
+		//check if CaAdmin role allows access, API and other code checking for access must call canAccess with the CAUUID as the resource for this check to work
+		Criteria c2 = s.createCriteria(SmartUserAction.class);
+				c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
+				.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$
+				.add(Restrictions.eq("resource", resource))
+				.setProjection(Projections.rowCount());
+		Long cnt3 = (Long) c2.uniqueResult();
+		if (cnt3 > 0){
+			return true;
+		}
 		return false;
 
 	}
@@ -108,11 +123,18 @@ public enum SecurityManager {
 		r = Restrictions.eq("action", action); //$NON-NLS-1$
 
 		Criteria c = s.createCriteria(SmartUserAction.class);
-				c.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-				.add(Restrictions.or(
-						Restrictions.eq("action", AdminAccountAction.KEY), //$NON-NLS-1$
-						r))
-				.setProjection(Projections.rowCount());
+		Criterion r2 = Restrictions.or(
+				Restrictions.eq("action", AdminAccountAction.KEY),
+				Restrictions.eq("action", CaAdminAccountAction.KEY));
+		
+		c.add(Restrictions.eq("username", username)); //$NON-NLS-1$
+		
+		if(!action.equals(AdminAccountAction.KEY)){ //don't allow for caAdmin to make this return true if the request is specifically about the "Admin" action.
+			c.add(Restrictions.or(r2,r));			// in summary:   "username"=username" && ("action" == action || ("action"=admin || "action"=caadmin))
+		}else{
+			c.add(r);
+		}
+		c.setProjection(Projections.rowCount());
 
 		Long cnt = (Long) c.uniqueResult();
 		if (cnt == 0){
@@ -152,5 +174,19 @@ public enum SecurityManager {
 				Response.Status.BAD_REQUEST,
 				Messages.getString("ConnectUserAction.AdminError", l)); //$NON-NLS-1$
 		
+	}
+
+	//is the user is CaAdmin of any CA?
+	public boolean isCaAdmin(Session s, String username, String key) {
+		Criteria c2 = s.createCriteria(SmartUserAction.class);
+		c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
+		.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$
+		.setProjection(Projections.rowCount());
+		
+		Long count = (Long) c2.uniqueResult();
+		if (count > 0){
+			return true;
+		}
+		return false;
 	}
 }

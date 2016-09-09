@@ -36,6 +36,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -253,6 +254,13 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
 		engine.cleanUp(session);
+	}
+
+
+	@Override
+	public void setSorting(QueryColumn arg0, int arg1) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -62,6 +62,8 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	protected GeometryFactory gf = new GeometryFactory();
 	protected boolean isDisposed = false;
 	protected int itemCount;
+	protected QueryColumn sortby;
+	protected int order;
 	
 	/**
 	 * Creates the geometry for the given row in the results set.
@@ -180,8 +182,10 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 
 	@Override
 	public void setSorting(QueryColumn arg0, int arg1) {
-		// Does not support sorting
-		throw new UnsupportedOperationException("Result set sorting not supported."); //$NON-NLS-1$
+//		// Does not support sorting
+//		throw new UnsupportedOperationException("Result set sorting not supported."); //$NON-NLS-1$
+		sortby = arg0;
+		order = arg1;
 	}
 	
 	@Override
