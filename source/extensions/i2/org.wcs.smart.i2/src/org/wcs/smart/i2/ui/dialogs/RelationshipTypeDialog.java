@@ -80,11 +80,14 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
+import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.ImageComposite;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
@@ -98,14 +101,19 @@ import org.wcs.smart.ui.properties.FilterComposite;
  * @author Emily
  *
  */
-public class EntityTypeDialog extends TitleAreaDialog {
+public class RelationshipTypeDialog extends TitleAreaDialog {
 
-	private IntelEntityType type;
+	private IntelRelationshipType type;
 	private NameKeyComposite nameKeyInfo;
 	private ImageComposite icon;
-	private List<IntelEntityType> entityTypeSiblings;
+	private List<IntelRelationshipType> entityTypeSiblings;
 	private TableViewer tblAttributes;
-	private ComboViewer idAttribute;
+	
+	private ComboViewer cmbSrcType;
+	private ComboViewer cmbTrgType;
+	
+	private ControlDecoration cdSrcType;
+	private ControlDecoration cdTrgType;
 	
 	private MenuItem editItem;
 	private MenuItem deleteItem;
@@ -115,12 +123,41 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private Button btnDelete;
 	private Button btnEdit;
 	
-	private ControlDecoration cdList;
-	private ControlDecoration cdId;
 	
-	private List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
+	private List<IntelRelationshipTypeAttribute> attributeList = new ArrayList<IntelRelationshipTypeAttribute>();
 	
-	public EntityTypeDialog(Shell parentShell, IntelEntityType type) {
+	private Job loadEntityType = new Job("load entity types"){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
+			Session s = HibernateManager.openSession();
+			try{
+				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
+			}finally{
+				s.close();
+			}
+			
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					cmbSrcType.setInput(types);
+					cmbTrgType.setInput(types);
+					
+					if (type.getSourceEntityType() != null){
+						cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
+					}
+					
+					if (type.getTargetEntityType() != null){
+						cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
+					}
+				}
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
+	public RelationshipTypeDialog(Shell parentShell, IntelRelationshipType type) {
 		super(parentShell);
 		this.type = type;
 	}
@@ -148,14 +185,14 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			s.beginTransaction();
 			s.saveOrUpdate(type);
 			
-			for (IntelEntityTypeAttribute a : attributeList){
+			for (IntelRelationshipTypeAttribute a : attributeList){
 				if (!type.getAttributes().contains(a)){
 					s.saveOrUpdate(a);
 					type.getAttributes().add(a);
 				}
 			}
 			
-			for (IntelEntityTypeAttribute a : type.getAttributes()){
+			for (IntelRelationshipTypeAttribute a : type.getAttributes()){
 				if (!attributeList.contains(a)){
 					//delete any entity attribute value associations
 					Query qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att"); //$NON-NLS-1$
@@ -202,21 +239,33 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		boolean isError = false;
 		if (nameKeyInfo.validate()){
 			isError = true;
+		}	
+		
+		cdSrcType.hide();
+		if (cmbSrcType.getSelection().isEmpty()){
+			isError = true;
+			cdSrcType.setDescriptionText("A source entity type must be selected");
+			cdSrcType.show();
+		}else{
+			if (! (((IStructuredSelection)cmbSrcType.getSelection()).getFirstElement() instanceof IntelEntityType)){
+				isError = true;
+				cdSrcType.setDescriptionText("A valid entity type must be selected for the source entity type.");
+				cdSrcType.show();
+			}
 		}
 		
-		cdList.hide();
-		if (attributeList.isEmpty()){
+		cdTrgType.hide();
+		if (cmbTrgType.getSelection().isEmpty()){
 			isError = true;
-			cdList.setDescriptionText("At least one attribute must exist.");
-			cdList.show();
+			cdTrgType.setDescriptionText("A target entity type must be selected");
+			cdTrgType.show();
+		}else{
+			if (! (((IStructuredSelection)cmbTrgType.getSelection()).getFirstElement() instanceof IntelEntityType)){
+				isError = true;
+				cdTrgType.setDescriptionText("A valid entity type must be selected for the target entity type.");
+				cdTrgType.show();
+			}
 		}
-		cdId.hide();
-		if (type.getIdAttribute() == null){
-			isError = true;
-			cdId.setDescriptionText("One attribute must be selected as the identifier for the attribute.");
-			cdId.show();
-		}
-		
 		getButton(IDialogConstants.OK_ID).setEnabled(!isError);
 	}
 	
@@ -254,27 +303,48 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		});
 	
 		l = new Label(parent, SWT.NONE);
-		l.setText("Id Attribute:");
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		l.setText("Source Entity Type:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		idAttribute = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
-		idAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		idAttribute.setContentProvider(ArrayContentProvider.getInstance());
-		idAttribute.setLabelProvider(AttributeLabelProvider.INSTANCE);
-		idAttribute.addSelectionChangedListener(new ISelectionChangedListener() {
-			
+		cmbSrcType = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbSrcType.setContentProvider(ArrayContentProvider.getInstance());
+		cmbSrcType.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
+		cmbSrcType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		cmbSrcType.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbSrcType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				Object x = ((IStructuredSelection)idAttribute.getSelection()).getFirstElement();
-				if (x instanceof IntelEntityTypeAttribute){
-					type.setIdAttribute(((IntelEntityTypeAttribute) x).getAttribute());
-				}else if (x instanceof IntelAttribute){
-					type.setIdAttribute(((IntelAttribute) x));
+				Object x = ((IStructuredSelection)cmbSrcType.getSelection()).getFirstElement();
+				if (x instanceof IntelEntityType){
+					type.setSourceEntityType((IntelEntityType) x);
 				}
 				modified();
 			}
 		});
-		cdId= createDecoration(idAttribute.getControl());
+		
+		cdSrcType = createDecoration(cmbSrcType.getControl());
+		
+		l = new Label(parent, SWT.NONE);
+		l.setText("Target Entity Type:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		cmbTrgType = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbTrgType.setContentProvider(ArrayContentProvider.getInstance());
+		cmbTrgType.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
+		cmbTrgType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		cmbTrgType.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbTrgType.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)cmbTrgType.getSelection()).getFirstElement();
+				if (x instanceof IntelEntityType){
+					type.setTargetEntityType((IntelEntityType) x);
+				}
+				modified();
+			}
+		});
+		
+		cdTrgType = createDecoration(cmbTrgType.getControl());
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText("Attributes:");
@@ -302,7 +372,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				
 			}
 		});
-		cdList = createDecoration(tblAttributes.getControl());
 		
 		Menu listMenu = new Menu(tblAttributes.getControl());
 		tblAttributes.getControl().setMenu(listMenu);
@@ -376,9 +445,9 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				removeAttributes();
 			}
 		});
-		setTitle("Entity Type");
-		getShell().setText("Entity Type");
-		setMessage("Configure entity type");
+		setTitle("Relationship Type");
+		getShell().setText("Relationship Type");
+		setMessage("Configure relationship type");
 		
 		return parent;
 	}
@@ -387,38 +456,36 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		AttributeListDialog dialog = new AttributeListDialog(getShell());
 		if (dialog.open() == Window.OK){
 			tblAttributes.refresh();
-			refreshAttributeList();
 			modified();
 		}
 	}
 	
 	private void editAttribute(){
 		Object x = ((IStructuredSelection)tblAttributes.getSelection()).getFirstElement();
-		if (x instanceof IntelEntityTypeAttribute){
-			IntelEntityTypeAttribute attribute = (IntelEntityTypeAttribute)x;
+		if (x instanceof IntelRelationshipTypeAttribute){
+			IntelRelationshipTypeAttribute attribute = (IntelRelationshipTypeAttribute)x;
 			
 			AttributeDialog ad = new AttributeDialog(getShell(), attribute.getAttribute());
 			ad.open();
 			
 			//refresh
 			tblAttributes.refresh();
-			refreshAttributeList();
 		}
 	}
 
 	
 	private void removeAttributes(){
 		IStructuredSelection items = (IStructuredSelection)tblAttributes.getSelection();
-		final List<IntelEntityTypeAttribute> toDelete = new ArrayList<IntelEntityTypeAttribute>();
+		final List<IntelRelationshipTypeAttribute> toDelete = new ArrayList<IntelRelationshipTypeAttribute>();
 		for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
-			if (x instanceof IntelEntityTypeAttribute){
-				toDelete.add((IntelEntityTypeAttribute) x);
+			if (x instanceof IntelRelationshipTypeAttribute){
+				toDelete.add((IntelRelationshipTypeAttribute) x);
 			}
 		}
 		
 		final List<String> warnings = new ArrayList<String>();
-		final List<IntelEntityTypeAttribute> aToDelete = new ArrayList<IntelEntityTypeAttribute>();
+		final List<IntelRelationshipTypeAttribute> aToDelete = new ArrayList<IntelRelationshipTypeAttribute>();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
 			pmd.run(true, false, new IRunnableWithProgress(){
@@ -428,12 +495,12 @@ public class EntityTypeDialog extends TitleAreaDialog {
 						throws InvocationTargetException, InterruptedException {
 					Session session = HibernateManager.openSession();
 					try{
-						for (IntelEntityTypeAttribute x : toDelete){
+						for (IntelRelationshipTypeAttribute x : toDelete){
 							try{
 								DeleteManager.canDelete(x, session);
 								aToDelete.add(x);
 							}catch (Exception ex){
-								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", ((IntelEntityTypeAttribute) x).getAttribute().getName(), ex.getMessage()));
+								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", ((IntelRelationshipTypeAttribute) x).getAttribute().getName(), ex.getMessage()));
 							}
 						}	
 					}finally{
@@ -453,7 +520,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		
 		if (aToDelete.size() > 0){
 			StringBuilder sb = new StringBuilder();
-			for (IntelEntityTypeAttribute d: aToDelete){
+			for (IntelRelationshipTypeAttribute d: aToDelete){
 				sb.append(d.getAttribute().getName());
 				sb.append(", ");
 			}
@@ -465,34 +532,9 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		}
 		
 		tblAttributes.refresh();
-		refreshAttributeList();
 	}
 	
-	private void refreshAttributeList(){
-		List<IntelAttribute> idAttributes = new ArrayList<IntelAttribute>();
-		for (IntelEntityTypeAttribute a : attributeList){
-			idAttributes.add(a.getAttribute());
-		}
-		idAttribute.setInput(idAttributes);
-		if (type.getIdAttribute() != null){
-			boolean contains = false;
-			for (IntelEntityTypeAttribute a : attributeList){
-				if (a.getAttribute().equals(type.getIdAttribute())){
-					contains = true;
-					break;
-				}
-			}
-			if (!contains){
-				type.setIdAttribute(null);
-				idAttribute.setSelection(null);
-				modified();
-			}else{
-				idAttribute.setSelection(new StructuredSelection(type.getIdAttribute()));
-			}
-		}else{
-			idAttribute.setSelection(null);
-		}
-	}
+	
 	private void initFields(){
 		if (type.getIcon() != null){
 			icon.setImage(type.getIcon());
@@ -500,9 +542,11 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		attributeList.addAll(type.getAttributes());
 		tblAttributes.setInput(attributeList);
 		
-		refreshAttributeList();
 		siblingsJob.setSystem(true);
 		siblingsJob.schedule(0);
+		
+		loadEntityType.setSystem(true);
+		loadEntityType.schedule(0);
 	}
 	
 	@Override
@@ -517,7 +561,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
 			try{
-				entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
+				entityTypeSiblings = RelationshipTypeManager.INSTANCE.getRelationshipTypes(s, SmartDB.getCurrentConservationArea());
 				entityTypeSiblings.remove(type);
 			}finally{
 				s.close();
@@ -567,10 +611,10 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		protected void okPressed() {
 			for (Object selection : attributeList.getCheckedElements()){
 				if (selection instanceof IntelAttribute){
-					IntelEntityTypeAttribute a  = new IntelEntityTypeAttribute();
+					IntelRelationshipTypeAttribute a  = new IntelRelationshipTypeAttribute();
 					a.setAttribute((IntelAttribute) selection);
-					a.setEntityType(EntityTypeDialog.this.type);
-					if (!EntityTypeDialog.this.attributeList.contains(a)) EntityTypeDialog.this.attributeList.add(a);
+					a.setRelationshipType(RelationshipTypeDialog.this.type);
+					if (!RelationshipTypeDialog.this.attributeList.contains(a)) RelationshipTypeDialog.this.attributeList.add(a);
 				}
 			}
 			super.okPressed();
@@ -653,15 +697,15 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			IntelAttribute attribute = new IntelAttribute();
 			attribute.setConservationArea(SmartDB.getCurrentConservationArea());
 			attribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
-			if (type.getAttributes() == null) type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
+			if (type.getAttributes() == null) type.setAttributes(new ArrayList<IntelRelationshipTypeAttribute>());
 			AttributeDialog ad = new AttributeDialog(getShell(), attribute);
 			ad.open();
 			
 			if (attribute.getUuid() != null){
-				IntelEntityTypeAttribute eta = new IntelEntityTypeAttribute();
+				IntelRelationshipTypeAttribute eta = new IntelRelationshipTypeAttribute();
 				eta.setAttribute(attribute);
-				eta.setEntityType(type);
-				if (!EntityTypeDialog.this.attributeList.contains(eta)) EntityTypeDialog.this.attributeList.add(eta);
+				eta.setRelationshipType(type);
+				if (!RelationshipTypeDialog.this.attributeList.contains(eta)) RelationshipTypeDialog.this.attributeList.add(eta);
 				
 				attributeList.refresh();
 				return true;

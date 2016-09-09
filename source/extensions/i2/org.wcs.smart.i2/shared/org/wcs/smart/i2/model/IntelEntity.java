@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -31,9 +32,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 
 /**
  * Model class of i_entity.
@@ -43,7 +46,7 @@ import org.wcs.smart.ca.UuidItem;
  */
 @Entity
 @Table(name="smart.i_entity")
-public class IntelEntity extends UuidItem{
+public class IntelEntity extends UuidItem implements IIntelAuditItem{
 
 	
 	private Date dateCreated;
@@ -94,7 +97,6 @@ public class IntelEntity extends UuidItem{
 	 * @param dateModified
 	 *            date_modified
 	 */
-	@Column(name="date_modified")
 	public void setDateModified(Date dateModified) {
 		this.dateModified = dateModified;
 	}
@@ -104,6 +106,7 @@ public class IntelEntity extends UuidItem{
 	 * 
 	 * @return date_modified
 	 */
+	@Column(name="date_modified")
 	public Date getDateModified() {
 		return this.dateModified;
 	}
@@ -201,8 +204,7 @@ public class IntelEntity extends UuidItem{
 	 * 
 	 * @return The set of i_entity_relationship
 	 */
-	@OneToMany
-	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.entity", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelEntityAttributeValue> getAttributes() {
 		return this.entityAttributes;
 	}
@@ -245,8 +247,7 @@ public class IntelEntity extends UuidItem{
 	 * 
 	 * @return The set of i_entity_attachment
 	 */
-	@OneToMany
-	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.entity", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelEntityAttachment> getEntityAttachments() {
 		return this.entityAttachments;
 	}
@@ -267,8 +268,7 @@ public class IntelEntity extends UuidItem{
 	 * 
 	 * @return The set of i_entity_record
 	 */
-	@OneToMany
-	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.entity", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelEntityRecord> getIntelligenceRecords() {
 		return this.intelligenceRecords;
 	}
@@ -304,5 +304,16 @@ public class IntelEntity extends UuidItem{
 	
 	public void setLocations(List<IntelEntityLocation> entityLocations) {
 		this.entityLocations = entityLocations;
+	}
+	
+	
+	@Transient
+	public String getIdAttributeAsText(){
+		for (IntelEntityAttributeValue v : getAttributes()){
+			if (v.getAttribute().equals(getEntityType().getIdAttribute())){
+				return AttributeValueLabelProvider.INSTANCE.getText(v);
+			}
+		}
+		return "";
 	}
 }

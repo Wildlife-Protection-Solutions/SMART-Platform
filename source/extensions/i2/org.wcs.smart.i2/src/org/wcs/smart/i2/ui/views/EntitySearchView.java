@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -29,9 +32,17 @@ import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.ui.EntitySearchJob;
 
 public class EntitySearchView {
 
@@ -39,6 +50,31 @@ public class EntitySearchView {
 	@Inject
 	private EPartService partService;
 
+	private EntityListComposite entityList;
+	private FormToolkit toolkit;
+	
+	private EntitySearchJob searchJob = new EntitySearchJob() {
+		
+		@Override
+		public void onLoaded(List<IntelEntity> entities) {
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					entityList.setEntities(entities);
+				}
+			});
+			
+		}
+		
+		@Override
+		public void onError(Exception ex) {
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+			entityList.setEntities(new ArrayList<IntelEntity>());
+		}
+	};
+	
+	
+	
 	public EntitySearchView() {
 		super();
 	}
@@ -47,8 +83,21 @@ public class EntitySearchView {
 	public void createPartControl(Composite parent) {
 		parent.setLayout(new GridLayout());
 		
-		Label l = new Label(parent, SWT.NONE);
-		l.setText("Entity Search View");
+		Button btnRefresh = new Button(parent, SWT.NONE);
+		btnRefresh.setText("REFRESH");
+		btnRefresh.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				searchJob.schedule();
+			}
+			
+		});
+		
+		toolkit = new FormToolkit(parent.getDisplay());
+		entityList = new EntityListComposite(parent, toolkit);
+		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		searchJob.schedule();
 	}
 
 	// @Optional
@@ -64,6 +113,7 @@ public class EntitySearchView {
 
 	@PreDestroy
 	public void dispose() {
+		toolkit.dispose();
 	}
 	
 	public static class EntitySearchViewWrapper extends DIViewPart<EntitySearchView>{

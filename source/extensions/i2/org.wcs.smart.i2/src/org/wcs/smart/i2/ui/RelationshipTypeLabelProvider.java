@@ -21,41 +21,45 @@
  */
 package org.wcs.smart.i2.ui;
 
+import java.awt.image.BufferedImage;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
-import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRelationshipType;
 
 /**
- * Label provider for intelligence attributes
+ * Label provider for entity types.
  * 
  * @author Emily
  *
  */
-public class AttributeLabelProvider extends LabelProvider {
+public class RelationshipTypeLabelProvider extends LabelProvider {
 
-	public static AttributeLabelProvider INSTANCE = new AttributeLabelProvider();
+	public static RelationshipTypeLabelProvider INSTANCE = new RelationshipTypeLabelProvider();
 	
+	@Override
 	public String getText(Object element){
-		if (element instanceof IntelAttribute){
-			return ((IntelAttribute) element).getName();
-		}else if (element instanceof IntelEntityTypeAttribute){
-			return ((IntelEntityTypeAttribute)element).getAttribute().getName();
-		}else if (element instanceof IntelRelationshipTypeAttribute){
-			return ((IntelRelationshipTypeAttribute)element).getAttribute().getName();
+		if (element instanceof IntelRelationshipType){
+			return ((IntelRelationshipType) element).getName();
 		}
 		return super.getText(element);
 	}
 	
+	@Override
 	public Image getImage(Object element){
-		if (element instanceof IntelAttribute){
-			IntelAttribute a = (IntelAttribute)element;
-			return a.getType().getImage();
-		}else if (element instanceof IntelEntityTypeAttribute){
-			return ((IntelEntityTypeAttribute)element).getAttribute().getType().getImage();
-		}else if (element instanceof IntelRelationshipTypeAttribute){
-			return ((IntelRelationshipTypeAttribute)element).getAttribute().getType().getImage();
+		if (element instanceof IntelRelationshipType){
+			try{
+				BufferedImage image = ((IntelRelationshipType) element).getIconAsImage();
+				if (image != null){
+					return AWTSWTImageUtils.convertToSWTImage(image);
+				}
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}
+			return null;
 		}
 		return super.getImage(element);
 	}

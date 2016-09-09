@@ -42,7 +42,7 @@ import org.wcs.smart.ca.NamedItem;
  */
 @Entity
 @Table(name="smart.i_record_query")
-public class IntelRecordQuery extends NamedItem {
+public class IntelRecordQuery extends NamedItem implements IIntelAuditItem{
 
 	private ConservationArea ca;
 

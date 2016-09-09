@@ -46,7 +46,7 @@ import org.wcs.smart.ca.UuidItem;
  */
 @Entity
 @Table(name="smart.i_record")
-public class IntelRecord extends UuidItem {
+public class IntelRecord extends UuidItem implements IIntelAuditItem{
 
 	private enum Status{
 			NEW,

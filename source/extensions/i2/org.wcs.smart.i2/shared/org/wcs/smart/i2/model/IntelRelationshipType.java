@@ -21,16 +21,21 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.sql.Blob;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
@@ -46,7 +51,7 @@ import org.wcs.smart.ca.NamedKeyItem;
 public class IntelRelationshipType extends NamedKeyItem {
 
 	private ConservationArea ca;
-	private Blob icon;
+	private byte[] icon;
 	private IntelRelationshipGroup group;
 
 	private IntelEntityType srcType;
@@ -88,7 +93,8 @@ public class IntelRelationshipType extends NamedKeyItem {
 	 * @return icon
 	 */
 	@Column(name="icon")
-	public Blob getIcon() {
+	@Lob
+	public byte[] getIcon() {
 		return this.icon;
 	}
 
@@ -98,10 +104,18 @@ public class IntelRelationshipType extends NamedKeyItem {
 	 * @param icon
 	 *            icon
 	 */
-	public void setIcon(Blob icon) {
+	public void setIcon(byte[] icon) {
 		this.icon = icon;
 	}
 
+	@Transient
+	public BufferedImage getIconAsImage() throws Exception{
+		if (getIcon() == null) return null;
+		try(ByteArrayInputStream in = new ByteArrayInputStream(getIcon())){
+			return ImageIO.read(in);
+		}
+	}
+	
 	/**
 	 * Get the i_relationship_group.
 	 * 

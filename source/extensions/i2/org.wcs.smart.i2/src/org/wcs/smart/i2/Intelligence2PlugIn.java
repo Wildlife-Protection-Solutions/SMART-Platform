@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.hibernate.service.BootstrapServiceRegistryBuilder;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;

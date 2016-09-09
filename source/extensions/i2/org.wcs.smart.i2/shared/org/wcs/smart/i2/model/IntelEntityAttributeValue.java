@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -33,6 +34,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 
 /**
  * Model class of i_entity_attribute_value.
@@ -105,6 +109,37 @@ public class IntelEntityAttributeValue {
 	public void setNumberValue(Double doubleValue){
 		this.doubleValue = doubleValue;
 	}
+	
+	
+	@Transient
+	public Date getDateValue(){
+		if (getStringValue() == null){
+			return null;
+		}
+		return java.sql.Date.valueOf(getStringValue());
+	}
+	
+	/**
+	 * 
+	 * @return the value of the observation based
+	 * on the attribute type.
+	 */
+	@Transient
+	public Object getAttributeValue(){
+		IAttributeType type = getAttribute().getType();
+		if (type == IAttributeType.BOOLEAN ||
+				type == IAttributeType.NUMERIC){
+			return getNumberValue();
+		}else if (type == IAttributeType.TEXT){
+			return getStringValue();
+		}else if (type == IAttributeType.LIST){
+			return getAttributeListItem();
+		}else if (type == IAttributeType.DATE){
+			return getDateValue();
+		}
+		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
+	}
+	
 	
 	/**
 	 * @param o

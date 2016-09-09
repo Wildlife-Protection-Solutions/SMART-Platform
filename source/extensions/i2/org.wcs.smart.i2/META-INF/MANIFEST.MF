@@ -7,7 +7,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.core.runtime;bundle-version="3.10.0",
- org.wcs.smart;bundle-version="4.0.1"
-Export-Package: org.wcs.smart.i2.model
+ org.wcs.smart;bundle-version="4.0.1",
+ org.eclipse.nebula.widgets.tablecombo;bundle-version="1.0.0"
+Export-Package: org.wcs.smart.i2,
+ org.wcs.smart.i2.model
 Bundle-Activator: org.wcs.smart.i2.Intelligence2PlugIn
 Bundle-Vendor: org.wcs.smart

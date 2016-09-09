@@ -44,7 +44,7 @@ import org.wcs.smart.ca.NamedItem;
  */
 @Entity
 @Table(name="smart.i_working_set")
-public class IntelWorkingSet extends NamedItem{
+public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 
 	
 	private ConservationArea ca;

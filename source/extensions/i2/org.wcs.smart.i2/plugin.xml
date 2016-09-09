@@ -250,6 +250,15 @@
                id="org.wcs.smart.i2.menu.main"
                label="Intelligence 2">
             <command
+                  commandId="org.wcs.smart.i2.command.entity.new"
+                  label="New Entity"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.i2.separator1"
+                  visible="true">
+            </separator>
+            <command
                   commandId="org.wcs.smart.i2.command.entitytypelist.show"
                   label="Entity Types..."
                   style="push">
@@ -257,6 +266,11 @@
             <command
                   commandId="org.wcs.smart.i2.command.attributelist.show"
                   label="Intelligence Attributes..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
+                  label="Relationship Types..."
                   style="push">
             </command>
          </menu>
@@ -272,6 +286,14 @@
             id="org.wcs.smart.i2.command.attributelist.show"
             name="Intelligence Attributes...">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.relationshiptypelist.show"
+            name="Relationship Types...">
+      </command>
+      <command
+            id="org.wcs.smart.i2.command.entity.new"
+            name="New Entity">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -282,6 +304,14 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowAttributeListDialogHandler$ShowAttributeListDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.attributelist.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowRelationshipTypeListDialogHandler$ShowRelationshipTypeListDialogHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.relationshiptypelist.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.NewEntityDialogHandler$NewEntityDialogHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.entity.new">
       </handler>
    </extension>
 
