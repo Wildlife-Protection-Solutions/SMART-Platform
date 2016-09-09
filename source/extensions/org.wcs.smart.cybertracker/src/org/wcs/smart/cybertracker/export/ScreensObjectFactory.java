@@ -1078,6 +1078,23 @@ public class ScreensObjectFactory {
 	}
 
 	/**
+	 * Creates a snap to last gps position control
+	 * <Control>
+	 * <Type>{582E62E2-C95B-4B87-94D3-EE8603C8056A}</Type>
+	 * <Id>20</Id>
+	 * <Required>True</Required>
+	 * </Control>
+	 * @return
+	 */
+	public Controls.Control createSnapLastGpsPosition(){
+		Controls.Control control = new Controls.Control();
+		control.setType("{582E62E2-C95B-4B87-94D3-EE8603C8056A}");
+		control.setId(20);
+		control.setRequired("True");
+		return control;
+	}
+	
+	/**
     <Control>
 	    <Type>{DBDA4351-F047-4AA9-8B87-684CAF7EEFA9}</Type>
 	    <Id>16</Id>
