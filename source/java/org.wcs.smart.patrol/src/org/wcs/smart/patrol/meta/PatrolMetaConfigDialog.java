@@ -46,7 +46,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -61,7 +61,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionMeta> {
 
 	private PatrolScreenOptionMeta[] optionsToShow = {
-			PatrolScreenOptionMeta.TYPE,
 			PatrolScreenOptionMeta.TRANSPORT,
 			PatrolScreenOptionMeta.ARMED,
 			PatrolScreenOptionMeta.TEAM,
@@ -77,7 +76,7 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 	
 	private LabelProvider metaScreenLabelProvider = new PatrolMetaScreenLabelProvider();
 	
-	private List<PatrolType> patrolTypes;
+	private List<PatrolTransportType> transportTypes;
 	private List<Team> teams;
 	private List<Station> stations;
 	private List<PatrolMandate> mandates;
@@ -104,10 +103,7 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 			}
 		}
 
-		patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
-		for (PatrolType type : patrolTypes) {
-			type.getTransportTypes().size(); //load lazy items
-		}
+		transportTypes = PatrolHibernateManager.getActivePatrolTransporationTypes(ca, session);
 		teams = PatrolHibernateManager.getActiveTeams(ca, session);
 		stations = PatrolHibernateManager.getActiveStations(ca, session);
 		mandates = PatrolHibernateManager.getActiveMandates(ca, session);
@@ -134,9 +130,8 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 	protected Map<PatrolScreenOptionMeta, ScreenOptionComposite> buildOptionComposites(Composite infoInnerPanel, IScreenOptionChangeListener listener) {
 		Map<PatrolScreenOptionMeta, ScreenOptionComposite> screenComposites = new HashMap<PatrolScreenOptionMeta, ScreenOptionComposite>();
 
-		ScreenOptionComposite soc  = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.TYPE), options.get(PatrolScreenOptionMeta.TRANSPORT), patrolTypes);
+		ScreenOptionComposite soc  = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.TRANSPORT), transportTypes);
 		soc.addScreenOptionListener(listener);
-		screenComposites.put(PatrolScreenOptionMeta.TYPE,      soc);
 		screenComposites.put(PatrolScreenOptionMeta.TRANSPORT, soc);
 		
 		soc = new YesNoScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.ARMED), metaScreenLabelProvider.getText(PatrolScreenOptionMeta.ARMED));

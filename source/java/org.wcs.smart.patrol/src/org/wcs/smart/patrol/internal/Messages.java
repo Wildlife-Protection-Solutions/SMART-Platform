@@ -583,7 +583,6 @@ public class Messages extends NLS {
 	public static String ScreenOption_Mandate;
 	public static String ScreenOption_Members;
 	public static String ScreenOption_Objective;
-	public static String ScreenOption_PatrolType;
 	public static String ScreenOption_Pilot;
 	public static String ScreenOption_Station;
 	public static String ScreenOption_Team;

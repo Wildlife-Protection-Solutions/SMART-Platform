@@ -25,7 +25,6 @@ public class LabelConstants {
 	public static final String MIXED_NAME =Messages.PatrolType_MixedName;
 	
 	
-	public static final String SC_OP_TYPE =Messages.ScreenOption_PatrolType;
 	public static final String SC_OP_TRANSPORT = Messages.ScreenOption_TransportType;
 	public static final String SC_OP_ARMED = Messages.ScreenOption_Armed;
 	public static final String SC_OP_STATION = Messages.ScreenOption_Station;
@@ -63,7 +62,6 @@ public class LabelConstants {
 		case STATION:return SC_OP_STATION;
 		case TEAM:return SC_OP_TEAM;
 		case TRANSPORT:return SC_OP_TRANSPORT;
-		case TYPE: return SC_OP_TYPE;
 		default:
 			return null;
 			

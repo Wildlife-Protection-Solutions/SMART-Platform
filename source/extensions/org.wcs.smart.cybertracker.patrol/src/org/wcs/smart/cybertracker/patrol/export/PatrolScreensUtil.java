@@ -25,9 +25,8 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.Session;
@@ -82,7 +81,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class PatrolScreensUtil extends ScreensUtil {
 	
-	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
+	private static final String GLOBAL_PATROL_TR_TYPE = "GLOBAL_PATROL_TR_TYPE"; //$NON-NLS-1$
 
 	public static enum JsonPatrolKey {
 		PATROL_TYPE("pt"), //$NON-NLS-1$
@@ -136,16 +135,18 @@ public class PatrolScreensUtil extends ScreensUtil {
 		CyberTrackerId startId = new CyberTrackerId();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		Map<PatrolScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
-		ScreenOption so_type = screenOptions.get(PatrolScreenOptionMeta.TYPE);
-		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, so_type, ca, session, dataType, DATATYPE_PATROL);
-		//patrol type & transport
-		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
-		String errorMsg = validatePatrolTypes(patrolTypes);
+		Map<PatrolTransportType, PatrolType> t2tMap = buildTransport2TypeMap(ca, session);
+		ScreenOption so_transport = screenOptions.get(PatrolScreenOptionMeta.TRANSPORT);
+		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, so_transport, t2tMap, ca, session, dataType, DATATYPE_PATROL);
+		List<PatrolTransportType> transportTypes = PatrolHibernateManager.getActivePatrolTransporationTypes(ca, session);
+		String errorMsg = validatePatrolTransportTypes(transportTypes);
 		if (errorMsg != null) {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, errorMsg, null);
 			return null;
 		}
-		id = addTypeTransportNodes(id, result, elements, ctProps, patrolTypes, screenOptions, session);
+		id = addTransportNodes(id, result, elements, ctProps, transportTypes, t2tMap, screenOptions, session);
+		
+		
 		//patrol armed
 		so = screenOptions.get(PatrolScreenOptionMeta.ARMED);
 		if (so == null || so.isVisible()) {
@@ -255,7 +256,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			id = addMembersNode(id, result, memberIds);
 			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_LEADER, memberIds, filter);
 			
-			id = addPilotScreen(id, result, elements, screenOptions, memberIds, patrolTypes, filter);
+			id = addPilotScreen(id, result, elements, screenOptions, memberIds, transportTypes, t2tMap, session, filter);
 		} else {
 			//adding default members
 			ScreenOption leader_so = screenOptions.get(PatrolScreenOptionMeta.LEADER);
@@ -292,7 +293,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 
 			if (pilot_so == null || pilot_so.isVisible()) {
-				id = addPilotScreen(id, result, elements, screenOptions, memberIds, patrolTypes, null);
+				id = addPilotScreen(id, result, elements, screenOptions, memberIds, transportTypes, t2tMap, session, null);
 			} else {
 				if (pilotItem == null) {
 					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Pilot, null);
@@ -335,12 +336,12 @@ public class PatrolScreensUtil extends ScreensUtil {
 		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData, jsonValues);
 	}
 	
-	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {
+	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolTransportType> trTypes, Map<PatrolTransportType, PatrolType> t2tMap, Session session, String filter) {
 		//TYPE is visible						- PILOT displayed with navigation formula
 		//TYPE is not visible (set to GROUND)	- PILOT in not displayed
 		//TYPE is not visible (set to !GROUND)	- PILOT displayed without navigation formula
-		ScreenOption type_so = screenOptions.get(PatrolScreenOptionMeta.TYPE);
-		if (type_so == null || type_so.isVisible()) {
+		ScreenOption tr_so = screenOptions.get(PatrolScreenOptionMeta.TRANSPORT);
+		if (tr_so == null || tr_so.isVisible()) {
 			String pilotNodeId = id.getNodeId();
 			id = addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
 			//NOTE: if previous screen is transport than we need to update several screens with formula
@@ -349,28 +350,31 @@ public class PatrolScreensUtil extends ScreensUtil {
 				Node prevNode = container.screenNodes.get(i);
 				Control control2 = ScreensObjectFactory.getNavigationControl(prevNode);
 				if (pilotNodeId.equals(control2.getTranslateNextScreenId())) {
-					addNavigationFormula(prevNode, builPilotFormula(patrolTypes), pilotNodeId, id.getNodeId());
+					addNavigationFormula(prevNode, builPilotFormula(trTypes, t2tMap), pilotNodeId, id.getNodeId());
 				} else {
 					break;
 				}
 			}
 			return id;
-		} else if (Type.GROUND.name().equals(type_so.getStringValue())) {
+		} else if (tr_so.getUuidValue() != null && Type.GROUND.equals(CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, tr_so.getUuidValue(), session).getPatrolType())) {
 			return id;
 		} else {
 			return addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
 		}
 	}
 	
-	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, ScreenOption so_type, ConservationArea ca, Session session, CyberTrackerId dataType, String strDataType) {
+	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, ScreenOption so_transport, Map<PatrolTransportType, PatrolType> t2tMap, ConservationArea ca, Session session, CyberTrackerId dataType, String strDataType) {
 		CyberTrackerId elId = null;
-		if (so_type != null  && !so_type.isVisible() && so_type.getStringValue() != null) {
+		if (so_transport != null  && !so_transport.isVisible() && so_transport.getUuidValue() != null) {
 			//patrol type is configured as a default value, but we still need to force speed limitation
 			//that is why we add this limitation here - for "Begin Patrol" screen option
-			Type type = PatrolType.Type.valueOf(so_type.getStringValue());
-			PatrolType pType = PatrolHibernateManager.getPatrolType(ca, session, type);
-			int maxSpeed = getMaxSpeed(pType);
-			elId = addElementsGpsAccuracyItem(elements, Messages.PatrolScreens_Begin, null, ctProps.getDilutionOfPrecision(), maxSpeed, pType.getType().name());
+			PatrolTransportType transport = CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, so_transport.getUuidValue(), session);
+			if (transport == null) {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Transport, null);
+				return null;
+			}
+			int maxSpeed = getMaxSpeed(transport, t2tMap);
+			elId = addElementsGpsAccuracyItem(elements, Messages.PatrolScreens_Begin, null, ctProps.getDilutionOfPrecision(), maxSpeed, null);
 		} else {
 			elId = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin).get(0);
 			
@@ -378,139 +382,83 @@ public class PatrolScreensUtil extends ScreensUtil {
 		StartScreensContent content = StartScreensContent.create(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_Begin_Title, elId);
 		return addStartScreen(id, container, elements, ctProps, content, dataType, strDataType);
 	}
-
-	private int getMaxSpeed(PatrolType type) {
-		if (type == null) {
-			SmartPlugIn.log("PatrolType is undefined when exporting to CyberTracker. Max value is used.", null); //$NON-NLS-1$
+	
+	private Map<PatrolTransportType, PatrolType> buildTransport2TypeMap(ConservationArea ca, Session session) {
+		Map<PatrolTransportType, PatrolType> t2tMap = new HashMap<>();
+		List<PatrolType> pTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
+		for (PatrolType pt : pTypes) {
+			for (PatrolTransportType tt : pt.getTransportTypes()) {
+				t2tMap.put(tt, pt);
+			}
+		}
+		return t2tMap;
+	}
+	
+	private int getMaxSpeed(PatrolTransportType trType, Map<PatrolTransportType, PatrolType> t2tMap) {
+		if (trType == null) {
+			SmartPlugIn.log("PatrolTransportType is undefined when exporting to CyberTracker. Max value is used.", null); //$NON-NLS-1$
 			return PatrolType.MAX_SPEED_MAX_VALUE;
 		}
-		if (type.getMaxSpeed() == null) {
+		PatrolType pType = t2tMap.get(trType);
+		if (pType == null) {
+			SmartPlugIn.log("PatrolType is undefined for selected transport type when exporting to CyberTracker. Max value is used.", null); //$NON-NLS-1$
+			return PatrolType.MAX_SPEED_MAX_VALUE;
+		}
+		if (pType.getMaxSpeed() == null) {
 			SmartPlugIn.log("MaxSpeed for PatrolType is undefined when exporting to CyberTracker. Max value is used.", null); //$NON-NLS-1$
 			return PatrolType.MAX_SPEED_MAX_VALUE;
 		}
-		return type.getMaxSpeed();
+		return pType.getMaxSpeed();
 	}
-
-	private String validatePatrolTypes(List<PatrolType> pTypes) {
-		if (pTypes == null || pTypes.isEmpty())
-			return Messages.PatrolScreensUtil_Error_TypesNotSet;
-		for (Iterator<PatrolType> i = pTypes.iterator(); i.hasNext();) {
-			PatrolType patrolType = i.next();
-			boolean invalid = true;
-			if (patrolType.getTransportTypes() != null) {
-				for (PatrolTransportType transportType : patrolType.getTransportTypes()) {
-					if (transportType.getIsActive()) {
-						//there is an active transport for this patrol type -> it is valid
-						invalid = false;
-						break;
-					}
-				}
-			}
-			
-			if (invalid) {
-				i.remove();
-			}
-		}
-		
-		if (pTypes.isEmpty())
+	
+	private String validatePatrolTransportTypes(List<PatrolTransportType> tTypes) {
+		if (tTypes == null || tTypes.isEmpty())
 			return Messages.PatrolScreensUtil_Error_TransportNotSet;
-		
 		return null;
 	}
 
-	private List<PatrolTransportType> getActiveTransportTypes(PatrolType patrolType) {
-		List<PatrolTransportType> list = new ArrayList<PatrolTransportType>();
-		if (patrolType.getTransportTypes() == null)
-			return list;
-		for (PatrolTransportType transportType : patrolType.getTransportTypes()) {
-			if (transportType.getIsActive()) {
-				list.add(transportType);
-			}
-		}
-		return list;
-	}
-	
-	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, List<PatrolType> pTypes, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, Session session) {
-		ScreenOption typeOption = screenOptions.get(PatrolScreenOptionMeta.TYPE);
-		if (typeOption == null || typeOption.isVisible()) {
+	private CyberTrackerId addTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerPropertiesProfile ctProps, List<PatrolTransportType> trTypes, Map<PatrolTransportType, PatrolType> t2tMap, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, Session session) {
+		ScreenOption trOption = screenOptions.get(PatrolScreenOptionMeta.TRANSPORT);
+		if (trOption == null || trOption.isVisible()) {
 			List<CyberTrackerId> typeIds = new ArrayList<CyberTrackerId>();
 			List<String> types = new ArrayList<String>();
-			for (PatrolType patrolType : pTypes) {
-				Type type = patrolType.getType();
-				final String name = type.getGuiName(Locale.getDefault());
-				final String tag0 = type.name();
+			for (PatrolTransportType tt : trTypes) {
+				final String name = ctUtil.getName(tt);
+				final String tag0 = UuidUtils.uuidToString(tt.getUuid());
+				final String jsonValue = JsonPatrolKey.TRANSPORT_TYPE.key + CyberTrackerConfExporter.KEY_SEP + tag0;
 				types.add(name);
-				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, ctProps.getDilutionOfPrecision(), getMaxSpeed(patrolType), patrolType.getType().name()));
+				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, ctProps.getDilutionOfPrecision(), getMaxSpeed(tt, t2tMap), jsonValue));
 			}
-			String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
-			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
+			String resultTransportId = createResultElement(RESULT_PATROL_TYPE, elements);
+			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTransportId, true);
 			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
-			control7.setResultGlobalValue(GLOBAL_PATROL_TYPE);
+			control7.setResultGlobalValue(GLOBAL_PATROL_TR_TYPE);
 			container.screenNodes.add(node);
-			container.resultElements.add(new IdNamePair(resultTypeElemId, RESULT_PATROL_TYPE));
-			CyberTrackerId nextId = new CyberTrackerId();
-			String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
-			container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
-			for (int i = 0; i < pTypes.size(); i++) {
-				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pTypes.get(i)), JsonPatrolKey.TRANSPORT_TYPE.key);
-				node = ctUtil.createRadioNode(typeIds.get(i).getNodeId(), types.get(i), trIds, resultTransportId);
-				container.screenNodes.add(node);
-				Control control2 = ScreensObjectFactory.getNavigationControl(node);
-				control2.setTranslateNextScreenId(nextId.getNodeId());
-			}
-			return nextId;
+			container.resultElements.add(new IdNamePair(resultTransportId, RESULT_PATROL_TYPE));
+			return toNextScreen(node, false);
 		} else {
-			Type value = typeOption.getStringValue() != null ? PatrolType.Type.valueOf(typeOption.getStringValue()) : null;
-			if (value == null) {
-				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Type, null);
+			PatrolTransportType transport = CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, trOption.getUuidValue(), session);
+			if (transport == null) {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Transport, null);
 				return null;
 			}
-			String elId = (new CyberTrackerId()).getItemId();
-			Elements.List.Items.Item tValue = ElementsUtil.addElementsItem(elements, "", elId, value.name()); //$NON-NLS-1$
-			tValue.setJsonId(JsonPatrolKey.PATROL_TYPE.key + CyberTrackerConfExporter.KEY_SEP + value.name());
-			container.defaultValues.add(createDefaultResultRecord(RESULT_PATROL_TYPE, elements, tValue));
-			
-			ScreenOption trOption = screenOptions.get(PatrolScreenOptionMeta.TRANSPORT);
-			if (trOption == null || trOption.isVisible()) {
-				PatrolType pType = null;
-				for (PatrolType pt : pTypes) {
-					if (value.equals(pt.getType()))
-						pType = pt;
-				}
-				List<CyberTrackerId> trIds = toCyberTrackerIds(elements, getActiveTransportTypes(pType), JsonPatrolKey.TRANSPORT_TYPE.key);
-				String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
-				Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Transport, trIds, resultTransportId);
-				container.screenNodes.add(node);
-				CyberTrackerId nextId = new CyberTrackerId();
-				Control control2 = ScreensObjectFactory.getNavigationControl(node);
-				control2.setTranslateNextScreenId(nextId.getNodeId());
-				return nextId;
-			} else {
-				PatrolTransportType transport = CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, trOption.getUuidValue(), session);
-				if (transport == null) {
-					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Transport, null);
-					return null;
-				}
-				String trElId = (new CyberTrackerId()).getItemId();
-				Elements.List.Items.Item trValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, UuidUtils.uuidToString(transport.getUuid()));
-				trValue.setJsonId(JsonPatrolKey.TRANSPORT_TYPE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(transport.getUuid()));
-				container.defaultValues.add(createDefaultResultRecord(RESULT_TRANSPORT, elements, trValue));
-				return id;
-			}
-			
+			String trElId = (new CyberTrackerId()).getItemId();
+			Elements.List.Items.Item trValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, UuidUtils.uuidToString(transport.getUuid()));
+			trValue.setJsonId(JsonPatrolKey.TRANSPORT_TYPE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(transport.getUuid()));
+			container.defaultValues.add(createDefaultResultRecord(RESULT_TRANSPORT, elements, trValue));
+			return id;
 		}
 	}
 
-	private String builPilotFormula(List<PatrolType> patrolTypes) {
+	private String builPilotFormula(List<PatrolTransportType> trTypes, Map<PatrolTransportType, PatrolType> t2tMap) {
 		String result = ""; //$NON-NLS-1$
-		for (int i = 0; i < patrolTypes.size(); i++) {
-			patrolTypes.get(i).getType();
-			switch (patrolTypes.get(i).getType()) {
+		for (int i = 0; i < trTypes.size(); i++) {
+			switch (trTypes.get(i).getPatrolType()) {
 			case AIR:
 			case MARINE:
 				if (!result.isEmpty())
 					result += " || "; //$NON-NLS-1$
-				result += GLOBAL_PATROL_TYPE+"=="+String.valueOf(i+1); //$NON-NLS-1$
+				result += GLOBAL_PATROL_TR_TYPE+"=="+String.valueOf(i+1); //$NON-NLS-1$
 				break;
 			default:
 				break;
@@ -541,6 +489,5 @@ public class PatrolScreensUtil extends ScreensUtil {
 		elements.getList().getItems().getItem().add(item);
 		return elemId;
 	}
-	
 	
 }

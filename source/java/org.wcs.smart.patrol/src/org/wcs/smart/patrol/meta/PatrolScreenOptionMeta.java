@@ -26,7 +26,6 @@ package org.wcs.smart.patrol.meta;
  * @author elitvin
  */
 public enum PatrolScreenOptionMeta {
-	TYPE,
 	TRANSPORT,
 	ARMED,
 	STATION,

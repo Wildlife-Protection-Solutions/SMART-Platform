@@ -250,6 +250,22 @@ public class PatrolHibernateManager extends HibernateManager{
 	}
 
 	/**
+	 * Gets active patrol transport types for a given conservation area.
+	 * 
+	 * @param ca conservation area
+	 * @param s active session
+	 * @return list of active patrol transport types
+	 */
+	public static List<PatrolTransportType> getActiveTransportTypes(ConservationArea ca, Session s) {
+		List<PatrolType> patrolTypes = getActivePatrolTypes(ca, s);
+		List<PatrolTransportType> transportTypes = new ArrayList<>();
+		for (PatrolType type : patrolTypes) {
+			transportTypes.addAll(type.getTransportTypes().stream().filter(tt -> tt.getIsActive()).collect(Collectors.toList()));
+		}
+		return transportTypes;
+	}
+	
+	/**
 	 * Gets patrol types for a given conservation area.
 	 * @param ca conservation area 
 	 * @param s active session 
