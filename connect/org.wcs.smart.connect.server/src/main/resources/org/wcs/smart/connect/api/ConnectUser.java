@@ -77,7 +77,7 @@ public class ConnectUser extends HttpServlet {
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 
-	private void validateUser(){
+	private void isAdminUser(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -101,7 +101,7 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("")
     public List<SmartUser> getActiveUsers(){
-		validateUser();
+		isAdminUser();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -123,7 +123,7 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("/getinactive/")
     public List<SmartUser> getInactiveUsers(){
-		validateUser();
+		isAdminUser();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -157,7 +157,7 @@ public class ConnectUser extends HttpServlet {
 			return null;
 		}
 		
-		validateUser();
+		isAdminUser();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -187,7 +187,7 @@ public class ConnectUser extends HttpServlet {
     @Path("/{username}")
     public SmartUser addUser(@PathParam("username") String user, 
     		SmartUser newUser) {
-		validateUser();
+		isAdminUser();
 		if (newUser.getUsername() != null && newUser.getUsername().length() > 0 && !newUser.getUsername().equals(user)){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.invalidusernames", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
@@ -255,7 +255,7 @@ public class ConnectUser extends HttpServlet {
     	
     	//if you are editing yourself, skip validation for admin-level user
     	if( !request.getUserPrincipal().getName().equals(olduser)){
-    		validateUser();
+    		isAdminUser();
     	}
     	
     	if (newUser.getUsername() != null){
@@ -354,7 +354,7 @@ public class ConnectUser extends HttpServlet {
     @Path("/activate/{username}")
     public SmartUser activateUser(
     		@PathParam("username") String username) {
-    	validateUser();
+    	isAdminUser();
     	
     	SmartUser user;
     	
@@ -397,7 +397,7 @@ public class ConnectUser extends HttpServlet {
     @Path("/activate/{username}")
     public SmartUser deactivateUser(
     		@PathParam("username") String username) {
-    	validateUser();
+    	isAdminUser();
     	
     	SmartUser user;
     	
@@ -441,7 +441,7 @@ public class ConnectUser extends HttpServlet {
     @DELETE
     @Path("/{username}")
     public SmartUser removeUser(@PathParam("username") String username) {
-    	validateUser();
+    	isAdminUser();
     	SmartUser toDelete = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();

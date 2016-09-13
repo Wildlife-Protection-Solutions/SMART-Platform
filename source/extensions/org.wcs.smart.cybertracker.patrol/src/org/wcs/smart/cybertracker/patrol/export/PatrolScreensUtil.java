@@ -125,7 +125,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 	 * @return root id
 	 */
 	@Override
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
 		CyberTrackerId dataType = registerDatatype(elements, DATATYPE_PATROL);
 		
 		MetaExportResult result = new MetaExportResult();
@@ -304,12 +304,12 @@ public class PatrolScreensUtil extends ScreensUtil {
 			
 		}
 		
-		addTaskNode(id, result, elements, startId, dmRootId, ctProps, pingAlertData);
+		addTaskNode(id, result, elements, startId, dmRootId, ctProps);
 		result.rootId = id;
 		return result;
 	}
 
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerPropertiesProfile ctProps) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		List<String> jsonValues = new ArrayList<String>();
@@ -333,7 +333,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
 		}
 		
-		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData, jsonValues);
+		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, jsonValues);
 	}
 	
 	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolTransportType> trTypes, Map<PatrolTransportType, PatrolType> t2tMap, Session session, String filter) {

@@ -129,7 +129,7 @@ public enum SecurityManager {
 		
 		c.add(Restrictions.eq("username", username)); //$NON-NLS-1$
 		
-		if(!action.equals(AdminAccountAction.KEY)){ //don't allow for caAdmin to make this return true if the request is specifically about the "Admin" action.
+		if(!action.equals(AdminAccountAction.KEY) && !action.equals(CaAdminAccountAction.KEY) ){ //if we are asking specifically about admin or caAdmin users (probably the menu filter) don't add this, or else it will return true for admin and caAdmin regardless 
 			c.add(Restrictions.or(r2,r));			// in summary:   "username"=username" && ("action" == action || ("action"=admin || "action"=caadmin))
 		}else{
 			c.add(r);

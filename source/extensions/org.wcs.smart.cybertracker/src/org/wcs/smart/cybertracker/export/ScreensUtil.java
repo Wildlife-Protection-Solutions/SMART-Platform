@@ -90,7 +90,7 @@ public class ScreensUtil {
 		this.screensFactory = ctUtil.getScreensFactory();
 	}
 	
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
 //		MetaExportResult result = new MetaExportResult();
 		return null; //TODO: in case we want to export without any meta screens logic for that should be placed here
 	}
@@ -164,8 +164,7 @@ public class ScreensUtil {
 	}
 
 	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, 
-			List<CyberTrackerId> nodeIds, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData,
-			List<String>  jsonValues) {
+			List<CyberTrackerId> nodeIds, CyberTrackerPropertiesProfile ctProps, List<String>  jsonValues) {
 		if (nextTaskOptions.size() != nodeIds.size()) {
 			throw new IllegalArgumentException("Unable to build next task node. Number of task options is not equal to the number of referenced nodes."); //$NON-NLS-1$
 		}
@@ -216,14 +215,6 @@ public class ScreensUtil {
 		
 		addGpsConfiguration(node, ctProps);
 		
-		//add ping control (e.g. configure alert action with ping only set to true)
-		for (AlertData data : pingAlertData) {
-			if (data != null) {
-				Controls.Control pingControl = screensFactory.createAlertControl(data, container.tripUniqueElementId, null);
-				ScreensObjectFactory.addControlToNode(node, pingControl);
-			}
-		}
-
 		container.screenNodes.add(node);
 	}
 	

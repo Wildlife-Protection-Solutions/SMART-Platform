@@ -248,7 +248,7 @@ public class CyberTrackerConfExporter {
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
 		ScreensUtil screensUtil = createScreensUtil(ctUtil);
-		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session, ctProperties, alertDataProvider.getPingAlertData());
+		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session, ctProperties);
 		if (metaScreensData == null) {
 			//failed to generate patrol data
 			//error message is expected to be displayed be PatrolScreensUtil
@@ -259,7 +259,7 @@ public class CyberTrackerConfExporter {
 		rootId = metaScreensData.rootId;
 		tripUniqueElementId = metaScreensData.tripUniqueElementId;
 		monitor.worked(5);
-
+		
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
 		monitor.worked(70);
 		
@@ -366,6 +366,15 @@ public class CyberTrackerConfExporter {
 			return result;
 		}
 		Node categoryNode = ctUtil.createRadioNode(node, keyMap, getNodeLevelResultElementId(level).getItemId());
+		
+		if (level == 0){
+			for (AlertData data : alertDataProvider.getPingAlertData()) {
+				if (data != null) {
+					Controls.Control pingControl = screensFactory.createAlertControl(data, tripUniqueElementId, null);
+					ScreensObjectFactory.addControlToNode(categoryNode, pingControl);
+				}
+			}
+		}
 		Control headerControl = ScreensObjectFactory.getHeaderControl(categoryNode);
 		headerControl.setColor(NODE_HEADER_COLOR);
 		addAlerts(categoryNode, node.getChildren(), null, keyMap);

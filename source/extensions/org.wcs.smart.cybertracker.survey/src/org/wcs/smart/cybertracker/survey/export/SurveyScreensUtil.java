@@ -110,7 +110,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 	}
 
 	@Override
-	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
 		CyberTrackerId dataType = registerDatatype(elements, DATATYPE_SURVEY);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
@@ -223,12 +223,12 @@ public class SurveyScreensUtil extends ScreensUtil {
 		cyberTrackerIds = suToCtIds(elements, samplingUnits);
 		id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_StartSamplingUnit, RESULT_MISSION_START_SAMPLING_UNIT, cyberTrackerIds, true);
 
-		addTaskNode(id, result, elements, startId, dmRootId, cyberTrackerIds, surveyDesign.getTrackObserver(), memberIds, membersFilter, ctProps, pingAlertData);
+		addTaskNode(id, result, elements, startId, dmRootId, cyberTrackerIds, surveyDesign.getTrackObserver(), memberIds, membersFilter, ctProps);
 		result.rootId = id;
 		return result;
 	}
 
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter, CyberTrackerPropertiesProfile ctProps, List<AlertData> pingAlertData) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter, CyberTrackerPropertiesProfile ctProps) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		List<String> jsonIds = new ArrayList<String>();
@@ -262,7 +262,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 			jsonIds.add(null);
 		}
 		
-		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, pingAlertData, jsonIds);
+		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps, jsonIds);
 	}
 	
 	//Not the best design, but we can obtain required data from Elements in this case
