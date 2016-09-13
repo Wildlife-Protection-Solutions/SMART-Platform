@@ -57,6 +57,8 @@ public class PatrolUtils {
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
 		}else if (type == PatrolType.Type.AIR){
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
+		}else if (type == PatrolType.Type.MIXED){
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);
 		}
 		return null;
 	}
@@ -76,6 +78,8 @@ public class PatrolUtils {
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.MARINE_PATROL_ICON);
 		}else if (type == PatrolType.Type.AIR){
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.AIR_PATROL_ICON);
+		}else if (type == PatrolType.Type.MIXED){
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.MIXED_PATROL_ICON);
 		}
 		return null;
 	}

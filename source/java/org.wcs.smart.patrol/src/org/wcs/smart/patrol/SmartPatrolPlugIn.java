@@ -65,6 +65,11 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	public static final String GROUND_PATROL_ICON = "org.wsc.smart.patrol.GROUND_PATROL"; //$NON-NLS-1$
 
 	/**
+	 * Image descriptor key for ground patrol icon
+	 */
+	public static final String MIXED_PATROL_ICON = "org.wsc.smart.patrol.MIXED_PATROL"; //$NON-NLS-1$
+
+	/**
 	 * Image descriptor key for patrol member
 	 */
 	public static final String PATROL_MEMBER_ICON = "org.wsc.smart.patrol.PATROL_MEMBER"; //$NON-NLS-1$
@@ -119,6 +124,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		reg.put(PATROL_TEAM_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_team.png")); //$NON-NLS-1$
 		reg.put(MARINE_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/boat.png")); //$NON-NLS-1$
 		reg.put(GROUND_PATROL_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_ground.png")); //$NON-NLS-1$
+		reg.put(MIXED_PATROL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_mixed.png")); //$NON-NLS-1$
 		reg.put(PATROL_LEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_leader.png")); //$NON-NLS-1$
 		reg.put(PATROL_MEMBER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_member.png")); //$NON-NLS-1$
 		reg.put(PATROL_PILOT_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_pilot.png")); //$NON-NLS-1$
