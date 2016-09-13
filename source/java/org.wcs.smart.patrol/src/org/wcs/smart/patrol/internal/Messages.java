@@ -557,10 +557,6 @@ public class Messages extends NLS {
 	public static String PatrolTypePropertyPage_TransportOptionsLabel;
 	public static String PatrolTypePropertyPage_TransportType_ColumnHeader;
 	public static String PatrolTypePropertyPage_TypesLabel;
-	public static String PatrolTypeWizardPage_Error_NoTypesFound;
-	public static String PatrolTypeWizardPage_PageMessage;
-	public static String PatrolTypeWizardPage_SelectType_Label;
-	public static String PatrolTypeWizardPage_Title;
 	public static String PatrolViewFilter_AscOp;
 	public static String PatrolViewFilter_DescOp;
 	public static String PatrolViewFilter_EndDateSort;

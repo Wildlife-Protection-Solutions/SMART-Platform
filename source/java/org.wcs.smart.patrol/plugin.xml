@@ -480,10 +480,6 @@
             id="newpatrol.patrolid">
       </wizardpage>
       <wizardpage
-            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolTypeWizardPage"
-            id="newpatrol.patroltype">
-      </wizardpage>
-      <wizardpage
             class="org.wcs.smart.patrol.internal.ui.createpatrol.TransportTypeWizardPage"
             id="newpatrol.transporttype">
       </wizardpage>
