@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.io.File;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,9 +32,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 
 /**
  * Model class of intelligence attachment.
@@ -40,13 +45,12 @@ import org.wcs.smart.ca.NamedItem;
  */
 @Entity
 @Table(name="smart.i_attachment")
-public class IntelAttachment extends NamedItem{
+public class IntelAttachment extends ISmartAttachment{
 
 	private ConservationArea ca;
 	private Date dateCreated;
 	private Employee createdBy;
 	private String description;
-	private String file;
 	
 	/**
 	 * Constructor.
@@ -138,23 +142,12 @@ public class IntelAttachment extends NamedItem{
 		return this.description;
 	}
 
-	/**
-	 * Set the file.
-	 * 
-	 * @param file
-	 *            file
-	 */
-	public void setFile(String file) {
-		this.file = file;
+	@Override
+	protected String getDatastoreFolderPath(Session session) throws Exception {
+		return getConservationArea().getFileDataStoreLocation() + 
+				File.separator + 
+				"intelligence2/attachments";
 	}
 
-	/**
-	 * Get the file.
-	 * 
-	 * @return file
-	 */
-	public String getFile() {
-		return this.file;
-	}
 
 }

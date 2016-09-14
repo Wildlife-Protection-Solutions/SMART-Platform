@@ -1,6 +1,7 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,11 +9,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -20,18 +22,24 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 
 public class EntityListComposite extends Composite {
 
 	private Color selectionColor = null;
+	private Color mouseOverColor = null;
 	
 	private Composite core = null;
 	
 	private List<IntelEntity> entities;
 	private FormToolkit toolkit = null;
+	private List<EntityComponent> components = null;
 	
 	public EntityListComposite(Composite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
@@ -39,7 +47,8 @@ public class EntityListComposite extends Composite {
 		
 		
 		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
-		selectionColor = new Color(parent.getDisplay(), blend(new RGB(0, 0, 0), color.getRGB(), 25));
+		selectionColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
+		mouseOverColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 90));
 		addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
@@ -48,14 +57,35 @@ public class EntityListComposite extends Composite {
 		});
 	}
 	
+	/**
+	 * set to null to configure loading message; set to empty list of results return 
+	 * no records
+	 * 
+	 * @param entities
+	 */
 	public void setEntities(List<IntelEntity> entities){
 		this.entities = entities;
 		createTable();
 	}
 	
+	public void setSearchError(Exception ex){
+		if (core != null){
+			core.dispose();
+			core = null;
+		}
+		core = toolkit.createComposite(this, SWT.NONE);
+		core.setLayout(new GridLayout(2, false));
+		Label img = toolkit.createLabel(this, "");
+		img.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
+		toolkit.createLabel(this, MessageFormat.format("Search error: {0}",ex.getMessage()));
+	}
+	
+	
 	private void createTable(){
 		if (core != null){
 			core.dispose();
+			core = null;
+			components = null;
 		}
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
@@ -67,115 +97,187 @@ public class EntityListComposite extends Composite {
 		((GridLayout)core.getLayout()).marginHeight = 0;
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		ScrolledComposite sc = new ScrolledComposite(core, SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
-		toolkit.adapt(sc);
-		Composite main = toolkit.createComposite(sc, SWT.NONE);
-		sc.setContent(main);
-		sc.setExpandHorizontal(true);
-		sc.setExpandVertical(true);
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		main.setLayout(new GridLayout());
-		main.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		for (IntelEntity i : entities){
+		if (entities == null){
+			toolkit.createLabel(core, "Searching...");
+		}else{
+			toolkit.createLabel(core, MessageFormat.format("{0} results", entities.size()));
 			
+			ScrolledComposite sc = new ScrolledComposite(core, SWT.V_SCROLL |  SWT.H_SCROLL);
+			toolkit.adapt(sc);
+			Composite main = toolkit.createComposite(sc, SWT.NONE);
+			sc.setContent(main);
+			sc.setExpandHorizontal(true);
+			sc.setExpandVertical(true);
+			main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			main.setLayout(new GridLayout());
+			main.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+
+			components = new ArrayList<EntityListComposite.EntityComponent>();
+			int cnt = 0;
+			for (IntelEntity i : entities){		
+				EntityComponent entityComposite = new EntityComponent(main, i, cnt++, components);
+				components.add(entityComposite);
+				toolkit.adapt(entityComposite);
+				entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
+				Label l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
+			}
+			sc.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			
-			Composite entityComposite = toolkit.createComposite(main);
-			entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			entityComposite.setLayout(new GridLayout(3, false));
-			EntityEventListener listener = new EntityEventListener(entityComposite);
-			addListener(entityComposite, listener);
-//			((GridLayout)entityComposite.getLayout()).marginWidth = 5;
-//			((GridLayout)entityComposite.getLayout()).marginHeight = 5;
-//			
-//			entityComposite.addPaintListener(new PaintListener() {
-//				
-//				@Override
-//				public void paintControl(PaintEvent e) {
-//					
-//					Boolean x = (Boolean) entityComposite.getData("in");
-//					
-//					if (x != null && x){
-//						Rectangle r = entityComposite.getClientArea();
-//						e.gc.setBackground(entityComposite.getDisplay().getSystemColor(SWT.COLOR_BLUE));
-//						e.gc.drawRectangle(0,0,r.width - 1, r.height - 1);
-//					}
-//				}
-//			});
-//			
-//			entityComposite.addListener(SWT.MouseEnter, new Listener(){
-//
-//				@Override
-//				public void handleEvent(Event event) {
-//					entityComposite.setData("in", true);
-//					entityComposite.redraw();
-//					
-//				}});
-//			entityComposite.addListener(SWT.MouseExit, new Listener(){
-//
-//				@Override
-//				public void handleEvent(Event event) {
-//					entityComposite.setData("in", false);
-//					entityComposite.redraw();
-//					
-//				}});
-			
-			Label l = toolkit.createLabel(entityComposite, "IMAGE HERE");
-			addListener(l, listener);
-			Composite middle = toolkit.createComposite(entityComposite, SWT.NONE);
-			middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			middle.setLayout(new GridLayout(2, false));
-			addListener(middle, listener);
-			
-			l = toolkit.createLabel(middle, i.getIdAttributeAsText());
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-			addListener(l, listener);
-			l = toolkit.createLabel(middle,"");
-			l.setImage(EntityTypeLabelProvider.INSTANCE.getImage(i.getEntityType()));
-			addListener(l, listener);
-			l = toolkit.createLabel(middle, "");
-			l.setText(EntityTypeLabelProvider.INSTANCE.getText(i.getEntityType()));
-			addListener(l, listener);
-			
-			Composite right = toolkit.createComposite(entityComposite, SWT.NONE);
-			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			right.setLayout(new GridLayout(2, false));
-			addListener(right, listener);
-			l = toolkit.createLabel(right, "Modified:");
-			addListener(l, listener);
-			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(i.getDateModified()));
-			addListener(l, listener);
-			l = toolkit.createLabel(right, "Created:");
-			addListener(l, listener);
-			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(i.getDateCreated()));
-			addListener(l, listener);
-			
-			l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			
-			
+			createMenu(main);
 		}
-		sc.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
 		layout(true);
 	}
 	
-	private void addListener(Control c, EntityEventListener l){
-		c.addListener(SWT.MouseEnter, l);
-		c.addListener(SWT.MouseExit, l);
+	private void openEntity(){
+		if (!getCurrentSelection().isEmpty()){
+			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0));
+		}
+	}
+	
+	private void createMenu(Composite parent){
+		Menu menu = new Menu(parent);
+		
+		MenuItem mnuOpen = new MenuItem(menu, SWT.PUSH);
+		mnuOpen.setText("Open...");
+		mnuOpen.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				openEntity();
+			}
+		});
+		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
+		mnuExport.setText("Export...");
+		
+		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
+		mnuWorkingset.setText("Add to WorkingSet");
+	
+		menu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				boolean hasSelection = !getCurrentSelection().isEmpty();
+				mnuOpen.setEnabled(hasSelection);
+				mnuExport.setEnabled(hasSelection);
+				mnuWorkingset.setEnabled(hasSelection);
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
+//		parent.setMenu(menu);
+		List<Control> kids = new ArrayList<Control>();
+		kids.add(parent);
+		while(!kids.isEmpty()){
+			Control c = kids.remove(0);
+			c.setMenu(menu);
+			if (c instanceof Composite){
+				for (Control cc : ((Composite)c).getChildren()){
+					kids.add(cc);
+				}
+			}
+		}
 	}
 	
 	
+	public List<IntelEntity> getCurrentSelection(){
+		ArrayList<IntelEntity> selections = new ArrayList<IntelEntity>();
+		if (components == null) return selections;
+		
+		for (EntityComponent c : components){
+			if (c.isSelected) selections.add(c.item);
+		}
+		return selections;
+		
+	}
+	private class EntityComponent extends Composite implements Listener{
 
-	private class EntityEventListener implements Listener{
-
-		private Composite parent;
-		public EntityEventListener(Composite parent){
-			this.parent = parent;
+		private IntelEntity item;
+		private Color backgroundColor = null;
+		private boolean isSelected = false;
+		private boolean mouseOver = false;
+		private int index;
+		private List<EntityComponent> siblings;
+		
+		public EntityComponent(Composite parent, IntelEntity item, int index, List<EntityComponent> siblings){
+			super(parent, SWT.NONE);
+			this.item = item;
+			createPart();
+			this.index = index;
+			this.siblings = siblings;
 		}
 		
-		private void colorAll(Color color){
+		private void clearSelection(){
+			for (EntityComponent c : siblings){
+				c.isSelected = false;
+				c.colorAll();
+			}
+		}
+		private void createPart(){
+			setLayout(new GridLayout(3, false));
+			((GridLayout)getLayout()).marginHeight = 0;
+			addListener(this);
+			Label l = toolkit.createLabel(this, "IMAGE HERE");
+			addListener(l);
+			Composite middle = toolkit.createComposite(this, SWT.NONE);
+			middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			middle.setLayout(new GridLayout(2, false));
+			addListener(middle);
+			
+			l = toolkit.createLabel(middle, item.getIdAttributeAsText());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			addListener(l);
+			l = toolkit.createLabel(middle,"");
+			l.setImage(EntityTypeLabelProvider.INSTANCE.getImage(item.getEntityType()));
+			addListener(l);
+			l = toolkit.createLabel(middle, "");
+			l.setText(EntityTypeLabelProvider.INSTANCE.getText(item.getEntityType()));
+			addListener(l);
+			
+			Composite right = toolkit.createComposite(this, SWT.NONE);
+			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			right.setLayout(new GridLayout(2, false));
+			addListener(right);
+			l = toolkit.createLabel(right, "Modified:");
+			addListener(l);
+			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getDateModified()));
+			addListener(l);
+			l = toolkit.createLabel(right, "Created:");
+			addListener(l);
+			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getDateCreated()));
+			addListener(l);
+		}
+		
+		private void addListener(Control c){
+			c.addListener(SWT.MouseEnter, this);
+			c.addListener(SWT.MouseExit, this);
+			c.addListener(SWT.MouseDown, this);
+			c.addListener(SWT.MouseDoubleClick, this);
+		}
+		
+		private void colorAll(){
+			if (backgroundColor == null){
+				backgroundColor = getBackground();
+			}
+			Color color = null;
+			if(isSelected){
+				color = selectionColor;
+			}else{
+				if (mouseOver){
+					color = mouseOverColor;
+				}else{
+					color = backgroundColor;
+				}
+			}
+			
+			
 			List<Control> kids = new ArrayList<Control>();
-			kids.add(parent);
+			kids.add(this);
 			while(!kids.isEmpty()){
 				Control c = kids.remove(0);
 				c.setBackground(color);
@@ -186,15 +288,50 @@ public class EntityListComposite extends Composite {
 				}
 			}
 		}
+		
 		@Override
 		public void handleEvent(Event event) {
-			if (event.type == SWT.MouseEnter){
-				
-				
-				colorAll(selectionColor);
-				
+			if (event.type == SWT.MouseDoubleClick){
+				openEntity();
+			}else if (event.type == SWT.MouseEnter){
+				mouseOver = true;
+				colorAll();
 			}else if (event.type == SWT.MouseExit){
-				colorAll(event.widget.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				
+				mouseOver = false;
+				colorAll();
+			}else if (event.type == SWT.MouseDown){
+				Integer lastSelection = (Integer) getParent().getData("last_selection_index");
+				if (lastSelection == null) lastSelection = 0;
+				getParent().setData("last_selection_index", index);
+				
+				if ((event.stateMask & SWT.CTRL) != 0){
+					isSelected = !isSelected;
+				}else if ((event.stateMask & SWT.SHIFT) != 0){
+					boolean newSelection = !isSelected;
+					//clearSelection();
+					int from = lastSelection;
+					int to = index;
+					if (index < lastSelection){
+						from = index;
+						to = lastSelection;
+					}
+					
+					for (int i = from; i <= to; i ++){
+						if (i == index){
+							siblings.get(i).isSelected = true;
+						}else{
+							siblings.get(i).isSelected = newSelection;		
+						}
+						siblings.get(i).colorAll();
+					}
+					
+				}else{
+					
+					clearSelection();
+					isSelected = true;
+				}
+				colorAll();
 			}
 		}
 		
@@ -223,4 +360,8 @@ public class EntityListComposite extends Composite {
         int b = blend(c1.blue, c2.blue, ratio);
         return new RGB(r, g, b);
     }
+    
+    
+    
+   
 }

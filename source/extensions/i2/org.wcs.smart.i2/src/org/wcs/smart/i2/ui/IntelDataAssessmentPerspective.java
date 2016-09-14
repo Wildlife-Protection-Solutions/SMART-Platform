@@ -36,7 +36,7 @@ import org.wcs.smart.i2.ui.views.WorkingSetView;
  */
 public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 
-	public static final String ID = "org.wcs.smart.i2.IntelDataAssesmentPerspective"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.i2.IntelDataAssessmentPerspective"; //$NON-NLS-1$
 
 
 	@Override

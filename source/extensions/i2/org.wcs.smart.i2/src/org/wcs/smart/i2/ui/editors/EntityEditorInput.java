@@ -26,15 +26,23 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.wcs.smart.i2.model.IntelEntityType;
 
 public class EntityEditorInput implements IEditorInput{
 
 	private String name;
 	private UUID uuid;
+	private IntelEntityType type;
 	
-	public EntityEditorInput(String name, UUID uuid){
+	public EntityEditorInput(String name, UUID uuid, IntelEntityType type){
 		this.name = name;
 		this.uuid = uuid;
+		this.type = type;
+	}
+	
+	public IntelEntityType getType(){
+		return this.type;
 	}
 	
 	public UUID getUuid(){
@@ -53,6 +61,12 @@ public class EntityEditorInput implements IEditorInput{
 
 	@Override
 	public ImageDescriptor getImageDescriptor() {
+		try {
+			return AWTSWTImageUtils.createImageDescriptor(getType().getIconAsImage());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -69,6 +83,19 @@ public class EntityEditorInput implements IEditorInput{
 	@Override
 	public String getToolTipText() {
 		return null;
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof EntityEditorInput){
+			return ((EntityEditorInput) other).getUuid().equals(uuid);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return uuid.hashCode();
 	}
 
 }

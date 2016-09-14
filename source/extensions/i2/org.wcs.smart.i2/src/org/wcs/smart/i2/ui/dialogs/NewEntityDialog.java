@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -29,6 +32,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,6 +49,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -67,7 +72,10 @@ public class NewEntityDialog extends TitleAreaDialog{
 	
 	private Composite attributePanel;
 	
-	private List<Object> attributeControls;
+	private List<AttributeFieldEditor> attributeControls;
+	
+	@Inject
+	private IEventBroker broker;
 	
 	private Job loadEntityTypes = new Job("load entity types"){
 
@@ -153,60 +161,14 @@ public class NewEntityDialog extends TitleAreaDialog{
 		IntelEntity newEntity = new IntelEntity();
 		newEntity.setEntityType(type);
 		newEntity.setAttributes(new ArrayList<IntelEntityAttributeValue>());
-		for (Object c : attributeControls){
-			IntelAttribute attribute = null;
-			if (c instanceof Control){
-				attribute = (IntelAttribute) ((Control)c).getData();
-			}else if (c instanceof Viewer){
-				attribute = (IntelAttribute) ((Viewer)c).getControl().getData();
-			}
+		for (AttributeFieldEditor c : attributeControls){
+			IntelAttribute attribute = c.getAttribute();
 			
 			IntelEntityAttributeValue ev = new IntelEntityAttributeValue();
 			ev.setAttribute(attribute);
 			ev.setEntity(newEntity);
 			
-			boolean add = false;
-			if (attribute.getType() == IAttributeType.BOOLEAN){
-				if (((OnOffButton)c).isEnabled()){
-					add = true;
-					if (((OnOffButton)c).getSelection()){
-						ev.setNumberValue(1d);
-					}else{
-						ev.setNumberValue(0d);
-					}
-				}
-			}else if (attribute.getType() == IAttributeType.DATE){
-				if (((DateTime)c).getEnabled()){
-					add = true;
-					ev.setStringValue( SmartUtils.getTime((DateTime)c).toString());
-				}
-			}else if (attribute.getType() == IAttributeType.LIST){
-				IStructuredSelection selection = (IStructuredSelection)((ComboViewer)c).getSelection();
-				if (!selection.isEmpty()){
-					Object item = selection.getFirstElement();
-					if (item instanceof IntelAttributeListItem){
-						add = true;
-						ev.setAttributeListItem((IntelAttributeListItem) item);
-					}
-				}
-			}else if (attribute.getType() == IAttributeType.NUMERIC){
-				try{
-					String value = ((Text)c).getText();
-					if (!value.trim().isEmpty()){
-						Double d = Double.parseDouble(value);
-						ev.setNumberValue(d);
-						add = true;
-					}
-				}catch (Exception ex){
-					//
-				}
-			}else if (attribute.getType() == IAttributeType.TEXT){
-				String value = ((Text)c).getText();
-				if (!value.trim().isEmpty()){
-					ev.setStringValue(value.trim());
-					add = true;
-				}
-			}
+			boolean add = c.updateValue(ev);
 			if (add){
 				newEntity.getAttributes().add(ev);
 			}
@@ -218,14 +180,22 @@ public class NewEntityDialog extends TitleAreaDialog{
 			session.saveOrUpdate(newEntity);
 			session.getTransaction().commit();
 			
-			super.okPressed();
+			
 		}catch (Exception ex){
 			MessageDialog.openWarning(getShell(), "Error", "Could not save entity: " + ex.getMessage());
 			Intelligence2PlugIn.log(ex.getMessage(), ex);
+			return;
 		}finally{
 			session.close();
 		}
 		
+		//fire events
+		try{
+			IntelEvents.fireNewEntity(newEntity, broker);
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+		}
+		super.okPressed();
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -236,6 +206,12 @@ public class NewEntityDialog extends TitleAreaDialog{
 	
 	private void modified(){
 		boolean isError = false;
+		for (AttributeFieldEditor e : attributeControls){
+			if (!e.isValid()){
+				isError = true;
+				break;
+			}
+		}
 		getButton(IDialogConstants.OK_ID).setEnabled(!isError);
 	}
 	
@@ -307,10 +283,18 @@ public class NewEntityDialog extends TitleAreaDialog{
 			c.dispose();
 		}
 		
-		attributeControls = new ArrayList<Object>();
+		attributeControls = new ArrayList<AttributeFieldEditor>();
 		attributePanel.setLayout(new GridLayout(2, false));
 		
-		createAttributeControl(type.getIdAttribute(), attributePanel);
+		SelectionListener listener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				modified();
+			}
+		};
+		AttributeFieldEditor editor = new AttributeFieldEditor(attributePanel, type.getIdAttribute());
+		editor.addSelectionListener(listener);
+		attributeControls.add(editor);
 		
 		ScrolledComposite sc = new ScrolledComposite(attributePanel, SWT.V_SCROLL | SWT.BORDER);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -323,118 +307,15 @@ public class NewEntityDialog extends TitleAreaDialog{
 		
 		for (IntelEntityTypeAttribute a : type.getAttributes()){
 			if (!a.getAttribute().equals(type.getIdAttribute())){
-				createAttributeControl(a.getAttribute(), content);
+				editor = new AttributeFieldEditor(content, a.getAttribute());
+				editor.addSelectionListener(listener);
+				attributeControls.add(editor);
 			}
 		}
 		sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		attributePanel.layout(true);
-		
+		attributePanel.layout(true);		
 	}
 
-	private void createAttributeControl(IntelAttribute a, Composite parent){
-		Label l = new Label(parent, SWT.NONE);
-		l.setText(a.getName() + ":");
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		if (a.getType() == IAttributeType.TEXT){
-			Text txt= new Text(parent, SWT.BORDER);
-			txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			txt.setData(a);
-			txt.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					modified();
-				}
-			});
-			attributeControls.add(txt);
-		}else if (a.getType() == IAttributeType.NUMERIC){
-			Text txt= new Text(parent, SWT.BORDER);
-			txt.setData(a);
-			txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			final ControlDecoration cd = createDecoration(txt);
-			txt.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					try{
-						Double.parseDouble(txt.getText());
-						cd.hide();
-					}catch(Exception ex){
-						cd.show();
-						cd.setDescriptionText("Unable to parse number from text");
-					}
-					modified();
-				}
-			});
-			attributeControls.add(txt);
-		}else if (a.getType() ==  IAttributeType.LIST){
-			ComboViewer cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
-			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-			cmbViewer.setLabelProvider(AttributeListItemLabelProvider.INSTANCE);
-			List<Object> items = new ArrayList<Object>();
-			items.add("");
-			items.addAll(a.getAttributeList());
-			cmbViewer.setInput(items);
-			cmbViewer.getControl().setData(a);
-			cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					modified();
-				}
-			});
-			cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			attributeControls.add(cmbViewer);
-		}else if (a.getType() ==  IAttributeType.DATE){
-			Composite t = new Composite(parent, SWT.NONE);
-			t.setLayout(new GridLayout(2, false));
-			((GridLayout)t.getLayout()).marginWidth = 0;
-			((GridLayout)t.getLayout()).marginHeight = 0;
-			
-			Button btnCh = new Button(t, SWT.CHECK);
-			btnCh.setSelection(false);
-			
-			DateTime txt= new DateTime(t, SWT.DROP_DOWN | SWT.DATE | SWT.LONG);
-			txt.setEnabled(false);
-			txt.setData(a);
-			txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			txt.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					modified();
-				}
-			});
-			btnCh.addSelectionListener(new SelectionAdapter(){
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					txt.setEnabled(btnCh.getSelection());
-				}
-			});
-			attributeControls.add(txt);
-		}else if (a.getType() ==  IAttributeType.BOOLEAN){
-			Composite t = new Composite(parent, SWT.NONE);
-			t.setLayout(new GridLayout(2, false));
-			((GridLayout)t.getLayout()).marginWidth = 0;
-			((GridLayout)t.getLayout()).marginHeight = 0;
-			
-			Button btnCh = new Button(t, SWT.CHECK);
-			btnCh.setSelection(false);
-			
-			OnOffButton btn = new OnOffButton(t, SWT.TOGGLE);
-			btn.setData(a);
-			btn.addSelectionListener(new SelectionAdapter(){
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					modified();
-				}
-			});
-			btnCh.addSelectionListener(new SelectionAdapter(){
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					btn.setEnabled(btnCh.getSelection());
-				}
-			});
-			btn.setSelection(true);
-		}
-	}
 	
 	@Override
 	public boolean isResizable(){

@@ -23,6 +23,8 @@ package org.wcs.smart.i2.ui.handler;
 
 import javax.inject.Named;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.Dialog;
@@ -44,9 +46,10 @@ public class ShowDialogHandler{
 	}
 	
 	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context) {
 		try{
 			Dialog d = (Dialog)dialogClass.getDeclaredConstructor(Shell.class).newInstance(activeShell);
+			ContextInjectionFactory.inject(d, context);
 			d.open();
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);

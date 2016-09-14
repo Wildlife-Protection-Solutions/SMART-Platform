@@ -35,7 +35,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 
 /**
@@ -116,9 +115,21 @@ public class IntelEntityAttributeValue {
 		if (getStringValue() == null){
 			return null;
 		}
-		return java.sql.Date.valueOf(getStringValue());
+		try{
+			return java.sql.Date.valueOf(getStringValue());
+		}catch (Exception ex){
+			return null;
+		}
 	}
-	
+	@Transient
+	public void setDateValue(Date date){
+		if (date == null){
+			setStringValue(null);
+			return;
+		}
+		java.sql.Date tmp = new java.sql.Date(date.getTime());
+		setStringValue(tmp.toString());
+	}
 	/**
 	 * 
 	 * @return the value of the observation based

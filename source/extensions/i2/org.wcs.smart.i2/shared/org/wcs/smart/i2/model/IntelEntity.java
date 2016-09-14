@@ -316,4 +316,14 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 		}
 		return "";
 	}
+	
+	@Transient
+	public IntelEntityAttributeValue findAttributeValue(IntelAttribute attribute){
+		for (IntelEntityAttributeValue v : getAttributes()){
+			if (v.getAttribute().equals(attribute)){
+				return v;
+			}
+		}
+		return null;
+	}
 }

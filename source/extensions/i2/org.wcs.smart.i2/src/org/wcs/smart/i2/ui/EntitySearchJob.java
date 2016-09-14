@@ -10,42 +10,46 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.search.BasicSearch;
+import org.wcs.smart.i2.search.IIntelSearch;
 
 public abstract class EntitySearchJob extends Job{
 
+	private IIntelSearch search = new BasicSearch(null);
+	
 	public EntitySearchJob() {
 		super("Entity Search");
 	}
 
+	public void setSearch(IIntelSearch search){
+		this.search = search;
+	}
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		
-		List<IntelEntity> entities = null;
+		beforeSearch();
+		
+		List<IntelEntity> entities = null; 
 		Session s = HibernateManager.openSession();
-		s.beginTransaction();
 		try{
-			entities = s.createCriteria(IntelEntity.class).list();
-			for (IntelEntity e : entities){
-				e.getEntityType().getName();
-				for (IntelEntityAttributeValue v : e.getAttributes()){
-					v.getAttribute().getName();
-					if (v.getAttributeListItem()!= null) v.getAttributeListItem().getName();
-				}
-			}
+			entities = search.doSearch(s);
 		}catch (Exception ex){
 			Intelligence2PlugIn.log(ex.getMessage(), ex);
 			onError(ex);
 			return Status.OK_STATUS;
 		}finally{
-			s.close();	
+			s.close();
 		}
-		onLoaded(entities);
+		
+		afterSearch(entities);
+		
 		return Status.OK_STATUS;
 	}
 
 	
 	public abstract void onError(Exception ex);
 	
-	public abstract void onLoaded(List<IntelEntity> entities);
+	public abstract void afterSearch(List<IntelEntity> entities);
+	
+	public abstract void beforeSearch();
 }

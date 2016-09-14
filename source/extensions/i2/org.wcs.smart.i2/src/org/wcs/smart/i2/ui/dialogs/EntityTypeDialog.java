@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -34,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -80,6 +82,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -120,6 +123,9 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	
 	private List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
 	
+	@Inject
+	private IEventBroker broker;
+	
 	public EntityTypeDialog(Shell parentShell, IntelEntityType type) {
 		super(parentShell);
 		this.type = type;
@@ -143,6 +149,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	}
 	
 	protected void okPressed() {
+		boolean isNew = type.getUuid() == null;
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
@@ -176,7 +183,11 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		}finally{
 			s.close();
 		}
-		
+		if (isNew){
+			IntelEvents.fireNewEntityType(type, broker);
+		}else{
+			IntelEvents.fireModifiedEntityType(type, broker);
+		}
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		
 	}

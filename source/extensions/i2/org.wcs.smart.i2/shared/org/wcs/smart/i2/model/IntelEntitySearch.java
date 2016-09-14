@@ -29,7 +29,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.UuidItem;
 
 /**
  * Model class of i_entity_search.
@@ -39,7 +41,7 @@ import org.wcs.smart.ca.NamedKeyItem;
  */
 @Entity
 @Table(name="smart.i_entity_search")
-public class IntelEntitySearch extends NamedKeyItem {
+public class IntelEntitySearch extends NamedItem {
 
 	/** conservation_area. */
 	private ConservationArea ca;
@@ -57,7 +59,6 @@ public class IntelEntitySearch extends NamedKeyItem {
 	 * @param searchString
 	 *            search_string
 	 */
-	@Column(name="search_string")
 	public void setSearchString(String searchString) {
 		this.searchString = searchString;
 	}
@@ -67,6 +68,7 @@ public class IntelEntitySearch extends NamedKeyItem {
 	 * 
 	 * @return search_string
 	 */
+	@Column(name="search_string")
 	public String getSearchString() {
 		return this.searchString;
 	}

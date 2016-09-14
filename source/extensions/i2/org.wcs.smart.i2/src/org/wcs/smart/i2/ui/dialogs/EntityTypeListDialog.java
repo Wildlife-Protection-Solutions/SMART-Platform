@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -34,6 +35,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -67,6 +71,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -82,6 +87,11 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class EntityTypeListDialog extends TitleAreaDialog {
 
+	@Inject
+	private IEventBroker broker;
+	@Inject
+	private IEclipseContext context;
+	
 	private TableViewer cmbTypes;
 	private List<IntelEntityType> types = null;
 	private NamedItemViewerFilter filter;
@@ -94,7 +104,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 	private Button btnNew;
 	private Button btnEdit;
 	private Button btnDelete;
-	
+	 
 	private Job loadTypes = new Job("load entity types"){ //$NON-NLS-1$
 
 		@Override
@@ -279,6 +289,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
 		
 		EntityTypeDialog ed = new EntityTypeDialog(getShell(), type);
+		ContextInjectionFactory.inject(ed, context);
 		ed.open();
 		
 		refresh();
@@ -289,6 +300,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		if (x instanceof IntelEntityType){
 			IntelEntityType type = (IntelEntityType)x;
 			EntityTypeDialog ed = new EntityTypeDialog(getShell(), type);
+			ContextInjectionFactory.inject(ed, context);
 			ed.open();
 			refresh();
 		}
@@ -321,6 +333,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 						InterruptedException {
 
 					monitor.beginTask("Deleting entity types", toDelete.size());
+					List<IntelEntityType> deleted = new ArrayList<IntelEntityType>();
 					Session s = HibernateManager.openSession();
 					try{
 						for (IntelEntityType t : toDelete){
@@ -329,6 +342,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 							try{
 								EntityTypeManager.INSTANCE.deleteEntityType(t, s);
 								s.getTransaction().commit();
+								deleted.add(t);
 							}catch(Exception ex){
 								s.getTransaction().rollback();
 								Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to delete Entity Type {0}. {1}", t.getName(), ex.getMessage()), ex);
@@ -339,7 +353,10 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 						s.close();
 					}
 					monitor.done();
-					
+					for (IntelEntityType d : deleted){
+						IntelEvents.fireDeleteEntityType(d, broker);
+					}
+					 
 				}
 			});
 		} catch (Exception e) {
