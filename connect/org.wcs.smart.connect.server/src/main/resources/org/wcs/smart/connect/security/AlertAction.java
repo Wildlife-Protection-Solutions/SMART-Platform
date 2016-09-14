@@ -61,8 +61,12 @@ public class AlertAction implements ISmartConnectAction{
 
 	@Override
 	public String[] getActionKeys() {
-		return new String[]{VIEW_ALERTS_KEY, CREATE_ALERTS_KEY, UPDATE_ALERTS_KEY, DELETE_ALERTS_KEY
-				};
+		return new String[]{VIEW_ALERTS_KEY, CREATE_ALERTS_KEY, UPDATE_ALERTS_KEY, DELETE_ALERTS_KEY};
+	}
+	
+	@Override
+	public String[] getCaAdminAccessibleActionKeys(){
+		return new String[]{VIEW_ALERTS_KEY, CREATE_ALERTS_KEY, UPDATE_ALERTS_KEY, DELETE_ALERTS_KEY};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -81,6 +85,22 @@ public class AlertAction implements ISmartConnectAction{
 	}
 
 	@Override
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) {
+		List<ResourceOption> ops = new ArrayList<ResourceOption>();
+		
+		for (UUID id : uuidList){
+			ConservationAreaInfo info = (ConservationAreaInfo)s.createCriteria(ConservationAreaInfo.class)
+					.add(Restrictions.eq("uuid", id))
+					.uniqueResult(); //$NON-NLS-1$
+				
+			ResourceOption ro = new ResourceOption(info.getLabel(), info.getUuid());
+			ops.add(ro);
+		}
+		return ops;	
+	}
+	
+	
+	@Override
 	public String getResourceName(UUID resource, Session s, Locale l) {
 		if (resource == null) return Messages.getString("CaAction.AllCas", l); //$NON-NLS-1$
 		ConservationAreaInfo info = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
@@ -89,5 +109,6 @@ public class AlertAction implements ISmartConnectAction{
 		if (info == null) return resource.toString();
 		return info.getLabel();
 	}
+
 
 }

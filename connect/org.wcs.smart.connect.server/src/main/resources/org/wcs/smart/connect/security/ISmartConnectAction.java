@@ -49,6 +49,12 @@ public interface ISmartConnectAction {
 	public String[] getActionKeys();
 	
 	/**
+	 * 
+	 * @return list of CA-Administrator supported action keys 
+	 */
+	public String[] getCaAdminAccessibleActionKeys();
+	
+	/**
 	 * @param actionKey the actionkey to list resources for
 	 * @param s current session with open transaction
 	 * @return List of resource options for given connect action.
@@ -56,6 +62,18 @@ public interface ISmartConnectAction {
 	 * 
 	 */
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l);
+	
+	/**
+	 * @param actionKey the actionkey to list resources for
+	 * @param s current session with open transaction
+	 * @param uuidList is the list of CAs this Ca-Admin user has access to. Return list will only include resources withing these CAs
+	 * @return List of resource options for given connect action.
+	 * 
+	 * Will return null if no resource options for this action.
+	 * 
+	 */
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList);
+	
 	
 	/**
 	 * 

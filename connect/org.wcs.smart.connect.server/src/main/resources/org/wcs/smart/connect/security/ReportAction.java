@@ -28,8 +28,11 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -55,6 +58,11 @@ public class ReportAction implements ISmartConnectAction{
 	public String[] getActionKeys() {
 		return new String[]{RUNREPORT_KEY};
 	}
+	
+	@Override
+	public String[] getCaAdminAccessibleActionKeys(){
+		return new String[]{RUNREPORT_KEY};
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -76,6 +84,32 @@ public class ReportAction implements ISmartConnectAction{
 		for (Report i : info){
 			ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 			ops.add(ro);
+		}
+		
+		return ops;
+	}
+	
+	@Override
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) {
+		List<ResourceOption> ops = new ArrayList<ResourceOption>();
+		
+		for (UUID id : uuidList){
+			ConservationAreaInfo info = (ConservationAreaInfo)s.createCriteria(ConservationAreaInfo.class)
+					.add(Restrictions.eq("uuid", id))
+					.uniqueResult(); //$NON-NLS-1$
+			ResourceOption ro =  new ResourceOption(Messages.getString("QueryAction.AllQueriesfromCA", l)+ info.getLabel(), info.getUuid()); //$NON-NLS-1$
+			ops.add(ro);
+		}
+		
+		@SuppressWarnings("unchecked")
+		List<Report> info = s.createCriteria(Report.class).list();
+		for (Report i : info){
+			for (UUID id : uuidList){
+				if(i.getConservationArea().getUuid().equals(id)){
+					ResourceOption ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+					ops.add(ro);
+				}
+			}
 		}
 		
 		return ops;

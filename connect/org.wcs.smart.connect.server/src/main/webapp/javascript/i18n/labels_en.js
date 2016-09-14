@@ -94,6 +94,7 @@ labels_en= {
 "users.resource": "Resource",
 "users.refreshusertable": "Refreshing User Table...",
 "users.permission":"Permissions can be provided through either roles or actions.  Roles are groups of actions and can be reused between users.  Actions are specific to this user.",
+"causers.permission":"Permissions can be provided through actions. Select the particular action and scope you want to give the selected user",
 "users.roleerror":"Error loading role details.",
 "users.rolename":"Rolename: ",
 "users.loading":"Loading...",

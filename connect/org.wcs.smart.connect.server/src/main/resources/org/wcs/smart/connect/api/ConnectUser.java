@@ -57,6 +57,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 
@@ -90,6 +91,16 @@ public class ConnectUser extends HttpServlet {
 		}
 	}
 	
+	private boolean isCaAdminUser(){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+	
 	/**
 	 * Get all Active User.
 	 * URL: ../server/api/connectuser/
@@ -101,7 +112,9 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("")
     public List<SmartUser> getActiveUsers(){
-		isAdminUser();
+		if(!isCaAdminUser()){
+			isAdminUser();//throws an exception if invalid user.
+		}
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -111,6 +124,7 @@ public class ConnectUser extends HttpServlet {
 		}
 	}
 
+	
 	
 	/**
 	 * Gets all inactive users
@@ -123,7 +137,9 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("/getinactive/")
     public List<SmartUser> getInactiveUsers(){
-		isAdminUser();
+		if(!isCaAdminUser()){
+			isAdminUser();//throws an exception if invalid user.
+		}
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -157,7 +173,9 @@ public class ConnectUser extends HttpServlet {
 			return null;
 		}
 		
-		isAdminUser();
+		if(!isCaAdminUser()){
+			isAdminUser();//throws an exception if invalid user.
+		}
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -187,7 +205,14 @@ public class ConnectUser extends HttpServlet {
     @Path("/{username}")
     public SmartUser addUser(@PathParam("username") String user, 
     		SmartUser newUser) {
-		isAdminUser();
+		boolean caRestricted;
+		if(!isCaAdminUser()){
+			isAdminUser();//throws an exception if invalid user.
+			caRestricted = false;
+		}else{
+			caRestricted = true;
+			//TODO, record and enforce what CAs this user's permissions can be for
+		}
 		if (newUser.getUsername() != null && newUser.getUsername().length() > 0 && !newUser.getUsername().equals(user)){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.invalidusernames", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
@@ -253,9 +278,16 @@ public class ConnectUser extends HttpServlet {
     		@PathParam("username") String olduser,
     		SmartUser newUser) {
     	
+    	boolean caRestricted = false;
     	//if you are editing yourself, skip validation for admin-level user
     	if( !request.getUserPrincipal().getName().equals(olduser)){
-    		isAdminUser();
+    		if(!isCaAdminUser()){
+    			isAdminUser();//throws an exception if invalid user.
+    			caRestricted = false;
+    		}else{
+    			caRestricted = true;
+    			//TODO, record and enforce what CAs this user's permissions can be for
+    		}
     	}
     	
     	if (newUser.getUsername() != null){
