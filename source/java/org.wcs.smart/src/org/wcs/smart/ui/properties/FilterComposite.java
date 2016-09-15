@@ -268,18 +268,25 @@ public class FilterComposite extends Composite {
 	private WorkbenchJob doCreateRefreshJob() {
 
 		return new WorkbenchJob("Refresh Filter") {//$NON-NLS-1$
+			private String lastSearch = null;
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				if (txtFilter.isDisposed()) {
 					return Status.CANCEL_STATUS;
 				}
 
 				String text = getText();
-
+				String pattern = null;
 				if (text == null || text.equals(initialText) || text.isEmpty()) {
-					setPattern(null);
+					pattern = null;
 				} else if (text != null) {
-					setPattern(text);
+					pattern = text;
 				}
+				if ( (pattern == null && lastSearch == null) || (pattern != null && pattern.equals(lastSearch))){
+					//search has not changed
+					return Status.OK_STATUS;
+				}
+				lastSearch = pattern;
+				setPattern(pattern);
 				fireChangeListeners();
 				if (text == null || text.equals(initialText) || text.isEmpty()) {
 					updateToolbar(false);

@@ -45,6 +45,13 @@ public class WarningDialog extends MessageDialog {
 
 	private List<String> warnings;
 	
+	/**
+	 * Creates a new warning dialog with a single OK button
+	 * @param parentShell
+	 * @param dialogTitle
+	 * @param dialogMessage
+	 * @param warnings
+	 */
 	public WarningDialog(Shell parentShell, String dialogTitle,
 			String dialogMessage, List<String> warnings) {
 
@@ -54,6 +61,15 @@ public class WarningDialog extends MessageDialog {
 		this.warnings = warnings;
 	}
 
+	/**
+	 * Creates a new warning dialog with the buttons provided
+	 * @param parentShell
+	 * @param dialogTitle
+	 * @param dialogMessage
+	 * @param warnings
+	 * @param buttonLabels
+	 * @param index
+	 */
 	public WarningDialog(Shell parentShell, String dialogTitle,
 			String dialogMessage, List<String> warnings, String[] buttonLabels, int index) {
 

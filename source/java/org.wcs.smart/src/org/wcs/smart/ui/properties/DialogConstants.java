@@ -52,4 +52,5 @@ public class DialogConstants {
 	
 	public static final String EDIT_LINK_TEXT = Messages.DialogConstants_EditLinkLabel;
 	
+	public static final String LOADING_TEXT = "Loading...";
 }

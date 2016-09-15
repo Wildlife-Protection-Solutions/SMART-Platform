@@ -281,8 +281,6 @@ public class SmartStartUp {
 						session.close();
 					}
 					
-					//	disconnect from the database & setup correct user level
-					HibernateManager.endSessionFactory(true, false);
 					ConservationAreaConfiguration config = null;
 					Session s = HibernateManager.openSession();
 					try{
@@ -290,7 +288,11 @@ public class SmartStartUp {
 					}finally{
 						s.close();
 					}
+					//	disconnect from the database & setup correct user level
 					SmartDB.setConservationAreaConfiguration(ccaaUser, password, ca, config);
+					
+					s = HibernateManager.openSession();
+					s.close();
 				}
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
@@ -303,8 +305,7 @@ public class SmartStartUp {
 					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.SmartStartUp_ErrorDialog_Title, Messages.SmartStartUp_Error_LoginFail);
 					return false;
 				}
-				//	disconnect from the database & setup correct user level
-				HibernateManager.endSessionFactory(true, false);
+
 				ConservationAreaConfiguration config = null;
 				Session s = HibernateManager.openSession();
 				try{
@@ -312,7 +313,11 @@ public class SmartStartUp {
 				}finally{
 					s.close();
 				}
+				//	disconnect from the database & setup correct user level
 				SmartDB.setConservationAreaConfiguration(e, password, ca, config);
+				
+				s = HibernateManager.openSession();
+				s.close();
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError + ": " + ex.getMessage(), ex); //$NON-NLS-1$
 				return false;

@@ -67,8 +67,8 @@ public class MapView implements IDropTargetProvider, MapPart, IAdaptable {
 	public static final String ID = "org.wcs.smart.ui.map.MapView"; //$NON-NLS-1$
 	private static final String MAP_NAME = Messages.MapView_MapName;
 	
-    private MapViewer mapviewer;
-    private Map map;
+    protected MapViewer mapviewer;
+    protected Map map;
     
     @Inject 
     private EPartService partService;

@@ -160,6 +160,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Image descriptor for map  icon
 	 */
 	public static final String DELETE_ICON = "org.wsc.smart.DELETE_ICON"; //$NON-NLS-1$
+	public static final String ADD_ICON = "org.wsc.smart.ADD_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for map  icon
 	 */
@@ -379,6 +380,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(IMG_DEC_FIELD_WARNING, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/warning_ovr.png")); //$NON-NLS-1$
 	     reg.put(STYLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style.png")); //$NON-NLS-1$
 	     reg.put(RENAME_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/pencil.png")); //$NON-NLS-1$
+	     reg.put(ADD_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/add.png")); //$NON-NLS-1$
 	     
 	     reg.put(BROWSER_FORWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_BACKWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_left.png")); //$NON-NLS-1$

@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.ui;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.MouseAdapter;
@@ -32,11 +36,11 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+
 
 /**
  * Class to represent a thumbnail for a SMART attachment.  Attachments
@@ -59,7 +63,7 @@ public class Thumbnail {
 	private ISmartAttachment attachment;
 	
 	private int thumbnailSize = 100;
-	
+	private boolean autoDispose;
 	/*
 	 * double click listener to
 	 * open attachment
@@ -67,7 +71,9 @@ public class Thumbnail {
 	private MouseListener doubleClickListener = new MouseAdapter(){
 		@Override
 		public void mouseDoubleClick(MouseEvent e) {
-			AttachmentUtil.openAttachment(attachment);
+			if (attachment != null){
+				AttachmentUtil.openAttachment(attachment);
+			}
 		}
 	};
 	
@@ -78,6 +84,19 @@ public class Thumbnail {
 	 * @param thumbnailSize
 	 */
 	public Thumbnail(ISmartAttachment attachment, int thumbnailSize){
+		this(attachment, thumbnailSize, true);
+	}
+	
+	/**
+	 * Creates a new thumbnail of the given size (thumbnails are always square). If autodipose
+	 * is selected the image is automatically disposed, otherwise
+	 * user must dispose of image by calling disposeImage
+	 * 
+	 * @param attachment
+	 * @param thumbnailSize
+	 * @param autoDispose
+	 */
+	public Thumbnail(ISmartAttachment attachment, int thumbnailSize, boolean autoDispose){
 		this.attachment = attachment;
 		this.thumbnailSize = thumbnailSize;
 		try{
@@ -85,6 +104,19 @@ public class Thumbnail {
 		}catch (Exception ex){
 			SmartPlugIn.log(ex.getMessage(), ex);
 		}
+		this.autoDispose = autoDispose;
+		
+	}
+	/**
+	 * Creates a new thumbnail of the default size. If autoDipose
+	 * is selected the image is automatically disposed, otherwise
+	 * user must dispose of image by calling disposeImage
+	 * 
+	 * @param attachment
+	 * @param autoDispose
+	 */
+	public Thumbnail(ISmartAttachment attachment, boolean autoDispose){
+		this(attachment, 100, autoDispose);
 	}
 	
 	/**
@@ -94,20 +126,39 @@ public class Thumbnail {
 	public Thumbnail(ISmartAttachment attachment){
 		this(attachment, 100);
 	}
+
+	/**
+	 * Manually dispose of thumbnail image
+	 */
+	public void disposeImage(){
+		if (image != null){
+			image.dispose();
+			image = null;
+		}
+	}
 	
+	public Image getImage(){
+		return this.image;
+	}
 	/*
 	 * generate the thumbnail in memory 
 	 */
 	private void loadImageData() throws Exception{
+		if (attachment == null) return;
 		try {
-			if (attachment.getAttachmentFile().length() > 200 * Math.pow(10, 6)) {
+			File file = null;
+			if( attachment.getCopyFromLocation() != null){
+				file = attachment.getCopyFromLocation();
+			}else{
+				file = attachment.getAttachmentFile();
+			}
+			
+			if (file.length() > 200 * Math.pow(10, 6)) {
 				// skip images > 200MB
 				return;
 			}
-
-			Image rawImage = new Image(Display.getDefault(), attachment.getAttachmentFile()
-					.getAbsolutePath());
-
+			
+			Image rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
 			//scale image
 			Rectangle bounds = rawImage.getBounds();
 			int x = 0, y = 0, width = 0, height = 0;
@@ -132,43 +183,80 @@ public class Thumbnail {
 	}
 	
 	/**
-	 * Creates the thumbnail widget
+	 * Creates a thumbnail with a border.
+	 * @param parent
+	 * @return
+	 */
+	public Composite createThumbnail(Composite parent){
+		return createThumbnail(parent, SWT.BORDER);
+	}
+	
+	/**
+	 * Creates the thumbnail widget with given style
 	 * @param parent
 	 */
-	public void createThumbnail(Composite parent){
-		final Composite c = new Composite(parent, SWT.BORDER);
+	public Composite createThumbnail(Composite parent, int style){
+		final Composite c = new Composite(parent, style);
 		c.setLocation(0,0);
 		c.setSize(thumbnailSize, thumbnailSize);
 		
 		c.addMouseListener(doubleClickListener);
 		
-		if (image == null){	
-			Label lbl = new Label(c, SWT.WRAP);
-			try{
-				lbl.setText(attachment.getAttachmentFile().getName());
-			}catch (Exception ex){
-				SmartPlugIn.log(ex.getMessage(), ex);
-			}
-			lbl.setLocation(0, 0);
-			lbl.setSize(thumbnailSize, thumbnailSize);
-			lbl.addMouseListener(doubleClickListener);
-			return;
+		String fileName = null;
+		if (attachment == null){
+			fileName = "";
+		}else if (attachment.getCopyFromLocation() != null){
+			fileName = attachment.getCopyFromLocation().getName();
+		}else{
+			fileName = attachment.getAttachmentFile().getName();
 		}
 		
-		
+		final String filename = fileName;
 		Listener listener = new Listener() {
 			public void handleEvent(Event e) {
 				switch (e.type) {
-				case SWT.Dispose:
-					image.dispose();
-					break;
-				case SWT.Paint: {
-					e.gc.drawImage(image, 0,0);
-				}
+					case SWT.Dispose:
+						disposeImage();
+						break;
+					case SWT.Paint: {
+						if (image != null){
+							e.gc.drawImage(image, 0,0);
+						}else{
+							List<String> toDraw = new ArrayList<String>();
+							
+							int width = c.getClientArea().width;
+							
+							int size = 0;
+							StringBuilder sb = new StringBuilder();
+							for (int i = 0; i <filename.length(); i ++){
+								if (size + e.gc.getCharWidth(filename.charAt(i)) < width){
+									sb.append(filename.charAt(i));
+									size = e.gc.stringExtent(sb.toString()).x;
+								}else{
+									toDraw.add(sb.toString());
+									sb = new StringBuilder();
+									sb.append(filename.charAt(i));;
+									size = e.gc.stringExtent(sb.toString()).x;
+								}
+							}
+							if (sb.length() >0) toDraw.add(sb.toString());
+							int y = 0;
+							
+							for (String x : toDraw){
+								e.gc.drawText(x, 0, y);
+								y += e.gc.stringExtent(x).y;
+							}
+						}
+						break;
+					}
 				}
 			}
 		};
-		c.addListener(SWT.Dispose, listener);
+		if (autoDispose){
+			c.addListener(SWT.Dispose, listener);
+		}
 		c.addListener(SWT.Paint, listener);
+		
+		return c;
 	}
 }
