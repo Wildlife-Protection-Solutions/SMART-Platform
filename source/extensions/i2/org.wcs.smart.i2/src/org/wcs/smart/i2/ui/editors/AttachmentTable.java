@@ -17,11 +17,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
+import org.wcs.smart.i2.ui.I2SwtUtils;
 import org.wcs.smart.ui.Thumbnail;
 
 public class AttachmentTable extends Composite implements Listener {
@@ -32,8 +35,11 @@ public class AttachmentTable extends Composite implements Listener {
 	
 	private ScrolledForm infoSection;
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit){
-		super(parent, SWT.BORDER);
+	private Menu thumbMenu;
+	
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu){
+		
+		super(parent, SWT.NONE);
 		this.toolkit = toolkit;
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
@@ -48,18 +54,23 @@ public class AttachmentTable extends Composite implements Listener {
 		gl.horizontalSpacing = 0;
 		infoSection.getBody().setLayout(gl);
 		
+		//ensure we manually dispose of images
+		//as we reuse them if we can
 		addDisposeListener(new DisposeListener() {
-			
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-				if (thumb != null){
+				if (thumb != null && thumb.thumbs != null){
 					for (org.wcs.smart.i2.ui.editors.AttachmentTable.ThumbnailComposite.ThumbInfo t : thumb.thumbs){
-						if (t.thumb != null) t.thumb.dispose();
+						if (t.thumb != null) t.thumb.disposeImage();
 					}
 				}
 			}
 		});
+		if (thumbsMenu != null) thumbMenu = thumbsMenu.createMenu(this); 
+		
+		
 	}
+	
 	
 	@Override
 	public void handleEvent(Event event) {
@@ -102,6 +113,7 @@ public class AttachmentTable extends Composite implements Listener {
 						toolkit.adapt(thumb);
 					}else{
 						for (Control c : thumb.getChildren()){
+							c.setMenu(null);
 							c.dispose();
 						}
 					}
@@ -132,10 +144,18 @@ public class AttachmentTable extends Composite implements Listener {
 		
 	};
 	
+	public List<IntelAttachment> getSelection(){
+		List<IntelAttachment> sel = new ArrayList<IntelAttachment>();
+		for (ThumbnailComposite.ThumbInfo t : thumb.thumbs){
+			if (t.isSelected) sel.add((IntelAttachment) t.file);
+		}
+		return sel;
+	}
+	
 	/*
 	 * A composite for thumbnails
 	 */
-	private class ThumbnailComposite extends Composite{
+	private class ThumbnailComposite extends Composite {
 		private List<ThumbInfo> thumbs;
 		
 		public ThumbnailComposite(Composite parent){
@@ -146,7 +166,7 @@ public class AttachmentTable extends Composite implements Listener {
 			
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		}
-		
+
 		public void updateLayout(int numCols){
 			GridLayout gl = new GridLayout(numCols, false);
 			gl.marginWidth = gl.marginHeight = 0;
@@ -180,7 +200,10 @@ public class AttachmentTable extends Composite implements Listener {
 					}
 				}
 				for (ThumbInfo i : old){
-					if (i.thumb != null) i.thumb.dispose();
+					if (i.thumb != null){
+						//dispose of unused images
+						i.thumb.disposeImage();
+					}
 				}
 			}
 		}
@@ -195,14 +218,57 @@ public class AttachmentTable extends Composite implements Listener {
 		public void createThumbs(){
 			if (thumbs == null) return;
 			for (ThumbInfo t : thumbs){
-				Composite parent = toolkit.createComposite(this);
-				t.thumb.createThumbnail(parent);
+				Composite parent = toolkit.createComposite(this, SWT.NONE);
+				parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+				Composite thumbNameComp = t.thumb.createThumbnail(parent, SWT.NONE);
+				if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu);
+				thumbNameComp.setData(t);
+				thumbNameComp.addDisposeListener(new DisposeListener() {
+					
+					@Override
+					public void widgetDisposed(DisposeEvent e) {
+						thumbNameComp.setMenu(null);
+					}
+				});
+				Listener l = new Listener(){
+					@Override
+					public void handleEvent(Event event) {
+						if (event.type == SWT.MouseEnter){
+							t.isMouseIn = true;
+							thumbNameComp.redraw();
+						}else if (event.type == SWT.MouseDown){
+							for (ThumbInfo kid : thumbs){
+								kid.isSelected = false;
+							}
+							t.isSelected = true;
+						}else if (event.type == SWT.MouseExit){
+							t.isMouseIn = false;
+							thumbNameComp.redraw();
+						}else if (event.type == SWT.Paint){
+							if (t.isMouseIn){
+								event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
+								event.gc.setLineWidth(4);
+								event.gc.drawRectangle(0, 0, thumbNameComp.getClientArea().width, thumbNameComp.getClientArea().height);
+							}else{
+								event.gc.setForeground(toolkit.getColors().getBorderColor());
+								event.gc.setLineWidth(2);
+								event.gc.drawRectangle(0, 0, thumbNameComp.getClientArea().width, thumbNameComp.getClientArea().height);
+							}
+						}	
+					}
+				};
+				I2SwtUtils.cascadeAdd(thumbNameComp,l, SWT.MouseEnter,SWT.MouseExit, SWT.Paint, SWT.MouseDown);
 			}
 		}
-		
+
+
 		private class ThumbInfo{
 			ISmartAttachment file;
 			Thumbnail thumb;
+			
+			boolean isMouseIn;
+			boolean isSelected;
 			
 			public ThumbInfo(ISmartAttachment file){
 				this.file = file;
@@ -214,5 +280,6 @@ public class AttachmentTable extends Composite implements Listener {
 				}
 			}
 		}
+
 	}
 }

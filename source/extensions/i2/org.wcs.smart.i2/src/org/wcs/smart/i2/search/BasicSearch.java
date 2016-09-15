@@ -40,6 +40,14 @@ public class BasicSearch implements IIntelSearch{
 			List<IntelEntity> items = c.list();
 			for (IntelEntity it : items){
 				it.getIdAttributeAsText();
+				if (it.getPrimaryAttachment() != null){
+					try {
+						it.getPrimaryAttachment().computeFileLocation(session);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 			return items;
 		}

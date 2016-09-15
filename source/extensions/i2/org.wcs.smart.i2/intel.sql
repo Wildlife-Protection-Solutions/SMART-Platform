@@ -38,7 +38,7 @@ CREATE TABLE smart.i_attachment
 	date_created timestamp NOT NULL,
 	created_by char(16) for bit data NOT NULL,
 	description varchar(2048),
-	file varchar(1024) NOT NULL,
+	filename varchar(1024) NOT NULL,
 	PRIMARY KEY (uuid)
 );
 

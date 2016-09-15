@@ -29,6 +29,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
+import org.wcs.smart.ui.Thumbnail;
 
 public class EntityListComposite extends Composite {
 
@@ -222,14 +223,21 @@ public class EntityListComposite extends Composite {
 			setLayout(new GridLayout(3, false));
 			((GridLayout)getLayout()).marginHeight = 0;
 			addListener(this);
-			Label l = toolkit.createLabel(this, "IMAGE HERE");
-			addListener(l);
+			
+			Thumbnail t = new Thumbnail(item.getPrimaryAttachment(), 50);
+			Composite c = t.createThumbnail(this);
+			addListener(c);
+			toolkit.adapt(c);
+			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			((GridData)c.getLayoutData()).widthHint = 50;
+			((GridData)c.getLayoutData()).heightHint = 50;
+			
 			Composite middle = toolkit.createComposite(this, SWT.NONE);
 			middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			middle.setLayout(new GridLayout(2, false));
 			addListener(middle);
 			
-			l = toolkit.createLabel(middle, item.getIdAttributeAsText());
+			Label l = toolkit.createLabel(middle, item.getIdAttributeAsText());
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			addListener(l);
 			l = toolkit.createLabel(middle,"");

@@ -143,7 +143,7 @@ public class IntelAttachment extends ISmartAttachment{
 	}
 
 	@Override
-	protected String getDatastoreFolderPath(Session session) throws Exception {
+	public String getDatastoreFolderPath(Session session) throws Exception {
 		return getConservationArea().getFileDataStoreLocation() + 
 				File.separator + 
 				"intelligence2/attachments";
