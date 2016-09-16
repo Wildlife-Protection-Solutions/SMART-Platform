@@ -3,8 +3,11 @@ package org.wcs.smart.i2.ui.views;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
@@ -28,8 +31,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
+import org.wcs.smart.util.E3Utils;
 
 public class EntityListComposite extends Composite {
 
@@ -42,11 +47,13 @@ public class EntityListComposite extends Composite {
 	private FormToolkit toolkit = null;
 	private List<EntityComponent> components = null;
 	
-	public EntityListComposite(Composite parent, FormToolkit toolkit) {
+	private EPartService pService; 
+	
+	public EntityListComposite(Composite parent, FormToolkit toolkit, EPartService pService) {
 		super(parent, SWT.NONE);
 		this.toolkit = toolkit;
-		
-		
+		this.pService = pService;
+				
 		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
 		selectionColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
 		mouseOverColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 90));
@@ -67,6 +74,10 @@ public class EntityListComposite extends Composite {
 	public void setEntities(List<IntelEntity> entities){
 		this.entities = entities;
 		createTable();
+	}
+	
+	public List<IntelEntity> getEntities(){
+		return this.entities;
 	}
 	
 	public void setSearchError(Exception ex){
@@ -157,6 +168,12 @@ public class EntityListComposite extends Composite {
 		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
 		mnuWorkingset.setText("Add to WorkingSet");
 	
+		
+//		MenuItem mnuCreateRelationship = new MenuItem(menu, SWT.CASCADE);
+//		mnuCreateRelationship.setText("Relate to ");
+//		Menu subRelateTo = new Menu(menu);
+//		mnuCreateRelationship.setMenu(subRelateTo);
+		
 		menu.addMenuListener(new MenuListener() {
 			
 			@Override
@@ -165,6 +182,25 @@ public class EntityListComposite extends Composite {
 				mnuOpen.setEnabled(hasSelection);
 				mnuExport.setEnabled(hasSelection);
 				mnuWorkingset.setEnabled(hasSelection);
+//				
+////				mnuWorkingset.getMenu().dispose();
+////				Menu subRelateTo = new Menu(menu);
+////				mnuCreateRelationship.setMenu(subRelateTo);
+//				for (MenuItem mi : subRelateTo.getItems()){
+//					mi.dispose();
+//				}
+//				Collection<MPart> parts = pService.getParts();
+//				for (MPart p : parts){
+//					if (E3Utils.isCompatibilityEditor(p)){
+//						Object editor = E3Utils.getSourceObject(p);
+//						if (editor instanceof EntityEditor && ((EntityEditor)editor).getEditMode()){
+//							MenuItem relate = new MenuItem(subRelateTo, SWT.PUSH);
+//							relate.setText( ((EntityEditor)editor).getEditorInput().getName()  );
+//							
+//						}
+//					}
+//				}
+				
 			}
 			
 			@Override

@@ -19,39 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui;
+package org.wcs.smart.i2.ui.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.wcs.smart.i2.ui.dialogs.RelationshipGroupListDialog;
 
 /**
- * Swt utils 
+ * Open dialog handler
  * 
  * @author Emily
  *
  */
-public class I2SwtUtils {
+public class ShowRelationshipGroupListDialogHandler extends ShowDialogHandler {
 
-	public static void cascadeAdd(Control parent, Listener listener, int... eventTypes){
-		List<Control> controls = new ArrayList<Control>();
-		controls.add(parent);
-		while(!controls.isEmpty()){
-			Control c = controls.remove(0);
-			
-			for (int e: eventTypes){
-				c.addListener(e, listener);
-			}
-			
-			if (c instanceof Composite){
-				for (Control kid : ((Composite)c).getChildren()){
-					controls.add(kid);
-				}
-			}
-		}
-		
+	public ShowRelationshipGroupListDialogHandler(){
+		super(RelationshipGroupListDialog.class);
 	}
+	
+	// E3
+	public static class ShowRelationshipGroupListDialogHandlerWrapper extends DIHandler<ShowRelationshipGroupListDialogHandler> {
+		public ShowRelationshipGroupListDialogHandlerWrapper() {
+			super(ShowRelationshipGroupListDialogHandler.class);
+		}
+	}
+	
 }

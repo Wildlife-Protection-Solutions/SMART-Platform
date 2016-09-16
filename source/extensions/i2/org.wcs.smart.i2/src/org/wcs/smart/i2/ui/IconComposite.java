@@ -54,7 +54,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
  * @author Emily
  *
  */
-public class ImageComposite extends Composite {
+public class IconComposite extends Composite {
 
 	private Label image;
 	private Button btnBrowse;
@@ -64,7 +64,7 @@ public class ImageComposite extends Composite {
 	
 	private byte[] imageData;
 	
-	public ImageComposite(Composite parent) {
+	public IconComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		createContent();
 	}

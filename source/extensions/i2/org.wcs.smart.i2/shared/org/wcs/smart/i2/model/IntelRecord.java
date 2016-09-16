@@ -48,7 +48,7 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.i_record")
 public class IntelRecord extends UuidItem implements IIntelAuditItem{
 
-	private enum Status{
+	public enum Status{
 			NEW,
 			PROCESSING,
 			COMPLETE
@@ -126,7 +126,6 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @param dateModified
 	 *            date_modified
 	 */
-	@Column(name="date_modified")
 	public void setDateModified(Date dateModified) {
 		this.dateModified = dateModified;
 	}
@@ -136,6 +135,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * 
 	 * @return date_modified
 	 */
+	@Column(name="last_modified_date")
 	public Date getDateModified() {
 		return this.dateModified;
 	}

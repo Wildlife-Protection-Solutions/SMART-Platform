@@ -88,7 +88,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
-import org.wcs.smart.i2.ui.ImageComposite;
+import org.wcs.smart.i2.ui.IconComposite;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
@@ -105,7 +105,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 
 	private IntelEntityType type;
 	private NameKeyComposite nameKeyInfo;
-	private ImageComposite icon;
+	private IconComposite icon;
 	private List<IntelEntityType> entityTypeSiblings;
 	private TableViewer tblAttributes;
 	private ComboViewer idAttribute;
@@ -254,7 +254,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		l.setText("Icon:");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		icon = new ImageComposite(parent);
+		icon = new IconComposite(parent);
 		icon.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		icon.addModifyListener(new ModifyListener() {
 			@Override

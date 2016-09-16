@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 
 /**

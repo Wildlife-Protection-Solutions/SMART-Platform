@@ -67,23 +67,22 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
-import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
-import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
+import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
- * Dialog for listing relationship types.
+ * Dialog for listing entity types.
  * @author Emily
  *
  */
-public class RelationshipTypeListDialog extends TitleAreaDialog {
+public class RelationshipGroupListDialog extends TitleAreaDialog {
 
-	private TableViewer cmbTypes;
-	private List<IntelRelationshipType> types = null;
+	private TableViewer cmbGroups;
+	private List<IntelRelationshipGroup> groups = null;
 	private NamedItemViewerFilter filter;
 	private IStructuredSelection currentSelection;
 	
@@ -95,29 +94,21 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 	private Button btnEdit;
 	private Button btnDelete;
 	
-	private Job loadTypes = new Job("load relationship types"){ //$NON-NLS-1$
+	private Job loadGroups = new Job("load relationships groups"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			types = null;
+			groups = null;
 			Session session = HibernateManager.openSession();
 			try{
-				types = RelationshipTypeManager.INSTANCE.getRelationshipTypes(session, SmartDB.getCurrentConservationArea());
-				for (IntelRelationshipType t : types){
-					t.getNames().size();
-					t.getSourceEntityType().getName();
-					t.getTargetEntityType().getName();
-					for (IntelRelationshipTypeAttribute a : t.getAttributes()){
-						a.getAttribute().getNames().size();
-						if (a.getAttribute().getAttributeList() != null){
-							for (IntelAttributeListItem i : a.getAttribute().getAttributeList()){
-								i.getNames().size();
-							}
-						}
-					}
-					if (t.getRelationshipGroup() != null){
-						t.getRelationshipGroup().getNames();
-					}
+				groups = RelationshipTypeManager.INSTANCE.getRelationshipGroups(session, SmartDB.getCurrentConservationArea());
+				for (IntelRelationshipGroup g : groups){
+					g.getNames().size();
+//					if (g.getRelationshipTypes() != null){
+//						for (IntelRelationshipType t : g.getRelationshipTypes()){
+//							t.getNames().size();
+//						}
+//					}
 				}
 			}finally{
 				session.close();
@@ -126,15 +117,15 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					cmbTypes.setInput(types);
-					cmbTypes.setSelection(currentSelection);
+					cmbGroups.setInput(groups);
+					cmbGroups.setSelection(currentSelection);
 				}
 			});
 			return Status.OK_STATUS;
 		}
 		
 	};
-	public RelationshipTypeListDialog(Shell parentShell) {
+	public RelationshipGroupListDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
@@ -164,31 +155,31 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		cmbTypes = new TableViewer(parent);
-		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTypes.setLabelProvider(RelationshipTypeLabelProvider.INSTANCE);
-		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		cmbTypes.getControl().setFocus();
-		cmbTypes.addDoubleClickListener(new IDoubleClickListener() {
+		cmbGroups = new TableViewer(parent);
+		cmbGroups.setContentProvider(ArrayContentProvider.getInstance());
+		cmbGroups.setLabelProvider(RelationshipGroupLabelProvider.INSTANCE);
+		cmbGroups.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbGroups.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbGroups.getControl().setFocus();
+		cmbGroups.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				edit();
 			}
 		});
-		cmbTypes.addSelectionChangedListener(new ISelectionChangedListener() {
+		cmbGroups.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				btnEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
-				btnDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
-				mnuEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
-				mnuDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
+				btnEdit.setEnabled(!cmbGroups.getSelection().isEmpty());
+				btnDelete.setEnabled(!cmbGroups.getSelection().isEmpty());
+				mnuEdit.setEnabled(!cmbGroups.getSelection().isEmpty());
+				mnuDelete.setEnabled(!cmbGroups.getSelection().isEmpty());
 			}
 		});
 		
-		filter = new NamedItemViewerFilter(cmbTypes);
-		cmbTypes.setFilters(new ViewerFilter[]{filter});
+		filter = new NamedItemViewerFilter(cmbGroups);
+		cmbGroups.setFilters(new ViewerFilter[]{filter});
 		
 		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
@@ -223,8 +214,8 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Menu menu = new Menu(cmbTypes.getControl());
-		cmbTypes.getControl().setMenu(menu);
+		Menu menu = new Menu(cmbGroups.getControl());
+		cmbGroups.getControl().setMenu(menu);
 
 		mnuAdd = new MenuItem(menu, SWT.DEFAULT);
 		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
@@ -263,12 +254,12 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		
 		
-		setTitle("Relationship Types");
-		getShell().setText("Relationship Types");
-		setMessage("Manage the relationship types in the system.");
+		setTitle("Relationship Type Groups");
+		getShell().setText("Relationship Type Groups");
+		setMessage("Manage the relationship groups in the system.");
 		
-		loadTypes.setSystem(true);
-		loadTypes.schedule();
+		loadGroups.setSystem(true);
+		loadGroups.schedule();
 		
 		return parent;
 	}
@@ -279,42 +270,42 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 	}
 	
 	private void add(){
-		IntelRelationshipType type = new IntelRelationshipType();
-		type.setConservationArea(SmartDB.getCurrentConservationArea());
-		type.setAttributes(new ArrayList<IntelRelationshipTypeAttribute>());
+		IntelRelationshipGroup group = new IntelRelationshipGroup();
+		group.setConservationArea(SmartDB.getCurrentConservationArea());
+		group.setRelationshipTypes(new ArrayList<IntelRelationshipType>());
 		
-		RelationshipTypeDialog ed = new RelationshipTypeDialog(getShell(), type);
+		RelationshipGroupDialog ed = new RelationshipGroupDialog(getShell(), group);
 		ed.open();
 		
 		refresh();
 	}
 	
 	private void edit(){
-		Object x = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
-		if (x instanceof IntelRelationshipType){
-			IntelRelationshipType type = (IntelRelationshipType)x;
-			RelationshipTypeDialog ed = new RelationshipTypeDialog(getShell(), type);
+		Object x = ((IStructuredSelection)cmbGroups.getSelection()).getFirstElement();
+		if (x instanceof IntelRelationshipGroup){
+			IntelRelationshipGroup type = (IntelRelationshipGroup)x;
+			RelationshipGroupDialog ed = new RelationshipGroupDialog(getShell(), type);
 			ed.open();
 			refresh();
 		}
 	}
 	
 	private void delete(){
-		List<IntelRelationshipType> toDelete = new ArrayList<IntelRelationshipType>();
+		List<IntelRelationshipGroup> toDelete = new ArrayList<IntelRelationshipGroup>();
 		StringBuilder sb = new StringBuilder();
 		
-		for (Iterator<?> iterator = ((IStructuredSelection)cmbTypes.getSelection()).iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)cmbGroups.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
-			if (x instanceof IntelRelationshipType){
-				toDelete.add((IntelRelationshipType)x);
-				sb.append(((IntelRelationshipType) x).getName());
+			if (x instanceof IntelRelationshipGroup){
+				toDelete.add((IntelRelationshipGroup)x);
+				sb.append(((IntelRelationshipGroup) x).getName());
 				sb.append(", ");
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the following relationship types?  All relationships and other references will also be removed.  This action cannot be undone.\n\n{0}", sb.toString()))){
+		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the following relationship groups? This action cannot be undone.\n\n{0}", sb.toString()))){
 			return;
 		}
 		
@@ -325,18 +316,18 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 
-					monitor.beginTask("Deleting relationship types", toDelete.size());
+					monitor.beginTask("Deleting relationship groups", toDelete.size());
 					Session s = HibernateManager.openSession();
 					try{
-						for (IntelRelationshipType t : toDelete){
+						for (IntelRelationshipGroup t : toDelete){
 							monitor.subTask(t.getName());
 							s.beginTransaction();
 							try{
-								RelationshipTypeManager.INSTANCE.deleteRelationshipType(t, s);
+								RelationshipTypeManager.INSTANCE.deleteRelationshipGroup(t, s);
 								s.getTransaction().commit();
 							}catch(Exception ex){
 								s.getTransaction().rollback();
-								Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to delete Relationship Type {0}. {1}", t.getName(), ex.getMessage()), ex);
+								Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to delete Relationship Group {0}. {1}", t.getName(), ex.getMessage()), ex);
 							}
 							monitor.worked(1);
 						}
@@ -348,16 +339,16 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				}
 			});
 		} catch (Exception e) {
-			Intelligence2PlugIn.displayLog("Error deleting relationship types: " +e.getMessage(), e);
+			Intelligence2PlugIn.displayLog("Error deleting relationship groups: " +e.getMessage(), e);
 		}
 		
 		refresh();
 	}
 	
 	private void refresh(){
-		currentSelection = (IStructuredSelection) cmbTypes.getSelection();
-		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		loadTypes.schedule(0);
+		currentSelection = (IStructuredSelection) cmbGroups.getSelection();
+		cmbGroups.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		loadGroups.schedule(0);
 	}
 	
 	@Override

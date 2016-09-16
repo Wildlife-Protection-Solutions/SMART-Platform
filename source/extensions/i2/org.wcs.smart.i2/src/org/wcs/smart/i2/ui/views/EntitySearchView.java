@@ -74,8 +74,8 @@ import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.search.BasicSearch;
-import org.wcs.smart.i2.search.IIntelSearch;
+import org.wcs.smart.i2.search.BasicEntitySearch;
+import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.ui.NamedItemLabelProvider;
@@ -148,6 +148,10 @@ public class EntitySearchView {
 		super();
 	}
 
+	public List<IntelEntity> getEntities(){
+		return this.entityList.getEntities();
+	}
+	
 	@PostConstruct
 	public void createPartControl(Composite parent) {
 		parent.setLayout(new GridLayout());
@@ -177,7 +181,7 @@ public class EntitySearchView {
 		Label l = toolkit.createLabel(parent, "", SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		entityList = new EntityListComposite(parent, toolkit);
+		entityList = new EntityListComposite(parent, toolkit, partService);
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		searchJob.schedule();
@@ -358,12 +362,12 @@ public class EntitySearchView {
 			}
 			
 		}
-		BasicSearch search = new BasicSearch(txtSearch.getPatternFilter(), filters);
+		BasicEntitySearch search = new BasicEntitySearch(txtSearch.getPatternFilter(), filters);
 		doSearch(search);
 
 	}
 	
-	private void doSearch(IIntelSearch search){
+	private void doSearch(IIntelEntitySearch search){
 		searchJob.setSearch(search);
 		searchJob.schedule(500);
 	}

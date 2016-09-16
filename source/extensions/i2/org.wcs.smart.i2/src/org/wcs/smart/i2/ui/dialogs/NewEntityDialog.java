@@ -255,7 +255,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		
 		setTitle("New Entity");
 		getShell().setText("New Entity");
-		setMessage("Create new a new entity");
+		setMessage("Create a new entity");
 		
 		loadEntityTypes.setSystem(true);
 		loadEntityTypes.schedule(0);

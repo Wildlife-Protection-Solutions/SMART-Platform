@@ -269,6 +269,11 @@
                   style="push">
             </command>
             <command
+                  commandId="org.wcs.smart.i2.command.relationshipgrouplist.show"
+                  label="Relationship Groups..."
+                  style="push">
+            </command>
+            <command
                   commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
                   label="Relationship Types..."
                   style="push">
@@ -294,6 +299,10 @@
             id="org.wcs.smart.i2.command.entity.new"
             name="New Entity">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.relationshipgrouplist.show"
+            name="Relationship Groups...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -312,6 +321,10 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.NewEntityDialogHandler$NewEntityDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.entity.new">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowRelationshipGroupListDialogHandler$ShowRelationshipGroupListDialogHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.relationshipgrouplist.show">
       </handler>
    </extension>
 

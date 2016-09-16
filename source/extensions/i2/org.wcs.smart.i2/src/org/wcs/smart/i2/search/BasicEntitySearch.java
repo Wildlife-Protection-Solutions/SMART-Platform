@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.search;
 
 import java.util.ArrayList;
@@ -7,22 +28,22 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 
-public class BasicSearch implements IIntelSearch{
+public class BasicEntitySearch implements IIntelEntitySearch{
 
-	public static final int MAX_RESULT_CNT = 500;
 	
 	private int maxResultCnt = MAX_RESULT_CNT;
 	private String searchString = null;
 	private List<IntelEntityType> entityTypeFilter = null;
 	
-	public BasicSearch(String searchString){
+	public BasicEntitySearch(String searchString){
 		this.searchString = searchString;
 	}
 	
-	public BasicSearch(String searchString, List<IntelEntityType> entityTypeFilter){
+	public BasicEntitySearch(String searchString, List<IntelEntityType> entityTypeFilter){
 		this.searchString = searchString;
 		this.entityTypeFilter = entityTypeFilter;
 	}
@@ -39,15 +60,7 @@ public class BasicSearch implements IIntelSearch{
 			
 			List<IntelEntity> items = c.list();
 			for (IntelEntity it : items){
-				it.getIdAttributeAsText();
-				if (it.getPrimaryAttachment() != null){
-					try {
-						it.getPrimaryAttachment().computeFileLocation(session);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+				lazyLoadEntity(it, session);
 			}
 			return items;
 		}
@@ -79,11 +92,24 @@ public class BasicSearch implements IIntelSearch{
 		List<IntelEntity> results = new ArrayList<IntelEntity>();
 		for (IntelEntity ie : queryResults){
 			if (!results.contains(ie)){
-				ie.getIdAttributeAsText();
+				lazyLoadEntity(ie, session);
 				results.add(ie);
 				if(results.size() == maxResultCnt) break;
 			}
 		}
 		return queryResults;
+	}
+	
+	private void lazyLoadEntity(IntelEntity it, Session session){
+		it.getIdAttributeAsText();
+		it.getEntityType();
+		if (it.getPrimaryAttachment() != null){
+			try {
+				it.getPrimaryAttachment().getCopyFromLocation();
+				it.getPrimaryAttachment().computeFileLocation(session);
+			} catch (Exception e) {
+				Intelligence2PlugIn.log("Unable to compute attachment location", e);
+			}
+		}
 	}
 }

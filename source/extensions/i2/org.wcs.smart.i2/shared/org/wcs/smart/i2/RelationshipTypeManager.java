@@ -29,7 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
-import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 
 /**
@@ -60,6 +60,20 @@ public enum RelationshipTypeManager {
 		return types;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public List<IntelRelationshipGroup> getRelationshipGroups(Session session, ConservationArea ca){
+		List<IntelRelationshipGroup> types = session.createCriteria(IntelRelationshipGroup.class)
+			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+			.list();
+		types.sort((IntelRelationshipGroup a, IntelRelationshipGroup b) -> Collator.getInstance().compare(a.getName(), b.getName()));
+		return types;
+	}
+	
+	public void canDelete(IntelRelationshipGroup type, Session session) throws Exception{
+		if (!DeleteManager.canDelete(type, session)){
+			throw new Exception("Unknown error occurrs while deleteing relationship type.");
+		}
+	}
 	public void canDelete(IntelRelationshipType type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
 			throw new Exception("Unknown error occurrs while deleteing relationship type.");
@@ -90,5 +104,22 @@ public enum RelationshipTypeManager {
 		q.executeUpdate();
 		
 		session.delete(type);
+	}
+	
+	/**
+	 * Deletes a relationship groups an all associated data (relationships, attributes etc.)
+	 * 
+	 * @param type
+	 * @param session
+	 * @throws Exception
+	 */
+	public void deleteRelationshipGroup(IntelRelationshipGroup group, Session session) throws Exception{
+		//update all references
+		Query q = session.createQuery("update IntelRelationshipType set relationshipGroup = null where relationshipGroup = :group");
+		q.setParameter("group", group); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		//delete group
+		session.delete(group);
 	}
 }

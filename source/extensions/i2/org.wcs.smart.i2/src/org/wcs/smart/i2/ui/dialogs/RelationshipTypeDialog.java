@@ -84,19 +84,21 @@ import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
-import org.wcs.smart.i2.ui.ImageComposite;
+import org.wcs.smart.i2.ui.IconComposite;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
+import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
- * Dialog for editing entity types.
+ * Dialog for editing relationship types.
  * 
  * @author Emily
  *
@@ -105,12 +107,13 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 
 	private IntelRelationshipType type;
 	private NameKeyComposite nameKeyInfo;
-	private ImageComposite icon;
+	private IconComposite icon;
 	private List<IntelRelationshipType> entityTypeSiblings;
 	private TableViewer tblAttributes;
 	
 	private ComboViewer cmbSrcType;
 	private ComboViewer cmbTrgType;
+	private ComboViewer cmbGroup;
 	
 	private ControlDecoration cdSrcType;
 	private ControlDecoration cdTrgType;
@@ -131,9 +134,11 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
+			List<IntelRelationshipGroup> groups = new ArrayList<IntelRelationshipGroup>();
 			Session s = HibernateManager.openSession();
 			try{
 				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
+				groups.addAll(RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea()));
 			}finally{
 				s.close();
 			}
@@ -143,6 +148,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 				public void run() {
 					cmbSrcType.setInput(types);
 					cmbTrgType.setInput(types);
+					cmbGroup.setInput(groups);
 					
 					if (type.getSourceEntityType() != null){
 						cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
@@ -150,6 +156,9 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 					
 					if (type.getTargetEntityType() != null){
 						cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
+					}
+					if (type.getRelationshipGroup() != null){
+						cmbGroup.setSelection(new StructuredSelection(type.getRelationshipGroup()));
 					}
 				}
 			});
@@ -292,7 +301,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		l.setText("Icon:");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		icon = new ImageComposite(parent);
+		icon = new IconComposite(parent);
 		icon.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		icon.addModifyListener(new ModifyListener() {
 			@Override
@@ -302,6 +311,28 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			}
 		});
 	
+		l = new Label(parent, SWT.NONE);
+		l.setText("Group:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		cmbGroup = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbGroup.setContentProvider(ArrayContentProvider.getInstance());
+		cmbGroup.setLabelProvider(RelationshipGroupLabelProvider.INSTANCE);
+		cmbGroup.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		cmbGroup.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbGroup.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)cmbGroup.getSelection()).getFirstElement();
+				if (x instanceof IntelRelationshipGroup){
+					type.setRelationshipGroup((IntelRelationshipGroup) x);
+				}else{
+					type.setRelationshipGroup(null);
+				}
+				modified();
+			}
+		});
+		
 		l = new Label(parent, SWT.NONE);
 		l.setText("Source Entity Type:");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));

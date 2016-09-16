@@ -19,39 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui;
+package org.wcs.smart.i2.search;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Session;
+import org.wcs.smart.i2.model.IntelEntity;
 
 /**
- * Swt utils 
+ * Intelligence search interface 
  * 
  * @author Emily
  *
  */
-public class I2SwtUtils {
+public interface IIntelEntitySearch {
 
-	public static void cascadeAdd(Control parent, Listener listener, int... eventTypes){
-		List<Control> controls = new ArrayList<Control>();
-		controls.add(parent);
-		while(!controls.isEmpty()){
-			Control c = controls.remove(0);
-			
-			for (int e: eventTypes){
-				c.addListener(e, listener);
-			}
-			
-			if (c instanceof Composite){
-				for (Control kid : ((Composite)c).getChildren()){
-					controls.add(kid);
-				}
-			}
-		}
-		
-	}
+	/**
+	 * Maximum number of results returned in an entity search
+	 */
+	public static final int MAX_RESULT_CNT = 500;
+	
+	public List<IntelEntity> doSearch(Session session);
 }
