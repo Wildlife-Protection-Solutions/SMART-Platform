@@ -46,7 +46,6 @@ import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
-import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
@@ -84,7 +83,6 @@ public class PatrolScreensUtil extends ScreensUtil {
 	private static final String GLOBAL_PATROL_TR_TYPE = "GLOBAL_PATROL_TR_TYPE"; //$NON-NLS-1$
 
 	public static enum JsonPatrolKey {
-		PATROL_TYPE("pt"), //$NON-NLS-1$
 		TRANSPORT_TYPE("tt"), //$NON-NLS-1$
 		MANDATE("pm"), //$NON-NLS-1$
 		STATION("ps"), //$NON-NLS-1$
@@ -97,7 +95,6 @@ public class PatrolScreensUtil extends ScreensUtil {
 		}
 	}
 	
-	public static final String RESULT_PATROL_TYPE = ScreensUtil.COMMON_PREFIX + "PatrolType"; //$NON-NLS-1$
 	public static final String RESULT_TRANSPORT = ScreensUtil.COMMON_PREFIX + "PatrolTransport"; //$NON-NLS-1$
 	public static final String RESULT_ARMED = ScreensUtil.COMMON_PREFIX + "Armed"; //$NON-NLS-1$
 	public static final String RESULT_TEAM = ScreensUtil.COMMON_PREFIX + "Team"; //$NON-NLS-1$
@@ -429,12 +426,12 @@ public class PatrolScreensUtil extends ScreensUtil {
 				types.add(name);
 				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, ctProps.getDilutionOfPrecision(), getMaxSpeed(tt, t2tMap), jsonValue));
 			}
-			String resultTransportId = createResultElement(RESULT_PATROL_TYPE, elements);
-			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTransportId, true);
+			String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
+			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Transport, typeIds, resultTransportId, true);
 			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 			control7.setResultGlobalValue(GLOBAL_PATROL_TR_TYPE);
 			container.screenNodes.add(node);
-			container.resultElements.add(new IdNamePair(resultTransportId, RESULT_PATROL_TYPE));
+			container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
 			return toNextScreen(node, false);
 		} else {
 			PatrolTransportType transport = CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, trOption.getUuidValue(), session);

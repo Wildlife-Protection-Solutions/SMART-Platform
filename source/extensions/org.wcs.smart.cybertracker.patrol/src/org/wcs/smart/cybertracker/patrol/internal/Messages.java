@@ -102,7 +102,6 @@ public class Messages extends NLS {
 	public static String PatrolScreens_Mandate;
 	public static String PatrolScreens_NewObservation;
 	public static String PatrolScreens_Objective;
-	public static String PatrolScreens_PatrolType;
 	public static String PatrolScreens_Paused;
 	public static String PatrolScreens_PausePatrol;
 	public static String PatrolScreens_Pilot;
@@ -131,7 +130,6 @@ public class Messages extends NLS {
 	public static String SmartImporter_ImportErrorDialogTitle;
 	public static String SmartImporter_LeaderTitle;
 	public static String SmartImporter_NoEmployeesErrorMessage;
-	public static String SmartImporter_PatrolType_Load_Error;
 	public static String SmartImporter_PilotTitle;
 	public static String SmartImporter_SelectLeaderMessage;
 	public static String SmartImporter_SelectPilotTitle;

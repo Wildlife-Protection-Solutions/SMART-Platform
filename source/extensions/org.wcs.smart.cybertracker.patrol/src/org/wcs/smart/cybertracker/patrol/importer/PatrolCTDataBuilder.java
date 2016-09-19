@@ -51,7 +51,6 @@ import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -172,12 +171,6 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 		} else if (ScreensUtil.RESULT_ID.equals(n)) {
 			ctPatrol.setId(v);
-		} else if (PatrolScreensUtil.RESULT_PATROL_TYPE.equals(n)) {
-			E e = eMap.get(v);
-			String tag0 = e != null ? e.getTag0() : null;
-			if (tag0 != null) {
-				ctPatrol.setPatrolType(Type.valueOf(e.getTag0()));
-			}
 		} else if (PatrolScreensUtil.RESULT_TRANSPORT.equals(n)) {
 			E e = eMap.get(v);
 			PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
@@ -276,7 +269,6 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 				ctPatrol.setPatrolTransportType(defaultValue.getPatrolTransportType());
 				if (defaultValue.getPatrolTransportType() != null) ctPatrol.setCtTransport(defaultValue.getPatrolTransportType().getName());
 			}
-			if (ctPatrol.getPatrolType() == null) ctPatrol.setPatrolType(defaultValue.getPatrolType());
 		
 			ctPatrol.getProblems().putAll(defaultValue.getProblems());
 			
