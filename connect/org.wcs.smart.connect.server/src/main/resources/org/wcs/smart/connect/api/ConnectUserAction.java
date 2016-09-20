@@ -332,12 +332,23 @@ public class ConnectUserAction extends HttpServlet {
     public void deleteUserActions(@PathParam("username") String username,
     		@PathParam("action") String action,
     		@PathParam("resource") String resource){
-		
-		validateAdmin();
-		
+		boolean restricted;
+		restricted = false;
+		if(!isCaAdminUser()){
+			validateAdmin();
+		}else{
+			restricted = true;
+		}
+
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			
+			//test action and current user (not username, the one making the request) to ensure they should be allowed to remove this permission out.
+			if(restricted){
+				hasAdminRights(resource, s);//throws an exception if they don't
+			}
+			
 			@SuppressWarnings("unchecked")
 			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
 					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
@@ -368,6 +379,7 @@ public class ConnectUserAction extends HttpServlet {
 					Messages.getString("ConnectUserAction.UserDeleteError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}	
 	}
+
 	
 	/**
 	 * Creates a new role. Uses the name property of the action
@@ -565,8 +577,6 @@ public class ConnectUserAction extends HttpServlet {
 			restricted = true;
 		}
 
-
-		
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -574,48 +584,7 @@ public class ConnectUserAction extends HttpServlet {
 			
 			//test action and current user (not username, the one making the request) to ensure they should be allowed to give this permission out.
 			if(restricted){
-				boolean access = false;
-				List<UUID> list = uuidsCaAdminof(s);
-				ConservationArea ca;
-				if(resourceKey != null){
-					ca = (ConservationArea) s.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", UUID.fromString(resourceKey))).uniqueResult();
-				}else{
-					ca = null;
-				}
-				if(ca != null){//this is a CA uuid, make sure the requestor has permission to hand out access
-					for (UUID u : list){
-						if(u.equals(ca.getUuid())){
-							access = true;
-							break;
-						}
-					}
-				}
-				if(!access){//if no approved access yet, check if the resource is a specific report or query uuid, then check if requestor is an admin of that ca
-					QueryProxy q = QueryManager.INSTANCE.findQueryProxy(UUID.fromString(resourceKey), s);
-					Report r = (Report)s.createCriteria(Report.class).add(Restrictions.eq("uuid", UUID.fromString(resourceKey))).uniqueResult();
-				
-					if(q != null ){
-						for (UUID u : list){
-							if(u.equals(q.getCaUuid() ) ){
-								access=true;
-								break;
-							}
-						}
-					}
-					if(r != null ){
-						for (UUID u : list){
-							if(u.equals(r.getConservationArea().getUuid() ) ){
-								access=true;
-								break;
-							}
-						}
-					}
-				}
-				
-				if(!access){
-					logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
-					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-				}
+				hasAdminRights(resourceKey, s);
 			}
 			
 			
@@ -826,6 +795,52 @@ public class ConnectUserAction extends HttpServlet {
 						Messages.getString("ConnectUserAction.RoleAddError", SmartUtils.getRequestLocale(request)), ex);  //$NON-NLS-1$
 			
 		}
+	}
+	
+	private boolean hasAdminRights(String resource, Session s) {
+		boolean access = false;
+		List<UUID> list = uuidsCaAdminof(s);
+		ConservationArea ca;
+		if(resource != null){
+			ca = (ConservationArea) s.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", UUID.fromString(resource))).uniqueResult();
+		}else{
+			ca = null;
+		}
+		if(ca != null){//this is a CA uuid, make sure the requestor has permission to hand out access
+			for (UUID u : list){
+				if(u.equals(ca.getUuid())){
+					access = true;
+					break;
+				}
+			}
+		}
+		if(!access){//if no approved access yet, check if the resource is a specific report or query uuid, then check if requestor is an admin of that ca
+			QueryProxy q = QueryManager.INSTANCE.findQueryProxy(UUID.fromString(resource), s);
+			Report r = (Report)s.createCriteria(Report.class).add(Restrictions.eq("uuid", UUID.fromString(resource))).uniqueResult();
+		
+			if(q != null ){
+				for (UUID u : list){
+					if(u.equals(q.getCaUuid() ) ){
+						access=true;
+						break;
+					}
+				}
+			}
+			if(r != null ){
+				for (UUID u : list){
+					if(u.equals(r.getConservationArea().getUuid() ) ){
+						access=true;
+						break;
+					}
+				}
+			}
+		}
+		
+		if(!access){
+			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+		}
+		return true;
 	}
 	
 
