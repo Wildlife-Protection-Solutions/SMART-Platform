@@ -223,6 +223,10 @@ public class ScreensUtil {
 		//navigate on save to start point
 		Node confirmNode = ctUtil.createSaveNode(endId, appStartId,  Messages.PatrolScreens_Confirm, confirmMsg, true);
 		container.screenNodes.add(confirmNode);
+		
+		//flush all data on save
+		Control control2 = screensFactory.createFlushOnSaveControl();
+		ScreensObjectFactory.addControlToNode(confirmNode, control2);
 		return endId;
 	}
 

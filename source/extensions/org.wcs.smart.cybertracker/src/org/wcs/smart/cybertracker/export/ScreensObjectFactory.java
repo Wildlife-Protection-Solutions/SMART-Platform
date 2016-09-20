@@ -1114,6 +1114,21 @@ public class ScreensObjectFactory {
 	}
 	
 	/**
+	<Control>
+    	<Type>{06F58F58-A9BC-4C23-A10A-4A35CC465D06}</Type>
+        <Id>20</Id>
+        <Enabled>True</Enabled>
+	</Control>
+	 */
+	public Controls.Control createFlushOnSaveControl() {
+		Controls.Control control = new Controls.Control();
+		control.setType("{06F58F58-A9BC-4C23-A10A-4A35CC465D06}"); //$NON-NLS-1$
+		control.setId(20);
+		control.setEnabled("True");
+		return control;
+	}
+	
+	/**
     <Control>
 	    <Type>{0BC657FA-C6C4-4348-9905-20202341662C}</Type>
 	    <Id>19</Id>
