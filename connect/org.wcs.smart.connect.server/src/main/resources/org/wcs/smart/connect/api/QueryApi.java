@@ -23,7 +23,6 @@ package org.wcs.smart.connect.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
@@ -70,7 +69,6 @@ import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.query.model.*;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridResultItem;

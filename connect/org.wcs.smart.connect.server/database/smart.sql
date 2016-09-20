@@ -306,7 +306,7 @@ CREATE TABLE smart.dm_aggregation_i18n
 (
    NAME varchar(16) NOT NULL,
    LANG_CODE varchar(5) NOT NULL,
-   GUI_NAME varchar(48) NOT NULL,
+   GUI_NAME varchar(96) NOT NULL,
    PRIMARY KEY (NAME,LANG_CODE)
 );
 

@@ -205,14 +205,9 @@ public class ConnectUser extends HttpServlet {
     @Path("/{username}")
     public SmartUser addUser(@PathParam("username") String user, 
     		SmartUser newUser) {
-		boolean caRestricted;
-		if(!isCaAdminUser()){
-			isAdminUser();//throws an exception if invalid user.
-			caRestricted = false;
-		}else{
-			caRestricted = true;
-			//TODO, record and enforce what CAs this user's permissions can be for
-		}
+
+		isAdminUser();//throws an exception if invalid user.
+		
 		if (newUser.getUsername() != null && newUser.getUsername().length() > 0 && !newUser.getUsername().equals(user)){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.invalidusernames", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
@@ -278,16 +273,9 @@ public class ConnectUser extends HttpServlet {
     		@PathParam("username") String olduser,
     		SmartUser newUser) {
     	
-    	boolean caRestricted = false;
     	//if you are editing yourself, skip validation for admin-level user
     	if( !request.getUserPrincipal().getName().equals(olduser)){
-    		if(!isCaAdminUser()){
-    			isAdminUser();//throws an exception if invalid user.
-    			caRestricted = false;
-    		}else{
-    			caRestricted = true;
-    			//TODO, record and enforce what CAs this user's permissions can be for
-    		}
+   			isAdminUser();//throws an exception if not an Admin
     	}
     	
     	if (newUser.getUsername() != null){

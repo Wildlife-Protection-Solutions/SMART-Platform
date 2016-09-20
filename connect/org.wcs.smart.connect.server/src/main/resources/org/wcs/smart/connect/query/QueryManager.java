@@ -215,6 +215,24 @@ public enum QueryManager {
 	}
 	
 	/**
+	 * Find a given query based on the uuid.
+	 * @param uuid
+	 * @param session
+	 * @return
+	 */
+	public QueryProxy findQueryProxy(UUID uuid, Session session){
+		
+		for (Class<?> table : queryClasses){
+			Query q = (Query) session.get(table, uuid);
+			if (q != null){
+				return new QueryProxy(q.getUuid(),q.getName(), table.getClass().toString(),q.getConservationArea().getNameLabel(),q.getId(),
+						q.getIsShared(), q.getConservationArea().getUuid(), false, q.getTypeKey());
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Lists all queries.
 	 * 
 	 * @param session

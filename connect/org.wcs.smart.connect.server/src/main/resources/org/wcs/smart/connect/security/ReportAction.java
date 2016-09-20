@@ -31,8 +31,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.query.QueryManager;
-import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -82,7 +80,7 @@ public class ReportAction implements ISmartConnectAction{
 		
 		List<Report> info = s.createCriteria(Report.class).list();
 		for (Report i : info){
-			ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+			ro = new ResourceOption(i.getName() + "[" + i.getConservationArea().getNameLabel() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 			ops.add(ro);
 		}
 		
@@ -106,7 +104,7 @@ public class ReportAction implements ISmartConnectAction{
 		for (Report i : info){
 			for (UUID id : uuidList){
 				if(i.getConservationArea().getUuid().equals(id)){
-					ResourceOption ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+					ResourceOption ro = new ResourceOption(i.getName() + "[" + i.getConservationArea().getNameLabel() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 					ops.add(ro);
 				}
 			}

@@ -49,6 +49,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -60,12 +61,15 @@ import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserPermissionProxy;
 import org.wcs.smart.connect.model.SmartUserPermissionProxy.Type;
 import org.wcs.smart.connect.model.SmartUserRole;
+import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.security.ActionManager;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.ISmartConnectAction;
 import org.wcs.smart.connect.security.ResourceOption;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.report.model.Report;
 
 /**
  * SMART Connect REST API for configuring user and role
@@ -152,8 +156,20 @@ public class ConnectUserAction extends HttpServlet {
 		try{
 			List<SmartActionsProxy> actionResources = new ArrayList<SmartActionsProxy>();
 			
-			for (ISmartConnectAction a : ActionManager.INSTANCE.getAllActions()){
-				for (String actionKey : a.getActionKeys()){
+			List<ISmartConnectAction> all;
+			if(restricted){
+				all = ActionManager.INSTANCE.getActionsForCaAdmins();
+			}else{
+				all = ActionManager.INSTANCE.getAllActions();
+			}
+			for (ISmartConnectAction a : all){
+				String[] keys;
+				if(restricted){
+					keys = a.getCaAdminAccessibleActionKeys();
+				}else{
+					keys = a.getActionKeys();
+				}
+				for (String actionKey : keys){
 					SmartActionsProxy next = new SmartActionsProxy(a.getActionName(actionKey, SmartUtils.getRequestLocale(request)), actionKey);
 					List<ResourceOption> options;
 					if(restricted){
@@ -549,11 +565,60 @@ public class ConnectUserAction extends HttpServlet {
 			restricted = true;
 		}
 
-		//TODO //test action and current user (not username, the one making the request) to ensure they should be allowed to give this permission out.
+
+		
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			
+			//test action and current user (not username, the one making the request) to ensure they should be allowed to give this permission out.
+			if(restricted){
+				boolean access = false;
+				List<UUID> list = uuidsCaAdminof(s);
+				ConservationArea ca;
+				if(resourceKey != null){
+					ca = (ConservationArea) s.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", UUID.fromString(resourceKey))).uniqueResult();
+				}else{
+					ca = null;
+				}
+				if(ca != null){//this is a CA uuid, make sure the requestor has permission to hand out access
+					for (UUID u : list){
+						if(u.equals(ca.getUuid())){
+							access = true;
+							break;
+						}
+					}
+				}
+				if(!access){//if no approved access yet, check if the resource is a specific report or query uuid, then check if requestor is an admin of that ca
+					QueryProxy q = QueryManager.INSTANCE.findQueryProxy(UUID.fromString(resourceKey), s);
+					Report r = (Report)s.createCriteria(Report.class).add(Restrictions.eq("uuid", UUID.fromString(resourceKey))).uniqueResult();
+				
+					if(q != null ){
+						for (UUID u : list){
+							if(u.equals(q.getCaUuid() ) ){
+								access=true;
+								break;
+							}
+						}
+					}
+					if(r != null ){
+						for (UUID u : list){
+							if(u.equals(r.getConservationArea().getUuid() ) ){
+								access=true;
+								break;
+							}
+						}
+					}
+				}
+				
+				if(!access){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+			}
+			
+			
 			SmartUserAction newaction = new SmartUserAction();
 			newaction.setAction(actionKey);
 			newaction.setUsername(username);
@@ -568,6 +633,8 @@ public class ConnectUserAction extends HttpServlet {
 			if(ex instanceof ConstraintViolationException){
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 						Messages.getString("ConnectUserAction.UserAddErrorDuplicate", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+			}else if(ex instanceof SmartConnectException){
+				throw ex;
 			}else{
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 						Messages.getString("ConnectUserAction.UserAddError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$

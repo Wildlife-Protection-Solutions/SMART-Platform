@@ -17,6 +17,11 @@ window.onload = function(){
 		elements[i].onclick=showUserInfo;
 	}
 
+
+	//new user dialog
+	document.querySelector("#btnNewUser").onclick=clearAndShowNewUserDialog;
+	document.querySelector("#cancelnewuser").onclick = function(){closeDialog('newUserDialog');};
+	document.querySelector("#newuserform").onsubmit = createNewUser;
 }
 
 
@@ -343,6 +348,90 @@ function deleteAction(){
 	oReq.open("DELETE", loc, true);
 	oReq.send();
 	return false;	
+}
+
+/* clears and displays new user dialog */
+function clearAndShowNewUserDialog(){
+ 	document.querySelector("input[name=password1]").value = "";
+ 	document.querySelector("input[name=password2]").value = "";
+ 	document.querySelector("input[name=username]").value = "";
+ 	document.querySelector("input[name=email]").value = "";
+ 	document.querySelector("#newUserDialog > #dialogerror").style.display = "none";
+ 	displayDialog('newUserDialog', 'main');
+}
+
+//creates a new user
+function createNewUser() {
+	var pass1 = document.querySelector("input[name=password1]").value;
+	var pass2 = document.querySelector("input[name=password2]").value;
+	var user = document.querySelector("input[name=username]").value;
+	var email = document.querySelector("input[name=email]").value;
+	
+	var error = "";
+	if (user.length == 0 ) {
+		error = i18n("settings.usernamerequired");
+	}else if (pass1.length == 0){
+		error = i18n("settings.passwordrequired");
+	}else if (pass1 != pass2){
+		error = i18n("settings.passwordsdontmatch");
+	}
+
+	if (error.length > 0){
+		document.querySelector("#newUserDialog > #dialogerror").innerHTML = error;
+		document.querySelector("#newUserDialog > #dialogerror").style.display = "block";
+		return false;
+	}
+	
+	var jsonData = {
+		"username" : user,
+		"email" : email,
+		"password" : pass1
+	};
+
+	//make ajax call
+	hideInfo();
+
+	closeDialog('newUserDialog');
+	var oReq = new XMLHttpRequest();
+	oReq.onload = userCreated;
+	oReq.open("POST", USER_URL + encodeURIComponent(user), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
+/* add action to user*/
+function addAction(username){
+	var ddactions = document.querySelector("#actionKey");
+	var ddresources = document.querySelector("#actionResourceKey");
+	
+	var selectedActionKey = ddactions.options[ddactions.selectedIndex].value;
+	var selectedResourceKey = ddresources.options[ddresources.selectedIndex].value;
+	
+	hideInfo();
+	var oReq = new XMLHttpRequest();
+	oReq.onload = actionAdded;
+	oReq.smartuser = username;
+	var loc = PRIVILEGE_URL + "/user/" + encodeURIComponent(username) + "/action/" + encodeURIComponent(selectedActionKey);
+	if (selectedResourceKey.length > 0){
+		loc += "/" + selectedResourceKey;
+	}
+	oReq.open("POST", loc, true);
+	oReq.send();
+}
+
+
+
+//callback for creating user 
+function userCreated() {
+	if (this.status == 201) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo(user.username + i18n("users.accountcreated"));
+	} else {
+		displayError(parseError(i18n("users.errorcreatinguser"), this.responseText));
+	}
+	refreshUsers();
 }
 
 //callback for delete action 

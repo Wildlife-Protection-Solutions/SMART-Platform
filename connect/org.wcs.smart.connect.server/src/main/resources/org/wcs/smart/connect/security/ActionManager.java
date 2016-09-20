@@ -36,6 +36,7 @@ public enum ActionManager {
 	INSTANCE;
 	
 	private List<ISmartConnectAction> actions;
+	private List<ISmartConnectAction> caActions;
 	
 	private ActionManager(){
 		actions = new ArrayList<ISmartConnectAction>();
@@ -46,7 +47,17 @@ public enum ActionManager {
 		actions.add(new QueryAction());
 		actions.add(new DataQueueAction());
 		actions.add(new ReportAction());
+		
+		caActions = new ArrayList<ISmartConnectAction>();
+		caActions.add(new CaAction());
+		caActions.add(new AlertAction());
+		caActions.add(new QueryAction());
+		caActions.add(new DataQueueAction());
+		caActions.add(new ReportAction());
+
 	}
+	
+	
 	
 	public ISmartConnectAction findAction(String key){
 		for (ISmartConnectAction a : actions){
@@ -61,5 +72,9 @@ public enum ActionManager {
 	
 	public List<ISmartConnectAction> getAllActions(){
 		return actions;
+	}
+
+	public List<ISmartConnectAction> getActionsForCaAdmins() {
+		return caActions;
 	}
 }

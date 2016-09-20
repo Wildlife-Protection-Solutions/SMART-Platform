@@ -111,19 +111,6 @@
     </div>
   </form>
   </div>
-<div id="newRoleDialog" style="display: none;" class="dialog">
-  <div class="dialog-title"><fmt:message key="users.newrole"/></div>
-  <div id="roledialogerror" class="errorsection"></div>
-  <div><fmt:message key="users.newrolemessage"/></div>
-  <form id="newroleform" >
-    <label class="block top-spacer"><fmt:message key="users.newrolenamelabel"/></label>
-    <input type="hidden" name="roleid" />
-    <input type="text" name="rolename" class="formtext block" />
-    <div class="block top-spacer" style="text-align:right">
-     <input class="button" type="submit" id="createrolebtn" value="<fmt:message key="users.newrolebutton"/>" />
-     <input class="button" type="button" id="cancelnewrole" value="<fmt:message key="users.cancel"/>" />
-    </div>
-  </form>
-  </div>
+
 </body>
 </html>
