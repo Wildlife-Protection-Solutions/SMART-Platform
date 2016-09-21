@@ -229,7 +229,7 @@
             name="Intelligence Query Editor">
       </editor>
       <editor
-            class="org.wcs.smart.i2.ui.editors.RecordEditor"
+            class="org.wcs.smart.i2.ui.editors.record.RecordEditor"
             default="false"
             id="org.wcs.smart.i2.editor.record"
             name="Intelligence Record Query">
@@ -249,6 +249,11 @@
          <menu
                id="org.wcs.smart.i2.menu.main"
                label="Intelligence 2">
+            <command
+                  commandId="org.wcs.smart.i2.command.record.new"
+                  label="New Record"
+                  style="push">
+            </command>
             <command
                   commandId="org.wcs.smart.i2.command.entity.new"
                   label="New Entity"
@@ -303,6 +308,10 @@
             id="org.wcs.smart.i2.command.relationshipgrouplist.show"
             name="Relationship Groups...">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.record.new"
+            name="New Intelligence Record">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -325,6 +334,10 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowRelationshipGroupListDialogHandler$ShowRelationshipGroupListDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.relationshipgrouplist.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.NewRecordHandler$NewRecordHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.record.new">
       </handler>
    </extension>
 

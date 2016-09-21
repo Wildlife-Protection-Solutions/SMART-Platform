@@ -4,6 +4,7 @@ import java.text.DateFormat;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
 public class RecordLabelProvider extends ColumnLabelProvider{
 
@@ -41,6 +42,8 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 	public String getText(Object element){
 		if (element instanceof IntelRecord){
 			return field.getLabel((IntelRecord) element);
+		}else if (element instanceof RecordEditorInput && field == RecordField.TITLE){
+			return ((RecordEditorInput) element).getName();
 		}
 		return super.getText(element);
 	}

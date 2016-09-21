@@ -105,8 +105,8 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				types = RelationshipTypeManager.INSTANCE.getRelationshipTypes(session, SmartDB.getCurrentConservationArea());
 				for (IntelRelationshipType t : types){
 					t.getNames().size();
-					t.getSourceEntityType().getName();
-					t.getTargetEntityType().getName();
+					if (t.getSourceEntityType() != null) t.getSourceEntityType().getName();
+					if (t.getTargetEntityType() != null) t.getTargetEntityType().getName();
 					for (IntelRelationshipTypeAttribute a : t.getAttributes()){
 						a.getAttribute().getNames().size();
 						if (a.getAttribute().getAttributeList() != null){

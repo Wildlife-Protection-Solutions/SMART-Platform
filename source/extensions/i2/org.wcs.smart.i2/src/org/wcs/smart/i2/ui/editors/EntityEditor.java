@@ -98,8 +98,10 @@ import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.AttachmentUtil;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttachment;
@@ -118,7 +120,9 @@ import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
+import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
+import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -287,14 +291,7 @@ public class EntityEditor extends EditorPart{
 		Session s = HibernateManager.openSession(new AttachmentInterceptor());
 		try{
 			s.beginTransaction();
-			for (IntelEntityAttachment ea : attachmentsToDelete){
-				
-				//TODO: check for other references before we delete this
-				if (ea.getAttachment().getUuid() != null){
-					s.delete(ea);
-					s.delete(ea.getAttachment());
-				}
-			}
+			
 			if (entity.getEntityAttachments() != null){
 				for (IntelEntityAttachment a : entity.getEntityAttachments()){
 					s.saveOrUpdate(a.getAttachment());
@@ -307,6 +304,17 @@ public class EntityEditor extends EditorPart{
 			}
 			for(IntelEntityRelationship r : relationshipsToDelete){
 				s.delete(r);
+			}
+			s.flush();
+			
+			for (IntelEntityAttachment ea : attachmentsToDelete){
+				//TODO: check for other references before we delete this
+				if (ea.getAttachment().getUuid() != null){
+					if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
+						s.delete(ea);
+						s.delete(ea.getAttachment());
+					}
+				}
 			}
 			s.getTransaction().commit();
 			
@@ -600,8 +608,27 @@ public class EntityEditor extends EditorPart{
 								newRelationship.setSourceEntity(e1);
 								newRelationship.setTargetEntity(e2);
 								add = true;
-								
-							}	
+							}else if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
+								newRelationship.setSourceEntity(e1);
+								newRelationship.setTargetEntity(e2);
+								add = true;
+							}else if (rType.getSourceEntityType() == null && rType.getTargetEntityType() != null){
+								if (rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+									newRelationship.setSourceEntity(e2);
+									newRelationship.setTargetEntity(e1);	
+								}else if (rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+									newRelationship.setSourceEntity(e1);
+									newRelationship.setTargetEntity(e2);
+								}
+							}else if (rType.getTargetEntityType() == null && rType.getSourceEntityType() != null){
+								if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+									newRelationship.setSourceEntity(e1);
+									newRelationship.setTargetEntity(e2);	
+								}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+									newRelationship.setSourceEntity(e2);
+									newRelationship.setTargetEntity(e1);
+								}
+							}
 							//check duplicates
 							if (add){
 								for (IntelEntityRelationship existing : relationships){
@@ -740,7 +767,7 @@ public class EntityEditor extends EditorPart{
 	
 	
 	private void createRecordsPanel(Composite parent){
-		tblRecords = new TableViewer(parent, SWT.BORDER);
+		tblRecords = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		tblRecords.setContentProvider(ArrayContentProvider.getInstance());
 		tblRecords.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblRecords.getTable().setHeaderVisible(true);
@@ -761,6 +788,17 @@ public class EntityEditor extends EditorPart{
 			col.getColumn().setWidth(width[i]);
 		}
 		tblRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		tblRecords.addDoubleClickListener(new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				Object x = ((IStructuredSelection)tblRecords.getSelection()).getFirstElement();
+				if (x instanceof IntelRecord){
+					(new OpenRecordHandler()).openRecord((IntelRecord) x, false);
+				}
+				
+			}
+		});
 		
 	}
 	private void createAttachmentPanel(Composite parent){
@@ -793,7 +831,7 @@ public class EntityEditor extends EditorPart{
 						entity.getEntityAttachments().add(iea);
 					}
 					setDirty(true);
-					attachmentTable.refresh();
+					refreshAttachmentTable();
 				}
 				
 			}
@@ -860,7 +898,7 @@ public class EntityEditor extends EditorPart{
 											break;
 										}
 									}
-									attachmentTable.refresh();
+									refreshAttachmentTable();
 									setDirty(true);
 								}
 							}	
@@ -900,6 +938,15 @@ public class EntityEditor extends EditorPart{
 		attachmentTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
 	
+	private void refreshAttachmentTable(){
+		List<ISmartAttachment> attachments = new ArrayList<ISmartAttachment>();
+		if (entity.getEntityAttachments() != null){
+			for (IntelEntityAttachment a : entity.getEntityAttachments()){
+				attachments.add(a.getAttachment());
+			}
+		}
+		attachmentTable.setAttachments(attachments);
+	}
 	
 	private void initControl(IntelEntity entity){
 		fieldEditors = new ArrayList<AttributeFieldEditor>();
@@ -986,8 +1033,7 @@ public class EntityEditor extends EditorPart{
 		attachmentEditPanel.getParent().layout(true);
 		relationshipEditPanel.getParent().layout(true);
 		
-		
-		attachmentTable.setEntity(entity);
+		refreshAttachmentTable();
 		
 		treeRelationships.setInput(relationships);
 		treeRelationships.refresh();

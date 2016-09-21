@@ -134,7 +134,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
-			List<IntelRelationshipGroup> groups = new ArrayList<IntelRelationshipGroup>();
+			List<Object> groups = new ArrayList<Object>();
 			Session s = HibernateManager.openSession();
 			try{
 				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
@@ -142,6 +142,12 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			}finally{
 				s.close();
 			}
+			IntelEntityType any = new IntelEntityType();
+			any.setName("<Any>");
+			types.add(0, any);
+			
+			String noGroup = "";
+			groups.add(0, noGroup);
 			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
@@ -152,13 +158,19 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 					
 					if (type.getSourceEntityType() != null){
 						cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
+					}else{
+						cmbSrcType.setSelection(new StructuredSelection(any));
 					}
 					
 					if (type.getTargetEntityType() != null){
 						cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
+					}else{
+						cmbTrgType.setSelection(new StructuredSelection(any));
 					}
 					if (type.getRelationshipGroup() != null){
 						cmbGroup.setSelection(new StructuredSelection(type.getRelationshipGroup()));
+					}else{
+						cmbGroup.setSelection(new StructuredSelection(noGroup));
 					}
 				}
 			});
@@ -347,7 +359,11 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object x = ((IStructuredSelection)cmbSrcType.getSelection()).getFirstElement();
 				if (x instanceof IntelEntityType){
-					type.setSourceEntityType((IntelEntityType) x);
+					if ( ((IntelEntityType)x).getUuid() == null){
+						type.setSourceEntityType(null);
+					}else{
+						type.setSourceEntityType((IntelEntityType) x);
+					}
 				}
 				modified();
 			}
@@ -368,7 +384,9 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object x = ((IStructuredSelection)cmbTrgType.getSelection()).getFirstElement();
-				if (x instanceof IntelEntityType){
+				if ( ((IntelEntityType)x).getUuid() == null){
+					type.setTargetEntityType(null);
+				}else{
 					type.setTargetEntityType((IntelEntityType) x);
 				}
 				modified();

@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -48,6 +49,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.i_record")
 public class IntelRecord extends UuidItem implements IIntelAuditItem{
 
+	public static final int MAX_TITLE_LENGTH = 1024;
+	
 	public enum Status{
 			NEW,
 			PROCESSING,
@@ -242,8 +245,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 		this.description = description;
 	}
 	
-	@OneToMany
-	@JoinColumn(name="record_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.record", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelEntityRecord> getEntities(){
 		return this.entities;
 	}
@@ -251,8 +253,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 		this.entities = entities;
 	}
 	
-	@OneToMany
-	@JoinColumn(name="record_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.record", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelRecordAttachment> getAttachments(){
 		return this.attachments;
 	}
@@ -262,7 +263,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	
 	
 	@OneToMany
-	@JoinColumn(name="location_uuid", referencedColumnName="uuid")
+	@JoinColumn(name="record_uuid", referencedColumnName="uuid")
 	public List<IntelLocation> getLocations(){
 		return this.locations;
 	}

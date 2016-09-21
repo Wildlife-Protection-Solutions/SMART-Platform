@@ -1,4 +1,4 @@
-package org.wcs.smart.i2.ui.views;
+package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -16,12 +16,17 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -29,31 +34,42 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
+import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
-import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
+import org.wcs.smart.i2.ui.views.EntitySearchResultTable;
 import org.wcs.smart.ui.Thumbnail;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
 
-public class EntityListComposite extends Composite {
+public class EntityList extends Composite {
 
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
 	
 	private Composite core = null;
 	
-	private List<IntelEntity> entities;
+	private List<IntelEntityRecord> entities;
 	private FormToolkit toolkit = null;
 	private List<EntityComponent> components = null;
 	
-	private EPartService pService; 
+	private EntityListComposite listParent;
+	private MenuItem mnuDelete;
+	private MenuItem mnuOpen;
 	
-	public EntityListComposite(Composite parent, FormToolkit toolkit, EPartService pService) {
+	public EntityList(EntityListComposite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
 		this.toolkit = toolkit;
-		this.pService = pService;
-				
+		this.listParent = parent;
+		
+		setLayout(new GridLayout());
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
+		
 		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
 		selectionColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
 		mouseOverColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 90));
@@ -71,25 +87,9 @@ public class EntityListComposite extends Composite {
 	 * 
 	 * @param entities
 	 */
-	public void setEntities(List<IntelEntity> entities){
+	public void setEntities(List<IntelEntityRecord> entities){
 		this.entities = entities;
 		createTable();
-	}
-	
-	public List<IntelEntity> getEntities(){
-		return this.entities;
-	}
-	
-	public void setSearchError(Exception ex){
-		if (core != null){
-			core.dispose();
-			core = null;
-		}
-		core = toolkit.createComposite(this, SWT.NONE);
-		core.setLayout(new GridLayout(2, false));
-		Label img = toolkit.createLabel(this, "");
-		img.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
-		toolkit.createLabel(this, MessageFormat.format("Search error: {0}",ex.getMessage()));
 	}
 	
 	
@@ -99,9 +99,7 @@ public class EntityListComposite extends Composite {
 			core = null;
 			components = null;
 		}
-		setLayout(new GridLayout());
-		((GridLayout)getLayout()).marginWidth = 0;
-		((GridLayout)getLayout()).marginHeight = 0;
+
 		
 		core = toolkit.createComposite(this, SWT.NONE);
 		core.setLayout(new GridLayout());
@@ -110,10 +108,8 @@ public class EntityListComposite extends Composite {
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		if (entities == null){
-			toolkit.createLabel(core, "Searching...");
+			toolkit.createLabel(core, "");
 		}else{
-			toolkit.createLabel(core, MessageFormat.format("{0} results", entities.size()));
-			
 			ScrolledComposite sc = new ScrolledComposite(core, SWT.V_SCROLL |  SWT.H_SCROLL);
 			toolkit.adapt(sc);
 			Composite main = toolkit.createComposite(sc, SWT.NONE);
@@ -122,22 +118,22 @@ public class EntityListComposite extends Composite {
 			sc.setExpandVertical(true);
 			main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			main.setLayout(new GridLayout());
+			main.setLayout(new GridLayout(2, true));
 			main.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 
-			components = new ArrayList<EntityListComposite.EntityComponent>();
+			components = new ArrayList<EntityComponent>();
 			int cnt = 0;
-			for (IntelEntity i : entities){		
+			for (IntelEntityRecord i : entities){		
 				EntityComponent entityComposite = new EntityComponent(main, i, cnt++, components);
 				components.add(entityComposite);
 				toolkit.adapt(entityComposite);
 				entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
-				Label l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL);
-				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//				Label l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+//				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 			}
-			sc.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			sc.setMinSize(computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			
 			createMenu(main);
 		}
@@ -152,67 +148,60 @@ public class EntityListComposite extends Composite {
 	}
 	
 	private void createMenu(Composite parent){
-		Menu menu = new Menu(parent);
+		Menu mnuEntities = new Menu(parent);
 		
-		MenuItem mnuOpen = new MenuItem(menu, SWT.PUSH);
-		mnuOpen.setText("Open...");
+		mnuEntities.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				
+				if (!listParent.getEditor().getEditMode()){
+					if (mnuDelete != null){
+						mnuDelete.dispose();
+						mnuDelete = null;
+					}
+				}else{
+					if (mnuDelete == null || mnuDelete.isDisposed()){
+						mnuDelete = new MenuItem(mnuEntities, SWT.PUSH);
+						mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+						mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+						mnuDelete.addSelectionListener(new SelectionAdapter() {
+							
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								listParent.deleteEntityLink();
+							}
+						});
+					}
+				}
+				mnuOpen.setEnabled(!getCurrentSelection().isEmpty());
+				if (mnuDelete != null && !mnuDelete.isDisposed()) mnuDelete.setEnabled(!getCurrentSelection().isEmpty());
+				
+				
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {}
+		});
+		
+		mnuOpen = new MenuItem(mnuEntities, SWT.PUSH);
+		mnuOpen.setText("Open");
 		mnuOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				openEntity();
 			}
 		});
-		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
-		mnuExport.setText("Export...");
 		
-		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
-		mnuWorkingset.setText("Add to WorkingSet");
-	
 		
-//		MenuItem mnuCreateRelationship = new MenuItem(menu, SWT.CASCADE);
-//		mnuCreateRelationship.setText("Relate to ");
-//		Menu subRelateTo = new Menu(menu);
-//		mnuCreateRelationship.setMenu(subRelateTo);
 		
-		menu.addMenuListener(new MenuListener() {
-			
-			@Override
-			public void menuShown(MenuEvent e) {
-				boolean hasSelection = !getCurrentSelection().isEmpty();
-				mnuOpen.setEnabled(hasSelection);
-				mnuExport.setEnabled(hasSelection);
-				mnuWorkingset.setEnabled(hasSelection);
-//				
-////				mnuWorkingset.getMenu().dispose();
-////				Menu subRelateTo = new Menu(menu);
-////				mnuCreateRelationship.setMenu(subRelateTo);
-//				for (MenuItem mi : subRelateTo.getItems()){
-//					mi.dispose();
-//				}
-//				Collection<MPart> parts = pService.getParts();
-//				for (MPart p : parts){
-//					if (E3Utils.isCompatibilityEditor(p)){
-//						Object editor = E3Utils.getSourceObject(p);
-//						if (editor instanceof EntityEditor && ((EntityEditor)editor).getEditMode()){
-//							MenuItem relate = new MenuItem(subRelateTo, SWT.PUSH);
-//							relate.setText( ((EntityEditor)editor).getEditorInput().getName()  );
-//							
-//						}
-//					}
-//				}
-				
-			}
-			
-			@Override
-			public void menuHidden(MenuEvent e) {
-			}
-		});
-//		parent.setMenu(menu);
 		List<Control> kids = new ArrayList<Control>();
 		kids.add(parent);
 		while(!kids.isEmpty()){
 			Control c = kids.remove(0);
-			c.setMenu(menu);
+			if (c.getMenu() == null){
+				c.setMenu(mnuEntities);
+			}
 			if (c instanceof Composite){
 				for (Control cc : ((Composite)c).getChildren()){
 					kids.add(cc);
@@ -227,22 +216,24 @@ public class EntityListComposite extends Composite {
 		if (components == null) return selections;
 		
 		for (EntityComponent c : components){
-			if (c.isSelected) selections.add(c.item);
+			if (c.isSelected) selections.add(c.item.getEntity());
 		}
 		return selections;
 		
 	}
 	private class EntityComponent extends Composite implements Listener{
 
-		private IntelEntity item;
+		private static final int THUMB_SIZE = 30;
+		
+		private IntelEntityRecord item;
 		private Color backgroundColor = null;
 		private boolean isSelected = false;
 		private boolean mouseOver = false;
 		private int index;
 		private List<EntityComponent> siblings;
 		
-		public EntityComponent(Composite parent, IntelEntity item, int index, List<EntityComponent> siblings){
-			super(parent, SWT.NONE);
+		public EntityComponent(Composite parent, IntelEntityRecord item, int index, List<EntityComponent> siblings){
+			super(parent, SWT.BORDER);
 			this.item = item;
 			createPart();
 			this.index = index;
@@ -260,41 +251,75 @@ public class EntityListComposite extends Composite {
 			((GridLayout)getLayout()).marginHeight = 0;
 			addListener(this);
 			
-			Thumbnail t = new Thumbnail(item.getPrimaryAttachment(), 50);
-			Composite c = t.createThumbnail(this);
+			Thumbnail t = new Thumbnail(item.getEntity().getPrimaryAttachment(), THUMB_SIZE);
+			Composite c = t.createThumbnail(this, SWT.NONE);
 			addListener(c);
 			toolkit.adapt(c);
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-			((GridData)c.getLayoutData()).widthHint = 50;
-			((GridData)c.getLayoutData()).heightHint = 50;
+			((GridData)c.getLayoutData()).widthHint = THUMB_SIZE;
+			((GridData)c.getLayoutData()).heightHint = THUMB_SIZE;
 			
-			Composite middle = toolkit.createComposite(this, SWT.NONE);
-			middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			middle.setLayout(new GridLayout(2, false));
-			addListener(middle);
 			
-			Label l = toolkit.createLabel(middle, item.getIdAttributeAsText());
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-			addListener(l);
-			l = toolkit.createLabel(middle,"");
-			l.setImage(EntityTypeLabelProvider.INSTANCE.getImage(item.getEntityType()));
-			addListener(l);
-			l = toolkit.createLabel(middle, "");
-			l.setText(EntityTypeLabelProvider.INSTANCE.getText(item.getEntityType()));
+			Label l = toolkit.createLabel(this, item.getEntity().getIdAttributeAsText());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			addListener(l);
 			
-			Composite right = toolkit.createComposite(this, SWT.NONE);
-			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			right.setLayout(new GridLayout(2, false));
-			addListener(right);
-			l = toolkit.createLabel(right, "Modified:");
-			addListener(l);
-			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getDateModified()));
-			addListener(l);
-			l = toolkit.createLabel(right, "Created:");
-			addListener(l);
-			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getDateCreated()));
-			addListener(l);
+			List<IntelRecordAttachment> allAttachments = listParent.getEditor().getRecord().getAttachments();
+			List<IntelAttachment> toShow1 = new ArrayList<IntelAttachment>();
+			List<IntelEntityAttachment> toShow2 = new ArrayList<IntelEntityAttachment>();
+			for (IntelEntityAttachment att : item.getEntity().getEntityAttachments()){
+				for (IntelRecordAttachment a : allAttachments){
+					if (att.getAttachment().equals(a.getAttachment())){
+						toShow1.add(a.getAttachment());
+						break;
+					}
+				}
+			}
+			for (IntelEntityAttachment att : listParent.getEditor().getAttachmentPanel().getNewEntityAttachments()){
+				if(att.getEntity().equals(item.getEntity())){
+					for (IntelRecordAttachment a : allAttachments){
+						if (att.getAttachment().equals(a.getAttachment())){
+							toShow2.add(att);
+							break;
+						}
+					}
+				}
+			}
+			
+			Composite attach = toolkit.createComposite(this, SWT.NONE);
+			attach.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			RowLayout layout = new RowLayout();
+			layout.wrap = false;
+			layout.marginBottom = layout.marginLeft = layout.marginRight = layout.marginTop = 0;
+			attach.setLayout(layout);
+			
+			for (IntelAttachment att : toShow1){
+				Thumbnail thumb = new Thumbnail(att, THUMB_SIZE-5);
+				Composite c2 = thumb.createThumbnail(attach, SWT.NONE);
+				toolkit.adapt(c2);
+				c2.setLayoutData(new RowData(THUMB_SIZE-5,THUMB_SIZE-5));
+				
+			}
+			for (IntelEntityAttachment att : toShow2){
+				Thumbnail thumb = new Thumbnail(att.getAttachment(), THUMB_SIZE-2);
+				Composite c2 = thumb.createThumbnail(attach, SWT.BORDER);
+				toolkit.adapt(c2);
+				c2.setLayoutData(new RowData(THUMB_SIZE-2,THUMB_SIZE-2));
+				
+				Menu menu = new Menu(c2);
+				c2.setMenu(menu);
+				MenuItem mi = new MenuItem(menu, SWT.PUSH);
+				mi.setText("Remove Attachment");
+				mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+				mi.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						listParent.getEditor().getRecord().getEntities().remove(att);
+						listParent.getEditor().getAttachmentPanel().getNewEntityAttachments().remove(att);
+						setEntities(listParent.getEditor().getRecord().getEntities());
+					}
+				});
+			}
 		}
 		
 		private void addListener(Control c){
@@ -404,8 +429,4 @@ public class EntityListComposite extends Composite {
         int b = blend(c1.blue, c2.blue, ratio);
         return new RGB(r, g, b);
     }
-    
-    
-    
-   
 }

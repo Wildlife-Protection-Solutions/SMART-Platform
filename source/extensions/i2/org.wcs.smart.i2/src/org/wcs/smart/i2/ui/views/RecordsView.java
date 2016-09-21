@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.views;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -38,13 +39,22 @@ import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -52,6 +62,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
+import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
+import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
@@ -70,44 +82,95 @@ public class RecordsView {
 	private ListViewer lstNewRecords;
 	private ListViewer lstAllRecords;
 	
+	
 	@PostConstruct
 	public void createPartControl(Composite parent) {
-		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		
 		parent.setLayout(new GridLayout());
+		((GridLayout)parent.getLayout()).marginHeight = 0;
+		((GridLayout)parent.getLayout()).marginWidth = 0;
 		
-		Section inProgress = toolkit.createSection(parent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
+		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
+		Composite thisParent = toolkit.createComposite(parent);
+		thisParent.setLayout(new GridLayout());
+		thisParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
+		Hyperlink refresh = toolkit.createHyperlink(thisParent, "Refresh", SWT.NONE);
+		refresh.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				loadRecordsJob.schedule();
+			}
+		});
+		
+		IDoubleClickListener openListener = new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				Object x = ((IStructuredSelection)event.getSelection()).getFirstElement();
+				if (x instanceof IntelRecord){
+					(new OpenRecordHandler()).openRecord((IntelRecord)x, false);
+				}else if (x instanceof RecordEditorInput){
+					(new OpenRecordHandler()).openRecord((RecordEditorInput)x, false);
+				}
+				
+			}
+		};
+		
+		Section inProgress = toolkit.createSection(thisParent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
 		inProgress.setText("In Progress");
 		inProgress.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		inProgress.setLayout(new GridLayout());
+		inProgress.addExpansionListener(new ExpansionAdapter() {
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				((GridData)inProgress.getLayoutData()).grabExcessVerticalSpace = e.getState();
+				thisParent.layout();
+			}
+		});
 		lstInProgress = new ListViewer(inProgress, SWT.BORDER);
 		inProgress.setClient(lstInProgress.getControl());
 		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
 		lstInProgress.setLabelProvider(new RecordLabelProvider());
 		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		lstInProgress.addDoubleClickListener(openListener);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-//		gd.heightHint = 200;
 		lstInProgress.getControl().setLayoutData(gd);
 		
 		
-		Section newRecords = toolkit.createSection(parent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
+		Section newRecords = toolkit.createSection(thisParent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
 		newRecords.setText("New Records");
 		newRecords.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		newRecords.setLayout(new GridLayout());
+		newRecords.addExpansionListener(new ExpansionAdapter() {
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				((GridData)newRecords.getLayoutData()).grabExcessVerticalSpace = e.getState();
+				thisParent.layout();
+			}
+		});
+
 		lstNewRecords = new ListViewer(newRecords, SWT.BORDER);
 		newRecords.setClient(lstNewRecords.getControl());
 		lstNewRecords.setContentProvider(ArrayContentProvider.getInstance());
 		lstNewRecords.setLabelProvider(new RecordLabelProvider());
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		lstNewRecords.addDoubleClickListener(openListener);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-//		gd.heightHint = 200;
 		lstNewRecords.getControl().setLayoutData(gd);
 		
 		
-		Section allRecords = toolkit.createSection(parent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
+		Section allRecords = toolkit.createSection(thisParent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
 		allRecords.setText("All Records");
 		allRecords.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		allRecords.setLayout(new GridLayout());
+		allRecords.addExpansionListener(new ExpansionAdapter() {
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				((GridData)allRecords.getLayoutData()).grabExcessVerticalSpace = e.getState();
+				thisParent.layout();
+			}
+		});
+
 		Composite allRecordsSection = toolkit.createComposite(allRecords);
 		allRecords.setClient(allRecordsSection);
 		allRecordsSection.setLayout(new GridLayout());
@@ -127,7 +190,7 @@ public class RecordsView {
 		lstAllRecords.setLabelProvider(new RecordLabelProvider());
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstAllRecords.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		lstAllRecords.addDoubleClickListener(openListener);
 		loadRecordsJob.schedule(0);
 	}
 
@@ -178,7 +241,7 @@ public class RecordsView {
 			final List<IntelRecord> newRecords = new ArrayList<IntelRecord>();
 			s = HibernateManager.openSession();
 			try{
-				inProgress.addAll(s.createCriteria(IntelRecord.class)
+				newRecords.addAll(s.createCriteria(IntelRecord.class)
 						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 						.add(Restrictions.eq("status", IntelRecord.Status.NEW))
 						.list());
@@ -190,6 +253,23 @@ public class RecordsView {
 				@Override
 				public void run() {
 					lstNewRecords.setInput(newRecords);
+				}
+			});
+			
+			s = HibernateManager.openSession();
+			final List<RecordEditorInput> allRecords = new ArrayList<RecordEditorInput>();
+			try{
+				List<Object[]> items = s.createQuery("SELECT title, uuid FROM IntelRecord order by dateModified desc").list();
+				for (Object[] item : items){
+					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1]));
+				}
+			}finally{
+				s.close();
+			}
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					lstAllRecords.setInput(allRecords);
 				}
 			});
 			return Status.OK_STATUS;

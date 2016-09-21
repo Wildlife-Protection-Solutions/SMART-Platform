@@ -268,8 +268,8 @@ CREATE TABLE smart.i_relationship_type
 	ca_uuid char(16) for bit data NOT NULL,
 	icon blob,
 	relationship_group_uuid char(16) for bit data,
-	src_entity_type char(16) for bit data NOT NULL,
-	target_entity_type char(16) for bit data NOT NULL,
+	src_entity_type char(16) for bit data,
+	target_entity_type char(16) for bit data,
 	PRIMARY KEY (uuid)
 );
 

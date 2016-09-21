@@ -171,7 +171,9 @@ public class EntityListShell {
 						Restrictions.and(Restrictions.eq("sourceEntityType", srcEntity.getEntityType()), 
 								Restrictions.eq("targetEntityType", targetEntity.getEntityType())),
 						Restrictions.and(Restrictions.eq("sourceEntityType", targetEntity.getEntityType()), 
-								Restrictions.eq("targetEntityType", srcEntity.getEntityType()))
+								Restrictions.eq("targetEntityType", srcEntity.getEntityType())),
+								Restrictions.isNull("sourceEntityType"),
+								Restrictions.isNull("targetEntityType")
 						))
 						.list());
 				for (IntelRelationshipType i : rtypes){

@@ -87,7 +87,7 @@ public class EntitySearchView {
 	@Inject
 	private EPartService partService;
 
-	private EntityListComposite entityList;
+	private EntitySearchResultTable entityList;
 	private FormToolkit toolkit;
 	
 	
@@ -181,7 +181,7 @@ public class EntitySearchView {
 		Label l = toolkit.createLabel(parent, "", SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		entityList = new EntityListComposite(parent, toolkit, partService);
+		entityList = new EntitySearchResultTable(parent, toolkit, partService);
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		searchJob.schedule();

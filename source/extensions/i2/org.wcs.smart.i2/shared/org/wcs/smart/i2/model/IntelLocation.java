@@ -152,7 +152,7 @@ public class IntelLocation extends UuidItem{
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="record_uiud", referencedColumnName="uuid")
+	@JoinColumn(name="record_uuid", referencedColumnName="uuid")
 	public IntelRecord getRecord(){
 		return this.record;
 	}

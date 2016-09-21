@@ -57,16 +57,15 @@ import org.wcs.smart.ui.Thumbnail;
 public class AttachmentTable extends Composite implements Listener {
 
 	private ThumbnailComposite thumb;
-	private IntelEntity entity;
+	private List<ISmartAttachment> attachments;
 	private FormToolkit toolkit;
 	
 	private ScrolledForm infoSection;
 	
 	private Menu thumbMenu;
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu){
-		
-		super(parent, SWT.NONE);
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, int style){
+		super(parent, style);
 		this.toolkit = toolkit;
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
@@ -94,8 +93,10 @@ public class AttachmentTable extends Composite implements Listener {
 			}
 		});
 		if (thumbsMenu != null) thumbMenu = thumbsMenu.createMenu(this); 
-		
-		
+	}
+	
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu){
+		this(parent, toolkit, thumbsMenu, SWT.NONE);
 	}
 	
 	
@@ -117,14 +118,11 @@ public class AttachmentTable extends Composite implements Listener {
 	
 	}
 	
-	public void setEntity(IntelEntity entity){
-		this.entity = entity;
-		refresh();
-	}
-	
-	public void refresh(){
+	public void setAttachments(List<ISmartAttachment> attachments){
+		this.attachments = attachments;
 		redraw.schedule();
 	}
+	
 	
 	
 	private Job redraw = new Job("redraw thumbnails"){
@@ -148,13 +146,8 @@ public class AttachmentTable extends Composite implements Listener {
 				
 			});
 			
-			if (entity != null && entity.getEntityAttachments() != null && !entity.getEntityAttachments().isEmpty()){
-				List<ISmartAttachment> thumbs = new ArrayList<ISmartAttachment>();
-				for (IntelEntityAttachment a : entity.getEntityAttachments()){
-					thumbs.add(a.getAttachment());
-				}
-			
-				thumb.setFiles(thumbs);
+			if (attachments != null && !attachments.isEmpty()){
+				thumb.setFiles(attachments);
 				thumb.initThumbs();
 				
 				Display.getDefault().syncExec(new Runnable(){

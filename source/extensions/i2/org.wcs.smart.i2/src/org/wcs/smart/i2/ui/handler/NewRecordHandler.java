@@ -19,53 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.editors;
+package org.wcs.smart.i2.ui.handler;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.part.EditorPart;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecord.Status;
+import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
-public class RecordEditor extends EditorPart{
+/**
+ * Open dialog handler
+ * 
+ * @author Emily
+ *
+ */
+public class NewRecordHandler {
 	
-	public static final String ID = "org.wcs.smart.i2.editor.record";
-
-	@Override
-	public void doSave(IProgressMonitor monitor) {
+	@Execute
+	public void createNewRecord(){
+		IntelRecord newRecord = new IntelRecord();
+		newRecord.setTitle("New Record");
+		newRecord.setStatus(Status.NEW);
+		newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
+		
+		RecordEditorInput input = new RecordEditorInput(newRecord);
+		
+		//open editor
+		(new OpenRecordHandler()).openRecord(input, true);
 	}
-
-	@Override
-	public void doSaveAs() {		
+	
+	// E3
+	public static class NewRecordHandlerWrapper extends DIHandler<NewRecordHandler> {
+		public NewRecordHandlerWrapper() {
+			super(NewRecordHandler.class);
+		}
 	}
-
-	@Override
-	public void init(IEditorSite site, IEditorInput input)
-			throws PartInitException {
-	}
-
-	@Override
-	public boolean isDirty() {
-		return false;
-	}
-
-	@Override
-	public boolean isSaveAsAllowed() {
-		return false;
-	}
-
-	@Override
-	public void createPartControl(Composite parent) {
-		Label l = new Label(parent, SWT.NONE);
-		l.setText("Intelligence Record Editor");
-	}
-
-	@Override
-	public void setFocus() {
-
-	}
-
+	
 }
