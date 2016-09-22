@@ -43,13 +43,18 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		this.searchString = searchString;
 	}
 	
+	public BasicEntitySearch(String searchString, int maxResults){
+		this.searchString = searchString;
+		this.maxResultCnt = maxResults;
+	}
+	
 	public BasicEntitySearch(String searchString, List<IntelEntityType> entityTypeFilter){
 		this.searchString = searchString;
 		this.entityTypeFilter = entityTypeFilter;
 	}
 	
 	public List<IntelEntity> doSearch(Session session){
-		//exact match id attribute
+
 		if (searchString == null || searchString.isEmpty()){
 			
 			Criteria c = session.createCriteria(IntelEntity.class);
@@ -64,7 +69,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			}
 			return items;
 		}
-		
+		//exact match id attribute		
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT e");
 		sb.append(" FROM IntelEntity e, ");
@@ -78,18 +83,50 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			sb.append("t IN (:types) AND ");
 		}
 		sb.append(" ( ( LOWER(v.stringValue) = :textSearch)  OR ");
-		sb.append(" ( a.value = :textSearch1 ) ) ");
+		sb.append(" ( LOWER(a.value) = :textSearch1 ) ) ");
 		
 		Query query = session.createQuery(sb.toString());
 		if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
 			query.setParameterList("types", entityTypeFilter);
 		}
 		query.setString("textSearch", searchString.toLowerCase());
-		query.setString("textSearch1", searchString);
+		query.setString("textSearch1", searchString.toLowerCase());
 		
 		List<IntelEntity> queryResults = query.list();
 		
 		List<IntelEntity> results = new ArrayList<IntelEntity>();
+		for (IntelEntity ie : queryResults){
+			if (!results.contains(ie)){
+				lazyLoadEntity(ie, session);
+				results.add(ie);
+				if(results.size() == maxResultCnt) break;
+			}
+		}
+		
+		//fuzzy match id attribute	
+		sb = new StringBuilder();
+		sb.append("SELECT e");
+		sb.append(" FROM IntelEntity e, ");
+		sb.append(" IntelEntityType t, ");
+		sb.append(" IntelEntityAttributeValue v left join v.attributeListItem i left Join i.names a ");
+		sb.append(" WHERE ");
+		sb.append(" e.entityType.uuid = t.uuid AND ");
+		sb.append(" v.id.attribute = t.idAttribute AND ");
+		sb.append(" v.id.entity = e AND ");
+		if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
+			sb.append("t IN (:types) AND ");
+		}
+		sb.append(" ( ( LOWER(v.stringValue) like :textSearch)  OR ");
+		sb.append(" ( LOWER(a.value) like :textSearch1 ) ) ");
+		
+		query = session.createQuery(sb.toString());
+		if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
+			query.setParameterList("types", entityTypeFilter);
+		}
+		query.setString("textSearch", "%" + searchString.toLowerCase() + "%");
+		query.setString("textSearch1","%" +  searchString.toLowerCase() + "%");
+		queryResults = query.list();
+				
 		for (IntelEntity ie : queryResults){
 			if (!results.contains(ie)){
 				lazyLoadEntity(ie, session);

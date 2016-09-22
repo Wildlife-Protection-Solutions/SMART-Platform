@@ -237,6 +237,7 @@ public class AttachmentTable extends Composite implements Listener {
 		
 		public void createThumbs(){
 			if (thumbs == null) return;
+			if (isDisposed()) return;
 			for (ThumbInfo t : thumbs){
 				Composite parent = toolkit.createComposite(this, SWT.NONE);
 				parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));

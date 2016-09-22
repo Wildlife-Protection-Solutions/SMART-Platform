@@ -37,7 +37,7 @@ import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.EntitySearchView.EntitySearchViewWrapper;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-public class EntityListShell {
+public class EntityRelationshipListShell {
 
 	private IntelEntity srcEntity;
 	private Shell shell;
@@ -49,7 +49,7 @@ public class EntityListShell {
 	
 	private TableViewer types;
 	
-	public EntityListShell(Display owner, IntelEntity srcEntity){
+	public EntityRelationshipListShell(Display owner, IntelEntity srcEntity){
 		this.srcEntity = srcEntity;
 		
 		hiddenParent = new Shell(owner);

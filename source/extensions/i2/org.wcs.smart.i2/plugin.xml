@@ -164,7 +164,7 @@
          <toolbar
                id="org.wcs.smart.i2.toolbar.perspective">
             <command
-                  commandId="org.wcs.smart.command.showperspective"
+                  commandId="org.wcs.smart.i2.command.perspective.open"
                   label="Data Analysis Mode"
                   style="radio">
                <parameter
@@ -173,7 +173,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.command.showperspective"
+                  commandId="org.wcs.smart.i2.command.perspective.open"
                   label="Data Assessment Mode"
                   style="radio">
                <parameter
@@ -189,6 +189,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.i2.ui.views.EntitySearchView$EntitySearchViewWrapper"
+            icon="images/icons/obj16/entity_list.png"
             id="org.wcs.smart.i2.view.entitysearch"
             name="Entity Search"
             restorable="true">
@@ -202,6 +203,7 @@
       </view>
       <view
             class="org.wcs.smart.i2.ui.views.RecordsView$RecordsViewWrapper"
+            icon="images/icons/obj16/script_list.png"
             id="org.wcs.smart.i2.ui.view.records"
             name="Records"
             restorable="true">
@@ -210,13 +212,6 @@
             class="org.wcs.smart.i2.ui.views.QueryView$QueryViewWrapper"
             id="org.wcs.smart.i2.ui.view.queries"
             name="Queries"
-            restorable="true">
-      </view>
-      <view
-            allowMultiple="false"
-            class="org.wcs.smart.i2.ui.views.IntelligenceMapView$IntelligenceMapViewWrapper"
-            id="org.wcs.smart.i2.view.map"
-            name="Map"
             restorable="true">
       </view>
    </extension>
@@ -231,6 +226,7 @@
       <editor
             class="org.wcs.smart.i2.ui.editors.record.RecordEditor"
             default="false"
+            icon="images/icons/obj16/script.png"
             id="org.wcs.smart.i2.editor.record"
             name="Intelligence Record Query">
       </editor>
@@ -239,6 +235,13 @@
             default="false"
             id="org.wcs.smart.i2.editor.entity"
             name="Entity Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.IntelligenceMapEditor"
+            default="false"
+            icon="images/icons/eview16/map.png"
+            id="org.wcs.smart.i2.editor.map"
+            name="Map">
       </editor>
    </extension>
    <extension
@@ -312,6 +315,15 @@
             id="org.wcs.smart.i2.command.record.new"
             name="New Intelligence Record">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.perspective.open"
+            name="Show Perspective">
+         <commandParameter
+               id="org.wcs.smart.perspectiveid"
+               name="Perspective ID"
+               optional="true">
+         </commandParameter>
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -338,6 +350,10 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.NewRecordHandler$NewRecordHandlerWrapper"
             commandId="org.wcs.smart.i2.command.record.new">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowPerspectiveHandler$ShowPerspectiveHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.perspective.open">
       </handler>
    </extension>
 

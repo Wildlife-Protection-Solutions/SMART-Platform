@@ -398,6 +398,9 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		AttributeListDialog dialog = new AttributeListDialog(getShell());
 		if (dialog.open() == Window.OK){
 			tblAttributes.refresh();
+			if (type.getIdAttribute() == null){
+				type.setIdAttribute(attributeList.get(0).getAttribute());
+			}
 			refreshAttributeList();
 			modified();
 		}
@@ -638,7 +641,15 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			});
 			filter = new NamedItemViewerFilter(attributeList);
 			attributeList.setFilters(new ViewerFilter[]{filter});
-			
+			attributeList.addDoubleClickListener(new IDoubleClickListener() {
+				
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					attributeList.setChecked( ((IStructuredSelection)attributeList.getSelection()).getFirstElement(), true );
+					okPressed();
+					
+				}
+			});
 			Button btnNew = new Button(parent, SWT.PUSH);
 			btnNew.setText("Create New Attribute");
 			btnNew.addSelectionListener(new SelectionAdapter() {

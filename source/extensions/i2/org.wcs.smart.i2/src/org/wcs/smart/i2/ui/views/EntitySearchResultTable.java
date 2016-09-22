@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.SWT;
@@ -31,7 +34,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
-import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
@@ -48,12 +50,12 @@ public class EntitySearchResultTable extends Composite {
 	private FormToolkit toolkit = null;
 	private List<EntityComponent> components = null;
 	
-	private EPartService pService; 
+	private IEclipseContext context;
 	
-	public EntitySearchResultTable(Composite parent, FormToolkit toolkit, EPartService pService) {
+	public EntitySearchResultTable(Composite parent, FormToolkit toolkit, IEclipseContext context) {
 		super(parent, SWT.NONE);
 		this.toolkit = toolkit;
-		this.pService = pService;
+		this.context = context;
 				
 		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
 		selectionColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
@@ -148,7 +150,7 @@ public class EntitySearchResultTable extends Composite {
 	
 	private void openEntity(){
 		if (!getCurrentSelection().isEmpty()){
-			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0));
+			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0), context);
 		}
 	}
 	
@@ -170,13 +172,11 @@ public class EntitySearchResultTable extends Composite {
 		mnuWorkingset.setText("Add to Working Set");
 	
 		
-		MenuItem mnuAddToRecord = new MenuItem(menu, SWT.CASCADE);
-		mnuAddToRecord.setText("Add to Record ");
-		Menu subRecord = new Menu(menu);
-		mnuAddToRecord.setMenu(subRecord);
+		
 		
 		menu.addMenuListener(new MenuListener() {
-			
+			private MenuItem mnuAddToRecord;
+			private Menu subRecord ;
 			@Override
 			public void menuShown(MenuEvent e) {
 				boolean hasSelection = !getCurrentSelection().isEmpty();
@@ -184,11 +184,20 @@ public class EntitySearchResultTable extends Composite {
 				mnuExport.setEnabled(hasSelection);
 				mnuWorkingset.setEnabled(hasSelection);
 				
+				if (mnuAddToRecord == null || mnuAddToRecord.isDisposed()){
+					mnuAddToRecord = new MenuItem(menu, SWT.CASCADE);
+					mnuAddToRecord.setText("Add to Record ");
 				
-				for (MenuItem mi : subRecord.getItems()){
-					mi.dispose();
+					subRecord = new Menu(menu);
+					mnuAddToRecord.setMenu(subRecord);
 				}
-				Collection<MPart> parts = pService.getParts();
+				if (subRecord != null && !subRecord.isDisposed()){
+					for (MenuItem mi : subRecord.getItems()){
+						mi.dispose();
+					}
+				}
+				
+				Collection<MPart> parts = context.get(EPartService.class).getParts();
 				for (MPart p : parts){
 					if (E3Utils.isCompatibilityEditor(p)){
 						Object editor = E3Utils.getSourceObject(p);
@@ -207,6 +216,9 @@ public class EntitySearchResultTable extends Composite {
 							});
 						}
 					}
+				}
+				if (subRecord.getItemCount() == 0){
+					mnuAddToRecord.dispose();
 				}
 				
 			}

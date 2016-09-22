@@ -30,6 +30,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -41,27 +45,36 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
@@ -70,6 +83,8 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.RecordManager;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -77,6 +92,8 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
+import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -92,6 +109,7 @@ public class RecordEditor extends EditorPart{
 	private boolean isDirty = false;
 	
 	private Button btnEditMode;
+	private Button btnDelete;
 	private Composite topPart;
 	
 	
@@ -101,6 +119,8 @@ public class RecordEditor extends EditorPart{
 	private EntityListComposite entityPanel;
 	private AttachmentListComposite attachmentPanel;
 	private LocationListComposite locationPanel;
+	
+	private IEclipseContext parentContext;
 	
 	private Job loadRecordJob = new Job("load intelligence record"){
 
@@ -177,6 +197,7 @@ public class RecordEditor extends EditorPart{
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		List<IntelEntity> modifiedEntities = new ArrayList<IntelEntity>();
+		boolean isnew = record.getUuid() == null;
 		
 		Session s = HibernateManager.openSession(new AttachmentInterceptor());
 		try{
@@ -196,7 +217,7 @@ public class RecordEditor extends EditorPart{
 			for (IntelEntityRecord r : entityPanel.getEntityLinksToDelete()){
 				s.delete(r);
 			}
-			
+			s.flush();
 			s.saveOrUpdate(record);
 			s.flush();
 			
@@ -221,9 +242,16 @@ public class RecordEditor extends EditorPart{
 			s.close();
 		}
 		
-		//TODO:: fire events (need event broker)
-		//1. for record
-		//2.  one for each entity in the modifiedEntities list
+		//fire events; one for record and one for each modified entity
+		if (isnew){
+			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_NEW, record);
+		}else{
+			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_MODIFIED, record);
+		}
+		for (IntelEntity modified : modifiedEntities){
+			parentContext.get(IEventBroker.class).post(IntelEvents.ENTITY_MODIFIED, modified);
+		}
+		
 		setDirty(false);
 		headerLabel.setText(record.getTitle());
 		super.setPartName(record.getTitle());
@@ -306,8 +334,32 @@ public class RecordEditor extends EditorPart{
 		link.schedule();
 	}
 	
+	public IEclipseContext getContext(){
+		return parentContext;
+	}
+	
+	
 	@Override
 	public void createPartControl(Composite parent) {
+		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
+		
+		//configure tags so editors show in both perspectives
+		MPart part = parentContext.get(MPart.class); 
+		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
+		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+		
+		getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter() {
+			@Override
+			public void perspectiveActivated(IWorkbenchPage page,
+					IPerspectiveDescriptor perspective) {
+				if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
+					//save and be done with it
+					setEditMode(false);
+				}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
+					setEditMode(true);
+				}
+			}
+		});
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		parent.setLayout(new GridLayout());
@@ -317,7 +369,7 @@ public class RecordEditor extends EditorPart{
 		
 		
 		Composite buttonPanel = toolkit.createComposite(parent, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout(2, false));
+		buttonPanel.setLayout(new GridLayout(3, false));
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)buttonPanel.getLayout()).marginWidth= 5;
 		((GridLayout)buttonPanel.getLayout()).marginHeight =5;
@@ -336,6 +388,29 @@ public class RecordEditor extends EditorPart{
 		headerLabel.setFont(headerFont);
 		headerLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
+		btnDelete = toolkit.createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (MessageDialog.openConfirm(getSite().getShell(), "Delete", "Are you sure you want to delete this record.  This action cannot be undone.")){
+					Session s = HibernateManager.openSession();
+					try{
+						s.beginTransaction();
+						RecordManager.INSTANCE.deleteRecord(record, s);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						Intelligence2PlugIn.displayLog("Error deleting record. " + ex.getMessage(), ex);
+						return;
+					}
+					parentContext.get(IEventBroker.class).send(IntelEvents.RECORD_DELETE, record);
+					getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
+				}
+				
+			}
+		});
+		btnDelete.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		btnDelete.setSelection(isEditMode);
+		
 		btnEditMode = toolkit.createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT, SWT.TOGGLE);
 		btnEditMode.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -344,31 +419,33 @@ public class RecordEditor extends EditorPart{
 				
 			}
 		});
-		btnEditMode.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		btnEditMode.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		btnEditMode.setSelection(isEditMode);
+		
+
 		
 		SashForm sash = new SashForm(parent, SWT.VERTICAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite top = createHeader(sash, "Narrative");
+		Composite top = createSectionHeader(sash, "Narrative");
 		topPart = toolkit.createComposite(top, SWT.NONE);
 		topPart.setLayout(new GridLayout(5, false));
-		((GridLayout)topPart.getLayout()).marginWidth = 0;
-		((GridLayout)topPart.getLayout()).marginHeight = 0;
+//		((GridLayout)topPart.getLayout()).marginWidth = 0;
+//		((GridLayout)topPart.getLayout()).marginHeight = 0;
 		topPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		
-		Composite expEntities = createHeader(sash, "Entities");
+		Composite expEntities = createSectionHeader(sash, "Entities");
 		entityPanel = new EntityListComposite(expEntities, toolkit, this);
 		entityPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)entityPanel.getLayoutData()).horizontalSpan = 0;
 		((GridData)entityPanel.getLayoutData()).verticalSpan = 0;
 				
-		Composite expAttachments = createHeader(sash, "Attachments");
+		Composite expAttachments = createSectionHeader(sash, "Attachments");
 		attachmentPanel = new AttachmentListComposite(expAttachments, toolkit, this);
 		attachmentPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite expLocation = createHeader(sash, "Locations");
+		Composite expLocation = createSectionHeader(sash, "Locations");
 		locationPanel = new LocationListComposite(expLocation, toolkit, this);
 		locationPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true)); 
 		
@@ -376,7 +453,7 @@ public class RecordEditor extends EditorPart{
 	}
 
 
-	private Composite createHeader(SashForm parent, String text){
+	private Composite createSectionHeader(SashForm parent, String text){
 		Composite all = toolkit.createComposite(parent, SWT.NONE);
 		all.setLayout(new GridLayout());
 		((GridLayout)all.getLayout()).marginWidth = 0;
@@ -472,10 +549,16 @@ public class RecordEditor extends EditorPart{
 		this.isEditMode = editMode;
 		
 		btnEditMode.setSelection(isEditMode);
+		btnDelete.setEnabled(isEditMode);
 		if (record != null){
 			initPage();
 		}
 		
+		if (!isEditMode){
+			setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
+		}else{
+			setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD_EDIT));
+		}
 		
 	}
 	
@@ -568,6 +651,94 @@ public class RecordEditor extends EditorPart{
 					setDirty(true);
 				}
 			});
+			
+			Menu menu = new Menu(txtDescription);
+			txtDescription.setMenu(menu);
+			
+			MenuItem search = new MenuItem(menu, SWT.CASCADE);
+			search.setText("Search Entity -> ");
+			search.addSelectionListener(new SelectionAdapter() {			
+				@Override
+				public void widgetSelected(SelectionEvent e) {				
+					EntitySearchShell shell = new EntitySearchShell(txtDescription.getDisplay(), txtDescription.getSelectionText(), RecordEditor.this);
+					shell.getShell().setLocation(Display.getDefault().getCursorLocation());
+					shell.getShell().open();
+					
+					shell.getShell().addListener(SWT.Close, new Listener() {
+						@Override
+						public void handleEvent(Event event) {
+							
+						}
+					
+					});
+				}
+			});
+			
+			new MenuItem(menu, SWT.SEPARATOR);
+			
+			MenuItem cut = new MenuItem(menu, SWT.PUSH);
+			cut.setText("Cut");
+			cut.addSelectionListener(new SelectionAdapter() {			
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					txtDescription.cut();
+				}
+			});
+			MenuItem copy = new MenuItem(menu, SWT.PUSH);
+			copy.setText("Copy");
+			copy.addSelectionListener(new SelectionAdapter() {			
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					txtDescription.copy();
+				}
+			});
+			MenuItem paste = new MenuItem(menu, SWT.PUSH);
+			paste.setText("Paste");
+			paste.addSelectionListener(new SelectionAdapter() {			
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					txtDescription.paste();
+				}
+			});
+			
+			MenuItem delete = new MenuItem(menu, SWT.PUSH);
+			delete.setText("Delete");
+			delete.addSelectionListener(new SelectionAdapter() {			
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Point sel = txtDescription.getSelection();
+					int from = sel.x;
+					int to = sel.y;
+					txtDescription.setText(txtDescription.getText().substring(0, from) + txtDescription.getText().substring(to));
+				}
+			});
+			
+			new MenuItem(menu, SWT.SEPARATOR);
+
+			MenuItem selectAll = new MenuItem(menu, SWT.PUSH);
+			selectAll.setText("Select All");
+			selectAll.addSelectionListener(new SelectionAdapter() {			
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					txtDescription.selectAll();
+				}
+			});
+			
+			menu.addMenuListener(new MenuListener() {
+				
+				@Override
+				public void menuShown(MenuEvent e) {
+					search.setEnabled(!txtDescription.getSelectionText().isEmpty());
+					delete.setEnabled(!txtDescription.getSelectionText().isEmpty());
+					cut.setEnabled(!txtDescription.getSelectionText().isEmpty());
+					copy.setEnabled(!txtDescription.getSelectionText().isEmpty());
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {
+					
+				}
+			});
 		}else{
 			txtDescription.setEditable(false);
 		}
@@ -579,6 +750,7 @@ public class RecordEditor extends EditorPart{
 		
 		attachmentPanel.refreshAttachmentTable();
 		attachmentPanel.updateEditMode();
+		entityPanel.updateEditMode();
 	}
 	
 	@Override

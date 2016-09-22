@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
@@ -83,10 +84,17 @@ import org.wcs.smart.ui.properties.FilterComposite;
 
 public class EntitySearchView {
 
+	/**
+	 * context location of entity search results
+	 */
+	public static final String ENTITY_SEARCH_RESULTS_KEY = "org.wcs.smart.i2.entity.search";
+	
 	public static final String ID = "org.wcs.smart.i2.view.entitysearch";
 	@Inject
 	private EPartService partService;
-
+	@Inject
+	private IEclipseContext context;
+	
 	private EntitySearchResultTable entityList;
 	private FormToolkit toolkit;
 	
@@ -119,11 +127,13 @@ public class EntitySearchView {
 				}
 			});
 		}
+		
 		@Override
 		public void afterSearch(List<IntelEntity> entities) {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
+					context.getParent().set(ENTITY_SEARCH_RESULTS_KEY, entities);
 					entityList.setEntities(entities);
 				}
 			});
@@ -181,7 +191,7 @@ public class EntitySearchView {
 		Label l = toolkit.createLabel(parent, "", SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		entityList = new EntitySearchResultTable(parent, toolkit, partService);
+		entityList = new EntitySearchResultTable(parent, toolkit, context);
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		searchJob.schedule();

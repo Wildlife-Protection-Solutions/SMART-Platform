@@ -61,7 +61,6 @@ public class AttachmentListComposite extends Composite{
 		
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginHeight = 0;
-		((GridLayout)getLayout()).marginWidth = 0;
 	
 		compAttachmentEdit= toolkit.createComposite(this, SWT.NONE);
 		compAttachmentEdit.setLayout(new GridLayout(1, false));
@@ -209,7 +208,7 @@ public class AttachmentListComposite extends Composite{
 				}
 			}
 		};
-		attachmentTable = new AttachmentTable(this, toolkit, thumbMenu, SWT.BORDER);
+		attachmentTable = new AttachmentTable(this, toolkit, thumbMenu, SWT.NONE);
 		attachmentTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 	}
@@ -238,8 +237,8 @@ public class AttachmentListComposite extends Composite{
 			editor.setDirty(true);
 			refreshAttachmentTable();
 		}
-		
 	}
+	
 	public void updateEditMode(){
 		if (editor.getEditMode()){
 			compAttachmentEdit.setVisible(true);

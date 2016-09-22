@@ -61,14 +61,16 @@ public class EntityList extends Composite {
 	private MenuItem mnuDelete;
 	private MenuItem mnuOpen;
 	
+	public int entityColumnCnt = 2;
+	
 	public EntityList(EntityListComposite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
 		this.toolkit = toolkit;
 		this.listParent = parent;
 		
 		setLayout(new GridLayout());
-		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
+		((GridLayout)getLayout()).marginWidth = 0;
 		
 		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
 		selectionColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
@@ -105,6 +107,7 @@ public class EntityList extends Composite {
 		core.setLayout(new GridLayout());
 		((GridLayout)core.getLayout()).marginWidth = 0;
 		((GridLayout)core.getLayout()).marginHeight = 0;
+
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		if (entities == null){
@@ -118,7 +121,9 @@ public class EntityList extends Composite {
 			sc.setExpandVertical(true);
 			main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			main.setLayout(new GridLayout(2, true));
+			main.setLayout(new GridLayout(entityColumnCnt, true));
+			((GridLayout)main.getLayout()).marginWidth = 0;
+			((GridLayout)main.getLayout()).marginHeight = 0;
 			main.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 
 			components = new ArrayList<EntityComponent>();
@@ -128,10 +133,6 @@ public class EntityList extends Composite {
 				components.add(entityComposite);
 				toolkit.adapt(entityComposite);
 				entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				
-//				Label l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL);
-//				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				
 			}
 			sc.setMinSize(computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			
@@ -143,7 +144,7 @@ public class EntityList extends Composite {
 	
 	private void openEntity(){
 		if (!getCurrentSelection().isEmpty()){
-			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0));
+			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0), listParent.getEditor().getContext());
 		}
 	}
 	

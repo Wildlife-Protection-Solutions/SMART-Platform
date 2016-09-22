@@ -36,8 +36,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -87,7 +92,10 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -116,6 +124,8 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
+import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
+import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
@@ -125,6 +135,7 @@ import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 
 public class EntityEditor extends EditorPart{
 	
@@ -169,6 +180,9 @@ public class EntityEditor extends EditorPart{
 	private List<IntelEntityRelationship> relationshipsToAdd = new ArrayList<IntelEntityRelationship>();
 	private List<IntelEntityRelationship> relationshipsToDelete = new ArrayList<IntelEntityRelationship>();
 	
+	private IEclipseContext context;
+	private IEventBroker eventBroker;
+
 	private Job loadEntity = new Job("load entity"){
 
 		@Override
@@ -317,20 +331,18 @@ public class EntityEditor extends EditorPart{
 				}
 			}
 			s.getTransaction().commit();
-			
-			eventBroker.send(IntelEvents.ENTITY_MODIFIED, entity);
-			
-			
 			attachmentsToDelete.clear();
 			relationshipsToAdd.clear();
 			relationshipsToDelete.clear();
-			//TODO: fire appropriate events; for this I need access to event broker
+
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog("Error saving entity changes: " + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
 		}
+		
+		eventBroker.send(IntelEvents.ENTITY_MODIFIED, entity);
 		setDirty(false);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
@@ -355,27 +367,30 @@ public class EntityEditor extends EditorPart{
 	public boolean isSaveAsAllowed() {
 		return false;
 	}
-
-	private IEventBroker eventBroker;
-//	private EventHandler relationshipEventHansler = new EventHandler() {
-//		
-//		@Override
-//		public void handleEvent(org.osgi.service.event.Event event) {
-//			// TODO Auto-generated method stub
-//			if (event.getTopic() == IntelEvents.ENTITY_RELATIONSHIP_DELETED){
-//				relationships.remove(event.getProperty());
-//			}
-//			
-//		}
-//	};
-	
 	
 	@Override
 	public void createPartControl(Composite parent) {
 		
-		IEclipseContext parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
-		eventBroker = parentContext.get(IEventBroker.class);
-//		eventBroker.subscribe(IntelEvents.ENTITY_RELATIONSHIP_ALL, );
+		context = (IEclipseContext) getSite().getService(IEclipseContext.class);
+		eventBroker = context.get(IEventBroker.class);
+		//configure tags for part to ensure shows in both perspectives
+		MPart part = context.get(MPart.class); 
+		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
+		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+		
+		getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter() {
+			@Override
+			public void perspectiveActivated(IWorkbenchPage page,
+					IPerspectiveDescriptor perspective) {
+				if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
+					//save and be done with it
+					setEditMode(false);
+				}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
+					setEditMode(true);
+				}
+			}
+		});
+		
 		
 		toolkit = new FormToolkit(parent.getDisplay());
 
@@ -548,8 +563,7 @@ public class EntityEditor extends EditorPart{
 				if (r.getSourceEntity() == entity){
 					toOpen = r.getTargetEntity();
 				}
-				
-				(new OpenEntityHandler()).openEntity(toOpen);
+				(new OpenEntityHandler()).openEntity(toOpen, context);
 			}
 		}
 	}
@@ -578,7 +592,7 @@ public class EntityEditor extends EditorPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				EntityListShell shell = new EntityListShell(getSite().getShell().getDisplay(), entity);
+				EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell().getDisplay(), entity);
 				
 				int x = btnAddRelationship.getLocation().x + btnAddRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				int y =  btnAddRelationship.getLocation().y;

@@ -35,10 +35,10 @@ import org.wcs.smart.i2.model.IntelAttribute;
  * @author Emily
  *
  */
-public enum IntelAttributeManager {
+public enum AttributeManager {
 	INSTANCE;
 	
-	private IntelAttributeManager(){
+	private AttributeManager(){
 		
 	}
 	

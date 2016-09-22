@@ -64,7 +64,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.IntelAttributeManager;
+import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -315,7 +315,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 						s.beginTransaction();
 						for (IntelAttribute a : toDelete){
 							try {
-								IntelAttributeManager.INSTANCE.deleteAttribute(a, s);
+								AttributeManager.INSTANCE.deleteAttribute(a, s);
 							}catch(Exception ex){
 								warnings.add(a.getName() + ": " + ex.getMessage());
 							}

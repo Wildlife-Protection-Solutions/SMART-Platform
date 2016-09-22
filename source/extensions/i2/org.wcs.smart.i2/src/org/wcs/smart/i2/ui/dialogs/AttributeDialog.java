@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.IntelAttributeManager;
+import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
@@ -79,7 +79,7 @@ public class AttributeDialog extends TitleAreaDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
 			try{
-				attributeSiblings = IntelAttributeManager.INSTANCE.getAttributes(s, SmartDB.getCurrentConservationArea());
+				attributeSiblings = AttributeManager.INSTANCE.getAttributes(s, SmartDB.getCurrentConservationArea());
 				attributeSiblings.remove(attribute);
 			}finally{
 				s.close();

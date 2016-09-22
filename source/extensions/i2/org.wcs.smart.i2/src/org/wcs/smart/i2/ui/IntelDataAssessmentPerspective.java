@@ -23,8 +23,8 @@ package org.wcs.smart.i2.ui;
 
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.wcs.smart.i2.ui.editors.IntelligenceMapEditor;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
-import org.wcs.smart.i2.ui.views.IntelligenceMapView;
 import org.wcs.smart.i2.ui.views.RecordsView;
 import org.wcs.smart.i2.ui.views.WorkingSetView;
 
@@ -51,11 +51,5 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 		layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 		layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
 		
-		if (layout instanceof org.eclipse.ui.internal.e4.compatibility.ModeledPageLayout) {
-			org.eclipse.ui.internal.e4.compatibility.ModeledPageLayout layout4 = (org.eclipse.ui.internal.e4.compatibility.ModeledPageLayout) layout;
-			
-			layout4.stackView(IntelligenceMapView.ID, layout.getEditorArea(), true);
-			layout.getViewLayout(IntelligenceMapView.ID).setCloseable(false);
-		}
 	}
 }
