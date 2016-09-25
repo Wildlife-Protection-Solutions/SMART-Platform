@@ -88,8 +88,6 @@ public class Messages extends NLS {
 	public static String PatrolLegImporter_MetaWarning_Mandate;
 	public static String PatrolLegImporter_MetaWarning_Station;
 	public static String PatrolLegImporter_MetaWarning_Team;
-	public static String PatrolLegImporter_TypeError_Message;
-	public static String PatrolLegImporter_TypeError_Title;
 	public static String PatrolLegImporter_Warn_TimeGap_End;
 	public static String PatrolLegImporter_Warn_TimeGap_Start;
 	public static String PatrolScreens_Begin;
