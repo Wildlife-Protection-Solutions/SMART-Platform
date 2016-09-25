@@ -454,6 +454,7 @@ public class PatrolHibernateManager extends HibernateManager{
 			patrol.setId(id);
 		}
 		
+		patrol.recalculateType();
 		session.saveOrUpdate(patrol);
 		
 		if (saveWaypoints){

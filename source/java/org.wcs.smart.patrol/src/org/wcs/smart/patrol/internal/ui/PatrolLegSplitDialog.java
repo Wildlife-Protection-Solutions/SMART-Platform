@@ -89,6 +89,8 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	private ArrayList<Employee> employeesA;
 	private ArrayList<Employee> employeesB;
 
+	private Label lblGroupAPilot;
+	private Label lblGroupBPilot;
 	private ComboViewer groupALeader;
 	private ComboViewer groupAPilot;
 	private ComboViewer groupBLeader;
@@ -198,10 +200,23 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		groupALeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupALeader_Label, (List<Employee>)groupAEmployees.getInput());
-		if (existingLeg.getPatrol().hasPilot()){
-			groupAPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupAPilot_Label, (List<Employee>)groupAEmployees.getInput());
-		}
+		Label lblGroupALeader = new Label(leaderComp, SWT.NONE);
+		lblGroupALeader.setText(Messages.PatrolLegSplitDialog_GroupALeader_Label);
+		groupALeader = createLeaderPilot(leaderComp, (List<Employee>)groupAEmployees.getInput());
+
+		lblGroupAPilot = new Label(leaderComp, SWT.NONE);
+		lblGroupAPilot.setText(Messages.PatrolLegSplitDialog_GroupAPilot_Label);
+		groupAPilot = createLeaderPilot(leaderComp, (List<Employee>)groupAEmployees.getInput());
+		
+		cmbTransportTypeA.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateGroupAPilotState();
+				
+			}
+		});
+		updateGroupAPilotState();
+
 		sc.setMinSize(gA.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		// -------- Group B -------------------
@@ -225,10 +240,24 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		leaderComp = new Composite(gB, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		groupBLeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBLeader_Label, (List<Employee>)groupBEmployees.getInput());
-		if (existingLeg.getPatrol().hasPilot()){
-			groupBPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBPilot_Label, (List<Employee>)groupBEmployees.getInput());
-		}
+
+		Label lblGroupBLeader = new Label(leaderComp, SWT.NONE);
+		lblGroupBLeader.setText(Messages.PatrolLegSplitDialog_GroupBLeader_Label);
+		groupBLeader = createLeaderPilot(leaderComp, (List<Employee>)groupBEmployees.getInput());
+
+		lblGroupBPilot = new Label(leaderComp, SWT.NONE);
+		lblGroupBPilot.setText(Messages.PatrolLegSplitDialog_GroupBPilot_Label);
+		groupBPilot = createLeaderPilot(leaderComp, (List<Employee>)groupBEmployees.getInput());
+		
+		cmbTransportTypeB.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateGroupBPilotState();
+				
+			}
+		});
+		updateGroupBPilotState();
+		
 		sc.setMinSize(gB.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		setMessage(Messages.PatrolLegSplitDialog_Dialog_Message);
@@ -237,12 +266,24 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		return parent;
 	}
 	
+	protected void updateGroupAPilotState() {
+		PatrolTransportType ptt = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
+		boolean showPilot = ptt != null && ptt.getPatrolType() != null && ptt.getPatrolType().requiresPilot();
+		lblGroupAPilot.setVisible(showPilot);
+		groupAPilot.getCombo().setVisible(showPilot);
+	}
+
+	protected void updateGroupBPilotState() {
+		PatrolTransportType ptt = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeB.getSelection()).getFirstElement();
+		boolean showPilot = ptt != null && ptt.getPatrolType() != null && ptt.getPatrolType().requiresPilot();
+		lblGroupBPilot.setVisible(showPilot);
+		groupBPilot.getCombo().setVisible(showPilot);
+	}
+	
 	/*
 	 * create a leader or pilot combo viewer
 	 */
-	private ComboViewer createLeaderPilot(Composite parent, String name, List<Employee> employeeList){
-		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(name);
+	private ComboViewer createLeaderPilot(Composite parent, List<Employee> employeeList){
 		ComboViewer cmbLeader = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbLeader.setLabelProvider(new EmployeeLabelProvider());
 		cmbLeader.setContentProvider(ArrayContentProvider.getInstance());
@@ -508,10 +549,12 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		if (  ((IStructuredSelection)this.groupBLeader.getSelection()).isEmpty() ){
 			return Messages.PatrolLegSplitDialog_Error_GroupBNoLeader;
 		}
-		if (this.groupAPilot != null &&   ((IStructuredSelection)this.groupAPilot.getSelection()).isEmpty() ){
+		PatrolTransportType pttA = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
+		if (this.groupAPilot != null && pttA.getPatrolType().requiresPilot() && ((IStructuredSelection)this.groupAPilot.getSelection()).isEmpty() ){
 			return Messages.PatrolLegSplitDialog_Error_GroupANoPilot;
 		}
-		if (this.groupBPilot != null &&   ((IStructuredSelection)this.groupBPilot.getSelection()).isEmpty() ){
+		PatrolTransportType pttB = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeB.getSelection()).getFirstElement();
+		if (this.groupBPilot != null && pttB.getPatrolType().requiresPilot() && ((IStructuredSelection)this.groupBPilot.getSelection()).isEmpty() ){
 			return Messages.PatrolLegSplitDialog_Error_GroupBNoPilot;
 		}
 		
@@ -617,8 +660,11 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		
 		Employee pilotA = null;
 		Employee pilotB = null;
-		if (this.groupAPilot != null){
+		if (this.groupAPilot != null && legA.getType().getPatrolType().requiresPilot()){
 			pilotA =   (Employee) ((IStructuredSelection)this.groupAPilot.getSelection()).getFirstElement();
+		}	
+
+		if (this.groupBPilot != null && legB.getType().getPatrolType().requiresPilot()){
 			pilotB =   (Employee) ((IStructuredSelection)this.groupBPilot.getSelection()).getFirstElement();
 		}	
 		
