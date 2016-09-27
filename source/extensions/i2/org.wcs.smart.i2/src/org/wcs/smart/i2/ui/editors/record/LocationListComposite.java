@@ -93,4 +93,8 @@ public class LocationListComposite extends Composite{
 	public void init(){
 		tblObservations.setInput(editor.getRecord().getLocations());
 	}
+	
+	public void refreshTable(){
+		tblObservations.refresh();
+	}
 }

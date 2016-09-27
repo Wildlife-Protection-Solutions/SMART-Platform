@@ -262,8 +262,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	}
 	
 	
-	@OneToMany
-	@JoinColumn(name="record_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="record", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<IntelLocation> getLocations(){
 		return this.locations;
 	}

@@ -95,7 +95,7 @@ public class IntelLocation extends UuidItem{
 	 * 
 	 * @param geometry new geometry
 	 */
-	public void setLineString(Geometry geometry){
+	public void setGeometry(Geometry geometry){
 		if (geometry == null){
 			this.geometry = null;
 			this.geom = null;

@@ -368,5 +368,18 @@
             icon="images/icons/obj16/entity_add.png">
       </image>
    </extension>
+   <extension
+         point="org.locationtech.udig.project.ui.tool">
+      <modalTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.i2.ui.editors.record.DrawPolygonTool"
+            icon="images/icons/obj16/entity_add.png"
+            id="org.wcs.smart.i2.record.polygon.draw"
+            name="Draw Area"
+            onToolbar="false"
+            toolCursorId="arrowCursor"
+            tooltip="draw the area for the record">
+      </modalTool>
+   </extension>
 
 </plugin>

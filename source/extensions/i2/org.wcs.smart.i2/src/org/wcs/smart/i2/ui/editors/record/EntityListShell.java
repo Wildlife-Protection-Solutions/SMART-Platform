@@ -98,7 +98,7 @@ public class EntityListShell implements Listener {
 		List<IntelEntity> entities = (List<IntelEntity>) editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY);
 		List<Object> allItems = new ArrayList<Object>();
 		allItems.add(ALL_ENTITIES);
-		allItems.addAll(entities);
+		if (entities != null) allItems.addAll(entities);
 		
 		tblSearchEntityList.setInput(allItems);
 		

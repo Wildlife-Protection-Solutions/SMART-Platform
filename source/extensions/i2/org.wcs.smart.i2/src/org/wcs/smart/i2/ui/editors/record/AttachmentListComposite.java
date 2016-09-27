@@ -187,7 +187,7 @@ public class AttachmentListComposite extends Composite{
 										
 										getNewEntityAttachments().add(a);
 										editor.setDirty(true);
-										editor.getEntityPanel().init();
+										editor.getSummaryPage().getEntityPanel().init();
 									}
 									
 								}

@@ -270,20 +270,22 @@ public class EntityList extends Composite {
 			List<IntelRecordAttachment> allAttachments = listParent.getEditor().getRecord().getAttachments();
 			List<IntelAttachment> toShow1 = new ArrayList<IntelAttachment>();
 			List<IntelEntityAttachment> toShow2 = new ArrayList<IntelEntityAttachment>();
-			for (IntelEntityAttachment att : item.getEntity().getEntityAttachments()){
-				for (IntelRecordAttachment a : allAttachments){
-					if (att.getAttachment().equals(a.getAttachment())){
-						toShow1.add(a.getAttachment());
-						break;
-					}
-				}
-			}
-			for (IntelEntityAttachment att : listParent.getEditor().getAttachmentPanel().getNewEntityAttachments()){
-				if(att.getEntity().equals(item.getEntity())){
+			if(allAttachments != null){
+				for (IntelEntityAttachment att : item.getEntity().getEntityAttachments()){
 					for (IntelRecordAttachment a : allAttachments){
 						if (att.getAttachment().equals(a.getAttachment())){
-							toShow2.add(att);
+							toShow1.add(a.getAttachment());
 							break;
+						}
+					}
+				}
+				for (IntelEntityAttachment att : listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments()){
+					if(att.getEntity().equals(item.getEntity())){
+						for (IntelRecordAttachment a : allAttachments){
+							if (att.getAttachment().equals(a.getAttachment())){
+								toShow2.add(att);
+								break;
+							}
 						}
 					}
 				}
@@ -318,7 +320,7 @@ public class EntityList extends Composite {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						listParent.getEditor().getRecord().getEntities().remove(att);
-						listParent.getEditor().getAttachmentPanel().getNewEntityAttachments().remove(att);
+						listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments().remove(att);
 						setEntities(listParent.getEditor().getRecord().getEntities());
 					}
 				});

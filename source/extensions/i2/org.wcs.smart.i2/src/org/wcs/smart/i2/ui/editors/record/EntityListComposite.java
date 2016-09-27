@@ -170,7 +170,7 @@ public class EntityListComposite extends Composite{
 		if (r != null && !r.isEmpty()){
 			for (IntelEntity toDelete : r){
 				//TODO: remove any links not yet saved links to attachments and locations
-				for (Iterator<IntelEntityAttachment> iterator = editor.getAttachmentPanel().getNewEntityAttachments().iterator(); iterator.hasNext();) {
+				for (Iterator<IntelEntityAttachment> iterator = editor.getSummaryPage().getAttachmentPanel().getNewEntityAttachments().iterator(); iterator.hasNext();) {
 					IntelEntityAttachment a = (IntelEntityAttachment) iterator.next();
 					if (a.getEntity().equals(toDelete)) iterator.remove();
 				}

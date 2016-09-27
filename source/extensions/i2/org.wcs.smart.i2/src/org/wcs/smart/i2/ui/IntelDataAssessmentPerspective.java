@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.i2.ui;
 
+import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.locationtech.udig.project.ui.internal.LayersView;
 import org.wcs.smart.i2.ui.editors.IntelligenceMapEditor;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.RecordsView;
@@ -44,12 +46,17 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(true);
 		
 		layout.addView(RecordsView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
-		layout.addView(WorkingSetView.ID, IPageLayout.BOTTOM, 0.7f, RecordsView.ID);
+		IFolderLayout bottomLeft = layout.createFolder("org.wcs.smart.i2.assessment.bottomleft", IPageLayout.BOTTOM,0.7f, RecordsView.ID);
+		
+		bottomLeft.addView(WorkingSetView.ID);
+		bottomLeft.addView(LayersView.ID);
+		
 		layout.addView(EntitySearchView.ID, IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA);
 		
 		layout.getViewLayout(RecordsView.ID).setCloseable(false);
 		layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 		layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
+		
 		
 	}
 }
