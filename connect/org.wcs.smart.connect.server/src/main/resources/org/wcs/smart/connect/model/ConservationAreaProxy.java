@@ -45,6 +45,51 @@ public class ConservationAreaProxy {
 	private String description;
 	private String designation;
 	
+	private String organization;
+	private String pointOfContact;
+	private String location;
+	private String owner;
+	
+
+//TODO
+//	private Polygon caBoundary;
+//	private Polygon bufferedManagementArea;
+//	private Polygon managementSectors;
+//	private Polygon patrolSectors;
+//	private Polygon administrativAreas;
+	
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
+
+	public String getPointOfContact() {
+		return pointOfContact;
+	}
+
+	public void setPointOfContact(String pointOfContact) {
+		this.pointOfContact = pointOfContact;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
 	public ConservationAreaProxy(ConservationAreaInfo ca){
 		this.caUuid = ca.getUuid();
 		this.label = ca.getLabel();

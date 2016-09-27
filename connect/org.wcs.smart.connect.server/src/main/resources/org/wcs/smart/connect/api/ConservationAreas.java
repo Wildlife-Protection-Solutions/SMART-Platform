@@ -189,25 +189,33 @@ public class ConservationAreas extends HttpServlet{
 	 * URL: ../server/api/conservationarea/
 	 * Call Type: GET
 	 * 
+	 * @parameter organizationFilter - only return CAs that have the provided text in the organization field
 	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
 	 */
 	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
-    public List<ConservationAreaProxy> getConservationAreas(){
+    public List<ConservationAreaProxy> getConservationAreas(@QueryParam("organizationFilter") String organizationFilter){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
 			List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
 			List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
 			for (ConservationAreaInfo ca : db){
-				//check to determine if ca is accessable by current user
+				//check to determine if ca is accessible by current user
 				try{
 					validateRead(ca.getUuid(), s);
 					ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
 					ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());
 					if (smartca != null){
 						proxy.setDescriptionDesignation(smartca.getDescription(), smartca.getDesignation());
+						
+						//add the extra metadata we have now
+						proxy.setLocation(smartca.getCountry());
+						proxy.setPointOfContact(smartca.getPointOfContact());
+						proxy.setOrganization(smartca.getOrganization());
+						proxy.setOwner(smartca.getOwner());
+
 					}
 					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
 					if(ca.getVersion()== null){
@@ -215,7 +223,10 @@ public class ConservationAreas extends HttpServlet{
 					}else{
 						proxy.setVersion(ca.getVersion());
 					}
-					conservationAreas.add(proxy);
+					
+					if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase().contains(organizationFilter.toUpperCase())) ){
+						conservationAreas.add(proxy);
+					}
 				}catch(SmartConnectException ex){
 					//not valid; ignore
 				}
@@ -252,7 +263,7 @@ public class ConservationAreas extends HttpServlet{
     public List<ConservationAreaProxy> getConservationAreasWithData(){
 		
 		List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
-		List<ConservationAreaProxy> allConservationAreas = getConservationAreas();
+		List<ConservationAreaProxy> allConservationAreas = getConservationAreas(null);
 		for (ConservationAreaProxy ca : allConservationAreas){
 			if(ca.getStatus().equals(ConservationAreaInfo.Status.CCAA) || ca.getStatus().equals(ConservationAreaInfo.Status.DATA)){
 				conservationAreas.add(ca);
