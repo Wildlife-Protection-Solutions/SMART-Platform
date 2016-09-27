@@ -74,7 +74,12 @@ public class Upgrader401To410 implements IDatabaseUpgrader {
 		@SuppressWarnings("nls")
 		String[] sql = new String[]{
 			"insert into smart.PATROL_TYPE (CA_UUID, PATROL_TYPE, IS_ACTIVE, MAX_SPEED) select DISTINCT CA_UUID, 'MIXED', true, 10000 from smart.PATROL_TYPE",
-			"delete from smart.screen_option where TYPE = 'TYPE'"
+			"delete from smart.screen_option where TYPE = 'TYPE'",
+
+			"alter table smart.conservation_area add column organization varchar(256)",
+			"alter table smart.conservation_area add column pointofcontact varchar(256)",
+			"alter table smart.conservation_area add column country varchar(256)",
+			"alter table smart.conservation_area add column owner varchar(256)"
 		};
 		
 		for (String s : sql) {
