@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,10 +32,16 @@ import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.derby.iapi.services.locks.Latch;
+import org.apache.derby.iapi.store.raw.ContainerKey;
+import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
@@ -46,27 +53,28 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
-import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
+import org.wcs.smart.i2.ui.handler.NewRecordHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -77,7 +85,9 @@ public class RecordsView {
 	
 	@Inject
 	private EPartService partService;
-
+	@Inject
+	private IEclipseContext context;
+	
 	public RecordsView() {
 		super();
 	}
@@ -98,13 +108,30 @@ public class RecordsView {
 		thisParent.setLayout(new GridLayout());
 		thisParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
-		Hyperlink refresh = toolkit.createHyperlink(thisParent, "Refresh", SWT.NONE);
-		refresh.addHyperlinkListener(new HyperlinkAdapter() {
+		ToolBar toolbar = new ToolBar(thisParent, SWT.HORIZONTAL | SWT.FLAT);
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		
+		ToolItem newItem = new ToolItem(toolbar, SWT.PUSH);
+		newItem.setToolTipText("create new record");
+		newItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD_NEW));
+		newItem.addSelectionListener(new SelectionAdapter(){
 			@Override
-			public void linkActivated(HyperlinkEvent e) {
+			public void widgetSelected(SelectionEvent e) {
+				ContextInjectionFactory.invoke(new NewRecordHandler(), Execute.class, context.createChild());
+			}
+		});
+		
+		ToolItem refreshItem = new ToolItem(toolbar, SWT.PUSH);
+		refreshItem.setToolTipText("refresh list");
+		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		refreshItem.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
 				loadRecordsJob.schedule();
 			}
 		});
+		
+		
 		
 		IDoubleClickListener openListener = new IDoubleClickListener() {
 			

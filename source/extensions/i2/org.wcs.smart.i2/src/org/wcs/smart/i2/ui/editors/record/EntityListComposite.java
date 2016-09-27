@@ -32,6 +32,7 @@ public class EntityListComposite extends Composite{
 	
 	private RecordEditor editor;
 	private List<IntelEntityRecord> intelLinksToDelete = new ArrayList<IntelEntityRecord>();
+	private List<IntelEntityRecord> intelLinksAdded = new ArrayList<IntelEntityRecord>();
 	
 	private Composite compEntityEdit;
 	
@@ -140,6 +141,8 @@ public class EntityListComposite extends Composite{
 							r.setRecord(editor.getRecord());
 							editor.getRecord().getEntities().add(r);
 							editor.setDirty(true);
+							
+							intelLinksAdded.add(r);
 						}
 						Display.getDefault().syncExec(() -> init());
 					}
@@ -157,6 +160,9 @@ public class EntityListComposite extends Composite{
 		lstEntities.setEntities(editor.getRecord().getEntities());
 	}
 	
+	public void refreshEntities(){
+		lstEntities.refreshTable();
+	}
 	
 	public void deleteEntityLink(){
 		boolean modified = false;
@@ -178,6 +184,7 @@ public class EntityListComposite extends Composite{
 				}
 				if (toRemove != null){
 					intelLinksToDelete.add(toRemove);
+					intelLinksAdded.remove(toRemove);
 					editor.getRecord().getEntities().remove(toRemove);
 					modified = true;
 				}
@@ -204,5 +211,9 @@ public class EntityListComposite extends Composite{
 	
 	public List<IntelEntityRecord> getEntityLinksToDelete(){
 		return this.intelLinksToDelete;
+	}
+	
+	public List<IntelEntityRecord> getEntityLinksAdded(){
+		return this.intelLinksAdded;
 	}
 }

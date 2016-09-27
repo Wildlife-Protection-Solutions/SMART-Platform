@@ -94,7 +94,9 @@ public class EntityList extends Composite {
 		createTable();
 	}
 	
-	
+	public void refreshTable(){
+		createTable();
+	}
 	private void createTable(){
 		if (core != null){
 			core.dispose();

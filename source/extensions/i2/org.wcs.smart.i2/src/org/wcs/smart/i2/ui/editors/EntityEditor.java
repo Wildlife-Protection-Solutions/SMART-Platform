@@ -27,31 +27,25 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
-import javax.swing.text.StyledEditorKit.BoldAction;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.UIEvents.EventTags;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -87,8 +81,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -110,6 +105,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
+import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttachment;
@@ -130,12 +126,10 @@ import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
-import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.E3Utils;
 
 public class EntityEditor extends EditorPart{
 	
@@ -166,7 +160,6 @@ public class EntityEditor extends EditorPart{
 	private Composite compAttributes;
 	private Composite compAttachments;
 	
-	private Button btnEditMode;
 	private AttachmentTable attachmentTable;
 	private Composite attachmentEditPanel;
 	private Composite relationshipEditPanel; 
@@ -183,6 +176,9 @@ public class EntityEditor extends EditorPart{
 	private IEclipseContext context;
 	private IEventBroker eventBroker;
 
+	private ToolItem deleteItem;
+	private ToolItem editItem;
+	
 	private Job loadEntity = new Job("load entity"){
 
 		@Override
@@ -331,10 +327,7 @@ public class EntityEditor extends EditorPart{
 				}
 			}
 			s.getTransaction().commit();
-			attachmentsToDelete.clear();
-			relationshipsToAdd.clear();
-			relationshipsToDelete.clear();
-
+			clearLists();
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog("Error saving entity changes: " + ex.getMessage(), ex);
 			return;
@@ -342,11 +335,22 @@ public class EntityEditor extends EditorPart{
 			s.close();
 		}
 		
-		eventBroker.send(IntelEvents.ENTITY_MODIFIED, entity);
+		HashMap<String, Object> data = new HashMap<String, Object>();
+		data.put(UIEvents.EventTags.ELEMENT, context.get(MPart.class));
+		data.put(IEventBroker.DATA, entity);
+		eventBroker.send(IntelEvents.ENTITY_MODIFIED, data);
 		setDirty(false);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
+		
+		super.setPartName(entity.getIdAttributeAsText());
 	}
 
+	private void clearLists(){
+		attachmentsToDelete.clear();
+		relationshipsToAdd.clear();
+		relationshipsToDelete.clear();
+	}
+	
 	@Override
 	public void doSaveAs() {		
 	}
@@ -368,6 +372,53 @@ public class EntityEditor extends EditorPart{
 		return false;
 	}
 	
+	private void subscribeToEvents(){
+		//on delete close editor
+		eventBroker.subscribe(IntelEvents.ENTITY_DELETE, new EventHandler() {
+			@Override
+			public void handleEvent(org.osgi.service.event.Event event) {
+				Object data = event.getProperty(IEventBroker.DATA);
+				if (data != null && data.equals(entity)){
+					getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
+				}
+			}
+		});
+		
+		
+		
+		final EventHandler promptToReset = new EventHandler(){
+			@Override
+			public void handleEvent(org.osgi.service.event.Event event) {
+				if (context.get(MPart.class) == event.getProperty(UIEvents.EventTags.ELEMENT)){
+					eventBroker.unsubscribe(this);
+					if (MessageDialog.openQuestion(getSite().getShell(), "Entity Modified", MessageFormat.format("The entity ''{0}'' has been changed by another process.  Do you want to reload the editor and loose local changes?", entity.getIdAttributeAsText()))){
+						loadEntity.schedule();
+						setDirty(false);
+					}
+				}
+			}
+		};
+		
+		eventBroker.subscribe(IntelEvents.ENTITY_MODIFIED, new EventHandler() {
+			@Override
+			public void handleEvent(org.osgi.service.event.Event event) {
+				Object data = event.getProperty(IEventBroker.DATA);
+				if (context.get(MPart.class) != event.getProperty(UIEvents.EventTags.ELEMENT)){
+					if (data != null && data.equals(entity)){
+						if (isDirty){
+							//the editor is dirty and the entity has changed behind the scenes; give the user the option of replacing 
+							//contents behind the scenes
+							eventBroker.subscribe(UIEvents.UILifeCycle.BRINGTOTOP, promptToReset);
+							//subscribe to active event
+						}else{
+							//reload page
+							loadEntity.schedule();
+						}
+					}
+				}
+			}
+		});
+	}
 	@Override
 	public void createPartControl(Composite parent) {
 		
@@ -417,6 +468,9 @@ public class EntityEditor extends EditorPart{
 				
 			}
 		});
+		
+
+		subscribeToEvents();
 	}
 
 
@@ -502,10 +556,60 @@ public class EntityEditor extends EditorPart{
 		lblIdentifier = toolkit.createLabel(rightPart, "");
 		lblIdentifier.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		lblIdentifier.setFont(headerFont);
-		btnEditMode = toolkit.createButton(rightPart, "Edit", SWT.TOGGLE);
-		btnEditMode.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		btnEditMode.addSelectionListener(new SelectionAdapter() {
-			
+
+		ToolBar buttonBar = new ToolBar(rightPart, SWT.HORIZONTAL | SWT.FLAT);
+		buttonBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
+		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		refreshItem.setToolTipText("refresh record");
+		refreshItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean doAction = true;
+				if (isDirty){
+					if (!MessageDialog.openConfirm(getSite().getShell(), "Refresh", "Changes will be lost.  Are you sure you want to refresh?")){
+						doAction = false;
+					}
+				}
+				if (doAction){
+					setDirty(false);
+					clearLists();
+					loadEntity.schedule();				
+				}
+			}
+		});
+		
+		deleteItem = new ToolItem(buttonBar, SWT.PUSH);
+		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		deleteItem.setToolTipText("delete entity");
+		deleteItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (MessageDialog.openConfirm(getSite().getShell(), "Delete", "Are you sure you want to delete this entity?  This action cannot be undone.")){
+					//TODO: delete entity
+					Session s = HibernateManager.openSession();
+					try{
+						s.beginTransaction();
+						EntityManager.INSTANCE.deleteEntity(entity, s);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						Intelligence2PlugIn.displayLog("Error deleting entity. " + ex.getMessage(), ex);
+						return;
+					}
+					eventBroker.send(IntelEvents.ENTITY_DELETE, entity);
+					
+				}
+				
+			}
+		});
+		deleteItem.setEnabled(isEditMode);
+		
+		
+		editItem = new ToolItem(buttonBar, SWT.CHECK);
+		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		editItem.setToolTipText("enable or disable editing of record");
+		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setEditMode(!isEditMode);
@@ -513,7 +617,6 @@ public class EntityEditor extends EditorPart{
 			}
 		});
 		
-	
 		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Attributes", "Files"}, rightPart, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
@@ -540,8 +643,9 @@ public class EntityEditor extends EditorPart{
 		}
 		this.isEditMode = isEdit;
 		if (entity != null) initControl(entity);
-		
-		btnEditMode.setSelection(isEdit);
+	
+		deleteItem.setEnabled(isEdit);
+		editItem.setSelection(isEdit);
 	}
 	
 	public void setDirty(boolean isDirty){
@@ -819,7 +923,8 @@ public class EntityEditor extends EditorPart{
 		
 		attachmentEditPanel = toolkit.createComposite(parent);
 		attachmentEditPanel.setLayout(createGridLayoutNoMargin(1));
-			
+		attachmentEditPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		Button btnAddAttachment = toolkit.createButton(attachmentEditPanel, "Add...", SWT.PUSH);
 		btnAddAttachment.addSelectionListener(new SelectionAdapter() {
 			@Override

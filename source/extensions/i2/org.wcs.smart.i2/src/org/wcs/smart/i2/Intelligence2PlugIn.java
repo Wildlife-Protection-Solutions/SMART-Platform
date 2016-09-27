@@ -49,8 +49,11 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String DB_VERSION_40 = "4.0"; //$NON-NLS-1$
 	public static final String DB_VERSION = DB_VERSION_40; //current version
 	
-	public static final String ICON_RECORD = "org.wcs.smart.i2.icon.record";
-	public static final String ICON_RECORD_EDIT = "org.wcs.smart.i2.icon.record.edit";
+	public static final String ICON_RECORD = "org.wcs.smart.i2.icon.record"; //$NON-NLS-1$
+	public static final String ICON_EDIT = "org.wcs.smart.i2.icon.edit"; //$NON-NLS-1$
+	public static final String ICON_REFRESH = "org.wcs.smart.i2.icon.refresh"; //$NON-NLS-1$
+	public static final String ICON_RECORD_NEW = "org.wcs.smart.i2.icon.record.new"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
 
@@ -66,8 +69,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		super.initializeImageRegistry(reg);
 		
 		reg.put(ICON_RECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script.png")); //$NON-NLS-1$);
-		reg.put(ICON_RECORD_EDIT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script_edit.png")); //$NON-NLS-1$);
-		
+		reg.put(ICON_RECORD_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script_add.png")); //$NON-NLS-1$);
+		reg.put(ICON_EDIT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit.png")); //$NON-NLS-1$);
+		reg.put(ICON_REFRESH, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png")); //$NON-NLS-1$);		
 	}
 	
 	/*
@@ -117,7 +121,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message); //$NON-NLS-1$
 			}
 			
 		});

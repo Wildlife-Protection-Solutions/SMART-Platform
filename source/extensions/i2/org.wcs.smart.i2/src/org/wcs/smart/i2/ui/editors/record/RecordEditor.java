@@ -1,4 +1,4 @@
-/*
+/*   
  * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -68,6 +68,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -79,6 +81,8 @@ import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.osgi.service.event.EventHandler;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.AttachmentManager;
@@ -94,6 +98,7 @@ import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -107,12 +112,10 @@ public class RecordEditor extends EditorPart{
 	
 	private boolean isEditMode = false;
 	private boolean isDirty = false;
-	
-	private Button btnEditMode;
-	private Button btnDelete;
+
+	private ToolItem deleteItem;
+	private ToolItem editItem;
 	private Composite topPart;
-	
-	
 	private IntelRecord record;
 	private Label headerLabel;
 	
@@ -133,50 +136,54 @@ public class RecordEditor extends EditorPart{
 				uuid = input.getUuid();
 			}else{
 				uuid = input.getRecord().getUuid();
+				temp = input.getRecord();
 			}
-			Session s = HibernateManager.openSession();
-			try{
-				temp = (IntelRecord) s.get(IntelRecord.class, uuid);
-				temp.getCreatedBy().getFamilyName();
-				temp.getLastModifiedBy().getFamilyName();
-				if (temp.getAttachments().size() > 0){
-					for (IntelRecordAttachment a : temp.getAttachments()){
-						try{
-							a.getAttachment().computeFileLocation(s);
-						}catch (Exception ex){
-							//TODO: 
-						}
-					}
-				}
-				if (temp.getEntities() != null){
-					for (IntelEntityRecord rr : temp.getEntities()){
-						rr.getEntity().getIdAttributeAsText();
-						rr.getEntity().getEntityType().getName();
-						if (rr.getEntity().getPrimaryAttachment()!= null){
+			if (uuid != null){
+				record = null;
+				Session s = HibernateManager.openSession();
+				try{
+					temp = (IntelRecord) s.get(IntelRecord.class, uuid);
+					temp.getCreatedBy().getFamilyName();
+					temp.getLastModifiedBy().getFamilyName();
+					if (temp.getAttachments().size() > 0){
+						for (IntelRecordAttachment a : temp.getAttachments()){
 							try{
-								rr.getEntity().getPrimaryAttachment().computeFileLocation(s);
+								a.getAttachment().computeFileLocation(s);
 							}catch (Exception ex){
-								//TODO:
+								//TODO: 
 							}
 						}
-						if (rr.getEntity().getEntityAttachments() != null){
-							for (IntelEntityAttachment a : rr.getEntity().getEntityAttachments()){
+					}
+					if (temp.getEntities() != null){
+						for (IntelEntityRecord rr : temp.getEntities()){
+							rr.getEntity().getIdAttributeAsText();
+							rr.getEntity().getEntityType().getName();
+							if (rr.getEntity().getPrimaryAttachment()!= null){
 								try{
-									a.getAttachment().computeFileLocation(s);
+									rr.getEntity().getPrimaryAttachment().computeFileLocation(s);
 								}catch (Exception ex){
 									//TODO:
 								}
 							}
+							if (rr.getEntity().getEntityAttachments() != null){
+								for (IntelEntityAttachment a : rr.getEntity().getEntityAttachments()){
+									try{
+										a.getAttachment().computeFileLocation(s);
+									}catch (Exception ex){
+										//TODO:
+									}
+								}
+							}
 						}
 					}
-				}
-				if (temp.getLocations() != null){
-					for (IntelLocation loc : temp.getLocations()){
-						loc.getId();
+					if (temp.getLocations() != null){
+						for (IntelLocation loc : temp.getLocations()){
+							loc.getId();
+						}
 					}
+				}finally{
+					s.close();
 				}
-			}finally{
-				s.close();
 			}
 			record = temp;
 			
@@ -211,12 +218,19 @@ public class RecordEditor extends EditorPart{
 			
 			for (IntelEntityAttachment entityAttachments : attachmentPanel.getNewEntityAttachments()){
 				s.save(entityAttachments);
+				entityAttachments.getEntity().getEntityAttachments().add(entityAttachments);
 				modifiedEntities.add(entityAttachments.getEntity());
 			}
 			
 			for (IntelEntityRecord r : entityPanel.getEntityLinksToDelete()){
+				modifiedEntities.add(r.getEntity());
 				s.delete(r);
 			}
+			
+			for (IntelEntityRecord r : entityPanel.getEntityLinksAdded()){
+				modifiedEntities.add(r.getEntity());
+			}
+			
 			s.flush();
 			s.saveOrUpdate(record);
 			s.flush();
@@ -232,8 +246,7 @@ public class RecordEditor extends EditorPart{
 			
 			s.getTransaction().commit();
 			
-			attachmentPanel.getAttachmentsToDelete().clear();
-			attachmentPanel.getNewEntityAttachments().clear();
+			clearLists();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog("Unable to save changes to intelligence record. " + ex.getMessage(), ex);
@@ -255,6 +268,14 @@ public class RecordEditor extends EditorPart{
 		setDirty(false);
 		headerLabel.setText(record.getTitle());
 		super.setPartName(record.getTitle());
+		entityPanel.refreshEntities();
+	}
+	
+	private void clearLists(){
+		attachmentPanel.getAttachmentsToDelete().clear();
+		attachmentPanel.getNewEntityAttachments().clear();
+		entityPanel.getEntityLinksAdded().clear();
+		entityPanel.getEntityLinksToDelete().clear();
 	}
 
 	@Override
@@ -348,6 +369,18 @@ public class RecordEditor extends EditorPart{
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
 		
+		//on delete close editor
+		parentContext.get(IEventBroker.class).subscribe(IntelEvents.RECORD_DELETE, new EventHandler() {
+			@Override
+			public void handleEvent(org.osgi.service.event.Event event) {
+				Object data = event.getProperty(IEventBroker.DATA);
+				if (data != null && data.equals(record)){
+					getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
+				}
+			}
+		});
+
+		  
 		getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter() {
 			@Override
 			public void perspectiveActivated(IWorkbenchPage page,
@@ -388,8 +421,33 @@ public class RecordEditor extends EditorPart{
 		headerLabel.setFont(headerFont);
 		headerLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		btnDelete = toolkit.createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
-		btnDelete.addSelectionListener(new SelectionAdapter() {
+		ToolBar buttonBar = new ToolBar(buttonPanel, SWT.HORIZONTAL | SWT.FLAT);
+		buttonBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
+		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		refreshItem.setToolTipText("refresh record");
+		refreshItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean doAction = true;
+				if (isDirty){
+					if (!MessageDialog.openConfirm(getSite().getShell(), "Refresh", "Changes will be lost.  Are you sure you want to refresh?")){
+						doAction = false;
+					}
+				}
+				if (doAction){
+					setDirty(false);
+					clearLists();
+					loadRecordJob.schedule();				
+				}
+			}
+		});
+		
+		deleteItem = new ToolItem(buttonBar, SWT.PUSH);
+		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		deleteItem.setToolTipText("delete record");
+		deleteItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (MessageDialog.openConfirm(getSite().getShell(), "Delete", "Are you sure you want to delete this record.  This action cannot be undone.")){
@@ -403,24 +461,23 @@ public class RecordEditor extends EditorPart{
 						return;
 					}
 					parentContext.get(IEventBroker.class).send(IntelEvents.RECORD_DELETE, record);
-					getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
 				}
 				
 			}
 		});
-		btnDelete.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		btnDelete.setSelection(isEditMode);
+		deleteItem.setEnabled(isEditMode);
 		
-		btnEditMode = toolkit.createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT, SWT.TOGGLE);
-		btnEditMode.addSelectionListener(new SelectionAdapter() {
+		
+		editItem = new ToolItem(buttonBar, SWT.CHECK);
+		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		editItem.setToolTipText("enable or disable editing of record");
+		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setEditMode(!isEditMode);
 				
 			}
 		});
-		btnEditMode.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		btnEditMode.setSelection(isEditMode);
 		
 
 		
@@ -548,18 +605,11 @@ public class RecordEditor extends EditorPart{
 		}
 		this.isEditMode = editMode;
 		
-		btnEditMode.setSelection(isEditMode);
-		btnDelete.setEnabled(isEditMode);
+		editItem.setSelection(isEditMode);
+		deleteItem.setEnabled(isEditMode);
 		if (record != null){
 			initPage();
-		}
-		
-		if (!isEditMode){
-			setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
-		}else{
-			setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD_EDIT));
-		}
-		
+		}		
 	}
 	
 	private void initPage(){
@@ -568,7 +618,8 @@ public class RecordEditor extends EditorPart{
 				c.dispose();
 			}
 		}
-		headerLabel.setText(record.getTitle());
+		super.setPartName(record.getTitle());
+		headerLabel.setText(record.getTitle() == null ? "" : record.getTitle());
 		toolkit.createLabel(topPart, "Title:");
 		int style = SWT.BORDER;
 		if (!isEditMode){

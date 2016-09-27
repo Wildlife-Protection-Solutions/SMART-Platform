@@ -160,6 +160,48 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
+         <menu
+               id="org.wcs.smart.i2.menu.main"
+               label="Intelligence 2">
+            <command
+                  commandId="org.wcs.smart.i2.command.record.new"
+                  label="New Record"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.entity.new"
+                  label="New Entity"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.i2.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.i2.command.entitytypelist.show"
+                  label="Entity Types..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.attributelist.show"
+                  label="Intelligence Attributes..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.relationshipgrouplist.show"
+                  label="Relationship Groups..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
+                  label="Relationship Types..."
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
                id="org.wcs.smart.i2.toolbar.perspective">
@@ -245,51 +287,6 @@
       </editor>
    </extension>
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu">
-         <menu
-               id="org.wcs.smart.i2.menu.main"
-               label="Intelligence 2">
-            <command
-                  commandId="org.wcs.smart.i2.command.record.new"
-                  label="New Record"
-                  style="push">
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.entity.new"
-                  label="New Entity"
-                  style="push">
-            </command>
-            <separator
-                  name="org.wcs.smart.i2.separator1"
-                  visible="true">
-            </separator>
-            <command
-                  commandId="org.wcs.smart.i2.command.entitytypelist.show"
-                  label="Entity Types..."
-                  style="push">
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.attributelist.show"
-                  label="Intelligence Attributes..."
-                  style="push">
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.relationshipgrouplist.show"
-                  label="Relationship Groups..."
-                  style="push">
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
-                  label="Relationship Types..."
-                  style="push">
-            </command>
-         </menu>
-      </menuContribution>
-   </extension>
-   <extension
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.i2.command.entitytypelist.show"
@@ -355,6 +352,21 @@
             class="org.wcs.smart.i2.ui.handler.ShowPerspectiveHandler$ShowPerspectiveHandlerWrapper"
             commandId="org.wcs.smart.i2.command.perspective.open">
       </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.i2.command.record.new"
+            icon="images/icons/obj16/script_add.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
+            icon="images/icons/obj16/relationship.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.i2.command.entity.new"
+            icon="images/icons/obj16/entity_add.png">
+      </image>
    </extension>
 
 </plugin>
