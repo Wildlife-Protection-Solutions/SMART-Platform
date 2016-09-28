@@ -1,13 +1,31 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors.record;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
@@ -16,17 +34,14 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -37,15 +52,20 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
+import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
-import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
-import org.wcs.smart.i2.ui.views.EntitySearchResultTable;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.E3Utils;
 
+/**
+ * Displays a list of entities.
+ * 
+ * @author Emily
+ *
+ */
 public class EntityList extends Composite {
 
 	private Color selectionColor = null;
@@ -54,6 +74,8 @@ public class EntityList extends Composite {
 	private Composite core = null;
 	
 	private List<IntelEntityRecord> entities;
+	private HashMap<IntelEntity, List<IntelLocation>> locationCounter;
+	
 	private FormToolkit toolkit = null;
 	private List<EntityComponent> components = null;
 	
@@ -90,6 +112,15 @@ public class EntityList extends Composite {
 	 * @param entities
 	 */
 	public void setEntities(List<IntelEntityRecord> entities){
+		locationCounter = new HashMap<IntelEntity, List<IntelLocation>>();
+		for (IntelEntityLocation location : listParent.getEditor().getEntityLocationLinks()){
+			List<IntelLocation> x = locationCounter.get(location.getEntity());
+			if (x == null){
+				x = new ArrayList<IntelLocation>();
+				locationCounter.put(location.getEntity(), x);
+			}
+			x.add(location.getLocation());
+		}
 		this.entities = entities;
 		createTable();
 	}
@@ -130,8 +161,10 @@ public class EntityList extends Composite {
 
 			components = new ArrayList<EntityComponent>();
 			int cnt = 0;
+			
+			
 			for (IntelEntityRecord i : entities){		
-				EntityComponent entityComposite = new EntityComponent(main, i, cnt++, components);
+				EntityComponent entityComposite = new EntityComponent(main, i, locationCounter.get(i.getEntity()), cnt++, components);
 				components.add(entityComposite);
 				toolkit.adapt(entityComposite);
 				entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -235,8 +268,20 @@ public class EntityList extends Composite {
 		private int index;
 		private List<EntityComponent> siblings;
 		
-		public EntityComponent(Composite parent, IntelEntityRecord item, int index, List<EntityComponent> siblings){
+		private int locationCount;
+		private String locationTooltip = null;
+		
+		
+		public EntityComponent(Composite parent, IntelEntityRecord item, List<IntelLocation> locationCnt, int index, List<EntityComponent> siblings){
 			super(parent, SWT.BORDER);
+			this.locationCount = locationCnt == null ? 0 : locationCnt.size();
+			if (locationCnt != null){
+				StringBuilder sb = new StringBuilder();
+				for (IntelLocation x : locationCnt){
+					sb.append(x.getId() + "\n");
+				}
+				locationTooltip = sb.toString();
+			}
 			this.item = item;
 			createPart();
 			this.index = index;
@@ -258,12 +303,21 @@ public class EntityList extends Composite {
 			Composite c = t.createThumbnail(this, SWT.NONE);
 			addListener(c);
 			toolkit.adapt(c);
-			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)c.getLayoutData()).widthHint = THUMB_SIZE;
 			((GridData)c.getLayoutData()).heightHint = THUMB_SIZE;
 			
+			Composite info = toolkit.createComposite(this);
+			info.setLayout(new GridLayout());
+			((GridLayout)info.getLayout()).marginWidth = 0;
+			((GridLayout)info.getLayout()).marginHeight = 0;
 			
-			Label l = toolkit.createLabel(this, item.getEntity().getIdAttributeAsText());
+			Label l = toolkit.createLabel(info, item.getEntity().getIdAttributeAsText());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			addListener(l);
+			
+			l = toolkit.createLabel(info, MessageFormat.format("Locations: {0}", locationCount));
+			l.setToolTipText(locationTooltip);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			addListener(l);
 			

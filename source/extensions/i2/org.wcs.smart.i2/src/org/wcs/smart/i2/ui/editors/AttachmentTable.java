@@ -43,8 +43,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.model.IntelAttachment;
-import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.ui.I2SwtUtils;
 import org.wcs.smart.ui.Thumbnail;
 
@@ -103,6 +101,7 @@ public class AttachmentTable extends Composite implements Listener {
 	@Override
 	public void handleEvent(Event event) {
 		if (event == null || event.type == SWT.Resize){
+			if (infoSection.isDisposed()) return;
 			if (thumb != null){
 				int mainWidth = infoSection.getClientArea().width - infoSection.getVerticalBar().getSize().x;
 				int width = infoSection.getSize().x - infoSection.getVerticalBar().getSize().x;	

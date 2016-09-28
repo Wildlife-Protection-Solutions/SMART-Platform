@@ -373,12 +373,22 @@
       <modalTool
             categoryId="org.wcs.smart.ui.map.tool"
             class="org.wcs.smart.i2.ui.editors.record.DrawPolygonTool"
-            icon="images/icons/obj16/entity_add.png"
+            icon="images/icons/obj16/polygon_add.png"
             id="org.wcs.smart.i2.record.polygon.draw"
             name="Draw Area"
             onToolbar="false"
             toolCursorId="arrowCursor"
             tooltip="draw the area for the record">
+      </modalTool>
+      <modalTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.i2.ui.editors.record.DrawPointTool"
+            icon="images/icons/obj16/point_add.png"
+            id="org.wcs.smart.i2.record.point.draw"
+            name="Draw Point"
+            onToolbar="false"
+            toolCursorId="arrowCursor"
+            tooltip="adds a point location">
       </modalTool>
    </extension>
 

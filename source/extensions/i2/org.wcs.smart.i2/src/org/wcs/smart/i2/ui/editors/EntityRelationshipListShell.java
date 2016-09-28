@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors;
 
 import java.util.ArrayList;
@@ -16,15 +37,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -33,46 +50,34 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
+import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.EntitySearchView.EntitySearchViewWrapper;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-public class EntityRelationshipListShell {
+/**
+ * Shell dialog for relating to entities
+ * 
+ * @author Emily
+ *
+ */
+public class EntityRelationshipListShell extends SmartShellDialog {
 
 	private IntelEntity srcEntity;
-	private Shell shell;
-	
-	private Shell hiddenParent;
-	
 	private IntelRelationshipType type;
 	private IntelEntity targetEntity;
 	
 	private TableViewer types;
 	
 	public EntityRelationshipListShell(Display owner, IntelEntity srcEntity){
+		super(owner);
 		this.srcEntity = srcEntity;
-		
-		hiddenParent = new Shell(owner);
-		
-		shell = new Shell(hiddenParent, SWT.NO_TRIM );
-		shell.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				hiddenParent.dispose();
-				
-			}
-		});
-		
-		shell.setLayout(createGridLayoutNoMargin(2));
-		shell.addListener(SWT.Deactivate, new Listener(){
-			@Override
-			public void handleEvent(Event event) {
-				getShell().close();
-			}
-			
-		});
-		
-		TableViewer entityListTable = new TableViewer(shell, SWT.BORDER);
+	}
+	
+	@Override
+	public void createContents(Composite parent){
+		parent.setLayout(new GridLayout(2, true));
+		TableViewer entityListTable = new TableViewer(parent, SWT.BORDER);
 		entityListTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityListTable.setContentProvider(ArrayContentProvider.getInstance());
 		entityListTable.setLabelProvider(new LabelProvider(){
@@ -108,7 +113,7 @@ public class EntityRelationshipListShell {
 			}
 		});
 		
-		types = new TableViewer(shell, SWT.BORDER);
+		types = new TableViewer(parent, SWT.BORDER);
 		types.setContentProvider(ArrayContentProvider.getInstance());
 		types.setLabelProvider(RelationshipTypeLabelProvider.INSTANCE);
 		types.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -132,14 +137,8 @@ public class EntityRelationshipListShell {
 		if (view != null){
 			entityListTable.setInput(view.getEntities());
 		}
-		
-		shell.setSize(400, 200);
 	}
-	
-	public Shell getShell(){
-		return shell;
-	}
-	
+
 	private GridLayout createGridLayoutNoMargin(int col){
 		GridLayout gd = new GridLayout(col, true);
 		gd.marginWidth = 0;

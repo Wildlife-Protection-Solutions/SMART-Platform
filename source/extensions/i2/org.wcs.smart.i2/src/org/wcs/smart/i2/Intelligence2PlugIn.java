@@ -27,7 +27,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.hibernate.service.BootstrapServiceRegistryBuilder;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -71,7 +70,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_RECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script.png")); //$NON-NLS-1$);
 		reg.put(ICON_RECORD_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script_add.png")); //$NON-NLS-1$);
 		reg.put(ICON_EDIT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit.png")); //$NON-NLS-1$);
-		reg.put(ICON_REFRESH, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png")); //$NON-NLS-1$);		
+		reg.put(ICON_REFRESH, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png")); //$NON-NLS-1$);
 	}
 	
 	/*

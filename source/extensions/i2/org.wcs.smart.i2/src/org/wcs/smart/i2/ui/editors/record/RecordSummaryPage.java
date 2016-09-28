@@ -1,19 +1,31 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -42,45 +54,38 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
-import org.h2.command.ddl.CreateLinkedTable;
 import org.hibernate.Session;
-import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
-import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecord.Status;
-import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
-import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.ui.SmartLabelProvider;
 
+/**
+ * Summary Page for record editor.
+ * 
+ * @author Emily
+ *
+ */
 public class RecordSummaryPage extends EditorPart{
 
 	private FormToolkit  toolkit;
@@ -225,7 +230,7 @@ public class RecordSummaryPage extends EditorPart{
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setEditMode(!recordEditor.getEditMode());
+				recordEditor.setEditMode(!recordEditor.getEditMode());
 				
 			}
 		});
@@ -453,16 +458,7 @@ public class RecordSummaryPage extends EditorPart{
 				@Override
 				public void widgetSelected(SelectionEvent e) {				
 					EntitySearchShell shell = new EntitySearchShell(txtDescription.getDisplay(), txtDescription.getSelectionText(), recordEditor);
-					shell.getShell().setLocation(Display.getDefault().getCursorLocation());
-					shell.getShell().open();
-					
-					shell.getShell().addListener(SWT.Close, new Listener() {
-						@Override
-						public void handleEvent(Event event) {
-							
-						}
-					
-					});
+					shell.open(Display.getDefault().getCursorLocation());
 				}
 			});
 			
@@ -520,7 +516,6 @@ public class RecordSummaryPage extends EditorPart{
 				
 				@Override
 				public void menuShown(MenuEvent e) {
-					search.setEnabled(!txtDescription.getSelectionText().isEmpty());
 					delete.setEnabled(!txtDescription.getSelectionText().isEmpty());
 					cut.setEnabled(!txtDescription.getSelectionText().isEmpty());
 					copy.setEnabled(!txtDescription.getSelectionText().isEmpty());

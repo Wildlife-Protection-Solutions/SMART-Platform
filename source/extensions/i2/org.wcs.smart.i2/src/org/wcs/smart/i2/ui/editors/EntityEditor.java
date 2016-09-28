@@ -39,7 +39,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
-import org.eclipse.e4.ui.workbench.UIEvents.EventTags;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -131,9 +130,14 @@ import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Entity editor.
+ * @author Emily
+ *
+ */
 public class EntityEditor extends EditorPart{
 	
-	public static final String ID = "org.wcs.smart.i2.editor.entity";
+	public static final String ID = "org.wcs.smart.i2.editor.entity"; //$NON-NLS-1$
 
 	private static final int THUMB_SIZE = 150;
 	private Font boldFont = null;
@@ -700,10 +704,8 @@ public class EntityEditor extends EditorPart{
 				
 				int x = btnAddRelationship.getLocation().x + btnAddRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				int y =  btnAddRelationship.getLocation().y;
-				shell.getShell().setLocation(btnAddRelationship.toDisplay(x,y));
-				shell.getShell().open();
-				
-				shell.getShell().addListener(SWT.Close, new Listener(){
+				shell.open(btnAddRelationship.toDisplay(x,y));
+				shell.addListener(SWT.Close, new Listener(){
 
 					@Override
 					public void handleEvent(Event event) {
@@ -716,17 +718,7 @@ public class EntityEditor extends EditorPart{
 							IntelEntityRelationship newRelationship = new IntelEntityRelationship();
 							newRelationship.setRelationshipType(rType);
 							boolean add = false;
-							if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid()) &&
-									rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
-								newRelationship.setSourceEntity(e1);
-								newRelationship.setTargetEntity(e2);
-								add = true;
-							}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid()) &&
-									rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
-								newRelationship.setSourceEntity(e1);
-								newRelationship.setTargetEntity(e2);
-								add = true;
-							}else if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
+							if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
 								newRelationship.setSourceEntity(e1);
 								newRelationship.setTargetEntity(e2);
 								add = true;
@@ -746,7 +738,17 @@ public class EntityEditor extends EditorPart{
 									newRelationship.setSourceEntity(e2);
 									newRelationship.setTargetEntity(e1);
 								}
-							}
+							}else if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid()) &&
+									rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+								newRelationship.setSourceEntity(e1);
+								newRelationship.setTargetEntity(e2);
+								add = true;
+							}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid()) &&
+									rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+								newRelationship.setSourceEntity(e1);
+								newRelationship.setTargetEntity(e2);
+								add = true;
+							} 
 							//check duplicates
 							if (add){
 								for (IntelEntityRelationship existing : relationships){

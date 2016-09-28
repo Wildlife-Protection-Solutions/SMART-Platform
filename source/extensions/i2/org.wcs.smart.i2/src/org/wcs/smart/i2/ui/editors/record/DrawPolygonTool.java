@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.awt.Color;
@@ -7,28 +28,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelEvent;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
+import org.locationtech.udig.tools.edit.animation.MessageBubble;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Polygon;
 
+/**
+ * uDig tool for creating location polygons
+ * 
+ * @author Emily
+ *
+ */
 public class DrawPolygonTool extends SimpleTool {
 
-	public static final String ID = "org.wcs.smart.i2.record.polygon.draw";
+	public static final String ID = "org.wcs.smart.i2.record.polygon.draw"; //$NON-NLS-1$
 	
 	private Color LINE_COLOR = new Color(51,68,107);
 	private Color FILL_COLOR = new Color(51,68,107,10);
@@ -36,6 +63,19 @@ public class DrawPolygonTool extends SimpleTool {
 	private List<Point> coordinates = new ArrayList<Point>();
 	private Point last;
 	private AbstractDrawCommand drawCommand = null;
+	
+	private Listener cancelListener = new Listener() {
+		
+		@Override
+		public void handleEvent(Event event) {
+			if (event.keyCode == SWT.ESC){
+				//start over
+				coordinates.clear();
+				getContext().getViewportPane().repaint();
+				
+			}
+		}
+	};
 	
 	private class FeedbackCommand extends AbstractDrawCommand{	
 		
@@ -123,7 +163,8 @@ public class DrawPolygonTool extends SimpleTool {
 			}
 			
 			if (min == null || max == null) return null;
-			Rectangle r =  new Rectangle(min.x-5, min.y-5, (max.x - min.x)+10, (max.y - min.y)+10);
+			int extra = 20;
+			Rectangle r =  new Rectangle(min.x-extra, min.y-extra, (max.x - min.x)+2*extra, (max.y - min.y)+2*extra);
 			return r;
 		}
 	};
@@ -141,7 +182,13 @@ public class DrawPolygonTool extends SimpleTool {
 			drawCommand.dispose();
 			drawCommand = null;
 		}
-    	redraw(null);
+		
+		if (active){
+			getContext().getViewportPane().getControl().addListener(SWT.KeyUp, cancelListener);
+		}else{
+			getContext().getViewportPane().getControl().removeListener(SWT.KeyUp, cancelListener);
+		}
+		getContext().getViewportPane().repaint();
 	}
 	
 	private void finish(){
@@ -154,15 +201,29 @@ public class DrawPolygonTool extends SimpleTool {
 			c[i] = getContext().getViewportModel().pixelToWorld(temp.x, temp.y);
 		}
 		
-		Polygon p = GeometryFactoryProvider.getFactory().createPolygon(c);
+		Polygon p = null;
+		String error = null;
 		try {
+			p = GeometryFactoryProvider.getFactory().createPolygon(c);
 			p = (Polygon) JTS.transform(p, CRS.findMathTransform(getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS));
+			if (p.isEmpty() || !p.isSimple() || !p.isValid()){
+				error = "Invalid polygon.  Polygon must not be empty and must be valid";
+			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Intelligence2PlugIn.log(e.getMessage(), e);
+			error = e.getMessage();
 		}
-		
-		editor.addNewLocation(p);
+		if (error != null){
+			MessageBubble bubble = new MessageBubble(coordinates.get(coordinates.size() - 2).x, coordinates.get(coordinates.size() - 2).y, error, (short)5);
+			bubble.setHorizontalCornerArc(5);
+			bubble.setBubbleColor(new Color(255, 225,225));
+			bubble.setTextColor(new Color(120,0,0));
+			bubble.setHorizontalBorder(15);
+			bubble.setVerticalBorder(15);
+			getContext().getViewportPane().addDrawCommand(bubble);
+		}else{
+			editor.addNewLocation(p);
+		}
 		
 	}
 	 /**

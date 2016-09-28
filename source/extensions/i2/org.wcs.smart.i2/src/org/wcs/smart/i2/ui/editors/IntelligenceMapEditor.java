@@ -39,8 +39,6 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IPageChangedListener;
-import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -64,19 +62,13 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.eclipse.ui.part.MultiPageEditorPart;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.internal.ui.IDropTargetProvider;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
-import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.render.RenderPackage;
 import org.locationtech.udig.project.internal.render.ViewportModel;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.locationtech.udig.project.ui.AnimationUpdater;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.commands.IDrawCommand;
@@ -109,7 +101,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropTargetProvider {
 
-	public static final String ID = "org.wcs.smart.i2.editor.map";
+	public static final String ID = "org.wcs.smart.i2.editor.map"; //$NON-NLS-1$
 	
 	public static IEditorInput MAPINPUT = new IEditorInput() {
 		

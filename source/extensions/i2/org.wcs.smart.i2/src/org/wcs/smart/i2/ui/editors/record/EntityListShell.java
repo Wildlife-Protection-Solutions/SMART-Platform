@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.util.ArrayList;
@@ -18,9 +39,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -29,16 +47,21 @@ import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-public class EntityListShell implements Listener {
+/**
+ * Dialog shell for listing entities.  First list displays all entities in most recent search,
+ * second list displays entity types and third list displays all entities of the given type.
+ * 
+ * @author Emily
+ *
+ */
+public class EntityListShell extends SmartShellDialog {
 	
 	private static final String ALL_ENTITIES = "All Entities >";
-	
-	private Shell shell;
-	private Shell hiddenParent;
-	
+
 	private TableViewer tblSearchEntityList;
 	private TableViewer tblEntityTypeList;
 	private TableViewer tblEntityList;
@@ -50,16 +73,13 @@ public class EntityListShell implements Listener {
 	
 	
 	public EntityListShell(Display ownerDisplay, RecordEditor editor){
-		
-		hiddenParent = new Shell(ownerDisplay);
-		
-		shell = new Shell(hiddenParent, SWT.NO_TRIM );
-		shell.setLayout(createGridLayoutNoMargin(1));
-		
-		shell.addListener(SWT.Dispose, this);
-		shell.addListener(SWT.Deactivate, this);
-
-		Composite owner = new Composite(shell, SWT.NONE);
+		super(ownerDisplay);
+		this.editor = editor;
+	}
+	
+	@Override
+	public void createContents(Composite parent){
+		Composite owner = new Composite(parent, SWT.NONE);
 		owner.setLayout(createGridLayoutNoMargin(1));
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -80,7 +100,7 @@ public class EntityListShell implements Listener {
 				Object selection = ((StructuredSelection)tblSearchEntityList.getSelection()).getFirstElement();
 				if (selection instanceof IntelEntity){
 					selectedEntity = (IntelEntity) selection;
-					shell.close();
+					close();
 				}else if (selection == ALL_ENTITIES){
 					if (tblEntityTypeList == null){
 						createEntityListTable(owner);
@@ -100,14 +120,9 @@ public class EntityListShell implements Listener {
 		allItems.add(ALL_ENTITIES);
 		if (entities != null) allItems.addAll(entities);
 		
-		tblSearchEntityList.setInput(allItems);
-		
-		shell.setSize(400, 200);		
+		tblSearchEntityList.setInput(allItems);	
 	}
 	
-	public Shell getShell(){
-		return shell;
-	}
 	
 	private void createEntityListTable(Composite parent){
 		tblEntityTypeList = new TableViewer(parent, SWT.BORDER);
@@ -139,7 +154,7 @@ public class EntityListShell implements Listener {
 								Object selection = ((StructuredSelection)tblEntityList.getSelection()).getFirstElement();
 								if (selection instanceof IntelEntity){
 									selectedEntity = (IntelEntity) selection;
-									shell.close();
+									close();
 								}
 							}
 						});
@@ -166,18 +181,6 @@ public class EntityListShell implements Listener {
 	
 	public IntelEntity getTargetEntity(){
 		return this.selectedEntity;
-	}
-
-	@Override
-	public void handleEvent(Event event) {
-		if (event.type == SWT.Dispose){
-			hiddenParent.dispose();
-			return;
-		}
-		if (event.type == SWT.Deactivate){
-			getShell().close();
-			return;
-		}
 	}
 	
 	private Job loadEntityTypesJob = new Job("load entity types"){

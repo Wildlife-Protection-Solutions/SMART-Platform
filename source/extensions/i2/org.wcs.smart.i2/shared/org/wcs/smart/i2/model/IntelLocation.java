@@ -54,6 +54,7 @@ import com.vividsolutions.jts.io.WKBWriter;
 public class IntelLocation extends UuidItem{
 
 	public static final int COMMENT_MAX_LENGTH = 4096;
+	public static final int ID_MAX_LENGTH = 1028;
 	
 	private ConservationArea ca;
 	private String id;

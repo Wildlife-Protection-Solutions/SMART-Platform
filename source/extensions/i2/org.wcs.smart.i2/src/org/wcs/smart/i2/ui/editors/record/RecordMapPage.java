@@ -1,5 +1,27 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +44,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
-import org.geotools.feature.SchemaException;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.core.internal.FeatureUtils;
@@ -37,9 +58,14 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.JobUtil;
 
+/**
+ * Map page for intelligence record.
+ * 
+ * @author Emily
+ *
+ */
 public class RecordMapPage extends SmartMapEditorPart {
 	
-	//TODO: refresh events??
 	private RecordEditor recordEditor; 
 	
 	private LoadDefaultLayersJob loadDefaultLayers;
@@ -50,7 +76,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 	
 	private LocationListComposite locationPanel ;
 	
-	private Job addLayerJob = new Job("adding map layers") {
+	private Job localMapLayerJob = new Job("configuring locations layer") {
 		
 		@SuppressWarnings("unchecked")
 		@Override
@@ -58,19 +84,37 @@ public class RecordMapPage extends SmartMapEditorPart {
 			String formatString = "the_geom:Geometry:srid=4326,fid:String,id:String,date:Date,time:Date,comment:String";
 			
 			try {
-				featureType = DataUtilities.createType(IntelRecordDataSource.RECORD_TYPE, formatString);
-				locationLayer = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
+				boolean add = false;
+				if (featureType == null){
+					featureType = DataUtilities.createType(IntelRecordDataSource.RECORD_TYPE, formatString);
+					locationLayer = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
+					add = true;
+				}
 			
 				IntelRecordFeatureReader featureReader = new IntelRecordFeatureReader(recordEditor.getRecord(), featureType);
 				List<SimpleFeature> features = new ArrayList<SimpleFeature>();
 				while(featureReader.hasNext()){
 					features.add(featureReader.next());
 				}
-				locationLayer.resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, featureType));
+				
+				
+				try{
+					locationLayer.resolve(FeatureStore.class, monitor).removeFeatures(Filter.INCLUDE);
+					locationLayer.resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, featureType));
+				}catch (ConcurrentModificationException ex){
+					//try again - geotools bug?
+					locationLayer.resolve(FeatureStore.class, monitor).removeFeatures(Filter.INCLUDE);
+					locationLayer.resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, featureType));
+				}
 		
-				AddLayersCommand command = new AddLayersCommand(Collections.singletonList(locationLayer), 0);
-				getMap().sendCommandASync(command);
-		    	addInitialZoomFunction();
+				if (add){
+					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(locationLayer), 0);
+					getMap().sendCommandASync(command);
+					
+			    	addInitialZoomFunction();
+				}else{
+					mapViewer.getRenderManager().refresh(null);
+				}
 			} catch (Exception e) {
 				//TODO:
 				e.printStackTrace();
@@ -92,42 +136,6 @@ public class RecordMapPage extends SmartMapEditorPart {
 		}
 	};
 	
-	  
-    /**
-     * Job to refresh the service and map.
-     */
-    private Job refreshJob = new Job("refresh map layers"){
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			try{
-				IntelRecordFeatureReader featureReader = new IntelRecordFeatureReader(recordEditor.getRecord(), featureType);
-				List<SimpleFeature> features = new ArrayList<SimpleFeature>();
-				while(featureReader.hasNext()){
-					features.add(featureReader.next());
-				}
-				try{
-					locationLayer.resolve(FeatureStore.class, monitor).removeFeatures(Filter.INCLUDE);
-					locationLayer.resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, featureType));
-				}catch (ConcurrentModificationException ex){
-					locationLayer.resolve(FeatureStore.class, monitor).removeFeatures(Filter.INCLUDE);
-					locationLayer.resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, featureType));
-				}
-			}catch(Exception ex){
-				ex.printStackTrace();
-			}
-			
-//			if (patrolService != null){
-//				try {
-//					patrolService.refresh(parentEditor.getPatrol(), null);
-//				} catch (IOException e) {
-//					SmartPatrolPlugIn.log(Messages.PatrolMapPageEditor_Error_RefreshingLayers, e);
-//				}
-//			}
-//			//clear selection
-			mapViewer.getRenderManager().refresh(null);
-			return Status.OK_STATUS;
-		}
-    };
     
    
 	    
@@ -143,22 +151,24 @@ public class RecordMapPage extends SmartMapEditorPart {
 	 * refresh the map and track layers
 	 */
 	public void refresh() {
-    	if (refreshJob != null) {
-        	refreshJob.cancel();
-        	refreshJob.schedule();
+    	if (localMapLayerJob != null) {
+    		localMapLayerJob.cancel();
+    		localMapLayerJob.schedule();
     	}
 
     	locationPanel.refreshTable();
 	}
 
 	public void setEditMode(boolean editMode){
+		
+		tools.getTool(DrawPolygonTool.ID).setEnabled(editMode);
 		//TODO:
 	}
 	
 	public void initPage(){
 		locationPanel.init();
 
-        addLayers();
+		localMapLayerJob.schedule();
 	}
 	
 	private void addLayers(){
@@ -168,7 +178,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 		loadDefaultLayers = new LoadDefaultLayersJob(getMap()){
 			protected IStatus run(IProgressMonitor monitor) {
 				IStatus status = super.run(monitor);
-				addLayerJob.schedule();
+				localMapLayerJob.schedule();
 				return status;
 			}
 		};
@@ -201,8 +211,9 @@ public class RecordMapPage extends SmartMapEditorPart {
 		SashForm sash = new SashForm(parent,  SWT.VERTICAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		String[] tools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 1);
-		tools[tools.length - 1] = "org.wcs.smart.i2.record.polygon.draw";
+		String[] tools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 2);
+		tools[tools.length - 2] = DrawPolygonTool.ID;
+		tools[tools.length - 1] = DrawPointTool.ID;
 		mapTools = tools;
 		
 		Composite mapArea = toolkit.createComposite(sash);
@@ -215,14 +226,15 @@ public class RecordMapPage extends SmartMapEditorPart {
 		
         
         getMap().getBlackboard().put(RecordEditor.class.getName(), recordEditor);
+        addLayers();
 	}
 
     
     @Override
     public void dispose() {
-    	JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
+    	JobUtil.stopJobs(loadDefaultLayers, localMapLayerJob);
     	loadDefaultLayers = null;
-        refreshJob = null;
+    	localMapLayerJob = null;
 
         if (toolkit != null){
         	toolkit.dispose();
@@ -232,7 +244,15 @@ public class RecordMapPage extends SmartMapEditorPart {
         
         //dispose of patrol service
         //TODO:
-//        CatalogPlugin.getDefault().getLocalCatalog().remove(patrolService);
+        try {
+			CatalogPlugin.getDefault().getLocalCatalog().remove(locationLayer.service(null));
+		} catch (UnsupportedOperationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //        patrolService.dispose(null);
 //        patrolService = null;
     }

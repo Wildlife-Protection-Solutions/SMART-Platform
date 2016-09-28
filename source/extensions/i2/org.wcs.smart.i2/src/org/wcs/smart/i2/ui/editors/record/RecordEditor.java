@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.editors.record;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,6 +48,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -59,6 +61,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
+import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
@@ -67,6 +70,7 @@ import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
@@ -84,6 +88,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private RecordMapPage mapPage;
 	
 	private IntelRecord record;
+	
+	private List<IntelEntityLocation> currentEntityLocationLinks = new ArrayList<IntelEntityLocation>();
+	private List<IntelEntityLocation> newEntityLocationLinks = new ArrayList<IntelEntityLocation>();
+	
+	private List<IntelLocation> locationsToDelete = new ArrayList<IntelLocation>();
 	
 	private Job loadRecordJob = new Job("load intelligence record"){
 
@@ -141,6 +150,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							loc.getId();
 						}
 					}
+					
+					currentEntityLocationLinks = s.createCriteria(IntelEntityLocation.class)
+							.add(Restrictions.in("id.location", temp.getLocations()))
+							.list();
+					
 				}finally{
 					s.close();
 				}
@@ -190,10 +204,32 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			for (IntelEntityRecord r : summaryPage.getNewEntityLinks()){
 				modifiedEntities.add(r.getEntity());
 			}
+			for (IntelLocation location : locationsToDelete){
+				if (location.getUuid() == null) continue;
+				//find any entity location links and remove these
+				List<IntelEntityLocation> todelete = s.createCriteria(IntelEntityLocation.class)
+					.add(Restrictions.eq("id.location", location))
+					.list();
+				for (IntelEntityLocation l : todelete){
+					l.setLocation((IntelLocation) s.merge(l.getLocation()));
+					modifiedEntities.add(l.getEntity());
+					s.delete(l);
+				}
+			}
 			
+			for (IntelEntityLocation locationlink : newEntityLocationLinks){
+				s.saveOrUpdate(locationlink.getLocation());
+				s.save(locationlink);
+				modifiedEntities.add(locationlink.getEntity());
+			}
+			
+			s.flush();
+			s.clear();
 			s.flush();
 			s.saveOrUpdate(record);
 			s.flush();
+			
+
 			
 			for (IntelRecordAttachment ea : summaryPage.getDeleteAttachments()){
 				if (ea.getAttachment().getUuid() != null){
@@ -206,6 +242,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			s.getTransaction().commit();
 			
+			currentEntityLocationLinks.addAll(newEntityLocationLinks);
+			newEntityLocationLinks.clear();
+			
+			locationsToDelete.clear();
 			summaryPage.clearLists();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -338,12 +378,38 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return false;
 	}
 
-	
+	public List<IntelEntityLocation> getEntityLocationLinks(){
+		List<IntelEntityLocation> links = new ArrayList<IntelEntityLocation>();
+		links.addAll(currentEntityLocationLinks);
+		links.addAll(newEntityLocationLinks);
+		return links;
+	}
 	public IntelRecord getRecord(){
 		return this.record;
 	}
 	
-	public void addNewLocation(Polygon p){
+	public void locationsUpdated(){
+		setDirty(true);
+		summaryPage.getLocationPanel().refreshTable();
+		mapPage.refresh();
+	}
+	
+	public void linkEntityToLocation(IntelLocation location, IntelEntity entity){
+		IntelEntityLocation newitem = new IntelEntityLocation();
+		newitem.setLocation(location);
+		newitem.setEntity(entity);
+		
+		//only add if it doesn't already exist
+		if (!currentEntityLocationLinks.contains(newitem) && !newEntityLocationLinks.contains(newitem)){
+			newEntityLocationLinks.add(newitem);
+		}
+		summaryPage.getEntityPanel().init();
+		summaryPage.getLocationPanel().refreshTable();
+		mapPage.refresh();
+		setDirty(true);
+	}
+	
+	public void addNewLocation(Geometry p){
 		if (record.getLocations() == null) record.setLocations(new ArrayList<IntelLocation>());
 		
 		IntelLocation newLocation = new IntelLocation();
@@ -362,6 +428,31 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		setDirty(true);
 	}
 	
+	public void deleteLocation(IntelLocation location){
+		record.getLocations().remove(location);
+		location.setRecord(null);
+		locationsToDelete.add(location);
+		
+		List<IntelEntityLocation> toRemove = new ArrayList<IntelEntityLocation>();
+		for (IntelEntityLocation e : currentEntityLocationLinks){
+			if (e.getLocation().equals(location)){
+				toRemove.add(e);
+			}
+		}
+		currentEntityLocationLinks.removeAll(toRemove);
+		toRemove = new ArrayList<IntelEntityLocation>();
+		for (IntelEntityLocation e : newEntityLocationLinks){
+			if (e.getLocation().equals(location)){
+				toRemove.add(e);
+			}
+		}
+		newEntityLocationLinks.removeAll(toRemove);
+		
+		summaryPage.getEntityPanel().init();
+		summaryPage.getLocationPanel().refreshTable();
+		mapPage.refresh();
+		setDirty(true);
+	}
 	
 	public void linkEntity(IntelEntity entity){
 		Job link = new Job("linking entity"){
