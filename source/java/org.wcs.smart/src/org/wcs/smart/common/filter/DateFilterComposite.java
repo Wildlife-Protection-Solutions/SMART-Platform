@@ -55,28 +55,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class DateFilterComposite extends Composite {
 
-	private SmartFilterDialog dialog;
-	
-	private Button btnFilterDate;
-	private Button btnIncludeAllDate;
-	private ComboViewer dateViewer;
-	private Label lblStartDateAnd;
-	private Label lblStartDateBetween;
-	private DateTime dtEnd;
-	private DateTime dtStart;
-
-	private Listener validateListener = new Listener() {
-
-		@Override
-		public void handleEvent(Event event) {
-			validate();
-		}
-	};
-
-	/**
-	 * Date filters
-	 */
 	public enum DateFilter {
+		
 		LAST_30_DAYS(Messages.DateFilter_Last30Days),
 		LAST_60_DAYS(Messages.DateFilter_Last60Days),
 		NEXT_30_DAYS(Messages.DateFilter_Next30Days),
@@ -87,7 +67,10 @@ public class DateFilterComposite extends Composite {
 		RANGE_60_DAYS(Messages.DateFilterComposite_60DayRangeOption),
 		CURRENT_YEAR(Messages.DateFilterComposite_CurrentYear),
 		CURRENT_MONTH(Messages.DateFilterComposite_CurrentMonth),
-		CUSTOM(Messages.DateFilter_Custom);
+		CUSTOM(Messages.DateFilter_Custom),
+		ALL("All"),
+		LAST_YEAR("Last Year"),
+		LAST_5_YEARS("Last 5 Years");
 		
 		private String guiName;
 		
@@ -120,6 +103,12 @@ public class DateFilterComposite extends Composite {
 			}else if (this == MONTH_TO_DATE || this == CURRENT_MONTH){
 				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
 				return cal.getTime();
+			}else if (this == LAST_YEAR){
+				cal.add(Calendar.YEAR, -1);
+				return cal.getTime();
+			}else if (this == LAST_5_YEARS){
+				cal.add(Calendar.YEAR, -5);
+				return cal.getTime();
 			}
 			return null;
 		}
@@ -134,7 +123,9 @@ public class DateFilterComposite extends Composite {
 			Calendar cal = Calendar.getInstance();
 			if (this == LAST_30_DAYS || this == LAST_60_DAYS 
 					|| this == YEAR_TO_DATE
-					|| this == MONTH_TO_DATE){
+					|| this == MONTH_TO_DATE
+					|| this == LAST_YEAR
+					|| this == LAST_5_YEARS){
 				return cal.getTime(); 	
 			}else if (this == NEXT_30_DAYS || this == RANGE_30_DAYS){
 				cal.add(Calendar.DAY_OF_MONTH, 30);
@@ -154,6 +145,24 @@ public class DateFilterComposite extends Composite {
 		
 	}
 	
+	private SmartFilterDialog dialog;
+	
+	private Button btnFilterDate;
+	private Button btnIncludeAllDate;
+	private ComboViewer dateViewer;
+	private Label lblStartDateAnd;
+	private Label lblStartDateBetween;
+	private DateTime dtEnd;
+	private DateTime dtStart;
+
+	private Listener validateListener = new Listener() {
+
+		@Override
+		public void handleEvent(Event event) {
+			validate();
+		}
+	};
+
 	public DateFilterComposite(Composite parent, int style, SmartFilterDialog dialog) {
 		super(parent, style);
 		this.dialog = dialog;
@@ -259,7 +268,7 @@ public class DateFilterComposite extends Composite {
 		return new StructuredSelection(DateFilter.LAST_30_DAYS);
 	}
 	
-	private void validate(){
+	protected void validate(){
 		dialog.setErrorMessage(null);
 		if (btnFilterDate.getSelection()){
 			IStructuredSelection dateSelection = (IStructuredSelection) this.dateViewer.getSelection();

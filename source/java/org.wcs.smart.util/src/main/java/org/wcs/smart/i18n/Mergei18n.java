@@ -33,11 +33,14 @@ public class Mergei18n {
 
     public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",
     	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er"};
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect"};
+    
     
     public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\translations\\",
     	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations"};
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations"};
 	
     public static final String LINE_SEP = "\n";
 
@@ -166,10 +169,10 @@ public class Mergei18n {
 
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
-                System.out.println("add: " + e.getKey());
+                //System.out.println("add: " + e.getKey());
 //                target.put(e.getKey(), e.getValue());
-                target.put(e.getKey(), "**NEW**" + e.getValue());
-                changes = true;
+                //target.put(e.getKey(), "**NEW**" + e.getValue());
+                //changes = true;
             }
         }
 

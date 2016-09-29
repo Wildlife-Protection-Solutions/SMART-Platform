@@ -122,6 +122,11 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 	private Label lblCoordinates;
 	private Button lblSRID;
 	
+	/**
+	 * Set to change the tools available on the map; leave as null to keep the default set of tools
+	 */
+	protected String[] mapTools = null;
+	
 	protected MapToolComposite tools;
 	
 	IPartListener2 partlistener = new IPartListener2(){
@@ -238,7 +243,6 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 	}
 	
 	
-	
 	/** Creates the map
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -277,8 +281,11 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 	      
         ApplicationGIS.getToolManager().setCurrentEditor(this);
-        
-		tools = new MapToolComposite();
+        if (mapTools == null || mapTools.length == 0){
+        	tools = new MapToolComposite();
+        }else{
+        	tools = new MapToolComposite(mapTools);
+        }
 		tools.createComposite(composite);
 		tools.selectTool("org.locationtech.udig.tools.Pan"); //$NON-NLS-1$
 		

@@ -49,6 +49,8 @@ import org.wcs.smart.ui.map.tool.BBoxInfoTool;
  */
 public class MapToolComposite {
 
+	
+	
 	//these tools will only work in a view or editor part.  If using in a dialog
 	//you need to use custom tools (see MapComposite.java)
 	//This is due to a rendering problem with uDig; the commands are not passed on
@@ -62,16 +64,19 @@ public class MapToolComposite {
 	public static final String UDIG_ZOOM_OUT_ID = "org.locationtech.udig.tool.default.ZoomOut"; //$NON-NLS-1$
 	public static final String UDIG_DISTANCE_ID = "org.locationtech.udig.tool.info.distancetool"; //$NON-NLS-1$
 	
-	private String tools[] = new String[]{AddLayerTool.ID, 
-			SetBasemapTool.ID, 
-			UDIG_ZOOM_EXTENT_ID,
-			UDIG_PAN_ID,
-			UDIG_ZOOM_ID,
-			UDIG_ZOOM_IN_ID,
-			UDIG_ZOOM_OUT_ID,
-			SmartDistanceTool.ID,
-			//InfoTool.ID,
-			BBoxInfoTool.ID};
+	public static final String[] DEFAULT_MAP_TOOLS = {
+		AddLayerTool.ID, 
+		SetBasemapTool.ID, 
+		UDIG_ZOOM_EXTENT_ID,
+		UDIG_PAN_ID,
+		UDIG_ZOOM_ID,
+		UDIG_ZOOM_IN_ID,
+		UDIG_ZOOM_OUT_ID,
+		SmartDistanceTool.ID,
+		//InfoTool.ID,
+		BBoxInfoTool.ID};
+	
+	private String tools[] = DEFAULT_MAP_TOOLS;
 	
 	private List<ToolItem> items = new ArrayList<ToolItem>();
 	private String currentToolId = null;
