@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ICellEditorValidator;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -183,7 +184,7 @@ public class LocationListComposite extends Composite{
 		obsColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				return super.getText(element);
+				return "TODO:";
 			}
 		});
 		
@@ -364,9 +365,11 @@ public class LocationListComposite extends Composite{
 		tblObservations.getTable().addListener(SWT.MouseDown, tableListener);
 		tblObservations.getTable().addListener(SWT.MouseUp, tableListener);
 		tblObservations.getTable().addListener(SWT.MouseMove, tableListener);
-		tblObservations.getTable().addListener(SWT.MouseHover, tableListener);
-
-		
+		tblObservations.getTable().addListener(SWT.MouseHover, tableListener);	
+	}
+	
+	public void addSelectionListener(ISelectionChangedListener listener){
+		tblObservations.addSelectionChangedListener(listener);
 	}
 	
 	public void init(){

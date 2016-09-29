@@ -26,12 +26,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -44,19 +48,29 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
+import org.geotools.factory.CommonFactoryFinder;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.core.internal.FeatureUtils;
+import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory;
+import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.udig.IntelRecordDataSource;
 import org.wcs.smart.i2.udig.IntelRecordFeatureReader;
+import org.wcs.smart.i2.udig.IntelRecordFeatureSource;
+import org.wcs.smart.i2.udig.IntelRecordService;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.JobUtil;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Map page for intelligence record.
@@ -71,8 +85,12 @@ public class RecordMapPage extends SmartMapEditorPart {
 	private LoadDefaultLayersJob loadDefaultLayers;
 	private FormToolkit toolkit = null;
 	
-	private IGeoResource locationLayer;
-	private SimpleFeatureType featureType = null;
+	private ILayer pointLayer;
+	private ILayer polygonLayer;
+	private IGeoResource pointResource;
+	private IGeoResource polygonResource;
+	private SimpleFeatureType polygonFeatureType = null;
+	private SimpleFeatureType pointFeatureType = null;
 	
 	private LocationListComposite locationPanel ;
 	
@@ -81,37 +99,66 @@ public class RecordMapPage extends SmartMapEditorPart {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			String formatString = "the_geom:Geometry:srid=4326,fid:String,id:String,date:Date,time:Date,comment:String";
 			
+			boolean added = false;
 			try {
-				boolean add = false;
-				if (featureType == null){
-					featureType = DataUtilities.createType(IntelRecordDataSource.RECORD_TYPE, formatString);
-					locationLayer = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
-					add = true;
-				}
-			
-				IntelRecordFeatureReader featureReader = new IntelRecordFeatureReader(recordEditor.getRecord(), featureType);
-				List<SimpleFeature> features = new ArrayList<SimpleFeature>();
-				while(featureReader.hasNext()){
-					features.add(featureReader.next());
-				}
 				
-				
-				try{
-					locationLayer.resolve(FeatureStore.class, monitor).removeFeatures(Filter.INCLUDE);
-					locationLayer.resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, featureType));
-				}catch (ConcurrentModificationException ex){
-					//try again - geotools bug?
-					locationLayer.resolve(FeatureStore.class, monitor).removeFeatures(Filter.INCLUDE);
-					locationLayer.resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, featureType));
-				}
-		
-				if (add){
-					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(locationLayer), 0);
+				if (polygonFeatureType == null){
+					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(IntelRecordDataSource.Type.POLYGON);
+					Name name = IntelRecordDataSource.generateName(IntelRecordDataSource.Type.POLYGON, recordEditor.getRecord().getUuid());
+					polygonFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
+					polygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(polygonFeatureType);
+					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(polygonResource), 0){
+						 public void run( IProgressMonitor monitor ) throws Exception {
+							 super.run(monitor);
+							 if (getLayers() != null &&  !getLayers().isEmpty()){
+								 polygonLayer = getLayers().get(0);
+								 polygonLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", IntelRecordService.getDefaultLocationStyle(IntelRecordDataSource.Type.POLYGON));
+							 }
+						 }
+					};
 					getMap().sendCommandASync(command);
+					added = true;
+				}
+				if (pointFeatureType == null){
+					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(IntelRecordDataSource.Type.POINT);
+					Name name = IntelRecordDataSource.generateName(IntelRecordDataSource.Type.POINT, recordEditor.getRecord().getUuid());
+					pointFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
+					pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(pointFeatureType);
+					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(pointResource), 0){
+						 public void run( IProgressMonitor monitor ) throws Exception {
+							 super.run(monitor);
+							 if (getLayers() != null &&  !getLayers().isEmpty()){
+								 pointLayer = getLayers().get(0);
+								 pointLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", IntelRecordService.getDefaultLocationStyle(IntelRecordDataSource.Type.POINT));
+							 }
+						 }
+					};
+					getMap().sendCommandASync(command);
+					added = true;
+				}
+				
+				IGeoResource toUpdate[] = new IGeoResource[]{polygonResource, pointResource};
+				SimpleFeatureType typesToUpdate[] = new SimpleFeatureType[]{polygonFeatureType, pointFeatureType};
+				for (int i = 0; i < toUpdate.length; i ++){
+					List<SimpleFeature> features = new ArrayList<SimpleFeature>();
+					try(IntelRecordFeatureReader featureReader = new IntelRecordFeatureReader(recordEditor.getRecord(), typesToUpdate[i])){
+						while(featureReader.hasNext()){
+							features.add(featureReader.next());
+						}
+					}
 					
-			    	addInitialZoomFunction();
+					try{
+						toUpdate[i].resolve(FeatureStore.class, monitor).removeFeatures(Filter.INCLUDE);
+						toUpdate[i].resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, typesToUpdate[i]));
+					}catch (ConcurrentModificationException ex){
+						//try again - geotools bug?
+						toUpdate[i].resolve(FeatureStore.class, monitor).removeFeatures(Filter.INCLUDE);
+						toUpdate[i].resolve(FeatureStore.class, monitor).addFeatures(FeatureUtils.toFeatureCollection(features, typesToUpdate[i]));
+					}
+				}
+				if (added){
+					addInitialZoomFunction();
 				}else{
 					mapViewer.getRenderManager().refresh(null);
 				}
@@ -178,7 +225,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 		loadDefaultLayers = new LoadDefaultLayersJob(getMap()){
 			protected IStatus run(IProgressMonitor monitor) {
 				IStatus status = super.run(monitor);
-				localMapLayerJob.schedule();
+				if (localMapLayerJob != null && !monitor.isCanceled()) localMapLayerJob.schedule();
 				return status;
 			}
 		};
@@ -211,7 +258,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 		SashForm sash = new SashForm(parent,  SWT.VERTICAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		String[] tools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 2);
+		String[] tools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 3);
+		tools[tools.length - 3] = ClearSelectionTool.ID;
 		tools[tools.length - 2] = DrawPolygonTool.ID;
 		tools[tools.length - 1] = DrawPointTool.ID;
 		mapTools = tools;
@@ -222,6 +270,19 @@ public class RecordMapPage extends SmartMapEditorPart {
 		super.createPartControl(mapArea);
 		
 		locationPanel = new LocationListComposite(sash, toolkit, recordEditor);
+		locationPanel.addSelectionListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				for (Iterator<?> iterator = ((IStructuredSelection)event.getSelection()).iterator(); iterator.hasNext();) {
+					Object next = (Object)iterator.next();
+					if (next instanceof IntelLocation){
+						highlightFeature((IntelLocation) next);
+						return;
+					}	
+				}
+			}
+		});
+		
 		sash.setWeights(new int[]{8,2});
 		
         
@@ -229,6 +290,21 @@ public class RecordMapPage extends SmartMapEditorPart {
         addLayers();
 	}
 
+	//udig does not support selection from multiple layers 
+	private void highlightFeature(IntelLocation location){
+		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+		if (location == null){
+			((Layer)pointLayer).setFilter(Filter.EXCLUDE);
+			((Layer)polygonLayer).setFilter(Filter.EXCLUDE);
+		}else if (location.isPoint()){
+			((Layer)polygonLayer).setFilter(Filter.EXCLUDE);
+			((Layer)pointLayer).setFilter(ff.equals(ff.property("system_id"), ff.literal(UuidUtils.uuidToString(location.getUuid()))));
+		}else if (location.isPolygon()){
+			((Layer)pointLayer).setFilter(Filter.EXCLUDE);
+			((Layer)polygonLayer).setFilter(ff.equals(ff.property("system_id"), ff.literal(UuidUtils.uuidToString(location.getUuid()))));
+		}
+		
+	}
     
     @Override
     public void dispose() {
@@ -245,7 +321,8 @@ public class RecordMapPage extends SmartMapEditorPart {
         //dispose of patrol service
         //TODO:
         try {
-			CatalogPlugin.getDefault().getLocalCatalog().remove(locationLayer.service(null));
+			if (pointResource != null) CatalogPlugin.getDefault().getLocalCatalog().remove(pointResource.service(null));
+			if (polygonResource != null) CatalogPlugin.getDefault().getLocalCatalog().remove(polygonResource.service(null));
 		} catch (UnsupportedOperationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

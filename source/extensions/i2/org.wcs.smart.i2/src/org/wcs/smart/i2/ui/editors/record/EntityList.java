@@ -357,6 +357,7 @@ public class EntityList extends Composite {
 				Composite c2 = thumb.createThumbnail(attach, SWT.NONE);
 				toolkit.adapt(c2);
 				c2.setLayoutData(new RowData(THUMB_SIZE-5,THUMB_SIZE-5));
+				c2.setToolTipText(att.getFilename());
 				
 			}
 			for (IntelEntityAttachment att : toShow2){
@@ -364,6 +365,7 @@ public class EntityList extends Composite {
 				Composite c2 = thumb.createThumbnail(attach, SWT.BORDER);
 				toolkit.adapt(c2);
 				c2.setLayoutData(new RowData(THUMB_SIZE-2,THUMB_SIZE-2));
+				c2.setToolTipText(att.getAttachment().getFilename());
 				
 				Menu menu = new Menu(c2);
 				c2.setMenu(menu);

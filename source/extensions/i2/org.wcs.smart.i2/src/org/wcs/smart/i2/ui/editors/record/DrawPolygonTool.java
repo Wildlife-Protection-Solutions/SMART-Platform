@@ -239,14 +239,20 @@ public class DrawPolygonTool extends SimpleTool {
 
     	redraw(null);
     	
-    	drawCommand.setValid(false);
-    	drawCommand.dispose();
-    	drawCommand = null;
+    	if (drawCommand != null){
+    		drawCommand.setValid(false);
+    		drawCommand.dispose();
+    		drawCommand = null;
+    	}else{
+    		
+    	}
     }
     
     private void redraw(Point last){
-    	if (drawCommand == null || !drawCommand.isValid() ) return;
-    	
+    	if (drawCommand == null || !drawCommand.isValid() ){
+    		getContext().getViewportPane().repaint();
+    		return;
+    	}
     	this.last = last;    	
     	Rectangle area = drawCommand.getValidArea();
         if (area != null){

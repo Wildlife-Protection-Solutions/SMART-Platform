@@ -39,6 +39,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
@@ -170,6 +172,22 @@ public class IntelLocation extends UuidItem{
 		this.observations = observations;
 	}
 	
+	@Transient
+	public boolean isPoint(){
+		try{
+			return this.getGeometry() instanceof Point;
+		}catch (Exception ex){
+			return false;
+		}
+	}
 	
+	@Transient
+	public boolean isPolygon(){
+		try{
+			return this.getGeometry() instanceof Polygon;
+		}catch (Exception ex){
+			return false;
+		}
+	}
 
 }

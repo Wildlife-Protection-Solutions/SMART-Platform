@@ -243,6 +243,7 @@ public class AttachmentTable extends Composite implements Listener {
 
 				Composite thumbNameComp = t.thumb.createThumbnail(parent, SWT.NONE);
 				if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu);
+				thumbNameComp.setToolTipText(t.file.getFilename());
 				thumbNameComp.setData(t);
 				thumbNameComp.addDisposeListener(new DisposeListener() {
 					

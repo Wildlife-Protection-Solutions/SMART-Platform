@@ -36,7 +36,7 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 	}
 	
 	public RecordLabelProvider(RecordField field){
-		this.field = RecordField.TITLE;
+		this.field = field;
 	}
 	
 	public String getText(Object element){

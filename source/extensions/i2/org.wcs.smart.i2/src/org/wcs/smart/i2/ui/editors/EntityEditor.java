@@ -39,6 +39,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -96,6 +97,10 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -135,7 +140,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EntityEditor extends EditorPart{
+public class EntityEditor extends EditorPart implements MapPart{
 	
 	public static final String ID = "org.wcs.smart.i2.editor.entity"; //$NON-NLS-1$
 
@@ -167,6 +172,7 @@ public class EntityEditor extends EditorPart{
 	private AttachmentTable attachmentTable;
 	private Composite attachmentEditPanel;
 	private Composite relationshipEditPanel; 
+	private EntityEditorMapComposite mapPart ;
 	
 	private Composite compMap;
 	private Composite compRecords;
@@ -497,6 +503,9 @@ public class EntityEditor extends EditorPart{
 		
 		compMap = toolkit.createComposite(tabPart, SWT.NONE);
 		compMap.setLayout(new GridLayout());
+		((GridLayout)compMap.getLayout()).marginWidth = 0;
+		((GridLayout)compMap.getLayout()).marginHeight = 0;
+		createMapPanel(compMap);
 		
 		compRecords = toolkit.createComposite(tabPart, SWT.NONE);
 		compRecords.setLayout(new GridLayout());
@@ -640,6 +649,15 @@ public class EntityEditor extends EditorPart{
 		tabList.selectTab(0);
 	}
 	
+	private void createMapPanel(Composite parent){
+		mapPart = new EntityEditorMapComposite(parent, this);
+		mapPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		ApplicationGIS.getToolManager().setCurrentEditor(this);
+	}
+	
+	public IntelEntity getEntity(){
+		return this.entity;
+	}
 	
 	public void setEditMode(boolean isEdit){
 		if (isEditMode && !isEdit && isDirty){
@@ -893,12 +911,13 @@ public class EntityEditor extends EditorPart{
 		tblRecords.getTable().setHeaderVisible(true);
 		tblRecords.getTable().setLinesVisible(true);
 		
-		String[] columns = new String[]{"Date Recieved", "Date Modified", "Short Name"};
-		ColumnLabelProvider[] lbls = new ColumnLabelProvider[]{new RecordLabelProvider(RecordLabelProvider.RecordField.DATE_RECIEVED),
-				new RecordLabelProvider(RecordLabelProvider.RecordField.LAST_MODIFIED),
-				new RecordLabelProvider(RecordLabelProvider.RecordField.TITLE)
+		String[] columns = new String[]{"Short Name", "Date Recieved", "Date Modified"};
+		ColumnLabelProvider[] lbls = new ColumnLabelProvider[]{
+				new RecordLabelProvider(RecordLabelProvider.RecordField.TITLE),
+				new RecordLabelProvider(RecordLabelProvider.RecordField.DATE_RECIEVED),
+				new RecordLabelProvider(RecordLabelProvider.RecordField.LAST_MODIFIED)
 		};
-		int[] width = new int[]{200, 200, 400};
+		int[] width = new int[]{400, 100, 100};
 		
 		for (int i = 0; i < columns.length; i ++){
 			TableViewerColumn col = new TableViewerColumn(tblRecords, SWT.NONE);
@@ -912,14 +931,30 @@ public class EntityEditor extends EditorPart{
 			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				Object x = ((IStructuredSelection)tblRecords.getSelection()).getFirstElement();
-				if (x instanceof IntelRecord){
-					(new OpenRecordHandler()).openRecord((IntelRecord) x, false);
-				}
-				
+				openSelectedRecord();
 			}
 		});
 		
+		Menu recordsMenu = new Menu(tblRecords.getTable());
+		tblRecords.getTable().setMenu(recordsMenu);
+		
+		MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
+		open.setText("Open");
+		open.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				openSelectedRecord();
+			}
+		});
+		
+	}
+	
+	private void openSelectedRecord(){
+		if (tblRecords.getSelection().isEmpty()) return;
+		Object x = ((IStructuredSelection)tblRecords.getSelection()).getFirstElement();
+		if (x instanceof IntelRecord){
+			(new OpenRecordHandler()).openRecord((IntelRecord) x, false);
+		}
 	}
 	private void createAttachmentPanel(Composite parent){
 		
@@ -1242,5 +1277,31 @@ public class EntityEditor extends EditorPart{
 		}
 		
 		
+	}
+
+	@Override
+	public Map getMap() {
+		return mapPart.getMap();
+	}
+
+	@Override
+	public void openContextMenu() {
+		mapPart.openContextMenu();
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+		mapPart.setFont(textArea);
+	}
+
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		mapPart.setSelectionProvider(selectionProvider);
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return mapPart.getStatusLineManager();
 	}
 }

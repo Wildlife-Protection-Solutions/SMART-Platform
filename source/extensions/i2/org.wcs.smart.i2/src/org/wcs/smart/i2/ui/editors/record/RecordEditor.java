@@ -150,10 +150,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							loc.getId();
 						}
 					}
-					
-					currentEntityLocationLinks = s.createCriteria(IntelEntityLocation.class)
+					if (!temp.getLocations().isEmpty()){
+						currentEntityLocationLinks = s.createCriteria(IntelEntityLocation.class)
 							.add(Restrictions.in("id.location", temp.getLocations()))
 							.list();
+					}
 					
 				}finally{
 					s.close();
