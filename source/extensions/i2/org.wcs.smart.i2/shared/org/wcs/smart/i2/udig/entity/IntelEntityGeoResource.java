@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.udig.entity;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,24 +31,15 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.styling.FeatureTypeStyle;
-import org.geotools.styling.Mark;
-import org.geotools.styling.PointSymbolizer;
-import org.geotools.styling.PolygonSymbolizer;
-import org.geotools.styling.Rule;
 import org.geotools.styling.Style;
-import org.geotools.styling.StyleBuilder;
-import org.geotools.styling.StyleFactory;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.i2.udig.IntelRecordDataSource;
-import org.wcs.smart.i2.udig.IntelRecordDataSource.Type;
-import org.wcs.smart.i2.udig.IntelRecordService;
+import org.wcs.smart.i2.udig.LocationLayerType;
+import org.wcs.smart.i2.udig.record.IntelRecordService;
 
 /**
  * Georesource for a entity locations
@@ -60,10 +50,10 @@ import org.wcs.smart.i2.udig.IntelRecordService;
 public class IntelEntityGeoResource extends IGeoResource {
 	
 	private URL url = null;
-	private IntelRecordDataSource.Type type;
+	private LocationLayerType type;
 	private Style cachedStyle = null;
 	
-	public IntelEntityGeoResource(IntelEntityService service, IntelRecordDataSource.Type type){
+	public IntelEntityGeoResource(IntelEntityService service, LocationLayerType type){
 		this.service = service;
 		this.type = type;
 		URL serviceIdentifer = service.getIdentifier();
@@ -156,7 +146,7 @@ public class IntelEntityGeoResource extends IGeoResource {
         }
         if (adaptee.isAssignableFrom(Style.class)){
         	if (cachedStyle == null){
-        		cachedStyle = IntelRecordService.getDefaultLocationStyle(type);
+        		cachedStyle = type.getDefaultLayerStyle();
         	}
         	if (cachedStyle != null) return adaptee.cast(cachedStyle);
         }

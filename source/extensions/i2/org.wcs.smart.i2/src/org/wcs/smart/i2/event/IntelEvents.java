@@ -2,7 +2,6 @@ package org.wcs.smart.i2.event;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 public class IntelEvents {

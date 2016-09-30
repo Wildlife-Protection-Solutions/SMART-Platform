@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.udig;
+package org.wcs.smart.i2.udig.record;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.Name;
-import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -41,20 +41,6 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class IntelRecordDataSource extends ContentDataStore{
 
-	public enum Type {
-		POINT("Point"), 
-		POLYGON("Polygon");
-		
-		private String geomType;
-		
-		private Type(String geomType){
-			this.geomType = geomType;
-		}
-		public String getGeomType(){
-			return this.geomType;
-		}
-	}
-	
 	private UUID recordUuid;
 	
 	
@@ -71,13 +57,13 @@ public class IntelRecordDataSource extends ContentDataStore{
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
 		List<Name> names = new ArrayList<Name>();
-		for (IntelRecordDataSource.Type layertype : IntelRecordDataSource.Type.values()){
+		for (LocationLayerType layertype : LocationLayerType.values()){
 			names.add(generateName(layertype, recordUuid));
 		}
 		return names;
 	}
 	
-	public static Name generateName(IntelRecordDataSource.Type type, UUID recordUuid){
+	public static Name generateName(LocationLayerType type, UUID recordUuid){
 		return new NameImpl("org.wcs.smart.i2.record.location." + UuidUtils.uuidToString(recordUuid), type.name());
 	}
 	

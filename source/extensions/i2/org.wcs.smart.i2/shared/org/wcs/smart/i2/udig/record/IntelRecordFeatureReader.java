@@ -19,30 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.udig;
+package org.wcs.smart.i2.udig.record;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 
 /**
@@ -57,13 +52,13 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 	
 	public IntelRecordFeatureReader(IntelRecord record, SimpleFeatureType ftype) {
 		this.ftype = ftype;
-		IntelRecordDataSource.Type geomType = IntelRecordDataSource.Type.valueOf(ftype.getName().getLocalPart());
+		LocationLayerType geomType = LocationLayerType.valueOf(ftype.getName().getLocalPart());
 		ArrayList<IntelLocation> locations = new ArrayList<IntelLocation>();
 		
 		if (record.getLocations() != null){
 			for (IntelLocation location : record.getLocations()){
-				if (( location.isPoint() && geomType == IntelRecordDataSource.Type.POINT )||
-					( location.isPolygon() && geomType == IntelRecordDataSource.Type.POLYGON)){
+				if (( location.isPoint() && geomType == LocationLayerType.POINT )||
+					( location.isPolygon() && geomType == LocationLayerType.POLYGON)){
 					locations.add(location);
 				}
 			}
@@ -74,7 +69,7 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 	
 	public IntelRecordFeatureReader(UUID recordUuid, SimpleFeatureType ftype) {
 		this.ftype = ftype;
-		IntelRecordDataSource.Type geomType = IntelRecordDataSource.Type.valueOf(ftype.getName().getLocalPart());
+		LocationLayerType geomType = LocationLayerType.valueOf(ftype.getName().getLocalPart());
 		ArrayList<IntelLocation> locations = new ArrayList<IntelLocation>();
 		
 		Session s = HibernateManager.openSession();
@@ -82,8 +77,8 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 			IntelRecord record = (IntelRecord) s.get(IntelRecord.class, recordUuid);
 			if (record != null && record.getLocations() != null){
 				for (IntelLocation location : record.getLocations()){
-					if (( location.isPoint() && geomType == IntelRecordDataSource.Type.POINT )||
-						( location.isPolygon() && geomType == IntelRecordDataSource.Type.POLYGON)){
+					if (( location.isPoint() && geomType == LocationLayerType.POINT )||
+						( location.isPolygon() && geomType == LocationLayerType.POLYGON)){
 						locations.add(location);
 					}
 				}

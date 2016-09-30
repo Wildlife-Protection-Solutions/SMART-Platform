@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.editors.record;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -71,7 +72,6 @@ import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
 	
@@ -91,6 +91,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private List<IntelEntityLocation> currentEntityLocationLinks = new ArrayList<IntelEntityLocation>();
 	private List<IntelEntityLocation> newEntityLocationLinks = new ArrayList<IntelEntityLocation>();
+	private List<IntelEntityLocation> deleteEntityLocationLinks = new ArrayList<IntelEntityLocation>();
 	
 	private List<IntelLocation> locationsToDelete = new ArrayList<IntelLocation>();
 	
@@ -218,6 +219,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 			}
 			
+
+			for (IntelEntityLocation locationlink : deleteEntityLocationLinks){
+				s.delete(locationlink);
+				modifiedEntities.add(locationlink.getEntity());
+			}
 			for (IntelEntityLocation locationlink : newEntityLocationLinks){
 				s.saveOrUpdate(locationlink.getLocation());
 				s.save(locationlink);
@@ -245,7 +251,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			currentEntityLocationLinks.addAll(newEntityLocationLinks);
 			newEntityLocationLinks.clear();
-			
+			deleteEntityLocationLinks.clear();
 			locationsToDelete.clear();
 			summaryPage.clearLists();
 		}catch (Exception ex){
@@ -394,6 +400,36 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		summaryPage.getLocationPanel().refreshTable();
 		mapPage.refresh();
 	}
+	
+	/**
+	 * unlinks entity from the given location; if entity is null it will unlink
+	 * all entities associated with the location
+	 * 
+	 * @param location
+	 * @param entity can be null in which case all entities are unlinked
+	 */
+	public void unlinkEntityFromLocation(IntelLocation location, IntelEntity entity){
+		for (Iterator<IntelEntityLocation> iterator = newEntityLocationLinks.iterator(); iterator.hasNext();) {
+			IntelEntityLocation newLink = (IntelEntityLocation) iterator.next();
+			if (newLink.getLocation().equals(location) && (entity == null || entity.equals(newLink.getEntity()))){
+				iterator.remove();
+			}
+		}
+			
+		for (Iterator<IntelEntityLocation> iterator = currentEntityLocationLinks.iterator(); iterator.hasNext();) {
+			IntelEntityLocation newLink = (IntelEntityLocation) iterator.next();
+			if (newLink.getLocation().equals(location) && (entity == null || entity.equals(newLink.getEntity()))){
+				deleteEntityLocationLinks.add(newLink);
+				iterator.remove();
+			}
+		}
+		
+		summaryPage.getEntityPanel().init();
+		summaryPage.getLocationPanel().refreshTable();
+		mapPage.refresh();
+		setDirty(true);
+	}
+	
 	
 	public void linkEntityToLocation(IntelLocation location, IntelEntity entity){
 		IntelEntityLocation newitem = new IntelEntityLocation();

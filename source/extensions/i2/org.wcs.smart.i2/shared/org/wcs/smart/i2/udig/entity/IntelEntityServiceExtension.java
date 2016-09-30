@@ -36,10 +36,9 @@ import org.locationtech.udig.core.internal.CorePlugin;
  * @since 1.0.0
  */
 public class IntelEntityServiceExtension implements ServiceExtension {
-//    public static final String KEY = "org.wcs.smart.udig.catalog.intel2.record"; //$NON-NLS-1$
-   
-    /**
-     * Service parameter conservation area uuid key
+
+	/**
+     * Entity uuid parameter
      */
     public static final String ENTITY_UUID_KEY = "entityuuid"; //$NON-NLS-1$
     

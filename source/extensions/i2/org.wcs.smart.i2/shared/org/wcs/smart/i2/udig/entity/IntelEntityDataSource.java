@@ -30,10 +30,12 @@ import java.util.UUID;
 import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.Name;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
-import org.wcs.smart.i2.udig.IntelRecordDataSource;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory;
+import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -44,22 +46,9 @@ import org.wcs.smart.util.UuidUtils;
 public class IntelEntityDataSource extends ContentDataStore{
 
 	private UUID entityUuid;
-	private Date[] dateFilter;
 	
 	public IntelEntityDataSource(UUID entityUuid){
 		this.entityUuid = entityUuid;
-		this.dateFilter = null;
-	}
-
-	/**
-	 * Two element date array representing the start and end day filters
-	 */
-	public void setDateFilter(Date[] dateFilter){
-		this.dateFilter = dateFilter;
-	}
-	
-	public Date[] getDateFilter(){
-		return dateFilter;
 	}
 	
 	@Override
@@ -71,14 +60,19 @@ public class IntelEntityDataSource extends ContentDataStore{
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
 		List<Name> names = new ArrayList<Name>();
-		for (IntelRecordDataSource.Type layertype : IntelRecordDataSource.Type.values()){
+		for (LocationLayerType layertype : LocationLayerType.values()){
 			names.add(generateName(layertype, entityUuid));
 		}
 		return names;
 	}
 	
-	public static Name generateName(IntelRecordDataSource.Type type, UUID entityUuid){
+	public static Name generateName(LocationLayerType type, UUID entityUuid){
 		return new NameImpl("org.wcs.smart.i2.entity.location." + UuidUtils.uuidToString(entityUuid), type.name());
 	}
 
+	public static Filter createDateFilter(Date startDate, Date endDate){
+		if (startDate == null || endDate == null) return Filter.INCLUDE;
+		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+		return ff.between(ff.property("date"), ff.literal(startDate), ff.literal(endDate));
+	}
 }

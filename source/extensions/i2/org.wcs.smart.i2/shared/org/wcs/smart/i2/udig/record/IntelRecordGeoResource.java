@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.udig;
+package org.wcs.smart.i2.udig.record;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -34,10 +34,10 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.catalog.IResolve.Status;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.i2.udig.LocationLayerType;
 
 /**
  * Georesource for a smart patrol data.
@@ -47,9 +47,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class IntelRecordGeoResource extends IGeoResource {
 
 	private URL url = null;
-	private IntelRecordDataSource.Type type;
+	private LocationLayerType type;
 	
-	public IntelRecordGeoResource(IntelRecordService service, IntelRecordDataSource.Type type){
+	public IntelRecordGeoResource(IntelRecordService service, LocationLayerType type){
 		this.service = service;
 		this.type = type;
 		URL serviceIdentifer = service.getIdentifier();

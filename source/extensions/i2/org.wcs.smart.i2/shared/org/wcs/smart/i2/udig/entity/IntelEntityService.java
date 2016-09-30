@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -39,7 +38,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.udig.IntelRecordDataSource;
+import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -63,8 +62,7 @@ public class IntelEntityService extends IService {
 	private Exception error;
 	
 	private IntelEntityDataSource ds = null;
-	private Date[] dateFilter = null;
-	
+		
 	public IntelEntityService(Map<String, Serializable> params) {
 		this.params = params;
 		this.url = IntelEntityServiceExtension.createURL(this.params);
@@ -79,14 +77,6 @@ public class IntelEntityService extends IService {
 		return this.entityUuid;
 	}
 	
-	/**
-	 * two element date array representing the start and end date filters
-	 * @param dateFilter
-	 * @throws IOException
-	 */
-	public void setDateFilter(Date[] dateFilter) throws IOException{
-		((IntelEntityDataSource)getDataStore(null)).setDateFilter(dateFilter);
-	}
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
 	 */
@@ -129,8 +119,8 @@ public class IntelEntityService extends IService {
 				if (members == null){
 					members = new ArrayList<IntelEntityGeoResource>();
 					//two resources per entity one for points and one for polygons
-					members.add(new IntelEntityGeoResource(this, IntelRecordDataSource.Type.POINT));
-					members.add(new IntelEntityGeoResource(this, IntelRecordDataSource.Type.POLYGON));
+					members.add(new IntelEntityGeoResource(this, LocationLayerType.POINT));
+					members.add(new IntelEntityGeoResource(this, LocationLayerType.POLYGON));
 				}
 			}
 		}

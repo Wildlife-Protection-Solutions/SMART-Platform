@@ -61,10 +61,10 @@ import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.i2.model.IntelLocation;
-import org.wcs.smart.i2.udig.IntelRecordDataSource;
-import org.wcs.smart.i2.udig.IntelRecordFeatureReader;
-import org.wcs.smart.i2.udig.IntelRecordFeatureSource;
-import org.wcs.smart.i2.udig.IntelRecordService;
+import org.wcs.smart.i2.udig.LocationLayerType;
+import org.wcs.smart.i2.udig.record.IntelRecordDataSource;
+import org.wcs.smart.i2.udig.record.IntelRecordFeatureReader;
+import org.wcs.smart.i2.udig.record.IntelRecordFeatureSource;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -104,8 +104,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 			try {
 				
 				if (polygonFeatureType == null){
-					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(IntelRecordDataSource.Type.POLYGON);
-					Name name = IntelRecordDataSource.generateName(IntelRecordDataSource.Type.POLYGON, recordEditor.getRecord().getUuid());
+					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POLYGON);
+					Name name = IntelRecordDataSource.generateName(LocationLayerType.POLYGON, recordEditor.getRecord().getUuid());
 					polygonFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
 					polygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(polygonFeatureType);
 					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(polygonResource), 0){
@@ -113,7 +113,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 							 super.run(monitor);
 							 if (getLayers() != null &&  !getLayers().isEmpty()){
 								 polygonLayer = getLayers().get(0);
-								 polygonLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", IntelRecordService.getDefaultLocationStyle(IntelRecordDataSource.Type.POLYGON));
+								 polygonLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POLYGON.getDefaultLayerStyle());
 							 }
 						 }
 					};
@@ -121,8 +121,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 					added = true;
 				}
 				if (pointFeatureType == null){
-					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(IntelRecordDataSource.Type.POINT);
-					Name name = IntelRecordDataSource.generateName(IntelRecordDataSource.Type.POINT, recordEditor.getRecord().getUuid());
+					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POINT);
+					Name name = IntelRecordDataSource.generateName(LocationLayerType.POINT, recordEditor.getRecord().getUuid());
 					pointFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
 					pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(pointFeatureType);
 					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(pointResource), 0){
@@ -130,7 +130,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 							 super.run(monitor);
 							 if (getLayers() != null &&  !getLayers().isEmpty()){
 								 pointLayer = getLayers().get(0);
-								 pointLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", IntelRecordService.getDefaultLocationStyle(IntelRecordDataSource.Type.POINT));
+								 pointLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POINT.getDefaultLayerStyle());
 							 }
 						 }
 					};

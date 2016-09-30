@@ -1,4 +1,4 @@
-package org.wcs.smart.i2.udig;
+package org.wcs.smart.i2.udig.record;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -13,7 +13,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
-import org.wcs.smart.i2.udig.IntelRecordDataSource.Type;
+import org.wcs.smart.i2.udig.LocationLayerType;
 
 public class IntelRecordFeatureSource extends ContentFeatureSource {
 
@@ -25,7 +25,7 @@ public class IntelRecordFeatureSource extends ContentFeatureSource {
 		this.recordUuid = recordUuid;
 	}
 
-	public static String getFeatureSchemaString(Type geomType){
+	public static String getFeatureSchemaString(LocationLayerType geomType){
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:");
 		sb.append(geomType.getGeomType());
@@ -36,7 +36,7 @@ public class IntelRecordFeatureSource extends ContentFeatureSource {
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
 		try {
-			IntelRecordDataSource.Type geomType = IntelRecordDataSource.Type.valueOf(entry.getName().getLocalPart());	
+			LocationLayerType geomType = LocationLayerType.valueOf(entry.getName().getLocalPart());	
 			Name name = IntelRecordDataSource.generateName(geomType, recordUuid);
 			return DataUtilities.createType(entry.getTypeName(), getFeatureSchemaString(geomType));
 		} catch (SchemaException e) {

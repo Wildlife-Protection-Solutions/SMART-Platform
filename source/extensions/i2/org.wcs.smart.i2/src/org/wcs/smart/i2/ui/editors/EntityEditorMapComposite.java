@@ -25,9 +25,12 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,18 +40,24 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -60,18 +69,22 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.geotools.data.FeatureSource;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.udig.catalog.IGeoResource;
+import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
-import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.render.RenderPackage;
 import org.locationtech.udig.project.internal.render.ViewportModel;
@@ -88,18 +101,30 @@ import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.IBlockingSelection;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.DateFilterComposite;
-import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
-import org.wcs.smart.i2.udig.entity.IntelEntityGeoResource;
+import org.wcs.smart.common.filter.DateFilterDropDownComposite;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.model.IntelEntityLocation;
+import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
+import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
+import org.wcs.smart.i2.udig.LocationLayerType;
+import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
+import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
 import org.wcs.smart.ui.map.ScaleRatioComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.ui.map.tool.ClearSelectionTool;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -108,18 +133,44 @@ import com.vividsolutions.jts.geom.Coordinate;
 
 public class EntityEditorMapComposite extends Composite implements MapPart{
 
+	private enum LocationTableColumn{
+		ID("ID"),
+		DATETIME("Date/Time"),
+		COMMENT("Comment"),
+		RECORD("Record"),
+		RECORDDATE("Record Date"),
+		OBSERVATION("Observation");
+		
+		String guiName;
+	
+		LocationTableColumn(String guiName){
+			this.guiName = guiName;
+		}
+		
+		public String getLabel(IntelLocation location){
+			if (this == ID) return location.getId();
+			if (this == DATETIME) return DateFormat.getDateTimeInstance().format(location.getDateTime());
+			if (this==COMMENT) return location.getComment() == null ? "" : location.getComment();
+			if (this == RECORD) return location.getRecord().getTitle();
+			if (this == RECORDDATE) return DateFormat.getDateTimeInstance().format(location.getRecord().getDateCreated());
+			if (this == OBSERVATION) return "TODO:";
+			return "";
+			
+		}
+	}
+	
 	private EntityEditor editor;
 
 	// map components
 	private Label lblCoordinates;
 	private Button lblSRID;
 	protected MapViewer mapViewer;
-	protected String[] mapTools = null;
 	protected MapToolComposite tools;
 	
 	private DateFilterDropDownComposite dateComp;
+	private Date[] dateFilter = null;
 	
-	IPartListener2 partlistener = new IPartListener2(){
+	private IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {
 	            if (partRef.getPart(false) == editor) {
 	                IToolManager toolManager = ApplicationGIS.getToolManager();
@@ -159,10 +210,15 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	    
     private FlashFeatureListener selectFeatureListener = new FlashFeatureListener();
     private boolean flashFeatureRegistered = false;
+    private List<ContentFilterLayerImpl> locationLayers = new ArrayList<ContentFilterLayerImpl>();
 	
-	public EntityEditorMapComposite(Composite parent, EntityEditor parentEditor) {
+    private FormToolkit toolkit;
+    private TableViewer locationTable;
+    
+	public EntityEditorMapComposite(Composite parent, EntityEditor parentEditor, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
 		this.editor = parentEditor;
+		this.toolkit = toolkit;
 		
 		createPartControl();
 		addLayers();
@@ -180,29 +236,36 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 					params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString(editor.getEntity().getUuid()));
 					service = new IntelEntityService(params);
 					
+					final Date[] dFilters = new Date[2];
 					Display.getDefault().syncExec(new Runnable(){
 
 						@Override
 						public void run() {
 							if (dateComp != null){
-								Date[] filter = null;
 								if (dateComp.getDateFilter() == DateFilter.CUSTOM){
-									filter = new Date[]{dateComp.getCustomStartDate(), dateComp.getCustomEndDate()};
+									dFilters[0] = dateComp.getCustomStartDate();
+									dFilters[1] = dateComp.getCustomEndDate();
 								}else{
-									filter = new Date[]{dateComp.getDateFilter().getStartDate(),dateComp.getDateFilter().getEndDate()};
-								}
-								try {
-									service.setDateFilter(filter);
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									dFilters[0] = dateComp.getDateFilter().getStartDate();
+									dFilters[1] = dateComp.getDateFilter().getEndDate();
 								}
 							}
 						}
-						
 					});
+					
 					try {
-						AddLayersCommand cmd = new AddLayersCommand(service.resources(monitor), 1);
+						Filter dateFilter = IntelEntityDataSource.createDateFilter(dFilters[0], dFilters[1]);
+						AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(service.resources(monitor), 1, dateFilter){
+							 public void run( IProgressMonitor monitor ) throws Exception {
+								 super.run(monitor);
+								 locationLayers.clear();
+								 for (Layer layer : getLayers()){
+									 if (layer instanceof ContentFilterLayerImpl){
+										 locationLayers.add((ContentFilterLayerImpl) layer);
+									 }
+								 }
+							 }
+						};
 						getMap().sendCommandASync(cmd);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -243,9 +306,14 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	 * 
 	 */
 	public void createPartControl() {
-		Composite parent = this;
-    
-
+		setLayout(new GridLayout());
+		
+		SashForm parent = new SashForm(this, SWT.VERTICAL);
+		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				
+		Composite mapPart = toolkit.createComposite(parent);
+		mapPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		DateFilterComposite.DateFilter[] defaultFilters = new DateFilter[]{
 					DateFilter.LAST_30_DAYS,
 					DateFilter.LAST_60_DAYS,
@@ -254,35 +322,23 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 					DateFilter.ALL,
 					DateFilter.CUSTOM
 		};
-		dateComp = new DateFilterDropDownComposite(this, defaultFilters, DateFilter.LAST_YEAR);
+		DateFilterComposite.DateFilter initialDateFilter = DateFilter.LAST_YEAR;
+		dateFilter = new Date[]{initialDateFilter.getStartDate(), initialDateFilter.getEndDate()};
+		dateComp = new DateFilterDropDownComposite(mapPart, defaultFilters, initialDateFilter);
         dateComp.setBounds(0, 0, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
         dateComp.addChangeListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				dateComp.setBounds(0, 0, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-				
-				if (service != null){
-					try {
-						Date[] filter = null;
-						if (dateComp.getDateFilter() == DateFilter.CUSTOM){
-							filter = new Date[]{dateComp.getCustomStartDate(), dateComp.getCustomEndDate()};
-						}else{
-							filter = new Date[]{dateComp.getDateFilter().getStartDate(),dateComp.getDateFilter().getEndDate()};
-						}
-						service.setDateFilter(filter);
-						getMap().getRenderManager().refresh(null);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+				dateFilterChanged();
 			}
 		});
-		Composite composite = new Composite(parent, SWT.NONE);
-		addListener(SWT.Resize, new Listener(){
+        
+		Composite composite = new Composite(mapPart, SWT.NONE);
+		mapPart.addListener(SWT.Resize, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				composite.setBounds(0,0,getBounds().width-5,getBounds().height-5);		
+				composite.setBounds(0,0,mapPart.getBounds().width-5,mapPart.getBounds().height-5);		
 			}
         });
 		GridLayout layout = new GridLayout(2,false);
@@ -305,15 +361,13 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 	    
-        if (mapTools == null || mapTools.length == 0){
-        	tools = new MapToolComposite();
-        }else{
-        	tools = new MapToolComposite(mapTools);
-        }
+		String[] strtools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 1);
+		strtools[strtools.length - 1] = ClearSelectionTool.ID;
+       	tools = new MapToolComposite(strtools);
 		tools.createComposite(composite);
 		tools.selectTool("org.locationtech.udig.tools.Pan"); //$NON-NLS-1$
 		
-        Composite infoArea = new Composite(parent, SWT.NONE);
+        Composite infoArea = new Composite(composite, SWT.NONE);
         GridLayout gl = new GridLayout(5, false);
         gl.marginTop = gl.marginBottom = gl.marginHeight= 0;
         gl.marginRight = 0;
@@ -400,9 +454,130 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
         
         editor.getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
         registerFeatureFlasher();
+        
+        Composite tableArea = createTableArea(parent);
+        tableArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        parent.setWeights(new int[] {7,3});
 	}
 
+	private void dateFilterChanged(){
+		if (dateComp.getDateFilter() == DateFilter.CUSTOM){
+			dateFilter = new Date[]{dateComp.getCustomStartDate(), dateComp.getCustomEndDate()};
+		}else{
+			dateFilter = new Date[]{dateComp.getDateFilter().getStartDate(),dateComp.getDateFilter().getEndDate()};
+		}
+		loadLocationsLink.schedule();
+		
+		if (service != null){
+			Filter udigDateFilter = IntelEntityDataSource.createDateFilter(dateFilter[0], dateFilter[1]);
+			 for (ContentFilterLayerImpl layer : locationLayers){
+				 layer.setContentFilter(udigDateFilter);
+			 }
+			getMap().getRenderManager().refresh(null);
+		}
+	}
+
+	public Composite createTableArea(Composite parent){
+		Composite locationsTableComp = toolkit.createComposite(parent);
+		locationsTableComp.setLayout(new GridLayout());
+		((GridLayout)locationsTableComp.getLayout()).marginWidth = 0;
+		((GridLayout)locationsTableComp.getLayout()).marginHeight = 0;
+		
+		locationTable = new TableViewer(locationsTableComp, SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER);
+		locationTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		locationTable.setContentProvider(ArrayContentProvider.getInstance());
+		locationTable.getTable().setLinesVisible(true);
+		locationTable.getTable().setHeaderVisible(true);
+		
+		for (LocationTableColumn column : LocationTableColumn.values()){
+			TableViewerColumn col = new TableViewerColumn(locationTable, SWT.LEFT);
+			col.getColumn().setText(column.guiName);
+			col.getColumn().setWidth(150);
+			
+			col.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof IntelEntityLocation){
+						IntelLocation location = ((IntelEntityLocation)element).getLocation();
+						return column.getLabel(location);
+					}
+					return super.getText(element);
+				}
+			});
+		}
+		
+		locationTable.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		locationTable.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				//filter features on map
+				try {
+					highlightFeature(getSelectedLocation());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		Menu mnu = new Menu(locationTable.getTable());
+		locationTable.getTable().setMenu(mnu);
+		
+		MenuItem mi = new MenuItem(mnu, SWT.PUSH);
+		mi.setText("Open Record");
+		mi.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (getSelectedLocation() != null){
+					(new OpenRecordHandler()).openRecord(getSelectedLocation().getRecord(),false);
+				}
+			}
+		});
+		mnu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				mi.setEnabled(getSelectedLocation() != null);
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
+		return locationsTableComp;
+	}
 	
+	private IntelLocation getSelectedLocation(){
+		IntelLocation location = null;
+		if (!locationTable.getSelection().isEmpty()){
+			Object x = ((IStructuredSelection)locationTable.getSelection()).getFirstElement();
+			if (x instanceof IntelEntityLocation){
+				return ((IntelEntityLocation) x).getLocation();
+			}
+		}
+		return null;
+	}
+	
+	//udig does not support selection from multiple layers 
+	private void highlightFeature(IntelLocation location) throws IOException{
+		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+		if (location == null){
+			for (Layer l : locationLayers){
+				l.setFilter(Filter.EXCLUDE);
+			}
+		}else{
+			for (Layer l : locationLayers){
+				if ((l.getGeoResource().resolve(FeatureSource.class, null).getSchema().getName().getLocalPart().equals(LocationLayerType.POINT.name()) && location.isPoint()) ||
+					( l.getGeoResource().resolve(FeatureSource.class, null).getSchema().getName().getLocalPart().equals(LocationLayerType.POLYGON.name()) && location.isPolygon())){
+					l.setFilter(ff.equals(ff.property("system_id"), ff.literal(UuidUtils.uuidToString(location.getUuid()))));
+				}else{
+					l.setFilter(Filter.EXCLUDE);
+				}
+			}
+		}
+	}
+		
 	private void updateLabel() {
 		editor.getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
@@ -420,6 +595,12 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
     public Map getMap() {
         return mapViewer.getMap();
     }
+	
+	public void refresh(){
+		getMap().getRenderManager().refresh(null);
+		
+		loadLocationsLink.schedule();
+	}
 	
     @Override
     public void dispose() {
@@ -550,30 +731,35 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	public void setInitialZoom(ReferencedEnvelope zoom){
 		this.initialZoom = zoom;
 	}
-//	
-//	protected IPageChangedListener initialZoomListener = new IPageChangedListener() {
-//		@Override
-//		public void pageChanged(PageChangedEvent event) {
-//			if (event.getSelectedPage() == editor){
-//					getMap().getViewportModel().addViewportModelListener(new IViewportModelListener() {
-//					
-//					@Override
-//					public void changed(ViewportModelEvent event) {
-//						getMap().getViewportModel().removeViewportModelListener(this);
-//						if (initialZoom == null){
-//							getMap().sendCommandSync(new ZoomExtentCommand());
-//						}else{
-//							getMap().sendCommandSync(new SetViewportBBoxCommand(initialZoom));
-//						}
-//					}
-//				});
-//			}
-//			
-//		}
-//	};
-//	
-//	protected void addInitialZoomFunction(){
-//		getParentEditor().addPageChangedListener(initialZoomListener);
-//	}
 
+	private Job loadLocationsLink = new Job("loading location links"){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Display.getDefault().syncExec(() -> { 
+				if (locationTable.getTable().isDisposed()) return;
+				locationTable.setInput(new String[]{DialogConstants.LOADING_TEXT});
+			});
+			final List<IntelEntityLocation> alllocations  = new ArrayList<IntelEntityLocation>();
+			Session s = HibernateManager.openSession();
+			try{
+				alllocations.addAll(EntityManager.INSTANCE.getEntityLocations(s, editor.getEntity().getUuid(), dateFilter));
+				for (IntelEntityLocation l : alllocations){
+					l.getLocation().getId();
+					l.getLocation().getRecord().getTitle();
+				}
+			}finally{
+				s.close();
+			}
+			Collections.sort(alllocations,
+					(x,y)-> -1*x.getLocation().getDateTime().compareTo(y.getLocation().getDateTime()));
+			
+			Display.getDefault().syncExec(() -> { 
+				if (locationTable.getTable().isDisposed()) return;
+				locationTable.setInput(alllocations);
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
 }

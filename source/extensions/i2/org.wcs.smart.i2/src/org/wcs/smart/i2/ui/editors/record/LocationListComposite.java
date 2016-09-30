@@ -86,7 +86,8 @@ public class LocationListComposite extends Composite{
 	private boolean doHover = true;
 	
 	private MenuItem deleteItem;
-	private MenuItem linkItem;
+	private MenuItem addLinkItem;
+	private MenuItem dropLinkItem;
 	
 	
 	public LocationListComposite(Composite parent, FormToolkit toolkit, RecordEditor editor){
@@ -215,7 +216,7 @@ public class LocationListComposite extends Composite{
 		Menu linkEntities = new Menu(tblObservations.getTable());
 		tblObservations.getTable().setMenu(linkEntities);
 		
-		SelectionListener linkEntityListener = new SelectionAdapter() {
+		SelectionListener addEntityLinkListener = new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -237,6 +238,22 @@ public class LocationListComposite extends Composite{
 				}
 			}
 		};
+		SelectionListener dropEntityLinkListener = new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+				if (!(selection instanceof IntelLocation)) return;
+				
+				IntelLocation location = (IntelLocation)selection;
+				Object data = ((MenuItem)e.widget).getData();
+				IntelEntity toDrop = null;
+				if (data != null){
+					toDrop = (IntelEntity)data;
+				}
+				editor.unlinkEntityFromLocation(location, toDrop);
+			}
+		};
 		
 		linkEntities.addMenuListener(new MenuListener() {
 			@Override
@@ -246,14 +263,19 @@ public class LocationListComposite extends Composite{
 						deleteItem.dispose();
 						deleteItem = null;
 					}
-					if (linkItem != null){
-						linkItem.dispose();
-						linkItem = null;
+					if (addLinkItem != null){
+						addLinkItem.dispose();
+						addLinkItem = null;
 					}
+					if (dropLinkItem != null){
+						dropLinkItem.dispose();
+						dropLinkItem = null;
+					}
+					
 				}else{
 					if (deleteItem == null){
 						deleteItem = new MenuItem(linkEntities, SWT.PUSH);
-						deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
+						deleteItem.setText(MessageFormat.format("{0} Location", DialogConstants.DELETE_BUTTON_TEXT));
 						deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 						deleteItem.addSelectionListener(new SelectionAdapter() {
 							
@@ -267,23 +289,30 @@ public class LocationListComposite extends Composite{
 						});
 					}
 					
-					if (linkItem == null){
-						linkItem = new MenuItem(linkEntities, SWT.CASCADE);
-						linkItem.setText("Link Entities");
+					if (addLinkItem == null){
+						addLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
+						addLinkItem.setText("Add Entity Link ");
 					}
 					
-					Menu linkSubMenu = new Menu(linkItem);
-					linkItem.setMenu(linkSubMenu);
-						
-					for (MenuItem item : linkSubMenu.getItems()){
-						item.dispose();
+
+					if (dropLinkItem == null){
+						dropLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
+						dropLinkItem.setText("Drop Entity Link ");
 					}
+					
+					Menu linkSubMenu = new Menu(addLinkItem);
+					addLinkItem.setMenu(linkSubMenu);
+					
+					Menu dropLinkSubMenu = new Menu(dropLinkItem);
+					dropLinkItem.setMenu(dropLinkSubMenu);
+					
 					Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
 					if (!(selection instanceof IntelLocation)) return;
 					IntelLocation location = (IntelLocation)selection;
 						
 					List<IntelEntityRecord> allEntities = editor.getRecord().getEntities();
 					List<IntelEntity> toAdd = new ArrayList<IntelEntity>();
+					List<IntelEntity> toDrop= new ArrayList<IntelEntity>();
 					for (IntelEntityRecord record : allEntities){
 						boolean add = true;
 						for (IntelEntityLocation elocation: editor.getEntityLocationLinks()){
@@ -294,26 +323,46 @@ public class LocationListComposite extends Composite{
 								}
 							}
 						}
-						if (add) toAdd.add(record.getEntity());
+						if (add){
+							toAdd.add(record.getEntity());
+						}else{
+							toDrop.add(record.getEntity());
+						}
 					}
 					if (toAdd.size() > 0){
 						MenuItem linkToAll = new MenuItem(linkSubMenu, SWT.PUSH);
 						linkToAll.setText("All");
-						linkToAll.addSelectionListener(linkEntityListener);
+						linkToAll.addSelectionListener(addEntityLinkListener);
 						new MenuItem(linkSubMenu, SWT.SEPARATOR);
 						for (IntelEntity entity : toAdd){
 							MenuItem linkTo = new MenuItem(linkSubMenu, SWT.PUSH);
 							linkTo.setText(entity.getIdAttributeAsText());
 							linkTo.setImage(EntityTypeLabelProvider.INSTANCE.getImage(entity.getEntityType()));
 							linkTo.setData(entity);
-							linkTo.addSelectionListener(linkEntityListener);
+							linkTo.addSelectionListener(addEntityLinkListener);
 						}
 					}else{
 						MenuItem noMore = new MenuItem(linkSubMenu, SWT.PUSH);
 						noMore.setEnabled(false);
 						noMore.setText("No Options");
 					}
-					
+					if (toDrop.size() > 0){
+						MenuItem linkToAll = new MenuItem(dropLinkSubMenu, SWT.PUSH);
+						linkToAll.setText("All");
+						linkToAll.addSelectionListener(dropEntityLinkListener);
+						new MenuItem(dropLinkSubMenu, SWT.SEPARATOR);
+						for (IntelEntity entity : toDrop){
+							MenuItem linkTo = new MenuItem(dropLinkSubMenu, SWT.PUSH);
+							linkTo.setText(entity.getIdAttributeAsText());
+							linkTo.setImage(EntityTypeLabelProvider.INSTANCE.getImage(entity.getEntityType()));
+							linkTo.setData(entity);
+							linkTo.addSelectionListener(dropEntityLinkListener);
+						}
+					}else{
+						MenuItem noMore = new MenuItem(dropLinkSubMenu, SWT.PUSH);
+						noMore.setEnabled(false);
+						noMore.setText("No Options");
+					}
 				}
 			}
 			

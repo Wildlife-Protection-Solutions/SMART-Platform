@@ -19,14 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.udig;
+package org.wcs.smart.i2.udig.record;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -35,22 +33,12 @@ import java.util.concurrent.locks.Lock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.styling.FeatureTypeStyle;
-import org.geotools.styling.Mark;
-import org.geotools.styling.PointSymbolizer;
-import org.geotools.styling.PolygonSymbolizer;
-import org.geotools.styling.Rule;
-import org.geotools.styling.Style;
-import org.geotools.styling.StyleBuilder;
-import org.geotools.styling.StyleFactory;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
-import org.locationtech.udig.catalog.IResolve.Status;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.udig.IntelRecordDataSource.Type;
+import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -132,8 +120,8 @@ public class IntelRecordService extends IService {
 				if (members == null){
 					members = new ArrayList<IntelRecordGeoResource>();
 					//two resources per entity one for points and one for polygons
-					members.add(new IntelRecordGeoResource(this, IntelRecordDataSource.Type.POINT));
-					members.add(new IntelRecordGeoResource(this, IntelRecordDataSource.Type.POLYGON));
+					members.add(new IntelRecordGeoResource(this, LocationLayerType.POINT));
+					members.add(new IntelRecordGeoResource(this, LocationLayerType.POLYGON));
 				}
 			}
 		}
@@ -196,46 +184,5 @@ public class IntelRecordService extends IService {
             }
         }
         return this.ds;
-    }
-	
-	
-	public static Style getDefaultLocationStyle(IntelRecordDataSource.Type type){
-    	Color lineColor = new Color(69,81,140);
-    	Color fillColor = new Color(120,153,215);
-    	StyleFactory sf = CommonFactoryFinder.getStyleFactory();
-    	StyleBuilder builder = new StyleBuilder(sf);
-    	
-    	if (type == Type.POINT){
-	    	FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-	    	fts.setName("Style 1");
-	    	Mark x = sf.getXMark();
-	    	x.setFill(sf.createFill(builder.colorExpression(fillColor), builder.literalExpression(0.5)));
-	    	PointSymbolizer point = sf.createPointSymbolizer();
-	    	point.getGraphic().setSize(builder.literalExpression(8));
-	    	point.getGraphic().graphicalSymbols().add(x);
-	    	point.getGraphic().setRotation(builder.literalExpression(0));
-	    	Rule r = sf.createRule();
-	    	r.setName("Rule 1");
-	    	r.symbolizers().add(point);
-	    	fts.rules().add(r);
-	    	Style style = sf.createStyle();
-	    	style.featureTypeStyles().add(fts);
-	    	return style;
-    	}else if (type == Type.POLYGON){
-    		Style style = sf.createStyle();
-    		FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-    		fts.setName("Style 1");
-    		style.featureTypeStyles().add(fts);
-    		
-    		PolygonSymbolizer sym = sf.createPolygonSymbolizer();
-    		sym.setFill(sf.createFill(builder.colorExpression(fillColor), builder.literalExpression(0.5)));
-    		sym.setStroke(sf.createStroke(builder.colorExpression(lineColor), builder.literalExpression(1)));
-    		Rule r = sf.createRule();
-    		r.setName("Rule 1");
-    		r.symbolizers().add(sym);
-    		fts.rules().add(r);
-    		return style;
-    	}
-    	return null;
     }
 }

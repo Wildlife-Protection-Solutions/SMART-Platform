@@ -650,7 +650,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	private void createMapPanel(Composite parent){
-		mapPart = new EntityEditorMapComposite(parent, this);
+		mapPart = new EntityEditorMapComposite(parent, this, toolkit);
 		mapPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 	}
@@ -1195,6 +1195,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		treeRelationships.refresh();
 		treeRelationships.expandAll();
 		
+		mapPart.refresh();
 		loadRecords.schedule(0);
 	}
 	

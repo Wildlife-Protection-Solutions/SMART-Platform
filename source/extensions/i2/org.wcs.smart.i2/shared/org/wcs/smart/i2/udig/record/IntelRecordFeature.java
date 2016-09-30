@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.udig;
+package org.wcs.smart.i2.udig.record;
 
 import org.geotools.feature.DecoratingFeature;
 import org.opengis.feature.simple.SimpleFeature;

@@ -25,7 +25,6 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.locationtech.udig.project.ui.internal.LayersView;
-import org.wcs.smart.i2.ui.editors.IntelligenceMapEditor;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.RecordsView;

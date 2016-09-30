@@ -3,11 +3,8 @@ package org.wcs.smart.i2.ui.handler;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
-import org.wcs.smart.i2.ui.editors.EntityEditor;
-import org.wcs.smart.i2.ui.editors.EntityEditorInput;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 

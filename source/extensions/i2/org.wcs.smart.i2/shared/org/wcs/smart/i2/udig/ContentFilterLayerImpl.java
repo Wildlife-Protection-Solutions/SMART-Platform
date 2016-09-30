@@ -21,20 +21,54 @@
  */
 package org.wcs.smart.i2.udig;
 
-import org.locationtech.udig.catalog.IServiceInfo;
+import org.eclipse.emf.common.util.EList;
+import org.geotools.data.Query;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.impl.LayerImpl;
+import org.opengis.filter.Filter;
 
 /**
- * Smart service information.
+ * A custom uDig layer that allows for the content of the layer to be filtered.
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class IntelRecordServiceInfo extends IServiceInfo{
+public class ContentFilterLayerImpl extends LayerImpl {
 
-	public IntelRecordServiceInfo(IntelRecordService service){
-		this.description = "service for providing intel record locations";
-		//this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
-		this.keywords = new String[]{"Intelligence", "Location", "Record"};
-		this.title = "Intelligence Record Service";
+	private Filter contentFilter;
+	
+	public ContentFilterLayerImpl(){
+		
 	}
 	
+	public void setContentFilter(Filter contentFilter){
+		this.contentFilter = contentFilter;
+	}
+	
+	public Filter getContentFilter(){
+		return this.contentFilter;
+	}
+
+	public void setGeoResources(EList<IGeoResource> resources){
+		geoResources = resources;
+	}
+	
+	@Override
+	public Query getQuery(boolean selection) {
+		try {
+			if (selection) {
+				return new Query(getSchema().getName().getLocalPart(), getFilter());
+			} else {
+				if (getContentFilter() == null) return Query.ALL;
+				return new Query(getSchema().getName().getLocalPart(), getContentFilter());
+			}
+		} catch (Exception e) {
+			if (selection) {
+				Query q = new Query();
+				q.setFilter(Filter.EXCLUDE);
+				return q;
+			} else {
+				return Query.ALL;
+			}
+		}
+	}
 }

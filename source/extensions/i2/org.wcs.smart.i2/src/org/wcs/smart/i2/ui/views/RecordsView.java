@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,9 +31,6 @@ import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.derby.iapi.services.locks.Latch;
-import org.apache.derby.iapi.store.raw.ContainerKey;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
