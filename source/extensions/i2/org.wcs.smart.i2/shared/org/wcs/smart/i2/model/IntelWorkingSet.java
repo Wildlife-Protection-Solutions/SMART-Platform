@@ -107,14 +107,13 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 		this.dateCreated = dateCreated;
 	}
 
-
 	/**
 	 * Set the date_modified.
 	 * 
 	 * @param dateModified
 	 *            date_modified
 	 */
-	@Column(name="date_modified")
+	
 	public void setDateModified(Date dateModified) {
 		this.dateModified = dateModified;
 	}
@@ -124,6 +123,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	 * 
 	 * @return date_modified
 	 */
+	@Column(name="last_modified_date")
 	public Date getDateModified() {
 		return this.dateModified;
 	}
@@ -188,6 +188,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	 * 
 	 * @return entity_date_filter
 	 */
+	@Column(name="entity_date_filter")
 	public String getEntityDateFilter() {
 		return this.entityDateFilter;
 	}

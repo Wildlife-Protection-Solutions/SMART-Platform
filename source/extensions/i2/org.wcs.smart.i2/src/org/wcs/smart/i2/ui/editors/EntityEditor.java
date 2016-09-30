@@ -914,7 +914,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		String[] columns = new String[]{"Short Name", "Date Recieved", "Date Modified"};
 		ColumnLabelProvider[] lbls = new ColumnLabelProvider[]{
 				new RecordLabelProvider(RecordLabelProvider.RecordField.TITLE),
-				new RecordLabelProvider(RecordLabelProvider.RecordField.DATE_RECIEVED),
+				new RecordLabelProvider(RecordLabelProvider.RecordField.DATE_CREATED),
 				new RecordLabelProvider(RecordLabelProvider.RecordField.LAST_MODIFIED)
 		};
 		int[] width = new int[]{400, 100, 100};

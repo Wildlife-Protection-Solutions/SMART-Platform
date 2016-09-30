@@ -48,6 +48,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String DB_VERSION_40 = "4.0"; //$NON-NLS-1$
 	public static final String DB_VERSION = DB_VERSION_40; //current version
 	
+	public static final String ICON_ENTITY = "org.wcs.smart.i2.icon.entity"; //$NON-NLS-1$
 	public static final String ICON_RECORD = "org.wcs.smart.i2.icon.record"; //$NON-NLS-1$
 	public static final String ICON_EDIT = "org.wcs.smart.i2.icon.edit"; //$NON-NLS-1$
 	public static final String ICON_REFRESH = "org.wcs.smart.i2.icon.refresh"; //$NON-NLS-1$
@@ -67,6 +68,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
 		
+		reg.put(ICON_ENTITY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity.png")); //$NON-NLS-1$);
 		reg.put(ICON_RECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script.png")); //$NON-NLS-1$);
 		reg.put(ICON_RECORD_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script_add.png")); //$NON-NLS-1$);
 		reg.put(ICON_EDIT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit.png")); //$NON-NLS-1$);

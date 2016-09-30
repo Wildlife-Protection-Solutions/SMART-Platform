@@ -39,7 +39,6 @@ import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelEvent;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
-import org.locationtech.udig.tools.edit.animation.MessageBubble;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.map.GeometryFactoryProvider;

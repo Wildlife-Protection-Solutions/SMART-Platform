@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.util.Date;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -37,23 +38,28 @@ public class RecordEditorInput implements IEditorInput{
 
 	private String name;
 	private UUID uuid;
-	
+	private Date date;
 	private IntelRecord record;
 	
-	public RecordEditorInput(String name, UUID uuid){
+	public RecordEditorInput(String name, UUID uuid, Date date){
 		this.name = name;
 		this.uuid = uuid;
+		this.date = date;
 	}
 	
 	public RecordEditorInput(IntelRecord record){
 		this.record = record;
 		this.name = record.getTitle();
+		this.date = record.getDateCreated();
 	}
 	
 	public IntelRecord getRecord(){
 		return this.record;
 	}
 	
+	public Date getDateCreated(){
+		return this.date;
+	}
 	public UUID getUuid(){
 		if (record != null){
 			return record.getUuid();

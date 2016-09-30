@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,28 +37,25 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -65,12 +64,10 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
-import org.wcs.smart.i2.ui.handler.NewRecordHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -79,8 +76,7 @@ public class RecordsView {
 
 	public static final String ID = "org.wcs.smart.i2.ui.view.records";
 	
-	@Inject
-	private EPartService partService;
+
 	@Inject
 	private IEclipseContext context;
 	
@@ -92,6 +88,22 @@ public class RecordsView {
 	private ListViewer lstNewRecords;
 	private ListViewer lstAllRecords;
 	
+	private RecordViewerFilter filter;
+	
+	private ISelectionChangedListener selectOne = new ISelectionChangedListener() {
+		
+		@Override
+		public void selectionChanged(SelectionChangedEvent event) {
+			if (event.getSelection().isEmpty()) return;
+			
+			for (ListViewer viewer : new ListViewer[]{lstInProgress, lstNewRecords, lstAllRecords}){
+				if (event.getSelectionProvider() != viewer){
+					viewer.setSelection(null);
+				}
+			}
+			
+		}
+	};
 	
 	@PostConstruct
 	public void createPartControl(Composite parent) {
@@ -104,29 +116,29 @@ public class RecordsView {
 		thisParent.setLayout(new GridLayout());
 		thisParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
-		ToolBar toolbar = new ToolBar(thisParent, SWT.HORIZONTAL | SWT.FLAT);
-		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		
-		ToolItem newItem = new ToolItem(toolbar, SWT.PUSH);
-		newItem.setToolTipText("create new record");
-		newItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD_NEW));
-		newItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ContextInjectionFactory.invoke(new NewRecordHandler(), Execute.class, context.createChild());
-			}
-		});
-		
-		ToolItem refreshItem = new ToolItem(toolbar, SWT.PUSH);
-		refreshItem.setToolTipText("refresh list");
-		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		refreshItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				loadRecordsJob.schedule();
-			}
-		});
-		
+//		ToolBar toolbar = new ToolBar(thisParent, SWT.HORIZONTAL | SWT.FLAT);
+//		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+//		
+//		ToolItem newItem = new ToolItem(toolbar, SWT.PUSH);
+//		newItem.setToolTipText("create new record");
+//		newItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD_NEW));
+//		newItem.addSelectionListener(new SelectionAdapter(){
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				ContextInjectionFactory.invoke(new NewRecordHandler(), Execute.class, context.createChild());
+//			}
+//		});
+//		
+//		ToolItem refreshItem = new ToolItem(toolbar, SWT.PUSH);
+//		refreshItem.setToolTipText("refresh list");
+//		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+//		refreshItem.addSelectionListener(new SelectionAdapter(){
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				loadRecordsJob.schedule();
+//			}
+//		});
+//		
 		
 		
 		IDoubleClickListener openListener = new IDoubleClickListener() {
@@ -162,7 +174,7 @@ public class RecordsView {
 		lstInProgress.addDoubleClickListener(openListener);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		lstInProgress.getControl().setLayoutData(gd);
-		
+		lstInProgress.addSelectionChangedListener(selectOne);
 		
 		Section newRecords = toolkit.createSection(thisParent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
 		newRecords.setText("New Records");
@@ -184,7 +196,7 @@ public class RecordsView {
 		lstNewRecords.addDoubleClickListener(openListener);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		lstNewRecords.getControl().setLayoutData(gd);
-		
+		lstNewRecords.addSelectionChangedListener(selectOne);
 		
 		Section allRecords = toolkit.createSection(thisParent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
 		allRecords.setText("All Records");
@@ -207,8 +219,19 @@ public class RecordsView {
 		typeFilter.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				//TODO filter
-//				filter.setFilterString(typeFilter.getPatternFilter());
+				if (typeFilter.getPatternFilter() == null || typeFilter.getPatternFilter().isEmpty()){
+					lstAllRecords.removeFilter(filter);
+					filter = null;
+				}else{
+					if (filter == null){
+						filter = new RecordViewerFilter();
+						filter.setFilterString(typeFilter.getPatternFilter());
+						lstAllRecords.addFilter(filter);
+					}else{
+						filter.setFilterString(typeFilter.getPatternFilter());
+						lstAllRecords.refresh();
+					}
+				}
 			}
 		});
 		
@@ -218,9 +241,14 @@ public class RecordsView {
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstAllRecords.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAllRecords.addDoubleClickListener(openListener);
+		lstAllRecords.addSelectionChangedListener(selectOne);
 		loadRecordsJob.schedule(0);
 	}
 
+	public void refreshView(){
+		loadRecordsJob.schedule();
+	}
+	
 	@Inject
 	@Optional
 	private void recordModified(@UIEventTopic(IntelEvents.RECORD_ALL) IntelRecord record){
@@ -256,6 +284,7 @@ public class RecordsView {
 			}finally{
 				s.close();
 			}
+			inProgress.sort((x,y)->x.getDateCreated().compareTo(y.getDateCreated()));
 			
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
@@ -274,6 +303,7 @@ public class RecordsView {
 			}finally{
 				s.close();
 			}
+			newRecords.sort((x,y)->x.getDateCreated().compareTo(y.getDateCreated()));
 			
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
@@ -285,13 +315,14 @@ public class RecordsView {
 			s = HibernateManager.openSession();
 			final List<RecordEditorInput> allRecords = new ArrayList<RecordEditorInput>();
 			try{
-				List<Object[]> items = s.createQuery("SELECT title, uuid FROM IntelRecord order by dateModified desc").list();
+				List<Object[]> items = s.createQuery("SELECT title, uuid, dateCreated FROM IntelRecord order by dateModified desc").list();
 				for (Object[] item : items){
-					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1]));
+					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1], (Date)item[2]));
 				}
 			}finally{
 				s.close();
 			}
+			allRecords.sort((x,y)->-1 * x.getDateCreated().compareTo(y.getDateCreated()));
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -302,4 +333,24 @@ public class RecordsView {
 		}
 		
 	};
+	
+	class RecordViewerFilter extends ViewerFilter{
+
+		private String filterString;
+		
+		public void setFilterString(String filterString){
+			this.filterString = ".*" + filterString.toUpperCase() + ".*";
+		}
+		
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (filterString == null || filterString.isEmpty()) return true;
+		
+			RecordEditorInput in = (RecordEditorInput)element;
+			if (in.getName().toUpperCase().matches(filterString)) return true;
+			if (DateFormat.getDateInstance().format(in.getDateCreated()).toUpperCase().matches(filterString)) return true;
+			return false;
+		}
+		
+	}
 }

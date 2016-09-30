@@ -210,7 +210,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	    
     private FlashFeatureListener selectFeatureListener = new FlashFeatureListener();
     private boolean flashFeatureRegistered = false;
-    private List<ContentFilterLayerImpl> locationLayers = new ArrayList<ContentFilterLayerImpl>();
+    private List<ContentFilterLayerImpl> locationLayers = null;
 	
     private FormToolkit toolkit;
     private TableViewer locationTable;
@@ -221,64 +221,55 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		this.toolkit = toolkit;
 		
 		createPartControl();
-		addLayers();
+		
+		//add default layers
+		new LoadDefaultLayersJob(getMap()).schedule();
+		
 	}
 
 	private IntelEntityService service = null;
+	
 	private void addLayers(){
-		LoadDefaultLayersJob loadDefaultLayers = new LoadDefaultLayersJob(getMap()){
-			protected IStatus run(IProgressMonitor monitor) {
-				IStatus status = super.run(monitor);
-				
-				if (service == null){
-					//TODO: only run once entity is loaded
-					HashMap<String, Serializable> params = new HashMap<String,Serializable>();
-					params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString(editor.getEntity().getUuid()));
-					service = new IntelEntityService(params);
-					
-					final Date[] dFilters = new Date[2];
-					Display.getDefault().syncExec(new Runnable(){
+		locationLayers = new ArrayList<ContentFilterLayerImpl>();
+		final Date[] dFilters = new Date[2];
+		if (dateComp != null){
+			if (dateComp.getDateFilter() == DateFilter.CUSTOM){
+				dFilters[0] = dateComp.getCustomStartDate();
+				dFilters[1] = dateComp.getCustomEndDate();
+			}else{
+				dFilters[0] = dateComp.getDateFilter().getStartDate();
+				dFilters[1] = dateComp.getDateFilter().getEndDate();
+			}
+		}
 
-						@Override
-						public void run() {
-							if (dateComp != null){
-								if (dateComp.getDateFilter() == DateFilter.CUSTOM){
-									dFilters[0] = dateComp.getCustomStartDate();
-									dFilters[1] = dateComp.getCustomEndDate();
-								}else{
-									dFilters[0] = dateComp.getDateFilter().getStartDate();
-									dFilters[1] = dateComp.getDateFilter().getEndDate();
-								}
-							}
-						}
-					});
-					
-					try {
-						Filter dateFilter = IntelEntityDataSource.createDateFilter(dFilters[0], dFilters[1]);
-						AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(service.resources(monitor), 1, dateFilter){
-							 public void run( IProgressMonitor monitor ) throws Exception {
-								 super.run(monitor);
-								 locationLayers.clear();
-								 for (Layer layer : getLayers()){
-									 if (layer instanceof ContentFilterLayerImpl){
-										 locationLayers.add((ContentFilterLayerImpl) layer);
-									 }
+		Job j = new Job("add location layers job"){
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
+				params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString(editor.getEntity().getUuid()));
+				service = new IntelEntityService(params);
+				try {
+					Filter dateFilter = IntelEntityDataSource.createDateFilter(dFilters[0], dFilters[1]);
+					AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(service.resources(monitor), 1, dateFilter){
+						 public void run( IProgressMonitor monitor ) throws Exception {
+							 super.run(monitor);
+							 locationLayers.clear();
+							 for (Layer layer : getLayers()){
+								 if (layer instanceof ContentFilterLayerImpl){
+									 locationLayers.add((ContentFilterLayerImpl) layer);
 								 }
 							 }
-						};
-						getMap().sendCommandASync(cmd);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
+						 }
+					};
+					getMap().sendCommandASync(cmd);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-				
-				
-				return status;
+				return Status.OK_STATUS;
 			}
 		};
-		loadDefaultLayers.schedule();
+		j.setSystem(true);
+		j.schedule();
 	}
 	 /**
      * registers a listener with the current page that flashes a feature each time the current
@@ -549,7 +540,6 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	}
 	
 	private IntelLocation getSelectedLocation(){
-		IntelLocation location = null;
 		if (!locationTable.getSelection().isEmpty()){
 			Object x = ((IStructuredSelection)locationTable.getSelection()).getFirstElement();
 			if (x instanceof IntelEntityLocation){
@@ -597,7 +587,13 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
     }
 	
 	public void refresh(){
-		getMap().getRenderManager().refresh(null);
+		if (locationLayers == null){
+			//add location layers
+			addLayers();
+		}else{
+			//refresh existing layers
+			getMap().getRenderManager().refresh(null);
+		}
 		
 		loadLocationsLink.schedule();
 	}

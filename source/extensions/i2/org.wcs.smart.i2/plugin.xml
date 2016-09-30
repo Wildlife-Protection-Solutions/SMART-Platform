@@ -223,7 +223,75 @@
                      value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
                </parameter>
             </command>
+            <separator
+                  name="org.wcs.smart.i2.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.eclipse.ui.file.save">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                        </equals>
+                     </with>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                        </equals>
+                     </with>
+                  </or>
+               </visibleWhen>
+            </command>
          </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.changeuserpassword">
+         <separator
+               name="org.wcs.smart.query.separator2"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.eclipse.ui.file.save">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                     </equals>
+                  </with>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                     </equals>
+                  </with>
+               </or>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.separator3"
+               visible="true">
+         </separator>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.i2.ui.view.records">
+         <command
+               commandId="org.wcs.smart.i2.command.record.new"
+               style="push">
+         </command>
+         <command
+               commandId="org.wcs.smart.i2.command.record.view.refresh"
+               style="push">
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -321,6 +389,10 @@
                optional="true">
          </commandParameter>
       </command>
+      <command
+            id="org.wcs.smart.i2.command.record.view.refresh"
+            name="Refresh Records View">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -352,6 +424,10 @@
             class="org.wcs.smart.i2.ui.handler.ShowPerspectiveHandler$ShowPerspectiveHandlerWrapper"
             commandId="org.wcs.smart.i2.command.perspective.open">
       </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.RefreshRecordViewHandler$RefreshRecordViewHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.record.view.refresh">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -366,6 +442,10 @@
       <image
             commandId="org.wcs.smart.i2.command.entity.new"
             icon="images/icons/obj16/entity_add.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.i2.command.record.view.refresh"
+            icon="images/icons/obj16/refresh.png">
       </image>
    </extension>
    <extension
