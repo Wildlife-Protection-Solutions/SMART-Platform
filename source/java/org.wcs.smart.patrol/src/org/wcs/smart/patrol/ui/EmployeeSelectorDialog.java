@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.patrol.importer;
+package org.wcs.smart.patrol.ui;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -44,6 +44,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  * for a given patrol leg.
  * 
  * @author Emily
+ * @author elitvin
  *
  */
 public class EmployeeSelectorDialog extends TitleAreaDialog{
@@ -64,14 +65,14 @@ public class EmployeeSelectorDialog extends TitleAreaDialog{
 	private String title;
 	private Type type;
 	private ComboViewer employeeViewer;
-	private PatrolLeg patrol;
+	private PatrolLeg patrolLeg;
 	
-	public EmployeeSelectorDialog(Shell parentShell, String title, String message, Type type, PatrolLeg patrol) {
+	public EmployeeSelectorDialog(Shell parentShell, String title, String message, Type type, PatrolLeg patrolLeg) {
 		super(parentShell);
 		this.title = title;
 		this.message = message;
 		this.type = type;
-		this.patrol = patrol;
+		this.patrolLeg = patrolLeg;
 	}
 	
 	/**
@@ -82,7 +83,7 @@ public class EmployeeSelectorDialog extends TitleAreaDialog{
 		Composite composite = (Composite) super.createDialogArea(parent);
 
 		setTitle(title);
-		getShell().setText(Messages.EmployeeSelectorDialog_DialogTitle);
+		getShell().setText(title);
 		setMessage(message);
 		
 		Composite main = new Composite(composite, SWT.NONE);
@@ -106,8 +107,8 @@ public class EmployeeSelectorDialog extends TitleAreaDialog{
 		});
         
         
-        employeeViewer.setInput(patrol.getMembers());
-        employeeViewer.setSelection(new StructuredSelection(patrol.getMembers().get(0)));
+        employeeViewer.setInput(patrolLeg.getMembers());
+        employeeViewer.setSelection(new StructuredSelection(patrolLeg.getMembers().get(0)));
         
 		return composite;
 	}
@@ -121,7 +122,7 @@ public class EmployeeSelectorDialog extends TitleAreaDialog{
 	 * </p>
 	 */
 	protected void okPressed() {
-		for(PatrolLegMember member: patrol.getMembers()){
+		for(PatrolLegMember member: patrolLeg.getMembers()){
 			if (type == Type.LEADER){
 				member.setIsLeader(false);
 			}else if (type == Type.PILOT){

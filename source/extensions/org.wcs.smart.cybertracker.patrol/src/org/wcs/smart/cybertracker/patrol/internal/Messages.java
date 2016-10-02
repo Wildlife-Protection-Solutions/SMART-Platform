@@ -62,9 +62,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPatrol_Warn_Station;
 	public static String CyberTrackerPatrol_Warn_Team;
 	public static String DataModelWrapper_Dropdown_Label;
-	public static String EmployeeSelectorDialog_DialogTitle;
-	public static String EmployeeSelectorDialog_LeaderType;
-	public static String EmployeeSelectorDialog_PilotType;
 	public static String PatrolCTDataBuilder_Error_DefaultValue;
 	public static String PatrolCTDataBuilder_Error_JsonDefaultValue;
 	public static String PatrolCTExportDialog_AssociatedProfileLoad_Error;
