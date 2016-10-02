@@ -504,6 +504,8 @@ public class Messages extends NLS {
 	public static String PatrolTransportChangeDialog_Error_StartDateAfter;
 	public static String PatrolTransportChangeDialog_Error_StartDateBefore;
 	public static String PatrolTransportChangeDialog_NewTransportTypeError;
+	public static String PatrolTransportChangeDialog_PilotSelectDialog_Message;
+	public static String PatrolTransportChangeDialog_PilotSelectDialog_Title;
 	public static String PatrolTransportChangeDialog_StartOfDay_Op;
 	public static String PatrolTransportChangeDialog_TimeLabel;
 	public static String PatrolTransportChangeDialog_TransportChangeLegIdentifier;
