@@ -115,7 +115,7 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 					return false;
 				}
 			}
-			if (patrol.hasPilot() && leg.getPilot() == null){
+			if (leg.getType().getPatrolType().requiresPilot() && leg.getPilot() == null){
 				if (!fixPilotError(leg, ctPatrol, session)){
 					return false;
 				}
