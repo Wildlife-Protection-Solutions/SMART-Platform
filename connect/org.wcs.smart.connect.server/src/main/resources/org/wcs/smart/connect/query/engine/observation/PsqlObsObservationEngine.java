@@ -280,4 +280,5 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 			return new ObsWaypointFilterProcessor(queryDataTable, this);
 		}
 	}
+
 }

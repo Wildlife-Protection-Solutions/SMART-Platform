@@ -168,7 +168,18 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 		super.dispose(session);
 		engine.cleanUp(session);
 	}
+	
+	@Override
+	public void setTableNameAndCaUuid() {
+		this.queryTempTable = engine.getQueryDataTable();
+		this.caUuid = engine.getCaUuid();
+	}
 
+	@Override
+	public void updateSortColumn(String sortColumn, Session session) throws SQLException {
+		updateSortColumnGeneral(session, "value", ".ob_", "_LIST", "_TREE", "uuid");
+		
+	}
 }
 
 

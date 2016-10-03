@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -52,6 +53,16 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 			return;
 		attrSql.append(')');
 
+		String dir;
+		if(direction == SWT.DOWN ){
+			dir = "DESC";
+		}else{
+			dir ="ASC";
+		}
+		if(sortColumn != null){
+			attrSql.append(" ORDER BY sortkeydbl " +dir+ ", sortkeytxt " + dir); //$NON-NLS-1$
+		}
+		
 		PreparedStatement ps = c.prepareStatement(attrSql.toString());
 		for (int i = 0; i < uuids.size(); i++) {
 			ps.setObject(i + 1, uuids.get(i));

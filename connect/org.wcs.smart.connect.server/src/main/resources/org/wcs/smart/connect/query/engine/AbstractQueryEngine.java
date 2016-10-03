@@ -113,6 +113,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	protected Session session;
 	protected Locale locale = Locale.getDefault();
 	protected int categoryCount = -1;
+	protected UUID caUuid;
 	
 	/**
 	 * Maps database tables to a prefix to use in the query.
@@ -770,5 +771,13 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 */
 	public String getDateFilterField() throws SQLException{
 		return null;
+	}
+	
+	public UUID getCaUuid() {
+		return caUuid;
+	}
+
+	public void setCaUuid(UUID caUuid) {
+		this.caUuid = caUuid;
 	}
 }

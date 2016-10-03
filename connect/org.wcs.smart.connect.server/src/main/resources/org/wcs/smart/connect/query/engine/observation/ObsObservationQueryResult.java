@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
@@ -111,6 +112,16 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		}
 		if (!hasObservations) return;
 		attrSql.append(')');
+		
+		String dir;
+		if(direction == SWT.DOWN ){
+			dir = "DESC";
+		}else{
+			dir ="ASC";
+		}
+		if(sortColumn != null){
+			attrSql.append(" ORDER BY sortkeydbl " +dir+ ", sortkeytxt " + dir); //$NON-NLS-1$
+		}
 		
 		PreparedStatement ps = c.prepareStatement(attrSql.toString());
 		for (int i = 0; i < uuids.size(); i ++){
@@ -263,4 +274,16 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		
 	}
 
+
+	@Override
+	public void setTableNameAndCaUuid() {
+		this.queryTempTable = engine.getQueryDataTable();
+		this.caUuid = engine.getCaUuid();
+	}
+
+	@Override
+	public void updateSortColumn(String sortColumn, Session session) throws SQLException {
+		updateSortColumnGeneral(session, "value", ".ob_", "_LIST", "_TREE", "uuid");
+		
+	}
 }

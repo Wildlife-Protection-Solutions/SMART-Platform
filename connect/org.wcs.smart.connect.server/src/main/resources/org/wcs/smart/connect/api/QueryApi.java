@@ -51,6 +51,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.swt.SWT;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
@@ -76,6 +77,7 @@ import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
@@ -114,7 +116,16 @@ public class QueryApi extends HttpServlet{
 	 * @param date_filter	date field type, not all make sense for all queries: waypointdate, patrolstart, patrolend, missiontrackdate, missionstartdate, missionenddate, intellreceiveddate
 	 * @param delimiter	delimiter override to use in CSV format
 	 * @param cafilter	comma separated list of CA uuids, only query these CAs.
+	 * @param sortcolumn	the attribute key of the column you wish to sort by. It is tricky to know what columns are valid here as the queries are all very dynamic and there are many type. 
+	 * 						Any data model value "key" works, eg: numberofpeople for "People -> Number of people. 
+	 * 						For metadata type values it depends on the query type:
+	 * 						Patrol queries will allow: p_id - to sort by Patrol ID, p_objective, p_type, p_legid,
+	 * 						if Ca details are included in your query the column names are: ca_name, ca_id 
+	 * 						Any queries with waypoint allows: wp_date, wp_id, wp_x, wp_y, wp_direction, wp_distance, wp_time, wp_comment, (wp_source sometimes)
+	 * 						survey queries:  surveydesign_startdate, surveydesign_enddate, survey_id, survey_startdate, survey_enddate, mission_id, mission_startdate, mission_enddate, samplingunit_id
+	 * @param sortdirection set this to "descending" to get reverse order, otherwise you will get ascending order by default. 
 	 * @return the results of the query, format is whatever is selected using the format parameter.
+	 * @throws SQLException 
 	 */
 	@SuppressWarnings("unchecked")
 	@GET
@@ -125,9 +136,17 @@ public class QueryApi extends HttpServlet{
 			@QueryParam("end_date") String end,
 			@QueryParam("date_filter") String filter,
 			@QueryParam("delimiter") String delimiter,
-			@QueryParam("cafilter") String cafilter){
+			@QueryParam("cafilter") String cafilter,
+			@QueryParam("sortcolumn") String sortColumnName,
+			@QueryParam("sortdirection") String sortDirection) throws SQLException{
 
 		UUID uuid = UuidUtils.stringToUuid(queryUuid);
+		int sortDirectionInt;
+		if(sortDirection != null && sortDirection.toLowerCase().equals("descending")){
+				sortDirectionInt = SWT.DOWN;
+		}else{
+			sortDirectionInt = SWT.UP;
+		}
 		
 		Date startDate = null;
 		Date endDate = null;
@@ -175,6 +194,7 @@ public class QueryApi extends HttpServlet{
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		Query query = null;
+		IQueryResult result = null;
 		try{
 			query = QueryManager.INSTANCE.findQuery(uuid, s);
 			
@@ -221,59 +241,63 @@ public class QueryApi extends HttpServlet{
 			params.put(Session.class.getName(), s);
 			params.put(Locale.class.getName(), request.getLocale());
 			
-			IQueryResult result = null;
-			try{
-				result = engine.executeQuery(query, params);
-			 
-				if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
-					java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
-					CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
-				
-					if (result instanceof AbstractDbFeatureResultSet
-						&& query instanceof SimpleQuery){
-						exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
-					}else if (result instanceof IMemoryTableResultSet
-						&& query instanceof GriddedQuery){
-						exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<GridResultItem>)result, s);
-					}else if (result instanceof SummaryQueryResult){
-						exporter.exportResults(query, (SummaryQueryResult)result, s);
-					}else{
-						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			result = engine.executeQuery(query, params);
+		 
+			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
+				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
+				CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
+			
+				if (result instanceof AbstractDbFeatureResultSet
+					&& query instanceof SimpleQuery){
+
+					if(sortColumnName != null){
+						((AbstractDbFeatureResultSet)result).setTableNameAndCaUuid();
+						((AbstractDbFeatureResultSet)result).setSorting(sortColumnName, sortDirectionInt);
+						((AbstractDbFeatureResultSet)result).updateSortColumn(sortColumnName, s);
 					}
-					return writeText(outputFile);
 					
-				}else if (format.equalsIgnoreCase(ShpExporter.FORMAT_KEY)){
-					String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
-					java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
 					
-					ShpExporter exporter = new ShpExporter(outputFile, request.getLocale());
-					
-					if (result instanceof AbstractDbFeatureResultSet &&
-							query instanceof SimpleQuery){
-						exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
-					}else{
-						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
-					}
-					return writeBinary(outputFile);
-				}else if (format.equalsIgnoreCase(TiffRasterExporter.FORMAT_KEY)){
-					String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".tiff"; //$NON-NLS-1$ //$NON-NLS-2$
-					java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
-					
-					TiffRasterExporter exporter = new TiffRasterExporter(outputFile, request.getLocale());
-					
-					if (result instanceof GridQueryResults &&
-							query instanceof GriddedQuery){
-						exporter.exportResults((GriddedQuery)query, (GridQueryResults)result, s);
-					}else{
-						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
-					}
-					return writeBinary(outputFile);
+					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
+				}else if (result instanceof IMemoryTableResultSet
+					&& query instanceof GriddedQuery){
+					exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<GridResultItem>)result, s);
+				}else if (result instanceof SummaryQueryResult){
+					exporter.exportResults(query, (SummaryQueryResult)result, s);
 				}else{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
-			}finally{
-				if (result != null) result.dispose(s);
+				return writeText(outputFile);
+				
+			}else if (format.equalsIgnoreCase(ShpExporter.FORMAT_KEY)){
+				String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
+				java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
+				
+				ShpExporter exporter = new ShpExporter(outputFile, request.getLocale());
+				
+				if (result instanceof AbstractDbFeatureResultSet &&
+						query instanceof SimpleQuery){
+					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
+				}else{
+					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
+				}
+				return writeBinary(outputFile);
+			}else if (format.equalsIgnoreCase(TiffRasterExporter.FORMAT_KEY)){
+				String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".tiff"; //$NON-NLS-1$ //$NON-NLS-2$
+				java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
+				
+				TiffRasterExporter exporter = new TiffRasterExporter(outputFile, request.getLocale());
+				
+				if (result instanceof GridQueryResults &&
+						query instanceof GriddedQuery){
+					exporter.exportResults((GriddedQuery)query, (GridQueryResults)result, s);
+				}else{
+					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
+				}
+				return writeBinary(outputFile);
+			}else{
+				return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
+
 
 		}catch (Exception ex){
 			String error = ex.getMessage();
@@ -281,10 +305,23 @@ public class QueryApi extends HttpServlet{
 				error = ex.getCause().getMessage();
 			}
 			logger.log(Level.SEVERE, error, ex);
+			//return createErrorResponse(Status.INTERNAL_SERVER_ERROR, error); //$NON-NLS-1$
 			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, MessageFormat.format(Messages.getString("QueryApi.ExecuteError", SmartUtils.getRequestLocale(request)), error)); //$NON-NLS-1$
-		}finally{
+		}finally {
 			s.getTransaction().commit();
-		}
+			Session session = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+			session.beginTransaction();
+			try {
+				if (result != null){
+
+					result.dispose(session);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			session.getTransaction().commit();	
+		}	
+		
 		
 	}
 	

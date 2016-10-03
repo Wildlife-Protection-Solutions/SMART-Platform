@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
@@ -57,6 +58,16 @@ public class ObsWaypointQueryResult extends AbstractDbFeatureResultSet {
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
+				String dir;
+				if(direction == SWT.DOWN ){
+					dir = "DESC";
+				}else{
+					dir ="ASC";
+				}
+				if(sortColumn != null){
+					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +dir+ ", sortkeytxt " + dir); //$NON-NLS-1$
+				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
 			}
@@ -126,5 +137,17 @@ public class ObsWaypointQueryResult extends AbstractDbFeatureResultSet {
 		super.dispose(session);
 		engine.cleanUp(session);
 	}
+	
+	@Override
+	public void setTableNameAndCaUuid() {
+		this.queryTempTable = engine.getQueryDataTable();
+		this.caUuid = engine.getCaUuid();
+	}
 
+	@Override
+	public void updateSortColumn(String sortColumn, Session session) throws SQLException {
+		//this is a weird one, it doesn't create any *_list or *_tree tables at all, not sure why yet... the last false just triggers an unsupported exception 
+		updateSortColumnGeneral(session, "value", ".ob_", "", "", "uuid", false);
+		
+	}
 }

@@ -61,6 +61,10 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	private String filterTable;
 	private String queryDataTable;
 	
+	public String getQueryDataTable() {
+		return queryDataTable;
+	}
+
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolQuery.KEY.equals(querytype);

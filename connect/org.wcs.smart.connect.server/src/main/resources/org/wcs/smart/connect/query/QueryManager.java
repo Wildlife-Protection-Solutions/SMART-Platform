@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.hibernate.internal.util.ReflectHelper;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
@@ -91,6 +92,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.ca.datamodel.Attribute;
 
 /**
  * Query manager for SMART Connect queries.
@@ -295,7 +297,12 @@ public enum QueryManager {
 	public IQueryEngine findQueryEngine(Query query) throws InstantiationException, IllegalAccessException{
 		for (IQueryEngine e : engines){
 			if (e.canExecute(query.getTypeKey())){
-				return e.getClass().newInstance();
+				
+				IQueryEngine engine = e.getClass().newInstance();
+				if(engine instanceof AbstractQueryEngine){
+					((AbstractQueryEngine) engine).setCaUuid(query.getConservationArea().getUuid());
+				}
+				return engine;
 			}
 		}
 		return null;
@@ -410,5 +417,25 @@ public enum QueryManager {
 
 	public SmartUser findUser(UUID uuid, Session s) {
 		return (SmartUser) s.get(SmartUser.class, uuid);
+	}
+	
+	/**
+	 * Returns the attribute with the given key
+	 * @param attributeKey
+	 * @param session
+	 * @return
+	 */
+	public Attribute getAttribute(Session session, String attributeKey, UUID caUuid){
+		org.hibernate.Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+		q.setParameter("ca", caUuid); //$NON-NLS-1$
+		q.setParameter("key", attributeKey); //$NON-NLS-1$
+		q.setCacheable(true);
+		@SuppressWarnings("unchecked")
+		List<Attribute> results = q.list();
+		if (results.size() != 1 ){
+			return null;
+		}else{
+			return results.get(0);
+		}
 	}
 }
