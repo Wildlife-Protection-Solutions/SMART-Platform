@@ -53,6 +53,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_EDIT = "org.wcs.smart.i2.icon.edit"; //$NON-NLS-1$
 	public static final String ICON_REFRESH = "org.wcs.smart.i2.icon.refresh"; //$NON-NLS-1$
 	public static final String ICON_RECORD_NEW = "org.wcs.smart.i2.icon.record.new"; //$NON-NLS-1$
+	public static final String ICON_WORKINGSET_NEW = "org.wcs.smart.i2.icon.workingset.new"; //$NON-NLS-1$
+	public static final String ICON_WORKINGSET_SELECT = "org.wcs.smart.i2.icon.workingset.select"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
@@ -73,6 +75,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_RECORD_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script_add.png")); //$NON-NLS-1$);
 		reg.put(ICON_EDIT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit.png")); //$NON-NLS-1$);
 		reg.put(ICON_REFRESH, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png")); //$NON-NLS-1$);
+		reg.put(ICON_WORKINGSET_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/working_set_add.png")); //$NON-NLS-1$);
+		reg.put(ICON_WORKINGSET_SELECT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/working_set_select.png")); //$NON-NLS-1$);
 	}
 	
 	/*

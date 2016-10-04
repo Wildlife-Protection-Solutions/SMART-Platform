@@ -31,13 +31,18 @@ import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
@@ -72,8 +77,36 @@ public class IntelRecordService extends IService {
 		}catch (Exception ex){
 			error = ex;
 		}
+		
+		//TODO: listen for changes and configure 
+		Job j = new Job("load name"){
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				String recordName = "Intelligence Record";
+				Session s = HibernateManager.openSession();
+				try{
+					IntelRecord r = (IntelRecord) s.get(IntelRecord.class, recordUuid);
+					if (r != null){
+						recordName = r.getTitle();
+					}
+				}catch (Exception ex){
+					
+				}
+				try{
+					for (IGeoResource r : resources(monitor)){
+						((IntelRecordGeoResourceInfo)r.getInfo(monitor)).setTitle(recordName);
+					}
+				}catch (Exception ex){
+					//TODO:
+					ex.printStackTrace();
+				}
+				return org.eclipse.core.runtime.Status.OK_STATUS;
+			}
+		};
+		j.schedule();
 	}
 	
+
 	public UUID getRecordUuid(){
 		return this.recordUuid;
 	}

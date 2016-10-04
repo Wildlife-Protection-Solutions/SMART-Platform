@@ -45,9 +45,12 @@ public class IntelRecordGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public IntelRecordGeoResourceInfo( IntelRecordGeoResource resource, IProgressMonitor monitor){
-		//TODO: full title here
-		this.title = "Intelligence Record Locations";
+		this.title = "Intelligence Record" ;
 		computeBounds(resource, monitor);
+	}
+	
+	public void setTitle(String newTitle){
+		this.title = newTitle;
 	}
 	
 	/**

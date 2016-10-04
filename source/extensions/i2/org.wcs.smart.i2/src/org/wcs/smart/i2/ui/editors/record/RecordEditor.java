@@ -59,6 +59,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -83,6 +84,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private boolean isDirty = false;
 
 	private IEclipseContext parentContext;
+	private List<EventHandler> handlers = null;
 	
 	private RecordSummaryPage summaryPage;
 	private RecordMapPage mapPage;
@@ -176,6 +178,15 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 		
 	};
+	
+	@Override
+	public void dispose(){
+		IEventBroker event = parentContext.get(IEventBroker.class);
+		if (handlers != null){
+			handlers.forEach((h)->event.unsubscribe(h));
+		}
+		super.dispose();
+	}
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -291,6 +302,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		showBusy(true);
 		try {
+			handlers = new ArrayList<EventHandler>();
+			
 			parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
 			
 			//configure tags so editors show in both perspectives
@@ -299,7 +312,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
 			
 			//on delete close editor
-			parentContext.get(IEventBroker.class).subscribe(IntelEvents.RECORD_DELETE, new EventHandler() {
+			EventHandler handler = new EventHandler() {
 				@Override
 				public void handleEvent(org.osgi.service.event.Event event) {
 					Object data = event.getProperty(IEventBroker.DATA);
@@ -307,9 +320,18 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
 					}
 				}
-			});
-
-			  
+			};
+			parentContext.get(IEventBroker.class).subscribe(IntelEvents.RECORD_DELETE, handler);
+			handlers.add(handler);
+			handler = new EventHandler() {
+				@Override
+				public void handleEvent(org.osgi.service.event.Event event) {
+					summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet());
+				}
+			};
+			parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_SET, handler);
+			handlers.add(handler);
+			
 			getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter() {
 				@Override
 				public void perspectiveActivated(IWorkbenchPage page,

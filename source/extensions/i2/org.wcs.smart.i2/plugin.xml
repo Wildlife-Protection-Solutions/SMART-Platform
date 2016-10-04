@@ -307,6 +307,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.i2.ui.views.WorkingSetView$WorkingSetViewWrapper"
+            icon="images/icons/obj16/working_set.png"
             id="org.wcs.smart.i2.ui.view.workingset"
             name="Working Set"
             restorable="true">

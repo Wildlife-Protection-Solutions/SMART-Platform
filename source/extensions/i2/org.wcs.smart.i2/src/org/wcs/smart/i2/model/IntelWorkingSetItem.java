@@ -2,6 +2,7 @@ package org.wcs.smart.i2.model;
 
 import java.util.UUID;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 
 public class IntelWorkingSetItem {
@@ -9,7 +10,8 @@ public class IntelWorkingSetItem {
 	private IntelWorkingSetCategory category;
 	private String label;
 	private UUID uuid;
-	private Image image;
+	
+	private ImageDescriptor descriptor;
 	
 	public IntelWorkingSetItem(IntelWorkingSetCategory category, String label, UUID uuid){
 		this.category = category;
@@ -17,10 +19,11 @@ public class IntelWorkingSetItem {
 		this.uuid = uuid;
 	}
 	
-	public IntelWorkingSetItem(IntelWorkingSetCategory category, String label, UUID uuid, Image image){
+	public IntelWorkingSetItem(IntelWorkingSetCategory category, String label, UUID uuid, ImageDescriptor descriptor){
 		this.category = category;
 		this.label = label;
 		this.uuid = uuid;
+		this.descriptor = descriptor;
 	}
 	
 	public IntelWorkingSetCategory getCategory(){
@@ -36,6 +39,7 @@ public class IntelWorkingSetItem {
 	}
 	
 	public Image getImage(){
-		return this.image;
+		return descriptor.createImage();
 	}
+	
 }

@@ -111,6 +111,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -188,6 +189,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 	private ToolItem deleteItem;
 	private ToolItem editItem;
+	private ToolItem wsetItem;
+	
+	private List<EventHandler> eventHandles = null;
 	
 	private Job loadEntity = new Job("load entity"){
 
@@ -383,8 +387,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	private void subscribeToEvents(){
+		eventHandles = new ArrayList<EventHandler>();
+		
+		EventHandler handler = (e) -> wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+		eventHandles.add(handler);
+		eventBroker.subscribe(IntelEvents.ACTIVE_WS_SET, handler);
+		
 		//on delete close editor
-		eventBroker.subscribe(IntelEvents.ENTITY_DELETE, new EventHandler() {
+		handler = new EventHandler() {
 			@Override
 			public void handleEvent(org.osgi.service.event.Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
@@ -392,11 +402,13 @@ public class EntityEditor extends EditorPart implements MapPart{
 					getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
 				}
 			}
-		});
+		};
+		eventHandles.add(handler);
+		eventBroker.subscribe(IntelEvents.ENTITY_DELETE, handler);
 		
 		
 		
-		final EventHandler promptToReset = new EventHandler(){
+		EventHandler promptToReset = new EventHandler(){
 			@Override
 			public void handleEvent(org.osgi.service.event.Event event) {
 				if (context.get(MPart.class) == event.getProperty(UIEvents.EventTags.ELEMENT)){
@@ -408,8 +420,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 			}
 		};
+		eventHandles.add(promptToReset);
 		
-		eventBroker.subscribe(IntelEvents.ENTITY_MODIFIED, new EventHandler() {
+		handler = new EventHandler() {
 			@Override
 			public void handleEvent(org.osgi.service.event.Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
@@ -427,8 +440,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}
 			}
-		});
+		};
+		eventHandles.add(handler);
+		eventBroker.subscribe(IntelEvents.ENTITY_MODIFIED, handler);
 	}
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		
@@ -487,6 +503,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 	@Override
 	public void dispose(){
 		if (headerFont != null){ headerFont.dispose(); headerFont = null;}
+		
+		//remove all event subscriptions
+		eventHandles.forEach((h)->eventBroker.unsubscribe(h));
+		
 		super.dispose();
 	}
 	
@@ -617,6 +637,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		deleteItem.setEnabled(isEditMode);
+		
+		wsetItem = new ToolItem(buttonBar, SWT.CHECK);
+		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+		wsetItem.setToolTipText("add to current working set");
+		wsetItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WorkingSetManager.INSTANCE.addToActiveWorkingSet(getEntity(), context);
+			}
+		});
+		wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
 		
 		
 		editItem = new ToolItem(buttonBar, SWT.CHECK);
@@ -1106,7 +1137,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private void initControl(IntelEntity entity){
 		fieldEditors = new ArrayList<AttributeFieldEditor>();
-		
+				
 		lblCreated.setText(DateFormat.getInstance().format(entity.getDateCreated()));
 		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
 		lblIdentifier.setText(entity.getIdAttributeAsText());

@@ -85,6 +85,7 @@ public class IntelRecordGeoResource extends IGeoResource {
 	@Override
 	protected IGeoResourceInfo createInfo(IProgressMonitor monitor)
 			throws IOException {
+		
 		return new IntelRecordGeoResourceInfo(this, monitor);
 	}
 

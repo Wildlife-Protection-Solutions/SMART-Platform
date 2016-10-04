@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -45,8 +46,7 @@ import org.wcs.smart.ca.NamedItem;
 @Entity
 @Table(name="smart.i_working_set")
 public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
-
-	
+ 
 	private ConservationArea ca;
 
 	private Date dateCreated;
@@ -198,8 +198,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	 * 
 	 * @return The set of i_working_set_query
 	 */
-	@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name="working_set_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.workingSet", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelWorkingSetQuery> getQueries() {
 		return this.queries;
 	}
@@ -214,8 +213,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 		this.queries = queries;
 	}
 	
-	@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name="working_set_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.workingSet", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelWorkingSetRecord> getRecords() {
 		return this.records;
 	}
@@ -223,8 +221,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 		this.records = records;
 	}
 	
-	@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name="working_set_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.workingSet", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelWorkingSetEntity> getEntities() {
 		return this.entities;
 	}

@@ -71,6 +71,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -90,8 +91,10 @@ public class RecordSummaryPage extends EditorPart{
 
 	private FormToolkit  toolkit;
 
+	private ToolItem wsetItem;
 	private ToolItem deleteItem;
 	private ToolItem editItem;
+	
 	private Composite topPart;
 	private Label headerLabel;
 	
@@ -145,6 +148,9 @@ public class RecordSummaryPage extends EditorPart{
 		super.setSite(site);
 	}
 
+	public void enableWs(boolean enable){
+		wsetItem.setEnabled(enable);
+	}
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -207,22 +213,23 @@ public class RecordSummaryPage extends EditorPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (MessageDialog.openConfirm(getSite().getShell(), "Delete", "Are you sure you want to delete this record.  This action cannot be undone.")){
-					Session s = HibernateManager.openSession();
-					try{
-						s.beginTransaction();
-						RecordManager.INSTANCE.deleteRecord(recordEditor.getRecord(), s);
-						s.getTransaction().commit();
-					}catch (Exception ex){
-						Intelligence2PlugIn.displayLog("Error deleting record. " + ex.getMessage(), ex);
-						return;
-					}
-					recordEditor.getContext().get(IEventBroker.class).send(IntelEvents.RECORD_DELETE, recordEditor.getRecord());
+					RecordManager.INSTANCE.deleteRecord(recordEditor.getRecord(), recordEditor.getContext());
 				}
-				
 			}
 		});
 		deleteItem.setEnabled(recordEditor.getEditMode());
 		
+		
+		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
+		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+		wsetItem.setToolTipText("add to current working set");
+		wsetItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				WorkingSetManager.INSTANCE.addToActiveWorkingSet(recordEditor.getRecord(), recordEditor.getContext());
+			}
+		});
+		wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
 		
 		editItem = new ToolItem(buttonBar, SWT.CHECK);
 		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));

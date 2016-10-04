@@ -290,9 +290,9 @@ CREATE TABLE smart.i_working_set
 CREATE TABLE smart.i_working_set_entity
 (
 	working_set_uuid char(16) for bit data NOT NULL,
-	entity_uuid char(16) for bit data,
+	entity_uuid char(16) for bit data NOT NULL,
 	map_style long varchar,
-	PRIMARY KEY (working_set_uuid)
+	PRIMARY KEY (working_set_uuid, entity_uuid)
 );
 
 

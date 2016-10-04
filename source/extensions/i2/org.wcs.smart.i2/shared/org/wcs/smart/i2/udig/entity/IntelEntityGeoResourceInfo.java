@@ -45,9 +45,12 @@ public class IntelEntityGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public IntelEntityGeoResourceInfo( IntelEntityGeoResource resource, IProgressMonitor monitor){
-		//TODO: get proper title
-		this.title = "Intelligence Entity Locations " ;
+		this.title = "Intelligence Entity" ;
 		computeBounds(resource, monitor);
+	}
+	
+	public void setTitle(String newTitle){
+		this.title = newTitle;
 	}
 	
 	/**

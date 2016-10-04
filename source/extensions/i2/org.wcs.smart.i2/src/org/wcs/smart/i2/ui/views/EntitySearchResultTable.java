@@ -17,6 +17,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -30,6 +31,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
@@ -168,7 +171,15 @@ public class EntitySearchResultTable extends Composite {
 		
 		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
 		mnuWorkingset.setText("Add to Working Set");
-	
+		mnuWorkingset.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+		mnuWorkingset.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (IntelEntity ie : getCurrentSelection()){
+					WorkingSetManager.INSTANCE.addToActiveWorkingSet(ie, context);
+				}
+			}
+		});
 		
 		
 		
@@ -180,7 +191,7 @@ public class EntitySearchResultTable extends Composite {
 				boolean hasSelection = !getCurrentSelection().isEmpty();
 				mnuOpen.setEnabled(hasSelection);
 				mnuExport.setEnabled(hasSelection);
-				mnuWorkingset.setEnabled(hasSelection);
+				mnuWorkingset.setEnabled(hasSelection && WorkingSetManager.INSTANCE.isSet());
 				
 				if (mnuAddToRecord == null || mnuAddToRecord.isDisposed()){
 					mnuAddToRecord = new MenuItem(menu, SWT.CASCADE);
@@ -201,7 +212,7 @@ public class EntitySearchResultTable extends Composite {
 						Object editor = E3Utils.getSourceObject(p);
 						if (editor instanceof RecordEditor && ((RecordEditor)editor).getEditMode()){
 							MenuItem relate = new MenuItem(subRecord, SWT.PUSH);
-							relate.setText( ((RecordEditor)editor).getEditorInput().getName()  );
+							relate.setText( ((RecordEditor)editor).getRecord().getTitle()  );
 							relate.addSelectionListener(new SelectionAdapter() {
 								@Override
 								public void widgetSelected(SelectionEvent e) {

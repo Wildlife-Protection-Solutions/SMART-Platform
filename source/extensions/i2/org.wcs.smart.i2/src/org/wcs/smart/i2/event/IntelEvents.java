@@ -22,6 +22,13 @@ public class IntelEvents {
 	public static final String RECORD_DELETE = "INTEL_RECORD/DELETE";
 	public static final String RECORD_MODIFIED = "INTEL_RECORD/UPDATED";
 	
+	public static final String WS_ALL = "INTEL_WS/*";
+	public static final String WS_NEW = "INTEL_WS/NEW";
+	public static final String WS_DELETE = "INTEL_WS/DELETE";
+	public static final String WS_MODIFIED = "INTEL_WS/UPDATED";
+	
+	public static final String ACTIVE_WS_SET = "INTEL_WS_SET";
+	
 	public static void fireNewEntity(IntelEntity entity, IEventBroker broker){
 		broker.send(ENTITY_NEW, entity);
 	}

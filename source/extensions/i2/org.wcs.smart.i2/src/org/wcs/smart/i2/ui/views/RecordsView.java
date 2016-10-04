@@ -52,18 +52,29 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.RecordManager;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
@@ -74,8 +85,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
 
 public class RecordsView {
 
-	public static final String ID = "org.wcs.smart.i2.ui.view.records";
-	
+	public static final String ID = "org.wcs.smart.i2.ui.view.records"; //$NON-NLS-1$
 
 	@Inject
 	private IEclipseContext context;
@@ -166,7 +176,7 @@ public class RecordsView {
 				thisParent.layout();
 			}
 		});
-		lstInProgress = new ListViewer(inProgress, SWT.BORDER);
+		lstInProgress = new ListViewer(inProgress, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		inProgress.setClient(lstInProgress.getControl());
 		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
 		lstInProgress.setLabelProvider(new RecordLabelProvider());
@@ -188,7 +198,7 @@ public class RecordsView {
 			}
 		});
 
-		lstNewRecords = new ListViewer(newRecords, SWT.BORDER);
+		lstNewRecords = new ListViewer(newRecords, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		newRecords.setClient(lstNewRecords.getControl());
 		lstNewRecords.setContentProvider(ArrayContentProvider.getInstance());
 		lstNewRecords.setLabelProvider(new RecordLabelProvider());
@@ -235,19 +245,87 @@ public class RecordsView {
 			}
 		});
 		
-		lstAllRecords = new ListViewer(allRecordsSection, SWT.BORDER);
+		lstAllRecords = new ListViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstAllRecords.setContentProvider(ArrayContentProvider.getInstance());
 		lstAllRecords.setLabelProvider(new RecordLabelProvider());
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstAllRecords.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAllRecords.addDoubleClickListener(openListener);
 		lstAllRecords.addSelectionChangedListener(selectOne);
+		
+		createMenu(lstAllRecords);
+		createMenu(lstInProgress);
+		createMenu(lstNewRecords);
+		
 		loadRecordsJob.schedule(0);
 	}
 
+	private void createMenu(ListViewer control){
+		Menu m = new Menu(control.getControl());
+		control.getControl().setMenu(m);
+	
+		MenuItem mi = new MenuItem(m, SWT.PUSH);
+		mi.setText("Open");
+		mi.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Object x = ((IStructuredSelection)control.getSelection()).getFirstElement();
+				if (x instanceof IntelRecord){
+					(new OpenRecordHandler()).openRecord((IntelRecord)x, false);
+				}else if (x instanceof RecordEditorInput){
+					(new OpenRecordHandler()).openRecord((RecordEditorInput)x, false);
+				}
+			}
+		});
+		
+		MenuItem miDelete = new MenuItem(m, SWT.PUSH);
+		miDelete.setText("Delete");
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Object x = ((IStructuredSelection)control.getSelection()).getFirstElement();
+				if (x instanceof IntelRecord){
+					RecordManager.INSTANCE.deleteRecord((IntelRecord)x, context);
+				}else if (x instanceof RecordEditorInput){
+					RecordManager.INSTANCE.deleteRecord(((RecordEditorInput)x).getUuid(), context);
+				}
+			}
+		});
+		
+		MenuItem miAdd = new MenuItem(m, SWT.PUSH);
+		miAdd.setText("Add To Working Set");
+		miAdd.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+		miAdd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Object x = ((IStructuredSelection)control.getSelection()).getFirstElement();
+				if (x instanceof IntelRecord){
+					WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
+				}else if (x instanceof RecordEditorInput){
+					WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput) x, context);
+				}
+			}
+		});
+			
+		m.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				miDelete.setEnabled(!control.getSelection().isEmpty());
+				mi.setEnabled(!control.getSelection().isEmpty());
+				miAdd.setEnabled(!control.getSelection().isEmpty() && WorkingSetManager.INSTANCE.isSet());
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {}
+		});
+	}
+	
 	public void refreshView(){
 		loadRecordsJob.schedule();
 	}
+
 	
 	@Inject
 	@Optional
