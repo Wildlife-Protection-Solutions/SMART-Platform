@@ -116,14 +116,17 @@ public class QueryApi extends HttpServlet{
 	 * @param date_filter	date field type, not all make sense for all queries: waypointdate, patrolstart, patrolend, missiontrackdate, missionstartdate, missionenddate, intellreceiveddate
 	 * @param delimiter	delimiter override to use in CSV format
 	 * @param cafilter	comma separated list of CA uuids, only query these CAs.
-	 * @param sortcolumn	the attribute key of the column you wish to sort by. It is tricky to know what columns are valid here as the queries are all very dynamic and there are many type. 
-	 * 						Any data model value "key" works, eg: numberofpeople for "People -> Number of people. 
+	 * @param sortcolumn	the attribute key of the column you wish to sort by. It is tricky to know what columns are valid here as the queries are all very dynamic and there are many type. eg, &sortcolumn=wp_id 
+	 * 						Any data model value "key" works, eg: numberofpeople for "People -> Number of people". 
 	 * 						For metadata type values it depends on the query type:
 	 * 						Patrol queries will allow: p_id - to sort by Patrol ID, p_objective, p_type, p_legid,
 	 * 						if Ca details are included in your query the column names are: ca_name, ca_id 
 	 * 						Any queries with waypoint allows: wp_date, wp_id, wp_x, wp_y, wp_direction, wp_distance, wp_time, wp_comment, (wp_source sometimes)
 	 * 						survey queries:  surveydesign_startdate, surveydesign_enddate, survey_id, survey_startdate, survey_enddate, mission_id, mission_startdate, mission_enddate, samplingunit_id
-	 * @param sortdirection set this to "descending" to get reverse order, otherwise you will get ascending order by default. 
+	 * 
+	 * 						NOTE: you will get an error, "{"status": 500, "error:": "Error executing query: ERROR: column "abc" does not exist Position: 52"} if the provided column is not supported, change the sortcolumn parameter and try again.
+	 * @param sortdirection set this to "descending" (or "desc") to get reverse order, otherwise you will get ascending order by default.  eg: &sortdirection=descending 
+	 * 			This parameter will be ignored if provided without a sortcolumn.
 	 * @return the results of the query, format is whatever is selected using the format parameter.
 	 * @throws SQLException 
 	 */
@@ -142,7 +145,7 @@ public class QueryApi extends HttpServlet{
 
 		UUID uuid = UuidUtils.stringToUuid(queryUuid);
 		int sortDirectionInt;
-		if(sortDirection != null && sortDirection.toLowerCase().equals("descending")){
+		if(sortDirection != null && (sortDirection.toLowerCase().equals("descending")|| sortDirection.toLowerCase().equals("desc") ) ){
 				sortDirectionInt = SWT.DOWN;
 		}else{
 			sortDirectionInt = SWT.UP;
