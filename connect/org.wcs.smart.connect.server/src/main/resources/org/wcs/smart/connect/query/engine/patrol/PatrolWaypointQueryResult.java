@@ -28,9 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -77,7 +77,7 @@ public class PatrolWaypointQueryResult extends AbstractDbFeatureResultSet {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
 				String dir;
-				if(direction == SWT.DOWN ){
+				if(direction == QueryApi.Direction.DOWN.value ){
 					dir = "DESC";
 				}else{
 					dir ="ASC";

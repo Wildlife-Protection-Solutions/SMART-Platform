@@ -100,6 +100,17 @@ public class QueryApi extends HttpServlet{
 	private final Logger logger = Logger.getLogger(QueryApi.class.getName());
 	
 	public static final String PATH = "query"; //$NON-NLS-1$
+	
+	public enum Direction{ 
+		UP(1), 
+		DOWN(2);
+		
+		public int value; 
+		private Direction(int value) { 
+			this.value = value; 
+		} 
+	};
+	
 
 	@Context private ServletContext context; 
 	@Context private HttpServletRequest request;
@@ -146,9 +157,9 @@ public class QueryApi extends HttpServlet{
 		UUID uuid = UuidUtils.stringToUuid(queryUuid);
 		int sortDirectionInt;
 		if(sortDirection != null && (sortDirection.toLowerCase().equals("descending")|| sortDirection.toLowerCase().equals("desc") ) ){
-				sortDirectionInt = SWT.DOWN;
+				sortDirectionInt = QueryApi.Direction.DOWN.value;
 		}else{
-			sortDirectionInt = SWT.UP;
+			sortDirectionInt = QueryApi.Direction.UP.value;
 		}
 		
 		Date startDate = null;

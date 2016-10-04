@@ -30,14 +30,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -93,7 +92,7 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 	private void attachEntityAttributes(List<IResultItem> result, Connection c, Session session) throws SQLException {
 		if (engine.getEntityTypes().size() > 0){
 			String dir;
-			if(direction == SWT.DOWN ){
+			if(direction == QueryApi.Direction.DOWN.value ){
 				dir = "DESC";
 			}else{
 				dir ="ASC";

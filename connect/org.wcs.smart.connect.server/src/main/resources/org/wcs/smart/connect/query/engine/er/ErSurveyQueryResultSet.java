@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.swt.SWT;
 import org.hibernate.Session;
+import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
@@ -54,7 +54,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 		attrSql.append(')');
 
 		String dir;
-		if(direction == SWT.DOWN ){
+		if(direction == QueryApi.Direction.DOWN.value ){
 			dir = "DESC";
 		}else{
 			dir ="ASC";

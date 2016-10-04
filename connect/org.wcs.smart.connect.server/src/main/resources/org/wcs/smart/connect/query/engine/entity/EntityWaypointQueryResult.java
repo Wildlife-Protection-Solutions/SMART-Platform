@@ -31,6 +31,7 @@ import java.util.UUID;
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -58,7 +59,7 @@ public class EntityWaypointQueryResult extends AbstractDbFeatureResultSet {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
 				String dir;
-				if(direction == SWT.DOWN ){
+				if(direction == QueryApi.Direction.DOWN.value ){
 					dir = "DESC";
 				}else{
 					dir ="ASC";
