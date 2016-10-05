@@ -263,8 +263,12 @@ public class DateFilterDropDownComposite extends Composite {
 		return SmartUtils.getDate(dtEnd);
 	}
 	
-	public void setDateFilter(DateFilterComposite.DateFilter filter){
+	public void setDateFilter(DateFilterComposite.DateFilter filter, Date[] customDates){
 		cmbFilter.setSelection(new StructuredSelection(filter));
+		if (filter == DateFilter.CUSTOM){
+			SmartUtils.initDateDateTimeWidget(dtStart, customDates[0]);
+			SmartUtils.initDateDateTimeWidget(dtEnd, customDates[1]);
+		}
 	}
 	
 	
