@@ -14,6 +14,7 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.locationtech.udig.project.render.displayAdapter.IMapDisplay;
 import org.locationtech.udig.project.ui.IAnimation;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
@@ -24,8 +25,6 @@ import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelEvent
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelListener;
 import org.locationtech.udig.project.ui.render.displayAdapter.ViewportPane;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
-
-import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Creates a semi transparent bubble (OSX like) that show a message to the user and disappears after

@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.io.Serializable;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -40,12 +41,36 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name="smart.i_working_set_query")
-public class IntelWorkingSetQuery {
+public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 	
 	private IWorkingSetQueryPk id = new IWorkingSetQueryPk();	
 	
+	private String mapStyle;
+	private Boolean isVisible;
+	
 	public IntelWorkingSetQuery(){
 		
+	}
+	
+	@Override
+	@Column(name="map_style")
+	public String getMapStyle(){
+		return this.mapStyle;
+	}
+	
+	@Override
+	public void setMapStyle(String style){
+		this.mapStyle = style;
+	}
+	
+	@Override
+	@Column(name="is_visible")
+	public boolean getIsVisible(){
+		return this.isVisible;
+	}
+	@Override
+	public void setIsVisible(boolean isVisible){
+		this.isVisible = isVisible;
 	}
 	
 	@EmbeddedId

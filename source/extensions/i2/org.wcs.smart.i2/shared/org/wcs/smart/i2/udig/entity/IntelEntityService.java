@@ -43,9 +43,7 @@ import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.udig.LocationLayerType;
-import org.wcs.smart.i2.udig.record.IntelRecordGeoResourceInfo;
 import org.wcs.smart.util.UuidUtils;
 
 /**

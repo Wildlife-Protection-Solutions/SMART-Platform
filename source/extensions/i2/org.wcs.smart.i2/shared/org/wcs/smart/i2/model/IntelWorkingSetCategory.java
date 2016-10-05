@@ -1,11 +1,7 @@
 package org.wcs.smart.i2.model;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
-import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 
 public enum IntelWorkingSetCategory {
 	ENTITY("Entities"),

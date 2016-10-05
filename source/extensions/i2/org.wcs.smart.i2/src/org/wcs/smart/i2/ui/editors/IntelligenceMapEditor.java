@@ -24,20 +24,17 @@ package org.wcs.smart.i2.ui.editors;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -68,16 +65,17 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.hibernate.Session;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.internal.ui.IDropTargetProvider;
 import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.ILayerListener;
+import org.locationtech.udig.project.LayerEvent;
+import org.locationtech.udig.project.LayerEvent.EventType;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
-import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
-import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.locationtech.udig.project.internal.render.RenderPackage;
 import org.locationtech.udig.project.internal.render.ViewportModel;
 import org.locationtech.udig.project.ui.AnimationUpdater;
@@ -94,22 +92,20 @@ import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.IBlockingSelection;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.filter.Filter;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelWorkingSet;
-import org.wcs.smart.i2.model.IntelWorkingSetEntity;
-import org.wcs.smart.i2.model.IntelWorkingSetRecord;
-import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
-import org.wcs.smart.i2.udig.entity.IntelEntityService;
-import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
-import org.wcs.smart.i2.udig.record.IntelRecordService;
-import org.wcs.smart.i2.udig.record.IntelRecordServiceExtension;
+import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
+import org.wcs.smart.i2.udig.IWorkingSetResource;
+import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+import org.wcs.smart.i2.ui.views.LayerVisibleEvent;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
@@ -117,7 +113,6 @@ import org.wcs.smart.ui.map.ScaleRatioComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -129,6 +124,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 
 	public static final String ID = "org.wcs.smart.i2.editor.map"; //$NON-NLS-1$
 
+	
 	private IEclipseContext parentContext;
 	
 	protected MapViewer mapViewer;
@@ -138,7 +134,73 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	private FlashFeatureListener selectFeatureListener = new FlashFeatureListener();
     private boolean flashFeatureRegistered = false;
     private List<EventHandler> handlers = null;
+    private WorkingSetMapLayersJob configureLayersJob = null;
     
+    private boolean handlingLayerVisibility = false;
+    
+    private ILayerListener visibilityListener = new ILayerListener() {
+
+		@Override
+		public void refresh(LayerEvent event) {
+			if (event.getType() != EventType.VISIBILITY) return;
+			if(handlingLayerVisibility) return;
+			try{
+				handlingLayerVisibility = true;
+				
+				ILayer layer = event.getSource();
+				if (layer == null) return;
+				
+				Object x = layer.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
+				if (x == null) return; //not a working set layer
+				if (!((Boolean)x)) return; //not a working set layer
+				if (!layer.getGeoResource().canResolve(IWorkingSetResource.class)) return;
+				
+				IWorkingSetResource resource = null;
+				try {
+					resource = layer.getGeoResource().resolve(IWorkingSetResource.class, null);
+				} catch (IOException e) {
+					Intelligence2PlugIn.log(e.getMessage(), e);
+				}
+				if (resource == null) return;
+				boolean visibility = layer.isVisible();
+				
+				boolean allVisible = true;
+				LayerVisibleEvent newevent = new  LayerVisibleEvent();
+				
+				List<IGeoResource> allItems = null;
+				try{
+					allItems = (List<IGeoResource>) layer.getGeoResource().resolve(IService.class, null).resources(null);
+				}catch (Exception ex){
+					Intelligence2PlugIn.log(ex.getMessage(), ex);
+				}
+				for (IGeoResource rr : allItems){
+					for (Layer l : getMap().getLayersInternal()){
+						if (l.getGeoResource().getID().equals(rr.getID())){
+							if (l.isVisible() != visibility){
+								allVisible = false;
+							}
+							break;
+						}
+					}
+					if (!allVisible) break;
+				}
+				if (allVisible){
+					if (!visibility){
+						newevent.notVisible.add(resource.getResourceId());
+					}else{
+						newevent.allVisible.add(resource.getResourceId());
+					}
+				}else{
+					newevent.partVisible.add(resource.getResourceId());
+				}
+				parentContext.get(IEventBroker.class).send(IntelEvents.ACTIVE_WS_LAYER_VISIBILITY, newevent);
+			}finally{
+				handlingLayerVisibility = false;
+			}
+			
+		}
+    	
+    };
 	public static IEditorInput MAPINPUT = new IEditorInput() {
 		
 		@Override
@@ -211,7 +273,8 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	        }
 
 	    };
-  
+	    
+	  
 
     /**
      * registers a listener with the current page that flashes a feature each time the current
@@ -315,6 +378,63 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 			}
 		};
 		parentContext.get(IEventBroker.class).subscribe(IntelEvents.WS_MODIFIED, handler);
+		handlers.add(handler);
+		
+		handler = new EventHandler() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				if (handlingLayerVisibility) return;
+				handlingLayerVisibility = true;
+				try{
+					LayerVisibleEvent visibleLayers = (LayerVisibleEvent) event.getProperty(IEventBroker.DATA);
+					for (Layer l : getMap().getLayersInternal()){
+						Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
+						if (x == null || !x) continue;
+						if (!l.getGeoResource().canResolve(IWorkingSetResource.class)) continue;
+						try {
+							UUID uuid = (l.getGeoResource().resolve(IWorkingSetResource.class, null)).getResourceId();
+							if (visibleLayers.allVisible.contains(uuid)){
+								l.setVisible(true);
+							}
+							if (visibleLayers.notVisible.contains(uuid)){
+								l.setVisible(false);
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}finally{
+					handlingLayerVisibility = false;
+				}
+			}
+		};
+		parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_LAYER_VISIBILITY, handler);
+		handlers.add(handler);
+		
+		
+		handler = new EventHandler() {
+			@Override
+			public void handleEvent(Event event) {
+				Date[] newDates = (Date[]) event.getProperty(IEventBroker.DATA);
+				if (newDates != null){
+					Filter udigDateFilter = IntelEntityDataSource.createDateFilter(newDates[0], newDates[1]);
+					boolean refresh = false;
+					for (Layer l : getMap().getLayersInternal()){
+						Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
+						if (x == null || !x) continue;
+						if (!l.getGeoResource().canResolve(IWorkingSetResource.class)) continue;
+						
+						if (l instanceof ContentFilterLayerImpl){
+							((ContentFilterLayerImpl) l).setContentFilter(udigDateFilter);
+							refresh = true;
+						}
+					}
+					if (refresh) getMap().getRenderManager().refresh(null);
+				}
+			}
+		};
+		parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_LAYER_DATEFILTER, handler);
 		handlers.add(handler);
 		
 		GridLayout layout = new GridLayout(1,false);
@@ -443,6 +563,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
         UDIGDragDropUtilities.addDropSupport(mapViewer.getViewport().getControl(), this);
         
         (new LoadDefaultLayersJob(getMap())).schedule();
+        
 	}
 
 	@Override
@@ -451,91 +572,8 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	}
 	
 	private void setWorkingSet(){
-		Job setWorkingset  = new Job("set working set"){
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				IntelWorkingSet workingset = null;
-				Session s = HibernateManager.openSession();
-				try{
-					workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-					
-					if (workingset.getEntities() != null){
-						workingset.getEntities().forEach(e->e.getEntity().getIdAttributeAsText());
-					}
-					if (workingset.getRecords() != null){
-						workingset.getRecords().forEach(e->e.getRecord().getTitle());
-					}
-					if (workingset.getQueries() != null){
-						workingset.getQueries().forEach(e->e.getQuery().getName());
-					}
-				}finally{
-					s.close();
-				}
-				
-				//remove all layers from map
-				List<ILayer> layersToRemove = new ArrayList<ILayer>();
-				for (ILayer l : getMap().getLayersInternal()){
-					Object x = l.getBlackboard().get("org.wcs.smart.i2.ws.map.wslayer") ;
-					if (x != null && ((Boolean)x)){
-						layersToRemove.add(l);
-					}
-				}
-				if (!layersToRemove.isEmpty()){
-					DeleteLayersCommand cmd = new DeleteLayersCommand(layersToRemove.toArray(new ILayer[layersToRemove.size()]));
-					getMap().sendCommandASync(cmd);
-				}
-				
-				List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-				for (IntelWorkingSetEntity entity: workingset.getEntities()){
-					HashMap<String, Serializable> params = new HashMap<String,Serializable>();
-					params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString(entity.getEntity().getUuid()));
-					IntelEntityService service = new IntelEntityService(params);
-					try {
-						toAdd.addAll(service.resources(monitor));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
-				AddContentFilterLayersCommand addCmd = new AddContentFilterLayersCommand(toAdd, 1){
-					 public void run( IProgressMonitor monitor ) throws Exception {
-							 super.run(monitor);
-							 for (Layer layer : getLayers()){
-								 layer.getBlackboard().put("org.wcs.smart.i2.ws.map.wslayer", Boolean.TRUE);
-							 }
-						 }
-					};
-				getMap().sendCommandASync(addCmd);
-				
-				
-				toAdd = new ArrayList<IGeoResource>();
-				for (IntelWorkingSetRecord record: workingset.getRecords()){
-					HashMap<String, Serializable> params = new HashMap<String,Serializable>();
-					params.put(IntelRecordServiceExtension.RECORD_UUID_KEY, UuidUtils.uuidToString(record.getRecord().getUuid()));
-					IntelRecordService service = new IntelRecordService(params);
-					try {
-						toAdd.addAll(service.resources(monitor));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
-				AddLayersCommand addCmd2 = new AddLayersCommand(toAdd, 1){
-					 public void run( IProgressMonitor monitor ) throws Exception {
-							 super.run(monitor);
-							 for (Layer layer : getLayers()){
-								 layer.getBlackboard().put("org.wcs.smart.i2.ws.map.wslayer", Boolean.TRUE);
-							 }
-						 }
-					};
-				getMap().sendCommandASync(addCmd2);
-				return Status.OK_STATUS;
-			}
-		};
-		setWorkingset.schedule();
+		if (configureLayersJob == null) configureLayersJob = new WorkingSetMapLayersJob(getMap(), visibilityListener);
+		configureLayersJob.schedule();
 	}
 	
 	

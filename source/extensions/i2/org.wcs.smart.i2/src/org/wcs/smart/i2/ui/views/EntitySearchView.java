@@ -40,7 +40,6 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -87,8 +86,7 @@ public class EntitySearchView {
 	public static final String ENTITY_SEARCH_RESULTS_KEY = "org.wcs.smart.i2.entity.search";
 	
 	public static final String ID = "org.wcs.smart.i2.view.entitysearch";
-	@Inject
-	private EPartService partService;
+	
 	@Inject
 	private IEclipseContext context;
 	
@@ -418,6 +416,7 @@ public class EntitySearchView {
 				super("Refreshing Saved Searches");
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<Object> types = new ArrayList<Object>();

@@ -24,6 +24,7 @@ package org.wcs.smart.i2.udig.record;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataStore;
@@ -37,6 +38,8 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.i2.model.IntelWorkingSetCategory;
+import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.LocationLayerType;
 
 /**
@@ -44,7 +47,7 @@ import org.wcs.smart.i2.udig.LocationLayerType;
  * @author Emily
  * @since 1.0.0
  */
-public class IntelRecordGeoResource extends IGeoResource {
+public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetResource {
 
 	private URL url = null;
 	private LocationLayerType type;
@@ -108,6 +111,7 @@ public class IntelRecordGeoResource extends IGeoResource {
 	                || adaptee.isAssignableFrom(FeatureStore.class)
 	                || adaptee.isAssignableFrom(SimpleFeatureStore.class)
 	                || adaptee.isAssignableFrom(SimpleFeatureSource.class)
+	                || adaptee.isAssignableFrom(IWorkingSetResource.class)
 	                || super.canResolve(adaptee);
 	    }
 	  
@@ -121,7 +125,9 @@ public class IntelRecordGeoResource extends IGeoResource {
         if( adaptee.isAssignableFrom(IService.class) ){
             return adaptee.cast( this.service );
         }
-      
+        if (adaptee.isAssignableFrom(IWorkingSetResource.class)){
+        	return adaptee.cast( this );
+        }
         if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ){
         	 DataStore ds = ((IntelRecordService)service).getDataStore(monitor);
              if (ds != null) {
@@ -143,4 +149,13 @@ public class IntelRecordGeoResource extends IGeoResource {
         return super.resolve(adaptee, monitor);
     }
 
+	@Override
+	public UUID getResourceId() {
+		return ((IntelRecordService)service).getRecordUuid();
+	}
+
+	@Override
+	public IntelWorkingSetCategory getResourceType() {
+		return IntelWorkingSetCategory.RECORD;
+	}
 }

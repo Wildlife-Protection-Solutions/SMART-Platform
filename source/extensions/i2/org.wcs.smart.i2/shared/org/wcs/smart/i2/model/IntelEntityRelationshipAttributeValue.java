@@ -35,7 +35,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 
 /**

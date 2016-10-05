@@ -23,7 +23,6 @@ package org.wcs.smart.i2.model;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.sql.Blob;
 import java.util.List;
 
 import javax.imageio.ImageIO;

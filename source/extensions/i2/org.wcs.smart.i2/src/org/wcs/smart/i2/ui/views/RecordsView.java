@@ -56,7 +56,6 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -350,6 +349,7 @@ public class RecordsView {
 
 	Job loadRecordsJob = new Job("Loading Intelligence Records"){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<IntelRecord> inProgress = new ArrayList<IntelRecord>();

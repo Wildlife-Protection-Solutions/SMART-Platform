@@ -30,6 +30,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -46,6 +47,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
+import org.wcs.smart.i2.ui.views.WorkingSetView;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -86,6 +88,30 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		Menu menu =  new Menu(lstViewer.getControl());
 		lstViewer.getControl().setMenu(menu);
 		
+		Composite buttonComp = new Composite(parent, SWT.NONE);
+		buttonComp.setLayout(new GridLayout());
+		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		Button btnAdd = new Button(buttonComp, SWT.PUSH);
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnAdd.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				addItem();
+			}
+		});
+		
+		Button btnDelete = new Button(buttonComp, SWT.PUSH);
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnDelete.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				deleteItem();
+			}
+		});
+		
 		MenuItem renameItem = new MenuItem(menu, SWT.PUSH);
 		renameItem.setText("Rename");
 //		renameItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.));
@@ -95,6 +121,30 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				renameItem();
 			}
 		});
+		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem addItem = new MenuItem(menu, SWT.PUSH);
+		addItem.setText(DialogConstants.ADD_BUTTON_TEXT);
+		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addItem();
+			}
+		});
+		
+		MenuItem copyItem = new MenuItem(menu, SWT.PUSH);
+		copyItem.setText("Create Copy");
+//		copyItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		copyItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				copyItem();
+			}
+		});
+		
+		new MenuItem(menu, SWT.SEPARATOR);
 		
 		MenuItem deleteItem = new MenuItem(menu, SWT.PUSH);
 		deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -112,6 +162,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				boolean hasSelection = getSelectedItem() != null;
 				deleteItem.setEnabled(hasSelection);
 				renameItem.setEnabled(hasSelection);
+				copyItem.setEnabled(hasSelection);
 			}
 			
 			@Override
@@ -132,6 +183,40 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		Object x = ((IStructuredSelection)lstViewer.getSelection()).getFirstElement();
 		if (x instanceof IntelWorkingSet) return (IntelWorkingSet) x;
 		return null;
+	}
+	
+	private void addItem(){
+		IntelWorkingSet item = WorkingSetView.createWorkingSet(getShell());
+		if (item != null) eventBroker.send(IntelEvents.WS_NEW, item);
+		loadWorkingsets.schedule();
+	}
+	
+
+	private void copyItem(){
+		IntelWorkingSet itemToCopy = getSelectedItem();
+		if (itemToCopy == null) return;
+		
+		String newName = WorkingSetView.getWorkingsetName(getShell(), MessageFormat.format("Copy of {0}", itemToCopy.getName()));
+		if (newName == null) return;
+		
+		Session s = HibernateManager.openSession();
+		IntelWorkingSet copy = null;
+		try{
+			s.beginTransaction();
+			IntelWorkingSet ic = (IntelWorkingSet)s.get(IntelWorkingSet.class, itemToCopy.getUuid());
+			copy = WorkingSetManager.INSTANCE.clone(ic);
+			copy.setName(newName);
+			copy.updateName(SmartDB.getCurrentLanguage(), newName);
+			copy.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newName);
+			s.save(copy);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog("Unable to save cloned working set", ex);
+		}finally{
+			s.close();
+		}
+		if (copy != null) eventBroker.send(IntelEvents.WS_NEW, copy);
+		loadWorkingsets.schedule();
 	}
 	
 	private void renameItem(){
@@ -160,6 +245,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				s.close();
 			}
 			lastSelection = new StructuredSelection(toRename);
+			if (toRename != null) eventBroker.send(IntelEvents.WS_MODIFIED, toRename);
 			loadWorkingsets.schedule();
 		}
 	}

@@ -53,6 +53,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		this.entityTypeFilter = entityTypeFilter;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public List<IntelEntity> doSearch(Session session){
 
 		if (searchString == null || searchString.isEmpty()){

@@ -431,13 +431,11 @@ public class LocationListComposite extends Composite{
 	
 	private class TextTableEditor extends EditingSupport {
 		
-		private TableViewer viewer;
 		private CellEditor editor;
 		private Column col;
 		
 		TextTableEditor(TableViewer viewer, Column col) {
 			super(viewer);
-			this.viewer = viewer;
 			this.col = col;
 			if (col == Column.DATE ){
 				this.editor = new DateCellEditor(viewer.getTable(), SWT.DATE | SWT.DROP_DOWN);

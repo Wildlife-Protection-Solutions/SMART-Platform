@@ -292,6 +292,7 @@ CREATE TABLE smart.i_working_set_entity
 	working_set_uuid char(16) for bit data NOT NULL,
 	entity_uuid char(16) for bit data NOT NULL,
 	map_style long varchar,
+	is_visible boolean not null default true,
 	PRIMARY KEY (working_set_uuid, entity_uuid)
 );
 
@@ -302,6 +303,7 @@ CREATE TABLE smart.i_working_set_query
 	query_uuid char(16) for bit data NOT NULL,
 	date_filter varchar(1024),
 	map_style long varchar,
+	is_visible boolean not null default true,
 	PRIMARY KEY (working_set_uuid, query_uuid)
 );
 
@@ -311,6 +313,7 @@ CREATE TABLE smart.i_working_set_record
 	working_set_uuid char(16) for bit data NOT NULL,
 	record_uuid char(16) for bit data NOT NULL,
 	map_style long varchar,
+	is_visible boolean not null default true,
 	PRIMARY KEY (working_set_uuid, record_uuid)
 );
 

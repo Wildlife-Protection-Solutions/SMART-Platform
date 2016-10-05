@@ -149,15 +149,6 @@ public class LocationDetailsShell extends SmartShellDialog{
 	public IntelLocation getLocationRecord(){
 		return location;
 	}
-	
-	
-	private GridLayout createGridLayoutNoMargin(int col){
-		GridLayout gd = new GridLayout(col, true);
-		gd.marginWidth = 0;
-		gd.marginHeight = 0;
-		return gd;
-	}
-	
 
 	@Override
 	public void handleEvent(Event event) {

@@ -138,13 +138,6 @@ public class EntityRelationshipListShell extends SmartShellDialog {
 			entityListTable.setInput(view.getEntities());
 		}
 	}
-
-	private GridLayout createGridLayoutNoMargin(int col){
-		GridLayout gd = new GridLayout(col, true);
-		gd.marginWidth = 0;
-		gd.marginHeight = 0;
-		return gd;
-	}
 	
 	private void setRelationshipType(IntelRelationshipType type){
 		this.type = type;
@@ -160,6 +153,7 @@ public class EntityRelationshipListShell extends SmartShellDialog {
 	
 	private Job relationshipSearchJob = new Job("relationship search"){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();

@@ -23,7 +23,6 @@ package org.wcs.smart.i2.model;
 
 import java.io.File;
 import java.util.Date;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,8 +34,6 @@ import javax.persistence.Table;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 
 /**

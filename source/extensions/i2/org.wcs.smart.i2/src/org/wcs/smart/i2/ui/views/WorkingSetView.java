@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.views;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -44,12 +45,15 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuAdapter;
@@ -68,12 +72,12 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.filter.DateFilterComposite;
+import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
+import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -86,6 +90,7 @@ import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetItem;
+import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
@@ -93,7 +98,6 @@ import org.wcs.smart.i2.ui.dialogs.WorkingSetListDialog;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
 
 public class WorkingSetView {
 	
@@ -106,16 +110,18 @@ public class WorkingSetView {
 	private Shell activeShell;
 	
 	private Label lblWorkingSet;
-	private ToolItem deleteItem;
+	private ToolItem copyItem;
 	private ToolItem newItem;
 	private ToolItem selectItem;
+	private DateFilterDropDownComposite dateComp;
 	
-	private TreeViewer workingsetTree;
-	private LoadWorkingSetJob job = new LoadWorkingSetJob();
+	private CheckboxTreeViewer workingsetTree;
+	private LoadWorkingSetJob loadWorkingSetJob = new LoadWorkingSetJob();
+	private boolean isConfigureVisibility = false;
 	
 	public WorkingSetView() {
 		super();
-		job.setSystem(true);
+		loadWorkingSetJob.setSystem(true);
 	}
 
 	@PostConstruct
@@ -136,7 +142,6 @@ public class WorkingSetView {
 		header.setLayout(new GridLayout(3, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		
 		lblWorkingSet = toolkit.createLabel(header, "");
 		lblWorkingSet.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		FontData fd = lblWorkingSet.getFont().getFontData()[0];
@@ -149,15 +154,17 @@ public class WorkingSetView {
 		
 		ToolBar tools = new ToolBar(header, SWT.FLAT);
 		
-		deleteItem = new ToolItem(tools, SWT.PUSH);
-		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteItem.setToolTipText("Delete active working set");
-		deleteItem.addSelectionListener(new SelectionAdapter() {
+		copyItem = new ToolItem(tools, SWT.PUSH);
+		copyItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_COPY));
+		copyItem.setToolTipText("Copy existing working set into a new working set");
+		copyItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				deleteActiveWorkingSet();	
+				copyWorkingSet();	
 			}
 		});
+		copyItem.setEnabled(false);
+		
 		newItem = new ToolItem(tools, SWT.PUSH);
 		newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		newItem.setToolTipText("Create new working set");
@@ -177,9 +184,55 @@ public class WorkingSetView {
 				selectWorkingSet();	
 			}
 		});
-
-	
-		workingsetTree = new TreeViewer(core, SWT.FULL_SELECTION | SWT.MULTI);
+		
+		DateFilterComposite.DateFilter[] defaultFilters = new DateFilter[]{
+				DateFilter.LAST_30_DAYS,
+				DateFilter.LAST_60_DAYS,
+				DateFilter.LAST_YEAR,
+				DateFilter.LAST_5_YEARS,
+				DateFilter.ALL,
+				DateFilter.CUSTOM
+		};
+		DateFilterComposite.DateFilter initialDateFilter = DateFilter.LAST_YEAR;
+		dateComp = new DateFilterDropDownComposite(core, defaultFilters, initialDateFilter);
+		toolkit.adapt(dateComp);
+		((GridLayout)dateComp.getLayout()).marginWidth = 5;
+		dateComp.addChangeListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Date[] dFilters = new Date[2];
+				if (dateComp.getDateFilter() == DateFilter.CUSTOM){
+					dFilters[0] = dateComp.getCustomStartDate();
+					dFilters[1] = dateComp.getCustomEndDate();
+				}else{
+					dFilters[0] = dateComp.getDateFilter().getStartDate();
+					dFilters[1] = dateComp.getDateFilter().getEndDate();
+				}
+				
+				String dateFilter = dateComp.getDateFilter().name();
+				if (dateComp.getDateFilter() == DateFilter.CUSTOM){
+					dateFilter += ":" + dFilters[0].getTime() + ":" + dFilters[1].getTime();
+				}
+				//TODO: save filter
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					IntelWorkingSet ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+					ws.setEntityDateFilter(dateFilter);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog("Unable to save changes to date filter to database.", ex);
+					s.getTransaction().rollback();
+				}finally{
+					s.close();
+				}
+				
+				context.get(IEventBroker.class).send(IntelEvents.ACTIVE_WS_LAYER_DATEFILTER, dFilters);
+			}
+		});
+		
+		workingsetTree = new CheckboxTreeViewer(core, SWT.FULL_SELECTION | SWT.MULTI);
 		workingsetTree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(workingsetTree.getTree());
 		workingsetTree.setLabelProvider(WorkingSetLabelProvider.INSTANCE);
@@ -190,6 +243,126 @@ public class WorkingSetView {
 				openSelection();
 			}
 		});
+		
+		workingsetTree.addCheckStateListener(new ICheckStateListener() {
+			
+			@Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				if (isConfigureVisibility) return;
+				isConfigureVisibility = true;
+				try{
+					LayerVisibleEvent newEvent = new LayerVisibleEvent();
+					
+					if ( event.getElement() instanceof IntelWorkingSetCategory){
+						Object[] kids = ((WorkingSetTreeContentProvider)workingsetTree.getContentProvider()).getChildren(event.getElement());
+						if (kids != null){
+							for (Object x : kids){
+								workingsetTree.setChecked(x, event.getChecked());
+								workingsetTree.setGrayed(x, false);
+								if(event.getChecked()){
+									newEvent.allVisible.add(((IntelWorkingSetItem)x).getUuid());
+								}else{
+									newEvent.notVisible.add(((IntelWorkingSetItem)x).getUuid());
+								}
+							}
+						}
+						workingsetTree.setGrayed(event.getElement(), false);
+					}else if (event.getElement() instanceof IntelWorkingSetItem){
+						workingsetTree.setGrayed(event.getElement(), false);
+						if(event.getChecked()){
+							newEvent.allVisible.add(((IntelWorkingSetItem)event.getElement()).getUuid());
+						}else{
+							newEvent.notVisible.add(((IntelWorkingSetItem)event.getElement()).getUuid());
+						}
+						Object parent = ((WorkingSetTreeContentProvider)workingsetTree.getContentProvider()).getParent(event.getElement());
+						Object[] kids = ((WorkingSetTreeContentProvider)workingsetTree.getContentProvider()).getChildren(parent);
+						if (kids.length > 0){
+							
+							boolean last = workingsetTree.getChecked(kids[0]);
+							workingsetTree.setChecked(parent, last);
+							workingsetTree.setGrayed(parent, false);
+							for (int i = 1; i < kids.length; i ++){
+								if (last != workingsetTree.getChecked(kids[i])){
+									workingsetTree.setChecked(parent, true);
+									workingsetTree.setGrayed(parent, true);
+									break;
+								}
+							}
+						}
+					}
+					
+					//update working set
+					Session s = HibernateManager.openSession();
+					try{
+						s.beginTransaction();
+						IntelWorkingSet ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+						
+						for (UUID uuid : newEvent.allVisible){
+							boolean found = false;
+							for (IntelWorkingSetEntity layer : ws.getEntities()){
+								if (uuid.equals(layer.getEntity().getUuid())){
+									layer.setIsVisible(true);
+									found = true;
+									break;
+								}
+							}
+							if (found) break;
+							for (IntelWorkingSetRecord layer : ws.getRecords()){
+								if (uuid.equals(layer.getRecord().getUuid())){
+									layer.setIsVisible(true);
+									found = true;
+									break;
+								}
+							}
+							if (found) break;
+							for (IntelWorkingSetQuery layer : ws.getQueries()){
+								if (uuid.equals(layer.getQuery().getUuid())){
+									layer.setIsVisible(true);
+									break;
+								}
+							}
+						};
+
+						for (UUID uuid : newEvent.notVisible){
+							boolean found = false;
+							for (IntelWorkingSetEntity layer : ws.getEntities()){
+								if (uuid.equals(layer.getEntity().getUuid())){
+									layer.setIsVisible(false);
+									found = true;
+									break;
+								}
+							}
+							if (found) break;
+							for (IntelWorkingSetRecord layer : ws.getRecords()){
+								if (uuid.equals(layer.getRecord().getUuid())){
+									layer.setIsVisible(false);
+									found = true;
+									break;
+								}
+							}
+							if (found) break;
+							for (IntelWorkingSetQuery layer : ws.getQueries()){
+								if (uuid.equals(layer.getQuery().getUuid())){
+									layer.setIsVisible(false);
+									break;
+								}
+							}
+						};
+						s.getTransaction().commit();
+					}catch(Exception ex){
+						s.getTransaction().rollback();
+						Intelligence2PlugIn.log("Unable to update visible state of layers for working set" + ex.getMessage(), ex);
+					}finally{
+						s.close();
+					}
+					context.get(IEventBroker.class).send(IntelEvents.ACTIVE_WS_LAYER_VISIBILITY, newEvent);
+
+				}finally{
+					isConfigureVisibility = false;
+				}
+			}
+		});
+
 		
 		Menu menu = new Menu(workingsetTree.getControl());
 		workingsetTree.getControl().setMenu(menu);
@@ -302,13 +475,13 @@ public class WorkingSetView {
 					}
 					(new OpenRecordHandler()).openRecord(i, false);
 				}else if (toOpen.getCategory() == IntelWorkingSetCategory.QUERIES){
-					IntelRecordQuery i = null;
-					Session s = HibernateManager.openSession();
-					try{
-						i = (IntelRecordQuery) s.get(IntelRecordQuery.class, toOpen.getUuid());
-					}finally{
-						s.close();
-					}
+//					IntelRecordQuery i = null;
+//					Session s = HibernateManager.openSession();
+//					try{
+//						i = (IntelRecordQuery) s.get(IntelRecordQuery.class, toOpen.getUuid());
+//					}finally{
+//						s.close();
+//					}
 					//TODO:
 //					(new OpenRecordHandler()).openRecord(i, false);
 				}
@@ -319,52 +492,32 @@ public class WorkingSetView {
 	}
 	
 	private void newWorkingSet(){
-		
-		InputDialog in = new InputDialog(activeShell, "New Working Set", "Enter a name for the new working set.", "Working Set", new IInputValidator() {
-			
-			@Override
-			public String isValid(String newText) {
-				if (newText.trim().isEmpty() || newText.trim().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
-					return MessageFormat.format("Name must be provided and few than {0} characters.", org.wcs.smart.ca.Label.MAX_LENGTH);
-				}
-				return null;
-			}
-		});
-		
-		if (in.open() == Window.CANCEL) return;
-		
-		String name = in.getValue().trim();
-		
-		IntelWorkingSet workingSet = new IntelWorkingSet();
-		workingSet.setConservationArea(SmartDB.getCurrentConservationArea());
-		workingSet.updateName(SmartDB.getCurrentLanguage(), name);
-		workingSet.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
-		workingSet.setName(name);
-		
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			s.save(workingSet);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Error creating new working set. {1}", ex.getMessage()), ex);
-		}finally{
-			s.close();
+		IntelWorkingSet newWorkingSet = createWorkingSet(activeShell);
+		if (newWorkingSet != null){
+			context.get(IEventBroker.class).send(IntelEvents.WS_NEW, newWorkingSet);
+			WorkingSetManager.INSTANCE.setActiveWorkingSet(newWorkingSet, context);
 		}
-		WorkingSetManager.INSTANCE.setActiveWorkingSet(workingSet, context);
 	}
 
-	private void deleteActiveWorkingSet(){
-		if (!MessageDialog.openConfirm(activeShell, "Delete Working Set", MessageFormat.format("Are you sure you want to delete the working set {0}?  This action cannot be undone.", lblWorkingSet.getText()))){
-			return;
-		}
+	private void copyWorkingSet(){
 		IntelWorkingSet set = null;
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
 			set = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-			WorkingSetManager.INSTANCE.deleteWorkingSet(s, set);
-			s.getTransaction().commit();
+			String newName = WorkingSetView.getWorkingsetName(activeShell, MessageFormat.format("Copy of {0}", set.getName()));
+			if (newName != null){
+				set = WorkingSetManager.INSTANCE.clone(set);
+				set.setName(newName);
+				set.updateName(SmartDB.getCurrentLanguage(), newName);
+				set.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newName);
+				s.save(set);
+				s.getTransaction().commit();
+			}else{
+				set = null;
+				s.getTransaction().rollback();
+			}
+			
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Error removing working set {0}. {1}", lblWorkingSet.getText(), ex.getMessage()), ex);
@@ -372,9 +525,41 @@ public class WorkingSetView {
 		}finally{
 			s.close();
 		}
-		if (set != null) context.get(IEventBroker.class).send(IntelEvents.WS_DELETE, set);
+		if (set != null){
+			context.get(IEventBroker.class).send(IntelEvents.WS_NEW, set);
+			WorkingSetManager.INSTANCE.setActiveWorkingSet(set, context);
+		}
+		
 	}
 	
+	@Inject
+	@Optional
+	private void workingSetLayerVisibilityModified(@UIEventTopic(IntelEvents.ACTIVE_WS_LAYER_VISIBILITY) LayerVisibleEvent event){
+		if (isConfigureVisibility) return;
+		try{
+			isConfigureVisibility = true;
+			
+			for (UUID uuid : event.allVisible){
+				IntelWorkingSetItem i = new IntelWorkingSetItem(null, null, true, uuid);
+				workingsetTree.setChecked(i, true);
+				workingsetTree.setGrayed(i, false);
+			}
+			for (UUID uuid : event.partVisible){
+				IntelWorkingSetItem i = new IntelWorkingSetItem(null, null, false, uuid);
+				workingsetTree.setChecked(i, true);
+				workingsetTree.setGrayed(i, true);
+			}
+			for (UUID uuid : event.notVisible){
+				IntelWorkingSetItem i = new IntelWorkingSetItem(null, null, false, uuid);
+				workingsetTree.setChecked(i, false);
+				workingsetTree.setGrayed(i, false);
+			}
+			
+		}finally{
+			isConfigureVisibility = false;
+		}
+		
+	}
 	
 	@Inject
 	@Optional
@@ -388,6 +573,7 @@ public class WorkingSetView {
 	@Optional
 	private void workingSetSet(@UIEventTopic(IntelEvents.ACTIVE_WS_SET) IntelWorkingSet activeWorkingSet){
 		setWorkingSet(activeWorkingSet);
+		copyItem.setEnabled(activeWorkingSet != null);
 	}
 	
 	@Inject
@@ -423,7 +609,7 @@ public class WorkingSetView {
 	}
 	
 	private void refreshWithDelay(){
-		job.schedule(250);
+		loadWorkingSetJob.schedule(250);
 	}
 	
 	private void selectWorkingSet(){
@@ -437,8 +623,8 @@ public class WorkingSetView {
 	}
 	
 	private void setWorkingSet(IntelWorkingSet set){	
-		job.setWorkingSetUuid(set == null ? null : set.getUuid());
-		job.schedule();
+		loadWorkingSetJob.setWorkingSetUuid(set == null ? null : set.getUuid());
+		loadWorkingSetJob.schedule();
 	}
 	
 	@Focus
@@ -455,6 +641,48 @@ public class WorkingSetView {
 		}
 	}
 
+	
+	public static String getWorkingsetName(Shell activeShell, String initialValue){
+		if (initialValue == null) initialValue = "Working Set";
+		InputDialog in = new InputDialog(activeShell, "New Working Set", "Enter a name for the new working set.", initialValue, new IInputValidator() {
+			@Override
+			public String isValid(String newText) {
+				if (newText.trim().isEmpty() || newText.trim().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
+					return MessageFormat.format("Name must be provided and few than {0} characters.", org.wcs.smart.ca.Label.MAX_LENGTH);
+				}
+				return null;
+			}
+		});
+		
+		if (in.open() == Window.CANCEL) return null;
+		return in.getValue().trim();
+	}
+	/**
+	 * Must be called from the display thread.  Opens a dialog to collect the name
+	 * of the workingset then adds the working set to the database.
+	 */
+	public static IntelWorkingSet createWorkingSet(Shell activeShell){
+		String name = getWorkingsetName(activeShell, null);
+		
+		IntelWorkingSet workingSet = new IntelWorkingSet();
+		workingSet.setConservationArea(SmartDB.getCurrentConservationArea());
+		workingSet.updateName(SmartDB.getCurrentLanguage(), name);
+		workingSet.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
+		workingSet.setName(name);
+		
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			s.save(workingSet);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(MessageFormat.format("Error creating new working set. {1}", ex.getMessage()), ex);
+		}finally{
+			s.close();
+		}
+		return workingSet;
+	}
+	
 	private class LoadWorkingSetJob extends Job{
 		
 		private UUID workingSetUuid;
@@ -496,33 +724,58 @@ public class WorkingSetView {
 					
 					ws.getName();
 					for (IntelWorkingSetEntity entity : ws.getEntities()){
-						IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getEntity().getUuid(), EntityTypeLabelProvider.INSTANCE.createImageDescriptor(entity.getEntity().getEntityType()));
+						IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.INSTANCE.createImageDescriptor(entity.getEntity().getEntityType()));
 						items.add(i);
 					}
 					
 					for (IntelWorkingSetRecord record : ws.getRecords()){
-						IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getRecord().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+						IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
 						items.add(i);
 					}
 				}finally{
 					s.close();
 				}
 			}
+			DateFilter initFilter = DateFilter.LAST_YEAR;
+			Date[] dates = null;
+			String dateFilter = ws.getEntityDateFilter();
+			if (dateFilter != null){
+				try{
+					String[] bits = dateFilter.split(":");
+					initFilter = DateFilter.valueOf(bits[0]);
+					if (initFilter == DateFilter.CUSTOM){
+						dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
+					}
+				}catch (Exception ex){
+					Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
+				}
+			}
+			final DateFilter dfilter = initFilter;
+			final Date[] dates2 = dates;
 			final IntelWorkingSet wss = ws;
+			
 			Display.getDefault().syncExec(()->{
 				if (lblWorkingSet.isDisposed()) return;
 				if (wss == null){
 					lblWorkingSet.setText("<Not Selected>");
+					dateComp.setEnabled(false);
 					workingsetTree.setInput(null);
 				}else{
+					dateComp.setEnabled(true);
+					dateComp.setDateFilter(dfilter, dates2);
+					
 					lblWorkingSet.setText(wss.getName());
 					workingsetTree.setInput(items);
+					
 					workingsetTree.setSelection(lastSelection);
 					if (lastOpenElements == null){
 						workingsetTree.expandAll();
 					}else{
 						workingsetTree.setExpandedElements(lastOpenElements);
 					}
+					
+					items.forEach((e) -> { if (e.isVisible()) workingsetTree.setChecked(e, true);  });
+					
 				}
 			});
 			

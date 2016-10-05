@@ -19,53 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.views;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+package org.wcs.smart.i2.model;
 
-import org.eclipse.e4.tools.compat.parts.DIViewPart;
-import org.eclipse.e4.ui.di.Focus;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
-public class QueryView {
+/**
+ * Interface for working set map layers which include a style and visibility
+ * property.
+ * 
+ * @author Emily
+ *
+ */
+public interface IWorkingSetMapLayer {
 
-	public static final String ID = "org.wcs.smart.i2.ui.view.queries";
+	/**
+	 * 
+	 * See StyleManager.INSTANCE for parsing
+	 * @return the map style string
+	 */
+	public String getMapStyle();
 	
-	public QueryView() {
-		super();
-	}
-
-	@PostConstruct
-	public void createPartControl(Composite parent) {
-		parent.setLayout(new GridLayout());
-		
-		Label l = new Label(parent, SWT.NONE);
-		l.setText("Intelligence Record Queries");
-	}
-
-	// @Optional
-	// @Inject
-	// private void
-	// dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object
-	// data){
-	// }
-
-	@Focus
-	public void setFocus() {
-	}
-
-	@PreDestroy
-	public void dispose() {
-	}
+	/**
+	 * Sets the map style string.  See StyleManager.INSTANCE for configuring
+	 * @param style
+	 */
+	public void setMapStyle(String style);
 	
-	public static class QueryViewWrapper extends DIViewPart<QueryView>{
-		public QueryViewWrapper() {
-			super(QueryView.class);
-		}
-	}
-
+	/**
+	 * 
+	 * @return the layer visibility
+	 */
+	public boolean getIsVisible();
+	
+	/**
+	 * Sets the layer visibility
+	 * 
+	 * @param isVisible
+	 */
+	public void setIsVisible(boolean isVisible);
 }

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui;
 
 import java.text.MessageFormat;
@@ -20,6 +41,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Table cell editor for modifying date and time values.
+ * 
+ * @author Emily
+ *
+ */
 public class DateCellEditor extends CellEditor {
 
 	 /**
@@ -28,15 +55,6 @@ public class DateCellEditor extends CellEditor {
     protected DateTime dtControl;
 
     private SelectionAdapter modifyListener;
-
-    /**
-     * State information for updating action enablement
-     */
-    private boolean isSelection = false;
-
-    private boolean isDeleteable = false;
-
-    private boolean isSelectable = false;
 
 
     /**
@@ -52,68 +70,20 @@ public class DateCellEditor extends CellEditor {
         super(parent, style);
     }
 
-//    /**
-//     * Checks to see if the "deletable" state (can delete/
-//     * nothing to delete) has changed and if so fire an
-//     * enablement changed notification.
-//     */
-//    private void checkDeleteable() {
-//        boolean oldIsDeleteable = isDeleteable;
-//        isDeleteable = isDeleteEnabled();
-//        if (oldIsDeleteable != isDeleteable) {
-//            fireEnablementChanged(DELETE);
-//        }
-//    }
-//
-//    /**
-//     * Checks to see if the "selectable" state (can select)
-//     * has changed and if so fire an enablement changed notification.
-//     */
-//    private void checkSelectable() {
-//        boolean oldIsSelectable = isSelectable;
-//        isSelectable = isSelectAllEnabled();
-//        if (oldIsSelectable != isSelectable) {
-//            fireEnablementChanged(SELECT_ALL);
-//        }
-//    }
-//
-//    /**
-//     * Checks to see if the selection state (selection /
-//     * no selection) has changed and if so fire an
-//     * enablement changed notification.
-//     */
-//    private void checkSelection() {
-//        boolean oldIsSelection = isSelection;
-//        isSelection = text.getSelectionCount() > 0;
-//        if (oldIsSelection != isSelection) {
-//            fireEnablementChanged(COPY);
-//            fireEnablementChanged(CUT);
-//        }
-//    }
 
     @Override
 	protected Control createControl(Composite parent) {
         dtControl = new DateTime(parent, getStyle());
-//        dtControl.addSelectionListener(new SelectionAdapter() {
-//            @Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//                handleDefaultSelection(e);
-//            }
-//        });
         dtControl.addKeyListener(new KeyAdapter() {
             // hook key pressed - see PR 14201  
             @Override
 			public void keyPressed(KeyEvent e) {
                 keyReleaseOccured(e);
-
                 // as a result of processing the above call, clients may have
                 // disposed this cell editor
                 if ((getControl() == null) || getControl().isDisposed()) {
 					return;
 				}
-//                checkSelection(); // see explanation below
-//                checkDeleteable();
-//                checkSelectable();
             }
         });
         dtControl.addTraverseListener(new TraverseListener() {
@@ -125,17 +95,7 @@ public class DateCellEditor extends CellEditor {
                 }
             }
         });
-//        // We really want a selection listener but it is not supported so we
-//        // use a key listener and a mouse listener to know when selection changes
-//        // may have occurred
-//        text.addMouseListener(new MouseAdapter() {
-//            @Override
-//			public void mouseUp(MouseEvent e) {
-//                checkSelection();
-//                checkDeleteable();
-//                checkSelectable();
-//            }
-//        });
+        
         dtControl.addFocusListener(new FocusAdapter() {
             @Override
 			public void focusLost(FocusEvent e) {

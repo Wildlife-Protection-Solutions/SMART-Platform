@@ -30,8 +30,6 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.NamedKeyItem;
-import org.wcs.smart.ca.UuidItem;
 
 /**
  * Model class of i_entity_search.

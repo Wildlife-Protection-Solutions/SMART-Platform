@@ -29,6 +29,12 @@ public class IntelEvents {
 	
 	public static final String ACTIVE_WS_SET = "INTEL_WS_SET";
 	
+	//payload needs to be an instance of LayerVisibleEvent
+	public static final String ACTIVE_WS_LAYER_VISIBILITY = "INTEL_WS_LAYER_VISIBILITY";
+	
+	//playload needs to be a array of two dates [startdate, enddate]
+	public static final String ACTIVE_WS_LAYER_DATEFILTER = "INTEL_WS_LAYER_DATEFILTER";
+	
 	public static void fireNewEntity(IntelEntity entity, IEventBroker broker){
 		broker.send(ENTITY_NEW, entity);
 	}
