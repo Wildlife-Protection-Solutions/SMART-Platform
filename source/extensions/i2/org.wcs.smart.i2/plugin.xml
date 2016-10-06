@@ -155,6 +155,11 @@
             id="org.wcs.smart.i2.IntelDataAssessmentPerspective"
             name="Intelligence Data Assessment Perspective">
       </perspective>
+      <perspective
+            class="org.wcs.smart.i2.birt.IntelEntityReportPerspective"
+            id="org.wcs.smart.i2.report.entity.edit"
+            name="Intelligence Entity Template Editor">
+      </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -244,6 +249,12 @@
                               value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
                         </equals>
                      </with>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.i2.report.entity.edit">
+                        </equals>
+                     </with>
                   </or>
                </visibleWhen>
             </command>
@@ -271,6 +282,12 @@
                         variable="activeWorkbenchWindow.activePerspective">
                      <equals
                            value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                     </equals>
+                  </with>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.i2.report.entity.edit">
                      </equals>
                   </with>
                </or>
@@ -471,6 +488,102 @@
             toolCursorId="arrowCursor"
             tooltip="adds a point location">
       </modalTool>
+   </extension>
+   <extension
+         point="org.wcs.smart.birt.reportEditorManager">
+      <EditorManager
+            EditorInput="org.wcs.smart.i2.birt.IntelEntityEditorInput"
+            EditorManager="org.wcs.smart.i2.birt.IntelReportEditorManager">
+      </EditorManager>
+   </extension>
+   <extension
+         id="org.wcs.smart.i2.oda.datasource"
+         point="org.eclipse.datatools.connectivity.oda.dataSource">
+      <dataSource
+            driverClass="org.wcs.smart.i2.birt.datasource.IntelBirtDataSource"
+            id="org.wcs.smart.i2.birt.datasource"
+            odaVersion="3.0"
+            overrideExplorerFiltering="false"
+            setThreadContextClassLoader="false">
+      </dataSource>
+      <dataSet
+            defaultDisplayName="Entity DataSets"
+            id="org.wcs.smart.i2.birt.dataset.entity">
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
+   </extension>
+   <extension
+         point="org.eclipse.datatools.connectivity.oda.design.ui.dataSource">
+      <dataSourceUI
+            id="org.wcs.smart.i2.birt.datasource">
+         <newDataSourceWizard
+               includesProgressMonitor="false"
+               pageClass="org.wcs.smart.i2.birt.datasource.ui.IntelligenceDataSourceWizardPage"
+               pageTitle="SMART Intelligence Data Source"
+               windowTitle="SMART Intelligence Data Source">
+         </newDataSourceWizard>
+      </dataSourceUI>
+      <dataSetUI
+            id="org.wcs.smart.i2.birt.dataset.entity"
+            supportsInParameters="true"
+            supportsOutParameters="false">
+         <dataSetWizard
+               class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+               windowTitle="Intelligence Entity Types DataSource"></dataSetWizard>
+         <dataSetPage
+               id="org.wcs.smart.i2.birt.ui.dataset.entity.wizard.page.list"
+               wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntityTypeWizardPage">
+         </dataSetPage>
+      </dataSetUI>
    </extension>
 
 </plugin>

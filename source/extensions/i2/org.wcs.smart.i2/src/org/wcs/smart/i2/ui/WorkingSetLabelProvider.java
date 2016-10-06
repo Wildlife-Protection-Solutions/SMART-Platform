@@ -25,7 +25,7 @@ public class WorkingSetLabelProvider extends LabelProvider {
 		if (element instanceof IntelWorkingSetCategory){
 			return ((IntelWorkingSetCategory) element).getImage();
 		}else if (element instanceof IntelWorkingSetItem){
-			return ((IntelWorkingSetItem) element).getImage();
+			return ((IntelWorkingSetItem) element).getImageDescriptor().createImage();
 			
 		}
 		return super.getImage(element);

@@ -176,11 +176,11 @@ public class AttachmentListComposite extends Composite{
 							MenuItem eItem = new MenuItem(mnuEntities, SWT.DEFAULT);
 							eItem.setText(entity.getEntity().getIdAttributeAsText());
 							eItem.setImage(EntityTypeLabelProvider.INSTANCE.getImage(entity.getEntity().getEntityType()));
+							eItem.addListener(SWT.Dispose, (event) -> {if (eItem.getImage() != null) eItem.getImage().dispose();});
 							eItem.addSelectionListener(new SelectionAdapter() {
 								
 								@Override
 								public void widgetSelected(SelectionEvent e) {
-									//TODO: 
 									if (!attachmentTable.getSelection().isEmpty()){
 										IntelEntityAttachment a = new IntelEntityAttachment();
 										a.setEntity(entity.getEntity());

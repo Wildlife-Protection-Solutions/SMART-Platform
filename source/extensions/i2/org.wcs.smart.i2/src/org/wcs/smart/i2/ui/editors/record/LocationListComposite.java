@@ -46,11 +46,14 @@ import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -88,8 +91,7 @@ public class LocationListComposite extends Composite{
 	private MenuItem deleteItem;
 	private MenuItem addLinkItem;
 	private MenuItem dropLinkItem;
-	
-	
+		
 	public LocationListComposite(Composite parent, FormToolkit toolkit, RecordEditor editor){
 		super(parent, SWT.NONE);
 		this.editor = editor;
@@ -294,10 +296,16 @@ public class LocationListComposite extends Composite{
 						addLinkItem.setText("Add Entity Link ");
 					}
 					
-
+					if (addLinkItem.getMenu() != null && !addLinkItem.getMenu().isDisposed()){
+						addLinkItem.getMenu().dispose();					
+					}
+					
 					if (dropLinkItem == null){
 						dropLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
 						dropLinkItem.setText("Drop Entity Link ");
+					}
+					if (dropLinkItem.getMenu() != null && !dropLinkItem.getMenu().isDisposed()){
+						dropLinkItem.getMenu().dispose();						
 					}
 					
 					Menu linkSubMenu = new Menu(addLinkItem);
@@ -338,6 +346,7 @@ public class LocationListComposite extends Composite{
 							MenuItem linkTo = new MenuItem(linkSubMenu, SWT.PUSH);
 							linkTo.setText(entity.getIdAttributeAsText());
 							linkTo.setImage(EntityTypeLabelProvider.INSTANCE.getImage(entity.getEntityType()));
+							linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});							
 							linkTo.setData(entity);
 							linkTo.addSelectionListener(addEntityLinkListener);
 						}
@@ -355,6 +364,7 @@ public class LocationListComposite extends Composite{
 							MenuItem linkTo = new MenuItem(dropLinkSubMenu, SWT.PUSH);
 							linkTo.setText(entity.getIdAttributeAsText());
 							linkTo.setImage(EntityTypeLabelProvider.INSTANCE.getImage(entity.getEntityType()));
+							linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
 							linkTo.setData(entity);
 							linkTo.addSelectionListener(dropEntityLinkListener);
 						}

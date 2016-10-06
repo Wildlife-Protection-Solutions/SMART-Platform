@@ -738,16 +738,18 @@ public class WorkingSetView {
 			}
 			DateFilter initFilter = DateFilter.LAST_YEAR;
 			Date[] dates = null;
-			String dateFilter = ws.getEntityDateFilter();
-			if (dateFilter != null){
-				try{
-					String[] bits = dateFilter.split(":");
-					initFilter = DateFilter.valueOf(bits[0]);
-					if (initFilter == DateFilter.CUSTOM){
-						dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
+			if (ws != null){
+				String dateFilter = ws.getEntityDateFilter();
+				if (dateFilter != null){
+					try{
+						String[] bits = dateFilter.split(":");
+						initFilter = DateFilter.valueOf(bits[0]);
+						if (initFilter == DateFilter.CUSTOM){
+							dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
+						}
+					}catch (Exception ex){
+						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
 					}
-				}catch (Exception ex){
-					Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
 				}
 			}
 			final DateFilter dfilter = initFilter;

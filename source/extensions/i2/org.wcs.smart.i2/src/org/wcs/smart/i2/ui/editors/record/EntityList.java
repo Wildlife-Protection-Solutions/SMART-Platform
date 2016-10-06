@@ -97,11 +97,10 @@ public class EntityList extends Composite {
 		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
 		selectionColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
 		mouseOverColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 90));
-		addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				selectionColor.dispose();
-			}
+		
+		addListener(SWT.Dispose, (e)->{
+			selectionColor.dispose(); 
+			mouseOverColor.dispose();
 		});
 	}
 	

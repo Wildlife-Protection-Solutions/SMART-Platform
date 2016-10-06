@@ -49,6 +49,10 @@ public class EntityTypeLabelProvider extends LabelProvider {
 		return super.getText(element);
 	}
 	
+	/**
+	 * If you use this outside a viewer you must make sure to dispose of the image after it has 
+	 * been created
+	 */
 	@Override
 	public Image getImage(Object element){
 		if (element instanceof IntelEntityType){

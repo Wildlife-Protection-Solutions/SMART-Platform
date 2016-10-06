@@ -31,7 +31,7 @@ import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 
 /**
- * Tools for mangaing intelligence attributes
+ * Tools for managing intelligence attributes
  * @author Emily
  *
  */

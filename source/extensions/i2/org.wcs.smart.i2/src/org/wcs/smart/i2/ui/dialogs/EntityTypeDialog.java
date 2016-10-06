@@ -82,6 +82,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -148,6 +149,16 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		return cd;
 	}
 	
+	@Override
+	public void cancelPressed(){
+		if (getButton(IDialogConstants.OK_ID).isEnabled()){
+			if (MessageDialog.openQuestion(getShell(), "Close", "Would you like to save changes before closing?")){
+				okPressed();
+			}
+		}
+		super.cancelPressed();
+	}
+	@Override
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
 		Session s = HibernateManager.openSession();
@@ -172,10 +183,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 					s.delete(a);
 				}
 			}
-			
-			
 			s.getTransaction().commit();
-			
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog("Unable to save changes: " +ex.getMessage(), ex);
@@ -208,8 +216,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	}
 	
 	private void modified(){
-		
-		
 		boolean isError = false;
 		if (nameKeyInfo.validate()){
 			isError = true;
@@ -265,8 +271,8 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		});
 	
 		l = new Label(parent, SWT.NONE);
-		l.setText("Id Attribute:");
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		l.setText("ID Attribute:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		idAttribute = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		idAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -286,6 +292,28 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 		});
 		cdId= createDecoration(idAttribute.getControl());
+		
+		l = new Label(parent, SWT.NONE);
+		l.setText("Print Template:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		l = new Label(parent, SWT.NONE);
+		l.setText(type.getBirtTemplate() == null ? "Not Configured" : type.getBirtTemplate());
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		
+		Button btnEditTemplate = new Button(parent, SWT.PUSH);
+		btnEditTemplate.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		btnEditTemplate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnEditTemplate.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				cancelPressed();
+				getParentShell().close();
+				IntelReportManager.INSTANCE.editTemplate(type);
+			}
+			
+		});
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText("Attributes:");
@@ -314,6 +342,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 		});
 		cdList = createDecoration(tblAttributes.getControl());
+		
 		
 		Menu listMenu = new Menu(tblAttributes.getControl());
 		tblAttributes.getControl().setMenu(listMenu);

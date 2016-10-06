@@ -304,9 +304,11 @@ public class EntitySearchResultTable extends Composite {
 			Label l = toolkit.createLabel(middle, item.getIdAttributeAsText());
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			addListener(l);
-			l = toolkit.createLabel(middle,"");
-			l.setImage(EntityTypeLabelProvider.INSTANCE.getImage(item.getEntityType()));
-			addListener(l);
+			final Label l1 = toolkit.createLabel(middle,"");
+			l1.setImage(EntityTypeLabelProvider.INSTANCE.getImage(item.getEntityType()));
+			l1.addDisposeListener((e)->{if (l1.getImage() != null) l1.getImage().dispose();});
+			addListener(l1);
+			
 			l = toolkit.createLabel(middle, "");
 			l.setText(EntityTypeLabelProvider.INSTANCE.getText(item.getEntityType()));
 			addListener(l);

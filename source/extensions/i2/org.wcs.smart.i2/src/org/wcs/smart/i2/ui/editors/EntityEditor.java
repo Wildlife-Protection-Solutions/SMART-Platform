@@ -112,6 +112,7 @@ import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -190,6 +191,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private ToolItem deleteItem;
 	private ToolItem editItem;
 	private ToolItem wsetItem;
+	private ToolItem printItem;
 	
 	private List<EventHandler> eventHandles = null;
 	
@@ -592,6 +594,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 		ToolBar buttonBar = new ToolBar(rightPart, SWT.HORIZONTAL | SWT.FLAT);
 		buttonBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		printItem = new ToolItem(buttonBar, SWT.PUSH);
+		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		printItem.setToolTipText("print to pdf");
+		printItem.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				IntelReportManager.INSTANCE.exportEntity(getEntity());
+			}
+			
+		});
 		
 		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
 		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));

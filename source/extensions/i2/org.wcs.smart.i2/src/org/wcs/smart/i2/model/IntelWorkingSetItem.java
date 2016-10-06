@@ -69,8 +69,8 @@ public class IntelWorkingSetItem {
 		return this.uuid;
 	}
 	
-	public Image getImage(){
-		return descriptor.createImage();
+	public ImageDescriptor getImageDescriptor(){
+		return descriptor;
 	}
 	
 	@Override

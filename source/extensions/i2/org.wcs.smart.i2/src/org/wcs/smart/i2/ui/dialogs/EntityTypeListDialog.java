@@ -367,6 +367,8 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 	}
 	
 	private void refresh(){
+		if (cmbTypes.getControl().isDisposed()) return;
+		
 		currentSelection = (IStructuredSelection) cmbTypes.getSelection();
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		loadTypes.schedule(0);
