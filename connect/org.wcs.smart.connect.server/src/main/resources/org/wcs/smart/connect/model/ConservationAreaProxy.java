@@ -50,13 +50,11 @@ public class ConservationAreaProxy {
 	private String location;
 	private String owner;
 	
-
-//TODO
-//	private Polygon caBoundary;
-//	private Polygon bufferedManagementArea;
-//	private Polygon managementSectors;
-//	private Polygon patrolSectors;
-//	private Polygon administrativAreas;
+	private String caBoundaryJson;
+	private String bufferedManagementAreaJson;
+	private String managementSectorsJson;
+	private String patrolSectorsJson;
+	private String administrativAreaJson;
 	
 	public String getOrganization() {
 		return organization;
@@ -145,5 +143,48 @@ public class ConservationAreaProxy {
 	}
 	public void setStatus(ConservationAreaInfo.Status status){
 		this.status = status;
+	}
+
+
+	
+	//Area Boundary getters/setters
+	public String getCaBoundaryJson() {
+		return caBoundaryJson;
+	}
+	
+	public void setCaBoundaryJson(String caBoundaryJson) {
+		this.caBoundaryJson = caBoundaryJson;
+	}
+
+	public String getBufferedManagementAreaJson() {
+		return bufferedManagementAreaJson;
+	}
+
+	public void setBufferedManagementAreaJson(String bufferedManagementAreaJson) {
+		this.bufferedManagementAreaJson = bufferedManagementAreaJson;
+	}
+
+	public String getManagementSectorsJson() {
+		return managementSectorsJson;
+	}
+
+	public void setManagementSectorsJson(String managementSectorsJson) {
+		this.managementSectorsJson = managementSectorsJson;
+	}
+
+	public String getPatrolSectorsJson() {
+		return patrolSectorsJson;
+	}
+
+	public void setPatrolSectorsJson(String patrolSectorsJson) {
+		this.patrolSectorsJson = patrolSectorsJson;
+	}
+
+	public String getAdministrativAreaJson() {
+		return administrativAreaJson;
+	}
+
+	public void setAdministrativAreaJson(String administrativAreaJson) {
+		this.administrativAreaJson = administrativAreaJson;
 	}
 }
