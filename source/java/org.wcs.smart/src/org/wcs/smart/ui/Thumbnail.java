@@ -199,7 +199,6 @@ public class Thumbnail {
 		final Composite c = new Composite(parent, style);
 		c.setLocation(0,0);
 		c.setSize(thumbnailSize, thumbnailSize);
-		
 		c.addMouseListener(doubleClickListener);
 		
 		String fileName = null;

@@ -32,6 +32,7 @@ import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.RunAndRenderTask;
 import org.hibernate.Session;
+import org.wcs.smart.SmartTimezoneWrapper;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.report.model.Report;
 

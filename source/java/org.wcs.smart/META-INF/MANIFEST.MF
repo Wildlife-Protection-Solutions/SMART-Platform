@@ -89,7 +89,8 @@ Require-Bundle: javax.inject;bundle-version="1.0.0",
  org.locationtech.udig.style.advanced;bundle-version="2.0.0",
  org.eclipse.e4.ui.widgets;bundle-version="1.0.0",
  org.locationtech.udig.mapgraphic;bundle-version="2.0.0",
- org.locationtech.udig.legend;bundle-version="2.0.0"
+ org.locationtech.udig.legend;bundle-version="2.0.0",
+ com.ibm.icu
 Eclipse-BuddyPolicy: global
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

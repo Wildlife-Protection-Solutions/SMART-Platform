@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.execute;
+package org.wcs.smart;
 
 import java.util.Date;
 
@@ -29,7 +29,7 @@ import com.ibm.icu.util.TimeZone;
 
 /**
  * This is a hack to be able to provide the current conservation
- * area and user to the SMART Birt Functions.
+ * area and user to the SMART BIRT Functions.
  * 
  * @author Emily
  *

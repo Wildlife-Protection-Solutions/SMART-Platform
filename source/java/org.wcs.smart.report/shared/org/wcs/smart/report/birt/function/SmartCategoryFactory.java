@@ -27,7 +27,7 @@ import org.eclipse.birt.core.script.functionservice.IScriptFunctionExecutor;
 import org.eclipse.birt.core.script.functionservice.IScriptFunctionFactory;
 //import org.wcs.smart.hibernate.SmartDB;
 //import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.report.execute.SmartTimezoneWrapper;
+import org.wcs.smart.SmartTimezoneWrapper;
 
 /**
  * Smart functions for BIRT reports

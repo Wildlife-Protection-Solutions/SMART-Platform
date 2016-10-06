@@ -210,6 +210,7 @@ public class NameKeyComposite {
 		if (canEdit) {
 			Label lbl = new Label(parent, SWT.NONE);
 			lbl.setText(Messages.NameKeyComposite_LanguageLabel);
+			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 			langViewer = new LanguageViewer(parent, SWT.NONE,
 					SmartDB.getCurrentConservationArea());
 			
