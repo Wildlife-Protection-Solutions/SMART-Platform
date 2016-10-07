@@ -1,6 +1,7 @@
 package org.wcs.smart.i2.birt.datasource.ui;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,21 +37,20 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
-import org.wcs.smart.i2.birt.entity.EntityDataset;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 
-public class IntelEntityTypeWizardPage extends DataSetWizardPage {
+public class IntelEntityLocationWizardPage extends DataSetWizardPage {
 
 	private static final String SELECT_ENTITY_TYPE = "Select the entity type to use";
-	
 	private TableViewer lstEntityTypes;
 	/**
 	 * Constructor
 	 * 
 	 * @param pageName
 	 */
-	public IntelEntityTypeWizardPage(String pageName) {
+	public IntelEntityLocationWizardPage(String pageName) {
 		super(pageName);
 		setTitle(pageName);
 		setMessage(SELECT_ENTITY_TYPE);
@@ -63,7 +63,7 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 	 * @param title
 	 * @param titleImage
 	 */
-	public IntelEntityTypeWizardPage(String pageName, String title,
+	public IntelEntityLocationWizardPage(String pageName, String title,
 			ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 		setMessage(SELECT_ENTITY_TYPE);
@@ -91,8 +91,6 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 		lstEntityTypes = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		lstEntityTypes.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
 		lstEntityTypes.setContentProvider(ArrayContentProvider.getInstance());
-		
-
 		lstEntityTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstEntityTypes.getControl().getLayoutData()).heightHint = 300;
 		lstEntityTypes.getControl().addListener(SWT.Selection, new Listener() {
@@ -110,7 +108,6 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 		}finally{
 			s.close();
 		}
-		
 		Collections.sort(types, (a,b) -> Collator.getInstance().compare(a.getName(), b.getName()));
 		lstEntityTypes.setInput(types);
 		
@@ -280,7 +277,7 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 			IntelEntityType entityType) throws OdaException {
 
 		//create dataests
-		IQuery query = conn.newQuery(EntityDataset.DATASET_TYPE);
+		IQuery query = conn.newQuery(EntityLocationDataset.DATASET_TYPE);
 		query.prepare(entityType.getKeyId());
 		dataSetDesign.setQueryText(entityType.getKeyId());
 
@@ -309,8 +306,8 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		dataSetDesign.setDisplayName(entityType.getName());
-		dataSetDesign.setName(entityType.getName());
+		dataSetDesign.setDisplayName(MessageFormat.format("{0} - Locations", entityType.getName()));
+		dataSetDesign.setName(MessageFormat.format("{0} - Locations", entityType.getName()));
 	}
 
 	/**

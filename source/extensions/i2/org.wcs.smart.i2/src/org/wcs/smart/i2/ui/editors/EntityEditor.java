@@ -601,7 +601,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		printItem.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				IntelReportManager.INSTANCE.exportEntity(getEntity());
+				IntelReportManager.INSTANCE.exportEntity(getEntity(), mapPart.getDateFilter());
 			}
 			
 		});

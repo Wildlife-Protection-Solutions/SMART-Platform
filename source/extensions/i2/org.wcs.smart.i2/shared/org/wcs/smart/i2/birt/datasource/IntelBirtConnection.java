@@ -23,6 +23,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetMetadata;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.ibm.icu.util.ULocale;
@@ -164,7 +166,11 @@ public class IntelBirtConnection implements IConnection {
 	public IQuery newQuery(String dataSetType) throws OdaException {
 		try {
 			if (dataSetType.equals(EntityDataset.DATASET_TYPE)) {
-				return createTableQuery();
+				return new EntityDataset(this);
+			}else if (dataSetType.equals(EntityLocationDataset.DATASET_TYPE)) {
+				return new EntityLocationDataset(this);
+			}else if (dataSetType.equals(EntityRecordDataset.DATASET_TYPE)) {
+				return new EntityRecordDataset(this);
 			}
 			throw new OdaException(
 					MessageFormat.format("Dataset {0} not supported by SMART", //$NON-NLS-1$
@@ -172,11 +178,6 @@ public class IntelBirtConnection implements IConnection {
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
-	}
-
-	
-	protected EntityDataset createTableQuery(){
-		return new EntityDataset(this);
 	}
 	
 	/**

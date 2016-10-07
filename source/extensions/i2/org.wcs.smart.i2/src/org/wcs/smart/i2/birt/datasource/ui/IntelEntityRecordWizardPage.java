@@ -37,10 +37,13 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
+import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 
-public class IntelEntityTypeWizardPage extends DataSetWizardPage {
+import com.ibm.icu.text.MessageFormat;
+
+public class IntelEntityRecordWizardPage extends DataSetWizardPage {
 
 	private static final String SELECT_ENTITY_TYPE = "Select the entity type to use";
 	
@@ -50,7 +53,7 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 	 * 
 	 * @param pageName
 	 */
-	public IntelEntityTypeWizardPage(String pageName) {
+	public IntelEntityRecordWizardPage(String pageName) {
 		super(pageName);
 		setTitle(pageName);
 		setMessage(SELECT_ENTITY_TYPE);
@@ -63,7 +66,7 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 	 * @param title
 	 * @param titleImage
 	 */
-	public IntelEntityTypeWizardPage(String pageName, String title,
+	public IntelEntityRecordWizardPage(String pageName, String title,
 			ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 		setMessage(SELECT_ENTITY_TYPE);
@@ -280,7 +283,7 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 			IntelEntityType entityType) throws OdaException {
 
 		//create dataests
-		IQuery query = conn.newQuery(EntityDataset.DATASET_TYPE);
+		IQuery query = conn.newQuery(EntityRecordDataset.DATASET_TYPE);
 		query.prepare(entityType.getKeyId());
 		dataSetDesign.setQueryText(entityType.getKeyId());
 
@@ -309,8 +312,8 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		dataSetDesign.setDisplayName(entityType.getName());
-		dataSetDesign.setName(entityType.getName());
+		dataSetDesign.setDisplayName(MessageFormat.format("{0} - Records", entityType.getName()));
+		dataSetDesign.setName(MessageFormat.format("{0} - Records", entityType.getName()));
 	}
 
 	/**

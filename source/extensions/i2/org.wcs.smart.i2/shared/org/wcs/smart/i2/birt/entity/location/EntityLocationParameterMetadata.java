@@ -1,15 +1,17 @@
-package org.wcs.smart.i2.birt.entity;
+package org.wcs.smart.i2.birt.entity.location;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.birt.entity.EntityDataset;
 
-public class EntityParameterMetadata implements IParameterMetaData{
-
+public class EntityLocationParameterMetadata implements IParameterMetaData{
 	private static DataSourceParameter[] parameters = new DataSourceParameter[]{
 		null,
-		DataSourceParameter.ENTITY_UUID
+		DataSourceParameter.ENTITY_UUID,
+		DataSourceParameter.START_DATE,
+		DataSourceParameter.END_DATE,
 	};
 	
 	public int findParameterIndex(String parameterName){

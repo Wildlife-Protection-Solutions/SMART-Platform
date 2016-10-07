@@ -22,9 +22,9 @@
 package org.wcs.smart.i2.birt;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.HashMap;
 
+import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
@@ -34,6 +34,7 @@ import org.eclipse.birt.report.engine.api.impl.RunAndRenderTask;
 import org.hibernate.Session;
 import org.wcs.smart.SmartTimezoneWrapper;
 import org.wcs.smart.birt.BirtConstants;
+import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationArea;
 
 import com.ibm.icu.util.TimeZone;

@@ -24,6 +24,7 @@ package org.wcs.smart.i2.birt;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Date;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
@@ -37,7 +38,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.birt.entity.EntityParameterMetadata.EntityParameter;
+import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -64,8 +65,8 @@ public enum IntelReportManager {
 				IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP");
 	}
 	
-	public void exportEntity(IntelEntity entity){
-		ReportRunnerJob job = new ReportRunnerJob(entity);
+	public void exportEntity(IntelEntity entity, Date[] dFilter){
+		ReportRunnerJob job = new ReportRunnerJob(entity, dFilter);
 		job.schedule();
 	}
 	/**
@@ -111,12 +112,30 @@ public enum IntelReportManager {
 				}
 				
 				//add entity uuid parameter
-				ScalarParameterHandle shandler = rdh.getElementFactory().newScalarParameter(EntityParameter.UUID.name);
+				
+				ScalarParameterHandle shandler = rdh.getElementFactory().newScalarParameter(DataSourceParameter.ENTITY_UUID.getName());
 				shandler.setValueType(DesignChoiceConstants.PARAM_VALUE_TYPE_STATIC);
 				shandler.setIsRequired(true);
 				shandler.setDataType(DesignChoiceConstants.PARAM_TYPE_STRING);
 				shandler.setDistinct(true);
 				rdh.getParameters().add(shandler);
+				
+				//dates
+				shandler = rdh.getElementFactory().newScalarParameter(DataSourceParameter.START_DATE.getName());
+				shandler.setValueType(DesignChoiceConstants.PARAM_VALUE_TYPE_STATIC);
+				shandler.setIsRequired(false);
+				shandler.setDataType(DesignChoiceConstants.PARAM_TYPE_DATETIME);
+				shandler.setDistinct(true);
+				rdh.getParameters().add(shandler);
+				
+				shandler = rdh.getElementFactory().newScalarParameter(DataSourceParameter.END_DATE.getName());
+				shandler.setValueType(DesignChoiceConstants.PARAM_VALUE_TYPE_STATIC);
+				shandler.setIsRequired(false);
+				shandler.setDataType(DesignChoiceConstants.PARAM_TYPE_DATETIME);
+				shandler.setDistinct(true);
+				rdh.getParameters().add(shandler);
+				
+				//TODO: see if we can include datasets by default
 				//add default library
 //				rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFileString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 				//add date parameter automatically

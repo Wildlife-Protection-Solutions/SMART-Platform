@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.datatools.connectivity.oda,
  org.eclipse.datatools.connectivity.oda.design,
  org.eclipse.datatools.connectivity.oda.design.ui,
- org.eclipse.birt.report.engine
+ org.eclipse.birt.report.engine,
+ org.wcs.smart.birt.map;bundle-version="4.0.0"
 Export-Package: org.wcs.smart.i2,
  org.wcs.smart.i2.model
 Bundle-Activator: org.wcs.smart.i2.Intelligence2PlugIn

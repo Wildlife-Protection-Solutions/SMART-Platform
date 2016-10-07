@@ -1,4 +1,4 @@
-package org.wcs.smart.i2.birt.entity;
+package org.wcs.smart.i2.birt.entity.records;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -15,15 +15,16 @@ import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.birt.entity.EntityParameterMetadata;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 
-public class EntityDataset  implements IQuery {
+public class EntityRecordDataset  implements IQuery {
 	
-	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity";
+	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity.record";
 
 	private IResultSetMetaData r_metadata = null;
-	private EntityParameterMetadata pMetadata = null;
+	private EntityRecordParameterMetadata pMetadata = null;
 	private int m_maxRows;
 	
 	private IntelEntityType type = null;
@@ -31,7 +32,7 @@ public class EntityDataset  implements IQuery {
 	
 	private HashMap<Integer, Object> parameters;
 	
-	public EntityDataset(IntelBirtConnection connection){
+	public EntityRecordDataset(IntelBirtConnection connection){
 		this.connection = connection;
 		parameters = new HashMap<Integer,Object>();
 		
@@ -72,15 +73,16 @@ public class EntityDataset  implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new EntityDatasetResultSetMetadata(type);
+			r_metadata = new EntityRecordDatasetResultSetMetadata();
 		}
 		return r_metadata;
 	}
 
 	@Override
 	public IResultSet executeQuery() throws OdaException {
-		EntityDatasetResultSet set = new EntityDatasetResultSet(type, (EntityDatasetResultSetMetadata)getMetaData(), 
-				connection, parameters, (EntityParameterMetadata)getParameterMetaData());
+		EntityRecordDatasetResultSet set = new EntityRecordDatasetResultSet(type, 
+				(EntityRecordDatasetResultSetMetadata)getMetaData(), connection, parameters,
+				(EntityRecordParameterMetadata)getParameterMetaData());
 		return set;
 	}
 
@@ -202,6 +204,7 @@ public class EntityDataset  implements IQuery {
 		}
 	}
 
+
 	@Override
 	public void setObject(int parameterId, Object value) throws OdaException {
 		parameters.put(parameterId, value);
@@ -232,7 +235,7 @@ public class EntityDataset  implements IQuery {
 	@Override
 	public IParameterMetaData getParameterMetaData() throws OdaException {
 		if (pMetadata == null) {
-			pMetadata = new EntityParameterMetadata();
+			pMetadata = new EntityRecordParameterMetadata();
 		}
 		return pMetadata;
 	}

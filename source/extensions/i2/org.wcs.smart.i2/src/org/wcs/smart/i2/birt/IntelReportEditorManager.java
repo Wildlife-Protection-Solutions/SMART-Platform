@@ -20,9 +20,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.birt.ui.IReportEditorManager;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
+import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
-import org.wcs.smart.i2.birt.entity.EntityParameterMetadata.EntityParameter;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 
 public class IntelReportEditorManager implements IReportEditorManager{ 
 
@@ -40,17 +41,20 @@ public class IntelReportEditorManager implements IReportEditorManager{
 				OdaDataSet ds = (OdaDataSet) ev.getTarget();
 				OdaDataSetHandle handle = (OdaDataSetHandle) ds.getHandle(ev.getTarget().getRoot());
 
-				if (handle.getExtensionID().startsWith(EntityDataset.DATASET_TYPE)
+				if ( (handle.getExtensionID().startsWith(EntityDataset.DATASET_TYPE) || 
+						handle.getExtensionID().equals(EntityLocationDataset.DATASET_TYPE) ||
+						handle.getExtensionID().equals(EntityRecordDataset.DATASET_TYPE))
 						&& ne.getOldName() == null
 						&& ne.getNewName().startsWith(
 								org.eclipse.birt.report.designer.nls.Messages
 										.getString("dataset.new.defaultName")) //$NON-NLS-1$
 						&& (ds.getDisplayName() == null || !ds.getDisplayName().equals(ne.getNewName()))) {
-						try {
-						handle.setName(((OdaDataSet) ev.getTarget())
-								.getDisplayName());
+					
+					try {
+						handle.setName(((OdaDataSet) ev.getTarget()).getDisplayName());
 					} catch (Exception ex) {
 						// eat me - we cant update the name for whatever reason
+						ex.printStackTrace();
 					}
 				}
 			} else if (ev.getEventType() == NotificationEvent.CONTENT_EVENT) {
@@ -60,20 +64,26 @@ public class IntelReportEditorManager implements IReportEditorManager{
 					
 					OdaDataSet ds = (OdaDataSet) ce.getContent();
 					OdaDataSetHandle handle = (OdaDataSetHandle) (ds).getHandle(ev.getTarget().getRoot());
-					if (handle.getExtensionID().equals(EntityDataset.DATASET_TYPE)) {
+					if (handle.getExtensionID().equals(EntityDataset.DATASET_TYPE) ||
+							handle.getExtensionID().equals(EntityLocationDataset.DATASET_TYPE) || 
+							handle.getExtensionID().equals(EntityRecordDataset.DATASET_TYPE)) {
 						//link parameters
 						PropertyHandle odaDataSetParameterProp = handle.getPropertyHandle(OdaDataSetHandle.PARAMETERS_PROP);
 						List<?> items = odaDataSetParameterProp.getItems();
 						for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
 							OdaDataSetParameter parameter = (OdaDataSetParameter) iterator.next();
-							if (parameter.getName().equals(EntityParameter.UUID.name)) {
+							if (parameter.getName().equals(DataSourceParameter.ENTITY_UUID.getName())) {
+								parameter.setDefaultValue(""); //$NON-NLS-1$
+								parameter.setParamName(parameter.getName());
+							}else if (parameter.getName().equals(DataSourceParameter.START_DATE.getName())) {
+								parameter.setDefaultValue(""); //$NON-NLS-1$
+								parameter.setParamName(parameter.getName());
+							}else if (parameter.getName().equals(DataSourceParameter.END_DATE.getName())) {
 								parameter.setDefaultValue(""); //$NON-NLS-1$
 								parameter.setParamName(parameter.getName());
 							}
 						}
-						
-						//setup column aliases to make
-					//charting UI have "nice" names
+
 						try{
 							ArrayList<?> columns = (ArrayList<?>) handle.getProperty("columnHints");  //$NON-NLS-1$
 							for (Object col : columns){

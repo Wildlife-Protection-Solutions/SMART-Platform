@@ -452,6 +452,9 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
         parent.setWeights(new int[] {7,3});
 	}
 
+	public Date[] getDateFilter(){
+		return dateFilter;
+	}
 	private void dateFilterChanged(){
 		if (dateComp.getDateFilter() == DateFilter.CUSTOM){
 			dateFilter = new Date[]{dateComp.getCustomStartDate(), dateComp.getCustomEndDate()};
