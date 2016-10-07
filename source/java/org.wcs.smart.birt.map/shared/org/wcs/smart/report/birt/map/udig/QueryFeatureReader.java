@@ -38,6 +38,14 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
 /**
  * Feature reader for BIRT SMART Query Results
  * 
@@ -103,7 +111,37 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	public boolean hasNext() throws IOException {
 		try {
 			if (itr == null) return false;
-			return itr.next();
+			while(itr.next()){
+				Object x = itr.getValue(info.getGeometryColumn());
+				//only return geometries of correct type
+				//this allows one layer to have multiple geometry types
+				//and multiple map layers
+				if (x instanceof Geometry){
+					switch ( info.getLayerType() ){
+						case POINT:
+							if (x instanceof Point) return true;
+							break;
+						case POLYGON:
+							if (x instanceof Polygon) return true;
+							break;
+						case LINE:
+							if (x instanceof LineString) return true;
+							break;
+						case MULTIPOINT:
+							if (x instanceof MultiPoint) return true;
+							break;
+						case MULTIPOLYGON:
+							if (x instanceof MultiPolygon) return true;
+							break;
+						case MULTILINE:
+							if (x instanceof MultiLineString) return true;
+							break;
+						case RASTER:
+							return false;
+					}
+				}
+			}
+			return false;
 		} catch (BirtException e) {
 			throw new IOException(e);
 		}
