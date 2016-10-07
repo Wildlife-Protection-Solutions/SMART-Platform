@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,12 +54,14 @@ import org.locationtech.udig.catalog.rasterings.AbstractRasterServiceInfo;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.raster.GridMetadata;
+import org.wcs.smart.map.raster.GridResultItem;
+import org.wcs.smart.map.raster.RasterBuilder;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.GridQueryResult;
-import org.wcs.smart.query.common.model.GridQueryResultMetadata;
-import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.util.UuidUtils;
@@ -167,12 +170,12 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 				
 			// sets the envelope based in the map bound
 			rb.setEnvelope(new Envelope2D(SmartDB.DATABASE_CRS,0,0,1,1));
-			GridResultItem gi = new GridResultItem();
+			QueryGridResultItem gi = new QueryGridResultItem();
 			gi.setTileX(0);
 			gi.setTileY(0);
 			gi.setValue(0);
 			
-			GridQueryResultMetadata md = new GridQueryResultMetadata(0,0,0,0,0,0);
+			GridMetadata md = new GridMetadata(0,0,0,0,0,0);
 			rb.setTable(Collections.singletonList(gi),md);
 			rb.setGridCellSize(1);
 			rb.build();
@@ -184,7 +187,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 			return null;
 		}
 		
-		GridQueryResultMetadata metadata = results.getMetadata();
+		GridMetadata metadata = results.getMetadata();
 		if (metadata == null){
 			//query has not been run
 			return null;
@@ -204,7 +207,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 					(metadata.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
 					(metadata.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
 					width * gridCellSize , height*gridCellSize)); 
-		rb.setTable(((GridQueryResult)query.getCachedResults()).getData(), 
+		rb.setTable(  ((GridQueryResult)query.getCachedResults()).getData(), 
 				results.getMetadata());
 		rb.setGridCellSize(gridCellSize);
 		rb.build();
@@ -256,7 +259,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 					//query has not been run
 					return null;
 				}
-				GridQueryResultMetadata metadata = results.getMetadata();
+				GridMetadata metadata = results.getMetadata();
 				if (metadata != null){
 					 minValue = metadata.getMinResultValue();
 					 maxValue = metadata.getMaxResultValue();

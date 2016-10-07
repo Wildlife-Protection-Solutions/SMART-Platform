@@ -44,6 +44,7 @@ import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -53,8 +54,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.GridQueryResult;
-import org.wcs.smart.query.common.model.GridQueryResultMetadata;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -119,11 +119,11 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();				
 					
 					//get numerator results
-					Collection<GridResultItem> numeratorResults = getItems(gridDef, valueItem, query.getQueryDefinition().getValueFilter(), c, session, monitor, true);
+					Collection<QueryGridResultItem> numeratorResults = getItems(gridDef, valueItem, query.getQueryDefinition().getValueFilter(), c, session, monitor, true);
 					
 					//combine with the patrol existance value
-					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
-					for (GridResultItem it : numeratorResults){
+					HashMap<String, QueryGridResultItem> items = new HashMap<String, QueryGridResultItem>();
+					for (QueryGridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
 					}
 
@@ -140,7 +140,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 			}
 
 		});
-		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
+		myResults.setResultsMetadata(GridMetadata.computeMetadata(myResults.getData()));
 		return myResults;
 
 	}
@@ -150,7 +150,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 	 * @param needsFilter if the values need to be filtered or if previous filter can be used
 	 * 
 	 */
-	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
+	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
 		monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
@@ -211,7 +211,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 	 * 
 	 * @throws SQLException
 	 */
-	protected Collection<GridResultItem> getGridResults(Connection c, 
+	protected Collection<QueryGridResultItem> getGridResults(Connection c, 
 			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
 
@@ -419,9 +419,9 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 			}
 		
 			try {
-				List<GridResultItem> items = new ArrayList<GridResultItem>();
+				List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();
 				while (rs.next()) {
-					GridResultItem it = new GridResultItem();
+					QueryGridResultItem it = new QueryGridResultItem();
 				
 					String tid = rs.getString("TILE_ID"); //$NON-NLS-1$
 					String[] tileids = tid.split("_"); //$NON-NLS-1$

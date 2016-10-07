@@ -50,7 +50,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.GridQueryResult;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
@@ -191,7 +191,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 						message += ex.getLocalizedMessage();
 					}
 					QueryPlugIn.displayLog(message, ex);
-					resultPage.updateAndShowTable(new ArrayList<GridResultItem>(), mymonitor);
+					resultPage.updateAndShowTable(new ArrayList<QueryGridResultItem>(), mymonitor);
 				}
 				mapPage.refresh(isFirstRun);
 				return Status.OK_STATUS;

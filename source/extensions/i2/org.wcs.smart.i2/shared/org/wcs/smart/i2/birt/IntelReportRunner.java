@@ -33,6 +33,7 @@ import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.RunAndRenderTask;
 import org.hibernate.Session;
 import org.wcs.smart.SmartTimezoneWrapper;
+import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 
 import com.ibm.icu.util.TimeZone;
@@ -47,21 +48,6 @@ import com.ibm.icu.util.TimeZone;
 public enum IntelReportRunner {
 
 	INSTANCE;
-	
-	/**
-	 * Conservation Area report parameter 
-	 */
-	public static final String CA_PARAM = "org.wcs.smart.ca"; //$NON-NLS-1$
-
-	/**
-	 * Database session report parameter
-	 */
-	public static final String SESSION_PARAM = "org.wcs.smart.session"; //$NON-NLS-1$
-	
-	/**
-	 * App context projection provider variable
-	 */
-	public static final String PROJECTION_PROVIDER_CONTEXT_VAR = "org.wcs.smart.report.crs"; //$NON-NLS-1$
 	
 //	/**
 //	 * Runs a SMART Report
@@ -91,8 +77,8 @@ public enum IntelReportRunner {
 		IReportRunnable design = engine.openReportDesign(file.getAbsolutePath());
 		IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, ca, currentUser);
 		try{
-			task.getAppContext().put(CA_PARAM, ca);
-			task.getAppContext().put(SESSION_PARAM, session);
+			task.getAppContext().put(BirtConstants.CA_PARAM, ca);
+			task.getAppContext().put(BirtConstants.SESSION_PARAM, session);
 			task.setRenderOption(options);
 			task.setParameterValues(reportParameters);
 			task.run();

@@ -8,7 +8,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart.intelligence.query;bundle-version="1.0.0",
  org.wcs.smart.birt;bundle-version="3.1.0",
- org.wcs.smart.report.birt.map;bundle-version="3.1.0",
  org.wcs.smart.report.birt.query;bundle-version="3.1.0",
  org.wcs.smart.query;bundle-version="3.1.0",
  org.wcs.smart.reporttable;bundle-version="3.1.0"

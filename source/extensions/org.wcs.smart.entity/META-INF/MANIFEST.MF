@@ -10,7 +10,6 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.observation,
  org.wcs.smart.query,
  org.wcs.smart.report.birt.query,
- org.wcs.smart.report.birt.map,
  org.eclipse.help,
  org.wcs.smart.p2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

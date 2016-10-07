@@ -28,9 +28,9 @@ import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
-import org.wcs.smart.report.birt.map.AbstractQueryMapLayer;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
+import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;
 
 /**
  * SMART Query Map Layer

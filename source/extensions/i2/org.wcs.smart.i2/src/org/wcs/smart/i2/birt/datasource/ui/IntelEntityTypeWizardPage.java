@@ -305,7 +305,7 @@ public class IntelEntityTypeWizardPage extends DataSetWizardPage {
 		 * set design instance.
 		 */
 		dataSetDesign.setDisplayName(entityType.getName());
-		dataSetDesign.setName(entityType.getKeyId());
+		dataSetDesign.setName(entityType.getName());
 	}
 
 	/**

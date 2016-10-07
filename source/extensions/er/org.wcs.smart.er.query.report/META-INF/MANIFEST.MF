@@ -11,7 +11,6 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.query,
  org.eclipse.datatools.connectivity.oda,
  org.wcs.smart,
- org.wcs.smart.report.birt.map,
  org.wcs.smart.report,
  org.wcs.smart.er,
  org.locationtech.udig.style.sld;bundle-version="2.0.0"

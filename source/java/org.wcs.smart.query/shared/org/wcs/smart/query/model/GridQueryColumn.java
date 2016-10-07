@@ -25,7 +25,7 @@ import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 
 /**
  * Class represents one of the fixed table columns that
@@ -79,14 +79,14 @@ public class GridQueryColumn extends QueryColumn{
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.query.model.QueryResultItem)
 	 */
 	public Object getValue(IResultItem item) {
-		if (item instanceof GridResultItem) {
+		if (item instanceof QueryGridResultItem) {
 			switch (column) {
 			case TILE_X:
-				return ((GridResultItem) item).getTileX();
+				return ((QueryGridResultItem) item).getTileX();
 			case TILE_Y:
-				return ((GridResultItem) item).getTileY();
+				return ((QueryGridResultItem) item).getTileY();
 			case VALUE:
-				return ((GridResultItem) item).getValue();
+				return ((QueryGridResultItem) item).getValue();
 			}
 		}
 		return ""; //$NON-NLS-1$

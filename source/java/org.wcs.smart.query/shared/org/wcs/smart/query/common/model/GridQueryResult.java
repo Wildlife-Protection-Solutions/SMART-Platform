@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.hibernate.Session;
+import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.query.common.engine.IQueryResult;
 
 /**
@@ -36,26 +37,26 @@ import org.wcs.smart.query.common.engine.IQueryResult;
  */
 public class GridQueryResult implements IQueryResult {
 	
-	protected Collection<GridResultItem> data;
+	protected Collection<QueryGridResultItem> data;
 	private File lastFile;
 	protected boolean isDisposed = false;
 	
-	protected GridQueryResultMetadata resultMetadata;
+	protected GridMetadata resultMetadata;
 	
 		
-	 public GridQueryResult(Collection<GridResultItem> data){
+	 public GridQueryResult(Collection<QueryGridResultItem> data){
 		 this.data = data;
 	 }
 	 
-	 public  Collection<GridResultItem> getData(){
+	 public  Collection<QueryGridResultItem> getData(){
 		 return this.data;
 	 }
 	 
-	 public void setResultsMetadata(GridQueryResultMetadata metadata){
+	 public void setResultsMetadata(GridMetadata metadata){
 		 this.resultMetadata = metadata;
 	 }
 	 
-	 public GridQueryResultMetadata getMetadata(){
+	 public GridMetadata getMetadata(){
 		 return this.resultMetadata;
 	 }
 	 

@@ -21,6 +21,7 @@
             queryTypeKey="observationwaypoint">
       </QueryTypeDataset>
    </extension>
+
    <extension
          point="org.wcs.smart.report.birt.maplayer">
       <MapLayer
@@ -29,5 +30,4 @@
       <StyleProvider
             styleprovider="org.wcs.smart.observation.query.report.data.QueryStyleProvider"></StyleProvider>
    </extension>
-
 </plugin>

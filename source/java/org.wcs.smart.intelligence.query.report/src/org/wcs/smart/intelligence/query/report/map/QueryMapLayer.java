@@ -26,9 +26,9 @@ import java.util.List;
 
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
-import org.wcs.smart.report.birt.map.AbstractQueryMapLayer;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
+import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;
 
 /**
  * SMART Query Map Layer

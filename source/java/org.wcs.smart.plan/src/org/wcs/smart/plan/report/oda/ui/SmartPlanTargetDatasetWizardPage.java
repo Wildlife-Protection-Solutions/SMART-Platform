@@ -43,6 +43,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
@@ -120,7 +121,7 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 			Session s = HibernateManager.openSession();
 			try{
 				HashMap<String, Object> ctx = new HashMap<String, Object>();
-				ctx.put(SmartReportRunner.SESSION_PARAM, s);
+				ctx.put(BirtConstants.SESSION_PARAM, s);
 				
 				customConn.setAppContext(ctx);
 				customConn.open(connProps);

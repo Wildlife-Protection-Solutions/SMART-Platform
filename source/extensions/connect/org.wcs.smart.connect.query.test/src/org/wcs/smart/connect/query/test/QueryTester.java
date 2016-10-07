@@ -43,7 +43,7 @@ import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.common.importexport.CsvSimpleQueryExporter;
 import org.wcs.smart.query.common.importexport.CsvSummaryExporter;
 import org.wcs.smart.query.common.model.GridQueryResult;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -340,7 +340,7 @@ public class QueryTester {
 		return false;
 	}
 	private void compareResults(GridQueryResult desktop, List<String[]> server){
-		Collection<GridResultItem> items = desktop.getData();
+		Collection<QueryGridResultItem> items = desktop.getData();
 		if (items.size() != server.size()-1){ //server returns header row; desktop does not
 			status.updateStatus("ERROR: Invalid Number of Rows.  Desktop = " + items.size() + "; Server = " + server.size());
 			return;
@@ -351,7 +351,7 @@ public class QueryTester {
 			status.updateStatus("ERROR: Server did not return the correct number of columns for gridded query (expected 3)");
 			return;
 		}
-		for (GridResultItem i : items){
+		for (QueryGridResultItem i : items){
 			
 			String x = String.valueOf(i.getTileX());
 			String y = String.valueOf(i.getTileY());

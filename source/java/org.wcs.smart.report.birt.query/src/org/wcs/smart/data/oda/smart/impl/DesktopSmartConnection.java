@@ -27,6 +27,7 @@ import java.util.Collection;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
+import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTableUtils;
@@ -36,7 +37,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.report.execute.SmartReportRunner;
 
 /**
  * Implementation class of IConnection for SMART ODA runtime driver.
@@ -48,7 +48,7 @@ public class DesktopSmartConnection extends SmartConnection {
 	public void openSession(){
 		cleanup = false;
 		if (appContext != null){
-			localSession = (Session) appContext.get(SmartReportRunner.SESSION_PARAM);
+			localSession = (Session) appContext.get(BirtConstants.SESSION_PARAM);
 		}
 		if (localSession == null){
 			cleanup = true;

@@ -32,9 +32,9 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
+import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.report.execute.SmartReportRunner;
 
 import com.ibm.icu.util.ULocale;
 
@@ -60,7 +60,7 @@ public class SmartIntelligenceConnection implements IConnection {
 	 */
 	public void open(Properties connProperties) throws OdaException {
 		m_isOpen = true;
-		localSession = (Session) appContext.get(SmartReportRunner.SESSION_PARAM);
+		localSession = (Session) appContext.get(BirtConstants.SESSION_PARAM);
 	}
 
 	/**

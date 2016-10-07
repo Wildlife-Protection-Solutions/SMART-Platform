@@ -24,13 +24,14 @@ package org.wcs.smart.entity.query.report.map;
 import java.util.Collections;
 import java.util.List;
 
+import org.wcs.smart.data.oda.smart.impl.GriddedQueryRasterCreator;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
-import org.wcs.smart.report.birt.map.AbstractQueryMapLayer;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
+import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;
 
 /**
  * SMART Query Map Layer

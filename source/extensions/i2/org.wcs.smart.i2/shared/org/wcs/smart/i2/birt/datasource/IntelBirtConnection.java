@@ -16,11 +16,11 @@ import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
+import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.birt.IntelReportRunner;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetMetadata;
 import org.wcs.smart.util.GeometryUtils;
@@ -77,7 +77,7 @@ public class IntelBirtConnection implements IConnection {
 	public void openSession(){
 		cleanup = false;
 		if (appContext != null){
-			localSession = (Session) appContext.get(IntelReportRunner.SESSION_PARAM);
+			localSession = (Session) appContext.get(BirtConstants.SESSION_PARAM);
 		}
 		if (localSession == null){
 			cleanup = true;
@@ -130,7 +130,7 @@ public class IntelBirtConnection implements IConnection {
 		if (appContext != null){
 			value = (IProjectionProvider) appContext.get(PROJECTION_PROVIDER_CONTEXT_VAR);	
 			if (value == null){
-				ConservationArea reportca = (ConservationArea) appContext.get(IntelReportRunner.CA_PARAM);
+				ConservationArea reportca = (ConservationArea) appContext.get(BirtConstants.CA_PARAM);
 				if (reportca != null){
 					value = ProjectionUtils.INSTANCE.createProjectionProvider(getSession(), reportca);
 					appContext.put(PROJECTION_PROVIDER_CONTEXT_VAR, value);

@@ -498,8 +498,10 @@
    </extension>
    <extension
          id="org.wcs.smart.i2.oda.datasource"
+         name="SMART Intelligence Data Source"
          point="org.eclipse.datatools.connectivity.oda.dataSource">
       <dataSource
+            defaultDisplayName="SMART Intelligence Data Source"
             driverClass="org.wcs.smart.i2.birt.datasource.IntelBirtDataSource"
             id="org.wcs.smart.i2.birt.datasource"
             odaVersion="3.0"
@@ -507,7 +509,7 @@
             setThreadContextClassLoader="false">
       </dataSource>
       <dataSet
-            defaultDisplayName="Entity DataSets"
+            defaultDisplayName="Entity Dataset"
             id="org.wcs.smart.i2.birt.dataset.entity">
          <dataTypeMapping
                nativeDataType="Double"
@@ -562,6 +564,7 @@
       </dataSet>
    </extension>
    <extension
+         id="org.wcs.smart.i2.oda.datasource"
          point="org.eclipse.datatools.connectivity.oda.design.ui.dataSource">
       <dataSourceUI
             id="org.wcs.smart.i2.birt.datasource">
@@ -578,8 +581,9 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="Intelligence Entity Types DataSource"></dataSetWizard>
+               windowTitle="Intelligence Entity Type Data Source"></dataSetWizard>
          <dataSetPage
+               displayName="Entity Type"
                id="org.wcs.smart.i2.birt.ui.dataset.entity.wizard.page.list"
                wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntityTypeWizardPage">
          </dataSetPage>

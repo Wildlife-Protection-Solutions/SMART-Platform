@@ -52,6 +52,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -81,8 +82,7 @@ import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.GridQueryResult;
-import org.wcs.smart.query.common.model.GridQueryResultMetadata;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -161,7 +161,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					
 					//get numerator results
-					Collection<GridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), caFilter, c, session, monitor, true);
+					Collection<QueryGridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), caFilter, c, session, monitor, true);
 					
 					//apply denominator results
 					if (denominator != null){
@@ -173,14 +173,14 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 						}
 						//computer denominator results
 						//only recompute filter if filter is different
-						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), caFilter, c, session, monitor, !isSame);
+						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), caFilter, c, session, monitor, !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
-						for (GridResultItem it : denominatorResults){
+						for (QueryGridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
 						}
 						
 						//compute value
-						for (GridResultItem i : numeratorResults){
+						for (QueryGridResultItem i : numeratorResults){
 							Double v = items.get(i.getTileId());
 							if (v == null){
 								i.setValue(0);
@@ -193,15 +193,15 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 					}
 
 					//combine with the patrol existance value
-					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
-					for (GridResultItem it : numeratorResults){
+					HashMap<String, QueryGridResultItem> items = new HashMap<String, QueryGridResultItem>();
+					for (QueryGridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
 					}
 
-					List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef, caFilter);
-					for (GridResultItem it : patrolLocations){
+					List<QueryGridResultItem> patrolLocations = computePatrolExistance(c, gridDef, caFilter);
+					for (QueryGridResultItem it : patrolLocations){
 						if (items.get(it.getTileId()) == null){ 
-							GridResultItem newitem = new GridResultItem();
+							QueryGridResultItem newitem = new QueryGridResultItem();
 							newitem.setTileX(it.getTileX());
 							newitem.setTileY(it.getTileY());
 							newitem.setValue(0);
@@ -221,7 +221,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				c.commit();
 			}
 		});
-		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
+		myResults.setResultsMetadata(GridMetadata.computeMetadata(myResults.getData()));
 		return myResults;
 
 	}
@@ -231,7 +231,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	 * @param needsFilter if the values need to be filtered or if previous filter can be used
 	 * 
 	 */
-	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
+	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, ConservationAreaFilter caFilter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
 		monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
@@ -281,7 +281,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	 * 
 	 * @throws SQLException
 	 */
-	protected Collection<GridResultItem> getGridResults(Connection c, 
+	protected Collection<QueryGridResultItem> getGridResults(Connection c, 
 			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
 
@@ -495,9 +495,9 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			}
 		
 			try {
-				List<GridResultItem> items = new ArrayList<GridResultItem>();
+				List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();
 				while (rs.next()) {
-					GridResultItem it = new GridResultItem();
+					QueryGridResultItem it = new QueryGridResultItem();
 				
 					String tid = rs.getString("TILE_ID"); //$NON-NLS-1$
 					String[] tileids = tid.split("_"); //$NON-NLS-1$
@@ -518,7 +518,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		}
 	}
 
-	private List<GridResultItem> computePatrolExistance(Connection c, 
+	private List<QueryGridResultItem> computePatrolExistance(Connection c, 
 			Grid gridDef, ConservationAreaFilter caFilter) throws Exception{
 		GridAnalysisEngine<?> engine = null;
 		
@@ -529,7 +529,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		return computePatrolTrackNoFilter(c, engine, caFilter);
 	}
 	
-	private Collection<GridResultItem> computePatrolValue(Connection c,
+	private Collection<QueryGridResultItem> computePatrolValue(Connection c,
 			PatrolValueItem item, 
 			Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
@@ -557,7 +557,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		return computePatrolTrack(c, engine, dataField);
 	}
 	
-	private Collection<GridResultItem> computePatrolTrack(Connection c, 
+	private Collection<QueryGridResultItem> computePatrolTrack(Connection c, 
 			GridAnalysisEngine<?> engine, 
 			String[] dataField) throws Exception{
 		
@@ -618,10 +618,10 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			}
 		}
 		
-		List<GridResultItem> items = new ArrayList<GridResultItem>();	
+		List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();	
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
 			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
-			GridResultItem it = new GridResultItem();
+			QueryGridResultItem it = new QueryGridResultItem();
 			it.setTileX(object.getKey().getXId()+1);
 			it.setTileY(object.getKey().getYId()+1);
 			it.setValue(object.getValue());
@@ -641,7 +641,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	 * @return
 	 * @throws Exception
 	 */
-	private List<GridResultItem> computePatrolTrackNoFilter(Connection c, 
+	private List<QueryGridResultItem> computePatrolTrackNoFilter(Connection c, 
 			GridAnalysisEngine<?> engine, ConservationAreaFilter caFilter) throws Exception{
 		clearParameters();
 		StringBuilder sql = new StringBuilder();
@@ -683,10 +683,10 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			}
 		}
 		
-		List<GridResultItem> items = new ArrayList<GridResultItem>();
+		List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
 			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
-			GridResultItem it = new GridResultItem();
+			QueryGridResultItem it = new QueryGridResultItem();
 			it.setTileX(object.getKey().getXId()+1);
 			it.setTileY(object.getKey().getYId()+1);
 			it.setValue(object.getValue());

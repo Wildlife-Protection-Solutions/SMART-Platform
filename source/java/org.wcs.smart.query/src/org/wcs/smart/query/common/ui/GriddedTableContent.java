@@ -42,7 +42,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
@@ -121,7 +121,7 @@ public class GriddedTableContent {
 	 * 
 	 * @param items new results
 	 */
-	public void setTableData(final Collection<GridResultItem> items, final IProgressMonitor monitor) {
+	public void setTableData(final Collection<QueryGridResultItem> items, final IProgressMonitor monitor) {
 		
 		editor.getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
