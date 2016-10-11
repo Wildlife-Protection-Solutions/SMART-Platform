@@ -53,10 +53,11 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 		rightFolder.addView(EntitySearchView.ID);
 		rightFolder.addView(RecordsView.ID);
 		rightFolder.addView(QueryView.ID);
+		rightFolder.addView(LayersView.ID);
 		
 		IFolderLayout bottomFolder = layout.createFolder("org.wcs.smart.i2.analysis.rightbottom", IPageLayout.BOTTOM, 0.7f, "org.wcs.smart.i2.analysis.right");
 		bottomFolder.addView(WorkingSetView.ID);
-		bottomFolder.addView(LayersView.ID);
+		
 		
 		
 		layout.getViewLayout(RecordsView.ID).setCloseable(false);

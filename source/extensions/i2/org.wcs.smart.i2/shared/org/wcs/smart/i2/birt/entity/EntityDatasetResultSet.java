@@ -39,6 +39,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -180,8 +181,7 @@ public class EntityDatasetResultSet implements IResultSet {
 		try {
 			i.getPrimaryAttachment().computeFileLocation(connection.getSession());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
 		
 		if (colIndex == 1){
@@ -210,14 +210,11 @@ public class EntityDatasetResultSet implements IResultSet {
 			}
 			return v.getAttributeValue();
 		}else{
-			
 			try {
 				return "file:/" + i.getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
 			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-				// TODO Auto-generated catch block
-//				
+				Intelligence2PlugIn.log(e.getMessage(), e);
+				return null;	
 			}
 		}
 	}

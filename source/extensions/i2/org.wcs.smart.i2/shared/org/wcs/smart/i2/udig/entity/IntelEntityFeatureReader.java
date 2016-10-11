@@ -36,6 +36,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -115,14 +116,11 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 	}
 	
 	private static SimpleFeature getIntelLocationAsFeature(IntelLocation location, SimpleFeatureType ftype){
-		//sb.append(":srid=4326,fid:String,id:String,date:Date,time:Date,comment:String,record:String,record_date:Date,record_time:Date,record_uuid:String,system_id:String");
-		Object data[] = new Object[9];
-		
+		Object data[] = new Object[9];		
 		try {
 			data[0] = location.getGeometry();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
 		data[1] = ftype.getName() + "." + location.getId() + "." + UuidUtils.uuidToString(location.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[2] = location.getId();

@@ -43,7 +43,6 @@ public class AttributeValueLabelProvider extends LabelProvider {
 	
 	
 	public Image getImage(Object element){
-		//TODO:
 		return super.getImage(element);
 	}
 }

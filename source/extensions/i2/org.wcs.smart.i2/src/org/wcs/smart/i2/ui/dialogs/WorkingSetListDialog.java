@@ -19,8 +19,10 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -94,6 +96,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		
 		Button btnAdd = new Button(buttonComp, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.setToolTipText("create a new working set");
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -101,9 +104,35 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				addItem();
 			}
 		});
+
+		Button btnCopy = new Button(buttonComp, SWT.PUSH);
+		btnCopy.setText("Copy");
+		btnCopy.setToolTipText("create a new working set using the selected working set as a template");
+		btnCopy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnCopy.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				copyItem();
+			}
+		});
+		btnCopy.setEnabled(false);
+		
+		Button btnRename = new Button(buttonComp, SWT.PUSH);
+		btnRename.setText("Rename");
+		btnRename.setToolTipText("rename selected working set");
+		btnRename.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnRename.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				renameItem();
+			}
+		});
+		btnRename.setEnabled(false);
+		
 		
 		Button btnDelete = new Button(buttonComp, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setToolTipText("delete selected working set");
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -111,10 +140,19 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				deleteItem();
 			}
 		});
+		btnDelete.setEnabled(false);
 		
+		lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				boolean enabled = getSelectedItem() != null;
+				btnDelete.setEnabled(enabled);
+				btnRename.setEnabled(enabled);
+				btnCopy.setEnabled(enabled);
+			}
+		});
 		MenuItem renameItem = new MenuItem(menu, SWT.PUSH);
 		renameItem.setText("Rename");
-//		renameItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.));
 		renameItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -296,6 +334,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 
 	Job loadWorkingsets = new Job("load working sets"){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Display.getDefault().syncExec(()->	lstViewer.setInput(new String[]{DialogConstants.LOADING_TEXT}));

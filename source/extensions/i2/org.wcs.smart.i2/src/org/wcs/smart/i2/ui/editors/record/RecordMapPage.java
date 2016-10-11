@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,6 +59,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.record.IntelRecordDataSource;
@@ -163,22 +163,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 					mapViewer.getRenderManager().refresh(null);
 				}
 			} catch (Exception e) {
-				//TODO:
-				e.printStackTrace();
+				Intelligence2PlugIn.log(e.getMessage(), e);
 			}
-			
-//			patrolService = new PatrolService(parentEditor.getPatrol());
-//	    	try {
-//	    		List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(monitor);
-//	    		
-//	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
-//	    		getMap().sendCommandASync(command);
-//    		
-//	    		addInitialZoomFunction();
-//				
-//			} catch (IOException e) {
-//				return new Status(IStatus.ERROR, Messages.PatrolMapPageEditor_UnknownError, IStatus.ERROR, Messages.PatrolMapPageEditor_Error_LoadingMapPage, e);
-//			}
 			return Status.OK_STATUS;
 		}
 	};
@@ -207,14 +193,11 @@ public class RecordMapPage extends SmartMapEditorPart {
 	}
 
 	public void setEditMode(boolean editMode){
-		
 		tools.getTool(DrawPolygonTool.ID).setEnabled(editMode);
-		//TODO:
 	}
 	
 	public void initPage(){
 		locationPanel.init();
-
 		localMapLayerJob.schedule();
 	}
 	
@@ -230,7 +213,6 @@ public class RecordMapPage extends SmartMapEditorPart {
 			}
 		};
 		loadDefaultLayers.schedule();
-		
 	}
 	
 	/**
@@ -243,8 +225,6 @@ public class RecordMapPage extends SmartMapEditorPart {
 			throw new RuntimeException("Invalid editor input."); //$NON-NLS-1$
 		}
 		super.init(site, input);
-		
-		
 	}
 
 	
@@ -303,7 +283,6 @@ public class RecordMapPage extends SmartMapEditorPart {
 			((Layer)pointLayer).setFilter(Filter.EXCLUDE);
 			((Layer)polygonLayer).setFilter(ff.equals(ff.property("system_id"), ff.literal(UuidUtils.uuidToString(location.getUuid()))));
 		}
-		
 	}
     
     @Override
@@ -318,20 +297,13 @@ public class RecordMapPage extends SmartMapEditorPart {
         }
         super.dispose();
         
-        //dispose of patrol service
-        //TODO:
+        //dispose of services
         try {
 			if (pointResource != null) CatalogPlugin.getDefault().getLocalCatalog().remove(pointResource.service(null));
 			if (polygonResource != null) CatalogPlugin.getDefault().getLocalCatalog().remove(polygonResource.service(null));
-		} catch (UnsupportedOperationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
-//        patrolService.dispose(null);
-//        patrolService = null;
     }
 
     

@@ -99,6 +99,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private Job loadRecordJob = new Job("load intelligence record"){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			record = null;
@@ -122,7 +123,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							try{
 								a.getAttachment().computeFileLocation(s);
 							}catch (Exception ex){
-								//TODO: 
+								Intelligence2PlugIn.log(ex.getMessage(), ex);
 							}
 						}
 					}
@@ -134,7 +135,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 								try{
 									rr.getEntity().getPrimaryAttachment().computeFileLocation(s);
 								}catch (Exception ex){
-									//TODO:
+									Intelligence2PlugIn.log(ex.getMessage(), ex);
 								}
 							}
 							if (rr.getEntity().getEntityAttachments() != null){
@@ -142,7 +143,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 									try{
 										a.getAttachment().computeFileLocation(s);
 									}catch (Exception ex){
-										//TODO:
+										Intelligence2PlugIn.log(ex.getMessage(), ex);
 									}
 								}
 							}
@@ -188,6 +189,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		super.dispose();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		Set<IntelEntity> modifiedEntities = new HashSet<IntelEntity>();
@@ -354,7 +356,6 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			setPageText(i, "Map");
 		} catch (final Throwable t) {
 			Intelligence2PlugIn.log(t.getMessage(), t);
-			//TODO:
 		}finally{
 			showBusy(false);
 		}
@@ -528,7 +529,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							try{
 								tolink.getPrimaryAttachment().computeFileLocation(s);
 							}catch (Exception ex){
-								//TODO:
+								Intelligence2PlugIn.log(ex.getMessage(), ex);
 							}
 						}
 						if (tolink.getEntityAttachments() != null){
@@ -536,7 +537,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 								try{
 									a.getAttachment().computeFileLocation(s);	
 								}catch (Exception ex){
-									//TODO;
+									Intelligence2PlugIn.log(ex.getMessage(), ex);
 								}
 								
 							}

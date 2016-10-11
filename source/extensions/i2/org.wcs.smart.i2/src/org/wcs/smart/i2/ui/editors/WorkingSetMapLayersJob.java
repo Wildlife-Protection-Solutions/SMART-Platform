@@ -11,6 +11,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IGeoResource;
@@ -25,11 +27,16 @@ import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.opengis.filter.Filter;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IWorkingSetMapLayer;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
@@ -50,7 +57,7 @@ public class WorkingSetMapLayersJob extends Job {
 	
 	private Map map;
 	private ILayerListener[] listeners;
-	
+	private IEclipseContext context;
 	  /*
      * listener that listens for style changes and saves them to the working
      * set item
@@ -118,10 +125,10 @@ public class WorkingSetMapLayersJob extends Job {
 		}
 	};
 	
-	public WorkingSetMapLayersJob(Map map, ILayerListener... layerlisteners){
+	public WorkingSetMapLayersJob(Map map, IEclipseContext context, ILayerListener... layerlisteners){
 		super("loading working set map layers");
 		this.map = map;
-		
+		this.context = context;
 		this.listeners = layerlisteners;
 	}
 	
@@ -168,7 +175,7 @@ public class WorkingSetMapLayersJob extends Job {
 			for (IntelWorkingSetEntity entity: workingset.getEntities()){
 				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
 				params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString(entity.getEntity().getUuid()));
-				IntelEntityService service = new IntelEntityService(params);
+				IntelEntityService service = createEntityService(params);
 				computeLayers(toAdd, visible, layerStyles, entity, service, monitor);
 			}
 			
@@ -195,7 +202,7 @@ public class WorkingSetMapLayersJob extends Job {
 			for (IntelWorkingSetRecord record: workingset.getRecords()){
 				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
 				params.put(IntelRecordServiceExtension.RECORD_UUID_KEY, UuidUtils.uuidToString(record.getRecord().getUuid()));
-				IntelRecordService service = new IntelRecordService(params);
+				IntelRecordService service = createRecordService(params);
 				computeLayers(toAdd, visible, layerStyles, record, service, monitor);
 			}
 			addLayers(toAdd, visible, layerStyles, false,  null);
@@ -203,6 +210,32 @@ public class WorkingSetMapLayersJob extends Job {
 			//TODO: query layers					
 		}
 		return Status.OK_STATUS;
+	}
+	
+	
+	private IntelEntityService createEntityService(HashMap<String, Serializable> params){
+		NameChangeListener nameChangeHandler = new NameChangeListener();
+		context.get(IEventBroker.class).subscribe(IntelEvents.ENTITY_MODIFIED, nameChangeHandler);
+		IntelEntityService service = new IntelEntityService(params){
+			public void dispose(IProgressMonitor monitor){
+				context.get(IEventBroker.class).unsubscribe(nameChangeHandler);
+				super.dispose(monitor);
+			}
+		};
+		nameChangeHandler.setService(service);
+		return service;
+	}
+	private IntelRecordService createRecordService(HashMap<String, Serializable> params){
+		NameChangeListener nameChangeHandler = new NameChangeListener();
+		context.get(IEventBroker.class).subscribe(IntelEvents.RECORD_MODIFIED, nameChangeHandler);
+		IntelRecordService service = new IntelRecordService(params){
+			public void dispose(IProgressMonitor monitor){
+				context.get(IEventBroker.class).unsubscribe(nameChangeHandler);
+				super.dispose(monitor);
+			}
+		};
+		nameChangeHandler.setService(service);
+		return service;
 	}
 	
 	//compute the layers to add to map from service
@@ -295,4 +328,44 @@ public class WorkingSetMapLayersJob extends Job {
 	
 	}
 
+	/*
+	 * Listens to name changes for record layers and entity layers and
+	 * update appropriate map layer names
+	 */
+	private class NameChangeListener implements EventHandler{
+		
+		private IService service;
+		
+		@Override
+		public void handleEvent(Event event) {
+			Object data = event.getProperty(IEventBroker.DATA);
+			if (service == null) return;
+			boolean updateLayers = false;
+			if (data instanceof IntelRecord && ((IntelRecord)data).getUuid().equals(((IntelRecordService)service).getRecordUuid())){
+				((IntelRecordService)service).refreshNames();
+				updateLayers = true;
+				
+			}else if (data instanceof IntelEntity && ((IntelEntity)data).getUuid().equals(((IntelEntityService)service).getEntityUuid())){
+				((IntelEntityService)service).refreshNames();
+				updateLayers = true;
+			}
+			
+			if (updateLayers){
+				for (Layer l : map.getLayersInternal()){
+					IService lservice = null;
+					try{
+						lservice = l.getGeoResource().resolve(IService.class, null);
+					}catch (Exception ex){
+						//eat me
+					}
+					if (lservice == service){
+						l.setName(l.getGeoResource().getTitle());
+					}
+				}
+			}
+		}
+		public void setService(IService s){
+			this.service = s;
+		}
+	};
 }

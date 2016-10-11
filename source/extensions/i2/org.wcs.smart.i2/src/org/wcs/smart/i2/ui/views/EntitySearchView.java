@@ -272,8 +272,8 @@ public class EntitySearchView {
 		core.setLayout(new GridLayout(2, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(core, "TODO::");
-		//TODO:
+		toolkit.createLabel(core, "TODO");
+		//TODO: Advanced Search
 	}
 	private void createBasicSearch(Composite parent){
 		

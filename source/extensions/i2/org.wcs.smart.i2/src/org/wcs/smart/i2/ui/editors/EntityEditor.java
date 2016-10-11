@@ -197,6 +197,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private Job loadEntity = new Job("load entity"){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			entity = null;
@@ -222,8 +223,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						try {
 							a.getAttachment().computeFileLocation(s);
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							Intelligence2PlugIn.log(e.getMessage(), e);
 						}
 					}
 				}
@@ -259,6 +259,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private Job loadRecords = new Job("loading entity records"){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelRecord> records = new ArrayList<IntelRecord>();
@@ -351,6 +352,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			s.close();
 		}
 		
+		lblIdentifier.setText(entity.getIdAttributeAsText());
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put(UIEvents.EventTags.ELEMENT, context.get(MPart.class));
 		data.put(IEventBroker.DATA, entity);
@@ -633,7 +635,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (MessageDialog.openConfirm(getSite().getShell(), "Delete", "Are you sure you want to delete this entity?  This action cannot be undone.")){
-					//TODO: delete entity
 					Session s = HibernateManager.openSession();
 					try{
 						s.beginTransaction();
@@ -926,7 +927,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						mnuEdit.addSelectionListener(new SelectionAdapter(){
 							@Override
 							public void widgetSelected(SelectionEvent e) {
-								//TODO:
+								//TODO: Editing Relationships
 								MessageDialog.openInformation(getEditorSite().getShell(),"TODO", "Implement This; users can switch src and target entities and configure attributes");
 							}	
 						});

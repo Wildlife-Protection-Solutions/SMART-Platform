@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -126,8 +127,7 @@ public class EntityListComposite extends Composite{
 							try {
 								toadd.getPrimaryAttachment().computeFileLocation(s);
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								Intelligence2PlugIn.log(e.getMessage(), e);
 							}
 						}
 						if (toadd.getEntityAttachments() != null){
@@ -135,8 +135,7 @@ public class EntityListComposite extends Composite{
 								try {
 									a.getAttachment().computeFileLocation(s);
 								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									Intelligence2PlugIn.log(e.getMessage(), e);
 								}	
 							}
 						}
@@ -194,7 +193,7 @@ public class EntityListComposite extends Composite{
 		List<IntelEntity> r = lstEntities.getCurrentSelection();
 		if (r != null && !r.isEmpty()){
 			for (IntelEntity toDelete : r){
-				//TODO: remove any links not yet saved links to attachments and locations
+				//remove any links not yet saved links to attachments and locations
 				for (Iterator<IntelEntityAttachment> iterator = editor.getSummaryPage().getAttachmentPanel().getNewEntityAttachments().iterator(); iterator.hasNext();) {
 					IntelEntityAttachment a = (IntelEntityAttachment) iterator.next();
 					if (a.getEntity().equals(toDelete)) iterator.remove();

@@ -214,7 +214,8 @@ public class WorkingSetView {
 				if (dateComp.getDateFilter() == DateFilter.CUSTOM){
 					dateFilter += ":" + dFilters[0].getTime() + ":" + dFilters[1].getTime();
 				}
-				//TODO: save filter
+				
+				//save date filter
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
@@ -475,6 +476,7 @@ public class WorkingSetView {
 					}
 					(new OpenRecordHandler()).openRecord(i, false);
 				}else if (toOpen.getCategory() == IntelWorkingSetCategory.QUERIES){
+					//TODO: Queries 
 //					IntelRecordQuery i = null;
 //					Session s = HibernateManager.openSession();
 //					try{
@@ -482,7 +484,6 @@ public class WorkingSetView {
 //					}finally{
 //						s.close();
 //					}
-					//TODO:
 //					(new OpenRecordHandler()).openRecord(i, false);
 				}
 				return;

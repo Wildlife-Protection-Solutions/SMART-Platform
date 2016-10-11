@@ -76,8 +76,6 @@ public class IntelRecordFeatureSource extends ContentFeatureSource {
 
 	@Override
 	protected int getCountInternal(Query query) throws IOException {
-		//return record.getLocations().size();
-		//TODO:
 		return -1;
 	}
 

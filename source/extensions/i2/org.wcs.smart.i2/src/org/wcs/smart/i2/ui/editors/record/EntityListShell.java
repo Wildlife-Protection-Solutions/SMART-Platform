@@ -44,6 +44,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -77,6 +78,7 @@ public class EntityListShell extends SmartShellDialog {
 		this.editor = editor;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void createContents(Composite parent){
 		Composite owner = new Composite(parent, SWT.NONE);
@@ -202,6 +204,7 @@ public class EntityListShell extends SmartShellDialog {
 	
 	private Job loadEntitiesJob = new Job("load entities"){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntity> entities = new ArrayList<IntelEntity>();
@@ -215,9 +218,8 @@ public class EntityListShell extends SmartShellDialog {
 						e.getIdAttributeAsText();
 						try {
 							e.getPrimaryAttachment().computeFileLocation(s);
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
+						} catch (Exception ex) {
+							Intelligence2PlugIn.log(ex.getMessage(), ex);
 						}
 					}
 				}finally{

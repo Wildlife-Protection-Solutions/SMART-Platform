@@ -79,7 +79,6 @@ public class RecordEditorInput implements IEditorInput{
 
 	@Override
 	public ImageDescriptor getImageDescriptor() {
-		//TODO: record icon
 		return null;
 	}
 

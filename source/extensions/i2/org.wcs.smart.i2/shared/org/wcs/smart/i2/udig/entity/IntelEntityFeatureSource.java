@@ -69,20 +69,16 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 	@Override
 	protected ReferencedEnvelope getBoundsInternal(Query arg0)
 			throws IOException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	protected int getCountInternal(Query query) throws IOException {
-//		return record.getLocations().size();
 		return -1;
-		//TODO:
 	}
 
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query) throws IOException {
-		
 		//do something special for single between dates filter
 		IntelEntityFeatureReader[] reader = new IntelEntityFeatureReader[]{new IntelEntityFeatureReader(entityUuid, getSchema())};
 		

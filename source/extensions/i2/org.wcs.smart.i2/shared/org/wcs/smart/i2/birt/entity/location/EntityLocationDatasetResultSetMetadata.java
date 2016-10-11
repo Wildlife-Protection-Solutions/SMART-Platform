@@ -23,6 +23,7 @@ package org.wcs.smart.i2.birt.entity.location;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 
@@ -57,10 +58,17 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 		public String getId(){
 			return this.id;
 		}
-		public Object getValue(IntelEntityLocation location) throws ParseException{
+		public Object getValue(IntelEntityLocation location) {
 			if (this == ENTITY_UUID) return location.getEntity().getUuid();
 			if (this == ID) return location.getLocation().getId();
-			if (this == GEOM) return location.getLocation().getGeometry();
+			if (this == GEOM) {
+				try{
+					return location.getLocation().getGeometry();
+				}catch (ParseException ex){
+					Intelligence2PlugIn.log(ex.getMessage(), ex);
+				}
+				return null;
+			}
 			if (this == DATE) return location.getLocation().getDateTime();
 			if (this == COMMENT) return location.getLocation().getComment();
 			if (this == OBSERVATION) return "TODO:";

@@ -54,7 +54,7 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 		public String getId(){
 			return this.id;
 		}
-		public Object getValue(IntelEntityRecord location) throws ParseException{
+		public Object getValue(IntelEntityRecord location) {
 			if (this == ENTITY_UUID) return location.getEntity().getUuid();
 			if (this == TITLE) return location.getRecord().getTitle();
 			if (this == DATE_RECIEVED) return location.getRecord().getDateCreated();

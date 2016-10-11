@@ -37,13 +37,12 @@ import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.io.ParseException;
 
 /**
  * Entity attachment dataset results set
@@ -184,19 +183,10 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 		
 		try {
 			i.getAttachment().computeFileLocation(currentSession);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (Exception e) {
+			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
-		
-		try {
-			return EntityAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			//TODO:
-			return "";
-		}
-		
+		return EntityAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 	}
 
 	/**

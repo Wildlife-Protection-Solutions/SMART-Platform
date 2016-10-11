@@ -572,7 +572,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	}
 	
 	private void setWorkingSet(){
-		if (configureLayersJob == null) configureLayersJob = new WorkingSetMapLayersJob(getMap(), visibilityListener);
+		if (configureLayersJob == null) configureLayersJob = new WorkingSetMapLayersJob(getMap(), parentContext, visibilityListener);
 		configureLayersJob.schedule();
 	}
 	

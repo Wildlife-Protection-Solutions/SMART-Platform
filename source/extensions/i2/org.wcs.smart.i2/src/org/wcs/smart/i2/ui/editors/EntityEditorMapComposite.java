@@ -510,8 +510,6 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				try {
 					highlightFeature(getSelectedLocation());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 		});

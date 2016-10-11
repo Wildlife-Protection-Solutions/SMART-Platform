@@ -133,53 +133,7 @@ public class NewRelationshipDialog extends TitleAreaDialog{
 	}
 	
 	protected void okPressed() {
-//		IntelEntityType type = null;
-//		Object x = ((IStructuredSelection)cmbEntityType.getSelection()).getFirstElement();
-//		if (x instanceof IntelEntityType){
-//			type = (IntelEntityType)x;
-//		}else{
-//			MessageDialog.openWarning(getShell(), "Error", "Invalid type selected for entity");
-//			//TODO: error
-//			return;
-//		}
-//		IntelEntity newEntity = new IntelEntity();
-//		newEntity.setEntityType(type);
-//		newEntity.setAttributes(new ArrayList<IntelEntityAttributeValue>());
-//		for (AttributeFieldEditor c : attributeControls){
-//			IntelAttribute attribute = c.getAttribute();
-//			
-//			IntelEntityAttributeValue ev = new IntelEntityAttributeValue();
-//			ev.setAttribute(attribute);
-//			ev.setEntity(newEntity);
-//			
-//			boolean add = c.updateValue(ev);
-//			if (add){
-//				newEntity.getAttributes().add(ev);
-//			}
-//		}
-//		
-//		Session session = HibernateManager.openSession();
-//		try{
-//			session.beginTransaction();
-//			session.saveOrUpdate(newEntity);
-//			session.getTransaction().commit();
-//			
-//			
-//		}catch (Exception ex){
-//			MessageDialog.openWarning(getShell(), "Error", "Could not save entity: " + ex.getMessage());
-//			Intelligence2PlugIn.log(ex.getMessage(), ex);
-//			return;
-//		}finally{
-//			session.close();
-//		}
-//		
-//		//fire events
-//		try{
-//			IntelEvents.fireNewEntity(newEntity, broker);
-//		}catch (Exception ex){
-//			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
-//		}
-//		super.okPressed();
+		//TODO: Implement this - new Relationship
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {

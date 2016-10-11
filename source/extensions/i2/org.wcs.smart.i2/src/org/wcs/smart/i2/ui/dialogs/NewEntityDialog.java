@@ -144,7 +144,6 @@ public class NewEntityDialog extends TitleAreaDialog{
 			type = (IntelEntityType)x;
 		}else{
 			MessageDialog.openWarning(getShell(), "Error", "Invalid type selected for entity");
-			//TODO: error
 			return;
 		}
 		IntelEntity newEntity = new IntelEntity();

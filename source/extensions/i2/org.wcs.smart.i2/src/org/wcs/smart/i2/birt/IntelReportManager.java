@@ -24,6 +24,7 @@ package org.wcs.smart.i2.birt;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.Date;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
@@ -69,6 +70,8 @@ public enum IntelReportManager {
 		EntityExportReportJob job = new EntityExportReportJob(entity, dFilter);
 		job.schedule();
 	}
+	
+	
 	/**
 	 * Edits the plan template
 	 * @param event
@@ -85,8 +88,7 @@ public enum IntelReportManager {
 					entityType.setBirtTemplate(file);
 					s.getTransaction().commit();
 				}catch (Exception ex){
-					ex.printStackTrace();
-					//TODO:
+					Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to edit template for entity type {0}. {1}", entityType.getName(),  ex.getMessage()), ex);
 				}finally{
 					s.close();
 				}
@@ -96,10 +98,7 @@ public enum IntelReportManager {
 			if (!Files.exists(p.getParent())){
 				Files.createDirectory(p.getParent());
 			}
-			if (!Files.exists(p)){
-				//Files.createFile(p);
-			
-			
+			if (!Files.exists(p)){		
 				//create a report files
 				SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 				ReportDesignHandle rdh = session.createDesign(p.toFile().getAbsolutePath());
@@ -107,12 +106,10 @@ public enum IntelReportManager {
 				try {
 					rdh.setTitle(entityType.getName());
 				} catch (SemanticException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//lets just consume this 
 				}
 				
-				//add entity uuid parameter
-				
+				//add parameters - entity types and dates
 				ScalarParameterHandle shandler = rdh.getElementFactory().newScalarParameter(DataSourceParameter.ENTITY_UUID.getName());
 				shandler.setValueType(DesignChoiceConstants.PARAM_VALUE_TYPE_STATIC);
 				shandler.setIsRequired(true);
@@ -120,7 +117,6 @@ public enum IntelReportManager {
 				shandler.setDistinct(true);
 				rdh.getParameters().add(shandler);
 				
-				//dates
 				shandler = rdh.getElementFactory().newScalarParameter(DataSourceParameter.START_DATE.getName());
 				shandler.setValueType(DesignChoiceConstants.PARAM_VALUE_TYPE_STATIC);
 				shandler.setIsRequired(false);
@@ -136,21 +132,7 @@ public enum IntelReportManager {
 				rdh.getParameters().add(shandler);
 				
 				//TODO: see if we can include datasets by default
-				//add default library
-//				rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFileString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
-				//add date parameter automatically
-//				if (param != null){
-//					rdh.getParameters().add(rdh.getElementFactory().newElementFrom(param, param.getName()));
-//				}
-//				if (dataSource != null){
-//					rdh.getDataSources().add(rdh.getElementFactory().newElementFrom(dataSource, dataSource.getName()));
-//				}
-//				try{
-//					library.close();
-//				}catch (Exception ex){
-//					ReportPlugIn.displayLog(
-//							Messages.NewReportHandler_Error_CouldNotCloseLibrary + ex.getLocalizedMessage(), ex);
-//				}
+				
 				rdh.save();
 				rdh.close();
 			}

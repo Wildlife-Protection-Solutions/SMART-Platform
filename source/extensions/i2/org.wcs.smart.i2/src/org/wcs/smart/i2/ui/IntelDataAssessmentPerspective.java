@@ -45,16 +45,18 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(true);
 		
 		layout.addView(RecordsView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
+		
 		IFolderLayout bottomLeft = layout.createFolder("org.wcs.smart.i2.assessment.bottomleft", IPageLayout.BOTTOM,0.7f, RecordsView.ID);
-		
 		bottomLeft.addView(WorkingSetView.ID);
-		bottomLeft.addView(LayersView.ID);
 		
-		layout.addView(EntitySearchView.ID, IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA);
+		IFolderLayout right = layout.createFolder("org.wcs.smart.i2.assessment.right", IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA);
+		right.addView(EntitySearchView.ID);
+		right.addView(LayersView.ID);
 		
 		layout.getViewLayout(RecordsView.ID).setCloseable(false);
 		layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 		layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
+		
 		
 		
 	}

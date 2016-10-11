@@ -42,8 +42,6 @@ import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.io.ParseException;
-
 /**
  * Entity locations dataset result set
  * 
@@ -190,15 +188,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelEntityLocation i = (IntelEntityLocation) ((Object[])currentItem)[0];
-		
-		try {
-			return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			//TODO:
-			return "";
-		}
-		
+		return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 	}
 
 	/**

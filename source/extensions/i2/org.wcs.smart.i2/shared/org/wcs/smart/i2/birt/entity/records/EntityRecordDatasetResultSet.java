@@ -42,8 +42,6 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.io.ParseException;
-
 /**
  * Entity record datasets results
  * @author Emily
@@ -175,15 +173,7 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelEntityRecord i = (IntelEntityRecord) ((Object[])currentItem)[0];
-		
-		try {
-			return EntityRecordDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			//TODO:
-			return "";
-		}
-		
+		return EntityRecordDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 	}
 
 	/**

@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -123,16 +124,12 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 		return IntelRecordFeatureReader.getIntelLocationAsFeature(fIterator.next(), ftype);
 	}
 	
-	
 	private static SimpleFeature getIntelLocationAsFeature(IntelLocation location, SimpleFeatureType ftype){
-		//String spec = "geom:Geometry:srid=4326,fid:String,id:String,date:Date,time:Time,comment:String,system_id:String";
 		Object data[] = new Object[7];
-		
 		try {
 			data[0] = location.getGeometry();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
 		data[1] = ftype.getName() + "." + location.getId() + "." + UuidUtils.uuidToString(location.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[2] = location.getId();

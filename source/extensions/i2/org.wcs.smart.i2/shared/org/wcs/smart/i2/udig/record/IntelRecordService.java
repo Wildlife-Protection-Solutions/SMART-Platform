@@ -64,6 +64,38 @@ public class IntelRecordService extends IService {
 	
 	private IntelRecordDataSource ds = null;
 	
+	/*
+	 * this jobs configures the names of the geo resources
+	 * associated with this service
+	 */
+	private Job configureResourceNames = new Job("load name"){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			String recordName = "Intelligence Record";
+			Session s = HibernateManager.openSession();
+			try{
+				IntelRecord r = (IntelRecord) s.get(IntelRecord.class, recordUuid);
+				if (r != null){
+					recordName = r.getTitle();
+				}	
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}finally{
+				s.close();
+			}
+			
+			try{
+				for (IGeoResource theseresources : resources(monitor)){
+					((IntelRecordGeoResourceInfo)theseresources.getInfo(monitor)).setTitle(recordName);
+				}
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}
+			return org.eclipse.core.runtime.Status.OK_STATUS;
+		}
+	};
+	
+
 	public IntelRecordService(Map<String, Serializable> params) {
 		this.params = params;
 		this.url = IntelRecordServiceExtension.createURL(this.params);
@@ -72,40 +104,30 @@ public class IntelRecordService extends IService {
 		}catch (Exception ex){
 			error = ex;
 		}
-		
-		//TODO: listen for changes and configure 
-		Job j = new Job("load name"){
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				String recordName = "Intelligence Record";
-				Session s = HibernateManager.openSession();
-				try{
-					IntelRecord r = (IntelRecord) s.get(IntelRecord.class, recordUuid);
-					if (r != null){
-						recordName = r.getTitle();
-					}
-				}catch (Exception ex){
-					
-				}
-				try{
-					for (IGeoResource r : resources(monitor)){
-						((IntelRecordGeoResourceInfo)r.getInfo(monitor)).setTitle(recordName);
-					}
-				}catch (Exception ex){
-					//TODO:
-					ex.printStackTrace();
-				}
-				return org.eclipse.core.runtime.Status.OK_STATUS;
-			}
-		};
-		j.schedule();
+
+		configureResourceNames.schedule();
 	}
 	
-
+	/**
+	 * The record uuid represented by this service.
+	 * 
+	 * @return
+	 */
 	public UUID getRecordUuid(){
 		return this.recordUuid;
 	}
 	
+	/**
+	 * Schedule the job to refresh the resource names
+	 */
+	public void refreshNames(){
+		configureResourceNames.schedule();
+		try {
+			configureResourceNames.join();
+		} catch (InterruptedException e) {
+			Intelligence2PlugIn.log(e.getMessage(), e);
+		}
+	}
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
 	 */
@@ -175,21 +197,7 @@ public class IntelRecordService extends IService {
 
 	@Override
 	public void dispose( IProgressMonitor monitor ) {
-        if (members == null)
-            return;
-        if (monitor == null){
-        	monitor = new NullProgressMonitor();
-        }
-        int steps = (int) ((double) 99 / (double) members.size());
-        for( IntelRecordGeoResource resolve : members ) {
-            try {
-                SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor, steps);
-                resolve.dispose(subProgressMonitor);
-                subProgressMonitor.done();
-            } catch (Throwable e) {
-            	Intelligence2PlugIn.log("Could not dispose Intelligence Record Service", e); //$NON-NLS-1$
-            }
-        }
+        super.dispose(monitor);
         if (this.ds != null){
         	this.ds.dispose();
         }

@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.i2.birt.entity.attachment;
 
+import java.io.IOException;
+
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
-
-import com.vividsolutions.jts.io.ParseException;
 
 /* Birt filter to filter only images (png, jpeg):
  * var re = /.*\.(png|jpeg|jpg)/
@@ -62,10 +63,17 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 		public String getId(){
 			return this.id;
 		}
-		public Object getValue(IntelEntityAttachment location) throws ParseException{
+		
+		public Object getValue(IntelEntityAttachment location) {
 			if (this == ENTITY_UUID) return location.getEntity().getUuid();
 			if (this == FILE_NAME) return location.getAttachment().getFilename();
-			if (this == PATH) return "file:/" + location.getAttachment().getAttachmentFile().getAbsolutePath();
+			if (this == PATH){
+				try {
+					return "file:/" + location.getAttachment().getAttachmentFile().getCanonicalPath();
+				} catch (IOException e) {
+					Intelligence2PlugIn.log(e.getMessage(), e);	
+				}
+			}
 			return null;
 		}
 	}
