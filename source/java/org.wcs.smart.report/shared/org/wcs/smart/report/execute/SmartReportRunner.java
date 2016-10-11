@@ -30,14 +30,11 @@ import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
-import org.eclipse.birt.report.engine.api.impl.RunAndRenderTask;
 import org.hibernate.Session;
-import org.wcs.smart.SmartTimezoneWrapper;
 import org.wcs.smart.birt.BirtConstants;
+import org.wcs.smart.birt.SmartRunAndRender;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.report.model.Report;
-
-import com.ibm.icu.util.TimeZone;
 
 /**
  * BIRT Report running.  This initailizes the required parameters for running
@@ -123,18 +120,6 @@ public enum SmartReportRunner {
 		}finally{
 			task.close();
 		}
-	}
-
-	public static class SmartRunAndRender extends RunAndRenderTask{
-		public SmartRunAndRender(ReportEngine engine, IReportRunnable runnable, ConservationArea ca, String currentUser) {
-			super(engine, runnable);
-		
-			//hack to allow smart birt functions to have access to ca and user
-			TimeZone tz = executionContext.getScriptContext().getTimeZone();
-			SmartTimezoneWrapper ss = new SmartTimezoneWrapper(tz, ca, currentUser);
-			executionContext.getScriptContext().setTimeZone(ss);
-		}
-		
 	}
 	
 }

@@ -12,5 +12,37 @@
             name="SMART Editor">
       </editor>
    </extension>
+   <extension
+         point="org.eclipse.birt.core.ScriptFunctionService">
+      <Category
+            factoryclass="org.wcs.smart.report.birt.function.SmartCategoryFactory"
+            isVisible="true"
+            name="SMART_Functions">
+         <Function
+               desc="%smart.birt.functions.smartuser.desc"
+               name="SmartUser"
+               variableArguments="false">
+            <DataType
+                  value="String">
+            </DataType>
+         </Function>
+         <Function
+               desc="%smart.birt.functions.caname.desc"
+               isConstructor="false"
+               isStatic="true"
+               isVisible="true"
+               name="ConservationAreaName"
+               variableArguments="false">
+         </Function>
+         <Function
+               desc="%smart.birt.functions.caid.desc"
+               isConstructor="false"
+               isStatic="true"
+               isVisible="true"
+               name="ConservationAreaId"
+               variableArguments="false">
+         </Function>
+      </Category>
+   </extension>
 
 </plugin>
