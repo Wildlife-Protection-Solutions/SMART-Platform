@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.entity.records;
+package org.wcs.smart.i2.birt.entity.attachment;
 
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
@@ -27,16 +27,16 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 
 /**
- * Entity record dataset metadata
+ * Entity attachment dataset metadata
  * 
  * @author Emily
  *
  */
-public class EntityRecordDatasetMetadata implements IDataSetMetaData {
+public class EntityAttachmentDatasetMetadata implements IDataSetMetaData {
 
 	private IConnection connection;
 	
-	public EntityRecordDatasetMetadata(IConnection connection){
+	public EntityAttachmentDatasetMetadata(IConnection connection){
 		this.connection = connection;
 	}
 	
@@ -63,7 +63,7 @@ public class EntityRecordDatasetMetadata implements IDataSetMetaData {
 
 	@Override
 	public String getDataSourceProductName() throws OdaException {
-		return "Intelligence Entity Records";
+		return "Intelligence Entity Types";
 	}
 
 	@Override

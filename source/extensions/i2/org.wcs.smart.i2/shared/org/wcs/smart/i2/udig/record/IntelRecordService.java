@@ -47,14 +47,9 @@ import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * A udig service for smart
- * conservation area "area" data.
- * 
- * Service exists for a conservation area.  Each
- * area type is a separate georesource.
+ * A udig service for intelligence entity record locations
  * 
  * @author Emily
- * @since 1.0.0
  */
 public class IntelRecordService extends IService {
 

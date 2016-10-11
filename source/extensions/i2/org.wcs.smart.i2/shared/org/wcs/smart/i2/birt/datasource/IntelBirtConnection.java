@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.birt.datasource;
 
 import java.text.MessageFormat;
@@ -23,12 +44,18 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetMetadata;
+import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.ibm.icu.util.ULocale;
 
+/**
+ * BIRT Connection for intelligence datasets 
+ * @author Emily
+ *
+ */
 public class IntelBirtConnection implements IConnection {
 	
 	/**
@@ -171,6 +198,8 @@ public class IntelBirtConnection implements IConnection {
 				return new EntityLocationDataset(this);
 			}else if (dataSetType.equals(EntityRecordDataset.DATASET_TYPE)) {
 				return new EntityRecordDataset(this);
+			}else if (dataSetType.equals(EntityAttachmentDataset.DATASET_TYPE)){
+				return new EntityAttachmentDataset(this);
 			}
 			throw new OdaException(
 					MessageFormat.format("Dataset {0} not supported by SMART", //$NON-NLS-1$

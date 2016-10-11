@@ -24,9 +24,7 @@ package org.wcs.smart.i2.udig.record;
 import org.locationtech.udig.catalog.IServiceInfo;
 
 /**
- * Smart service information.
  * @author Emily
- * @since 1.0.0
  */
 public class IntelRecordServiceInfo extends IServiceInfo{
 

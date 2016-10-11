@@ -39,9 +39,9 @@ import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Geotools data store for SMART area layers.
+ * Geotools data store for entity locations
+ * 
  * @author Emily
- * @since 1.0.0
  */
 public class IntelEntityDataSource extends ContentDataStore{
 

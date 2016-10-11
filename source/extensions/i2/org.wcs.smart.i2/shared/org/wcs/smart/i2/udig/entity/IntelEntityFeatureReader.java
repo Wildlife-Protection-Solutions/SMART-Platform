@@ -44,9 +44,9 @@ import org.wcs.smart.util.UuidUtils;
 import com.vividsolutions.jts.io.ParseException;
 
 /**
- * Smart area feature reader
+ * Smart entity location feature reader
+ * 
  * @author Emily
- * @since 1.0.0
  */
 public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 

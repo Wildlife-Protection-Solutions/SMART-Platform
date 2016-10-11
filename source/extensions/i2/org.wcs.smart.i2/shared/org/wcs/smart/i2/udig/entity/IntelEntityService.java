@@ -51,12 +51,9 @@ import org.wcs.smart.util.UuidUtils;
  * smart://smartdb/intel2/entity/location/<entityuuid>#TYPE
  * 
  * @author Emily
- * @since 1.0.0
  */
 public class IntelEntityService extends IService {
-//
-//	private static final String SERVICE_ID_PREFIX = "org.wcs.smart.i2.udig.catalog.service.entity"; //$NON-NLS-1$
-//	
+
 	private Map<String, Serializable> params;
 	private URL url;
 	

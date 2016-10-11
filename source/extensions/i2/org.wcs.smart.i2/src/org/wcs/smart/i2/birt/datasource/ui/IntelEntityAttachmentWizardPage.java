@@ -24,15 +24,16 @@ package org.wcs.smart.i2.birt.datasource.ui;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
- * Dataset wizard for entity location dataset.
+ * Dataset wizard for entity attachment dataset
+ * 
  * @author Emily
  *
  */
-public class IntelEntityLocationWizardPage extends AbstractIntelEntityTypeListWizardPage {
+public class IntelEntityAttachmentWizardPage extends AbstractIntelEntityTypeListWizardPage {
 
 	private static final String SELECT_ENTITY_TYPE = "Select the entity type to use";
 	
@@ -41,7 +42,7 @@ public class IntelEntityLocationWizardPage extends AbstractIntelEntityTypeListWi
 	 * 
 	 * @param pageName
 	 */
-	public IntelEntityLocationWizardPage(String pageName) {
+	public IntelEntityAttachmentWizardPage(String pageName) {
 		super(pageName, SELECT_ENTITY_TYPE);
 	}
 
@@ -52,18 +53,18 @@ public class IntelEntityLocationWizardPage extends AbstractIntelEntityTypeListWi
 	 * @param title
 	 * @param titleImage
 	 */
-	public IntelEntityLocationWizardPage(String pageName, String title,
+	public IntelEntityAttachmentWizardPage(String pageName, String title,
 			ImageDescriptor titleImage) {
 		super(pageName, title, titleImage, SELECT_ENTITY_TYPE);
 	}
-	
+
 	@Override
 	protected String getDatasetType(){
-		return EntityLocationDataset.DATASET_TYPE;
+		return EntityAttachmentDataset.DATASET_TYPE;
 	}
 	
 	@Override
 	protected String getDatasetName(IntelEntityType type){
-		return MessageFormat.format("{0} - Locations", type.getName());
+		return MessageFormat.format("{0} - Attachments", type.getName());
 	}
 }

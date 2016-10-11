@@ -43,9 +43,9 @@ import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.LocationLayerType;
 
 /**
- * Georesource for a smart patrol data.
+ * Georesource for a entity record locations
+ * 
  * @author Emily
- * @since 1.0.0
  */
 public class IntelRecordGeoResource extends IGeoResource implements IWorkingSetResource {
 

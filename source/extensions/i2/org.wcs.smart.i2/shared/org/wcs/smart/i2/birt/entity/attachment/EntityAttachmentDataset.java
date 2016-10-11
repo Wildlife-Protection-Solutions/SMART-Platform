@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.entity.records;
+package org.wcs.smart.i2.birt.entity.attachment;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -39,17 +39,16 @@ import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
- * Entity records dataset
- * 
+ * Entity attachment dataset
  * @author Emily
  *
  */
-public class EntityRecordDataset  implements IQuery {
+public class EntityAttachmentDataset  implements IQuery {
 	
-	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity.record";
+	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity.attachment";
 
 	private IResultSetMetaData r_metadata = null;
-	private EntityRecordParameterMetadata pMetadata = null;
+	private EntityAttachmentParameterMetadata pMetadata = null;
 	private int m_maxRows;
 	
 	private IntelEntityType type = null;
@@ -57,7 +56,7 @@ public class EntityRecordDataset  implements IQuery {
 	
 	private HashMap<Integer, Object> parameters;
 	
-	public EntityRecordDataset(IntelBirtConnection connection){
+	public EntityAttachmentDataset(IntelBirtConnection connection){
 		this.connection = connection;
 		parameters = new HashMap<Integer,Object>();
 		
@@ -98,16 +97,15 @@ public class EntityRecordDataset  implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new EntityRecordDatasetResultSetMetadata();
+			r_metadata = new EntityAttachmentDatasetResultSetMetadata();
 		}
 		return r_metadata;
 	}
 
 	@Override
 	public IResultSet executeQuery() throws OdaException {
-		EntityRecordDatasetResultSet set = new EntityRecordDatasetResultSet(type, 
-				(EntityRecordDatasetResultSetMetadata)getMetaData(), connection, parameters,
-				(EntityRecordParameterMetadata)getParameterMetaData());
+		EntityAttachmentDatasetResultSet set = new EntityAttachmentDatasetResultSet(type, (EntityAttachmentDatasetResultSetMetadata)getMetaData(), 
+				connection, parameters, (EntityAttachmentParameterMetadata)getParameterMetaData());
 		return set;
 	}
 
@@ -229,7 +227,6 @@ public class EntityRecordDataset  implements IQuery {
 		}
 	}
 
-
 	@Override
 	public void setObject(int parameterId, Object value) throws OdaException {
 		parameters.put(parameterId, value);
@@ -260,7 +257,7 @@ public class EntityRecordDataset  implements IQuery {
 	@Override
 	public IParameterMetaData getParameterMetaData() throws OdaException {
 		if (pMetadata == null) {
-			pMetadata = new EntityRecordParameterMetadata();
+			pMetadata = new EntityAttachmentParameterMetadata();
 		}
 		return pMetadata;
 	}

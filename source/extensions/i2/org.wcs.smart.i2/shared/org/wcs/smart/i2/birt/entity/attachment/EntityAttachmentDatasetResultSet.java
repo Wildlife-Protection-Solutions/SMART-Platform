@@ -19,53 +19,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.entity;
+package org.wcs.smart.i2.birt.entity.attachment;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.Session;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
-import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
 
+import com.vividsolutions.jts.io.ParseException;
+
 /**
- * Entity dataset result set
+ * Entity attachment dataset results set
+ * 
  * @author Emily
  *
  */
-public class EntityDatasetResultSet implements IResultSet {
-	
+public class EntityAttachmentDatasetResultSet implements IResultSet {
+
 	private long m_maxRows = -1;
 	private int m_currentRowId = -1;
 
 	private Object currentItem;
 	private Object lastRowItem;
 	
-	private EntityDatasetResultSetMetadata metadata;
-	private IntelBirtConnection connection;
-	private IntelEntityType type;
+	private EntityAttachmentDatasetResultSetMetadata metadata;
 	private ScrollableResults results;
+	
+	private Session currentSession = null;
 	
 	/**
 	 * Creates a new summary results set
@@ -75,34 +72,42 @@ public class EntityDatasetResultSet implements IResultSet {
 	 * @param metadata
 	 *            the metadata
 	 */
-	public EntityDatasetResultSet(IntelEntityType type,
-			EntityDatasetResultSetMetadata metadata, 
+	public EntityAttachmentDatasetResultSet(IntelEntityType type,
+			EntityAttachmentDatasetResultSetMetadata metadata, 
 			IntelBirtConnection connection, HashMap<Integer, Object> parameters,
-			EntityParameterMetadata pmetadata) {
+			EntityAttachmentParameterMetadata pmetadata) {
 		
 		this.metadata = metadata;
-		this.type = type;
+	
+		String q1 = "SELECT count(*) FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type ";
+		String q2 = "FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type ";
 		
-		Criteria c = connection.getSession().createCriteria(IntelEntity.class)
-			.add(Restrictions.eq("entityType", type));
-		Criteria c2 = connection.getSession().createCriteria(IntelEntity.class)
-				.add(Restrictions.eq("entityType", type));
-		
-		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
-		if (index > 0){
+		HashMap<String, Object> values = new HashMap<String, Object>();
+		values.put("type", type);
+		int index =pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
+		if (index >= 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
-				c = c.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(entity)));
-				c2 = c2.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(entity)));
+				q1 += " AND l.id.entity.uuid = :uuid";
+				q2 += " AND l.id.entity.uuid = :uuid";
+				
+				values.put("uuid", UuidUtils.stringToUuid(entity));
 			}
 		}
-			
-		m_maxRows = (Long)c.setProjection(Projections.rowCount()).uniqueResult();
 		
-		results = c2.setReadOnly(true)
+		Query query1 = connection.getSession().createQuery(q1);
+		Query query2 = connection.getSession().createQuery(q2);
+		for (Entry<String,Object> e : values.entrySet()){
+			query1.setParameter(e.getKey(), e.getValue());
+			query2.setParameter(e.getKey(), e.getValue());
+		}
+		
+		m_maxRows = (Long)query1.uniqueResult();
+		results = query2.setReadOnly(true)
 				.scroll(ScrollMode.FORWARD_ONLY);
+
+		currentSession = connection.getSession();
 		
-		this.connection = connection;
 		this.m_currentRowId = 0;
 	}
 	
@@ -175,51 +180,23 @@ public class EntityDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntity i = (IntelEntity) ((Object[])currentItem)[0];
+		IntelEntityAttachment i = (IntelEntityAttachment) ((Object[])currentItem)[0];
 		
 		try {
-			i.getPrimaryAttachment().computeFileLocation(connection.getSession());
-		} catch (Exception e) {
+			i.getAttachment().computeFileLocation(currentSession);
+		} catch (Exception e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
 		
-		if (colIndex == 1){
-			return i.getUuid();
-		}else if (colIndex == 2){
-			return i.getIdAttributeAsText();
-		}else if (colIndex == 3){
-			return i.getEntityType().getKeyId();
-		}else if (colIndex == 4){
-			return i.getEntityType().getName();
-		}else if (colIndex == 5){
-			return i.getDateCreated();
-		}else if (colIndex == 6){
-			return i.getDateModified();
-		}else if (colIndex == 7){
-			return MessageFormat.format("{0} {1}", i.getCreatedBy().getGivenName(), i.getCreatedBy().getFamilyName());
-		}else if (colIndex == 8){
-			return MessageFormat.format("{0} {1}", i.getLastModifiedBy().getGivenName(), i.getLastModifiedBy().getFamilyName());
-		}else if (colIndex - 9 < type.getAttributes().size()){
-			IntelAttribute attribute = type.getAttributes().get(colIndex-9).getAttribute();
-			
-			IntelEntityAttributeValue v = i.findAttributeValue(attribute);
-			if (v == null) return null;
-			if (attribute.getType() == IAttributeType.LIST){
-				return ((IntelAttributeListItem)v.getAttributeValue()).getName();
-			}
-			return v.getAttributeValue();
-		}else{
-			
-			try {
-				return "file:/" + i.getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-				// TODO Auto-generated catch block
-//				
-			}
+		try {
+			return EntityAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			//TODO:
+			return "";
 		}
+		
 	}
 
 	/**

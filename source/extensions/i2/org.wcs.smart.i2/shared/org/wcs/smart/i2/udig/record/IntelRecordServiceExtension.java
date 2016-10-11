@@ -31,15 +31,11 @@ import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
 
 /**
- * Udig service extension for smart conservation area 
- * Area layers.
  * 
  * @author Emily
- * @since 1.0.0
  */
 public class IntelRecordServiceExtension implements ServiceExtension {
-//    public static final String KEY = "org.wcs.smart.udig.catalog.intel2.record"; //$NON-NLS-1$
-   
+  
     /**
      * Service parameter conservation area uuid key
      */

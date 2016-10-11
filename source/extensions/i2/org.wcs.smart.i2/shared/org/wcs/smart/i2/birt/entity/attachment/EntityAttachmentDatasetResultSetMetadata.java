@@ -19,27 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.entity.records;
+package org.wcs.smart.i2.birt.entity.attachment;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
-import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
 
 import com.vividsolutions.jts.io.ParseException;
 
+/* Birt filter to filter only images (png, jpeg):
+ * var re = /.*\.(png|jpeg|jpg)/
+ * if (re.test(row["Name"].toLowerCase())){
+ * "true"
+ * }else{
+ * "false"
+ * }
+ */
 /**
- * Entity record datasets results metadata
+ * Entity attachment result set metadata
  * @author Emily
  *
  */
-public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData {
+public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column{
 		ENTITY_UUID("entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		TITLE("title", "Title", java.sql.Types.VARCHAR),
-		DATE_RECIEVED("datereceived", "Date Received", java.sql.Types.DATE),
-		DATE_MODIFIED("datemodified", "Date Modified", java.sql.Types.DATE);
+		FILE_NAME("filename", "Name", java.sql.Types.VARCHAR),
+		PATH("path", "Path", java.sql.Types.VARCHAR);
 		
 		String id;
 		String name;
@@ -54,16 +62,16 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 		public String getId(){
 			return this.id;
 		}
-		public Object getValue(IntelEntityRecord location) throws ParseException{
+		public Object getValue(IntelEntityAttachment location) throws ParseException{
 			if (this == ENTITY_UUID) return location.getEntity().getUuid();
-			if (this == TITLE) return location.getRecord().getTitle();
-			if (this == DATE_RECIEVED) return location.getRecord().getDateCreated();
-			if (this == DATE_MODIFIED) return location.getRecord().getDateModified();
+			if (this == FILE_NAME) return location.getAttachment().getFilename();
+			if (this == PATH) return "file:/" + location.getAttachment().getAttachmentFile().getAbsolutePath();
 			return null;
 		}
 	}
 	
-	public EntityRecordDatasetResultSetMetadata(){
+	
+	public EntityAttachmentDatasetResultSetMetadata(){
 	}
 	
 	/**

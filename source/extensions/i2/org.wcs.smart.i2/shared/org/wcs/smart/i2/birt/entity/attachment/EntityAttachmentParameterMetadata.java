@@ -19,25 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.entity.records;
+package org.wcs.smart.i2.birt.entity.attachment;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
-import org.wcs.smart.i2.birt.entity.EntityDataset;
 
 /**
- * Entity record parameter metadata
+ * Entity attachment dataset parameters
  * 
  * @author Emily
  *
  */
-public class EntityRecordParameterMetadata implements IParameterMetaData{
-	
+public class EntityAttachmentParameterMetadata implements IParameterMetaData{
+
 	private static DataSourceParameter[] parameters = new DataSourceParameter[]{
 		null,
-		DataSourceParameter.ENTITY_UUID,
+		DataSourceParameter.ENTITY_UUID
 	};
 	
 	public int findParameterIndex(String parameterName){
@@ -72,7 +71,7 @@ public class EntityRecordParameterMetadata implements IParameterMetaData{
 	@Override
 	public String getParameterTypeName(int param) throws OdaException {
 		int nativeTypeCode = getParameterType(param);
-		return IntelBirtConnection.getNativeDataTypeName(nativeTypeCode, EntityDataset.DATASET_TYPE);
+		return IntelBirtConnection.getNativeDataTypeName(nativeTypeCode, EntityAttachmentDataset.DATASET_TYPE);
 	}
 
 	@Override

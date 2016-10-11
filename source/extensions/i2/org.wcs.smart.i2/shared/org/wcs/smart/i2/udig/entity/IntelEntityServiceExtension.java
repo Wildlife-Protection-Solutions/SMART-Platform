@@ -31,9 +31,9 @@ import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
 
 /**
- * Udig service extension for entity records
+ * Udig service extension for entities
+ * 
  * @author Emily
- * @since 1.0.0
  */
 public class IntelEntityServiceExtension implements ServiceExtension {
 

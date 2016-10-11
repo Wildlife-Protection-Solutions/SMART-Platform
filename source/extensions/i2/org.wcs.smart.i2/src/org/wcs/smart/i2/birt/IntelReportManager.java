@@ -66,7 +66,7 @@ public enum IntelReportManager {
 	}
 	
 	public void exportEntity(IntelEntity entity, Date[] dFilter){
-		ReportRunnerJob job = new ReportRunnerJob(entity, dFilter);
+		EntityExportReportJob job = new EntityExportReportJob(entity, dFilter);
 		job.schedule();
 	}
 	/**

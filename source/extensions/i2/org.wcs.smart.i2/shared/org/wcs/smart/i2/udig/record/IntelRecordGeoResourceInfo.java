@@ -37,9 +37,9 @@ import org.wcs.smart.SmartPlugIn;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * Georesource Information for a smart area resource 
+ * Georesource Information for enitity record location
+ *  
  * @author Emily
- * @since 1.0.0
  */
 public class IntelRecordGeoResourceInfo extends IGeoResourceInfo {
 
