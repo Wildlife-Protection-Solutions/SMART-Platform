@@ -50,6 +50,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
@@ -66,6 +68,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -121,7 +124,9 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -132,6 +137,8 @@ import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
+import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
+import org.wcs.smart.i2.ui.editors.record.LocationDetailsShell;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.Thumbnail;
@@ -193,6 +200,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private ToolItem wsetItem;
 	private ToolItem printItem;
 	
+	private EntityRelationshipDetailsShell detailsShell;
+	
 	private List<EventHandler> eventHandles = null;
 	
 	private Job loadEntity = new Job("load entity"){
@@ -227,6 +236,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						}
 					}
 				}
+				
 				temp.getPrimaryAttachment();
 				
 				relationships = s.createCriteria(IntelEntityRelationship.class)
@@ -239,6 +249,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 					r.getSourceEntity().getIdAttributeAsText();
 					r.getTargetEntity().getIdAttributeAsText();
+					r.getRelationshipType().getAttributes().size();
+					
+					if (r.getAttributes() != null){
+						r.getAttributes().forEach((e) -> {
+							e.getAttribute().getName();
+							e.getAttributeValue();
+							if (e.getAttributeListItem() != null){
+								e.getAttributeListItem().getName();
+							}
+						});
+					}
 				}
 			}finally{
 				s.close();
@@ -325,7 +346,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 			}
 			s.saveOrUpdate(entity);
-			
+			for(IntelEntityRelationship r : relationships){
+				s.saveOrUpdate(r);
+			}
 			for(IntelEntityRelationship r : relationshipsToAdd){
 				s.saveOrUpdate(r);
 			}
@@ -535,7 +558,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		compRecords.setLayout(new GridLayout());
 		createRecordsPanel(compRecords);
 		
-		compRelationships = toolkit.createComposite(tabPart, SWT.NONE);
+		compRelationships = toolkit.createComposite(tabPart, SWT.BORDER);
 		compRelationships.setLayout(new GridLayout());
 		createRelationshipPanel(compRelationships);
 		
@@ -846,9 +869,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		treeRelationships.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		treeRelationships.setContentProvider(new RelationshipContentProvider());
 		treeRelationships.getTree().setHeaderVisible(true);
-//		treeRelationships.getTree().setLinesVisible(true);
 		treeRelationships.addDoubleClickListener(new IDoubleClickListener() {
-			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				openRelationship();
@@ -867,10 +888,72 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		TreeViewerColumn colAttributes = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
 		colAttributes.getColumn().setText("Attributes");
-		colAttributes.getColumn().setWidth(500);
 		colAttributes.setLabelProvider(new RelationshipLabelProvider(2));
+		treeRelationships.getTree().addPaintListener(new PaintListener() {			
+			@Override
+			public void paintControl(PaintEvent e) {
+				treeRelationships.getTree().removePaintListener(this);
+				int size = parent.getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT).x - 350;
+				if (size < 350) size = 350;
+				colAttributes.getColumn().setWidth(size);		
+			}
+		});
 		
-		
+		//tooltip shell
+		Listener tableListener = new Listener(){
+			private boolean doHover = false;
+			
+			@Override
+			public void handleEvent(Event event) {
+				switch(event.type){
+					case SWT.MouseDoubleClick:
+					case SWT.MouseDown:
+					case SWT.MouseUp:
+						doHover = false;
+						break;
+					case SWT.MouseMove:
+						doHover= true;
+						break;
+					case SWT.MouseHover:
+						if (doHover){
+							doHover(event.x,event.y);
+						}
+						break;
+				}
+					
+			}
+			private void doHover(int x, int y){
+				
+				ViewerCell cell = treeRelationships.getCell(new Point(x, y));
+				if (cell.getColumnIndex() != 2){
+					if (detailsShell != null && !detailsShell.isDisposed()){
+						detailsShell.close();
+					}
+					return;
+				}
+				if (cell != null && cell.getElement() instanceof IntelEntityRelationship){
+					IntelEntityRelationship relationship = (IntelEntityRelationship) cell.getElement();
+					if (detailsShell == null || detailsShell.isDisposed() || !detailsShell.getRelationship().equals(relationship)){
+						detailsShell = new EntityRelationshipDetailsShell(treeRelationships.getTree().getDisplay(),relationship);
+					
+						int height = detailsShell.getSize().y;
+						Point p  = treeRelationships.getTree().toDisplay(x, y);
+						detailsShell.open(new Point(p.x, p.y - height));
+					}
+				}else{
+					if (detailsShell != null && !detailsShell.isDisposed()){
+						detailsShell.close();
+					}
+					return;
+				}
+			}
+			
+		};
+		treeRelationships.getTree().addListener(SWT.MouseDoubleClick, tableListener);
+		treeRelationships.getTree().addListener(SWT.MouseDown, tableListener);
+		treeRelationships.getTree().addListener(SWT.MouseUp, tableListener);
+		treeRelationships.getTree().addListener(SWT.MouseMove, tableListener);
+		treeRelationships.getTree().addListener(SWT.MouseHover, tableListener);	
 		
 		
 		IMenuCreator mnuRelationship = new IMenuCreator() {
@@ -901,7 +984,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 			private void createMenu(){		
 				if (mnuOpen == null){
 					mnuOpen = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuOpen.setText("Open");
+					mnuOpen.setText("Open Entity");
+					mnuOpen.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY));
 					mnuOpen.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -910,7 +994,32 @@ public class EntityEditor extends EditorPart implements MapPart{
 					});
 				}
 				if (isEditMode){
+					
+					if (mnuEdit == null){
+						mnuEdit = new MenuItem(thumbMenu,SWT.DEFAULT);
+						mnuEdit.setText("Edit Attributes");
+						mnuEdit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+						mnuEdit.addSelectionListener(new SelectionAdapter(){
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								//TODO: Editing Relationships
+								IStructuredSelection sel = (IStructuredSelection) treeRelationships.getSelection();
+								if (!sel.isEmpty()){
+									if (sel.getFirstElement() instanceof IntelEntityRelationship){
+										IntelEntityRelationship r = (IntelEntityRelationship)sel.getFirstElement();
+										RelationshipAttributeDialog dialog = new RelationshipAttributeDialog(treeRelationships.getControl().getShell(), r);
+										if (dialog.open() == Window.OK){
+											treeRelationships.refresh();
+											setDirty(true);
+										}
+									}
+								}
+							}	
+						});
+					}
 					if (mnuDelete == null){
+						new MenuItem(thumbMenu,SWT.SEPARATOR);
+						
 						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT);
 						mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 						mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -918,17 +1027,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 							@Override
 							public void widgetSelected(SelectionEvent e) {
 								deleteRelationship();
-							}	
-						});
-					}
-					if (mnuEdit == null){
-						mnuEdit = new MenuItem(thumbMenu,SWT.DEFAULT);
-						mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-						mnuEdit.addSelectionListener(new SelectionAdapter(){
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								//TODO: Editing Relationships
-								MessageDialog.openInformation(getEditorSite().getShell(),"TODO", "Implement This; users can switch src and target entities and configure attributes");
 							}	
 						});
 					}
@@ -1151,7 +1249,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private void initControl(IntelEntity entity){
 		fieldEditors = new ArrayList<AttributeFieldEditor>();
-				
+		if (lblCreated.isDisposed()) return;
+		 
 		lblCreated.setText(DateFormat.getInstance().format(entity.getDateCreated()));
 		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
 		lblIdentifier.setText(entity.getIdAttributeAsText());
@@ -1277,13 +1376,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 			if (element instanceof IntelRelationshipGroup){
 				return toolkit.getColors().getColor(IFormColors.TB_BG);
 			}
-				
 			return null;
 		}
 
 		@Override
 		public Color getForeground(Object element) {
-			
 			return null;
 		}
 
@@ -1316,7 +1413,20 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		}else if (columnIndex == 2){
 			if (element instanceof IntelEntityRelationship){
-				return "TODO: attributes";
+				
+				StringBuilder sb = new StringBuilder();
+				IntelEntityRelationship relation = (IntelEntityRelationship)element;
+				if (relation.getAttributes() == null) return "";
+				for (IntelEntityRelationshipAttributeValue value : relation.getAttributes()){
+					sb.append(value.getAttribute().getName());
+					sb.append(": ");
+					sb.append(AttributeValueLabelProvider.INSTANCE.getText(value));
+					sb.append(" / ");
+				}
+				if (sb.length() > 0){
+					return sb.substring(0, sb.length() - 3);
+				}
+				return sb.toString();
 			}
 		}
 		return "";

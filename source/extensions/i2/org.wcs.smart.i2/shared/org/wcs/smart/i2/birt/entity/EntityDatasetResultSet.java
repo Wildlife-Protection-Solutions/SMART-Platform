@@ -401,13 +401,15 @@ public class EntityDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getBoolean(int)
 	 */
 	public boolean getBoolean(int index) throws OdaException {
-		Object item = getCurrentItem(index);
-		if (item instanceof Boolean) {
-			return (Boolean) item;
-		} else if (item instanceof Integer) {
-			return ((Integer) item) <= 0;
-		} else if (item instanceof Double) {
-			return ((Double) item) <= 0.5;
+		lastRowItem = getCurrentItem(index);
+		if (lastRowItem instanceof Boolean) {
+			return (Boolean) lastRowItem;
+		} else if (lastRowItem instanceof Integer) {
+			return ((Integer) lastRowItem) <= 0;
+		} else if (lastRowItem instanceof Double) {
+			return ((Double) lastRowItem) <= 0.5;
+		}else if (lastRowItem == null){
+			return false;
 		}
 		throw new UnsupportedOperationException();
 	}

@@ -32,6 +32,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ui.OnOffButton;
 import org.wcs.smart.util.SmartUtils;
@@ -95,6 +96,87 @@ public class AttributeFieldEditor {
 			l.widgetSelected(null);
 		}
 	}
+	
+	/**
+	 * returns true if the value is set; false if not set and should be removed
+	 * from attribute list.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public boolean updateValue(IntelEntityRelationshipAttributeValue value){
+		boolean add = false;
+		if (attribute.getType() == IAttributeType.BOOLEAN){
+			if (((OnOffButton)btnOnOff).isEnabled()){
+				add = true;
+				if (((OnOffButton)btnOnOff).getSelection()){
+					value.setNumberValue(1d);
+				}else{
+					value.setNumberValue(0d);
+				}
+			}
+		}else if (attribute.getType() == IAttributeType.DATE){
+			if (((DateTime)dtDateTime).getEnabled()){
+				add = true;
+				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
+			}
+		}else if (attribute.getType() == IAttributeType.LIST){
+			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
+			if (!selection.isEmpty()){
+				Object item = selection.getFirstElement();
+				if (item instanceof IntelAttributeListItem){
+					add = true;
+					value.setAttributeListItem((IntelAttributeListItem) item);
+				}
+			}
+		}else if (attribute.getType() == IAttributeType.NUMERIC){
+			try{
+				String dvalue = ((Text)txtValue).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue(d);
+					add = true;
+				}
+			}catch (Exception ex){
+				//
+			}
+		}else if (attribute.getType() == IAttributeType.TEXT){
+			String svalue = ((Text)txtValue).getText();
+			if (!svalue.trim().isEmpty()){
+				value.setStringValue(svalue.trim());
+				add = true;
+			}
+		}
+		return add;
+	}
+	
+	public void initControl(IntelEntityRelationshipAttributeValue value){
+		if (attribute.getType() == IAttributeType.TEXT){
+			txtValue.setText(value.getStringValue());
+		}else if (attribute.getType() == IAttributeType.NUMERIC){
+			txtValue.setText(String.valueOf(value.getNumberValue()));
+		}else if (attribute.getType() ==  IAttributeType.LIST){
+			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
+		}else if (attribute.getType() ==  IAttributeType.DATE){
+			if(value.getDateValue() == null){
+				btnChDateTime.setSelection(false);
+				dtDateTime.setEnabled(false);
+			}else{
+				btnChDateTime.setSelection(true);
+				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
+				dtDateTime.setEnabled(true);
+			}
+		}else if (attribute.getType() ==  IAttributeType.BOOLEAN){
+			if (value.getNumberValue() == null){
+				btnChOnOff.setSelection(false);
+				btnOnOff.setEnabled(false);
+			}else{
+				btnChOnOff.setSelection(true);
+				btnOnOff.setSelection(value.getNumberValue() >= 0.5);
+				btnOnOff.setEnabled(true);
+			}
+		}
+	}
 	/**
 	 * returns true if the value is set; false if not set and should be removed
 	 * from attribute list.
@@ -151,7 +233,6 @@ public class AttributeFieldEditor {
 	public void initControl(IntelEntityAttributeValue value){
 		if (attribute.getType() == IAttributeType.TEXT){
 			txtValue.setText(value.getStringValue());
-			
 		}else if (attribute.getType() == IAttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() ==  IAttributeType.LIST){
@@ -176,6 +257,8 @@ public class AttributeFieldEditor {
 			}
 		}
 	}
+	
+	
 	private void createControl(){
 		Label l = new Label(parent, SWT.NONE);
 		l.setText(attribute.getName() + ":");

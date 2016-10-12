@@ -98,11 +98,13 @@ import org.wcs.smart.i2.ui.dialogs.WorkingSetListDialog;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.UuidUtils;
 
 public class WorkingSetView {
 	
 	public static final String ID = "org.wcs.smart.i2.ui.view.workingset"; //$NON-NLS-1$
 	
+	public static final String LAST_WS_PREFERENCE = "org.wcs.smart.i2.workingset.uuid";
 	@Inject
 	private IEclipseContext context;
 
@@ -114,6 +116,7 @@ public class WorkingSetView {
 	private ToolItem newItem;
 	private ToolItem selectItem;
 	private DateFilterDropDownComposite dateComp;
+	private boolean isInitializing = false;
 	
 	private CheckboxTreeViewer workingsetTree;
 	private LoadWorkingSetJob loadWorkingSetJob = new LoadWorkingSetJob();
@@ -201,6 +204,7 @@ public class WorkingSetView {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (isInitializing) return;
 				Date[] dFilters = new Date[2];
 				if (dateComp.getDateFilter() == DateFilter.CUSTOM){
 					dFilters[0] = dateComp.getCustomStartDate();
@@ -702,85 +706,96 @@ public class WorkingSetView {
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			IntelWorkingSet ws = null;
-			Display.getDefault().syncExec(()->{
-				if (lblWorkingSet.isDisposed()) return;
-				lastSelection = workingsetTree.getSelection();
-				lblWorkingSet.setText("Loading...");
-				
-				if (isNew){
-					lastOpenElements = null;
-				}else{
-					lastOpenElements = workingsetTree.getExpandedElements();
-				}
-				
-				workingsetTree.setInput(new String[]{DialogConstants.LOADING_TEXT});
-			});
-			
-			List<IntelWorkingSetItem> items = new ArrayList<IntelWorkingSetItem>();
-			if (workingSetUuid != null){
-				Session s = HibernateManager.openSession();
-				try{
-					ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, workingSetUuid);
+			isInitializing = true;
+			try{
+				IntelWorkingSet ws = null;
+				Display.getDefault().syncExec(()->{
+					if (lblWorkingSet.isDisposed()) return;
+					lastSelection = workingsetTree.getSelection();
+					lblWorkingSet.setText("Loading...");
 					
-					ws.getName();
-					for (IntelWorkingSetEntity entity : ws.getEntities()){
-						IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.INSTANCE.createImageDescriptor(entity.getEntity().getEntityType()));
-						items.add(i);
-					}
-					
-					for (IntelWorkingSetRecord record : ws.getRecords()){
-						IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
-						items.add(i);
-					}
-				}finally{
-					s.close();
-				}
-			}
-			DateFilter initFilter = DateFilter.LAST_YEAR;
-			Date[] dates = null;
-			if (ws != null){
-				String dateFilter = ws.getEntityDateFilter();
-				if (dateFilter != null){
-					try{
-						String[] bits = dateFilter.split(":");
-						initFilter = DateFilter.valueOf(bits[0]);
-						if (initFilter == DateFilter.CUSTOM){
-							dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
-						}
-					}catch (Exception ex){
-						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
-					}
-				}
-			}
-			final DateFilter dfilter = initFilter;
-			final Date[] dates2 = dates;
-			final IntelWorkingSet wss = ws;
-			
-			Display.getDefault().syncExec(()->{
-				if (lblWorkingSet.isDisposed()) return;
-				if (wss == null){
-					lblWorkingSet.setText("<Not Selected>");
-					dateComp.setEnabled(false);
-					workingsetTree.setInput(null);
-				}else{
-					dateComp.setEnabled(true);
-					dateComp.setDateFilter(dfilter, dates2);
-					
-					lblWorkingSet.setText(wss.getName());
-					workingsetTree.setInput(items);
-					
-					workingsetTree.setSelection(lastSelection);
-					if (lastOpenElements == null){
-						workingsetTree.expandAll();
+					if (isNew){
+						lastOpenElements = null;
 					}else{
-						workingsetTree.setExpandedElements(lastOpenElements);
+						lastOpenElements = workingsetTree.getExpandedElements();
 					}
 					
-					items.forEach((e) -> { if (e.isVisible()) workingsetTree.setChecked(e, true);  });
-					
+					workingsetTree.setInput(new String[]{DialogConstants.LOADING_TEXT});
+				});
+				
+				List<IntelWorkingSetItem> items = new ArrayList<IntelWorkingSetItem>();
+				if (workingSetUuid != null){
+					Session s = HibernateManager.openSession();
+					try{
+						ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, workingSetUuid);
+						
+						ws.getName();
+						for (IntelWorkingSetEntity entity : ws.getEntities()){
+							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.INSTANCE.createImageDescriptor(entity.getEntity().getEntityType()));
+							items.add(i);
+						}
+						
+						for (IntelWorkingSetRecord record : ws.getRecords()){
+							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+							items.add(i);
+						}
+					}finally{
+						s.close();
+					}
 				}
-			});
+				DateFilter initFilter = DateFilter.LAST_YEAR;
+				Date[] dates = null;
+				if (ws != null){
+					String dateFilter = ws.getEntityDateFilter();
+					if (dateFilter != null){
+						try{
+							String[] bits = dateFilter.split(":");
+							initFilter = DateFilter.valueOf(bits[0]);
+							if (initFilter == DateFilter.CUSTOM){
+								dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
+							}
+						}catch (Exception ex){
+							Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
+						}
+					}
+				}
+				final DateFilter dfilter = initFilter;
+				final Date[] dates2 = dates;
+				final IntelWorkingSet wss = ws;
+				
+				if (wss != null){
+					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_WS_PREFERENCE, UuidUtils.uuidToString(wss.getUuid()));
+				}else{
+					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_WS_PREFERENCE, "");
+				}
+				
+				Display.getDefault().syncExec(()->{
+					if (lblWorkingSet.isDisposed()) return;
+					if (wss == null){
+						lblWorkingSet.setText("<Not Selected>");
+						dateComp.setEnabled(false);
+						workingsetTree.setInput(null);
+					}else{
+						dateComp.setEnabled(true);
+						dateComp.setDateFilter(dfilter, dates2);
+						
+						lblWorkingSet.setText(wss.getName());
+						workingsetTree.setInput(items);
+						
+						workingsetTree.setSelection(lastSelection);
+						if (lastOpenElements == null){
+							workingsetTree.expandAll();
+						}else{
+							workingsetTree.setExpandedElements(lastOpenElements);
+						}
+						
+						items.forEach((e) -> { if (e.isVisible()) workingsetTree.setChecked(e, true);  });
+						
+					}
+				});
+			}finally{
+				isInitializing = false;
+			}
 			
 			return Status.OK_STATUS;
 		}

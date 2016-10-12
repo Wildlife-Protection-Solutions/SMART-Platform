@@ -23,6 +23,7 @@ package org.wcs.smart.i2.model;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -123,8 +124,7 @@ public class IntelEntityRelationship extends UuidItem{
 	 * 
 	 * @return The set of i_entity_relationship_attribute
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="entity_relationship_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.relationship", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelEntityRelationshipAttributeValue> getAttributes() {
 		return this.attributes;
 	}

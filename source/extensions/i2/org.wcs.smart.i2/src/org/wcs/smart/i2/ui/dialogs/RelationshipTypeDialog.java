@@ -216,7 +216,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			for (IntelRelationshipTypeAttribute a : type.getAttributes()){
 				if (!attributeList.contains(a)){
 					//delete any entity attribute value associations
-					Query qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att"); //$NON-NLS-1$
+					Query qDelete = s.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue WHERE id.attribute = :att"); //$NON-NLS-1$
 					qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
 					qDelete.executeUpdate();
 							
@@ -577,6 +577,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			sb.deleteCharAt(sb.length() - 1);
 			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? \n All attribute information associated with entities will also be removed.", sb.toString()))){
 				attributeList.removeAll(aToDelete);
+				modified();
 			}
 		}
 		

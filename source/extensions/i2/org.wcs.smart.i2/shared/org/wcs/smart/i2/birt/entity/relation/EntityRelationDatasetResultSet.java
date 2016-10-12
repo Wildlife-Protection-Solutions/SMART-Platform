@@ -19,14 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.entity.attachment;
+package org.wcs.smart.i2.birt.entity.relation;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
@@ -36,21 +38,22 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
-import org.wcs.smart.i2.model.IntelEntityAttachment;
+import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata.Column;
+import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Entity attachment dataset results set
- * 
+ * Entity record datasets results
  * @author Emily
  *
  */
-public class EntityAttachmentDatasetResultSet implements IResultSet {
+public class EntityRelationDatasetResultSet implements IResultSet {
 
 	private long m_maxRows = -1;
 	private int m_currentRowId = -1;
@@ -58,10 +61,12 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 	private Object currentItem;
 	private Object lastRowItem;
 	
-	private EntityAttachmentDatasetResultSetMetadata metadata;
+	private EntityRelationDatasetResultSetMetadata metadata;
 	private ScrollableResults results;
 	
-	private Session currentSession = null;
+	private UUID entityUuid;
+	
+	private List<IntelAttribute> validAttributes;
 	
 	/**
 	 * Creates a new summary results set
@@ -71,15 +76,18 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 	 * @param metadata
 	 *            the metadata
 	 */
-	public EntityAttachmentDatasetResultSet(IntelEntityType type,
-			EntityAttachmentDatasetResultSetMetadata metadata, 
+	public EntityRelationDatasetResultSet(IntelEntityType type,
+			 List<IntelAttribute> validAttributes,
+			EntityRelationDatasetResultSetMetadata metadata, 
 			IntelBirtConnection connection, HashMap<Integer, Object> parameters,
-			EntityAttachmentParameterMetadata pmetadata) {
+			EntityRelationParameterMetadata pmetadata) {
 		
 		this.metadata = metadata;
-	
-		String q1 = "SELECT count(*) FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type ";
-		String q2 = "FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type ";
+		this.entityUuid = null;
+		this.validAttributes = validAttributes;
+		
+		String q1 = "SELECT count(*) FROM IntelEntityRelationship l WHERE (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
+		String q2 = "FROM IntelEntityRelationship l WHERE (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
 		
 		HashMap<String, Object> values = new HashMap<String, Object>();
 		values.put("type", type);
@@ -87,10 +95,11 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 		if (index >= 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
-				q1 += " AND l.id.entity.uuid = :uuid";
-				q2 += " AND l.id.entity.uuid = :uuid";
-				
-				values.put("uuid", UuidUtils.stringToUuid(entity));
+				q1 += " AND ( l.sourceEntity.uuid = :uuid1 or l.targetEntity.uuid = :uuid2 )";
+				q2 += " AND ( l.sourceEntity.uuid = :uuid1 or l.targetEntity.uuid = :uuid2 )";
+				this.entityUuid = UuidUtils.stringToUuid(entity);
+				values.put("uuid1", entityUuid);
+				values.put("uuid2", entityUuid);
 			}
 		}
 		
@@ -104,8 +113,6 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 		m_maxRows = (Long)query1.uniqueResult();
 		results = query2.setReadOnly(true)
 				.scroll(ScrollMode.FORWARD_ONLY);
-
-		currentSession = connection.getSession();
 		
 		this.m_currentRowId = 0;
 	}
@@ -179,14 +186,26 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntityAttachment i = (IntelEntityAttachment) ((Object[])currentItem)[0];
+		IntelEntityRelationship i = (IntelEntityRelationship) ((Object[])currentItem)[0];
 		
-		try {
-			i.getAttachment().computeFileLocation(currentSession);
-		} catch (Exception e) {
-			Intelligence2PlugIn.log(e.getMessage(), e);
+		if (colIndex <= Column.values().length){
+			return EntityRelationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(entityUuid, i);
 		}
-		return EntityAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		colIndex = colIndex - 1 - Column.values().length;
+		if (colIndex >= 0){
+			for (IntelEntityRelationshipAttributeValue value : i.getAttributes()){
+				if (value.getAttribute().equals(validAttributes.get(colIndex))){
+					Object x = value.getAttributeValue();
+					if (x instanceof IntelAttributeListItem){
+						return ((IntelAttributeListItem) x).getName();
+					}
+					return x;
+				}
+			}
+		}
+		return null;
+		
+		
 	}
 
 	/**

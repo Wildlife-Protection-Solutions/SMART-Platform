@@ -26,8 +26,6 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 
-import com.vividsolutions.jts.io.ParseException;
-
 /**
  * Entity record datasets results metadata
  * @author Emily
@@ -36,10 +34,10 @@ import com.vividsolutions.jts.io.ParseException;
 public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column{
-		ENTITY_UUID("entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		TITLE("title", "Title", java.sql.Types.VARCHAR),
-		DATE_RECIEVED("datereceived", "Date Received", java.sql.Types.DATE),
-		DATE_MODIFIED("datemodified", "Date Modified", java.sql.Types.DATE);
+		ENTITY_UUID("record:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
+		TITLE("record:title", "Title", java.sql.Types.VARCHAR),
+		DATE_RECIEVED("record:datereceived", "Date Received", java.sql.Types.DATE),
+		DATE_MODIFIED("record:datemodified", "Date Modified", java.sql.Types.DATE);
 		
 		String id;
 		String name;
@@ -88,7 +86,7 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].id;
+		return Column.values()[index-1].name;
 	}
 
 	/**
@@ -96,7 +94,7 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].id;
 	}
 
 	/**

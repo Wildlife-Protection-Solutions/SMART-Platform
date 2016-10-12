@@ -46,9 +46,9 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
 public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column{
-		ENTITY_UUID("entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		FILE_NAME("filename", "Name", java.sql.Types.VARCHAR),
-		PATH("path", "Path", java.sql.Types.VARCHAR);
+		ENTITY_UUID("attachment:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
+		FILE_NAME("attachment:filename", "Name", java.sql.Types.VARCHAR),
+		PATH("attachment:path", "Path", java.sql.Types.VARCHAR);
 		
 		String id;
 		String name;
@@ -104,7 +104,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].id;
+		return Column.values()[index-1].name;
 	}
 
 	/**
@@ -112,7 +112,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].id;
 	}
 
 	/**

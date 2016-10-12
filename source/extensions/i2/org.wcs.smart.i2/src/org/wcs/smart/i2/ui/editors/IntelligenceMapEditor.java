@@ -106,6 +106,7 @@ import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.views.LayerVisibleEvent;
+import org.wcs.smart.i2.ui.views.WorkingSetView;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
@@ -113,6 +114,7 @@ import org.wcs.smart.ui.map.ScaleRatioComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -563,6 +565,19 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
         UDIGDragDropUtilities.addDropSupport(mapViewer.getViewport().getControl(), this);
         
         (new LoadDefaultLayersJob(getMap())).schedule();
+        
+		//initialize from preference store
+		String uuid = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(WorkingSetView.LAST_WS_PREFERENCE);
+		if (uuid != null && !uuid.isEmpty()){
+			try{
+				UUID wset = UuidUtils.stringToUuid(uuid);
+				IntelWorkingSet s = new IntelWorkingSet();
+				s.setUuid(wset);
+				WorkingSetManager.INSTANCE.setActiveWorkingSet(s, parentContext);
+			}catch (Exception ex){
+				
+			}
+		}
         
 	}
 

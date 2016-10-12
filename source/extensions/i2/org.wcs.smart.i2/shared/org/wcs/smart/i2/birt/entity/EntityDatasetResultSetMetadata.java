@@ -23,6 +23,7 @@ package org.wcs.smart.i2.birt.entity;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -66,27 +67,6 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		if (index == 1) return "entity_uuid";
-		if (index == 2) return "id";
-		if (index == 3) return "type_key";
-		if (index == 4) return "type";
-		if (index == 5) return "date_created";
-		if (index == 6) return "date_modified";
-		if (index == 7) return "created_by";
-		if (index == 8) return "modified_by";
-		
-		index = index - 9;
-		if (index < type.getAttributes().size()){
-			return type.getAttributes().get(index).getAttribute().getKeyId();
-		}
-		return "primary_image";
-	}
-
-	/**
-	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnName(int)
-	 */
-	@Override
-	public String getColumnName(int index) throws OdaException {
 		if (index == 1) return "Entity UUID";
 		if (index == 2) return "ID";
 		if (index == 3) return "Entity Type Key";
@@ -100,6 +80,27 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			return type.getAttributes().get(index).getAttribute().getName();
 		}
 		return "Primary Image";
+	}
+
+	/**
+	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnName(int)
+	 */
+	@Override
+	public String getColumnName(int index) throws OdaException {
+		if (index == 1) return "entity:entity_uuid";
+		if (index == 2) return "entity:id";
+		if (index == 3) return "entity:type_key";
+		if (index == 4) return "entity:type";
+		if (index == 5) return "entity:date_created";
+		if (index == 6) return "entity:date_modified";
+		if (index == 7) return "entity:created_by";
+		if (index == 8) return "entity:modified_by";
+		
+		index = index - 9;
+		if (index < type.getAttributes().size()){
+			return "attribute:" + type.getAttributes().get(index).getAttribute().getKeyId();
+		}
+		return "entity:primary_image";
 	}
 
 	/**
@@ -119,20 +120,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		index = index - 9;
 		if (index < type.getAttributes().size()){
 			IAttributeType attType = type.getAttributes().get(index).getAttribute().getType();
-			switch(attType){
-			case BOOLEAN:
-				return java.sql.Types.BOOLEAN;
-			case DATE:
-				return java.sql.Types.DATE;
-			case NUMERIC:
-				return java.sql.Types.DOUBLE;
-			case LIST:
-			case TEXT:
-				return java.sql.Types.VARCHAR;
-			default:
-				break;
-			
-			};
+			return AttributeManager.INSTANCE.getAttributeSqlType(attType);
 		}
 		return java.sql.Types.VARCHAR;
 	}

@@ -83,7 +83,6 @@ public class LocationListComposite extends Composite{
 	private RecordEditor editor;
 	
 	private LocationDetailsShell detailsShell = null; 
-	private boolean doHover = true;
 	
 	private MenuItem deleteItem;
 	private MenuItem addLinkItem;
@@ -381,7 +380,7 @@ public class LocationListComposite extends Composite{
 		
 		
 		Listener tableListener = new Listener(){
-
+			private boolean doHover = true;
 			@Override
 			public void handleEvent(Event event) {
 				switch(event.type){

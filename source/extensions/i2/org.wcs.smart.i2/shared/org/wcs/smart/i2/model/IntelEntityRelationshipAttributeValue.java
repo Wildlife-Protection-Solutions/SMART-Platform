@@ -151,6 +151,16 @@ public class IntelEntityRelationshipAttributeValue {
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 	}
 	
+	@Transient
+	public void setDateValue(Date date){
+		if (date == null){
+			setStringValue(null);
+			return;
+		}
+		java.sql.Date tmp = new java.sql.Date(date.getTime());
+		setStringValue(tmp.toString());
+	}
+	
 	/**
 	 * Date attribute types are stored
 	 * as in the string field in the ISO8601 format

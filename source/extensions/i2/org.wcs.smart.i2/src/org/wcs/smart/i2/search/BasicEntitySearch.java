@@ -141,6 +141,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	private void lazyLoadEntity(IntelEntity it, Session session){
 		it.getIdAttributeAsText();
 		it.getEntityType();
+		it.getEntityType().getIcon();
 		if (it.getPrimaryAttachment() != null){
 			try {
 				it.getPrimaryAttachment().getCopyFromLocation();

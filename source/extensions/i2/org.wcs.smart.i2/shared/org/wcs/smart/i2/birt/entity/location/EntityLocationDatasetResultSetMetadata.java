@@ -38,12 +38,12 @@ import com.vividsolutions.jts.io.ParseException;
 public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column{
-		ENTITY_UUID("entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		ID("id", "ID", java.sql.Types.VARCHAR),
-		GEOM("geom", "Geometry", java.sql.Types.JAVA_OBJECT),
-		DATE("date", "Date", java.sql.Types.DATE),
-		COMMENT("comment", "Comment", java.sql.Types.VARCHAR),
-		OBSERVATION("observation", "Observation", java.sql.Types.VARCHAR);
+		ENTITY_UUID("location:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
+		ID("location:id", "ID", java.sql.Types.VARCHAR),
+		GEOM("location:geom", "Geometry", java.sql.Types.JAVA_OBJECT),
+		DATE("location:date", "Date", java.sql.Types.DATE),
+		COMMENT("location:comment", "Comment", java.sql.Types.VARCHAR),
+		OBSERVATION("location:observation", "Observation", java.sql.Types.VARCHAR);
 		
 		String id;
 		String name;
@@ -100,7 +100,7 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].id;
+		return Column.values()[index-1].name;
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].id;
 	}
 
 	/**

@@ -48,6 +48,7 @@ import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
+import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
 
 /**
  * Manager for entity report editor.
@@ -66,6 +67,7 @@ public class IntelReportEditorManager implements IReportEditorManager{
 		SUPPORTED_DATASETS.add(EntityLocationDataset.DATASET_TYPE);
 		SUPPORTED_DATASETS.add(EntityRecordDataset.DATASET_TYPE);
 		SUPPORTED_DATASETS.add(EntityAttachmentDataset.DATASET_TYPE);
+		SUPPORTED_DATASETS.add(EntityRelationDataset.DATASET_TYPE);
 	};
 	
 	// This listener is a hack to name the
