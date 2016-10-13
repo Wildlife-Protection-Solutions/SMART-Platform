@@ -22,18 +22,24 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+
+import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -81,6 +87,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -105,6 +112,11 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class RelationshipTypeDialog extends TitleAreaDialog {
 
+	private static final String NEW_GROUP = "<Create New Group...>";
+	
+	@Inject
+	private IEventBroker eventBroker;
+	
 	private IntelRelationshipType type;
 	private NameKeyComposite nameKeyInfo;
 	private IconComposite icon;
@@ -146,9 +158,10 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			any.setName("<Any>");
 			types.add(0, any);
 			
+			Collections.sort(groups, (a,b) -> Collator.getInstance().compare(((IntelRelationshipGroup)a).getName().toLowerCase(), ((IntelRelationshipGroup)b).getName().toLowerCase()));
 			String noGroup = "";
 			groups.add(0, noGroup);
-			
+			groups.add(NEW_GROUP);
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -201,6 +214,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	}
 	
 	protected void okPressed() {
+		boolean isNew = type.getUuid() == null;
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
@@ -214,10 +228,11 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			}
 			
 			for (IntelRelationshipTypeAttribute a : type.getAttributes()){
-				if (!attributeList.contains(a)){
+				if (!attributeList.contains(a)){					
 					//delete any entity attribute value associations
-					Query qDelete = s.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue WHERE id.attribute = :att"); //$NON-NLS-1$
+					Query qDelete = s.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue WHERE id.attribute = :att AND id.relationship IN (FROM IntelEntityRelationship r WHERE r.relationshipType = :relationshipType ) "); //$NON-NLS-1$
 					qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
+					qDelete.setParameter("relationshipType", type); //$NON-NLS-1$
 					qDelete.executeUpdate();
 							
 					s.delete(a);
@@ -235,6 +250,11 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			s.close();
 		}
 		
+		if (isNew){
+			eventBroker.send(IntelEvents.RELATION_TYPE_NEW, type);
+		}else{
+			eventBroker.send(IntelEvents.RELATION_TYPE_MODIFIED, type);
+		}
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		
 	}
@@ -333,11 +353,42 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		cmbGroup.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		cmbGroup.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbGroup.addSelectionChangedListener(new ISelectionChangedListener() {
+			private boolean isNew = false;
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object x = ((IStructuredSelection)cmbGroup.getSelection()).getFirstElement();
 				if (x instanceof IntelRelationshipGroup){
 					type.setRelationshipGroup((IntelRelationshipGroup) x);
+				}else if (x == NEW_GROUP){
+					if (isNew) return;
+					isNew = true;
+					try{
+						//create a new group
+						IntelRelationshipGroup group = new IntelRelationshipGroup();
+						group.setConservationArea(SmartDB.getCurrentConservationArea());
+						group.setRelationshipTypes(new ArrayList<IntelRelationshipType>());
+						RelationshipGroupDialog ed = new RelationshipGroupDialog(getShell(), group);
+						ed.open();
+						if (group.getUuid() != null){
+							List<Object> groups = (List<Object>) cmbGroup.getInput();
+							groups.add(group);
+							Collections.sort(groups, (a,b)->{
+								if (a == NEW_GROUP) return 1;
+								if (b == NEW_GROUP) return -1;
+								if (a instanceof String ) return -1;
+								if (b instanceof String ) return 1;
+								if (a instanceof IntelRelationshipGroup && b instanceof IntelRelationshipGroup){
+									return Collator.getInstance().compare( ((IntelRelationshipGroup)a).getName().toLowerCase(),((IntelRelationshipGroup)b).getName().toLowerCase());  
+								}
+								return 0;
+							});
+							cmbGroup.refresh();
+							cmbGroup.setSelection(new StructuredSelection(group));
+							
+						}
+					}finally{
+						isNew = false;
+					}
 				}else{
 					type.setRelationshipGroup(null);
 				}

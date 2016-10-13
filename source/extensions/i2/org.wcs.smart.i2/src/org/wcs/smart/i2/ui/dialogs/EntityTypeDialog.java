@@ -176,8 +176,9 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			for (IntelEntityTypeAttribute a : type.getAttributes()){
 				if (!attributeList.contains(a)){
 					//delete any entity attribute value associations
-					Query qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att"); //$NON-NLS-1$
+					Query qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att AND id.entity IN ( FROM IntelEntity e WHERE e.entityType = :entityType ) "); //$NON-NLS-1$
 					qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
+					qDelete.setParameter("entityType", type); //$NON-NLS-1$
 					qDelete.executeUpdate();
 							
 					s.delete(a);

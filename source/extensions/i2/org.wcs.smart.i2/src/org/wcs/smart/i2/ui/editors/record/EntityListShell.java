@@ -39,6 +39,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -73,8 +74,8 @@ public class EntityListShell extends SmartShellDialog {
 	private IntelEntityType lastSelectedType;
 	
 	
-	public EntityListShell(Display ownerDisplay, RecordEditor editor){
-		super(ownerDisplay);
+	public EntityListShell(Shell ownerShell, RecordEditor editor){
+		super(ownerShell);
 		this.editor = editor;
 	}
 	

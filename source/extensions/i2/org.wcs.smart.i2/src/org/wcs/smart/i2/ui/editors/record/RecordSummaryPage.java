@@ -460,7 +460,7 @@ public class RecordSummaryPage extends EditorPart{
 			search.addSelectionListener(new SelectionAdapter() {			
 				@Override
 				public void widgetSelected(SelectionEvent e) {				
-					EntitySearchShell shell = new EntitySearchShell(txtDescription.getDisplay(), txtDescription.getSelectionText(), recordEditor);
+					EntitySearchShell shell = new EntitySearchShell(getSite().getShell(), txtDescription.getSelectionText(), recordEditor);
 					shell.open(Display.getDefault().getCursorLocation());
 				}
 			});

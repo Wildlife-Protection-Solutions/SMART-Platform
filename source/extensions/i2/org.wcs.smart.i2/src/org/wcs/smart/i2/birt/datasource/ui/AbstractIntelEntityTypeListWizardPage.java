@@ -141,7 +141,7 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 			s.close();
 		}
 		
-		Collections.sort(types, (a,b) -> Collator.getInstance().compare(a.getName(), b.getName()));
+		Collections.sort(types, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 		lstEntityTypes.setInput(types);
 		
 		setPageComplete(false);

@@ -34,6 +34,7 @@ import org.eclipse.birt.report.model.api.PropertyHandle;
 import org.eclipse.birt.report.model.api.activity.NotificationEvent;
 import org.eclipse.birt.report.model.api.command.ContentEvent;
 import org.eclipse.birt.report.model.api.command.NameEvent;
+import org.eclipse.birt.report.model.api.command.NameException;
 import org.eclipse.birt.report.model.api.core.Listener;
 import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
 import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter;
@@ -89,11 +90,22 @@ public class IntelReportEditorManager implements IReportEditorManager{
 						&& ne.getNewName().startsWith(org.eclipse.birt.report.designer.nls.Messages.getString("dataset.new.defaultName")) //$NON-NLS-1$
 						&& (ds.getDisplayName() == null || !ds.getDisplayName().equals(ne.getNewName()))) {
 					
-					try {
-						handle.setName(((OdaDataSet) ev.getTarget()).getDisplayName());
-					} catch (Exception ex) {
-						// eat me - we cant update the name for whatever reason
-						ex.printStackTrace();
+					String newName = ((OdaDataSet) ev.getTarget()).getDisplayName();
+					String coreName = newName;
+					int cnt = 1;
+					while(true){
+						try {
+							handle.setName(newName);
+							break;
+						}catch (NameException nex){
+							if (!nex.getErrorCode().equals(NameException.DESIGN_EXCEPTION_DUPLICATE)){
+								nex.printStackTrace();
+								break;
+							}
+							//duplicate name - lets add a number and try again
+						}
+						newName = coreName + " - " + cnt;
+						cnt++;
 					}
 				}
 			} else if (ev.getEventType() == NotificationEvent.CONTENT_EVENT) {

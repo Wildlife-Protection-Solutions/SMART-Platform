@@ -17,6 +17,11 @@ public class IntelEvents {
 	public static final String ENTITY_TYPE_DELETE = "INTEL_ENTITY_TYPE/DELETE";
 	public static final String ENTITY_TYPE_MODIFIED = "INTEL_ENTITY_TYPE/UPDATED";
 	
+	public static final String RELATION_TYPE_ALL = "INTEL_RELATION_TYPE/*";
+	public static final String RELATION_TYPE_NEW = "INTEL_RELATION_TYPE/NEW";
+	public static final String RELATION_TYPE_DELETE = "INTEL_RELATION_TYPE/DELETE";
+	public static final String RELATION_TYPE_MODIFIED = "INTEL_RELATION_TYPE/UPDATED";
+	
 	public static final String RECORD_ALL = "INTEL_RECORD/*";
 	public static final String RECORD_NEW = "INTEL_RECORD/NEW";
 	public static final String RECORD_DELETE = "INTEL_RECORD/DELETE";

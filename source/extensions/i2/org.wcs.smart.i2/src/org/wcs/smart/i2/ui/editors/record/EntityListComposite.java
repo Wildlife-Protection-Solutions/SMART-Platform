@@ -85,7 +85,7 @@ public class EntityListComposite extends Composite{
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				EntityListShell shell = new EntityListShell(EntityListComposite.this.getDisplay(), editor);
+				EntityListShell shell = new EntityListShell(EntityListComposite.this.getShell(), editor);
 				
 				int x = btnAdd.getLocation().x + btnAdd.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				int y =  btnAdd.getLocation().y;

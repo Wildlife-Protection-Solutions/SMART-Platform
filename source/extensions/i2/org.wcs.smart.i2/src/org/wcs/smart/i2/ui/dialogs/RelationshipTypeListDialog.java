@@ -27,13 +27,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -67,13 +74,16 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
+import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Dialog for listing relationship types.
@@ -82,6 +92,11 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class RelationshipTypeListDialog extends TitleAreaDialog {
 
+	@Inject
+	private IEventBroker broker;
+	@Inject
+	private IEclipseContext context;
+	
 	private TableViewer cmbTypes;
 	private List<IntelRelationshipType> types = null;
 	private NamedItemViewerFilter filter;
@@ -278,24 +293,57 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 	
+	private void openTypeDialog(IntelRelationshipType type){
+		RelationshipTypeDialog ed = new RelationshipTypeDialog(getShell(), type);
+		ContextInjectionFactory.inject(ed, context);
+		ed.open();
+		refresh();
+	}
+	
+
 	private void add(){
 		IntelRelationshipType type = new IntelRelationshipType();
 		type.setConservationArea(SmartDB.getCurrentConservationArea());
 		type.setAttributes(new ArrayList<IntelRelationshipTypeAttribute>());
-		
-		RelationshipTypeDialog ed = new RelationshipTypeDialog(getShell(), type);
-		ed.open();
-		
-		refresh();
+		openTypeDialog(type);
 	}
 	
+	
+	private boolean checkSaveEditors(IntelRelationshipType type, String action){
+		//before we edit the entity type ensure that all editors with this type are not dirty
+		List<EntityEditor> toSave = new ArrayList<EntityEditor>();
+		StringBuilder sb= new StringBuilder();
+		for (MPart part : context.get(EPartService.class).getParts()){
+			if (E3Utils.isCompatibilityEditor(part)){
+				Object src = E3Utils.getSourceObject(part); 
+				if ( src instanceof EntityEditor && ((EntityEditor)src).isDirty()){
+					//ensure there is at least one relationship of this type we are modifiying
+					if (((EntityEditor)src).hasRelation(type)){
+						toSave.add((EntityEditor) src);
+						sb.append(((EntityEditor)src).getEntity().getIdAttributeAsText());
+						sb.append(", ");
+					}
+				}
+			}
+		}
+		if (!toSave.isEmpty()){
+			if (MessageDialog.openQuestion(getShell(), "Relationship Type", 
+					MessageFormat.format("Before {0} the relationship type {1} all changes to the following entities must be saved.  Do you want to save now? \n{2}", action, type.getName(), sb.substring(0, sb.length()-2)))){
+				for (EntityEditor e : toSave){
+					e.doSave(new NullProgressMonitor());
+				}
+			}else{
+				return false;  //cannot edit
+			}
+		}
+		return true;
+	}
 	private void edit(){
 		Object x = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
 		if (x instanceof IntelRelationshipType){
-			IntelRelationshipType type = (IntelRelationshipType)x;
-			RelationshipTypeDialog ed = new RelationshipTypeDialog(getShell(), type);
-			ed.open();
-			refresh();
+			IntelRelationshipType type = (IntelRelationshipType)x;	
+			checkSaveEditors(type, "editing");
+			openTypeDialog(type);
 		}
 	}
 	
@@ -317,6 +365,11 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the following relationship types?  All relationships and other references will also be removed.  This action cannot be undone.\n\n{0}", sb.toString()))){
 			return;
 		}
+		for (IntelRelationshipType t : toDelete){
+			if (!checkSaveEditors(t, "deleting")){
+				return;
+			}
+		}
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -326,6 +379,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 						InterruptedException {
 
 					monitor.beginTask("Deleting relationship types", toDelete.size());
+					List<IntelRelationshipType> deleted = new ArrayList<IntelRelationshipType>();
 					Session s = HibernateManager.openSession();
 					try{
 						for (IntelRelationshipType t : toDelete){
@@ -334,6 +388,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 							try{
 								RelationshipTypeManager.INSTANCE.deleteRelationshipType(t, s);
 								s.getTransaction().commit();
+								deleted.add(t);
 							}catch(Exception ex){
 								s.getTransaction().rollback();
 								Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to delete Relationship Type {0}. {1}", t.getName(), ex.getMessage()), ex);
@@ -344,7 +399,9 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 						s.close();
 					}
 					monitor.done();
-					
+					for (IntelRelationshipType d : deleted){
+						broker.send(IntelEvents.RELATION_TYPE_DELETE, d);
+					}
 				}
 			});
 		} catch (Exception e) {

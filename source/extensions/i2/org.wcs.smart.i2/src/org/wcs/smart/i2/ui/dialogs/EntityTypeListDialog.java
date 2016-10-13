@@ -33,11 +33,14 @@ import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -77,8 +80,10 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
+import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Dialog for listing entity types.
@@ -299,6 +304,33 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		Object x = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
 		if (x instanceof IntelEntityType){
 			IntelEntityType type = (IntelEntityType)x;
+			
+			//before we edit the entity type ensure that all editors with this type are not dirty
+			List<EntityEditor> toSave = new ArrayList<EntityEditor>();
+			StringBuilder sb= new StringBuilder();
+			for (MPart part : context.get(EPartService.class).getParts()){
+				if (E3Utils.isCompatibilityEditor(part)){
+					Object src = E3Utils.getSourceObject(part); 
+					if ( src instanceof EntityEditor 
+							&& ((EntityEditor)src).isDirty()
+							&& ((EntityEditor)src).getEntity().getEntityType().equals(type)){
+						toSave.add((EntityEditor) src);
+						sb.append(((EntityEditor)src).getEntity().getIdAttributeAsText());
+						sb.append(", ");
+					}
+				}
+			}
+			if (!toSave.isEmpty()){
+				if (MessageDialog.openQuestion(getShell(), "Entity Type", 
+						MessageFormat.format("Before editing the entity type {0} all changes to the following entities must be saved.  Do you want to save now? \n{1}", type.getName(), sb.substring(0, sb.length()-2)))){
+					for (EntityEditor e : toSave){
+						e.doSave(new NullProgressMonitor());
+					}
+				}else{
+					return;  //cannot edit
+				}
+			}
+			
 			EntityTypeDialog ed = new EntityTypeDialog(getShell(), type);
 			ContextInjectionFactory.inject(ed, context);
 			ed.open();

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.birt;
 
+import org.eclipse.ui.IPageLayout;
 import org.wcs.smart.birt.ui.BasicReportPerspective;
 
 /**
@@ -32,5 +33,5 @@ import org.wcs.smart.birt.ui.BasicReportPerspective;
 public class IntelEntityReportPerspective extends BasicReportPerspective {
 
 	public static final String ID = "org.wcs.smart.i2.report.entity.edit"; //$NON-NLS-1$
-	
+
 }

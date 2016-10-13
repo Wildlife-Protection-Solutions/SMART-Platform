@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui;
 
 import java.awt.image.BufferedImage;
+import java.text.MessageFormat;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -42,7 +43,12 @@ public class RelationshipTypeLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element){
 		if (element instanceof IntelRelationshipType){
-			return ((IntelRelationshipType) element).getName();
+			IntelRelationshipType type = (IntelRelationshipType) element;
+			if (type.getRelationshipGroup() == null){
+				return type.getName();
+			}else{
+				return MessageFormat.format("{0} ({1})", type.getName(), type.getRelationshipGroup().getName());
+			}
 		}
 		return super.getText(element);
 	}

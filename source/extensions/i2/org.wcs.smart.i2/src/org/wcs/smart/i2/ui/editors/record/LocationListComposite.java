@@ -406,7 +406,7 @@ public class LocationListComposite extends Composite{
 				if (cell != null && cell.getElement() instanceof IntelLocation){
 					IntelLocation location = (IntelLocation) cell.getElement();
 					if (detailsShell == null || detailsShell.isDisposed() || !detailsShell.getLocationRecord().equals(location)){
-						detailsShell = new LocationDetailsShell(tblObservations.getTable().getDisplay(),(IntelLocation)cell.getElement(), editor.getEntityLocationLinks());
+						detailsShell = new LocationDetailsShell(getShell(),(IntelLocation)cell.getElement(), editor.getEntityLocationLinks());
 					
 						int height = detailsShell.getSize().y;
 						Point p  = tblObservations.getTable().toDisplay(x, y);

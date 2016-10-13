@@ -23,21 +23,33 @@ package org.wcs.smart.i2.ui.dialogs;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -45,6 +57,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
+import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -57,10 +71,13 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class RelationshipGroupDialog extends TitleAreaDialog {
 
+	@Inject
+	private IEclipseContext context;
+	
 	private NameKeyComposite nameKeyInfo;
 	private IntelRelationshipGroup group;
 	private List<IntelRelationshipGroup> groupSiblings;
-	
+	private TableViewer lstTypes;
 	
 	public RelationshipGroupDialog(Shell parentShell, IntelRelationshipGroup group) {
 		super(parentShell);
@@ -142,8 +159,29 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 			}
 		});
 		
+		Label l = new Label(parent, SWT.NONE);
+		l.setText("Types:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
-		
+		lstTypes = new TableViewer(parent);
+		lstTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
+		lstTypes.setContentProvider(ArrayContentProvider.getInstance());
+		lstTypes.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelRelationshipType){
+					return ((IntelRelationshipType) element).getName();
+				}
+				return super.getText(element);
+			}
+			
+			@Override
+			public Image getImage(Object element){
+				return RelationshipTypeLabelProvider.INSTANCE.getImage(element);
+			}
+		});
+		lstTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
+
 		setTitle("Relationship Group");
 		getShell().setText("Relationship Group");
 		setMessage("Configure relationship group");
@@ -153,10 +191,8 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 	
 	
 	private void initFields(){
-
 		siblingsJob.setSystem(true);
 		siblingsJob.schedule(0);
-		
 	}
 	
 	@Override
@@ -173,6 +209,9 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 			try{
 				groupSiblings = RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea());
 				groupSiblings.remove(group);
+				
+				group = (IntelRelationshipGroup) s.merge(group);
+				group.getRelationshipTypes().forEach(e -> e.getName());
 			}finally{
 				s.close();
 			}
@@ -180,7 +219,8 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					nameKeyInfo.initFields(group, groupSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
+					nameKeyInfo.initFields(group, groupSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+					lstTypes.setInput(group.getRelationshipTypes());
 					getButton(IDialogConstants.OK_ID).setEnabled(group.getUuid() == null);
 				}
 			});

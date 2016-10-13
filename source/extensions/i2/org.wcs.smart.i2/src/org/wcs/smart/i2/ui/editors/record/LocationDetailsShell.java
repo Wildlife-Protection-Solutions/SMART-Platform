@@ -36,9 +36,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.SmartShellDialog;
@@ -61,8 +61,8 @@ public class LocationDetailsShell extends SmartShellDialog{
 	private int xPos, yPos;
 	private Label lblId;
 	
-	public LocationDetailsShell(Display ownerDisplay, IntelLocation location, List<IntelEntityLocation> entityLocationLinks){
-		super(ownerDisplay, SWT.RESIZE);
+	public LocationDetailsShell(Shell ownerShell, IntelLocation location, List<IntelEntityLocation> entityLocationLinks){
+		super(ownerShell, SWT.RESIZE);
 		this.location = location;
 		this.entityLocationLinks = new ArrayList<IntelEntityLocation>();
 		for (IntelEntityLocation l : entityLocationLinks){

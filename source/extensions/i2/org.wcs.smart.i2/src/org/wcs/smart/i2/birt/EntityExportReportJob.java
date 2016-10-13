@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
@@ -62,11 +63,13 @@ public class EntityExportReportJob extends Job {
 
 	private IntelEntity entity;
 	private Date[] dFilter;
+	private EmitterInfo format;
 	
-	public EntityExportReportJob(IntelEntity entity, Date[] dFilter) {
+	public EntityExportReportJob(IntelEntity entity, Date[] dFilter, EmitterInfo format) {
 		super("Running BIRT Report");
 		this.entity = entity;
 		this.dFilter = dFilter;
+		this.format = format;
 	}
 
 	@Override
@@ -101,14 +104,14 @@ public class EntityExportReportJob extends Job {
 		}
 
 		//TODO: delete outputfile when done with it
-		outputFile = outputFile.resolve(UuidUtils.uuidToString(entity.getUuid()) + "." + System.nanoTime() + ".pdf");
+		outputFile = outputFile.resolve(UuidUtils.uuidToString(entity.getUuid()) + "." + System.nanoTime() + "." + format.getFormat());
 		
 		IRenderOption options = new RenderOption();
 		try(FileOutputStream fout = new FileOutputStream(outputFile.toFile())){
 			
 			options.setOutputStream(fout);
-			options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf");
-			options.setOutputFormat("PDF");
+			options.setEmitterID(format.getID());
+			//options.setOutputFormat("PDF");
 			options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 			
 			HashMap<String, Object> reportParameters = new HashMap<String, Object>();

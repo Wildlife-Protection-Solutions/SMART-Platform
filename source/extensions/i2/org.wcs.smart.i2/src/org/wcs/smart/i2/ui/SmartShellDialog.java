@@ -39,15 +39,16 @@ import org.eclipse.swt.widgets.Shell;
 public abstract class SmartShellDialog implements Listener {
 
 	protected Shell shell;
-	private Shell hiddenParent;
-
-	public SmartShellDialog(Display ownerDisplay) {
-		this(ownerDisplay, SWT.NO_TRIM);
+	protected Shell hiddenParent;
+	protected Shell parentShell;
+	
+	public SmartShellDialog(Shell parentShell) {
+		this(parentShell, SWT.NO_TRIM);
 	}
 	
-	public SmartShellDialog(Display ownerDisplay, int style) {
-
-		hiddenParent = new Shell(ownerDisplay);
+	public SmartShellDialog(Shell parentShell, int style) {
+		this.parentShell = parentShell;
+		hiddenParent = new Shell(parentShell.getDisplay());
 
 		shell = new Shell(hiddenParent, style);
 

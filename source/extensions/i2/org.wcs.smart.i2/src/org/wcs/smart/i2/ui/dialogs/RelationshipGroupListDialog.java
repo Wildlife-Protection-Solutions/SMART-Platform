@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -34,6 +35,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -81,6 +84,9 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class RelationshipGroupListDialog extends TitleAreaDialog {
 
+	@Inject
+	private IEclipseContext context;
+	
 	private TableViewer cmbGroups;
 	private List<IntelRelationshipGroup> groups = null;
 	private NamedItemViewerFilter filter;
@@ -269,24 +275,25 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 	
+	private void openGroupDialog(IntelRelationshipGroup group){
+		RelationshipGroupDialog ed = new RelationshipGroupDialog(getShell(), group);
+		ContextInjectionFactory.inject(ed, context);
+		ed.open();
+		refresh();
+	}
+	
 	private void add(){
 		IntelRelationshipGroup group = new IntelRelationshipGroup();
 		group.setConservationArea(SmartDB.getCurrentConservationArea());
 		group.setRelationshipTypes(new ArrayList<IntelRelationshipType>());
-		
-		RelationshipGroupDialog ed = new RelationshipGroupDialog(getShell(), group);
-		ed.open();
-		
-		refresh();
+		openGroupDialog(group);
 	}
 	
 	private void edit(){
 		Object x = ((IStructuredSelection)cmbGroups.getSelection()).getFirstElement();
 		if (x instanceof IntelRelationshipGroup){
 			IntelRelationshipGroup type = (IntelRelationshipGroup)x;
-			RelationshipGroupDialog ed = new RelationshipGroupDialog(getShell(), type);
-			ed.open();
-			refresh();
+			openGroupDialog(type);
 		}
 	}
 	

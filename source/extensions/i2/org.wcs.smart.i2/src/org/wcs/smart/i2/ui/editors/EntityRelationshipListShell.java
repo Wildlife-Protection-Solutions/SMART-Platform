@@ -42,6 +42,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -61,15 +62,15 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EntityRelationshipListShell extends SmartShellDialog {
+public abstract class EntityRelationshipListShell extends SmartShellDialog {
 
 	private IntelEntity srcEntity;
 	private IntelRelationshipType type;
 	private IntelEntity targetEntity;
 	
 	private TableViewer types;
-	
-	public EntityRelationshipListShell(Display owner, IntelEntity srcEntity){
+		
+	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity){
 		super(owner);
 		this.srcEntity = srcEntity;
 	}
@@ -129,7 +130,7 @@ public class EntityRelationshipListShell extends SmartShellDialog {
 					}
 				}
 				setRelationshipType(selection);
-				shell.close();
+				doEvent();
 			}
 		});
 		
@@ -138,6 +139,8 @@ public class EntityRelationshipListShell extends SmartShellDialog {
 			entityListTable.setInput(view.getEntities());
 		}
 	}
+	
+	protected abstract void doEvent();
 	
 	private void setRelationshipType(IntelRelationshipType type){
 		this.type = type;
@@ -175,6 +178,7 @@ public class EntityRelationshipListShell extends SmartShellDialog {
 					if (i.getRelationshipGroup() != null){
 						i.getRelationshipGroup().getName();
 					}
+					i.getAttributes().size();
 				}
 			}finally{
 				s.close();

@@ -348,7 +348,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				s.close();
 			}
 			
-			Collections.sort(sets, (a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			Collections.sort(sets, (a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 			final List<IntelWorkingSet> newSets = sets;
 			Display.getDefault().syncExec(()->	{
 				lstViewer.setInput(newSets);

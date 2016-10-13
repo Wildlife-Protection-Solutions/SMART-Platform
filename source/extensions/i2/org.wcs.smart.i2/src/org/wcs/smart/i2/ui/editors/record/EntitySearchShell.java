@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -67,8 +68,8 @@ public class EntitySearchShell extends SmartShellDialog {
 	private RecordEditor editor;
 	private String searchString;
 	
-	public EntitySearchShell(Display ownerDisplay, String searchString, RecordEditor editor){
-		super(ownerDisplay);
+	public EntitySearchShell(Shell ownerShell, String searchString, RecordEditor editor){
+		super(ownerShell);
 		this.editor = editor;
 		this.searchString = searchString;
 	}

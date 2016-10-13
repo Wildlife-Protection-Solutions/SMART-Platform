@@ -158,8 +158,22 @@
       <perspective
             class="org.wcs.smart.i2.birt.IntelEntityReportPerspective"
             id="org.wcs.smart.i2.report.entity.edit"
-            name="Intelligence Entity Template Editor">
+            name="Intelligence Entity Template BIRT Editor">
       </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.wcs.smart.i2.report.entity.edit">
+         <view
+               closeable="false"
+               id="org.wcs.smart.i2.view.entitytypelist"
+               minimized="false"
+               relationship="stack"
+               relative="bottomLeft"
+               visible="true">
+         </view>
+      </perspectiveExtension>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -184,13 +198,18 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.i2.command.attributelist.show"
+                  label="Intelligence Attributes..."
+                  style="push">
+            </command>
+            <command
                   commandId="org.wcs.smart.i2.command.entitytypelist.show"
                   label="Entity Types..."
                   style="push">
             </command>
             <command
-                  commandId="org.wcs.smart.i2.command.attributelist.show"
-                  label="Intelligence Attributes..."
+                  commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
+                  label="Relationship Types..."
                   style="push">
             </command>
             <command
@@ -198,10 +217,39 @@
                   label="Relationship Groups..."
                   style="push">
             </command>
+            <separator
+                  name="org.wcs.smart.i2.separator2"
+                  visible="true">
+            </separator>
             <command
-                  commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
-                  label="Relationship Types..."
+                  commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/template.png"
+                  label="Edit Entity Templates..."
                   style="push">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.report.entity.edit">
+               </parameter>
+            </command>
+            <separator
+                  name="org.wcs.smart.i2.separator3"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.i2.command.perspective.open"
+                  label="Data Assessment Mode">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.perspective.open"
+                  label="Data Analysis Mode">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+               </parameter>
             </command>
          </menu>
       </menuContribution>
@@ -212,8 +260,7 @@
                id="org.wcs.smart.i2.toolbar.perspective">
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
-                  label="Data Analysis Mode"
-                  style="radio">
+                  label="Data Analysis Mode">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
@@ -221,8 +268,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
-                  label="Data Assessment Mode"
-                  style="radio">
+                  label="Data Assessment Mode">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
@@ -340,6 +386,13 @@
             class="org.wcs.smart.i2.ui.views.QueryView$QueryViewWrapper"
             id="org.wcs.smart.i2.ui.view.queries"
             name="Queries"
+            restorable="true">
+      </view>
+      <view
+            class="org.wcs.smart.i2.ui.views.EntityTypeListView$EntityTypeListViewWrapper"
+            icon="images/icons/obj16/entity.png"
+            id="org.wcs.smart.i2.view.entitytypelist"
+            name="Entity Type List View"
             restorable="true">
       </view>
    </extension>
@@ -464,6 +517,14 @@
       <image
             commandId="org.wcs.smart.i2.command.record.view.refresh"
             icon="images/icons/obj16/refresh.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.i2.command.entitytypelist.show"
+            icon="images/icons/obj16/entity.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.i2.command.attributelist.show"
+            icon="images/icons/obj16/attribute.png">
       </image>
    </extension>
    <extension

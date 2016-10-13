@@ -36,9 +36,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -46,7 +46,6 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.SmartShellDialog;
-import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Shell dialog for displaying details of an intel location.
@@ -69,8 +68,8 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 	private Composite owner;
 	private ScrolledComposite scroll;
 	
-	public EntityRelationshipDetailsShell(Display ownerDisplay, IntelEntityRelationship relationship){
-		super(ownerDisplay, SWT.RESIZE);
+	public EntityRelationshipDetailsShell(Shell ownerShell, IntelEntityRelationship relationship){
+		super(ownerShell, SWT.RESIZE);
 		this.relationship = relationship;
 	}
 	
@@ -174,7 +173,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 	private void initDetails(IntelRelationshipType type){
 		List<IntelRelationshipTypeAttribute> all = new ArrayList<IntelRelationshipTypeAttribute>();
 		all.addAll(type.getAttributes());
-		Collections.sort(all, (a, b) -> Collator.getInstance().compare(a.getAttribute().getName(), b.getAttribute().getName()));
+		Collections.sort(all, (a, b) -> Collator.getInstance().compare(a.getAttribute().getName().toLowerCase(), b.getAttribute().getName().toLowerCase()));
 		
 		for (IntelRelationshipTypeAttribute a : all){
 			Label ll = new Label(details, SWT.NONE);

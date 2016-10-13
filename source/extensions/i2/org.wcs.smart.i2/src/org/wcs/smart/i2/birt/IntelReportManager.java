@@ -29,6 +29,7 @@ import java.util.Date;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
+import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.ScalarParameterHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
@@ -53,6 +54,19 @@ public enum IntelReportManager {
 
 	INSTANCE;
 	
+	public enum Format{
+			DOC("DOCX", "org.eclipse.birt.report.engine.emitter.word"),
+			PDF("PDF", "org.eclipse.birt.report.engine.emitter.pdf");
+			
+			public String id;
+			public String emitter;
+			
+			Format(String id, String emitter){
+				this.id = id;
+				this.emitter = emitter;
+			}
+	}
+	
 	public Path getEntityTemplate(IntelEntityType entityType){
 		return FileSystems.getDefault().getPath(
 				entityType.getConservationArea().getFileDataStoreLocation(),
@@ -66,8 +80,8 @@ public enum IntelReportManager {
 				IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP");
 	}
 	
-	public void exportEntity(IntelEntity entity, Date[] dFilter){
-		EntityExportReportJob job = new EntityExportReportJob(entity, dFilter);
+	public void exportEntity(IntelEntity entity, Date[] dFilter, EmitterInfo format){
+		EntityExportReportJob job = new EntityExportReportJob(entity, dFilter, format);
 		job.schedule();
 	}
 	
@@ -80,7 +94,7 @@ public enum IntelReportManager {
 		try{
 			if (entityType.getBirtTemplate() == null){
 				//create a new template for entity type
-				String file = UuidUtils.uuidToString(entityType.getUuid()) + "." + entityType.getKeyId() + ".rpt";
+				String file = entityType.getKeyId() + "." + UuidUtils.uuidToString(entityType.getUuid()) + ".rptdesign";
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();

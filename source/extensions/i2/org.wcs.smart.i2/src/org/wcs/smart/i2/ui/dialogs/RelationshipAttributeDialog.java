@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,7 +36,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -103,9 +104,11 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 			scroll.setContent(core);
 			
 			for (int i = 0; i < relationship.getRelationshipType().getAttributes().size(); i ++){
+				//so dialog is opened to correct size
 				Label spacer = new Label(core, SWT.NONE);
 				spacer.setText(DialogConstants.LOADING_TEXT);
 				spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+				((GridData)spacer.getLayoutData()).heightHint = 22;
 			}
 			
 			scroll.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -148,17 +151,17 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 			IntelAttribute attribute = x.getAttribute();
 			AttributeFieldEditor editor = new AttributeFieldEditor(core, attribute);
 			IntelEntityRelationshipAttributeValue item = null;
-			for (IntelEntityRelationshipAttributeValue value : relationship.getAttributes()){
-				if (value.getAttribute().equals(attribute)){
-					editor.initControl(value);
-					item = value;
-					break;
+			if (relationship.getAttributes() != null){
+				for (IntelEntityRelationshipAttributeValue value : relationship.getAttributes()){
+					if (value.getAttribute().equals(attribute)){
+						editor.initControl(value);
+						item = value;
+						break;
+					}
 				}
 			}
 			fields.put(editor, item);
-			
 			editor.addSelectionListener(new SelectionAdapter() {
-				
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					modified();
@@ -180,6 +183,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	}
 	@Override
 	protected void okPressed(){
+		if (relationship.getAttributes() == null) relationship.setAttributes(new ArrayList<IntelEntityRelationshipAttributeValue>());
 		for (AttributeFieldEditor e : fields.keySet()){
 			IntelEntityRelationshipAttributeValue v = fields.get(e);
 			if (v == null){
@@ -199,7 +203,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, true);
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);

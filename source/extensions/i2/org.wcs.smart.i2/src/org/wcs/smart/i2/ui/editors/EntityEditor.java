@@ -23,13 +23,18 @@ package org.wcs.smart.i2.ui.editors;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -63,6 +68,7 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -106,6 +112,8 @@ import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.birt.BirtResourceLocator;
+import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -118,6 +126,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttachment;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -125,8 +134,8 @@ import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
-import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -138,7 +147,6 @@ import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
-import org.wcs.smart.i2.ui.editors.record.LocationDetailsShell;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.Thumbnail;
@@ -336,6 +344,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		}
 
+		List<IntelEntity> otherEntityModified = new ArrayList<IntelEntity>();
+		
 		Session s = HibernateManager.openSession(new AttachmentInterceptor());
 		try{
 			s.beginTransaction();
@@ -346,14 +356,29 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 			}
 			s.saveOrUpdate(entity);
+			
 			for(IntelEntityRelationship r : relationships){
 				s.saveOrUpdate(r);
 			}
+			
 			for(IntelEntityRelationship r : relationshipsToAdd){
 				s.saveOrUpdate(r);
+				if (!r.getSourceEntity().equals(entity)){
+					otherEntityModified.add(r.getSourceEntity());
+				}
+				if (!r.getTargetEntity().equals(entity)){
+					otherEntityModified.add(r.getTargetEntity());
+				}
 			}
+			
 			for(IntelEntityRelationship r : relationshipsToDelete){
 				s.delete(r);
+				if (!r.getSourceEntity().equals(entity)){
+					otherEntityModified.add(r.getSourceEntity());
+				}
+				if (!r.getTargetEntity().equals(entity)){
+					otherEntityModified.add(r.getTargetEntity());
+				}
 			}
 			s.flush();
 			
@@ -366,6 +391,23 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}
 			}
+			
+			//validate attributes against type
+			//this is done in case the type has modified and removed an attribute 
+			Set<IntelAttribute> attributes = new HashSet<>();
+			IntelEntityType type = (IntelEntityType) s.get(IntelEntityType.class, entity.getEntityType().getUuid());
+			type.getAttributes().forEach(a -> attributes.add(a.getAttribute()));
+			List<IntelEntityAttributeValue> toRemove = new ArrayList<IntelEntityAttributeValue>();
+			for (IntelEntityAttributeValue item : entity.getAttributes()){
+				if (!attributes.contains(item.getAttribute())){
+					toRemove.add(item);
+				}
+			}
+			for (IntelEntityAttributeValue item : toRemove){
+				entity.getAttributes().remove(item);
+			}
+			
+			
 			s.getTransaction().commit();
 			clearLists();
 		}catch (Exception ex){
@@ -380,9 +422,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 		data.put(UIEvents.EventTags.ELEMENT, context.get(MPart.class));
 		data.put(IEventBroker.DATA, entity);
 		eventBroker.send(IntelEvents.ENTITY_MODIFIED, data);
+		
+		for (IntelEntity o : otherEntityModified){
+			eventBroker.send(IntelEvents.ENTITY_MODIFIED, o);
+		}
 		setDirty(false);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
-		
 		super.setPartName(entity.getIdAttributeAsText());
 	}
 
@@ -454,12 +499,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 			public void handleEvent(org.osgi.service.event.Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
 				if (context.get(MPart.class) != event.getProperty(UIEvents.EventTags.ELEMENT)){
-					if (data != null && data.equals(entity)){
+					if (data != null && (
+						data.equals(entity) || 
+					    (data instanceof IntelEntityType && ((IntelEntityType)data).equals(entity.getEntityType())) ||
+					    (data instanceof IntelRelationshipType && hasRelation((IntelRelationshipType)data)) 
+					    )){
 						if (isDirty){
 							//the editor is dirty and the entity has changed behind the scenes; give the user the option of replacing 
 							//contents behind the scenes
 							eventBroker.subscribe(UIEvents.UILifeCycle.BRINGTOTOP, promptToReset);
-							//subscribe to active event
+							//subscribe to active event							
 						}else{
 							//reload page
 							loadEntity.schedule();
@@ -467,9 +516,13 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}
 			}
+
 		};
 		eventHandles.add(handler);
 		eventBroker.subscribe(IntelEvents.ENTITY_MODIFIED, handler);
+		eventBroker.subscribe(IntelEvents.ENTITY_TYPE_MODIFIED, handler);
+		eventBroker.subscribe(IntelEvents.RELATION_TYPE_MODIFIED, handler);
+		eventBroker.subscribe(IntelEvents.RELATION_TYPE_DELETE, handler);
 	}
 	
 	@Override
@@ -594,8 +647,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}else{
 					gc.drawLine(0, 0, r.width - 1, r.height - 1);
 					gc.drawLine(0, r.height-1, r.width - 1, 0);
+					gc.drawRectangle(0, 0, r.width - 1, r.height - 1);
 				}
-				gc.drawRectangle(0, 0, r.width - 1, r.height - 1);
+				
 			}
 		});
 		lblMainImage.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 2, 1));
@@ -620,15 +674,40 @@ public class EntityEditor extends EditorPart implements MapPart{
 		ToolBar buttonBar = new ToolBar(rightPart, SWT.HORIZONTAL | SWT.FLAT);
 		buttonBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		printItem = new ToolItem(buttonBar, SWT.PUSH);
+		Menu formatsOpMenu = new Menu(getSite().getShell(), SWT.POP_UP);
+		for (EmitterInfo einfo : ReportEngineManager.getBirtReportEngine().getEmitterInfo()){
+			MenuItem mi = new MenuItem(formatsOpMenu,SWT.PUSH);
+			mi.setText(einfo.getFormat());
+			mi.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					IntelReportManager.INSTANCE.exportEntity(getEntity(), mapPart.getDateFilter(), einfo);
+				}
+			});
+		}
+		
+		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
 		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
 		printItem.setToolTipText("print to pdf");
 		printItem.addSelectionListener(new SelectionAdapter(){
 			@Override
-			public void widgetSelected(SelectionEvent e){
-				IntelReportManager.INSTANCE.exportEntity(getEntity(), mapPart.getDateFilter());
-			}
-			
+			public void widgetSelected(SelectionEvent event){
+				 if (event.detail == SWT.ARROW) {
+			          Rectangle rect = printItem.getBounds();
+			          Point pt = new Point(rect.x, rect.y + rect.height);
+			          pt = buttonBar.toDisplay(pt);
+			          formatsOpMenu.setLocation(pt.x, pt.y);
+			          formatsOpMenu.setVisible(true);
+			    }else{
+					for (EmitterInfo i : ReportEngineManager.getBirtReportEngine().getEmitterInfo()){
+						if (i.getFormat().equalsIgnoreCase("PDF")){
+							IntelReportManager.INSTANCE.exportEntity(getEntity(), mapPart.getDateFilter(), i);
+							return;
+						}
+					}
+					MessageDialog.openError(getSite().getShell(), "Error", "Could not find PDF exporter.");
+			    }
+			}	
 		});
 		
 		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
@@ -727,6 +806,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 		return this.entity;
 	}
 	
+	public boolean hasRelation(IntelRelationshipType type){
+		for (IntelEntityRelationship r : relationships){
+			if (r.getRelationshipType().equals(type)) return true;
+		}
+		for (IntelEntityRelationship r : relationshipsToAdd){
+			if (r.getRelationshipType().equals(type)) return true;
+		}
+		return false;
+	}
+	
 	public void setEditMode(boolean isEdit){
 		if (isEditMode && !isEdit && isDirty){
 			doSave(new NullProgressMonitor());
@@ -783,23 +872,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		Button btnAddRelationship = toolkit.createButton(relationshipEditPanel, "New Relationship...", SWT.PUSH);
 		btnAddRelationship.addSelectionListener(new SelectionAdapter() {
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-				EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell().getDisplay(), entity);
-				
-				int x = btnAddRelationship.getLocation().x + btnAddRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-				int y =  btnAddRelationship.getLocation().y;
-				shell.open(btnAddRelationship.toDisplay(x,y));
-				shell.addListener(SWT.Close, new Listener(){
+				EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell(), entity){
+					protected void doEvent(){
+						if (getRelationshipType() != null){
 
-					@Override
-					public void handleEvent(Event event) {
-						if (shell.getRelationshipType() != null){
-
-							IntelRelationshipType rType = shell.getRelationshipType();
+							IntelRelationshipType rType = getRelationshipType();
 							IntelEntity e1 = entity;
-							IntelEntity e2 = shell.getTargetEntity();
+							IntelEntity e2 = getTargetEntity();
 							
 							IntelEntityRelationship newRelationship = new IntelEntityRelationship();
 							newRelationship.setRelationshipType(rType);
@@ -831,8 +913,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 								add = true;
 							}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid()) &&
 									rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
-								newRelationship.setSourceEntity(e1);
-								newRelationship.setTargetEntity(e2);
+								newRelationship.setSourceEntity(e2);
+								newRelationship.setTargetEntity(e1);
 								add = true;
 							} 
 							//check duplicates
@@ -842,6 +924,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 											existing.getTargetEntity().equals(newRelationship.getTargetEntity()) &&
 											existing.getRelationshipType().equals(newRelationship.getRelationshipType())){
 										add = false;
+										MessageDialog.openInformation(parentShell, "Relationship", "Relationship already exists between these entities. Cannot duplicate relationships.");
 										break;
 									}
 											
@@ -853,12 +936,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 								setDirty(true);
 								treeRelationships.setInput(relationships);
 								treeRelationships.expandAll();
+								
+								if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
+									//edit 
+									editRelationshipAttributes(newRelationship);
+								}
 							}
 						}
 					}
-					
-				});
+				};
 				
+				int x = btnAddRelationship.getLocation().x + btnAddRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+				int y =  btnAddRelationship.getLocation().y;
+				shell.open(btnAddRelationship.toDisplay(x,y));
 			}
 		});
 		
@@ -867,7 +957,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		treeRelationships = new TreeViewer(rTree);
 		toolkit.adapt(treeRelationships.getTree());
 		treeRelationships.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		treeRelationships.setContentProvider(new RelationshipContentProvider());
+		treeRelationships.setContentProvider(new RelationshipContentProvider( input.getUuid() ));
 		treeRelationships.getTree().setHeaderVisible(true);
 		treeRelationships.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -881,14 +971,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 		colType.getColumn().setWidth(150);
 		colType.setLabelProvider(new RelationshipLabelProvider(0));
 		
-		TreeViewerColumn colRelationship = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
-		colRelationship.getColumn().setText("Relation");
-		colRelationship.getColumn().setWidth(200);
-		colRelationship.setLabelProvider(new RelationshipLabelProvider(1));
+		TreeViewerColumn colRelationshipSrc = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
+		colRelationshipSrc.getColumn().setText("Source Relation");
+		colRelationshipSrc.getColumn().setWidth(150);
+		colRelationshipSrc.setLabelProvider(new RelationshipLabelProvider(1));
+		
+		TreeViewerColumn colRelationshipTrg = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
+		colRelationshipTrg.getColumn().setText("Target Relation");
+		colRelationshipTrg.getColumn().setWidth(150);
+		colRelationshipTrg.setLabelProvider(new RelationshipLabelProvider(2));
 		
 		TreeViewerColumn colAttributes = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
 		colAttributes.getColumn().setText("Attributes");
-		colAttributes.setLabelProvider(new RelationshipLabelProvider(2));
+		colAttributes.setLabelProvider(new RelationshipLabelProvider(3));
 		treeRelationships.getTree().addPaintListener(new PaintListener() {			
 			@Override
 			public void paintControl(PaintEvent e) {
@@ -925,7 +1020,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 			private void doHover(int x, int y){
 				
 				ViewerCell cell = treeRelationships.getCell(new Point(x, y));
-				if (cell.getColumnIndex() != 2){
+				if (cell == null) return;
+				if (cell.getColumnIndex() != 3){
 					if (detailsShell != null && !detailsShell.isDisposed()){
 						detailsShell.close();
 					}
@@ -934,7 +1030,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				if (cell != null && cell.getElement() instanceof IntelEntityRelationship){
 					IntelEntityRelationship relationship = (IntelEntityRelationship) cell.getElement();
 					if (detailsShell == null || detailsShell.isDisposed() || !detailsShell.getRelationship().equals(relationship)){
-						detailsShell = new EntityRelationshipDetailsShell(treeRelationships.getTree().getDisplay(),relationship);
+						detailsShell = new EntityRelationshipDetailsShell(getSite().getShell(),relationship);
 					
 						int height = detailsShell.getSize().y;
 						Point p  = treeRelationships.getTree().toDisplay(x, y);
@@ -1006,12 +1102,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 								IStructuredSelection sel = (IStructuredSelection) treeRelationships.getSelection();
 								if (!sel.isEmpty()){
 									if (sel.getFirstElement() instanceof IntelEntityRelationship){
-										IntelEntityRelationship r = (IntelEntityRelationship)sel.getFirstElement();
-										RelationshipAttributeDialog dialog = new RelationshipAttributeDialog(treeRelationships.getControl().getShell(), r);
-										if (dialog.open() == Window.OK){
-											treeRelationships.refresh();
-											setDirty(true);
-										}
+										editRelationshipAttributes((IntelEntityRelationship)sel.getFirstElement());
 									}
 								}
 							}	
@@ -1045,7 +1136,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		treeRelationships.getTree().setMenu(mnuRelationship.createMenu(treeRelationships.getTree()));
 	}
-	
+
+	private void editRelationshipAttributes(IntelEntityRelationship relation){
+		RelationshipAttributeDialog dialog = new RelationshipAttributeDialog(treeRelationships.getControl().getShell(), relation);
+		if (dialog.open() == Window.OK){
+			treeRelationships.refresh();
+			setDirty(true);
+		}
+	}
 	
 	private void createRecordsPanel(Composite parent){
 		tblRecords = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
@@ -1281,7 +1379,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 		part.setLayout(createGridLayoutNoMargin(2));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		for (IntelEntityTypeAttribute a : entity.getEntityType().getAttributes()){
+		List<IntelEntityTypeAttribute> sortedAttributes = new ArrayList<IntelEntityTypeAttribute>();
+		sortedAttributes.addAll(entity.getEntityType().getAttributes());
+		Collections.sort(sortedAttributes, (a,b) -> Collator.getInstance().compare(a.getAttribute().getName().toLowerCase(), b.getAttribute().getName().toLowerCase()));
+		
+		for (IntelEntityTypeAttribute a : sortedAttributes){
 			if (isEditMode){
 				AttributeFieldEditor e = new AttributeFieldEditor(part, a.getAttribute());
 				e.adapt(toolkit);
@@ -1405,18 +1507,22 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}else if (columnIndex == 1){
 			if (element instanceof IntelEntityRelationship){
 				IntelEntityRelationship r = (IntelEntityRelationship) element;
-				if (r.getSourceEntity() == entity){
-					return r.getTargetEntity().getIdAttributeAsText();
-				}else{
-					return r.getSourceEntity().getIdAttributeAsText();
-				}
+				return r.getSourceEntity().getIdAttributeAsText();
 			}
 		}else if (columnIndex == 2){
+			if (element instanceof IntelEntityRelationship){
+				IntelEntityRelationship r = (IntelEntityRelationship) element;
+				return r.getTargetEntity().getIdAttributeAsText();
+			}
+		}else if (columnIndex == 3){
 			if (element instanceof IntelEntityRelationship){
 				
 				StringBuilder sb = new StringBuilder();
 				IntelEntityRelationship relation = (IntelEntityRelationship)element;
 				if (relation.getAttributes() == null) return "";
+				List<IntelEntityRelationshipAttributeValue> sorted = new ArrayList<IntelEntityRelationshipAttributeValue>(); 
+				Collections.sort(sorted, (a,b)-> Collator.getInstance().compare(a.getAttribute().getName().toLowerCase(), b.getAttribute().getName().toLowerCase()));
+				
 				for (IntelEntityRelationshipAttributeValue value : relation.getAttributes()){
 					sb.append(value.getAttribute().getName());
 					sb.append(": ");
