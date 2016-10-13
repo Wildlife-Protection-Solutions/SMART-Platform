@@ -52,10 +52,13 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.SWT;
+import org.geotools.referencing.CRS;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
+import org.wcs.smart.ProjectionProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -64,6 +67,7 @@ import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.CsvExporter;
+import org.wcs.smart.connect.query.engine.GeoJsonExporter;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.ShpExporter;
@@ -84,6 +88,7 @@ import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -120,8 +125,9 @@ public class QueryApi extends HttpServlet{
 	 * URL: ../server/api/query/{queryuuid}
 	 * Call Type: GET
 	 * 
-	 * @param queryuuid	provided in the URL, the uuid of the query requested
-	 * @param format	requested format, not all options makes sense for all query types: csv, shp, tif
+	 * @param queryuuid		provided in the URL, the uuid of the query requested
+	 * @param format	requested format, not all options makes sense for all query types: csv, shp, tif, geojson
+	 * @param srid		srid that any spatial data results should be returned in
 	 * @param start_date	start date of query, number of milliseconds since the epoch
 	 * @param end_date	end date of query, number of milliseconds since the epoch
 	 * @param date_filter	date field type, not all make sense for all queries: waypointdate, patrolstart, patrolend, missiontrackdate, missionstartdate, missionenddate, intellreceiveddate
@@ -138,6 +144,7 @@ public class QueryApi extends HttpServlet{
 	 * 						NOTE: you will get an error, "{"status": 500, "error:": "Error executing query: ERROR: column "abc" does not exist Position: 52"} if the provided column is not supported, change the sortcolumn parameter and try again.
 	 * @param sortdirection set this to "descending" (or "desc") to get reverse order, otherwise you will get ascending order by default.  eg: &sortdirection=descending 
 	 * 			This parameter will be ignored if provided without a sortcolumn.
+	 * @param srid	the requested output projection SRID. The default is 4326 (WGS84, standard Lat/long coordinates). This parameter is ignored if the 'format' is not geojson or shp. (Note: for google map's projection you must use the official srid of 3857, 900913 doesn't work. 
 	 * @return the results of the query, format is whatever is selected using the format parameter.
 	 * @throws SQLException 
 	 */
@@ -152,7 +159,8 @@ public class QueryApi extends HttpServlet{
 			@QueryParam("delimiter") String delimiter,
 			@QueryParam("cafilter") String cafilter,
 			@QueryParam("sortcolumn") String sortColumnName,
-			@QueryParam("sortdirection") String sortDirection) throws SQLException{
+			@QueryParam("sortdirection") String sortDirection,
+			@QueryParam("srid") String srid) throws SQLException{
 
 		UUID uuid = UuidUtils.stringToUuid(queryUuid);
 		int sortDirectionInt;
@@ -256,6 +264,14 @@ public class QueryApi extends HttpServlet{
 			params.put(Locale.class.getName(), request.getLocale());
 			
 			result = engine.executeQuery(query, params);
+			
+			ProjectionProvider prjProvider = null;
+			if(srid != null && !srid.equals("")){
+				Projection prj = new Projection();
+				prj.setParsedCoordinateReferenceSystem(CRS.decode("EPSG:" + srid, true));
+				prj.setName(GeometryUtils.SMART_CRS.getName().toString());
+				prjProvider= new ProjectionProvider(prj);
+			}
 		 
 			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
 				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
@@ -287,6 +303,7 @@ public class QueryApi extends HttpServlet{
 				java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
 				
 				ShpExporter exporter = new ShpExporter(outputFile, request.getLocale());
+				exporter.setPrj(prjProvider);
 				
 				if (result instanceof AbstractDbFeatureResultSet &&
 						query instanceof SimpleQuery){
@@ -308,6 +325,21 @@ public class QueryApi extends HttpServlet{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
 				}
 				return writeBinary(outputFile);
+			}else if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
+				
+				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale());
+				exporter.setProjectionProvider(prjProvider);
+				
+				if (result instanceof AbstractDbFeatureResultSet && query instanceof SimpleQuery){
+					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s, srid);
+				}else{
+					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
+				}
+				return Response
+						.status(Status.OK)
+						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
+						.entity(exporter.getGeoJsonOutput() )
+						.build();
 			}else{
 				return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}

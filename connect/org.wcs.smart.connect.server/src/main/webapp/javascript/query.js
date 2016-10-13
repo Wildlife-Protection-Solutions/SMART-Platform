@@ -292,11 +292,14 @@ function showQueryOptions(){
 	//update shape option
 	var isShape = shpValues.indexOf(querytype) >= 0;
 	var item = document.querySelector("#queryformat option[value=shp]");
+	var itemjson = document.querySelector("#queryformat option[value=geojson]");
 	if (item != null){
 		if (isShape){
 			item.style.display = "block";
+			itemjson.style.display = "block"; 
 		}else{
 			item.style.display = "none";
+			itemjson.style.display = "none";
 		}
 	}
 	//update tiff option

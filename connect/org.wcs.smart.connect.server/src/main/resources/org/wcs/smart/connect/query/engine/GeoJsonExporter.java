@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,44 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package org.wcs.smart.connect.query.engine;
 
+
 import java.io.IOException;
-import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
-import org.geotools.data.DefaultTransaction;
-import org.geotools.data.FeatureStore;
-import org.geotools.data.FileDataStoreFactorySpi;
-import org.geotools.data.FileDataStoreFinder;
-import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
-import org.wcs.smart.connect.ZipUtil;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -67,35 +60,29 @@ import org.wcs.smart.util.GeometryUtils;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * Exports query results to shapefiles.  Query results must extend
+ * Exports query results to geoJson.  Query results must extend
  * AbstractDbFeatureResultSet 
  * 
- * @author Emily
+ * @author Jeff
  *
  */
-public class ShpExporter {
-	
-	public static final String FORMAT_KEY = "shp"; //$NON-NLS-1$
-	
-	
-	
-	public static final String getName(Locale l){
-		return Messages.getString("ShpExporter.Shapefilename", l); //$NON-NLS-1$
-	}
-	
-	private final Logger logger = Logger.getLogger(ShpExporter.class.getName());
-	private IProjectionProvider prj;
-	
-	public void setPrj(IProjectionProvider prj) {
-		this.prj = prj;
-	}
+public class GeoJsonExporter {
 
-	private Path zipFile;
+	private final Logger logger = Logger.getLogger(ShpExporter.class.getName());
+	ProjectionProvider prjProvider;
+	
+	public static final String FORMAT_KEY = "geojson"; //$NON-NLS-1$
+	String geoJsonOutput;
+	
 	private Locale l;
 	
-	public ShpExporter(Path zipFile,  Locale l){
-		this.zipFile = zipFile;
+	public GeoJsonExporter(Locale l){
 		this.l = l;
+	}
+
+	
+	public static final String getName(Locale l){
+		return Messages.getString("GeoJsonExporter.GeoJson", l); //$NON-NLS-1$
 	}
 	
 	
@@ -107,58 +94,59 @@ public class ShpExporter {
 	 * @param session
 	 * @throws IOException 
 	 */
-	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws IOException{
-		//remove extension and add .shp to filename
-		final String newName = FilenameUtils.removeExtension(zipFile.getFileName().toString()) ;
-		final Path outDirectory = zipFile.getParent().resolve(String.valueOf(System.nanoTime()));
-		Files.createDirectory(outDirectory);
-		final Path shpfile = outDirectory.resolve(newName+ ".shp"); //$NON-NLS-1$
+	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session, String srid) throws IOException{
+
+		geoJsonOutput = new String();
+		//final IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
 		
 
-		
 		session.doWork(new Work(){
-			@SuppressWarnings("unchecked")
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try{
-					List<QueryColumn> columns = query.computeQueryColumns(l, session, prj);
+					FeatureJSON fjson = new FeatureJSON();
+					StringWriter writer = new StringWriter();
+					StringWriter crsWriter = new StringWriter();
+
+					List<QueryColumn> columns = query.computeQueryColumns(l, session, prjProvider);
 					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false)); //$NON-NLS-1$
 					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
+					
 					IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
 					for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
 						IResultItem resultItem = (IResultItem) iterator.next();	
 						SimpleFeature sf = results.toFeature(resultItem, columns, session, type);
 						features.add(sf);
+
 					}
-					
-					
-					FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
-			        Map<String, Serializable> params = new HashMap<String, Serializable>();
-					params.put(ShapefileDataStoreFactory.URLP.key, shpfile.toUri().toURL());
-					DataStore shapefile = factory.createNewDataStore(params);
-					
-					
-					//retype 
+					//reproject 
 					List<SimpleFeature> reprojected = new ArrayList<SimpleFeature>();
-					if (prj == null || CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, prj.getProjection().getParsedCoordinateReferenceSystem())){
+					if (prjProvider == null || CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, prjProvider.getProjection().getParsedCoordinateReferenceSystem())){
 						reprojected = features;
-						shapefile.createSchema(type);
+//						shapefile.createSchema(type);
 					}else{
-						SimpleFeatureType reprojectedType = SimpleFeatureTypeBuilder.retype(type, prj.getProjection().getParsedCoordinateReferenceSystem());
-						shapefile.createSchema(reprojectedType);
-						MathTransform transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, prj.getProjection().getParsedCoordinateReferenceSystem(), true);
+//						SimpleFeatureType reprojectedType = SimpleFeatureTypeBuilder.retype(type, prjProvider.getProjection().getParsedCoordinateReferenceSystem());
+//						shapefile.createSchema(reprojectedType);
+						MathTransform transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, prjProvider.getProjection().getParsedCoordinateReferenceSystem(), true);
 						for (SimpleFeature f : features){
 							SimpleFeature copy = SimpleFeatureBuilder.copy(f);
 							copy.setDefaultGeometry(JTS.transform((Geometry)f.getDefaultGeometry(), transform));
 							reprojected.add(copy);
 						}
+						fjson.writeCRS(prjProvider.getProjection().getParsedCoordinateReferenceSystem(), crsWriter); //write the new projection into JSON
 					}
 					
-					FeatureStore<SimpleFeatureType, SimpleFeature> fs = 
-							(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource(shapefile.getTypeNames()[0]);
-					fs.setTransaction(new DefaultTransaction());
-					fs.addFeatures( DataUtilities.collection(reprojected) );
-					fs.getTransaction().commit();
+					SimpleFeatureCollection collection = DataUtilities.collection(reprojected);
+					if(collection != null && collection.getSchema() != null){
+						fjson.writeFeatureCollection(collection, writer);
+						geoJsonOutput = writer.toString();
+						if(crsWriter != null){//add the project to the JSON, the JSON library kinda sucks and has no way to write it in automatically from what I can tell...
+							geoJsonOutput = "{\"crs\":" + crsWriter.toString() + geoJsonOutput.substring(1);  //the substring pulls off the opening bracket of the json. Replaces the { at the start and add the crs value/object into the json   
+						}
+					}else{
+						geoJsonOutput = "{}";
+					}
+					
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -166,9 +154,18 @@ public class ShpExporter {
 			}			
 		});
 		
-		ZipUtil.createZip(Files.newDirectoryStream(outDirectory), zipFile);
-		
-		FileUtils.deleteDirectory(outDirectory.toFile());
+
+	}
+	
+	public String getGeoJsonOutput(){
+		return geoJsonOutput;
+	}
+
+
+	public void setProjectionProvider(ProjectionProvider prjProvider) {
+		this.prjProvider = prjProvider;
 	}
 	
 }
+
+
