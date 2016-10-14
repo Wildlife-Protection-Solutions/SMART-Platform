@@ -21,11 +21,8 @@
  */
 package org.wcs.smart.i2.birt.datasource.ui;
 
-import java.text.MessageFormat;
-
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
-import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
  * Dataset wizard page for entities dataset
@@ -61,10 +58,5 @@ public class IntelEntityTypeWizardPage extends AbstractIntelEntityTypeListWizard
 	@Override
 	protected String getDatasetType(){
 		return EntityDataset.DATASET_TYPE;
-	}
-	
-	@Override
-	protected String getDatasetName(IntelEntityType type){
-		return MessageFormat.format("{0}", type.getName());
 	}
 }

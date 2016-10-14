@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.editors;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.DateFormat;
@@ -34,10 +35,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.birt.core.framework.IConfigurationElement;
+import org.eclipse.birt.report.designer.internal.ui.util.UIHelper;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -68,7 +72,6 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -110,9 +113,9 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.osgi.framework.Bundle;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.AttachmentUtil;
@@ -676,8 +679,20 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		Menu formatsOpMenu = new Menu(getSite().getShell(), SWT.POP_UP);
 		for (EmitterInfo einfo : ReportEngineManager.getBirtReportEngine().getEmitterInfo()){
+			
 			MenuItem mi = new MenuItem(formatsOpMenu,SWT.PUSH);
 			mi.setText(einfo.getFormat());
+			if (einfo.getIcon() != null){
+				InputStream in = einfo.getClass().getClassLoader().getResourceAsStream(einfo.getIcon());
+				IConfigurationElement confElem = einfo.getEmitter();
+				if ( confElem != null ){
+					String pluginId = confElem.getDeclaringExtension( ).getNamespace( );
+					Bundle bundle = Platform.getBundle( pluginId );
+					mi.setImage( UIHelper.getImage( bundle, einfo.getIcon(), false ));
+					mi.addListener (SWT.Dispose, e-> {if (!mi.getImage().isDisposed()) mi.getImage().dispose();});
+				}
+			}
+			
 			mi.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {

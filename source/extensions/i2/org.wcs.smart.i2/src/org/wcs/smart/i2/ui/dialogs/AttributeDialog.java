@@ -21,12 +21,20 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -45,13 +53,18 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.ui.AttributeTypeLabelProvider;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
@@ -65,11 +78,22 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class AttributeDialog extends TitleAreaDialog {
 
+	public static void showAttributeDialog(Shell parentShell, IntelAttribute attribute, IEclipseContext context){
+		AttributeDialog dialog = new AttributeDialog(parentShell, attribute);
+		ContextInjectionFactory.inject(dialog, context);
+		dialog.open();
+	}
+	
+	
+	@Inject
+	private IEventBroker eventBroker;
+	
 	private IntelAttribute attribute;
 	
 	private NameKeyComposite nameKeyInfo;
 	private ComboViewer cmbType;
 	private List<IntelAttribute> attributeSiblings;
+	private List<IntelAttributeListItem> allItems;
 	
 	private AttributeListPanel listPanel;
 	
@@ -97,9 +121,13 @@ public class AttributeDialog extends TitleAreaDialog {
 		
 	};
 	
-	public AttributeDialog(Shell parentShell, IntelAttribute attribute) {
+	private AttributeDialog(Shell parentShell, IntelAttribute attribute) {
 		super(parentShell);
 		this.attribute = attribute;
+		this.allItems = new ArrayList<IntelAttributeListItem>();
+		if (attribute.getAttributeList() != null){
+			this.allItems.addAll(attribute.getAttributeList());
+		}
 	}
 	
 	@Override
@@ -108,11 +136,42 @@ public class AttributeDialog extends TitleAreaDialog {
 		return new Point(p.x,(int)(p.y*1.4));
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void okPressed() {
+		Set<IntelEntity> modifiedEntities = new HashSet<>();
+		
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
+			for (IntelAttributeListItem i : allItems){
+				if(!attribute.getAttributeList().contains(i)){
+					//delete all reference to attribute list item
+					List<IntelEntityAttributeValue> items = s.createCriteria(IntelEntityAttributeValue.class)
+							.add(Restrictions.eq("attributeListItem", i))
+							.list();
+					for (IntelEntityAttributeValue item : items){
+						modifiedEntities.add(item.getEntity());
+						s.delete(item);
+					}
+					
+					List<IntelEntityRelationshipAttributeValue> items2 = s.createCriteria(IntelEntityRelationshipAttributeValue.class)
+							.add(Restrictions.eq("attributeListItem", i))
+							.list();
+					for (IntelEntityRelationshipAttributeValue item : items2){
+						modifiedEntities.add(item.getRelationship().getSourceEntity());
+						modifiedEntities.add(item.getRelationship().getTargetEntity());
+						s.delete(item);
+					}
+					
+				}
+			}
+			s.flush();
+			s.clear();
+			
 			s.saveOrUpdate(attribute);
+			
+			this.allItems = new ArrayList<IntelAttributeListItem>();
+			this.allItems.addAll(attribute.getAttributeList());
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
@@ -122,8 +181,8 @@ public class AttributeDialog extends TitleAreaDialog {
 			s.close();
 		}
 		
+		modifiedEntities.forEach(e -> eventBroker.send(IntelEvents.ENTITY_MODIFIED, e));		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
-		
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {

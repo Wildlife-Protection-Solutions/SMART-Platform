@@ -19,44 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.datasource.ui;
+package org.wcs.smart.i2;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.wcs.smart.ILoginHandler;
+import org.wcs.smart.i2.birt.IntelReportManager;
 
 /**
- * Dataset wizard for entity location dataset.
+ * Cleans up temporary directory of entity exports.
+ * 
  * @author Emily
  *
  */
-public class IntelEntityLocationWizardPage extends AbstractIntelEntityTypeListWizardPage {
+public class CleanUpJob implements ILoginHandler {
 
-	private static final String SELECT_ENTITY_TYPE = "Select the entity type to use";
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param pageName
-	 */
-	public IntelEntityLocationWizardPage(String pageName) {
-		super(pageName, SELECT_ENTITY_TYPE);
+	public CleanUpJob() {
 	}
 
-	/**
-	 * Constructor
-	 * 
-	 * @param pageName
-	 * @param title
-	 * @param titleImage
-	 */
-	public IntelEntityLocationWizardPage(String pageName, String title,
-			ImageDescriptor titleImage) {
-		super(pageName, title, titleImage, SELECT_ENTITY_TYPE);
-	}
-	
 	@Override
-	protected String getDatasetType(){
-		return EntityLocationDataset.DATASET_TYPE;
+	public void onLogin() throws Exception {
+		Job j = new Job("clean up exported entities job"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				//delete all files in the temporary output directory
+				 try (DirectoryStream<Path> stream = Files.newDirectoryStream(IntelReportManager.INSTANCE.getTemporaryDirectory())) {
+					 for (Path entry: stream) {
+			        	   try{
+			        		   Files.delete(entry);
+			        	   }catch (Exception ex){}
+			           }
+				 }catch (Exception ex){
+					 Intelligence2PlugIn.log(ex.getMessage(), ex);
+				 }
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.setSystem(true);
+		j.schedule();
 	}
-	
+
 }

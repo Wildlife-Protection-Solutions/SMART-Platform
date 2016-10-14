@@ -30,7 +30,6 @@ import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Entity record datasets results metadata
@@ -41,11 +40,12 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 	
 	private List<IntelAttribute> validAttributes;
 	
-	public enum Column{
+	public static enum Column{
 		ENTITY_UUID("relation:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		ENTITY_ID("relation:entity_id", "Entity ID", java.sql.Types.VARCHAR),
-		RELATION_UUID("relation:relation_uuid", "Relation UUID", java.sql.Types.VARCHAR),
-		RELATION_ID("relation:relation_id", "Relation", java.sql.Types.VARCHAR),
+		SOURCE_RELATION_UUID("relation:source_uuid", "Source Relation UUID", java.sql.Types.VARCHAR),
+		SOURCE_RELATION_ID("relation:source_id", "Source Relation", java.sql.Types.VARCHAR),
+		TARGET_RELATION_UUID("relation:target_uuid", "Target Relation UUID", java.sql.Types.VARCHAR),
+		TARGET_RELATION_ID("relation:garget_id", "Target Relation", java.sql.Types.VARCHAR),
 		GROUP_NAME("relation:group_name", "Group", java.sql.Types.VARCHAR),
 		GROUP_KEY("relation:group_key", "Group Key", java.sql.Types.VARCHAR),
 		RELATIONSHIP_TYPE("relation:relationship_type", "Relationship Type", java.sql.Types.VARCHAR),
@@ -60,7 +60,9 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 			this.name = name;
 			this.type = type;
 		}
-		
+		public String getColumnName(){
+			return this.name;
+		}
 		public String getId(){
 			return this.id;
 		}
@@ -76,15 +78,6 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 					return relation.getTargetEntity().getUuid();
 				}
 				break;
-			case ENTITY_ID:
-				if (entity == null){
-					return relation.getSourceEntity().getIdAttributeAsText();
-				}else if (entity.equals(relation.getSourceEntity().getUuid())){
-					return relation.getSourceEntity().getIdAttributeAsText();
-				}else if (entity.equals(relation.getTargetEntity().getUuid())){
-					return relation.getTargetEntity().getIdAttributeAsText();
-				}
-				break;
 			case GROUP_KEY:
 				if (relation.getRelationshipType().getRelationshipGroup() == null) return "";
 				return relation.getRelationshipType().getRelationshipGroup().getKeyId();
@@ -95,24 +88,15 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 				return relation.getRelationshipType().getName();
 			case RELATIONSHIP_TYPE_KEY:
 				return relation.getRelationshipType().getKeyId();
-			case RELATION_ID:
-				if (entity == null){
-					return relation.getTargetEntity().getIdAttributeAsText();
-				}else if (entity.equals(relation.getSourceEntity().getUuid())){
-					return relation.getTargetEntity().getIdAttributeAsText();
-				}else if (entity.equals(relation.getTargetEntity().getUuid())){
-					return relation.getSourceEntity().getIdAttributeAsText();
-				}
-				break;
-			case RELATION_UUID:
-				if (entity == null){
-					return UuidUtils.uuidToString(relation.getTargetEntity().getUuid());
-				}else if (entity.equals(relation.getSourceEntity().getUuid())){
-					return UuidUtils.uuidToString(relation.getTargetEntity().getUuid());
-				}else if (entity.equals(relation.getTargetEntity().getUuid())){
-					return UuidUtils.uuidToString(relation.getSourceEntity().getUuid());
-				}
-				break;
+			case TARGET_RELATION_ID:
+				return relation.getTargetEntity().getIdAttributeAsText();
+			case TARGET_RELATION_UUID:
+				return relation.getTargetEntity().getUuid();
+			case SOURCE_RELATION_ID:
+				return relation.getSourceEntity().getIdAttributeAsText();
+			case SOURCE_RELATION_UUID:
+				return relation.getSourceEntity().getUuid();
+			
 			default:
 				break;
 			}

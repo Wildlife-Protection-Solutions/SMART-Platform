@@ -27,20 +27,18 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Date;
 
-import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
-import org.eclipse.birt.report.model.api.ReportDesignHandle;
-import org.eclipse.birt.report.model.api.ScalarParameterHandle;
-import org.eclipse.birt.report.model.api.SessionHandle;
-import org.eclipse.birt.report.model.api.activity.SemanticException;
-import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.birt.entity.EntityDataset;
+import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
+import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -85,6 +83,28 @@ public enum IntelReportManager {
 		job.schedule();
 	}
 	
+	/**
+	 * Returns the dataset name for the given entity type and dataset
+	 * id.
+	 * 
+	 * @param entityType
+	 * @param dataSetId
+	 * @return
+	 */
+	public String getName(IntelEntityType entityType, String dataSetId){
+		if (dataSetId.equals(EntityDataset.DATASET_TYPE)){
+			return entityType.getName();
+		}else if (dataSetId.equals(EntityLocationDataset.DATASET_TYPE)){
+			return MessageFormat.format("{0} - Locations", entityType.getName());
+		}else if (dataSetId.equals(EntityRelationDataset.DATASET_TYPE)){
+			return MessageFormat.format("{0} - Relationships", entityType.getName());
+		}else if (dataSetId.equals(EntityAttachmentDataset.DATASET_TYPE)){
+			return MessageFormat.format("{0} - Attachments", entityType.getName());
+		}else if (dataSetId.equals(EntityRecordDataset.DATASET_TYPE)){
+			return MessageFormat.format("{0} - Records", entityType.getName());
+		}
+		return null;
+	}
 	
 	/**
 	 * Edits the plan template
@@ -112,48 +132,24 @@ public enum IntelReportManager {
 			if (!Files.exists(p.getParent())){
 				Files.createDirectory(p.getParent());
 			}
-			if (!Files.exists(p)){		
-				//create a report files
-				SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
-				ReportDesignHandle rdh = session.createDesign(p.toFile().getAbsolutePath());
-				
-				try {
-					rdh.setTitle(entityType.getName());
-				} catch (SemanticException e) {
-					//lets just consume this 
+			if (!Files.exists(p)){
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
+					if (entityType.getAttributes() != null){
+						entityType.getAttributes().forEach((a) ->a.getAttribute().getName());
+					}
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to edit template for entity type {0}. {1}", entityType.getName(),  ex.getMessage()), ex);
+				}finally{
+					s.close();
 				}
-				
-				//add parameters - entity types and dates
-				ScalarParameterHandle shandler = rdh.getElementFactory().newScalarParameter(DataSourceParameter.ENTITY_UUID.getName());
-				shandler.setValueType(DesignChoiceConstants.PARAM_VALUE_TYPE_STATIC);
-				shandler.setIsRequired(true);
-				shandler.setDataType(DesignChoiceConstants.PARAM_TYPE_STRING);
-				shandler.setDistinct(true);
-				rdh.getParameters().add(shandler);
-				
-				shandler = rdh.getElementFactory().newScalarParameter(DataSourceParameter.START_DATE.getName());
-				shandler.setValueType(DesignChoiceConstants.PARAM_VALUE_TYPE_STATIC);
-				shandler.setIsRequired(false);
-				shandler.setDataType(DesignChoiceConstants.PARAM_TYPE_DATETIME);
-				shandler.setDistinct(true);
-				rdh.getParameters().add(shandler);
-				
-				shandler = rdh.getElementFactory().newScalarParameter(DataSourceParameter.END_DATE.getName());
-				shandler.setValueType(DesignChoiceConstants.PARAM_VALUE_TYPE_STATIC);
-				shandler.setIsRequired(false);
-				shandler.setDataType(DesignChoiceConstants.PARAM_TYPE_DATETIME);
-				shandler.setDistinct(true);
-				rdh.getParameters().add(shandler);
-				
-				//TODO: see if we can include datasets by default
-				
-				rdh.save();
-				rdh.close();
+				EntityReportGenerator.INSTANCE.generateReport(entityType, p);
 			}
 			
-			PlatformUI.getWorkbench().showPerspective(IntelEntityReportPerspective.ID, 
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-			
+			PlatformUI.getWorkbench().showPerspective(IntelEntityReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			IntelEntityEditorInput input = new IntelEntityEditorInput(p.toFile(), entityType);
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){

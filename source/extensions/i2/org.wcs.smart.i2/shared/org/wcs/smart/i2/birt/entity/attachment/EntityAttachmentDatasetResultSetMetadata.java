@@ -45,7 +45,7 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
  */
 public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaData {
 
-	public enum Column{
+	public static enum Column{
 		ENTITY_UUID("attachment:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
 		FILE_NAME("attachment:filename", "Name", java.sql.Types.VARCHAR),
 		PATH("attachment:path", "Path", java.sql.Types.VARCHAR);
@@ -62,6 +62,10 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 		
 		public String getId(){
 			return this.id;
+		}
+		
+		public String getColumnName(){
+			return this.name;
 		}
 		
 		public Object getValue(IntelEntityAttachment location) {

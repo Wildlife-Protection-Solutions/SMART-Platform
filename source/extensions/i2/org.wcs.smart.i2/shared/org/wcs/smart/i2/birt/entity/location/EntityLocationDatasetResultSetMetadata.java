@@ -37,7 +37,7 @@ import com.vividsolutions.jts.io.ParseException;
  */
 public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaData {
 
-	public enum Column{
+	public static enum Column{
 		ENTITY_UUID("location:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
 		ID("location:id", "ID", java.sql.Types.VARCHAR),
 		GEOM("location:geom", "Geometry", java.sql.Types.JAVA_OBJECT),
@@ -54,7 +54,9 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 			this.name = name;
 			this.type = type;
 		}
-		
+		public String getColumnName(){
+			return this.name;
+		}
 		public String getId(){
 			return this.id;
 		}

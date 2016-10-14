@@ -33,7 +33,7 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
  */
 public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData {
 
-	public enum Column{
+	public static enum Column{
 		ENTITY_UUID("record:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
 		TITLE("record:title", "Title", java.sql.Types.VARCHAR),
 		DATE_RECIEVED("record:datereceived", "Date Received", java.sql.Types.DATE),
@@ -48,7 +48,9 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 			this.name = name;
 			this.type = type;
 		}
-		
+		public String getColumnName(){
+			return this.name;
+		}
 		public String getId(){
 			return this.id;
 		}

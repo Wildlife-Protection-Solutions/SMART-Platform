@@ -24,7 +24,6 @@ package org.wcs.smart.i2.model;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.graphics.Image;
 
 /**
  * Working set item for displaying in the working set view

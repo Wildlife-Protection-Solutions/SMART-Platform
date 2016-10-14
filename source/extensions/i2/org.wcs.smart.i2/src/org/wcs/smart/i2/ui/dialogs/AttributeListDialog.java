@@ -27,11 +27,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -81,6 +83,9 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class AttributeListDialog extends TitleAreaDialog {
 
+	@Inject
+	private IEclipseContext context;
+	
 	private TableViewer cmbTypes;
 	private List<IntelAttribute> types = null;
 	private NamedItemViewerFilter filter;
@@ -265,9 +270,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 		newAttribute.setConservationArea(SmartDB.getCurrentConservationArea());
 		newAttribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
 		
-		AttributeDialog ad = new AttributeDialog(getShell(), newAttribute);
-		ad.open();
-		
+		AttributeDialog.showAttributeDialog(getShell(), newAttribute, context);		
 		refresh();
 	}
 	
@@ -276,8 +279,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 		Object first = items.getFirstElement();
 		if (first instanceof IntelAttribute){
 			IntelAttribute editAttribute = (IntelAttribute) first;
-			AttributeDialog ad = new AttributeDialog(getShell(), editAttribute);
-			ad.open();
+			AttributeDialog.showAttributeDialog(getShell(), editAttribute, context);
 			refresh();
 		}
 	}

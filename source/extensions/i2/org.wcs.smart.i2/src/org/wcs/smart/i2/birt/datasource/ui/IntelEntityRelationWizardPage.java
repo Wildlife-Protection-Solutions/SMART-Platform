@@ -21,11 +21,8 @@
  */
 package org.wcs.smart.i2.birt.datasource.ui;
 
-import java.text.MessageFormat;
-
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
-import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
  * Dataset wizard for entity attachment dataset
@@ -62,9 +59,5 @@ public class IntelEntityRelationWizardPage extends AbstractIntelEntityTypeListWi
 	protected String getDatasetType(){
 		return EntityRelationDataset.DATASET_TYPE;
 	}
-	
-	@Override
-	protected String getDatasetName(IntelEntityType type){
-		return MessageFormat.format("{0} - Relationships", type.getName());
-	}
+
 }

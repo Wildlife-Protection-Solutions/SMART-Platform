@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.birt;
 
-import org.eclipse.ui.IPageLayout;
 import org.wcs.smart.birt.ui.BasicReportPerspective;
 
 /**

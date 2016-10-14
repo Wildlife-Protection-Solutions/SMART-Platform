@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.birt.SmartRunAndRender;
 import org.wcs.smart.birt.ui.ReportEngineManager;
@@ -103,15 +104,26 @@ public class EntityExportReportJob extends Job {
 			}
 		}
 
-		//TODO: delete outputfile when done with it
-		outputFile = outputFile.resolve(UuidUtils.uuidToString(entity.getUuid()) + "." + System.nanoTime() + "." + format.getFormat());
+		String fileName = entity.getIdAttributeAsText();
+		fileName = URLUtils.cleanFilename(fileName);
+		Path current = outputFile;
+		outputFile = current.resolve(fileName + "." + format.getFormat());
+		if (Files.exists(outputFile)){
+			int cnt = 1;
+			while(cnt < 1000){
+				outputFile = current.resolve(fileName + "." + cnt + "." + format.getFormat());
+				if (!Files.exists(outputFile)){
+					break;
+				}
+			}
+		}
+			
 		
 		IRenderOption options = new RenderOption();
 		try(FileOutputStream fout = new FileOutputStream(outputFile.toFile())){
 			
 			options.setOutputStream(fout);
 			options.setEmitterID(format.getID());
-			//options.setOutputFormat("PDF");
 			options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 			
 			HashMap<String, Object> reportParameters = new HashMap<String, Object>();
@@ -141,6 +153,8 @@ public class EntityExportReportJob extends Job {
 			throw new Exception(MessageFormat.format("Unable to export entity. {0}", ex.getMessage(), ex));
 		}
 		
+		//delete on exit
+		outputFile.toFile().deleteOnExit();
 		return outputFile;
 		
 	}

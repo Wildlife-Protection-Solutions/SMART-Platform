@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -126,6 +127,8 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	
 	@Inject
 	private IEventBroker broker;
+	@Inject
+	private IEclipseContext context;
 	
 	public EntityTypeDialog(Shell parentShell, IntelEntityType type) {
 		super(parentShell);
@@ -440,10 +443,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		Object x = ((IStructuredSelection)tblAttributes.getSelection()).getFirstElement();
 		if (x instanceof IntelEntityTypeAttribute){
 			IntelEntityTypeAttribute attribute = (IntelEntityTypeAttribute)x;
-			
-			AttributeDialog ad = new AttributeDialog(getShell(), attribute.getAttribute());
-			ad.open();
-			
+			AttributeDialog.showAttributeDialog(getShell(), attribute.getAttribute(), context); 
 			//refresh
 			tblAttributes.refresh();
 			refreshAttributeList();
@@ -706,8 +706,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			attribute.setConservationArea(SmartDB.getCurrentConservationArea());
 			attribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
 			if (type.getAttributes() == null) type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
-			AttributeDialog ad = new AttributeDialog(getShell(), attribute);
-			ad.open();
+			AttributeDialog.showAttributeDialog(getShell(), attribute, context);
 			
 			if (attribute.getUuid() != null){
 				IntelEntityTypeAttribute eta = new IntelEntityTypeAttribute();

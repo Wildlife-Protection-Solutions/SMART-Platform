@@ -29,16 +29,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-
 import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -116,6 +115,8 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	
 	@Inject
 	private IEventBroker eventBroker;
+	@Inject
+	private IEclipseContext context;
 	
 	private IntelRelationshipType type;
 	private NameKeyComposite nameKeyInfo;
@@ -564,10 +565,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		Object x = ((IStructuredSelection)tblAttributes.getSelection()).getFirstElement();
 		if (x instanceof IntelRelationshipTypeAttribute){
 			IntelRelationshipTypeAttribute attribute = (IntelRelationshipTypeAttribute)x;
-			
-			AttributeDialog ad = new AttributeDialog(getShell(), attribute.getAttribute());
-			ad.open();
-			
+			AttributeDialog.showAttributeDialog(getShell(), attribute.getAttribute(), context);
 			//refresh
 			tblAttributes.refresh();
 		}
@@ -799,8 +797,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			attribute.setConservationArea(SmartDB.getCurrentConservationArea());
 			attribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
 			if (type.getAttributes() == null) type.setAttributes(new ArrayList<IntelRelationshipTypeAttribute>());
-			AttributeDialog ad = new AttributeDialog(getShell(), attribute);
-			ad.open();
+			AttributeDialog.showAttributeDialog(getShell(), attribute, context);
 			
 			if (attribute.getUuid() != null){
 				IntelRelationshipTypeAttribute eta = new IntelRelationshipTypeAttribute();

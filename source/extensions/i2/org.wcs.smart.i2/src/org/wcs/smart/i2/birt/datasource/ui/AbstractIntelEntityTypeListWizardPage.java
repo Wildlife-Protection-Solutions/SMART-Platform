@@ -56,6 +56,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -312,7 +313,9 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 	 * @param type
 	 * @return
 	 */
-	protected abstract String getDatasetName(IntelEntityType type);
+	protected String getDatasetName(IntelEntityType type){
+		return IntelReportManager.INSTANCE.getName(type, getDatasetType());
+	}
 	
 	/**
 	 * Updates the given dataSetDesign with the queryText and its derived

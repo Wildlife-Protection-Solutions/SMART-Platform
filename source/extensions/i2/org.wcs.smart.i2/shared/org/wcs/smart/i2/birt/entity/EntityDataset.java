@@ -60,8 +60,8 @@ public class EntityDataset  implements IQuery {
 	public EntityDataset(IntelBirtConnection connection){
 		this.connection = connection;
 		parameters = new HashMap<Integer,Object>();
-		
 	}
+	
 	@Override
 	public void prepare(String queryText) throws OdaException {
 		//TODO: support CCAA
