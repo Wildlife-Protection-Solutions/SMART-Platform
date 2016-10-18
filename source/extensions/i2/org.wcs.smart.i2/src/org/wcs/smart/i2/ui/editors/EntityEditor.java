@@ -838,8 +838,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		this.isEditMode = isEdit;
 		if (entity != null) initControl(entity);
 	
-		deleteItem.setEnabled(isEdit);
-		editItem.setSelection(isEdit);
+		if (!deleteItem.isDisposed()) deleteItem.setEnabled(isEdit);
+		if (!editItem.isDisposed()) editItem.setSelection(isEdit);
 	}
 	
 	public void setDirty(boolean isDirty){

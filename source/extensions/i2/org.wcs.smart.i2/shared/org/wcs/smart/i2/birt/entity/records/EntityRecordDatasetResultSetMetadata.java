@@ -36,8 +36,10 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 	public static enum Column{
 		ENTITY_UUID("record:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
 		TITLE("record:title", "Title", java.sql.Types.VARCHAR),
+		STATUS("record:status", "Status", java.sql.Types.VARCHAR),
 		DATE_RECIEVED("record:datereceived", "Date Received", java.sql.Types.DATE),
-		DATE_MODIFIED("record:datemodified", "Date Modified", java.sql.Types.DATE);
+		DATE_MODIFIED("record:datemodified", "Date Modified", java.sql.Types.DATE),
+		DESCRIPTION("record:description", "Description", java.sql.Types.VARCHAR);
 		
 		String id;
 		String name;
@@ -59,6 +61,8 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 			if (this == TITLE) return location.getRecord().getTitle();
 			if (this == DATE_RECIEVED) return location.getRecord().getDateCreated();
 			if (this == DATE_MODIFIED) return location.getRecord().getDateModified();
+			if (this == DESCRIPTION) return location.getRecord().getDescription();
+			if (this == STATUS) return location.getRecord().getStatus().name();
 			return null;
 		}
 	}

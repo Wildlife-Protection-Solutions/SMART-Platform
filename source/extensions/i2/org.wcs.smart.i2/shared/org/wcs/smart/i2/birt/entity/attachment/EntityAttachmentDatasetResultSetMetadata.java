@@ -48,6 +48,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 	public static enum Column{
 		ENTITY_UUID("attachment:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
 		FILE_NAME("attachment:filename", "Name", java.sql.Types.VARCHAR),
+		DATE_CREATED("attachment:date_created", "Date Created", java.sql.Types.DATE),
 		PATH("attachment:path", "Path", java.sql.Types.VARCHAR);
 		
 		String id;
@@ -77,6 +78,10 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 				} catch (IOException e) {
 					Intelligence2PlugIn.log(e.getMessage(), e);	
 				}
+				return null;
+			}
+			if (this ==  DATE_CREATED){
+				return location.getAttachment().getDateCreated();
 			}
 			return null;
 		}

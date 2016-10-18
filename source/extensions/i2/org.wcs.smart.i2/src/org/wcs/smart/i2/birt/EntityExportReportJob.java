@@ -115,6 +115,7 @@ public class EntityExportReportJob extends Job {
 				if (!Files.exists(outputFile)){
 					break;
 				}
+				cnt++;
 			}
 		}
 			
