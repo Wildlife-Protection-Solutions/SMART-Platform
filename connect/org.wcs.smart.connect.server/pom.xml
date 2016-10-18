@@ -6,13 +6,12 @@
 	<parent>
 		<groupId>org.wcs.smart.connect</groupId>
 		<artifactId>org.wcs.smart.connect</artifactId>
-		<version>4.0-SNAPSHOT</version>
+		<version>4.1-SNAPSHOT</version>
 	</parent>
 	
 	<groupId>org.wcs.smart.connect.server</groupId>
 	<artifactId>org.wcs.smart.connect.server</artifactId>
 	<packaging>war</packaging>
-	<version>4.0-SNAPSHOT</version>
 	<name>SMART Connect Server</name>
 
 	<properties>

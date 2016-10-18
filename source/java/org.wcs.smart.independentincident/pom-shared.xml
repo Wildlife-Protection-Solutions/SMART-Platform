@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart</artifactId>
-		<version>4.0</version>
+		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 	
@@ -13,7 +13,6 @@
 	<groupId>org.wcs.smart</groupId>
 	<artifactId>org.wcs.smart.incident</artifactId>
 	<name>Independent Incident Module</name>
-	<version>${smart.version}</version>
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
