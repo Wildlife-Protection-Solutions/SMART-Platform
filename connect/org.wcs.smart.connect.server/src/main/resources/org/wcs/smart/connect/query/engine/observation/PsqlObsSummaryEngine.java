@@ -843,8 +843,9 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 			}else if (gb instanceof DateGroupBy){
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
 				if (op.getClass().equals(DayDateGroupBy.class)){
+					groupByInnerSql.append("date_trunc('day', ");
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
-					groupByInnerSql.append(".datetime as wp_date_time_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(".datetime) as wp_date_time_" + itemcnt); //$NON-NLS-1$
 					groupBySql.append("wp_date_time_" + itemcnt); //$NON-NLS-1$
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
