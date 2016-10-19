@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Waypoint_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/independentincident", "Waypoint"); //$NON-NLS-1$ //$NON-NLS-2$
+    private final static QName _Waypoint_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.0/independentincident", "Waypoint"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.incident.xml.model
@@ -76,7 +76,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link WaypointType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/1.0/independentincident", name = "Waypoint")
+    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/2.0/independentincident", name = "Waypoint")
     public JAXBElement<WaypointType> createWaypoint(WaypointType value) {
         return new JAXBElement<WaypointType>(_Waypoint_QNAME, WaypointType.class, null, value);
     }

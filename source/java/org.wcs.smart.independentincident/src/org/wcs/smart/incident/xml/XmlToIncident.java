@@ -118,9 +118,7 @@ public class XmlToIncident {
 		incident.setDirection(xml.getDirection());
 		incident.setDistance(xml.getDistance());
 		incident.setId(xml.getId());
-		
-		
-		incident.setDateTime(xml.getDateTime().toGregorianCalendar().getTime());
+		incident.setDateTime(IncidentToXml.DATE_FORMAT.parse(xml.getDateTime()));
 		incident.setX(xml.getX());
 		incident.setY(xml.getY());
 		
