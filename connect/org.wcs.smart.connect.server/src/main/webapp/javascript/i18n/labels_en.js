@@ -149,7 +149,6 @@ labels_en= {
 "query.lastyear":"Last Year",
 "query.alldates":"All Dates",
 "query.custom":"Custom",
-
 "report.refreshingreports": "Refreshing Reports Table...",
 "report.runreport":"Run Report",
 "report.noreportsfound":"No Reports found. Try a different search or contact your adminsitrator to give you permissions to reports you are looking for.",
