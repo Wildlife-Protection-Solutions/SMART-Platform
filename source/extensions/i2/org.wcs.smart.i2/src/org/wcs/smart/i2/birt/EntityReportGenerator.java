@@ -49,7 +49,6 @@ import org.eclipse.birt.report.model.api.SimpleMasterPageHandle;
 import org.eclipse.birt.report.model.api.StructureFactory;
 import org.eclipse.birt.report.model.api.StyleHandle;
 import org.eclipse.birt.report.model.api.TableHandle;
-import org.eclipse.birt.report.model.api.TextDataHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
@@ -68,7 +67,6 @@ import org.eclipse.datatools.connectivity.oda.design.ParameterDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
@@ -252,6 +250,11 @@ public enum EntityReportGenerator {
 		tableStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana");
 		tableStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "8pt");
 		rdh.getStyles().add(tableStyle);
+		
+		StyleHandle footerStyle = factory.newStyle("FooterStyle");
+		footerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana");
+		footerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "6pt");
+		rdh.getStyles().add(footerStyle);
 		
 		OdaDataSetHandle entityDataset = datasetHandles.get(EntityDataset.DATASET_TYPE);
 		
@@ -546,6 +549,7 @@ public enum EntityReportGenerator {
 		l = factory.newLabel(null);
 		l.setText("Locations");
 		l.setStyleName(sectionHeaderStyle.getName());
+		l.setProperty(IStyleModel.PAGE_BREAK_BEFORE_PROP, DesignChoiceConstants.PAGE_BREAK_BEFORE_ALWAYS);
 		rdh.getBody().add(l);
 		
 		ExtendedItemHandle map = factory.newExtendedItem(null, SmartMapItem.EXTENSION_NAME);
@@ -578,6 +582,7 @@ public enum EntityReportGenerator {
 		
 		//entity id and date parameters
 		GridHandle footerGrid1 = factory.newGridItem(null, 2, 1);
+		footerGrid1.setStyleName(footerStyle.getName());
 		di = factory.newDataItem(null);
 		di.setDataSet(entityDataset);
 		footerGrid1.setProperty(IStyleModel.BORDER_TOP_STYLE_PROP, DesignChoiceConstants.LINE_STYLE_SOLID);

@@ -76,6 +76,7 @@ CREATE TABLE smart.i_datamodel_event
 CREATE TABLE smart.i_entity
 (
 	uuid char(16) for bit data NOT NULL,
+	ca_uuid char(16) for bit data NOT NULL,
 	date_created timestamp NOT NULL,
 	date_modified timestamp,
 	created_by char(16) for bit data NOT NULL,
@@ -434,6 +435,12 @@ ALTER TABLE smart.i_working_set ADD CONSTRAINT iworkingset_lastmodifiedby_fk
 	ON DELETE RESTRICT
 DEFERRABLE INITIALLY IMMEDIATE;
 
+ALTER TABLE smart.i_entity ADD CONSTRAINT ientity_cauuid_fk
+	FOREIGN KEY (ca_uuid)
+	REFERENCES smart.conservation_area (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery_cauuid_fk
 	FOREIGN KEY (ca_uuid)

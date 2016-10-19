@@ -9,8 +9,14 @@ import java.util.List;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MenuEvent;
@@ -325,6 +331,36 @@ public class EntitySearchResultTable extends Composite {
 			addListener(l);
 			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getDateCreated()));
 			addListener(l);
+			
+			addDragSources();
+		}
+		
+		private void addDragSources(){
+			final IntelEntitySelectionTransfer trans = IntelEntitySelectionTransfer.getTransfer();
+			DragSourceAdapter listener = new DragSourceAdapter() {
+				@Override
+				public void dragSetData(DragSourceEvent event) {
+					if (IntelEntitySelectionTransfer.getTransfer().isSupportedType(event.dataType)){
+						trans.setSelection(new StructuredSelection(item));
+					}
+				}
+			};
+			
+			//add parent and all kids as drag sources
+			List<Control> kids = new ArrayList<Control>();
+			kids.add(this);
+			while(!kids.isEmpty()){
+				Control kid = kids.remove(0);
+				DragSource dragSource = new DragSource(kid, DND.DROP_LINK);
+				dragSource.setTransfer(new Transfer[]{trans});
+				dragSource.addDragListener(listener);
+				
+				if (kid instanceof Composite){
+					for (Control cc : ((Composite)kid).getChildren()){
+						kids.add(cc);
+					}
+				}
+			}
 		}
 		
 		private void addListener(Control c){

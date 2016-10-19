@@ -28,6 +28,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -58,7 +59,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 
 		if (searchString == null || searchString.isEmpty()){
 			
-			Criteria c = session.createCriteria(IntelEntity.class);
+			Criteria c = session.createCriteria(IntelEntity.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
 			if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
 				c.add(Restrictions.in("entityType", entityTypeFilter));
 			}
@@ -77,6 +78,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		sb.append(" IntelEntityType t, ");
 		sb.append(" IntelEntityAttributeValue v left join v.attributeListItem i left Join i.names a ");
 		sb.append(" WHERE ");
+		sb.append(" e.conservationArea = :ca AND ");
 		sb.append(" e.entityType.uuid = t.uuid AND ");
 		sb.append(" v.id.attribute = t.idAttribute AND ");
 		sb.append(" v.id.entity = e AND ");
@@ -92,9 +94,9 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		}
 		query.setString("textSearch", searchString.toLowerCase());
 		query.setString("textSearch1", searchString.toLowerCase());
+		query.setParameter("ca", SmartDB.getCurrentConservationArea());
 		
 		List<IntelEntity> queryResults = query.list();
-		
 		List<IntelEntity> results = new ArrayList<IntelEntity>();
 		for (IntelEntity ie : queryResults){
 			if (!results.contains(ie)){
@@ -111,6 +113,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		sb.append(" IntelEntityType t, ");
 		sb.append(" IntelEntityAttributeValue v left join v.attributeListItem i left Join i.names a ");
 		sb.append(" WHERE ");
+		sb.append(" e.conservationArea = :ca AND ");
 		sb.append(" e.entityType.uuid = t.uuid AND ");
 		sb.append(" v.id.attribute = t.idAttribute AND ");
 		sb.append(" v.id.entity = e AND ");
@@ -126,8 +129,9 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		}
 		query.setString("textSearch", "%" + searchString.toLowerCase() + "%");
 		query.setString("textSearch1","%" +  searchString.toLowerCase() + "%");
-		queryResults = query.list();
-				
+		query.setParameter("ca", SmartDB.getCurrentConservationArea());
+		
+		queryResults = query.list();				
 		for (IntelEntity ie : queryResults){
 			if (!results.contains(ie)){
 				lazyLoadEntity(ie, session);

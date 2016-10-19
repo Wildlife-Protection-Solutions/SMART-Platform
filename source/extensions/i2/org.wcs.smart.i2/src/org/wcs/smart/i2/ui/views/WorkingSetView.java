@@ -56,8 +56,15 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.DropTargetListener;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -95,6 +102,7 @@ import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.WorkingSetListDialog;
+import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -130,8 +138,8 @@ public class WorkingSetView {
 	@PostConstruct
 	public void createPartControl(Composite parent) {
 		parent.setLayout(new GridLayout());
-		((GridLayout)parent.getLayout()).marginWidth = 0;
-		((GridLayout)parent.getLayout()).marginHeight = 0;
+		((GridLayout)parent.getLayout()).marginWidth = 2;
+		((GridLayout)parent.getLayout()).marginHeight = 2;
 		
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		
@@ -407,8 +415,78 @@ public class WorkingSetView {
 				open.setEnabled(enabled);
 			}
 		});
+		addDropListener(parent);
 	}
 	
+	private void addDropListener(Composite parent){
+		
+		DropTarget dropTarget = new DropTarget(parent, DND.DROP_LINK);
+		dropTarget.setTransfer(new Transfer[]{IntelEntitySelectionTransfer.getTransfer(), IntelRecordSelectionTransfer.getTransfer()});
+		dropTarget.addDropListener(new DropTargetListener() {		
+			private PaintListener paintListener = new PaintListener() {
+				@Override
+				public void paintControl(PaintEvent e) {
+					e.gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION));
+					e.gc.setLineWidth(2);
+					e.gc.drawRectangle(0, 0, e.width, e.height);
+				}
+			};
+			
+			@Override
+			public void dropAccept(DropTargetEvent event) {
+			}
+			
+			@Override
+			public void drop(DropTargetEvent event) {
+				ISelection s = null;
+				if (IntelEntitySelectionTransfer.getTransfer().isSupportedType(event.currentDataType)) {
+					s = IntelEntitySelectionTransfer.getTransfer().getSelection();
+				}else if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.currentDataType)){
+					s = IntelRecordSelectionTransfer.getTransfer().getSelection();
+				}
+				if (s != null && s instanceof IStructuredSelection) {
+					IStructuredSelection sel = (IStructuredSelection)s;
+					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+						Object element = (Object)iterator.next();
+						if (element instanceof IntelRecord){
+							WorkingSetManager.INSTANCE.addToActiveWorkingSet(new RecordEditorInput((IntelRecord)element), context);
+						}else if (element instanceof RecordEditorInput){
+							WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput)element, context);
+						}else if (element instanceof IntelEntity){
+							WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelEntity)element, context);		
+						}
+						
+					}
+				}
+				
+				parent.removePaintListener(paintListener);
+				parent.redraw();
+			}
+			
+			@Override
+			public void dragOver(DropTargetEvent event) {
+				 
+			}
+			
+			@Override
+			public void dragOperationChanged(DropTargetEvent event) {
+				event.detail = DND.DROP_LINK;
+			}
+			
+			@Override
+			public void dragLeave(DropTargetEvent event) {
+				parent.removePaintListener(paintListener);
+				parent.redraw();
+			}
+			
+			@Override
+			public void dragEnter(DropTargetEvent event) {
+				event.detail = DND.DROP_LINK;
+				parent.addPaintListener(paintListener);
+				parent.redraw();
+			}
+		});
+	}
 	private void removeSelection(){
 		IStructuredSelection selection = (IStructuredSelection) workingsetTree.getSelection();
 		List<IntelWorkingSetItem> toDeleteItems = new ArrayList<IntelWorkingSetItem>();

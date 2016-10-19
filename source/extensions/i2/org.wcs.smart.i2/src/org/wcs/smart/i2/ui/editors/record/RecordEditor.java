@@ -287,6 +287,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		setDirty(false);
 		summaryPage.doAfterSave();
+		summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
 		super.setPartName(record.getTitle());
 	}
 	
@@ -328,7 +329,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			handler = new EventHandler() {
 				@Override
 				public void handleEvent(org.osgi.service.event.Event event) {
-					summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet());
+					summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
 				}
 			};
 			parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_SET, handler);

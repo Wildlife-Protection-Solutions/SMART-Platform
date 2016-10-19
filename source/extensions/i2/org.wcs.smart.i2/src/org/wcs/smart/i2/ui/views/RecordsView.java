@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.views;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,6 +53,10 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -66,6 +71,7 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
@@ -124,32 +130,7 @@ public class RecordsView {
 		Composite thisParent = toolkit.createComposite(parent);
 		thisParent.setLayout(new GridLayout());
 		thisParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	
-//		ToolBar toolbar = new ToolBar(thisParent, SWT.HORIZONTAL | SWT.FLAT);
-//		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-//		
-//		ToolItem newItem = new ToolItem(toolbar, SWT.PUSH);
-//		newItem.setToolTipText("create new record");
-//		newItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD_NEW));
-//		newItem.addSelectionListener(new SelectionAdapter(){
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				ContextInjectionFactory.invoke(new NewRecordHandler(), Execute.class, context.createChild());
-//			}
-//		});
-//		
-//		ToolItem refreshItem = new ToolItem(toolbar, SWT.PUSH);
-//		refreshItem.setToolTipText("refresh list");
-//		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-//		refreshItem.addSelectionListener(new SelectionAdapter(){
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				loadRecordsJob.schedule();
-//			}
-//		});
-//		
-		
-		
+ 		
 		IDoubleClickListener openListener = new IDoubleClickListener() {
 			
 			@Override
@@ -175,7 +156,7 @@ public class RecordsView {
 				thisParent.layout();
 			}
 		});
-		lstInProgress = new ListViewer(inProgress, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		lstInProgress = new ListViewer(inProgress, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		inProgress.setClient(lstInProgress.getControl());
 		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
 		lstInProgress.setLabelProvider(new RecordLabelProvider());
@@ -197,7 +178,7 @@ public class RecordsView {
 			}
 		});
 
-		lstNewRecords = new ListViewer(newRecords, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		lstNewRecords = new ListViewer(newRecords, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI);
 		newRecords.setClient(lstNewRecords.getControl());
 		lstNewRecords.setContentProvider(ArrayContentProvider.getInstance());
 		lstNewRecords.setLabelProvider(new RecordLabelProvider());
@@ -244,7 +225,7 @@ public class RecordsView {
 			}
 		});
 		
-		lstAllRecords = new ListViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		lstAllRecords = new ListViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		lstAllRecords.setContentProvider(ArrayContentProvider.getInstance());
 		lstAllRecords.setLabelProvider(new RecordLabelProvider());
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
@@ -252,10 +233,37 @@ public class RecordsView {
 		lstAllRecords.addDoubleClickListener(openListener);
 		lstAllRecords.addSelectionChangedListener(selectOne);
 		
+
 		createMenu(lstAllRecords);
 		createMenu(lstInProgress);
 		createMenu(lstNewRecords);
 		
+		//add drag and drop support
+		lstAllRecords.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)){
+					IntelRecordSelectionTransfer.getTransfer().setSelection(lstAllRecords.getSelection());
+				}
+			}
+		});
+		//add drag and drop support
+		lstInProgress.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)){
+					IntelRecordSelectionTransfer.getTransfer().setSelection(lstInProgress.getSelection());
+				}
+			}
+		});
+		lstNewRecords.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)){
+					IntelRecordSelectionTransfer.getTransfer().setSelection(lstNewRecords.getSelection());
+				}
+			}
+		});
 		loadRecordsJob.schedule(0);
 	}
 
@@ -268,11 +276,14 @@ public class RecordsView {
 		mi.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Object x = ((IStructuredSelection)control.getSelection()).getFirstElement();
-				if (x instanceof IntelRecord){
-					(new OpenRecordHandler()).openRecord((IntelRecord)x, false);
-				}else if (x instanceof RecordEditorInput){
-					(new OpenRecordHandler()).openRecord((RecordEditorInput)x, false);
+				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();
+				
+					if (x instanceof IntelRecord){
+						(new OpenRecordHandler()).openRecord((IntelRecord)x, false);
+					}else if (x instanceof RecordEditorInput){
+						(new OpenRecordHandler()).openRecord((RecordEditorInput)x, false);
+					}
 				}
 			}
 		});
@@ -283,11 +294,14 @@ public class RecordsView {
 		miDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Object x = ((IStructuredSelection)control.getSelection()).getFirstElement();
-				if (x instanceof IntelRecord){
-					RecordManager.INSTANCE.deleteRecord((IntelRecord)x, context);
-				}else if (x instanceof RecordEditorInput){
-					RecordManager.INSTANCE.deleteRecord(((RecordEditorInput)x).getUuid(), context);
+				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();
+					
+					if (x instanceof IntelRecord){
+						RecordManager.INSTANCE.deleteRecord((IntelRecord)x, context);
+					}else if (x instanceof RecordEditorInput){
+						RecordManager.INSTANCE.deleteRecord(((RecordEditorInput)x).getUuid(), context);
+					}
 				}
 			}
 		});
@@ -298,11 +312,13 @@ public class RecordsView {
 		miAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Object x = ((IStructuredSelection)control.getSelection()).getFirstElement();
-				if (x instanceof IntelRecord){
-					WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
-				}else if (x instanceof RecordEditorInput){
-					WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput) x, context);
+				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();	
+					if (x instanceof IntelRecord){
+						WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
+					}else if (x instanceof RecordEditorInput){
+						WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput) x, context);
+					}
 				}
 			}
 		});
@@ -393,7 +409,9 @@ public class RecordsView {
 			s = HibernateManager.openSession();
 			final List<RecordEditorInput> allRecords = new ArrayList<RecordEditorInput>();
 			try{
-				List<Object[]> items = s.createQuery("SELECT title, uuid, dateCreated FROM IntelRecord order by dateModified desc").list();
+				Query q = s.createQuery("SELECT title, uuid, dateCreated FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc");
+				q.setParameter("ca", SmartDB.getCurrentConservationArea());
+				List<Object[]> items = q.list();
 				for (Object[] item : items){
 					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1], (Date)item[2]));
 				}

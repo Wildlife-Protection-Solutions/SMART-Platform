@@ -428,6 +428,9 @@ public class LocationListComposite extends Composite{
 	}
 	
 	public void init(){
+		if (editor.getRecord().getLocations() == null){
+			editor.getRecord().setLocations(new ArrayList<IntelLocation>());
+		}
 		tblObservations.setInput(editor.getRecord().getLocations());
 	}
 	

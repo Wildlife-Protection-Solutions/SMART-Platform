@@ -50,18 +50,20 @@ public class CleanUpJob implements ILoginHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				//delete all files in the temporary output directory
-				 try (DirectoryStream<Path> stream = Files.newDirectoryStream(IntelReportManager.INSTANCE.getTemporaryDirectory())) {
-					 for (Path entry: stream) {
-			        	   try{
-			        		   Files.delete(entry);
-			        	   }catch (Exception ex){}
-			           }
-				 }catch (Exception ex){
-					 Intelligence2PlugIn.log(ex.getMessage(), ex);
-				 }
+				if (Files.exists(IntelReportManager.INSTANCE.getTemporaryDirectory())){
+					try (DirectoryStream<Path> stream = Files.newDirectoryStream(IntelReportManager.INSTANCE.getTemporaryDirectory())) {
+						for (Path entry : stream) {
+							try {
+								Files.delete(entry);
+							} catch (Exception ex) {
+							}
+						}
+					} catch (Exception ex) {
+						Intelligence2PlugIn.log(ex.getMessage(), ex);
+					}
+				}
 				return Status.OK_STATUS;
 			}
-			
 		};
 		j.setSystem(true);
 		j.schedule();

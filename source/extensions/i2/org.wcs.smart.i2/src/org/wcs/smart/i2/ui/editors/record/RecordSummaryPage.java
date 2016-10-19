@@ -225,7 +225,7 @@ public class RecordSummaryPage extends EditorPart{
 				WorkingSetManager.INSTANCE.addToActiveWorkingSet(recordEditor.getRecord(), recordEditor.getContext());
 			}
 		});
-		wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+		wsetItem.setEnabled(false);
 		
 		editItem = new ToolItem(buttonBar, SWT.CHECK);
 		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
@@ -541,6 +541,8 @@ public class RecordSummaryPage extends EditorPart{
 		attachmentPanel.refreshAttachmentTable();
 		attachmentPanel.updateEditMode();
 		entityPanel.updateEditMode();
+		
+		enableWs(WorkingSetManager.INSTANCE.isSet() && recordEditor.getRecord().getUuid() != null);
 	}
 	
 	@Override

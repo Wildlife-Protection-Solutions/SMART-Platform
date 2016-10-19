@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -47,16 +48,21 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -69,6 +75,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -78,6 +85,7 @@ import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
+import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
@@ -179,9 +187,8 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		cmbTypes = new TableViewer(parent);
+		cmbTypes = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTypes.setLabelProvider(RelationshipTypeLabelProvider.INSTANCE);
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmbTypes.getControl().setFocus();
@@ -201,7 +208,80 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				mnuDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
 			}
 		});
-		
+		cmbTypes.getTable().setHeaderVisible(true);
+		cmbTypes.getTable().setLinesVisible(true);
+		TableViewerColumn nameColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
+		nameColumn.getColumn().setText("Relationship");
+		nameColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelRelationshipType){
+					return ((IntelRelationshipType) element).getName();
+				}
+				return super.getText(element);
+			}
+			@Override
+			public Image getImage(Object element){
+				return RelationshipTypeLabelProvider.INSTANCE.getImage(element);
+			}
+		});
+		nameColumn.getColumn().setWidth(150);
+		TableViewerColumn groupColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
+		groupColumn.getColumn().setText("Relationship Group");
+		groupColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelRelationshipType){
+					IntelRelationshipType t = (IntelRelationshipType)element;
+					if (t.getRelationshipGroup() != null) return t.getRelationshipGroup().getName();
+					return "";
+				}
+				return super.getText(element);
+			}
+		});
+		groupColumn.getColumn().setWidth(150);
+		TableViewerColumn sourceColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
+		sourceColumn.getColumn().setText("Source Entity Type");
+		sourceColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelRelationshipType){
+					IntelRelationshipType t = (IntelRelationshipType)element;
+					if (t.getSourceEntityType() != null) return t.getSourceEntityType().getName();
+					return "<Unknown>";
+				}
+				return super.getText(element);
+			}
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof IntelRelationshipType){
+					return EntityTypeLabelProvider.INSTANCE.getImage(((IntelRelationshipType)element).getSourceEntityType());
+				}
+				return null;
+			}
+		});
+		sourceColumn.getColumn().setWidth(150);
+		TableViewerColumn targetColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
+		targetColumn.getColumn().setText("Source Entity Type");
+		targetColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelRelationshipType){
+					IntelRelationshipType t = (IntelRelationshipType)element;
+					if (t.getSourceEntityType() != null) return t.getTargetEntityType().getName();
+					return "<Unknown>";
+				}
+				return super.getText(element);
+			}
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof IntelRelationshipType){
+					return EntityTypeLabelProvider.INSTANCE.getImage(((IntelRelationshipType)element).getTargetEntityType());
+				}
+				return null;
+			}
+		});
+		targetColumn.getColumn().setWidth(150);
 		filter = new NamedItemViewerFilter(cmbTypes);
 		cmbTypes.setFilters(new ViewerFilter[]{filter});
 		

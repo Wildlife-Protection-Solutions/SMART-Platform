@@ -34,6 +34,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
@@ -57,7 +58,8 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 
 	private IntelAttachment primaryAttachment;
 	private IntelEntityType entityType;
-
+	private ConservationArea conservationArea;
+	
 	private List<IntelEntityAttributeValue> entityAttributes;
 	private List<IntelEntityAttachment> entityAttachments;
 //	private Set<IEntityRelationship> entityRelationships;
@@ -70,6 +72,23 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	public IntelEntity() {
 	}
 
+	/**
+	 * Get the conservation area
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea(){
+		return this.conservationArea;
+	}
+	
+	/**
+	 * Sets the conservation area
+	 * @param ca
+	 */
+	public void setConservationArea(ConservationArea ca){
+		this.conservationArea = ca;
+	}
 
 	/**
 	 * Get the date_created.

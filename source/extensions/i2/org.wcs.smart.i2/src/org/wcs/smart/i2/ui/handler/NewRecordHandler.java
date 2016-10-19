@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
+import java.util.Date;
+
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.hibernate.SmartDB;
@@ -42,6 +44,7 @@ public class NewRecordHandler {
 		newRecord.setTitle("New Record");
 		newRecord.setStatus(Status.NEW);
 		newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
+		newRecord.setDateCreated(new Date());
 		
 		RecordEditorInput input = new RecordEditorInput(newRecord);
 		

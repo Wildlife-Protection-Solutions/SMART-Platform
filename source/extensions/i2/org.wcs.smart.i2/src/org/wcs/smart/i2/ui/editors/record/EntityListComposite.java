@@ -29,7 +29,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -46,6 +55,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -70,7 +80,8 @@ public class EntityListComposite extends Composite{
 		toolkit.adapt(this);
 		
 		GridLayout gl = new GridLayout();
-		gl.marginHeight = 0;
+		gl.marginHeight = 2;
+		gl.marginWidth = 2;
 		setLayout(gl);
 		
 		compEntityEdit = toolkit.createComposite(this, SWT.NONE);
@@ -106,6 +117,53 @@ public class EntityListComposite extends Composite{
 		
 		lstEntities = new EntityList(this, toolkit);
 		lstEntities.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		DropTarget dropTarget = new DropTarget(this, DND.DROP_LINK);
+		final IntelEntitySelectionTransfer objTransfer = IntelEntitySelectionTransfer.getTransfer();
+		dropTarget.setTransfer(new Transfer[]{objTransfer});
+		dropTarget.addDropListener(new DropTargetAdapter() {		
+			private PaintListener paintListener = new PaintListener() {
+				@Override
+				public void paintControl(PaintEvent e) {
+					e.gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION));
+					e.gc.setLineWidth(2);
+					e.gc.drawRectangle(0, 0, e.width, e.height);
+				}
+			};
+
+			@Override
+			public void drop(DropTargetEvent event) {
+				if (objTransfer.isSupportedType(event.currentDataType)) {
+					ISelection s = objTransfer.getSelection();
+					if (s instanceof IStructuredSelection) {
+						IStructuredSelection sel = (IStructuredSelection)s;
+						for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+							Object element = (Object)iterator.next();
+							if (element instanceof IntelEntity){
+								linkEntity((IntelEntity)element);		
+							}
+							
+						}
+					}
+				}
+				EntityListComposite.this.removePaintListener(paintListener);
+				EntityListComposite.this.redraw();
+			}
+
+			@Override
+			public void dragLeave(DropTargetEvent event) {
+				EntityListComposite.this.removePaintListener(paintListener);
+				EntityListComposite.this.redraw();
+			}
+			
+			@Override
+			public void dragEnter(DropTargetEvent event) {
+				event.detail = DND.DROP_LINK;
+				EntityListComposite.this.addPaintListener(paintListener);
+				EntityListComposite.this.redraw();
+			}
+		});
+		
 	}
 	
 	public RecordEditor getEditor(){

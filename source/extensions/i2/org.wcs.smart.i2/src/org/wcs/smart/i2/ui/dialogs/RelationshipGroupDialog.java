@@ -206,8 +206,10 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 				groupSiblings = RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea());
 				groupSiblings.remove(group);
 				
-				group = (IntelRelationshipGroup) s.merge(group);
-				group.getRelationshipTypes().forEach(e -> e.getName());
+				if(group.getUuid() != null){
+					group = (IntelRelationshipGroup) s.merge(group);
+					group.getRelationshipTypes().forEach(e -> e.getName());
+				}
 			}finally{
 				s.close();
 			}

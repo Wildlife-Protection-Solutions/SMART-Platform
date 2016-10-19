@@ -45,6 +45,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -76,6 +77,7 @@ import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.ui.NamedItemLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
 public class EntitySearchView {
@@ -95,7 +97,7 @@ public class EntitySearchView {
 	
 	
 	private ComboViewer cmbSavedSearch;
-	private ComboViewer cmbEntityType;
+	private TableComboViewer cmbEntityType;
 	private FilterComposite txtSearch;
 	private Font boldFont;
 	private Font hlFont;
@@ -298,11 +300,13 @@ public class EntitySearchView {
 		});
 		
 		toolkit.createLabel(core, "EntityType:");
-		cmbEntityType = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
-		toolkit.adapt(cmbEntityType.getCombo());
+		
+		cmbEntityType = new TableComboViewer(core, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbEntityType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbEntityType.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
+		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		toolkit.adapt(cmbEntityType.getTableCombo());
 		cmbEntityType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
