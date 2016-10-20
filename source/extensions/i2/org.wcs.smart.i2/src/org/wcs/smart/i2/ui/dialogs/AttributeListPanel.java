@@ -92,7 +92,7 @@ public class AttributeListPanel extends Composite {
 		
 		items = new ListViewer(this, SWT.MULTI | SWT.BORDER);
 		items.setContentProvider(ArrayContentProvider.getInstance());
-		items.setLabelProvider(AttributeListItemLabelProvider.INSTANCE);
+		items.setLabelProvider(new AttributeListItemLabelProvider());
 		items.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		items.setInput(attribute.getAttributeList());
 		items.addDoubleClickListener(new IDoubleClickListener() {

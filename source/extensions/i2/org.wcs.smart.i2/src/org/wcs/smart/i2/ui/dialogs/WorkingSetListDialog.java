@@ -76,7 +76,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		lstViewer = new ListViewer(parent, SWT.BORDER | SWT.V_SCROLL);
-		lstViewer.setLabelProvider(WorkingSetLabelProvider.INSTANCE);
+		lstViewer.setLabelProvider(new WorkingSetLabelProvider());
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstViewer.setInput(new String[]{DialogConstants.LOADING_TEXT});
@@ -249,6 +249,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 			s.save(copy);
 			s.getTransaction().commit();
 		}catch (Exception ex){
+			if (s.getTransaction().isActive())s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog("Unable to save cloned working set", ex);
 		}finally{
 			s.close();

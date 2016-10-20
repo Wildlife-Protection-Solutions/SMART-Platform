@@ -226,7 +226,7 @@ public class AttributeDialog extends TitleAreaDialog {
 		cmbType = new ComboViewer(parent);
 		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());
-		cmbType.setLabelProvider(AttributeTypeLabelProvider.INSTANCE);
+		cmbType.setLabelProvider(new AttributeTypeLabelProvider());
 		cmbType.setInput(IAttributeType.values());
 		cmbType.addSelectionChangedListener(new ISelectionChangedListener() {
 			

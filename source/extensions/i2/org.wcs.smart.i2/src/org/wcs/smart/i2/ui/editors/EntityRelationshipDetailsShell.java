@@ -68,10 +68,14 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 	private Composite owner;
 	private ScrolledComposite scroll;
 	
+	private AttributeValueLabelProvider attributeLabelprovider;
+	
 	public EntityRelationshipDetailsShell(Shell ownerShell, IntelEntityRelationship relationship){
 		super(ownerShell, SWT.RESIZE);
 		this.relationship = relationship;
+		attributeLabelprovider = new AttributeValueLabelProvider();
 	}
+	
 	
 	public void createContents(Composite parent){
 		owner = new Composite(parent, SWT.NONE);
@@ -85,7 +89,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label image = new Label(header, SWT.NONE);
-		image.setImage(RelationshipTypeLabelProvider.INSTANCE.getImage(relationship.getRelationshipType()));
+		image.setImage(RelationshipTypeLabelProvider.createImageDescriptor(relationship.getRelationshipType()).createImage());
 		image.addListener(SWT.Dispose, (e)->{
 			if (!image.getImage().isDisposed()) image.getImage().dispose();
 		});
@@ -184,7 +188,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 			ll = new Label(details, SWT.NONE);
 			for (IntelEntityRelationshipAttributeValue value : relationship.getAttributes()){
 				if (value.getAttribute().equals(a.getAttribute())){
-					ll.setText(AttributeValueLabelProvider.INSTANCE.getText(value));
+					ll.setText(attributeLabelprovider.getText(value));
 					break;
 				}
 			}
@@ -210,10 +214,9 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 				headerBoldFont.dispose();
 				headerBoldFont = null;
 			}
-			return;
+			attributeLabelprovider.dispose();
 		}else if (event.type == SWT.Deactivate){
 			close();
-			return;
 		}else if (event.type == SWT.MouseDown){
 			if (event.widget != header) return;
 			blnMouseDown = true;

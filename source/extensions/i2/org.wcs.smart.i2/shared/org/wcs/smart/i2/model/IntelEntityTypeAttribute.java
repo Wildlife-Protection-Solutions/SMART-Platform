@@ -23,6 +23,7 @@ package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -42,6 +43,8 @@ import javax.persistence.Transient;
 public class IntelEntityTypeAttribute {
 
 	private IEntityTypeAttributePk id = new IEntityTypeAttributePk();	
+	
+	private int order;
 	
 	public IntelEntityTypeAttribute(){		
 	}
@@ -73,6 +76,14 @@ public class IntelEntityTypeAttribute {
 	}
 	
 
+	@Column(name="seq_order")
+	public int getOrder(){
+		return this.order;
+	}
+	
+	public void setOrder(int order){
+		this.order = order;
+	}
 	/**
 	 * @param o
 	 * @return

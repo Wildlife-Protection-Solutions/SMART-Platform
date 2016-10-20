@@ -24,10 +24,14 @@ package org.wcs.smart.i2.ui.editors.record;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -35,6 +39,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -50,6 +55,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.SmartShellDialog;
+import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -63,6 +69,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class EntityListShell extends SmartShellDialog {
 	
 	private static final String ALL_ENTITIES = "All Entities >";
+	private static final String NEW_ENTITY = "New Entity...";
 
 	private TableViewer tblSearchEntityList;
 	private TableViewer tblEntityTypeList;
@@ -73,6 +80,8 @@ public class EntityListShell extends SmartShellDialog {
 	
 	private IntelEntityType lastSelectedType;
 	
+	@Inject
+	private IEclipseContext context;
 	
 	public EntityListShell(Shell ownerShell, RecordEditor editor){
 		super(ownerShell);
@@ -95,6 +104,12 @@ public class EntityListShell extends SmartShellDialog {
 				if (element instanceof IntelEntity) return ((IntelEntity) element).getIdAttributeAsText();
 				return super.getText(element);
 			}
+			
+			public Image getImage(Object element){
+				if (element == ALL_ENTITIES) return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
+				if (element == NEW_ENTITY) return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_NEW);
+				return null;
+			}
 		});
 		
 		tblSearchEntityList.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -113,6 +128,12 @@ public class EntityListShell extends SmartShellDialog {
 					tblEntityTypeList.getTable().setVisible(true);
 					tblEntityTypeList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 					loadEntityTypesJob.schedule();
+				}else if (selection == NEW_ENTITY){
+					NewEntityDialog dialog = new NewEntityDialog(editor.getSite().getShell());
+					ContextInjectionFactory.inject(dialog, context);
+					if (dialog.open() == NewEntityDialog.OK){
+						editor.linkEntity(dialog.getNewEntity());
+					}
 				}
 			}
 		});
@@ -121,6 +142,7 @@ public class EntityListShell extends SmartShellDialog {
 		List<IntelEntity> entities = (List<IntelEntity>) editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY);
 		List<Object> allItems = new ArrayList<Object>();
 		allItems.add(ALL_ENTITIES);
+		allItems.add(NEW_ENTITY);
 		if (entities != null) allItems.addAll(entities);
 		
 		tblSearchEntityList.setInput(allItems);	
@@ -131,7 +153,7 @@ public class EntityListShell extends SmartShellDialog {
 		tblEntityTypeList = new TableViewer(parent, SWT.BORDER);
 		tblEntityTypeList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblEntityTypeList.setContentProvider(ArrayContentProvider.getInstance());
-		tblEntityTypeList.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
+		tblEntityTypeList.setLabelProvider(new EntityTypeLabelProvider());
 		tblEntityTypeList.getTable().setVisible(false);
 		tblEntityTypeList.addSelectionChangedListener(new ISelectionChangedListener() {
 			

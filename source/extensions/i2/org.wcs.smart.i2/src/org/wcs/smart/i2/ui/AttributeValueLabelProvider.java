@@ -43,8 +43,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
  */
 public class AttributeValueLabelProvider extends LabelProvider {
 	
-	public static AttributeValueLabelProvider INSTANCE = new AttributeValueLabelProvider();
-	
 	public String getText(Object element){
 		Object value = null;
 		IntelAttribute attribute = null;

@@ -122,6 +122,7 @@ public enum IntelReportManager {
 					entityType.setBirtTemplate(file);
 					s.getTransaction().commit();
 				}catch (Exception ex){
+					s.getTransaction().rollback();
 					Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to edit template for entity type {0}. {1}", entityType.getName(),  ex.getMessage()), ex);
 				}finally{
 					s.close();
@@ -142,6 +143,7 @@ public enum IntelReportManager {
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex){
+					s.getTransaction().rollback();
 					Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to edit template for entity type {0}. {1}", entityType.getName(),  ex.getMessage()), ex);
 				}finally{
 					s.close();

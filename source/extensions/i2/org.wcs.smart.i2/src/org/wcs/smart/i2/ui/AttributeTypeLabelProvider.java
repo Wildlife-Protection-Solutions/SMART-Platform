@@ -34,8 +34,6 @@ import org.wcs.smart.i2.model.IntelAttribute;
  */
 public class AttributeTypeLabelProvider extends LabelProvider {
 	
-	public static AttributeTypeLabelProvider INSTANCE = new AttributeTypeLabelProvider();
-	
 	public String getText(Object element){
 		if (element instanceof IntelAttribute.IAttributeType){
 			return ((IntelAttribute.IAttributeType) element).getGuiName(Locale.getDefault());

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
-import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -48,7 +47,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -57,7 +55,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -75,7 +72,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -187,7 +183,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		cmbTypes = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER);
+		cmbTypes = new TableViewer(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -213,6 +209,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		TableViewerColumn nameColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
 		nameColumn.getColumn().setText("Relationship");
 		nameColumn.setLabelProvider(new ColumnLabelProvider() {
+			private RelationshipTypeLabelProvider rl = new RelationshipTypeLabelProvider();
 			@Override
 			public String getText(Object element){
 				if (element instanceof IntelRelationshipType){
@@ -221,8 +218,13 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				return super.getText(element);
 			}
 			@Override
+			public void dispose(){
+				super.dispose();
+				rl.dispose();
+			}
+			@Override
 			public Image getImage(Object element){
-				return RelationshipTypeLabelProvider.INSTANCE.getImage(element);
+				return rl.getImage(element);
 			}
 		});
 		nameColumn.getColumn().setWidth(150);
@@ -243,6 +245,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		TableViewerColumn sourceColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
 		sourceColumn.getColumn().setText("Source Entity Type");
 		sourceColumn.setLabelProvider(new ColumnLabelProvider() {
+			private EntityTypeLabelProvider el = new EntityTypeLabelProvider();
 			@Override
 			public String getText(Object element){
 				if (element instanceof IntelRelationshipType){
@@ -255,20 +258,26 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			@Override
 			public Image getImage(Object element){
 				if (element instanceof IntelRelationshipType){
-					return EntityTypeLabelProvider.INSTANCE.getImage(((IntelRelationshipType)element).getSourceEntityType());
+					return el.getImage(((IntelRelationshipType)element).getSourceEntityType());
 				}
 				return null;
+			}
+			@Override
+			public void dispose(){
+				super.dispose();
+				el.dispose();
 			}
 		});
 		sourceColumn.getColumn().setWidth(150);
 		TableViewerColumn targetColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
 		targetColumn.getColumn().setText("Source Entity Type");
 		targetColumn.setLabelProvider(new ColumnLabelProvider() {
+			private EntityTypeLabelProvider el = new EntityTypeLabelProvider();
 			@Override
 			public String getText(Object element){
 				if (element instanceof IntelRelationshipType){
 					IntelRelationshipType t = (IntelRelationshipType)element;
-					if (t.getSourceEntityType() != null) return t.getTargetEntityType().getName();
+					if (t.getTargetEntityType() != null) return t.getTargetEntityType().getName();
 					return "<Unknown>";
 				}
 				return super.getText(element);
@@ -276,9 +285,14 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			@Override
 			public Image getImage(Object element){
 				if (element instanceof IntelRelationshipType){
-					return EntityTypeLabelProvider.INSTANCE.getImage(((IntelRelationshipType)element).getTargetEntityType());
+					return el.getImage(((IntelRelationshipType)element).getTargetEntityType());
 				}
 				return null;
+			}
+			@Override
+			public void dispose(){
+				super.dispose();
+				el.dispose();
 			}
 		});
 		targetColumn.getColumn().setWidth(150);

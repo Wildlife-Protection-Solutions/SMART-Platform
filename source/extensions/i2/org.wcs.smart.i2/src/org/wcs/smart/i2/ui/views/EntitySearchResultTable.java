@@ -311,12 +311,12 @@ public class EntitySearchResultTable extends Composite {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			addListener(l);
 			final Label l1 = toolkit.createLabel(middle,"");
-			l1.setImage(EntityTypeLabelProvider.INSTANCE.getImage(item.getEntityType()));
+			l1.setImage(EntityTypeLabelProvider.createImageDescriptor(item.getEntityType()).createImage());
 			l1.addDisposeListener((e)->{if (l1.getImage() != null) l1.getImage().dispose();});
 			addListener(l1);
 			
 			l = toolkit.createLabel(middle, "");
-			l.setText(EntityTypeLabelProvider.INSTANCE.getText(item.getEntityType()));
+			l.setText(EntityTypeLabelProvider.getText(item.getEntityType()));
 			addListener(l);
 			
 			Composite right = toolkit.createComposite(this, SWT.NONE);
@@ -338,11 +338,20 @@ public class EntitySearchResultTable extends Composite {
 		private void addDragSources(){
 			final IntelEntitySelectionTransfer trans = IntelEntitySelectionTransfer.getTransfer();
 			DragSourceAdapter listener = new DragSourceAdapter() {
+				
+				@Override
+				public void dragStart(DragSourceEvent event) {
+					IntelEntitySelectionTransfer.getTransfer().setSelection(new StructuredSelection(item));				
+				}
 				@Override
 				public void dragSetData(DragSourceEvent event) {
-					if (IntelEntitySelectionTransfer.getTransfer().isSupportedType(event.dataType)){
-						trans.setSelection(new StructuredSelection(item));
+					if (IntelEntitySelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
+						event.data = new StructuredSelection(item);
 					}
+				}
+				@Override
+				public void dragFinished(DragSourceEvent event) {
+					IntelEntitySelectionTransfer.getTransfer().setSelection(null);
 				}
 			};
 			

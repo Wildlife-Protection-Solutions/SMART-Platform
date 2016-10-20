@@ -168,6 +168,7 @@ CREATE TABLE smart.i_entity_type_attribute
 (
 	entity_type_uuid char(16)for bit data  NOT NULL,
 	attribute_uuid char(16) for bit data NOT NULL,
+	seq_order integer not null,
 	PRIMARY KEY (entity_type_uuid, attribute_uuid)
 );
 
@@ -249,6 +250,7 @@ CREATE TABLE smart.i_relationship_type_attribute
 (
 	relationship_type_uuid char(16) for bit data NOT NULL,
 	attribute_uuid char(16) for bit data NOT NULL,
+	seq_order integer not null,
 	PRIMARY KEY (relationship_type_uuid, attribute_uuid)
 );
 
@@ -759,6 +761,22 @@ ALTER TABLE smart.i_relationship_type_attribute ADD CONSTRAINT irelationshipattr
 DEFERRABLE INITIALLY IMMEDIATE;
 
 
+alter table smart.I_RELATIONSHIP_TYPE
+	add constraint I_RELATIONSHIP_TYPE_SRC_TYPE_FK 
+	FOREIGN KEY (src_entity_type)
+	REFERENCES smart.I_ENTITY_TYPE(uuid)
+	on update restrict
+	on delete restrict
+	DEFERRABLE INITIALLY IMMEDIATE;
+
+alter table smart.I_RELATIONSHIP_TYPE
+	add constraint I_RELATIONSHIP_TYPE_TRG_TYPE_FK 
+	FOREIGN KEY (target_entity_type)
+	REFERENCES smart.I_ENTITY_TYPE(uuid)
+	on update restrict
+	on delete restrict
+	DEFERRABLE INITIALLY ;
+	
 ALTER TABLE smart.i_entity_relationship ADD CONSTRAINT ientityrelationship_type_fk
 	FOREIGN KEY (relationship_type_uuid)
 	REFERENCES smart.i_relationship_type (uuid)

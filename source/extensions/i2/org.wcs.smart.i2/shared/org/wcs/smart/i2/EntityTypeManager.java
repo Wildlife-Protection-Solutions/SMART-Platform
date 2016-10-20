@@ -74,9 +74,17 @@ public enum EntityTypeManager {
 	 */
 	public void deleteEntityType(IntelEntityType type, Session session) throws Exception{
 		
-
+		//update relationships references to null
+		Query q = session.createQuery("UPDATE IntelRelationshipType SET sourceEntityType = null where sourceEntityType = :type");
+		q.setParameter("type", type); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("UPDATE IntelRelationshipType SET targetEntityType = null where targetEntityType = :type");
+		q.setParameter("type", type); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		//delete all entity attribute values
-		Query q = session.createQuery("delete from IntelEntityAttributeValue ieav where ieav.id.entity in (FROM IntelEntity WHERE entityType = :type)"); //$NON-NLS-1$
+		q = session.createQuery("delete from IntelEntityAttributeValue ieav where ieav.id.entity in (FROM IntelEntity WHERE entityType = :type)"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -104,6 +112,11 @@ public enum EntityTypeManager {
 		
 		//delete all locations
 		q = session.createQuery("delete from IntelEntityLocation ii where ii.id.entity in (FROM IntelEntity WHERE entityType = :type) "); //$NON-NLS-1$
+		q.setParameter("type", type); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		//delete all links to working sets
+		q = session.createQuery("delete from IntelWorkingSetEntity ii where ii.id.entity in (FROM IntelEntity WHERE entityType = :type) "); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		

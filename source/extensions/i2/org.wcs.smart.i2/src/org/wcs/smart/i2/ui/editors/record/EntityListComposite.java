@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -97,7 +98,7 @@ public class EntityListComposite extends Composite{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				EntityListShell shell = new EntityListShell(EntityListComposite.this.getShell(), editor);
-				
+				ContextInjectionFactory.inject(shell, editor.getContext());
 				int x = btnAdd.getLocation().x + btnAdd.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				int y =  btnAdd.getLocation().y;
 				shell.addListener(SWT.Close, new Listener() {

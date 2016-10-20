@@ -35,10 +35,8 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -162,18 +160,13 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 		lstTypes = new TableViewer(parent);
 		lstTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
 		lstTypes.setContentProvider(ArrayContentProvider.getInstance());
-		lstTypes.setLabelProvider(new LabelProvider(){
+		lstTypes.setLabelProvider(new RelationshipTypeLabelProvider(){
 			@Override
 			public String getText(Object element){
 				if (element instanceof IntelRelationshipType){
 					return ((IntelRelationshipType) element).getName();
 				}
 				return super.getText(element);
-			}
-			
-			@Override
-			public Image getImage(Object element){
-				return RelationshipTypeLabelProvider.INSTANCE.getImage(element);
 			}
 		});
 		lstTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});

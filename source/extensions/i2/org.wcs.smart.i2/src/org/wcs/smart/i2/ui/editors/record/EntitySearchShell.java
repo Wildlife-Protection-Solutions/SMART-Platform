@@ -32,7 +32,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -96,7 +95,7 @@ public class EntitySearchShell extends SmartShellDialog {
 		tblEntityList = new TableViewer(owner, SWT.BORDER);
 		tblEntityList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblEntityList.setContentProvider(ArrayContentProvider.getInstance());
-		tblEntityList.setLabelProvider(new LabelProvider(){
+		tblEntityList.setLabelProvider(new EntityTypeLabelProvider(){
 			@Override
 			public String getText(Object element){
 				if (element instanceof IntelEntity) return ((IntelEntity) element).getIdAttributeAsText();
@@ -105,8 +104,10 @@ public class EntitySearchShell extends SmartShellDialog {
 			
 			@Override
 			public Image getImage(Object element){
-				if (element instanceof IntelEntity) return EntityTypeLabelProvider.INSTANCE.getImage(((IntelEntity) element).getEntityType());
-				return super.getImage(element);
+				if (element instanceof IntelEntity){
+					return super.getImage(((IntelEntity) element).getEntityType());
+				}
+				return null;
 			}
 		});
 		

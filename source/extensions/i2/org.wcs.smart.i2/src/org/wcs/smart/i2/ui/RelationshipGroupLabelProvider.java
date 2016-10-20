@@ -31,8 +31,6 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
  */
 public class RelationshipGroupLabelProvider extends LabelProvider {
 
-	public static RelationshipGroupLabelProvider INSTANCE = new RelationshipGroupLabelProvider();
-	
 	@Override
 	public String getText(Object element){
 		if (element instanceof IntelRelationshipGroup){

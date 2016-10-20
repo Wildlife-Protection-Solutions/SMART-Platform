@@ -142,7 +142,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 		
 		cmbTypes = new TableViewer(parent, SWT.MULTI | SWT.BORDER);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTypes.setLabelProvider(AttributeLabelProvider.INSTANCE);
+		cmbTypes.setLabelProvider(new AttributeLabelProvider());
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmbTypes.getControl().setFocus();

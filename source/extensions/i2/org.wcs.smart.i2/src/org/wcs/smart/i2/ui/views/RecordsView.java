@@ -50,6 +50,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
@@ -241,27 +242,51 @@ public class RecordsView {
 		//add drag and drop support
 		lstAllRecords.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){
 			@Override
+			public void dragStart(DragSourceEvent event) {
+				IntelRecordSelectionTransfer.getTransfer().setSelection(lstAllRecords.getSelection());				
+			}
+			@Override
 			public void dragSetData(DragSourceEvent event) {
-				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)){
-					IntelRecordSelectionTransfer.getTransfer().setSelection(lstAllRecords.getSelection());
+				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
+					event.data = lstAllRecords.getSelection();
 				}
+			}
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				IntelRecordSelectionTransfer.getTransfer().setSelection(null);
 			}
 		});
 		//add drag and drop support
 		lstInProgress.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){
 			@Override
-			public void dragSetData(DragSourceEvent event) {
-				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)){
-					IntelRecordSelectionTransfer.getTransfer().setSelection(lstInProgress.getSelection());
-				}
+			public void dragStart(DragSourceEvent event) {
+				IntelRecordSelectionTransfer.getTransfer().setSelection(lstInProgress.getSelection());				
 			}
-		});
-		lstNewRecords.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){
 			@Override
 			public void dragSetData(DragSourceEvent event) {
-				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)){
-					IntelRecordSelectionTransfer.getTransfer().setSelection(lstNewRecords.getSelection());
+				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
+					event.data = lstInProgress.getSelection();
 				}
+			}
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				IntelRecordSelectionTransfer.getTransfer().setSelection(null);
+			}
+		});
+		lstNewRecords.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){	
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				IntelRecordSelectionTransfer.getTransfer().setSelection(lstNewRecords.getSelection());				
+			}
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
+					event.data = lstNewRecords.getSelection();
+				}
+			}
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				IntelRecordSelectionTransfer.getTransfer().setSelection(null);
 			}
 		});
 		loadRecordsJob.schedule(0);

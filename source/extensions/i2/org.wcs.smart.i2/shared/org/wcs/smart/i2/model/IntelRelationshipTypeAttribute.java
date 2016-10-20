@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.io.Serializable;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -42,8 +43,9 @@ import javax.persistence.Transient;
 @Table(name="smart.i_relationship_type_attribute")
 public class IntelRelationshipTypeAttribute{
 
-
 	private IRelationshipTypeAttributePk id = new IRelationshipTypeAttributePk();	
+
+	private int order;
 	
 	public IntelRelationshipTypeAttribute(){
 	}
@@ -74,6 +76,13 @@ public class IntelRelationshipTypeAttribute{
 		id.setAttribute(attachment);
 	}
 
+	@Column(name="seq_order")
+	public int getOrder(){
+		return this.order;
+	}
+	public void setOrder(int order){
+		this.order = order;
+	}
 	/**
 	 * @param o
 	 * @return

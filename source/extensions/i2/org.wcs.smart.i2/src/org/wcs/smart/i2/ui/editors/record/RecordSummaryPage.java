@@ -189,7 +189,7 @@ public class RecordSummaryPage extends EditorPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean doAction = true;
-				if (recordEditor.getEditMode()){
+				if (recordEditor.isDirty()){
 					if (!MessageDialog.openConfirm(getSite().getShell(), "Refresh", "Changes will be lost.  Are you sure you want to refresh?")){
 						doAction = false;
 					}

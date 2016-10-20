@@ -34,8 +34,6 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
  *
  */
 public class AttributeLabelProvider extends LabelProvider {
-
-	public static AttributeLabelProvider INSTANCE = new AttributeLabelProvider();
 	
 	public String getText(Object element){
 		if (element instanceof IntelAttribute){

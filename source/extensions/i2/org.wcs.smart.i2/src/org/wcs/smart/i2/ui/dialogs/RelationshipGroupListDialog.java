@@ -163,7 +163,7 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 		
 		cmbGroups = new TableViewer(parent);
 		cmbGroups.setContentProvider(ArrayContentProvider.getInstance());
-		cmbGroups.setLabelProvider(RelationshipGroupLabelProvider.INSTANCE);
+		cmbGroups.setLabelProvider(new RelationshipGroupLabelProvider());
 		cmbGroups.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbGroups.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmbGroups.getControl().setFocus();

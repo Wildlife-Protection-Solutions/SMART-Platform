@@ -62,7 +62,6 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	
 	private List<IntelEntityAttributeValue> entityAttributes;
 	private List<IntelEntityAttachment> entityAttachments;
-//	private Set<IEntityRelationship> entityRelationships;
 	private List<IntelEntityRecord> intelligenceRecords;
 	private List<IntelEntityLocation> entityLocations;
 
@@ -237,29 +236,6 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	public void setAttributes(List<IntelEntityAttributeValue> entityAttributes) {
 		this.entityAttributes = entityAttributes;
 	}
-//
-//
-//	/**
-//	 * Get the set of the i_entity_relationship.
-//	 * 
-//	 * @return The set of i_entity_relationship
-//	 */
-//	@OneToMany(fetch = FetchType.LAZY)
-//	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
-//	public Set<IEntityRelationship> getEntityRelationships() {
-//		return this.entityRelationships;
-//	}
-//	
-//	/**
-//	 * Set the set of the i_entity_relationship.
-//	 * 
-//	 * @param iEntityRelationshipSet
-//	 *            The set of i_entity_relationship
-//	 */
-//	public void setIEntityRelationshipSet(Set<IEntityRelationship> entityRelationships) {
-//		this.entityRelationships = entityRelationships;
-//	}
-
 
 	/**
 	 * Get the set of the i_entity_attachment.
@@ -308,8 +284,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	 * 
 	 * @return The set of i_entity_location
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="entity_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.entity", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelEntityLocation> getLocations() {
 		return this.entityLocations;
 	}
@@ -330,7 +305,8 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	public String getIdAttributeAsText(){
 		for (IntelEntityAttributeValue v : getAttributes()){
 			if (v.getAttribute().equals(getEntityType().getIdAttribute())){
-				return AttributeValueLabelProvider.INSTANCE.getText(v);
+				//TODO Fix this as this won't compile when shared with connect
+				return (new AttributeValueLabelProvider()).getText(v);
 			}
 		}
 		return "";

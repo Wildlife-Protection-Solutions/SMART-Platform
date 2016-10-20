@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.dialogs;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -54,9 +56,15 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
@@ -119,6 +127,8 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private Button btnAdd;
 	private Button btnDelete;
 	private Button btnEdit;
+	private Button btnMoveUp;
+	private Button btnMoveDown;
 	
 	private ControlDecoration cdList;
 	private ControlDecoration cdId;
@@ -171,11 +181,12 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			
 			for (IntelEntityTypeAttribute a : attributeList){
 				if (!type.getAttributes().contains(a)){
-					s.saveOrUpdate(a);
+					//new items 
 					type.getAttributes().add(a);
 				}
 			}
 			
+			List<IntelEntityTypeAttribute> toDelete = new ArrayList<IntelEntityTypeAttribute>();
 			for (IntelEntityTypeAttribute a : type.getAttributes()){
 				if (!attributeList.contains(a)){
 					//delete any entity attribute value associations
@@ -183,10 +194,20 @@ public class EntityTypeDialog extends TitleAreaDialog {
 					qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
 					qDelete.setParameter("entityType", type); //$NON-NLS-1$
 					qDelete.executeUpdate();
-							
-					s.delete(a);
+					toDelete.add(a);
 				}
 			}
+			type.getAttributes().removeAll(toDelete);
+			
+			int order = 1;
+			for (IntelEntityTypeAttribute a : attributeList){
+				int index = type.getAttributes().indexOf(a);
+				if (index >= 0){
+					type.getAttributes().get(index).setOrder(order++);
+				}
+			}
+			Collections.sort(type.getAttributes(), (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
+			
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
@@ -217,6 +238,8 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		btnDelete.setEnabled(!tblAttributes.getSelection().isEmpty());
 		editItem.setEnabled(!tblAttributes.getSelection().isEmpty());
 		deleteItem.setEnabled(!tblAttributes.getSelection().isEmpty());
+		btnMoveUp.setEnabled(!tblAttributes.getSelection().isEmpty());
+		btnMoveDown.setEnabled(!tblAttributes.getSelection().isEmpty());
 	}
 	
 	private void modified(){
@@ -281,7 +304,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		idAttribute = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		idAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		idAttribute.setContentProvider(ArrayContentProvider.getInstance());
-		idAttribute.setLabelProvider(AttributeLabelProvider.INSTANCE);
+		idAttribute.setLabelProvider(new AttributeLabelProvider());
 		idAttribute.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -331,7 +354,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		tblAttributes = new TableViewer(attributeComp, SWT.BORDER | SWT.MULTI);
 		tblAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		tblAttributes.setLabelProvider(AttributeLabelProvider.INSTANCE);
+		tblAttributes.setLabelProvider(new AttributeLabelProvider());
 		tblAttributes.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -346,7 +369,64 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 		});
 		cdList = createDecoration(tblAttributes.getControl());
+		int operations = DND.DROP_MOVE;
+		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+		tblAttributes.addDragSupport(operations, transferTypes , new DragSourceListener() {
+			
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				LocalSelectionTransfer.getTransfer().setSelection(tblAttributes.getSelection());				
+			}
+			
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (LocalSelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
+					event.data = tblAttributes.getSelection();
+				}	
+			}
+			
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				LocalSelectionTransfer.getTransfer().setSelection(null);
+				
+			}
+		});
 		
+		tblAttributes.addDropSupport(operations, transferTypes, new ViewerDropAdapter(tblAttributes) {
+			@Override
+			public boolean performDrop(Object data) {
+				StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
+				if (selection == null){
+					return false;
+				}
+				Object obj = selection.getFirstElement();
+				if (obj.equals(getCurrentTarget())) return false;
+				if (obj instanceof IntelEntityTypeAttribute){
+					int loc = getCurrentLocation();
+					attributeList.remove(obj);
+					int targetIndex = attributeList.indexOf(getCurrentTarget());					
+					if (loc == LOCATION_AFTER){
+						targetIndex ++;
+					}
+					if (targetIndex < 0) targetIndex = 0;
+					if (targetIndex > attributeList.size()) targetIndex = attributeList.size();
+					attributeList.add(targetIndex, (IntelEntityTypeAttribute) obj);
+					getViewer().refresh();
+					modified();
+				}
+				return true;
+			}
+
+			@Override
+			public boolean validateDrop(Object target, int operation, TransferData transferType) {
+				if (LocalSelectionTransfer.getTransfer().isSupportedType(transferType) &&
+						operation == DND.DROP_MOVE && getCurrentTarget() != null){
+					return true;
+				}
+				return false;
+			}
+			
+		});
 		
 		Menu listMenu = new Menu(tblAttributes.getControl());
 		tblAttributes.getControl().setMenu(listMenu);
@@ -420,11 +500,58 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				removeAttributes();
 			}
 		});
+		
+		Label s = new Label(buttonComp, SWT.HORIZONTAL | SWT.SEPARATOR);
+		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		btnMoveUp = new Button(buttonComp, SWT.NONE);
+		btnMoveUp.setText("Move Down");
+		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveUp.setEnabled(false);
+		btnMoveUp.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				moveAttribute(SWT.UP);
+			}
+		});
+		
+		btnMoveDown = new Button(buttonComp, SWT.NONE);
+		btnMoveDown.setText("Move Up");
+		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveDown.setEnabled(false);
+		btnMoveDown.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				moveAttribute(SWT.DOWN);
+			}
+		});
 		setTitle("Entity Type");
 		getShell().setText("Entity Type");
 		setMessage("Configure entity type");
 		
 		return parent;
+	}
+	
+	private void moveAttribute(int direction){
+		for (Iterator<?> iterator = ((IStructuredSelection) tblAttributes.getSelection()).iterator(); iterator.hasNext();) {
+			IntelEntityTypeAttribute a = (IntelEntityTypeAttribute) iterator.next();
+			
+			int index = attributeList.indexOf(a);
+			if (direction == SWT.UP){
+				index ++;
+				if(index >= attributeList.size()){
+					index = attributeList.size() - 1;
+				}
+			}else if (direction == SWT.DOWN){
+				index --;
+				if(index < 0) index = 0;
+			}
+			
+			attributeList.remove(a);
+			attributeList.add(index, a);
+		}
+		modified();
+		tblAttributes.refresh();
 	}
 	
 	private void addAttribute(){
@@ -644,7 +771,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			
 			attributeList = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
 			attributeList.setContentProvider(ArrayContentProvider.getInstance());
-			attributeList.setLabelProvider(AttributeLabelProvider.INSTANCE);
+			attributeList.setLabelProvider(new AttributeLabelProvider());
 			attributeList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 			attributeList.getControl().setFocus();
 			attributeList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

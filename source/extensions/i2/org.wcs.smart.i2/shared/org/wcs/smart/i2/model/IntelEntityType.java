@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,6 +34,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -145,8 +147,8 @@ public class IntelEntityType extends NamedKeyItem {
 		this.birtTemplate = birtTemplate;
 	}
 
-	@OneToMany(fetch=FetchType.LAZY)
-	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid" )
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.entityType", orphanRemoval = true, cascade={CascadeType.ALL})
+	@OrderBy("seq_order asc")
 	public List<IntelEntityTypeAttribute> getAttributes(){
 		return this.attributes;
 	}

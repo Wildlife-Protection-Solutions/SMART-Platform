@@ -293,7 +293,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() ==  IAttributeType.LIST){
 			cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-			cmbViewer.setLabelProvider(AttributeListItemLabelProvider.INSTANCE);
+			cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
 			List<Object> items = new ArrayList<Object>();
 			items.add("");
 			items.addAll(attribute.getAttributeList());

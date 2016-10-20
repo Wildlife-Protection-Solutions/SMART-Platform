@@ -80,6 +80,11 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
+/**
+ * View for entity search and results
+ * @author Emily
+ *
+ */
 public class EntitySearchView {
 
 	/**
@@ -303,7 +308,7 @@ public class EntitySearchView {
 		
 		cmbEntityType = new TableComboViewer(core, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbEntityType.setContentProvider(ArrayContentProvider.getInstance());
-		cmbEntityType.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
+		cmbEntityType.setLabelProvider(new EntityTypeLabelProvider());
 		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		toolkit.adapt(cmbEntityType.getTableCombo());

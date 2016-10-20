@@ -91,7 +91,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	
 		if (relationship.getRelationshipType().getAttributes().size() == 0){
 			Label l = new Label(parent, SWT.NONE);
-			l.setText("There are not attributes configured for this relationship type.");
+			l.setText("There are no attributes configured for this relationship type.");
 		}else{
 			ScrolledComposite scroll = new ScrolledComposite(parent, SWT.V_SCROLL);
 			scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -176,6 +176,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 		if (getButton(IDialogConstants.OK_ID).isEnabled()){
 			if (MessageDialog.openQuestion(getShell(), "Save Changes", "Would you like the save the changes before closing?")){
 				okPressed();
+				return;
 			}
 		}
 		super.cancelPressed();

@@ -176,7 +176,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		
 		cmbTypes = new TableViewer(parent);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTypes.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
+		cmbTypes.setLabelProvider(new EntityTypeLabelProvider());
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmbTypes.getControl().setFocus();

@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -71,6 +72,7 @@ import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -83,14 +85,16 @@ public class NewEntityDialog extends TitleAreaDialog{
 
 	private static final String LAST_TYPE_KEY = "org.wcs.smart.i2.ui.dialogs.newentity.lasttype";
 	
-	private TableComboViewer cmbEntityType;
-	
+	private TableComboViewer cmbEntityType;	
 	private Composite attributePanel;
-	
 	private List<AttributeFieldEditor> attributeControls;
+	
+	private IntelEntity newEntity = null;
 	
 	@Inject
 	private IEventBroker broker;
+	@Inject
+	private IEclipseContext context;
 	
 	private Job loadEntityTypes = new Job("load entity types"){
 
@@ -98,7 +102,6 @@ public class NewEntityDialog extends TitleAreaDialog{
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<IntelEntityType> types = new ArrayList<IntelEntityType>();
 			Session s = HibernateManager.openSession();
-//			s.addEventListeners(new IntelEntityListener());
 			try{
 				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
 			}finally{
@@ -172,7 +175,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 			MessageDialog.openWarning(getShell(), "Error", "Invalid type selected for entity");
 			return;
 		}
-		IntelEntity newEntity = new IntelEntity();
+		newEntity = new IntelEntity();
 		newEntity.setConservationArea(SmartDB.getCurrentConservationArea());
 		newEntity.setEntityType(type);
 		newEntity.setAttributes(new ArrayList<IntelEntityAttributeValue>());
@@ -194,11 +197,11 @@ public class NewEntityDialog extends TitleAreaDialog{
 			session.beginTransaction();
 			session.saveOrUpdate(newEntity);
 			session.getTransaction().commit();
-			
-			
 		}catch (Exception ex){
+			if (session.getTransaction().isActive()) session.getTransaction().rollback();
 			MessageDialog.openWarning(getShell(), "Error", "Could not save entity: " + ex.getMessage());
 			Intelligence2PlugIn.log(ex.getMessage(), ex);
+			newEntity = null;
 			return;
 		}finally{
 			session.close();
@@ -210,7 +213,14 @@ public class NewEntityDialog extends TitleAreaDialog{
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 		}
+		
+		//open editor
+		(new OpenEntityHandler()).openEntity(newEntity, context);
 		super.okPressed();
+	}
+	
+	public IntelEntity getNewEntity(){
+		return this.newEntity;
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -246,7 +256,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		
 		cmbEntityType = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbEntityType.setContentProvider(ArrayContentProvider.getInstance());
-		cmbEntityType.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
+		cmbEntityType.setLabelProvider(new EntityTypeLabelProvider());
 		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbEntityType.addSelectionChangedListener(new ISelectionChangedListener() {

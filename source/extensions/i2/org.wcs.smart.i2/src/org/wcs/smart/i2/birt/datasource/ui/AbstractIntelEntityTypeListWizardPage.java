@@ -120,7 +120,7 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 		composite.setLayoutData(gridData);
 
 		lstEntityTypes = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		lstEntityTypes.setLabelProvider(EntityTypeLabelProvider.INSTANCE);
+		lstEntityTypes.setLabelProvider(new EntityTypeLabelProvider());
 		lstEntityTypes.setContentProvider(ArrayContentProvider.getInstance());
 		
 

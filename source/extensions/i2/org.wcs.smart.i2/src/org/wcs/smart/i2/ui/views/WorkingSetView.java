@@ -248,7 +248,7 @@ public class WorkingSetView {
 		workingsetTree = new CheckboxTreeViewer(core, SWT.FULL_SELECTION | SWT.MULTI);
 		workingsetTree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(workingsetTree.getTree());
-		workingsetTree.setLabelProvider(WorkingSetLabelProvider.INSTANCE);
+		workingsetTree.setLabelProvider(new WorkingSetLabelProvider());
 		workingsetTree.setContentProvider(new WorkingSetTreeContentProvider());
 		workingsetTree.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -759,6 +759,7 @@ public class WorkingSetView {
 			s.save(workingSet);
 			s.getTransaction().commit();
 		}catch (Exception ex){
+			if (s.getTransaction().isActive())s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Error creating new working set. {1}", ex.getMessage()), ex);
 		}finally{
 			s.close();
@@ -809,7 +810,7 @@ public class WorkingSetView {
 						
 						ws.getName();
 						for (IntelWorkingSetEntity entity : ws.getEntities()){
-							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.INSTANCE.createImageDescriptor(entity.getEntity().getEntityType()));
+							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()));
 							items.add(i);
 						}
 						

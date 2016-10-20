@@ -933,5 +933,11 @@
             clazz="org.wcs.smart.i2.CleanUpJob">
       </loginHandler>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="intelligence2">
+      </FilestoreDirectory>
+   </extension>
 
 </plugin>

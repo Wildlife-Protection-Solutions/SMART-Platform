@@ -171,11 +171,11 @@ public class AttachmentListComposite extends Composite{
 						
 						Menu mnuEntities = new Menu(mnulinkTo);
 						mnulinkTo.setMenu(mnuEntities);
-						
+						if (editor.getRecord().getEntities() == null) editor.getRecord().setEntities(new ArrayList<IntelEntityRecord>());
 						for (IntelEntityRecord entity : editor.getRecord().getEntities()){
 							MenuItem eItem = new MenuItem(mnuEntities, SWT.DEFAULT);
 							eItem.setText(entity.getEntity().getIdAttributeAsText());
-							eItem.setImage(EntityTypeLabelProvider.INSTANCE.getImage(entity.getEntity().getEntityType()));
+							eItem.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()).createImage());
 							eItem.addListener(SWT.Dispose, (event) -> {if (eItem.getImage() != null) eItem.getImage().dispose();});
 							eItem.addSelectionListener(new SelectionAdapter() {
 								

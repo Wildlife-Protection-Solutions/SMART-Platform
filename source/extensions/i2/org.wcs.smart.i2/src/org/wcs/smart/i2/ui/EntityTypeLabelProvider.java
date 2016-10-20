@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui;
 
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -39,12 +40,12 @@ import org.wcs.smart.i2.model.IntelEntityType;
  */
 public class EntityTypeLabelProvider extends LabelProvider {
 
-	public static EntityTypeLabelProvider INSTANCE = new EntityTypeLabelProvider();
+	private HashMap<IntelEntityType, Image> images = new HashMap<>();
 	
 	@Override
 	public String getText(Object element){
 		if (element instanceof IntelEntityType){
-			return ((IntelEntityType) element).getName();
+			return getText((IntelEntityType) element);
 		}
 		return super.getText(element);
 	}
@@ -56,10 +57,14 @@ public class EntityTypeLabelProvider extends LabelProvider {
 	@Override
 	public Image getImage(Object element){
 		if (element instanceof IntelEntityType){
+			Image img = images.get((IntelEntityType)element);
+			if (img != null) return img;
 			try{
 				BufferedImage image = ((IntelEntityType) element).getIconAsImage();
 				if (image != null){
-					return AWTSWTImageUtils.convertToSWTImage(image);
+					img = AWTSWTImageUtils.convertToSWTImage(image);
+					images.put((IntelEntityType)element, img);
+					return img;
 				}
 			}catch (Exception ex){
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
@@ -69,7 +74,17 @@ public class EntityTypeLabelProvider extends LabelProvider {
 		return super.getImage(element);
 	}
 	
-	public ImageDescriptor createImageDescriptor(IntelEntityType type){
+	@Override
+	public void dispose(){
+		images.values().forEach(i -> i.dispose());
+		super.dispose();
+	}
+	
+	public static String getText(IntelEntityType type){
+		return type.getName();
+	}
+	
+	public static ImageDescriptor createImageDescriptor(IntelEntityType type){
 		return new ImageDescriptor() {
 			
 			@Override

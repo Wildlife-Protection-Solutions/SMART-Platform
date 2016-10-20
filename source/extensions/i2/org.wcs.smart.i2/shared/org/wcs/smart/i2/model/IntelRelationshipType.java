@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,6 +34,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -164,8 +166,8 @@ public class IntelRelationshipType extends NamedKeyItem {
 	 * @param iRelationshipAttributeSet
 	 *            The set of i_relationship_attribute
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="relationship_type_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL},mappedBy="id.relationshipType", orphanRemoval = true)
+	@OrderBy("seq_order asc")
 	public List<IntelRelationshipTypeAttribute> getAttributes() {
 		return this.attributes;
 	}

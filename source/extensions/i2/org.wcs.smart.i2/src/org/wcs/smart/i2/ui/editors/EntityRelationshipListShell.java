@@ -33,7 +33,6 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -47,6 +46,7 @@ import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -81,13 +81,13 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 		TableViewer entityListTable = new TableViewer(parent, SWT.BORDER);
 		entityListTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityListTable.setContentProvider(ArrayContentProvider.getInstance());
-		entityListTable.setLabelProvider(new LabelProvider(){
+		entityListTable.setLabelProvider(new EntityTypeLabelProvider(){
 			@Override
 			public Image getImage(Object element){
 				if (element instanceof IntelEntity){
-					return EntityTypeLabelProvider.INSTANCE.getImage(((IntelEntity) element).getEntityType());
+					return getImage(((IntelEntity) element).getEntityType());
 				}
-				return super.getImage(element);
+				return null;
 			}
 			@Override
 			public String getText(Object element){
@@ -116,7 +116,7 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 		
 		types = new TableViewer(parent, SWT.BORDER);
 		types.setContentProvider(ArrayContentProvider.getInstance());
-		types.setLabelProvider(RelationshipTypeLabelProvider.INSTANCE);
+		types.setLabelProvider(new RelationshipTypeLabelProvider());
 		types.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		types.addDoubleClickListener(new IDoubleClickListener() {
@@ -163,15 +163,16 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 			final List<IntelRelationshipType> rtypes = new ArrayList<IntelRelationshipType>();
 			try{
 				rtypes.addAll(s.createCriteria(IntelRelationshipType.class)
-				.add(Restrictions.or (
+				.add(Restrictions.and(
+					Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()),
+					Restrictions.or (
 						Restrictions.and(Restrictions.eq("sourceEntityType", srcEntity.getEntityType()), 
 								Restrictions.eq("targetEntityType", targetEntity.getEntityType())),
 						Restrictions.and(Restrictions.eq("sourceEntityType", targetEntity.getEntityType()), 
 								Restrictions.eq("targetEntityType", srcEntity.getEntityType())),
 								Restrictions.isNull("sourceEntityType"),
 								Restrictions.isNull("targetEntityType")
-						))
-						.list());
+				))).list());
 				for (IntelRelationshipType i : rtypes){
 					i.getSourceEntityType();
 					i.getTargetEntityType();

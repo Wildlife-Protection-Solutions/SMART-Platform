@@ -104,12 +104,13 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q = session.createQuery("delete from IntelWorkingSet where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
-		
-		q = session.createQuery("delete from IntelEntityRelationship ii where ii.relationshipType in (from IntelRelationshipType where conservationArea = :ca)"); //$NON-NLS-1$
+
+		q = session.createQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.attribute in (from IntelAttribute where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
+
 		
-		q = session.createQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.attribute in (from IntelAttribute where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createQuery("delete from IntelEntityRelationship ii where ii.relationshipType in (from IntelRelationshipType where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -121,19 +122,16 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
+
+		q = session.createQuery("delete from IntelEntityAttachment ii where ii.id.attachment in (from IntelAttachment where conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		q = session.createQuery("delete from IntelAttachment where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		q = session.createQuery("delete from IntelAttributeListItem ii where ii.attribute in (from IntelAttribute where conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-		
-		q = session.createQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-	
-		q = session.createQuery("delete from IntelEntityAttachment ii where ii.id.attachment in (from IntelAttachment where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -152,6 +150,11 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q = session.createQuery("delete from IntelEntityType where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
+
+		q = session.createQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+	
 	}
 	
 	

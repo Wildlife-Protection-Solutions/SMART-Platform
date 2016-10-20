@@ -29,6 +29,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 
 /**
@@ -41,9 +42,35 @@ public enum EntityManager {
 	
 	INSTANCE;
 	
-	public void deleteEntity(IntelEntity entity, Session session){
-		//TODO:
+	public void deleteEntity(IntelEntity entity, Session session) throws Exception{
+
+		//delete all entity relationships attributes
+		Query q = session.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity))"); 
+		q.setParameter("srcentity", entity);
+		q.setParameter("trgentity", entity);
+		q.executeUpdate();
+
+		//delete all entity relationships 
+		q = session.createQuery("DELETE FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity)");
+		q.setParameter("srcentity", entity);
+		q.setParameter("trgentity", entity);
+		q.executeUpdate();
+
+		//delete all working set links 
+		q = session.createQuery("DELETE FROM IntelWorkingSetEntity where id.entity = :entity");
+		q.setParameter("entity", entity);
+		q.executeUpdate();
+		
+		//delete entity
 		session.delete(entity);
+		
+		if (entity.getEntityAttachments() != null){
+			for (IntelEntityAttachment attachment : entity.getEntityAttachments()){
+				if (AttachmentManager.INSTANCE.canDelete(attachment.getAttachment(), session)){
+					session.delete(attachment.getAttachment());
+				}
+			}
+		}
 	}
 	
 

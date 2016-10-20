@@ -99,6 +99,8 @@ public enum WorkingSetManager {
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence record {0} to active working set. {1}", input.getName(), ex.getMessage()), ex);
 			return;
+		}finally{
+			s.close();
 		}
 		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -133,6 +135,8 @@ public enum WorkingSetManager {
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence record {0} to active working set. {1}", record.getTitle(), ex.getMessage()), ex);
 			return;
+		}finally{
+			s.close();
 		}
 		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -167,6 +171,8 @@ public enum WorkingSetManager {
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence entity {0} to active working set. {1}", entity.getIdAttributeAsText(), ex.getMessage()), ex);
 			return;
+		}finally{
+			s.close();
 		}
 		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -202,6 +208,8 @@ public enum WorkingSetManager {
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence query {0} to active working set. {1}", query.getName(), ex.getMessage()), ex);
 			return;
+		}finally{
+			s.close();
 		}
 		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -230,6 +238,8 @@ public enum WorkingSetManager {
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not remove intelligence query {0} from active working set. {1}", query.getName(), ex.getMessage()), ex);
 			return;
+		}finally{
+			s.close();
 		}
 		if (wset != null) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -258,6 +268,8 @@ public enum WorkingSetManager {
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not remove intelligence entity {0} from active working set. {1}", entity.getIdAttributeAsText(), ex.getMessage()), ex);
 			return;
+		}finally{
+			s.close();
 		}
 		if (wset != null) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -286,6 +298,8 @@ public enum WorkingSetManager {
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not remove intelligence record {0} from active working set. {1}", record.getTitle(), ex.getMessage()), ex);
 			return;
+		}finally{
+			s.close();
 		}
 		if (wset != null) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}

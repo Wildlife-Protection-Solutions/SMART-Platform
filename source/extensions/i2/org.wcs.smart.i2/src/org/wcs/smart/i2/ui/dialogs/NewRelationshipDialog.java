@@ -164,7 +164,7 @@ public class NewRelationshipDialog extends TitleAreaDialog{
 		
 		cmbRelationshipType = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbRelationshipType.setContentProvider(ArrayContentProvider.getInstance());
-		cmbRelationshipType.setLabelProvider(RelationshipTypeLabelProvider.INSTANCE);
+		cmbRelationshipType.setLabelProvider(new RelationshipTypeLabelProvider());
 		cmbRelationshipType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbRelationshipType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbRelationshipType.addSelectionChangedListener(new ISelectionChangedListener() {
