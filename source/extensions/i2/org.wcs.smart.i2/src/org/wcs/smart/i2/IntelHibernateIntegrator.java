@@ -45,7 +45,6 @@ public class IntelHibernateIntegrator implements Integrator {
 	public void integrate(Configuration configuration,
 			SessionFactoryImplementor sessionFactory,
 			SessionFactoryServiceRegistry serviceRegistry) {
-		System.out.println("LOADED FILES");
 		// As you might expect, an EventListenerRegistry is the place with which event listeners are registered  It is a service
         // so we look it up using the service registry
         final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService( EventListenerRegistry.class );

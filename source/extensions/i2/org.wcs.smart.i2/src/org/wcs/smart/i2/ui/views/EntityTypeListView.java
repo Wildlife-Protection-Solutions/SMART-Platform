@@ -35,6 +35,7 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -105,14 +106,32 @@ public class EntityTypeListView {
 			}
 		});
 		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem reset = new MenuItem(mnu, SWT.PUSH);
+		reset.setText("Reset");
+		reset.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IntelEntityType type = getSelection();
+				if (type != null) IntelReportManager.INSTANCE.resetTemplate(type, context.get(EPartService.class));
+			}
+		});
+		
 		refreshList();
 	}
 	
-	private void editTemplate(){
+	private IntelEntityType getSelection(){
 		Object x = ((IStructuredSelection)lstTypes.getSelection()).getFirstElement();
 		if (x instanceof IntelEntityType){
-			IntelReportManager.INSTANCE.editTemplate((IntelEntityType)x);
+			return (IntelEntityType) x;
 		}
+		return null;
+	}
+	
+	private void editTemplate(){
+		IntelEntityType type = getSelection();
+		if (type != null) IntelReportManager.INSTANCE.editTemplate(type);
 	}
 	
 	private void refreshList(){

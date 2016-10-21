@@ -292,12 +292,16 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		IntelEntityType type = new IntelEntityType();
 		type.setConservationArea(SmartDB.getCurrentConservationArea());
 		type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
-		
-		EntityTypeDialog ed = new EntityTypeDialog(getShell(), type);
-		ContextInjectionFactory.inject(ed, context);
-		ed.open();
-		
+		openDialog(type);
 		refresh();
+	}
+	
+	private void openDialog(IntelEntityType type){
+		IEclipseContext ctx = context.createChild();
+		ctx.set(IntelEntityType.class, type);
+		ctx.set(Shell.class, getShell());
+		EntityTypeDialog ed = ContextInjectionFactory.make(EntityTypeDialog.class, ctx);
+		ed.open();
 	}
 	
 	private void edit(){
@@ -330,10 +334,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 					return;  //cannot edit
 				}
 			}
-			
-			EntityTypeDialog ed = new EntityTypeDialog(getShell(), type);
-			ContextInjectionFactory.inject(ed, context);
-			ed.open();
+			openDialog(type);
 			refresh();
 		}
 	}
@@ -386,7 +387,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 					}
 					monitor.done();
 					for (IntelEntityType d : deleted){
-						IntelEvents.fireDeleteEntityType(d, broker);
+						broker.send(IntelEvents.ENTITY_TYPE_DELETE, d);
 					}
 					 
 				}

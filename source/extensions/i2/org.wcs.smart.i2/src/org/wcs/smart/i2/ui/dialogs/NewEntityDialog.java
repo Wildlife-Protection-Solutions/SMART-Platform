@@ -209,7 +209,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		
 		//fire events
 		try{
-			IntelEvents.fireNewEntity(newEntity, broker);
+			broker.send(IntelEvents.ENTITY_NEW, newEntity);
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 		}

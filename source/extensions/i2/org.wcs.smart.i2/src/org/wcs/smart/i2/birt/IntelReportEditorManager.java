@@ -204,8 +204,8 @@ public class IntelReportEditorManager implements IReportEditorManager{
 	@Override
 	public void addPages() {	
 		editor.getModel().addListener(nameChangeListener);
-		if (editor.getEditorInput() instanceof IntelEntityEditorInput){
-			IntelEntityEditorInput in = getEditorInputLocal();
+		if (editor.getEditorInput() instanceof IntelEntityTypeEditorInput){
+			IntelEntityTypeEditorInput in = getEditorInputLocal();
 			//if we are editing a SMART report update the name; otherwise leave it alone 
 			editor.setPartName(in.getEntityType().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -216,11 +216,11 @@ public class IntelReportEditorManager implements IReportEditorManager{
 		this.editor = editor;
 	}
 
-	private IntelEntityEditorInput getEditorInputLocal(){
+	private IntelEntityTypeEditorInput getEditorInputLocal(){
 		if (editor == null){
 			return null;
 		}
-		return (IntelEntityEditorInput)editor.getEditorInput();
+		return (IntelEntityTypeEditorInput)editor.getEditorInput();
 	}
 
 }

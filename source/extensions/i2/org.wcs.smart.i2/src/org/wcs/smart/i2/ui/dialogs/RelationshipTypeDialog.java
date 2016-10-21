@@ -26,8 +26,10 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
@@ -151,6 +153,11 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	
 	private List<IntelRelationshipTypeAttribute> attributeList = new ArrayList<IntelRelationshipTypeAttribute>();
 	
+
+	private IntelEntityType initialSourceType;
+	private IntelEntityType initialTargetType;
+	
+	
 	private Job loadEntityType = new Job("load entity types"){
 
 		@Override
@@ -161,6 +168,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			try{
 				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
 				groups.addAll(RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea()));
+
 			}finally{
 				s.close();
 			}
@@ -204,6 +212,9 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	public RelationshipTypeDialog(Shell parentShell, IntelRelationshipType type) {
 		super(parentShell);
 		this.type = type;
+		
+		this.initialSourceType = type.getSourceEntityType();
+		this.initialTargetType = type.getTargetEntityType();
 	}
 
 	@Override
@@ -223,8 +234,10 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		return cd;
 	}
 	
+	
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
+		boolean attributesModified = false;
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
@@ -233,6 +246,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			for (IntelRelationshipTypeAttribute a : attributeList){
 				if (!type.getAttributes().contains(a)){
 					type.getAttributes().add(a);
+					attributesModified = true;
 				}
 			}
 			List<IntelRelationshipTypeAttribute> toDelete = new ArrayList<IntelRelationshipTypeAttribute>();
@@ -244,6 +258,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 					qDelete.setParameter("relationshipType", type); //$NON-NLS-1$
 					qDelete.executeUpdate();
 					toDelete.add(a);
+					attributesModified = true;
 				}
 			}
 			type.getAttributes().removeAll(toDelete);
@@ -265,15 +280,46 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			s.close();
 		}
 		
-		if (isNew){
-			eventBroker.send(IntelEvents.RELATION_TYPE_NEW, type);
-		}else{
-			eventBroker.send(IntelEvents.RELATION_TYPE_MODIFIED, type);
+		
+		try{
+		
+			if (isNew){
+				eventBroker.send(IntelEvents.RELATION_TYPE_NEW, type);
+			}else{
+				eventBroker.send(IntelEvents.RELATION_TYPE_MODIFIED, type);
+			}
+			
+			
+			if (attributesModified || !equals(initialSourceType, type.getSourceEntityType()) ||
+					!equals(initialTargetType, type.getTargetEntityType())){
+				Set<IntelEntityType> modifiedTypes = new HashSet<>();
+				modifiedTypes.add(initialSourceType);
+				modifiedTypes.add(initialTargetType);
+				modifiedTypes.add(type.getSourceEntityType());
+				modifiedTypes.add(type.getTargetEntityType());
+				if (modifiedTypes.contains(null)){
+					//we have to update all types as one is unknown
+					List<IntelEntityType> types = (List<IntelEntityType>) cmbSrcType.getInput();
+					types.forEach(t -> {if (t.getUuid() != null) { modifiedTypes.add(t); } });
+					modifiedTypes.remove(null);
+				}
+				
+				eventBroker.send(IntelEvents.ENTITY_TYPE_TEMPLATE_REFRESH, modifiedTypes);
+			}
+		}catch (Exception ex){
+			//TODO:
 		}
+		this.initialSourceType = type.getSourceEntityType();
+		this.initialTargetType = type.getTargetEntityType();
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		
 	}
 
+	private boolean equals(IntelEntityType t1, IntelEntityType t2){
+		if (t1 == null && t2 == null) return true;
+		if (t1 != null && t2 != null) return t1.equals(t2);
+		return false;
+	}
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT,true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);

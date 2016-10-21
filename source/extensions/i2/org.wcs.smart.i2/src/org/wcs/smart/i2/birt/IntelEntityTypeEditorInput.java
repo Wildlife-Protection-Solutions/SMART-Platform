@@ -27,16 +27,13 @@ import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
- *  Editor input for intelligence template editor.
- *  
- * @author elitvin
- * @since 3.0.0
+ *  Editor for editing report entity templates
  */
-public class IntelEntityEditorInput extends ReportEditorInput {
+public class IntelEntityTypeEditorInput extends ReportEditorInput {
 
 	private IntelEntityType type;
 	
-	public IntelEntityEditorInput(File file, IntelEntityType type) {
+	public IntelEntityTypeEditorInput(File file, IntelEntityType type) {
 		super(file);
 		this.type = type;
 	}
@@ -48,8 +45,8 @@ public class IntelEntityEditorInput extends ReportEditorInput {
 	
 	public boolean equals(Object other){
 		if (this == other) return true;
-		if (other instanceof IntelEntityEditorInput){
-			return  ((IntelEntityEditorInput)other).getFile().equals(getFile());
+		if (other instanceof IntelEntityTypeEditorInput){
+			return  ((IntelEntityTypeEditorInput)other).getFile().equals(getFile());
 		}
 		return false;
 	}

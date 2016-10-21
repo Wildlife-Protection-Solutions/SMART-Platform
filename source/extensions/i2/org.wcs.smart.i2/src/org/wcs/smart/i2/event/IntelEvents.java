@@ -1,8 +1,5 @@
 package org.wcs.smart.i2.event;
 
-import org.eclipse.e4.core.services.events.IEventBroker;
-import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityType;
 
 public class IntelEvents {
 
@@ -16,6 +13,15 @@ public class IntelEvents {
 	public static final String ENTITY_TYPE_NEW = "INTEL_ENTITY_TYPE/NEW";
 	public static final String ENTITY_TYPE_DELETE = "INTEL_ENTITY_TYPE/DELETE";
 	public static final String ENTITY_TYPE_MODIFIED = "INTEL_ENTITY_TYPE/UPDATED";
+	
+	//identifies when the entity type template needs refreshing
+	//only needs refreshing when the entity attributes are modified or
+	//relationship attributes are modified
+	/**
+	 * payload may be a single entity type
+	 * or a list of entity types
+	 */
+	public static final String ENTITY_TYPE_TEMPLATE_REFRESH = "INTEL_ENTITY_TYPE_TEMPLATE/REFRESH";
 	
 	public static final String RELATION_TYPE_ALL = "INTEL_RELATION_TYPE/*";
 	public static final String RELATION_TYPE_NEW = "INTEL_RELATION_TYPE/NEW";
@@ -40,27 +46,4 @@ public class IntelEvents {
 	//playload needs to be a array of two dates [startdate, enddate]
 	public static final String ACTIVE_WS_LAYER_DATEFILTER = "INTEL_WS_LAYER_DATEFILTER";
 	
-	public static void fireNewEntity(IntelEntity entity, IEventBroker broker){
-		broker.send(ENTITY_NEW, entity);
-	}
-	
-	public static void fireDeleteEntity(IntelEntity entity, IEventBroker broker){
-		broker.send(ENTITY_DELETE, entity);
-	}
-
-	public static void fireModifiedEntity(IntelEntity entity, IEventBroker broker){
-		broker.send(ENTITY_MODIFIED, entity);
-	}
-	
-	public static void fireNewEntityType(IntelEntityType entity, IEventBroker broker){
-		broker.send(ENTITY_TYPE_NEW, entity);
-	}
-	
-	public static void fireModifiedEntityType(IntelEntityType entity, IEventBroker broker){
-		broker.send(ENTITY_TYPE_MODIFIED, entity);
-	}
-	
-	public static void fireDeleteEntityType(IntelEntityType entity, IEventBroker broker){
-		broker.send(ENTITY_TYPE_DELETE, entity);
-	}
 }

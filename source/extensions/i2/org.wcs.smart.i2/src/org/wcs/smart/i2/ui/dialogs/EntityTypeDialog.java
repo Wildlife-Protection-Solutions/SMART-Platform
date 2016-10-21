@@ -140,6 +140,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	@Inject
 	private IEclipseContext context;
 	
+	@Inject
 	public EntityTypeDialog(Shell parentShell, IntelEntityType type) {
 		super(parentShell);
 		this.type = type;
@@ -174,6 +175,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	@Override
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
+		boolean attributesModified = false;
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
@@ -183,6 +185,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				if (!type.getAttributes().contains(a)){
 					//new items 
 					type.getAttributes().add(a);
+					attributesModified = true;
 				}
 			}
 			
@@ -195,6 +198,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 					qDelete.setParameter("entityType", type); //$NON-NLS-1$
 					qDelete.executeUpdate();
 					toDelete.add(a);
+					attributesModified = true;
 				}
 			}
 			type.getAttributes().removeAll(toDelete);
@@ -217,9 +221,13 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			s.close();
 		}
 		if (isNew){
-			IntelEvents.fireNewEntityType(type, broker);
+			broker.send(IntelEvents.ENTITY_TYPE_NEW, type);
 		}else{
-			IntelEvents.fireModifiedEntityType(type, broker);
+			broker.send(IntelEvents.ENTITY_TYPE_MODIFIED, type);
+			if (attributesModified){
+				broker.send(IntelEvents.ENTITY_TYPE_TEMPLATE_REFRESH, type);
+			}
+			
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		
