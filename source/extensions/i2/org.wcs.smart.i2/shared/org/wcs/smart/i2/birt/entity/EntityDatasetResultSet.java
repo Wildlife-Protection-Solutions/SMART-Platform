@@ -26,7 +26,6 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.MessageFormat;
 import java.util.HashMap;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
@@ -183,39 +182,24 @@ public class EntityDatasetResultSet implements IResultSet {
 		} catch (Exception e) {
 			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
-		
-		if (colIndex == 1){
-			return i.getUuid();
-		}else if (colIndex == 2){
-			return i.getIdAttributeAsText();
-		}else if (colIndex == 3){
-			return i.getEntityType().getKeyId();
-		}else if (colIndex == 4){
-			return i.getEntityType().getName();
-		}else if (colIndex == 5){
-			return i.getDateCreated();
-		}else if (colIndex == 6){
-			return i.getDateModified();
-		}else if (colIndex == 7){
-			return MessageFormat.format("{0} {1}", i.getCreatedBy().getGivenName(), i.getCreatedBy().getFamilyName());
-		}else if (colIndex == 8){
-			return MessageFormat.format("{0} {1}", i.getLastModifiedBy().getGivenName(), i.getLastModifiedBy().getFamilyName());
-		}else if (colIndex - 9 < type.getAttributes().size()){
-			IntelAttribute attribute = type.getAttributes().get(colIndex-9).getAttribute();
-			
-			IntelEntityAttributeValue v = i.findAttributeValue(attribute);
-			if (v == null) return null;
-			if (attribute.getType() == IAttributeType.LIST){
-				return ((IntelAttributeListItem)v.getAttributeValue()).getName();
+		try {
+			if (colIndex <= 8){
+				return EntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 			}
-			return v.getAttributeValue();
-		}else{
-			try {
-				return "file:/" + i.getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
-			} catch (IOException e) {
-				Intelligence2PlugIn.log(e.getMessage(), e);
-				return null;	
+			if (colIndex - 9 < type.getAttributes().size()){
+				IntelAttribute attribute = type.getAttributes().get(colIndex-9).getAttribute();
+				IntelEntityAttributeValue v = i.findAttributeValue(attribute);
+				if (v == null) return null;
+				if (attribute.getType() == IAttributeType.LIST){
+					return ((IntelAttributeListItem)v.getAttributeValue()).getName();
+				}
+				return v.getAttributeValue();
+			}else{
+				return EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getValue(i);
 			}
+		} catch (IOException e) {
+			Intelligence2PlugIn.log(e.getMessage(), e);
+			return null;	
 		}
 	}
 

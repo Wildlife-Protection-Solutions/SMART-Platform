@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,41 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2;
+package org.wcs.smart.hibernate;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.event.service.spi.EventListenerRegistry;
-import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.metamodel.source.MetadataImplementor;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
-import org.wcs.smart.i2.events.IntelHibernateListener;
 
 /**
- * Hibernate integrator for intelligence modified dates and last
- *  modified date.
- *  
+ * Hibernate integrator that looks for extensions and applys them.
+ * 
  * @author Emily
  *
  */
-public class IntelHibernateIntegrator implements Integrator {
-
+public class SmartIntegrator implements Integrator {
+	
+	public static final String EXTENSION_ID = "org.wcs.smart.hibernate.interceptor";
+	
 	//http://in.relation.to/2012/01/09/event-listener-registration/
 	
 	@Override
 	public void integrate(Configuration configuration,
-			SessionFactoryImplementor sessionFactory,
-			SessionFactoryServiceRegistry serviceRegistry) {
-		System.out.println("LOADED FILES");
-		// As you might expect, an EventListenerRegistry is the place with which event listeners are registered  It is a service
-        // so we look it up using the service registry
-        final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService( EventListenerRegistry.class );
+			SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
 
-        //2) This form adds the specified listener(s) to the beginning of the listener chain
-        IntelHibernateListener listener = new IntelHibernateListener();
-        eventListenerRegistry.prependListeners( EventType.PRE_INSERT, listener );
-        eventListenerRegistry.prependListeners( EventType.PRE_UPDATE, listener );
+		//find all contributions and run integrate
+		for (Integrator i : getMappings()){
+			i.integrate(configuration, sessionFactory, serviceRegistry);
+		}
 	}
 
     /** 
@@ -61,18 +60,37 @@ public class IntelHibernateIntegrator implements Integrator {
      */
 	@Override
 	public void integrate(MetadataImplementor metadata,
-			SessionFactoryImplementor sessionFactory,
-			SessionFactoryServiceRegistry serviceRegistry) {
-		// TODO Auto-generated method stub
-		
+			SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
+		for (Integrator i : getMappings()){
+			i.integrate(metadata, sessionFactory, serviceRegistry);
+		}
 	}
 
 	@Override
 	public void disintegrate(SessionFactoryImplementor sessionFactory,
 			SessionFactoryServiceRegistry serviceRegistry) {
-		// TODO Auto-generated method stub
-		
+		for (Integrator i : getMappings()){
+			i.disintegrate(sessionFactory, serviceRegistry);
+		}
 	}
-
+	/**
+	 * @return gets all hibernate mappings
+	 */
+	private static final List<Integrator>  getMappings(){
+		List<Integrator> items = new ArrayList<Integrator>();
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				if (e.getName().equalsIgnoreCase("integrator")){	
+					items.add((Integrator)e.createExecutableExtension("class")); //$NON-NLS-1$
+				}
+			}
+		}catch (Exception ex){
+			//todo: log this
+			ex.printStackTrace();
+		}
+		return items;
+	}
 	
 }

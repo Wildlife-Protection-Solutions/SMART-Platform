@@ -939,5 +939,11 @@
             directory="intelligence2">
       </FilestoreDirectory>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.interceptor">
+      <integrator
+            class="org.wcs.smart.i2.IntelHibernateIntegrator">
+      </integrator>
+   </extension>
 
 </plugin>

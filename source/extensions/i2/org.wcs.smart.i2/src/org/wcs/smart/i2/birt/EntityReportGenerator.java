@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.birt;
 
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,6 +73,7 @@ import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
+import org.wcs.smart.i2.birt.entity.EntityDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
@@ -219,7 +221,7 @@ public enum EntityReportGenerator {
 		rdh.close();
 	}
 	
-	//TODO i18n
+	@SuppressWarnings("unchecked")
 	private void initializeValue(ReportDesignHandle rdh, HashMap<String,OdaDataSetHandle> datasetHandles, IntelEntityType type) throws Exception{
 		ElementFactory factory = rdh.getElementFactory();
 		
@@ -283,17 +285,15 @@ public enum EntityReportGenerator {
 		for (ComputedColumn c : entityColumns){
 			headerGrid.getColumnBindings().addItem(c);
 		}
-
+		
 		ImageHandle primaryImage = factory.newImage(null);
 		primaryImage.setWidth("2in");
 		primaryImage.setHeight("2in");
 		primaryImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
-		primaryImage.setURL("row[\"Primary Image\"]");
+		primaryImage.setURL("row[\""+ EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getColumnName() +"\"]");
 		
 		headerGrid.getCell(1, 1).getContent().add(primaryImage);
 		((ColumnHandle)headerGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "2.2in");
-		
-		
 		
 		GridHandle infoGrid = factory.newGridItem(null, 2, 5);
 		infoGrid.setStyleName(tableStyle.getName());
@@ -302,47 +302,47 @@ public enum EntityReportGenerator {
 		
 		int row = 1;
 		LabelHandle l = factory.newLabel(null);
-		l.setText("Entity Type:");
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.TYPE.getColumnName()));
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		DataItemHandle di = factory.newDataItem(null);
-		di.setResultSetColumn("Entity Type");
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.TYPE.getColumnName());
 		infoGrid.getCell(row,2).getContent().add(di);		
 		row++;
 		
 		l = factory.newLabel(null);
-		l.setText("Date Created:");
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.DATE_CREATED.getColumnName()));
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn("Date Created");
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.DATE_CREATED.getColumnName());
 		infoGrid.getCell(row,2).getContent().add(di);
 		row++;
 		
 		l = factory.newLabel(null);
-		l.setText("Last Modified:");
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.DATE_MODIFIED.getColumnName()));
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn("Last Modified");
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.DATE_MODIFIED.getColumnName());
 		infoGrid.getCell(row,2).getContent().add(di);
 		row++;
 		
 		l = factory.newLabel(null);
-		l.setText("Created By:");
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.CREATED_BY.getColumnName()));
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn("Created By");
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.CREATED_BY.getColumnName());
 		infoGrid.getCell(row,2).getContent().add(di);
 		row++;
 		
 		l = factory.newLabel(null);
-		l.setText("Last Modified By:");
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.MODIFIED_BY.getColumnName()));
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn("Last Modified By");
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.MODIFIED_BY.getColumnName());
 		infoGrid.getCell(row,2).getContent().add(di);
 		
 		//spacer
@@ -365,11 +365,11 @@ public enum EntityReportGenerator {
 		((ColumnHandle)attributeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20%");
 		
 		l = factory.newLabel(null);
-		l.setText("Entity Type:");
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.TYPE.getColumnName()));
 		attributeGrid.getCell(1,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn("Entity Type");
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.TYPE.getColumnName());
 		attributeGrid.getCell(1,2).getContent().add(di);
 		
 		int rowcnt = 2;
@@ -378,14 +378,12 @@ public enum EntityReportGenerator {
 			l.setText(a.getAttribute().getName() + ":");
 			attributeGrid.getCell(rowcnt,1).getContent().add(l);
 			
-			
 			di = factory.newDataItem(null);
 			di.setResultSetColumn(a.getAttribute().getName());
 			attributeGrid.getCell(rowcnt,2).getContent().add(di);
 			
 			rowcnt++;
 		}
-		
 		
 		//spacer
 		l = factory.newLabel(null);
@@ -434,7 +432,6 @@ public enum EntityReportGenerator {
 		l.setStyleName(sectionHeaderStyle.getName());
 		rdh.getBody().add(l);
 		
-		
 		List<String> names = new ArrayList<String>();
 		
 		List<String> toExclude = new ArrayList<String>();
@@ -449,7 +446,6 @@ public enum EntityReportGenerator {
 		relationsTable.setDataSet(datasetHandles.get(EntityRelationDataset.DATASET_TYPE));
 		
 		List<ComputedColumn> relationsColumns = DataUtil.generateComputedColumns(relationsTable);
-
 		for (ComputedColumn c : relationsColumns){
 			if (!toExclude.contains(c.getName())){
 				names.add(c.getName());
@@ -463,10 +459,10 @@ public enum EntityReportGenerator {
 		for (ComputedColumn c : relationsColumns){
 			relationsTable.getColumnBindings().addItem(c);
 		}
+		
 		relationsTable.getHeader().get(0).setProperty(DesignChoiceConstants.CHOICE_FONT_WEIGHT,DesignChoiceConstants.FONT_WEIGHT_BOLD);
 		relationsTable.getHeader().get(0).setProperty(IStyleModel.BORDER_BOTTOM_STYLE_PROP, DesignChoiceConstants.LINE_STYLE_SOLID);
 		relationsTable.getHeader().get(0).setProperty(IStyleModel.BORDER_BOTTOM_WIDTH_PROP, "1px");
-		
 		relationsTable.getDetail().get(0).setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_CENTER);
 		
 		int colindex = 1;
@@ -593,7 +589,7 @@ public enum EntityReportGenerator {
 		c.setProperty("name", "ID_Date_Time");
 		c.setDisplayName("ID_Date_Time");
 		c.setDataType("string");
-		c.setExpression("dataSetRow[\"ID\"] + \"\\n\" + Formatter.format(params[\"Start Date\"].value, 'MMM dd, YYYY') + \" to \" + Formatter.format(params[\"End Date\"].value, 'MMM dd, YYYY')");
+		c.setExpression("dataSetRow[\"ID\"] + \"\\n\" + Formatter.format(params[\"" + DataSourceParameter.START_DATE.getName() + "\"].value, 'MMM dd, YYYY') + \" to \" + Formatter.format(params[\"" + DataSourceParameter.END_DATE.getName() + "\"].value, 'MMM dd, YYYY')");
 		di.getColumnBindings().addItem(c);
 		di.setResultSetColumn("ID_Date_Time");
 		footerGrid1.getCell(1, 1).getContent().add(di);

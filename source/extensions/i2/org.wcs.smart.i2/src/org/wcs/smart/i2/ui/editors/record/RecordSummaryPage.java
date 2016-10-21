@@ -100,6 +100,9 @@ public class RecordSummaryPage extends EditorPart{
 	
 	private RecordEditor recordEditor;
 	
+	private Label lblLastModified;
+	private Label lblLastModifiedBy;
+	
 	public RecordSummaryPage(RecordEditor parent){
 		this.recordEditor =  parent;
 	}
@@ -133,6 +136,8 @@ public class RecordSummaryPage extends EditorPart{
 	public void doAfterSave(){
 		headerLabel.setText(recordEditor.getRecord().getTitle());
 		entityPanel.refreshEntities();
+		lblLastModified.setText(DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
+		lblLastModifiedBy.setText(recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
 	}
 	
 	public void linkEntity(IntelEntity toLink){
@@ -430,12 +435,12 @@ public class RecordSummaryPage extends EditorPart{
 		
 		toolkit.createLabel(topPart, "");
 		toolkit.createLabel(topPart, "Date Last Modified:");
-		l = toolkit.createLabel(topPart, recordEditor.getRecord().getDateModified() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblLastModified = toolkit.createLabel(topPart, recordEditor.getRecord().getDateModified() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
+		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		toolkit.createLabel(topPart, "Last Modified By:");
-		l = toolkit.createLabel(topPart, recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblLastModifiedBy = toolkit.createLabel(topPart, recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
+		lblLastModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		
 		l = toolkit.createLabel(topPart, "Narrative:");

@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.i2.birt.entity;
 
+import java.io.IOException;
+import java.text.MessageFormat;
+
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
@@ -35,7 +39,47 @@ import org.wcs.smart.i2.model.IntelEntityType;
  *
  */
 public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
-
+	
+	public static enum Column{
+		ENTITY_UUID("entity:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
+		ID("entity:id", "ID", java.sql.Types.VARCHAR),
+		TYPE_KEY("entity:type_key", "Entity Type Key", java.sql.Types.VARCHAR),
+		TYPE("entity:type", "Entity Type", java.sql.Types.VARCHAR),
+		DATE_CREATED("entity:date_created", "Date Created", java.sql.Types.DATE),
+		DATE_MODIFIED("entity:date_modified", "Date Modified", java.sql.Types.DATE),
+		CREATED_BY("entity:created_by", "Created By", java.sql.Types.VARCHAR),
+		MODIFIED_BY("entity:modified_by", "Last Modified By", java.sql.Types.VARCHAR),
+		PRIMARY_IMAGE("entity:primary_image", "Primay Image", java.sql.Types.VARCHAR);
+		
+		String id;
+		String name;
+		int type;
+		
+		Column(String id, String name, int type){
+			this.id = id;
+			this.name = name;
+			this.type = type;
+		}
+		public String getColumnName(){
+			return this.name;
+		}
+		public String getId(){
+			return this.id;
+		}
+		public Object getValue(IntelEntity entity) throws IOException {
+			if (this == ENTITY_UUID) return entity.getUuid();
+			if (this == ID) return entity.getIdAttributeAsText();
+			if (this == TYPE_KEY) return entity.getEntityType().getKeyId();
+			if (this == TYPE) return entity.getEntityType().getName();
+			if (this == DATE_CREATED) return entity.getDateCreated();
+			if (this == DATE_MODIFIED) return entity.getDateModified();
+			if (this == CREATED_BY) return MessageFormat.format("{0} {1}", entity.getCreatedBy().getGivenName(), entity.getCreatedBy().getFamilyName());
+			if (this == MODIFIED_BY) return MessageFormat.format("{0} {1}", entity.getLastModifiedBy().getGivenName(), entity.getLastModifiedBy().getFamilyName());
+			if (this == PRIMARY_IMAGE) return "file:/" + entity.getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
+			return null;
+		}
+	}
+	
 	private IntelEntityType type;
 	
 	public EntityDatasetResultSetMetadata(IntelEntityType type){
@@ -47,7 +91,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		int cnt = 9;
+		int cnt = Column.values().length;
 		if (type.getAttributes() != null){
 			cnt += type.getAttributes().size();
 		}
@@ -67,19 +111,12 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		if (index == 1) return "Entity UUID";
-		if (index == 2) return "ID";
-		if (index == 3) return "Entity Type Key";
-		if (index == 4) return "Entity Type";
-		if (index == 5) return "Date Created";
-		if (index == 6) return "Last Modified";
-		if (index == 7) return "Created By";
-		if (index == 8) return "Last Modified By";
+		if (index <= 8) return Column.values()[index-1].name;
 		index = index - 9;
 		if (index < type.getAttributes().size()){
 			return type.getAttributes().get(index).getAttribute().getName();
 		}
-		return "Primary Image";
+		return Column.PRIMARY_IMAGE.name;
 	}
 
 	/**
@@ -87,20 +124,12 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		if (index == 1) return "entity:entity_uuid";
-		if (index == 2) return "entity:id";
-		if (index == 3) return "entity:type_key";
-		if (index == 4) return "entity:type";
-		if (index == 5) return "entity:date_created";
-		if (index == 6) return "entity:date_modified";
-		if (index == 7) return "entity:created_by";
-		if (index == 8) return "entity:modified_by";
-		
+		if (index <= 8) return Column.values()[index-1].id;
 		index = index - 9;
 		if (index < type.getAttributes().size()){
 			return "attribute:" + type.getAttributes().get(index).getAttribute().getKeyId();
 		}
-		return "entity:primary_image";
+		return Column.PRIMARY_IMAGE.id;
 	}
 
 	/**
@@ -108,21 +137,13 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
-		if (index == 1) return java.sql.Types.JAVA_OBJECT;
-		if (index == 2) return java.sql.Types.VARCHAR;
-		if (index == 3) return java.sql.Types.VARCHAR;
-		if (index == 4) return java.sql.Types.VARCHAR;
-		if (index == 5) return java.sql.Types.DATE;
-		if (index == 6) return java.sql.Types.DATE;
-		if (index == 7) return java.sql.Types.VARCHAR;
-		if (index == 8) return java.sql.Types.VARCHAR;
-		
+		if (index <= 8) return Column.values()[index-1].type;
 		index = index - 9;
 		if (index < type.getAttributes().size()){
 			IAttributeType attType = type.getAttributes().get(index).getAttribute().getType();
 			return AttributeManager.INSTANCE.getAttributeSqlType(attType);
 		}
-		return java.sql.Types.VARCHAR;
+		return Column.PRIMARY_IMAGE.type;
 	}
 
 	/**

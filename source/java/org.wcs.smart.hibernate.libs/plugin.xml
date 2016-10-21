@@ -2,5 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.wcs.smart.hibernate.mapping" name="Hibernate Entity Class" schema="schema/org.wcs.smart.hibernate.mapping.exsd"/>
+   <extension-point id="org.wcs.smart.hibernate.interceptor" name="Hibernate Interceptor" schema="schema/org.wcs.smart.hibernate.interceptor.exsd"/>
 
 </plugin>

@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.editors;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -423,6 +422,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
+		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put(UIEvents.EventTags.ELEMENT, context.get(MPart.class));
 		data.put(IEventBroker.DATA, entity);
@@ -686,7 +686,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 			MenuItem mi = new MenuItem(formatsOpMenu,SWT.PUSH);
 			mi.setText(einfo.getFormat());
 			if (einfo.getIcon() != null){
-				InputStream in = einfo.getClass().getClassLoader().getResourceAsStream(einfo.getIcon());
 				IConfigurationElement confElem = einfo.getEmitter();
 				if ( confElem != null ){
 					String pluginId = confElem.getDeclaringExtension( ).getNamespace( );
