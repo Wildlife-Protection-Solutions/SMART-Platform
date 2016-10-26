@@ -23,6 +23,9 @@ package org.wcs.smart.i2.birt.entity;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
@@ -31,6 +34,7 @@ import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 
 /**
  * Entity dataset result set metadata
@@ -82,8 +86,31 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	
 	private IntelEntityType type;
 	
+	private List<String> attributeColumnNames;
+	private List<String> attributeColumnLabels;
+	
 	public EntityDatasetResultSetMetadata(IntelEntityType type){
 		this.type = type;
+		
+		HashSet<String> fixedLabels = new HashSet<>();
+		for (Column c : Column.values()){
+			fixedLabels.add(c.name);
+		}
+		attributeColumnNames = new ArrayList<String>(type.getAttributes().size());
+		attributeColumnLabels = new ArrayList<String>(type.getAttributes().size());
+		for (IntelEntityTypeAttribute attribute : type.getAttributes()){
+			String corelabel = attribute.getAttribute().getName();
+			String name = "attribute:" + attribute.getAttribute().getKeyId();
+			
+			attributeColumnNames.add(name);
+			int add = 1;
+			String label = corelabel;
+			while(attributeColumnLabels.contains(label) || fixedLabels.contains(label)){
+				label = corelabel + "_" + add;
+				add++;
+			}
+			attributeColumnLabels.add(label);
+		}
 	}
 	
 	/**
@@ -114,7 +141,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		if (index <= 8) return Column.values()[index-1].name;
 		index = index - 9;
 		if (index < type.getAttributes().size()){
-			return type.getAttributes().get(index).getAttribute().getName();
+			return attributeColumnLabels.get(index);
 		}
 		return Column.PRIMARY_IMAGE.name;
 	}
@@ -127,7 +154,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		if (index <= 8) return Column.values()[index-1].id;
 		index = index - 9;
 		if (index < type.getAttributes().size()){
-			return "attribute:" + type.getAttributes().get(index).getAttribute().getKeyId();
+			return attributeColumnNames.get(index);
 		}
 		return Column.PRIMARY_IMAGE.id;
 	}

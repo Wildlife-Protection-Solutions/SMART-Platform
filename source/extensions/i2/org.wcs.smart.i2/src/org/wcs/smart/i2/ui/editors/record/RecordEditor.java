@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -72,6 +73,7 @@ import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 
+import com.drew.lang.annotations.NotNull;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
@@ -158,6 +160,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						currentEntityLocationLinks = s.createCriteria(IntelEntityLocation.class)
 							.add(Restrictions.in("id.location", temp.getLocations()))
 							.list();
+						for (IntelEntityLocation ll : currentEntityLocationLinks){
+							ll.getEntity().getIdAttributeAsText();
+						}
 					}
 					
 				}finally{
@@ -204,7 +209,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					s.saveOrUpdate(a.getAttachment());
 				}
 			}
-			
+
 			for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
 				s.save(entityAttachments);
 				entityAttachments.getEntity().getEntityAttachments().add(entityAttachments);
@@ -470,13 +475,19 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		setDirty(true);
 	}
 	
-	public void addNewLocation(Geometry p){
+	/**
+	 * creates a new location with given date time.  If datetime is null; then uses the record
+	 * date time.  Geometry is required.
+	 * @param p
+	 * @param dateTime
+	 */
+	public void addNewLocation(@NotNull Geometry p, Date dateTime){
 		if (record.getLocations() == null) record.setLocations(new ArrayList<IntelLocation>());
 		
 		IntelLocation newLocation = new IntelLocation();
 		newLocation.setComment(null);
 		newLocation.setConservationArea(SmartDB.getCurrentConservationArea());
-		newLocation.setDateTime(record.getDateCreated());
+		newLocation.setDateTime(dateTime == null ? record.getDateCreated() : dateTime);
 		newLocation.setGeometry(p);
 		newLocation.setId(MessageFormat.format("Location {0}", record.getLocations().size()+1));
 		newLocation.setRecord(record);

@@ -55,6 +55,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
+import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -269,13 +270,21 @@ public class EntityListComposite extends Composite{
 					intelLinksToDelete.add(toRemove);
 					intelLinksAdded.remove(toRemove);
 					editor.getRecord().getEntities().remove(toRemove);
-					modified = true;
+					modified = true;	
+				}
+				
+				//if the entity was removed we also need to delete the location link
+				for (IntelEntityLocation entityLocationLink : editor.getEntityLocationLinks()){
+					if (toDelete.equals(entityLocationLink.getEntity())){
+						editor.unlinkEntityFromLocation(entityLocationLink.getLocation(), toDelete);
+					}
 				}
 			}
 			
 		}
 		if (modified){
 			init();
+			editor.locationsUpdated();
 			editor.setDirty(true);
 		}
 	}

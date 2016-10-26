@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,7 +51,16 @@ import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.AttachmentTable;
 import org.wcs.smart.i2.ui.editors.IMenuCreator;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.lang.GeoLocation;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.GpsDirectory;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Composite for displaying attachments and thumbnails
@@ -246,6 +256,23 @@ public class AttachmentListComposite extends Composite{
 					editor.getRecord().setAttachments(new ArrayList<IntelRecordAttachment>());
 				}
 				editor.getRecord().getAttachments().add(iea);
+				
+				File imageFile = ia.getCopyFromLocation();
+				try{
+					Metadata metadata = ImageMetadataReader.readMetadata(imageFile);
+					for (Directory directory : metadata.getDirectoriesOfType(GpsDirectory.class)) {
+						GeoLocation geoLocation = ((GpsDirectory)directory).getGeoLocation();
+						if (geoLocation != null){
+							Date dateTime = ((GpsDirectory) directory).getGpsDate();
+							Point pnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(geoLocation.getLongitude(), geoLocation.getLatitude()));
+							editor.addNewLocation(pnt, dateTime);
+							break;
+						}
+						
+					}
+				}catch (Exception ex){
+					ex.printStackTrace();
+				}
 			}
 			editor.setDirty(true);
 			refreshAttachmentTable();

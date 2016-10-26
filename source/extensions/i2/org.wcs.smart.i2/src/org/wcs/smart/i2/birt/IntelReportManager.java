@@ -80,6 +80,7 @@ public enum IntelReportManager {
 	}
 	
 	public Path getEntityTemplate(IntelEntityType entityType){
+		if (entityType.getBirtTemplate() == null) return null;
 		return FileSystems.getDefault().getPath(
 				entityType.getConservationArea().getFileDataStoreLocation(),
 				IntelAttachment.INTELLIGENCE_FS_DIR,

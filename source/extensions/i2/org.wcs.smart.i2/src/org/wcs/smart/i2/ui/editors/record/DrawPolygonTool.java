@@ -221,7 +221,7 @@ public class DrawPolygonTool extends SimpleTool {
 			bubble.setVerticalBorder(15);
 			getContext().getViewportPane().addDrawCommand(bubble);
 		}else{
-			editor.addNewLocation(p);
+			editor.addNewLocation(p, null);
 		}
 		
 	}
