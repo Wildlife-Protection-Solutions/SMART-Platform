@@ -21,13 +21,6 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -43,10 +36,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -107,7 +96,20 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 						type = null;
 						targetEntity = (IntelEntity) sel.getFirstElement();
 						types.setInput(new String[]{DialogConstants.LOADING_TEXT});
-						relationshipSearchJob.schedule(0);
+						(new RelationshipSearchJob(srcEntity.getEntityType(), targetEntity.getEntityType()) {
+							@Override
+							protected void afterLoad() {
+								Display.getDefault().syncExec(()->{
+										if (rtypes.isEmpty()){
+											types.setInput(new String[]{"No relationship types found for given entity types"});
+										}else{
+											types.setInput(rtypes);
+										}
+										types.refresh();
+									}
+								);
+							}
+						}).schedule(0);
 					}
 					
 				}
@@ -152,55 +154,6 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 	public IntelEntity getTargetEntity(){
 		return this.targetEntity;
 	}
-	
-	
-	private Job relationshipSearchJob = new Job("relationship search"){
 
-		@SuppressWarnings("unchecked")
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			final List<IntelRelationshipType> rtypes = new ArrayList<IntelRelationshipType>();
-			try{
-				rtypes.addAll(s.createCriteria(IntelRelationshipType.class)
-				.add(Restrictions.and(
-					Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()),
-					Restrictions.or (
-						Restrictions.and(Restrictions.eq("sourceEntityType", srcEntity.getEntityType()), 
-								Restrictions.eq("targetEntityType", targetEntity.getEntityType())),
-						Restrictions.and(Restrictions.eq("sourceEntityType", targetEntity.getEntityType()), 
-								Restrictions.eq("targetEntityType", srcEntity.getEntityType())),
-								Restrictions.isNull("sourceEntityType"),
-								Restrictions.isNull("targetEntityType")
-				))).list());
-				for (IntelRelationshipType i : rtypes){
-					i.getSourceEntityType();
-					i.getTargetEntityType();
-					if (i.getRelationshipGroup() != null){
-						i.getRelationshipGroup().getName();
-					}
-					i.getAttributes().size();
-				}
-			}finally{
-				s.close();
-			}
-			
-			Display.getDefault().syncExec(new Runnable(){
-
-				@Override
-				public void run() {
-					if (rtypes.isEmpty()){
-						types.setInput(new String[]{"No relationship types found for given entity types"});
-					}else{
-						types.setInput(rtypes);
-					}
-					types.refresh();
-				}
-				
-			});
-			return Status.OK_STATUS;
-		} 
-		
-	};
 
 }

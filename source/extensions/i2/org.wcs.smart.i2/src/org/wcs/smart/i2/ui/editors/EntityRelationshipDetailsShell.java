@@ -88,11 +88,15 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		((GridLayout)header.getLayout()).marginHeight = 0;
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label image = new Label(header, SWT.NONE);
-		image.setImage(RelationshipTypeLabelProvider.createImageDescriptor(relationship.getRelationshipType()).createImage());
-		image.addListener(SWT.Dispose, (e)->{
-			if (!image.getImage().isDisposed()) image.getImage().dispose();
-		});
+		int col = 2;
+		if (relationship.getRelationshipType().getIcon() != null){
+			Label image = new Label(header, SWT.NONE);
+			image.setImage(RelationshipTypeLabelProvider.createImageDescriptor(relationship.getRelationshipType()).createImage());
+			image.addListener(SWT.Dispose, (e)->{
+				if (!image.getImage().isDisposed()) image.getImage().dispose();
+			});
+			col = 1;
+		}
 		
 		Label lblType = new Label(header, SWT.NONE);
 		lblType.setText(relationship.getRelationshipType().getName());
@@ -101,7 +105,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		fd.height = fd.height + 1;
 		headerBoldFont = new Font(owner.getDisplay(), fd);
 		lblType.setFont(headerBoldFont);
-		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, col, 1));
 		
 		header.addListener(SWT.MouseDown, this);
 		header.addListener(SWT.MouseUp, this);
@@ -186,10 +190,12 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 			ll.setFont(boldFont);
 			
 			ll = new Label(details, SWT.NONE);
-			for (IntelEntityRelationshipAttributeValue value : relationship.getAttributes()){
-				if (value.getAttribute().equals(a.getAttribute())){
-					ll.setText(attributeLabelprovider.getText(value));
-					break;
+			if (relationship.getAttributes() != null){
+				for (IntelEntityRelationshipAttributeValue value : relationship.getAttributes()){
+					if (value.getAttribute().equals(a.getAttribute())){
+						ll.setText(attributeLabelprovider.getText(value));
+						break;
+					}
 				}
 			}
 		}

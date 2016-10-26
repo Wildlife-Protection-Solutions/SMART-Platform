@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -51,6 +52,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -61,6 +63,11 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.DropTargetListener;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MenuEvent;
@@ -148,8 +155,10 @@ import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
+import org.wcs.smart.i2.ui.dialogs.RelationshipSelectorDialog;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -617,13 +626,78 @@ public class EntityEditor extends EditorPart implements MapPart{
 		compRecords.setLayout(new GridLayout());
 		createRecordsPanel(compRecords);
 		
-		compRelationships = toolkit.createComposite(tabPart, SWT.BORDER);
+		compRelationships = toolkit.createComposite(tabPart, SWT.NONE);
 		compRelationships.setLayout(new GridLayout());
 		createRelationshipPanel(compRelationships);
+		addEntityDropTarget(compRelationships);
 		
 		tabList.setContent(new Composite[]{compMap,  compRecords, compRelationships}, tabPart);
 		tabList.selectTab(0);
-		
+	}
+	
+	private void addEntityDropTarget(Composite comp){
+		DropTarget dropTarget = new DropTarget(comp, DND.DROP_LINK);
+		dropTarget.setTransfer(new Transfer[]{IntelEntitySelectionTransfer.getTransfer()});
+		dropTarget.addDropListener(new DropTargetListener() {		
+			private PaintListener paintListener = new PaintListener() {
+				@Override
+				public void paintControl(PaintEvent e) {
+					e.gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION));
+					e.gc.setLineWidth(2);
+					e.gc.drawRectangle(0, 0, e.width, e.height);
+				}
+			};
+			
+			@Override
+			public void dropAccept(DropTargetEvent event) {
+			}
+			
+			@Override
+			public void drop(DropTargetEvent event) {
+				ISelection s = IntelEntitySelectionTransfer.getTransfer().getSelection();
+				
+				if (s != null && s instanceof IStructuredSelection) {
+					IStructuredSelection sel = (IStructuredSelection)s;
+					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+						Object element = (Object)iterator.next();
+						if (element instanceof IntelEntity){
+							
+							RelationshipSelectorDialog dialog = new RelationshipSelectorDialog( getSite().getShell(), getEntity().getEntityType(), ((IntelEntity)element).getEntityType() );
+							dialog.open();
+							if (dialog.getRelationshipType() != null){
+								addRelationship(dialog.getRelationshipType(), (IntelEntity) element);
+							}
+						}
+					}
+				}
+				
+				comp.removePaintListener(paintListener);
+				comp.redraw();
+			}
+			
+			@Override
+			public void dragOver(DropTargetEvent event) {
+				 
+			}
+			
+			@Override
+			public void dragOperationChanged(DropTargetEvent event) {
+				event.detail = DND.DROP_LINK;
+			}
+			
+			@Override
+			public void dragLeave(DropTargetEvent event) {
+				comp.removePaintListener(paintListener);
+				comp.redraw();
+			}
+			
+			@Override
+			public void dragEnter(DropTargetEvent event) {
+				event.detail = DND.DROP_LINK;
+				comp.addPaintListener(paintListener);
+				comp.redraw();
+			}
+		});
 	}
 	private void createTopPanel(Composite parent){
 		
@@ -874,6 +948,74 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		}
 	}
+	
+	private void addRelationship(IntelRelationshipType rType, IntelEntity targetEntity){
+		if (rType == null) return;
+		
+		IntelEntity e1 = entity;
+		IntelEntity e2 = targetEntity;
+		IntelEntityRelationship newRelationship = new IntelEntityRelationship();
+		newRelationship.setRelationshipType(rType);
+		
+		boolean add = false;
+		if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
+			newRelationship.setSourceEntity(e1);
+			newRelationship.setTargetEntity(e2);
+			add = true;
+		}else if (rType.getSourceEntityType() == null && rType.getTargetEntityType() != null){
+			if (rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+				newRelationship.setSourceEntity(e2);
+				newRelationship.setTargetEntity(e1);	
+			}else if (rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+				newRelationship.setSourceEntity(e1);
+				newRelationship.setTargetEntity(e2);
+			}
+		}else if (rType.getTargetEntityType() == null && rType.getSourceEntityType() != null){
+			if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+				newRelationship.setSourceEntity(e1);
+				newRelationship.setTargetEntity(e2);	
+			}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+				newRelationship.setSourceEntity(e2);
+				newRelationship.setTargetEntity(e1);
+			}
+		}else if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid()) &&
+				rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+			newRelationship.setSourceEntity(e1);
+			newRelationship.setTargetEntity(e2);
+			add = true;
+		}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid()) &&
+				rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+			newRelationship.setSourceEntity(e2);
+			newRelationship.setTargetEntity(e1);
+			add = true;
+		} 
+		//check duplicates
+		if (add){
+			for (IntelEntityRelationship existing : relationships){
+				if (existing.getSourceEntity().equals(newRelationship.getSourceEntity()) && 
+						existing.getTargetEntity().equals(newRelationship.getTargetEntity()) &&
+						existing.getRelationshipType().equals(newRelationship.getRelationshipType())){
+					add = false;
+					MessageDialog.openInformation(getEditorSite().getShell(), "Relationship", "Relationship already exists between these entities. Cannot duplicate relationships.");
+					break;
+				}
+						
+			}
+		}
+		if (add){
+			relationships.add(newRelationship);
+			relationshipsToAdd.add(newRelationship);
+			setDirty(true);
+			treeRelationships.setInput(relationships);
+			treeRelationships.expandAll();
+			
+			if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
+				//edit 
+				editRelationshipAttributes(newRelationship);
+			}
+		}
+	}
+	
 	private void createRelationshipPanel(Composite parent){
 
 		relationshipEditPanel = toolkit.createComposite(parent, SWT.NONE);
@@ -888,70 +1030,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell(), entity){
 					protected void doEvent(){
 						if (getRelationshipType() != null){
-
-							IntelRelationshipType rType = getRelationshipType();
-							IntelEntity e1 = entity;
-							IntelEntity e2 = getTargetEntity();
-							
-							IntelEntityRelationship newRelationship = new IntelEntityRelationship();
-							newRelationship.setRelationshipType(rType);
-							boolean add = false;
-							if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
-								newRelationship.setSourceEntity(e1);
-								newRelationship.setTargetEntity(e2);
-								add = true;
-							}else if (rType.getSourceEntityType() == null && rType.getTargetEntityType() != null){
-								if (rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
-									newRelationship.setSourceEntity(e2);
-									newRelationship.setTargetEntity(e1);	
-								}else if (rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
-									newRelationship.setSourceEntity(e1);
-									newRelationship.setTargetEntity(e2);
-								}
-							}else if (rType.getTargetEntityType() == null && rType.getSourceEntityType() != null){
-								if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid())){
-									newRelationship.setSourceEntity(e1);
-									newRelationship.setTargetEntity(e2);	
-								}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid())){
-									newRelationship.setSourceEntity(e2);
-									newRelationship.setTargetEntity(e1);
-								}
-							}else if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid()) &&
-									rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
-								newRelationship.setSourceEntity(e1);
-								newRelationship.setTargetEntity(e2);
-								add = true;
-							}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid()) &&
-									rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
-								newRelationship.setSourceEntity(e2);
-								newRelationship.setTargetEntity(e1);
-								add = true;
-							} 
-							//check duplicates
-							if (add){
-								for (IntelEntityRelationship existing : relationships){
-									if (existing.getSourceEntity().equals(newRelationship.getSourceEntity()) && 
-											existing.getTargetEntity().equals(newRelationship.getTargetEntity()) &&
-											existing.getRelationshipType().equals(newRelationship.getRelationshipType())){
-										add = false;
-										MessageDialog.openInformation(parentShell, "Relationship", "Relationship already exists between these entities. Cannot duplicate relationships.");
-										break;
-									}
-											
-								}
-							}
-							if (add){
-								relationships.add(newRelationship);
-								relationshipsToAdd.add(newRelationship);
-								setDirty(true);
-								treeRelationships.setInput(relationships);
-								treeRelationships.expandAll();
-								
-								if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
-									//edit 
-									editRelationshipAttributes(newRelationship);
-								}
-							}
+							addRelationship(getRelationshipType(), getTargetEntity());
 						}
 					}
 				};
