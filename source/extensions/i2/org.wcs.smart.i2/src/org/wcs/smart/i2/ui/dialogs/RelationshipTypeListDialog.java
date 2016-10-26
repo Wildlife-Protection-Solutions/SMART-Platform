@@ -270,7 +270,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		});
 		sourceColumn.getColumn().setWidth(150);
 		TableViewerColumn targetColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
-		targetColumn.getColumn().setText("Source Entity Type");
+		targetColumn.getColumn().setText("Target Entity Type");
 		targetColumn.setLabelProvider(new ColumnLabelProvider() {
 			private EntityTypeLabelProvider el = new EntityTypeLabelProvider();
 			@Override

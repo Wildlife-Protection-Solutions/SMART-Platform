@@ -210,11 +210,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 			}
 
-			for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
-				s.save(entityAttachments);
-				entityAttachments.getEntity().getEntityAttachments().add(entityAttachments);
-				modifiedEntities.add(entityAttachments.getEntity());
-			}
+			
 			
 			for (IntelEntityRecord r : summaryPage.getDeleteEntityLinks()){
 				modifiedEntities.add(r.getEntity());
@@ -242,16 +238,24 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				s.delete(locationlink);
 				modifiedEntities.add(locationlink.getEntity());
 			}
+			
+			
+			s.flush();
+			s.clear();
+			
+			s.saveOrUpdate(record);
+			
+			for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
+				s.save(entityAttachments);
+				entityAttachments.getEntity().getEntityAttachments().add(entityAttachments);
+				modifiedEntities.add(entityAttachments.getEntity());
+			}
+			
 			for (IntelEntityLocation locationlink : newEntityLocationLinks){
 				s.saveOrUpdate(locationlink.getLocation());
 				s.save(locationlink);
 				modifiedEntities.add(locationlink.getEntity());
 			}
-			
-			s.flush();
-			s.clear();
-			s.flush();
-			s.saveOrUpdate(record);
 			s.flush();
 			
 

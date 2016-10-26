@@ -21,11 +21,13 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -45,6 +47,7 @@ public class NewRecordHandler {
 		newRecord.setStatus(Status.NEW);
 		newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
 		newRecord.setDateCreated(new Date());
+		newRecord.setEntities(new ArrayList<IntelEntityRecord>());
 		
 		RecordEditorInput input = new RecordEditorInput(newRecord);
 		
