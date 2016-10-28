@@ -59,6 +59,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_WORKINGSET_COPY = "org.wcs.smart.i2.icon.workingset.copy"; //$NON-NLS-1$
 	public static final String ICON_PDF = "org.wcs.smart.i2.icon.print.pdf"; //$NON-NLS-1$
 	public static final String ICON_RELATIONSHIP = "org.wcs.smart.i2.icon.relationship"; //$NON-NLS-1$
+	public static final String ICON_SECTION_EXPAND = "org.wcs.smart.i2.icon.section.expand"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
@@ -85,6 +86,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_WORKINGSET_COPY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/working_set_copy.png")); //$NON-NLS-1$);
 		reg.put(ICON_PDF, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/printpdf.png")); //$NON-NLS-1$);
 		reg.put(ICON_RELATIONSHIP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/relationship.png")); //$NON-NLS-1$);
+		reg.put(ICON_SECTION_EXPAND, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj12/section_expand.png")); //$NON-NLS-1$);
 	}
 	
 	/*

@@ -848,7 +848,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		});
 		deleteItem.setEnabled(isEditMode);
 		
-		wsetItem = new ToolItem(buttonBar, SWT.CHECK);
+		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
 		wsetItem.setToolTipText("add to current working set");
 		wsetItem.addSelectionListener(new SelectionAdapter() {

@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,6 +65,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Twistie;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -102,6 +104,9 @@ public class RecordSummaryPage extends EditorPart{
 	
 	private Label lblLastModified;
 	private Label lblLastModifiedBy;
+	
+	private SashForm sashForm;
+	private int currentMaximized = -1; //current maximized sash section
 	
 	public RecordSummaryPage(RecordEditor parent){
 		this.recordEditor =  parent;
@@ -245,120 +250,90 @@ public class RecordSummaryPage extends EditorPart{
 		
 
 		
-		SashForm sash = new SashForm(parent, SWT.VERTICAL);
-		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sashForm = new SashForm(parent, SWT.VERTICAL);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite top = createSectionHeader(sash, "Narrative");
+		Section top = createSectionHeader(sashForm, "Narrative");
 		topPart = toolkit.createComposite(top, SWT.NONE);
 		topPart.setLayout(new GridLayout(5, false));
-//		((GridLayout)topPart.getLayout()).marginWidth = 0;
-//		((GridLayout)topPart.getLayout()).marginHeight = 0;
 		topPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
-		Composite expEntities = createSectionHeader(sash, "Entities");
+		Section expEntities = createSectionHeader(sashForm, "Entities");
 		entityPanel = new EntityListComposite(expEntities, toolkit, recordEditor);
 		entityPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)entityPanel.getLayoutData()).horizontalSpan = 0;
 		((GridData)entityPanel.getLayoutData()).verticalSpan = 0;
 				
-		Composite expAttachments = createSectionHeader(sash, "Attachments");
+		Section expAttachments = createSectionHeader(sashForm, "Attachments");
 		attachmentPanel = new AttachmentListComposite(expAttachments, toolkit, recordEditor);
 		attachmentPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite expLocation = createSectionHeader(sash, "Locations");
+		Section expLocation = createSectionHeader(sashForm, "Locations");
 		locationPanel = new LocationListComposite(expLocation, toolkit, recordEditor);
 		locationPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true)); 
 		
-	}
-
-
-	private Composite createSectionHeader(SashForm parent, String text){
-		Composite all = toolkit.createComposite(parent, SWT.NONE);
-		all.setLayout(new GridLayout());
-		((GridLayout)all.getLayout()).marginWidth = 0;
-		((GridLayout)all.getLayout()).marginHeight = 0;
 		
-		Composite header = toolkit.createComposite(all, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)header.getLayout()).marginWidth = 2;
-		((GridLayout)header.getLayout()).marginHeight = 2;
-		
-		
-		Label l =toolkit.createLabel(header, text);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		l.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
-		FontData fd = l.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		final Font boldFont = new Font(parent.getDisplay(), fd);
-		l.addDisposeListener((e) -> {boldFont.dispose();});
-		l.setFont(boldFont);
-
-		l.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				
-				int[] weights = parent.getWeights();
-				
-				//find the index of the control
-				int index = -1;
-				for (int i = 0; i < parent.getChildren().length; i ++){
-					if (parent.getChildren()[i] == all){
-						index = i;
-						break;
-					}
-				}
-				if (index >= 0){
-					//compute the new minimum height for the control
-					int minHeight =  header.getClientArea().height;
-					int totalweight = 0;
-					for (int w : weights){
-						totalweight += w;
-					}
-					double unitperpixel = totalweight / (parent.getClientArea().height* 1.0);
-					double units = unitperpixel * minHeight;
-					minHeight = (int)units + 5;
-					
-					if (weights[index] <= minHeight + 10 ){
-						//compressed; we want to expand
-						int adjust = (int) (unitperpixel * (parent.getClientArea().height / weights.length)) - minHeight;
-
-						//take away from the previous or next collapsed panel
-						int inc = -1;
-						if (index == 0) inc = 1;						
-						for (int i = index; i >=0 && i <= weights.length; i += inc){
-							if ((weights[i] > minHeight + 10) && (weights[i] - adjust > minHeight)){
-								weights[i] = weights[i] - adjust;
-								weights[index] = adjust;
-								break;
-							}
-						}
-					}else{
-						if (index == 0){
-							//see if we can find one that is not collapses; otherwise use index 0
-							int changeIndex = 1;
-							for (int i = 1; i < weights.length; i ++){
-								if (weights[i] > minHeight + 10){
-									changeIndex = i; 
-									break;
-								}
-							}
-							weights[changeIndex] = weights[0] + weights[changeIndex] - minHeight;
-							weights[0] = minHeight;
-						}else{
-							weights[index-1] = weights[index-1]+ weights[index] - minHeight;
-							weights[index] = minHeight;
-						}
-					}
-					
-				}
-				parent.setWeights(weights);
+		sashForm.addListener(SWT.Resize, (e)->{
+			if (currentMaximized >= 0){ 
+				maximizePosition(currentMaximized);
+			}else{
+				//resize all so that the minimum size is respected
+				resizeMinSize();
 			}
 		});
-		return all;
-		
+		Section[] sections = new Section[]{top, expEntities, expAttachments, expLocation};
+		sashForm.setData(sections);
+		for (Section c : sections){
+			c.addListener(SWT.Resize, (e)->{
+				currentMaximized = -1;
+				if (c.getClientArea().height > c.getMinSize()) c.setMinimized(false);
+			});
+		}		
+	}
+	
+	private void resizeMinSize(){
+		Section[] sections = (Section[]) sashForm.getData();
+		int[] newweights = new int[sections.length];
+		Arrays.fill(newweights, -1);
+		int cnt = 0;
+		int off = 0;
+		for (int i = 0; i < sections.length; i ++){
+			
+			if (sections[i].isMinimized){
+				newweights[i] = sections[i].getMinSize();
+				off += newweights[i];
+			}else{
+				cnt++;
+			}
+		}
+		int totalHeight = sashForm.getClientArea().height - off;
+		for (int i = 0; i < sections.length; i ++){
+			if (newweights[i] == -1){
+				newweights[i] = totalHeight / cnt;
+			}
+		}		
+		for (Section s : sections) s.processingEvent = true;
+		try{
+			sashForm.setWeights(newweights);
+		}finally{
+			for (Section s : sections) s.processingEvent = false;
+		}
+	}
+	
+	
+	private void maximizePosition(int position){
+		Section[] sections = (Section[]) sashForm.getData();
+		for (int i = 0; i < sections.length; i ++){
+			sections[i].setMinimized(i != position);
+		}
+		resizeMinSize();
+		currentMaximized = position;
+	}
+
+	private Section createSectionHeader(SashForm parent, String text){
+		Section sec = new Section(parent, text);
+		toolkit.adapt(sec);
+		return sec;
 	}
 	
 	public void setEditMode(boolean editMode){		
@@ -445,8 +420,10 @@ public class RecordSummaryPage extends EditorPart{
 		
 		l = toolkit.createLabel(topPart, "Narrative:");
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
 		Text txtDescription = toolkit.createText(topPart, recordEditor.getRecord().getDescription(), SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+		txtDescription.addListener(SWT.MouseDoubleClick, (e)->maximizePosition(0));
 		if (recordEditor.getEditMode()){
 			txtDescription.addModifyListener(new ModifyListener() {
 				
@@ -586,4 +563,157 @@ public class RecordSummaryPage extends EditorPart{
 		return false;
 	}
 
+	private class Section extends Composite{
+
+		private boolean isMinimized;
+		private Composite header;
+		private Twistie img;
+		
+		private boolean processingEvent = false;
+		
+		public Section(SashForm parent, String text) {
+			super(parent, SWT.NONE);
+			createContents(parent, text);
+		}
+		
+		public void setMinimized(boolean min){
+			if (processingEvent) return;
+			isMinimized = min;
+			if (isMinimized){
+				img.setExpanded(false);
+			}else{
+				img.setExpanded(true);
+			}
+		}
+		
+		public int getMinSize(){
+			int size = header.computeSize(SWT.DEFAULT, SWT.DEFAULT).y+2;
+			return size;
+		}
+		
+		public int getIndex(){
+			Section[] items = (Section[]) sashForm.getData();
+			for (int i = 0; i < items.length; i ++){;
+				if (items[i] == this) return i;
+			}
+			return -1;
+		}
+		private void createContents(final SashForm sash, String text){
+			setLayout(new GridLayout());
+			((GridLayout)getLayout()).marginWidth = 0;
+			((GridLayout)getLayout()).marginHeight = 0;
+			
+			header = toolkit.createComposite(this, SWT.NONE);
+			header.setLayout(new GridLayout(3, false));
+			header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
+			header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)header.getLayout()).marginWidth = 2;
+			((GridLayout)header.getLayout()).marginHeight = 2;
+			
+			img = new Twistie(header, SWT.NONE);
+			img.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
+			Label l =toolkit.createLabel(header, text);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			l.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
+			FontData fd = l.getFont().getFontData()[0];
+			fd.setStyle(SWT.BOLD);
+			final Font boldFont = new Font(getDisplay(), fd);
+			l.addDisposeListener((e) -> {boldFont.dispose();});
+			l.setFont(boldFont);
+
+			Label exp = toolkit.createLabel(header, text);
+			exp.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SECTION_EXPAND));
+			exp.addListener(SWT.MouseUp, (e)-> maximizePosition(getIndex()));
+			exp.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
+			
+			MouseAdapter listener = new MouseAdapter() {
+				@Override
+				public void mouseDoubleClick(MouseEvent e) {
+					currentMaximized = -1;
+					Section[] items = (Section[]) sash.getData();
+					int index = -1;
+					int sumWeights = 0;
+					int weights[] = sash.getWeights();
+					for (int i : weights) sumWeights += i;
+					//re-portion to match current sash size then resize components
+					int sumWeights2 = 0;
+					
+					for (int i = 0; i < weights.length; i ++){
+						weights[i] = (int)( ( 1.0 * weights[i] / sumWeights) * sash.getClientArea().height);
+						if (weights[i] < items[i].getMinSize()) weights[i] = items[i].getMinSize();
+						sumWeights2 += weights[i];
+					}
+					
+					for (int i = 0; i < items.length; i ++){
+						if (items[i] == Section.this){
+							index = i;
+							break;
+						}
+					}
+					
+					int delta = 0;
+					if (!isMinimized){
+						setMinimized(true);
+						delta = getClientArea().height - getMinSize();
+					}else{
+						//want to set the default height to some logical portion 
+						//of entire page and take away from another expanded element
+						setMinimized(false);
+						
+						int height = sumWeights2;
+						for (Section s : items){
+							height -= s.getMinSize();
+						}
+						delta = -(height / items.length);
+					}
+					
+					
+					if (index < 0){
+						resizeMinSize();
+						return;
+					}
+					//find non minimized section to subtract from
+					if (isMinimized){
+						weights[index] = getMinSize();
+					}else{
+						weights[index] = -delta + getMinSize();
+					}
+					int start = index + 1;
+					if (start >= items.length) start = 0;
+					while(start != index ){
+						if (!items[start].isMinimized){
+							int newweight = weights[start] + delta;
+							if (newweight < items[start].getMinSize()){
+								delta = delta + (newweight - items[start].getMinSize());
+								newweight = items[start].getMinSize();
+								weights[start] = newweight;
+							}else{
+								weights[start] = newweight;
+								break;
+							}
+							
+						}
+						
+						start ++;
+						if (start >= items.length) start = 0;
+					}
+					processingEvent = true;
+					try{
+						sash.setWeights(weights);	
+					}finally{
+						processingEvent = false;
+					}
+					
+				}
+			};
+			l.addMouseListener(listener);
+			img.addMouseListener(listener);
+			
+			l.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
+			img.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
+			exp.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
+			
+		}
+		
+	}
 }

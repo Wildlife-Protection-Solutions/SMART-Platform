@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -60,6 +61,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -81,6 +83,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.geotools.data.FeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.legend.Glyph;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
@@ -100,6 +103,7 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.IBlockingSelection;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
@@ -483,6 +487,35 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		locationTable.setContentProvider(ArrayContentProvider.getInstance());
 		locationTable.getTable().setLinesVisible(true);
 		locationTable.getTable().setHeaderVisible(true);
+		
+		TableViewerColumn geomTypeColumn = new TableViewerColumn(locationTable, SWT.CENTER);
+		geomTypeColumn.getColumn().setText("");
+		geomTypeColumn.getColumn().setWidth(25);
+		geomTypeColumn.setLabelProvider(new ColumnLabelProvider() {
+			
+			private Image polygon = AWTSWTImageUtils.createSWTImage(Glyph.polygon(new Color(15,58,122, 50), new Color(15,58,122), 1));
+			private Image point = AWTSWTImageUtils.createSWTImage(Glyph.point(new Color(15,58,122), new Color(15,58,122, 50)));
+			
+			@Override
+			public void dispose(){
+				polygon.dispose();
+				point.dispose();
+				super.dispose();
+			}
+			@Override
+			public String getText(Object element) {
+				return "";
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof IntelEntityLocation){
+					if (((IntelEntityLocation) element).getLocation().isPoint()) return point;
+					if (((IntelEntityLocation) element).getLocation().isPolygon()) return polygon;
+				}
+				return null;
+			}
+		});
 		
 		for (LocationTableColumn column : LocationTableColumn.values()){
 			TableViewerColumn col = new TableViewerColumn(locationTable, SWT.LEFT);

@@ -298,7 +298,7 @@ public class EntitySearchResultTable extends Composite {
 			Composite c = t.createThumbnail(this);
 			addListener(c);
 			toolkit.adapt(c);
-			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			c.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			((GridData)c.getLayoutData()).widthHint = 50;
 			((GridData)c.getLayoutData()).heightHint = 50;
 			
@@ -307,8 +307,9 @@ public class EntitySearchResultTable extends Composite {
 			middle.setLayout(new GridLayout(2, false));
 			addListener(middle);
 			
-			Label l = toolkit.createLabel(middle, item.getIdAttributeAsText());
+			Label l = toolkit.createLabel(middle, item.getIdAttributeAsText(), SWT.WRAP);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			((GridData)l.getLayoutData()).widthHint = 100;
 			addListener(l);
 			final Label l1 = toolkit.createLabel(middle,"");
 			l1.setImage(EntityTypeLabelProvider.createImageDescriptor(item.getEntityType()).createImage());
@@ -320,7 +321,7 @@ public class EntitySearchResultTable extends Composite {
 			addListener(l);
 			
 			Composite right = toolkit.createComposite(this, SWT.NONE);
-			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			right.setLayout(new GridLayout(2, false));
 			addListener(right);
 			l = toolkit.createLabel(right, "Modified:");

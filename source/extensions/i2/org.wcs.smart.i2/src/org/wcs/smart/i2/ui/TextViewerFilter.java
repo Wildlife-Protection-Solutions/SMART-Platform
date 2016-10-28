@@ -21,33 +21,27 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.util.regex.Pattern;
-
 import org.eclipse.jface.viewers.Viewer;
-import org.wcs.smart.ca.NamedItem;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 /**
- * Viewer filter for viewers that display NamedItems
+ * Abstract viewer filter that filters based on a simple string.
  * 
  * @author Emily
  *
  */
-public class NamedItemViewerFilter extends TextViewerFilter{
-
-	public NamedItemViewerFilter(Viewer viewer){
-		super(viewer);
+public abstract class TextViewerFilter extends ViewerFilter {
+	
+	protected String filter;
+	protected Viewer viewer;
+	
+	public TextViewerFilter(Viewer viewer){
+		this.viewer = viewer;
 	}
 	
-	@Override
-	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (filter == null || filter.length() == 0) {
-			return true;
-		}
-		String search = ".*" + Pattern.quote(filter.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
-		NamedItem item = (NamedItem) element;
-		if (item.getName().toLowerCase().matches(search)){
-			return true;
-		}
-		return false;
+	public void setFilterString(String filter){
+		this.filter = filter;
+		viewer.refresh();
 	}
+	
 }

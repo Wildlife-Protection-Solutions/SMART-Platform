@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.awt.Color;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -60,6 +62,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.geotools.legend.Glyph;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
@@ -119,8 +123,36 @@ public class LocationListComposite extends Composite{
 		
 		TableViewerEditor.create(tblObservations, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
 
+		TableViewerColumn geomTypeColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
+		geomTypeColumn.getColumn().setText("");
+		geomTypeColumn.getColumn().setWidth(25);
+		geomTypeColumn.setLabelProvider(new ColumnLabelProvider() {
+			
+			private Image polygon = AWTSWTImageUtils.createSWTImage(Glyph.polygon(new Color(15,58,122, 50), new Color(15,58,122), 1));
+			private Image point = AWTSWTImageUtils.createSWTImage(Glyph.point(new Color(15,58,122), new Color(15,58,122, 50)));
+			
+			@Override
+			public void dispose(){
+				polygon.dispose();
+				point.dispose();
+				super.dispose();
+			}
+			@Override
+			public String getText(Object element) {
+				return "";
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof IntelLocation){
+					if (((IntelLocation) element).isPoint()) return point;
+					if (((IntelLocation) element).isPolygon()) return polygon;
+				}
+				return null;
+			}
+		});
 		
-		TableViewerColumn idColumn = new TableViewerColumn(tblObservations, SWT.BORDER | SWT.V_SCROLL);
+		TableViewerColumn idColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		idColumn.getColumn().setText("ID");
 		idColumn.getColumn().setWidth(100);
 		idColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -134,7 +166,7 @@ public class LocationListComposite extends Composite{
 		});
 		idColumn.setEditingSupport(new TextTableEditor(tblObservations, Column.ID));
 		
-		TableViewerColumn dateColumn = new TableViewerColumn(tblObservations, SWT.BORDER | SWT.V_SCROLL);
+		TableViewerColumn dateColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		dateColumn.getColumn().setText("Date");
 		dateColumn.getColumn().setWidth(100);
 		dateColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -148,7 +180,7 @@ public class LocationListComposite extends Composite{
 		});
 		dateColumn.setEditingSupport(new TextTableEditor(tblObservations, Column.DATE));
 		
-		TableViewerColumn timeColumn = new TableViewerColumn(tblObservations, SWT.BORDER | SWT.V_SCROLL);
+		TableViewerColumn timeColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		timeColumn.getColumn().setText("Time");
 		timeColumn.getColumn().setWidth(100);
 		timeColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -162,7 +194,7 @@ public class LocationListComposite extends Composite{
 		});
 		timeColumn.setEditingSupport(new TextTableEditor(tblObservations, Column.TIME));
 		
-		TableViewerColumn commentColumn = new TableViewerColumn(tblObservations, SWT.BORDER | SWT.V_SCROLL);
+		TableViewerColumn commentColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		commentColumn.getColumn().setText("Comment");
 		commentColumn.getColumn().setWidth(200);
 		commentColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -177,7 +209,7 @@ public class LocationListComposite extends Composite{
 		commentColumn.setEditingSupport(new TextTableEditor(tblObservations, Column.COMMENT));
 		
 		
-		TableViewerColumn obsColumn = new TableViewerColumn(tblObservations, SWT.BORDER | SWT.V_SCROLL);
+		TableViewerColumn obsColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		obsColumn.getColumn().setText("Observation");
 		obsColumn.getColumn().setWidth(200);
 		obsColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -188,7 +220,7 @@ public class LocationListComposite extends Composite{
 		});
 		
 		
-		TableViewerColumn entityListColumn = new TableViewerColumn(tblObservations, SWT.BORDER | SWT.V_SCROLL);
+		TableViewerColumn entityListColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		entityListColumn.getColumn().setText("Entities");
 		entityListColumn.getColumn().setWidth(200);
 		entityListColumn.setLabelProvider(new ColumnLabelProvider() {

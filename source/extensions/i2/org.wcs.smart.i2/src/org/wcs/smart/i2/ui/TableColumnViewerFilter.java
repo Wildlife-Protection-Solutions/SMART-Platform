@@ -23,19 +23,26 @@ package org.wcs.smart.i2.ui;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.wcs.smart.ca.NamedItem;
 
 /**
- * Viewer filter for viewers that display NamedItems
- * 
- * @author Emily
- *
+ * Viewer filter that filters based on the values returned by one or more
+ * label providers.  If any one of the label provides matches the text, the value
+ * of true is returned.
  */
-public class NamedItemViewerFilter extends TextViewerFilter{
+public class TableColumnViewerFilter extends TextViewerFilter {
 
-	public NamedItemViewerFilter(Viewer viewer){
+	private ColumnLabelProvider[] columns;
+	
+	public TableColumnViewerFilter(Viewer viewer, ColumnLabelProvider column){
 		super(viewer);
+		this.columns = new ColumnLabelProvider[]{column};
+	}
+	
+	public TableColumnViewerFilter(Viewer viewer, ColumnLabelProvider... column){
+		super(viewer);
+		this.columns = column;
 	}
 	
 	@Override
@@ -44,10 +51,11 @@ public class NamedItemViewerFilter extends TextViewerFilter{
 			return true;
 		}
 		String search = ".*" + Pattern.quote(filter.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
-		NamedItem item = (NamedItem) element;
-		if (item.getName().toLowerCase().matches(search)){
-			return true;
+		for (ColumnLabelProvider col : columns){
+			String text = col.getText(element);
+			if (text != null && text.toLowerCase().matches(search)) return true;
 		}
 		return false;
 	}
+
 }

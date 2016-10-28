@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,10 +56,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -71,6 +75,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -82,8 +87,9 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
-import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
+import org.wcs.smart.i2.ui.TableColumnViewerFilter;
+import org.wcs.smart.i2.ui.TextViewerFilter;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -95,15 +101,18 @@ import org.wcs.smart.util.E3Utils;
  *
  */
 public class RelationshipTypeListDialog extends TitleAreaDialog {
-
+	
+	private static final int ASC = 1;
+	private static final int DESC = -1;
+	
 	@Inject
 	private IEventBroker broker;
 	@Inject
 	private IEclipseContext context;
 	
-	private TableViewer cmbTypes;
+	private TableViewer tblTypes;
 	private List<IntelRelationshipType> types = null;
-	private NamedItemViewerFilter filter;
+	private TextViewerFilter filter;
 	private IStructuredSelection currentSelection;
 	
 	private MenuItem mnuEdit;
@@ -113,6 +122,10 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 	private Button btnNew;
 	private Button btnEdit;
 	private Button btnDelete;
+	
+	
+	private int sortColumn = -1;
+	private int sortDirection = ASC;
 	
 	private Job loadTypes = new Job("load relationship types"){ //$NON-NLS-1$
 
@@ -145,8 +158,8 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					cmbTypes.setInput(types);
-					cmbTypes.setSelection(currentSelection);
+					tblTypes.setInput(types);
+					tblTypes.setSelection(currentSelection);
 				}
 			});
 			return Status.OK_STATUS;
@@ -183,30 +196,70 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		cmbTypes = new TableViewer(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER);
-		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		cmbTypes.getControl().setFocus();
-		cmbTypes.addDoubleClickListener(new IDoubleClickListener() {
+		tblTypes = new TableViewer(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER);
+		tblTypes.setContentProvider(ArrayContentProvider.getInstance());
+		tblTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		tblTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblTypes.getControl().setFocus();
+		tblTypes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				edit();
 			}
 		});
-		cmbTypes.addSelectionChangedListener(new ISelectionChangedListener() {
+		tblTypes.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				btnEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
-				btnDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
-				mnuEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
-				mnuDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
+				btnEdit.setEnabled(!tblTypes.getSelection().isEmpty());
+				btnDelete.setEnabled(!tblTypes.getSelection().isEmpty());
+				mnuEdit.setEnabled(!tblTypes.getSelection().isEmpty());
+				mnuDelete.setEnabled(!tblTypes.getSelection().isEmpty());
 			}
 		});
-		cmbTypes.getTable().setHeaderVisible(true);
-		cmbTypes.getTable().setLinesVisible(true);
-		TableViewerColumn nameColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
+		tblTypes.getTable().setHeaderVisible(true);
+		tblTypes.getTable().setLinesVisible(true);
+		
+		SelectionListener sortListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TableColumn c = (TableColumn) e.widget;
+				int current=-1;
+				TableColumn[] cols = tblTypes.getTable().getColumns();
+				for (int i = 0; i < cols.length; i ++){
+					if (cols[i].equals(c)){
+						current = i;
+						break;
+					}
+				}
+				
+				if (current == sortColumn){
+					sortDirection = sortDirection == ASC ? DESC: ASC; 
+				}
+				sortColumn = current;
+				if (sortColumn < 0){
+					tblTypes.getTable().setSortColumn(null);
+				}else{
+					tblTypes.getTable().setSortColumn(tblTypes.getTable().getColumn(sortColumn));
+					tblTypes.getTable().setSortDirection(sortDirection == ASC ? SWT.UP : SWT.DOWN);
+				}
+				tblTypes.refresh();
+			}
+		};
+		tblTypes.setComparator(new ViewerComparator(){
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				int result = 0;
+				if (sortColumn >= 0){
+					String s1 = ((ColumnLabelProvider)tblTypes.getLabelProvider(sortColumn)).getText(e1);
+					String s2 = ((ColumnLabelProvider)tblTypes.getLabelProvider(sortColumn)).getText(e2);
+					result = Collator.getInstance().compare(s1, s2);
+				}
+				return sortDirection * result;
+			}
+		});
+		
+		final TableViewerColumn nameColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
 		nameColumn.getColumn().setText("Relationship");
 		nameColumn.setLabelProvider(new ColumnLabelProvider() {
 			private RelationshipTypeLabelProvider rl = new RelationshipTypeLabelProvider();
@@ -228,7 +281,9 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			}
 		});
 		nameColumn.getColumn().setWidth(150);
-		TableViewerColumn groupColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
+		nameColumn.getColumn().addSelectionListener(sortListener);
+		
+		TableViewerColumn groupColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
 		groupColumn.getColumn().setText("Relationship Group");
 		groupColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -242,7 +297,8 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			}
 		});
 		groupColumn.getColumn().setWidth(150);
-		TableViewerColumn sourceColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
+		groupColumn.getColumn().addSelectionListener(sortListener);
+		TableViewerColumn sourceColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
 		sourceColumn.getColumn().setText("Source Entity Type");
 		sourceColumn.setLabelProvider(new ColumnLabelProvider() {
 			private EntityTypeLabelProvider el = new EntityTypeLabelProvider();
@@ -269,7 +325,8 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			}
 		});
 		sourceColumn.getColumn().setWidth(150);
-		TableViewerColumn targetColumn = new TableViewerColumn(cmbTypes, SWT.DEFAULT);
+		sourceColumn.getColumn().addSelectionListener(sortListener);
+		TableViewerColumn targetColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
 		targetColumn.getColumn().setText("Target Entity Type");
 		targetColumn.setLabelProvider(new ColumnLabelProvider() {
 			private EntityTypeLabelProvider el = new EntityTypeLabelProvider();
@@ -296,8 +353,10 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			}
 		});
 		targetColumn.getColumn().setWidth(150);
-		filter = new NamedItemViewerFilter(cmbTypes);
-		cmbTypes.setFilters(new ViewerFilter[]{filter});
+		targetColumn.getColumn().addSelectionListener(sortListener);
+		filter = new TableColumnViewerFilter(tblTypes, 
+				(ColumnLabelProvider)tblTypes.getLabelProvider(0), (ColumnLabelProvider)tblTypes.getLabelProvider(1));
+		tblTypes.setFilters(new ViewerFilter[]{filter});
 		
 		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
@@ -332,8 +391,8 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Menu menu = new Menu(cmbTypes.getControl());
-		cmbTypes.getControl().setMenu(menu);
+		Menu menu = new Menu(tblTypes.getControl());
+		tblTypes.getControl().setMenu(menu);
 
 		mnuAdd = new MenuItem(menu, SWT.DEFAULT);
 		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
@@ -433,7 +492,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		return true;
 	}
 	private void edit(){
-		Object x = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
+		Object x = ((IStructuredSelection)tblTypes.getSelection()).getFirstElement();
 		if (x instanceof IntelRelationshipType){
 			IntelRelationshipType type = (IntelRelationshipType)x;	
 			checkSaveEditors(type, "editing");
@@ -445,7 +504,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		List<IntelRelationshipType> toDelete = new ArrayList<IntelRelationshipType>();
 		StringBuilder sb = new StringBuilder();
 		
-		for (Iterator<?> iterator = ((IStructuredSelection)cmbTypes.getSelection()).iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)tblTypes.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
 			if (x instanceof IntelRelationshipType){
 				toDelete.add((IntelRelationshipType)x);
@@ -506,8 +565,8 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 	}
 	
 	private void refresh(){
-		currentSelection = (IStructuredSelection) cmbTypes.getSelection();
-		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		currentSelection = (IStructuredSelection) tblTypes.getSelection();
+		tblTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		loadTypes.schedule(0);
 	}
 	
@@ -515,4 +574,5 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 	public boolean isResizable(){
 		return true;
 	}
+	
 }
