@@ -610,8 +610,10 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 						} else if (dataSetType == Type.TABLE){
 							String geom = parseGeometryColumn(queryText
 									.getTextContent(), ""); //$NON-NLS-1$
-							GeometryColumn gc = new GeometryColumn(geom, geom);
-							columns = new GeometryColumn[] { gc };
+							if (geom != null){
+								GeometryColumn gc = new GeometryColumn(geom, geom);
+								columns = new GeometryColumn[] { gc };
+							}
 						} else if (dataSetType == Type.PLAN || dataSetType == Type.INTEL){
 							GeometryColumn gc = new GeometryColumn("Geometry", "geometry"); //$NON-NLS-1$ //$NON-NLS-2$
 							columns = new GeometryColumn[] { gc };
@@ -775,6 +777,8 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 		String queryType = QueryTypeManager.INSTANCE.findDeprecatedQueryTypeString(bits[0]);
 
 		AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType);
+		if (qq == null) return null; //this is not a valid query type;likely a table with no geometry column (employee)
+		
 		GeometryColumn[] columns = qq.getGeometryColumns(queryType, Locale.getDefault());
 		if (columns == null)
 			return null;
