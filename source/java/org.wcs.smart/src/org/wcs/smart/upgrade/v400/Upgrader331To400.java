@@ -454,7 +454,7 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 			throws SQLException {
 		HashMap<String, Employee> ccaaUsers = new HashMap<String, Employee>();
 
-		ConservationArea ccaa = (ConservationArea) s.get(
+		ConservationArea ccaa = (ConservationArea) s.load(
 				ConservationArea.class, ConservationArea.MULTIPLE_CA);
 
 		List<Employee> existingUsers = (List<Employee>) s
