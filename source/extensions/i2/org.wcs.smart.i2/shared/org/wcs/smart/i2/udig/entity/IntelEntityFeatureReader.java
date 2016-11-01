@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -36,7 +38,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -120,7 +121,7 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 		try {
 			data[0] = location.getGeometry();
 		} catch (ParseException e) {
-			Intelligence2PlugIn.log(e.getMessage(), e);
+			Logger.getLogger(IntelEntityFeatureReader.class.getName()).log(Level.INFO, e.getMessage(), e);
 		}
 		data[1] = ftype.getName() + "." + location.getId() + "." + UuidUtils.uuidToString(location.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[2] = location.getId();

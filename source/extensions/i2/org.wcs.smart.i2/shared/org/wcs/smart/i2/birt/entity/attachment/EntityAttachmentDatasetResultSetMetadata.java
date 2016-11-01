@@ -22,10 +22,11 @@
 package org.wcs.smart.i2.birt.entity.attachment;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -76,7 +77,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 				try {
 					return "file:/" + location.getAttachment().getAttachmentFile().getCanonicalPath();
 				} catch (IOException e) {
-					Intelligence2PlugIn.log(e.getMessage(), e);	
+					Logger.getLogger(EntityAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}
 				return null;
 			}

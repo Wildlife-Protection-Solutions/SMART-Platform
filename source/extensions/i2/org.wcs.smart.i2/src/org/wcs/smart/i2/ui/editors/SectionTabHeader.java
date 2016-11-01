@@ -88,6 +88,7 @@ public class SectionTabHeader extends Composite implements IHyperlinkListener{
 			max.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SECTION_EXPAND));
 			max.addListener(SWT.MouseUp, (e)->onMaximize.run());
 			max.setBackground(background);
+			max.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 		}
 	}
 	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit, Runnable onMaximize){

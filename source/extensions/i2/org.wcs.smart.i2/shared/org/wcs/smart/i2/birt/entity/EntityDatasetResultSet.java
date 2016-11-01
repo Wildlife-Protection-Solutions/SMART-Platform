@@ -27,6 +27,8 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
@@ -38,7 +40,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -180,7 +181,7 @@ public class EntityDatasetResultSet implements IResultSet {
 		try {
 			i.getPrimaryAttachment().computeFileLocation(connection.getSession());
 		} catch (Exception e) {
-			Intelligence2PlugIn.log(e.getMessage(), e);
+			Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e); //$NON-NLS-1$
 		}
 		try {
 			if (colIndex <= 8){
@@ -198,7 +199,7 @@ public class EntityDatasetResultSet implements IResultSet {
 				return EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getValue(i);
 			}
 		} catch (IOException e) {
-			Intelligence2PlugIn.log(e.getMessage(), e);
+			Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.SEVERE, e.getMessage(), e); //$NON-NLS-1$
 			return null;	
 		}
 	}

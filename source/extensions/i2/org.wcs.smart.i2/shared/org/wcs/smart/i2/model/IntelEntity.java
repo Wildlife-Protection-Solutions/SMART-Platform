@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -36,8 +37,10 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
+import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Model class of i_entity.
@@ -305,8 +308,27 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	public String getIdAttributeAsText(){
 		for (IntelEntityAttributeValue v : getAttributes()){
 			if (v.getAttribute().equals(getEntityType().getIdAttribute())){
-				//TODO Fix this as this won't compile when shared with connect
-				return (new AttributeValueLabelProvider()).getText(v);
+				
+				Object value = v.getAttributeValue();
+				IntelAttribute attribute = v.getAttribute();
+				if (value instanceof String){
+					return (String) value;
+				}else if (value instanceof Number){
+					if (attribute.getType() == IAttributeType.BOOLEAN){
+						if (((Number)value).doubleValue() >= 0.5){
+							return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
+						}else{
+							return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
+						}
+					}
+					return ((Number)value).toString();
+				}else if (value instanceof Date){
+					return DateFormat.getDateInstance().format((Date)value);
+				}else if (value instanceof NamedItem){
+					return ((NamedItem) value).getName();
+				}else{
+					return value.toString();
+				}
 			}
 		}
 		return "";

@@ -27,6 +27,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
@@ -37,7 +39,6 @@ import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -184,7 +185,7 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 		try {
 			i.getAttachment().computeFileLocation(currentSession);
 		} catch (Exception e) {
-			Intelligence2PlugIn.log(e.getMessage(), e);
+			Logger.getLogger(EntityAttachmentDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e); //$NON-NLS-1$
 		}
 		return EntityAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 	}

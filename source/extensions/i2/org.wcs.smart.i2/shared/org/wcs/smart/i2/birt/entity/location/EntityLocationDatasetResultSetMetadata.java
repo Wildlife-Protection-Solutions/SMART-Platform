@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.i2.birt.entity.location;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 
@@ -66,8 +68,8 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 			if (this == GEOM) {
 				try{
 					return location.getLocation().getGeometry();
-				}catch (ParseException ex){
-					Intelligence2PlugIn.log(ex.getMessage(), ex);
+				}catch (ParseException e){
+					Logger.getLogger(EntityLocationDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}
 				return null;
 			}

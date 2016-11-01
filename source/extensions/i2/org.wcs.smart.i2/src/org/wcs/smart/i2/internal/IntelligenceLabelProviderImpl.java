@@ -23,8 +23,11 @@ package org.wcs.smart.i2.internal;
 
 import java.util.Locale;
 
+import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 
 /**
  * Desktop label provider for intelligence module.
@@ -52,8 +55,23 @@ public class IntelligenceLabelProviderImpl implements
 				return "TEXT";
 			}
 		}
+		
+		if (item == IntelWorkingSetCategory.ENTITY) return "Entities";
+		if (item == IntelWorkingSetCategory.RECORD) return "Records";
+		if (item == IntelWorkingSetCategory.QUERIES) return "Queries";
+		
 		return null;
 		
+	}
+	
+	public Image getImage(Object item){
+
+		if (item == IntelWorkingSetCategory.RECORD){
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
+		}else if (item == IntelWorkingSetCategory.ENTITY){
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
+		}
+		return null;
 	}
 
 }

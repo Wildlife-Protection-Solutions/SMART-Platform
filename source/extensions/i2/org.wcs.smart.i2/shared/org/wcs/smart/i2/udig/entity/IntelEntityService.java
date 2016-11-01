@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -39,7 +41,6 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
@@ -77,8 +78,8 @@ public class IntelEntityService extends IService {
 				if (r != null){
 					recordName = r.getIdAttributeAsText();
 				}
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);		
+			}catch (Exception e){	
+				Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			}finally{
 				s.close();
 			}
@@ -86,8 +87,8 @@ public class IntelEntityService extends IService {
 				for (IGeoResource lresource : resources(monitor)){
 					((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(recordName);
 				}
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}catch (Exception e){
+				Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			}
 			
 			return org.eclipse.core.runtime.Status.OK_STATUS;
@@ -121,7 +122,7 @@ public class IntelEntityService extends IService {
 		try {
 			configureResourceNames.join();
 		} catch (InterruptedException e) {
-			Intelligence2PlugIn.log(e.getMessage(), e);
+			Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}
 	}
 	

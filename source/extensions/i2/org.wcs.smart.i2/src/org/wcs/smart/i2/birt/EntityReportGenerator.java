@@ -351,8 +351,6 @@ public enum EntityReportGenerator {
 		l = factory.newLabel(null);
 		rdh.getBody().add(l);
 		
-		
-		
 		List<IntelEntityTypeAttributeGroup> groups = new ArrayList<>();
 		HashMap<IntelEntityTypeAttributeGroup, List<IntelEntityTypeAttribute>> group2attribute = new HashMap<>();
 		for (IntelEntityTypeAttribute a : type.getAttributes()){

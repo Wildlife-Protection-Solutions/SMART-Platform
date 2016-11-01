@@ -22,6 +22,8 @@
 package org.wcs.smart.i2.events;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.event.spi.PreInsertEvent;
@@ -29,7 +31,6 @@ import org.hibernate.event.spi.PreInsertEventListener;
 import org.hibernate.event.spi.PreUpdateEvent;
 import org.hibernate.event.spi.PreUpdateEventListener;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IIntelAuditItem;
 
 /**
@@ -99,9 +100,7 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 		if (index >= 0) {
 			currentState[index] = value;
 		} else {
-			Intelligence2PlugIn.log("Field '" + propertyToSet
-					+ "' not found on entity '" + entity.getClass().getName()
-					+ "'.", null);
+			Logger.getLogger(IntelHibernateListener.class.getName()).log(Level.INFO, "Field '" + propertyToSet+ "' not found on entity '" + entity.getClass().getName() + "'.");
 		}
 	}
 }

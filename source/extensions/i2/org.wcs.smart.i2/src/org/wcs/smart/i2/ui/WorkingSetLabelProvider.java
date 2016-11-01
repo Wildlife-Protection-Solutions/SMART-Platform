@@ -22,9 +22,13 @@
 package org.wcs.smart.i2.ui;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetItem;
@@ -44,7 +48,7 @@ public class WorkingSetLabelProvider extends LabelProvider {
 		if (element instanceof IntelWorkingSet){
 			return ((IntelWorkingSet) element).getName();
 		}else if (element instanceof IntelWorkingSetCategory){
-			return ((IntelWorkingSetCategory) element).getGuiName();
+			return ((IntelWorkingSetCategory) element).getGuiName(Locale.getDefault());
 		}else if (element instanceof IntelWorkingSetItem){
 			return ((IntelWorkingSetItem) element).getLabel();
 		}
@@ -53,7 +57,7 @@ public class WorkingSetLabelProvider extends LabelProvider {
 	
 	public Image getImage(Object element){
 		if (element instanceof IntelWorkingSetCategory){
-			return ((IntelWorkingSetCategory) element).getImage();
+			return ((IntelligenceLabelProviderImpl)SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class)).getImage(element);
 		}else if (element instanceof IntelWorkingSetItem){
 			IntelWorkingSetItem wi = (IntelWorkingSetItem)element;
 			Image img = images.get(wi);
