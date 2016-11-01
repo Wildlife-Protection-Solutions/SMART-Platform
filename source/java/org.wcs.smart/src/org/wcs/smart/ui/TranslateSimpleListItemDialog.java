@@ -59,7 +59,7 @@ import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for changing the name of
- * any SimpleListItem.
+ * any NamedItem.
  * <p>Displays to the user a dialog with a language combo
  * and text box.</p>
  * 
