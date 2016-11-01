@@ -29,6 +29,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -45,6 +46,7 @@ public class IntelEntityTypeAttribute {
 	private IEntityTypeAttributePk id = new IEntityTypeAttributePk();	
 	
 	private int order;
+	private IntelEntityTypeAttributeGroup group;
 	
 	public IntelEntityTypeAttribute(){		
 	}
@@ -84,6 +86,17 @@ public class IntelEntityTypeAttribute {
 	public void setOrder(int order){
 		this.order = order;
 	}
+	
+	@ManyToOne
+	@JoinColumn(name="attribute_group_uuid", referencedColumnName="uuid")
+	public IntelEntityTypeAttributeGroup getAttributeGroup(){
+		return this.group;
+	}
+	
+	public void setAttributeGroup(IntelEntityTypeAttributeGroup group){
+		this.group = group;
+	}
+	
 	/**
 	 * @param o
 	 * @return

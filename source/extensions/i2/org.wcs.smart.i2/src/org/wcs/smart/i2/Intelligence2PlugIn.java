@@ -48,6 +48,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String DB_VERSION_40 = "4.0"; //$NON-NLS-1$
 	public static final String DB_VERSION = DB_VERSION_40; //current version
 	
+	public static final String ICON_ATTRIBUTE_GROUP = "org.wcs.smart.i2.icon.attribute.group"; //$NON-NLS-1$
+	public static final String ICON_ATTRIBUTE_GROUP_NEW = "org.wcs.smart.i2.icon.attribute.group.new"; //$NON-NLS-1$
 	public static final String ICON_ENTITY = "org.wcs.smart.i2.icon.entity"; //$NON-NLS-1$
 	public static final String ICON_ENTITY_NEW = "org.wcs.smart.i2.icon.entity.new"; //$NON-NLS-1$
 	public static final String ICON_RECORD = "org.wcs.smart.i2.icon.record"; //$NON-NLS-1$
@@ -87,6 +89,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_PDF, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/printpdf.png")); //$NON-NLS-1$);
 		reg.put(ICON_RELATIONSHIP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/relationship.png")); //$NON-NLS-1$);
 		reg.put(ICON_SECTION_EXPAND, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj12/section_expand.png")); //$NON-NLS-1$);
+		reg.put(ICON_ATTRIBUTE_GROUP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group.png")); //$NON-NLS-1$);
+		reg.put(ICON_ATTRIBUTE_GROUP_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group_new.png")); //$NON-NLS-1$);
+		
 	}
 	
 	/*

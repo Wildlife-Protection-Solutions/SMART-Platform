@@ -82,6 +82,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -111,7 +112,9 @@ import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.themes.ColorUtil;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -143,10 +146,12 @@ import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
+import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -182,6 +187,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private EntityEditorInput input;
 	private IntelEntity entity;
 	private List<IntelEntityRelationship> relationships;
+	private List<IntelEntityTypeAttributeGroup> groups;
 	
 	private List<AttributeFieldEditor> fieldEditors = null;
 	
@@ -195,6 +201,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private Composite compAttributes;
 	private Composite compAttachments;
+	private SashForm mainSash;
+	private int[] mainSashMinSize;
 	
 	private AttachmentTable attachmentTable;
 	private Composite attachmentEditPanel;
@@ -256,6 +264,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 						}
 					}
 				}
+				
+				groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
+						.add(Restrictions.eq("entityType", temp.getEntityType()))
+						.addOrder(Order.asc("order"))
+						.list();
 				
 				temp.getPrimaryAttachment();
 				
@@ -567,13 +580,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 		parent.setLayout(createGridLayoutNoMargin(1));
 		
-		SashForm sash = new SashForm(parent, SWT.VERTICAL);
-		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		createTopPanel(sash);
-		
-		createBottomPanel(sash);
-		sash.setWeights(new int[]{1,2});
+		mainSash = new SashForm(parent, SWT.VERTICAL);
+		mainSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		int minSize1 = createTopPanel(mainSash);
+		int minSize2 = createBottomPanel(mainSash);
+		mainSashMinSize = new int[]{minSize1, minSize2};
+		mainSash.setWeights(new int[]{1,2});
 		
 		loadEntity.schedule();
 		
@@ -604,12 +616,26 @@ public class EntityEditor extends EditorPart implements MapPart{
 		attributeLabelProvider.dispose();
 		super.dispose();
 	}
+	private void maximizeMainPanel(int index){
+		int totalHeight = mainSash.getClientArea().height;
+		int weights[] = new int[mainSashMinSize.length];
+		for (int i= 0; i < weights.length; i ++){
+			weights[i] = mainSashMinSize[i];
+			if (i == index){
+				totalHeight -= weights[i];
+			}
+		}
+		weights[index] = totalHeight;
+		mainSash.setWeights(weights);
+	}
 	
-	private void createBottomPanel(Composite parent){
+	private int createBottomPanel(Composite parent){
 		Composite bottom = toolkit.createComposite(parent);
 		bottom.setLayout(new GridLayout());
+		((GridLayout)bottom.getLayout()).marginWidth = 0;
+		((GridLayout)bottom.getLayout()).marginHeight = 0;
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Map", "Records", "Relationships"}, bottom, toolkit);
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Map", "Records", "Relationships"}, bottom, toolkit, ()->maximizeMainPanel(1));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(bottom, SWT.NONE);
@@ -633,6 +659,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		tabList.setContent(new Composite[]{compMap,  compRecords, compRelationships}, tabPart);
 		tabList.selectTab(0);
+		return tabList.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 	}
 	
 	private void addEntityDropTarget(Composite comp){
@@ -699,7 +726,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 	}
-	private void createTopPanel(Composite parent){
+	private int createTopPanel(Composite parent){
 		
 		FontData fd = parent.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -708,6 +735,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		Composite panel = toolkit.createComposite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout(2, false));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite leftPart = toolkit.createComposite(panel, SWT.NONE);
@@ -736,7 +765,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridData)lblMainImage.getLayoutData()).widthHint = THUMB_SIZE;
 		((GridData)lblMainImage.getLayoutData()).heightHint = THUMB_SIZE;
 
-		
 		toolkit.createLabel(leftPart, "Created:");
 		lblCreated = toolkit.createLabel(leftPart, "CREATED");
 		
@@ -746,7 +774,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		Composite rightPart = toolkit.createComposite(panel, SWT.NONE);
 		rightPart.setLayout(new GridLayout(2, false));
 		rightPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		((GridLayout)rightPart.getLayout()).verticalSpacing = 2;
 		lblIdentifier = toolkit.createLabel(rightPart, "");
 		lblIdentifier.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		lblIdentifier.setFont(headerFont);
@@ -871,7 +899,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Attributes", "Files"}, rightPart, toolkit);
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Attributes", "Files"}, rightPart, toolkit, ()->maximizeMainPanel(0));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(rightPart, SWT.NONE);
@@ -880,14 +908,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		compAttributes = toolkit.createComposite(tabPart, SWT.NONE);
 		compAttributes.setLayout(new GridLayout());
+		((GridLayout)compAttributes.getLayout()).marginWidth = 0;
+		((GridLayout)compAttributes.getLayout()).marginHeight = 0;
 		
 		compAttachments = toolkit.createComposite(tabPart, SWT.NONE);
 		compAttachments.setLayout(new GridLayout());
-
+		((GridLayout)compAttachments.getLayout()).marginHeight = 0;
+		((GridLayout)compAttachments.getLayout()).marginWidth = 0;
+		
 		createAttachmentPanel(compAttachments);
 		
 		tabList.setContent(new Composite[]{compAttributes,  compAttachments}, tabPart);
 		tabList.selectTab(0);
+		return leftPart.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 	}
 	
 	private void createMapPanel(Composite parent){
@@ -1501,49 +1534,97 @@ public class EntityEditor extends EditorPart implements MapPart{
 			kid.dispose();
 		}
 		
-		ScrolledForm attributelist = toolkit.createScrolledForm(compAttributes);
-		attributelist.getBody().setLayout(createGridLayoutNoMargin(1));
-		attributelist.setExpandHorizontal(true);
-		attributelist.setExpandVertical(true);
-		attributelist.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Composite part = toolkit.createComposite(attributelist.getBody(), SWT.NONE);
-		part.setLayout(createGridLayoutNoMargin(2));
-		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-		for (IntelEntityTypeAttribute a : entity.getEntityType().getAttributes()){
-			if (isEditMode){
-				AttributeFieldEditor e = new AttributeFieldEditor(part, a.getAttribute());
-				e.adapt(toolkit);
-				IntelEntityAttributeValue initValue = entity.findAttributeValue(a.getAttribute());
-				if (initValue != null) e.initControl(initValue);
-				e.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						EntityEditor.this.setDirty(true);
-					}
-				});
-				fieldEditors.add(e);
-			}else{
-				Label key = toolkit.createLabel(part, a.getAttribute().getName() + ":");
-				key.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-				
-				String text = "";
-				for (IntelEntityAttributeValue v : entity.getAttributes()){
-					if (v.getAttribute().equals(a.getAttribute())){
-						text = attributeLabelProvider.getText(v);
-						break;
-						
-					}
-				}
-				Text tmp = toolkit.createText(part, text, SWT.BORDER);
-				tmp.setEditable(false);
-//				tmp.setEnabled(false);
-//				Label tmp = toolkit.createLabel(part, text, SWT.BORDER);
-				tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			}
-			
+		//groups
+		List<String> groupHeaders = new ArrayList<String>();
+		for (IntelEntityTypeAttributeGroup g : groups){
+			groupHeaders.add(g.getName());
 		}
+		//only add other group if an attribute belongs in it
+		for (IntelEntityTypeAttribute a : entity.getEntityType().getAttributes()){
+			if (a.getAttributeGroup() == null){
+				groupHeaders.add(OtherAttributeGroup.INSTANCE.getName());
+				break;
+			}
+		}
+		
+		Composite outer = toolkit.createComposite(compAttributes, SWT.NONE);
+		outer.setLayout(new GridLayout());
+		((GridLayout)outer.getLayout()).marginWidth = 0;
+		((GridLayout)outer.getLayout()).marginHeight = 0;
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Color c = toolkit.getColors().getColor(IFormColors.TB_BG);
+		Color e2 = new Color(getSite().getShell().getDisplay(), ColorUtil.blend(c.getRGB(), new RGB(255,255,255),50));
+		
+		
+		SectionTabHeader tabList = new SectionTabHeader(groupHeaders.toArray(new String[groupHeaders.size()]), outer, toolkit,e2);
+		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Composite tabPart = toolkit.createComposite(outer, SWT.NONE);
+		tabPart.setLayout(new StackLayout());
+		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		tabPart.addDisposeListener((e) ->  e2.dispose());
+		
+		Composite[] parts = new Composite[groupHeaders.size()];
+		int counter = 0;
+		
+		for (int i = 0; i < groupHeaders.size(); i ++){
+			IntelEntityTypeAttributeGroup group = null;
+			if (i < groups.size()){
+				group = groups.get(i);
+			}
+			ScrolledForm attributelist = toolkit.createScrolledForm(tabPart);
+			attributelist.getBody().setLayout(new GridLayout());
+			attributelist.setExpandHorizontal(true);
+			attributelist.setExpandVertical(true);
+			attributelist.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			parts[counter++] = attributelist;
+		
+			Composite part = toolkit.createComposite(attributelist.getBody(), SWT.NONE);
+			part.setLayout(createGridLayoutNoMargin(2));
+			part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			for (IntelEntityTypeAttribute a : entity.getEntityType().getAttributes()){
+				if (group == null){
+					if (a.getAttributeGroup() != null) continue;
+				}else{
+					if (!group.equals(a.getAttributeGroup())) continue;
+				}
+				if (isEditMode){
+					AttributeFieldEditor e = new AttributeFieldEditor(part, a.getAttribute());
+					e.adapt(toolkit);
+					IntelEntityAttributeValue initValue = entity.findAttributeValue(a.getAttribute());
+					if (initValue != null) e.initControl(initValue);
+					e.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							EntityEditor.this.setDirty(true);
+						}
+					});
+					fieldEditors.add(e);
+				}else{
+					Label key = toolkit.createLabel(part, a.getAttribute().getName() + ":");
+					key.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+					
+					String text = "";
+					for (IntelEntityAttributeValue v : entity.getAttributes()){
+						if (v.getAttribute().equals(a.getAttribute())){
+							text = attributeLabelProvider.getText(v);
+							break;
+							
+						}
+					}
+					Text tmp = toolkit.createText(part, text, SWT.BORDER);
+					tmp.setEditable(false);
+					tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				}
+				
+			}
+			attributelist.layout(true);
+		}
+		tabList.setContent(parts, tabPart);
+		tabList.selectTab(0);
+		
 		compAttributes.layout(true);
 		
 		//attachment composite

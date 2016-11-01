@@ -83,6 +83,8 @@ import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.item.LayerItem;
 import org.wcs.smart.report.birt.map.item.SmartMapItem;
@@ -349,45 +351,87 @@ public enum EntityReportGenerator {
 		l = factory.newLabel(null);
 		rdh.getBody().add(l);
 		
-		l = factory.newLabel(null);
-		l.setText("Attributes");
-		l.setStyleName(sectionHeaderStyle.getName());
-		rdh.getBody().add(l);
 		
-		GridHandle attributeGrid = factory.newGridItem(null, 2, type.getAttributes().size() + 1);
-		attributeGrid.setDataSet(entityDataset);
-		attributeGrid.setStyleName(tableStyle.getName());
-		rdh.getBody().add(attributeGrid);
 		
-		for (ComputedColumn c : entityColumns){
-			attributeGrid.getColumnBindings().addItem(c);
-		}
-		((ColumnHandle)attributeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20%");
-		
-		l = factory.newLabel(null);
-		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.TYPE.getColumnName()));
-		attributeGrid.getCell(1,1).getContent().add(l);
-		
-		di = factory.newDataItem(null);
-		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.TYPE.getColumnName());
-		attributeGrid.getCell(1,2).getContent().add(di);
-		
-		int rowcnt = 2;
+		List<IntelEntityTypeAttributeGroup> groups = new ArrayList<>();
+		HashMap<IntelEntityTypeAttributeGroup, List<IntelEntityTypeAttribute>> group2attribute = new HashMap<>();
 		for (IntelEntityTypeAttribute a : type.getAttributes()){
-			l = factory.newLabel(null);
-			l.setText(a.getAttribute().getName() + ":");
-			attributeGrid.getCell(rowcnt,1).getContent().add(l);
-			
-			di = factory.newDataItem(null);
-			di.setResultSetColumn(a.getAttribute().getName());
-			attributeGrid.getCell(rowcnt,2).getContent().add(di);
-			
-			rowcnt++;
+			List<IntelEntityTypeAttribute> as = group2attribute.get(a.getAttributeGroup());
+			if (as == null){
+				as = new ArrayList<IntelEntityTypeAttribute>();
+				group2attribute.put(a.getAttributeGroup(), as);
+			}
+			as.add(a);
+			if (a.getAttributeGroup() != null && !groups.contains(a.getAttributeGroup())) groups.add(a.getAttributeGroup());
 		}
 		
-		//spacer
-		l = factory.newLabel(null);
-		rdh.getBody().add(l);
+		groups.sort((a,b) -> ((Integer)a.getOrder()).compareTo(b.getOrder()));
+		
+		for (IntelEntityTypeAttributeGroup group : groups){
+			l = factory.newLabel(null);
+			l.setText("Attributes - " + group.getName());
+			l.setStyleName(sectionHeaderStyle.getName());
+			rdh.getBody().add(l);
+			
+			GridHandle attributeGrid = factory.newGridItem(null, 2, group2attribute.get(group).size());
+			attributeGrid.setDataSet(entityDataset);
+			attributeGrid.setStyleName(tableStyle.getName());
+			rdh.getBody().add(attributeGrid);
+			
+			for (ComputedColumn c : entityColumns){
+				attributeGrid.getColumnBindings().addItem(c);
+			}
+			((ColumnHandle)attributeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20%");
+			int rowcnt = 1;
+			for (IntelEntityTypeAttribute a : group2attribute.get(group)){
+				l = factory.newLabel(null);
+				l.setText(a.getAttribute().getName() + ":");
+				attributeGrid.getCell(rowcnt,1).getContent().add(l);
+				
+				di = factory.newDataItem(null);
+				di.setResultSetColumn(a.getAttribute().getName());
+				attributeGrid.getCell(rowcnt,2).getContent().add(di);
+				
+				rowcnt++;
+			}
+			
+			//spacer
+			l = factory.newLabel(null);
+			rdh.getBody().add(l);
+		}
+		if (group2attribute.get(null) != null){
+			l = factory.newLabel(null);
+			l.setText("Attributes - " + OtherAttributeGroup.INSTANCE.getName());
+			l.setStyleName(sectionHeaderStyle.getName());
+			rdh.getBody().add(l);
+			
+			GridHandle attributeGrid = factory.newGridItem(null, 2, group2attribute.get(null).size());
+			attributeGrid.setDataSet(entityDataset);
+			attributeGrid.setStyleName(tableStyle.getName());
+			rdh.getBody().add(attributeGrid);
+			
+			for (ComputedColumn c : entityColumns){
+				attributeGrid.getColumnBindings().addItem(c);
+			}
+			((ColumnHandle)attributeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20%");
+
+			int rowcnt = 1;
+			for (IntelEntityTypeAttribute a : group2attribute.get(null)){
+				l = factory.newLabel(null);
+				l.setText(a.getAttribute().getName() + ":");
+				attributeGrid.getCell(rowcnt,1).getContent().add(l);
+				
+				di = factory.newDataItem(null);
+				di.setResultSetColumn(a.getAttribute().getName());
+				attributeGrid.getCell(rowcnt,2).getContent().add(di);
+				
+				rowcnt++;
+			}
+			
+			//spacer
+			l = factory.newLabel(null);
+			rdh.getBody().add(l);
+		}
 		
 		/* ----- Attachments Table ----- */
 		l = factory.newLabel(null);

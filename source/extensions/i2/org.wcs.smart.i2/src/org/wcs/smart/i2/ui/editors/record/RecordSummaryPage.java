@@ -54,6 +54,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -610,8 +611,15 @@ public class RecordSummaryPage extends EditorPart{
 			((GridLayout)header.getLayout()).marginWidth = 2;
 			((GridLayout)header.getLayout()).marginHeight = 2;
 			
-			img = new Twistie(header, SWT.NONE);
+			img = new Twistie(header, SWT.NONE){
+				@Override
+				protected void handleActivate(Event e) {
+					
+				}
+			};
 			img.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
+			img.setExpanded(true);
+//			img.getListeners(SWT.MouseDown)
 			Label l =toolkit.createLabel(header, text);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));

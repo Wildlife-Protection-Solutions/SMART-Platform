@@ -28,7 +28,7 @@ DROP TABLE smart.i_relationship_type;
 DROP TABLE smart.i_record_query;
 DROP TABLE smart.i_attribute;
 DROP TABLE smart.i_relationship_group;
-
+DROP TABLE smart.i_entity_type_attribute_group;
 
 /* Create Tables */
 CREATE TABLE smart.i_attachment
@@ -168,10 +168,18 @@ CREATE TABLE smart.i_entity_type_attribute
 (
 	entity_type_uuid char(16)for bit data  NOT NULL,
 	attribute_uuid char(16) for bit data NOT NULL,
+	attribute_group_uuid char(16) for bit data,
 	seq_order integer not null,
 	PRIMARY KEY (entity_type_uuid, attribute_uuid)
 );
 
+CREATE TABLE smart.i_entity_type_attribute_group
+(
+	uuid char(16) for bit data NOT NULL,
+	entity_type_uuid char(16) for bit data not null,
+	seq_order integer not null,
+	PRIMARY KEY (uuid)
+);
 
 CREATE TABLE smart.i_location
 (
@@ -560,6 +568,19 @@ ALTER TABLE smart.i_entity_type_attribute ADD CONSTRAINT ientitytypeattribute_at
 	ON DELETE RESTRICT
 DEFERRABLE INITIALLY IMMEDIATE;
 
+ALTER TABLE smart.i_entity_type_attribute ADD CONSTRAINT iattributegroupuuid_fk
+	FOREIGN KEY (attribute_group_uuid)
+	REFERENCES smart.i_entity_type_attribute_group (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE smart.i_entity_type_attribute_group ADD CONSTRAINT ientitytypeattributegroupentitytypeuuid_fk
+	FOREIGN KEY (entity_type_uuid)
+	REFERENCES smart.i_entity_type (uuid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE smart.i_entity_relationship_attribute_value ADD CONSTRAINT ientityrelationshipattribute_attribute_fk
 	FOREIGN KEY (attribute_uuid)

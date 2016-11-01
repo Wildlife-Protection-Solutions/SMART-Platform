@@ -127,6 +127,11 @@
             class="org.wcs.smart.i2.model.IntelWorkingSetRecord"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".entityType.conservationArea"
+            class="org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.ca.deleteAdvisor">

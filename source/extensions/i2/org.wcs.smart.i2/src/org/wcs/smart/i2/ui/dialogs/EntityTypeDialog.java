@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,6 +40,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -53,9 +55,12 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
@@ -71,6 +76,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -84,6 +90,8 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.WarningDialog;
@@ -97,9 +105,12 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.IconComposite;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -117,14 +128,16 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private NameKeyComposite nameKeyInfo;
 	private IconComposite icon;
 	private List<IntelEntityType> entityTypeSiblings;
-	private TableViewer tblAttributes;
+	private TreeViewer treeAttributes;
 	private ComboViewer idAttribute;
 	
 	private MenuItem editItem;
 	private MenuItem deleteItem;
 	private MenuItem addItem;
+	private MenuItem addGroupItem;
 	
 	private Button btnAdd;
+	private Button btnNewGroup;
 	private Button btnDelete;
 	private Button btnEdit;
 	private Button btnMoveUp;
@@ -134,6 +147,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private ControlDecoration cdId;
 	
 	private List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
+	private List<IntelEntityTypeAttributeGroup> groups = new ArrayList<IntelEntityTypeAttributeGroup>();
 	
 	@Inject
 	private IEventBroker broker;
@@ -172,6 +186,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		}
 		super.cancelPressed();
 	}
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
@@ -180,6 +195,12 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		try{
 			s.beginTransaction();
 			s.saveOrUpdate(type);
+			
+			//set order and update groups
+			for (int i = 0; i < groups.size(); i ++){
+				groups.get(i).setOrder(i);
+				s.saveOrUpdate(groups.get(i));
+			}
 			
 			for (IntelEntityTypeAttribute a : attributeList){
 				if (!type.getAttributes().contains(a)){
@@ -203,15 +224,35 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 			type.getAttributes().removeAll(toDelete);
 			
-			int order = 1;
+			HashMap<IntelEntityTypeAttributeGroup, Integer> orderCnt = new HashMap<>();
 			for (IntelEntityTypeAttribute a : attributeList){
-				int index = type.getAttributes().indexOf(a);
-				if (index >= 0){
-					type.getAttributes().get(index).setOrder(order++);
+				Integer x = orderCnt.get(a.getAttributeGroup());
+				if (x == null){
+					x = 0;
 				}
+				x++;
+				orderCnt.put(a.getAttributeGroup(), x);
+				for (IntelEntityTypeAttribute aa : type.getAttributes()){
+					if (aa.equals(a)){
+						aa.setOrder(x);
+						break;
+					}
+				}
+				a.setOrder(x);
 			}
 			Collections.sort(type.getAttributes(), (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
+			Collections.sort(groups, (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
 			
+			//remove groups
+			List<IntelEntityTypeAttributeGroup> currentGroups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
+					.add(Restrictions.eq("entityType", type))
+					.list();
+			for (IntelEntityTypeAttributeGroup g : currentGroups){
+				if (!groups.contains(g)){
+					s.delete(g);
+				}
+			}
+			s.flush();
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
@@ -242,12 +283,25 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	}
 	
 	private void attributeSelectionModified(){
-		btnEdit.setEnabled(!tblAttributes.getSelection().isEmpty());
-		btnDelete.setEnabled(!tblAttributes.getSelection().isEmpty());
-		editItem.setEnabled(!tblAttributes.getSelection().isEmpty());
-		deleteItem.setEnabled(!tblAttributes.getSelection().isEmpty());
-		btnMoveUp.setEnabled(!tblAttributes.getSelection().isEmpty());
-		btnMoveDown.setEnabled(!tblAttributes.getSelection().isEmpty());
+		boolean ok = false;
+		if (!treeAttributes.getSelection().isEmpty()){
+			IStructuredSelection sel = (IStructuredSelection)treeAttributes.getSelection();
+			for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+				Object next = iterator.next();
+				if (next instanceof IntelEntityTypeAttribute || next instanceof IntelEntityTypeAttributeGroup){
+					ok = true;
+					break;
+				}
+				
+			}
+		}
+		
+		btnEdit.setEnabled(ok);
+		btnDelete.setEnabled(ok);
+		editItem.setEnabled(ok);
+		deleteItem.setEnabled(ok);
+		btnMoveUp.setEnabled(ok);
+		btnMoveDown.setEnabled(ok);
 	}
 	
 	private void modified(){
@@ -359,37 +413,66 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		attributeComp.setLayout(new GridLayout(2, false));
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 				
-		tblAttributes = new TableViewer(attributeComp, SWT.BORDER | SWT.MULTI);
-		tblAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tblAttributes.setContentProvider(ArrayContentProvider.getInstance());
-		tblAttributes.setLabelProvider(new AttributeLabelProvider());
-		tblAttributes.addSelectionChangedListener(new ISelectionChangedListener() {
+		treeAttributes = new TreeViewer(attributeComp, SWT.BORDER | SWT.MULTI);
+		treeAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		treeAttributes.setContentProvider(new AttributeTreeContentProvider());
+		treeAttributes.setLabelProvider(new LabelProvider(){
+			AttributeLabelProvider attribute = new AttributeLabelProvider();
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelEntityTypeAttributeGroup){
+					return ((IntelEntityTypeAttributeGroup) element).getName();
+				}else if (element instanceof OtherAttributeGroup){
+					return ((OtherAttributeGroup)element).getName();
+				}
+				return attribute.getText(element);		
+			}
+			
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof IntelEntityTypeAttribute){
+					return attribute.getImage(element);		
+				}else if (element instanceof IntelEntityTypeAttributeGroup || 
+						element instanceof OtherAttributeGroup){
+					return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTRIBUTE_GROUP);
+				}
+				return null;
+			}
+			
+			@Override
+			public void dispose(){
+				attribute.dispose();
+				super.dispose();
+			}
+			
+		});
+		treeAttributes.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				attributeSelectionModified();
 			}
 		});
-		tblAttributes.addDoubleClickListener(new IDoubleClickListener() {
+		treeAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				editAttribute();
 				
 			}
 		});
-		cdList = createDecoration(tblAttributes.getControl());
+		cdList = createDecoration(treeAttributes.getControl());
 		int operations = DND.DROP_MOVE;
 		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
-		tblAttributes.addDragSupport(operations, transferTypes , new DragSourceListener() {
+		treeAttributes.addDragSupport(operations, transferTypes , new DragSourceListener() {
 			
 			@Override
 			public void dragStart(DragSourceEvent event) {
-				LocalSelectionTransfer.getTransfer().setSelection(tblAttributes.getSelection());				
+				LocalSelectionTransfer.getTransfer().setSelection(treeAttributes.getSelection());				
 			}
 			
 			@Override
 			public void dragSetData(DragSourceEvent event) {
 				if (LocalSelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
-					event.data = tblAttributes.getSelection();
+					event.data = treeAttributes.getSelection();
 				}	
 			}
 			
@@ -400,7 +483,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		tblAttributes.addDropSupport(operations, transferTypes, new ViewerDropAdapter(tblAttributes) {
+		treeAttributes.addDropSupport(operations, transferTypes, new ViewerDropAdapter(treeAttributes) {
 			@Override
 			public boolean performDrop(Object data) {
 				StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
@@ -410,6 +493,16 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				Object obj = selection.getFirstElement();
 				if (obj.equals(getCurrentTarget())) return false;
 				if (obj instanceof IntelEntityTypeAttribute){
+					IntelEntityTypeAttribute target = (IntelEntityTypeAttribute)obj;
+					if (getCurrentTarget() instanceof IntelEntityTypeAttributeGroup){
+						target.setAttributeGroup( (IntelEntityTypeAttributeGroup)getCurrentTarget() );
+					}else if (getCurrentTarget() instanceof IntelEntityTypeAttribute){
+						target.setAttributeGroup(  ((IntelEntityTypeAttribute)getCurrentTarget()).getAttributeGroup());
+					}else if (getCurrentTarget().equals(OtherAttributeGroup.INSTANCE)){
+						//none object
+						target.setAttributeGroup(null);
+					}
+					
 					int loc = getCurrentLocation();
 					attributeList.remove(obj);
 					int targetIndex = attributeList.indexOf(getCurrentTarget());					
@@ -422,31 +515,65 @@ public class EntityTypeDialog extends TitleAreaDialog {
 					getViewer().refresh();
 					modified();
 				}
+				if (obj instanceof IntelEntityTypeAttributeGroup){
+					IntelEntityTypeAttributeGroup target = (IntelEntityTypeAttributeGroup)obj;
+					int loc = getCurrentLocation();
+					groups.remove(target);
+					int targetIndex = groups.indexOf(getCurrentTarget());					
+					if (loc == LOCATION_AFTER){
+						targetIndex ++;
+					}
+					if (targetIndex < 0) targetIndex = 0;
+					if (targetIndex > groups.size()) targetIndex = groups.size();
+					groups.add(targetIndex, target);
+					getViewer().refresh();
+					modified();
+				}
 				return true;
 			}
 
 			@Override
 			public boolean validateDrop(Object target, int operation, TransferData transferType) {
+				Object moving = ((IStructuredSelection)LocalSelectionTransfer.getTransfer().getSelection()).getFirstElement();
 				if (LocalSelectionTransfer.getTransfer().isSupportedType(transferType) &&
 						operation == DND.DROP_MOVE && getCurrentTarget() != null){
-					return true;
+					if (moving instanceof IntelEntityTypeAttributeGroup){
+						return target instanceof IntelEntityTypeAttributeGroup;
+					}
+					if (moving instanceof IntelEntityTypeAttribute || 
+							moving instanceof IntelEntityTypeAttributeGroup){
+						return true;
+					}
+					//do not move none object
+					return false;
 				}
 				return false;
 			}
 			
 		});
 		
-		Menu listMenu = new Menu(tblAttributes.getControl());
-		tblAttributes.getControl().setMenu(listMenu);
+		Menu listMenu = new Menu(treeAttributes.getControl());
+		treeAttributes.getControl().setMenu(listMenu);
 		
 		addItem = new MenuItem(listMenu, SWT.DEFAULT);
-		addItem.setText(DialogConstants.ADD_BUTTON_TEXT);
+		addItem.setText("Add Attribute");
 		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addItem.setEnabled(true);
 		addItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				addAttribute();
+			}
+		});
+		
+		addGroupItem = new MenuItem(listMenu, SWT.DEFAULT);
+		addGroupItem.setText("New Group...");
+		addGroupItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTRIBUTE_GROUP_NEW));
+		addGroupItem.setEnabled(true);
+		addGroupItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addGroup();
 			}
 		});
 		
@@ -478,12 +605,22 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		btnAdd = new Button(buttonComp, SWT.NONE);
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.setText("Add Attribute");
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				addAttribute();
+			}
+		});
+		
+		btnNewGroup = new Button(buttonComp, SWT.NONE);
+		btnNewGroup.setText("New Group");
+		btnNewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnNewGroup.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addGroup();
 			}
 		});
 		
@@ -541,31 +678,75 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	}
 	
 	private void moveAttribute(int direction){
-		for (Iterator<?> iterator = ((IStructuredSelection) tblAttributes.getSelection()).iterator(); iterator.hasNext();) {
-			IntelEntityTypeAttribute a = (IntelEntityTypeAttribute) iterator.next();
-			
-			int index = attributeList.indexOf(a);
-			if (direction == SWT.UP){
-				index ++;
-				if(index >= attributeList.size()){
-					index = attributeList.size() - 1;
+		for (Iterator<?> iterator = ((IStructuredSelection) treeAttributes.getSelection()).iterator(); iterator.hasNext();) {
+			Object toMove = iterator.next();
+			if (toMove instanceof IntelEntityTypeAttribute){
+				IntelEntityTypeAttribute a = (IntelEntityTypeAttribute) toMove;
+				
+				int index = attributeList.indexOf(a);
+				if (direction == SWT.UP){
+					index ++;
+					if(index >= attributeList.size()){
+						index = attributeList.size() - 1;
+					}
+				}else if (direction == SWT.DOWN){
+					index --;
+					if(index < 0) index = 0;
 				}
-			}else if (direction == SWT.DOWN){
-				index --;
-				if(index < 0) index = 0;
+				
+				attributeList.remove(a);
+				attributeList.add(index, a);
+			}else if (toMove instanceof IntelEntityTypeAttributeGroup){
+				IntelEntityTypeAttributeGroup a = (IntelEntityTypeAttributeGroup) toMove;
+				
+				int index = groups.indexOf(a);
+				if (direction == SWT.UP){
+					index ++;
+					if(index >= groups.size()){
+						index = groups.size() - 1;
+					}
+				}else if (direction == SWT.DOWN){
+					index --;
+					if(index < 0) index = 0;
+				}
+				
+				groups.remove(a);
+				groups.add(index, a);
 			}
-			
-			attributeList.remove(a);
-			attributeList.add(index, a);
 		}
 		modified();
-		tblAttributes.refresh();
+		treeAttributes.refresh();
+	}
+	
+	private void addGroup(){
+		InputDialog dialog = new InputDialog(getParentShell(), "New Group", "Name for group",
+				"New Group", (text)-> text.trim().isEmpty() ? "Name cannot be empty" : null);
+		if (dialog.open() == Window.OK){
+			IntelEntityTypeAttributeGroup newGroup = new IntelEntityTypeAttributeGroup();
+			newGroup.setEntityType(type);
+			String name = dialog.getValue();
+			newGroup.setName(name);
+			newGroup.updateName(SmartDB.getCurrentLanguage(), name);
+			newGroup.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
+		
+			groups.add(newGroup);
+			treeAttributes.refresh();
+		}
 	}
 	
 	private void addAttribute(){
-		AttributeListDialog dialog = new AttributeListDialog(getShell());
+		IntelEntityTypeAttributeGroup parent = null;
+		if (!treeAttributes.getSelection().isEmpty()){
+			Object x = ((IStructuredSelection)treeAttributes.getSelection()).getFirstElement();
+			if (x instanceof IntelEntityTypeAttributeGroup){
+				parent = (IntelEntityTypeAttributeGroup) x;
+			}else if (x instanceof IntelEntityTypeAttribute){
+				parent = ((IntelEntityTypeAttribute) x).getAttributeGroup();
+			}
+		}
+		AttributeListDialog dialog = new AttributeListDialog(getShell(), parent);
 		if (dialog.open() == Window.OK){
-			tblAttributes.refresh();
+			treeAttributes.refresh();
 			if (type.getIdAttribute() == null){
 				type.setIdAttribute(attributeList.get(0).getAttribute());
 			}
@@ -575,29 +756,45 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	}
 	
 	private void editAttribute(){
-		Object x = ((IStructuredSelection)tblAttributes.getSelection()).getFirstElement();
+		Object x = ((IStructuredSelection)treeAttributes.getSelection()).getFirstElement();
 		if (x instanceof IntelEntityTypeAttribute){
 			IntelEntityTypeAttribute attribute = (IntelEntityTypeAttribute)x;
 			AttributeDialog.showAttributeDialog(getShell(), attribute.getAttribute(), context); 
 			//refresh
-			tblAttributes.refresh();
+			treeAttributes.refresh();
 			refreshAttributeList();
+		}
+		if (x instanceof IntelEntityTypeAttributeGroup){
+			IntelEntityTypeAttributeGroup toRename = (IntelEntityTypeAttributeGroup)x;
+			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toRename);
+			if (dialog.open() == Window.OK){
+				treeAttributes.refresh();
+				modified();
+			}
 		}
 	}
 
 	
 	private void removeAttributes(){
-		IStructuredSelection items = (IStructuredSelection)tblAttributes.getSelection();
+		IStructuredSelection items = (IStructuredSelection)treeAttributes.getSelection();
 		final List<IntelEntityTypeAttribute> toDelete = new ArrayList<IntelEntityTypeAttribute>();
+		final List<IntelEntityTypeAttributeGroup> toDeleteGroups = new ArrayList<IntelEntityTypeAttributeGroup>();
 		for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof IntelEntityTypeAttribute){
 				toDelete.add((IntelEntityTypeAttribute) x);
+			}else if (x instanceof IntelEntityTypeAttributeGroup){
+				IntelEntityTypeAttributeGroup group = (IntelEntityTypeAttributeGroup)x;
+				toDeleteGroups.add(group);
+				for (IntelEntityTypeAttribute a : attributeList){
+					if (group.equals(a.getAttributeGroup())) toDelete.add(a);
+				}
 			}
 		}
 		
 		final List<String> warnings = new ArrayList<String>();
 		final List<IntelEntityTypeAttribute> aToDelete = new ArrayList<IntelEntityTypeAttribute>();
+		final List<IntelEntityTypeAttributeGroup> gToDelete = new ArrayList<IntelEntityTypeAttributeGroup>(toDeleteGroups);	
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
 			pmd.run(true, false, new IRunnableWithProgress(){
@@ -612,9 +809,23 @@ public class EntityTypeDialog extends TitleAreaDialog {
 								DeleteManager.canDelete(x, session);
 								aToDelete.add(x);
 							}catch (Exception ex){
-								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", ((IntelEntityTypeAttribute) x).getAttribute().getName(), ex.getMessage()));
+								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", x.getAttribute().getName(), ex.getMessage()));
+								//cannot remove associated group
+								if (x.getAttributeGroup() != null && gToDelete.contains(x.getAttributeGroup())){
+									warnings.add(MessageFormat.format("The attribute group {0} cannot be removed. {1}", x.getAttributeGroup().getName(), ex.getMessage()));
+									gToDelete.remove(x.getAttributeGroup());
+								}
 							}
 						}	
+						for (IntelEntityTypeAttributeGroup g : toDeleteGroups){
+							if (!gToDelete.contains(g)) continue;
+							try{
+								DeleteManager.canDelete(g, session);
+							}catch (Exception ex){
+								gToDelete.remove(g);
+								warnings.add(MessageFormat.format("The attribute group {0} cannot be removed. {1}", g.getName(), ex.getMessage()));
+							}
+						}
 					}finally{
 						session.close();
 					}
@@ -630,20 +841,25 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			wd.open();
 		}
 		
-		if (aToDelete.size() > 0){
+		if (aToDelete.size() > 0 || gToDelete.size() > 0){
 			StringBuilder sb = new StringBuilder();
 			for (IntelEntityTypeAttribute d: aToDelete){
 				sb.append(d.getAttribute().getName());
 				sb.append(", ");
 			}
+			for (IntelEntityTypeAttributeGroup d: gToDelete){
+				sb.append(d.getName());
+				sb.append(", ");
+			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
-			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? \n All attribute information associated with entities will also be removed.", sb.toString()))){
+			if (MessageDialog.openConfirm(getShell(), "Remove Attributes / Groups", MessageFormat.format("Are you sure you want to delete the attributes (and groups) {0}? \n All attribute information associated with entities will also be removed.", sb.toString()))){
 				attributeList.removeAll(aToDelete);
+				groups.removeAll(gToDelete);
 			}
 		}
 		
-		tblAttributes.refresh();
+		treeAttributes.refresh();
 		refreshAttributeList();
 	}
 	
@@ -677,7 +893,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			icon.setImage(type.getIcon());
 		}
 		attributeList.addAll(type.getAttributes());
-		tblAttributes.setInput(attributeList);
+		treeAttributes.setInput(attributeList);
 		
 		refreshAttributeList();
 		siblingsJob.setSystem(true);
@@ -692,12 +908,19 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	
 	private Job siblingsJob = new Job("get siblings"){ //$NON-NLS-1$
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
 			try{
 				entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
 				entityTypeSiblings.remove(type);
+				
+				groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
+						.add(Restrictions.eq("entityType", type))
+						.addOrder(Order.asc("order"))
+						.list();
+				for (IntelEntityTypeAttributeGroup g : groups) g.getNames().size();
 			}finally{
 				s.close();
 			}
@@ -707,6 +930,9 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				public void run() {
 					nameKeyInfo.initFields(type, entityTypeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
 					getButton(IDialogConstants.OK_ID).setEnabled(type.getUuid() == null);
+					
+					treeAttributes.refresh();
+					treeAttributes.expandAll();
 				}
 			});
 			return Status.OK_STATUS;
@@ -719,6 +945,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private class AttributeListDialog extends TitleAreaDialog{
 		private CheckboxTableViewer attributeList;
 		private NamedItemViewerFilter filter;
+		private IntelEntityTypeAttributeGroup group;
 		
 		private Job loadAttributes = new LoadAttributesJob(){
 			@Override
@@ -732,8 +959,9 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 			
 		};
-		public AttributeListDialog(Shell parentShell) {
+		public AttributeListDialog(Shell parentShell, IntelEntityTypeAttributeGroup group) {
 			super(parentShell);
+			this.group = group;
 		}
 
 		@Override
@@ -749,6 +977,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 					IntelEntityTypeAttribute a  = new IntelEntityTypeAttribute();
 					a.setAttribute((IntelAttribute) selection);
 					a.setEntityType(EntityTypeDialog.this.type);
+					a.setAttributeGroup(group);
 					if (!EntityTypeDialog.this.attributeList.contains(a)) EntityTypeDialog.this.attributeList.add(a);
 				}
 			}
@@ -847,6 +1076,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				IntelEntityTypeAttribute eta = new IntelEntityTypeAttribute();
 				eta.setAttribute(attribute);
 				eta.setEntityType(type);
+				eta.setAttributeGroup(group);
 				if (!EntityTypeDialog.this.attributeList.contains(eta)) EntityTypeDialog.this.attributeList.add(eta);
 				
 				attributeList.refresh();
@@ -861,5 +1091,67 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		public boolean isResizable(){
 			return true;
 		}	
+	}
+	
+	private class AttributeTreeContentProvider implements ITreeContentProvider{
+
+		
+		@Override
+		public void dispose() {
+		}
+
+		@Override
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+
+		@Override
+		public Object[] getElements(Object inputElement) {
+			Object[] items = new Object[groups.size() + 1];
+			for (int i = 0; i < groups.size(); i  ++){
+				items[i] = groups.get(i);
+			}
+			items[items.length - 1] = OtherAttributeGroup.INSTANCE;
+			return items;
+		}
+
+		@Override
+		public Object[] getChildren(Object parentElement) {
+			if (parentElement instanceof IntelEntityTypeAttributeGroup){
+				IntelEntityTypeAttributeGroup g = (IntelEntityTypeAttributeGroup)parentElement;
+				List<IntelEntityTypeAttribute> a = new ArrayList<IntelEntityTypeAttribute>();
+				for (IntelEntityTypeAttribute aa : attributeList){
+					if (g.equals(aa.getAttributeGroup())){
+						a.add(aa);
+					}
+				}
+				return a.toArray();
+			}
+			if (parentElement == OtherAttributeGroup.INSTANCE){
+				List<IntelEntityTypeAttribute> a = new ArrayList<IntelEntityTypeAttribute>();
+				for (IntelEntityTypeAttribute aa : attributeList){
+					if (aa.getAttributeGroup() == null){
+						a.add(aa);
+					}
+				}
+				return a.toArray();
+			}
+			return null;
+		}
+
+		@Override
+		public Object getParent(Object element) {
+			if (element instanceof IntelEntityTypeAttribute){
+				IntelEntityTypeAttribute a = (IntelEntityTypeAttribute)element;
+				if (a.getAttributeGroup() != null) return a.getAttributeGroup();
+				return OtherAttributeGroup.INSTANCE;
+			}
+			return null;
+		}
+
+		@Override
+		public boolean hasChildren(Object element) {
+			return element instanceof IntelEntityTypeAttributeGroup || element == OtherAttributeGroup.INSTANCE;
+		}
+		
 	}
 }
