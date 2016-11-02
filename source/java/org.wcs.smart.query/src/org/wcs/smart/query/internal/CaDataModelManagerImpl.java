@@ -494,6 +494,11 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		 * @param cat
 		 */
 		private void visitCategory(Category cat){
+			cat.getName();
+			for (Category child : cat.getChildren()){
+				visitCategory(child);
+				child.getName();
+			}
 			for (Category child : cat.getActiveChildren()){
 				visitCategory(child);
 				child.getName();
