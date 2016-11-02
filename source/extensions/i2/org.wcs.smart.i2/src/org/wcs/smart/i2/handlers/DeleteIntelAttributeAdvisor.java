@@ -28,6 +28,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 
 /**
  * Checks for attribute relationships that prevent deletion.
@@ -54,7 +55,7 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 		
 		if (!links.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following entity types reference the intelligence attribute.  That link must be removed first: ");
+			sb.append("The following entity types reference the intelligence attribute.  These links must be removed first: ");
 			for (IntelEntityTypeAttribute a : links){
 				sb.append(a.getEntityType().getName());
 				sb.append(", ");
@@ -65,7 +66,24 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 			return sb.toString();
 		}
 		
-		//TODO: relationships
+		List<IntelRelationshipTypeAttribute> links2 = 
+				session.createCriteria(IntelRelationshipTypeAttribute.class)
+			.add(Restrictions.eq("id.attribute", attribute)) //$NON-NLS-1$
+			.list();
+		
+		if (!links.isEmpty()){
+			StringBuilder sb = new StringBuilder();
+			sb.append("The following relationship types reference the intelligence attribute.  These links must be removed first: ");
+			for (IntelRelationshipTypeAttribute a : links2){
+				sb.append(a.getRelationshipType().getName());
+				sb.append(", ");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
+			sb.append(".");
+			return sb.toString();
+		}
+		
 		return null;
 	}
 

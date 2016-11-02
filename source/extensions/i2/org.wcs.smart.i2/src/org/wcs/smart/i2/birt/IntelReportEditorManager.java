@@ -50,6 +50,10 @@ import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
+import org.wcs.smart.i2.birt.record.RecordDataset;
+import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
+import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
 
 /**
  * Manager for entity report editor.
@@ -69,6 +73,11 @@ public class IntelReportEditorManager implements IReportEditorManager{
 		SUPPORTED_DATASETS.add(EntityRecordDataset.DATASET_TYPE);
 		SUPPORTED_DATASETS.add(EntityAttachmentDataset.DATASET_TYPE);
 		SUPPORTED_DATASETS.add(EntityRelationDataset.DATASET_TYPE);
+		
+		SUPPORTED_DATASETS.add(RecordDataset.DATASET_TYPE);
+		SUPPORTED_DATASETS.add(RecordEntityDataset.DATASET_TYPE);
+		SUPPORTED_DATASETS.add(RecordAttachmentDataset.DATASET_TYPE);
+		SUPPORTED_DATASETS.add(RecordLocationDataset.DATASET_TYPE);
 	};
 	
 	// This listener is a hack to name the
@@ -128,6 +137,9 @@ public class IntelReportEditorManager implements IReportEditorManager{
 								parameter.setDefaultValue(""); //$NON-NLS-1$
 								parameter.setParamName(parameter.getName());
 							}else if (parameter.getName().equals(DataSourceParameter.END_DATE.getName())) {
+								parameter.setDefaultValue(""); //$NON-NLS-1$
+								parameter.setParamName(parameter.getName());
+							}else if (parameter.getName().equals(DataSourceParameter.RECORD_UUID.getName())) {
 								parameter.setDefaultValue(""); //$NON-NLS-1$
 								parameter.setParamName(parameter.getName());
 							}

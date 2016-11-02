@@ -19,52 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.datasource;
+package org.wcs.smart.i2.birt;
 
-import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
+import java.io.File;
+
+import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 
 /**
- * Shared data source parameters for entity data sets.
+ * Editor input for birt record templates.
  * 
  * @author Emily
  *
  */
-public class DataSourceParameter {
+public class IntelRecordTemplateEditorInput  extends ReportEditorInput {
 
-	public static DataSourceParameter RECORD_UUID = new DataSourceParameter(
-			"Record UUID", IParameterMetaData.parameterModeIn,
-			java.sql.Types.VARCHAR);
+	public IntelRecordTemplateEditorInput(File file) {
+		super(file);
+	}
 	
-	public static DataSourceParameter ENTITY_UUID = new DataSourceParameter(
-			"Entity UUID", IParameterMetaData.parameterModeIn,
-			java.sql.Types.VARCHAR);
+	public boolean equals(Object other){
+		if (this == other) return true;
+		if (other instanceof IntelRecordTemplateEditorInput){
+			return  ((IntelRecordTemplateEditorInput)other).getFile().equals(getFile());
+		}
+		return false;
+	}
 	
-	public static DataSourceParameter START_DATE = new DataSourceParameter("Start Date",
-			IParameterMetaData.parameterModeIn, java.sql.Types.DATE);
+	public int hashCode(){
+		return getFile().hashCode();
+	}
 	
-	public static DataSourceParameter END_DATE = new DataSourceParameter("End Date",
-			IParameterMetaData.parameterModeIn, java.sql.Types.DATE);
-
-	private String name;
-	private int parameterMode;
-	private int type;
-
-	DataSourceParameter(String name, int parameterMode, int type) {
-		this.name = name;
-		this.parameterMode = parameterMode;
-		this.type = type;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public int getParameterMode() {
-		return this.parameterMode;
-	}
-
-	public int getType() {
-		return type;
-	}
-
 }

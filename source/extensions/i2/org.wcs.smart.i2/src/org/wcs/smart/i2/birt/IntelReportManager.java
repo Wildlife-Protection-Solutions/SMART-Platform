@@ -44,6 +44,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.birt.ColumnBindingFixer;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -52,33 +53,45 @@ import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
+import org.wcs.smart.i2.birt.record.RecordDataset;
+import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
+import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
 
 
 /**
- *
+ * BIRT utilities to support entity and intelligence record exports.
  */
 public enum IntelReportManager {
 
 	INSTANCE;
-	
-	public enum Format{
-			DOC("DOCX", "org.eclipse.birt.report.engine.emitter.word"),
-			PDF("PDF", "org.eclipse.birt.report.engine.emitter.pdf");
-			
-			public String id;
-			public String emitter;
-			
-			Format(String id, String emitter){
-				this.id = id;
-				this.emitter = emitter;
-			}
+
+	/**
+	 * The BIRT template for intelligence records for the given conservation area.
+	 * 
+	 * @param ca
+	 * @return 
+	 */
+	public Path getRecordTemplate(ConservationArea ca){
+		return FileSystems.getDefault().getPath(
+				ca.getFileDataStoreLocation(),
+				IntelAttachment.INTELLIGENCE_FS_DIR,
+				"record" + IReportEditorContants.DESIGN_FILE_EXTENTION);
 	}
 	
+
+	/**
+	 * The BIRT template for a given entity type.
+	 * 
+	 * @param ca
+	 * @return 
+	 */
 	public Path getEntityTemplate(IntelEntityType entityType){
 		if (entityType.getBirtTemplate() == null) return null;
 		return FileSystems.getDefault().getPath(
@@ -87,14 +100,38 @@ public enum IntelReportManager {
 				"entitytypes",
 				entityType.getBirtTemplate());
 	}
+	
+	/**
+	 * Temporary directory for intelligence files.  This directory is emptied
+	 * when the application is started up.
+	 * 
+	 * @return
+	 */
 	public Path getTemporaryDirectory(){
 		return FileSystems.getDefault().getPath(
 				SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
 				IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP");
 	}
 	
+	/**
+	 * Exports an entity to the given format.
+	 * 
+	 * @param entity the entity to export 
+	 * @param dFilter the date filter to use
+	 * @param format the export format
+	 */
 	public void exportEntity(IntelEntity entity, Date[] dFilter, EmitterInfo format){
 		EntityExportReportJob job = new EntityExportReportJob(entity, dFilter, format);
+		job.schedule();
+	}
+	
+	/**
+	 * Export the intelligence record to the specified format
+	 * @param record
+	 * @param format
+	 */
+	public void exportRecord(IntelRecord record, EmitterInfo format){
+		RecordExportJob job = new RecordExportJob(record, format);
 		job.schedule();
 	}
 	
@@ -102,7 +139,7 @@ public enum IntelReportManager {
 	 * Returns the dataset name for the given entity type and dataset
 	 * id.
 	 * 
-	 * @param entityType
+	 * @param entityType optional but should be supplied for entity related datasets
 	 * @param dataSetId
 	 * @return
 	 */
@@ -117,12 +154,20 @@ public enum IntelReportManager {
 			return MessageFormat.format("{0} - Attachments", entityType.getName());
 		}else if (dataSetId.equals(EntityRecordDataset.DATASET_TYPE)){
 			return MessageFormat.format("{0} - Records", entityType.getName());
+		}else if (dataSetId.equals(RecordDataset.DATASET_TYPE)){
+			return "Record Details";
+		}else if (dataSetId.equals(RecordEntityDataset.DATASET_TYPE)){
+			return "Record Entities";
+		}else if (dataSetId.equals(RecordLocationDataset.DATASET_TYPE)){
+			return "Record Locations";
+		}else if (dataSetId.equals(RecordAttachmentDataset.DATASET_TYPE)){
+			return "Record Attachments";
 		}
-		return null;
+		return dataSetId;
 	}
 	
 	/**
-	 * Call from display thread
+	 * Call from display thread.  Resets the template for the given entity type
 	 * 
 	 * @param entityType
 	 * @param service
@@ -165,6 +210,40 @@ public enum IntelReportManager {
 	}
 	
 	/**
+	 * Call from display thread.  Resets the intelligence record template 
+	 * 
+	 * @param entityType
+	 * @param service
+	 */
+	public void resetRecordTemplate(EPartService service){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Reset", 
+				"Are you sure you want to reset the printing template for intelligence records?  You will loose any changes you have made to this template.")){
+			return;
+		}
+		
+		if (getRecordTemplate(SmartDB.getCurrentConservationArea()) != null){
+			for (MPart p : service.getParts()){
+				Object x = E3Utils.getSourceObject(p);
+				if (x instanceof IEditorPart && 
+						((IEditorPart)x).getEditorInput() instanceof IntelRecordTemplateEditorInput){
+					service.hidePart(p, true);
+				}
+			}
+			
+			Path p = getRecordTemplate(SmartDB.getCurrentConservationArea());
+			if (Files.exists(p)){
+				try {
+					Files.delete(p);
+				} catch (IOException e) {
+					Intelligence2PlugIn.log("Unable to delete current template file. " + e.getMessage(), e);
+					return;
+				}
+			}
+		}
+		editRecordTemplate();
+	}
+	
+	/**
 	 * Edits the plan template
 	 * @param event
 	 */
@@ -172,7 +251,7 @@ public enum IntelReportManager {
 		try{
 			if (entityType.getBirtTemplate() == null){
 				//create a new template for entity type
-				String file = entityType.getKeyId() + "." + UuidUtils.uuidToString(entityType.getUuid()) + ".rptdesign";
+				String file = entityType.getKeyId() + "." + UuidUtils.uuidToString(entityType.getUuid()) +  IReportEditorContants.DESIGN_FILE_EXTENTION;
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
@@ -219,6 +298,12 @@ public enum IntelReportManager {
 	}
 
 
+	/**
+	 * Refresh bindings in the template for the given entity type
+	 * @param type
+	 * @param pService
+	 * @throws Exception
+	 */
 	public void refreshReportDataset(IntelEntityType type, EPartService pService) throws Exception{
 		if (type.getBirtTemplate() == null) return;
 		Path file = getEntityTemplate(type);
@@ -267,10 +352,14 @@ public enum IntelReportManager {
 			final MPart fopen = toOpen;
 			pService.showPart(fopen, PartState.CREATE);
 		}
-		
 	}
 	
-
+	/**
+	 * Refresh bindings for the given report design handle.
+	 * 
+	 * @param rdh
+	 * @throws Exception
+	 */
 	public void refreshReportDataset(ReportDesignHandle rdh) throws Exception{
 		for (Object x : rdh.getAllDataSets()){
 			if (x instanceof OdaDataSetHandle){
@@ -282,5 +371,29 @@ public enum IntelReportManager {
 			}
 		}
 		
+	}
+	
+	
+	/**
+	 * Edits the intelligence record template
+	 * @param event
+	 */
+	public void editRecordTemplate(){
+		try{
+			Path p = getRecordTemplate(SmartDB.getCurrentConservationArea());
+			if (!Files.exists(p.getParent())){
+				Files.createDirectory(p.getParent());
+			}
+			if (!Files.exists(p)){
+				RecordReportGenerator.INSTANCE.generateReport(p);
+			}
+	
+			PlatformUI.getWorkbench().showPerspective(IntelEntityReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+			IntelRecordTemplateEditorInput input = new IntelRecordTemplateEditorInput(p.toFile());
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog("Error opening intelligence record printing template." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			return;
+		}
 	}
 }

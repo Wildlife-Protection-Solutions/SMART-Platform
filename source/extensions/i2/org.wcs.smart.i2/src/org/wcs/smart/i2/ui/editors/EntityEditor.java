@@ -408,7 +408,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 			s.flush();
 			
 			for (IntelEntityAttachment ea : attachmentsToDelete){
-				//TODO: check for other references before we delete this
 				if (ea.getAttachment().getUuid() != null){
 					if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
 						s.delete(ea);
@@ -1263,7 +1262,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 						mnuEdit.addSelectionListener(new SelectionAdapter(){
 							@Override
 							public void widgetSelected(SelectionEvent e) {
-								//TODO: Editing Relationships
 								IStructuredSelection sel = (IStructuredSelection) treeRelationships.getSelection();
 								if (!sel.isEmpty()){
 									if (sel.getFirstElement() instanceof IntelEntityRelationship){

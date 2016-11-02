@@ -62,15 +62,11 @@ public class IntelHibernateIntegrator implements Integrator {
 	public void integrate(MetadataImplementor metadata,
 			SessionFactoryImplementor sessionFactory,
 			SessionFactoryServiceRegistry serviceRegistry) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void disintegrate(SessionFactoryImplementor sessionFactory,
-			SessionFactoryServiceRegistry serviceRegistry) {
-		// TODO Auto-generated method stub
-		
+			SessionFactoryServiceRegistry serviceRegistry) {	
 	}
 
 	

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -50,33 +51,31 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Runs an entity export.
+ * Export intelligence record to file using BIRT.
  * 
  * @author Emily
  *
  */
-public class EntityExportReportJob extends Job {
+public class RecordExportJob extends Job {
 
-	private IntelEntity entity;
-	private Date[] dFilter;
+	private IntelRecord record;
 	private EmitterInfo format;
 	
-	public EntityExportReportJob(IntelEntity entity, Date[] dFilter, EmitterInfo format) {
-		super("Exporting Entity Record");
-		this.entity = entity;
-		this.dFilter = dFilter;
+	public RecordExportJob(IntelRecord record, EmitterInfo format) {
+		super("Exporting Intelligence Record");
+		this.record = record;
 		this.format = format;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		try{
-			final Path out = runEntityType(entity, dFilter);
+			final Path out = runRecord();
 			Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out.toFile()));
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
@@ -86,12 +85,12 @@ public class EntityExportReportJob extends Job {
 	}
 
 	
-	protected Path runEntityType(IntelEntity entity, Date[] dateFilter) throws Exception{
+	protected Path runRecord() throws Exception{
 		
 		//get the template
-		Path reportFile = IntelReportManager.INSTANCE.getEntityTemplate(entity.getEntityType());
+		Path reportFile = IntelReportManager.INSTANCE.getRecordTemplate(SmartDB.getCurrentConservationArea());
 		if (reportFile == null || !Files.exists(reportFile)){
-			throw new Exception(MessageFormat.format("BIRT template is not configured for the entity type {0}.  You must configure the template before you can export the entity.", entity.getEntityType().getName()));
+			throw new Exception("BIRT template is not configured for intelligence record.  You must configure the template before you can export the record.");
 			
 		}
 		//create the pdf file output location
@@ -104,7 +103,8 @@ public class EntityExportReportJob extends Job {
 			}
 		}
 
-		String fileName = entity.getIdAttributeAsText();
+		
+		String fileName = record.getTitle() + "." + (new SimpleDateFormat("MMMddyyyy")).format(new Date());
 		fileName = URLUtils.cleanFilename(fileName);
 		Path current = outputFile;
 		outputFile = current.resolve(fileName + "." + format.getFormat());
@@ -118,6 +118,7 @@ public class EntityExportReportJob extends Job {
 				cnt++;
 			}
 		}
+			
 		
 		IRenderOption options = new RenderOption();
 		try(FileOutputStream fout = new FileOutputStream(outputFile.toFile())){
@@ -127,11 +128,8 @@ public class EntityExportReportJob extends Job {
 			options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 			
 			HashMap<String, Object> reportParameters = new HashMap<String, Object>();
-			reportParameters.put(DataSourceParameter.ENTITY_UUID.getName(), UuidUtils.uuidToString(entity.getUuid()));
-			if (dateFilter != null && dateFilter.length == 2){
-				reportParameters.put(DataSourceParameter.START_DATE.getName(), dateFilter[0]);
-				reportParameters.put(DataSourceParameter.END_DATE.getName(), dateFilter[1]);
-			}
+			reportParameters.put(DataSourceParameter.RECORD_UUID.getName(), UuidUtils.uuidToString(record.getUuid()));
+			
 			Session session = HibernateManager.openSession();
 			try{
 				IReportRunnable design = ReportEngineManager.getBirtReportEngine().openReportDesign(reportFile.toAbsolutePath().toString());
@@ -150,7 +148,7 @@ public class EntityExportReportJob extends Job {
 				if (session.isOpen()) session.close();
 			}
 		}catch (Exception ex){
-			throw new Exception(MessageFormat.format("Unable to export entity. {0}", ex.getMessage(), ex));
+			throw new Exception(MessageFormat.format("Unable to export intelligence record. {0}", ex.getMessage(), ex));
 		}
 		
 		//delete on exit

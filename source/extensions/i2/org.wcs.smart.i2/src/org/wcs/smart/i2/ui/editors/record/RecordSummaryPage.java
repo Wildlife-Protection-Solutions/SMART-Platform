@@ -25,7 +25,11 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.birt.core.framework.IConfigurationElement;
+import org.eclipse.birt.report.designer.internal.ui.util.UIHelper;
+import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -49,6 +53,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -68,10 +73,13 @@ import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Twistie;
 import org.eclipse.ui.part.EditorPart;
+import org.osgi.framework.Bundle;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -93,6 +101,7 @@ public class RecordSummaryPage extends EditorPart{
 	private ToolItem wsetItem;
 	private ToolItem deleteItem;
 	private ToolItem editItem;
+	private ToolItem printItem;
 	
 	private Composite topPart;
 	private Label headerLabel;
@@ -192,6 +201,54 @@ public class RecordSummaryPage extends EditorPart{
 		
 		ToolBar buttonBar = new ToolBar(buttonPanel, SWT.HORIZONTAL | SWT.FLAT);
 		buttonBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+				
+		Menu formatsOpMenu = new Menu(getSite().getShell(), SWT.POP_UP);
+		EmitterInfo pdfEmitter = null;
+		for (EmitterInfo einfo : ReportEngineManager.getBirtReportEngine().getEmitterInfo()){
+			if (einfo.getFormat().equalsIgnoreCase("PDF")){
+				pdfEmitter = einfo;
+			}
+			MenuItem mi = new MenuItem(formatsOpMenu,SWT.PUSH);
+			mi.setText(einfo.getFormat());
+			if (einfo.getIcon() != null){
+				IConfigurationElement confElem = einfo.getEmitter();
+				if ( confElem != null ){
+					String pluginId = confElem.getDeclaringExtension( ).getNamespace( );
+					Bundle bundle = Platform.getBundle( pluginId );
+					mi.setImage( UIHelper.getImage( bundle, einfo.getIcon(), false ));
+					mi.addListener (SWT.Dispose, e-> {if (!mi.getImage().isDisposed()) mi.getImage().dispose();});
+				}
+			}
+			
+			mi.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					IntelReportManager.INSTANCE.exportRecord(recordEditor.getRecord(), einfo);
+				}
+			});
+		}
+		final EmitterInfo pdfFormat = pdfEmitter;
+		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
+		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		printItem.setToolTipText("print to pdf");
+		printItem.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent event){
+				 if (event.detail == SWT.ARROW) {
+			          Rectangle rect = printItem.getBounds();
+			          Point pt = new Point(rect.x, rect.y + rect.height);
+			          pt = buttonBar.toDisplay(pt);
+			          formatsOpMenu.setLocation(pt.x, pt.y);
+			          formatsOpMenu.setVisible(true);
+			    }else{
+			    	if (pdfFormat != null){
+			    		IntelReportManager.INSTANCE.exportRecord(recordEditor.getRecord(), pdfFormat);
+			    	}else{	
+			    		MessageDialog.openError(getSite().getShell(), "Error", "Could not find PDF exporter.");
+			    	}
+			    }
+			}	
+		});
 		
 		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
 		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));

@@ -48,6 +48,10 @@ import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
+import org.wcs.smart.i2.birt.record.RecordDataset;
+import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
+import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
+import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.ibm.icu.util.ULocale;
@@ -203,6 +207,14 @@ public class IntelBirtConnection implements IConnection {
 				return new EntityAttachmentDataset(this);
 			}else if (dataSetType.equals(EntityRelationDataset.DATASET_TYPE)){
 				return new EntityRelationDataset(this);
+			}else if (dataSetType.equals(RecordDataset.DATASET_TYPE)){
+				return new RecordDataset(this);
+			}else if (dataSetType.equals(RecordEntityDataset.DATASET_TYPE)){
+				return new RecordEntityDataset(this);
+			}else if (dataSetType.equals(RecordLocationDataset.DATASET_TYPE)){
+				return new RecordLocationDataset(this);
+			}else if (dataSetType.equals(RecordAttachmentDataset.DATASET_TYPE)){
+				return new RecordAttachmentDataset(this);
 			}
 			throw new OdaException(
 					MessageFormat.format("Dataset {0} not supported by SMART", //$NON-NLS-1$

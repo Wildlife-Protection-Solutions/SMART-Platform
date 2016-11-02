@@ -307,7 +307,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 				eventBroker.send(IntelEvents.ENTITY_TYPE_TEMPLATE_REFRESH, modifiedTypes);
 			}
 		}catch (Exception ex){
-			//TODO:
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 		}
 		this.initialSourceType = type.getSourceEntityType();
 		this.initialTargetType = type.getTargetEntityType();

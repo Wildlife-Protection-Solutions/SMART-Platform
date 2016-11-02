@@ -29,6 +29,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 
 /**
  * Validates the deletion of attribute list items
@@ -54,10 +55,18 @@ public class DeleteIntelAttributeListItemAdvisor implements IDeleteAdvisor {
 			.uniqueResult();
 		
 		if (linkCnt > 0){
-			return MessageFormat.format("This attribute list item is referenced by {0} entities.  This references must be removed before you can delete this item. ", linkCnt);
+			return MessageFormat.format("This attribute list item is referenced by {0} entities.  These references must be removed before you can delete this item. ", linkCnt);
 		}
 		
-		//TODO: relationship attributes
+		linkCnt =  
+				(Long)session.createCriteria(IntelEntityRelationshipAttributeValue.class)
+			.add(Restrictions.eq("attributeListItem", attribute)) //$NON-NLS-1$
+			.setProjection(Projections.rowCount())
+			.uniqueResult();
+		
+		if (linkCnt > 0){
+			return MessageFormat.format("This attribute list item is referenced by {0} relationships.  These references must be removed before you can delete this item. ", linkCnt);
+		}
 		return null;
 	}
 

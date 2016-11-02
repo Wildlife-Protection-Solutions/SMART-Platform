@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -40,10 +41,12 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -68,7 +71,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EntityTypeListView {
+public class IntelligenceTemplatesView {
 	
 	public static final String ID = "org.wcs.smart.i2.view.entitytypelist";
 	
@@ -83,7 +86,33 @@ public class EntityTypeListView {
 		
 		lstTypes = new TableViewer(parent, SWT.NONE);
 		lstTypes.setContentProvider(ArrayContentProvider.getInstance());
-		lstTypes.setLabelProvider(new EntityTypeLabelProvider());
+		lstTypes.setLabelProvider(new LabelProvider(){
+			
+			private EntityTypeLabelProvider provider = new EntityTypeLabelProvider();
+			
+			@Override
+			public void dispose(){
+				super.dispose();
+				provider.dispose();
+			}
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelRecordTemplate){
+					return ((IntelRecordTemplate) element).getName();
+				}else{
+					return provider.getText(element);
+				}
+			}
+			
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof IntelRecordTemplate){
+					return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
+				}else{
+					return provider.getImage(element);
+				}
+			}
+		});
 		lstTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		lstTypes.addDoubleClickListener(new IDoubleClickListener() {
@@ -113,25 +142,38 @@ public class EntityTypeListView {
 		reset.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IntelEntityType type = getSelection();
-				if (type != null) IntelReportManager.INSTANCE.resetTemplate(type, context.get(EPartService.class));
+				Object type = getSelection();
+				if (type != null){
+					if (type instanceof IntelEntityType){
+						IntelReportManager.INSTANCE.resetTemplate((IntelEntityType) type, context.get(EPartService.class));
+					}else if (type instanceof IntelRecordTemplate){
+						IntelReportManager.INSTANCE.resetRecordTemplate(context.get(EPartService.class));
+					}
+					
+				}
 			}
 		});
 		
 		refreshList();
 	}
 	
-	private IntelEntityType getSelection(){
+	private Object getSelection(){
 		Object x = ((IStructuredSelection)lstTypes.getSelection()).getFirstElement();
-		if (x instanceof IntelEntityType){
-			return (IntelEntityType) x;
+		if (x instanceof IntelEntityType || x instanceof IntelRecordTemplate){
+			return x;
 		}
 		return null;
 	}
 	
 	private void editTemplate(){
-		IntelEntityType type = getSelection();
-		if (type != null) IntelReportManager.INSTANCE.editTemplate(type);
+		Object type = getSelection();
+		if (type != null){
+			if (type instanceof IntelEntityType){
+				IntelReportManager.INSTANCE.editTemplate((IntelEntityType) type);
+			}else if (type instanceof IntelRecordTemplate){
+				IntelReportManager.INSTANCE.editRecordTemplate();
+			}
+		}
 	}
 	
 	private void refreshList(){
@@ -149,9 +191,9 @@ public class EntityTypeListView {
 		refreshList();
 	}
 	
-	public static class EntityTypeListViewWrapper extends DIViewPart<EntityTypeListView>{
-		public EntityTypeListViewWrapper() {
-			super(EntityTypeListView.class);
+	public static class IntelligenceTemplatesViewWrapper extends DIViewPart<IntelligenceTemplatesView>{
+		public IntelligenceTemplatesViewWrapper() {
+			super(IntelligenceTemplatesView.class);
 		}
 	}
 	
@@ -160,19 +202,28 @@ public class EntityTypeListView {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Display.getDefault().syncExec(() -> lstTypes.setInput(new String[]{DialogConstants.LOADING_TEXT}));
-			List<IntelEntityType> types = null;
+			List<Object> types = new ArrayList<>();
 		
 			Session s = HibernateManager.openSession();
 			try{
-				types = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
+				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
 			}finally{
 				s.close();
 			}
-			
-			final List<IntelEntityType> ftypes = types;
+			types.add(0,IntelRecordTemplate.INSTANCE);	
+			final List<Object> ftypes = types;
 			Display.getDefault().syncExec(() -> lstTypes.setInput(ftypes));
 			return Status.OK_STATUS;
 		}
 		
 	};
+	
+	private static class IntelRecordTemplate{
+		
+		public static final IntelRecordTemplate INSTANCE = new IntelRecordTemplate();
+		private IntelRecordTemplate(){}
+		public String getName(){
+			return "Intelligence Record";
+		}
+	}
 }

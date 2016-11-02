@@ -175,7 +175,7 @@
                id="org.wcs.smart.i2.view.entitytypelist"
                minimized="false"
                relationship="stack"
-               relative="bottomLeft"
+               relative="org.eclipse.ui.views.ContentOutline"
                visible="true">
          </view>
       </perspectiveExtension>
@@ -235,6 +235,11 @@
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.report.entity.edit">
                </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.birt.record.template.edit"
+                  label="Edit Record Template..."
+                  style="push">
             </command>
             <separator
                   name="org.wcs.smart.i2.separator3"
@@ -407,10 +412,10 @@
             restorable="true">
       </view>
       <view
-            class="org.wcs.smart.i2.ui.views.EntityTypeListView$EntityTypeListViewWrapper"
+            class="org.wcs.smart.i2.ui.views.IntelligenceTemplatesView$IntelligenceTemplatesViewWrapper"
             icon="images/icons/obj16/entity.png"
             id="org.wcs.smart.i2.view.entitytypelist"
-            name="Entity Type List View"
+            name="Intelligence Templates View"
             restorable="true">
       </view>
    </extension>
@@ -486,6 +491,10 @@
             id="org.wcs.smart.i2.entity.template.querybindings.fix"
             name="Refresh DataSet Query Bindings">
       </command>
+      <command
+            id="org.wcs.smart.i2.birt.record.template.edit"
+            name="Edit Record Template...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -525,6 +534,10 @@
             class="org.wcs.smart.i2.handlers.RefreshDataSetBindings$RefreshDataSetBindingsWrapper"
             commandId="org.wcs.smart.i2.entity.template.querybindings.fix">
       </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.EditRecordTemplateHandler$EditRecordTemplateHandlerWrapper"
+            commandId="org.wcs.smart.i2.birt.record.template.edit">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -562,7 +575,7 @@
             id="org.wcs.smart.i2.record.polygon.draw"
             name="Draw Area"
             onToolbar="false"
-            toolCursorId="arrowCursor"
+            toolCursorId="org.wcs.smart.cross"
             tooltip="draw the area for the record">
       </modalTool>
       <modalTool
@@ -572,7 +585,7 @@
             id="org.wcs.smart.i2.record.point.draw"
             name="Draw Point"
             onToolbar="false"
-            toolCursorId="arrowCursor"
+            toolCursorId="org.wcs.smart.cross"
             tooltip="adds a point location">
       </modalTool>
    </extension>
@@ -580,6 +593,10 @@
          point="org.wcs.smart.birt.reportEditorManager">
       <EditorManager
             EditorInput="org.wcs.smart.i2.birt.IntelEntityTypeEditorInput"
+            EditorManager="org.wcs.smart.i2.birt.IntelReportEditorManager">
+      </EditorManager>
+      <EditorManager
+            EditorInput="org.wcs.smart.i2.birt.IntelRecordTemplateEditorInput"
             EditorManager="org.wcs.smart.i2.birt.IntelReportEditorManager">
       </EditorManager>
    </extension>
@@ -865,7 +882,224 @@
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
+      <dataSet
+            defaultDisplayName="Record Details"
+            id="org.wcs.smart.i2.birt.dataset.record.details">
+		<dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
+      <dataSet
+            defaultDisplayName="Record Entity Links"
+            id="org.wcs.smart.i2.birt.dataset.record.entities">
+		<dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
+      <dataSet
+            defaultDisplayName="Record Attachments"
+            id="org.wcs.smart.i2.birt.dataset.record.attachment">
+		<dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
+      <dataSet
+            defaultDisplayName="Record Locations"
+            id="org.wcs.smart.i2.birt.dataset.record.location">
+		<dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
    </extension>
+   
    <extension
          id="org.wcs.smart.i2.oda.datasource"
          point="org.eclipse.datatools.connectivity.oda.design.ui.dataSource">
@@ -943,11 +1177,66 @@
                wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntityRelationWizardPage">
          </dataSetPage>
       </dataSetUI>
+      <dataSetUI
+            id="org.wcs.smart.i2.birt.dataset.record.details"
+            supportsInParameters="true"
+            supportsOutParameters="false">
+         <dataSetWizard
+               class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+               windowTitle="Record Details"></dataSetWizard>
+         <dataSetPage
+               displayName="Record Details"
+               id="org.wcs.smart.i2.birt.ui.dataset.record.details.wizard.page.list"
+               wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordDetailsWizardPage">
+         </dataSetPage>
+      </dataSetUI>
+      <dataSetUI
+            id="org.wcs.smart.i2.birt.dataset.record.entities"
+            supportsInParameters="true"
+            supportsOutParameters="false">
+         <dataSetWizard
+               class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+               windowTitle="Record Entities"></dataSetWizard>
+         <dataSetPage
+               displayName="Record Entities"
+               id="org.wcs.smart.i2.birt.ui.dataset.record.entities.wizard.page.list"
+               wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordDetailsWizardPage">
+         </dataSetPage>
+      </dataSetUI>
+       <dataSetUI
+            id="org.wcs.smart.i2.birt.dataset.record.attachment"
+            supportsInParameters="true"
+            supportsOutParameters="false">
+         <dataSetWizard
+               class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+               windowTitle="Record Attachments"></dataSetWizard>
+         <dataSetPage
+               displayName="Record Attachments"
+               id="org.wcs.smart.i2.birt.ui.dataset.record.attachment.wizard.page.list"
+               wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordDetailsWizardPage">
+         </dataSetPage>
+      </dataSetUI>
+       <dataSetUI
+            id="org.wcs.smart.i2.birt.dataset.record.location"
+            supportsInParameters="true"
+            supportsOutParameters="false">
+         <dataSetWizard
+               class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+               windowTitle="Record Locations"></dataSetWizard>
+         <dataSetPage
+               displayName="Record Locations"
+               id="org.wcs.smart.i2.birt.ui.dataset.record.location.wizard.page.list"
+               wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordDetailsWizardPage">
+         </dataSetPage>
+      </dataSetUI>
    </extension>
    <extension
          point="org.wcs.smart.report.birt.maplayer">
       <MapLayer
             maplayer="org.wcs.smart.i2.birt.map.entity.EntityMapLayer">
+      </MapLayer>
+      <MapLayer
+            maplayer="org.wcs.smart.i2.birt.map.entity.RecordMapLayer">
       </MapLayer>
    </extension>
    <extension
