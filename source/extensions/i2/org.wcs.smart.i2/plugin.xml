@@ -447,6 +447,12 @@
             id="org.wcs.smart.i2.editor.map"
             name="Map">
       </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.EntityComparisonEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.entity.compare"
+            name="name">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.commands">

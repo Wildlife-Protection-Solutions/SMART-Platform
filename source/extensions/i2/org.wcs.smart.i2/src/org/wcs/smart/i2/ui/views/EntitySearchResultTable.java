@@ -9,6 +9,7 @@ import java.util.List;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -41,6 +42,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
+import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.E3Utils;
@@ -174,6 +176,21 @@ public class EntitySearchResultTable extends Composite {
 		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
 		mnuExport.setText("Export...");
 		
+		
+		MenuItem mnuCompare = new MenuItem(menu, SWT.PUSH);
+		mnuCompare.setText("Compare...");
+		mnuCompare.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				try{
+					(new CompareEntitiesHandler()).compare(getCurrentSelection());
+				}catch (Exception ex){
+					MessageDialog.openInformation(getShell(), "Error", ex.getMessage());
+				}
+			}
+		});
+		
+		
 		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
 		mnuWorkingset.setText("Add to Working Set");
 		mnuWorkingset.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
@@ -197,6 +214,7 @@ public class EntitySearchResultTable extends Composite {
 				mnuOpen.setEnabled(hasSelection);
 				mnuExport.setEnabled(hasSelection);
 				mnuWorkingset.setEnabled(hasSelection && WorkingSetManager.INSTANCE.isSet());
+				mnuCompare.setEnabled(getCurrentSelection().size() > 0);
 				
 				if (mnuAddToRecord == null || mnuAddToRecord.isDisposed()){
 					mnuAddToRecord = new MenuItem(menu, SWT.CASCADE);
@@ -421,6 +439,8 @@ public class EntitySearchResultTable extends Composite {
 				mouseOver = false;
 				colorAll();
 			}else if (event.type == SWT.MouseDown){
+				if ((event.button != 1) ) return;
+				
 				Integer lastSelection = (Integer) getParent().getData("last_selection_index");
 				if (lastSelection == null) lastSelection = 0;
 				getParent().setData("last_selection_index", index);
