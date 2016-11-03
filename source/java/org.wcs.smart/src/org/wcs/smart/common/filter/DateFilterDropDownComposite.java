@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -175,7 +176,7 @@ public class DateFilterDropDownComposite extends Composite {
 		cmbFilter.addSelectionChangedListener(fireListener);
 		
 		lbl1 = new Label(main, SWT.NONE);
-		lbl1.setText("Between");
+		lbl1.setText(Messages.DateFilterDropDownComposite_Between);
 		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
@@ -188,7 +189,7 @@ public class DateFilterDropDownComposite extends Composite {
 		dtStart.addListener(SWT.Selection, validateListener);
 		
 		lbl2 = new Label(main, SWT.NONE);
-		lbl2.setText("And");
+		lbl2.setText(Messages.DateFilterDropDownComposite_And);
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		dtEnd = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
@@ -240,9 +241,9 @@ public class DateFilterDropDownComposite extends Composite {
 		lbl2.setVisible(isCustom);
 		
 		if (isCustom){
-			lbl1.setText("Between");
+			lbl1.setText(Messages.DateFilterDropDownComposite_Between);
 		}else{
-			lbl1.setText("");
+			lbl1.setText(""); //$NON-NLS-1$
 		}
 		((GridData)lbl1.getLayoutData()).widthHint = lbl1.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 	}
@@ -277,7 +278,7 @@ public class DateFilterDropDownComposite extends Composite {
 		
 		DateFilterComposite.DateFilter filter = getDateFilter();
 		if (filter.getEndDate() != null && filter.getStartDate() != null && filter.getEndDate().before(filter.getStartDate())){
-			error = "Invalid end date";
+			error = Messages.DateFilterDropDownComposite_InvalidDate;
 		}
 		
 		if (error != null){

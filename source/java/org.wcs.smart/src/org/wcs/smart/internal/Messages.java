@@ -193,7 +193,7 @@ public class Messages extends NLS {
 	public static String AutoBackupDialog_Error_InvalidDirectory;
 	public static String AutoBackupDialog_Error_InvalidNumberDays;
 	public static String AutoBackupDialog_Message;
-	public static String AutoBackupDialog_TimeLabel;
+	public static String AutoBackupDialog_TimeLabel1;
 	public static String AutoBackupDialog_TimerInfo;
 	public static String AutoBackupDialog_Title;
 	public static String AutoBackupEngine_AutoBackupCancelled_Dialog_Message;
@@ -205,6 +205,7 @@ public class Messages extends NLS {
 	public static String AutoBackupEngine_MakeDirectoryFailed;
 	public static String AutoBackupEngine_ProgressDialogTitle;
 	public static String AutoBackupPerferencePage_InvalidUser;
+	public static String AutoBackupPerferencePage_PartialBackupMsg;
 	public static String BackupDialog_BrowseButton;
 	public static String BackupDialog_Confirm_DialogTitle;
 	public static String BackupDialog_Confirm_Message;
@@ -212,6 +213,10 @@ public class Messages extends NLS {
 	public static String BackupDialog_ConfirmCreateDirTitle;
 	public static String BackupDialog_CouldNotCreateOutputDir;
 	public static String BackupDialog_ErrorDialogTitle;
+	public static String BackupDialog_ExcludeFilestoreOp;
+	public static String BackupDialog_ExcludeFilestoreTooltip;
+	public static String BackupDialog_ExcludeMsg;
+	public static String BackupDialog_ExcludeMsgTitle;
 	public static String BackupDialog_FileLabel;
 	public static String BackupDialog_InfoMessage;
 	public static String BackupDialog_InvalidFile;
@@ -523,6 +528,7 @@ public class Messages extends NLS {
 	public static String DateFilter_YearToDate;
 	public static String DateFilterComposite_30DayRangeOption;
 	public static String DateFilterComposite_60DayRangeOption;
+	public static String DateFilterComposite_All;
 	public static String DateFilterComposite_ContainsDate_Label_A;
 	public static String DateFilterComposite_ContainsDate_Label_B;
 	public static String DateFilterComposite_CurrentMonth;
@@ -531,6 +537,11 @@ public class Messages extends NLS {
 	public static String DateFilterComposite_EndDateRange_Error;
 	public static String DateFilterComposite_FilterDates_Label;
 	public static String DateFilterComposite_IncludeAllDates_Label;
+	public static String DateFilterComposite_Last5Year;
+	public static String DateFilterComposite_LastYear;
+	public static String DateFilterDropDownComposite_And;
+	public static String DateFilterDropDownComposite_Between;
+	public static String DateFilterDropDownComposite_InvalidDate;
 	public static String DeleteConservationArea_Confirm_Delete;
 	public static String DeleteConservationArea_Delete_DialogTitle;
 	public static String DeleteConservationArea_DeleteError;
@@ -564,6 +575,8 @@ public class Messages extends NLS {
 	public static String DerbyRestoreEngine_Error_RestoreFailedCouldNotRevert;
 	public static String DerbyRestoreEngine_Error_RestoreFailedRevertSuccessful;
 	public static String DerbyRestoreEngine_ExtraPlugins;
+	public static String DerbyRestoreEngine_FileStoreMissingMessage;
+	public static String DerbyRestoreEngine_FileStoreMissingTitle;
 	public static String DerbyRestoreEngine_InconsistentVersions;
 	public static String DerbyRestoreEngine_InvalidUserDialogMessage;
 	public static String DerbyRestoreEngine_InvalidUserDialogTitle;
@@ -592,6 +605,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_EnableButton_Label;
 	public static String DialogConstants_ExportButton_Label;
 	public static String DialogConstants_ImportButton_Label;
+	public static String DialogConstants_LoadingText;
 	public static String DialogConstants_SaveButton_Label;
 	public static String EditProjectionDialog_Dialog_Message;
 	public static String EditProjectionDialog_Dialog_Title;

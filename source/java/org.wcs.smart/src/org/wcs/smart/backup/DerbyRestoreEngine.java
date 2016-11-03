@@ -75,6 +75,7 @@ public class DerbyRestoreEngine {
 	 * @param currentShell the current shell for displaying input boxes
 	 * @return <code>true</code> if can restore, <code>false</code> otherwise
 	 */
+	@SuppressWarnings("unchecked")
 	public static boolean validateUserRestore(Shell currentShell) {
 		// a backup can be restored if:
 		// 1. there are no conservation areas
@@ -207,15 +208,12 @@ public class DerbyRestoreEngine {
 			throw new Exception(Messages.DerbyRestoreEngine_Error_NoDbInBackupFile);
 		}
 		if (!extractedFilestore.exists()){
-			String cleanUpErr = cleanUp(new File[] { temp });
-			if (cleanUpErr.length() > 0) {
-				throw new Exception(
-						Messages.DerbyRestoreEngine_Error_NoFilestoreInBackupFile
-						+ "\n\n"  //$NON-NLS-1$
-						+ Messages.DerbyRestoreEngine_Error_CouldNotCleanup
-						+ cleanUpErr);
-			}
-			throw new Exception(Messages.DerbyRestoreEngine_Error_NoFilestoreInBackupFile);
+			Display.getDefault().syncExec(()->{
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.DerbyRestoreEngine_FileStoreMissingTitle,
+						Messages.DerbyRestoreEngine_FileStoreMissingMessage);	
+			});
+			
+			extractedFilestore.mkdir();
 		}
 		
 		/* get database versions */

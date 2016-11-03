@@ -65,7 +65,13 @@ public class AutoBackupEngine {
 	/**
 	 * Property name for how often backup should occur
 	 */
-	public static final String PROP_BACKUP_TIMER = "backup_timer"; //$NON-NLS-1$
+	public static final String PROP_FULL_BACKUP_TIMER = "backup_timer"; //$NON-NLS-1$
+	
+	/**
+	 * Property name for how often only a database backup should occur
+	 */
+	public static final String PROP_PARTIAL_BACKUP_TIMER = "db_backup_timer"; //$NON-NLS-1$
+	
 	/**
 	 * Property name for when backups should be deleted
 	 */
@@ -86,7 +92,7 @@ public class AutoBackupEngine {
 	 */
 	public static boolean autoBackup(final Shell shell){
 		final Properties properties = getAutoBackupProperties();
-		if(properties == null || properties.getProperty(PROP_BACKUP_TIMER) == null) return false; //no file exists
+		if(properties == null || properties.getProperty(PROP_FULL_BACKUP_TIMER) == null) return false; //no file exists
 
 		try {
 			final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(shell);
@@ -102,49 +108,12 @@ public class AutoBackupEngine {
 					}
 					
 				});
-				if (timerIsExpired(properties)){
-					deleteOldFiles(properties);
-						
-					DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss"); //$NON-NLS-1$
-					Date date = new Date();
-					final File tmp = new File(properties.getProperty(PROP_BACKUP_LOCATION));
-					
-					if(!tmp.exists()){						
-						try{
-							FileUtils.forceMkdir(tmp);
-						}catch (final Exception ex){
-							final String error = MessageFormat.format(Messages.AutoBackupEngine_MakeDirectoryFailed, new Object[]{ex.getLocalizedMessage()});
-							shell.getDisplay().syncExec(new Runnable(){
-							    public void run (){
-							    	SmartPlugIn.displayLog(error, ex);
-							        
-							}
-							});
-							return;
-						}
-					}
-					
-					File f = new File(properties.getProperty(PROP_BACKUP_LOCATION) + File.separator + BACKUP_FILENAME_PREFIX + dateFormat.format(date) + ".zip"); //$NON-NLS-1$
-					try{
-						if(DerbyBackupEngine.backupSystem(f, monitor)){					
-							//do nothing if success
-						}else if (monitor.isCanceled()){
-							shell.getDisplay().syncExec(new Runnable(){
-							    public void run (){    
-							        MessageDialog.openError(shell, Messages.AutoBackupEngine_AutoBackupFailed_Dialog_Title, Messages.AutoBackupEngine_AutoBackupCancelled_Dialog_Message);
-							}
-							});
-						}else{
-							shell.getDisplay().syncExec(new Runnable(){
-							    public void run (){    
-							        MessageDialog.openError(shell, Messages.AutoBackupEngine_AutoBackupFailed_Dialog_Title, Messages.AutoBackupEngine_AutoBackupDidNotFinish_Dialog_Message);
-							}
-								});
-
-						}
-					}catch (Exception ex){
-						SmartPlugIn.displayLog(Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
-					}
+				deleteOldFiles(properties);
+				if (timerIsExpired(properties, PROP_FULL_BACKUP_TIMER)){
+					performBackup(properties, shell, true, monitor);
+				}
+				if (timerIsExpired(properties, PROP_PARTIAL_BACKUP_TIMER)){
+					performBackup(properties, shell, false, monitor);
 				}
 			}
 
@@ -156,6 +125,61 @@ public class AutoBackupEngine {
 		properties.setProperty(PROP_LASTBACKUP,String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
 		setAutoBackupProperties(properties);
 		return true;
+	}
+	
+	private static void performBackup(final Properties properties , final Shell shell, boolean full, IProgressMonitor monitor){
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss"); //$NON-NLS-1$
+		Date date = new Date();
+		final File tmp = new File(properties.getProperty(PROP_BACKUP_LOCATION));
+		
+		if(!tmp.exists()){						
+			try{
+				FileUtils.forceMkdir(tmp);
+			}catch (final Exception ex){
+				final String error = MessageFormat.format(Messages.AutoBackupEngine_MakeDirectoryFailed, new Object[]{ex.getLocalizedMessage()});
+				shell.getDisplay().syncExec(new Runnable(){
+				    public void run (){
+				    	SmartPlugIn.displayLog(error, ex);
+				        
+				}
+				});
+				return;
+			}
+		}
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(properties.getProperty(PROP_BACKUP_LOCATION));
+		sb.append(File.separator);
+		sb.append(BACKUP_FILENAME_PREFIX);
+		sb.append(dateFormat.format(date));
+		sb.append("."); //$NON-NLS-1$
+		if (full){
+			sb.append("full"); //$NON-NLS-1$
+		}else{
+			sb.append("partial"); //$NON-NLS-1$
+		}
+		sb.append(".zip"); //$NON-NLS-1$
+		File f = new File(sb.toString()); 
+		try{
+			if(DerbyBackupEngine.backupSystem(f, !full, monitor)){					
+				//do nothing if success
+			}else if (monitor.isCanceled()){
+				shell.getDisplay().syncExec(new Runnable(){
+				    public void run (){    
+				        MessageDialog.openError(shell, Messages.AutoBackupEngine_AutoBackupFailed_Dialog_Title, Messages.AutoBackupEngine_AutoBackupCancelled_Dialog_Message);
+				}
+				});
+			}else{
+				shell.getDisplay().syncExec(new Runnable(){
+				    public void run (){    
+				        MessageDialog.openError(shell, Messages.AutoBackupEngine_AutoBackupFailed_Dialog_Title, Messages.AutoBackupEngine_AutoBackupDidNotFinish_Dialog_Message);
+				}
+					});
+
+			}
+		}catch (Exception ex){
+			SmartPlugIn.displayLog(Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
+		}
 	}
 	
 	/**
@@ -189,11 +213,12 @@ public class AutoBackupEngine {
 	 * <p>Checkes the backup_timer properties
 	 * against the current time.</p>
 	 * @param properties current backup properties
+	 * @Param key should be one of PROP_FULL_BACKUP_TIMER or PROP_PARITAL_BACKUP_TIMER
 	 * @return <code>true</code> if backup should run, <code>false</code> if not
 	 */
-	private static boolean timerIsExpired(Properties properties){
+	private static boolean timerIsExpired(Properties properties, String key){
 		//implement edge cases of  0 = always backup; and  -1 = off
-		double days = Double.valueOf(properties.getProperty(PROP_BACKUP_TIMER));
+		double days = Double.valueOf(properties.getProperty(key));
 		if (days < 0) return false;
 		if (daysSinceBackup(properties) >= days || days == 0){
 			return true;

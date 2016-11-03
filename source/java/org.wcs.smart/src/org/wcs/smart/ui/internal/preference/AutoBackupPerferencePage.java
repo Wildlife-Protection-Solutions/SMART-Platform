@@ -62,11 +62,13 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 	private static final String DEFAULT_TIMER = "-1"; //$NON-NLS-1$
 	
 	private Properties prop;
-	private Text days;
+	private Text fullDays;
+	private Text partDays;
 	private Text deleteDays;
 	private Text txtBackupDir;
 
-	private ControlDecoration cdTimer;
+	private ControlDecoration cdFullTimer;
+	private ControlDecoration cdPartTimer;
 	private ControlDecoration cdDeleteTimer;
 	private ControlDecoration cdLoc;
 	
@@ -86,7 +88,8 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		if (!isEditable()){
 			return true;
 		}
-		prop.setProperty(AutoBackupEngine.PROP_BACKUP_TIMER, days.getText());
+		prop.setProperty(AutoBackupEngine.PROP_FULL_BACKUP_TIMER, fullDays.getText());
+		prop.setProperty(AutoBackupEngine.PROP_PARTIAL_BACKUP_TIMER, partDays.getText());
 		prop.setProperty(AutoBackupEngine.PROP_DELETE_TIMER, deleteDays.getText());
 		prop.setProperty(AutoBackupEngine.PROP_BACKUP_LOCATION, txtBackupDir.getText());
 		if(!prop.containsKey(AutoBackupEngine.PROP_LASTBACKUP)){
@@ -104,7 +107,8 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 			return;
 		}
 		super.performDefaults();
-		days.setText(DEFAULT_TIMER);
+		fullDays.setText(DEFAULT_TIMER);
+		partDays.setText(DEFAULT_TIMER);
 		deleteDays.setText(DEFAULT_DELETE_TIMER);
 		
 		File temp = new File(System.getProperty("user.dir")); //$NON-NLS-1$
@@ -129,9 +133,11 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		}
 		prop = AutoBackupEngine.getAutoBackupProperties();
 		
-		if(prop.containsKey(AutoBackupEngine.PROP_BACKUP_TIMER)){
-			days.setText(prop.getProperty(AutoBackupEngine.PROP_BACKUP_TIMER));
-			
+		if(prop.containsKey(AutoBackupEngine.PROP_FULL_BACKUP_TIMER)){
+			fullDays.setText(prop.getProperty(AutoBackupEngine.PROP_FULL_BACKUP_TIMER));
+		}
+		if(prop.containsKey(AutoBackupEngine.PROP_PARTIAL_BACKUP_TIMER)){
+			partDays.setText(prop.getProperty(AutoBackupEngine.PROP_PARTIAL_BACKUP_TIMER));
 		}
 		if(prop.containsKey(AutoBackupEngine.PROP_DELETE_TIMER)){
 			deleteDays.setText(prop.getProperty(AutoBackupEngine.PROP_DELETE_TIMER));
@@ -158,24 +164,25 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 			Label lbl = new Label(main, SWT.WRAP);
 			lbl.setText(Messages.AutoBackupPerferencePage_InvalidUser);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			((GridData)lbl.getLayoutData()).widthHint = 100;
+			((GridData)lbl.getLayoutData()).widthHint = 200;
 			return main;
 		}
 		
 		Label info1 = new Label(main, SWT.WRAP);
 		info1.setText(Messages.AutoBackupDialog_Message);
 		info1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)info1.getLayoutData()).widthHint = 100;
+		((GridData)info1.getLayoutData()).widthHint = 200;
 		
 		Label lbl = new Label(main, SWT.HORIZONTAL | SWT.SEPARATOR);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		
+		/* FULL BACKUP*/
 		int indent = 20;
-		lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.AutoBackupDialog_TimeLabel);
+		lbl = new Label(main, SWT.WRAP);
+		lbl.setText(Messages.AutoBackupDialog_TimeLabel1);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-				
+		((GridData)lbl.getLayoutData()).widthHint = 200;
+		
 		Composite backup = new Composite(main, SWT.NONE);
 		backup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		backup.setLayout(new GridLayout(3, false));
@@ -184,15 +191,15 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		((GridData)lbl.getLayoutData()).horizontalIndent = indent;
 
-		days = new Text(backup, SWT.BORDER);
+		fullDays = new Text(backup, SWT.BORDER);
 		
-		days.setText(DEFAULT_TIMER);
-		days.setTextLimit(3);
+		fullDays.setText(DEFAULT_TIMER);
+		fullDays.setTextLimit(3);
 		GridData data = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		data.widthHint = 18;
-		days.setLayoutData(data);
+		fullDays.setLayoutData(data);
 		
-		days.addKeyListener(validate);
+		fullDays.addKeyListener(validate);
 		
 		lbl = new Label(backup, SWT.NONE);
 		lbl.setText(Messages.AutoBackupDialog_BackupEveryXDays_2 + "*"); //$NON-NLS-1$
@@ -200,11 +207,48 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		Label lbl2 = new Label(main, SWT.WRAP);
 		lbl2.setText("*" + Messages.AutoBackupDialog_TimerInfo);  //$NON-NLS-1$
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
-		((GridData)lbl2.getLayoutData()).widthHint = 100;
+		((GridData)lbl2.getLayoutData()).widthHint = 200;
 		
 		lbl = new Label(main, SWT.HORIZONTAL | SWT.SEPARATOR);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
+		
+		/* PARTIAL BACKUP*/
+		lbl = new Label(main, SWT.WRAP);
+		lbl.setText(Messages.AutoBackupPerferencePage_PartialBackupMsg);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridData)lbl.getLayoutData()).widthHint = 200;
+		
+		backup = new Composite(main, SWT.NONE);
+		backup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		backup.setLayout(new GridLayout(3, false));
+		lbl = new Label(backup, SWT.NONE);
+		lbl.setText(Messages.AutoBackupDialog_BackupEveryXDays_1);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridData)lbl.getLayoutData()).horizontalIndent = indent;
+
+		partDays = new Text(backup, SWT.BORDER);
+		
+		partDays.setText(DEFAULT_TIMER);
+		partDays.setTextLimit(3);
+		data = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		data.widthHint = 18;
+		partDays.setLayoutData(data);
+		
+		partDays.addKeyListener(validate);
+		
+		lbl = new Label(backup, SWT.NONE);
+		lbl.setText(Messages.AutoBackupDialog_BackupEveryXDays_2 + "*"); //$NON-NLS-1$
+		
+		lbl2 = new Label(main, SWT.WRAP);
+		lbl2.setText("*" + Messages.AutoBackupDialog_TimerInfo);  //$NON-NLS-1$
+		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,3,1));
+		((GridData)lbl2.getLayoutData()).widthHint = 200;
+		
+		lbl = new Label(main, SWT.HORIZONTAL | SWT.SEPARATOR);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		/* DELETE BACKUP */
 		lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.AutoBackupDialog_DeleteSectionLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -256,6 +300,7 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		txtBackupDir.setEditable(true);
 		txtBackupDir.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridData)txtBackupDir.getLayoutData()).horizontalIndent = indent;
+		((GridData)txtBackupDir.getLayoutData()).widthHint = 200;
 		txtBackupDir.setSelection(txtBackupDir.getText().length());
 		
 		txtBackupDir.addKeyListener(validate);
@@ -280,14 +325,11 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		
-		cdTimer = createDecoration(days);
+		cdFullTimer = createDecoration(fullDays);
+		cdPartTimer = createDecoration(partDays);
 		cdDeleteTimer = createDecoration(deleteDays);
 		cdLoc = createDecoration(txtBackupDir);
-		
 
-//		setTitle(Messages.AutoBackupDialog_Title);
-//		setMessage(Messages.AutoBackupDialog_Message); 
-//		super.getShell().setText(Messages.AutoBackupDialog_SellTitle);
 		setMessage(Messages.AutoBackupDialog_Title);
 		
 		initPref();
@@ -312,15 +354,22 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 	private boolean validate() {
 		boolean isComplete = true;
 		String error = null;
-		if ( ! isInteger(days.getText()) || Integer.parseInt(days.getText()) < -1){
-			cdTimer.show();
+		if ( ! isInteger(fullDays.getText()) || Integer.parseInt(fullDays.getText()) < -1){
+			cdFullTimer.show();
 			error = Messages.AutoBackupDialog_Error_InvalidNumberDays;
-			cdTimer.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidNumberDays);
+			cdFullTimer.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidNumberDays);
 			isComplete = false;
 		}else{
-			cdTimer.hide();
+			cdFullTimer.hide();
 		}
-		
+		if ( ! isInteger(partDays.getText()) || Integer.parseInt(partDays.getText()) < -1){
+			cdPartTimer.show();
+			error = Messages.AutoBackupDialog_Error_InvalidNumberDays;
+			cdPartTimer.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidNumberDays);
+			isComplete = false;
+		}else{
+			cdPartTimer.hide();
+		}
 		if ( ! isInteger(deleteDays.getText()) || Integer.parseInt(deleteDays.getText()) < 0 ){
 			cdDeleteTimer.show();
 			error = Messages.AutoBackupDialog_Error_InvalidNumberDays;

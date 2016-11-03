@@ -77,7 +77,21 @@ public class DerbyBackupEngine {
 	 * @throws IOException
 	 */
 	//apache derby database backup: http://db.apache.org/derby/docs/10.0/manuals/admin/hubprnt43.html
-	public static boolean  backupSystem(File outputFile, IProgressMonitor monitor) throws IOException{
+	public static boolean backupSystem(File outputFile, IProgressMonitor monitor) throws IOException{
+		return backupSystem(outputFile, false, monitor);
+	}
+	
+	/**
+	 * Backs up all SMART data to the given output file, with the option to exclude the filestore
+	 * and only backup the database.
+	 * 
+	 * @param outputFile output file
+	 * @param monitor progress monitor
+	 * @param excludeFilestore <code>false</code> to exclude the entire filestore from the database; true otherwies
+	 * @return <code>true</code> if backup successful, <code>false</code> if cancelled or failed
+	 * @throws IOException
+	 */
+	public static boolean  backupSystem(File outputFile, boolean excludeFilestore, IProgressMonitor monitor) throws IOException{
 		if (outputFile.exists()){
 			if (!outputFile.delete()){
 				throw new IllegalStateException(Messages.DerbyBackupEngine_DeleteOutputFileError + " '" + outputFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -100,12 +114,14 @@ public class DerbyBackupEngine {
 				q.executeUpdate();
 				File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 				File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
-			
-				if (!filestore.exists()){
-					filestore.mkdir();
+							
+				File[] dirsToBackup = new File[]{database};
+				if (!excludeFilestore){
+					if (!filestore.exists()){
+						filestore.mkdir();
+					}
+					dirsToBackup = new File[]{filestore, database};
 				}
-				
-				File[] dirsToBackup = new File[]{filestore, database};
 			
 				monitor.beginTask(Messages.DerbyBackupEngine_ProgressMessage, 2);
 			

@@ -104,7 +104,7 @@ public class BackupHandler {
 					}
 					backupFile = dialog.getSelectedFile();
 					try {
-						final boolean ok = DerbyBackupEngine.backupSystem(backupFile,monitor);						
+						final boolean ok = DerbyBackupEngine.backupSystem(backupFile,dialog.getExcludeFilestore(),monitor);						
 						if (ok){
 							backupState = 1;
 						}else if (monitor.isCanceled()){

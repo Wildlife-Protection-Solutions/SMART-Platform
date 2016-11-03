@@ -61,11 +61,13 @@ public class BackupDialog extends TitleAreaDialog {
 	
 	private Text txtBackupFile;
 	private File selectedFile;
-	
+	private Boolean excludeFilestore;
 	private String title;
 	private String message;
 	private String buttonText;
 	private String defaultFileName;
+	
+	private Button chExcludeFile;
 	
 	private String fileNameKey;
 	private boolean upgradeInstructions;
@@ -100,9 +102,13 @@ public class BackupDialog extends TitleAreaDialog {
 		return this.selectedFile;
 	}
 	
+	public boolean getExcludeFilestore(){
+		return this.excludeFilestore;
+	}
+	
 	@Override
 	public Point getInitialSize(){
-		return new Point(550, 350);
+		return new Point(550, 400);
 	}
 	/**
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
@@ -113,7 +119,7 @@ public class BackupDialog extends TitleAreaDialog {
 		
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout(3, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.BackupDialog_FileLabel);
@@ -162,16 +168,27 @@ public class BackupDialog extends TitleAreaDialog {
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
+		new Label(main, SWT.NONE);
+		chExcludeFile = new Button(main, SWT.CHECK);
+		chExcludeFile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		chExcludeFile.setText(Messages.BackupDialog_ExcludeFilestoreOp);
+		chExcludeFile.setToolTipText(Messages.BackupDialog_ExcludeFilestoreTooltip);
+		
 		if (upgradeInstructions){
+			
+			Label l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+			
 			Composite g = new Composite(main, SWT.NONE);
 			g.setLayout(new GridLayout());
-			g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+			((GridLayout)g.getLayout()).marginWidth = 0;
+			g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 			
 			Link lnk = new Link(g, SWT.NONE);
 			lnk.setText(Messages.BackupDialog_UpgradeQuestion);
 			
-			final Text info = new Text(g, SWT.MULTI | SWT.WRAP | SWT.BORDER);
-			info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			final Text info = new Text(g, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
+			info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			((GridData)info.getLayoutData()).widthHint = 200;
 			info.setText(Messages.BackupDialog_InfoMessage);
 			info.setVisible(false);
@@ -209,6 +226,21 @@ public class BackupDialog extends TitleAreaDialog {
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
+			excludeFilestore = false;
+			if (chExcludeFile.getSelection()){
+				MessageDialog md = new MessageDialog(getShell(),
+						Messages.BackupDialog_ExcludeMsgTitle, 
+						null,
+						Messages.BackupDialog_ExcludeMsg,
+						MessageDialog.WARNING, 
+						new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL},
+						1);
+				if (md.open() == 1){
+					return;
+				}
+				excludeFilestore = true;
+			}
+			
 			File file = new File(txtBackupFile.getText());
 			
 			if (file.exists()){

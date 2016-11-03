@@ -68,9 +68,9 @@ public class DateFilterComposite extends Composite {
 		CURRENT_YEAR(Messages.DateFilterComposite_CurrentYear),
 		CURRENT_MONTH(Messages.DateFilterComposite_CurrentMonth),
 		CUSTOM(Messages.DateFilter_Custom),
-		ALL("All"),
-		LAST_YEAR("Last Year"),
-		LAST_5_YEARS("Last 5 Years");
+		ALL(Messages.DateFilterComposite_All),
+		LAST_YEAR(Messages.DateFilterComposite_LastYear),
+		LAST_5_YEARS(Messages.DateFilterComposite_Last5Year);
 		
 		private String guiName;
 		
