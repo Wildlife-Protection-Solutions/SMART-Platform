@@ -292,6 +292,7 @@ public enum EntityReportGenerator {
 		primaryImage.setWidth("2in");
 		primaryImage.setHeight("2in");
 		primaryImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
+		primaryImage.setProportionalScale(true);
 		primaryImage.setURL("row[\""+ EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getColumnName() +"\"]");
 		
 		headerGrid.getCell(1, 1).getContent().add(primaryImage);
@@ -451,6 +452,7 @@ public enum EntityReportGenerator {
 		ImageHandle attachImage = factory.newImage(null);
 		attachImage.setWidth("1in");
 		attachImage.setHeight("1in");
+		attachImage.setProportionalScale(true);
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
 		attachImage.setURL("row[\"" + EntityAttachmentDatasetResultSetMetadata.Column.PATH.getColumnName() + "\"]");
 		attachmentsTable.getCell(attachmentsTable.getDetail().getSlotID(), -1, 1, 1).getContent().add(attachImage);

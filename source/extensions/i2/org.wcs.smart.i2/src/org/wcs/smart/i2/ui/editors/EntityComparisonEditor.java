@@ -369,7 +369,7 @@ public class EntityComparisonEditor extends EditorPart{
 			Composite table = toolkit.createComposite(form.getBody());
 			form.setContent(table);
 			
-			table.setLayout(new GridLayout(entities.size() + 1, true));
+			table.setLayout(new GridLayout(entities.size() + 1, false));
 			((GridLayout)table.getLayout()).marginHeight = 0;
 			((GridLayout)table.getLayout()).marginWidth = 0;
 			
@@ -476,11 +476,12 @@ public class EntityComparisonEditor extends EditorPart{
 				for (IntelEntityTypeAttribute a : attributes){
 					Composite outer = toolkit.createComposite(parent);
 					outer.setLayout(new GridLayout());
-					outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+					((GridData)outer.getLayoutData()).widthHint = 200;
 					Label l = toolkit.createLabel(outer, "", SWT.WRAP);
 					l.setText(a.getAttribute().getName());
 					GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
-					gd.widthHint = 150;
+					gd.widthHint = 200;
 					l.setLayoutData(gd);
 					
 					if (row % 2 == 0){

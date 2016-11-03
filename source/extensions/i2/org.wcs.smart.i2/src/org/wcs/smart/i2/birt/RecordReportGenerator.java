@@ -94,6 +94,7 @@ import org.wcs.smart.report.birt.map.item.SmartMapItem;
 public enum RecordReportGenerator {
 	INSTANCE;
 	
+	@SuppressWarnings("unchecked")
 	public void generateReport(Path file) throws Exception{
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 		ReportDesignHandle rdh = session.createDesign(file.toFile().getAbsolutePath());
@@ -337,6 +338,7 @@ public enum RecordReportGenerator {
 		attachImage.setWidth(".5in");
 		attachImage.setHeight(".5in");
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
+		attachImage.setProportionalScale(true);
 		attachImage.setURL("row[\"" + RecordEntityDatasetResultSetMetadata.Column.ENTITY_IMAGE.getColumnName() + "\"]");
 		entityTable.getCell(entityTable.getDetail().getSlotID(), -1, 1, 1).getContent().add(attachImage);
 		
@@ -371,6 +373,7 @@ public enum RecordReportGenerator {
 		attachImage.setWidth(".5in");
 		attachImage.setHeight(".5in");
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
+		attachImage.setProportionalScale(true);
 		attachImage.setURL("row[\"" + RecordAttachmentDatasetResultSetMetadata.Column.PATH.getColumnName() + "\"]");
 		attachmentTable.getCell(entityTable.getDetail().getSlotID(), -1, 1, 1).getContent().add(attachImage);
 		
