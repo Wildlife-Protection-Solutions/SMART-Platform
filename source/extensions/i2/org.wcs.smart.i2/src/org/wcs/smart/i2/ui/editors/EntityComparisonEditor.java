@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors;
 
 import java.util.ArrayList;
@@ -14,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -26,6 +48,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -42,19 +65,27 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.i2.ui.AttachmentPopoutShell;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
-import org.wcs.smart.i2.ui.views.IntelRecordSelectionTransfer;
 import org.wcs.smart.ui.Thumbnail;
 
+/**
+ * Editor for comparing entities
+ * 
+ * @author Emily
+ *
+ */
 public class EntityComparisonEditor extends EditorPart{
 
 	public static final String ID = "org.wcs.smart.i2.editor.entity.compare"; //$NON-NLS-1$
@@ -63,6 +94,11 @@ public class EntityComparisonEditor extends EditorPart{
 	private EntityComparisonTable table;
 	
 	private FormToolkit toolkit;
+	
+	@Override
+	public void dispose(){
+		if (getTitleImage() != null) getTitleImage().dispose();
+	}
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -108,16 +144,38 @@ public class EntityComparisonEditor extends EditorPart{
 		
 		parent.setLayout(new GridLayout());
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)parent.getLayout()).marginHeight = 0;
-		((GridLayout)parent.getLayout()).marginWidth = 0;
+		((GridLayout)parent.getLayout()).marginHeight = 2;
+		((GridLayout)parent.getLayout()).marginWidth = 2;
+		((GridLayout)parent.getLayout()).verticalSpacing = 0;
+		((GridLayout)parent.getLayout()).horizontalSpacing = 0;
+		toolkit.adapt(parent);
+		Hyperlink l = toolkit.createHyperlink(parent, "Merge...", SWT.NONE);
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		
+		l.addHyperlinkListener(new IHyperlinkListener() {
+			@Override
+			public void linkExited(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				MessageDialog.openInformation(getSite().getShell(), "TODO", "TODO: implement a dialog where users can pick which attributes to use in merged entity");
+			}
+		});
 		
 		table = new EntityComparisonTable(parent);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		addDropTarget(parent);
 		
 		loadValues.schedule();
-		
+	}
+	
+	private void addDropTarget(Composite parent){
 		DropTargetListener dropListener = new DropTargetListener() {
-			
 			private PaintListener paintListener = new PaintListener() {
 				@Override
 				public void paintControl(PaintEvent e) {
@@ -175,7 +233,6 @@ public class EntityComparisonEditor extends EditorPart{
 			
 			@Override
 			public void dragOver(DropTargetEvent event) {
-					
 			}
 			
 			@Override
@@ -192,9 +249,9 @@ public class EntityComparisonEditor extends EditorPart{
 			
 			@Override
 			public void dragEnter(DropTargetEvent event) {
-				validate(event);
 				parent.addPaintListener(paintListener);
 				parent.redraw();
+				validate(event);
 			}
 		};
 		
@@ -210,7 +267,6 @@ public class EntityComparisonEditor extends EditorPart{
 	}
 	
 	private Job loadValues= new Job("Loading Entities Values"){
-
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			IntelEntityType type;
@@ -237,6 +293,13 @@ public class EntityComparisonEditor extends EditorPart{
 						v.getAttribute().getName();
 						if (v.getAttributeListItem() != null) v.getAttributeListItem().getName();
 					}
+					for (IntelEntityAttachment a : i.getEntityAttachments()){
+						try{
+							a.getAttachment().computeFileLocation(s);
+						}catch (Exception ex){
+							Intelligence2PlugIn.log(ex.getMessage(), ex);
+						}
+					}
 				}
 				
 			}finally{
@@ -250,6 +313,8 @@ public class EntityComparisonEditor extends EditorPart{
 		}
 		
 	};
+	
+	
 	private class EntityComparisonTable extends Composite{
 
 		private Font headerFont = null;
@@ -287,10 +352,19 @@ public class EntityComparisonEditor extends EditorPart{
 				c.dispose();
 			}
 			EntityComparisonEditor.this.setPartName(input.getName());
+			if (getTitleImage() != null) getTitleImage().dispose();
+			
+			try {
+				EntityComparisonEditor.this.setTitleImage(AWTSWTImageUtils.convertToSWTImage(input.getType().getIconAsImage()));
+			} catch (Exception e) {
+				EntityComparisonEditor.this.setTitleImage(null);
+			}
 			
 			ScrolledForm form = toolkit.createScrolledForm(this);
 			form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			form.getBody().setLayout(new GridLayout());
+			((GridLayout)form.getBody().getLayout()).marginHeight = 2;
+			((GridLayout)form.getBody().getLayout()).marginWidth = 2;
 			
 			Composite table = toolkit.createComposite(form.getBody());
 			form.setContent(table);
@@ -441,8 +515,47 @@ public class EntityComparisonEditor extends EditorPart{
 				}
 				
 			});
+			Composite groupRow = toolkit.createComposite(parent);
+			groupRow.setLayout(new GridLayout());
+			groupRow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, entities.size() + 1, 1));
+			groupRow.setBackground(headerColor);
+
+			Label info = toolkit.createLabel(groupRow, "Attachments");
+			info.setBackground(headerColor);
+			info.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 			
-			
+			toolkit.createLabel(parent, "");
+			for (IntelEntity e : entities){
+				Composite outer = toolkit.createComposite(parent, SWT.NONE);
+				outer.setLayout(new GridLayout());
+				outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				
+				e.getEntityAttachments().forEach(ea ->{
+					Composite c = toolkit.createComposite(outer, SWT.NONE);
+					c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+					((GridData)c.getLayoutData()).widthHint = 100;
+					((GridData)c.getLayoutData()).heightHint = 100;
+					Thumbnail thumb = new Thumbnail(ea.getAttachment());
+					Composite t = thumb.createThumbnail(c);
+					
+					t.addListener(SWT.MouseHover, (event)->{
+						AttachmentPopoutShell popout = new AttachmentPopoutShell(getShell(), ea.getAttachment());
+						Point pnt = t.toDisplay(new Point(event.x, event.y));
+						popout.open(new Point(pnt.x, pnt.y - (popout.getSize().y/2)));
+					});
+				});
+				
+				outer.addListener(SWT.Resize, (event)->{
+					int width = outer.getClientArea().width;
+					int cols = Math.floorDiv(width, 105);
+					if (cols < 1) cols = 1;
+					((GridLayout)outer.getLayout()).numColumns = cols;
+					outer.layout(true);
+				});
+				
+				
+			}
+				
 		}
 	}
 }

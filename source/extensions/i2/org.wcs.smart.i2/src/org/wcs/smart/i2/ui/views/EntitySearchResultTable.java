@@ -183,7 +183,7 @@ public class EntitySearchResultTable extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				try{
-					(new CompareEntitiesHandler()).compare(getCurrentSelection());
+					(new CompareEntitiesHandler()).compare(getCurrentSelection(), context.get(EPartService.class));
 				}catch (Exception ex){
 					MessageDialog.openInformation(getShell(), "Error", ex.getMessage());
 				}
@@ -439,14 +439,13 @@ public class EntitySearchResultTable extends Composite {
 				mouseOver = false;
 				colorAll();
 			}else if (event.type == SWT.MouseDown){
-				if ((event.button != 1) ) return;
 				
 				Integer lastSelection = (Integer) getParent().getData("last_selection_index");
 				if (lastSelection == null) lastSelection = 0;
 				getParent().setData("last_selection_index", index);
 				
 				if ((event.stateMask & SWT.CTRL) != 0){
-					isSelected = !isSelected;
+					if (event.button == 1) isSelected = !isSelected;
 				}else if ((event.stateMask & SWT.SHIFT) != 0){
 					boolean newSelection = !isSelected;
 					//clearSelection();
@@ -467,8 +466,11 @@ public class EntitySearchResultTable extends Composite {
 					}
 					
 				}else{
-					
-					clearSelection();
+					if (event.button == 1){
+						clearSelection();
+					}else if (!isSelected){
+						clearSelection();
+					}
 					isSelected = true;
 				}
 				colorAll();

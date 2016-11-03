@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,6 +72,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -321,7 +323,10 @@ public class NewEntityDialog extends TitleAreaDialog{
 		editor.addSelectionListener(listener);
 		attributeControls.add(editor);
 		
-		ScrolledComposite sc = new ScrolledComposite(attributePanel, SWT.V_SCROLL | SWT.BORDER);
+		Label ll = new Label(attributePanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		ScrolledComposite sc = new ScrolledComposite(attributePanel, SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
@@ -329,14 +334,56 @@ public class NewEntityDialog extends TitleAreaDialog{
 		Composite content = new Composite(sc, SWT.NONE);
 		sc.setContent(content);
 		content.setLayout(new GridLayout(2, false));
-		
-		for (IntelEntityTypeAttribute a : type.getAttributes()){
-			if (!a.getAttribute().equals(type.getIdAttribute())){
-				editor = new AttributeFieldEditor(content, a.getAttribute());
-				editor.addSelectionListener(listener);
-				attributeControls.add(editor);
+		type.getAttributes().stream()
+			.filter(a -> a.getAttributeGroup() != null)
+			.map(a -> a.getAttributeGroup())
+			.distinct()
+			.sorted((a,b)-> ((Integer)a.getOrder()).compareTo(b.getOrder()))
+			.forEach(group -> {
+				Composite spacer = new Composite(content, SWT.NONE);
+				spacer.setLayout(new GridLayout());
+				spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+				spacer.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
+				((GridLayout)spacer.getLayout()).marginWidth = 3;
+				((GridLayout)spacer.getLayout()).marginHeight = 3;
+				Label l = new Label(spacer, SWT.NONE);
+				l.setText(group.getName());
+				l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
+				l.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				
+				type.getAttributes().stream().filter(a -> group.equals(a.getAttributeGroup()))
+				.sorted((a,b)-> ((Integer)a.getOrder()).compareTo(b.getOrder()))
+				.forEach(attribute -> {
+					if (!attribute.getAttribute().equals(type.getIdAttribute())){
+						AttributeFieldEditor leditor = new AttributeFieldEditor(content, attribute.getAttribute());
+						leditor.addSelectionListener(listener);
+						attributeControls.add(leditor);
+					}
+				});
 			}
-		}
+		);
+		//other
+		Composite spacer = new Composite(content, SWT.NONE);
+		spacer.setLayout(new GridLayout());
+		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		spacer.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
+		((GridLayout)spacer.getLayout()).marginWidth = 3;
+		((GridLayout)spacer.getLayout()).marginHeight = 3;
+		Label l = new Label(spacer, SWT.NONE);
+		l.setText(OtherAttributeGroup.INSTANCE.getName());
+		l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
+		l.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		
+		type.getAttributes().stream().filter(a -> a.getAttributeGroup() == null)
+		.sorted((a,b)-> ((Integer)a.getOrder()).compareTo(b.getOrder()))
+		.forEach(attribute -> {
+			if (!attribute.getAttribute().equals(type.getIdAttribute())){
+				AttributeFieldEditor leditor = new AttributeFieldEditor(content, attribute.getAttribute());
+				leditor.addSelectionListener(listener);
+				attributeControls.add(leditor);
+			}
+		});
+		
 		sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		attributePanel.layout(true);		
 	}
