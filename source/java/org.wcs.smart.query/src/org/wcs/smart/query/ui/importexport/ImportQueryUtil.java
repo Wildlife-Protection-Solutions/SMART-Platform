@@ -37,6 +37,7 @@ import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -47,15 +48,16 @@ import org.wcs.smart.util.SharedUtils;
 public class ImportQueryUtil {
 
 	/**
-	 * Searches for an employee to associated with a query.  If the provided
+	 * Searches for an employee to associate with a query.  If the provided
 	 * conservation area is the same as the current conservation area then the
 	 * current user is returned.  Otherwise it finds an employee with the same
 	 * user name as the current user.  If that's not found it will return
-	 * the first admin user for the given conservation area.
+	 * the first active admin user for the given conservation area.
 	 * 
 	 * @param ca the conservation area to search
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static Employee findEmployee(ConservationArea ca) {
 		if (ca.equals(SmartDB.getCurrentConservationArea())){
 			return SmartDB.getCurrentEmployee();
@@ -72,14 +74,14 @@ public class ImportQueryUtil {
 				return e;
 			}
 			
-			//look for any admin users
-			e = (Employee)s.createCriteria(Employee.class)
+			//look for any active admin users
+			List<Employee> others = s.createCriteria(Employee.class)
 					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-					.add(Restrictions.eq("smartUserLevel", Employee.SmartUserLevel.ADMIN)) //$NON-NLS-1$
-					.setMaxResults(1)
-					.uniqueResult();
-			if (e != null){
-				return e;
+					.add(Restrictions.isNull("endEmploymentDate")) //$NON-NLS-1$
+					.add(Restrictions.isNotNull("smartUserLevelKeys")) //$NON-NLS-1$
+					.list();
+			for (Employee o : others){
+				if (o.supportsUser(UserLevelManager.ADMIN)) return o;
 			}
 			
 			//this should never happen

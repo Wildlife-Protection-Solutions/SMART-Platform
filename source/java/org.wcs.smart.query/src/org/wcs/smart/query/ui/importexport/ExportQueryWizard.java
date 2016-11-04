@@ -48,7 +48,6 @@ import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -64,6 +63,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -401,13 +401,13 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			QueryFolder root = new QueryFolder();
 			root.setRootFolder(true);
 			Employee e = ImportQueryUtil.findEmployee(ca);
-			if (e.getSmartUserLevel() == SmartUserLevel.ADMIN || 
-					e.getSmartUserLevel() == SmartUserLevel.MANAGER ){
+			if (e.supportsUser(UserLevelManager.ADMIN) || 
+					e.supportsUser(UserLevelManager.MANAGER)){
 				root.setUuid(IQueryHibernateManager.CA_QUERY_KEY);	
-			}else if (e.getSmartUserLevel() == SmartUserLevel.ANALYST){
+			}else if (e.supportsUser(UserLevelManager.ANALYST) ){
 				//store in my queries folder
 				root.setUuid(IQueryHibernateManager.USER_QUERY_KEY);
-			}else if (e.getSmartUserLevel() == SmartUserLevel.DATA_ENTRY){
+			}else if (e.supportsUser(UserLevelManager.DATA_ENTRY) ){
 				//data entry queries do not have access to import queries
 				errors.add(MessageFormat.format(Messages.ExportQueryWizard_UserError, ca.getNameLabel(), SmartLabelProvider.getFullLabel(e)));
 			}

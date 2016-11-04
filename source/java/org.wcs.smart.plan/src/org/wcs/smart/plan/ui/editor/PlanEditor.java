@@ -48,7 +48,6 @@ import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -67,6 +66,7 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.user.UserLevelManager;
 
 
 /**
@@ -292,7 +292,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 
 	public boolean canEdit() {
 		//analyst users can never edit
-		return SmartDB.getCurrentEmployee().getSmartUserLevel() != Employee.SmartUserLevel.ANALYST;
+		return  SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.DATA_ENTRY);
 	}
 	
 	/**

@@ -55,7 +55,6 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.locationtech.udig.project.ui.ApplicationGIS;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
@@ -75,6 +74,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.user.UserLevelManager;
 /**
  * Ingeliigence editor summary page
  * @author Emily
@@ -332,7 +332,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	
 	private boolean canEdit() {
 		//analyst users can never edit
-		return SmartDB.getCurrentEmployee().getSmartUserLevel() != Employee.SmartUserLevel.ANALYST;
+		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.DATA_ENTRY);
 	}
 	
 	/**

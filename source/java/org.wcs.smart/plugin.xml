@@ -15,6 +15,7 @@
  <extension-point id="org.wcs.smart.changelog.installer" name="ChangeLog Tracker" schema="schema/org.wcs.smart.changelog.installer.exsd"/>
  <extension-point id="org.wcs.smart.startup.db" name="org.wcs.smart.startup.db" schema="schema/org.wcs.smart.startup.db.exsd"/>
  <extension-point id="org.wcs.smart.changelog.handler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
+ <extension-point id="org.wcs.smart.userlevel" name="SMART User Level" schema="schema/org.wcs.smart.userlevel.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"
@@ -256,6 +257,31 @@
                   mnemonic="%systempref.command.mnemonic"
                   style="push"
                   tooltip="%systempref.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="data_entry">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.file.separator1"
@@ -315,6 +341,31 @@
                   mnemonic="%systempref.command.mnemonic"
                   style="push"
                   tooltip="%systempref.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="data_entry">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.separator1"
@@ -426,6 +477,31 @@
                   label="%employeelist.command.label"
                   mnemonic="%employeelist.command.mnemonic"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="data_entry">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.command.ca.stations.show"
@@ -433,6 +509,31 @@
                   label="%stationlist.command.label"
                   mnemonic="%stationlist.command.mnemonic"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="data_entry">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.command.ca.projections.show"
@@ -1476,7 +1577,7 @@
             id="org.wcs.smart.udig.legend.LegendRenderer"
             name="Smart Legend Renderer">
       </renderer>
-   </extension>
+   </extension> 
 
 </plugin>
 

@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.ca;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -38,6 +39,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -61,6 +63,8 @@ public class Employee {
 	 * is associated with the CrossCA Conservation Area.
 	 */
 	public static final UUID SHARED_UUID = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR);
+	
+	private static final String USER_LEVEL_SEP = ","; //$NON-NLS-1$
 	
 	//non internationalizable
 	public static final char DB_FEMALE = 'F';
@@ -99,18 +103,18 @@ public class Employee {
 	 */
 	public static final int MAX_ID_LENGTH = 32;
 	
-	/**
-	 * Smart user level.
-	 * 
-	 * Do not change the ording or this as it is stored in the database
-	 * as the order it appears in this list.
-	 * @author Emily
-	 *
-	 */
-	public enum SmartUserLevel {
-		ADMIN, DATA_ENTRY, ANALYST, MANAGER;
-
-	};
+//	/**
+//	 * Smart user level.
+//	 * 
+//	 * Do not change the ording or this as it is stored in the database
+//	 * as the order it appears in this list.
+//	 * @author Emily
+//	 *
+//	 */
+//	public enum SmartUserLevel {
+//		ADMIN, DATA_ENTRY, ANALYST, MANAGER;
+//
+//	};
 	
 	private UUID uuid;
 	
@@ -126,7 +130,9 @@ public class Employee {
 	private char gender;
 	private String smartUserId;
 	private String smartPassword;
-	private SmartUserLevel smartUserLevel;
+	private String userLevelKey;
+	
+	private Set<SmartUserLevel> userLevels;
 	
 	private ConservationArea ca;
 	private Agency agency;
@@ -237,14 +243,53 @@ public class Employee {
 	}
 
 	@Column(name="smartuserlevel")
-	@Enumerated(EnumType.ORDINAL)
-	public SmartUserLevel getSmartUserLevel() {
-		return smartUserLevel;
-	}
-	public void setSmartUserLevel(SmartUserLevel smartUserLevel) {
-		this.smartUserLevel = smartUserLevel;
+	public String getSmartUserLevelKeys() {
+		return userLevelKey;
 	}
 	
+	public void setSmartUserLevelKeys(String userLevelKey) {
+		this.userLevelKey = userLevelKey;
+		
+		userLevels = new HashSet<SmartUserLevel>();
+		if (userLevelKey != null && !userLevelKey.isEmpty()){
+			String[] parts = userLevelKey.split(USER_LEVEL_SEP);
+			for (String p : parts){
+				SmartUserLevel level = UserLevelManager.INSTANCE.getUserLevel(p);
+				if (level != null) userLevels.add(level);
+			}
+		}
+	}
+	
+	@Transient
+	public void setSmartUserLevel(Collection<SmartUserLevel> levels){
+		StringBuilder sb = new StringBuilder();
+		levels.forEach(l -> sb.append(l.getKey() + USER_LEVEL_SEP));
+		if (sb.length() > 0){
+			sb.deleteCharAt(sb.length() -1);
+			setSmartUserLevelKeys(sb.toString());
+		}else{
+			setSmartUserLevelKeys(null);
+		}
+		
+	}
+	/**
+	 * 
+	 * @return set of user levels associated with this employee
+	 */
+	@Transient
+	public Collection<SmartUserLevel> getSmartUserLevels(){
+		return this.userLevels;
+	}
+	
+	@Transient
+	public boolean supportsUser(SmartUserLevel... l){
+		for (SmartUserLevel ll : getSmartUserLevels()){
+			for (SmartUserLevel c : l){
+				if (ll.equals(c)) return true;
+			}
+		}
+		return false;
+	}
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {

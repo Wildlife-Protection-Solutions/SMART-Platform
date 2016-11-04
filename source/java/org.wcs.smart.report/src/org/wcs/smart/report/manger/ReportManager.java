@@ -55,7 +55,6 @@ import org.wcs.smart.PerspectiveEditorTracker;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
@@ -66,6 +65,7 @@ import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
 import org.wcs.smart.report.ui.SmartReportEditorInput;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -89,15 +89,13 @@ public class ReportManager {
 	public static boolean canModifyCaReports(){
 		if (SmartDB.getCurrentConservationArea().getIsCcaa()){
 			for (Employee e : SmartDB.getConservationAreaConfiguration().getEmployees()){
-				if (!(e.getSmartUserLevel() == SmartUserLevel.ADMIN 
-					|| e.getSmartUserLevel() == SmartUserLevel.MANAGER)){
+				if (!(e.supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER))){
 					return false;
 				}
 			}
 			return true;
 		}else{
-			return SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER 
-				|| SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN;
+			return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.MANAGER, UserLevelManager.ADMIN);
 		}
 	}
 	/**

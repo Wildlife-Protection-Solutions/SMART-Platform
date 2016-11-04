@@ -28,12 +28,12 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.user.UserLevelManager;
 /**
  * Utility functions for supporting query module
  * when logged in as a single conservation area
@@ -49,8 +49,7 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 	 */
 	@Override
 	public boolean canModifyCaQueries(){
-		return SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN 
-				|| SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER;
+		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER);
 	}
 
 	/**

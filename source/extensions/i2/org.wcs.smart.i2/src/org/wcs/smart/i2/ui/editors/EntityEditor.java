@@ -131,6 +131,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
@@ -919,6 +920,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		tabList.setContent(new Composite[]{compAttributes,  compAttachments}, tabPart);
 		tabList.selectTab(0);
+		
+		if (!IntelSecurityManager.INSTANCE.canEditEntity()){
+			setEditMode(false);
+			editItem.setEnabled(false);
+		}
+		
 		return leftPart.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 	}
 	
@@ -943,6 +950,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	public void setEditMode(boolean isEdit){
+		if (isEdit && !IntelSecurityManager.INSTANCE.canEditEntity()){
+			//cannot change the edit more; this user cannot edit entities
+			return;
+		}
 		if (isEditMode && !isEdit && isDirty){
 			doSave(new NullProgressMonitor());
 		}

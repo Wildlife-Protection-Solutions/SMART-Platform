@@ -160,9 +160,11 @@ public class EntityListComposite extends Composite{
 			
 			@Override
 			public void dragEnter(DropTargetEvent event) {
-				event.detail = DND.DROP_LINK;
-				EntityListComposite.this.addPaintListener(paintListener);
-				EntityListComposite.this.redraw();
+				if (editor.getEditMode()){
+					event.detail = DND.DROP_LINK;
+					EntityListComposite.this.addPaintListener(paintListener);
+					EntityListComposite.this.redraw();
+				}
 			}
 		});
 		

@@ -42,9 +42,9 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.statushandlers.StatusManager;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.p2.internal.Messages;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * SMARTPolicy defines the SMART UI policies for the
@@ -66,7 +66,7 @@ public class SmartPolicy extends Policy {
 		setRepositoryPreferencePageId("org.wcs.smart.p2.ui.SitesPreferencePage"); //$NON-NLS-1$		
 		setRepositoryPreferencePageName(Messages.SmartPolicy_PreferencePageName);
 		if (SmartDB.getCurrentEmployee() != null){
-			setRepositoriesVisible(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN);
+			setRepositoriesVisible(SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN));
 		}
 		Activator.getDefault().updateWithPreferences(this);
 	}

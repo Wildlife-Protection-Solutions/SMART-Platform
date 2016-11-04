@@ -4,12 +4,12 @@ import java.text.MessageFormat;
 import java.util.Date;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.user.UserLevelManager;
 
 public class IncidentManager {
 	
@@ -34,10 +34,14 @@ public class IncidentManager {
 	 * that described reason why can't be edited.
 	 */
 	public String canEdit(Waypoint waypoint, ObservationOptions ops){
+		if (!SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
+			return "Insufficient privleges";
+		}
 		if (ops.getEditTime() == null || ops.getEditTime() < 0){
 			return null;
-		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY || 
-				SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST ){
+		}else if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
+			return null;
+		}else if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
 			Date d = new Date();
 			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
 			if (waypoint.getDateTime().after(d)){

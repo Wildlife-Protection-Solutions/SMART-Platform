@@ -76,6 +76,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.osgi.framework.Bundle;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
@@ -156,6 +157,7 @@ public class RecordSummaryPage extends EditorPart{
 	}
 	
 	public void linkEntity(IntelEntity toLink){
+		if (!recordEditor.getEditMode()) return;
 		entityPanel.linkEntity(toLink);
 	}
 	@Override
@@ -281,8 +283,11 @@ public class RecordSummaryPage extends EditorPart{
 				}
 			}
 		});
-		deleteItem.setEnabled(recordEditor.getEditMode());
-		
+		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
+			deleteItem.setEnabled(recordEditor.getEditMode());	
+		}else{
+			deleteItem.setEnabled(false);
+		}
 		
 		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
@@ -396,7 +401,9 @@ public class RecordSummaryPage extends EditorPart{
 	
 	public void setEditMode(boolean editMode){		
 		editItem.setSelection(editMode);
-		deleteItem.setEnabled(editMode);		
+		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
+			deleteItem.setEnabled(editMode);		
+		}
 	}
 	
 	public void initPage(){

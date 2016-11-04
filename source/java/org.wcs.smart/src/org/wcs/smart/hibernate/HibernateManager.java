@@ -22,6 +22,7 @@
 package org.wcs.smart.hibernate;
 
 
+import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -45,7 +46,6 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metadata.ClassMetadata;
@@ -61,7 +61,6 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.ICaCreateHandler;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -74,6 +73,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.export.TableInfo;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.I18nUtil;
 
 /**
@@ -353,26 +353,28 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return list of conservation areas 
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<ConservationArea> findConservationAreas(String userName, String password) throws Exception{
 		Session x = HibernateManager.openSession();
 		Transaction tx = x.beginTransaction();
 		try{
-			String hql = "SELECT e.conservationArea, e.smartPassword from Employee e where smartUserId = :userid and smartUserLevel IN (:users) ORDER BY e.conservationArea.name"; //$NON-NLS-1$
-			Query q = x.createQuery(hql);
-			q.setParameter("userid", userName); //$NON-NLS-1$
-			q.setParameterList("users", new Integer[]{Employee.SmartUserLevel.ADMIN.ordinal(), Employee.SmartUserLevel.ANALYST.ordinal(), Employee.SmartUserLevel.MANAGER.ordinal()}); //$NON-NLS-1$
 			
-			List<?> data = q.list();
+			List<Employee> es = x.createCriteria(Employee.class)
+					.add(Restrictions.eq("smartUserId", userName)) //$NON-NLS-1$
+					.list();
+			
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();
-			for(Object v : data){
-				ConservationArea ca = (ConservationArea) ((Object[])v)[0];
-				if (!ca.getIsCcaa()){
-					String pass = (String) ((Object[])v)[1];
-					if (validatePassword(password, pass)){
-						areas.add(ca);
+			for (Employee e : es){
+				if (!e.getConservationArea().getIsCcaa()){
+					if (e.supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.ANALYST)){
+						if (validatePassword(password, e)){
+							areas.add(e.getConservationArea());
+						}
 					}
 				}
 			}
+			areas.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));
+			
 			return areas;
 			
 		}catch (Exception ex){
@@ -648,24 +650,26 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return an error message if the employee should not be updated, false if updates
 	 * can be made.
 	 */
+	@SuppressWarnings("unchecked")
 	public static String validateSmartUserChanges(Session session, Employee e){
 		//we only care if we are modifying ourself.
 		Criteria crit = session.createCriteria(Employee.class);
 		crit.add(Restrictions.isNull("endEmploymentDate")); //$NON-NLS-1$
 		crit.add(Restrictions.ne("uuid", e.getUuid())); //$NON-NLS-1$
-		crit.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN)); //$NON-NLS-1$
 		crit.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-		crit.setProjection(Projections.rowCount());
+		crit.add(Restrictions.isNotNull("smartUserLevelKeys")); //$NON-NLS-1$
 			
-		int num = ((Long)crit.list().get(0)).intValue();
-		if (num > 0){
-			return null;
+		List<Employee> otherEmployees = crit.list();
+		for (Employee other : otherEmployees){
+			//some other employee in this ca is admin; we don't have anything to worry about
+			if (other.supportsUser(UserLevelManager.ADMIN)) return null;
 		}
-		//no other users so I must be an active smart admin user
+		
+		//no other admin users so I must be an active smart admin user
 		if (e.getEndEmploymentDate() != null){
 			return Messages.HibernateManager_Error_CannotDeleteLastAdminUser;
 		}
-		if (e.getSmartUserLevel() == null || ! e.getSmartUserLevel().equals(Employee.SmartUserLevel.ADMIN)){
+		if (!e.supportsUser(UserLevelManager.ADMIN)){
 			return Messages.HibernateManager_CannotChangeLastAdminUser;
 		}
 			

@@ -43,7 +43,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
@@ -51,6 +50,7 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 import org.wcs.smart.upgrade.UpgradeEngine;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -108,12 +108,12 @@ public class DerbyRestoreEngine {
 				String password = dialog.getPassword();
 
 				List<Employee> matching = session.createCriteria(Employee.class)
-						.add(Restrictions.eq("smartUserId", username).ignoreCase()) //$NON-NLS-1$
-						.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN)).list(); //$NON-NLS-1$
+						.add(Restrictions.eq("smartUserId", username).ignoreCase()).list(); //$NON-NLS-1$
 				
 				boolean found = false;
 				for (Employee e : matching){
-					if (HibernateManager.validatePassword(password, e)){
+					if (e.supportsUser(UserLevelManager.ADMIN) &&
+							HibernateManager.validatePassword(password, e)){
 						found = true;
 						break;
 					}

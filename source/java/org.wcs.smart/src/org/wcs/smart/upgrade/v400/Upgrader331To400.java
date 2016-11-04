@@ -38,12 +38,12 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -555,7 +555,7 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 					newe.setStartEmploymentDate(new Date());
 					newe.setId(newe.getSmartUserId());
 					newe.setConservationArea(ccaa);
-					newe.setSmartUserLevel(SmartUserLevel.ADMIN);
+					newe.setSmartUserLevelKeys( UserLevelManager.ADMIN.getKey() );
 					session.save(newe);
 					session.flush();
 					ccaaUsers.put(newe.getSmartUserId(), newe);

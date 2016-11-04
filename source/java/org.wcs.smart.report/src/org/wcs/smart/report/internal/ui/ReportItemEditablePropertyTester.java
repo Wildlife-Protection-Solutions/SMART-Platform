@@ -24,12 +24,12 @@ package org.wcs.smart.report.internal.ui;
 import java.text.Collator;
 
 import org.eclipse.core.expressions.PropertyTester;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Property tester for determining if a report item (report or report folder) 
@@ -79,7 +79,7 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 			return false;
 		}
 		
-		if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.DATA_ENTRY){
+		if (!SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN,UserLevelManager.ANALYST, UserLevelManager.MANAGER)){
 			//data entry can't do anything with reports
 			return false;
 		}

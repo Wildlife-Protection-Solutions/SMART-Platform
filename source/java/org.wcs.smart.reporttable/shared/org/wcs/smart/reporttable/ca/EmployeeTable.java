@@ -50,7 +50,7 @@ public class EmployeeTable extends SmartBirtTable {
 		BIRTH_DATE(ICoreLabelProvider.EMP_BIRTHDATE_KEY, "Birth Date", java.sql.Types.DATE), //$NON-NLS-1$
 		GENDER(ICoreLabelProvider.EMP_GENDER_KEY,"Gender",java.sql.Types.CHAR), //$NON-NLS-1$
 		SMARTUSERID(ICoreLabelProvider.EMP_SMART_USER_KEY, "SMART User Id", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		SMARTUSERLEVEL(ICoreLabelProvider.EMP_SMART_USER_LEVEL_KEY, "SMART User Level", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		SMARTUSERLEVEL(ICoreLabelProvider.EMP_SMART_USER_LEVEL_KEY, "SMART User Levels", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		AGENCY(ICoreLabelProvider.EMP_AGENCY_KEY, "Agency", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		RANK(ICoreLabelProvider.EMP_RANK_KEY, "Rank", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
@@ -94,8 +94,8 @@ public class EmployeeTable extends SmartBirtTable {
 			case SMARTUSERID:
 				return e.getSmartUserId();
 			case SMARTUSERLEVEL:
-				if (e.getSmartUserLevel() != null){
-					return e.getSmartUserLevel().name();
+				if (e.getSmartUserLevelKeys() != null){
+					return e.getSmartUserLevelKeys();
 				}
 				return ""; //$NON-NLS-1$
 			case AGENCY:

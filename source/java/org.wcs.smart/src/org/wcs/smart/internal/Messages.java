@@ -646,6 +646,7 @@ public class Messages extends NLS {
 	public static String EmployeeComposite_Password_Label;
 	public static String EmployeeComposite_Password2_Label;
 	public static String EmployeeComposite_SmartUser_Label;
+	public static String EmployeeComposite_UserLevelRequired;
 	public static String EmployeeCsvImporter_Error_AgencyNotFound;
 	public static String EmployeeCsvImporter_Error_BirthDate;
 	public static String EmployeeCsvImporter_Error_BirthDateFormat;

@@ -22,9 +22,9 @@
 package org.wcs.smart;
 
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * The start of a permission manager for providing security around
@@ -68,8 +68,6 @@ public enum PermissionManager {
 	 * @return
 	 */
 	public boolean isAdmin(){
-		SmartUserLevel level =SmartDB.getCurrentEmployee().getSmartUserLevel();
-		if (level == null) return false;
-		return level == SmartUserLevel.ADMIN;
+		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN);
 	}
 }

@@ -75,6 +75,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.p2.internal.Messages;
 import org.wcs.smart.ui.UserNamePasswordDialog;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Modified version of the org.eclipse.equinox.p2.ui.sdk installed software pages.
@@ -155,7 +156,7 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 
 		
 		if (!SmartDB.isMultipleAnalysis() &&
-				SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
+				SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN)){
  			// Uninstall action
 			Action uninstallAction = new UninstallAction(getProvisioningUI(), 
 					installedIUGroup.getStructuredViewer(), profileId) {

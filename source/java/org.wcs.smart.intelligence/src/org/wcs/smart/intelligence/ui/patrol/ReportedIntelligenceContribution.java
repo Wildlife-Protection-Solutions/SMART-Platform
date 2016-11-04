@@ -58,7 +58,6 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
@@ -74,6 +73,7 @@ import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
 import org.wcs.smart.intelligence.ui.wizard.NewIntelligenceWizard;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Reported Intelligence contribution item for the patrol editor.
@@ -151,7 +151,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
 		
-		if (SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ANALYST){
+		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.DATA_ENTRY, UserLevelManager.MANAGER)){
 			Hyperlink btnCreate = toolkit.createHyperlink(main, Messages.ReportedIntelligenceContribution_Create_Button, SWT.NONE);
 			btnCreate.setToolTipText(Messages.ReportedIntelligenceContribution_Create_Button_Tooltip);
 			btnCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));

@@ -42,7 +42,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -50,6 +49,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * This class contains some of the basic functions required
@@ -254,7 +254,7 @@ public class SmartStartUp {
 							ccaaUser.setStartEmploymentDate(new Date());
 							ccaaUser.setId(ccaaUser.getSmartUserId());
 							ccaaUser.setConservationArea(ca);
-							ccaaUser.setSmartUserLevel(SmartUserLevel.ADMIN);
+							ccaaUser.setSmartUserLevel(UserLevelManager.INSTANCE.getUserLevels()); //give them all seeing access
 							session.save(ccaaUser);
 							session.flush();
 						}

@@ -44,6 +44,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -175,7 +176,7 @@ public class AttachmentListComposite extends Composite{
 							}	
 						});
 					}
-					if (mnulinkTo == null){
+					if (mnulinkTo == null && IntelSecurityManager.INSTANCE.canLinkAttachmentsToEntities()){
 						mnulinkTo = new MenuItem(this.thumbMenu, SWT.CASCADE);
 						mnulinkTo.setText("Link To Entity...");
 						
@@ -217,6 +218,11 @@ public class AttachmentListComposite extends Composite{
 							});
 						}
 						
+					}else if (mnulinkTo != null && !IntelSecurityManager.INSTANCE.canLinkAttachmentsToEntities()){
+						if (mnulinkTo != null){
+							mnulinkTo.dispose();
+							mnulinkTo = null;
+						}	
 					}
 					
 				}else{

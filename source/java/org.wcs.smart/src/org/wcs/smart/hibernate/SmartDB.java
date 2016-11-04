@@ -33,6 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.GeometryUtils;
 
 /**
@@ -223,16 +224,17 @@ public class SmartDB {
 	 * @return the database user
 	 */
 	public static DbUser findDbUser(Employee user){
-		if (user.getSmartUserLevel() == Employee.SmartUserLevel.MANAGER){
-			return DbUser.MANAGER;
-		}else if (user.getSmartUserLevel() == Employee.SmartUserLevel.ADMIN){
+
+		if (user.supportsUser(UserLevelManager.ADMIN)){
 			return DbUser.ADMIN;
-		}else if (user.getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY){
-			return DbUser.DATAENTRY;
-		}else if (user.getSmartUserLevel() == Employee.SmartUserLevel.ANALYST){
+		}else if (user.supportsUser(UserLevelManager.MANAGER)){
+			return DbUser.MANAGER;
+		}else if (user.supportsUser(UserLevelManager.ANALYST)){
 			return DbUser.ANALYST;
+		}else if (user.supportsUser(UserLevelManager.DATA_ENTRY)){
+			return DbUser.DATAENTRY;
 		}
-		return DbUser.LOGIN;
+		return DbUser.ADMIN;
 	}
 	
 	

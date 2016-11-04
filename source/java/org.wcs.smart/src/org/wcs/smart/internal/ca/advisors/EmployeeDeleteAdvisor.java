@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.internal.ca.advisors;
 
+import java.util.List;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Delete advisor to ensure that when an employee
@@ -39,6 +40,7 @@ import org.wcs.smart.internal.Messages;
  */
 public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Employee)){
@@ -50,17 +52,19 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 			return null;
 		}
 		
-		Long cnt = (Long) session.createCriteria(Employee.class)
+		//find another active admin user
+		List<Employee> others  = session.createCriteria(Employee.class)
 				.add(Restrictions.eq("conservationArea", e.getConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.isNull("endEmploymentDate")) //$NON-NLS-1$
 				.add(Restrictions.ne("uuid", e.getUuid())) //$NON-NLS-1$
-				.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount()).uniqueResult();
-		
-		if (cnt == 0){
-			return Messages.EmployeeDeleteAdvisor_Error_NoMoreAdmin;
-		}else{
-			return null;
+				.add(Restrictions.isNotNull("smartUserLevelKeys")) //$NON-NLS-1$
+				.list();
+		for (Employee other : others){
+			if (other.supportsUser(UserLevelManager.ADMIN)) return null;
 		}
+		
+		return Messages.EmployeeDeleteAdvisor_Error_NoMoreAdmin;
+		
 	}
 
 }

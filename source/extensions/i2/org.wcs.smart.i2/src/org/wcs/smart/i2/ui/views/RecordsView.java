@@ -77,6 +77,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
@@ -311,54 +312,73 @@ public class RecordsView {
 				}
 			}
 		});
-		
-		MenuItem miDelete = new MenuItem(m, SWT.PUSH);
-		miDelete.setText("Delete");
-		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		miDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
-					Object x = (Object) iterator.next();
-					
-					if (x instanceof IntelRecord){
-						RecordManager.INSTANCE.deleteRecord((IntelRecord)x, context);
-					}else if (x instanceof RecordEditorInput){
-						RecordManager.INSTANCE.deleteRecord(((RecordEditorInput)x).getUuid(), context);
-					}
-				}
-			}
-		});
-		
-		MenuItem miAdd = new MenuItem(m, SWT.PUSH);
-		miAdd.setText("Add To Working Set");
-		miAdd.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-		miAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
-					Object x = (Object) iterator.next();	
-					if (x instanceof IntelRecord){
-						WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
-					}else if (x instanceof RecordEditorInput){
-						WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput) x, context);
-					}
-				}
-			}
-		});
-			
 		m.addMenuListener(new MenuListener() {
-			
 			@Override
 			public void menuShown(MenuEvent e) {
-				miDelete.setEnabled(!control.getSelection().isEmpty());
 				mi.setEnabled(!control.getSelection().isEmpty());
-				miAdd.setEnabled(!control.getSelection().isEmpty() && WorkingSetManager.INSTANCE.isSet());
 			}
 			
 			@Override
 			public void menuHidden(MenuEvent e) {}
 		});
+		
+		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
+			MenuItem miDelete = new MenuItem(m, SWT.PUSH);
+			miDelete.setText("Delete");
+			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			miDelete.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+						Object x = (Object) iterator.next();
+						
+						if (x instanceof IntelRecord){
+							RecordManager.INSTANCE.deleteRecord((IntelRecord)x, context);
+						}else if (x instanceof RecordEditorInput){
+							RecordManager.INSTANCE.deleteRecord(((RecordEditorInput)x).getUuid(), context);
+						}
+					}
+				}
+			});
+			m.addMenuListener(new MenuListener() {
+				@Override
+				public void menuShown(MenuEvent e) {
+					miDelete.setEnabled(!control.getSelection().isEmpty());
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {}
+			});
+		}
+		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
+			MenuItem miAdd = new MenuItem(m, SWT.PUSH);
+			miAdd.setText("Add To Working Set");
+			miAdd.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+			miAdd.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+						Object x = (Object) iterator.next();	
+						if (x instanceof IntelRecord){
+							WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
+						}else if (x instanceof RecordEditorInput){
+							WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput) x, context);
+						}
+					}
+				}
+			});
+			m.addMenuListener(new MenuListener() {
+				@Override
+				public void menuShown(MenuEvent e) {
+					miAdd.setEnabled(!control.getSelection().isEmpty() && WorkingSetManager.INSTANCE.isSet());
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {}
+			});
+		}
+			
+		
 	}
 	
 	public void refreshView(){

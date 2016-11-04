@@ -40,7 +40,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.in.CaImporter;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
@@ -51,6 +50,7 @@ import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.UserNamePasswordDialog;
+import org.wcs.smart.user.UserLevelManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -198,7 +198,7 @@ public class DownloadCaEngine {
 						.uniqueResult();
 				if (smartUser != null &&  HibernateManager.validatePassword(password, smartUser)){
 					break;
-				}else if (smartUser != null && smartUser.getSmartUserLevel() != SmartUserLevel.ADMIN){
+				}else if (smartUser != null && !smartUser.supportsUser(UserLevelManager.ADMIN)){
 					MessageDialog.openError(activeShell, Messages.DownloadCaEngine_ErrorDialogTitle, Messages.DownloadCaEngine_InvalidPermission);
 					return false;
 				}

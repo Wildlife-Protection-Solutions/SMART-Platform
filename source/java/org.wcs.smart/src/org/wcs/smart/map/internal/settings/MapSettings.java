@@ -78,10 +78,10 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.google.gson.Gson;
@@ -182,12 +182,12 @@ public class MapSettings {
 	 * 
 	 * @return a {@link MapRegister} instance. Null value when the method find error.
  	 */
-	private MapRegister createMapRegister(final Map map, final SmartUserLevel userLevel){
+	private MapRegister createMapRegister(final Map map, final Employee user){
 	
 		MapRegister mapRegister = null;
 		try {
 			// creates the map settings and the list of layers settings 
-			List<LayerRegister> layerRegisterList = createLayerRegisterList(userLevel, map.getLayersInternal());
+			List<LayerRegister> layerRegisterList = createLayerRegisterList(user, map.getLayersInternal());
 
 			java.net.URI uri = new java.net.URI(map.getID().toString());
 			String name = map.getName();
@@ -211,7 +211,7 @@ public class MapSettings {
 	 * 
 	 * @return the list of {@link LayerRegister} 
 	 */
-	private List<LayerRegister> createLayerRegisterList(SmartUserLevel userLevel, List<Layer> layerList) throws Exception{
+	private List<LayerRegister> createLayerRegisterList(Employee user, List<Layer> layerList) throws Exception{
 		
 		List<LayerRegister> layerRegisterList= new LinkedList<LayerRegister>();  
 		synchronized(layerList){
@@ -253,7 +253,7 @@ public class MapSettings {
 				final Double minScaleDenominator = layer.getMinScaleDenominator();
 				
 				// only administrator level can add new layers
-				if(userLevel == SmartUserLevel.ADMIN){
+				if(user.supportsUser(UserLevelManager.ADMIN)){
 					if(uri != null){
 						if(URIUtil.isFileURI(uri) ){
 							uri = importFile(uri);
@@ -606,7 +606,7 @@ public class MapSettings {
 				//this point is where files are copied into the filestore
 				//so if an error happens after this point we get files in the filestore
 				//that may never get references to a basemap and not removed.
-				MapRegister mapRegister = createMapRegister(map, SmartDB.getCurrentEmployee().getSmartUserLevel() ); 
+				MapRegister mapRegister = createMapRegister(map, SmartDB.getCurrentEmployee() ); 
 			
 				//when overwriting and existing file; this gets the
 				//files currently in the basemap; below we

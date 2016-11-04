@@ -19,54 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity;
+package org.wcs.smart.ca;
 
-import org.wcs.smart.ca.SmartUserLevel;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.user.UserLevelManager;
+import java.util.Locale;
+
+import javax.annotation.Nonnull;
 
 /**
- * Utility for determining which users have permissions
- * for which functions.
+ * SMART User level must contain at a minimum a key.  This key must be unique and
+ * is stored in the system.
  * 
  * @author Emily
  *
  */
-public class EntityPermissionManager {
+public class SmartUserLevel {
 
+	private String key;
+	
 	/**
-	 * If current user can modify entities
-	 * @return
+	 * 
+	 * @param key cannot be null
 	 */
-	public static boolean canCreateEditDeleteEntities(){
-		if (SmartDB.isMultipleAnalysis()){
-			return false;
-		}
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.DATA_ENTRY, UserLevelManager.MANAGER)){
-			return true;
+	public SmartUserLevel(@Nonnull String key){
+		this.key = key;
+	}
+	
+	public String getKey(){
+		return this.key;	
+	}
+	
+	public String getGuiName(Locale l){
+		return getKey();
+	}
+	
+	public boolean equals(Object other){
+		if (other instanceof SmartUserLevel){
+			return ((SmartUserLevel) other).key.equals(key);
 		}
 		return false;
 	}
 	
-	/**
-	 * If current user can modify entity types
-	 * @return
-	 */
-	public static boolean canCreateEditDeleteTypes(){
-		if (SmartDB.isMultipleAnalysis()){
-			return false;
-		}
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN);
-	}
-	
-	/**
-	 * If the current user can view entity sightings
-	 * @return
-	 */
-	public static boolean canViewSightings(){
-		if (SmartDB.isMultipleAnalysis()){
-			return true;
-		}
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.ANALYST, UserLevelManager.MANAGER);
+	public int hashCode(){
+		return key.hashCode();
 	}
 }

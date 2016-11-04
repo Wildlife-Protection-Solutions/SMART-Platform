@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.create;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -32,6 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.EmployeeComposite;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * The second page of the create conservation 
@@ -81,7 +83,7 @@ public class CaWizard_UserDef extends CaWizardPage{
 		admin.setConservationArea(ca);
 		
 		compEmployee.updateEmploye(admin);
-		admin.setSmartUserLevel(Employee.SmartUserLevel.ADMIN);
+		admin.setSmartUserLevel(Collections.singleton(UserLevelManager.ADMIN));
 
 		//remove any previous users
 		ca.getEmployees().clear(); 

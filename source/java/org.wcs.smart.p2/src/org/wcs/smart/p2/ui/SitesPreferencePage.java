@@ -28,9 +28,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.p2.internal.Messages;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Plugin Install Locations preferences page.
@@ -72,7 +72,6 @@ public class SitesPreferencePage extends RepositoryManipulationPage {
 	}
 	
 	private boolean isEditable(){
-		return (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN ||
-				SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER);
+		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER);
 	}
 }

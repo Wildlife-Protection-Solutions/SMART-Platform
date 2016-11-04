@@ -24,13 +24,12 @@ package org.wcs.smart.er;
 import java.text.MessageFormat;
 import java.util.Date;
 
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Permission manager for surveys.
@@ -51,12 +50,10 @@ public class SurveyPermissionManager {
 	 * @return error string if the current user cannot delete a survey design
 	 */
 	public String canDeleteSurveyDesign(){
-		SmartUserLevel level = SmartDB.getCurrentEmployee().getSmartUserLevel();
-		if (level == SmartUserLevel.DATA_ENTRY ||
-			level == SmartUserLevel.ANALYST){
-			return Messages.SurveyPermissionManager_InsufficientPrivileges;
+		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
+			return null;
 		}
-		return null;		
+		return Messages.SurveyPermissionManager_InsufficientPrivileges;
 	}
 	
 	/**
@@ -69,20 +66,15 @@ public class SurveyPermissionManager {
 	 * @return
 	 */
 	public String canEditSurvey(Survey survey, ObservationOptions op){
-		SmartUserLevel level = SmartDB.getCurrentEmployee().getSmartUserLevel();
-		
-		if (level == SmartUserLevel.MANAGER ||
-				level == SmartUserLevel.ADMIN){
+		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
 			return null;
 		}
-		if (level == SmartUserLevel.DATA_ENTRY ||
-				level == SmartUserLevel.ANALYST){
+		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
 			if (op.getEditTime() == null || op.getEditTime() < 0){
 				return null;
 			}else if (survey.getStartDate() == null){
 				return null;
-			}else if (level == Employee.SmartUserLevel.DATA_ENTRY || 
-					level == Employee.SmartUserLevel.ANALYST){
+			}else {
 				Date d = new Date();
 				d.setTime( d.getTime() - (long)op.getEditTime() * 24 * 60 * 60 * 1000 );
 				if (survey.getStartDate().after(d)){
@@ -90,8 +82,6 @@ public class SurveyPermissionManager {
 				}else{
 					return MessageFormat.format(Messages.SurveyPermissionManager_SurveyToOld, new Object[]{op.getEditTime()}) ;
 				}
-			}else{
-				return null;
 			}
 		}
 		return Messages.SurveyPermissionManager_InvalidUserType;
@@ -107,18 +97,15 @@ public class SurveyPermissionManager {
 	 * @return
 	 */
 	public String canEditMission(Mission mission, ObservationOptions op){
-		SmartUserLevel level = SmartDB.getCurrentEmployee().getSmartUserLevel();
-		if (level == SmartUserLevel.MANAGER ||
-				level == SmartUserLevel.ADMIN){
-			return null;
-		}
-		if (level == SmartUserLevel.DATA_ENTRY || level == SmartUserLevel.ANALYST){
+		
+		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)) return null;
+		
+		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
 			if (op.getEditTime() == null || op.getEditTime() < 0){
 				return null;
 			}else if (mission.getStartDate() == null){
 				return null;
-			}else if (level == Employee.SmartUserLevel.DATA_ENTRY ||
-					level == Employee.SmartUserLevel.ANALYST){
+			}else {
 				Date d = new Date();
 				d.setTime( d.getTime() - (long)op.getEditTime() * 24 * 60 * 60 * 1000 );
 				if (mission.getStartDate().after(d)){
@@ -126,8 +113,6 @@ public class SurveyPermissionManager {
 				}else{
 					return MessageFormat.format(Messages.SurveyPermissionManager_MissionToOld, new Object[]{op.getEditTime()}) ;
 				}
-			}else{
-				return null;
 			}
 		}
 		return Messages.SurveyPermissionManager_InvalidUserType;
@@ -143,16 +128,8 @@ public class SurveyPermissionManager {
 	 * @return
 	 */
 	public String canEditSurveyDesign(){
-		SmartUserLevel level = SmartDB.getCurrentEmployee().getSmartUserLevel();
-		if (level == SmartUserLevel.MANAGER ||
-				level == SmartUserLevel.ADMIN){
-			return null;
-		}
-		if (level == SmartUserLevel.ANALYST || 
-				level == SmartUserLevel.DATA_ENTRY){
-			return Messages.SurveyPermissionManager_InsufficientPrivileges;
-		}
-		return Messages.SurveyPermissionManager_InvalidUserType;
+		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)) return null;
+		return Messages.SurveyPermissionManager_InsufficientPrivileges;
 	}
 	
 	/**
@@ -173,13 +150,8 @@ public class SurveyPermissionManager {
 	 * @return true if the current user can create/edit new surveys and mission
 	 */
 	public boolean canEditMissionSurvery(){
-		SmartUserLevel level = SmartDB.getCurrentEmployee().getSmartUserLevel();
-		if (level == SmartUserLevel.MANAGER ||
-				level == SmartUserLevel.ADMIN || 
-				level == SmartUserLevel.DATA_ENTRY ||
-				level == SmartUserLevel.ANALYST){
-			return true;
-		}
+		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, 
+				UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)) return true;
 		return false;
 	}
 }

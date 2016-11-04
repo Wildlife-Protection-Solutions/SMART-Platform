@@ -45,9 +45,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.wcs.smart.backup.AutoBackupEngine;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SmartUtils;
 /**
  * Preference page for configuring auto-backups
@@ -118,8 +118,8 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 	}
 	
 	private boolean isEditable(){
-		return (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN ||
-				SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER);
+		return (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN) ||
+				SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.MANAGER) );
 	}
 	
 	@Override

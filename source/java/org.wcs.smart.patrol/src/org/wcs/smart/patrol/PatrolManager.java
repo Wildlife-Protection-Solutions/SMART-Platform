@@ -32,7 +32,6 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -42,6 +41,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -80,13 +80,15 @@ public class PatrolManager {
 	 * that described reason why can't be edited.
 	 */
 	public String canEdit(Patrol patrol, ObservationOptions ops){
+		if (!SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST, UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
+			return "Insufficient privileges"; 
+		}
+			
 		if (ops.getEditTime() == null || ops.getEditTime() < 0){
 			return null;
 		}else if (patrol.getStartDate() == null){
 			return null;
-		}else if (SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.DATA_ENTRY ||
-				SmartDB.getCurrentEmployee().getSmartUserLevel() == Employee.SmartUserLevel.ANALYST 
-				){
+		}else if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){				
 			Date d = new Date();
 			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
 			if (patrol.getStartDate().after(d)){

@@ -67,6 +67,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -149,24 +150,26 @@ public class EntityComparisonEditor extends EditorPart{
 		((GridLayout)parent.getLayout()).verticalSpacing = 0;
 		((GridLayout)parent.getLayout()).horizontalSpacing = 0;
 		toolkit.adapt(parent);
-		Hyperlink l = toolkit.createHyperlink(parent, "Merge...", SWT.NONE);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
-		l.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-			}
+		if (IntelSecurityManager.INSTANCE.canEditEntity()){
+			Hyperlink l = toolkit.createHyperlink(parent, "Merge...", SWT.NONE);
+			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				MessageDialog.openInformation(getSite().getShell(), "TODO", "TODO: implement a dialog where users can pick which attributes to use in merged entity");
-			}
-		});
-		
+			l.addHyperlinkListener(new IHyperlinkListener() {
+				@Override
+				public void linkExited(HyperlinkEvent e) {
+				}
+				
+				@Override
+				public void linkEntered(HyperlinkEvent e) {
+				}
+				
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					MessageDialog.openInformation(getSite().getShell(), "TODO", "TODO: implement a dialog where users can pick which attributes to use in merged entity");
+				}
+			});
+		}
 		table = new EntityComparisonTable(parent);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		addDropTarget(parent);

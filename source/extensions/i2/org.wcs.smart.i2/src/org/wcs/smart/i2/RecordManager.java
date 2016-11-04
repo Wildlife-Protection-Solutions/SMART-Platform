@@ -27,6 +27,8 @@ import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -75,6 +77,10 @@ public enum RecordManager {
 	}
 
 	public void deleteRecord(IntelRecord record, IEclipseContext context){
+		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
+			MessageDialog.openError(context.get(Shell.class), "Error", "Insufficient privileges");
+			return;
+		}
 		Session s = HibernateManager.openSession(new AttachmentInterceptor());
 		List<IntelEntity> entities = new ArrayList<IntelEntity>();
 		try{

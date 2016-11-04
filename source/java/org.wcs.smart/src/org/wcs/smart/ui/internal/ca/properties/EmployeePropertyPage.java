@@ -564,10 +564,10 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				}
 			case SMART_USER: return element.getSmartUserId();
 			case SMART_USER_LEVEL: 
-				if (element.getSmartUserLevel() == null){
+				if (element.getSmartUserLevelKeys() == null){
 					return null;
 				}
-				return element.getSmartUserLevel().name();
+				return element.getSmartUserLevelKeys();
 				
 			
 		}
@@ -636,7 +636,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 					return -1;
 				}
 			case SMART_USER: return compareString(e1.getSmartUserId(),e2.getSmartUserId());
-			case SMART_USER_LEVEL: return compareString(e1.getSmartUserLevel() == null ? null : e1.getSmartUserLevel().name(), e2.getSmartUserLevel() == null? null:e2.getSmartUserLevel().name());			
+			case SMART_USER_LEVEL: return compareString(e1.getSmartUserLevelKeys() == null ? null : e1.getSmartUserLevelKeys(), e2.getSmartUserLevelKeys() == null? null:e2.getSmartUserLevelKeys());			
 		}
 		return 0;
 	}

@@ -197,6 +197,13 @@
                   commandId="org.wcs.smart.i2.command.entity.new"
                   label="New Entity"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.i2.separator1"
@@ -206,21 +213,49 @@
                   commandId="org.wcs.smart.i2.command.attributelist.show"
                   label="Intelligence Attributes..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.entitytypelist.show"
                   label="Entity Types..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
                   label="Relationship Types..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.relationshipgrouplist.show"
                   label="Relationship Groups..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.i2.separator2"
@@ -235,11 +270,25 @@
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.report.entity.edit">
                </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.i2.birt.record.template.edit"
                   label="Edit Record Template..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.i2.separator3"
@@ -260,7 +309,33 @@
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
                </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_data_entry">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution
@@ -275,6 +350,21 @@
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
                </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_analyst">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
@@ -283,6 +373,25 @@
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
                </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_analyst">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_data_entry">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.i2.separator1"
@@ -507,22 +616,52 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowEntityTypeListDialogHandler$ShowEntityTypeListDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.entitytypelist.show">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="intel_analyst">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowAttributeListDialogHandler$ShowAttributeListDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.attributelist.show">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="intel_analyst">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowRelationshipTypeListDialogHandler$ShowRelationshipTypeListDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.relationshiptypelist.show">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="intel_analyst">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.i2.ui.handler.NewEntityDialogHandler$NewEntityDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.entity.new">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="intel_analyst">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowRelationshipGroupListDialogHandler$ShowRelationshipGroupListDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.relationshipgrouplist.show">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="intel_analyst">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.i2.ui.handler.NewRecordHandler$NewRecordHandlerWrapper"
@@ -539,6 +678,12 @@
       <handler
             class="org.wcs.smart.i2.handlers.RefreshDataSetBindings$RefreshDataSetBindingsWrapper"
             commandId="org.wcs.smart.i2.entity.template.querybindings.fix">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="intel_analyst">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.i2.ui.handler.EditRecordTemplateHandler$EditRecordTemplateHandlerWrapper"
@@ -1273,6 +1418,15 @@
             apply="always"
             uri="fragment.e4xmi">
       </fragment>
+   </extension>
+   <extension
+         point="org.wcs.smart.userlevel">
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.IntelAnalystUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.IntelDataEntryUserLevel">
+      </SMARTUserLevel>
    </extension>
 
 </plugin>

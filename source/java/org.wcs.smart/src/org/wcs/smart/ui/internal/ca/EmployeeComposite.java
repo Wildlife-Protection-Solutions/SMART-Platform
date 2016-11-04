@@ -25,9 +25,11 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -63,9 +65,12 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.ca.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SmartUtils;
 
 public class EmployeeComposite extends Composite {
@@ -87,7 +92,8 @@ public class EmployeeComposite extends Composite {
 	protected Text txtSmartPassword2 = null;
 	protected ComboViewer cmbViewerAgency = null;
 	protected ComboViewer cmbViewerRank = null;
-	protected ComboViewer cmbSmartUserLevel = null;
+	protected CheckBoxDropDown cmbUserLevel = null;
+	
 	private Button chNotActive = null;
 	
 	private ControlDecoration cdGiveName;
@@ -99,6 +105,7 @@ public class EmployeeComposite extends Composite {
 	private ControlDecoration cdSmartId;
 	private ControlDecoration cdSmartPassword;
 	private ControlDecoration cdSmartPassword2;
+	private ControlDecoration cdUserLevel;
 
 	private Group smartc = null;
 	protected Button chSmartUser = null;
@@ -293,25 +300,31 @@ public class EmployeeComposite extends Composite {
 			});
 			if ((localStyle & SMART_USER_LEVEL) == SMART_USER_LEVEL){
 				createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER_LEVEL + ":"); //$NON-NLS-1$
-				cmbSmartUserLevel = new ComboViewer(smartc , SWT.READ_ONLY | SWT.BORDER);
-				cmbSmartUserLevel.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-				cmbSmartUserLevel.setLabelProvider(new LabelProvider(){
+				
+				cmbUserLevel = new CheckBoxDropDown(smartc);
+				cmbUserLevel.setLabelProvider(new LabelProvider(){
 					@Override
 					public String getText(Object element){
-						return ((Employee.SmartUserLevel)element).name();
+						if (element instanceof SmartUserLevel) return ((SmartUserLevel) element).getGuiName(Locale.getDefault());
+						return super.getText(element);
 					}
 				});
-				cmbSmartUserLevel.setContentProvider(ArrayContentProvider.getInstance());
-				cmbSmartUserLevel.setInput(new Employee.SmartUserLevel[]{Employee.SmartUserLevel.DATA_ENTRY, Employee.SmartUserLevel.ANALYST, Employee.SmartUserLevel.MANAGER, Employee.SmartUserLevel.ADMIN});
-				cmbSmartUserLevel.getCombo().select(0);
-				cmbSmartUserLevel.addSelectionChangedListener(new ISelectionChangedListener() {
+				cmbUserLevel.setContentProvider(ArrayContentProvider.getInstance());
+				List<SmartUserLevel> levels = new ArrayList<SmartUserLevel>();
+				levels.addAll(UserLevelManager.INSTANCE.getUserLevels());
+				levels.sort((a,b) -> Collator.getInstance().compare(a.getGuiName(Locale.getDefault()), b.getGuiName(Locale.getDefault())));
+				cmbUserLevel.setInput(levels);
+				cmbUserLevel.addSelectionChangedListener(new ISelectionChangedListener() {
 					
 					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
 						validate();
 					}
 				});
-				((GridData)cmbSmartUserLevel.getCombo().getLayoutData()).horizontalIndent = 10;
+				cmbUserLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)cmbUserLevel.getLayoutData()).horizontalIndent = 8;
+				cdUserLevel = createDecoration(cmbUserLevel);
+				
 			}
 			
 			smartc.setText(Messages.EmployeeComposite_SmartUser_Label);
@@ -353,7 +366,6 @@ public class EmployeeComposite extends Composite {
 
 		validate();
 	}
-
 	
 	private void updateRanks(){
 		IStructuredSelection selection = ((IStructuredSelection) cmbViewerAgency
@@ -555,6 +567,13 @@ public class EmployeeComposite extends Composite {
 			if (hide){
 				cdSmartPassword2.hide();
 			}
+			
+			if (cmbUserLevel.getCheckObjects().size() == 0){
+				cdUserLevel.show();
+				cdUserLevel.setDescriptionText(Messages.EmployeeComposite_UserLevelRequired);
+			}else{
+				cdUserLevel.hide();
+			}
 		}else if (chSmartUser != null){
 			cdSmartId.hide();
 			cdSmartPassword.hide();
@@ -616,12 +635,8 @@ public class EmployeeComposite extends Composite {
 				txtSmartId.setText(e.getSmartUserId());
 				txtSmartPassword.setText(e.getSmartPassword());
 				txtSmartPassword2.setText(e.getSmartPassword());
-				if (cmbSmartUserLevel != null){
-					if (e.getSmartUserLevel() != null){
-						cmbSmartUserLevel.setSelection( new StructuredSelection(e.getSmartUserLevel()));
-					}else{
-						cmbSmartUserLevel.setSelection( new StructuredSelection(Employee.SmartUserLevel.DATA_ENTRY));
-					}
+				if (cmbUserLevel != null){
+					cmbUserLevel.setValue(e.getSmartUserLevels());
 				}
 				enableSmartUser(true);
 			}else{
@@ -629,9 +644,9 @@ public class EmployeeComposite extends Composite {
 				chSmartUser.setSelection(false);
 				txtSmartId.setText(""); //$NON-NLS-1$
 				txtSmartPassword.setText(""); //$NON-NLS-1$
-				txtSmartPassword2.setText(""); //$NON-NLS-1$
-				if (cmbSmartUserLevel != null){
-					cmbSmartUserLevel.setSelection(new StructuredSelection(Employee.SmartUserLevel.DATA_ENTRY));
+				txtSmartPassword2.setText(""); //$NON-NLS-1$ 
+				if (cmbUserLevel != null){
+					cmbUserLevel.setValue(Collections.emptyList());
 				}
 			}
 			txtSmartPassword.setData(MODIFIED_KEY, false);
@@ -652,7 +667,7 @@ public class EmployeeComposite extends Composite {
 				this.opMale,
 				this.opFemale,
 				this.chSmartUser,
-				this.cmbSmartUserLevel == null ? null : this.cmbSmartUserLevel.getCombo(),
+				this.cmbUserLevel,
 				this.cmbViewerAgency.getCombo(),
 				this.cmbViewerRank.getCombo()
 		};
@@ -668,10 +683,9 @@ public class EmployeeComposite extends Composite {
 	
 	protected void enableSmartUser(boolean enable){
 		txtSmartId.setEditable(enable);
+
+		if (cmbUserLevel != null) cmbUserLevel.setEnabled(enable);
 		
-		if (cmbSmartUserLevel != null){
-			cmbSmartUserLevel.getCombo().setEnabled(enable);
-		}
 		if (txtSmartPassword != null){
 			txtSmartPassword.setEnabled(enable);
 		}
@@ -738,12 +752,7 @@ public class EmployeeComposite extends Composite {
 					e.setSmartPassword(HibernateManager.generatePassword(txtSmartPassword.getText()));
 				}
 				e.setSmartUserId(txtSmartId.getText().trim());
-				if (cmbSmartUserLevel != null){
-					IStructuredSelection a = (IStructuredSelection) cmbSmartUserLevel.getSelection();
-					if (!a.isEmpty()){
-						e.setSmartUserLevel( ((Employee.SmartUserLevel)a.getFirstElement())  );
-					}
-				}
+				e.setSmartUserLevel((Collection<SmartUserLevel>) cmbUserLevel.getCheckObjects());
 			}else{
 				e.setSmartUserId(null);
 				e.setSmartUserLevel(null);

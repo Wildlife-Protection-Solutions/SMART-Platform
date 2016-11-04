@@ -19,54 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity;
+package org.wcs.smart.i2;
 
 import org.wcs.smart.ca.SmartUserLevel;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.user.UserLevelManager;
 
 /**
- * Utility for determining which users have permissions
- * for which functions.
+ * Intelligence data entry user level 
  * 
  * @author Emily
  *
  */
-public class EntityPermissionManager {
-
-	/**
-	 * If current user can modify entities
-	 * @return
-	 */
-	public static boolean canCreateEditDeleteEntities(){
-		if (SmartDB.isMultipleAnalysis()){
-			return false;
-		}
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.DATA_ENTRY, UserLevelManager.MANAGER)){
-			return true;
-		}
-		return false;
-	}
+public class IntelDataEntryUserLevel extends SmartUserLevel {
 	
-	/**
-	 * If current user can modify entity types
-	 * @return
-	 */
-	public static boolean canCreateEditDeleteTypes(){
-		if (SmartDB.isMultipleAnalysis()){
-			return false;
-		}
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN);
-	}
+	public static final IntelDataEntryUserLevel INSTANCE = new IntelDataEntryUserLevel();
 	
-	/**
-	 * If the current user can view entity sightings
-	 * @return
-	 */
-	public static boolean canViewSightings(){
-		if (SmartDB.isMultipleAnalysis()){
-			return true;
-		}
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.ANALYST, UserLevelManager.MANAGER);
+	private static final String KEY = "INTEL_DATA_ENTRY";
+	
+	public IntelDataEntryUserLevel() {
+		super(KEY);
 	}
 }

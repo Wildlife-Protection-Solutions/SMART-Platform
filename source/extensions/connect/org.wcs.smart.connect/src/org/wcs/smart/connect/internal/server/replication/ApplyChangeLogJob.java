@@ -411,8 +411,8 @@ public class ApplyChangeLogJob extends Job {
 				.uniqueResult();
 			final boolean[] cont = new boolean[]{true};
 			if (afterDownload == null ||
-					afterDownload.getSmartUserLevel() == null ||
-					!afterDownload.getSmartUserLevel().equals(currentEmployee.getSmartUserLevel())){
+					afterDownload.getSmartUserLevelKeys() == null ||
+					!afterDownload.getSmartUserLevelKeys().equals(currentEmployee.getSmartUserLevelKeys())){
 				//current employee no longer exists; 
 				//or no longer a smart user
 				//or user level has changed

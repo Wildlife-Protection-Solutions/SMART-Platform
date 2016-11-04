@@ -203,7 +203,7 @@ public class Thumbnail {
 		
 		String fileName = null;
 		if (attachment == null){
-			fileName = "";
+			fileName = ""; //$NON-NLS-1$
 		}else if (attachment.getCopyFromLocation() != null){
 			fileName = attachment.getCopyFromLocation().getName();
 		}else{

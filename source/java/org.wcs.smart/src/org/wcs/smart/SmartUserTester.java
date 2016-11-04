@@ -22,7 +22,7 @@
 package org.wcs.smart;
 
 import org.eclipse.core.expressions.PropertyTester;
-import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -38,25 +38,19 @@ public class SmartUserTester extends PropertyTester {
 	 * Tests the current logged in user level against the level
 	 * provided by the expectedValue.  
 	 * 
-	 * @param expectedValue one of "admin",
-	 * "manager", "analyst", "dataentry" otherwise false is returned.
+	 * @param expectedValue one of the smart user level keys 
+	 * "admin", "manager", "analyst", "dataentry" or others supplied by a plugin
 	 */
 	@Override
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
 		if (SmartDB.getCurrentEmployee() == null) return false;
-		if (expectedValue.equals("admin")){ //$NON-NLS-1$
-			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
-				SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.ADMIN);
-		}else if (expectedValue.equals("manager")){ //$NON-NLS-1$
-			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
-					SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.MANAGER);
-		}else if (expectedValue.equals("analyst")){ //$NON-NLS-1$
-			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
-					SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.ANALYST);
-		}else if (expectedValue.equals("dataentry")){ //$NON-NLS-1$
-			return SmartDB.getCurrentEmployee().getSmartUserLevel() != null &&
-					SmartDB.getCurrentEmployee().getSmartUserLevel().equals(Employee.SmartUserLevel.DATA_ENTRY);
+		String userLevel = (String)expectedValue;
+		
+		for (SmartUserLevel l : SmartDB.getCurrentEmployee().getSmartUserLevels()){
+			if (l.getKey().equals(userLevel.toUpperCase())){
+				return true;
+			}
 		}
 		
 		return false;

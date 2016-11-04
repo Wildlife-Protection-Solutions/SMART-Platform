@@ -42,7 +42,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.report.ReportPlugIn;
@@ -55,6 +54,7 @@ import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.RootReportFolder;
+import org.wcs.smart.user.UserLevelManager;
 
 
 /**
@@ -206,7 +206,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 			RootReportFolder folder = null;
 			if (ReportManager.canModifyCaReports()){
 				folder = RootReportFolder.CA_ROOT_FOLDER;
-			}else if (e.getSmartUserLevel() == SmartUserLevel.ANALYST){
+			}else if (e.supportsUser(UserLevelManager.ANALYST)){
 				folder = RootReportFolder.USER_ROOT_FOLDER;
 			}else{
 				//error
