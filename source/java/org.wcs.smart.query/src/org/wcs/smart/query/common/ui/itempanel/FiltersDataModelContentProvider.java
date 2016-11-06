@@ -43,6 +43,7 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
 import org.wcs.smart.query.common.model.QueryFilterConfiguration;
+import org.wcs.smart.query.internal.DataModelManagerUtil;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.itempanel.QueryItemView;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
@@ -155,7 +156,8 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 			if (parentElement == DataModelItem.CATEGORIES){
 					return provider.getChildren(provider.getElements(null)[0]);	
 			}else if (parentElement == DataModelItem.ATTRIBUTES){
-				List<Attribute> atts = QueryDataModelManager.getInstance().getActiveAttributes(this.dataModel);
+				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(this.dataModel, !showInactive);
 				
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override
@@ -219,7 +221,7 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 	 */
 	private class FiltersDataModelLabelProvider extends LabelProvider implements IColorProvider {
 
-		private DataModelLabelProvider dmLabelProvider = new DataModelLabelProvider();;
+		private DataModelLabelProvider dmLabelProvider = new DataModelLabelProvider();
 
 		@Override
 		public String getText(Object element) {
@@ -239,6 +241,10 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 		}
 		@Override
 		public Color getForeground(Object element) {
+			if (element instanceof Attribute) {
+				Attribute a = (Attribute) element;
+				return DataModelManagerUtil.isActive(a, dataModel) ? DataModelLabelProvider.BLACK : DataModelLabelProvider.GRAY;
+			}
 			return dmLabelProvider.getForeground(element);
 		}
 		@Override

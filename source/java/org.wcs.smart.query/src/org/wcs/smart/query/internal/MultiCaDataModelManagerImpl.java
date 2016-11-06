@@ -47,7 +47,6 @@ import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
@@ -62,7 +61,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class MultiCaDataModelManagerImpl implements IDataModelManager{
+public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 
 	private DataModel dm = null;
 

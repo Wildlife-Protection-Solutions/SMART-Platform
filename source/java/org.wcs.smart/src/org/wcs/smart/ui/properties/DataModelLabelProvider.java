@@ -45,8 +45,8 @@ import org.wcs.smart.internal.Messages;
 public class DataModelLabelProvider extends LabelProvider implements IColorProvider {
 
 	
-	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
-	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+	public static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+	public static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
 	private Language currentLang = null;
 	
