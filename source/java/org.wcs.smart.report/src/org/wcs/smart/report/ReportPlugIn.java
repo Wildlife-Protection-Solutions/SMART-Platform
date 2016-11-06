@@ -111,11 +111,15 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	}
 	
 	public static File getReportDirectory(ConservationArea ca) {
-		return new File(ca.getFileDataStoreLocation()
+		return getReportDirectory(ca.getFileDataStoreLocation());
+	}
+
+	public static File getReportDirectory(String caFileDataStoreLocation) {
+		return new File(caFileDataStoreLocation
 				+ File.separator
 				+ Report.REPORT_DIR + File.separator);
 	}
-
+	
 	/**
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
