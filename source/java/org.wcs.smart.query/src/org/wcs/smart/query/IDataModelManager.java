@@ -226,7 +226,6 @@ public interface IDataModelManager {
 	/**
 	 * Computes the depth of the active
 	 * data model category tree.
-	 * tree.
 	 * 
 	 * @return
 	 */
