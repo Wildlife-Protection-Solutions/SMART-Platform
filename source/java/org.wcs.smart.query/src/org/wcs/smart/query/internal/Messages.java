@@ -497,6 +497,7 @@ public class Messages extends NLS {
 	public static String GridTiffImageExporter_QueryError;
 	public static String GridTiffImageExporter_TiffExporterName;
 	public static String ListHelpWizardPage_PageTitle;
+	public static String ListItem_Inactive;
 	public static String ShapeQueryExporter_ExporterName;
 	public static String SimpleQueryExporter_Error_ExportFailed;
 	public static String SimpleQueryExporter_Error_QueryNotRun;

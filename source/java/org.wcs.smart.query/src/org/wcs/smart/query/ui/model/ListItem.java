@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.util.UUID;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.wcs.smart.query.internal.Messages;
 
 /**
  * A list item for drop item lists.  A list item can contain
@@ -44,6 +45,7 @@ public class ListItem implements Comparable<ListItem>{
 	private String name;
 	private String key;
 	private String shortName;
+	private boolean active = true;
 	
 	/**
 	 * Creates a new list item with a name. 
@@ -66,7 +68,20 @@ public class ListItem implements Comparable<ListItem>{
 	public ListItem(UUID uuid, String name){
 		this(uuid, name, null);
 	}
-			
+
+	/**
+	 * Creates a new list item with a name, uuid and active state. 
+	 * In this case the key will be null. 
+	 *  
+	 * 
+	 * @param uuid
+	 * @param name
+	 */
+	public ListItem(UUID uuid, String name, boolean active){
+		this(uuid, name, null);
+		this.active = active;
+	}
+	
 	/**
 	 * Creates a new list item
 	 * 
@@ -127,19 +142,18 @@ public class ListItem implements Comparable<ListItem>{
 		return this.key;
 	}
 	
+	/**
+	 * @return the active state for a list item
+	 */
+	public boolean isActive() {
+		return active;
+	}
 
 	/**
 	 * @return label provider for list items
 	 */
-	public static LabelProvider createLabelProvider(){
-		return new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof ListItem){
-					return ((ListItem)element).getName();
-				}
-				return super.getText(element);
-			}
-		};
+	public static LabelProvider createLabelProvider() {
+		return new ListItemLabelProvider();
 	}
 
 	@Override
@@ -183,5 +197,28 @@ public class ListItem implements Comparable<ListItem>{
 		String src = (name == null) ? "" : name; //$NON-NLS-1$
 		String dst = (o.getName() == null) ? "" : o.getName(); //$NON-NLS-1$
 		return Collator.getInstance().compare(src, dst);
+	}
+	
+	/**
+	 * Label provider for {@link ListItem}.
+	 * 
+	 * @author elitvin
+	 * @since 4.1.0
+	 */
+	private static class ListItemLabelProvider extends LabelProvider {
+
+		@Override
+		public String getText (Object element) {
+			if (element instanceof ListItem) {
+				ListItem li = (ListItem) element;
+				String name = li.getName();
+				if (!li.isActive()) {
+					name += Messages.ListItem_Inactive;
+				}
+				return name;
+			}
+			return super.getText(element);
+		}
+
 	}
 }

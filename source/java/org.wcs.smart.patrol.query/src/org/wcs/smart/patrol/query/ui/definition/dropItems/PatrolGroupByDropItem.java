@@ -227,7 +227,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			items = data.getAllActiveValues(s);
+			items = data.getAllValues(s);
 			s.getTransaction().rollback();
 			s.close();
 		}catch (Exception ex){

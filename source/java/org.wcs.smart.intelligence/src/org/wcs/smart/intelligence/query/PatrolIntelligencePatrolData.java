@@ -50,11 +50,11 @@ public class PatrolIntelligencePatrolData implements IPatrolOptionData {
 	
 	@Override
 	public List<ListItem> getValues(Session session, String[] keys) {
-		return getAllActiveValues(session);
+		return getAllValues(session);
 	}
 
 	@Override
-	public List<ListItem> getAllActiveValues(Session session) {
+	public List<ListItem> getAllValues(Session session) {
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		List<Intelligence> inteligenceList = IntelligenceHibernateManager.getIntelligences(session);
 		for (Intelligence i : inteligenceList) {
@@ -70,5 +70,9 @@ public class PatrolIntelligencePatrolData implements IPatrolOptionData {
 		return ANY_INTELLIGENCE_ITEM;
 	}
 
+	@Override
+	public boolean isDependOnQueryConfiguration() {
+		return false;
+	}
 
 }

@@ -71,9 +71,9 @@ public class QueryFilterConfigManager {
 	
 	/**
 	 * 
-	 * @return the patrol event manager instance
+	 * @return the query filter configuration manager instance
 	 */
-	public static QueryFilterConfigManager getInstance(){
+	public static QueryFilterConfigManager getInstance() {
 		return INSTANCE;
 	}
 	
