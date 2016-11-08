@@ -25,8 +25,10 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -147,8 +149,16 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		for(Entry<String, Object> dataitem : data.entrySet()){
 			String colName = dataitem.getKey();
 			Object obj = dataitem.getValue();	
-			sb.append(colName + " = ?, "); //$NON-NLS-1$
-			params.add(obj);
+			sb.append(colName + " = ");
+			if (obj instanceof Date ){
+				//do this to avoid time zone issues
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+				params.add(sdf.format((Date)obj));
+				sb.append("cast(? as timestamp),");
+			}else{
+				sb.append("?, "); //$NON-NLS-1$
+				params.add(obj);
+			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
@@ -187,8 +197,16 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 			String colName = dataitem.getKey();
 			Object obj = dataitem.getValue();	
 			sb.append(colName + ","); //$NON-NLS-1$
-			values.append("?,"); //$NON-NLS-1$
-			params.add(obj);
+			
+			if (obj instanceof Date ){
+				//do this to avoid time zone issues
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+				params.add(sdf.format((Date)obj));
+				values.append("cast(? as timestamp),");
+			}else{
+				values.append("?,"); //$NON-NLS-1$
+				params.add(obj);
+			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		values.deleteCharAt(values.length() - 1);

@@ -23,12 +23,15 @@ package org.wcs.smart.connect.api.model;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Simple Connect conservation area info object.
  * 
  * @author Emily
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ConservationAreaProxy {
 
 	public enum Status{
