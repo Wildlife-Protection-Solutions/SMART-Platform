@@ -87,6 +87,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
@@ -320,19 +321,23 @@ public class PatrolLegDayInputComposite {
 		mainComposite = toolkit.createComposite(parent);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		((GridLayout)mainComposite.getLayout()).verticalSpacing = 0;
+		
 		Composite timeInfo = toolkit.createComposite(mainComposite);
 		timeInfo.setLayout(new GridLayout(4, false));
 		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 15;
+		((GridLayout) timeInfo.getLayout()).verticalSpacing = 0;
 		 ((GridLayout)timeInfo.getLayout()).marginWidth = 0;
 		 ((GridLayout)timeInfo.getLayout()).marginLeft = 5;
 		 ((GridLayout)timeInfo.getLayout()).marginHeight = 5;
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite c = toolkit.createComposite(timeInfo);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		c.setLayout(new GridLayout(2, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
+		((GridLayout)c.getLayout()).verticalSpacing = 3;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_StartTimeLabel);
 		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtStartTime);
@@ -354,8 +359,29 @@ public class PatrolLegDayInputComposite {
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 			}
 		});
-
+		Hyperlink btnUpdateTime = toolkit.createHyperlink(c, Messages.PatrolLegDayInputComposite_Button_UpdateTime_Text, SWT.NONE);
+		btnUpdateTime.setToolTipText(Messages.PatrolLegDayInputComposite_Button_UpdateTime_Tooltip);
+		btnUpdateTime.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false, 2, 1));
+		btnUpdateTime.addHyperlinkListener(new IHyperlinkListener() {
+			
+			@Override
+			public void linkExited(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message)) {
+					updateTimeWithWpData();
+				}
+			}
+		});
+		
 		c = toolkit.createComposite(timeInfo);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		c.setLayout(new GridLayout(2, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
@@ -384,6 +410,7 @@ public class PatrolLegDayInputComposite {
 		
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_RestMinutesLabel);
@@ -433,18 +460,6 @@ public class PatrolLegDayInputComposite {
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		
-		Button btnUpdateTime = toolkit.createButton(c, Messages.PatrolLegDayInputComposite_Button_UpdateTime_Text, SWT.PUSH);
-		btnUpdateTime.setToolTipText(Messages.PatrolLegDayInputComposite_Button_UpdateTime_Tooltip);
-		btnUpdateTime.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false, 2, 1));
-		btnUpdateTime.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message)) {
-					updateTimeWithWpData();
-				}
-			}
-		});
-		
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalPatrolHours_Label);
 		lblTotalPatrolHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalActivePatrolHours_Label);
@@ -460,6 +475,8 @@ public class PatrolLegDayInputComposite {
 		lblTotalPatrolHours.setLayoutData(gd);
 		lblTotalFieldHours.setLayoutData(gd);
 
+		
+		
 		Composite trackComp = toolkit.createComposite(mainComposite);
 		trackComp.setLayout(new GridLayout(4, false));
 		

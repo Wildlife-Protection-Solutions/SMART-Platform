@@ -37,8 +37,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -55,8 +55,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -74,6 +72,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -388,17 +387,6 @@ public class PatrolSummaryEditor extends EditorPart {
 			}
 		});
 		
-		Button btnUpdateTime = toolkit.createButton(comp, Messages.PatrolSummaryEditor_Button_UpdateTime, SWT.PUSH);
-		btnUpdateTime.setToolTipText(Messages.PatrolSummaryEditor_Button_UpdateTime_Tooltip);
-		btnUpdateTime.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-		btnUpdateTime.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Title, Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Message)) {
-					updateTimeWithWpData();
-				}
-			}
-		});
 		
 		if (editor.getPatrol().getLegs().size() <=1 ){
 			//single leg patrol
@@ -464,9 +452,32 @@ public class PatrolSummaryEditor extends EditorPart {
 		dataSection.setClient(compData);
 
 		Composite statsCmp = toolkit.createComposite(compData, SWT.NONE );
-		statsCmp.setLayoutData(new GridData(SWT.TRAIL, SWT.TOP, true, false));
-		statsCmp.setLayout(new GridLayout(1, false));
+		statsCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		statsCmp.setLayout(new GridLayout(2, false));
+		((GridLayout)statsCmp.getLayout()).marginWidth = 0;
+		((GridLayout)statsCmp.getLayout()).marginHeight = 0;
+		
+		
+		Hyperlink btnUpdateTime = toolkit.createHyperlink(statsCmp, Messages.PatrolSummaryEditor_Button_UpdateTime, SWT.NONE);
+		btnUpdateTime.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
+		btnUpdateTime.setToolTipText(Messages.PatrolSummaryEditor_Button_UpdateTime_Tooltip);
+		btnUpdateTime.addHyperlinkListener(new IHyperlinkListener() {
+			@Override
+			public void linkExited(HyperlinkEvent e) {}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {	}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Title, Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Message)) {
+					updateTimeWithWpData();
+				}
+			}
+		});
+		
 		lblStats = toolkit.createLabel(statsCmp, ""); //$NON-NLS-1$
+		lblStats.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
 		Point p = top.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolltop.setMinSize(p.x, p.y+20);
