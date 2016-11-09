@@ -50,6 +50,7 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.dialogs.AttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.editors.AttachmentTable;
 import org.wcs.smart.i2.ui.editors.IMenuCreator;
 import org.wcs.smart.map.GeometryFactoryProvider;
@@ -107,6 +108,9 @@ public class AttachmentListComposite extends Composite{
 			private MenuItem mnuOpen;
 			private MenuItem mnuDelete;
 			private MenuItem mnulinkTo;
+			private MenuItem mnuProperties;
+			private MenuItem mnuSep;
+			
 			private Menu thumbMenu;
 			
 			
@@ -140,10 +144,12 @@ public class AttachmentListComposite extends Composite{
 							}
 						}
 					});
+					new MenuItem(thumbMenu, SWT.SEPARATOR);
 				}
 				if (editor.getEditMode()){
+					int index = 2;
 					if (mnuAdd == null){
-						mnuAdd = new MenuItem(thumbMenu,SWT.DEFAULT);
+						mnuAdd = new MenuItem(thumbMenu,SWT.DEFAULT,index++);
 						mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 						mnuAdd.addSelectionListener(new SelectionAdapter() {
 							@Override
@@ -153,7 +159,7 @@ public class AttachmentListComposite extends Composite{
 						});
 					}
 					if (mnuDelete == null){
-						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT);
+						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT,index++);
 						mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 						mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 						mnuDelete.addSelectionListener(new SelectionAdapter(){
@@ -177,7 +183,7 @@ public class AttachmentListComposite extends Composite{
 						});
 					}
 					if (mnulinkTo == null && IntelSecurityManager.INSTANCE.canLinkAttachmentsToEntities()){
-						mnulinkTo = new MenuItem(this.thumbMenu, SWT.CASCADE);
+						mnulinkTo = new MenuItem(this.thumbMenu, SWT.CASCADE,index++);
 						mnulinkTo.setText("Link To Entity...");
 						
 						Menu mnuEntities = new Menu(mnulinkTo);
@@ -224,8 +230,16 @@ public class AttachmentListComposite extends Composite{
 							mnulinkTo = null;
 						}	
 					}
-					
+					if (mnuSep == null) mnuSep = new MenuItem(thumbMenu, SWT.SEPARATOR, index++);
 				}else{
+					if (mnuAdd != null){
+						mnuAdd.dispose();
+						mnuAdd = null;
+					}
+					if (mnuSep != null){
+						mnuSep.dispose();
+						mnuSep = null;
+					}
 					if (mnuDelete != null){
 						mnuDelete.dispose();
 						mnuDelete = null;
@@ -235,6 +249,19 @@ public class AttachmentListComposite extends Composite{
 						mnulinkTo = null;
 					}
 				}
+				if (mnuProperties == null){
+					mnuProperties = new MenuItem(thumbMenu,SWT.DEFAULT);
+					mnuProperties.setText("Properties...");
+					mnuProperties.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							if (!attachmentTable.getSelection().isEmpty()){
+								(new AttachmentPropertiesDialog(getShell(), attachmentTable.getSelection().get(0))).open();
+							}
+						}
+					});
+				}
+				
 			}
 		};
 		attachmentTable = new AttachmentTable(this, toolkit, thumbMenu, SWT.NONE);

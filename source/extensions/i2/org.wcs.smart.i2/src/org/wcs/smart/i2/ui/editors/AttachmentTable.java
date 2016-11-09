@@ -43,8 +43,11 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.model.IntelAttachment;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.ui.I2SwtUtils;
 import org.wcs.smart.ui.Thumbnail;
+
+import com.ibm.icu.text.DateFormat;
 
 /**
  * Table for displaying list of attachments.
@@ -243,7 +246,7 @@ public class AttachmentTable extends Composite implements Listener {
 
 				Composite thumbNameComp = t.thumb.createThumbnail(parent, SWT.NONE);
 				if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu);
-				thumbNameComp.setToolTipText(t.file.getFilename());
+				thumbNameComp.setToolTipText(t.tooltip);
 				thumbNameComp.setData(t);
 				thumbNameComp.addDisposeListener(new DisposeListener() {
 					
@@ -287,12 +290,17 @@ public class AttachmentTable extends Composite implements Listener {
 		private class ThumbInfo{
 			ISmartAttachment file;
 			Thumbnail thumb;
+			String tooltip;
 			
 			boolean isMouseIn;
 			boolean isSelected;
 			
 			public ThumbInfo(ISmartAttachment file){
 				this.file = file;
+				tooltip = file.getFilename();
+				if (file instanceof IntelAttachment){
+					tooltip += "\nAdded: " + DateFormat.getDateInstance().format(((IntelAttachment)file).getDateCreated());
+				}
 			}
 			
 			public void createThumb(){

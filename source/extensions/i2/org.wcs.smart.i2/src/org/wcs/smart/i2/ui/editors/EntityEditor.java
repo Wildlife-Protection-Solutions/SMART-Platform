@@ -155,12 +155,14 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.i2.ui.AttachmentPopoutShell;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
+import org.wcs.smart.i2.ui.dialogs.AttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.dialogs.RelationshipSelectorDialog;
@@ -1426,7 +1428,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 			private MenuItem mnuOpen;
 			private MenuItem mnuDelete;
 			private MenuItem mnuPrimary;
-	
+			private MenuItem mnuProperties;
+			private MenuItem mnuSep;
+			
 			private Menu thumbMenu;
 			
 			@Override
@@ -1462,7 +1466,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 				if (isEditMode){
 					if (mnuDelete == null){
-						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT);
+						mnuSep = new MenuItem(thumbMenu, SWT.SEPARATOR, 1);
+						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT, 2);
 						mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 						mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 						mnuDelete.addSelectionListener(new SelectionAdapter(){
@@ -1490,7 +1495,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						});
 					}
 					if (mnuPrimary == null){
-						mnuPrimary = new MenuItem(thumbMenu,SWT.DEFAULT);
+						mnuPrimary = new MenuItem(thumbMenu,SWT.DEFAULT,2);
 						mnuPrimary.setText("Set as Primary Image");
 						mnuPrimary.addSelectionListener(new SelectionAdapter(){
 							@Override
@@ -1507,15 +1512,36 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}	
 						});
 					}
+					
 				}else{
 					if (mnuDelete != null){
 						mnuDelete.dispose();
 						mnuDelete = null;
 					}
+					if (mnuSep != null){
+						mnuSep.dispose();
+						mnuSep = null;
+					}
 					if (mnuPrimary != null){
 						mnuPrimary.dispose();
 						mnuPrimary = null;
 					}
+				}
+				
+				if (mnuProperties == null){
+					new MenuItem(thumbMenu, SWT.SEPARATOR);
+					mnuProperties = new MenuItem(thumbMenu, SWT.DEFAULT);
+					mnuProperties.setText("Properties...");
+					mnuProperties.addSelectionListener(new SelectionAdapter(){
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							if (!attachmentTable.getSelection().isEmpty()){
+								AttachmentPropertiesDialog dialog = new AttachmentPropertiesDialog(getSite().getShell(), attachmentTable.getSelection().get(0));
+								dialog.open();
+							}
+						}
+					});
+					
 				}
 			}
 		};
