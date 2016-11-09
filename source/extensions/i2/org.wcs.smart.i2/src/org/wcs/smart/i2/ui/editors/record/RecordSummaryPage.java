@@ -67,8 +67,11 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Twistie;
@@ -103,6 +106,7 @@ public class RecordSummaryPage extends EditorPart{
 	private ToolItem deleteItem;
 	private ToolItem editItem;
 	private ToolItem printItem;
+	private ToolItem saveItem;
 	
 	private Composite topPart;
 	private Label headerLabel;
@@ -229,6 +233,21 @@ public class RecordSummaryPage extends EditorPart{
 				}
 			});
 		}
+		saveItem = new ToolItem(buttonBar, SWT.PUSH);
+		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		saveItem.setToolTipText("save");
+		saveItem.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent event){
+				getSite().getPage().saveEditor(recordEditor, false);
+			}
+		});
+		saveItem.setEnabled(false);
+		recordEditor.addPropertyListener((source, propId) -> {
+			if (propId == IEditorPart.PROP_DIRTY){
+				saveItem.setEnabled(isDirty());
+			}
+		});
+		
 		final EmitterInfo pdfFormat = pdfEmitter;
 		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
 		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));

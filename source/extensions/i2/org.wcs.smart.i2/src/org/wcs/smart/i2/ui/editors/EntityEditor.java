@@ -105,9 +105,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PerspectiveAdapter;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -226,6 +228,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private ToolItem editItem;
 	private ToolItem wsetItem;
 	private ToolItem printItem;
+	private ToolItem saveItem;
 	
 	private EntityRelationshipDetailsShell detailsShell;
 	
@@ -805,6 +808,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 			});
 		}
 		
+		saveItem = new ToolItem(buttonBar, SWT.PUSH);
+		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		saveItem.setToolTipText("save");
+		saveItem.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent event){
+				getSite().getPage().saveEditor(EntityEditor.this, false);
+			}
+		});
+		saveItem.setEnabled(false);
+		
 		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
 		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
 		printItem.setToolTipText("print to pdf");
@@ -966,6 +979,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
+		saveItem.setEnabled(isDirty);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
 	
