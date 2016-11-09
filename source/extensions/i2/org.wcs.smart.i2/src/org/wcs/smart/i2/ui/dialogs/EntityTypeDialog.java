@@ -915,12 +915,13 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			try{
 				entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
 				entityTypeSiblings.remove(type);
-				
-				groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
-						.add(Restrictions.eq("entityType", type))
-						.addOrder(Order.asc("order"))
-						.list();
-				for (IntelEntityTypeAttributeGroup g : groups) g.getNames().size();
+				if (type.getUuid() != null){
+					groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
+							.add(Restrictions.eq("entityType", type))
+							.addOrder(Order.asc("order"))
+							.list();
+					for (IntelEntityTypeAttributeGroup g : groups) g.getNames().size();
+				}
 			}finally{
 				s.close();
 			}
