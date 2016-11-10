@@ -241,10 +241,10 @@ public class RecordSummaryPage extends EditorPart{
 				getSite().getPage().saveEditor(recordEditor, false);
 			}
 		});
-		saveItem.setEnabled(false);
+		saveItem.setEnabled(recordEditor.isDirty());
 		recordEditor.addPropertyListener((source, propId) -> {
 			if (propId == IEditorPart.PROP_DIRTY){
-				saveItem.setEnabled(isDirty());
+				Display.getDefault().syncExec(()->saveItem.setEnabled(isDirty()));
 			}
 		});
 		

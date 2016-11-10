@@ -23,12 +23,15 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,6 +42,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -72,6 +76,8 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+
+
 
 import com.drew.lang.annotations.NotNull;
 import com.vividsolutions.jts.geom.Geometry;
@@ -308,6 +314,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return this.summaryPage;
 	}
 	
+	private void subscribeToEvent(String eventTopic, EventHandler handler){
+		parentContext.get(IEventBroker.class).subscribe(eventTopic, handler);
+		handlers.add(handler);
+	}
+	
 	@Override
 	protected void createPages() {
 		
@@ -324,25 +335,30 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
 			
 			//on delete close editor
-			EventHandler handler = new EventHandler() {
-				@Override
-				public void handleEvent(org.osgi.service.event.Event event) {
-					Object data = event.getProperty(IEventBroker.DATA);
-					if (data != null && data.equals(record)){
-						getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
-					}
+			subscribeToEvent(IntelEvents.RECORD_DELETE, (event)->{
+				Object data = event.getProperty(IEventBroker.DATA);
+				if (data != null && data.equals(record)){
+					getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
 				}
-			};
-			parentContext.get(IEventBroker.class).subscribe(IntelEvents.RECORD_DELETE, handler);
-			handlers.add(handler);
-			handler = new EventHandler() {
-				@Override
-				public void handleEvent(org.osgi.service.event.Event event) {
-					summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
+			});
+			
+			//wsset active
+			subscribeToEvent(IntelEvents.ACTIVE_WS_SET, (event)->{
+				summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
+			});
+		
+
+			//entity deleted
+			subscribeToEvent(IntelEvents.ENTITY_DELETE, (event)->{
+				IntelEntity entity = (IntelEntity) event.getProperty(IEventBroker.DATA);
+				if (isDirty){
+					//try to just remove this entity link
+					MessageDialog.openWarning(getSite().getShell(), "Warning", MessageFormat.format("The record {0} has local modifications and could not be refreshed after the entity {0} was deleted.  You may need to manually remove the entity or refresh the editor and drop all changes.", getEditorInput().getName(), entity.getIdAttributeAsText()) );
+				}else{
+					//refresh the entire editor
+					refresh();
 				}
-			};
-			parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_SET, handler);
-			handlers.add(handler);
+			});
 			
 			getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter() {
 				@Override
@@ -368,21 +384,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			Intelligence2PlugIn.log(t.getMessage(), t);
 		}finally{
 			showBusy(false);
-		}
-		
-		getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter() {
-			@Override
-			public void perspectiveActivated(IWorkbenchPage page,
-					IPerspectiveDescriptor perspective) {
-				if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
-					//save and be done with it
-					setEditMode(false);
-				}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
-					setEditMode(true);
-				}
-			}
-		});
-		
+		}	
 		refresh();
 	}
 	

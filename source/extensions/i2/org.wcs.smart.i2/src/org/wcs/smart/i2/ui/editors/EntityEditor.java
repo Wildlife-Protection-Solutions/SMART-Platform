@@ -46,6 +46,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -155,7 +156,6 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
-import org.wcs.smart.i2.ui.AttachmentPopoutShell;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -166,11 +166,13 @@ import org.wcs.smart.i2.ui.dialogs.AttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.dialogs.RelationshipSelectorDialog;
+import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Entity editor.
@@ -871,6 +873,35 @@ public class EntityEditor extends EditorPart implements MapPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (MessageDialog.openConfirm(getSite().getShell(), "Delete", "Are you sure you want to delete this entity?  This action cannot be undone.")){
+					
+					//look for any dirty record editors and save them first
+					List<RecordEditor> editors = new ArrayList<>();
+					StringBuilder names = new StringBuilder();
+					for(MPart p : context.get(EPartService.class).getParts()){
+						Object x = E3Utils.getSourceObject(p);
+						if ( x instanceof RecordEditor && ((RecordEditor)x).isDirty()){
+							editors.add((RecordEditor) x);
+							names.append(((RecordEditor)x).getPartName());
+							names.append(", ");
+						}
+					}
+					if (!editors.isEmpty()){
+						StringBuilder sb = new StringBuilder();
+						sb.append("The following editors must be saved before you can delete this entity.  Do you want to save these editors and continue?");
+						sb.append("\n");
+						sb.append(names.substring(0, names.length() - 2));
+						
+						if (!MessageDialog.openQuestion(getSite().getShell(), "Delete Entity", sb.toString())){
+							return;
+						}
+						for (RecordEditor p : editors){
+							try{
+								getSite().getPage().saveEditor(p, false);
+							}catch (Exception ex){
+								Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+							}
+						}
+					}
 					Session s = HibernateManager.openSession(new AttachmentInterceptor());
 					try{
 						s.beginTransaction();
