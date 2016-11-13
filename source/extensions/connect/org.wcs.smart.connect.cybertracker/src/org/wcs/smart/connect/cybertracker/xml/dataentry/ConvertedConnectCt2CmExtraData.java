@@ -121,7 +121,7 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 		
 		
 		for (CmExtraDataStringKeyType strKeyType : dataType.getStringKey()) {
-			if (ConnectCt2CmXmlExtraDataContribution.KEY_PING_ALERTTYPE.equals(strKeyType.getKey())) {
+			if (ConnectCt2CmXmlExtraDataContribution.KEY_PING_ALERTTYPE.equals(strKeyType.getKey()) && strKeyType.getValue() != null) {
 				p.setPingType(UuidUtils.stringToUuid(strKeyType.getValue()));
 			}
 		}
