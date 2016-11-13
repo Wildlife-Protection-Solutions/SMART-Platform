@@ -22,13 +22,18 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
@@ -40,6 +45,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
 	private CmRootNode rootNode;
+
+	private Button btnGpsFirst;
 	
 	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model) {
 		super(parent, model);
@@ -55,6 +62,28 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
 		createDisplayModeControls(container);
+		
+		Label label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmRootNodeInfoComposite_GpsFirst);
+		label.setToolTipText(Messages.CmRootNodeInfoComposite_GpsFirstTooltip);
+		btnGpsFirst = new Button(container, SWT.CHECK);
+		btnGpsFirst.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getSourceObject().getModel().setGpsFirst(btnGpsFirst.getSelection());
+				fireModelChanged();
+			}
+		});
+		
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject, Language language) {
+				ConfigurableModel cm = getSourceObject().getModel();
+				if (btnGpsFirst != null) {
+					btnGpsFirst.setSelection(cm.isGpsFirst());
+				}
+			}
+		});
 	}
 
 	public boolean isButtonValid(ConfigurableModelEditorDefaultTab.ControlButton button){

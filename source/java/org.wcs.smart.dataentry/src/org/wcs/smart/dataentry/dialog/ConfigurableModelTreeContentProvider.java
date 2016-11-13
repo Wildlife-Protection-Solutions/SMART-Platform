@@ -154,5 +154,9 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 	
 	public class CmRootNode {
 		public ConfigurableModel model;
+		
+		public ConfigurableModel getModel() {
+			return model;
+		}
 	}
 }

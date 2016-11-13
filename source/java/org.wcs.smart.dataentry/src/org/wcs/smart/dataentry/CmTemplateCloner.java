@@ -88,6 +88,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		ConfigurableModel clone = new ConfigurableModel();
 		clone.setConservationArea(engine.getNewCa());
 		clone.setDisplayMode(cm.getDisplayMode());
+		clone.setGpsFirst(cm.isGpsFirst());
 		engine.copyLabels(cm, clone);
 		engine.getSession().saveOrUpdate(clone);
 		
@@ -199,6 +200,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		clonedNode.setNodeOrder(toCopy.getNodeOrder());
 		clonedNode.setPhotoAllowed(toCopy.isPhotoAllowed());
 		clonedNode.setPhotoRequired(toCopy.isPhotoRequired());
+		clonedNode.setPhotoFisrt(toCopy.isPhotoFisrt());
 		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
 		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
 		clonedNode.setDisplayMode(toCopy.getDisplayMode());

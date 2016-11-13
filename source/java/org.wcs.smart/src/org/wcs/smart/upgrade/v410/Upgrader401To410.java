@@ -73,13 +73,19 @@ public class Upgrader401To410 implements IDatabaseUpgrader {
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
 		@SuppressWarnings("nls")
 		String[] sql = new String[]{
+			// #1445: Editing patrol type for existing patrols
 			"insert into smart.PATROL_TYPE (CA_UUID, PATROL_TYPE, IS_ACTIVE, MAX_SPEED) select DISTINCT CA_UUID, 'MIXED', true, 10000 from smart.PATROL_TYPE",
 			"delete from smart.screen_option where TYPE = 'TYPE'",
 
+			// #1855: Connect API Changes #2a - Add MetaData Fields to SMART Desktop
 			"alter table smart.conservation_area add column organization varchar(256)",
 			"alter table smart.conservation_area add column pointofcontact varchar(256)",
 			"alter table smart.conservation_area add column country varchar(256)",
-			"alter table smart.conservation_area add column owner varchar(256)"
+			"alter table smart.conservation_area add column owner varchar(256)",
+			
+			// #1425: Enable CT to take waypoint at beginning rather than end of observation
+			"alter table smart.CONFIGURABLE_MODEL ADD COLUMN gps_first BOOLEAN",
+			"alter table smart.CM_NODE ADD COLUMN photo_first BOOLEAN"
 		};
 		
 		for (String s : sql) {
