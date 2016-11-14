@@ -1088,9 +1088,9 @@ public class ScreensObjectFactory {
 	 */
 	public Controls.Control createSnapLastGpsPosition(){
 		Controls.Control control = new Controls.Control();
-		control.setType("{582E62E2-C95B-4B87-94D3-EE8603C8056A}");
+		control.setType("{582E62E2-C95B-4B87-94D3-EE8603C8056A}"); //$NON-NLS-1$
 		control.setId(20);
-		control.setRequired("True");
+		control.setRequired("True"); //$NON-NLS-1$
 		return control;
 	}
 	
@@ -1124,7 +1124,7 @@ public class ScreensObjectFactory {
 		Controls.Control control = new Controls.Control();
 		control.setType("{06F58F58-A9BC-4C23-A10A-4A35CC465D06}"); //$NON-NLS-1$
 		control.setId(20);
-		control.setEnabled("True");
+		control.setEnabled("True"); //$NON-NLS-1$
 		return control;
 	}
 	
