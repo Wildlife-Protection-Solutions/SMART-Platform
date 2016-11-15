@@ -147,13 +147,10 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 
 	
 	private void handleSaveOrUpdate(IImageAssociatedObject imgObject) {
-		//need some from-to mapping; and also objects can be cleared
-		File from = imgObject.getImageFile();
-		File to = new File(imgObject.getImagePersistenceLocation());
 		IOperation lastOp = operations.get(imgObject.getUuid());
 		if (!(lastOp instanceof DeleteOperation)) {
 			//in case this object was deleted other operations do not make sense
-			operations.put(imgObject.getUuid(), new SaveOperation(from, to));
+			operations.put(imgObject.getUuid(), new SaveOperation(imgObject));
 		}
 	}
 
@@ -172,6 +169,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		public void execute();
 	}
 
+	
 	/**
 	 * Operation responsible for deleting an associated image file.
 	 * 
@@ -207,16 +205,18 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 	 */
 	private class SaveOperation implements IOperation {
 		
-		private File from;
-		private File to;
+		private IImageAssociatedObject imgObject;
 		
-		public SaveOperation(File from, File to) {
-			this.from = from;
-			this.to = to;
+		public SaveOperation(IImageAssociatedObject imgObject) {
+			this.imgObject = imgObject;
 		}
 
 		@Override
 		public void execute() {
+			//need some from-to mapping; and also objects can be cleared
+			File from = imgObject.getImageFile();
+			File to = new File(imgObject.getImagePersistenceLocation());
+			
 			if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
 				//image was cleared
 				if (to.exists()) {
@@ -233,6 +233,10 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 					SmartPlugIn.log("Could not copy file: " + from.toString() + " to " + to.toString(), e); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
+			
+			//reset img object file.  If we copy into the system this call will
+			//reset the object reference to the file copied in
+			imgObject.setImageFile(null);
 		}
 	}
 }
