@@ -948,11 +948,13 @@ public class CyberTrackerConfExporter {
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
 		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, resultElementId, true, treeCmAttribute.getCurrentDisplayMode());
-		if (!treeCmAttribute.getAttribute().getIsRequired() && navId != null) {
-			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
-			navControl.setTranslateNextScreenId(navId.getNodeId());
+		if (!treeCmAttribute.getAttribute().getIsRequired()) {
 			Control control7 = ScreensObjectFactory.getRadioMainControl(treeRootNode);
 			control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
+		}
+		if (navId != null) {
+			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
+			navControl.setTranslateNextScreenId(navId.getNodeId());
 			if (!terminate) {
 				navId = null; //we are under mutli-select and if two next screens are defined that causes stacking problem (so we need to avoid next screen for leaves)
 			}
