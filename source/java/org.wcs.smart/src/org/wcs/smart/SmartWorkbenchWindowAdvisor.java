@@ -117,7 +117,6 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	super.dispose();
     	
     	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
-    	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().removeWorkbenchListener(shutdownListener);
     	super.getWindowConfigurer().getWindow().removePerspectiveListener(perspectiveListener);
     	
     	perspectiveTracker = null;

@@ -568,11 +568,13 @@ public class EmployeeComposite extends Composite {
 				cdSmartPassword2.hide();
 			}
 			
-			if (cmbUserLevel.getCheckObjects().size() == 0){
-				cdUserLevel.show();
-				cdUserLevel.setDescriptionText(Messages.EmployeeComposite_UserLevelRequired);
-			}else{
-				cdUserLevel.hide();
+			if (cmbUserLevel != null){
+				if (cmbUserLevel.getCheckObjects().size() == 0){
+					cdUserLevel.show();
+					cdUserLevel.setDescriptionText(Messages.EmployeeComposite_UserLevelRequired);
+				}else{
+					cdUserLevel.hide();
+				}
 			}
 		}else if (chSmartUser != null){
 			cdSmartId.hide();
@@ -752,7 +754,11 @@ public class EmployeeComposite extends Composite {
 					e.setSmartPassword(HibernateManager.generatePassword(txtSmartPassword.getText()));
 				}
 				e.setSmartUserId(txtSmartId.getText().trim());
-				e.setSmartUserLevel((Collection<SmartUserLevel>) cmbUserLevel.getCheckObjects());
+				if (cmbUserLevel != null){
+					e.setSmartUserLevel((Collection<SmartUserLevel>) cmbUserLevel.getCheckObjects());
+				}else{
+					e.setSmartUserLevel(Collections.singleton(UserLevelManager.ADMIN));
+				}
 			}else{
 				e.setSmartUserId(null);
 				e.setSmartUserLevel(null);

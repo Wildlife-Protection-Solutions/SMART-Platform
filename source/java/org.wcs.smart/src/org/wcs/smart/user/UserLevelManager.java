@@ -81,7 +81,7 @@ public enum UserLevelManager {
 		for (IConfigurationElement e : config) {
 			 if (e.getName().equals("SMARTUserLevel")){ //$NON-NLS-1$
 				 try{
-					 SmartUserLevel level = (SmartUserLevel) e.createExecutableExtension("class");
+					 SmartUserLevel level = (SmartUserLevel) e.createExecutableExtension("class"); //$NON-NLS-1$
 					 levels.add(level);
 				 }catch (Exception ex){
 					 SmartPlugIn.log(ex.getMessage(), ex);;

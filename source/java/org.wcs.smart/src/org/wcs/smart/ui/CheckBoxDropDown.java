@@ -250,7 +250,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		// set the popup visible
 		popup.setVisible (true);
 		popup.getChildren()[0].setFocus();
-		for (int i = 0; i < 150; i +=1){
+		for (int i = 0; i < 150; i +=2){
 			popup.setBounds(pnt.x, pnt.y + l.height , l.width, i);	
 	    }
 	    

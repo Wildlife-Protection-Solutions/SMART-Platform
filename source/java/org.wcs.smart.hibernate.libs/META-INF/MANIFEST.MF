@@ -6,9 +6,9 @@ Bundle-Version: 4.0.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: global
 Bundle-ClassPath: .,
+ lib/derby-10.12.1.1.jar,
  lib/antlr-2.7.7.jar,
  lib/c3p0-0.9.5.2.jar,
- lib/derby-10.12.1.1.jar,
  lib/derbytools-10.12.1.1.jar,
  lib/dom4j-1.6.1.jar,
  lib/ehcache-core-2.4.3.jar,

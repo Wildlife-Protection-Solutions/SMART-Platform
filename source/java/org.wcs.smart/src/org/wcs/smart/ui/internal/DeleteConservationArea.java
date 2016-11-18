@@ -57,7 +57,7 @@ public class DeleteConservationArea {
 	public void execute(final Shell activeShell) throws ExecutionException {
 		
 		//ensure the user has permission
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN)){
+		if (!SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN)){
 			MessageDialog.openInformation(activeShell, Messages.DeleteConservationArea_Delete_DialogTitle, Messages.DeleteConservationArea_Error_Permission);
 			return;
 		}
