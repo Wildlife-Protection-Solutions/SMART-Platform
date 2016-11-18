@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -51,6 +52,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.BasicEntitySearch;
+import org.wcs.smart.i2.search.IntelEntitySearchResult;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -98,14 +100,16 @@ public class EntitySearchShell extends SmartShellDialog {
 		tblEntityList.setLabelProvider(new EntityTypeLabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof IntelEntity) return ((IntelEntity) element).getIdAttributeAsText();
+				if (element instanceof IntelEntitySearchResult){
+					return ((IntelEntitySearchResult) element).getEntity().getIdAttributeAsText();
+				}
 				return super.getText(element);
 			}
 			
 			@Override
 			public Image getImage(Object element){
-				if (element instanceof IntelEntity){
-					return super.getImage(((IntelEntity) element).getEntityType());
+				if (element instanceof IntelEntitySearchResult){
+					return super.getImage(((IntelEntitySearchResult) element).getEntity().getEntityType());
 				}
 				return null;
 			}
@@ -154,11 +158,11 @@ public class EntitySearchShell extends SmartShellDialog {
 			});
 		
 			
-			List<IntelEntity> entities = new ArrayList<IntelEntity>();
+			List<IntelEntitySearchResult> entities = new ArrayList<IntelEntitySearchResult>();
 			Session s = HibernateManager.openSession();
 			try{
 				BasicEntitySearch search = new BasicEntitySearch(searchText[0], 50);
-				entities.addAll(search.doSearch(s));
+				entities.addAll(search.doSearch(s, new NullProgressMonitor()).getResults());
 			}finally{
 				s.close();
 			}

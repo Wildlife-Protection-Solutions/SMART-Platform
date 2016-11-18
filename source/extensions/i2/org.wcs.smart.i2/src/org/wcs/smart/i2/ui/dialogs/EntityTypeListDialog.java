@@ -75,7 +75,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -119,15 +118,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 			try{
 				types = EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea());
 				for (IntelEntityType t : types){
-					t.getNames().size();
-					for (IntelEntityTypeAttribute a : t.getAttributes()){
-						a.getAttribute().getNames().size();
-						if (a.getAttribute().getAttributeList() != null){
-							for (IntelAttributeListItem i : a.getAttribute().getAttributeList()){
-								i.getNames().size();
-							}
-						}
-					}
+					t.getName();
 				}
 			}finally{
 				session.close();
@@ -136,6 +127,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
+					if (cmbTypes.getControl().isDisposed()) return;
 					cmbTypes.setInput(types);
 					cmbTypes.setSelection(currentSelection);
 				}

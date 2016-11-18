@@ -74,6 +74,8 @@ import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.search.BasicEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
+import org.wcs.smart.i2.search.IntelEntitySearchResult;
+import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.ui.NamedItemLabelProvider;
@@ -121,17 +123,18 @@ public class EntitySearchView {
 	private EntitySearchJob searchJob = new EntitySearchJob() {
 		
 		@Override
-		public void beforeSearch() {
+		public void beforeSearch(IProgressMonitor monitor) {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					entityList.setEntities(null);
 				}
 			});
+			monitor.done();
 		}
 		
 		@Override
-		public void afterSearch(List<IntelEntity> entities) {
+		public void afterSearch(IntelSearchResult entities, IProgressMonitor monitor) {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -139,6 +142,7 @@ public class EntitySearchView {
 					entityList.setEntities(entities);
 				}
 			});
+			monitor.done();
 			
 		}
 		
@@ -160,7 +164,7 @@ public class EntitySearchView {
 		super();
 	}
 
-	public List<IntelEntity> getEntities(){
+	public List<IntelEntitySearchResult> getEntities(){
 		return this.entityList.getEntities();
 	}
 	
@@ -231,6 +235,7 @@ public class EntitySearchView {
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		basicSearch = toolkit.createHyperlink(header, "Basic Search", SWT.NONE);
+		basicSearch.setToolTipText("searches all entity identifiers and entity type attributes flagged as include in basic search");
 		advancedSearch = toolkit.createHyperlink(header, "Advanced Search", SWT.NONE);
 		savedSearch = toolkit.createHyperlink(header, "Saved Search", SWT.NONE);
 		IHyperlinkListener hlistener = new IHyperlinkListener() {

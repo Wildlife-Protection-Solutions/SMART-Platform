@@ -60,6 +60,7 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 		right.addView(LayersView.ID);
 		
 		layout.getViewLayout(RecordsView.ID).setCloseable(false);
+		layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
 		
 		
 		try {

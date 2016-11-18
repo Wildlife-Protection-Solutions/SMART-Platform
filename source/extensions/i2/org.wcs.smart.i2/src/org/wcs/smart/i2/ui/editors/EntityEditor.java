@@ -481,8 +481,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 		this.input = (EntityEditorInput) input;
 		setInput(input);
 		setSite(site);
-		
-		super.setTitleImage(input.getImageDescriptor().createImage());
+		if (input.getImageDescriptor() != null){
+			super.setTitleImage(input.getImageDescriptor().createImage());
+		}
 		super.setPartName(input.getName());
 	}
 
@@ -618,7 +619,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (headerFont != null){ headerFont.dispose(); headerFont = null;}
 		
 		//remove all event subscriptions
-		eventHandles.forEach((h)->eventBroker.unsubscribe(h));
+		if (eventHandles != null) eventHandles.forEach((h)->eventBroker.unsubscribe(h));
 		
 		attributeLabelProvider.dispose();
 		super.dispose();

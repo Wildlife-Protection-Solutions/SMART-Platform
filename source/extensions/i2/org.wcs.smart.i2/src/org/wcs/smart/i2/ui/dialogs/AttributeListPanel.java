@@ -71,9 +71,8 @@ public class AttributeListPanel extends Composite {
 	private MenuItem eItem;
 	private MenuItem aItem;
 	
-	public AttributeListPanel(Composite parent, IntelAttribute attribute) {
+	public AttributeListPanel(Composite parent) {
 		super(parent, SWT.NONE);
-		this.attribute = attribute;
 		createControls();
 		listeners = new ArrayList<IChangeListener>();
 	}
@@ -87,14 +86,21 @@ public class AttributeListPanel extends Composite {
 			l.itemModified();
 		}
 	}
+	
+	public void setInput(IntelAttribute attribute){
+		this.attribute = attribute;
+		items.setInput(attribute.getAttributeList());
+	}
+	
 	private void createControls(){
 		setLayout(new GridLayout(2, false));
 		
-		items = new ListViewer(this, SWT.MULTI | SWT.BORDER);
+		items = new ListViewer(this, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
 		items.setContentProvider(ArrayContentProvider.getInstance());
 		items.setLabelProvider(new AttributeListItemLabelProvider());
 		items.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		items.setInput(attribute.getAttributeList());
+		((GridData)items.getControl().getLayoutData()).heightHint = 200;
+		items.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		items.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -220,10 +226,7 @@ public class AttributeListPanel extends Composite {
 		sb.deleteCharAt(sb.length()-1);
 		
 		if (!MessageDialog.openConfirm(getShell(), "Delete List Items", MessageFormat.format("Are you sure you want to delete the following {0} list items? \n {1}", toDelete.size(), sb.toString()))) return;
-	
-		for (IntelAttributeListItem item : toDelete){
-			item.setAttribute(null);
-		}
+
 		attribute.getAttributeList().removeAll(toDelete);
 		this.items.refresh();
 		modified();

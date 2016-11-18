@@ -1,6 +1,28 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.views;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,11 +47,14 @@ import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -40,6 +65,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.search.IntelEntitySearchResult;
+import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
@@ -47,18 +74,29 @@ import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.E3Utils;
 
+/**
+ * Displays the entity search results in a table.
+ * 
+ * @author Emily
+ *
+ */
 public class EntitySearchResultTable extends Composite {
 
+	private static final DecimalFormat DFORMAT = new DecimalFormat("0.000");
+	
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
 	
 	private Composite core = null;
+	private Font smallerFont = null;
+	private Font boldFont = null;
 	
-	private List<IntelEntity> entities;
+	private IntelSearchResult entities;
 	private FormToolkit toolkit = null;
 	private List<EntityComponent> components = null;
 	
 	private IEclipseContext context;
+	private ScrolledComposite sc;
 	
 	public EntitySearchResultTable(Composite parent, FormToolkit toolkit, IEclipseContext context) {
 		super(parent, SWT.NONE);
@@ -72,6 +110,14 @@ public class EntitySearchResultTable extends Composite {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				selectionColor.dispose();
+				if (smallerFont != null){
+					smallerFont.dispose();
+					smallerFont = null;
+				}
+				if (boldFont != null){
+					boldFont.dispose();
+					boldFont = null;
+				}
 			}
 		});
 	}
@@ -82,13 +128,18 @@ public class EntitySearchResultTable extends Composite {
 	 * 
 	 * @param entities
 	 */
-	public void setEntities(List<IntelEntity> entities){
+	public void setEntities(IntelSearchResult entities){
 		this.entities = entities;
 		createTable();
+		core.layout(true);
+		if (sc != null){
+			sc.setMinSize(sc.getChildren()[0].computeSize(sc.getClientArea().width, SWT.DEFAULT));	
+		}
+		
 	}
 	
-	public List<IntelEntity> getEntities(){
-		return this.entities;
+	public List<IntelEntitySearchResult> getEntities(){
+		return this.entities.getResults();
 	}
 	
 	public void setSearchError(Exception ex){
@@ -98,9 +149,19 @@ public class EntitySearchResultTable extends Composite {
 		}
 		core = toolkit.createComposite(this, SWT.NONE);
 		core.setLayout(new GridLayout(2, false));
-		Label img = toolkit.createLabel(this, "");
+		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label img = toolkit.createLabel(core, "");
 		img.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
-		toolkit.createLabel(this, MessageFormat.format("Search error: {0}",ex.getMessage()));
+		img.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		
+		Label l = toolkit.createLabel(core, MessageFormat.format("Search error: {0}", ex.getMessage()), SWT.WRAP);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = 150;
+		l.setToolTipText(ex.getMessage());
+		
+		this.layout(true);
 	}
 	
 	
@@ -110,6 +171,7 @@ public class EntitySearchResultTable extends Composite {
 			core = null;
 			components = null;
 		}
+		
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
@@ -120,12 +182,23 @@ public class EntitySearchResultTable extends Composite {
 		((GridLayout)core.getLayout()).marginHeight = 0;
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		if (smallerFont == null){
+			FontData fd = core.getFont().getFontData()[0];
+			fd.height = fd.height - 1;
+			smallerFont = new Font(Display.getDefault(), fd);
+		}
+		if (boldFont == null){
+			FontData fd = core.getFont().getFontData()[0];
+			fd.setStyle(SWT.BOLD); 
+			boldFont = new Font(Display.getDefault(), fd);
+		}
 		if (entities == null){
 			toolkit.createLabel(core, "Searching...");
+			sc = null;
 		}else{
-			toolkit.createLabel(core, MessageFormat.format("{0} results", entities.size()));
+			toolkit.createLabel(core, MessageFormat.format("{0} of {1} ", entities.getResults().size(), entities.getTotalMatched()));
 			
-			ScrolledComposite sc = new ScrolledComposite(core, SWT.V_SCROLL |  SWT.H_SCROLL);
+			sc = new ScrolledComposite(core, SWT.V_SCROLL |  SWT.H_SCROLL);
 			toolkit.adapt(sc);
 			Composite main = toolkit.createComposite(sc, SWT.NONE);
 			sc.setContent(main);
@@ -138,7 +211,7 @@ public class EntitySearchResultTable extends Composite {
 
 			components = new ArrayList<EntitySearchResultTable.EntityComponent>();
 			int cnt = 0;
-			for (IntelEntity i : entities){		
+			for (IntelEntitySearchResult i : entities.getResults()){		
 				EntityComponent entityComposite = new EntityComponent(main, i, cnt++, components);
 				components.add(entityComposite);
 				toolkit.adapt(entityComposite);
@@ -148,8 +221,11 @@ public class EntitySearchResultTable extends Composite {
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 			}
-			sc.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-			
+			layout(true);
+			sc.setMinSize(main.computeSize(sc.getClientArea().width, SWT.DEFAULT));
+			core.addListener(SWT.Resize, event -> {
+				sc.setMinSize(main.computeSize(sc.getClientArea().width, SWT.DEFAULT));
+			});
 			createMenu(main);
 		}
 		
@@ -279,21 +355,21 @@ public class EntitySearchResultTable extends Composite {
 		if (components == null) return selections;
 		
 		for (EntityComponent c : components){
-			if (c.isSelected) selections.add(c.item);
+			if (c.isSelected) selections.add(c.item.getEntity());
 		}
 		return selections;
 		
 	}
 	private class EntityComponent extends Composite implements Listener{
 
-		private IntelEntity item;
+		private IntelEntitySearchResult item;
 		private Color backgroundColor = null;
 		private boolean isSelected = false;
 		private boolean mouseOver = false;
 		private int index;
 		private List<EntityComponent> siblings;
 		
-		public EntityComponent(Composite parent, IntelEntity item, int index, List<EntityComponent> siblings){
+		public EntityComponent(Composite parent, IntelEntitySearchResult item, int index, List<EntityComponent> siblings){
 			super(parent, SWT.NONE);
 			this.item = item;
 			createPart();
@@ -308,11 +384,11 @@ public class EntitySearchResultTable extends Composite {
 			}
 		}
 		private void createPart(){
-			setLayout(new GridLayout(3, false));
-			((GridLayout)getLayout()).marginHeight = 0;
+			setLayout(new GridLayout(2, false));
+			((GridLayout)getLayout()).marginHeight = 2;
 			addListener(this);
 			
-			Thumbnail t = new Thumbnail(item.getPrimaryAttachment(), 50);
+			Thumbnail t = new Thumbnail(item.getEntity().getPrimaryAttachment(), 50);
 			Composite c = t.createThumbnail(this);
 			addListener(c);
 			toolkit.adapt(c);
@@ -320,36 +396,74 @@ public class EntitySearchResultTable extends Composite {
 			((GridData)c.getLayoutData()).widthHint = 50;
 			((GridData)c.getLayoutData()).heightHint = 50;
 			
-			Composite middle = toolkit.createComposite(this, SWT.NONE);
-			middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			middle.setLayout(new GridLayout(2, false));
-			addListener(middle);
+			Composite right = toolkit.createComposite(this, SWT.NONE);
+			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			right.setLayout(new GridLayout(2, false));
+			((GridLayout)right.getLayout()).marginWidth = 0;
+			((GridLayout)right.getLayout()).marginHeight = 0;
+			addListener(right);
 			
-			Label l = toolkit.createLabel(middle, item.getIdAttributeAsText(), SWT.WRAP);
+			Label l = toolkit.createLabel(right, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			l.setFont(boldFont);
 			((GridData)l.getLayoutData()).widthHint = 100;
 			addListener(l);
-			final Label l1 = toolkit.createLabel(middle,"");
-			l1.setImage(EntityTypeLabelProvider.createImageDescriptor(item.getEntityType()).createImage());
-			l1.addDisposeListener((e)->{if (l1.getImage() != null) l1.getImage().dispose();});
-			addListener(l1);
+			StringBuilder sb = new StringBuilder();
+			sb.append(MessageFormat.format("Date Created: {0}", DateFormat.getDateInstance().format(item.getEntity().getDateCreated())));
+			sb.append("\n");
+			sb.append(MessageFormat.format("Date Modified: {0}", DateFormat.getDateInstance().format(item.getEntity().getDateModified())));
+			l.setToolTipText(sb.toString());
 			
-			l = toolkit.createLabel(middle, "");
-			l.setText(EntityTypeLabelProvider.getText(item.getEntityType()));
-			addListener(l);
+			int spacer = 2;
+			Composite typecomp = toolkit.createComposite(right);
+			typecomp.setLayout(new GridLayout(2, false));
+			((GridLayout)typecomp.getLayout()).marginWidth = 0;
+			((GridLayout)typecomp.getLayout()).marginHeight = 0;
+			typecomp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
+			if (item.getEntity().getEntityType().getIcon() != null){
+				final Label l1 = toolkit.createLabel(typecomp,"");
+				l1.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
+				l1.setImage(EntityTypeLabelProvider.createImageDescriptor(item.getEntity().getEntityType()).createImage());
+				l1.addDisposeListener((e)->{if (l1.getImage() != null) l1.getImage().dispose();});
+				addListener(l1);
+				spacer = 1;
+			}
 			
-			Composite right = toolkit.createComposite(this, SWT.NONE);
-			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-			right.setLayout(new GridLayout(2, false));
-			addListener(right);
-			l = toolkit.createLabel(right, "Modified:");
+			l = toolkit.createLabel(typecomp, EntityTypeLabelProvider.getText(item.getEntity().getEntityType()));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true, spacer, 1));
 			addListener(l);
-			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getDateModified()));
+			l.setFont(smallerFont);
+			
+			
+			l = toolkit.createLabel(right, MessageFormat.format("Rating: {0}", DFORMAT.format(item.getRating())));
+			l.setToolTipText(item.getMatchString());
+			l.setFont(smallerFont);
 			addListener(l);
-			l = toolkit.createLabel(right, "Created:");
-			addListener(l);
-			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getDateCreated()));
-			addListener(l);
+			l.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, true));
+			
+//			Composite right = toolkit.createComposite(this, SWT.NONE);
+//			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+//			right.setLayout(new GridLayout(2, false));
+//			addListener(right);
+			
+		
+//			l = toolkit.createLabel(right, "Modified:");
+//			l.setFont(smallerFont);
+//			addListener(l);
+//			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getEntity().getDateModified()));
+//			l.setFont(smallerFont);
+//			addListener(l);
+			
+			
+			
+			
+//			l = toolkit.createLabel(right, "Created:");
+//			l.setFont(smallerFont);
+//			addListener(l);
+//			
+//			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getEntity().getDateCreated()));
+//			l.setFont(smallerFont);
+//			addListener(l);
 			
 			addDragSources();
 		}

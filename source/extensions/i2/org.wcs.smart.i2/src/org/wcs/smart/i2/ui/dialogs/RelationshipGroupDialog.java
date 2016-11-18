@@ -21,19 +21,20 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -180,44 +181,51 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 	
 	
 	private void initFields(){
-		siblingsJob.setSystem(true);
-		siblingsJob.schedule(0);
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true,false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					Session s = HibernateManager.openSession();
+					try{
+						if (group.getUuid() != null){
+							group = (IntelRelationshipGroup) s.get(IntelRelationshipGroup.class, group.getUuid());
+							group.getNames().size();
+							if (group.getRelationshipTypes() != null){
+								group.getRelationshipTypes().forEach(g->g.getNames().size());
+							}
+						}
+						groupSiblings = RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea());
+						groupSiblings.remove(group);
+						
+						if(group.getUuid() != null){
+							group = (IntelRelationshipGroup) s.merge(group);
+							group.getRelationshipTypes().forEach(e -> e.getName());
+						}
+					}finally{
+						s.close();
+					}
+					
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							nameKeyInfo.initFields(group, groupSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+							lstTypes.setInput(group.getRelationshipTypes());
+							getButton(IDialogConstants.OK_ID).setEnabled(group.getUuid() == null);
+						}
+					});
+					
+				}
+			});
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(MessageFormat.format("Error loading relationship group: {0}", ex.getMessage()), ex);
+		}
 	}
 	
 	@Override
 	public boolean isResizable(){
 		return true;
 	}
-	
-	
-	private Job siblingsJob = new Job("get siblings"){ //$NON-NLS-1$
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
-				groupSiblings = RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea());
-				groupSiblings.remove(group);
-				
-				if(group.getUuid() != null){
-					group = (IntelRelationshipGroup) s.merge(group);
-					group.getRelationshipTypes().forEach(e -> e.getName());
-				}
-			}finally{
-				s.close();
-			}
-			
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					nameKeyInfo.initFields(group, groupSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
-					lstTypes.setInput(group.getRelationshipTypes());
-					getButton(IDialogConstants.OK_ID).setEnabled(group.getUuid() == null);
-				}
-			});
-			return Status.OK_STATUS;
-		}
-		
-	};
-	
 }

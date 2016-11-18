@@ -83,7 +83,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.event.IntelEvents;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -136,19 +135,11 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			try{
 				types = RelationshipTypeManager.INSTANCE.getRelationshipTypes(session, SmartDB.getCurrentConservationArea());
 				for (IntelRelationshipType t : types){
-					t.getNames().size();
+					t.getName();
 					if (t.getSourceEntityType() != null) t.getSourceEntityType().getName();
 					if (t.getTargetEntityType() != null) t.getTargetEntityType().getName();
-					for (IntelRelationshipTypeAttribute a : t.getAttributes()){
-						a.getAttribute().getNames().size();
-						if (a.getAttribute().getAttributeList() != null){
-							for (IntelAttributeListItem i : a.getAttribute().getAttributeList()){
-								i.getNames().size();
-							}
-						}
-					}
 					if (t.getRelationshipGroup() != null){
-						t.getRelationshipGroup().getNames();
+						t.getRelationshipGroup().getName();
 					}
 				}
 			}finally{

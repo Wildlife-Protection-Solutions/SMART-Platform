@@ -126,6 +126,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 			clone.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
 			for (IntelEntityTypeAttribute atype : etype.getAttributes()){
 				IntelEntityTypeAttribute aclone = new IntelEntityTypeAttribute();
+				aclone.setInBasicSearch(atype.getInBasicSearch());
 				aclone.setAttribute( (IntelAttribute)engine.getNewConservationItem(atype.getAttribute()) );
 				aclone.setEntityType(clone);
 				clone.getAttributes().add(aclone);

@@ -45,6 +45,8 @@ public class IntelEntityTypeAttribute {
 	private IEntityTypeAttributePk id = new IEntityTypeAttributePk();	
 	
 	private int order;
+	private boolean inBasicSearch;
+	
 	private IntelEntityTypeAttributeGroup group;
 	
 	public IntelEntityTypeAttribute(){		
@@ -84,6 +86,15 @@ public class IntelEntityTypeAttribute {
 	
 	public void setOrder(int order){
 		this.order = order;
+	}
+	
+	@Column(name="in_basic_search")
+	public boolean getInBasicSearch(){
+		return this.inBasicSearch;
+	}
+	
+	public void setInBasicSearch(boolean inBasicSearch){
+		this.inBasicSearch = inBasicSearch;
 	}
 	
 	@ManyToOne

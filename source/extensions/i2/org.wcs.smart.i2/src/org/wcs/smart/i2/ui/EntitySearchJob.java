@@ -21,18 +21,17 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.BasicEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
+import org.wcs.smart.i2.search.IntelSearchResult;
 
 /**
  * Entity search job.
@@ -54,12 +53,13 @@ public abstract class EntitySearchJob extends Job{
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		
-		beforeSearch();
+		monitor.beginTask("Entity Search", 3);
+		beforeSearch(new SubProgressMonitor(monitor, 1));
 		
-		List<IntelEntity> entities = null; 
+		IntelSearchResult entities = null; 
 		Session s = HibernateManager.openSession();
 		try{
-			entities = search.doSearch(s);
+			entities = search.doSearch(s, new SubProgressMonitor(monitor, 1));
 		}catch (Exception ex){
 			Intelligence2PlugIn.log(ex.getMessage(), ex);
 			onError(ex);
@@ -67,8 +67,9 @@ public abstract class EntitySearchJob extends Job{
 		}finally{
 			s.close();
 		}
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
-		afterSearch(entities);
+		afterSearch(entities, new SubProgressMonitor(monitor, 1));
 		
 		return Status.OK_STATUS;
 	}
@@ -76,7 +77,7 @@ public abstract class EntitySearchJob extends Job{
 	
 	public abstract void onError(Exception ex);
 	
-	public abstract void afterSearch(List<IntelEntity> entities);
+	public abstract void afterSearch(IntelSearchResult entities, IProgressMonitor monitor);
 	
-	public abstract void beforeSearch();
+	public abstract void beforeSearch(IProgressMonitor monitor);
 }

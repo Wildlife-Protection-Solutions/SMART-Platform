@@ -1428,5 +1428,13 @@
             class="org.wcs.smart.i2.IntelDataEntryUserLevel">
       </SMARTUserLevel>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.wcs.smart.i2.ui.FuzzyPreferencePage"
+            id="org.wcs.smart.i2.fuzzymatching"
+            name="Fuzzy String Matching ">
+      </page>
+   </extension>
 
 </plugin>

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,14 +31,13 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -96,38 +97,10 @@ public class AttributeDialog extends TitleAreaDialog {
 	private List<IntelAttributeListItem> allItems;
 	
 	private AttributeListPanel listPanel;
-	
-	private Job siblingsJob = new Job("get siblings"){ //$NON-NLS-1$
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
-				attributeSiblings = AttributeManager.INSTANCE.getAttributes(s, SmartDB.getCurrentConservationArea());
-				attributeSiblings.remove(attribute);
-			}finally{
-				s.close();
-			}
-			
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					nameKeyInfo.initFields(attribute, attributeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
-					getButton(IDialogConstants.OK_ID).setEnabled(attribute.getUuid() == null);
-				}
-			});
-			return Status.OK_STATUS;
-		}
 		
-	};
-	
 	private AttributeDialog(Shell parentShell, IntelAttribute attribute) {
 		super(parentShell);
 		this.attribute = attribute;
-		this.allItems = new ArrayList<IntelAttributeListItem>();
-		if (attribute.getAttributeList() != null){
-			this.allItems.addAll(attribute.getAttributeList());
-		}
 	}
 	
 	@Override
@@ -252,7 +225,7 @@ public class AttributeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		listPanel = new AttributeListPanel(parent, attribute);
+		listPanel = new AttributeListPanel(parent);
 		listPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		listPanel.addChangeListener(new IChangeListener() {
 			@Override
@@ -269,15 +242,58 @@ public class AttributeDialog extends TitleAreaDialog {
 	}
 	
 	private void initFields(){
-		if (attribute.getType() != null){
-			cmbType.setSelection(new StructuredSelection(attribute.getType()));
-		}else{
-			cmbType.setSelection(new StructuredSelection(IAttributeType.NUMERIC));
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+		pmd.run(true, false, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				Session s = HibernateManager.openSession();
+				try{
+					if (attribute.getUuid() != null){
+						attribute = (IntelAttribute) s.get(IntelAttribute.class, attribute.getUuid());
+						attribute.getNames().size();
+						if (attribute.getAttributeList() != null){
+							for (IntelAttributeListItem item : attribute.getAttributeList()){
+								item.getNames().size();
+							}
+						}
+					}
+					attributeSiblings = AttributeManager.INSTANCE.getAttributes(s, SmartDB.getCurrentConservationArea());
+					attributeSiblings.remove(attribute);
+				}finally{
+					s.close();
+				}
+				
+				allItems = new ArrayList<IntelAttributeListItem>();
+				if (attribute.getAttributeList() != null){
+					allItems.addAll(attribute.getAttributeList());
+				}
+				
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						nameKeyInfo.initFields(attribute, attributeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
+						getButton(IDialogConstants.OK_ID).setEnabled(attribute.getUuid() == null);
+						if (attribute.getType() != null){
+							cmbType.setSelection(new StructuredSelection(attribute.getType()));
+						}else{
+							cmbType.setSelection(new StructuredSelection(IAttributeType.NUMERIC));
+						}
+						
+						cmbType.getControl().setEnabled(attribute.getUuid() == null);
+						listPanel.setInput(attribute);
+					}
+				});				
+			}
+		});
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(MessageFormat.format("Uanble to load attribute: {0}", ex.getMessage()), ex);
 		}
 		
-		cmbType.getControl().setEnabled(attribute.getUuid() == null);
-		siblingsJob.setSystem(true);
-		siblingsJob.schedule(0);
+		
 	}
 	
 	@Override

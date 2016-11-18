@@ -24,9 +24,13 @@ Require-Bundle: org.eclipse.ui.workbench,
  org.wcs.smart.birt.map;bundle-version="4.0.0",
  org.eclipse.birt.report.model.adapter.oda;bundle-version="4.4.1"
 Export-Package: org.wcs.smart.i2,
- org.wcs.smart.i2.model
+ org.wcs.smart.i2.model,
+ org.wcs.smart.i2.search
 Bundle-Activator: org.wcs.smart.i2.Intelligence2PlugIn
 Bundle-Vendor: org.wcs.smart
 Bundle-ClassPath: lib/metadata-extractor-2.9.1.jar,
  lib/xmpcore-5.1.2.jar,
- .
+ .,
+ lib/java-string-similarity-0.19.jar,
+ lib/jcip-annotations-1.0.jar,
+ lib/commons-codec-1.6.jar

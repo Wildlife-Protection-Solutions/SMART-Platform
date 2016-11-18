@@ -34,8 +34,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -102,6 +100,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -142,6 +141,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private Button btnEdit;
 	private Button btnMoveUp;
 	private Button btnMoveDown;
+	private Button btnSearch;
 	
 	private ControlDecoration cdList;
 	private ControlDecoration cdId;
@@ -163,7 +163,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	@Override
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		return new Point(p.x,(int)(p.y*1.4));
+		return new Point(p.x,650);
 	}
 	
 	/*
@@ -302,6 +302,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		deleteItem.setEnabled(ok);
 		btnMoveUp.setEnabled(ok);
 		btnMoveDown.setEnabled(ok);
+		btnSearch.setEnabled(ok);
 	}
 	
 	private void modified(){
@@ -425,6 +426,10 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				}else if (element instanceof OtherAttributeGroup){
 					return ((OtherAttributeGroup)element).getName();
 				}
+				
+				if (element instanceof IntelEntityTypeAttribute && ((IntelEntityTypeAttribute) element).getInBasicSearch()){
+					return attribute.getText(element) + "*";
+				}
 				return attribute.getText(element);		
 			}
 			
@@ -446,6 +451,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 			
 		});
+		
 		treeAttributes.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -670,6 +676,36 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				moveAttribute(SWT.DOWN);
 			}
 		});
+		
+		s = new Label(buttonComp, SWT.HORIZONTAL | SWT.SEPARATOR);
+		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		btnSearch = new Button(buttonComp, SWT.NONE);
+		btnSearch.setText("Basic Search");
+		btnSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnSearch.setEnabled(false);
+		btnSearch.setToolTipText("only applicable to text attributes - flagged attributes will be included in the basic search");
+		btnSearch.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (Iterator<?> iterator = ((IStructuredSelection) treeAttributes.getSelection()).iterator(); iterator.hasNext();) {
+					Object toMove = iterator.next();
+					if (toMove instanceof IntelEntityTypeAttribute){
+						if (((IntelEntityTypeAttribute) toMove).getAttribute().getType() == IAttributeType.TEXT){
+							IntelEntityTypeAttribute a = (IntelEntityTypeAttribute)toMove;
+							a.setInBasicSearch(!a.getInBasicSearch());
+							modified();
+						}
+					}
+				}
+				treeAttributes.refresh();
+			}
+		});
+		
+		Label lbl = new Label(attributeComp, SWT.NONE);
+		lbl.setText("*" + "Attributes included in basic search");
+		lbl.setToolTipText("attributes flagged with asterix(*) will be included in the basic search");
+		
 		setTitle("Entity Type");
 		getShell().setText("Entity Type");
 		setMessage("Configure entity type");
@@ -889,58 +925,77 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		}
 	}
 	private void initFields(){
-		if (type.getIcon() != null){
-			icon.setImage(type.getIcon());
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+		pmd.run(true, false, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				monitor.beginTask("Loading Entity Type Details", 5);
+				
+				monitor.worked(1);
+				Session s = HibernateManager.openSession();
+				try{
+					if (type.getUuid() != null){
+						type = (IntelEntityType) s.get(IntelEntityType.class, type.getUuid());
+						type.getNames().size();
+						for (IntelEntityTypeAttribute a : type.getAttributes()){
+							a.getAttribute().getNames().size();
+							if (a.getAttribute().getAttributeList() != null){
+								for (IntelAttributeListItem i : a.getAttribute().getAttributeList()){
+									i.getNames().size();
+								}
+							}
+						}
+					}
+					monitor.worked(1);
+					entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
+					entityTypeSiblings.remove(type);
+					monitor.worked(1);
+					if (type.getUuid() != null){
+						groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
+								.add(Restrictions.eq("entityType", type))
+								.addOrder(Order.asc("order"))
+								.list();
+						for (IntelEntityTypeAttributeGroup g : groups) g.getNames().size();
+					}
+					monitor.worked(1);
+				}finally{
+					s.close();
+				}
+				
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						if (type.getIcon() != null){
+							icon.setImage(type.getIcon());
+						}
+						attributeList.addAll(type.getAttributes());
+						treeAttributes.setInput(attributeList);
+						
+						refreshAttributeList();
+						
+						nameKeyInfo.initFields(type, entityTypeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
+						getButton(IDialogConstants.OK_ID).setEnabled(type.getUuid() == null);
+						
+						treeAttributes.refresh();
+						treeAttributes.expandAll();
+					}
+				});
+				monitor.worked(1);
+				monitor.done();
+			}
+		});
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to load entity type: {0}", ex.getMessage()), ex);
 		}
-		attributeList.addAll(type.getAttributes());
-		treeAttributes.setInput(attributeList);
-		
-		refreshAttributeList();
-		siblingsJob.setSystem(true);
-		siblingsJob.schedule(0);
 	}
 	
 	@Override
 	public boolean isResizable(){
 		return true;
 	}
-	
-	
-	private Job siblingsJob = new Job("get siblings"){ //$NON-NLS-1$
-
-		@SuppressWarnings("unchecked")
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
-				entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
-				entityTypeSiblings.remove(type);
-				if (type.getUuid() != null){
-					groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
-							.add(Restrictions.eq("entityType", type))
-							.addOrder(Order.asc("order"))
-							.list();
-					for (IntelEntityTypeAttributeGroup g : groups) g.getNames().size();
-				}
-			}finally{
-				s.close();
-			}
-			
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					nameKeyInfo.initFields(type, entityTypeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
-					getButton(IDialogConstants.OK_ID).setEnabled(type.getUuid() == null);
-					
-					treeAttributes.refresh();
-					treeAttributes.expandAll();
-				}
-			});
-			return Status.OK_STATUS;
-		}
-		
-	};
-	
 	
 	
 	private class AttributeListDialog extends TitleAreaDialog{
@@ -976,6 +1031,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			for (Object selection : attributeList.getCheckedElements()){
 				if (selection instanceof IntelAttribute){
 					IntelEntityTypeAttribute a  = new IntelEntityTypeAttribute();
+					a.setInBasicSearch(false);
 					a.setAttribute((IntelAttribute) selection);
 					a.setEntityType(EntityTypeDialog.this.type);
 					a.setAttributeGroup(group);
@@ -1075,6 +1131,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			
 			if (attribute.getUuid() != null){
 				IntelEntityTypeAttribute eta = new IntelEntityTypeAttribute();
+				eta.setInBasicSearch(false);
 				eta.setAttribute(attribute);
 				eta.setEntityType(type);
 				eta.setAttributeGroup(group);

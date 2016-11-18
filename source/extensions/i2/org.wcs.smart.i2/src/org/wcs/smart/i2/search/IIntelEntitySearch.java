@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.i2.search;
 
-import java.util.List;
-
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.i2.model.IntelEntity;
 
 /**
  * Intelligence search interface 
@@ -37,7 +35,10 @@ public interface IIntelEntitySearch {
 	/**
 	 * Maximum number of results returned in an entity search
 	 */
-	public static final int MAX_RESULT_CNT = 500;
+	public static final int MAX_RESULT_CNT = 50;
 	
-	public List<IntelEntity> doSearch(Session session);
+	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor);
+	
+	public String serialize();
+	
 }

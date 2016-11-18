@@ -220,7 +220,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	@Override
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		return new Point(p.x,(int)(p.y*1.4));
+		return new Point(p.x, 650);
 	}
 	
 	/*
@@ -800,48 +800,90 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	
 	
 	private void initFields(){
-		if (type.getIcon() != null){
-			icon.setImage(type.getIcon());
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+		pmd.run(true,  false, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				List<IntelEntityType> types = new ArrayList<IntelEntityType>();
+				List<Object> groups = new ArrayList<Object>();
+				Session s = HibernateManager.openSession();
+				try{
+					if (type.getUuid() != null){
+						type = (IntelRelationshipType) s.get(IntelRelationshipType.class, type.getUuid());
+						type.getNames().size();
+						for (IntelRelationshipTypeAttribute a : type.getAttributes()) {
+							a.getAttribute().getNames().size();
+							if (a.getAttribute().getAttributeList() != null) {
+								for (IntelAttributeListItem i : a.getAttribute().getAttributeList()) {
+									i.getNames().size();
+								}
+							}
+						}
+					}
+					entityTypeSiblings = RelationshipTypeManager.INSTANCE.getRelationshipTypes(s, SmartDB.getCurrentConservationArea());
+					entityTypeSiblings.remove(type);
+					types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
+					groups.addAll(RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea()));
+				}finally{
+					s.close();
+				}
+				
+				
+				IntelEntityType any = new IntelEntityType();
+				any.setName("<Any>");
+				types.add(0, any);
+				
+				Collections.sort(groups, (a,b) -> Collator.getInstance().compare(((IntelRelationshipGroup)a).getName().toLowerCase(), ((IntelRelationshipGroup)b).getName().toLowerCase()));
+				String noGroup = "";
+				groups.add(0, noGroup);
+				groups.add(NEW_GROUP);
+				
+				Display.getDefault().syncExec(()->{
+						if (type.getIcon() != null){
+							icon.setImage(type.getIcon());
+						}
+						attributeList.addAll(type.getAttributes());
+						tblAttributes.setInput(attributeList);
+						
+						nameKeyInfo.initFields(type, entityTypeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
+						getButton(IDialogConstants.OK_ID).setEnabled(type.getUuid() == null);
+						
+						cmbSrcType.setInput(types);
+						cmbTrgType.setInput(types);
+						cmbGroup.setInput(groups);
+						
+						if (type.getSourceEntityType() != null){
+							cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
+						}else{
+							cmbSrcType.setSelection(new StructuredSelection(any));
+						}
+						
+						if (type.getTargetEntityType() != null){
+							cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
+						}else{
+							cmbTrgType.setSelection(new StructuredSelection(any));
+						}
+						if (type.getRelationshipGroup() != null){
+							cmbGroup.setSelection(new StructuredSelection(type.getRelationshipGroup()));
+						}else{
+							cmbGroup.setSelection(new StructuredSelection(noGroup));
+						}
+					});
+			}
+		});
+		
+		}catch (Exception ex){
+			Intelligence2PlugIn.log(MessageFormat.format("Error loading Relationship Type: {0}", ex.getMessage()), ex);
 		}
-		attributeList.addAll(type.getAttributes());
-		tblAttributes.setInput(attributeList);
-		
-		siblingsJob.setSystem(true);
-		siblingsJob.schedule(0);
-		
-		loadEntityType.setSystem(true);
-		loadEntityType.schedule(0);
 	}
 	
 	@Override
 	public boolean isResizable(){
 		return true;
 	}
-	
-	
-	private Job siblingsJob = new Job("get siblings"){ //$NON-NLS-1$
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
-				entityTypeSiblings = RelationshipTypeManager.INSTANCE.getRelationshipTypes(s, SmartDB.getCurrentConservationArea());
-				entityTypeSiblings.remove(type);
-			}finally{
-				s.close();
-			}
-			
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					nameKeyInfo.initFields(type, entityTypeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
-					getButton(IDialogConstants.OK_ID).setEnabled(type.getUuid() == null);
-				}
-			});
-			return Status.OK_STATUS;
-		}
-		
-	};
 	
 	
 	

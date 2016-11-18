@@ -62,6 +62,7 @@ public class EntityEditorInput implements IEditorInput{
 
 	@Override
 	public ImageDescriptor getImageDescriptor() {
+		if (getType().getIcon() == null) return null;
 		try {
 			return AWTSWTImageUtils.createImageDescriptor(getType().getIconAsImage());
 		} catch (Exception e) {

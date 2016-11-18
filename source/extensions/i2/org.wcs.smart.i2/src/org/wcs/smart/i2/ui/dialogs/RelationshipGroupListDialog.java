@@ -108,14 +108,6 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 			Session session = HibernateManager.openSession();
 			try{
 				groups = RelationshipTypeManager.INSTANCE.getRelationshipGroups(session, SmartDB.getCurrentConservationArea());
-				for (IntelRelationshipGroup g : groups){
-					g.getNames().size();
-//					if (g.getRelationshipTypes() != null){
-//						for (IntelRelationshipType t : g.getRelationshipTypes()){
-//							t.getNames().size();
-//						}
-//					}
-				}
 			}finally{
 				session.close();
 			}

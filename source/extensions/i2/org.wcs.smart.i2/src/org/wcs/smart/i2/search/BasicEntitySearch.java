@@ -22,11 +22,13 @@
 package org.wcs.smart.i2.search;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -38,108 +40,74 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	
 	private int maxResultCnt = MAX_RESULT_CNT;
 	private String searchString = null;
-	private List<IntelEntityType> entityTypeFilter = null;
+	private List<String> entityTypes = null;
 	
 	public BasicEntitySearch(String searchString){
 		this.searchString = searchString;
 	}
 	
 	public BasicEntitySearch(String searchString, int maxResults){
-		this.searchString = searchString;
+		this(searchString);
 		this.maxResultCnt = maxResults;
 	}
 	
 	public BasicEntitySearch(String searchString, List<IntelEntityType> entityTypeFilter){
-		this.searchString = searchString;
-		this.entityTypeFilter = entityTypeFilter;
+		this(searchString);
+		this.entityTypes = new ArrayList<String>();
+		entityTypeFilter.forEach(e -> entityTypes.add(e.getKeyId()));
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<IntelEntity> doSearch(Session session){
+	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor){
+		
+		if (searchString != null && searchString.length() > 0){
+			monitor.beginTask("searching...", maxResultCnt);
+			
+			List<IntelEntitySearchResult> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, session);
+			int actualCnt = Math.min(sresults.size(), maxResultCnt);
+			for (int i = 0; i < actualCnt; i ++){
+				IntelEntity it = (IntelEntity) session.get(IntelEntity.class, sresults.get(i).getEntityUuid());
+				lazyLoadEntity(it, session);
+				sresults.get(i).setEntity(it);
+				monitor.worked(1);
+			}
+			monitor.done();
+			return new IntelSearchResult(sresults.size(), sresults.subList(0, actualCnt));
+		}
 
 		if (searchString == null || searchString.isEmpty()){
-			
-			Criteria c = session.createCriteria(IntelEntity.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
-			if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
-				c.add(Restrictions.in("entityType", entityTypeFilter));
+			monitor.beginTask("searching...", maxResultCnt);
+			Criteria c = session.createCriteria(IntelEntity.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
+			Criteria c1 = session.createCriteria(IntelEntity.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
+			if (entityTypes != null && !entityTypes.isEmpty()){
+				c.createAlias("entityType", "et");
+				c.add(Restrictions.in("et.keyId", entityTypes));
+				c1.createAlias("entityType", "et");
+				c1.add(Restrictions.in("et.keyId", entityTypes));
 			}
-			c.setMaxResults(maxResultCnt);
 			
-			List<IntelEntity> items = c.list();
+			
+			Long maxCnt = (Long) c.setProjection(Projections.rowCount()).list().get(0);
+			
+			c1.setMaxResults(maxResultCnt);
+			
+			List<IntelEntity> items = c1.list();
+			List<IntelEntitySearchResult> results = new ArrayList<IntelEntitySearchResult>();
 			for (IntelEntity it : items){
 				lazyLoadEntity(it, session);
+				IntelEntitySearchResult result = new IntelEntitySearchResult(it.getUuid(),"", 1.0);
+				result.setEntity(it);
+				results.add(result);
+				monitor.worked(1);
 			}
-			return items;
-		}
-		//exact match id attribute		
-		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT e");
-		sb.append(" FROM IntelEntity e, ");
-		sb.append(" IntelEntityType t, ");
-		sb.append(" IntelEntityAttributeValue v left join v.attributeListItem i left Join i.names a ");
-		sb.append(" WHERE ");
-		sb.append(" e.conservationArea = :ca AND ");
-		sb.append(" e.entityType.uuid = t.uuid AND ");
-		sb.append(" v.id.attribute = t.idAttribute AND ");
-		sb.append(" v.id.entity = e AND ");
-		if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
-			sb.append("t IN (:types) AND ");
-		}
-		sb.append(" ( ( LOWER(v.stringValue) = :textSearch)  OR ");
-		sb.append(" ( LOWER(a.value) = :textSearch1 ) ) ");
-		
-		Query query = session.createQuery(sb.toString());
-		if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
-			query.setParameterList("types", entityTypeFilter);
-		}
-		query.setString("textSearch", searchString.toLowerCase());
-		query.setString("textSearch1", searchString.toLowerCase());
-		query.setParameter("ca", SmartDB.getCurrentConservationArea());
-		
-		List<IntelEntity> queryResults = query.list();
-		List<IntelEntity> results = new ArrayList<IntelEntity>();
-		for (IntelEntity ie : queryResults){
-			if (!results.contains(ie)){
-				lazyLoadEntity(ie, session);
-				results.add(ie);
-				if(results.size() == maxResultCnt) break;
-			}
+			monitor.done();
+			return new IntelSearchResult(maxCnt, results);
 		}
 		
-		//fuzzy match id attribute	
-		sb = new StringBuilder();
-		sb.append("SELECT e");
-		sb.append(" FROM IntelEntity e, ");
-		sb.append(" IntelEntityType t, ");
-		sb.append(" IntelEntityAttributeValue v left join v.attributeListItem i left Join i.names a ");
-		sb.append(" WHERE ");
-		sb.append(" e.conservationArea = :ca AND ");
-		sb.append(" e.entityType.uuid = t.uuid AND ");
-		sb.append(" v.id.attribute = t.idAttribute AND ");
-		sb.append(" v.id.entity = e AND ");
-		if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
-			sb.append("t IN (:types) AND ");
-		}
-		sb.append(" ( ( LOWER(v.stringValue) like :textSearch)  OR ");
-		sb.append(" ( LOWER(a.value) like :textSearch1 ) ) ");
-		
-		query = session.createQuery(sb.toString());
-		if (entityTypeFilter != null && !entityTypeFilter.isEmpty()){
-			query.setParameterList("types", entityTypeFilter);
-		}
-		query.setString("textSearch", "%" + searchString.toLowerCase() + "%");
-		query.setString("textSearch1","%" +  searchString.toLowerCase() + "%");
-		query.setParameter("ca", SmartDB.getCurrentConservationArea());
-		
-		queryResults = query.list();				
-		for (IntelEntity ie : queryResults){
-			if (!results.contains(ie)){
-				lazyLoadEntity(ie, session);
-				results.add(ie);
-				if(results.size() == maxResultCnt) break;
-			}
-		}
-		return queryResults;
+		monitor.done();
+		return new IntelSearchResult(0, Collections.emptyList());
 	}
 	
 	private void lazyLoadEntity(IntelEntity it, Session session){
@@ -154,5 +122,42 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 				Intelligence2PlugIn.log("Unable to compute attachment location", e);
 			}
 		}
+	}
+	
+	@Override
+	public String serialize(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("basic");
+		sb.append(":");
+		sb.append(maxResultCnt);
+		sb.append(":");
+		sb.append(searchString);
+		sb.append(":");
+		if (entityTypes != null){
+			entityTypes.forEach(a -> sb.append(a + ":"));
+		}
+		return sb.toString();
+	}
+	
+	
+	public BasicEntitySearch deserialize(String search){
+		String[] bits = search.split(":");
+		if (bits.length < 2) return null;
+		if (!bits[0].equals("basic")) return null;
+		
+		
+		int maxCnt = Integer.parseInt(bits[1]);
+		String searchString = bits[2];
+		
+		BasicEntitySearch basicSearch = new BasicEntitySearch(searchString, maxCnt);
+		if (bits.length >= 3){
+			basicSearch.entityTypes = new ArrayList<>();
+		}
+		for (int i = 3; i < bits.length; i ++){
+			String entityKey = bits[i];
+			basicSearch.entityTypes.add(entityKey);
+		}
+		
+		return basicSearch;
 	}
 }

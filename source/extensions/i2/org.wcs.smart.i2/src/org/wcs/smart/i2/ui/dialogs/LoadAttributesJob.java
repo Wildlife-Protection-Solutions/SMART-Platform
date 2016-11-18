@@ -32,7 +32,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
 
 /**
  * Job that can be extended to load attributes and all associated items eagerly.
@@ -55,12 +54,7 @@ public abstract class LoadAttributesJob extends Job {
 		try{
 			attributes  = AttributeManager.INSTANCE.getAttributes(session, SmartDB.getCurrentConservationArea());
 			for (IntelAttribute ia : attributes){
-				ia.getNames().size();
-				if (ia.getAttributeList() != null){
-					for (IntelAttributeListItem item : ia.getAttributeList()){
-						item.getNames().size();
-					}
-				}
+				ia.getName();
 			}
 				
 		}finally{

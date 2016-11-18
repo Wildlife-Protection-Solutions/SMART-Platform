@@ -280,9 +280,14 @@ public class AttributeFieldEditor {
 			txtValue.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
+					
 					try{
-						Double.parseDouble(txtValue.getText());
-						cdNumber.hide();
+						if (txtValue.getText().trim().isEmpty()){
+							cdNumber.hide();
+						}else{
+							Double.parseDouble(txtValue.getText());
+							cdNumber.hide();
+						}
 					}catch(Exception ex){
 						cdNumber.show();
 						cdNumber.setDescriptionText("Unable to parse number from text");
