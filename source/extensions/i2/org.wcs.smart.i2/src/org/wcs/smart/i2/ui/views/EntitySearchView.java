@@ -388,7 +388,7 @@ public class EntitySearchView {
 	
 	private void doSearch(IIntelEntitySearch search){
 		searchJob.setSearch(search);
-		searchJob.schedule(500);
+		searchJob.schedule(1000);
 	}
 	
 	public static class EntitySearchViewWrapper extends DIViewPart<EntitySearchView>{

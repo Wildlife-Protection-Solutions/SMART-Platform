@@ -108,7 +108,14 @@ public class IntelEntityAttributeValue {
 	public void setNumberValue(Double doubleValue){
 		this.doubleValue = doubleValue;
 	}
-	
+	private String meta;
+	@Column(name="metaphone")
+	public String getMetaphone(){
+		return this.meta;
+	}
+	public void setMetaphone(String meta){
+		this.meta = meta;
+	}
 	
 	@Transient
 	public Date getDateValue(){

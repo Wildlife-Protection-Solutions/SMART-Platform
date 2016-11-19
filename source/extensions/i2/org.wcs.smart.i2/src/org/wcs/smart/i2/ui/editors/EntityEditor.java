@@ -1665,6 +1665,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			Composite part = toolkit.createComposite(attributelist.getBody(), SWT.NONE);
 			part.setLayout(createGridLayoutNoMargin(2));
 			part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			part.setVisible(false);
 			for (IntelEntityTypeAttribute a : entity.getEntityType().getAttributes()){
 				if (group == null){
 					if (a.getAttributeGroup() != null) continue;
@@ -1702,7 +1703,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 				
 			}
 			attributelist.layout(true);
+			part.setVisible(true);
 		}
+		
 		tabList.setContent(parts, tabPart);
 		tabList.selectTab(0);
 		

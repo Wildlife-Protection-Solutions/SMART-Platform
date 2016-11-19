@@ -30,7 +30,7 @@ public class SearchDataGenerator {
 	
 	private static int attributesPerType = 100;
 	
-	private static int numberOfEntities = 2000;
+	private static int numberOfEntities = 100;
 	
 	private static int numberOfRelationshipGroups = 200;
 	private static int numberOfRelationshipTypes = 200;
@@ -156,6 +156,73 @@ public class SearchDataGenerator {
 		InputStream is = FuzzySearchTest.class.getClassLoader().getResourceAsStream("org/wcs/smart/i2/search/words.txt");
 //		Set<String> phones = new HashSet<>();
 //		Map<String, List<Object[]>> map = new HashMap<>();
+//		List<String> items = new ArrayList<String>();
+//		try{
+//			Scanner s = new Scanner(is).useDelimiter("\\n");
+//			while(s.hasNext()){
+//				String n = s.next().trim();
+//				items.add(n);
+//			}
+//		}catch (Exception ex){
+//			ex.printStackTrace();
+//		}
+//		for (int i = 0; i < numberOfEntities; i ++){
+//			System.out.println("Generating Entities: " + i  + "/" + numberOfEntities);
+//		
+//			IntelEntity entity = new IntelEntity();
+//			entity.setAttributes(new ArrayList<IntelEntityAttributeValue>());
+//			entity.setConservationArea(SmartDB.getCurrentConservationArea());
+//			
+//			IntelEntityType type  = types.get((int)Math.round(Math.random() * (types.size()-1)));
+//			
+//			entity.setEntityType(type);
+//			
+//			for (IntelEntityTypeAttribute a : type.getAttributes()){
+//				IntelEntityAttributeValue av = generateValue(a, items);
+//				entity.getAttributes().add(av);
+//				av.setEntity(entity);
+//			}
+//			session.save(entity);
+//			if (i % 10 == 0){
+//				session.flush();
+//			}
+//		}
+		session.flush();
+	}
+	
+	private static IntelEntityAttributeValue generateValue(IntelEntityTypeAttribute a, List<String> strings){
+		IntelEntityAttributeValue value = new IntelEntityAttributeValue();
+		value.setAttribute(a.getAttribute());
+		
+		if (a.getAttribute().getType() == IAttributeType.BOOLEAN){
+			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
+		}else if (a.getAttribute().getType() == IAttributeType.DATE){
+			value.setDateValue(new Date());
+		}else if (a.getAttribute().getType() == IAttributeType.LIST){
+			int index = (int)Math.round((a.getAttribute().getAttributeList().size()-1) * Math.random());
+			value.setAttributeListItem(a.getAttribute().getAttributeList().get(index));
+		}else if (a.getAttribute().getType() == IAttributeType.NUMERIC){
+			value.setNumberValue(Math.random() * 100 * Math.random() + Math.random());
+		}else if (a.getAttribute().getType() == IAttributeType.TEXT){
+			StringBuilder sb= new StringBuilder();
+			for (int i = 0; i < Math.random() * 15; i ++){
+				sb.append(strings.get(  (int)Math.round(Math.random() * (strings.size() - 1) )) + " ");
+			}
+			value.setStringValue(sb.toString());
+//			System.out.println(sb.toString());
+		}
+		
+		return value;
+	}
+	
+	public static void generateEntities(Session session, int numberOfEntities){
+		InputStream is = FuzzySearchTest.class.getClassLoader().getResourceAsStream("org/wcs/smart/i2/search/words.txt");
+//		Set<String> phones = new HashSet<>();
+//		Map<String, List<Object[]>> map = new HashMap<>();
+		List<IntelEntityType> types = session.createCriteria(IntelEntityType.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.list();
+		
 		List<String> items = new ArrayList<String>();
 		try{
 			Scanner s = new Scanner(is).useDelimiter("\\n");
@@ -183,32 +250,10 @@ public class SearchDataGenerator {
 				av.setEntity(entity);
 			}
 			session.save(entity);
-			if (i % 1000 == 0) session.flush();
-		}
-		session.flush();
-	}
-	
-	private static IntelEntityAttributeValue generateValue(IntelEntityTypeAttribute a, List<String> strings){
-		IntelEntityAttributeValue value = new IntelEntityAttributeValue();
-		value.setAttribute(a.getAttribute());
-		
-		if (a.getAttribute().getType() == IAttributeType.BOOLEAN){
-			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
-		}else if (a.getAttribute().getType() == IAttributeType.DATE){
-			value.setDateValue(new Date());
-		}else if (a.getAttribute().getType() == IAttributeType.LIST){
-			int index = (int)Math.round((a.getAttribute().getAttributeList().size()-1) * Math.random());
-			value.setAttributeListItem(a.getAttribute().getAttributeList().get(index));
-		}else if (a.getAttribute().getType() == IAttributeType.NUMERIC){
-			value.setNumberValue(Math.random() * 100 * Math.random() + Math.random());
-		}else if (a.getAttribute().getType() == IAttributeType.TEXT){
-			StringBuilder sb= new StringBuilder();
-			for (int i = 0; i < Math.random() * 15; i ++){
-				sb.append(strings.get(  (int)Math.round(Math.random() * (strings.size() - 1) )) + " ");
+			if (i % 10 == 0) {
+				System.out.println("flushing");
+				session.flush();
 			}
-			value.setStringValue(sb.toString());
 		}
-		
-		return value;
 	}
 }

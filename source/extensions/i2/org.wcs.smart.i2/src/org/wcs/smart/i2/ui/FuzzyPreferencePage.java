@@ -100,15 +100,20 @@ public class FuzzyPreferencePage extends PreferencePage implements
 								InterruptedException {
 							Session s = HibernateManager.openSession();
 							try{
-								s.beginTransaction();
-								SearchDataGenerator.generateData(s);
-								s.getTransaction().commit();
-								s.beginTransaction();
-								SearchDataGenerator.generateData2(s);
-								s.getTransaction().commit();
+//								s.beginTransaction();
+//								SearchDataGenerator.generateData(s);
+//								s.getTransaction().commit();
+//								s.beginTransaction();
+//								SearchDataGenerator.generateData2(s);
+//								s.getTransaction().commit();
 								
+								s.beginTransaction();
+								SearchDataGenerator.generateEntities(s, 500);
+								s.getTransaction().commit();
 							}catch (Exception ex){
 								ex.printStackTrace();
+							}finally{
+								s.close();
 							}
 						}
 					});

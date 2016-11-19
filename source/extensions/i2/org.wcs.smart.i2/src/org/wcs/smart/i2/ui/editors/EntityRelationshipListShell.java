@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
+import java.util.stream.Collectors;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -136,9 +138,10 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 			}
 		});
 		
-		EntitySearchView view = ((EntitySearchViewWrapper) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(EntitySearchView.ID)).getComponent();
+		EntitySearchView view = ((EntitySearchViewWrapper) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+				.findView(EntitySearchView.ID)).getComponent();
 		if (view != null){
-			entityListTable.setInput(view.getEntities());
+			entityListTable.setInput(view.getEntities().stream().map(e->e.getEntity()).collect(Collectors.toList()));
 		}
 	}
 	

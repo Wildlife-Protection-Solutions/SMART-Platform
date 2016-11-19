@@ -838,3 +838,42 @@ ALTER TABLE smart.i_relationship_group ADD CONSTRAINT relationshipgroup_cauuid_f
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 DEFERRABLE INITIALLY IMMEDIATE;
+
+
+
+create function smart.metaphoneContains (metaphone varchar(4), searchstring varchar(32600)) 
+returns boolean
+LANGUAGE JAVA
+PARAMETER STYLE JAVA
+DETERMINISTIC
+NO SQL
+RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'org.wcs.smart.i2.search.DerbyFuzzyFunctions.metaphoneContains';
+
+create function smart.double_metaphone (string varchar(32600)) 
+returns varchar(32600)
+LANGUAGE JAVA
+PARAMETER STYLE JAVA
+DETERMINISTIC
+NO SQL
+RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'org.wcs.smart.i2.search.DerbyFuzzyFunctions.doubleMetaphone';
+
+GRANT EXECUTE ON FUNCTION smart.double_metaphone TO admin,data_entry,manager,analyst;
+GRANT EXECUTE ON FUNCTION smart.metaphoneContains TO admin,data_entry,manager,analyst;
+
+alter table smart.i_entity_attribute_value add column metaphone varchar(32600);
+
+create trigger i_entity_attribute_value_insert_trg
+AFTER INSERT ON smart.i_entity_attribute_value
+REFERENCING NEW AS NEW
+FOR EACH ROW
+UPDATE smart.i_entity_attribute_value set metaphone = smart.double_metaphone(new.string_value)
+where entity_uuid = new.entity_uuid and attribute_uuid = new.attribute_uuid; 
+
+create trigger i_entity_attribute_value_update_trg
+AFTER UPDATE of string_value ON smart.i_entity_attribute_value
+REFERENCING NEW AS NEW
+FOR EACH ROW
+UPDATE smart.i_entity_attribute_value set metaphone = smart.double_metaphone(new.string_value)
+where entity_uuid = new.entity_uuid and attribute_uuid = new.attribute_uuid;
