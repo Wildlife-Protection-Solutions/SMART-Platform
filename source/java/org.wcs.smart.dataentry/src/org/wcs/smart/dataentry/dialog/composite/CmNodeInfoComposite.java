@@ -34,6 +34,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
@@ -54,6 +55,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  * @since 2.0.0
  */
 public class CmNodeInfoComposite extends AbstractInfoComposite {
+	
+	private Session session;
 
 	private CmNode node;
 
@@ -69,11 +72,12 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
 	private ImageSelectionControl imageControl;
 	
-	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, boolean isGroup) {
+	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
 		super(parent, model);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		this.setLayout(layout);
+		this.session = session;
 		this.isGroup = isGroup;
 		
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -124,7 +128,13 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			
 			@Override
 			public void setImageFile(File file) {
-				getSourceObject().setImageFile(file);
+				CmNode cmNode = getSourceObject();
+				cmNode.setImageFile(file);
+				if (cmNode.getUuid() != null) {
+					//need this logic to correctly trigger intercepter
+					session.evict(cmNode);
+					session.saveOrUpdate(cmNode);
+				}
 				fireModelChanged();
 			}
 		});
