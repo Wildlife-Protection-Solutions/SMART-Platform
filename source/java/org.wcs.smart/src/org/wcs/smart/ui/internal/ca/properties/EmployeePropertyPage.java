@@ -173,7 +173,12 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		super(parent, Messages.EmployeePropertyPage_Dialog_Title);
 
 		//load the current ca
-		this.currentCa = (ConservationArea) getSession().load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+		Session s = HibernateManager.openSession();
+		try{
+			this.currentCa = (ConservationArea) s.load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+		}finally{
+			s.close();
+		}
 	}
 
 	@Override
@@ -314,13 +319,16 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 
 	@SuppressWarnings("unchecked")
 	private void refreshEmployeeList() {
-		Session s = getSession();
-		s.beginTransaction();
+		Session s = HibernateManager.openSession();
 		try{
-			employees = getSession().createCriteria(Employee.class)
+			employees = s.createCriteria(Employee.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+			employees.forEach(e -> {
+				if (e.getAgency() != null) e.getAgency().getName();
+				if (e.getRank() != null) e.getRank().getName();
+			});
 		}finally{
-			s.getTransaction().rollback();
+			s.close();
 		}
 		tblEmployee.setInput(employees);
 		tblEmployee.refresh();
@@ -332,16 +340,21 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private List<Agency> getAgencies(){
 		if (agencies == null){
-			getSession().beginTransaction();
+			Session s = HibernateManager.openSession();
 			try{
-				agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), getSession());
+				agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), s);
 				Collections.sort(agencies, new Comparator<Object>(){
 					@Override
 					public int compare(Object o1, Object o2) {
 						return Collator.getInstance().compare(((Agency)o1).getName(), ((Agency)o2).getName());
 					}});
+				agencies.forEach(a -> {
+					if (a.getRanks() != null){
+						a.getRanks().forEach(r -> r.getNames());
+					}
+				});
 			}finally{
-				getSession().getTransaction().rollback();
+				s.close();
 			}
 		}
 		return agencies;
@@ -353,7 +366,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 * user for employee information
 	 */
 	private void createNewEmployee(){
-		EmployeeDialog dia = new EmployeeDialog(getShell(), null, currentCa, getAgencies(), getSession());
+		EmployeeDialog dia = new EmployeeDialog(getShell(), null, currentCa, getAgencies());
 		dia.open();
 		refreshEmployeeList();
 	}
@@ -368,7 +381,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			return;
 		}
 		Employee e = (Employee)sec.getFirstElement();
-		EmployeeDialog dia = new EmployeeDialog(getShell(), e, currentCa, getAgencies(), getSession());
+		EmployeeDialog dia = new EmployeeDialog(getShell(), e, currentCa, getAgencies());
 		dia.open();		
 		tblEmployee.refresh();
 	}
@@ -409,7 +422,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.EmployeePropertyPage_ProgessDeleteEmployee, toDelete.size());
-					Session s = getSession();
+					Session s = HibernateManager.openSession();
 					Transaction tx = s.beginTransaction();
 					try{
 						for (Employee del : toDelete){
@@ -462,6 +475,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 								
 							}});
 						
+					}finally{
+						s.close();
 					}
 				}
 			});

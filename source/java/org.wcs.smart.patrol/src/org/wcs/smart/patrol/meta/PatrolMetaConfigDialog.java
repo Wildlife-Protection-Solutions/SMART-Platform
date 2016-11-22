@@ -42,6 +42,7 @@ import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
 import org.wcs.smart.dataentry.meta.TextScreenOptionComposite;
 import org.wcs.smart.dataentry.meta.YesNoScreenOptionComposite;
 import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
@@ -88,32 +89,36 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 	}
 
 	private void initData() {
-		Session session = getSession();
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		options = PatrolHibernateManager.getScreenOptions(ca, session);
-		//creating missing options
-		for (PatrolScreenOptionMeta meta : optionsToShow) {
-			ScreenOption cto = options.get(meta);
-			if (cto == null) {
-				cto = new ScreenOption();
-				cto.setConservationArea(ca);
-				cto.setResource(PatrolScreenOptionMeta.PATROL_RESOURCE_ID);
-				cto.setType(meta.name());
-				options.put(meta, cto);
+		Session session = HibernateManager.openSession();
+		try{
+			ConservationArea ca = SmartDB.getCurrentConservationArea();
+			options = PatrolHibernateManager.getScreenOptions(ca, session);
+			//creating missing options
+			for (PatrolScreenOptionMeta meta : optionsToShow) {
+				ScreenOption cto = options.get(meta);
+				if (cto == null) {
+					cto = new ScreenOption();
+					cto.setConservationArea(ca);
+					cto.setResource(PatrolScreenOptionMeta.PATROL_RESOURCE_ID);
+					cto.setType(meta.name());
+					options.put(meta, cto);
+				}
 			}
+	
+			transportTypes = PatrolHibernateManager.getActivePatrolTransporationTypes(ca, session);
+			teams = PatrolHibernateManager.getActiveTeams(ca, session);
+			stations = PatrolHibernateManager.getActiveStations(ca, session);
+			mandates = PatrolHibernateManager.getActiveMandates(ca, session);
+			members = PatrolHibernateManager.getActiveEmployees(ca, session);
+			Collections.sort(members, new Comparator<Employee>() {
+				@Override
+				public int compare(Employee e1, Employee e2) {
+					return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
+				}
+			});
+		}finally{
+			session.close();
 		}
-
-		transportTypes = PatrolHibernateManager.getActivePatrolTransporationTypes(ca, session);
-		teams = PatrolHibernateManager.getActiveTeams(ca, session);
-		stations = PatrolHibernateManager.getActiveStations(ca, session);
-		mandates = PatrolHibernateManager.getActiveMandates(ca, session);
-		members = PatrolHibernateManager.getActiveEmployees(ca, session);
-		Collections.sort(members, new Comparator<Employee>() {
-			@Override
-			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
-			}
-		});
 	}
 
 	@Override

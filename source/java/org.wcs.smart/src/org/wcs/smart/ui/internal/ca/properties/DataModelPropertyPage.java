@@ -76,6 +76,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.common.control.WarningDialog;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
@@ -123,6 +124,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private LanguageViewer cmbLanguage = null;
 	
 	private ConservationArea currentCa = SmartDB.getCurrentConservationArea();
+	
+	protected Session session;
+	
 	/**
 	 * Creates new data model property page
 	 */
@@ -132,6 +136,14 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		for (Aggregation agg : DataModel.getAggregations()){
 			getSession().update(agg);
 		}
+	}
+	
+	 
+	public Session getSession(){
+		if (session == null || !session.isOpen()){
+			session = HibernateManager.openSession();
+		}
+		return session;
 	}
 	
 	public boolean close(){

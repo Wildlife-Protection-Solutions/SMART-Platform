@@ -31,8 +31,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -45,7 +43,6 @@ import org.wcs.smart.internal.Messages;
  */
 public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 
-	protected Session session;
 	protected boolean changesMade;
 	
 	private String title;
@@ -62,13 +59,6 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(title);
-	}
-	 
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = HibernateManager.openSession();
-		}
-		return session;
 	}
 
 	@Override
@@ -143,16 +133,7 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 				return false;
 			}
 		}
-		
-		if (session != null){
-			if (session.isOpen() && session.getTransaction().isActive()){
-			//at this point we want to rollback any active transactions
-				session.getTransaction().rollback();
-			}
-			if (session.isOpen()){
-				session.close();
-			}
-		}
+
 		return super.close();  
 	}
 	

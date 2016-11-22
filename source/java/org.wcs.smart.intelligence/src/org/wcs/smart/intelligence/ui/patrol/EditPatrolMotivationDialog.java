@@ -28,6 +28,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -71,8 +72,12 @@ public class EditPatrolMotivationDialog extends AbstractPropertyJHeaderDialog {
 				}
 			}
 		});
-
-		content.initFromModel(patrol, getSession(), selectedList);
+		Session s = HibernateManager.openSession();
+		try{
+			content.initFromModel(patrol, s, selectedList);
+		}finally{
+			s.close();
+		}
 		setChangesMade(false);
 		
 		setTitle(Messages.IntelligencePatrolWizardPage_PageTitle);
@@ -83,7 +88,7 @@ public class EditPatrolMotivationDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected boolean performSave() {
 		content.updateModel(patrol);
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try {
 			IntelligenceHibernateManager.savePatrolIntelligences(s, patrol, content.getCurrentIntelligences());

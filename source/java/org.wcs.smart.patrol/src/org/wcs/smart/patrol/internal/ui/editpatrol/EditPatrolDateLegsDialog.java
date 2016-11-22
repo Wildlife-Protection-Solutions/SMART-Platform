@@ -27,12 +27,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
-import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -97,12 +94,6 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 		return comp;
 	}
 	
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		}
-		return session;
-	}
 	
 	/**
 	 * Saves the updates to he database.

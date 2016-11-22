@@ -75,6 +75,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -131,7 +132,15 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 
 	@Override
 	protected Composite createContent(Composite parent) {
-		sourceTypes = new ArrayList<IntelligenceSource>(IntelligenceHibernateManager.getSourceTypes(currentCa, getSession()));
+		Session s = HibernateManager.openSession();
+		try{
+			sourceTypes = new ArrayList<IntelligenceSource>(IntelligenceHibernateManager.getSourceTypes(currentCa, s));
+			for (IntelligenceSource st : sourceTypes){
+				st.getNames().size();
+			}
+		}finally{
+			s.close();
+		}
 		Collections.sort(sourceTypes, new Comparator<IntelligenceSource>(){
 			@Override
 			public int compare(IntelligenceSource o1, IntelligenceSource o2) {
@@ -354,9 +363,10 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.SourceTypesPropertyDialog_Delete, MessageFormat.format(Messages.SourceTypesPropertyDialog_DeleteConfirmation, new Object[]{source.getName()}))){
 			return;
 		}
+		Session s = HibernateManager.openSession();
 		try{
 			if (source.getUuid() != null){
-				if (DeleteManager.canDelete(source, getSession())){
+				if (DeleteManager.canDelete(source, s)){
 					sourceTypes.remove(source);
 					toDelete.add(source);
 					setChangesMade(true);
@@ -368,7 +378,9 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog( 
 					MessageFormat.format(Messages.SourceTypesPropertyDialog_CannotDelete_Error + "\n\n" + ex.getLocalizedMessage(), new Object[]{source.getName()}), ex); //$NON-NLS-1$
-		}	
+		}finally{
+			s.close();
+		}
 		
 		tableViewer.refresh();
 		
@@ -388,7 +400,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 	
 	@Override
 	protected boolean performSave() {
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
 		try {
 			s.beginTransaction();
 			for (IntelligenceSource m : toDelete){
@@ -414,6 +426,8 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 				s.getTransaction().rollback();
 			}
 			SmartPatrolPlugIn.displayLog(Messages.SourceTypesPropertyDialog_SaveError + ex.getLocalizedMessage(), ex);
+		}finally{
+			s.close();
 		}
 		return false;
 	}

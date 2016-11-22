@@ -42,6 +42,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -169,7 +170,7 @@ public abstract class MetaConfigDialog<T> extends AbstractPropertyJHeaderDialog 
 		if (!validate())
 			return false;
 		
-		Session session = getSession();
+		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
 			for (ScreenOption so : getOptionsMap().values()) {
@@ -182,6 +183,8 @@ public abstract class MetaConfigDialog<T> extends AbstractPropertyJHeaderDialog 
 			session.getTransaction().rollback();
 			SmartPlugIn.displayLog(Messages.MetaConfigDialog_SaveError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return false;
+		}finally{
+			session.close();
 		}
 	}
 

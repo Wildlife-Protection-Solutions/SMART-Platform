@@ -51,6 +51,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -127,16 +128,16 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 	@SuppressWarnings("unchecked")
 	private void refreshUserList() {
 		tblEmployee.setInput(Messages.CcaaUserPropertyPage_Loading);
-		Session s = getSession();
-		s.beginTransaction();
+		Session s = HibernateManager.openSession();;
+		
 		try{
-			List<Employee> users = getSession().createCriteria(Employee.class)
+			List<Employee> users = s.createCriteria(Employee.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.add(Restrictions.ne("uuid", Employee.SHARED_UUID)) //$NON-NLS-1$
 				.list();
 			tblEmployee.setInput(users);
 		}finally{
-			s.getTransaction().rollback();
+			s.close();
 		}
 		
 		tblEmployee.refresh();
@@ -181,10 +182,11 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.CcaaUserPropertyPage_ProgressMsg, toDelete.size());
-					Session s = getSession();
+					Session s = HibernateManager.openSession();
 					s.beginTransaction();
 					try{
 						for (Employee del : toDelete){
+							del = (Employee) s.get(Employee.class, del.getUuid());
 							monitor.subTask(del.getSmartUserId());
 							String deleteError = null;
 							try{
@@ -223,6 +225,8 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 						}
 						displayError(Messages.CcaaUserPropertyPage_Error3 + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 						SmartPlugIn.log(ex.getMessage(), ex);						
+					}finally{
+						s.close();
 					}
 				}
 			});

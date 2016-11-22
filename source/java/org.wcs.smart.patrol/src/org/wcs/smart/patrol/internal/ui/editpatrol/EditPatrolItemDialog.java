@@ -90,9 +90,6 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	public boolean close(){
 		if (super.close()){
 			item.removeChangeListener(listener);
-			if (session != null && session.isOpen()){
-				session.close();
-			}
 			return true;
 		}
 		return false;
@@ -105,20 +102,18 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 		Composite comp = item.createComponent(parent, SWT.NONE);
 		item.addChangeListener(listener);
 		
-		Session s = getSession();
-		item.setValues(patrol, s);
+		Session s = HibernateManager.openSession();
+		try{
+			item.setValues(patrol, s);
+		}finally{
+			s.close();
+		}
 		
 		setTitle(item.getTitle());
 		setChangesMade(false);
 		return comp;
 	}
 	
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		}
-		return session;
-	}
 	
 	/**
 	 * Saves the updates to he database.
@@ -136,7 +131,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	}
 
 	private boolean savePatrolInternal() {
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
 		
 		try{
 			s.beginTransaction();

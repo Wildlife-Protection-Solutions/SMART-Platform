@@ -307,28 +307,29 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	}
 
 	private void resetAgencyList() {
-		Session s = getSession();
-		s.beginTransaction();
-		List<Agency> lst = new ArrayList<Agency>();
+		Session s = HibernateManager.openSession();
 		try{
-			lst = HibernateManager.getAgencies(currentCa,s );
-		}finally{
-			s.getTransaction().rollback();
-		}
-		Collections.sort(lst, new Comparator<Agency>(){
+			List<Agency> lst = HibernateManager.getAgencies(currentCa,s );
+			Collections.sort(lst, new Comparator<Agency>(){
 
-			@Override
-			public int compare(Agency o1, Agency o2) {
-				String a = o1.getName();
-				if (a != null) a = a.toLowerCase();
-				String b = o2.getName();
-				if (b != null) b = b.toLowerCase();
-				return Collator.getInstance().compare(a, b);
-			}});
-		
-		agencies = lst;
-		
-		
+				@Override
+				public int compare(Agency o1, Agency o2) {
+					String a = o1.getName();
+					if (a != null) a = a.toLowerCase();
+					String b = o2.getName();
+					if (b != null) b = b.toLowerCase();
+					return Collator.getInstance().compare(a, b);
+				}});
+			lst.forEach(l -> {
+				l.getNames().size();
+				if (l.getRanks() != null){
+					l.getRanks().forEach(r -> r.getNames().size());
+				}
+			});
+			agencies = lst;
+		}finally{
+			s.close();
+		}
 	}
 	
 	/**
@@ -564,7 +565,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected boolean performSave(){
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
 		Transaction tx = s.beginTransaction();
 		try{
 			for (Iterator<Agency> iterator = toDelete.iterator(); iterator.hasNext();) {
@@ -586,6 +587,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_Save + ex.getLocalizedMessage(), ex);
 			tx.rollback();
 			s.close();			
+		}finally{
+			s.close();
 		}
 		return false;
 	}
@@ -624,23 +627,27 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	}
  
 	private void deleteAgency() {
-		for (Iterator<?> iterator = ((IStructuredSelection)tblAgencies.getSelection()).iterator(); iterator.hasNext();) {
-			Agency type = (Agency) iterator.next();
-			try{
-				if (type.getUuid() != null){
-					if (DeleteManager.canDelete(type, getSession())){
+		Session session = HibernateManager.openSession();
+		try{
+			for (Iterator<?> iterator = ((IStructuredSelection)tblAgencies.getSelection()).iterator(); iterator.hasNext();) {
+				Agency type = (Agency) iterator.next();
+				
+				try{
+					if (type.getUuid() != null){
+						if (DeleteManager.canDelete(type, session)){
+							agencies.remove(type);
+							toDelete.add(type);
+							setChangesMade(true);
+						}
+					}else{
 						agencies.remove(type);
-						toDelete.add(type);
-						setChangesMade(true);
 					}
-				}else{
-					agencies.remove(type);
+				}catch (Exception ex){
+					SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_DeleteAgency + type.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
-			}catch (Exception ex){
-				SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_DeleteAgency + type.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
-			
-			
+		}finally{
+			session.close();
 		}
 		tblAgencies.refresh();
 		setChangesMade(true);
@@ -674,11 +681,13 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			return;
 		}
 		Rank r =(Rank) ((IStructuredSelection)tblRank.getSelection()).getFirstElement();
-		try{
 		
+		Session s = HibernateManager.openSession();
+		try{
+			
 			if (current != null){
 				if (r.getUuid() != null){
-					if (DeleteManager.canDelete(r, getSession())){
+					if (DeleteManager.canDelete(r, s)){
 						currentRankSet.remove(r);
 						current.getRanks().remove(r);
 						setChangesMade(true);
@@ -690,6 +699,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_DeleteRank + r.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
+		}finally{
+			s.close();
 		}
 		
 		

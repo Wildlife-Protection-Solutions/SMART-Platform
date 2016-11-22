@@ -68,6 +68,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResource;
@@ -279,18 +280,21 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!ret ){
 			return;
 		}
-		getSession().beginTransaction();
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
 		try{
 			// remove existing areas
 			String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
-			Query q = AreaPropertyPage.this.getSession().createQuery(query);
+			Query q = session.createQuery(query);
 			q.setParameter("ca", currentCa); //$NON-NLS-1$
 			q.setParameter("type", areatype); //$NON-NLS-1$
 			q.executeUpdate();
-			getSession().getTransaction().commit();
+			session.getTransaction().commit();
 		}catch (Exception ex){
+			session.getTransaction().rollback();
 			SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_DeletingArea, ex);
-			getSession().close();
+		}finally{
+			session.close();
 		}
 		
 		// reset feature counts
@@ -413,7 +417,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					
 					
 					
-					Session s = getSession();
+					Session s = HibernateManager.openSession();
 					s.beginTransaction();
 					// add new areas
 					try {
@@ -474,8 +478,9 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						}catch (Exception ex){
 							SmartPlugIn.log("", ex); //$NON-NLS-1$
 						}
-						s.close();
 						throw(new InvocationTargetException(e));
+					}finally{
+						s.close();
 					}
 
 					if (monitor.isCanceled()) {

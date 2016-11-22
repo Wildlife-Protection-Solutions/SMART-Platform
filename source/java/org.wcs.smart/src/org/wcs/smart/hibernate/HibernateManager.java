@@ -334,7 +334,6 @@ public class HibernateManager extends SmartHibernateManager{
 			return ok;
 		}catch (Exception ex){
 			tx.rollback();
-			session.close();
 			SmartPlugIn.displayLog(Messages.HibernateManager_Error_ValidatingUserId, ex);
 		}
 		return false;

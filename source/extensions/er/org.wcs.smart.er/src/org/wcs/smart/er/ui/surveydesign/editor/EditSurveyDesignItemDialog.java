@@ -27,6 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
@@ -34,6 +35,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignCompositeFactory.PanelType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -61,7 +63,8 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 	public EditSurveyDesignItemDialog(Shell shell, PanelType panelType, SurveyDesign surveyDesign) {
 		super(shell, ""); //$NON-NLS-1$
 		this.surveyDesign = surveyDesign;
-		this.content = SurveyDesignCompositeFactory.getInstance().createComposite(panelType, getSession());
+		
+		this.content = SurveyDesignCompositeFactory.getInstance().createComposite(panelType);
 	}
 
 	@Override
@@ -76,7 +79,12 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 		center.setLayout(new GridLayout(1, false));
 		
 		content.createControl(center);
-		content.init(surveyDesign, getSession());
+		Session s = HibernateManager.openSession();
+		try{
+			content.init(surveyDesign, s);
+		}finally{
+			s.close();
+		}
 		content.addChangeListener(changeListener);
 		
 		setChangesMade(false);
@@ -97,10 +105,6 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 			e.printStackTrace();
 		}
 
-    	//ensure sesion is closed to clear any cached items before fire handlers
-    	if (session.isOpen()){
-    		session.close();
-    	}
     	
     	if (Status.OK_STATUS.equals(saveJob.getResult())) {
 			setChangesMade(false);

@@ -73,7 +73,7 @@ public class EmployeeDialog extends Dialog {
 	 */
 	public EmployeeDialog(Shell parent,  
 			Employee toUpdate, ConservationArea ca,
-			List<Agency> agencies, Session session) {
+			List<Agency> agencies) {
 		
 		super(parent);
 		if (toUpdate == null){
@@ -81,9 +81,9 @@ public class EmployeeDialog extends Dialog {
 		}else{
 			title = Messages.EmployeeDialog_Edit_DialogTitle + toUpdate.getId();
 		}
-		this.ca = (ConservationArea) session.load(ConservationArea.class, ca.getUuid());
 		this.toUpdate = toUpdate;
 		this.agencies = agencies;
+		this.ca = ca;
 	}
 
 	@Override
