@@ -9,6 +9,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
+import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -58,7 +59,7 @@ public class PatrolGroupByViewer extends AbstractGroupByViewer<PatrolGroupBy> {
 						initItems[i] = new ListItem(null, items[i], items[i]);
 					}
 				}
-				it.initializeData(initItems);
+				it.initializeData(new Object[]{new PatrolOptionData(groupBy.getOption()), initItems});
 			}
 			return it;
 		} catch (Exception ex) {
