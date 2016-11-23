@@ -245,7 +245,7 @@ public class SearchDataGenerator {
 	}
 	
 	public static void generateEntities(int numberOfEntities,  List<IntelEntityType> types, List<IntelRelationshipType> relationshipTypes, IProgressMonitor monitor, Session session){
-		InputStream is = FuzzySearchTest.class.getClassLoader().getResourceAsStream("org/wcs/smart/i2/search/words.txt");
+		InputStream is = SearchDataGenerator.class.getClassLoader().getResourceAsStream("org/wcs/smart/i2/search/words.txt");
 		
 		List<String> items = new ArrayList<String>();
 		try(Scanner s = new Scanner(is).useDelimiter("\\n")){
