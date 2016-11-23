@@ -94,6 +94,7 @@ import org.wcs.smart.report.birt.map.udig.MapGeoResource;
 import org.wcs.smart.report.birt.map.udig.MapQueryService;
 import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
+import org.wcs.smart.udig.catalog.smart.ISessionService;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.util.UuidUtils;
@@ -155,31 +156,27 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			((MapImpl)renderedMap).eSetDeliver(false);
 			
 			// -- Restore Basemap --
-			BasemapDefinition def = getBasemap(mapItem.getBasemapName());
-			if (def != null) {
-				IDatabaseConnectionProvider provider = new IDatabaseConnectionProvider() {
-					
-					/**
-					 * 
-					 */
-					private static final long serialVersionUID = 1L;
+			IDatabaseConnectionProvider provider = new IDatabaseConnectionProvider() {
+				private static final long serialVersionUID = 1L;
 
-					@Override
-					public Session openSession() {
-						return (Session)context.getAppContext().get(SmartReportRunner.SESSION_PARAM);
-					}
-					
-					@Override
-					public Locale getLocale() {
-						return context.getLocale();
-					}
-					
-					@Override
-					public void finishSession(Session session) {
-						//do nothing we don't want to close the session as it is reused
-					}
-				};
+				@Override
+				public Session openSession() {
+					return (Session)context.getAppContext().get(SmartReportRunner.SESSION_PARAM);
+				}
 				
+				@Override
+				public Locale getLocale() {
+					return context.getLocale();
+				}
+				
+				@Override
+				public void finishSession(Session session) {
+					//do nothing we don't want to close the session as it is reused
+				}
+			};
+			BasemapDefinition def = getBasemap(mapItem.getBasemapName());
+			
+			if (def != null) {
 				(new RestoreMapSettings()).applyTo((Map) renderedMap, def, reportca, provider);
 			} else if (reportca != null){
 				if (mapItem.getBasemapName() != null
@@ -190,7 +187,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 					HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 					params.put(SmartServiceExtension.CA_UUID_KEY, reportca.getUuid());
 					SmartService ss = (SmartService) (new SmartServiceExtension()).createService(null, params);
-					
+					if (ss instanceof ISessionService){
+		            	((ISessionService) ss).setConnectionProvider(provider);
+		            }
 					List<? extends IGeoResource> defaultLayers = ss.resources(null);
 					AddLayersCommand alCommand = new AddLayersCommand(defaultLayers, 0);
 					executeCommmand(renderedMap, alCommand);
