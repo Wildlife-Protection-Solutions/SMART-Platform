@@ -621,13 +621,17 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
         if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null) {
         	mapViewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
-        
-        getMap().getViewportModelInternal().setInitialized(false);
-        mapViewer.getRenderManager().disableRendering();
-        mapViewer.getRenderManager().stopRendering();
-       	mapViewer.getRenderManager().dispose();
-
-        mapViewer.dispose();
+        if (getMap() != null){
+                getMap().getViewportModelInternal().setInitialized(false);
+        }
+        if (mapViewer != null){
+        	if ( mapViewer.getRenderManager() != null){
+        		mapViewer.getRenderManager().disableRendering();
+        		mapViewer.getRenderManager().stopRendering();
+        		mapViewer.getRenderManager().dispose();
+        	}
+        	mapViewer.dispose();
+        }
         
         IEventBroker events = parentContext.get(IEventBroker.class);
         if (handlers != null) handlers.forEach(h -> events.unsubscribe(h));

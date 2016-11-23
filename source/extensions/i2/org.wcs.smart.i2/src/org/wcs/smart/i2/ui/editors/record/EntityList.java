@@ -156,6 +156,9 @@ public class EntityList extends Composite {
 			((GridLayout)main.getLayout()).marginHeight = 0;
 			main.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 
+			core.addListener(SWT.Resize, r->{
+				sc.setMinSize(main.computeSize(sc.getClientArea().width, SWT.DEFAULT));
+			});
 			components = new ArrayList<EntityComponent>();
 			int cnt = 0;
 			
@@ -166,11 +169,10 @@ public class EntityList extends Composite {
 				toolkit.adapt(entityComposite);
 				entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			}
-			sc.setMinSize(computeSize(SWT.DEFAULT, SWT.DEFAULT));
-			
+			layout(true);
+			sc.setMinSize(main.computeSize(sc.getClientArea().width, SWT.DEFAULT));
 			createMenu(main);
 		}
-		
 		layout(true);
 	}
 	
@@ -292,31 +294,32 @@ public class EntityList extends Composite {
 			}
 		}
 		private void createPart(){
-			setLayout(new GridLayout(3, false));
+			setLayout(new GridLayout(2, false));
 			((GridLayout)getLayout()).marginHeight = 0;
+			((GridLayout)getLayout()).marginWidth = 0;
 			addListener(this);
 			
 			Thumbnail t = new Thumbnail(item.getEntity().getPrimaryAttachment(), THUMB_SIZE);
-			Composite c = t.createThumbnail(this, SWT.NONE);
+			Composite c = t.createThumbnail(this);
 			addListener(c);
 			toolkit.adapt(c);
-			c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			c.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			((GridData)c.getLayoutData()).widthHint = THUMB_SIZE;
 			((GridData)c.getLayoutData()).heightHint = THUMB_SIZE;
 			
-			Composite info = toolkit.createComposite(this);
+			Composite info = toolkit.createComposite(this, SWT.NONE);
 			info.setLayout(new GridLayout());
 			((GridLayout)info.getLayout()).marginWidth = 0;
 			((GridLayout)info.getLayout()).marginHeight = 0;
+			info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			addListener(info);
 			
-			Label l = toolkit.createLabel(info, item.getEntity().getIdAttributeAsText());
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			Label l = toolkit.createLabel(info, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			((GridData)l.getLayoutData()).widthHint = 100;
 			addListener(l);
 			
-			l = toolkit.createLabel(info, MessageFormat.format("Locations: {0}", locationCount));
-			l.setToolTipText(locationTooltip);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-			addListener(l);
+			
 			
 			List<IntelRecordAttachment> allAttachments = listParent.getEditor().getRecord().getAttachments();
 			List<IntelAttachment> toShow1 = new ArrayList<IntelAttachment>();
@@ -342,12 +345,14 @@ public class EntityList extends Composite {
 				}
 			}
 			
-			Composite attach = toolkit.createComposite(this, SWT.NONE);
-			attach.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			Composite attach = toolkit.createComposite(info, SWT.NONE);
+			attach.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
+			((GridData)attach.getLayoutData()).widthHint = 100;
 			RowLayout layout = new RowLayout();
-			layout.wrap = false;
+			layout.wrap = true;
 			layout.marginBottom = layout.marginLeft = layout.marginRight = layout.marginTop = 0;
 			attach.setLayout(layout);
+			addListener(attach);
 			
 			for (IntelAttachment att : toShow1){
 				Thumbnail thumb = new Thumbnail(att, THUMB_SIZE-5);
@@ -355,6 +360,7 @@ public class EntityList extends Composite {
 				toolkit.adapt(c2);
 				c2.setLayoutData(new RowData(THUMB_SIZE-5,THUMB_SIZE-5));
 				c2.setToolTipText(att.getFilename());
+				addListener(c2);
 				
 			}
 			for (IntelEntityAttachment att : toShow2){
@@ -372,12 +378,16 @@ public class EntityList extends Composite {
 				mi.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						listParent.getEditor().getRecord().getEntities().remove(att);
 						listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments().remove(att);
 						setEntities(listParent.getEditor().getRecord().getEntities());
 					}
 				});
 			}
+			
+			l = toolkit.createLabel(info, MessageFormat.format("Locations: {0}", locationCount));
+			l.setToolTipText(locationTooltip);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+			addListener(l);
 		}
 		
 		private void addListener(Control c){
@@ -424,7 +434,6 @@ public class EntityList extends Composite {
 				mouseOver = true;
 				colorAll();
 			}else if (event.type == SWT.MouseExit){
-				
 				mouseOver = false;
 				colorAll();
 			}else if (event.type == SWT.MouseDown){

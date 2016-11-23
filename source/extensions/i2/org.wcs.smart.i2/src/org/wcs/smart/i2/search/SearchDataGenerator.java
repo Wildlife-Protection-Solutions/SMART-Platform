@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
@@ -53,28 +52,6 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
  *
  */
 public class SearchDataGenerator {
-
-//	private static int numOfAttributes = 1000;
-//	private static int numOfListItems = 50;
-//	private static int numberOfTypes = 100;
-//	
-//	private static int attributesPerType = 100;
-//	
-//	private static int numberOfEntities = 100;
-//	
-//	private static int numberOfRelationshipGroups = 200;
-//	private static int numberOfRelationshipTypes = 200;
-	
-//	public static void generateCore(int numberAttribute, int numberOfListItems, int numberOfTypes, 
-//			int numberOfAttributePerType, int numberOfRelationshipGroups, int numberOfRelationshipTypes, Session session){
-//	
-//		List<IntelAttribute> attributes = session.createCriteria(IntelAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-//		List<IntelEntityType> types = session.createCriteria(IntelEntityType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-//
-//		List<IntelEntityType> types = session.createCriteria(IntelEntityType.class)
-//				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-//				.list();
-//	}		
 
 	public static List<IntelRelationshipType> generateRelationshipTypes(int numberOfGroups, int numberOfRelationshipTypes, int numberOfAttributePerRelationship, List<IntelAttribute> attributes, List<IntelEntityType> types, IProgressMonitor monitor, Session session){
 			
@@ -271,8 +248,7 @@ public class SearchDataGenerator {
 		InputStream is = FuzzySearchTest.class.getClassLoader().getResourceAsStream("org/wcs/smart/i2/search/words.txt");
 		
 		List<String> items = new ArrayList<String>();
-		try{
-			Scanner s = new Scanner(is).useDelimiter("\\n");
+		try(Scanner s = new Scanner(is).useDelimiter("\\n")){
 			while(s.hasNext()){
 				String n = s.next().trim();
 				items.add(n);
@@ -280,11 +256,41 @@ public class SearchDataGenerator {
 		}catch (Exception ex){
 			ex.printStackTrace();
 		}
-		monitor.beginTask("Generating Entities...", numberOfEntities * 2);
+		monitor.beginTask("Generating Entities...", numberOfEntities * 2 + types.size() + relationshipTypes.size());
+		
 		
 		HashMap<IntelEntityType, List<IntelEntity>> typesToEntity = new HashMap<>();
 		List<IntelEntity> entities = new ArrayList<IntelEntity>();
+		int k = 0;
 		
+		for (IntelEntityType t : types){
+			monitor.subTask("Loading type details..." + (k++) + " / " + types.size());
+			
+			if (t.getAttributes() != null){
+				t.getAttributes().forEach(a ->{
+					a.getAttribute();
+					a.getAttribute().getType();
+					if (a.getAttribute().getAttributeList() != null){
+						a.getAttribute().getAttributeList().forEach(l -> l.getNames().size());
+					}
+				});
+			}
+			monitor.worked(1);
+		}
+		k = 0;
+		for (IntelRelationshipType t : relationshipTypes){
+			monitor.subTask("Loading relationship type details..." + (k++) + " / " + types.size());
+			if (t.getAttributes() != null){
+				t.getAttributes().forEach(a ->{
+					a.getAttribute();
+					a.getAttribute().getType();
+					if (a.getAttribute().getAttributeList() != null){
+						a.getAttribute().getAttributeList().forEach(l -> l.getNames().size());
+					}
+				});
+			}
+			monitor.worked(1);
+		}
 		for (int i = 0; i < numberOfEntities; i ++){
 			monitor.subTask("entities:" + i + "/" + numberOfEntities);
 			IntelEntity entity = new IntelEntity();
@@ -294,16 +300,16 @@ public class SearchDataGenerator {
 			IntelEntityType type  = types.get((int)Math.round(Math.random() * (types.size()-1)));
 			entity.setEntityType(type);
 			
-			
-			for (IntelEntityTypeAttribute a : type.getAttributes()){
-				IntelEntityAttributeValue av = generateValue(a, items);
-				entity.getAttributes().add(av);
-				av.setEntity(entity);
-			}
-			
 			session.save(entity);
 			if (i % 10 == 0) {
 				session.flush();
+			}
+			
+			for (IntelEntityTypeAttribute a : type.getAttributes()){
+				IntelEntityAttributeValue av = generateValue(a, items);
+				//entity.getAttributes().add(av);
+				av.setEntity(entity);
+				session.save(av);
 			}
 			
 			List<IntelEntity> le = typesToEntity.get(type);
@@ -315,13 +321,19 @@ public class SearchDataGenerator {
 			entities.add(entity);
 			
 			monitor.worked(1);
+			
+			if (i % 10 == 0) {
+				session.clear();
+				
+			}
 		}
 		
 		//generate relationships
 		int cnt = 0;
 		for (IntelEntity entity: entities){
-			monitor.subTask("relations:" + cnt + "/" + entities.size());
+			monitor.subTask("relations:" + (cnt++) + "/" + entities.size());
 			//generate some relationships for this 
+			int rcnt = 0;
 			for (IntelRelationshipType t : relationshipTypes){
 				IntelEntityRelationship relation = new IntelEntityRelationship();
 				relation.setRelationshipType(t);
@@ -348,15 +360,25 @@ public class SearchDataGenerator {
 				if (relation != null){
 					//generate attributes
 					relation.setAttributes(new ArrayList<IntelEntityRelationshipAttributeValue>());
+					session.save(relation);
+					rcnt++;
+					
 					for (IntelRelationshipTypeAttribute a : relation.getRelationshipType().getAttributes()){
 						IntelEntityRelationshipAttributeValue value = generateValue(a, items);
-						relation.getAttributes().add(value);
+						//relation.getAttributes().add(value);
 						value.setRelationship(relation);
+						session.save(value);
 					}
-					session.save(relation);
+					
 				}
+				if (rcnt > 20) break; //max out at 20 relationships
 			}
 			monitor.worked(1);
+			
+			if (cnt % 10 == 0) {
+				session.flush();
+				session.clear();
+			}
 		}
 	}
 }

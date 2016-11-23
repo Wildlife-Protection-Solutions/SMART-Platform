@@ -98,8 +98,9 @@ public enum RecordManager {
 		}finally{
 			s.close();
 		}
-		context.get(IEventBroker.class).send(IntelEvents.RECORD_DELETE, record);
-		entities.forEach(e -> context.get(IEventBroker.class).send(IntelEvents.ENTITY_MODIFIED, e));
+		IEventBroker broker = context.get(IEventBroker.class);
+		broker.send(IntelEvents.RECORD_DELETE, record);
+		entities.forEach(e -> broker.send(IntelEvents.ENTITY_MODIFIED, e));
 	}
 	
 	public void deleteRecord(UUID recordUuid, IEclipseContext context){

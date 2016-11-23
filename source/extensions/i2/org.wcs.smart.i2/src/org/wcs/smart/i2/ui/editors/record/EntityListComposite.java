@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -142,7 +143,11 @@ public class EntityListComposite extends Composite{
 						for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 							Object element = (Object)iterator.next();
 							if (element instanceof IntelEntity){
-								linkEntity((IntelEntity)element);		
+								linkEntity((IntelEntity)element);
+							}
+							if (element instanceof IAdaptable){
+								Object x = ((IAdaptable)element).getAdapter(IntelEntity.class);
+								if (x != null) linkEntity((IntelEntity) x);
 							}
 							
 						}

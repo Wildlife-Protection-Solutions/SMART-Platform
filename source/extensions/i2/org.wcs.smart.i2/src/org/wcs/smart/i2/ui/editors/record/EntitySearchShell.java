@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -101,7 +103,9 @@ public class EntitySearchShell extends SmartShellDialog {
 			@Override
 			public String getText(Object element){
 				if (element instanceof IntelSearchResultItem){
-					return ((IntelSearchResultItem) element).getEntity().getIdAttributeAsText();
+					IntelSearchResultItem item = (IntelSearchResultItem)element;
+					return MessageFormat.format("{0} ({1})", item.getEntity().getIdAttributeAsText(), item.getFormattedRating());
+					
 				}
 				return super.getText(element);
 			}
@@ -141,10 +145,17 @@ public class EntitySearchShell extends SmartShellDialog {
 	
 	private void linkSelection(){
 		Object x = ((IStructuredSelection)tblEntityList.getSelection()).getFirstElement();
+		IntelEntity entity =  null;
+		
 		if (x instanceof IntelEntity){
-			IntelEntity entity = (IntelEntity) x;
-			editor.linkEntity(entity);
+			entity = (IntelEntity) x;
+		}else if (x instanceof IAdaptable){
+			entity = (IntelEntity) ((IAdaptable)x).getAdapter(IntelEntity.class);
 		}
+		if (entity != null){
+			editor.linkEntity(entity);	
+		}
+		
 	}
 
 	

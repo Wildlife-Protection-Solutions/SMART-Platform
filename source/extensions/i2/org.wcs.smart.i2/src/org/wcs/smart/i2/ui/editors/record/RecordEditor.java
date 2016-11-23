@@ -23,7 +23,6 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -219,8 +218,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			
 			for (IntelEntityRecord r : summaryPage.getDeleteEntityLinks()){
-				modifiedEntities.add(r.getEntity());
-				s.delete(r);
+				if (r.getRecord().getUuid() != null){
+					modifiedEntities.add(r.getEntity());
+					s.delete(r);
+				}
 			}
 			
 			for (IntelEntityRecord r : summaryPage.getNewEntityLinks()){

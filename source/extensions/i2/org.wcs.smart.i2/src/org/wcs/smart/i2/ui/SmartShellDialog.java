@@ -67,7 +67,7 @@ public abstract class SmartShellDialog implements Listener {
 	public abstract void createContents(Composite parent);
 	
 	public void close(){
-		if (shell.isDisposed() || shell == null) return;
+		if (shell == null || shell.isDisposed()) return;
 		shell.close();
 	}
 	

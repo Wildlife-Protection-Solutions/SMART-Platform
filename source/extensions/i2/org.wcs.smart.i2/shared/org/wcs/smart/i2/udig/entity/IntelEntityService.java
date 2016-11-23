@@ -166,10 +166,11 @@ public class IntelEntityService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<IntelEntityGeoResource>();
+					ArrayList<IntelEntityGeoResource> list = new ArrayList<>();
 					//two resources per entity one for points and one for polygons
-					members.add(new IntelEntityGeoResource(this, LocationLayerType.POINT));
-					members.add(new IntelEntityGeoResource(this, LocationLayerType.POLYGON));
+					list.add(new IntelEntityGeoResource(this, LocationLayerType.POINT));
+					list.add(new IntelEntityGeoResource(this, LocationLayerType.POLYGON));
+					members = list;
 				}
 			}
 		}

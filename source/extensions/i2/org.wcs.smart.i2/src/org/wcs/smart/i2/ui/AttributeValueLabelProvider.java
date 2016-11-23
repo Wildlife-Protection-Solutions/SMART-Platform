@@ -52,7 +52,7 @@ public class AttributeValueLabelProvider extends LabelProvider {
 		}else if (element instanceof IntelEntityRelationshipAttributeValue){
 			value = ((IntelEntityRelationshipAttributeValue) element).getAttributeValue();
 			attribute = ((IntelEntityRelationshipAttributeValue) element).getAttribute();
-		}else if (element instanceof IntelObservationAttribute){
+		}else if (element instanceof IntelEntityRelationshipAttributeValue){
 			value = ((IntelEntityRelationshipAttributeValue) element).getAttributeValue();
 			attribute = ((IntelEntityRelationshipAttributeValue) element).getAttribute();
 		}else{

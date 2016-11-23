@@ -30,6 +30,7 @@ import org.eclipse.birt.report.designer.internal.ui.util.UIHelper;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -90,6 +91,7 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -504,10 +506,11 @@ public class RecordSummaryPage extends EditorPart{
 		
 		l = toolkit.createLabel(topPart, "Narrative:");
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		l.addListener(SWT.MouseDoubleClick, (e)->maximizePosition(0));
 		
 		Text txtDescription = toolkit.createText(topPart, recordEditor.getRecord().getDescription(), SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
-		txtDescription.addListener(SWT.MouseDoubleClick, (e)->maximizePosition(0));
+//		txtDescription.addListener(SWT.MouseDoubleClick, (e)->maximizePosition(0));
 		if (recordEditor.getEditMode()){
 			txtDescription.addModifyListener(new ModifyListener() {
 				
@@ -528,6 +531,19 @@ public class RecordSummaryPage extends EditorPart{
 				public void widgetSelected(SelectionEvent e) {				
 					EntitySearchShell shell = new EntitySearchShell(getSite().getShell(), txtDescription.getSelectionText(), recordEditor);
 					shell.open(Display.getDefault().getCursorLocation());
+				}
+			});
+			
+			MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
+			newEntity.setText("New Entity ... ");
+			newEntity.addSelectionListener(new SelectionAdapter() {			
+				@Override
+				public void widgetSelected(SelectionEvent e) {				
+					NewEntityDialog dialog = new NewEntityDialog(getSite().getShell());
+					ContextInjectionFactory.inject(dialog, recordEditor.getContext());
+					if (dialog.open() == NewEntityDialog.OK){
+						recordEditor.linkEntity(dialog.getNewEntity());
+					}
 				}
 			});
 			

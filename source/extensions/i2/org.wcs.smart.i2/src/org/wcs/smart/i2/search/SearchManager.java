@@ -157,7 +157,7 @@ public enum SearchManager {
 					String m3 = searchParse.getMetas(j)[0];
 					String m4 = searchParse.getMetas(j)[1];
 					
-					if (m1.equals(m3) || m1.equals(m4) | m2.equals(m3) || m2.equals(m4)){
+					if (m1.equals(m3) || m1.equals(m4) || m2.equals(m3) || m2.equals(m4)){
 						Double v = 1 - (LEVENSHTEIN_DISTANCE.distance(words.getWord(i), searchParse.getWord(j)) / Math.max(words.getWord(i).length(), searchParse.getWord(j).length()));
 						if (bestValue == null || v > bestValue){
 							bestValue = v;

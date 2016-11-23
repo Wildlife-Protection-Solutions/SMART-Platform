@@ -71,6 +71,7 @@ public class EntityRelationDataset  implements IQuery {
 		parameters = new HashMap<Integer,Object>();
 		
 	}
+	@SuppressWarnings("unchecked")
 	@Override
 	public void prepare(String queryText) throws OdaException {
 		//TODO: support CCAA

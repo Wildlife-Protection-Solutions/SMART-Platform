@@ -43,7 +43,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.model.IntelAttachment;
-import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.ui.I2SwtUtils;
 import org.wcs.smart.ui.Thumbnail;
 

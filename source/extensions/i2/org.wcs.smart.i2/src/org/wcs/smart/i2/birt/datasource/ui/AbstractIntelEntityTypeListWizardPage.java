@@ -111,6 +111,7 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 	/**
 	 * Creates custom control for user-defined query text.
 	 */
+	@SuppressWarnings("unchecked")
 	private Control createPageControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));

@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.i2.search;
 
+import java.text.DecimalFormat;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.wcs.smart.i2.model.IntelEntity;
 
 /**
@@ -31,7 +33,9 @@ import org.wcs.smart.i2.model.IntelEntity;
  * @author Emily
  *
  */
-public class IntelSearchResultItem {
+public class IntelSearchResultItem implements IAdaptable {
+	
+	private static final DecimalFormat DFORMAT = new DecimalFormat("0.000");
 	
 	private String matchedString;
 	private UUID entityUuid;
@@ -78,6 +82,14 @@ public class IntelSearchResultItem {
 	}
 	
 	/**
+	 * The rating formatted for display.
+	 * 
+	 * @return
+	 */
+	public String getFormattedRating(){
+		return DFORMAT.format(getRating());
+	}
+	/**
 	 * The string matched
 	 * @return
 	 */
@@ -101,5 +113,11 @@ public class IntelSearchResultItem {
 	 */
 	public void setEntity(IntelEntity entity){
 		this.entity = entity;
+	}
+
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter == IntelEntity.class && entity != null) return entity;
+		return null;
 	}
 }

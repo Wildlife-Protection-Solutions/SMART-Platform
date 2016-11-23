@@ -199,8 +199,10 @@ public class AttachmentListComposite extends Composite{
 						for (IntelEntityRecord entity : editor.getRecord().getEntities()){
 							MenuItem eItem = new MenuItem(mnuEntities, SWT.DEFAULT);
 							eItem.setText(entity.getEntity().getIdAttributeAsText());
-							eItem.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()).createImage());
-							eItem.addListener(SWT.Dispose, (event) -> {if (eItem.getImage() != null) eItem.getImage().dispose();});
+							if (entity.getEntity().getEntityType().getIcon() != null){
+								eItem.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()).createImage());
+								eItem.addListener(SWT.Dispose, (event) -> {if (eItem.getImage() != null) eItem.getImage().dispose();});
+							}
 							eItem.addSelectionListener(new SelectionAdapter() {
 								
 								@Override

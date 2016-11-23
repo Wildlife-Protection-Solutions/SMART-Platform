@@ -641,16 +641,18 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
         this.partlistener = null;
         this.selectFeatureListener = null;
         
-        if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null) {
+        if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null){
         	mapViewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
-        
-        getMap().getViewportModelInternal().setInitialized(false);
-        mapViewer.getRenderManager().disableRendering();
-        mapViewer.getRenderManager().stopRendering();
-       	mapViewer.getRenderManager().dispose();
-
-        mapViewer.dispose();
+        if (getMap() != null)  getMap().getViewportModelInternal().setInitialized(false);
+        if (mapViewer != null){
+        	if (mapViewer.getRenderManager() != null){
+        		mapViewer.getRenderManager().disableRendering();
+                mapViewer.getRenderManager().stopRendering();
+               	mapViewer.getRenderManager().dispose();		
+        	}
+            mapViewer.dispose();
+        }
     }
 
     public void openContextMenu() {

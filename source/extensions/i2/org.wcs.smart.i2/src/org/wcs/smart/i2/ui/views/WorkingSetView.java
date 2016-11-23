@@ -32,6 +32,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -448,6 +449,20 @@ public class WorkingSetView {
 					IStructuredSelection sel = (IStructuredSelection)s;
 					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 						Object element = (Object)iterator.next();
+						
+						if (element instanceof IAdaptable){
+							Object tmp = ((IAdaptable)element).getAdapter(IntelRecord.class);
+							if (tmp == null){
+								tmp = ((IAdaptable)element).getAdapter(RecordEditorInput.class);
+							}
+							if (tmp == null){
+								tmp = ((IAdaptable)element).getAdapter(IntelEntity.class);
+							}
+							if (tmp != null){
+								element = tmp;
+							}
+						}
+						
 						if (element instanceof IntelRecord){
 							WorkingSetManager.INSTANCE.addToActiveWorkingSet(new RecordEditorInput((IntelRecord)element), context);
 						}else if (element instanceof RecordEditorInput){

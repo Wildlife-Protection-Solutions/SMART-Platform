@@ -143,7 +143,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = new Label(g, SWT.WRAP);
-		l.setText("This generates a collection of sample data in your database.  This is only for TESTING.  It does not remove any existing data, but will add data with randomly generated attribute values.");
+		l.setText("This generates a collection of sample data in your database.  This is only for TESTING.  It does not remove any existing data, but will add data with randomly generated attribute values. Restart application after generating data.");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 200;
 
@@ -332,7 +332,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 		l.setText("Number of Entities:");
 				
 		final Text txtNumEntities = new Text(eg, SWT.BORDER);
-		txtNumEntities.setText("20000");
+		txtNumEntities.setText("500");
 		txtNumEntities.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnEntities = new Button(eg, SWT.PUSH);

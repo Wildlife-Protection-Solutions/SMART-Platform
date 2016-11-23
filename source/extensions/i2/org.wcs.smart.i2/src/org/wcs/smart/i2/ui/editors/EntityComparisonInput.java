@@ -63,6 +63,7 @@ public class EntityComparisonInput  implements IEditorInput{
 	public List<UUID> getEntities(){
 		return this.entitiesToCompare;
 	}
+	
 	@Override
 	public Object getAdapter(Class adapter) {
 		return null;

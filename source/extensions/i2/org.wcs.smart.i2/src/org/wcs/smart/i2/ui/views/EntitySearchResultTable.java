@@ -82,8 +82,6 @@ import org.wcs.smart.util.E3Utils;
  */
 public class EntitySearchResultTable extends Composite {
 
-	private static final DecimalFormat DFORMAT = new DecimalFormat("0.000");
-	
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
 	
@@ -285,8 +283,8 @@ public class EntitySearchResultTable extends Composite {
 		
 		
 		menu.addMenuListener(new MenuListener() {
-			private MenuItem mnuAddToRecord;
-			private Menu subRecord ;
+			private MenuItem mnuAddToRecord = null;
+			private Menu subRecord = null;
 			@Override
 			public void menuShown(MenuEvent e) {
 				boolean hasSelection = !getCurrentSelection().isEmpty();
@@ -328,7 +326,7 @@ public class EntitySearchResultTable extends Composite {
 						}
 					}
 				}
-				if (subRecord.getItemCount() == 0){
+				if (subRecord == null || subRecord.getItemCount() == 0){
 					mnuAddToRecord.dispose();
 				}
 				
@@ -438,7 +436,7 @@ public class EntitySearchResultTable extends Composite {
 			l.setFont(smallerFont);
 			
 			
-			l = toolkit.createLabel(right, MessageFormat.format("Rating: {0}", DFORMAT.format(item.getRating())));
+			l = toolkit.createLabel(right, MessageFormat.format("Rating: {0}", item.getFormattedRating()));
 			l.setToolTipText(item.getMatchString());
 			l.setFont(smallerFont);
 			addListener(l);
@@ -477,12 +475,12 @@ public class EntitySearchResultTable extends Composite {
 				
 				@Override
 				public void dragStart(DragSourceEvent event) {
-					IntelEntitySelectionTransfer.getTransfer().setSelection(new StructuredSelection(item));				
+					IntelEntitySelectionTransfer.getTransfer().setSelection(new StructuredSelection(getCurrentSelection()));				
 				}
 				@Override
 				public void dragSetData(DragSourceEvent event) {
 					if (IntelEntitySelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
-						event.data = new StructuredSelection(item);
+						event.data = new StructuredSelection(getCurrentSelection());
 					}
 				}
 				@Override
@@ -512,6 +510,8 @@ public class EntitySearchResultTable extends Composite {
 			c.addListener(SWT.MouseEnter, this);
 			c.addListener(SWT.MouseExit, this);
 			c.addListener(SWT.MouseDown, this);
+			c.addListener(SWT.MouseUp, this);
+			c.addListener(SWT.MouseMove, this);
 			c.addListener(SWT.MouseDoubleClick, this);
 		}
 		
@@ -544,6 +544,8 @@ public class EntitySearchResultTable extends Composite {
 			}
 		}
 		
+		private boolean changeSelection = false;
+		
 		@Override
 		public void handleEvent(Event event) {
 			if (event.type == SWT.MouseDoubleClick){
@@ -555,8 +557,12 @@ public class EntitySearchResultTable extends Composite {
 				
 				mouseOver = false;
 				colorAll();
+			}else if (event.type == SWT.MouseMove){
+				changeSelection = false;
 			}else if (event.type == SWT.MouseDown){
-				
+				changeSelection = true;
+			}else if (event.type == SWT.MouseUp){
+				if (!changeSelection) return;
 				Integer lastSelection = (Integer) getParent().getData("last_selection_index");
 				if (lastSelection == null) lastSelection = 0;
 				getParent().setData("last_selection_index", index);

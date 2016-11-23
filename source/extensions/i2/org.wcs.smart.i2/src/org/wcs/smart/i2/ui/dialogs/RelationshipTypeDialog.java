@@ -36,8 +36,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -150,65 +148,10 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	private Button btnMoveUp;
 	private Button btnMoveDown;
 	
-	
 	private List<IntelRelationshipTypeAttribute> attributeList = new ArrayList<IntelRelationshipTypeAttribute>();
-	
-
 	private IntelEntityType initialSourceType;
 	private IntelEntityType initialTargetType;
 	
-	
-	private Job loadEntityType = new Job("load entity types"){
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
-			List<Object> groups = new ArrayList<Object>();
-			Session s = HibernateManager.openSession();
-			try{
-				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
-				groups.addAll(RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea()));
-
-			}finally{
-				s.close();
-			}
-			IntelEntityType any = new IntelEntityType();
-			any.setName("<Any>");
-			types.add(0, any);
-			
-			Collections.sort(groups, (a,b) -> Collator.getInstance().compare(((IntelRelationshipGroup)a).getName().toLowerCase(), ((IntelRelationshipGroup)b).getName().toLowerCase()));
-			String noGroup = "";
-			groups.add(0, noGroup);
-			groups.add(NEW_GROUP);
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					cmbSrcType.setInput(types);
-					cmbTrgType.setInput(types);
-					cmbGroup.setInput(groups);
-					
-					if (type.getSourceEntityType() != null){
-						cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
-					}else{
-						cmbSrcType.setSelection(new StructuredSelection(any));
-					}
-					
-					if (type.getTargetEntityType() != null){
-						cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
-					}else{
-						cmbTrgType.setSelection(new StructuredSelection(any));
-					}
-					if (type.getRelationshipGroup() != null){
-						cmbGroup.setSelection(new StructuredSelection(type.getRelationshipGroup()));
-					}else{
-						cmbGroup.setSelection(new StructuredSelection(noGroup));
-					}
-				}
-			});
-			return Status.OK_STATUS;
-		}
-		
-	};
 	public RelationshipTypeDialog(Shell parentShell, IntelRelationshipType type) {
 		super(parentShell);
 		this.type = type;

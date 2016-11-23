@@ -205,6 +205,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Label lblCreated;
 	private Label lblModified;
 	private Label lblIdentifier;
+	private Label lblType;
 	
 	private Composite compAttributes;
 	private Composite compAttachments;
@@ -773,6 +774,18 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridData)lblMainImage.getLayoutData()).widthHint = THUMB_SIZE;
 		((GridData)lblMainImage.getLayoutData()).heightHint = THUMB_SIZE;
 
+		toolkit.createLabel(leftPart, "Type:");
+		lblType = toolkit.createLabel(leftPart, "");
+		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		int offset = 0;
+		GC gc = new GC(lblType);
+		try{
+			offset = gc.textExtent("Type:").x;
+		}finally{
+			gc.dispose();
+		}
+		((GridData)lblType.getLayoutData()).widthHint = THUMB_SIZE - offset;
+		
 		toolkit.createLabel(leftPart, "Created:");
 		lblCreated = toolkit.createLabel(leftPart, "CREATED");
 		
@@ -1597,6 +1610,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		 
 		lblCreated.setText(DateFormat.getInstance().format(entity.getDateCreated()));
 		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
+		lblType.setText(entity.getEntityType().getName());
+		lblType.setToolTipText(entity.getEntityType().getName());
 		lblIdentifier.setText(entity.getIdAttributeAsText());
 		lblModified.getParent().layout();
 		lblModified.redraw();

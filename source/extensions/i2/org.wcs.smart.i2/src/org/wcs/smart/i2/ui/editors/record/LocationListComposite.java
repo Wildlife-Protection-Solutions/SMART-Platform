@@ -374,8 +374,10 @@ public class LocationListComposite extends Composite{
 							for (IntelEntity entity : toAdd){
 								MenuItem linkTo = new MenuItem(linkSubMenu, SWT.PUSH);
 								linkTo.setText(entity.getIdAttributeAsText());
-								linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
-								linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});							
+								if (entity.getEntityType().getIcon() != null){
+									linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
+									linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
+								}
 								linkTo.setData(entity);
 								linkTo.addSelectionListener(addEntityLinkListener);
 							}
@@ -392,8 +394,10 @@ public class LocationListComposite extends Composite{
 							for (IntelEntity entity : toDrop){
 								MenuItem linkTo = new MenuItem(dropLinkSubMenu, SWT.PUSH);
 								linkTo.setText(entity.getIdAttributeAsText());
-								linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
-								linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
+								if (entity.getEntityType().getIcon() != null){
+									linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
+									linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
+								}
 								linkTo.setData(entity);
 								linkTo.addSelectionListener(dropEntityLinkListener);
 							}

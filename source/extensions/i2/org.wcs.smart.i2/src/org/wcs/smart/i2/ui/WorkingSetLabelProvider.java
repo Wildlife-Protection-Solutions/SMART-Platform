@@ -62,6 +62,7 @@ public class WorkingSetLabelProvider extends LabelProvider {
 			IntelWorkingSetItem wi = (IntelWorkingSetItem)element;
 			Image img = images.get(wi);
 			if (img != null) return img;
+			if (wi.getImageDescriptor() == null) return null;
 			img = wi.getImageDescriptor().createImage();
 			images.put(wi, img);
 			return img;

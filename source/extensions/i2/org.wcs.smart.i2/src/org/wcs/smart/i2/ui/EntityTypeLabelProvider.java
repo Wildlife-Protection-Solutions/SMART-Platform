@@ -85,6 +85,7 @@ public class EntityTypeLabelProvider extends LabelProvider {
 	}
 	
 	public static ImageDescriptor createImageDescriptor(IntelEntityType type){
+		if (type.getIcon() == null) return null;
 		return new ImageDescriptor() {
 			
 			@Override

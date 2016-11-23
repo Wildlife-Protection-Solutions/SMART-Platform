@@ -490,44 +490,52 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				if (selection == null){
 					return false;
 				}
-				Object obj = selection.getFirstElement();
-				if (obj.equals(getCurrentTarget())) return false;
-				if (obj instanceof IntelEntityTypeAttribute){
-					IntelEntityTypeAttribute target = (IntelEntityTypeAttribute)obj;
-					if (getCurrentTarget() instanceof IntelEntityTypeAttributeGroup){
-						target.setAttributeGroup( (IntelEntityTypeAttributeGroup)getCurrentTarget() );
-					}else if (getCurrentTarget() instanceof IntelEntityTypeAttribute){
-						target.setAttributeGroup(  ((IntelEntityTypeAttribute)getCurrentTarget()).getAttributeGroup());
-					}else if (getCurrentTarget().equals(OtherAttributeGroup.INSTANCE)){
-						//none object
-						target.setAttributeGroup(null);
-					}
-					
-					int loc = getCurrentLocation();
-					attributeList.remove(obj);
-					int targetIndex = attributeList.indexOf(getCurrentTarget());					
-					if (loc == LOCATION_AFTER){
-						targetIndex ++;
-					}
-					if (targetIndex < 0) targetIndex = 0;
-					if (targetIndex > attributeList.size()) targetIndex = attributeList.size();
-					attributeList.add(targetIndex, (IntelEntityTypeAttribute) obj);
-					getViewer().refresh();
-					modified();
+				List<Object> items = new ArrayList<>();
+				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+					Object obj = iterator.next();
+					if (obj.equals(getCurrentTarget())) continue;
+					items.add(0,obj);
 				}
-				if (obj instanceof IntelEntityTypeAttributeGroup){
-					IntelEntityTypeAttributeGroup target = (IntelEntityTypeAttributeGroup)obj;
-					int loc = getCurrentLocation();
-					groups.remove(target);
-					int targetIndex = groups.indexOf(getCurrentTarget());					
-					if (loc == LOCATION_AFTER){
-						targetIndex ++;
+				
+				for (Object obj: items){	
+					if (obj.equals(getCurrentTarget())) return false;
+					if (obj instanceof IntelEntityTypeAttribute){
+						IntelEntityTypeAttribute target = (IntelEntityTypeAttribute)obj;
+						if (getCurrentTarget() instanceof IntelEntityTypeAttributeGroup){
+							target.setAttributeGroup( (IntelEntityTypeAttributeGroup)getCurrentTarget() );
+						}else if (getCurrentTarget() instanceof IntelEntityTypeAttribute){
+							target.setAttributeGroup(  ((IntelEntityTypeAttribute)getCurrentTarget()).getAttributeGroup());
+						}else if (getCurrentTarget().equals(OtherAttributeGroup.INSTANCE)){
+							//none object
+							target.setAttributeGroup(null);
+						}
+						
+						int loc = getCurrentLocation();
+						attributeList.remove(obj);
+						int targetIndex = attributeList.indexOf(getCurrentTarget());					
+						if (loc == LOCATION_AFTER){
+							targetIndex ++;
+						}
+						if (targetIndex < 0) targetIndex = 0;
+						if (targetIndex > attributeList.size()) targetIndex = attributeList.size();
+						attributeList.add(targetIndex, (IntelEntityTypeAttribute) obj);
+						getViewer().refresh();
+						modified();
 					}
-					if (targetIndex < 0) targetIndex = 0;
-					if (targetIndex > groups.size()) targetIndex = groups.size();
-					groups.add(targetIndex, target);
-					getViewer().refresh();
-					modified();
+					if (obj instanceof IntelEntityTypeAttributeGroup){
+						IntelEntityTypeAttributeGroup target = (IntelEntityTypeAttributeGroup)obj;
+						int loc = getCurrentLocation();
+						groups.remove(target);
+						int targetIndex = groups.indexOf(getCurrentTarget());					
+						if (loc == LOCATION_AFTER){
+							targetIndex ++;
+						}
+						if (targetIndex < 0) targetIndex = 0;
+						if (targetIndex > groups.size()) targetIndex = groups.size();
+						groups.add(targetIndex, target);
+						getViewer().refresh();
+						modified();
+					}
 				}
 				return true;
 			}

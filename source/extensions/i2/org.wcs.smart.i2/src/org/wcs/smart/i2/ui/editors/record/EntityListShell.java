@@ -90,7 +90,6 @@ public class EntityListShell extends SmartShellDialog {
 		this.editor = editor;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void createContents(Composite parent){
 		Composite owner = new Composite(parent, SWT.NONE);

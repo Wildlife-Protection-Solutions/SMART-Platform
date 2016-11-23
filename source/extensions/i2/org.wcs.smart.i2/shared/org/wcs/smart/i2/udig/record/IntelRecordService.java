@@ -167,10 +167,11 @@ public class IntelRecordService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<IntelRecordGeoResource>();
+					List<IntelRecordGeoResource> list = new ArrayList<>();
 					//two resources per entity one for points and one for polygons
-					members.add(new IntelRecordGeoResource(this, LocationLayerType.POINT));
-					members.add(new IntelRecordGeoResource(this, LocationLayerType.POLYGON));
+					list.add(new IntelRecordGeoResource(this, LocationLayerType.POINT));
+					list.add(new IntelRecordGeoResource(this, LocationLayerType.POLYGON));
+					members = list;
 				}
 			}
 		}
