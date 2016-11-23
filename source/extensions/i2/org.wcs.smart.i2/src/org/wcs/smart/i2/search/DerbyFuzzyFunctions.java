@@ -1,14 +1,49 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.search;
 
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.language.DoubleMetaphone;
-
+/**
+ * Fuzzy search functions for use in Derby
+ * 
+ * @author Emily
+ *
+ */
 public class DerbyFuzzyFunctions {
 
 	private static final DoubleMetaphone DOUBLE_METAPHONE = new DoubleMetaphone();
+	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+");
 	
+	/**
+	 * Determines if one metaphone is contained within a set of metaphones represented
+	 * by a single space deleminted string.
+	 * @param string a single metaphone value
+	 * @param metaphone a collection of metaphone values separated by a space (use doubleMetaphone
+	 * function to generate this string).
+	 * @return
+	 */
 	public static boolean metaphoneContains(String string, String metaphone){
 		char[] c1 = string.toCharArray();
 		char[] c2 = metaphone.toCharArray();
@@ -34,8 +69,14 @@ public class DerbyFuzzyFunctions {
 
 	}
 	
-	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+");
-	
+	/**
+	 * Computes the double metaphone version of a string.  The string
+	 * is split into words by whitespace, then both versions of the metaphone
+	 * pattern are computed.  These are all put into a set then concatenated using
+	 * a space to form a single string.  They are not ordered in any way. 
+	 * @param string
+	 * @return
+	 */
 	public static String doubleMetaphone(String string){
 		if (string == null) return null;
 		if (string.isEmpty()) return null;
@@ -59,12 +100,4 @@ public class DerbyFuzzyFunctions {
 		return sb.toString();
 	}
 
-	public final static void main (String args[]){
-//		String ss = "NPF";
-//		String s = "NPF KNTR RNFL TMNF KN0R SNSP N ";
-//		System.out.println(metaphoneContains(ss, s));
-		System.out.println(doubleMetaphone("pyroantimonic swaimous recompression unglutinate stomatocace tragicomic"));
-		System.out.println(doubleMetaphone("impaternate overcluster"));
-		
-	}
 }

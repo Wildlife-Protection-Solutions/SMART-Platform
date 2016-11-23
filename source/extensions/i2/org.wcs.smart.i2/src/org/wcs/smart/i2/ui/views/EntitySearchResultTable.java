@@ -65,7 +65,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.search.IntelEntitySearchResult;
+import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
@@ -138,7 +138,7 @@ public class EntitySearchResultTable extends Composite {
 		
 	}
 	
-	public List<IntelEntitySearchResult> getEntities(){
+	public List<IntelSearchResultItem> getEntities(){
 		return this.entities.getResults();
 	}
 	
@@ -196,7 +196,7 @@ public class EntitySearchResultTable extends Composite {
 			toolkit.createLabel(core, "Searching...");
 			sc = null;
 		}else{
-			toolkit.createLabel(core, MessageFormat.format("{0} of {1} ", entities.getResults().size(), entities.getTotalMatched()));
+			toolkit.createLabel(core, MessageFormat.format("{0} of {1}", entities.getResults().size(), entities.getTotalMatched()));
 			
 			sc = new ScrolledComposite(core, SWT.V_SCROLL |  SWT.H_SCROLL);
 			toolkit.adapt(sc);
@@ -211,7 +211,7 @@ public class EntitySearchResultTable extends Composite {
 
 			components = new ArrayList<EntitySearchResultTable.EntityComponent>();
 			int cnt = 0;
-			for (IntelEntitySearchResult i : entities.getResults()){		
+			for (IntelSearchResultItem i : entities.getResults()){		
 				EntityComponent entityComposite = new EntityComponent(main, i, cnt++, components);
 				components.add(entityComposite);
 				toolkit.adapt(entityComposite);
@@ -221,12 +221,15 @@ public class EntitySearchResultTable extends Composite {
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 			}
+			toolkit.createLabel(main, MessageFormat.format("{0} seconds", entities.getTotalTime() / Math.pow(10, 9)));
 			layout(true);
 			sc.setMinSize(main.computeSize(sc.getClientArea().width, SWT.DEFAULT));
 			core.addListener(SWT.Resize, event -> {
 				sc.setMinSize(main.computeSize(sc.getClientArea().width, SWT.DEFAULT));
 			});
 			createMenu(main);
+			
+			
 		}
 		
 		layout(true);
@@ -362,14 +365,14 @@ public class EntitySearchResultTable extends Composite {
 	}
 	private class EntityComponent extends Composite implements Listener{
 
-		private IntelEntitySearchResult item;
+		private IntelSearchResultItem item;
 		private Color backgroundColor = null;
 		private boolean isSelected = false;
 		private boolean mouseOver = false;
 		private int index;
 		private List<EntityComponent> siblings;
 		
-		public EntityComponent(Composite parent, IntelEntitySearchResult item, int index, List<EntityComponent> siblings){
+		public EntityComponent(Composite parent, IntelSearchResultItem item, int index, List<EntityComponent> siblings){
 			super(parent, SWT.NONE);
 			this.item = item;
 			createPart();

@@ -52,10 +52,10 @@ public abstract class EntitySearchJob extends Job{
 	}
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		monitor.beginTask("Entity Search", 3);
 		beforeSearch(new SubProgressMonitor(monitor, 1));
-		
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		IntelSearchResult entities = null; 
 		Session s = HibernateManager.openSession();
 		try{
@@ -68,9 +68,7 @@ public abstract class EntitySearchJob extends Job{
 			s.close();
 		}
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-		
-		afterSearch(entities, new SubProgressMonitor(monitor, 1));
-		
+		afterSearch(entities, new SubProgressMonitor(monitor, 1));		
 		return Status.OK_STATUS;
 	}
 

@@ -52,7 +52,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.BasicEntitySearch;
-import org.wcs.smart.i2.search.IntelEntitySearchResult;
+import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -100,16 +100,16 @@ public class EntitySearchShell extends SmartShellDialog {
 		tblEntityList.setLabelProvider(new EntityTypeLabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof IntelEntitySearchResult){
-					return ((IntelEntitySearchResult) element).getEntity().getIdAttributeAsText();
+				if (element instanceof IntelSearchResultItem){
+					return ((IntelSearchResultItem) element).getEntity().getIdAttributeAsText();
 				}
 				return super.getText(element);
 			}
 			
 			@Override
 			public Image getImage(Object element){
-				if (element instanceof IntelEntitySearchResult){
-					return super.getImage(((IntelEntitySearchResult) element).getEntity().getEntityType());
+				if (element instanceof IntelSearchResultItem){
+					return super.getImage(((IntelSearchResultItem) element).getEntity().getEntityType());
 				}
 				return null;
 			}
@@ -158,7 +158,7 @@ public class EntitySearchShell extends SmartShellDialog {
 			});
 		
 			
-			List<IntelEntitySearchResult> entities = new ArrayList<IntelEntitySearchResult>();
+			List<IntelSearchResultItem> entities = new ArrayList<IntelSearchResultItem>();
 			Session s = HibernateManager.openSession();
 			try{
 				BasicEntitySearch search = new BasicEntitySearch(searchText[0], 50);

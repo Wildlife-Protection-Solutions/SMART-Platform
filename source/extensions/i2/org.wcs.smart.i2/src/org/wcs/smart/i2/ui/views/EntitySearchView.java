@@ -74,7 +74,7 @@ import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.search.BasicEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
-import org.wcs.smart.i2.search.IntelEntitySearchResult;
+import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -95,6 +95,8 @@ public class EntitySearchView {
 	public static final String ENTITY_SEARCH_RESULTS_KEY = "org.wcs.smart.i2.entity.search";
 	
 	public static final String ID = "org.wcs.smart.i2.view.entitysearch";
+	
+	private static final int searchDelay = 500;
 	
 	@Inject
 	private IEclipseContext context;
@@ -120,7 +122,7 @@ public class EntitySearchView {
 	private StackLayout searchStack;
 	private Composite searchArea ;
 	
-	private EntitySearchJob searchJob = new EntitySearchJob() {
+	final private EntitySearchJob searchJob = new EntitySearchJob() {
 		
 		@Override
 		public void beforeSearch(IProgressMonitor monitor) {
@@ -164,7 +166,7 @@ public class EntitySearchView {
 		super();
 	}
 
-	public List<IntelEntitySearchResult> getEntities(){
+	public List<IntelSearchResultItem> getEntities(){
 		return this.entityList.getEntities();
 	}
 	
@@ -178,7 +180,6 @@ public class EntitySearchView {
 		parent = toolkit.createComposite(parent);
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		parent.setLayout(new GridLayout());
-		
 		
 		createHeaderOptions(parent);
 		
@@ -200,11 +201,10 @@ public class EntitySearchView {
 		entityList = new EntitySearchResultTable(parent, toolkit, context);
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		searchJob.schedule();
-
 		entityTypeJob.schedule();
 		savedSearches.schedule();
 		
+		doBasicSearch(0);
 	}
 
 	
@@ -305,7 +305,7 @@ public class EntitySearchView {
 		txtSearch.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				doBasicSearch();
+				doBasicSearch(searchDelay);
 			}
 		});
 		
@@ -320,7 +320,7 @@ public class EntitySearchView {
 		cmbEntityType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				doBasicSearch();
+				doBasicSearch(500);
 			}
 		});
 		
@@ -335,7 +335,7 @@ public class EntitySearchView {
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				doBasicSearch();	
+				doBasicSearch(0);	
 			}
 		});
 		Hyperlink saveSearch = toolkit.createHyperlink(bottom, "Save Search", SWT.NONE);
@@ -345,14 +345,14 @@ public class EntitySearchView {
 	@Inject
 	@Optional
 	private void entityModified(@UIEventTopic(IntelEvents.ENTITY_ALL) IntelEntity entity){
-		searchJob.schedule();
+		doSearch(null, searchDelay);
 	}
 	
 	@Inject
 	@Optional
 	private void entityTypesModified(@UIEventTopic(IntelEvents.ENTITY_TYPE_ALL) IntelEntityType type){
 		entityTypeJob.schedule();
-		searchJob.schedule();
+		doSearch(null, searchDelay);
 	}
 	
 	// @Optional
@@ -372,7 +372,7 @@ public class EntitySearchView {
 		if (boldFont != null) boldFont.dispose();
 	}
 	
-	private void doBasicSearch(){
+	private void doBasicSearch(long delay){
 		List<IntelEntityType> filters = new ArrayList<IntelEntityType>();
 		for (Iterator<?> iterator = ((IStructuredSelection)cmbEntityType.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
@@ -382,13 +382,16 @@ public class EntitySearchView {
 			
 		}
 		BasicEntitySearch search = new BasicEntitySearch(txtSearch.getPatternFilter(), filters);
-		doSearch(search);
+		doSearch(search, delay);
 
 	}
 	
-	private void doSearch(IIntelEntitySearch search){
-		searchJob.setSearch(search);
-		searchJob.schedule(1000);
+	private void doSearch(IIntelEntitySearch search, long delay){
+		if (search != null){
+			searchJob.setSearch(search);
+		}
+		searchJob.cancel();
+		searchJob.schedule(delay);
 	}
 	
 	public static class EntitySearchViewWrapper extends DIViewPart<EntitySearchView>{

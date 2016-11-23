@@ -30,6 +30,9 @@ DROP TABLE smart.i_entity_type;
 DROP TABLE smart.i_attribute;
 DROP TABLE smart.i_relationship_group;
 
+DROP FUNCTION smart.double_metaphone;
+DROP FUNCTION smart.metaphoneContains;
+
 /* Create Tables */
 CREATE TABLE smart.i_attachment
 (
@@ -102,6 +105,7 @@ CREATE TABLE smart.i_entity_attribute_value
 	string_value varchar(1024),
 	double_value double,
 	list_item_uuid char(16) for bit data,
+	metaphone varchar(32600), 	
 	PRIMARY KEY (entity_uuid, attribute_uuid)
 );
 
@@ -170,7 +174,6 @@ CREATE TABLE smart.i_entity_type_attribute
 	attribute_uuid char(16) for bit data NOT NULL,
 	attribute_group_uuid char(16) for bit data,
 	seq_order integer not null,
-	in_basic_search boolean not null default false,	
 	PRIMARY KEY (entity_type_uuid, attribute_uuid)
 );
 
@@ -840,7 +843,7 @@ ALTER TABLE smart.i_relationship_group ADD CONSTRAINT relationshipgroup_cauuid_f
 DEFERRABLE INITIALLY IMMEDIATE;
 
 
-
+-- FUNCTIONS AND TRIGGERS FOR METAPHONE FUZZY SEARCH --
 create function smart.metaphoneContains (metaphone varchar(4), searchstring varchar(32600)) 
 returns boolean
 LANGUAGE JAVA
@@ -861,8 +864,6 @@ EXTERNAL NAME 'org.wcs.smart.i2.search.DerbyFuzzyFunctions.doubleMetaphone';
 
 GRANT EXECUTE ON FUNCTION smart.double_metaphone TO admin,data_entry,manager,analyst;
 GRANT EXECUTE ON FUNCTION smart.metaphoneContains TO admin,data_entry,manager,analyst;
-
-alter table smart.i_entity_attribute_value add column metaphone varchar(32600);
 
 create trigger i_entity_attribute_value_insert_trg
 AFTER INSERT ON smart.i_entity_attribute_value

@@ -20,7 +20,7 @@
 		<property name="dialect">org.hibernate.dialect.DerbyDialect</property>
 
 		<!-- Echo all executed SQL to stdout -->
-		<property name="show_sql">true</property> 
+		<property name="show_sql">false</property> 
 		
 		<property name="hibernate.current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</property>
 

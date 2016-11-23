@@ -34,6 +34,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -100,7 +101,6 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -141,7 +141,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private Button btnEdit;
 	private Button btnMoveUp;
 	private Button btnMoveDown;
-	private Button btnSearch;
 	
 	private ControlDecoration cdList;
 	private ControlDecoration cdId;
@@ -302,7 +301,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		deleteItem.setEnabled(ok);
 		btnMoveUp.setEnabled(ok);
 		btnMoveDown.setEnabled(ok);
-		btnSearch.setEnabled(ok);
 	}
 	
 	private void modified(){
@@ -425,10 +423,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 					return ((IntelEntityTypeAttributeGroup) element).getName();
 				}else if (element instanceof OtherAttributeGroup){
 					return ((OtherAttributeGroup)element).getName();
-				}
-				
-				if (element instanceof IntelEntityTypeAttribute && ((IntelEntityTypeAttribute) element).getInBasicSearch()){
-					return attribute.getText(element) + "*";
 				}
 				return attribute.getText(element);		
 			}
@@ -680,32 +674,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		s = new Label(buttonComp, SWT.HORIZONTAL | SWT.SEPARATOR);
 		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		btnSearch = new Button(buttonComp, SWT.NONE);
-		btnSearch.setText("Basic Search");
-		btnSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		btnSearch.setEnabled(false);
-		btnSearch.setToolTipText("only applicable to text attributes - flagged attributes will be included in the basic search");
-		btnSearch.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				for (Iterator<?> iterator = ((IStructuredSelection) treeAttributes.getSelection()).iterator(); iterator.hasNext();) {
-					Object toMove = iterator.next();
-					if (toMove instanceof IntelEntityTypeAttribute){
-						if (((IntelEntityTypeAttribute) toMove).getAttribute().getType() == IAttributeType.TEXT){
-							IntelEntityTypeAttribute a = (IntelEntityTypeAttribute)toMove;
-							a.setInBasicSearch(!a.getInBasicSearch());
-							modified();
-						}
-					}
-				}
-				treeAttributes.refresh();
-			}
-		});
-		
-		Label lbl = new Label(attributeComp, SWT.NONE);
-		lbl.setText("*" + "Attributes included in basic search");
-		lbl.setToolTipText("attributes flagged with asterix(*) will be included in the basic search");
-		
 		setTitle("Entity Type");
 		getShell().setText("Entity Type");
 		setMessage("Configure entity type");
@@ -929,10 +897,12 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		try{
 		pmd.run(true, false, new IRunnableWithProgress() {
 			
+			@SuppressWarnings("unchecked")
 			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+			public void run(IProgressMonitor smonitor) throws InvocationTargetException,
 					InterruptedException {
-				monitor.beginTask("Loading Entity Type Details", 5);
+				SubMonitor monitor = SubMonitor.convert(smonitor);
+				monitor.beginTask("Loading Entity Type Details", 4);
 				
 				monitor.worked(1);
 				Session s = HibernateManager.openSession();
@@ -940,16 +910,16 @@ public class EntityTypeDialog extends TitleAreaDialog {
 					if (type.getUuid() != null){
 						type = (IntelEntityType) s.get(IntelEntityType.class, type.getUuid());
 						type.getNames().size();
+						
+						SubMonitor kid1 = monitor.newChild(1);
+						kid1.beginTask("Loading Attributes...", type.getAttributes().size());
 						for (IntelEntityTypeAttribute a : type.getAttributes()){
 							a.getAttribute().getNames().size();
-							if (a.getAttribute().getAttributeList() != null){
-								for (IntelAttributeListItem i : a.getAttribute().getAttributeList()){
-									i.getNames().size();
-								}
-							}
+							monitor.subTask(MessageFormat.format("Loading {0}", a.getAttribute().getName()));
+							kid1.worked(1);
 						}
 					}
-					monitor.worked(1);
+					monitor.subTask("Loading Entity Types...");
 					entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
 					entityTypeSiblings.remove(type);
 					monitor.worked(1);
@@ -1031,7 +1001,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			for (Object selection : attributeList.getCheckedElements()){
 				if (selection instanceof IntelAttribute){
 					IntelEntityTypeAttribute a  = new IntelEntityTypeAttribute();
-					a.setInBasicSearch(false);
 					a.setAttribute((IntelAttribute) selection);
 					a.setEntityType(EntityTypeDialog.this.type);
 					a.setAttributeGroup(group);
@@ -1131,7 +1100,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			
 			if (attribute.getUuid() != null){
 				IntelEntityTypeAttribute eta = new IntelEntityTypeAttribute();
-				eta.setInBasicSearch(false);
 				eta.setAttribute(attribute);
 				eta.setEntityType(type);
 				eta.setAttributeGroup(group);

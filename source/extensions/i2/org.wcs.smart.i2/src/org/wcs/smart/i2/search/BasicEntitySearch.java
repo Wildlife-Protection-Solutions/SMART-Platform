@@ -60,10 +60,12 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	@SuppressWarnings("unchecked")
 	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor){
 		
+		Long now = System.nanoTime();
+		
 		if (searchString != null && searchString.length() > 0){
+			//perform fuzzy search
 			monitor.beginTask("searching...", maxResultCnt);
-			
-			List<IntelEntitySearchResult> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, session);
+			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, session);
 			int actualCnt = Math.min(sresults.size(), maxResultCnt);
 			for (int i = 0; i < actualCnt; i ++){
 				IntelEntity it = (IntelEntity) session.get(IntelEntity.class, sresults.get(i).getEntityUuid());
@@ -71,11 +73,12 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 				sresults.get(i).setEntity(it);
 				monitor.worked(1);
 			}
-			monitor.done();
-			return new IntelSearchResult(sresults.size(), sresults.subList(0, actualCnt));
+			monitor.done();;
+			return new IntelSearchResult(sresults.size(), sresults.subList(0, actualCnt), System.nanoTime() - now);
 		}
 
 		if (searchString == null || searchString.isEmpty()){
+			//search all entities
 			monitor.beginTask("searching...", maxResultCnt);
 			Criteria c = session.createCriteria(IntelEntity.class)
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
@@ -94,20 +97,20 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			c1.setMaxResults(maxResultCnt);
 			
 			List<IntelEntity> items = c1.list();
-			List<IntelEntitySearchResult> results = new ArrayList<IntelEntitySearchResult>();
+			List<IntelSearchResultItem> results = new ArrayList<IntelSearchResultItem>();
 			for (IntelEntity it : items){
 				lazyLoadEntity(it, session);
-				IntelEntitySearchResult result = new IntelEntitySearchResult(it.getUuid(),"", 1.0);
+				IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0);
 				result.setEntity(it);
 				results.add(result);
 				monitor.worked(1);
 			}
 			monitor.done();
-			return new IntelSearchResult(maxCnt, results);
+			return new IntelSearchResult(maxCnt, results, System.nanoTime() - now);
 		}
-		
+		//should never get here
 		monitor.done();
-		return new IntelSearchResult(0, Collections.emptyList());
+		return new IntelSearchResult(0, Collections.emptyList(), 0);
 	}
 	
 	private void lazyLoadEntity(IntelEntity it, Session session){

@@ -196,7 +196,7 @@ public class FilterComposite extends Composite {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				filterJob.cancel();
-				filterJob.schedule(200);
+				filterJob.schedule();
 				txtFilter.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK));
 			}
 		});

@@ -37,8 +37,19 @@ public interface IIntelEntitySearch {
 	 */
 	public static final int MAX_RESULT_CNT = 50;
 	
+	/**
+	 * Perform the search
+	 * @param session
+	 * @param monitor
+	 * @return
+	 */
 	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor);
 	
+	/**
+	 * Serialize the search for saving the search to the database.
+	 * 
+	 * @return
+	 */
 	public String serialize();
 	
 }
