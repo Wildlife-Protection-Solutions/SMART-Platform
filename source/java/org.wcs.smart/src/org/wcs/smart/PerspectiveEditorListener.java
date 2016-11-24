@@ -72,10 +72,13 @@ public class PerspectiveEditorListener extends PerspectiveAdapter {
 					p.getTags().contains(PerspectiveEditorTracker.EDITOR_TAG)){
 				if (p.getTags().contains(perspectiveDescriptor.getId())){
 					//this is set to make the close others/close all/close menu work
-					p.setCloseable(true);	
+					if (!p.getTags().contains("smart-donotclose")) p.setCloseable(true);	
 					p.setVisible(true);
 				}else{
 					p.setVisible(false);
+					if (!p.isCloseable() && !p.getTags().contains("smart-donotclose")){
+						p.getTags().add("smart-donotclose");
+					}
 					p.setCloseable(false);
 				}
 			}
