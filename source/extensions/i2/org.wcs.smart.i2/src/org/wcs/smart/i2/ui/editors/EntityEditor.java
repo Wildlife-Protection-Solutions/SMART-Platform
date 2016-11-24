@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.editors;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -49,6 +50,8 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -916,20 +919,33 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}
 						}
 					}
-					Session s = HibernateManager.openSession(new AttachmentInterceptor());
+					ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
 					try{
-						s.beginTransaction();
-						EntityManager.INSTANCE.deleteEntity(entity, s);
-						s.getTransaction().commit();
+						pmd.run(true, false, new IRunnableWithProgress() {
+							
+							@Override
+							public void run(IProgressMonitor monitor) throws InvocationTargetException,
+									InterruptedException {
+								monitor.beginTask("Deleting Entity...", IProgressMonitor.UNKNOWN);
+								Session s = HibernateManager.openSession(new AttachmentInterceptor());
+								try{
+									s.beginTransaction();
+									EntityManager.INSTANCE.deleteEntity(entity, s);
+									s.getTransaction().commit();
+								}catch (Exception ex){
+									s.getTransaction().rollback();
+									throw new InvocationTargetException(ex);
+									
+								}finally{
+									s.close();
+								}
+							}
+						});
 					}catch (Exception ex){
-						s.getTransaction().rollback();
 						Intelligence2PlugIn.displayLog("Error deleting entity. " + ex.getMessage(), ex);
 						return;
-					}finally{
-						s.close();
 					}
 					eventBroker.send(IntelEvents.ENTITY_DELETE, entity);
-					
 				}
 				
 			}

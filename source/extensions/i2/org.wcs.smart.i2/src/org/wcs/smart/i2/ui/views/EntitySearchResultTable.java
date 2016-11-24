@@ -544,7 +544,6 @@ public class EntitySearchResultTable extends Composite {
 			}
 		}
 		
-		private boolean changeSelection = false;
 		
 		@Override
 		public void handleEvent(Event event) {
@@ -558,48 +557,51 @@ public class EntitySearchResultTable extends Composite {
 				mouseOver = false;
 				colorAll();
 			}else if (event.type == SWT.MouseMove){
-				changeSelection = false;
-			}else if (event.type == SWT.MouseDown){
-				changeSelection = true;
-			}else if (event.type == SWT.MouseUp){
-				if (!changeSelection) return;
-				Integer lastSelection = (Integer) getParent().getData("last_selection_index");
-				if (lastSelection == null) lastSelection = 0;
-				getParent().setData("last_selection_index", index);
 				
-				if ((event.stateMask & SWT.CTRL) != 0){
-					if (event.button == 1) isSelected = !isSelected;
-				}else if ((event.stateMask & SWT.SHIFT) != 0){
-					boolean newSelection = !isSelected;
-					//clearSelection();
-					int from = lastSelection;
-					int to = index;
-					if (index < lastSelection){
-						from = index;
-						to = lastSelection;
-					}
-					
-					for (int i = from; i <= to; i ++){
-						if (i == index){
-							siblings.get(i).isSelected = true;
-						}else{
-							siblings.get(i).isSelected = newSelection;		
-						}
-						siblings.get(i).colorAll();
-					}
-					
-				}else{
-					if (event.button == 1){
-						clearSelection();
-					}else if (!isSelected){
-						clearSelection();
-					}
-					isSelected = true;
-				}
-				colorAll();
+			}else if (event.type == SWT.MouseDown){
+				if (event.stateMask == 0 && !isSelected) changeSelection(event);
+			}else if (event.type == SWT.MouseUp){
+				changeSelection(event);
 			}
 		}
 		
+		private void changeSelection(Event event){
+
+			Integer lastSelection = (Integer) getParent().getData("last_selection_index");
+			if (lastSelection == null) lastSelection = 0;
+			getParent().setData("last_selection_index", index);
+			
+			if ((event.stateMask & SWT.CTRL) != 0){
+				if (event.button == 1) isSelected = !isSelected;
+			}else if ((event.stateMask & SWT.SHIFT) != 0){
+				boolean newSelection = !isSelected;
+				//clearSelection();
+				int from = lastSelection;
+				int to = index;
+				if (index < lastSelection){
+					from = index;
+					to = lastSelection;
+				}
+				
+				for (int i = from; i <= to; i ++){
+					if (i == index){
+						siblings.get(i).isSelected = true;
+					}else{
+						siblings.get(i).isSelected = newSelection;		
+					}
+					siblings.get(i).colorAll();
+				}
+				
+			}else{
+				if (event.button == 1){
+					clearSelection();
+				}else if (!isSelected){
+					clearSelection();
+				}
+				isSelected = true;
+			}
+			colorAll();
+		}
 	}
 	
     private static int blend(int v1, int v2, int ratio) {
