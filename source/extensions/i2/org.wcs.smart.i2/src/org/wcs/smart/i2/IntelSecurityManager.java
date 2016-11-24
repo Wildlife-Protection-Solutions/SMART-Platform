@@ -37,6 +37,14 @@ public enum IntelSecurityManager {
 	}
 	
 	/**
+	 * Determine if the current user can create entities
+	 * @return
+	 */
+	public boolean canCreateEntity(){
+		return SmartDB.getCurrentEmployee().supportsUser(IntelAnalystUserLevel.INSTANCE);
+	}
+	
+	/**
 	 * Determine if the current user can view and modify
 	 * working sets
 	 * 

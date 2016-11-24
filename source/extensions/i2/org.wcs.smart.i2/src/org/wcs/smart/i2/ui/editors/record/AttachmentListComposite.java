@@ -159,6 +159,7 @@ public class AttachmentListComposite extends Composite{
 						});
 					}
 					index ++;
+					
 					if (mnuDelete == null){
 						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT,index);
 						mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -184,6 +185,7 @@ public class AttachmentListComposite extends Composite{
 						});
 					}
 					index ++;
+					
 					if (mnulinkTo != null){
 						mnulinkTo.dispose();
 						mnulinkTo = null;
@@ -232,9 +234,11 @@ public class AttachmentListComposite extends Composite{
 								}
 							});
 						}
+						index ++;
 					}
+					
+					if (mnuSep == null) mnuSep = new MenuItem(thumbMenu, SWT.SEPARATOR, index);
 					index ++;
-					if (mnuSep == null) mnuSep = new MenuItem(thumbMenu, SWT.SEPARATOR, index++);
 				}else{
 					if (mnuAdd != null){
 						mnuAdd.dispose();

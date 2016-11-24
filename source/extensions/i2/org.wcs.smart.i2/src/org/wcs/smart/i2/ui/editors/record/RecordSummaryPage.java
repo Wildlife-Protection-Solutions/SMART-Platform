@@ -534,18 +534,20 @@ public class RecordSummaryPage extends EditorPart{
 				}
 			});
 			
-			MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
-			newEntity.setText("New Entity ... ");
-			newEntity.addSelectionListener(new SelectionAdapter() {			
-				@Override
-				public void widgetSelected(SelectionEvent e) {				
-					NewEntityDialog dialog = new NewEntityDialog(getSite().getShell());
-					ContextInjectionFactory.inject(dialog, recordEditor.getContext());
-					if (dialog.open() == NewEntityDialog.OK){
-						recordEditor.linkEntity(dialog.getNewEntity());
+			if (IntelSecurityManager.INSTANCE.canCreateEntity()){
+				MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
+				newEntity.setText("New Entity ... ");
+				newEntity.addSelectionListener(new SelectionAdapter() {			
+					@Override
+					public void widgetSelected(SelectionEvent e) {				
+						NewEntityDialog dialog = new NewEntityDialog(getSite().getShell());
+						ContextInjectionFactory.inject(dialog, recordEditor.getContext());
+						if (dialog.open() == NewEntityDialog.OK){
+							recordEditor.linkEntity(dialog.getNewEntity());
+						}
 					}
-				}
-			});
+				});
+			}
 			
 			new MenuItem(menu, SWT.SEPARATOR);
 			
