@@ -410,6 +410,11 @@ public class CyberTrackerConfExporter {
 		buildResult = buildBasicAttributeNodes(splitResult.getToShowOncesBefore(), keyMap, nextId, 0, true, null);
 		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
 		nodeList.addAll(buildResult.getNodes());
+
+		//add photo nodes if required (at the beginning)
+		if (cmNode.isPhotoAllowed() && cmNode.isPhotoFisrt()) {
+			nextId = addPhotos(nextId, nodeList, cmNode.isPhotoRequired(), ctUtil.getCtProperties().getMaxPhotoCount());
+		}
 		
 		//adding all attributes that are supposed to be displayed
 		CyberTrackerId loopBackId = nextId;
@@ -417,9 +422,8 @@ public class CyberTrackerConfExporter {
 		nodeList.addAll(buildResult.getNodes());
 		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
 		
-		
-		//add photo nodes if required
-		if (cmNode.isPhotoAllowed()) {
+		//add photo nodes if required (at the end)
+		if (cmNode.isPhotoAllowed() && !cmNode.isPhotoFisrt()) {
 			nextId = addPhotos(nextId, nodeList, cmNode.isPhotoRequired(), ctUtil.getCtProperties().getMaxPhotoCount());
 		}
 		
