@@ -46,6 +46,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -55,6 +57,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener2;
@@ -346,8 +349,6 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		return false;
 	}
 	
-	
-	
 	/** Creates the map
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -355,12 +356,22 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	public void createPartControl(Composite parent) {
 		handlers = new ArrayList<EventHandler>();
 		
-		//configure tags so editors show in both perspectives
+		
 		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
-		MPart part = parentContext.get(MPart.class); 
+		MPart part = parentContext.get(MPart.class);
+		//disable close button on map editor
+		part.setCloseable(false);
+		CTabFolder folder = (CTabFolder)part.getParent().getWidget();
+		for (CTabItem item : folder.getItems()){
+			if (item.getControl() == null){
+				item.setData("smartclose", "false");
+			}			
+		}
+		
+		//configure tags so editors show in both perspectives
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
-		
+		//part.get
 		EventHandler handler = new EventHandler() {
 			@Override
 			public void handleEvent(Event event) {

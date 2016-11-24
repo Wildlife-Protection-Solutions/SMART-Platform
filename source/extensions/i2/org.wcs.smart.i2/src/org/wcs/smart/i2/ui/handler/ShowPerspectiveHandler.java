@@ -27,9 +27,12 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.ui.editors.IntelligenceMapEditor;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Show perspective handler with a single parameter identifying the perspective
@@ -43,6 +46,10 @@ public class ShowPerspectiveHandler {
 	public void execute(IEclipseContext context){
 		ContextInjectionFactory.invoke(new org.wcs.smart.ui.ShowPerspectiveHandler(), Execute.class, context);
 		
+		EPartService parts = context.get(EPartService.class);
+		for (MPart p : parts.getParts()){
+			if (E3Utils.getSourceObject(p) instanceof IntelligenceMapEditor) return;
+		}
 		
 		try {
 			//ensure map editor is open

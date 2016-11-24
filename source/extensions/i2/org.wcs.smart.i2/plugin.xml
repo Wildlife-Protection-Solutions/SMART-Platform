@@ -345,7 +345,8 @@
                id="org.wcs.smart.i2.toolbar.perspective">
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
-                  label="Data Analysis Mode">
+                  label="Data Analysis Mode"
+                  tooltip="open intelligence analysis mode">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
@@ -368,7 +369,8 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
-                  label="Data Assessment Mode">
+                  label="Data Assessment Mode"
+                  tooltip="open intelligence assessment mode">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAssessmentPerspective">

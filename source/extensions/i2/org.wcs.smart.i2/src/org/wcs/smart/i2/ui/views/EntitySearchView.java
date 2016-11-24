@@ -40,6 +40,8 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -172,6 +174,10 @@ public class EntitySearchView {
 	
 	@PostConstruct
 	public void createPartControl(Composite parent) {
+		//we seem to need this one and the one at the end to get this view to show on top of the other views in the perspective stacks
+		//I am sure there must be a better way...
+		context.get(EPartService.class).activate(context.get(MPart.class), true);	
+		
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginHeight = 0;
 		((GridLayout)parent.getLayout()).marginWidth = 0;
@@ -205,6 +211,8 @@ public class EntitySearchView {
 		savedSearches.schedule();
 		
 		doBasicSearch(0);
+
+		context.get(EPartService.class).activate(context.get(MPart.class), true);
 	}
 
 	

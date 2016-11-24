@@ -174,7 +174,9 @@ public class AttachmentPropertiesDialog {
 		
 		Session s = HibernateManager.openSession();
 		try{
-			attachment = (IntelAttachment) s.get(IntelAttachment.class, attachment.getUuid());
+			if (attachment.getUuid() != null){
+				attachment = (IntelAttachment) s.get(IntelAttachment.class, attachment.getUuid());
+			}
 			List<Entry> details = new ArrayList<AttachmentPropertiesDialog.Entry>();
 			details.add(new Entry("Name", attachment.getFilename()));
 			details.add(new Entry("Created By", SmartLabelProvider.getShortLabel(attachment.getCreatedBy())));

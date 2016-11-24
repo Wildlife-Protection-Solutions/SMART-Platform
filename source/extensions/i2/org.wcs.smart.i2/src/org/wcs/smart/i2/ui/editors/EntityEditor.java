@@ -239,6 +239,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private ToolItem saveItem;
 	
 	private EntityRelationshipDetailsShell detailsShell;
+	private RecordDetailsShell recordDetailsShell;
 	
 	private List<EventHandler> eventHandles = null;
 	
@@ -1426,6 +1427,53 @@ public class EntityEditor extends EditorPart implements MapPart{
 				openSelectedRecord();
 			}
 		});
+		
+		//tooltip shell
+		Listener tableListener = new Listener(){
+			private boolean doHover = false;
+			
+			@Override
+			public void handleEvent(Event event) {
+				switch(event.type){
+					case SWT.MouseDoubleClick:
+					case SWT.MouseDown:
+					case SWT.MouseUp:
+						doHover = false;
+						break;
+					case SWT.MouseMove:
+						doHover= true;
+						break;
+					case SWT.MouseHover:
+						if (doHover){
+							doHover(event.x,event.y);
+						}
+						break;
+				}
+					
+			}
+			private void doHover(int x, int y){
+				ViewerCell cell = tblRecords.getCell(new Point(x, y));
+				if (cell == null) return;
+				if (cell.getElement() instanceof IntelRecord){
+					IntelRecord record = (IntelRecord) cell.getElement();
+					if (recordDetailsShell == null || recordDetailsShell.isDisposed()){
+						recordDetailsShell = new RecordDetailsShell(getSite().getShell(),record);
+					}else{
+						recordDetailsShell.setRecord(record);
+					}
+					int height = recordDetailsShell.getSize().y;
+					Point p  = tblRecords.getControl().toDisplay(x, y);
+					recordDetailsShell.open(new Point(p.x+10, (int)Math.round(p.y - height*0.5)));
+				}
+			}
+			
+		};
+		
+		tblRecords.getControl().addListener(SWT.MouseDoubleClick, tableListener);
+		tblRecords.getControl().addListener(SWT.MouseDown, tableListener);
+		tblRecords.getControl().addListener(SWT.MouseUp, tableListener);
+		tblRecords.getControl().addListener(SWT.MouseMove, tableListener);
+		tblRecords.getControl().addListener(SWT.MouseHover, tableListener);	
 		
 		Menu recordsMenu = new Menu(tblRecords.getTable());
 		tblRecords.getTable().setMenu(recordsMenu);
