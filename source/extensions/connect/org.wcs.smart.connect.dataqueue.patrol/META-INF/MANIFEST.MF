@@ -5,10 +5,10 @@ Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.patrol;singleton:=true
 Bundle-Version: 4.0.1.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart.connect.dataqueue;bundle-version="4.0.0",
- org.wcs.smart.patrol;bundle-version="4.0.0",
- org.wcs.smart;bundle-version="4.0.0",
- org.wcs.smart.connect;bundle-version="4.0.0"
+ org.wcs.smart.connect.dataqueue,
+ org.wcs.smart.patrol,
+ org.wcs.smart,
+ org.wcs.smart.connect
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.connect.dataqueue.patrol

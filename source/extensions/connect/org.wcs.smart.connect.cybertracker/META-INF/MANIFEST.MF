@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart,
  org.wcs.smart.p2,
  org.wcs.smart.cybertracker,
- org.wcs.smart.connect;bundle-version="4.0.0"
+ org.wcs.smart.connect
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: org.wcs.smart

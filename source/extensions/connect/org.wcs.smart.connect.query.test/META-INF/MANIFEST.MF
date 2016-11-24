@@ -6,14 +6,14 @@ Bundle-Version: 1.0.0
 Bundle-Activator: org.wcs.smart.connect.query.test.QueryTesterPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart;bundle-version="4.0.0",
- org.wcs.smart.connect;bundle-version="4.0.0",
- org.wcs.smart.query;bundle-version="4.0.0",
- org.wcs.smart.entity.query;bundle-version="4.0.0",
- org.wcs.smart.er.query;bundle-version="4.0.0",
- org.wcs.smart.intelligence.query;bundle-version="4.0.0",
- org.wcs.smart.observation.query;bundle-version="4.0.0",
- org.wcs.smart.patrol.query;bundle-version="4.0.0"
+ org.wcs.smart,
+ org.wcs.smart.connect,
+ org.wcs.smart.query,
+ org.wcs.smart.entity.query,
+ org.wcs.smart.er.query,
+ org.wcs.smart.intelligence.query,
+ org.wcs.smart.observation.query,
+ org.wcs.smart.patrol.query
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/activation-1.1.jar,

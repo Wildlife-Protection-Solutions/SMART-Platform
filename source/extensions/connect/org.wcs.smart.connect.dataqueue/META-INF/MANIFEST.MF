@@ -7,8 +7,8 @@ Bundle-Activator: org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart;bundle-version="4.0.0",
- org.wcs.smart.connect;bundle-version="4.0.0",
+ org.wcs.smart,
+ org.wcs.smart.connect,
  org.wcs.smart.p2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
