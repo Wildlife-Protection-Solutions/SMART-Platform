@@ -411,13 +411,35 @@ public class CyberTrackerConfExporter {
 		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
 		nodeList.addAll(buildResult.getNodes());
 
+		CyberTrackerId loopBackId = nextId;
+
 		//add photo nodes if required (at the beginning)
 		if (cmNode.isPhotoAllowed() && cmNode.isPhotoFisrt()) {
 			nextId = addPhotos(nextId, nodeList, cmNode.isPhotoRequired(), ctUtil.getCtProperties().getMaxPhotoCount());
 		}
+
+		//gps reading at the beginning if configured that way
+		if (cmNode.getModel().isGpsFirst()) {
+			if (!cmNode.isCollectMultipleObservations()) {
+				//options for regular screens
+				buildResult = createWaypointSaveOptionNodes(nextId);
+				nodeList.addAll(buildResult.getNodes());
+				nextId = buildResult.getNextId(); //id for next screen
+			} else if (!cmNode.isUseSingleGpsPoint()) {
+				//multiple observations and each need a gps point first
+				Node takeGpsMsgNode = screensFactory.createNodeMsgText(nextId.getNodeId(), Messages.CyberTrackerConfExporter_MultiObsGpsFirst, Messages.CyberTrackerConfExporter_MultiObsGpsFirstMessage);
+				nodeList.add(takeGpsMsgNode);
+				nextId = new CyberTrackerId();
+				//add snap gps control to record gps data for the observation
+				Controls.Control snapGps = ctUtil.getScreensFactory().createSnapGpsPosition();
+				ScreensObjectFactory.addControlToNode(takeGpsMsgNode, snapGps);
+				//add snap to last waypoint control to page so that alerts come through with valid locations
+				Control control2 = ScreensObjectFactory.getNavigationControl(takeGpsMsgNode);
+				control2.setTranslateNextScreenId(nextId.getNodeId());
+			}
+		}
 		
 		//adding all attributes that are supposed to be displayed
-		CyberTrackerId loopBackId = nextId;
 		buildResult = buildBasicAttributeNodes(splitResult.getToShow(), keyMap, nextId, 0, true, null);
 		nodeList.addAll(buildResult.getNodes());
 		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
@@ -443,13 +465,23 @@ public class CyberTrackerConfExporter {
 		String defaultAttrValues = recordDefaultValues(splitResult.getInvisibleList());
 		if (cmNode.isCollectMultipleObservations()) {
 			//this is observation group and we show simple "save" screen as it will always be added as new waypoint
-			Node saveGrpNode = ctUtil.createSaveNode(nextId, rootId, Messages.CyberTrackerConfExporter_EndGroup, Messages.CyberTrackerConfExporter_EndGroupMessage, !cmNode.isUseSingleGpsPoint());
+			boolean takeGps = !cmNode.isUseSingleGpsPoint() && !cmNode.getModel().isGpsFirst();
+			Node saveGrpNode = ctUtil.createSaveNode(nextId, rootId, Messages.CyberTrackerConfExporter_EndGroup, Messages.CyberTrackerConfExporter_EndGroupMessage, takeGps);
 			addAttributesDefaultValues(saveGrpNode, defaultAttrValues);
 			nodeList.add(saveGrpNode);
 		} else {
-			//this is a regular single observation -> show "save as new" / "add to last" options
-			nodeList.addAll(createSaveWaypointNodes(nextId, defaultAttrValues));
+			//this is a regular single observation
+			if (cmNode.getModel().isGpsFirst()) {
+				//simple save without gps as option (as new/ad to last) was selected before
+				Node saveObNode = ctUtil.createSaveNode(nextId, rootId, Messages.CyberTrackerConfExporter_EndObservation, Messages.CyberTrackerConfExporter_EndObservationMessage, false);
+				addAttributesDefaultValues(saveObNode, defaultAttrValues);
+				nodeList.add(saveObNode);
+			} else {
+				//show usual "save as new" / "add to last" options
+				nodeList.addAll(createSaveWaypointNodes(nextId, defaultAttrValues));
+			}
 		}
+		
 		return nodeList;
 	}
 
@@ -1050,8 +1082,7 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId addToLastId = new CyberTrackerId();
 		Node addToLastNode = ctUtil.createSaveNode(addToLastId, rootId, Messages.CyberTrackerExporter_Waypoint_AddToLast, Messages.CyberTrackerConfExporter_SaveWithoutGps, false);
 
-		//add snap to last waypoint control to page so that alerts come through with valid
-		//locations
+		//add snap to last waypoint control to page so that alerts come through with valid locations
 		Controls.Control snapToLast = ctUtil.getScreensFactory().createSnapLastGpsPosition();
 		ScreensObjectFactory.addControlToNode(addToLastNode, snapToLast);
 		
@@ -1069,6 +1100,43 @@ public class CyberTrackerConfExporter {
 		return nodeList;
 	}	
 
+	/**
+	 * Creates nodes where user can specify if he want to save observation as new waypoint or attach to previous.
+	 * Nodes are intended to use at the beginning (or in the middle) as they have "Next" button
+	 * 
+	 * @param id
+	 */
+	private BuildNodesResult createWaypointSaveOptionNodes(CyberTrackerId id) {
+		List<Node> nodeList = new ArrayList<Node>();
+		
+		CyberTrackerId saveAsNewId = new CyberTrackerId();
+		Node saveAsNewNode = screensFactory.createNodeMsgText(saveAsNewId.getNodeId(), Messages.CyberTrackerExporter_Waypoint_SaveAsNew, Messages.CyberTrackerConfExporter_SaveAndGps);
+		//add snap gps control to record gps data for the observation
+		Controls.Control snapGps = ctUtil.getScreensFactory().createSnapGpsPosition();
+		ScreensObjectFactory.addControlToNode(saveAsNewNode, snapGps);
+		
+		CyberTrackerId addToLastId = new CyberTrackerId();
+		Node addToLastNode = screensFactory.createNodeMsgText(addToLastId.getNodeId(), Messages.CyberTrackerExporter_Waypoint_AddToLast, Messages.CyberTrackerConfExporter_SaveWithoutGps);
+		//add snap to last waypoint control to page so that alerts come through with valid locations
+		Controls.Control snapToLast = ctUtil.getScreensFactory().createSnapLastGpsPosition();
+		ScreensObjectFactory.addControlToNode(addToLastNode, snapToLast);
+		
+		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
+		ids.add(new CyberTrackerIdMap(saveAsNewId, newWpElementsIds.get(0)));
+		ids.add(new CyberTrackerIdMap(addToLastId, newWpElementsIds.get(1)));
+
+		Node node = ctUtil.createRadioNode(id.getNodeId(),  Messages.CyberTrackerExporter_Waypoint_ScreenTitle, ids, newWpResultId.getItemId(), true);
+		CyberTrackerId nextId = new CyberTrackerId();
+		Control control2 = ScreensObjectFactory.getNavigationControl(node);
+		control2.setTranslateNextScreenId(nextId.getNodeId());
+		
+		nodeList.add(node);
+		nodeList.add(saveAsNewNode);
+		nodeList.add(addToLastNode);
+		
+		return new BuildNodesResult(nextId, nodeList);
+	}	
+	
 	/**
 	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
 	 * 

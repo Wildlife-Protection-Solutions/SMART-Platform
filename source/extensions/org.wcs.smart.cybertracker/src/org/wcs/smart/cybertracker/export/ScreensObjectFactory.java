@@ -1093,6 +1093,25 @@ public class ScreensObjectFactory {
 		control.setRequired("True"); //$NON-NLS-1$
 		return control;
 	}
+
+	/**
+	 * Creates a snap to last gps position control
+	 * <Control>
+	 *     <Type>{096D1ED0-442D-41A3-BB4E-19113EBD7EF9}</Type>
+	 *     <Id>20</Id>
+	 *     <Required>True</Required>
+	 *     <AutoConnect>True</AutoConnect>
+	 * </Control>
+	 * @return
+	 */
+	public Controls.Control createSnapGpsPosition(){
+		Controls.Control control = new Controls.Control();
+		control.setType("{096D1ED0-442D-41A3-BB4E-19113EBD7EF9}"); //$NON-NLS-1$
+		control.setId(20);
+		control.setRequired("True"); //$NON-NLS-1$
+		control.setAutoConnect("True"); //$NON-NLS-1$
+		return control;
+	}
 	
 	/**
     <Control>
