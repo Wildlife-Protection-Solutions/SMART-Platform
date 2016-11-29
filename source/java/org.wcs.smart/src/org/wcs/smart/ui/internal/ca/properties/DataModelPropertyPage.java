@@ -161,6 +161,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.children"); //$NON-NLS-1$
 		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.activeChildren"); //$NON-NLS-1$
 		
+		if (getSession().getTransaction().isActive()){
+			getSession().getTransaction().rollback();
+		}
+		if (getSession().isOpen()) getSession().close();
 		return super.close();
 	}
 	
