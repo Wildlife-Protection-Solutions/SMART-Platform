@@ -508,6 +508,7 @@ public class PatrolHibernateManager extends HibernateManager{
 				.list();
 		Map<PatrolScreenOptionMeta, ScreenOption> options = new HashMap<PatrolScreenOptionMeta, ScreenOption>();
 		for (ScreenOption screenOption : results) {
+			screenOption.getUuidList().size();
 			try {
 				options.put(PatrolScreenOptionMeta.valueOf(screenOption.getType()), screenOption);
 			} catch (IllegalArgumentException e) {
