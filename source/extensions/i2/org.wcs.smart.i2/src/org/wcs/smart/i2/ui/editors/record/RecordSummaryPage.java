@@ -421,6 +421,7 @@ public class RecordSummaryPage extends EditorPart{
 	}
 	
 	public void setEditMode(boolean editMode){		
+		if (editItem.isDisposed()) return;
 		editItem.setSelection(editMode);
 		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			deleteItem.setEnabled(editMode);		

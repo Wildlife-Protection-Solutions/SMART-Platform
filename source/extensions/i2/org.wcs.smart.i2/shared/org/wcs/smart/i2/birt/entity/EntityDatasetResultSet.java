@@ -178,10 +178,12 @@ public class EntityDatasetResultSet implements IResultSet {
 		if (currentItem == null) return null;
 		IntelEntity i = (IntelEntity) ((Object[])currentItem)[0];
 		
-		try {
-			i.getPrimaryAttachment().computeFileLocation(connection.getSession());
-		} catch (Exception e) {
-			Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e); //$NON-NLS-1$
+		if (i.getPrimaryAttachment() != null){
+			try {
+				i.getPrimaryAttachment().computeFileLocation(connection.getSession());
+			} catch (Exception e) {
+				Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e); //$NON-NLS-1$
+			}
 		}
 		try {
 			if (colIndex <= 8){

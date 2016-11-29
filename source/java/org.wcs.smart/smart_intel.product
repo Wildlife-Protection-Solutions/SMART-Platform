@@ -122,7 +122,6 @@ limitations under the License.
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.emf.common"/>
-      <feature id="org.wcs.smart.i2.feature" version="1.0.0.qualifier"/>
    </features>
 
    <configurations>

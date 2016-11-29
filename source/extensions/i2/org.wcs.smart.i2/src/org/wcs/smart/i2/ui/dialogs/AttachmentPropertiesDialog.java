@@ -164,7 +164,10 @@ public class AttachmentPropertiesDialog {
 			@Override
 			public String getText(Object element){
 				if (element instanceof String) return "";
-				if (element instanceof Entry) return ((Entry) element).getValue().toString();
+				if (element instanceof Entry){
+					if (((Entry)element).getValue() == null) return "";
+					return ((Entry) element).getValue().toString();
+				}
 				return super.getText(element);
 			}
 		});

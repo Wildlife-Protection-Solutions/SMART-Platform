@@ -38,11 +38,21 @@ public abstract class RelationshipSearchJob extends Job{
 				Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()),
 				Restrictions.or (
 					Restrictions.and(Restrictions.eq("sourceEntityType", srcType), 
-							Restrictions.eq("targetEntityType", targetType)),
+						Restrictions.eq("targetEntityType", targetType)),
 					Restrictions.and(Restrictions.eq("sourceEntityType", targetType), 
-							Restrictions.eq("targetEntityType", srcType)),
-							Restrictions.isNull("sourceEntityType"),
-							Restrictions.isNull("targetEntityType")
+						Restrictions.eq("targetEntityType", srcType)),
+					Restrictions.and(Restrictions.isNull("sourceEntityType"),
+						Restrictions.isNull("targetEntityType")),
+					Restrictions.and(Restrictions.isNull("sourceEntityType"),
+						Restrictions.or(
+							Restrictions.eq("targetEntityType", srcType),
+							Restrictions.eq("targetEntityType", targetType)
+						)),
+					Restrictions.and(Restrictions.isNull("targetEntityType"),
+						Restrictions.or(
+							Restrictions.eq("sourceEntityType", srcType),
+							Restrictions.eq("sourceEntityType", targetType)
+						))		
 			))).list());
 			for (IntelRelationshipType i : rtypes){
 				i.getSourceEntityType();

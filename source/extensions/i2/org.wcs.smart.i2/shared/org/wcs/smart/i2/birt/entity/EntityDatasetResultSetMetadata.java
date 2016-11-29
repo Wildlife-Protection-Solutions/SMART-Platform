@@ -79,7 +79,12 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			if (this == DATE_MODIFIED) return entity.getDateModified();
 			if (this == CREATED_BY) return MessageFormat.format("{0} {1}", entity.getCreatedBy().getGivenName(), entity.getCreatedBy().getFamilyName());
 			if (this == MODIFIED_BY) return MessageFormat.format("{0} {1}", entity.getLastModifiedBy().getGivenName(), entity.getLastModifiedBy().getFamilyName());
-			if (this == PRIMARY_IMAGE) return "file:/" + entity.getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
+			if (this == PRIMARY_IMAGE){
+				if (entity.getPrimaryAttachment() == null){
+					return "";
+				}
+				return "file:/" + entity.getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
+			}
 			return null;
 		}
 	}

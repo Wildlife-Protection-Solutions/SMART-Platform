@@ -43,10 +43,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.wcs.smart.i2"; //$NON-NLS-1$
 
 	//Version of Data Structures required for current implementation
-	public static final String DB_VERSION_31 = "3.1"; //$NON-NLS-1$
-	public static final String DB_VERSION_32 = "3.2"; //$NON-NLS-1$
-	public static final String DB_VERSION_40 = "4.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_40; //current version
+	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_1; //the latest db version of tables
+	
 	
 	public static final String ICON_ATTRIBUTE_GROUP = "org.wcs.smart.i2.icon.attribute.group"; //$NON-NLS-1$
 	public static final String ICON_ATTRIBUTE_GROUP_NEW = "org.wcs.smart.i2.icon.attribute.group.new"; //$NON-NLS-1$

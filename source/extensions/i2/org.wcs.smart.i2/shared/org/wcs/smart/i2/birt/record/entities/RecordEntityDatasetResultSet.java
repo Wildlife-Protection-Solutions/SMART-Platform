@@ -125,10 +125,13 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 		m_currentRowId++;
 		if (results.next()){
 			currentItem = results.get();
-			try{
-				((IntelEntityRecord)((Object[])currentItem)[0]).getEntity().getPrimaryAttachment().computeFileLocation(connection.getSession());
-			}catch (Exception ex){
-				Logger.getLogger(RecordEntityDatasetResultSet.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+			
+			if (((IntelEntityRecord)((Object[])currentItem)[0]).getEntity().getPrimaryAttachment() != null){
+				try{
+					((IntelEntityRecord)((Object[])currentItem)[0]).getEntity().getPrimaryAttachment().computeFileLocation(connection.getSession());
+				}catch (Exception ex){
+					Logger.getLogger(RecordEntityDatasetResultSet.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+				}
 			}
 			return true;
 		}

@@ -95,11 +95,12 @@ public class AttributeListPanel extends Composite {
 	private void createControls(){
 		setLayout(new GridLayout(2, false));
 		
-		items = new ListViewer(this, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+		items = new ListViewer(this, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		items.setContentProvider(ArrayContentProvider.getInstance());
 		items.setLabelProvider(new AttributeListItemLabelProvider());
 		items.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)items.getControl().getLayoutData()).heightHint = 200;
+		((GridData)items.getControl().getLayoutData()).widthHint = 100;
 		items.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		items.addDoubleClickListener(new IDoubleClickListener() {
 			@Override

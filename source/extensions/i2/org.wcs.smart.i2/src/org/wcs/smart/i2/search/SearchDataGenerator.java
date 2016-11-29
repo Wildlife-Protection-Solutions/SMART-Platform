@@ -209,7 +209,11 @@ public class SearchDataGenerator {
 			value.setNumberValue(Math.random() * 100 * Math.random() + Math.random());
 		}else if (a.getAttribute().getType() == IAttributeType.TEXT){
 			StringBuilder sb= new StringBuilder();
-			for (int i = 0; i < Math.random() * 15; i ++){
+			int numWords = (int)Math.round(Math.random() * 15);
+			if (a.getEntityType().getIdAttribute().equals(a.getAttribute())){
+				if (numWords == 0) numWords = 1;
+			}
+			for (int i = 0; i < numWords; i ++){
 				sb.append(strings.get(  (int)Math.round(Math.random() * (strings.size() - 1) )) + " ");
 			}
 			value.setStringValue(sb.toString());

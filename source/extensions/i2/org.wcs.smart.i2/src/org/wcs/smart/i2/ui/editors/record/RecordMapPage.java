@@ -99,7 +99,13 @@ public class RecordMapPage extends SmartMapEditorPart {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
+			//wait for job to finish
+			try {
+				loadDefaultLayers.join();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			boolean added = false;
 			try {
 				
@@ -108,7 +114,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POLYGON, recordEditor.getRecord().getUuid());
 					polygonFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
 					polygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(polygonFeatureType);
-					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(polygonResource), 0){
+					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(polygonResource), getMap().getLayersInternal().size()){
 						 public void run( IProgressMonitor monitor ) throws Exception {
 							 super.run(monitor);
 							 if (getLayers() != null &&  !getLayers().isEmpty()){
@@ -125,7 +131,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POINT, recordEditor.getRecord().getUuid());
 					pointFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
 					pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(pointFeatureType);
-					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(pointResource), 0){
+					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(pointResource), getMap().getLayersInternal().size()){
 						 public void run( IProgressMonitor monitor ) throws Exception {
 							 super.run(monitor);
 							 if (getLayers() != null &&  !getLayers().isEmpty()){
@@ -205,13 +211,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 		if (loadDefaultLayers != null){
 			loadDefaultLayers.cancel();			
 		}
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap()){
-			protected IStatus run(IProgressMonitor monitor) {
-				IStatus status = super.run(monitor);
-				if (localMapLayerJob != null && !monitor.isCanceled()) localMapLayerJob.schedule();
-				return status;
-			}
-		};
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap());
 		loadDefaultLayers.schedule();
 	}
 	

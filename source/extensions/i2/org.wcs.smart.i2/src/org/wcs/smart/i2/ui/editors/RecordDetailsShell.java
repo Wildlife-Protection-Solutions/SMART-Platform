@@ -230,8 +230,9 @@ public class RecordDetailsShell extends SmartShellDialog{
 				dModified = temp.getDateModified();
 				for (IntelEntityRecord e : temp.getEntities()){
 					sbEntities.append(e.getEntity().getIdAttributeAsText());
-					sbEntities.append("\n");
+					sbEntities.append(", ");
 				}
+				if (sbEntities.length() > 0) sbEntities.delete(sbEntities.length() - 2, sbEntities.length());
 			}finally{
 				s.close();
 			}
@@ -242,12 +243,13 @@ public class RecordDetailsShell extends SmartShellDialog{
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {	
+					if (lblName.isDisposed()) return;
 					lblName.setText(name1);
 					lblNarrative.setText(narr1);
 					lblEntities.setText(sbEntities.toString());
 					lblDateCreated.setText(DateFormat.getDateInstance().format(dCreated1));
 					lblDateModified.setText(DateFormat.getDateInstance().format(dModified1));
-					owner.layout(true);
+					owner.layout(true, true);
 					sc.setMinSize(scContent.computeSize(sc.getClientArea().width, SWT.DEFAULT));
 				}
 			});

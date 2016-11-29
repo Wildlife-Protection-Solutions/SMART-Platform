@@ -140,7 +140,12 @@ public class EntityListShell extends SmartShellDialog {
 		});
 		
 		
-		List<IntelSearchResultItem> entities = ((IntelSearchResult) editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY)).getResults();
+		List<IntelSearchResultItem> entities = null;
+		if (editor.getContext() != null && editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY) != null){
+			entities = ((IntelSearchResult) editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY)).getResults();
+		}else{
+			entities = new ArrayList<>();
+		}
 		List<Object> allItems = new ArrayList<Object>();
 		allItems.add(ALL_ENTITIES);
 		allItems.add(NEW_ENTITY);
@@ -242,10 +247,12 @@ public class EntityListShell extends SmartShellDialog {
 					.list());
 					for (IntelEntity e : entities){
 						e.getIdAttributeAsText();
-						try {
-							e.getPrimaryAttachment().computeFileLocation(s);
-						} catch (Exception ex) {
-							Intelligence2PlugIn.log(ex.getMessage(), ex);
+						if (e.getPrimaryAttachment() != null){
+							try {
+								e.getPrimaryAttachment().computeFileLocation(s);
+							} catch (Exception ex) {
+								Intelligence2PlugIn.log(ex.getMessage(), ex);
+							}
 						}
 					}
 				}finally{

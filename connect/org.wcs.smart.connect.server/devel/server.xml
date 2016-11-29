@@ -48,7 +48,7 @@
     	name="org.wcs.smart.connect.datasource.postgresql"
     	username="smart" 
     	password="smart" 
-    	url="jdbc:postgresql://192.168.50.131:5432/connectjeff" />
+    	url="jdbc:postgresql://192.168.50.131:5432/connectemily" />
     	
     
      <!-- environment variables -->

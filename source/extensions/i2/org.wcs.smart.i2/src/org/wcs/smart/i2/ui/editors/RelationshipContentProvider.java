@@ -43,6 +43,7 @@ public class RelationshipContentProvider implements ITreeContentProvider {
 
 	private HashMap<IntelRelationshipGroup, List<IntelEntityRelationship>> data = new HashMap<IntelRelationshipGroup, List<IntelEntityRelationship>>();
 	private UUID entityUuid;
+	private List<?> input;
 	
 	private static IntelRelationshipGroup NONEGROUP;
 	static{
@@ -62,45 +63,53 @@ public class RelationshipContentProvider implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput instanceof List){
-			data = new HashMap<IntelRelationshipGroup, List<IntelEntityRelationship>>();
-			List<?> items = (List<?>)newInput;
-			for (Object x : items){
-				if (x instanceof IntelEntityRelationship){
-					IntelRelationshipGroup g = ((IntelEntityRelationship) x).getRelationshipType().getRelationshipGroup();
-					if (g == null) g = NONEGROUP;
-					
-					List<IntelEntityRelationship> rels = data.get(g);
-					if (rels == null){
-						rels = new ArrayList<IntelEntityRelationship>();
-						data.put(g, rels);
-					}
-					rels.add((IntelEntityRelationship) x);
-				}
-			}
-			for (List<IntelEntityRelationship> relations : data.values()){
-				Collections.sort(relations, (a,b) -> {
-					if (a.getRelationshipType().equals(b.getRelationshipType())){
-						String namea = null;
-						String nameb = null;
-						if (a.getSourceEntity().getUuid().equals(entityUuid)){
-							namea = a.getTargetEntity().getIdAttributeAsText();
-						}else{
-							namea = a.getSourceEntity().getIdAttributeAsText();
-						}
-						if (b.getSourceEntity().getUuid().equals(entityUuid)){
-							nameb = b.getTargetEntity().getIdAttributeAsText();
-						}else{
-							nameb = b.getSourceEntity().getIdAttributeAsText();
-						}
-						return Collator.getInstance().compare(namea.toLowerCase(), nameb.toLowerCase());
-					}else{
-						return Collator.getInstance().compare(a.getRelationshipType().getName().toLowerCase(), b.getRelationshipType().getName().toLowerCase());
-					}
-				});
-			}
+			this.input = (List<?>) newInput;
+			parseInput();
 		}
 	}
-
+	
+	public void refresh(){
+		parseInput();
+	}
+	
+	private void parseInput(){
+		data = new HashMap<IntelRelationshipGroup, List<IntelEntityRelationship>>();
+		List<?> items = input;
+		for (Object x : items){
+			if (x instanceof IntelEntityRelationship){
+				IntelRelationshipGroup g = ((IntelEntityRelationship) x).getRelationshipType().getRelationshipGroup();
+				if (g == null) g = NONEGROUP;
+				
+				List<IntelEntityRelationship> rels = data.get(g);
+				if (rels == null){
+					rels = new ArrayList<IntelEntityRelationship>();
+					data.put(g, rels);
+				}
+				rels.add((IntelEntityRelationship) x);
+			}
+		}
+		for (List<IntelEntityRelationship> relations : data.values()){
+			Collections.sort(relations, (a,b) -> {
+				if (a.getRelationshipType().equals(b.getRelationshipType())){
+					String namea = null;
+					String nameb = null;
+					if (a.getSourceEntity().getUuid().equals(entityUuid)){
+						namea = a.getTargetEntity().getIdAttributeAsText();
+					}else{
+						namea = a.getSourceEntity().getIdAttributeAsText();
+					}
+					if (b.getSourceEntity().getUuid().equals(entityUuid)){
+						nameb = b.getTargetEntity().getIdAttributeAsText();
+					}else{
+						nameb = b.getSourceEntity().getIdAttributeAsText();
+					}
+					return Collator.getInstance().compare(namea.toLowerCase(), nameb.toLowerCase());
+				}else{
+					return Collator.getInstance().compare(a.getRelationshipType().getName().toLowerCase(), b.getRelationshipType().getName().toLowerCase());
+				}
+			});
+		}
+	}
 	@Override
 	public Object[] getElements(Object inputElement) {
 		List<IntelRelationshipGroup> grps = new ArrayList<IntelRelationshipGroup>();

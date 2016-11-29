@@ -102,6 +102,7 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 							@Override
 							protected void afterLoad() {
 								Display.getDefault().syncExec(()->{
+									if (types.getControl().isDisposed()) return;
 										if (rtypes.isEmpty()){
 											types.setInput(new String[]{"No relationship types found for given entity types"});
 										}else{

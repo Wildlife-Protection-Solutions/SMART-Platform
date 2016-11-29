@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
-import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -155,6 +154,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		scroll.setContent(details);
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
+		scroll.addListener(SWT.Resize, e->scroll.setSize(details.computeSize(scroll.getClientArea().width, SWT.DEFAULT)));
 		
 		initDetails(relationship.getRelationshipType());
 		
@@ -172,8 +172,8 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 				}
 			}
 		}	
-		
-		int height = parent.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		parent.layout(true, true);
+		int height = parent.computeSize(400, SWT.DEFAULT).y;
 		if (height > 500) height = 500;
 		shell.setSize(400, height);
 	}
@@ -181,7 +181,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 	private void initDetails(IntelRelationshipType type){
 		List<IntelRelationshipTypeAttribute> all = new ArrayList<IntelRelationshipTypeAttribute>();
 		all.addAll(type.getAttributes());
-		Collections.sort(all, (a, b) -> Collator.getInstance().compare(a.getAttribute().getName().toLowerCase(), b.getAttribute().getName().toLowerCase()));
+		Collections.sort(all, (a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
 		
 		for (IntelRelationshipTypeAttribute a : all){
 			Label ll = new Label(details, SWT.NONE);
@@ -189,7 +189,9 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 			ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 			ll.setFont(boldFont);
 			
-			ll = new Label(details, SWT.NONE);
+			ll = new Label(details, SWT.WRAP);
+			ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)ll.getLayoutData()).widthHint = 100;
 			if (relationship.getAttributes() != null){
 				for (IntelEntityRelationshipAttributeValue value : relationship.getAttributes()){
 					if (value.getAttribute().equals(a.getAttribute())){
@@ -200,7 +202,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 			}
 		}
 		
-		scroll.setMinSize(details.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		scroll.setSize(details.computeSize(scroll.getClientArea().width, SWT.DEFAULT));
 	}
 	
 	public IntelEntityRelationship getRelationship(){

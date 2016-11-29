@@ -70,6 +70,7 @@ public class RecordEntityDatasetResultSetMetadata implements IResultSetMetaData 
 			case ENTITY_ID:
 				return entityrecord.getEntity().getIdAttributeAsText();
 			case ENTITY_IMAGE:
+				if (entityrecord.getEntity().getPrimaryAttachment() == null) return null;
 				try {
 					return "file:/" + entityrecord.getEntity().getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
 				} catch (IOException e) {

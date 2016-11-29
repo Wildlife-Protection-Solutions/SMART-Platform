@@ -1438,5 +1438,29 @@
             name="Fuzzy String Matching ">
       </page>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.i2.plugin.IntelligenceDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.i2.plugin.OnInstallAction"
+            name="org.wcs.smart.i2.onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="1.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.i2.plugin.OnUninstallAction"
+            name="org.wcs.smart.i2.onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="1.0.0">
+      </action>
+   </extension>
 
 </plugin>

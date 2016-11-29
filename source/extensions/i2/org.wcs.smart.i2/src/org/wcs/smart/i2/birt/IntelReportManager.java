@@ -72,6 +72,8 @@ public enum IntelReportManager {
 
 	INSTANCE;
 
+	public static final String TEMP_DIRECTORY = IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP";
+	
 	/**
 	 * The BIRT template for intelligence records for the given conservation area.
 	 * 
@@ -110,7 +112,7 @@ public enum IntelReportManager {
 	public Path getTemporaryDirectory(){
 		return FileSystems.getDefault().getPath(
 				SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-				IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP");
+				TEMP_DIRECTORY);
 	}
 	
 	/**

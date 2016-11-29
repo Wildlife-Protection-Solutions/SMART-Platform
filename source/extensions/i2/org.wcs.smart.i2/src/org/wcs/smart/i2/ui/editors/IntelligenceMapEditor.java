@@ -57,7 +57,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener2;
@@ -115,6 +114,7 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
 import org.wcs.smart.ui.map.ScaleRatioComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -244,9 +244,22 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {
 	            if (partRef.getPart(false) == IntelligenceMapEditor.this) {
+	            	
 	                IToolManager toolManager = ApplicationGIS.getToolManager();
 	                toolManager.setCurrentEditor( IntelligenceMapEditor.this.mapViewer );
 	                IntelligenceMapEditor.this.tools.selectLastTool();
+	                
+	                //make sure the table does not display the close button
+	                //I tried this with css styles but it didn't work properly; the 
+	                //active editor ended up with the wrong styling
+	                MPart part = parentContext.get(MPart.class);
+	        		CTabFolder folder = (CTabFolder)part.getParent().getWidget();
+	        		for (CTabItem item : folder.getItems()){
+	        			if (item.getControl() == part.getWidget()){
+	        				item.setShowClose(false);
+	        				break;
+	        			}			
+	        		}
 	            }
 	        }
 
@@ -361,13 +374,8 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		MPart part = parentContext.get(MPart.class);
 		//disable close button on map editor
 		part.setCloseable(false);
-		CTabFolder folder = (CTabFolder)part.getParent().getWidget();
-		for (CTabItem item : folder.getItems()){
-			if (item.getControl() == null){
-				item.setData("smartclose", "false");
-			}			
-		}
-		
+		part.getTags().add(E3Utils.DO_NOT_CLOSE_TAG);
+
 		//configure tags so editors show in both perspectives
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);

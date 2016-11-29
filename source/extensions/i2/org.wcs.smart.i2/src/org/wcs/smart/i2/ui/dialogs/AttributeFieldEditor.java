@@ -267,15 +267,18 @@ public class AttributeFieldEditor {
 		if (attribute.getType() == IAttributeType.TEXT){
 			txtValue = new Text(parent, SWT.BORDER);
 			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)txtValue.getLayoutData()).widthHint = 100;
 			txtValue.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
 					modified();
 				}
 			});
+			
 		}else if (attribute.getType() == IAttributeType.NUMERIC){
 			txtValue = new Text(parent, SWT.BORDER);
 			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)txtValue.getLayoutData()).widthHint = 100;
 			cdNumber = createDecoration(txtValue);
 			txtValue.addModifyListener(new ModifyListener() {
 				@Override
@@ -310,6 +313,7 @@ public class AttributeFieldEditor {
 				}
 			});
 			cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
 		}else if (attribute.getType() ==  IAttributeType.DATE){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));

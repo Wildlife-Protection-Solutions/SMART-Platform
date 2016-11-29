@@ -62,7 +62,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -1062,9 +1061,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 				IntelEntityRelationship r = (IntelEntityRelationship)sel.getFirstElement();
 				relationships.remove(r);
 				relationshipsToDelete.add(r);
-				treeRelationships.setInput(relationships);
-				treeRelationships.expandAll();
-				
+				((RelationshipContentProvider)treeRelationships.getContentProvider()).refresh();
+				treeRelationships.refresh();
 				setDirty(true);
 			}
 		}
@@ -1086,18 +1084,22 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}else if (rType.getSourceEntityType() == null && rType.getTargetEntityType() != null){
 			if (rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
 				newRelationship.setSourceEntity(e2);
-				newRelationship.setTargetEntity(e1);	
+				newRelationship.setTargetEntity(e1);
+				add = true;
 			}else if (rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
 				newRelationship.setSourceEntity(e1);
 				newRelationship.setTargetEntity(e2);
+				add = true;
 			}
 		}else if (rType.getTargetEntityType() == null && rType.getSourceEntityType() != null){
 			if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid())){
 				newRelationship.setSourceEntity(e1);
-				newRelationship.setTargetEntity(e2);	
+				newRelationship.setTargetEntity(e2);
+				add = true;
 			}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid())){
 				newRelationship.setSourceEntity(e2);
 				newRelationship.setTargetEntity(e1);
+				add = true;
 			}
 		}else if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid()) &&
 				rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
@@ -1127,8 +1129,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			relationships.add(newRelationship);
 			relationshipsToAdd.add(newRelationship);
 			setDirty(true);
-			treeRelationships.setInput(relationships);
-			treeRelationships.expandAll();
+			((RelationshipContentProvider)treeRelationships.getContentProvider()).refresh();
 			
 			if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
 				//edit 
@@ -1228,65 +1229,22 @@ public class EntityEditor extends EditorPart implements MapPart{
 				colAttributes.getColumn().setWidth(size);		
 			}
 		});
-		
-		//tooltip shell
-		Listener tableListener = new Listener(){
-			private boolean doHover = false;
-			
+		//create table listener for displaying entity relationship info
+		new AbstractEntityEditorShellListener<IntelEntityRelationship, EntityRelationshipDetailsShell>(treeRelationships, 3) {			
 			@Override
-			public void handleEvent(Event event) {
-				switch(event.type){
-					case SWT.MouseDoubleClick:
-					case SWT.MouseDown:
-					case SWT.MouseUp:
-						doHover = false;
-						break;
-					case SWT.MouseMove:
-						doHover= true;
-						break;
-					case SWT.MouseHover:
-						if (doHover){
-							doHover(event.x,event.y);
-						}
-						break;
+			protected EntityRelationshipDetailsShell getShellDialog(IntelEntityRelationship currentSelection) {
+				if (currentSelection instanceof IntelEntityRelationship){
+					IntelEntityRelationship relationship = (IntelEntityRelationship) currentSelection;
+					if (shellDialog == null || !shellDialog.getRelationship().equals(relationship)){
+						return new EntityRelationshipDetailsShell(getSite().getShell(),relationship);
+					}else if (shellDialog != null && shellDialog.getRelationship().equals(relationship)){
+						return shellDialog;
+					}
 				}
-					
+				return null;
 			}
-			private void doHover(int x, int y){
-				
-				ViewerCell cell = treeRelationships.getCell(new Point(x, y));
-				if (cell == null) return;
-				if (cell.getColumnIndex() != 3){
-					if (detailsShell != null && !detailsShell.isDisposed()){
-						detailsShell.close();
-					}
-					return;
-				}
-				if (cell != null && cell.getElement() instanceof IntelEntityRelationship){
-					IntelEntityRelationship relationship = (IntelEntityRelationship) cell.getElement();
-					if (detailsShell == null || detailsShell.isDisposed() || !detailsShell.getRelationship().equals(relationship)){
-						detailsShell = new EntityRelationshipDetailsShell(getSite().getShell(),relationship);
-					
-						int height = detailsShell.getSize().y;
-						Point p  = treeRelationships.getTree().toDisplay(x, y);
-						detailsShell.open(new Point(p.x, p.y - height));
-					}
-				}else{
-					if (detailsShell != null && !detailsShell.isDisposed()){
-						detailsShell.close();
-					}
-					return;
-				}
-			}
-			
 		};
-		treeRelationships.getTree().addListener(SWT.MouseDoubleClick, tableListener);
-		treeRelationships.getTree().addListener(SWT.MouseDown, tableListener);
-		treeRelationships.getTree().addListener(SWT.MouseUp, tableListener);
-		treeRelationships.getTree().addListener(SWT.MouseMove, tableListener);
-		treeRelationships.getTree().addListener(SWT.MouseHover, tableListener);	
-		
-		
+
 		IMenuCreator mnuRelationship = new IMenuCreator() {
 			private MenuItem mnuOpen;
 			private MenuItem mnuDelete;
@@ -1428,52 +1386,20 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		
-		//tooltip shell
-		Listener tableListener = new Listener(){
-			private boolean doHover = false;
-			
+		//records details tooltip
+		new AbstractEntityEditorShellListener<IntelRecord, RecordDetailsShell>(tblRecords) {			
 			@Override
-			public void handleEvent(Event event) {
-				switch(event.type){
-					case SWT.MouseDoubleClick:
-					case SWT.MouseDown:
-					case SWT.MouseUp:
-						doHover = false;
-						break;
-					case SWT.MouseMove:
-						doHover= true;
-						break;
-					case SWT.MouseHover:
-						if (doHover){
-							doHover(event.x,event.y);
-						}
-						break;
+			protected RecordDetailsShell getShellDialog(IntelRecord currentSelection) {
+				
+				if (shellDialog == null || shellDialog.isDisposed()){
+					return  new RecordDetailsShell(getSite().getShell(),currentSelection);
+				}else if (!shellDialog.getRecord().equals(currentSelection)){
+					shellDialog.setRecord(currentSelection);
 				}
-					
+				return shellDialog;
 			}
-			private void doHover(int x, int y){
-				ViewerCell cell = tblRecords.getCell(new Point(x, y));
-				if (cell == null) return;
-				if (cell.getElement() instanceof IntelRecord){
-					IntelRecord record = (IntelRecord) cell.getElement();
-					if (recordDetailsShell == null || recordDetailsShell.isDisposed()){
-						recordDetailsShell = new RecordDetailsShell(getSite().getShell(),record);
-					}else{
-						recordDetailsShell.setRecord(record);
-					}
-					int height = recordDetailsShell.getSize().y;
-					Point p  = tblRecords.getControl().toDisplay(x, y);
-					recordDetailsShell.open(new Point(p.x+10, (int)Math.round(p.y - height*0.5)));
-				}
-			}
-			
 		};
 		
-		tblRecords.getControl().addListener(SWT.MouseDoubleClick, tableListener);
-		tblRecords.getControl().addListener(SWT.MouseDown, tableListener);
-		tblRecords.getControl().addListener(SWT.MouseUp, tableListener);
-		tblRecords.getControl().addListener(SWT.MouseMove, tableListener);
-		tblRecords.getControl().addListener(SWT.MouseHover, tableListener);	
 		
 		Menu recordsMenu = new Menu(tblRecords.getTable());
 		tblRecords.getTable().setMenu(recordsMenu);
