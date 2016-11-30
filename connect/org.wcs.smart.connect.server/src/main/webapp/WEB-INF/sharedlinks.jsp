@@ -18,7 +18,7 @@
 				};
 	</script>
 		
-	<title><fmt:message key="query.pagetitle"/></title>	
+	<title><fmt:message key="sharedlinks.title"/></title>	
 </head>
 
 <body style="${style_bodycss}">

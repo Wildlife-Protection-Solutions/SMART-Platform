@@ -151,8 +151,13 @@
 						<p><fmt:message key="query.sharingDescriptionAll" /></p>
 						<p><font color='red'><bold><fmt:message key="query.sharingDescriptionAll2" /></bold></font></p>
 						<br>
-						<p><fmt:message key="query.numminutes" /><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647"><fmt:message key="query.numminutes2" /></p>
-						<p><fmt:message key="query.quickselect" />
+						<table width="100%"><tr><td>
+						<fmt:message key="query.numminutes" />
+						</td><td>
+						<input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647"><fmt:message key="query.numminutes2" /></p>
+						</td></tr><td>
+						<fmt:message key="query.quickselect" />
+						</td><td>
 							<select id="quickMinSelect">
 								<option value=60>1 hour</option>
 								<option value=1440>1 day</option>
@@ -161,9 +166,12 @@
 								<option value=259200>6 months</option>
 								<option value=518400>1 year</option>
 							</select>
-						</p>
+						</td></tr>
+						<tr><td>
 					<input id="createlinkbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" />
+					</td><td>
 					<input id="createdlink" class="hide" type="text" width="100"/>
+					</table>
 	   				</fieldset>
 	   				
 	   			</div>
