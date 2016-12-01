@@ -28,25 +28,23 @@
 <div id="main">
 <div class="pageheader"><fmt:message key="sharedlinks.title"/></div>
 <div><div id="message" class="msgsection"></div></div>
-<div class="top-spacer"> 
+
+<div>
+ 	<p class="infomessage"><fmt:message key="sharedlinks.createnewdetails" /></p>
+ 	<p class="smart-warninghighlight"><fmt:message key="query.sharingDescriptionAll2" /></p>
 </div>
 
-<div class="top-spacer"  style="margin-left: -20px" >
+<div class="top-spacer" style="margin-left: -20px"> 
   <div id="linktable" class="linktable table-cell smart-table">
   	<div class="table-row smart-table-header">
-		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.runquery" /></div>
-		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('uuid')"><fmt:message key="query.id" /></a></div>
-		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('url')"><fmt:message key="sharedlinks.url" /></a></div>
+		<!-- <div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.runquery" /></div>-->
+		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.url" /></div>
+		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.link" /></div>
 		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('expiresAt')"><fmt:message key="sharedlinks.expiresat" /></a></div>
 		<div class="table-cell smart-table-cell"></div>
 	</div>
   </div>
-  <div>
-	<ul>
-		<li><fmt:message key="sharedlinks.createnewdetails" /></li>
-		<li><font color='red'><bold><fmt:message key="query.sharingDescriptionAll2" /></bold></font></li>
-	</ul>
-  </div>  
+ 
 </div>
 
 </div>

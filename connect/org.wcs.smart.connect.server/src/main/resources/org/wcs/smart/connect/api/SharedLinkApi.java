@@ -150,8 +150,6 @@ public class SharedLinkApi extends HttpServlet{
 	@POST
     @Path("/")
     public SharedLink createSharedLink(SharedLink newLink) {
-
-	
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -203,7 +201,10 @@ public class SharedLinkApi extends HttpServlet{
 		    
 			//set expiration date			
 			int mins = newLink.getExpiresAfter();
-			if(mins > -1){
+			if (mins == 0){
+				//never expire
+				newLink.setExpiresAt(new Timestamp(4102444800000l));
+			}else if (mins > 0){
 				//long is important here or else anything over 35790 mins or so breaks the Integer limit when converted to milliseconds 
 				java.util.Date date= new java.util.Date();
 				long now = date.getTime();

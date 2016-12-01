@@ -43,8 +43,15 @@ window.onload = function(){
 	};
 	
 	document.getElementById("quickMinSelect").onchange = function(){
-		document.getElementById("expiresAfter").value = document.getElementById("quickMinSelect").value;
+		var number = document.getElementById("quickMinSelect").value;
+		if (number > 0){
+			document.getElementById("expiresAfter").value = number;
+			document.getElementById("expiresAfter").disabled=true;
+		}else{
+			document.getElementById("expiresAfter").disabled=false;
+		}
 	}
+	
 	document.getElementById("createcustomlinklink").onclick = function(){
 		document.getElementById('createcustomlink').style.display = 'block';
 		document.getElementById('createcustomlinktitle').style.display = 'none';
@@ -534,7 +541,10 @@ function linkCreated(){
 		document.getElementById("createdlink").value = resolve(SHAREDLINKSERVLETURL) + "?uuid=" + link.uuid;
 	}
 	document.getElementById("createlinkbutton").style.display = "none";
-	document.getElementById("createdlink").style = "display: block; width:100%";
+	document.getElementById("createdlink").style = "display: block;";
 	document.getElementById("createdlink").select();
+	
+	document.getElementById("quickMinSelect").disabled=true;
+	document.getElementById("expiresAfter").disabled=true;
 	
 }

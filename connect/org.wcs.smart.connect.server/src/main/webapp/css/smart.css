@@ -21,6 +21,12 @@ h2{
 	font-weight: bold;
 }
 
+.smart-warninghighlight{
+	color: red;
+	font-weight:bold;
+	font-size: 1.2em;
+}
+
 .select-limit{
 	max-width:24em;
 }

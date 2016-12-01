@@ -128,11 +128,12 @@
 				</div>
 				<div id='createcustomlink' style='display:none'>
 					<fieldset class="linkdialog">
-						<p><fmt:message key="query.sharingDescriptionAll" /></p>
-						<p><font color='red'><bold><fmt:message key="query.sharingDescriptionAll2" /></bold></font></p>
-						<br>
-						<p><fmt:message key="query.numminutes" /><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647"><fmt:message key="query.numminutes2" /></p>
-						<p><fmt:message key="query.quickselect" />
+						<p><fmt:message key="query.sharingDescriptionAll"/> <span class="smart-warninghighlight"><fmt:message key="query.sharingDescriptionAll2" /></span></p>
+						
+						<table class="top-spacer" style="width:100%">
+						  <tr>
+						   <td><fmt:message key="query.numminutes" /></td>
+						   <td>
 							<select id="quickMinSelect">
 								<option value=60>1 hour</option>
 								<option value=1440>1 day</option>
@@ -140,10 +141,18 @@
 								<option value=43200>1 month</option>
 								<option value=259200>6 months</option>
 								<option value=518400>1 year</option>
+								<option value=-1>Custom...</option>
 							</select>
-						</p>
-					<input id="createlinkbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" />
-					<input id="createdlink" class="hide" type="text" width="100"/>
+						  </td>
+						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
+						  </tr>
+						  <tr >
+						     <td colspan=3 align="center"><input id="createlinkbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
+						  </tr>
+						  <tr >
+						     <td colspan=3><input id="createdlink" class="hide linkdialog" type="text"/></td>
+						  </tr>
+						</table>
 	   				</fieldset>
 	   				
 	   			</div>

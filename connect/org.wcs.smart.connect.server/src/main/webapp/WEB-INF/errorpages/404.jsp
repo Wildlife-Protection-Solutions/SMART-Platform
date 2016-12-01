@@ -15,7 +15,10 @@
 <div style="display:block; padding:20px">
 <div class="pageheader"><fmt:message key="404.title"/></div>
 <p><fmt:message key="404.message"/></p>
+<c:set var="errmsg"  value="${requestScope['javax.servlet.error.message']}"/>
+<c:if test="${errmsg != null}">${errmsg}</c:if>
 <p style="padding-top:10px"><a href="${pageContext.request.contextPath}/connect/home">Connect Home</a></p>
 </div>
+
 </body>
 </html>

@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.query.QueryManager;
 
@@ -62,11 +63,15 @@ public class SharedLinkServlet extends HttpServlet {
 		s.beginTransaction();
 		try{
 			SharedLink link = QueryManager.INSTANCE.findSharedLink(uuid, s);
+			if (link == null){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
 			//check if link is still valid
 			java.util.Date today = new java.util.Date();
 			Timestamp now = new Timestamp(today.getTime());
 			if(link.getExpiresAt().before(now)){
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "This shared link has expired and can no longer be used.");
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale()));
 				return;
 			}
 			path =  link.getUrl();
@@ -81,7 +86,7 @@ public class SharedLinkServlet extends HttpServlet {
 			RequestDispatcher rd = request.getRequestDispatcher(path);
 			rd.forward(request, response);
 		}else{
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The Shared Link was not found.");
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkNotFound", request.getLocale()));
 		}
 	}
 

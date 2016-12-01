@@ -86,19 +86,21 @@ function createLinkTable(){
 	var parent = document.querySelector("div.linktable");
 
  	for (var i = 0; i < links.length; i ++){
+ 		var openlink = SHAREDLINKSERVLETURL + "?uuid=" + links[i].uuid;
+ 		
  		var date = new Date(links[i].expiresAt);
  		var row = tableCreateRow(parent,
- 				["", links[i].uuid, links[i].url, date.toString() , null], 
+ 				[null, links[i].url, date.toString() , null], 
  				"linkrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.uuid = links[i].uuid;
 
- 		var openlink = SHAREDLINKSERVLETURL + "?uuid=" + links[i].uuid;
- 		var aTag = document.createElement('a');
- 		aTag.setAttribute('href',openlink);
- 		aTag.setAttribute('target',"_blank");
- 		aTag.innerHTML = "Open Link";
- 		row.childNodes[0].appendChild(aTag);
+ 		var aTag1 = document.createElement('a');
+ 		aTag1.setAttribute('href',openlink);
+ 		aTag1.setAttribute('target',"_blank");
+ 		aTag1.innerHTML = resolve(openlink);
+ 		aTag1.title="Open Link in New Tab"
+ 		row.childNodes[0].appendChild(aTag1);
  		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="deleteca delete-icon";
@@ -106,11 +108,27 @@ function createLinkTable(){
  		deleteicon.dataset.uuid = links[i].uuid;
  		deleteicon.onclick = confirmdeletelink;
  		deleteicon.href="";
- 		row.childNodes[4].appendChild(deleteicon);
+ 		row.childNodes[3].appendChild(deleteicon);		
  	}
  	
 }
 
+//get full URL from a relative one, used to give full-url link to users to share.
+function resolve(url) {
+	  var doc      = document
+	    , old_base = doc.getElementsByTagName('base')[0]
+	    , old_href = old_base && old_base.href
+	    , doc_head = doc.head || doc.getElementsByTagName('head')[0]
+	    , our_base = old_base || doc_head.appendChild(doc.createElement('base'))
+	    , resolver = doc.createElement('a')
+	    , resolved_url
+	    ;
+
+	  resolver.href = url;
+	  resolved_url  = resolver.href; // browser magic at work here
+
+	  return resolved_url;
+}
 
 function sortTable(sortColumn){
 	if(lastSorted == sortColumn){
