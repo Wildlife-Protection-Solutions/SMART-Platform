@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.i2.core.feature"
+      label="Intelligence Core Plugin"
+      version="1.0.0.qualifier"
+      provider-name="org.wcs.smart"
+      plugin="org.wcs.smart.i2"
+      license-feature="org.wcs.smart.smart.feature">
+
+   <description>
+      The extended intelligence plugin for tracking records, entities and relationships
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <plugin
+         id="org.wcs.smart.i2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

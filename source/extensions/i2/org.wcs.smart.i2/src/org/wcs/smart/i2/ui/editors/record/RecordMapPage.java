@@ -70,7 +70,6 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.JobUtil;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Map page for intelligence record.
@@ -273,15 +272,16 @@ public class RecordMapPage extends SmartMapEditorPart {
 	//udig does not support selection from multiple layers 
 	private void highlightFeature(IntelLocation location){
 		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+		if (pointLayer == null || polygonLayer == null) return;
 		if (location == null){
 			((Layer)pointLayer).setFilter(Filter.EXCLUDE);
 			((Layer)polygonLayer).setFilter(Filter.EXCLUDE);
 		}else if (location.isPoint()){
 			((Layer)polygonLayer).setFilter(Filter.EXCLUDE);
-			((Layer)pointLayer).setFilter(ff.equals(ff.property("system_id"), ff.literal(UuidUtils.uuidToString(location.getUuid()))));
+			((Layer)pointLayer).setFilter(ff.equals(ff.property(IntelRecordFeatureSource.FID_FIELD), ff.literal(location.getFeatureId())));
 		}else if (location.isPolygon()){
 			((Layer)pointLayer).setFilter(Filter.EXCLUDE);
-			((Layer)polygonLayer).setFilter(ff.equals(ff.property("system_id"), ff.literal(UuidUtils.uuidToString(location.getUuid()))));
+			((Layer)polygonLayer).setFilter(ff.equals(ff.property(IntelRecordFeatureSource.FID_FIELD), ff.literal(location.getFeatureId())));
 		}
 	}
     

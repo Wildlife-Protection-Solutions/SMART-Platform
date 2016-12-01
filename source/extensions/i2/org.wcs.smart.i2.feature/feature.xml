@@ -4,10 +4,12 @@
       label="All Intelligence Feature"
       version="1.0.0.qualifier"
       provider-name="org.wcs.smart"
-      plugin="org.wcs.smart">
+      plugin="org.wcs.smart"
+      license-feature="org.wcs.smart.smart.feature">
 
-   <description url="http://www.smartconservationtools.org">
-      The SMART feature of intelligence product.
+   <description>
+      The extended intelligence plugin for tracking records, entities
+and relationships.
    </description>
 
    <copyright>
@@ -89,124 +91,7 @@ limitations under the License.
    </license>
 
    <includes
-         id="org.eclipse.help"
+         id="org.wcs.smart.i2.core.feature"
          version="0.0.0"/>
-
-   <includes
-         id="org.wcs.smart.udig.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="javax.media.jai_imageio-feature"
-         version="0.0.0"/>
-
-   <includes
-         id="org.wcs.smart.birtfeature"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.wcs.smart.hibernate.libs"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.transforms.xslt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.transforms.hook"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.udig.customization"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.css.swt.theme"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ui.themes"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.e4.tools.compat"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.tools.services"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.birt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.help"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.udig.catalog.image.auxxml"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.i2"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.nebula.widgets.tablecombo"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.birt.map"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
 </feature>

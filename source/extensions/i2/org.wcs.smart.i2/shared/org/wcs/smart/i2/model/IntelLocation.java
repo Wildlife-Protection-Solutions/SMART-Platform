@@ -23,6 +23,7 @@ package org.wcs.smart.i2.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -37,6 +38,7 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -67,8 +69,12 @@ public class IntelLocation extends UuidItem{
 	private List<IntelObservation> observations;
 	private IntelRecord record;
 	
+	
 	@Transient
 	private Geometry geometry;
+	//used to generate a uuid for features that have not yet been
+	//saved to the database; so selection and other map features work as expected
+	private volatile UUID featureId;  
 	
 	public IntelLocation(){
 		
@@ -190,4 +196,18 @@ public class IntelLocation extends UuidItem{
 		}
 	}
 
+	@Transient
+	public String getFeatureId(){
+		UUID fid = getUuid();
+		if (fid == null){
+			synchronized (this) {
+				if (featureId == null){
+					featureId = UUID.randomUUID();
+				}	
+			}
+			
+			fid = featureId;
+		}
+		return UuidUtils.uuidToString(fid);
+	}
 }

@@ -53,6 +53,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
@@ -67,10 +68,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.ui.forms.events.ExpansionAdapter;
-import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Section;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -84,6 +82,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
+import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -122,14 +121,13 @@ public class RecordsView {
 	};
 	
 	@PostConstruct
-	public void createPartControl(Composite parent) {
+	public void createPartControl(final Composite parent) {
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginHeight = 0;
 		((GridLayout)parent.getLayout()).marginWidth = 0;
 		
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		Composite thisParent = toolkit.createComposite(parent);
-		thisParent.setLayout(new GridLayout());
+		SashForm thisParent = new SashForm(parent, SWT.VERTICAL);
 		thisParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
  		
 		IDoubleClickListener openListener = new IDoubleClickListener() {
@@ -146,64 +144,32 @@ public class RecordsView {
 			}
 		};
 		
-		Section inProgress = toolkit.createSection(thisParent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
-		inProgress.setText("In Progress");
-		inProgress.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		inProgress.setLayout(new GridLayout());
-		inProgress.addExpansionListener(new ExpansionAdapter() {
-			@Override
-			public void expansionStateChanged(ExpansionEvent e) {
-				((GridData)inProgress.getLayoutData()).grabExcessVerticalSpace = e.getState();
-				thisParent.layout();
-			}
-		});
-		lstInProgress = new ListViewer(inProgress, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-		inProgress.setClient(lstInProgress.getControl());
+		SmartSection inProgress = new SmartSection(thisParent, toolkit, "In Progress");
+		lstInProgress = new ListViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
 		lstInProgress.setLabelProvider(new RecordLabelProvider());
 		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstInProgress.addDoubleClickListener(openListener);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = 100;
 		lstInProgress.getControl().setLayoutData(gd);
 		lstInProgress.addSelectionChangedListener(selectOne);
 		
-		Section newRecords = toolkit.createSection(thisParent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
-		newRecords.setText("New Records");
-		newRecords.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		newRecords.setLayout(new GridLayout());
-		newRecords.addExpansionListener(new ExpansionAdapter() {
-			@Override
-			public void expansionStateChanged(ExpansionEvent e) {
-				((GridData)newRecords.getLayoutData()).grabExcessVerticalSpace = e.getState();
-				thisParent.layout();
-			}
-		});
-
-		lstNewRecords = new ListViewer(newRecords, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI);
-		newRecords.setClient(lstNewRecords.getControl());
+		SmartSection newRecords = new SmartSection(thisParent, toolkit, "New Records");
+		lstNewRecords = new ListViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI);
 		lstNewRecords.setContentProvider(ArrayContentProvider.getInstance());
 		lstNewRecords.setLabelProvider(new RecordLabelProvider());
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstNewRecords.addDoubleClickListener(openListener);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = 100;
 		lstNewRecords.getControl().setLayoutData(gd);
 		lstNewRecords.addSelectionChangedListener(selectOne);
 		
-		Section allRecords = toolkit.createSection(thisParent, Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED);
-		allRecords.setText("All Records");
-		allRecords.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		allRecords.setLayout(new GridLayout());
-		allRecords.addExpansionListener(new ExpansionAdapter() {
-			@Override
-			public void expansionStateChanged(ExpansionEvent e) {
-				((GridData)allRecords.getLayoutData()).grabExcessVerticalSpace = e.getState();
-				thisParent.layout();
-			}
-		});
-
+		SmartSection allRecords = new SmartSection(thisParent, toolkit, "All Records");
 		Composite allRecordsSection = toolkit.createComposite(allRecords);
-		allRecords.setClient(allRecordsSection);
 		allRecordsSection.setLayout(new GridLayout());
+		allRecordsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		FilterComposite typeFilter = new FilterComposite(allRecordsSection, SWT.NONE);
 		typeFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -231,10 +197,10 @@ public class RecordsView {
 		lstAllRecords.setLabelProvider(new RecordLabelProvider());
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstAllRecords.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)lstAllRecords.getControl().getLayoutData()).heightHint = 100;
 		lstAllRecords.addDoubleClickListener(openListener);
 		lstAllRecords.addSelectionChangedListener(selectOne);
 		
-
 		createMenu(lstAllRecords);
 		createMenu(lstInProgress);
 		createMenu(lstNewRecords);

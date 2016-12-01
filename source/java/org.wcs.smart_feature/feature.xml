@@ -255,13 +255,6 @@ limitations under the License.
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.report.birt.map"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.report.birt.query"
          download-size="0"
          install-size="0"

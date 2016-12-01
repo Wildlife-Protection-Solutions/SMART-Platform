@@ -35,6 +35,14 @@ import org.eclipse.ui.internal.e4.compatibility.CompatibilityPart;
 public class E3Utils {
 
 	/**
+	 * A tag to add to editor parts that you do not want to close; this is used
+	 * by the persepective switcher to set the closeable property of the part when
+	 * switching perspectives.  This will not remove the 'x' button from the editor part, you
+	 * will have to do that yourself.  See IntelligenceMapEditor for an example.
+	 */
+	public static final String DO_NOT_CLOSE_TAG = "smart-donotclose"; //$NON-NLS-1$
+	
+	/**
 	 * Gets the source object for a part.  This goes one level before the compatibilitypart of
 	 * parts which are part of the compatibility layer; and gets components of DIViewParts.
 	 * @param part

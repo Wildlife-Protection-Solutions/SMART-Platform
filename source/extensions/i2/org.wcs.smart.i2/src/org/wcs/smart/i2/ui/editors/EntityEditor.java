@@ -237,15 +237,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private ToolItem printItem;
 	private ToolItem saveItem;
 	
-	private EntityRelationshipDetailsShell detailsShell;
-	private RecordDetailsShell recordDetailsShell;
-	
 	private List<EventHandler> eventHandles = null;
 	
 	private AttributeValueLabelProvider attributeLabelProvider = new AttributeValueLabelProvider();
 	
 	private Job loadEntity = new Job("load entity"){
-
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

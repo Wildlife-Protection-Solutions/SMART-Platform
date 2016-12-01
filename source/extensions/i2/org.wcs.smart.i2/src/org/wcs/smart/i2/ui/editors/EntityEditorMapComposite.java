@@ -113,6 +113,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
@@ -644,7 +645,6 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			//refresh existing layers
 			getMap().getRenderManager().refresh(null);
 		}
-		
 		loadLocationsLink.schedule();
 	}
 	
@@ -784,14 +784,19 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			
 			Display.getDefault().syncExec(() -> { 
 				if (locationTable.getTable().isDisposed()) return;
 				locationTable.setInput(new String[]{DialogConstants.LOADING_TEXT});
 			});
+			
+			IntelEntity entity = editor.getEntity();
+			if (entity == null) return Status.OK_STATUS;
+			
 			final List<IntelEntityLocation> alllocations  = new ArrayList<IntelEntityLocation>();
 			Session s = HibernateManager.openSession();
 			try{
-				alllocations.addAll(EntityManager.INSTANCE.getEntityLocations(s, editor.getEntity().getUuid(), dateFilter));
+				alllocations.addAll(EntityManager.INSTANCE.getEntityLocations(s, entity.getUuid(), dateFilter));
 				for (IntelEntityLocation l : alllocations){
 					l.getLocation().getId();
 					l.getLocation().getRecord().getTitle();

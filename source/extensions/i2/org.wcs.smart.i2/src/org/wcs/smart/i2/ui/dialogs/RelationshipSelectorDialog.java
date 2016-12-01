@@ -105,7 +105,7 @@ public class RelationshipSelectorDialog extends TitleAreaDialog{
 			if (cmbTypes.getSelection() instanceof IStructuredSelection){
 				if ( !((IStructuredSelection)cmbTypes.getSelection()).isEmpty()){
 					ok = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement() instanceof IntelRelationshipType;
-					selectedType = (IntelRelationshipType) ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
+					if (ok) selectedType = (IntelRelationshipType) ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
 				}
 			}
 			getButton(IDialogConstants.OK_ID).setEnabled(ok);

@@ -100,8 +100,8 @@ public class RecordEditorInput implements IEditorInput{
 	@Override
 	public boolean equals(Object other){
 		if (other != null && other instanceof RecordEditorInput){
-			if (record != null) return record.equals(((RecordEditorInput)other).record);
-			return uuid.equals(((RecordEditorInput)other).uuid);
+			RecordEditorInput o = (RecordEditorInput) other;
+			return getUuid().equals(o.getUuid());
 		}
 		return false;
 	}

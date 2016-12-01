@@ -198,7 +198,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 					}
 				});
 				}catch (Exception ex){
-					Intelligence2PlugIn.log(ex.getMessage(), ex);
+					Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 				}
 			}
 		});
@@ -253,7 +253,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 					}
 				});
 			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
+				Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}
 		});
@@ -318,7 +318,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 					}
 				});
 				}catch (Exception ex){
-					Intelligence2PlugIn.log(ex.getMessage(), ex);
+					Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 				}
 			}
 		});
@@ -366,11 +366,54 @@ public class FuzzyPreferencePage extends PreferencePage implements
 					}
 				});
 				}catch (Exception ex){
-					Intelligence2PlugIn.log(ex.getMessage(), ex);
+					Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 				}
 			}
 		});	
 		
+		// ---------- RECORD  ----------------
+		Group recordg = new Group(g, SWT.NONE);
+		recordg.setLayout(new GridLayout(2, false));
+		recordg.setText("Records");
+		recordg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		l = new Label(recordg, SWT.NONE);
+		l.setText("Number of Record:");
+						
+		final Text txtNumRecords = new Text(recordg, SWT.BORDER);
+		txtNumRecords.setText("500");
+		txtNumRecords.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
+		Button btnRecords = new Button(recordg, SWT.PUSH);
+		btnRecords.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		btnRecords.setText("Generate Record...");
+		btnRecords.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				final int v1 = Integer.valueOf(txtNumRecords.getText());
+				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+				try{
+				pmd.run(true, false, new IRunnableWithProgress() {
+							
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException {
+						Session s = HibernateManager.openSession();
+						s.beginTransaction();
+						try{
+							SearchDataGenerator.generateRecords(v1, monitor, s);		
+							s.getTransaction().commit();
+						}catch (Exception ex){
+							s.getTransaction().rollback();
+							throw new InvocationTargetException(ex);
+						}finally{
+							s.close();
+						}	
+					}
+				});
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+				}
+			}
+		});	
 		return c;
 	}
 

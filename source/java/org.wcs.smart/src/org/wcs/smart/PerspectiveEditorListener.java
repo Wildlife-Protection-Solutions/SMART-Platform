@@ -59,8 +59,6 @@ public class PerspectiveEditorListener extends PerspectiveAdapter {
 	@Override
 	public void perspectiveActivated(IWorkbenchPage page,
 			IPerspectiveDescriptor perspectiveDescriptor) {
-		//super.perspectiveActivated(page, perspectiveDescriptor);
-			
 		Collection<MPart> allParts  = null;
 		try{
 			allParts = partService.getParts();
@@ -72,12 +70,16 @@ public class PerspectiveEditorListener extends PerspectiveAdapter {
 					p.getTags().contains(PerspectiveEditorTracker.EDITOR_TAG)){
 				if (p.getTags().contains(perspectiveDescriptor.getId())){
 					//this is set to make the close others/close all/close menu work
-					if (!p.getTags().contains("smart-donotclose")) p.setCloseable(true);	
+					if (!p.getTags().contains(E3Utils.DO_NOT_CLOSE_TAG)){ 
+						p.setCloseable(true);	
+					}else{
+						p.setCloseable(false);
+					}
 					p.setVisible(true);
 				}else{
 					p.setVisible(false);
-					if (!p.isCloseable() && !p.getTags().contains("smart-donotclose")){
-						p.getTags().add("smart-donotclose");
+					if (!p.isCloseable() && !p.getTags().contains(E3Utils.DO_NOT_CLOSE_TAG)){
+						p.getTags().add(E3Utils.DO_NOT_CLOSE_TAG);
 					}
 					p.setCloseable(false);
 				}

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature url="features/org.wcs.smart.i2.feature_1.0.0.201611251608.jar" id="org.wcs.smart.i2.feature" version="1.0.0.201611251608">
+   <feature url="features/org.wcs.smart.i2.feature_1.0.0.201611301613.jar" id="org.wcs.smart.i2.feature" version="1.0.0.201611301613">
       <category name="intelligence"/>
    </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">

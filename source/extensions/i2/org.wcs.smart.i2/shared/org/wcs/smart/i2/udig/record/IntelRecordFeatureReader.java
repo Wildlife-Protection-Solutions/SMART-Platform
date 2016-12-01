@@ -132,7 +132,7 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 		} catch (ParseException e) {
 			Logger.getLogger(IntelRecordFeatureReader.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}
-		data[1] = ftype.getName() + "." + location.getId() + "." + UuidUtils.uuidToString(location.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		data[1] = location.getFeatureId(); //$NON-NLS-1$ //$NON-NLS-2$
 		data[2] = location.getId();
 		data[3] = location.getDateTime();
 		data[4] = location.getDateTime();

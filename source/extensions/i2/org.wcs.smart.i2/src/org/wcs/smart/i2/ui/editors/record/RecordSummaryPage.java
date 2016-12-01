@@ -91,6 +91,7 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -119,11 +120,12 @@ public class RecordSummaryPage extends EditorPart{
 	
 	private RecordEditor recordEditor;
 	
+	private SmartSection detailSection;
+	
 	private Label lblLastModified;
 	private Label lblLastModifiedBy;
 	
 	private SashForm sashForm;
-	private int currentMaximized = -1; //current maximized sash section
 	
 	public RecordSummaryPage(RecordEditor parent){
 		this.recordEditor =  parent;
@@ -337,85 +339,44 @@ public class RecordSummaryPage extends EditorPart{
 		sashForm = new SashForm(parent, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Section top = createSectionHeader(sashForm, "Narrative");
-		topPart = toolkit.createComposite(top, SWT.NONE);
+		detailSection = createSectionHeader(sashForm, toolkit, "Narrative");
+		topPart = toolkit.createComposite(detailSection, SWT.NONE);
 		topPart.setLayout(new GridLayout(5, false));
 		topPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Section expEntities = createSectionHeader(sashForm, "Entities");
+		SmartSection expEntities = createSectionHeader(sashForm, toolkit, "Entities");
 		entityPanel = new EntityListComposite(expEntities, toolkit, recordEditor);
 		entityPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)entityPanel.getLayoutData()).horizontalSpan = 0;
 		((GridData)entityPanel.getLayoutData()).verticalSpan = 0;
 				
-		Section expAttachments = createSectionHeader(sashForm, "Attachments");
+		SmartSection expAttachments = createSectionHeader(sashForm, toolkit, "Attachments");
 		attachmentPanel = new AttachmentListComposite(expAttachments, toolkit, recordEditor);
 		attachmentPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Section expLocation = createSectionHeader(sashForm, "Locations");
+		SmartSection expLocation = createSectionHeader(sashForm, toolkit, "Locations");
 		locationPanel = new LocationListComposite(expLocation, toolkit, recordEditor);
 		locationPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true)); 
 		
 		
 		sashForm.addListener(SWT.Resize, (e)->{
-			if (currentMaximized >= 0){ 
-				maximizePosition(currentMaximized);
+			List<SmartSection> sections = (List<SmartSection>) sashForm.getData(SmartSection.KIDS_KEY);
+			int max = (Integer)sashForm.getData(SmartSection.MAX_KEY);
+			if ( max >= 0){
+				sections.get(max).maximize();
+				
 			}else{
 				//resize all so that the minimum size is respected
-				resizeMinSize();
+				sections.forEach(s->s.resizeMinSize());
 			}
 		});
-		Section[] sections = new Section[]{top, expEntities, expAttachments, expLocation};
-		sashForm.setData(sections);
-		for (Section c : sections){
-			c.addListener(SWT.Resize, (e)->{
-				currentMaximized = -1;
-				if (c.getClientArea().height > c.getMinSize()) c.setMinimized(false);
-			});
-		}		
-	}
-	
-	private void resizeMinSize(){
-		Section[] sections = (Section[]) sashForm.getData();
-		int[] newweights = new int[sections.length];
-		Arrays.fill(newweights, -1);
-		int cnt = 0;
-		int off = 0;
-		for (int i = 0; i < sections.length; i ++){
-			
-			if (sections[i].isMinimized){
-				newweights[i] = sections[i].getMinSize();
-				off += newweights[i];
-			}else{
-				cnt++;
-			}
-		}
-		int totalHeight = sashForm.getClientArea().height - off;
-		for (int i = 0; i < sections.length; i ++){
-			if (newweights[i] == -1){
-				newweights[i] = totalHeight / cnt;
-			}
-		}		
-		for (Section s : sections) s.processingEvent = true;
-		try{
-			sashForm.setWeights(newweights);
-		}finally{
-			for (Section s : sections) s.processingEvent = false;
-		}
+		
 	}
 	
 	
-	private void maximizePosition(int position){
-		Section[] sections = (Section[]) sashForm.getData();
-		for (int i = 0; i < sections.length; i ++){
-			sections[i].setMinimized(i != position);
-		}
-		resizeMinSize();
-		currentMaximized = position;
-	}
 
-	private Section createSectionHeader(SashForm parent, String text){
-		Section sec = new Section(parent, text);
+	private SmartSection createSectionHeader(SashForm parent, FormToolkit toolkit, String text){
+		SmartSection sec = new SmartSection(parent, toolkit, text);
 		toolkit.adapt(sec);
 		return sec;
 	}
@@ -507,7 +468,7 @@ public class RecordSummaryPage extends EditorPart{
 		
 		l = toolkit.createLabel(topPart, "Narrative:");
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-		l.addListener(SWT.MouseDoubleClick, (e)->maximizePosition(0));
+		l.addListener(SWT.MouseDoubleClick, (e)->detailSection.maximize());
 		
 		Text txtDescription = toolkit.createText(topPart, recordEditor.getRecord().getDescription(), SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
@@ -666,164 +627,5 @@ public class RecordSummaryPage extends EditorPart{
 		return false;
 	}
 
-	private class Section extends Composite{
-
-		private boolean isMinimized;
-		private Composite header;
-		private Twistie img;
-		
-		private boolean processingEvent = false;
-		
-		public Section(SashForm parent, String text) {
-			super(parent, SWT.NONE);
-			createContents(parent, text);
-		}
-		
-		public void setMinimized(boolean min){
-			if (processingEvent) return;
-			isMinimized = min;
-			if (isMinimized){
-				img.setExpanded(false);
-			}else{
-				img.setExpanded(true);
-			}
-		}
-		
-		public int getMinSize(){
-			int size = header.computeSize(SWT.DEFAULT, SWT.DEFAULT).y+2;
-			return size;
-		}
-		
-		public int getIndex(){
-			Section[] items = (Section[]) sashForm.getData();
-			for (int i = 0; i < items.length; i ++){;
-				if (items[i] == this) return i;
-			}
-			return -1;
-		}
-		private void createContents(final SashForm sash, String text){
-			setLayout(new GridLayout());
-			((GridLayout)getLayout()).marginWidth = 0;
-			((GridLayout)getLayout()).marginHeight = 0;
-			
-			header = toolkit.createComposite(this, SWT.NONE);
-			header.setLayout(new GridLayout(3, false));
-			header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
-			header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridLayout)header.getLayout()).marginWidth = 2;
-			((GridLayout)header.getLayout()).marginHeight = 2;
-			
-			img = new Twistie(header, SWT.NONE){
-				@Override
-				protected void handleActivate(Event e) {
-					
-				}
-			};
-			img.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
-			img.setExpanded(true);
-//			img.getListeners(SWT.MouseDown)
-			Label l =toolkit.createLabel(header, text);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			l.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
-			FontData fd = l.getFont().getFontData()[0];
-			fd.setStyle(SWT.BOLD);
-			final Font boldFont = new Font(getDisplay(), fd);
-			l.addDisposeListener((e) -> {boldFont.dispose();});
-			l.setFont(boldFont);
-
-			Label exp = toolkit.createLabel(header, text);
-			exp.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SECTION_EXPAND));
-			exp.addListener(SWT.MouseUp, (e)-> maximizePosition(getIndex()));
-			exp.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
-			
-			MouseAdapter listener = new MouseAdapter() {
-				@Override
-				public void mouseDoubleClick(MouseEvent e) {
-					currentMaximized = -1;
-					Section[] items = (Section[]) sash.getData();
-					int index = -1;
-					int sumWeights = 0;
-					int weights[] = sash.getWeights();
-					for (int i : weights) sumWeights += i;
-					//re-portion to match current sash size then resize components
-					int sumWeights2 = 0;
-					
-					for (int i = 0; i < weights.length; i ++){
-						weights[i] = (int)( ( 1.0 * weights[i] / sumWeights) * sash.getClientArea().height);
-						if (weights[i] < items[i].getMinSize()) weights[i] = items[i].getMinSize();
-						sumWeights2 += weights[i];
-					}
-					
-					for (int i = 0; i < items.length; i ++){
-						if (items[i] == Section.this){
-							index = i;
-							break;
-						}
-					}
-					
-					int delta = 0;
-					if (!isMinimized){
-						setMinimized(true);
-						delta = getClientArea().height - getMinSize();
-					}else{
-						//want to set the default height to some logical portion 
-						//of entire page and take away from another expanded element
-						setMinimized(false);
-						
-						int height = sumWeights2;
-						for (Section s : items){
-							height -= s.getMinSize();
-						}
-						delta = -(height / items.length);
-					}
-					
-					
-					if (index < 0){
-						resizeMinSize();
-						return;
-					}
-					//find non minimized section to subtract from
-					if (isMinimized){
-						weights[index] = getMinSize();
-					}else{
-						weights[index] = -delta + getMinSize();
-					}
-					int start = index + 1;
-					if (start >= items.length) start = 0;
-					while(start != index ){
-						if (!items[start].isMinimized){
-							int newweight = weights[start] + delta;
-							if (newweight < items[start].getMinSize()){
-								delta = delta + (newweight - items[start].getMinSize());
-								newweight = items[start].getMinSize();
-								weights[start] = newweight;
-							}else{
-								weights[start] = newweight;
-								break;
-							}
-							
-						}
-						
-						start ++;
-						if (start >= items.length) start = 0;
-					}
-					processingEvent = true;
-					try{
-						sash.setWeights(weights);	
-					}finally{
-						processingEvent = false;
-					}
-					
-				}
-			};
-			l.addMouseListener(listener);
-			img.addMouseListener(listener);
-			
-			l.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
-			img.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
-			exp.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
-			
-		}
-		
-	}
+	
 }

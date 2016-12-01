@@ -30,18 +30,24 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
@@ -383,6 +389,85 @@ public class SearchDataGenerator {
 				session.flush();
 				session.clear();
 			}
+		}
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public static void generateRecords(int numberRecords, IProgressMonitor monitor, Session session){
+		InputStream is = SearchDataGenerator.class.getClassLoader().getResourceAsStream("org/wcs/smart/i2/search/words.txt");
+		
+		List<String> items = new ArrayList<String>();
+		try(Scanner s = new Scanner(is).useDelimiter("\\n")){
+			while(s.hasNext()){
+				String n = s.next().trim();
+				items.add(n);
+			}
+		}catch (Exception ex){
+			ex.printStackTrace();
+		}
+		monitor.beginTask("Generating Records...", numberRecords);
+		
+		List<IntelEntity> entities = session.createCriteria(IntelEntity.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.list();
+
+		for (int i = 0; i < numberRecords; i ++){
+			monitor.subTask("Generated Records " + i + " / " + numberRecords);
+			
+			IntelRecord record = new IntelRecord();
+//			record.setAttachments(attachments);
+			record.setConservationArea(SmartDB.getCurrentConservationArea());		
+			record.setEntities(new ArrayList<IntelEntityRecord>());
+			record.setLocations(new ArrayList<IntelLocation>());
+			
+			int status = (int)Math.round(Math.random() * 2);
+			record.setStatus(IntelRecord.Status.values()[status]);
+			
+			int wordsTitle = (int)Math.round(Math.random() * 6);
+			if (wordsTitle == 0) wordsTitle = 1;
+			StringBuilder title = new StringBuilder();
+			for (int j = 0; j < wordsTitle; j ++){
+				int index = (int)Math.round(Math.random() * (items.size()-1));
+				title.append(items.get(index));
+				title.append(" ");
+			}
+			title.deleteCharAt(title.length() - 1);
+			record.setTitle(WordUtils.capitalize(title.toString()));
+			
+			
+			int descTitle = (int)Math.round(Math.random() * 10000);
+			if (descTitle == 0) descTitle = 1;
+			StringBuilder desc = new StringBuilder();
+			for (int j = 0; j < descTitle; j ++){
+				int index = (int)Math.round(Math.random() * (items.size()-1));
+				desc.append(items.get(index));
+				desc.append(" ");
+			}
+			String v = desc.toString();
+			if (v.length() > 32700) v = v.substring(0, 32700);
+			record.setDescription(v.toString());
+			
+			
+			int numEntities = (int)Math.round(Math.random() * 20);
+			Set<IntelEntity> used = new HashSet<IntelEntity>();
+			int j = 0;
+			while( j < numEntities && used.size() < entities.size()){
+				int index = (int)Math.round(Math.random() * (entities.size() - 1));
+				IntelEntity e = entities.get(index);
+				if (!used.contains(e)){
+					IntelEntityRecord entity = new IntelEntityRecord();
+					entity.setRecord(record);
+					entity.setEntity(e);
+					record.getEntities().add(entity);
+					j++;
+					used.add(e);
+				}
+			}
+			session.save(record);
+			session.flush();
+			session.clear();
+			monitor.worked(1);
 		}
 	}
 }
