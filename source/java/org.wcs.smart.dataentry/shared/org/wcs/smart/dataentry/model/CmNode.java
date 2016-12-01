@@ -58,7 +58,6 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	private List<CmAttribute> cmAttributes;
 	private boolean photoAllowed = false;
 	private boolean photoRequired = true;
-	private boolean photoFisrt = false;
 	private boolean collectMultipleObservations = false;
 	private boolean useSingleGpsPoint = false;
 	private DisplayMode displayMode;
@@ -142,14 +141,6 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	}
 	public void setPhotoRequired(Boolean photoRequired) {
 		this.photoRequired = !Boolean.FALSE.equals(photoRequired); //null <==> true
-	}
-	
-	@Column(name = "photo_first")
-	public boolean isPhotoFisrt() {
-		return photoFisrt;
-	}
-	public void setPhotoFisrt(Boolean photoFisrt) {
-		this.photoFisrt = Boolean.TRUE.equals(photoFisrt); //null <==> false
 	}
 	
 	@Column(name = "collect_multiple_obs")

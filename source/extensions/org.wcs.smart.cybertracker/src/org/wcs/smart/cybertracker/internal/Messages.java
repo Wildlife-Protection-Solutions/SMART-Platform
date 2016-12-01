@@ -76,11 +76,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerConfExporter_DefaultValue_Tree_Error;
 	public static String CyberTrackerConfExporter_EndGroup;
 	public static String CyberTrackerConfExporter_EndGroupMessage;
-	public static String CyberTrackerConfExporter_EndObservation;
 	public static String CyberTrackerConfExporter_EndObservationGroup;
-	public static String CyberTrackerConfExporter_EndObservationMessage;
-	public static String CyberTrackerConfExporter_MultiObsGpsFirst;
-	public static String CyberTrackerConfExporter_MultiObsGpsFirstMessage;
 	public static String CyberTrackerConfExporter_NextGroupTask;
 	public static String CyberTrackerConfExporter_Progress_AlertsConfig;
 	public static String CyberTrackerConfExporter_ResumeObservationGroup;

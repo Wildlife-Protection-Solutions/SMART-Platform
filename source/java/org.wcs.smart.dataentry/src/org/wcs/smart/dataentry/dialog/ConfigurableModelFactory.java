@@ -83,7 +83,6 @@ public class ConfigurableModelFactory {
 		
 		monitor.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
 		ConfigurableModel clone = createBlankModel(name);
-		clone.setGpsFirst(cm.isGpsFirst());
 		clone.setDisplayMode(cm.getDisplayMode());
 		ConfigurableModelCloneResult cloneResult = new ConfigurableModelCloneResult(clone);
 		Map<UUID, UuidItem> o2iMap = cloneResult.getOriginal2CloneItemMap();
@@ -288,7 +287,6 @@ public class ConfigurableModelFactory {
 		clonedNode.setNodeOrder(toCopy.getNodeOrder());
 		clonedNode.setPhotoAllowed(toCopy.isPhotoAllowed());
 		clonedNode.setPhotoRequired(toCopy.isPhotoRequired());
-		clonedNode.setPhotoFisrt(toCopy.isPhotoFisrt());
 		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
 		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
 		clonedNode.setDisplayMode(toCopy.getDisplayMode());

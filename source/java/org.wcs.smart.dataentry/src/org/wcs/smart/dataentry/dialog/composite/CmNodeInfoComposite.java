@@ -65,7 +65,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	private Button btnPhoto;
 	private Button btnPhotoRequired;
-	private Button btnPhotoFirst;
 	private Button btnCollectMultiple;
 	private Button btnSingleGpsPoint;
 	private boolean isGroup;
@@ -166,7 +165,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoAllowed(btnPhoto.getSelection());
 				btnPhotoRequired.setEnabled(getSourceObject().isPhotoAllowed());
-				btnPhotoFirst.setEnabled(getSourceObject().isPhotoAllowed());
 				fireModelChanged();
 			}
 		});
@@ -180,18 +178,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoRequired(btnPhotoRequired.getSelection());
-				fireModelChanged();
-			}
-		});
-		
-		label = new Label(container, SWT.NONE);
-		label.setText(Messages.CmNodeInfoComposite_PhotoFirst);
-		label.setToolTipText(Messages.CmNodeInfoComposite_PhotoFirstTooltip);
-		btnPhotoFirst = new Button(container, SWT.CHECK);
-		btnPhotoFirst.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				getSourceObject().setPhotoFisrt(btnPhotoFirst.getSelection());
 				fireModelChanged();
 			}
 		});
@@ -253,10 +239,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 					if (btnPhotoRequired != null) {
 						btnPhotoRequired.setSelection(n.isPhotoRequired());
 						btnPhotoRequired.setEnabled(n.isPhotoAllowed());
-					}
-					if (btnPhotoFirst != null) {
-						btnPhotoFirst.setSelection(n.isPhotoFisrt());
-						btnPhotoFirst.setEnabled(n.isPhotoAllowed());
 					}
 					if (btnCollectMultiple != null)
 						btnCollectMultiple.setSelection(n.isCollectMultipleObservations());

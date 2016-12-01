@@ -72,8 +72,6 @@ public class ConfigurableModel extends NamedItem {
 	
 	private Map<Attribute, CmDmAttributeSettings> attributeSettings;
 
-	private boolean gpsFirst = false;
-	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -105,16 +103,6 @@ public class ConfigurableModel extends NamedItem {
 		this.displayMode = displayMode;
 	}
 
-	@Column(name="gps_first")
-	public boolean isGpsFirst() {
-		return gpsFirst;
-	}
-
-	public void setGpsFirst(Boolean takeGpsFirst) {
-		this.gpsFirst = Boolean.TRUE.equals(takeGpsFirst); //null <==> false
-	}
-
-	
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "parent_uuid is null and dm_attribute_uuid is not null")
 	@OrderBy(clause = "node_order")

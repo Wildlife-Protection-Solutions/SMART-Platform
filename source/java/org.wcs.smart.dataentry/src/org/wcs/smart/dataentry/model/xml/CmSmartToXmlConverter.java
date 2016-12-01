@@ -88,7 +88,6 @@ public class CmSmartToXmlConverter {
 			if (cm.getDisplayMode() != null) {
 				xml.setDisplayMode(cm.getDisplayMode().name());
 			}
-			xml.setGpsFirst(cm.isGpsFirst());
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
@@ -223,7 +222,6 @@ public class CmSmartToXmlConverter {
 		}
 		nt.setPhotoAllowed(node.isPhotoAllowed());
 		nt.setPhotoRequired(node.isPhotoRequired());
-		nt.setPhotoFirst(node.isPhotoFisrt());
 		if (node.getDisplayMode() != null) {
 			nt.setDisplayMode(node.getDisplayMode().name());
 		}

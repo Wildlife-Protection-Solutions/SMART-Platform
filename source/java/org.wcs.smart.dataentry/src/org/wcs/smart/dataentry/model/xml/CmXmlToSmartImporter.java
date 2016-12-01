@@ -176,7 +176,6 @@ public class CmXmlToSmartImporter {
 			cm.setConservationArea(SmartDB.getCurrentConservationArea());
 			updateNames(cm, xmlCm.getName());
 			cm.setDisplayMode(getDisplayMode(xmlCm.getDisplayMode()));
-			cm.setGpsFirst(xmlCm.isGpsFirst());
 			
 			cm.setNodes(processCmNodes(xmlCm.getNodes().getNode(), cm, null, monitor));
 			
@@ -369,7 +368,6 @@ public class CmXmlToSmartImporter {
 			cmNode.setCategory(fetchCategory(xmlNode.getCategoryKey(), xmlNode.getCategoryHkey()));
 			cmNode.setPhotoAllowed(xmlNode.isPhotoAllowed());
 			cmNode.setPhotoRequired(xmlNode.isPhotoRequired());
-			cmNode.setPhotoFisrt(xmlNode.isPhotoFirst());
 			cmNode.setNodeOrder(i);
 			cmNode.setParent(parent);
 			cmNode.setChildren(processCmNodes(xmlNode.getNode(), cm, cmNode, monitor));

@@ -82,10 +82,6 @@ public class Upgrader401To410 implements IDatabaseUpgrader {
 			"alter table smart.conservation_area add column pointofcontact varchar(256)",
 			"alter table smart.conservation_area add column country varchar(256)",
 			"alter table smart.conservation_area add column owner varchar(256)",
-			
-			// #1425: Enable CT to take waypoint at beginning rather than end of observation
-			"alter table smart.CONFIGURABLE_MODEL ADD COLUMN gps_first BOOLEAN",
-			"alter table smart.CM_NODE ADD COLUMN photo_first BOOLEAN"
 		};
 		
 		for (String s : sql) {
