@@ -23,23 +23,6 @@ alter table smart.conservation_area add column owner varchar(256);
 insert into smart.PATROL_TYPE (CA_UUID, PATROL_TYPE, IS_ACTIVE, MAX_SPEED) 
 select DISTINCT CA_UUID, 'MIXED', true, 10000 from smart.PATROL_TYPE;
 
-CREATE OR REPLACE FUNCTION smart.manage_user_roles()
-  RETURNS trigger                                   
-  LANGUAGE plpgsql                                  
- AS $function$                                      
-     BEGIN                                          
-         --                                                                                    
-         -- should only be called on insert; adds necessary smart role                         
-         -- for web access                                                                     
-         --                                                                                    
-         IF (TG_OP = 'INSERT') THEN                                                            
-             INSERT INTO connect.user_roles (username, role_id) VALUES (NEW.username, 'smart');
-             RETURN NEW;                                                                       
-         END IF;                                                                               
-         RETURN NULL; -- result is ignored since this is an AFTER trigger                      
-	END;
-$function$
-
 --update plugin versions
 update connect.connect_plugin_version set version = '4.1.0' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '4.1.0' where plugin_id = 'org.wcs.smart';
