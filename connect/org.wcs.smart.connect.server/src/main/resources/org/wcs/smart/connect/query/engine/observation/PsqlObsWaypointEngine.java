@@ -37,7 +37,6 @@ import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
@@ -107,9 +106,9 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				try {		
-					ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					parseConservationAreaFilterInternal(query);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							cafilter, false, true);
+							caFilter, false, true);
 					
 					populateTemporaryTableExtra(c, session);
 					

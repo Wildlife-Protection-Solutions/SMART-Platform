@@ -795,13 +795,13 @@ public class ConnectAlert extends HttpServlet {
     	 return featureCollection;
     }
 
-	private Date convertTimeToGMT(Date date) {
-		@SuppressWarnings("deprecation")
-		int offset = date.getTimezoneOffset();
-		final long ONE_MINUTE_IN_MILLIS=60000;//millisecs
-		Date dateInGMT = new Date(date.getTime() + (offset * ONE_MINUTE_IN_MILLIS));
-		return dateInGMT;
-	}
+//	private Date convertTimeToGMT(Date date) {
+//		@SuppressWarnings("deprecation")
+//		int offset = date.getTimezoneOffset();
+//		final long ONE_MINUTE_IN_MILLIS=60000;//millisecs
+//		Date dateInGMT = new Date(date.getTime() + (offset * ONE_MINUTE_IN_MILLIS));
+//		return dateInGMT;
+//	}
     
     private Alert updateAndEditAlert(String oldAlertId, Alert newAlert, boolean keepPoint){
     	newAlert = validateAlertValues(newAlert);

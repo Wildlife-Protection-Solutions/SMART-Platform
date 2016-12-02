@@ -39,7 +39,7 @@
   	<div class="table-row smart-table-header">
 		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.url" /></div>
 		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.link" /></div>
-		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('ownerUsername')">Created By</a></div>
+		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('ownerUsername')"><fmt:message key="sharedlinks.createdby"/></a></div>
 		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('expiresAt')"><fmt:message key="sharedlinks.expiresat" /></a></div>
 		<div class="table-cell smart-table-cell"></div>
 	</div>

@@ -105,12 +105,13 @@ public class QueryApi extends HttpServlet{
 	public static final String PATH = "query"; //$NON-NLS-1$
 	
 	public enum Direction{ 
-		UP(1), 
-		DOWN(2);
+		UP("ASC"), 
+		DOWN("DESC");
+		 
+		public String sql;
 		
-		public int value; 
-		private Direction(int value) { 
-			this.value = value; 
+		private Direction(String sql) {  
+			this.sql = sql;
 		} 
 	};
 	
@@ -161,11 +162,9 @@ public class QueryApi extends HttpServlet{
 			@QueryParam("srid") String srid) throws SQLException{
 
 		UUID uuid = UuidUtils.stringToUuid(queryUuid);
-		int sortDirectionInt;
-		if(sortDirection != null && (sortDirection.toLowerCase().equals("descending")|| sortDirection.toLowerCase().equals("desc") ) ){
-				sortDirectionInt = QueryApi.Direction.DOWN.value;
-		}else{
-			sortDirectionInt = QueryApi.Direction.UP.value;
+		QueryApi.Direction sortDirectionInt = QueryApi.Direction.UP;
+		if(sortDirection != null && (sortDirection.toLowerCase().equals("descending") || sortDirection.toLowerCase().equals("desc") ) ){
+				sortDirectionInt = QueryApi.Direction.DOWN;
 		}
 		
 		Date startDate = null;
@@ -285,9 +284,8 @@ public class QueryApi extends HttpServlet{
 					&& query instanceof SimpleQuery){
 
 					if(sortColumnName != null){
-						((AbstractDbFeatureResultSet)result).setTableNameAndCaUuid();
 						((AbstractDbFeatureResultSet)result).setSorting(sortColumnName, sortDirectionInt);
-						((AbstractDbFeatureResultSet)result).updateSortColumn(sortColumnName, s);
+						((AbstractDbFeatureResultSet)result).updateSortColumn(s);
 					}
 					
 					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
@@ -329,7 +327,7 @@ public class QueryApi extends HttpServlet{
 				}
 				return writeBinary(outputFile);
 			}else if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
-				
+				//TODO: sort reuslts??
 				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
 				
 				if (result instanceof AbstractDbFeatureResultSet && query instanceof SimpleQuery){

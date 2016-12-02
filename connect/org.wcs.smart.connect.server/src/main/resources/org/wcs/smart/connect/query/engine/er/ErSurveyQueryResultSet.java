@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
@@ -53,15 +52,6 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 			return;
 		attrSql.append(')');
 
-		String dir;
-		if(direction == QueryApi.Direction.DOWN.value ){
-			dir = "DESC";
-		}else{
-			dir ="ASC";
-		}
-		if(sortColumn != null){
-			attrSql.append(" ORDER BY sortkeydbl " +dir+ ", sortkeytxt " + dir); //$NON-NLS-1$
-		}
 		
 		PreparedStatement ps = c.prepareStatement(attrSql.toString());
 		for (int i = 0; i < uuids.size(); i++) {

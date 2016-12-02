@@ -31,13 +31,16 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.internal.util.ReflectHelper;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartUser;
-import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
@@ -92,7 +95,6 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
-import org.wcs.smart.ca.datamodel.Attribute;
 
 /**
  * Query manager for SMART Connect queries.
@@ -297,11 +299,7 @@ public enum QueryManager {
 	public IQueryEngine findQueryEngine(Query query) throws InstantiationException, IllegalAccessException{
 		for (IQueryEngine e : engines){
 			if (e.canExecute(query.getTypeKey())){
-				
 				IQueryEngine engine = e.getClass().newInstance();
-				if(engine instanceof AbstractQueryEngine){
-					((AbstractQueryEngine) engine).setCaUuid(query.getConservationArea().getUuid());
-				}
 				return engine;
 			}
 		}
@@ -425,17 +423,34 @@ public enum QueryManager {
 	 * @param session
 	 * @return
 	 */
-	public Attribute getAttribute(Session session, String attributeKey, UUID caUuid){
-		org.hibernate.Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
-		q.setParameter("ca", caUuid); //$NON-NLS-1$
-		q.setParameter("key", attributeKey); //$NON-NLS-1$
-		q.setCacheable(true);
-		@SuppressWarnings("unchecked")
-		List<Attribute> results = q.list();
-		if (results.size() != 1 ){
+	public Attribute.AttributeType getAttributeType(Session session, String attributeKey, ConservationAreaFilter caFilter){
+		if (caFilter.getConservationAreaFilterIds().size() == 1){
+			org.hibernate.Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
+			q.setParameter("key", attributeKey); //$NON-NLS-1$
+			q.setCacheable(true);
+			@SuppressWarnings("unchecked")
+			List<Attribute> results = q.list();
+			if (results.size() != 1 ){
+				return null;
+			}else{
+				return results.get(0).getType();
+			}
+		}else if (caFilter.getConservationAreaFilterIds().size() == 0){
+			//no conservation areas in filter; this should not be valid
 			return null;
+			
 		}else{
-			return results.get(0);
+			org.hibernate.Query q = session.createQuery("From Attribute where conservationArea.uuid in (:cas) and keyid = :key"); //$NON-NLS-1$
+			q.setParameterList("cas", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+			q.setParameter("key", attributeKey); //$NON-NLS-1$
+			
+			List<Attribute> allAttributes = q.list();
+			if (allAttributes.size() == 0) return null;
+			
+			Set<AttributeType> types = allAttributes.stream().map(a->a.getType()).distinct().collect(Collectors.toSet());
+			if (types.size() == 1) return types.iterator().next();
+			return null;	//not a valid column as the key has different types in different cas (or is not valid in any cas)
 		}
 	}
 }

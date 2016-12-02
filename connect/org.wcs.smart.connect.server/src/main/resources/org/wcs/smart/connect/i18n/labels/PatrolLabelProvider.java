@@ -45,6 +45,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 				case AIR: return Messages.getString("PatrolLabelProvider.AirPatrol", l); //$NON-NLS-1$
 				case GROUND: return Messages.getString("PatrolLabelProvider.GroundPatrol", l); //$NON-NLS-1$
 				case MARINE: return Messages.getString("PatrolLabelProvider.WaterPatrol", l); //$NON-NLS-1$
+				case MIXED: return Messages.getString("PatrolLabelProvider.MixedPatrol", l); //$NON-NLS-1$
 			}
 		}else if (item instanceof PatrolWaypointSource){
 			return Messages.getString("PatrolLabelProvider.WpSource", l); //$NON-NLS-1$

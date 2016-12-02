@@ -44,7 +44,6 @@ import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
@@ -113,12 +112,12 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {			
-					ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
+					parseConservationAreaFilterInternal(lquery);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							cafilter, 
+							caFilter, 
 							false, true);
 					
-					populateTemporaryTableExtra(c, cafilter.getConservationAreaFilterIds().size() > 1, session);
+					populateTemporaryTableExtra(c, caFilter.getConservationAreaFilterIds().size() > 1, session);
 					
 					//item cnt
 					int itemcnt = 0;

@@ -3,7 +3,6 @@ package org.wcs.smart.connect.dataqueue;
 import java.util.Date;
 import java.util.UUID;
 
-import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 
 public class ServerDataQueueItemProxy extends DataQueueItem implements Comparable<ServerDataQueueItemProxy>	{

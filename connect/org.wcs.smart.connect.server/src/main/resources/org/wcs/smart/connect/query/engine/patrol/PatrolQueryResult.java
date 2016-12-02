@@ -30,7 +30,6 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
-import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -66,15 +65,9 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
-				String dir;
-				if(direction == QueryApi.Direction.DOWN.value ){
-					dir = "DESC";
-				}else{
-					dir ="ASC";
-				}
 				if(sortColumn != null){
 					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery() + " ORDER BY sortkeydbl " +dir+ ", sortkeytxt " + dir);//$NON-NLS-1$
+							ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$
 				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery());
@@ -154,15 +147,10 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 		engine.cleanUp(session);
 	}
 
-	@Override
-	public void setTableNameAndCaUuid() {
-		this.queryTempTable = engine.getQueryDataTable();
-		this.caUuid = engine.getCaUuid();
-	}
 
 	@Override
-	public void updateSortColumn(String sortColumn, Session session) throws SQLException {
-		updateSortColumnGeneral(session, "value", ".ob_", "_LIST", "_TREE", "uuid");
+	public void updateSortColumn(Session session) throws SQLException {
+		updateSortColumnGeneral(session, engine.getQueryDataTable(),engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid");
 		
 	}
 }

@@ -120,7 +120,7 @@
 					</c:forEach> 
      			</select>
      			<table><tr><td>
-     			<label id="sridDropdownLobel" style="display:none"">EPSG:</label>
+     			<label id="sridDropdownLobel" style="display:none">EPSG:</label>
      			</td><td>
      			<select id="sridDropdown" name="sridDropdown" style="display:none">
      				<option value="-1">custom</option>
@@ -131,7 +131,7 @@
      				<option value="3857">Google/Bing/OpenStreetMaps Projection</option>
      			</select>
      			</td><td>
-     			<input id="srid" type="number" name="srid" value="4326" style="width:65px;display:none" min="0" max="69036405" disabled="">
+     			<input id="srid" type="number" name="srid" value="4326" style="width:65px;display:none" min="0" max="69036405" disabled>
      			</td></tr>
      			</table>
      			<label id="zoneLabel" style="display:none">UTM Zone</label><input id="utmzone" type="number" name="srid" value="1" style="width:65px;display:none" min="0" max="60">

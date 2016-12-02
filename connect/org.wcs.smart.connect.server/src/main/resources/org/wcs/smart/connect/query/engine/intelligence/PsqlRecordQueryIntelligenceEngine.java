@@ -50,7 +50,6 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.BracketFilter;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.NotExpression;
 import org.wcs.smart.query.model.filter.Operator;
@@ -170,7 +169,7 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					List<Object> parameterValues = new ArrayList<Object>();
 					
 					// ca filter
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					parseConservationAreaFilterInternal(query);
 					
 					sql.append(tablePrefix(ConservationArea.class) + ".uuid IN ("); //$NON-NLS-1$
 					for (UUID ca : caFilter.getConservationAreaFilterIds()){

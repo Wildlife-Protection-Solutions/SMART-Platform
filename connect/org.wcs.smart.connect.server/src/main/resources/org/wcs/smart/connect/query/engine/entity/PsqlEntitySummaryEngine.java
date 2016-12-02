@@ -181,7 +181,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 			public void execute(Connection c) throws SQLException {
 				
 				try {
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					parseConservationAreaFilterInternal(query);
 					
 					try{
 						getHeaderInfo(query, sumResults, locale, session);
@@ -1072,8 +1072,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 	 * @param session hibernate session
 	 */
 	public void getHeaderInfo(SummaryQuery query, SummaryQueryResult results,Locale l, Session session) throws Exception{
-		ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter); 
+		parseConservationAreaFilterInternal(query);
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();

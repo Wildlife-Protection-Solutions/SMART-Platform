@@ -48,7 +48,6 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
@@ -140,8 +139,8 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
-					ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, cafilter, false, false);
+					parseConservationAreaFilterInternal(lquery);
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, caFilter, false, false);
 					getResults(c, session);
 					
 					c.commit();

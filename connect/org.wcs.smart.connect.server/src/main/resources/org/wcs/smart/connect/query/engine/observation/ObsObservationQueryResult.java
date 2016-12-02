@@ -33,7 +33,6 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -112,17 +111,7 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		}
 		if (!hasObservations) return;
 		attrSql.append(')');
-		
-		String dir;
-		if(direction == QueryApi.Direction.DOWN.value ){
-			dir = "DESC";
-		}else{
-			dir ="ASC";
-		}
-		if(sortColumn != null){
-			attrSql.append(" ORDER BY sortkeydbl " +dir+ ", sortkeytxt " + dir); //$NON-NLS-1$
-		}
-		
+				
 		PreparedStatement ps = c.prepareStatement(attrSql.toString());
 		for (int i = 0; i < uuids.size(); i ++){
 			ps.setObject(i+1, uuids.get(i));
@@ -220,6 +209,10 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
+				if(sortColumn != null){
+					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " + direction.sql + ", sortkeytxt " + direction.sql); //$NON-NLS-1$
+				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
 			}
@@ -274,16 +267,8 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		
 	}
 
-
 	@Override
-	public void setTableNameAndCaUuid() {
-		this.queryTempTable = engine.getQueryDataTable();
-		this.caUuid = engine.getCaUuid();
-	}
-
-	@Override
-	public void updateSortColumn(String sortColumn, Session session) throws SQLException {
-		updateSortColumnGeneral(session, "value", ".ob_", "_LIST", "_TREE", "uuid");
-		
+	public void updateSortColumn(Session session) throws SQLException {
+		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid");
 	}
 }

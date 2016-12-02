@@ -38,7 +38,6 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
@@ -106,7 +105,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 				try {			
 					filterer = PsqlEntityWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 					
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					parseConservationAreaFilterInternal(query);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, false, true);
 					

@@ -129,6 +129,10 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 				+ " left join " + engine.tableName(MissionTrack.class) + " bar on  bar.mission_day_uuid = c.uuid " //$NON-NLS-1$ //$NON-NLS-2$
 				+ " GROUP BY " //$NON-NLS-1$
 				+ sb.toString().substring(0, sb.length() - 1);
+				
+				if(sortColumn != null){
+					sql += " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql;//$NON-NLS-1$
+				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery(sql);
 			}
@@ -167,16 +171,10 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 		super.dispose(session);
 		engine.cleanUp(session);
 	}
-	@Override
-	public void setTableNameAndCaUuid() {
-		this.queryTempTable = engine.getQueryDataTable();
-		this.caUuid = engine.getCaUuid();
-	}
 	
 	@Override
-	public void updateSortColumn(String sortColumn, Session session) throws SQLException {
-		updateSortColumnGeneral(session, "value", ".ob_", "_LIST", "_TREE", "uuid");
-		
+	public void updateSortColumn(Session session) throws SQLException {
+		updateSortColumnGeneral(session, engine.getQueryDataTable(),engine.getCaFilter(),  "value", ".ob_", "_LIST", "_TREE", "uuid");
 	}
 }
 

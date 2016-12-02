@@ -55,7 +55,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;

@@ -33,7 +33,6 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -91,12 +90,7 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 	
 	private void attachEntityAttributes(List<IResultItem> result, Connection c, Session session) throws SQLException {
 		if (engine.getEntityTypes().size() > 0){
-			String dir;
-			if(direction == QueryApi.Direction.DOWN.value ){
-				dir = "DESC";
-			}else{
-				dir ="ASC";
-			}
+			
 			//attach entities
 				StringBuilder sql = new StringBuilder();
 				sql.append("SELECT r.ob_uuid, a.keyid as entitykey, ea.keyid as entityattributekey, eav.number_value, eav.string_value, rl.value as list_value, rt.value as tree_value "); //$NON-NLS-1$
@@ -129,9 +123,6 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 				}
 				sql.deleteCharAt(sql.length() - 1);
 				sql.append(")"); //$NON-NLS-1$
-				if(sortColumn != null){
-					sql.append(" ORDER BY sortkeydbl " +dir+ ", sortkeytxt " + dir);//$NON-NLS-1$
-				}
 				
 				PreparedStatement ps = c.prepareStatement(sql.toString());
 				for (int i = 0; i < uuids.size(); i ++){
@@ -292,8 +283,12 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
+				if(sortColumn != null){
+					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+							ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$
+				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+						ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getQueryDataTable());
 			}
 		});
 	}
@@ -333,17 +328,10 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 		super.dispose(session);
 		engine.cleanUp(session);		
 	}
-	
-	@Override
-	public void setTableNameAndCaUuid() {
-		this.queryTempTable = engine.getQueryDataTable();
-		this.caUuid = engine.getCaUuid();
-	}
 
 	@Override
-	public void updateSortColumn(String sortColumn, Session session) throws SQLException {
-		updateSortColumnGeneral(session, "value", ".ob_", "_LIST", "_TREE", "uuid");
-		
+	public void updateSortColumn(Session session) throws SQLException {
+		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid");		
 	}
 
 }

@@ -30,7 +30,6 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
-import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -84,14 +83,7 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public ResultSet getResultSet(final Session session) {
-		String dir;
-		if(direction == QueryApi.Direction.DOWN.value ){
-			dir = "DESC";
-		}else{
-			dir ="ASC";
-		}
-
-		final String dataQuerySort = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +dir+ ", sortkeytxt " + dir; //$NON-NLS-1$
+		final String dataQuerySort = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql; //$NON-NLS-1$
 		final String dataQuery = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable();//$NON-NLS-1$
 
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
@@ -166,14 +158,7 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 	}
 	
 	@Override
-	public void setTableNameAndCaUuid() {
-		this.queryTempTable = engine.getQueryDataTable();
-		this.caUuid = engine.getCaUuid();
-	}
-	
-	@Override
-	public void updateSortColumn(String sortColumn, Session session) throws SQLException {
-		updateSortColumnGeneral(session, "value", ".ob_", "_LIST", "_TREE", "uuid");
-		
+	public void updateSortColumn(Session session) throws SQLException {
+		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid");
 	}
 }

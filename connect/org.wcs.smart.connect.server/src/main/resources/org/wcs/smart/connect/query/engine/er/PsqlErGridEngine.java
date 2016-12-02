@@ -157,7 +157,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+				parseConservationAreaFilterInternal(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
 					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErGridEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
 				}
