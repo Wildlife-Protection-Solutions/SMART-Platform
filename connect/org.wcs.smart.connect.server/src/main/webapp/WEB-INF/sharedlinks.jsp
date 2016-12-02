@@ -37,9 +37,9 @@
 <div class="top-spacer" style="margin-left: -20px"> 
   <div id="linktable" class="linktable table-cell smart-table">
   	<div class="table-row smart-table-header">
-		<!-- <div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.runquery" /></div>-->
 		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.url" /></div>
 		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.link" /></div>
+		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('ownerUsername')">Created By</a></div>
 		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('expiresAt')"><fmt:message key="sharedlinks.expiresat" /></a></div>
 		<div class="table-cell smart-table-cell"></div>
 	</div>

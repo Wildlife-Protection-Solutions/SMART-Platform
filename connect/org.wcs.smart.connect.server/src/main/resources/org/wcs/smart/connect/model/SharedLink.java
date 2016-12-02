@@ -28,9 +28,10 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-/*
- * An Alert entity
+/**
+ * An Shared Link entity
  *
  * @Author Jeff
  */
@@ -43,6 +44,9 @@ public class SharedLink extends ConnectUuidItem{
 	private Timestamp expiresAt;
 	private String url; 
 	private int expiresAfter;
+	
+	@Transient
+	public String ownerUsername;
 	
 	
 	@Column(name="owner_uuid")
@@ -85,4 +89,11 @@ public class SharedLink extends ConnectUuidItem{
 		this.caUuid = caUuid;
 	}
 	
+	@Transient
+	public String getOwnerUsername(){
+		return this.ownerUsername;
+	}
+	public void setOwnerUsername(String ownerUsername){
+		this.ownerUsername = ownerUsername;
+	}
 }

@@ -99,7 +99,7 @@ public class SharedLinkApi extends HttpServlet{
 	@GET
     @Path("/")
     public List<SharedLink> getSharedLinks(){
-		List<SharedLink> links = new ArrayList<SharedLink>();
+		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -111,13 +111,15 @@ public class SharedLinkApi extends HttpServlet{
 						.add(Restrictions.eq("action", CaAdminAccountAction.KEY));
 				
 				List<SmartUserAction> list = (ArrayList<SmartUserAction>)c.list();
-				
+		
+				List<SharedLink> links = new ArrayList<SharedLink>();
 				for(SmartUserAction a : list ){//loop over each CA they are admins of
 					UUID caUuid = a.getResource();
 					
 					List<SharedLink> temp = s.createCriteria(SharedLink.class).add(Restrictions.eq("caUuid", caUuid)).list(); 
 					for(SharedLink t : temp){//add all shared links from this CA
 						links.add(t);
+						t.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, t.getOwnerUuid())).getUsername() );
 					}
 				}
 				return links;
@@ -125,7 +127,11 @@ public class SharedLinkApi extends HttpServlet{
 			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}else{
-				return s.createCriteria(SharedLink.class).list();	
+				List<SharedLink> links =  s.createCriteria(SharedLink.class).list();
+				for (SharedLink l : links){
+					l.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, l.getOwnerUuid())).getUsername() );
+				}
+				return links;
 			}
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);

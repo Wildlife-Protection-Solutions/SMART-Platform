@@ -90,7 +90,7 @@ function createLinkTable(){
  		
  		var date = new Date(links[i].expiresAt);
  		var row = tableCreateRow(parent,
- 				[null, links[i].url, date.toString() , null], 
+ 				[null, links[i].url, links[i].ownerUsername, date.toString() , null], 
  				"linkrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.uuid = links[i].uuid;
@@ -108,7 +108,7 @@ function createLinkTable(){
  		deleteicon.dataset.uuid = links[i].uuid;
  		deleteicon.onclick = confirmdeletelink;
  		deleteicon.href="";
- 		row.childNodes[3].appendChild(deleteicon);		
+ 		row.childNodes[4].appendChild(deleteicon);
  	}
  	
 }

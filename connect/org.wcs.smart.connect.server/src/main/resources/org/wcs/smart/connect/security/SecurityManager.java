@@ -35,6 +35,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUserAction;
+import org.wcs.smart.connect.model.SmartUserRole;
 
 /**
  * Security manager for smart connect.
@@ -46,7 +47,21 @@ public enum SecurityManager {
 
 	INSTANCE;
 
+	/*
+	 * Determine if the user represented by the username is active
+	 */
+	private boolean isActive(Session s, String username){
+		SmartUserRole user = (SmartUserRole)s.createCriteria(SmartUserRole.class)
+				.add(Restrictions.eq("id.username", username))
+				.uniqueResult();
+		if (user == null) return false;
+		return true;
+	}
+	
 	public boolean canAccess(Session s, String username, String action, UUID resource){
+		//ensure user is active
+		if (!isActive(s, username)) return false;
+		
 		//check roles for permission
 		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
 		queryString += "WHERE a.role = role AND r.id.username = :username AND ( a.action = :adminAction OR "; //$NON-NLS-1$
@@ -119,6 +134,9 @@ public enum SecurityManager {
 	}
 	
 	public boolean canAccessAtLeastOneResouce(Session s, String username, String action){
+		//ensure the user is active
+		if (!isActive(s, username)) return false;
+		
 		Criterion r = null;
 		r = Restrictions.eq("action", action); //$NON-NLS-1$
 
@@ -178,6 +196,7 @@ public enum SecurityManager {
 
 	//is the user is CaAdmin of any CA?
 	public boolean isCaAdmin(Session s, String username, String key) {
+		//TODO: do we need to ensure the user is active first?
 		Criteria c2 = s.createCriteria(SmartUserAction.class);
 		c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
 		.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$

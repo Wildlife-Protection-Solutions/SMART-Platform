@@ -232,6 +232,8 @@ public class QueryApi extends HttpServlet{
 				//we use the ccaafilter; otherwise we ignore it
 				query.setConservationAreaFilter(parseCaFilter(cafilter, s));
 			}
+			
+			//for shared links; these links do not have a user but we want to check the j_username which is set to the link creator
 			String name="";
 			if( request.getUserPrincipal() == null){
 				name = (String)request.getAttribute("j_username");	
@@ -241,7 +243,7 @@ public class QueryApi extends HttpServlet{
 			
 			//check for permission to this query for this user.
 			if (!SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY, uuid)){
-				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
+				if (SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
 					//access is OK since they have access to All Queries in this CA.
 				}else{
 					return createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
