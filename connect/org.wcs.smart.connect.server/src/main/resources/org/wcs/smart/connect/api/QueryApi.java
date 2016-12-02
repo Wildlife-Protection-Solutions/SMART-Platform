@@ -434,18 +434,17 @@ public class QueryApi extends HttpServlet{
 	 * URL: ../server/api/query/
 	 * Call Type: GET
 	 * 
-	 * @param typefilter - optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.
-	 * @param cafilter - optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.
-	 * @param isccaafilter - optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything.
-	 * @param orderby - optional String - which column to sort the results by, valid values are: name, descendingname, type, descendingtype, ca, descendingca, id, descendingid 
+	 * @param type - optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.
+	 * @param ca - optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.
+	 * @param isccaa - optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything. 
 	 * @return A JSON list of QueryProxy objects. ( https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/query/QueryProxy.java )
 	 */
 	@GET
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public List<QueryProxy> getAllQueriesForUser(@QueryParam("typefilter") String typeFilter,
-			@QueryParam("cafilter") String caFilter,
-			@QueryParam("isccaafilter") Boolean isCcaaFilter){
+    public List<QueryProxy> getAllQueriesForUser(@QueryParam("type") String typeFilter,
+			@QueryParam("ca") String caFilter,
+			@QueryParam("isccaa") Boolean isCcaaFilter){
 		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
 
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
@@ -535,28 +534,4 @@ public class QueryApi extends HttpServlet{
 				.entity("{" + error +"}") //$NON-NLS-1$ //$NON-NLS-2$
 				.build();
 	}
-	
-	/**
-	 * returns all valid Query types 
-	 * URL: ../server/api/query/types/
-	 * Call Type: GET
-	 * 
-	 * @return A JSON list of query type keys that are valid.
-	 */
-	@GET
-    @Path("/types/")
-	@Produces({ MediaType.APPLICATION_JSON })
-    public String[] getAllQueryTypes(){
-
-		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
-		s.beginTransaction();
-		try{
-			return QueryManager.INSTANCE.getQueryTypes();			
-		} catch (Exception e) {
-			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, "Error getting query types."); //$NON-NLS-1$
-		}finally{
-			s.getTransaction().commit();
-		}
-	}
-
 }

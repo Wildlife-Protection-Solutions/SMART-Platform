@@ -223,7 +223,7 @@ public class ConservationAreas extends HttpServlet{
 						proxy.setOrganization(smartca.getOrganization());
 						proxy.setOwner(smartca.getOwner());
 						
-						proxy.setAdministrativAreaJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)) )) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
+						proxy.setAdministrativeAreasJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)) )) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
 						proxy.setCaBoundaryJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)))) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "'").uniqueResult() );
 						proxy.setBufferedManagementAreaJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.BA + "'").uniqueResult() );
 						proxy.setManagementSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.MNGT + "'").uniqueResult() );
@@ -656,6 +656,17 @@ public class ConservationAreas extends HttpServlet{
 			ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, cuuid);
 			if (ca != null){
 				proxy.setDescriptionDesignation(ca.getDescription(), ca.getDesignation());
+				
+				proxy.setLocation(ca.getCountry());
+				proxy.setPointOfContact(ca.getPointOfContact());
+				proxy.setOrganization(ca.getOrganization());
+				proxy.setOwner(ca.getOwner());
+				
+				proxy.setAdministrativeAreasJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)) )) as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
+				proxy.setCaBoundaryJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)))) as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "'").uniqueResult() );
+				proxy.setBufferedManagementAreaJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.BA + "'").uniqueResult() );
+				proxy.setManagementSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.MNGT + "'").uniqueResult() );
+				proxy.setPatrolSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.PATRL + "'").uniqueResult() );
 			}
 			proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid()));
 			return Response.ok().entity(proxy).build();

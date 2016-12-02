@@ -54,7 +54,7 @@ public class ConservationAreaProxy {
 	private String bufferedManagementAreaJson;
 	private String managementSectorsJson;
 	private String patrolSectorsJson;
-	private String administrativAreaJson;
+	private String administrativeAreasJson;
 	
 	public String getOrganization() {
 		return organization;
@@ -180,11 +180,11 @@ public class ConservationAreaProxy {
 		this.patrolSectorsJson = patrolSectorsJson;
 	}
 
-	public String getAdministrativAreaJson() {
-		return administrativAreaJson;
+	public String getAdministrativeAreasJson() {
+		return administrativeAreasJson;
 	}
 
-	public void setAdministrativAreaJson(String administrativAreaJson) {
-		this.administrativAreaJson = administrativAreaJson;
+	public void setAdministrativeAreasJson(String administrativAreasJson) {
+		this.administrativeAreasJson = administrativAreasJson;
 	}
 }
