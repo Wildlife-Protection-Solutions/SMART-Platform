@@ -52,6 +52,44 @@ window.onload = function(){
 		}
 	}
 	
+	document.getElementById("queryformat").onchange = function(){
+		var type = document.getElementById("queryformat").value;
+		if (type == "shp" || type =="geojson"){
+			document.getElementById("sridDropdownLobel").style.display = "block";
+			document.getElementById("sridDropdown").style.display = "block";
+			document.getElementById("srid").style.display = "block";
+		}else{
+			document.getElementById("sridDropdownLobel").style.display = "none";
+			document.getElementById("sridDropdown").style.display = "none";
+			document.getElementById("srid").style.display = "none";
+			document.getElementById("zoneLabel").style.display = "none";
+			document.getElementById("utmzone").style.display = "none";
+		}
+	}
+	document.getElementById("sridDropdown").onchange = function(){
+		var srid = document.getElementById("sridDropdown").value;
+		document.getElementById("srid").disabled = true;
+		document.getElementById("zoneLabel").style.display = "none";
+		document.getElementById("utmzone").style.display = "none";
+		
+		if(srid == 32600 || srid == 32700){
+			document.getElementById("zoneLabel").style.display = "block";
+			document.getElementById("utmzone").style.display = "block";
+			document.getElementById("srid").value = parseInt(srid) + parseInt(document.getElementById("utmzone").value);
+		}else if(srid==-1){
+			document.getElementById("srid").disabled = false;
+		}else{
+			
+			document.getElementById("srid").value = srid;
+		}
+	}
+	
+	document.getElementById("utmzone").onchange = function(){
+		document.getElementById("srid").value = parseInt(document.getElementById("utmzone").value) + parseInt(document.getElementById("sridDropdown").value);
+	}
+	
+	
+	
 	document.getElementById("createcustomlinklink").onclick = function(){
 		document.getElementById('createcustomlink').style.display = 'block';
 		document.getElementById('createcustomlinktitle').style.display = 'none';
@@ -435,6 +473,10 @@ function generateRelativeUrl(root){
 		if (cafilter.length > 0){
 			url = url + "&cafilter=" + cafilter.substring(1);
 		}
+	}
+	var type = document.getElementById("queryformat").value;
+	if (type == "shp" || type =="geojson"){
+		url = url + "&srid=" + document.getElementById('srid').value;
 	}
 	return url;
 }

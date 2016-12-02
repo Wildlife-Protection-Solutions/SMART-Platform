@@ -119,6 +119,23 @@
 	     				<option value="${exp[0]}">${exp[1]}</option> 
 					</c:forEach> 
      			</select>
+     			<table><tr><td>
+     			<label id="sridDropdownLobel" style="display:none"">EPSG:</label>
+     			</td><td>
+     			<select id="sridDropdown" name="sridDropdown" style="display:none">
+     				<option value="-1">custom</option>
+     				<option selected value="4326">4326(lat/long, WGS84)</option>
+     				<option value="4269">4269(lat/long, NAD83)</option>
+     				<option value="32600">WGS 84 UTM North (select Zone)</option>
+     				<option value="32700">WGS 84 UTM South (select Zone)</option>
+     				<option value="3857">Google/Bing/OpenStreetMaps Projection</option>
+     			</select>
+     			</td><td>
+     			<input id="srid" type="number" name="srid" value="4326" style="width:65px;display:none" min="0" max="69036405" disabled="">
+     			</td></tr>
+     			</table>
+     			<label id="zoneLabel" style="display:none">UTM Zone</label><input id="utmzone" type="number" name="srid" value="1" style="width:65px;display:none" min="0" max="60">
+     			
      		</fieldset>
      		
      		<fieldset id="cafilter" style="height:150px; overflow:auto;">
