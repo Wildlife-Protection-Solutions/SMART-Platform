@@ -51,7 +51,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.swt.SWT;
 import org.geotools.referencing.CRS;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
@@ -81,7 +80,6 @@ import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
@@ -269,8 +267,12 @@ public class QueryApi extends HttpServlet{
 			if(srid != null && !srid.equals("")){
 				Projection prj = new Projection();
 				prj.setParsedCoordinateReferenceSystem(CRS.decode("EPSG:" + srid, true));
-				prj.setName(GeometryUtils.SMART_CRS.getName().toString());
 				prjProvider= new ProjectionProvider(prj);
+			}else{
+				//assume to default projection
+				Projection prj = new Projection();
+				prj.setParsedCoordinateReferenceSystem(GeometryUtils.SMART_CRS);
+				prjProvider = new ProjectionProvider(prj);
 			}
 		 
 			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
@@ -285,7 +287,6 @@ public class QueryApi extends HttpServlet{
 						((AbstractDbFeatureResultSet)result).setSorting(sortColumnName, sortDirectionInt);
 						((AbstractDbFeatureResultSet)result).updateSortColumn(sortColumnName, s);
 					}
-					
 					
 					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
 				}else if (result instanceof IMemoryTableResultSet
@@ -327,11 +328,10 @@ public class QueryApi extends HttpServlet{
 				return writeBinary(outputFile);
 			}else if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
 				
-				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale());
-				exporter.setProjectionProvider(prjProvider);
+				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
 				
 				if (result instanceof AbstractDbFeatureResultSet && query instanceof SimpleQuery){
-					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s, srid);
+					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
 				}else{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$	
 				}

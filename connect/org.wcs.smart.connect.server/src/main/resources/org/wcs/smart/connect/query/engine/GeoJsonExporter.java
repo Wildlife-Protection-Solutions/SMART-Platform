@@ -33,10 +33,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -44,12 +44,8 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
-import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionProvider;
-import org.wcs.smart.ProjectionUtils;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -68,16 +64,17 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class GeoJsonExporter {
 
-	private final Logger logger = Logger.getLogger(ShpExporter.class.getName());
-	ProjectionProvider prjProvider;
-	
 	public static final String FORMAT_KEY = "geojson"; //$NON-NLS-1$
-	String geoJsonOutput;
 	
+	private final Logger logger = Logger.getLogger(ShpExporter.class.getName());
+	
+	private ProjectionProvider prjProvider;
+	private String geoJsonOutput;
 	private Locale l;
 	
-	public GeoJsonExporter(Locale l){
+	public GeoJsonExporter(Locale l, ProjectionProvider prjProvider){
 		this.l = l;
+		this.prjProvider = prjProvider;
 	}
 
 	
@@ -94,11 +91,8 @@ public class GeoJsonExporter {
 	 * @param session
 	 * @throws IOException 
 	 */
-	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session, String srid) throws IOException{
-
+	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws IOException{
 		geoJsonOutput = new String();
-		//final IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
-		
 
 		session.doWork(new Work(){
 			@Override
@@ -123,25 +117,22 @@ public class GeoJsonExporter {
 					List<SimpleFeature> reprojected = new ArrayList<SimpleFeature>();
 					if (prjProvider == null || CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, prjProvider.getProjection().getParsedCoordinateReferenceSystem())){
 						reprojected = features;
-//						shapefile.createSchema(type);
 					}else{
-//						SimpleFeatureType reprojectedType = SimpleFeatureTypeBuilder.retype(type, prjProvider.getProjection().getParsedCoordinateReferenceSystem());
-//						shapefile.createSchema(reprojectedType);
 						MathTransform transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, prjProvider.getProjection().getParsedCoordinateReferenceSystem(), true);
 						for (SimpleFeature f : features){
 							SimpleFeature copy = SimpleFeatureBuilder.copy(f);
 							copy.setDefaultGeometry(JTS.transform((Geometry)f.getDefaultGeometry(), transform));
 							reprojected.add(copy);
 						}
-						fjson.writeCRS(prjProvider.getProjection().getParsedCoordinateReferenceSystem(), crsWriter); //write the new projection into JSON
+						
 					}
-					
+					fjson.writeCRS(prjProvider.getProjection().getParsedCoordinateReferenceSystem(), crsWriter); //write the new projection into JSON
 					SimpleFeatureCollection collection = DataUtilities.collection(reprojected);
 					if(collection != null && collection.getSchema() != null){
 						fjson.writeFeatureCollection(collection, writer);
 						geoJsonOutput = writer.toString();
 						if(crsWriter != null){//add the project to the JSON, the JSON library kinda sucks and has no way to write it in automatically from what I can tell...
-							geoJsonOutput = "{\"crs\":" + crsWriter.toString() + geoJsonOutput.substring(1);  //the substring pulls off the opening bracket of the json. Replaces the { at the start and add the crs value/object into the json   
+							geoJsonOutput = "{\"crs\":" + crsWriter.toString() + "," + geoJsonOutput.substring(1);  //the substring pulls off the opening bracket of the json. Replaces the { at the start and add the crs value/object into the json   
 						}
 					}else{
 						geoJsonOutput = "{}";
@@ -161,11 +152,6 @@ public class GeoJsonExporter {
 		return geoJsonOutput;
 	}
 
-
-	public void setProjectionProvider(ProjectionProvider prjProvider) {
-		this.prjProvider = prjProvider;
-	}
-	
 }
 
 
