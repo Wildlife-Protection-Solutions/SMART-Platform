@@ -234,6 +234,7 @@ public class CyberTrackerUtil {
 		fakeRoot.setName(model.getName());
 		fakeRoot.setNames(model.getNames());
 		fakeRoot.setChildren(model.getNodes());
+		fakeRoot.setDisplayMode(model.getDisplayMode());
 		return fakeRoot;
 	}
 
