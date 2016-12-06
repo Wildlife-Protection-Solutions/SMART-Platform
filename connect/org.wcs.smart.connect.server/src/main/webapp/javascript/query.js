@@ -53,18 +53,7 @@ window.onload = function(){
 	}
 	
 	document.getElementById("queryformat").onchange = function(){
-		var type = document.getElementById("queryformat").value;
-		if (type == "shp" || type =="geojson"){
-			document.getElementById("sridDropdownLobel").style.display = "block";
-			document.getElementById("sridDropdown").style.display = "block";
-			document.getElementById("srid").style.display = "block";
-		}else{
-			document.getElementById("sridDropdownLobel").style.display = "none";
-			document.getElementById("sridDropdown").style.display = "none";
-			document.getElementById("srid").style.display = "none";
-			document.getElementById("zoneLabel").style.display = "none";
-			document.getElementById("utmzone").style.display = "none";
-		}
+		updateSRIDVisibility();
 	}
 	document.getElementById("sridDropdown").onchange = function(){
 		var srid = document.getElementById("sridDropdown").value;
@@ -135,6 +124,20 @@ window.onload = function(){
 	
 }
 
+function updateSRIDVisibility(){
+	var type = document.getElementById("queryformat").value;
+	if (type == "shp" || type =="geojson"){
+		document.getElementById("sridDropdownLobel").style.display = "block";
+		document.getElementById("sridDropdown").style.display = "block";
+		document.getElementById("srid").style.display = "block";
+	}else{
+		document.getElementById("sridDropdownLobel").style.display = "none";
+		document.getElementById("sridDropdown").style.display = "none";
+		document.getElementById("srid").style.display = "none";
+		document.getElementById("zoneLabel").style.display = "none";
+		document.getElementById("utmzone").style.display = "none";
+	}
+}
 function canExecute(queryType){
 	return executeableTypes.indexOf(queryType.toLowerCase())>=0;
 }
@@ -394,7 +397,7 @@ function showQueryOptions(){
 	document.querySelector("#queryformat").selectedIndex = formatIndex;
 	 
 	displayDialogLocation('urlOptionsDialog', pos.x, window.pageYOffset + 20);
-
+	updateSRIDVisibility();
 }
 
 function isFoundInRow(row){

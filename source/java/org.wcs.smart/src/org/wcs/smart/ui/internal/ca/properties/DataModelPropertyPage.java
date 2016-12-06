@@ -164,7 +164,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		if (getSession().getTransaction().isActive()){
 			getSession().getTransaction().rollback();
 		}
-		if (getSession().isOpen()) getSession().close();
+		if (session != null && session.isOpen()){
+			session.close();
+		}
 		return super.close();
 	}
 	
