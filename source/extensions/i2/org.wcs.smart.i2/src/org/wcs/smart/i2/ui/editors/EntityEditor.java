@@ -1126,10 +1126,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 			relationshipsToAdd.add(newRelationship);
 			setDirty(true);
 			((RelationshipContentProvider)treeRelationships.getContentProvider()).refresh();
-			
 			if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
 				//edit 
 				editRelationshipAttributes(newRelationship);
+			}else{
+				treeRelationships.refresh();
+				setDirty(true);
 			}
 		}
 	}
@@ -1149,6 +1151,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					protected void doEvent(){
 						if (getRelationshipType() != null){
 							addRelationship(getRelationshipType(), getTargetEntity());
+							close();
 						}
 					}
 				};

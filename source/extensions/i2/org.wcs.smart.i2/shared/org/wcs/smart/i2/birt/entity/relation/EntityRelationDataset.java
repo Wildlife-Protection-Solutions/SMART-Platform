@@ -88,7 +88,9 @@ public class EntityRelationDataset  implements IQuery {
 				Restrictions.eq("targetEntityType", type),
 				Restrictions.isNull("sourceEntityType"),
 				Restrictions.isNull("targetEntityType")
-				)).list();
+				))
+		.add(Restrictions.in("conservationArea", connection.getConservationAreas()))
+		.list();
 		
 		Set<IntelAttribute> attSet = new HashSet<IntelAttribute>();
 		relationshipTypes.stream().forEach(

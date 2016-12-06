@@ -81,7 +81,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			if (this == MODIFIED_BY) return MessageFormat.format("{0} {1}", entity.getLastModifiedBy().getGivenName(), entity.getLastModifiedBy().getFamilyName());
 			if (this == PRIMARY_IMAGE){
 				if (entity.getPrimaryAttachment() == null){
-					return "";
+					return null;
 				}
 				return "file:/" + entity.getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
 			}

@@ -54,7 +54,9 @@ import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
 import org.eclipse.birt.report.model.api.elements.structures.ComputedColumn;
+import org.eclipse.birt.report.model.api.elements.structures.HideRule;
 import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter;
+import org.eclipse.birt.report.model.elements.interfaces.IReportItemModel;
 import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
 import org.eclipse.birt.report.model.elements.interfaces.ITableColumnModel;
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
@@ -294,6 +296,12 @@ public enum EntityReportGenerator {
 		primaryImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
 		primaryImage.setProportionalScale(true);
 		primaryImage.setURL("row[\""+ EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getColumnName() +"\"]");
+		
+		/* hide if no image */
+		HideRule visibility = StructureFactory.createHideRule();
+		visibility.setFormat(DesignChoiceConstants.FORMAT_TYPE_ALL);
+		visibility.setExpression("row[\""+ EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getColumnName() +"\"] == null");
+		primaryImage.getPropertyHandle(IReportItemModel.VISIBILITY_PROP).addItem(visibility);
 		
 		headerGrid.getCell(1, 1).getContent().add(primaryImage);
 		((ColumnHandle)headerGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "2.2in");

@@ -38,6 +38,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata.Column;
@@ -85,10 +86,12 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		this.entityUuid = null;
 		this.validAttributes = validAttributes;
-		
-		String q1 = "SELECT count(*) FROM IntelEntityRelationship l WHERE (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
-		String q2 = "FROM IntelEntityRelationship l WHERE (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
-		
+
+		//add the conservation area filter here otherwise we will
+		//get data from other conservation areas if no entity is provided
+		String q1 = "SELECT count(*) FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
+		String q2 = "FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
+
 		HashMap<String, Object> values = new HashMap<String, Object>();
 		values.put("type", type);
 		int index =pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
@@ -109,6 +112,8 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 			query1.setParameter(e.getKey(), e.getValue());
 			query2.setParameter(e.getKey(), e.getValue());
 		}
+		query1.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas());
+		query2.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas());
 		
 		m_maxRows = (Long)query1.uniqueResult();
 		results = query2.setReadOnly(true)

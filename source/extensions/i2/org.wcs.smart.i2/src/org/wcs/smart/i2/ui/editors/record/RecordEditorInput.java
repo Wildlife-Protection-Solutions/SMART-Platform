@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -99,16 +100,20 @@ public class RecordEditorInput implements IEditorInput{
 	
 	@Override
 	public boolean equals(Object other){
-		if (other != null && other instanceof RecordEditorInput){
-			RecordEditorInput o = (RecordEditorInput) other;
-			return getUuid().equals(o.getUuid());
+		if (this == other) return true;
+		if (other == null) return false;
+		if (getClass() != other.getClass()) return false;
+		RecordEditorInput ie = (RecordEditorInput) other;
+		if (getUuid() != null){
+			return Objects.equals(getUuid(), ie.getUuid());
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode(){
-		return uuid.hashCode();
+		if (uuid != null) return uuid.hashCode();
+		return super.hashCode();
 	}
 
 }

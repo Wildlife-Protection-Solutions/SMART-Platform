@@ -51,6 +51,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -89,9 +90,17 @@ public class EntityExportReportJob extends Job {
 	protected Path runEntityType(IntelEntity entity, Date[] dateFilter) throws Exception{
 		
 		//get the template
-		Path reportFile = IntelReportManager.INSTANCE.getEntityTemplate(entity.getEntityType());
+		IntelEntityType type = null;
+		Session s = HibernateManager.openSession();
+		try{
+			type = (IntelEntityType)s.get(IntelEntityType.class, entity.getEntityType().getUuid());
+			type.getName();
+		}finally{
+			s.close();
+		}
+		Path reportFile = IntelReportManager.INSTANCE.getEntityTemplate(type);
 		if (reportFile == null || !Files.exists(reportFile)){
-			throw new Exception(MessageFormat.format("BIRT template is not configured for the entity type {0}.  You must configure the template before you can export the entity.", entity.getEntityType().getName()));
+			throw new Exception(MessageFormat.format("BIRT template is not configured for the entity type {0}.  You must configure the template before you can export the entity.", type.getName()));
 			
 		}
 		//create the pdf file output location

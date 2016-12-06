@@ -55,7 +55,9 @@ import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
 import org.eclipse.birt.report.model.api.elements.structures.ComputedColumn;
+import org.eclipse.birt.report.model.api.elements.structures.HideRule;
 import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter;
+import org.eclipse.birt.report.model.elements.interfaces.IReportItemModel;
 import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
 import org.eclipse.birt.report.model.elements.interfaces.ITableColumnModel;
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
@@ -340,6 +342,12 @@ public enum RecordReportGenerator {
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
 		attachImage.setProportionalScale(true);
 		attachImage.setURL("row[\"" + RecordEntityDatasetResultSetMetadata.Column.ENTITY_IMAGE.getColumnName() + "\"]");
+		/* hide if no image */
+		HideRule visibility = StructureFactory.createHideRule();
+		visibility.setFormat(DesignChoiceConstants.FORMAT_TYPE_ALL);
+		visibility.setExpression("row[\""+ RecordEntityDatasetResultSetMetadata.Column.ENTITY_IMAGE.getColumnName() +"\"] == null");
+		attachImage.getPropertyHandle(IReportItemModel.VISIBILITY_PROP).addItem(visibility);
+		
 		entityTable.getCell(entityTable.getDetail().getSlotID(), -1, 1, 1).getContent().add(attachImage);
 		
 		di = factory.newDataItem(null);
@@ -375,6 +383,8 @@ public enum RecordReportGenerator {
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
 		attachImage.setProportionalScale(true);
 		attachImage.setURL("row[\"" + RecordAttachmentDatasetResultSetMetadata.Column.PATH.getColumnName() + "\"]");
+		attachImage.getPropertyHandle(IReportItemModel.VISIBILITY_PROP).addItem(visibility);
+		
 		attachmentTable.getCell(entityTable.getDetail().getSlotID(), -1, 1, 1).getContent().add(attachImage);
 		
 		di = factory.newDataItem(null);
