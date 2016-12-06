@@ -142,7 +142,12 @@ public abstract class ChangeLogDeserializer {
 				//serialization of dates does not include timezone which causes a problem when deserializing as
 				//it assumes the jvms default timezone which causes dates to get shifted
 				//so we will serialize and deserialize dates a strings
-				data.put(colName, new java.sql.Date(ChangeLogItemSerializer.DATE_FORMATTER.parse((String)is.readObject()).getTime()));
+				Object x = is.readObject();
+				if( x == null){
+					data.put(colName, null);	
+				}else{
+					data.put(colName, new java.sql.Date(ChangeLogItemSerializer.DATE_FORMATTER.parse((String)x).getTime()));
+				}
 			}else if (type == Types.OTHER){
 				//uuid
 				UUID uuid = (UUID) is.readObject();

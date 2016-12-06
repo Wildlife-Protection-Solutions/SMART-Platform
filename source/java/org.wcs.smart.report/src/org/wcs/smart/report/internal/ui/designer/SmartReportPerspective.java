@@ -28,6 +28,7 @@ import org.eclipse.gef.ui.views.palette.PaletteView;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.wcs.smart.report.internal.ui.ReportListView;
 
 /**
  * 
@@ -90,6 +91,7 @@ public class SmartReportPerspective implements IPerspectiveFactory {
 				"bottomLeft", IPageLayout.BOTTOM, (float) 0.50,//$NON-NLS-1$
 				"topLeft");//$NON-NLS-1$
 		bottomLeft.addView(IPageLayout.ID_OUTLINE);
+		bottomLeft.addView(ReportListView.ID);
 
 		// Bottom right.
 		IFolderLayout bootomRight = layout.createFolder(

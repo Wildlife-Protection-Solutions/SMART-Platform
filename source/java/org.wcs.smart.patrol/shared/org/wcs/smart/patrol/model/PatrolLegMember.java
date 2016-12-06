@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -141,5 +142,20 @@ public class PatrolLegMember {
 		public void setPatrolLeg(PatrolLeg leg){
 			this.leg  = leg;
 		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (this == other) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			PatrolLegMemberPk o = (PatrolLegMemberPk)other;
+			return Objects.equals(member, o.member) && Objects.equals(leg, o.leg);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(member, leg);
+		}
+		
 	}
 }

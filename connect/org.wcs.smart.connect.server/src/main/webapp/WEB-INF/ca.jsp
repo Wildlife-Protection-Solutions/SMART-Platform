@@ -121,7 +121,7 @@
   <div id="downloadDialog" style="display: none;" class="dialog">
     <div class="dialog-title"><fmt:message key="ca.downloadtitle"/></div>
     <div id="dialogerror" class="errorsection"></div>
-    <p><fmt:message key="ca.downloadinfo"/></p>
+    <p id="downloadinfomsg"><fmt:message key="ca.downloadinfo"/></p>
    	<div id="statusurl" style="font-size:0.8em"></div>
    	<div class="block top-spacer" style="text-align:right">
      <input class="button" type="button" value="<fmt:message key="ca.cancelbutton"/>" onclick="return cancelCaDownload();" />

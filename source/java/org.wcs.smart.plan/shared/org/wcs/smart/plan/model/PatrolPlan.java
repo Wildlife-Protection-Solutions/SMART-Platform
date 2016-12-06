@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -110,6 +111,20 @@ public class PatrolPlan {
 		}
 		public void setPlan(Plan plan){
 			this.plan = plan;
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (other == this) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			PatrolPlanPk o = (PatrolPlanPk) other;
+			return Objects.equals(plan, o.plan) && Objects.equals(patrol, o.patrol);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(plan, patrol);
 		}
 	}
 

@@ -135,6 +135,8 @@ labels_en= {
 "ca.errordeletingca": "Error deleting conservation area ",
 "ca.refreshingcas": "Refreshing Conservation Area Table...",
 "ca.errorcreatingca":"Error creating new Conservation Area",
+"ca.unauthorized":"Unauthorized",
+"ca.erroroccurred":"Error occurred.",
 "query.refreshingqueries": "Refreshing Queries Table...",
 "query.runquery":"Run Query",
 "query.noqueriesfound":"No queries found. Try a different search or contact your adminsitrator to give you permissions to queries you are looking for.",

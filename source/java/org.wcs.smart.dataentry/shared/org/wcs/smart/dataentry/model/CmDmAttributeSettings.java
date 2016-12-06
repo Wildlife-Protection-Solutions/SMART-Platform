@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -134,6 +135,20 @@ public class CmDmAttributeSettings {
 		}
 		public void setModel(ConfigurableModel model) {
 			this.model = model;
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (other == this) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			CmDmAttributeSettingsPk o = (CmDmAttributeSettingsPk) other;
+			return Objects.equals(dmAttribute, o.dmAttribute) && Objects.equals(model, o.model);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(model, dmAttribute);
 		}
 	}
 	

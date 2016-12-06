@@ -1,6 +1,7 @@
 package org.wcs.smart.connect.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -76,6 +77,20 @@ public class SmartUserRole {
 		}
 		public void setRole(SmartRole role){
 			this.role = role;
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (other == this) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			SmartUserRolePk o = (SmartUserRolePk) other;
+			return Objects.equals(role, o.role) && Objects.equals(username, o.username);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(role, username);
 		}
 	}
 }

@@ -51,7 +51,7 @@ function cacreated(){
 	if (this.status == 204) {
 		displayInfo("Conservation area created.");
 	} else if (this.status == 401){
-		displayError(parseError(i18n("ca.errorcreatingca") + ". Unauthorized.", this.responseText));
+		displayError(parseError(i18n("ca.errorcreatingca") + ". " + i18n("ca.unauthorized"), this.responseText));
 	}else{
 		displayError(parseError(i18n("ca.errorcreatingca"), this.responseText));
 	}
@@ -124,15 +124,20 @@ function updateDownloadProgress(){
 		var location = this.getResponseHeader ("Location");
 		document.querySelector("#downloadDialog > #dialogerror").style.display = "none";
 		document.querySelector("#downloadDialog > #statusurl").innerHTML = location;
-
+		document.querySelector("#downloadDialog > #downloadinfomsg").style.display = "block";
 		var onReq = new XMLHttpRequest();
 		onReq.onload = updateDownloadStatus;
 		onReq.open("GET", location);
 		onReq.send();
-		
+	} else if (this.status = 401) {
+		document.querySelector("#downloadDialog > #dialogerror").style.display = "block";
+		document.querySelector("#downloadDialog > #dialogerror").innerHTML = i18n("ca.unauthorized");
+		document.querySelector("#downloadDialog > #downloadinfomsg").style.display = "none";
 	} else {
 		document.querySelector("#downloadDialog > #dialogerror").style.display = "block";
-		document.querySelector("#downloadDialog > #dialogerror").innerHTML = "Error occurred.";	
+		document.querySelector("#downloadDialog > #dialogerror").innerHTML = i18n("ca.erroroccurred");
+		document.querySelector("#downloadDialog > #downloadinfomsg").style.display = "none";
+		
 	}	
 }
 

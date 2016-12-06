@@ -59,6 +59,8 @@ import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.internal.Messages;
+import org.wcs.smart.report.internal.ui.ReportViewerPerspective;
+import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -131,6 +133,8 @@ public class ReportView implements IReportListener{
 	@PostConstruct
 	public void createPartControl(Composite parent) {
 		part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);//remove this view when closed
+		part.getTags().add(SmartReportPerspective.ID);
+		part.getTags().add(ReportViewerPerspective.ID);
 		ReportEventManager.getInstance().addReportListener(this);
 		
 		parent.setLayout(new GridLayout());

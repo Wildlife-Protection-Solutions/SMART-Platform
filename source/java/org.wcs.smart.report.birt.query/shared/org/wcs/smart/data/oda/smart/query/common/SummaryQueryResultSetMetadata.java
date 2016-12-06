@@ -101,8 +101,11 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 					sb.append(" _ "); //$NON-NLS-1$
 				}
 				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getKey());
-				sb.append("_");
-				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getIdentifier());
+				String identifier = results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getIdentifier();
+				if ( identifier != null){
+					sb.append("_");
+					sb.append(identifier);
+				}
 			}
 			return sb.toString();
 		}

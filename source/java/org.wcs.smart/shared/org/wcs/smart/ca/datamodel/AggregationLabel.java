@@ -1,6 +1,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -60,6 +61,7 @@ public class AggregationLabel {
 	@Embeddable
 	public static class AggregationLabelPk implements Serializable{
 		private static final long serialVersionUID = 1L;
+		
 		private String aggregation;
 		private String code;
 		
@@ -87,6 +89,20 @@ public class AggregationLabel {
 		
 		public void setCode(String code){
 			this.code = code;			
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (other == this) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			AggregationLabelPk o = (AggregationLabelPk) other;
+			return Objects.equals(aggregation, o.aggregation) && Objects.equals(code, o.code);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(aggregation, code);
 		}
 	}
 }

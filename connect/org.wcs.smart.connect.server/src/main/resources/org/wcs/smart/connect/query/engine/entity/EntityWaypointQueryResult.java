@@ -58,10 +58,10 @@ public class EntityWaypointQueryResult extends AbstractDbFeatureResultSet {
 			public ResultSet execute(Connection c) throws SQLException {
 				if(sortColumn != null){
 					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$
+							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$
 				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getQueryDataTable());
+						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable());
 			}
 		});
 	}

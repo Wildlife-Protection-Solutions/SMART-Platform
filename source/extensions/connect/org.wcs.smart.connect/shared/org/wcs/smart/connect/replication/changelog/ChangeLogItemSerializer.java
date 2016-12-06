@@ -176,7 +176,12 @@ public abstract class ChangeLogItemSerializer {
 					//serialization of dates does not include timezone which causes a problem when deserializing as
 					//it assumes the jvms default timezone which causes dates to get shifted
 					//so we will serialize and deserialize dates a strings
-					stream.writeObject(DATE_FORMATTER.format(rs.getObject(i)));
+					Object obj = rs.getObject(i);
+					if (obj == null){
+						stream.writeObject(null);
+					}else{
+						stream.writeObject(DATE_FORMATTER.format(rs.getObject(i)));
+					}
 				}else{
 					Object x = rs.getObject(i);
 					stream.writeObject(x);	
