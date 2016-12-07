@@ -23,6 +23,7 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -69,18 +70,15 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	private LanguageViewer langViewer;
 	private ListViewer lstBasemaps;
 	private List<BasemapDefinition> basemaps;
+	private List<BasemapDefinition> itemsToDelete;
 	
 	public BasemapPropertyPage(Shell parent) {
 		super(parent, Messages.BasemapPropertyPage_Dialog_Title);
-
+		itemsToDelete = new ArrayList<>();
 	}
 
-	@Override 
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = HibernateManager.openSession(new BasemapInterceptor());
-		}
-		return session;
+	private Session openSession(){
+		return HibernateManager.openSession(new BasemapInterceptor());
 	}
 	
 	@Override
@@ -91,7 +89,6 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		}
 		changesMade = false;
-		getSession().getTransaction().rollback();
 		return super.close();  
 	}
 
@@ -102,18 +99,22 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param updated if the udig service needs to be reset; otherwise the existing service will be used
 	 */
 	private void loadData() {
-		getSession().beginTransaction();
-		basemaps = HibernateManager.getBasemaps(getSession());
-		Collections.sort(basemaps, new Comparator<Object>(){
-			@Override
-			public int compare(Object o1, Object o2) {
-				return Collator.getInstance().compare(
-						((BasemapDefinition)o1).getName(), 
-						((BasemapDefinition)o2).getName());
-			}});
-		lstBasemaps.setInput(basemaps);
-		if (basemaps.size() > 0){
-			lstBasemaps.setSelection(new StructuredSelection(basemaps.get(0)));
+		Session s = openSession();
+		try{
+			basemaps = HibernateManager.getBasemaps(s);
+			Collections.sort(basemaps, new Comparator<Object>(){
+				@Override
+				public int compare(Object o1, Object o2) {
+					return Collator.getInstance().compare(
+							((BasemapDefinition)o1).getName(), 
+							((BasemapDefinition)o2).getName());
+				}});
+			lstBasemaps.setInput(basemaps);
+			if (basemaps.size() > 0){
+				lstBasemaps.setSelection(new StructuredSelection(basemaps.get(0)));
+			}
+		}finally{
+			s.close();
 		}
 	}
 
@@ -234,10 +235,9 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 					return;
 				}
 				
-				getSession().delete(toDelete);
-				getSession().flush();
-				
+				itemsToDelete.add(toDelete);
 				basemaps.remove(toDelete);
+				
 				lstBasemaps.refresh();
 				setChangesMade(true);
 			}
@@ -261,14 +261,21 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
+		Session s = openSession();
+		s.beginTransaction();
 		try{
-			getSession().getTransaction().commit();
+			itemsToDelete.forEach(b -> s.delete(b));
+			basemaps.forEach(b -> s.saveOrUpdate(b));
+			s.getTransaction().commit();
 			setChangesMade(false);
+			itemsToDelete.clear();
 		}catch (Exception ex){
+			s.getTransaction().rollback();
 			SmartPlugIn.displayLog(Messages.BasemapPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 			return false;
+		}finally{
+			s.close();
 		}
-		getSession().beginTransaction();
 		return true;
 	}
 }

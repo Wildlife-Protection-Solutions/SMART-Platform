@@ -49,6 +49,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -60,11 +61,15 @@ import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserPermissionProxy;
 import org.wcs.smart.connect.model.SmartUserPermissionProxy.Type;
 import org.wcs.smart.connect.model.SmartUserRole;
+import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.security.ActionManager;
 import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.ISmartConnectAction;
 import org.wcs.smart.connect.security.ResourceOption;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.report.model.Report;
 
 /**
  * SMART Connect REST API for configuring user and role
@@ -90,7 +95,7 @@ public class ConnectUserAction extends HttpServlet {
 	/*
 	 * Ensures the user has access to change/view user actions
 	 */
-	private void validateUser(){
+	private void validateAdmin(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -103,6 +108,32 @@ public class ConnectUserAction extends HttpServlet {
 		}
 	}
 	
+	private boolean isCaAdminUser(){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+	
+	//returns a list of uuids of all the CAs that the current user is a CA-Admin for. 
+	private List<UUID> getAdminCas(Session s){
+		ArrayList<UUID> items = new ArrayList<UUID>();
+		@SuppressWarnings("unchecked")
+		List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
+				.add(Restrictions.eq("username", request.getUserPrincipal().getName())) //$NON-NLS-1$
+				.list();
+		for (SmartUserAction a : actions){
+			if(a.getAction().equals(CaAdminAccountAction.KEY)){
+				items.add(a.getResource());	
+			}
+		}
+		
+		return items;
+	}
+	
 	/**
 	 * Lists all available actions.
 	 * 
@@ -111,16 +142,40 @@ public class ConnectUserAction extends HttpServlet {
 	@GET
     @Path("/actions")
     public List<SmartActionsProxy> getActions(){
-		validateUser();
+		boolean restricted = false;
+		if(!isCaAdminUser()){
+			validateAdmin();
+		}else{
+			restricted = true;
+		}
 		Session s = HibernateManager.getSession(context, request.getLocale());
 		s.beginTransaction();
 		try{
 			List<SmartActionsProxy> actionResources = new ArrayList<SmartActionsProxy>();
 			
-			for (ISmartConnectAction a : ActionManager.INSTANCE.getAllActions()){
-				for (String actionKey : a.getActionKeys()){
+			List<ISmartConnectAction> all;
+			if(restricted){
+				all = ActionManager.INSTANCE.getActionsForCaAdmins();
+			}else{
+				all = ActionManager.INSTANCE.getAllActions();
+			}
+			for (ISmartConnectAction a : all){
+				String[] keys;
+				if(restricted){
+					keys = a.getCaAdminAccessibleActionKeys();
+				}else{
+					keys = a.getActionKeys();
+				}
+				for (String actionKey : keys){
 					SmartActionsProxy next = new SmartActionsProxy(a.getActionName(actionKey, SmartUtils.getRequestLocale(request)), actionKey);
-					List<ResourceOption> options = a.getResourceOptions(actionKey,s, SmartUtils.getRequestLocale(request));
+					List<ResourceOption> options;
+					if(restricted){
+						List<UUID> uuidList = getAdminCas(s);
+						options = a.getResourceOptionsForCas(actionKey,s, SmartUtils.getRequestLocale(request), uuidList );
+					}else{
+						options = a.getResourceOptions(actionKey,s, SmartUtils.getRequestLocale(request));
+					}
+					
 					if (options == null || options.size() == 0){
 						next.addResource(Messages.getString("ConnectUserAction.NA", SmartUtils.getRequestLocale(request)), null); //$NON-NLS-1$
 					}else{
@@ -140,6 +195,8 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().commit();
 		}
 	}
+
+
 	
 	/**
 	 * Lists all available roles.
@@ -150,7 +207,7 @@ public class ConnectUserAction extends HttpServlet {
 	@GET
     @Path("/roles")
     public List<SmartActionsProxy> getRoles(){
-		validateUser();
+		validateAdmin();
 		Session s = HibernateManager.getSession(context, request.getLocale());
 		s.beginTransaction();
 		try{
@@ -182,15 +239,31 @@ public class ConnectUserAction extends HttpServlet {
 	@GET
     @Path("/user/{username}")
     public List<SmartUserPermissionProxy> getUserPrivileges(@PathParam("username") String username){
-		validateUser();
+		boolean restricted = false;
+		if(!isCaAdminUser()){
+			validateAdmin();
+		}else{
+			restricted = true;
+		}
 		
 		Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
 		s.beginTransaction();
 		try{
+					
+			
+			
 			@SuppressWarnings("unchecked")
 			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
 					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
 					.list();
+			if(restricted){
+				for (SmartUserAction a : actions){
+					if (a.getAction().equals(AdminAccountAction.KEY)){
+						return new ArrayList<SmartUserPermissionProxy>(); //if you are asking about an admin user as a Ca-Admin, don't return anything, they don't have access to change it anyways, cleaner UI this way.
+					}
+				}
+			}
+
 			
 			List<SmartUserPermissionProxy> items = new ArrayList<SmartUserPermissionProxy>();
 			for (SmartUserAction a : actions){
@@ -256,12 +329,23 @@ public class ConnectUserAction extends HttpServlet {
     public void deleteUserActions(@PathParam("username") String username,
     		@PathParam("action") String action,
     		@PathParam("resource") String resource){
-		
-		validateUser();
-		
+		boolean restricted;
+		restricted = false;
+		if(!isCaAdminUser()){
+			validateAdmin();
+		}else{
+			restricted = true;
+		}
+
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			
+			//test action and current user (not username, the one making the request) to ensure they should be allowed to remove this permission out.
+			if(restricted){
+				hasAdminRights(resource, s);//throws an exception if they don't
+			}
+			
 			@SuppressWarnings("unchecked")
 			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
 					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
@@ -292,6 +376,7 @@ public class ConnectUserAction extends HttpServlet {
 					Messages.getString("ConnectUserAction.UserDeleteError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}	
 	}
+
 	
 	/**
 	 * Creates a new role. Uses the name property of the action
@@ -419,7 +504,7 @@ public class ConnectUserAction extends HttpServlet {
     		@PathParam("action") String action,
     		@PathParam("resource") String resource){
 		
-		validateUser();
+		validateAdmin();
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -482,11 +567,24 @@ public class ConnectUserAction extends HttpServlet {
     public void addUserActions(@PathParam("username") String username,
     		@PathParam("action") String actionKey,
     		@PathParam("resource") String resourceKey){
-		validateUser();
+		boolean restricted = false;
+		if(!isCaAdminUser()){
+			validateAdmin();
+		}else{
+			restricted = true;
+		}
+
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			
+			//test action and current user (not username, the one making the request) to ensure they should be allowed to give this permission out.
+			if(restricted){
+				hasAdminRights(resourceKey, s);
+			}
+			
+			
 			SmartUserAction newaction = new SmartUserAction();
 			newaction.setAction(actionKey);
 			newaction.setUsername(username);
@@ -501,6 +599,8 @@ public class ConnectUserAction extends HttpServlet {
 			if(ex instanceof ConstraintViolationException){
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 						Messages.getString("ConnectUserAction.UserAddErrorDuplicate", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+			}else if(ex instanceof SmartConnectException){
+				throw ex;
 			}else{
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 						Messages.getString("ConnectUserAction.UserAddError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
@@ -574,7 +674,7 @@ public class ConnectUserAction extends HttpServlet {
     public void addRoleActions(@PathParam("roleid") String roleid,
     		@PathParam("action") String actionKey,
     		@PathParam("resource") String resourceKey){
-		validateUser();
+		validateAdmin();
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -618,7 +718,7 @@ public class ConnectUserAction extends HttpServlet {
     public void deleteUserRole(@PathParam("username") String username,
     		@PathParam("role") String role){
     		
-		validateUser();
+		validateAdmin();
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -661,7 +761,7 @@ public class ConnectUserAction extends HttpServlet {
     public void addUserRole(@PathParam("username") String username,
     		@PathParam("role") String roleId){
 	
-		validateUser();
+		validateAdmin();
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -692,6 +792,58 @@ public class ConnectUserAction extends HttpServlet {
 						Messages.getString("ConnectUserAction.RoleAddError", SmartUtils.getRequestLocale(request)), ex);  //$NON-NLS-1$
 			
 		}
+	}
+	
+	/*
+	 * checks for admin rights to given conservation area; must throw an exception
+	 * if does not have admin rights
+	 */
+	private void hasAdminRights(String resource, Session s) {
+		if (resource == null ){
+			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+		}
+		
+		UUID resourceUuid = UUID.fromString(resource);
+		List<UUID> list = getAdminCas(s);
+		
+		//is the resource a Conservation Area
+		if(resourceUuid != null){
+			ConservationArea ca = (ConservationArea) s.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid",resourceUuid)).uniqueResult();
+			if (ca != null){
+				//is the user an admin ca?
+				for (UUID u : list){
+					if(u.equals(ca.getUuid())){
+						return ;
+					}
+				}
+			}
+		}
+		
+		//if no approved access yet, check if the resource is a specific query; then check if requestor is an admin of that ca
+		QueryProxy q = QueryManager.INSTANCE.findQueryProxy(resourceUuid, s);
+		if(q != null ){
+			for (UUID u : list){
+				if(u.equals(q.getCaUuid() ) ){
+					return ;
+				}
+			}
+		}
+		
+		
+		//same as above but now we check reports
+		Report r = (Report)s.createCriteria(Report.class).add(Restrictions.eq("uuid", resourceUuid)).uniqueResult();
+		if(r != null ){
+			for (UUID u : list){
+				if(u.equals(r.getConservationArea().getUuid() ) ){
+					return ;
+				}
+			}
+		}
+		
+		logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+	
 	}
 	
 

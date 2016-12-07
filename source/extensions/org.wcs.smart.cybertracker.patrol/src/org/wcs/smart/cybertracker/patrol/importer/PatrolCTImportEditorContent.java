@@ -271,7 +271,6 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 			updateCd(cdGeneral, problems.get(PatrolMeta.GENERAL));
 			updateCd(cdStartDate, problems.get(PatrolMeta.START_DATE));
 			updateCd(cdEndDate, problems.get(PatrolMeta.END_DATE));
-			updateCd(cdPatrolType, problems.get(PatrolMeta.TYPE));
 			updateCd(cdTransportType, problems.get(PatrolMeta.TRANSPORT));
 			updateCd(cdArmed, problems.get(PatrolMeta.ARMED));
 			updateCd(cdMandate, problems.get(PatrolMeta.MANDATE));

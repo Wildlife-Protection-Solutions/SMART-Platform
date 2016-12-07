@@ -53,7 +53,6 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 		GENERAL,
 		START_DATE,
 		END_DATE,
-		TYPE,
 		TRANSPORT,
 		ARMED,
 		MANDATE,
@@ -70,7 +69,6 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 	private Team team;
 	private String objective;
 	private PatrolMandate mandate;
-	private PatrolType.Type patrolType;
 	private PatrolTransportType patrolTransportType;
 	private boolean isArmed = false;
 	private String comment;
@@ -107,7 +105,7 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 	}
 
 	public PatrolType.Type getPatrolType() {
-		return patrolType;
+		return patrolTransportType != null ? patrolTransportType.getPatrolType() : null;
 	}
 
 	public PatrolTransportType getPatrolTransportType() {
@@ -136,10 +134,6 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 
 	public void setMandate(PatrolMandate mandate) {
 		this.mandate = mandate;
-	}
-
-	public void setPatrolType(PatrolType.Type patrolType) {
-		this.patrolType = patrolType;
 	}
 
 	public void setPatrolTransportType(PatrolTransportType patrolTransportType) {

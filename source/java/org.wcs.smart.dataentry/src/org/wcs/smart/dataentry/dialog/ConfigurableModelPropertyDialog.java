@@ -298,13 +298,14 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	private List<ConfigurableModel> getModelsList() {
 		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
 		Session s = HibernateManager.openSession();
-		s.beginTransaction();
+		
 		try {
+			s.beginTransaction();
 			modelList = DataentryHibernateManager.getConfigurableModels(s);
+			s.getTransaction().rollback();
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
 		} finally {
-			s.getTransaction().rollback();
 			s.close();
 		}
 		return modelList;

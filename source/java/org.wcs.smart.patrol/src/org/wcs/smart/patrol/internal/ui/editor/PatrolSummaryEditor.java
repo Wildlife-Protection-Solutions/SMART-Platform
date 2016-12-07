@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
+import java.sql.Time;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -37,9 +38,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -58,6 +61,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
@@ -68,6 +72,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -100,6 +105,8 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.patrol.ui.StationComposite;
@@ -146,6 +153,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	private PatrolEditor editor;
 	private TableViewer tblPatrolData;
 	private FormToolkit toolkit;
+	
+	private Label lblStats;
 	
 	private boolean isMulti = false;
 	
@@ -349,7 +358,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		Composite comp = toolkit.createComposite(compData, SWT.NONE );
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		comp.setLayout(new GridLayout(5, false));
+		comp.setLayout(new GridLayout(6, false));
 		toolkit.createLabel(comp, Messages.PatrolSummaryEditor_StartDate_Label);
 		txtStartDate = toolkit.createText(comp, ""); //$NON-NLS-1$
 		txtStartDate.setEditable(false);
@@ -377,6 +386,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 			}
 		});
+		
 		
 		if (editor.getPatrol().getLegs().size() <=1 ){
 			//single leg patrol
@@ -440,6 +450,34 @@ public class PatrolSummaryEditor extends EditorPart {
 			}
 		});
 		dataSection.setClient(compData);
+
+		Composite statsCmp = toolkit.createComposite(compData, SWT.NONE );
+		statsCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		statsCmp.setLayout(new GridLayout(2, false));
+		((GridLayout)statsCmp.getLayout()).marginWidth = 0;
+		((GridLayout)statsCmp.getLayout()).marginHeight = 0;
+		
+		
+		Hyperlink btnUpdateTime = toolkit.createHyperlink(statsCmp, Messages.PatrolSummaryEditor_Button_UpdateTime, SWT.NONE);
+		btnUpdateTime.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
+		btnUpdateTime.setToolTipText(Messages.PatrolSummaryEditor_Button_UpdateTime_Tooltip);
+		btnUpdateTime.addHyperlinkListener(new IHyperlinkListener() {
+			@Override
+			public void linkExited(HyperlinkEvent e) {}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {	}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Title, Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Message)) {
+					updateTimeWithWpData();
+				}
+			}
+		});
+		
+		lblStats = toolkit.createLabel(statsCmp, ""); //$NON-NLS-1$
+		lblStats.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
 		Point p = top.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolltop.setMinSize(p.x, p.y+20);
@@ -514,6 +552,45 @@ public class PatrolSummaryEditor extends EditorPart {
 	@Override
 	public void doSaveAs() {
 		// Do the Save As operation
+	}
+
+	/**
+	 * NOTE: Similar logic for single leg is located in {@link PatrolLegDayInputComposite}
+	 */
+	protected void updateTimeWithWpData() {
+		List<PatrolLegDay> updatedLegDays = new ArrayList<>();
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			Patrol patrol = editor.getPatrol();
+			session.update(patrol);
+			for (PatrolLeg leg : patrol.getLegs()) {
+				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+					List<PatrolWaypoint> wps = pld.getWaypoints();
+					if (wps.isEmpty()) continue;
+					List<Date> dates = wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList());
+					Date minDate = Collections.min(dates);
+					Date mmaxDate = Collections.max(dates);
+					pld.setStartTime(new Time(minDate.getTime()));
+					pld.setEndTime(new Time(mmaxDate.getTime()));
+					session.saveOrUpdate(pld);
+					updatedLegDays.add(pld);
+				}
+			}
+			session.getTransaction().commit();
+		} catch (Exception ex) {
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
+			SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
+			return;
+		} finally {
+			session.close();
+		}
+		//fire events
+		for (PatrolLegDay pld : updatedLegDays) {
+			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, pld);
+		}
 	}
 
 	/**
@@ -652,6 +729,8 @@ public class PatrolSummaryEditor extends EditorPart {
 				tblPatrolData.refresh();
 			}});
 			
+		updateOverallStatistics();
+
 	}
 	
 	private void updateTableLayout(){
@@ -683,6 +762,34 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		tblPatrolData.getTable().getParent().layout(true,true);
 	}
+
+	private void updateOverallStatistics() {
+		final Patrol patrol = editor.getPatrol();
+		float distance = 0;
+		double totalTime = 0;
+		double activeTime = 0;
+		for (PatrolLeg leg : patrol.getLegs()) {
+			for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+				Track track = pld.getTrack();
+				if (track != null && track.getDistance() != null) {
+					distance += track.getDistance();
+				}
+				totalTime += pld.getPatrolHoursWorked();
+				activeTime += pld.getFieldHoursWorked();
+			}
+		}
+		final String statText = MessageFormat.format(Messages.PatrolSummaryEditor_OverallStatistics, String.valueOf(distance), PatrolEditor.formatTimeRange(totalTime), PatrolEditor.formatTimeRange(activeTime));
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (!lblStats.isDisposed()) {
+					lblStats.setText(statText);
+					lblStats.getParent().layout(true, true);
+				}
+			}
+		});
+	}
+
 	/**
 	 * Refresh the patrol summary table.
 	 * <p>May be called from outside the display thread.</p>

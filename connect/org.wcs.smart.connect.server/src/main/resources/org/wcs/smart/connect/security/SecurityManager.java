@@ -35,6 +35,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUserAction;
+import org.wcs.smart.connect.model.SmartUserRole;
 
 /**
  * Security manager for smart connect.
@@ -46,7 +47,21 @@ public enum SecurityManager {
 
 	INSTANCE;
 
+	/*
+	 * Determine if the user represented by the username is active
+	 */
+	private boolean isActive(Session s, String username){
+		SmartUserRole user = (SmartUserRole)s.createCriteria(SmartUserRole.class)
+				.add(Restrictions.eq("id.username", username))
+				.uniqueResult();
+		if (user == null) return false;
+		return true;
+	}
+	
 	public boolean canAccess(Session s, String username, String action, UUID resource){
+		//ensure user is active
+		if (!isActive(s, username)) return false;
+		
 		//check roles for permission
 		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
 		queryString += "WHERE a.role = role AND r.id.username = :username AND ( a.action = :adminAction OR "; //$NON-NLS-1$
@@ -95,6 +110,21 @@ public enum SecurityManager {
 		if (cnt2 > 0){
 			return true;
 		}
+		
+		//if we are checking specifically for Administrator(the real-one, not a CA admin), don't do this check since it will pass when resource = null;
+		if(action.equals(AdminAccountAction.KEY)){
+			return false;
+		}
+		//check if CaAdmin role allows access, API and other code checking for access must call canAccess with the CAUUID as the resource for this check to work
+		Criteria c2 = s.createCriteria(SmartUserAction.class);
+				c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
+				.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$
+				.add(Restrictions.eq("resource", resource))
+				.setProjection(Projections.rowCount());
+		Long cnt3 = (Long) c2.uniqueResult();
+		if (cnt3 > 0){
+			return true;
+		}
 		return false;
 
 	}
@@ -104,15 +134,25 @@ public enum SecurityManager {
 	}
 	
 	public boolean canAccessAtLeastOneResouce(Session s, String username, String action){
+		//ensure the user is active
+		if (!isActive(s, username)) return false;
+		
 		Criterion r = null;
 		r = Restrictions.eq("action", action); //$NON-NLS-1$
 
 		Criteria c = s.createCriteria(SmartUserAction.class);
-				c.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-				.add(Restrictions.or(
-						Restrictions.eq("action", AdminAccountAction.KEY), //$NON-NLS-1$
-						r))
-				.setProjection(Projections.rowCount());
+		Criterion r2 = Restrictions.or(
+				Restrictions.eq("action", AdminAccountAction.KEY),
+				Restrictions.eq("action", CaAdminAccountAction.KEY));
+		
+		c.add(Restrictions.eq("username", username)); //$NON-NLS-1$
+		
+		if(!action.equals(AdminAccountAction.KEY) && !action.equals(CaAdminAccountAction.KEY) ){ //if we are asking specifically about admin or caAdmin users (probably the menu filter) don't add this, or else it will return true for admin and caAdmin regardless 
+			c.add(Restrictions.or(r2,r));			// in summary:   "username"=username" && ("action" == action || ("action"=admin || "action"=caadmin))
+		}else{
+			c.add(r);
+		}
+		c.setProjection(Projections.rowCount());
 
 		Long cnt = (Long) c.uniqueResult();
 		if (cnt == 0){
@@ -152,5 +192,20 @@ public enum SecurityManager {
 				Response.Status.BAD_REQUEST,
 				Messages.getString("ConnectUserAction.AdminError", l)); //$NON-NLS-1$
 		
+	}
+
+	//is the user is CaAdmin of any CA?
+	public boolean isCaAdmin(Session s, String username, String key) {
+		//TODO: do we need to ensure the user is active first?
+		Criteria c2 = s.createCriteria(SmartUserAction.class);
+		c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
+		.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$
+		.setProjection(Projections.rowCount());
+		
+		Long count = (Long) c2.uniqueResult();
+		if (count > 0){
+			return true;
+		}
+		return false;
 	}
 }

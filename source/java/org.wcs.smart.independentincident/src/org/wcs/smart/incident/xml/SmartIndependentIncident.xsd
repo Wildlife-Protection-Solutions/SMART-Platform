@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/independentincident" 
-xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/independentincident"
+targetNamespace="http://www.smartconservationsoftware.org/xml/2.0/independentincident" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/2.0/independentincident"
 elementFormDefault="qualified">
 
  <complexType name="WaypointType">
@@ -25,7 +25,7 @@ elementFormDefault="qualified">
     	<attribute name="id" type="int"></attribute>
     	<attribute name="x" type="double"></attribute>
     	<attribute name="y" type="double"></attribute>
-    	<attribute name="dateTime" type="dateTime"></attribute>
+    	<attribute name="dateTime" type="string"></attribute>
     </complexType>
 
 

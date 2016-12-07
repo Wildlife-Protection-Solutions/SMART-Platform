@@ -101,7 +101,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	public void setValues(PatrolLeg patrolLeg, Session session) {
-		List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(patrolLeg.getPatrol().getConservationArea(), session, patrolLeg.getPatrol().getPatrolType());
+		List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(patrolLeg.getPatrol().getConservationArea(), session);
 		Collections.sort(types, new Comparator<PatrolTransportType>(){
 			@Override
 			public int compare(PatrolTransportType o1, PatrolTransportType o2) {
@@ -134,6 +134,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		PatrolTransportType pm = getSelectedTransportType();
 		if (pm != null){
 			patrolLeg.setType(pm);
+			patrolLeg.getPatrol().recalculateType();
 			return true;
 		}else{
 			SmartPatrolPlugIn.displayLog(Messages.PatrolTransportComposite_Error_NoTransportType, null);

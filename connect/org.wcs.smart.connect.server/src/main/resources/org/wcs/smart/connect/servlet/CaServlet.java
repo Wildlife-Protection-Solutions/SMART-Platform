@@ -57,7 +57,7 @@ public class CaServlet extends HttpServlet {
 		ConservationAreas cas = new ConservationAreas();
 		cas.configure(request.getServletContext(), null, response, request);
 		
-		List<ConservationAreaProxy> info = cas.getConservationAreas();
+		List<ConservationAreaProxy> info = cas.getConservationAreas(null, null);
 		request.setAttribute("cas", info); //$NON-NLS-1$
 		
 		boolean canAdd = false;

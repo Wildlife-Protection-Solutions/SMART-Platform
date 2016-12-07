@@ -21,11 +21,9 @@
  */
 package org.wcs.smart.incident.xml;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.text.SimpleDateFormat;
 
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.incident.xml.model.EmployeeType;
@@ -46,14 +44,11 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
  */
 public class IncidentToXml {
 
+	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	
 	public static WaypointType toXml(Waypoint incident) throws DatatypeConfigurationException{
 		WaypointType wt = new WaypointType();
-		
-		Calendar c = Calendar.getInstance();
-		c.setTime(incident.getDateTime());
-		wt.setDateTime(DatatypeFactory.newInstance().newXMLGregorianCalendar((GregorianCalendar)c));
-		
+		wt.setDateTime(DATE_FORMAT.format(incident.getDateTime()));
 		wt.setComment(incident.getComment());
 		wt.setDirection(incident.getDirection());
 		wt.setDistance(incident.getDistance());

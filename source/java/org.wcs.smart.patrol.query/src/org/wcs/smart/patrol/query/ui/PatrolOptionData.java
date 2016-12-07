@@ -49,6 +49,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
+import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -101,7 +102,7 @@ public class PatrolOptionData implements IPatrolOptionData{
 				}else if (object instanceof Employee){
 					Employee e = (Employee)object;
 					if (e.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-						results.add(new ListItem(e.getUuid(), SmartLabelProvider.getShortLabel((Employee) e)));
+						results.add(new ListItem(e.getUuid(), SmartLabelProvider.getShortLabel((Employee) e), e.isActive()));
 					}
 				}else if (object instanceof ConservationArea){
 					ConservationArea ca = (ConservationArea)object;
@@ -155,7 +156,7 @@ public class PatrolOptionData implements IPatrolOptionData{
 	 * @return a list of listitems that represent all
 	 * active values for a given object 
 	 */
-	public List<ListItem> getAllActiveValues(Session session){
+	public List<ListItem> getAllValues(Session session){
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		if (option == PatrolQueryOption.ID){
 			List<String> pids = PatrolHibernateManager.getPatrolIds(session);
@@ -189,12 +190,13 @@ public class PatrolOptionData implements IPatrolOptionData{
 			}
 		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE || option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){
 			items.addAll(PatrolQueryHibernateManager.getInstance().getActiveTransportTypes(session));
-		}else if (option == PatrolQueryOption.LEADER ||
-				option == PatrolQueryOption.PILOT || 
-						option == PatrolQueryOption.EMPLOYEE){
-			List<Employee> employees = PatrolHibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session);
+		}else if (option == PatrolQueryOption.LEADER || option == PatrolQueryOption.PILOT || option == PatrolQueryOption.EMPLOYEE){
+			boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+			List<Employee> employees = showInactive ?
+					PatrolHibernateManager.getAllEmployees(SmartDB.getCurrentConservationArea(), session) : 
+					PatrolHibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session); 
 			for (Employee t : employees){
-				items.add(new ListItem(t.getUuid(), SmartLabelProvider.getShortLabel(t) ));
+				items.add(new ListItem(t.getUuid(), SmartLabelProvider.getShortLabel(t), t.isActive()));
 			}
 		}else if (option == PatrolQueryOption.AGENCY){
 			List<Agency> agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), session);
@@ -216,5 +218,10 @@ public class PatrolOptionData implements IPatrolOptionData{
 	@Override
 	public ListItem getDefaultListItem() {
 		return null;
+	}
+	
+	@Override
+	public boolean isDependOnQueryConfiguration() {
+		return option == PatrolQueryOption.LEADER || option == PatrolQueryOption.PILOT || option == PatrolQueryOption.EMPLOYEE;
 	}
 }

@@ -406,17 +406,17 @@ public class JsonCtParser {
 				}
 				
 			}
-			
-			//parse attachments
-			List<WaypointAttachment> attachments = parseAttachments(waypointAttachments);
-			if (!attachments.isEmpty() && newWaypoint.getAttachments()== null){
-				newWaypoint.setAttachments(new ArrayList<WaypointAttachment>());
-			}
-			for (WaypointAttachment att : attachments){
-				att.setWaypoint(newWaypoint);
-				newWaypoint.getAttachments().add(att);
-			}
 		}
+		//parse attachments
+		List<WaypointAttachment> attachments = parseAttachments(waypointAttachments);
+		if (!attachments.isEmpty() && newWaypoint.getAttachments()== null){
+			newWaypoint.setAttachments(new ArrayList<WaypointAttachment>());
+		}
+		for (WaypointAttachment att : attachments){
+			att.setWaypoint(newWaypoint);
+			newWaypoint.getAttachments().add(att);
+		}
+		
 		return newWaypoint;
 	}
 	

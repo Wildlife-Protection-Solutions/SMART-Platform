@@ -133,7 +133,7 @@
 		
 		<h2 id="tab3text" class=" "><a onclick="settab(3)"><fmt:message key="alert.viewmanagealerts" />:(0)</a></h2>
 		<div class="overflow"><table id="alerttable">
-		<tr class="table-row smart-table-header"><th><a onclick="sort('typeUuid')" href="#"><fmt:message key="alert.type" /></a></th><th><a onclick="sort('userGeneratedId')" href="#"><fmt:message key="alert.id" /></a></th><th><a onclick="sort('date')" href="#"><fmt:message key="alert.date" /></a></th><th><a onclick="sort('description')" href="#"><fmt:message key="alert.description" /></a></th><th><a onclick="sort('level')" href="#"><fmt:message key="alert.eventimportance" /></a></th><th><a onclick="sort('status')" href="#"><fmt:message key="alert.status" /></a></th><th><a onclick="sort('x')" href="#"><fmt:message key="alert.location" /></a></th><th><fmt:message key="actions" /></th></tr>
+		<tr class="table-row smart-table-header"><th><a onclick="sort('typeUuid')" href="#"><fmt:message key="alert.type" /></a></th><th><a onclick="sort('ca.label')" href="#"><fmt:message key="query.conservationarea" /></a></th><th><a onclick="sort('date')" href="#"><fmt:message key="alert.date" /></a></th><th><a onclick="sort('description')" href="#"><fmt:message key="alert.description" /></a></th><th><a onclick="sort('level')" href="#"><fmt:message key="alert.eventimportance" /></a></th><th><a onclick="sort('status')" href="#"><fmt:message key="alert.status" /></a></th><th><a onclick="sort('x')" href="#"><fmt:message key="alert.location" /></a></th><th><fmt:message key="actions" /></th></tr>
 		</table>
 		</div> 
 	</section>
@@ -146,8 +146,8 @@
 		<a id="filter-link" onClick="hideShowFilters()" style="cursor: pointer;"><img id="filter-button" style="cursor: pointer;"/><fmt:message key="alert.hidefilters" /></a>
 
 		<form id="filter-form" name="filter-form" action="" onsubmit="return false;">
-			<input id="sortBy" type="hidden" name="sortBy" value="userGeneratedId"/>
-			<input id="sortAscending" type="hidden" name="sortAscending"  value="true"/>
+			<input id="sortBy" type="hidden" name="sortBy" value="date"/>
+			<input id="sortAscending" type="hidden" name="sortAscending"  value="false"/>
 			
 			<p>
 			<select id='filterDate' class='updateChange' name="time_filter" style="margin-bottom:3px">
@@ -216,7 +216,7 @@
      		<label class="top-spacer block"><fmt:message key="alert.calabel" /></label>
      		<input type="hidden" name="uuid" value="" />
      		<input type="hidden" name="user_id" value="" />
-     		<select name="update_alert_ca" class="block formtext alert-select">
+     		<select name="update_alert_ca" class="block formtext alert-select" disabled>
      		<c:forEach var="ca" items="${cas}" varStatus="count">
      			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
 			</c:forEach> 

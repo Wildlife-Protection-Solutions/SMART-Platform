@@ -36,6 +36,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.model.QueryColumn;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -110,7 +111,7 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		}
 		if (!hasObservations) return;
 		attrSql.append(')');
-		
+				
 		PreparedStatement ps = c.prepareStatement(attrSql.toString());
 		for (int i = 0; i < uuids.size(); i ++){
 			ps.setObject(i+1, uuids.get(i));
@@ -208,6 +209,10 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
+				if(sortColumn != null){
+					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " + direction.sql + ", sortkeytxt " + direction.sql); //$NON-NLS-1$
+				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
 			}
@@ -255,4 +260,15 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		engine.cleanUp(session);
 	}
 
+
+	@Override
+	public void setSorting(QueryColumn arg0, int arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateSortColumn(Session session) throws SQLException {
+		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid");
+	}
 }

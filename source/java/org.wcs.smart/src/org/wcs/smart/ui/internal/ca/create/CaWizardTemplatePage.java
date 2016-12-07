@@ -125,6 +125,10 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 			ca.setDesignation(null);
 			ca.getLanguages().clear();
 			ca.setName(null);
+			ca.setOrganization(null);
+			ca.setPointOfContact(null);
+			ca.setCountry(null);
+			ca.setOwner(null);
 			return;
 		}
 		
@@ -133,6 +137,10 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 		ca.setName(templateCa.getName());
 		ca.setDescription(templateCa.getDescription());
 		ca.setDesignation(templateCa.getDesignation());
+		ca.setOrganization(templateCa.getOrganization());
+		ca.setPointOfContact(templateCa.getPointOfContact());
+		ca.setCountry(templateCa.getCountry());
+		ca.setOwner(templateCa.getOwner());
 		
 		ca.getLanguages().clear();
 		for (Language l : templateCa.getLanguages()){

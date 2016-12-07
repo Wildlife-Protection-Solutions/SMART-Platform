@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART
 Bundle-SymbolicName: org.wcs.smart;singleton:=true
-Bundle-Version: 0.0.1.qualifier
+Bundle-Version: 4.1.0.qualifier
 Bundle-ClassPath: .,
  lib/opencsv-2.3.jar,
  lib/gson-2.2.4.jar,

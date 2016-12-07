@@ -198,12 +198,6 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		return txtProfileName != null && txtProfileName.getText() != null 
 				&& txtProfileName.getText().length() <= org.wcs.smart.ca.Label.MAX_LENGTH;
 	}
-
-	@Deprecated
-	@Override
-	public Session getSession() {
-		throw new UnsupportedOperationException("It is not allowed to use session attached to this thread."); //$NON-NLS-1$
-	}
 	
 	@Override
 	protected boolean performSave() {

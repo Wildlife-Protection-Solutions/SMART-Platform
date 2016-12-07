@@ -53,6 +53,11 @@ public class CaInfoComposite extends Composite {
 	private Text txtName;
 	private Text txtDescription;
 	private Text txtDesignation;
+	private Text txtOrganization;
+	private Text txtPointOfContact;
+	private Text txtCountry;
+	private Text txtOwner;
+	
 	private ControlDecoration cdIdentifier;
 	private ControlDecoration cdName;
 	
@@ -142,7 +147,59 @@ public class CaInfoComposite extends Composite {
 		txtDesignation.setLayoutData(data);
 		txtDesignation.setTextLimit(ConservationArea.MAX_DESIGNATION_LENGTH);
 		txtDesignation.addKeyListener(changeListener);
+
+		Label lblOrganization = new Label(this, SWT.NONE);
+		lblOrganization.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblOrganization.setText(Messages.CaInfoComposite_OrganizationLabel);
+		lblOrganization.setToolTipText(Messages.CaInfoComposite_Organization_Tooltip);
+
+		txtOrganization = new Text(this, SWT.BORDER);
+		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
+		data.horizontalIndent = indent;
+		data.widthHint = 350;
+		txtOrganization.setLayoutData(data);
+		txtOrganization.setTextLimit(ConservationArea.MAX_ORGANIZATION_LENGTH);
+		txtOrganization.addKeyListener(changeListener);
 		
+		Label lblPointOfContact = new Label(this, SWT.NONE);
+		lblPointOfContact.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblPointOfContact.setText(Messages.CaInfoComposite_PointOfContactLabel);
+		lblPointOfContact.setToolTipText(Messages.CaInfoComposite_PointOfContact_Tooltip);
+
+		txtPointOfContact = new Text(this, SWT.BORDER);
+		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
+		data.horizontalIndent = indent;
+		data.widthHint = 350;
+		txtPointOfContact.setLayoutData(data);
+		txtPointOfContact.setTextLimit(ConservationArea.MAX_POINT_OF_CONTACT_LENGTH);
+		txtPointOfContact.addKeyListener(changeListener);
+
+		Label lblCountry = new Label(this, SWT.NONE);
+		lblCountry.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblCountry.setText(Messages.CaInfoComposite_CountryLabel);
+		lblCountry.setToolTipText(Messages.CaInfoComposite_Country_Tooltip);
+
+		txtCountry = new Text(this, SWT.BORDER);
+		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
+		data.horizontalIndent = indent;
+		data.widthHint = 350;
+		txtCountry.setLayoutData(data);
+		txtCountry.setTextLimit(ConservationArea.MAX_COUNTRY_LENGTH);
+		txtCountry.addKeyListener(changeListener);
+
+		Label lblOwner = new Label(this, SWT.NONE);
+		lblOwner.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblOwner.setText(Messages.CaInfoComposite_OwnerLabel);
+		lblOwner.setToolTipText(Messages.CaInfoComposite_Owner_Tooltip);
+
+		txtOwner = new Text(this, SWT.BORDER);
+		data = new GridData(SWT.FILL, SWT.CENTER, true,false, 1, 1);
+		data.horizontalIndent = indent;
+		data.widthHint = 350;
+		txtOwner.setLayoutData(data);
+		txtOwner.setTextLimit(ConservationArea.MAX_OWNER_LENGTH);
+		txtOwner.addKeyListener(changeListener);
+
 		cdIdentifier = createDecoration(txtIdentifier);
 		cdName= createDecoration(txtName);
 		
@@ -175,6 +232,10 @@ public class CaInfoComposite extends Composite {
 		}else{
 			txtDesignation.setText(""); //$NON-NLS-1$
 		}
+		txtOrganization.setText(ca.getOrganization() != null ? ca.getOrganization() : ""); //$NON-NLS-1$
+		txtPointOfContact.setText(ca.getPointOfContact() != null ? ca.getPointOfContact() : ""); //$NON-NLS-1$
+		txtCountry.setText(ca.getCountry() != null ? ca.getCountry() : ""); //$NON-NLS-1$
+		txtOwner.setText(ca.getOwner() != null ? ca.getOwner() : ""); //$NON-NLS-1$
 		validate();
 	}
 	
@@ -242,6 +303,10 @@ public class CaInfoComposite extends Composite {
 		ca.setName(getCaName().trim());
 		ca.setDescription(getDescription().trim());
 		ca.setDesignation(getDesignation().trim());
+		ca.setOrganization(txtOrganization.getText().trim());
+		ca.setPointOfContact(txtPointOfContact.getText().trim());
+		ca.setCountry(txtCountry.getText().trim());
+		ca.setOwner(txtOwner.getText().trim());
 	}
 	
 	/*

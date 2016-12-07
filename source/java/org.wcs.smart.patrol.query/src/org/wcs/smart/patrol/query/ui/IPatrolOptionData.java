@@ -35,8 +35,10 @@ public interface IPatrolOptionData {
 
 	public List<ListItem> getValues(Session session, String[] keys);
 	
-	public List<ListItem> getAllActiveValues(Session session);
+	public List<ListItem> getAllValues(Session session);
 	
 	public ListItem getDefaultListItem();
-	
+
+	public boolean isDependOnQueryConfiguration();
+
 }

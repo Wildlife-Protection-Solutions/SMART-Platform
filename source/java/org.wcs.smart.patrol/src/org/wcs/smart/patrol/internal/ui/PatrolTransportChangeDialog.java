@@ -31,6 +31,7 @@ import java.util.List;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
@@ -47,6 +49,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -234,6 +237,25 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog implements Sele
 		newLeg.setEndDate(existingLeg.getEndDate());
 		newLeg.setStartDate(newStart);
 		compTransportType.updatePatrol(newLeg);
+		
+		if (!newLeg.getType().getPatrolType().requiresPilot()) {
+			//this is needed to clear pilot if changed from transport type with pilot to transport type without pilot
+			for (PatrolLegMember member : newLeg.getMembers()) {
+				member.setIsPilot(false);
+			}
+		}
+		if (newLeg.getType().getPatrolType().requiresPilot() && newLeg.getPilot() == null) {
+			//transport type was changed from a type without pilot to a type that requires pilot, need to for pilot selection
+			EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(
+					Display.getDefault().getActiveShell(),
+					Messages.PatrolTransportChangeDialog_PilotSelectDialog_Title,
+					Messages.PatrolTransportChangeDialog_PilotSelectDialog_Message,
+					EmployeeSelectorDialog.Type.PILOT, newLeg);
+			if (dialog.open() != Window.OK) {
+				return;
+			}
+		}
+		
 		legsToUpdate.add(newLeg);
 		
 		//update the existing leg

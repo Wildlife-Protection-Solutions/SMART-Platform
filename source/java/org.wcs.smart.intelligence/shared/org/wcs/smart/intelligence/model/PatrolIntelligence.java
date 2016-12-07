@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -109,6 +110,19 @@ public class PatrolIntelligence {
 			this.intelligence = intelligence;
 		}
 		
+		@Override
+		public boolean equals(Object other){
+			if (other == this) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			PatrolIntelligencePk o = (PatrolIntelligencePk) other;
+			return Objects.equals(patrol, o.patrol) && Objects.equals(intelligence, o.intelligence);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(patrol, intelligence);
+		}
 	}
 	
 

@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.model;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -76,7 +77,8 @@ public class PatrolType {
 	public enum Type {
 		GROUND, 
 		MARINE, 
-		AIR;
+		AIR,
+		MIXED;
 		
 		public String getGuiName(Locale l){
 			return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, Locale.getDefault());
@@ -87,12 +89,13 @@ public class PatrolType {
 			case GROUND: return MAX_SPEED_GROUND_DEFAULT;
 			case MARINE: return MAX_SPEED_MARINE_DEFAULT;
 			case AIR: return MAX_SPEED_AIR_DEFAULT;
+			case MIXED: return MAX_SPEED_MAX_VALUE;
 			}
 			return MAX_SPEED_MAX_VALUE;
 		}
 		
 		public boolean requiresPilot(){
-			return (this == MARINE || this == AIR);
+			return (this == MARINE || this == AIR || this == MIXED);
 		}
 	}
 
@@ -245,24 +248,17 @@ public class PatrolType {
 		}
 		
 		@Override
-		public boolean equals(Object key) {
-			if (! (key instanceof PatrolTypePk)){
-				return false;
-			}
-			PatrolTypePk p = (PatrolTypePk)key;
-			
-			
-			if (p.ca == null || this.ca == null ||
-				p.pt == null || this.pt == null ){
-				
-				if (p.ca == null && this.ca == null && 
-					p.pt == null && this.pt == null){
-						return true;
-				}
-				return false;
-			}
-			return p.ca.equals(this.ca) && p.pt.equals(this.pt);
-			
+		public boolean equals(Object other){
+			if (other == this) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			PatrolTypePk o = (PatrolTypePk) other;
+			return Objects.equals(ca, o.ca) && Objects.equals(pt, o.pt);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(ca, pt);
 		}
 	}
 }

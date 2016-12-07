@@ -31,10 +31,16 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.internal.util.ReflectHelper;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.connect.model.SharedLink;
+import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
@@ -213,6 +219,24 @@ public enum QueryManager {
 	}
 	
 	/**
+	 * Find a given query based on the uuid.
+	 * @param uuid
+	 * @param session
+	 * @return
+	 */
+	public QueryProxy findQueryProxy(UUID uuid, Session session){
+		
+		for (Class<?> table : queryClasses){
+			Query q = (Query) session.get(table, uuid);
+			if (q != null){
+				return new QueryProxy(q.getUuid(),q.getName(), table.getClass().toString(),q.getConservationArea().getNameLabel(),q.getId(),
+						q.getIsShared(), q.getConservationArea().getUuid(), false, q.getTypeKey());
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Lists all queries.
 	 * 
 	 * @param session
@@ -250,7 +274,7 @@ public enum QueryManager {
 //				r = textCompare.compare(o1.getName(), o2.getName());
 //				return r;
 				
-				//I want to sort by Name only for the user's security page. 
+				//I want to sort by Name only for now 
 				return textCompare.compare(o1.getName(), o2.getName());
 			}
 		});
@@ -275,7 +299,8 @@ public enum QueryManager {
 	public IQueryEngine findQueryEngine(Query query) throws InstantiationException, IllegalAccessException{
 		for (IQueryEngine e : engines){
 			if (e.canExecute(query.getTypeKey())){
-				return e.getClass().newInstance();
+				IQueryEngine engine = e.getClass().newInstance();
+				return engine;
 			}
 		}
 		return null;
@@ -381,5 +406,51 @@ public enum QueryManager {
 			}
 		}
 		return false;
+	}
+
+	public SharedLink findSharedLink(UUID uuid, Session s) {
+		SharedLink q = (SharedLink) s.get(SharedLink.class, uuid);
+		return q;
+	}
+
+	public SmartUser findUser(UUID uuid, Session s) {
+		return (SmartUser) s.get(SmartUser.class, uuid);
+	}
+	
+	/**
+	 * Returns the attribute with the given key
+	 * @param attributeKey
+	 * @param session
+	 * @return
+	 */
+	public Attribute.AttributeType getAttributeType(Session session, String attributeKey, ConservationAreaFilter caFilter){
+		if (caFilter.getConservationAreaFilterIds().size() == 1){
+			org.hibernate.Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
+			q.setParameter("key", attributeKey); //$NON-NLS-1$
+			q.setCacheable(true);
+			@SuppressWarnings("unchecked")
+			List<Attribute> results = q.list();
+			if (results.size() != 1 ){
+				return null;
+			}else{
+				return results.get(0).getType();
+			}
+		}else if (caFilter.getConservationAreaFilterIds().size() == 0){
+			//no conservation areas in filter; this should not be valid
+			return null;
+			
+		}else{
+			org.hibernate.Query q = session.createQuery("From Attribute where conservationArea.uuid in (:cas) and keyid = :key"); //$NON-NLS-1$
+			q.setParameterList("cas", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+			q.setParameter("key", attributeKey); //$NON-NLS-1$
+			
+			List<Attribute> allAttributes = q.list();
+			if (allAttributes.size() == 0) return null;
+			
+			Set<AttributeType> types = allAttributes.stream().map(a->a.getType()).distinct().collect(Collectors.toSet());
+			if (types.size() == 1) return types.iterator().next();
+			return null;	//not a valid column as the key has different types in different cas (or is not valid in any cas)
+		}
 	}
 }

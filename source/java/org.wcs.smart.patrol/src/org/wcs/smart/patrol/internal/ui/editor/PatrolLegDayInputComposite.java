@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -81,10 +82,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
@@ -178,6 +181,20 @@ public class PatrolLegDayInputComposite {
 		public void eventFired(int attributeChanged, Object source) {
 			if (attributeChanged == PatrolEventManager.PATROL_WAYPOINTS && source.equals(patrolLegDate)){
 				refreshObservationTable();
+			}
+			
+		}
+	};
+	private IPatrolEventListener timeListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(int attributeChanged, Object source) {
+			if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG && source.equals(patrolLegDate) && !mainComposite.isDisposed()){
+				mainComposite.getDisplay().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						setData(patrolLegDate);
+					}
+				});
 			}
 			
 		}
@@ -304,19 +321,23 @@ public class PatrolLegDayInputComposite {
 		mainComposite = toolkit.createComposite(parent);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		((GridLayout)mainComposite.getLayout()).verticalSpacing = 0;
+		
 		Composite timeInfo = toolkit.createComposite(mainComposite);
 		timeInfo.setLayout(new GridLayout(4, false));
 		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 15;
+		((GridLayout) timeInfo.getLayout()).verticalSpacing = 0;
 		 ((GridLayout)timeInfo.getLayout()).marginWidth = 0;
 		 ((GridLayout)timeInfo.getLayout()).marginLeft = 5;
 		 ((GridLayout)timeInfo.getLayout()).marginHeight = 5;
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite c = toolkit.createComposite(timeInfo);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		c.setLayout(new GridLayout(2, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
+		((GridLayout)c.getLayout()).verticalSpacing = 3;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_StartTimeLabel);
 		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtStartTime);
@@ -338,8 +359,29 @@ public class PatrolLegDayInputComposite {
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 			}
 		});
-
+		Hyperlink btnUpdateTime = toolkit.createHyperlink(c, Messages.PatrolLegDayInputComposite_Button_UpdateTime_Text, SWT.NONE);
+		btnUpdateTime.setToolTipText(Messages.PatrolLegDayInputComposite_Button_UpdateTime_Tooltip);
+		btnUpdateTime.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false, 2, 1));
+		btnUpdateTime.addHyperlinkListener(new IHyperlinkListener() {
+			
+			@Override
+			public void linkExited(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message)) {
+					updateTimeWithWpData();
+				}
+			}
+		});
+		
 		c = toolkit.createComposite(timeInfo);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		c.setLayout(new GridLayout(2, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
@@ -368,6 +410,7 @@ public class PatrolLegDayInputComposite {
 		
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_RestMinutesLabel);
@@ -432,6 +475,8 @@ public class PatrolLegDayInputComposite {
 		lblTotalPatrolHours.setLayoutData(gd);
 		lblTotalFieldHours.setLayoutData(gd);
 
+		
+		
 		Composite trackComp = toolkit.createComposite(mainComposite);
 		trackComp.setLayout(new GridLayout(4, false));
 		
@@ -517,6 +562,7 @@ public class PatrolLegDayInputComposite {
 		
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, waypointListener);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, timeListener);
 		updateTotalHours();
 		return mainComposite;
 	}
@@ -537,10 +583,10 @@ public class PatrolLegDayInputComposite {
 		return true;
 	}
 	
-	
 	public void dispose(){
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, waypointListener);
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, timeListener);
 		
 		doubleCellEditor.dispose();
 		nullableDoubleCellEditor.dispose();
@@ -562,10 +608,25 @@ public class PatrolLegDayInputComposite {
 		}
 		mainComposite.dispose();
 		mainComposite = null;
-		
-		
 	}
-	
+
+	/**
+	 * NOTE: Similar logic for all legs is located in {@link PatrolSummaryEditor} page
+	 */
+	protected void updateTimeWithWpData() {
+		List<PatrolWaypoint> wps = patrolLegDate.getWaypoints();
+		if (wps.isEmpty()) return;
+		//find min and max time among waypoints
+		List<Date> dates = wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList());
+		Date minDate = Collections.min(dates);
+		Date mmaxDate = Collections.max(dates);
+		patrolLegDate.setStartTime(new Time(minDate.getTime()));
+		patrolLegDate.setEndTime(new Time(mmaxDate.getTime()));
+		setData(patrolLegDate);
+		editor.getPatrolEditor().save(patrolLegDate);
+		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
+	}
+
 	private void moveSelectedWaypoints(){
 		MoveWaypointDialog dialog = new MoveWaypointDialog(mainComposite.getShell(), patrolLegDate.getPatrolLeg().getPatrol());
 		if (dialog.open() != Window.OK ){
@@ -862,10 +923,9 @@ public class PatrolLegDayInputComposite {
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(LOAD_WIZARD_PROGRESS_MSG);
 					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
-					
-					if (dialog != null) {
-						monitor.setTaskName(SHOW_WIZARD_PROGRESS_MSG);
-						dialog.open();
+					monitor.setTaskName(SHOW_WIZARD_PROGRESS_MSG);
+					if (dialog.open() == Window.OK) {
+						updateTimeWithWpData();
 					}
 				}
 			});

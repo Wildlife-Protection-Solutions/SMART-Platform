@@ -181,7 +181,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 			public void execute(Connection c) throws SQLException {
 				
 				try {
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					parseConservationAreaFilterInternal(query);
 					
 					try{
 						getHeaderInfo(query, sumResults, locale, session);
@@ -830,8 +830,9 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 			}else if (gb instanceof DateGroupBy){
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
 				if (op.getClass().equals(DayDateGroupBy.class)){
+					groupByInnerSql.append("date_trunc('day', ");
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
-					groupByInnerSql.append(".datetime as wp_date_time_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(".datetime) as wp_date_time_" + itemcnt); //$NON-NLS-1$
 					groupBySql.append("wp_date_time_" + itemcnt); //$NON-NLS-1$
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
@@ -1071,8 +1072,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 	 * @param session hibernate session
 	 */
 	public void getHeaderInfo(SummaryQuery query, SummaryQueryResult results,Locale l, Session session) throws Exception{
-		ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter); 
+		parseConservationAreaFilterInternal(query);
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();

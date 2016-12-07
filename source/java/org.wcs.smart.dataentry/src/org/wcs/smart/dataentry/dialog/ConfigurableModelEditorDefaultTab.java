@@ -219,10 +219,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model);
 		rootNodeComposite.addModelChangedListener(modelChangeListener);
 
-		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, true);
+		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), true);
 		groupNodeComposite.addModelChangedListener(modelChangeListener);
 		
-		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, false);
+		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), false);
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
 
 		attributeComposites = new HashMap<AttributeType, CmAttributeInfoComposite>();

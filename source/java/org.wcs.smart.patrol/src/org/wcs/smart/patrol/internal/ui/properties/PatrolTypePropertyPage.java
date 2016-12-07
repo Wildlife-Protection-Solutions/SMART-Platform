@@ -70,6 +70,7 @@ import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.export.dialog.CsvCaImportDialog;
 import org.wcs.smart.export.dialog.CsvExportDialog;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -127,17 +128,17 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		patrolTypes = new ArrayList<PatrolType>(PatrolHibernateManager.getPatrolTypes(currentCa, getSession()));
-		getSession().beginTransaction();
+		Session s = HibernateManager.openSession();
 		try{
+			patrolTypes = new ArrayList<PatrolType>(PatrolHibernateManager.getPatrolTypes(currentCa, s));		
 			//ensure all types are laziy loaded
 			for (Object t : patrolTypes){
 				if (((PatrolType)t).getTransportTypes() != null){
-					((PatrolType)t).getTransportTypes().size();
+					((PatrolType)t).getTransportTypes().forEach(tt -> tt.getNames().size());
 				}
 			}
 		}finally{
-			getSession().getTransaction().rollback();
+			s.close();
 		}
 		
 		Composite container = new Composite(parent, SWT.NONE);
@@ -701,9 +702,10 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			return;
 		}
 		
+		Session s = HibernateManager.openSession();
 		try{
 			if (ttype.getUuid() != null){
-				if (DeleteManager.canDelete(ttype, getSession())){
+				if (DeleteManager.canDelete(ttype, s)){
 					pt.getTransportTypes().remove(ttype);
 					toDelete.add(ttype);
 //					ttype.setPatrolType(null);
@@ -716,7 +718,9 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.PatrolTypePropertyPage_Error_DeletingTransport + " " + ex.getLocalizedMessage(), new Object[]{ ttype.getName()}), ex); //$NON-NLS-1$
-		}	
+		}finally{
+			s.close();
+		}
 		
 		transportTblViewer.refresh();
 		
@@ -750,15 +754,17 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			return false;
 		}
 		
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
 			for (PatrolTransportType t : toDelete){
 				s.delete(t);
 			}
-
+			s.flush();
+			
 			for (Iterator<?> iterator = this.patrolTypes.iterator(); iterator.hasNext();) {
 				PatrolType type = (PatrolType) iterator.next();
+				s.saveOrUpdate(type.getConservationArea());	
 				s.saveOrUpdate(type);
 				if (type.getTransportTypes() != null){
 					for (PatrolTransportType tt : type.getTransportTypes()){
@@ -772,8 +778,9 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			return true;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			s.close();
 			SmartPatrolPlugIn.displayLog(Messages.PatrolTypePropertyPage_Error_SavingChanges + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+		}finally{
+			s.close();
 		}
 		return false;
 	}

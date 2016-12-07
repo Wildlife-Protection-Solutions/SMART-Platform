@@ -4,15 +4,14 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart</artifactId>
-		<version>4.0</version>
+		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>../../java/pom-shared.xml</relativePath>
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
 	
 	<artifactId>org.wcs.smart.entity.query.report</artifactId>
-	<name>SMART Entity Report Query Module</name>
-	<version>${smart.version}</version>
+	<name>SMART Entity Report Query Module</name>	
 	<packaging>bundle</packaging>
 	
 	<dependencies>

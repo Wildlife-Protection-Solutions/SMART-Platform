@@ -36,6 +36,7 @@ import org.wcs.smart.er.ui.surveydesign.NameIdComposite;
 import org.wcs.smart.er.ui.surveydesign.PropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.StatusComposite;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -57,11 +58,24 @@ public class SurveyDesignCompositeFactory {
 		return instance;
 	}
 
-	public SurveyDesignComposite createComposite(PanelType type, Session session) {
+	public SurveyDesignComposite createComposite(PanelType type) {
+		
 		switch (type) {
-		case NAME:					return new NameIdComposite(getSurveyDesigns(session));
+		case NAME:
+			Session s = HibernateManager.openSession();
+			try{
+				return new NameIdComposite(getSurveyDesigns(s));
+			}finally{
+				s.close();
+			}
 		case DATES:					return new DateComposites();
-		case MODEL:					return new ConfigurableModelComposite(getConfigurableModels(session));
+		case MODEL:
+			s = HibernateManager.openSession();
+			try{
+				return new ConfigurableModelComposite(getConfigurableModels(s));
+			}finally{
+				s.close();
+			}
 		case STATUS:				return new StatusComposite();
 		case MISSION_PROPERTIES:	return new MissionPropertiesComposite();
 		case PROPERTIES:			return new PropertiesComposite();

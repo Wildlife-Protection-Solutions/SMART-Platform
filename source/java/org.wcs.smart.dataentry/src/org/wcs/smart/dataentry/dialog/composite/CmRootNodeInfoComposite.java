@@ -40,7 +40,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
 	private CmRootNode rootNode;
-	
+
 	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model) {
 		super(parent, model);
 		createControls();

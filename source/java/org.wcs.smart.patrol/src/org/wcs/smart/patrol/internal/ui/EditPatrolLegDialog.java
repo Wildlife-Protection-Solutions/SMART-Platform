@@ -36,8 +36,10 @@ import java.util.List;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -88,6 +90,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	private ArrayList<Employee> employeeList;
 	private ArrayList<Employee> employeeListA;
 
+	private Label lblGroupAPilot;
 	private ComboViewer groupALeader;
 	private ComboViewer groupAPilot;
 	private ComboViewer cmbTransportTypeA;
@@ -189,10 +192,23 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		groupALeader = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupALeader_Label, employeeListA, editLeg.getLeader().getMember());
-		if (editLeg.getPatrol().hasPilot()){
-			groupAPilot = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupAPilot_Label, employeeListA, editLeg.getPilot().getMember());
-		}
+		Label lblGroupALeader = new Label(leaderComp, SWT.NONE);
+		lblGroupALeader.setText(Messages.EditPatrolLegDialog_GroupALeader_Label);
+		groupALeader = createLeaderPilot(leaderComp, employeeListA, editLeg.getLeader().getMember());
+
+		lblGroupAPilot = new Label(leaderComp, SWT.NONE);
+		lblGroupAPilot.setText(Messages.EditPatrolLegDialog_GroupAPilot_Label);
+		Employee pilotA = editLeg.getPilot() != null ? editLeg.getPilot().getMember() : null;
+		groupAPilot = createLeaderPilot(leaderComp, employeeListA, pilotA);
+		
+		cmbTransportTypeA.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateGroupAPilotState();
+				
+			}
+		});
+		updateGroupAPilotState();
 		
 		setMessage(Messages.EditPatrolLegDialog_DialogMessage);
 		getShell().setText(Messages.EditPatrolLegDialog_DialogTitle);
@@ -200,19 +216,26 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		return parent;
 	}
 	
+	protected void updateGroupAPilotState() {
+		PatrolTransportType ptt = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
+		boolean showPilot = ptt != null && ptt.getPatrolType() != null && ptt.getPatrolType().requiresPilot();
+		lblGroupAPilot.setVisible(showPilot);
+		groupAPilot.getCombo().setVisible(showPilot);
+	}
+
 	/*
 	 * Create a combo viewer for selecting patrol leader/pilot
 	 */
-	private ComboViewer createLeaderPilot(Composite parent, String name, List<Employee> employeeList, Employee defaultValue){
-		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(name);
+	private ComboViewer createLeaderPilot(Composite parent, List<Employee> employeeList, Employee defaultValue){
 		ComboViewer cmb = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmb.setLabelProvider(new EmployeeLabelProvider());
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
 		cmb.setInput(employeeList);
 		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		
-		cmb.setSelection( new StructuredSelection(defaultValue));
+		if (defaultValue != null) {
+			cmb.setSelection(new StructuredSelection(defaultValue));
+		}
 		
 		return cmb;
 	}
@@ -506,7 +529,8 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		if (this.groupALeader.getSelection().isEmpty()){
 			return Messages.EditPatrolLegDialog_Error_NoLeader;
 		}
-		if (this.groupAPilot != null && this.groupAPilot.getSelection().isEmpty()){
+		PatrolTransportType pttA = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
+		if (this.groupAPilot != null && pttA.getPatrolType().requiresPilot() && this.groupAPilot.getSelection().isEmpty()){
 			return Messages.EditPatrolLegDialog_Error_NoPilot;
 		}		
 		return null;
@@ -555,7 +579,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		
 		//update pilot
 		Employee pilotA = null;
-		if (this.groupAPilot != null){
+		if (this.groupAPilot != null && editLeg.getType().getPatrolType().requiresPilot()){
 			pilotA =   (Employee) ((IStructuredSelection)this.groupAPilot.getSelection()).getFirstElement();
 		}	
 		

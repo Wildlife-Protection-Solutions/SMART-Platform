@@ -57,6 +57,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 
@@ -77,7 +78,7 @@ public class ConnectUser extends HttpServlet {
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 
-	private void validateUser(){
+	private void isAdminUser(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -85,6 +86,16 @@ public class ConnectUser extends HttpServlet {
 				logger.info("User " + request.getUserPrincipal().getName() + " does not have user accounts permissions."); //$NON-NLS-1$ //$NON-NLS-2$
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+	
+	private boolean isCaAdminUser(){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
 		}finally{
 			s.getTransaction().commit();
 		}
@@ -101,7 +112,9 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("")
     public List<SmartUser> getActiveUsers(){
-		validateUser();
+		if(!isCaAdminUser()){
+			isAdminUser();//throws an exception if invalid user.
+		}
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -111,6 +124,7 @@ public class ConnectUser extends HttpServlet {
 		}
 	}
 
+	
 	
 	/**
 	 * Gets all inactive users
@@ -123,7 +137,9 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("/getinactive/")
     public List<SmartUser> getInactiveUsers(){
-		validateUser();
+		if(!isCaAdminUser()){
+			isAdminUser();//throws an exception if invalid user.
+		}
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -157,7 +173,9 @@ public class ConnectUser extends HttpServlet {
 			return null;
 		}
 		
-		validateUser();
+		if(!isCaAdminUser()){
+			isAdminUser();//throws an exception if invalid user.
+		}
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -187,7 +205,9 @@ public class ConnectUser extends HttpServlet {
     @Path("/{username}")
     public SmartUser addUser(@PathParam("username") String user, 
     		SmartUser newUser) {
-		validateUser();
+
+		isAdminUser();//throws an exception if invalid user.
+		
 		if (newUser.getUsername() != null && newUser.getUsername().length() > 0 && !newUser.getUsername().equals(user)){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.invalidusernames", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
@@ -255,7 +275,7 @@ public class ConnectUser extends HttpServlet {
     	
     	//if you are editing yourself, skip validation for admin-level user
     	if( !request.getUserPrincipal().getName().equals(olduser)){
-    		validateUser();
+   			isAdminUser();//throws an exception if not an Admin
     	}
     	
     	if (newUser.getUsername() != null){
@@ -354,7 +374,7 @@ public class ConnectUser extends HttpServlet {
     @Path("/activate/{username}")
     public SmartUser activateUser(
     		@PathParam("username") String username) {
-    	validateUser();
+    	isAdminUser();
     	
     	SmartUser user;
     	
@@ -397,7 +417,7 @@ public class ConnectUser extends HttpServlet {
     @Path("/activate/{username}")
     public SmartUser deactivateUser(
     		@PathParam("username") String username) {
-    	validateUser();
+    	isAdminUser();
     	
     	SmartUser user;
     	
@@ -441,7 +461,7 @@ public class ConnectUser extends HttpServlet {
     @DELETE
     @Path("/{username}")
     public SmartUser removeUser(@PathParam("username") String username) {
-    	validateUser();
+    	isAdminUser();
     	SmartUser toDelete = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();

@@ -211,11 +211,21 @@ public interface IDataModelManager {
 	 */
 	public List<Attribute> getActiveAttributes(DataModel dm);
 	
+
+	/**
+	 * Returns a modifiable list of all the attributes
+	 * in the given data model. An attribute is active if it has
+	 * at least one active category association.
+	 * 
+	 * @param dm
+	 * @param onlyActive
+	 * @return
+	 */
+	public List<Attribute> getAttributes(DataModel dm, boolean onlyActive);
 	
 	/**
 	 * Computes the depth of the active
 	 * data model category tree.
-	 * tree.
 	 * 
 	 * @return
 	 */

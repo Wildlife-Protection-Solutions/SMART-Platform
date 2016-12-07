@@ -42,11 +42,12 @@ import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
 import org.wcs.smart.dataentry.meta.TextScreenOptionComposite;
 import org.wcs.smart.dataentry.meta.YesNoScreenOptionComposite;
 import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -61,7 +62,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionMeta> {
 
 	private PatrolScreenOptionMeta[] optionsToShow = {
-			PatrolScreenOptionMeta.TYPE,
 			PatrolScreenOptionMeta.TRANSPORT,
 			PatrolScreenOptionMeta.ARMED,
 			PatrolScreenOptionMeta.TEAM,
@@ -77,7 +77,7 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 	
 	private LabelProvider metaScreenLabelProvider = new PatrolMetaScreenLabelProvider();
 	
-	private List<PatrolType> patrolTypes;
+	private List<PatrolTransportType> transportTypes;
 	private List<Team> teams;
 	private List<Station> stations;
 	private List<PatrolMandate> mandates;
@@ -89,35 +89,36 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 	}
 
 	private void initData() {
-		Session session = getSession();
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		options = PatrolHibernateManager.getScreenOptions(ca, session);
-		//creating missing options
-		for (PatrolScreenOptionMeta meta : optionsToShow) {
-			ScreenOption cto = options.get(meta);
-			if (cto == null) {
-				cto = new ScreenOption();
-				cto.setConservationArea(ca);
-				cto.setResource(PatrolScreenOptionMeta.PATROL_RESOURCE_ID);
-				cto.setType(meta.name());
-				options.put(meta, cto);
+		Session session = HibernateManager.openSession();
+		try{
+			ConservationArea ca = SmartDB.getCurrentConservationArea();
+			options = PatrolHibernateManager.getScreenOptions(ca, session);
+			//creating missing options
+			for (PatrolScreenOptionMeta meta : optionsToShow) {
+				ScreenOption cto = options.get(meta);
+				if (cto == null) {
+					cto = new ScreenOption();
+					cto.setConservationArea(ca);
+					cto.setResource(PatrolScreenOptionMeta.PATROL_RESOURCE_ID);
+					cto.setType(meta.name());
+					options.put(meta, cto);
+				}
 			}
+	
+			transportTypes = PatrolHibernateManager.getActivePatrolTransporationTypes(ca, session);
+			teams = PatrolHibernateManager.getActiveTeams(ca, session);
+			stations = PatrolHibernateManager.getActiveStations(ca, session);
+			mandates = PatrolHibernateManager.getActiveMandates(ca, session);
+			members = PatrolHibernateManager.getActiveEmployees(ca, session);
+			Collections.sort(members, new Comparator<Employee>() {
+				@Override
+				public int compare(Employee e1, Employee e2) {
+					return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
+				}
+			});
+		}finally{
+			session.close();
 		}
-
-		patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
-		for (PatrolType type : patrolTypes) {
-			type.getTransportTypes().size(); //load lazy items
-		}
-		teams = PatrolHibernateManager.getActiveTeams(ca, session);
-		stations = PatrolHibernateManager.getActiveStations(ca, session);
-		mandates = PatrolHibernateManager.getActiveMandates(ca, session);
-		members = PatrolHibernateManager.getActiveEmployees(ca, session);
-		Collections.sort(members, new Comparator<Employee>() {
-			@Override
-			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
-			}
-		});
 	}
 
 	@Override
@@ -134,9 +135,8 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 	protected Map<PatrolScreenOptionMeta, ScreenOptionComposite> buildOptionComposites(Composite infoInnerPanel, IScreenOptionChangeListener listener) {
 		Map<PatrolScreenOptionMeta, ScreenOptionComposite> screenComposites = new HashMap<PatrolScreenOptionMeta, ScreenOptionComposite>();
 
-		ScreenOptionComposite soc  = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.TYPE), options.get(PatrolScreenOptionMeta.TRANSPORT), patrolTypes);
+		ScreenOptionComposite soc  = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.TRANSPORT), transportTypes);
 		soc.addScreenOptionListener(listener);
-		screenComposites.put(PatrolScreenOptionMeta.TYPE,      soc);
 		screenComposites.put(PatrolScreenOptionMeta.TRANSPORT, soc);
 		
 		soc = new YesNoScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.ARMED), metaScreenLabelProvider.getText(PatrolScreenOptionMeta.ARMED));

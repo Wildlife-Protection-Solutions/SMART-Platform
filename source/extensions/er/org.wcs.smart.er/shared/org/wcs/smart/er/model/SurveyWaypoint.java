@@ -22,6 +22,7 @@
 package org.wcs.smart.er.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -159,6 +160,20 @@ public class SurveyWaypoint {
 		}
 		public void setWaypoint(Waypoint wp){
 			this.wp  = wp;
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (other == this) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			SurveyWaypointPk o = (SurveyWaypointPk) other;
+			return Objects.equals(wp, o.wp);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(wp);
 		}
 	}
 }

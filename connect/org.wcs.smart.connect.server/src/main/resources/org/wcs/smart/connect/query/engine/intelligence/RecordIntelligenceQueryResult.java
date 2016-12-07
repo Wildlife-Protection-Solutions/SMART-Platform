@@ -83,12 +83,19 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public ResultSet getResultSet(final Session session) {
-		final String dataQuery = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable(); //$NON-NLS-1$
+		final String dataQuerySort = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql; //$NON-NLS-1$
+		final String dataQuery = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable();//$NON-NLS-1$
+
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
+				if(sortColumn != null){
+					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY).executeQuery(dataQuerySort);
+				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery(dataQuery);
+
 			}
 		});
 	}
@@ -148,5 +155,10 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
 		engine.cleanUp(session);
+	}
+	
+	@Override
+	public void updateSortColumn(Session session) throws SQLException {
+		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid");
 	}
 }

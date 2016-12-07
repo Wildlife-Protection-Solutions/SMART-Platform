@@ -38,6 +38,7 @@ import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
+import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartRole;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserRole;
@@ -327,5 +328,14 @@ public class HibernateManager {
 		return (SmartRole) s.createCriteria(SmartRole.class)
 		.add(Restrictions.eq("roleName", SmartRole.SYSTEM_ROLE_NAME))  //$NON-NLS-1$
 		.uniqueResult();
+	}
+
+	public static SharedLink getSharedLink(Session s, UUID uuid) {
+		SharedLink a = (SharedLink)s
+				.createCriteria(SharedLink.class)
+				.add(Restrictions.eq("uuid", uuid)) //$NON-NLS-1$
+				.uniqueResult();
+		return a;
+
 	}
 }

@@ -100,3 +100,5 @@ update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.
 update connect.connect_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';
 
+
+update connect.connect_version set version = '4.0.1';

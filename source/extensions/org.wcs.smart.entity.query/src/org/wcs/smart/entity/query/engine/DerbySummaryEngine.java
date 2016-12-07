@@ -879,8 +879,15 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			}else if (gb instanceof DateGroupBy){
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
 				if (op.getClass().equals(DayDateGroupBy.class)){
+					groupByInnerSql.append("date( trim(cast(year("); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
-					groupByInnerSql.append(".datetime as wp_date_time_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(".datetime) as char(4))) || '-' || trim(cast(month("); //$NON-NLS-1$
+					groupByInnerSql.append(tablePrefix(Waypoint.class));
+					groupByInnerSql.append(".datetime) as char(2))) || '-' || trim(cast(day(");
+					groupByInnerSql.append(tablePrefix(Waypoint.class));
+					groupByInnerSql.append(".datetime) as char(2))) )"); //$NON-NLS-1$
+					groupByInnerSql.append(" as wp_date_time_" + itemcnt); //$NON-NLS-1$
+					
 					groupBySql.append("wp_date_time_" + itemcnt); //$NON-NLS-1$
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$

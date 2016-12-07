@@ -108,8 +108,12 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet {
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
+				if(sortColumn != null){
+					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$
+				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " +engine.getQueryDataTable());
 			}
 		});
 	}
@@ -153,6 +157,13 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet {
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
 		engine.cleanUp(session);
+	}
+	
+	
+	@Override
+	public void updateSortColumn(Session session) throws SQLException {
+		//pass in the specific column name prefixes and suffixes to customize the SQL to this type of Query
+		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".wp_", "_mLIST", "_TREE", "uuid");
 	}
 
 }

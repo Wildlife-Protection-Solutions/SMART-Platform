@@ -92,7 +92,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 				try {
 					filterer = PsqlPatrolObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 					
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
+					parseConservationAreaFilterInternal(lquery);
 					
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, true, true);

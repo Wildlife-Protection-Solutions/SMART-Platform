@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
@@ -77,7 +78,12 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	 */
 	public ObservationOptionsPropertyPage(Shell parent) {
 		super(parent, Messages.PatrolOptionsPropertyPage_DialogTitle);
-		patrolOption = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), getSession());
+		Session s = HibernateManager.openSession();
+		try{
+			patrolOption = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
+		}finally{
+			s.close();
+		}
 	}
 	
 
@@ -251,7 +257,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		patrolOption.setTrackObserver(btnTrackObserver.getSelection());
 		patrolOption.setEditTime(Integer.parseInt(txtEditTime.getText()));
 	
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
 			s.saveOrUpdate(patrolOption);
@@ -264,8 +270,9 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 			return true;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			s.close();
 			ObservationPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
+		}finally{
+			s.close();
 		}
 		return false;
 	}

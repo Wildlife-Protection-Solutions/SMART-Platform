@@ -22,6 +22,7 @@
 package org.wcs.smart.er.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -118,6 +119,20 @@ public class MissionMember {
 		}
 		public void setMission(Mission mission){
 			this.mission  = mission;
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (other == this) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			MissionMemberPk o = (MissionMemberPk) other;
+			return Objects.equals(mission, o.mission) && Objects.equals(member, o.member);
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(mission, member);
 		}
 	}
 }

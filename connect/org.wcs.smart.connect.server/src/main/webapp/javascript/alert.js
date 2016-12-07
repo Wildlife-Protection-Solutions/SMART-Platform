@@ -8,6 +8,7 @@ var realtime;
 var map;
 var layerControl;
 var redMarker;
+var deletetimer;
 
 
 
@@ -334,9 +335,11 @@ function remove_class(id, classname){
 /* delete alert*/
 function deleteAlert(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var id = this.parentElement.parentElement.getAttribute('data-alertid');
-	
-	displayConfirmDialog("Delete Alert", i18n("alert.areyousuredeletealert") + id + "?"  , function(){
+	var date = this.parentElement.parentElement.getAttribute('data-alertdate');
+	date = new Date(Date.parse(date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
+	var type = this.parentElement.parentElement.getAttribute('data-alerttype');
+
+	displayConfirmDialog("Delete Alert",  i18n("alert.areyousuredeletealert") + type + " on " + date + "?"  , function(){
 		hideInfo();
 		
 		var oReq = new XMLHttpRequest();
@@ -445,10 +448,12 @@ function createAlertTable(){
 		 		date = new Date(Date.parse(alerts[i].properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
 
 		 		var row = tableCreateRowTDs(parent,
-		 				[alerts[i].properties.type, alerts[i].properties.id, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
+		 				[alerts[i].properties.type, alerts[i].properties.caname, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
 		 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
+		 		row.dataset.alertdate = alerts[i].properties.date;
+		 		row.dataset.alerttype = alerts[i].properties.type;
 		 		row.dataset.alertid = alerts[i].properties.id;
 	
 		 		if(canupdate){
@@ -468,7 +473,22 @@ function createAlertTable(){
 			 		row.childNodes[7].appendChild(deleteicon);
 		 		}
 		 	}
-	 	}
+		 	
+		 	var lastrow = document.createElement("tr");
+			lastrow.className="table-row alertrow";
+			
+			cell = document.createElement("td");
+			cell.className="table-cell smart-table-cell";
+			cell.colSpan = "5";
+			var a = document.createElement("a");
+			var linkText = document.createTextNode(i18n("alert.deleteall"));
+			a.appendChild(linkText);
+			a.onclick=deleteFilteredAlerts;
+			a.href="";
+			cell.appendChild(a);
+			lastrow.appendChild(cell);
+			parent.appendChild(lastrow);
+		}
 	}catch(err) {
  		var newRow = parent.insertRow(-1);
  		newRow.style.backgroundColor = "#F00";
@@ -508,7 +528,7 @@ function showCurrentAlert() {
 	
 	document.getElementById("updatealertform").user_id.value = r.userGeneratedId;
 	
-	document.getElementById("updatealertform").update_alert_ca.value = r.caUuid;
+	document.getElementById("updatealertform").update_alert_ca.value = r.ca.uuid;
 	document.getElementById("updatealertform").update_alert_type.value = r.typeUuid;
 	document.getElementById("updatealertform").update_level.value = r.level;
 	document.getElementById("updatealertform").update_status.value = r.status;
@@ -539,7 +559,6 @@ function submitUpdatedAlert(){
 	
 	//generate the data to send
 	data = {
-		    "caUuid": form.update_alert_ca.value,
 		    "typeUuid": form.update_alert_type.value,
 		    "level": form.update_level.value ,
 		    "status": form.update_status.value,
@@ -692,7 +711,7 @@ function updateRealtimeLayer(updatedUrl){
                 	text = text + "</font>"
                 }
                 	
-                text = text + "<br>" + i18n("alert.alertid") + feature.properties.id +
+                text = text + 
                 	"<br>" + i18n("alert.reportedtime") + d +
                 	"<br>" + i18n("alert.location") +
                     coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW') +
@@ -982,4 +1001,29 @@ function sort(str){
 	}
 	
 	refreshAlerts();
+}
+//Delete all alerts that meet the current filter criteria
+function deleteFilteredAlerts(){
+	displayConfirmDialog("Delete All Alerts", i18n("alert.areyousuredeleteallalerts"), function(){
+
+		var alerts = document.querySelectorAll(".alertrow");
+		for (var i = 0; i < alerts.length-1; i++){ //-1 because the delete all link is in the list as well. 
+			var uuid = alerts[i].dataset.uuid;
+			var oReq = new XMLHttpRequest();
+			oReq.onload = allAlertDeleted;
+			oReq.open("DELETE", ALERT_URL  + encodeURIComponent(uuid), true);
+			oReq.send();
+		}
+		return false;
+	});
+	return false;
+}
+function allAlertDeleted(){	
+	if (this.status == 200  && this.status != 201 ) {
+	} else {
+		displayError(parseError(i18n("alert.errordeletealert") + " : " + this.statusText));
+	}
+	clearTimeout(deletetimer);  //reset the delay if another delete is completed before 2 sec is up.
+	deletetimer = setTimeout(refreshAlerts,2000); //don't want to run this a million times, just run it after waiting for 2sec 
+	return false;
 }

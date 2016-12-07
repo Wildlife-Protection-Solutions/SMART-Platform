@@ -135,7 +135,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 			        });
 			        
 					filterer = PsqlEntityObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					parseConservationAreaFilterInternal(query);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 
 							true, true);

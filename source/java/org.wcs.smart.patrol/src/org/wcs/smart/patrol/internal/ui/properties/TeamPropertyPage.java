@@ -83,6 +83,7 @@ import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -148,26 +149,40 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		this.currentCa = SmartDB.getCurrentConservationArea();
 		
 		/* get mandates */
-		getSession().beginTransaction();
 		List<PatrolMandate> ms =  null;
+		Session s = HibernateManager.openSession();
 		try{
-			ms = PatrolHibernateManager.getActiveMandates(currentCa, getSession());
-			getSession().getTransaction().rollback();
+			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(currentCa, s));
+			Collections.sort(teams, new Comparator<Team>(){
+
+				@Override
+				public int compare(Team o1, Team o2) {
+					String a = o1.getName();
+					String b = o2.getName();
+					if (a != null) a = a.toLowerCase();
+					if (b != null) b = b.toLowerCase();
+					return Collator.getInstance().compare(a,b);
+				}});
+			teams.forEach(t -> t.getNames().size());
+			
+			ms = PatrolHibernateManager.getActiveMandates(currentCa, s);
+			Collections.sort(ms, new Comparator<PatrolMandate>(){
+				@Override
+				public int compare(PatrolMandate o1, PatrolMandate o2) {
+					String a = o1.getName();
+					String b = o2.getName();
+					if (a != null) a = a.toLowerCase();
+					if (b != null) b= b.toLowerCase();
+					return Collator.getInstance().compare(a,b);
+				}});
+			ms.forEach(m -> m.getNames().size());
 		}catch (Exception ex){
-			getSession().getTransaction().rollback();
-			getSession().close();
 			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingMandates, ex);
 			return;
+		}finally{
+			s.close();
 		}
-		Collections.sort(ms, new Comparator<PatrolMandate>(){
-			@Override
-			public int compare(PatrolMandate o1, PatrolMandate o2) {
-				String a = o1.getName();
-				String b = o2.getName();
-				if (a != null) a = a.toLowerCase();
-				if (b != null) b= b.toLowerCase();
-				return Collator.getInstance().compare(a,b);
-			}});
+		
 		ms.add(0, null);
 		mandates = ms.toArray(new PatrolMandate[ms.size()]);
 
@@ -185,26 +200,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	protected Composite createContent(Composite parent) {
-		getSession().beginTransaction();
-		try{
-			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(currentCa, getSession()));
-			getSession().getTransaction().rollback();
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingTeams, ex);
-			getSession().close();
-		}
-		Collections.sort(teams, new Comparator<Team>(){
-
-			@Override
-			public int compare(Team o1, Team o2) {
-				String a = o1.getName();
-				String b = o2.getName();
-				if (a != null) a = a.toLowerCase();
-				if (b != null) b = b.toLowerCase();
-				return Collator.getInstance().compare(a,b);
-			}});
-		
+	protected Composite createContent(Composite parent) {		
 		container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
 
@@ -362,9 +358,10 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.TeamPropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.TeamPropertyPage_ConfirmDeleteMessage, new Object[]{team.getName()}))){
 			return;
 		}
+		Session session = HibernateManager.openSession();
 		try{
 			if (team.getUuid() != null){
-				if (DeleteManager.canDelete(team, getSession())){
+				if (DeleteManager.canDelete(team, session)){
 					teams.remove(team);
 					toDelete.add(team);
 					setChangesMade(true);
@@ -375,6 +372,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.TeamPropertyPage_Error_DeletingTeam + "\n\n" + ex.getLocalizedMessage(), new Object[]{team.getName()}), ex); //$NON-NLS-1$
+		}finally{
+			session.close();
 		}
 		tableViewer.refresh();
 	}
@@ -384,13 +383,15 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		
 		try {
-			s.beginTransaction();
-			
 			for (Team t : toDelete){
 				s.delete(t);
 			}
+			s.flush();
+			
 			List<Team> siblings = new ArrayList<Team>(teams.size());
 			siblings.addAll(teams);
 			
@@ -426,6 +427,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			SmartPatrolPlugIn.displayLog(
 					Messages.TeamPropertyPage_Error_SavingUpdates  + "\n" + ex.getLocalizedMessage(), //$NON-NLS-1$
 					ex);
+		}finally{
+			s.close();
 		}
 		return false;
 	}
@@ -437,9 +440,14 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		team.setMandate(null);
 		
 		team.updateName(currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamName);
-		team.setName(team.findName(currentCa.getDefaultLanguage()));		
-		team.updateDescription(getSession(), currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamDescription);
-		team.setDescription(team.findDescriptionNull(getSession(), currentCa.getDefaultLanguage()));
+		team.setName(team.findName(currentCa.getDefaultLanguage()));	
+		Session s = HibernateManager.openSession();
+		try{
+			team.updateDescription(s, currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamDescription);
+			team.setDescription(team.findDescriptionNull(s, currentCa.getDefaultLanguage()));
+		}finally{
+			s.close();
+		}
 		
 		teams.add(team);
 		setChangesMade(true);
@@ -476,7 +484,14 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 			return x;
 		}else if (type == Column.DESCRIPTION){
-			String x = mnd.findDescriptionNull(getSession(), languageViewer.getCurrentSelection());
+			String x = null;
+			Session s = HibernateManager.openSession();
+			try{
+				x = mnd.findDescriptionNull(s, languageViewer.getCurrentSelection());
+			}finally{
+				s.close();
+			}
+			
 			if (x == null){
 				x = mnd.getDescription();
 				if (x == null){
@@ -553,7 +568,12 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		}else if (type == Column.DESCRIPTION){
 			if (!findValue(type, mnd).equals((String)newValue)){
-				mnd.updateDescription(getSession(), languageViewer.getCurrentSelection(), (String)newValue);
+				Session s = HibernateManager.openSession();
+				try{
+					mnd.updateDescription(s, languageViewer.getCurrentSelection(), (String)newValue);
+				}finally{
+					s.close();
+				}
 				setChangesMade(true);
 			}
 		}else if (type == Column.MANDATE){

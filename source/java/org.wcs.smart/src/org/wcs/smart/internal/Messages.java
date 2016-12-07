@@ -268,6 +268,8 @@ public class Messages extends NLS {
 	public static String CaImporter_ValidatingPluginProgressMessage;	
 	public static String CaImporter_VersionError;
 	public static String CaImporter_WarningDialogTitle;
+	public static String CaInfoComposite_Country_Tooltip;
+	public static String CaInfoComposite_CountryLabel;
 	public static String CaInfoComposite_Description_Tooltip;
 	public static String CaInfoComposite_DescriptionLabel;
 	public static String CaInfoComposite_Designation_Tooltip;
@@ -279,6 +281,12 @@ public class Messages extends NLS {
 	public static String CaInfoComposite_IdLabel;
 	public static String CaInfoComposite_Name_Tooltip;
 	public static String CaInfoComposite_NameLabel;
+	public static String CaInfoComposite_Organization_Tooltip;
+	public static String CaInfoComposite_OrganizationLabel;
+	public static String CaInfoComposite_Owner_Tooltip;
+	public static String CaInfoComposite_OwnerLabel;
+	public static String CaInfoComposite_PointOfContact_Tooltip;
+	public static String CaInfoComposite_PointOfContactLabel;
 	public static String CaPropertyPage_ConfirmDialogMessage;
 	public static String CaPropertyPage_ConfirmDialogTitle;
 	public static String CaPropertyPage_DefaultLanguageLabel1;
@@ -1142,6 +1150,8 @@ public class Messages extends NLS {
 	public static String Upgrader330To400_ProcessMessage;
 	public static String Upgrader400To401_UpgradeError;
 	public static String Upgrader400To401_UpgradeMsg;
+	public static String Upgrader401To410_UpgradeError;
+	public static String Upgrader401To410_UpgradeMsg;
 	public static String UserLoginInfo_ReadError;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;

@@ -52,11 +52,11 @@ public class PlanPatrolQueryOptionData implements IPatrolOptionData{
 
 	@Override
 	public List<ListItem> getValues(Session session, String[] keys) {
-		return getAllActiveValues(session);
+		return getAllValues(session);
 	}
 
 	@Override
-	public List<ListItem> getAllActiveValues(Session session) {
+	public List<ListItem> getAllValues(Session session) {
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		
 		List<Plan> plans = PlanHibernateManager.getPlans(SmartDB.getCurrentConservationArea(), session);
@@ -77,9 +77,13 @@ public class PlanPatrolQueryOptionData implements IPatrolOptionData{
 		return items;
 	}
 
-	@Override
 	public ListItem getDefaultListItem() {
 		return ANY_PATROL_ITEM;
+	}
+
+	@Override
+	public boolean isDependOnQueryConfiguration() {
+		return false;
 	}
 
 }

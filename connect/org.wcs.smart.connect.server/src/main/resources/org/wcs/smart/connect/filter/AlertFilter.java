@@ -31,6 +31,7 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
 import org.hibernate.Session;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
@@ -39,8 +40,8 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
-import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
+import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
@@ -153,7 +154,11 @@ public class AlertFilter {
 	
 	@SuppressWarnings("unchecked")
 	public List<Alert> getAlerts(Session s, String username){
-		Criteria c = s.createCriteria(Alert.class);
+		Criteria c = s.createCriteria(Alert.class,"alerts");
+		c.createAlias("alerts.ca", "ca"); 
+		c.setFetchMode("alerts.ca", FetchMode.JOIN);
+		
+		
 		List<Alert> emptyList = new ArrayList<Alert>();
 		
 		//level
@@ -198,7 +203,7 @@ public class AlertFilter {
 			}
 			for(int x=0; x < caUuidFilter.size();x++){
 				if(SecurityManager.INSTANCE.canAccess(s, username , AlertAction.VIEW_ALERTS_KEY, caUuidFilter.get(x)) ){;
-					or.add(Restrictions.eq("caUuid", caUuidFilter.get(x) )); //$NON-NLS-1$
+					or.add(Restrictions.eq("ca.uuid", caUuidFilter.get(x) )); //$NON-NLS-1$
 				}
 			}
 			c.add(or);

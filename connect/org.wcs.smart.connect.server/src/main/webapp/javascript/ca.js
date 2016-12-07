@@ -51,7 +51,7 @@ function cacreated(){
 	if (this.status == 204) {
 		displayInfo("Conservation area created.");
 	} else if (this.status == 401){
-		displayError(parseError(i18n("ca.errorcreatingca") + ". Unauthorized.", this.responseText));
+		displayError(parseError(i18n("ca.errorcreatingca") + ". " + i18n("ca.unauthorized"), this.responseText));
 	}else{
 		displayError(parseError(i18n("ca.errorcreatingca"), this.responseText));
 	}
@@ -124,15 +124,20 @@ function updateDownloadProgress(){
 		var location = this.getResponseHeader ("Location");
 		document.querySelector("#downloadDialog > #dialogerror").style.display = "none";
 		document.querySelector("#downloadDialog > #statusurl").innerHTML = location;
-
+		document.querySelector("#downloadDialog > #downloadinfomsg").style.display = "block";
 		var onReq = new XMLHttpRequest();
 		onReq.onload = updateDownloadStatus;
 		onReq.open("GET", location);
 		onReq.send();
-		
+	} else if (this.status = 401) {
+		document.querySelector("#downloadDialog > #dialogerror").style.display = "block";
+		document.querySelector("#downloadDialog > #dialogerror").innerHTML = i18n("ca.unauthorized");
+		document.querySelector("#downloadDialog > #downloadinfomsg").style.display = "none";
 	} else {
 		document.querySelector("#downloadDialog > #dialogerror").style.display = "block";
-		document.querySelector("#downloadDialog > #dialogerror").innerHTML = "Error occurred.";	
+		document.querySelector("#downloadDialog > #dialogerror").innerHTML = i18n("ca.erroroccurred");
+		document.querySelector("#downloadDialog > #downloadinfomsg").style.display = "none";
+		
 	}	
 }
 
@@ -167,6 +172,7 @@ function confirmdeleteca(){
 	var cauuid = this.dataset.cauuid;
 	var status = this.dataset.status;
 	var label = this.dataset.label;
+	var version = this.dataset.version;
 	
 	if (status == 'DATA' || status == 'UPLOADING'){
 		document.querySelector("#deleteform > div#confirmtype").style.display = 'block';
@@ -180,6 +186,8 @@ function confirmdeleteca(){
 	formUuidElement.setAttribute("value", cauuid);
 	var formUuidElement = document.querySelector("#deleteform > input[name=label]");
 	formUuidElement.setAttribute("value", label);
+	var versionElement = document.querySelector("#deleteform > input[name=version]");
+	versionElement.setAttribute("value", version);
 	
 	displayDialog('deleteDialog', 'main');
 
@@ -194,9 +202,11 @@ function deleteca(){
 	var label = document.querySelector("#deleteform > input[name=label]").value;
 	var username = document.querySelector("#deleteform > input[name=username]").value;
 	var password = document.querySelector("#deleteform > input[name=password]").value;
+	var version = document.querySelector("#deleteform > input[name=version]").value;
 	
 	document.querySelector("#deleteform > input[name=username]").value = "";
 	document.querySelector("#deleteform > input[name=password]").value = "";
+	document.querySelector("#deleteform > input[name=version]").value = "";
 	
 	var datavalue = document.querySelector('input[name="caoption"]:checked').value;
 	var dataonly = "true";
@@ -223,7 +233,7 @@ function deleteca(){
 		oReq.onload = caDeleted;
 		oReq.cauuid=cauuid;
 		oReq.calabel=label;
-		oReq.open("DELETE", CAURL + '/' +encodeURIComponent(cauuid) + "?username=" + encodeURIComponent(username) + "&password="+encodeURIComponent(password)+"&dataonly="+encodeURIComponent(dataonly), true);
+		oReq.open("DELETE", CAURL + '/' +encodeURIComponent(cauuid) + "?username=" + encodeURIComponent(username) + "&password="+encodeURIComponent(password)+"&dataonly="+encodeURIComponent(dataonly) + "&version="+encodeURIComponent(version), true);
 		oReq.send();
 	});
 	
@@ -316,6 +326,12 @@ function createCaTable(){
  		deleteicon.dataset.cauuid = cas[i].uuid;
  		deleteicon.dataset.status = cas[i].status;
  		deleteicon.dataset.label = cas[i].label;
+ 		if(cas[i].version == null){
+ 			var version="";
+ 		}else{
+ 			var version=cas[i].version;
+ 		}
+ 		deleteicon.dataset.version = version;
  		deleteicon.onclick = confirmdeleteca;
  		deleteicon.href="";
  		row.childNodes[4].appendChild(deleteicon);

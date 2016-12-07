@@ -275,6 +275,22 @@ public class Patrol extends UuidItem {
 		return null;
 	}
 	
+	/**
+	 * Calculates and updates the type of the patrol based on transport types in assigned legs.
+	 */
+	@Transient
+	public void recalculateType() {
+		if (getLegs() == null || getLegs().isEmpty())
+			return;
+		PatrolType.Type type = getLegs().get(0).getType().getPatrolType();
+		for (PatrolLeg leg : getLegs()){
+			if (!type.equals(leg.getType().getPatrolType())) {
+				setPatrolType(PatrolType.Type.MIXED);
+				return;
+			}
+		}
+		setPatrolType(type);
+	}
 	
 	/**
 	 * 

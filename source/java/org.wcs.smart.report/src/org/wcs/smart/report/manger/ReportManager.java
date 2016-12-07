@@ -232,7 +232,10 @@ public class ReportManager {
 				IEditorPart part = window.getActivePage().findEditor(ri);
 				if (part == null){
 					//not yet open so lets refresh before we open
-					refreshReport(r);	
+					//EG - i commented this out because it was very slow for reports
+					//with many queries; we also have the update
+					//query column binding option which does a better job of this
+					//refreshReport(r);	
 				}
 				IEditorPart editor = window.getActivePage().openEditor(
 								ri,

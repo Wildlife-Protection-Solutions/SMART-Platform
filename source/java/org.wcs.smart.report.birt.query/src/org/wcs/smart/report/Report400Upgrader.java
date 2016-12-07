@@ -24,6 +24,10 @@ package org.wcs.smart.report;
 import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,10 +45,12 @@ import javax.xml.transform.stream.StreamResult;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
@@ -53,8 +59,8 @@ import org.wcs.smart.data.oda.smart.impl.QueryDatasetExtensionManager;
 import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.report.model.Report;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Script to upgrade report files from the "old" map report structure to the new
@@ -87,7 +93,25 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 			upgradeReportFiles(session);
 			
 			final List<String> warnings = new ArrayList<String>();
-			List<ConservationArea> cas = session.createCriteria(ConservationArea.class).list();
+			
+			//NOTE: we are not allowed to use hibernate objects attached to session (see )
+			//This is why we fetch everything manually and fill object with fields that will be used later
+			final List<ConservationArea> cas = new ArrayList<>();
+			session.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+					try(ResultSet ca_rs = c.createStatement().executeQuery("select uuid, name from smart.conservation_area")){ //$NON-NLS-1$
+						while (ca_rs.next()) {
+							ConservationArea ca = new ConservationArea();
+							byte[] uuid = ca_rs.getBytes(1);
+							ca.setUuid(UuidUtils.byteToUUID(uuid));
+							ca.setName(ca_rs.getString(2));
+							cas.add(ca);
+						}
+					}
+				}
+			});
+
 			for (ConservationArea ca : cas){
 				try{
 					upgradePlan(ca);
@@ -134,20 +158,39 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void upgradeReportFiles(Session session) throws Exception {
-		List<Report> reports = session.createCriteria(Report.class).list();
+		final List<String> warnings = new ArrayList<>();
 
-		final List<String> warnings = new ArrayList<String>();
-		for (Report r : reports) {
-			try {
-				xmlUpdater(new File(ReportPlugIn.getReportDirectory(r
-						.getConservationArea()), r.getFilename()));
-			} catch (Exception ex) {
-				warnings.add(MessageFormat.format(Messages.Report400Upgrader_UpgradeError, r.getName() + " [" + r.getConservationArea().getName() + "]", ex.getMessage())); //$NON-NLS-1$ //$NON-NLS-2$
-				ReportPlugIn.log(ex.getMessage(), ex);
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try(ResultSet r_rs = c.createStatement().executeQuery("select uuid, ca_uuid, filename, id from smart.report")){ //$NON-NLS-1$
+					while (r_rs.next()) {
+						byte[] uuid = r_rs.getBytes(1);
+						byte[] ca_uuid = r_rs.getBytes(2);
+						String reportFilename = r_rs.getString(3);
+						String reportId = r_rs.getString(4);
+						String caFileDataStoreLocation = SmartContext.INSTANCE.getFilestoreLocation() + File.separator + UuidUtils.getDirectoryPath(UuidUtils.byteToUUID(ca_uuid));
+						try {
+							xmlUpdater(new File(ReportPlugIn.getReportDirectory(caFileDataStoreLocation), reportFilename));
+						} catch (Exception ex) {
+							String reportName = reportId;
+							PreparedStatement ps = c.prepareStatement("select lbl.VALUE from smart.REPORT rpt left join smart.I18N_LABEL lbl on lbl.ELEMENT_UUID=rpt.uuid left join smart.LANGUAGE lng on lbl.LANGUAGE_UUID=lng.UUID where rpt.UUID=? and lng.ISDEFAULT"); //$NON-NLS-1$
+							ps.setBytes(1, uuid);
+							try (ResultSet name_rs = ps.executeQuery()) {
+								if (name_rs.next()) {
+									reportName = name_rs.getString(1);
+								}
+							} catch (Exception e) {
+								ReportPlugIn.log("Failed to find a name for report with uuid=" + UuidUtils.uuidToString(UuidUtils.byteToUUID(uuid)), e); //$NON-NLS-1$
+							}
+							warnings.add(MessageFormat.format(Messages.Report400Upgrader_UpgradeError, reportName, ex.getMessage()));
+							ReportPlugIn.log(ex.getMessage(), ex);
+						}
+					}
+				}
 			}
-		}
+		});
 
 		if (warnings.size() > 0){
 			Display.getDefault().syncExec(new Runnable(){
@@ -610,8 +653,10 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 						} else if (dataSetType == Type.TABLE){
 							String geom = parseGeometryColumn(queryText
 									.getTextContent(), ""); //$NON-NLS-1$
-							GeometryColumn gc = new GeometryColumn(geom, geom);
-							columns = new GeometryColumn[] { gc };
+							if (geom != null){
+								GeometryColumn gc = new GeometryColumn(geom, geom);
+								columns = new GeometryColumn[] { gc };
+							}
 						} else if (dataSetType == Type.PLAN || dataSetType == Type.INTEL){
 							GeometryColumn gc = new GeometryColumn("Geometry", "geometry"); //$NON-NLS-1$ //$NON-NLS-2$
 							columns = new GeometryColumn[] { gc };
@@ -775,6 +820,8 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 		String queryType = QueryTypeManager.INSTANCE.findDeprecatedQueryTypeString(bits[0]);
 
 		AbstractSmartQuery qq = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType);
+		if (qq == null) return null; //this is not a valid query type;likely a table with no geometry column (employee)
+		
 		GeometryColumn[] columns = qq.getGeometryColumns(queryType, Locale.getDefault());
 		if (columns == null)
 			return null;

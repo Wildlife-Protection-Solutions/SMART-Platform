@@ -264,12 +264,6 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		return profileList;
 	}
 
-	@Deprecated
-	@Override
-	public Session getSession() {
-		throw new UnsupportedOperationException("It is not allowed to use session attached to this thread."); //$NON-NLS-1$
-	}
-
 	@Override
 	protected boolean performSave() {
 		return true;

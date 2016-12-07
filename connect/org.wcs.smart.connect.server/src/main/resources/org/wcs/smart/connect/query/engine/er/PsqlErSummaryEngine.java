@@ -184,7 +184,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 			@Override
 			public void execute(Connection c) throws SQLException {		
 				try {
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					parseConservationAreaFilterInternal(query);
 					if (caFilter.getConservationAreaFilterIds().size() > 1){
 						throw new SQLException(MessageFormat.format(Messages.getString("PsqlErSummaryEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
 					}
@@ -1457,10 +1457,10 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 			Locale l,
 			Session session) throws Exception{
 		
-		ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+		parseConservationAreaFilterInternal(query);
 		SurveyDesignFilter sdFilter = SurveyDesignFilter.createStringFilter(((SurveySummaryQuery)query).getSurveyDesign());
 		
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter, sdFilter); 
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter, sdFilter); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();

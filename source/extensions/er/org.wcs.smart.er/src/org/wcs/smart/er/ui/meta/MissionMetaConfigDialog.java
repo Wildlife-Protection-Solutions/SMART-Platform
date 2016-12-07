@@ -72,28 +72,32 @@ public class MissionMetaConfigDialog extends MetaConfigDialog<MissionScreenOptio
 	}
 
 	private void initData() {
-		Session session = getSession();
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		options = SurveyHibernateManager.getMissionScreenOptions(ca, session);
-		//creating missing options
-		for (MissionScreenOptionMeta meta : optionsToShow) {
-			ScreenOption cto = options.get(meta);
-			if (cto == null) {
-				cto = new ScreenOption();
-				cto.setConservationArea(ca);
-				cto.setResource(MissionScreenOptionMeta.MISSION_RESOURCE_ID);
-				cto.setType(meta.name());
-				options.put(meta, cto);
+		Session session = HibernateManager.openSession();
+		try{
+			ConservationArea ca = SmartDB.getCurrentConservationArea();
+			options = SurveyHibernateManager.getMissionScreenOptions(ca, session);
+			//creating missing options
+			for (MissionScreenOptionMeta meta : optionsToShow) {
+				ScreenOption cto = options.get(meta);
+				if (cto == null) {
+					cto = new ScreenOption();
+					cto.setConservationArea(ca);
+					cto.setResource(MissionScreenOptionMeta.MISSION_RESOURCE_ID);
+					cto.setType(meta.name());
+					options.put(meta, cto);
+				}
 			}
+	
+			members = HibernateManager.getActiveEmployees(ca, session);
+			Collections.sort(members, new Comparator<Employee>() {
+				@Override
+				public int compare(Employee e1, Employee e2) {
+					return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
+				}
+			});
+		}finally{
+			session.close();
 		}
-
-		members = HibernateManager.getActiveEmployees(ca, session);
-		Collections.sort(members, new Comparator<Employee>() {
-			@Override
-			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
-			}
-		});
 	}
 	
 	@Override

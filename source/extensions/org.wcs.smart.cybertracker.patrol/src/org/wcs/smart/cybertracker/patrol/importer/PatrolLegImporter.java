@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -66,11 +65,6 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 	public boolean importData(Patrol patrol, CyberTrackerPatrol ctPatrol) {
 		clearWarning();
 
-		if (ctPatrol.getPatrolType() == null) {
-			if(!fixPatrolTypeError(ctPatrol))
-				return false;
-		}
-		
 		if (ctPatrol.getPatrolTransportType() == null) {
 			if(!fixTransportError(ctPatrol))
 				return false;
@@ -81,11 +75,6 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 			session.beginTransaction();
 			
 			patrol = CyberTrackerHibernateManager.fetchByUuid(Patrol.class, patrol.getUuid(), session);
-			if (patrol.getPatrolType() != ctPatrol.getPatrolType()) {
-				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_TypeError_Title, MessageFormat.format(Messages.PatrolLegImporter_TypeError_Message, ctPatrol.getPatrolType().getGuiName(Locale.getDefault()), patrol.getPatrolType().getGuiName(Locale.getDefault())), null);
-				return false;
-			}
-			
 
 			PatrolLeg tmpLeg = new PatrolLeg();
 			initLegData(tmpLeg, ctPatrol, session);
@@ -126,7 +115,7 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 					return false;
 				}
 			}
-			if (patrol.hasPilot() && leg.getPilot() == null){
+			if (leg.getType().getPatrolType().requiresPilot() && leg.getPilot() == null){
 				if (!fixPilotError(leg, ctPatrol, session)){
 					return false;
 				}
@@ -148,7 +137,7 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 
 			if (!displayWarnings(ctPatrol))
 				return false;
-
+			
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
 			PatrolEventManager.getInstance().patrolSaved(patrol, true);

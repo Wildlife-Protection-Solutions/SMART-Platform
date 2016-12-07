@@ -101,7 +101,7 @@ public class TiffRasterExporter {
 						(pnts.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
 						width * gridCellSize , height*gridCellSize)); 
 			
-			rb.setTable(results,pnts); 
+			rb.setTable(results,pnts);
 			rb.build();
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Error writing grid results to tif file", ex); //$NON-NLS-1$

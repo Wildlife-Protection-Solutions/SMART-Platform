@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.geotools.referencing.CRS;
+import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.locationtech.udig.ui.CRSChooserDialog;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -68,27 +69,19 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 
 	private ListViewer lstViewer;
 	private List<Projection> projections;
+	private List<Projection> projectionsToDelete;
 	
 	private Button btnAdd;
 	private Button btnRemove;
 	private Button btnEdit;
 	
 	private ComboViewer projectionViewer = null;
-	private Transaction currentTransaction = null;
 	
 	public ProjectionPropertyDialog(Shell parent) {
 		super(parent, Messages.ProjectionPropertyDialog_Dialog_Title);
-		
+		projectionsToDelete = new ArrayList<>();
 	}
 
-	/**
-	 * Starts a new transaction and opens the dialog
-	 */
-	@Override
-	public int open(){
-		currentTransaction = getSession().beginTransaction();
-		return super.open();
-	}
 	
 	@Override
 	protected Composite createContent(Composite parent) {
@@ -195,9 +188,14 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		});
 		
 		//init data 
-		projections = new ArrayList<Projection>(HibernateManager.getCaProjectionList(getSession()));
-		lstViewer.setInput(projections);
-		projectionViewer.setInput(projections);
+		Session s = HibernateManager.openSession();
+		try{
+			projections = new ArrayList<Projection>(HibernateManager.getCaProjectionList(s));
+			lstViewer.setInput(projections);
+			projectionViewer.setInput(projections);
+		}finally{
+			s.close();
+		}
 		for (Projection p : projections){
 			if (p.getIsDefault()){
 				projectionViewer.setSelection(new StructuredSelection(p));
@@ -213,14 +211,22 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 
 	@Override
 	protected boolean performSave() {
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
 		try{
-			currentTransaction.commit();
+			projectionsToDelete.forEach(p -> s.delete(p));
+			projections.forEach(p -> s.saveOrUpdate(p));
+			s.getTransaction().commit();
+			projectionsToDelete.clear();
 		}catch (Exception ex){
+			s.getTransaction().rollback();
 			SmartPlugIn.displayLog(Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 			return false;
+		}finally{
+			s.close();
 		}
 		ConservationAreaManager.getInstance().fireProjectionListModified();
-		currentTransaction = getSession().beginTransaction();
+		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		super.setChangesMade(false);
 		return true;
@@ -256,7 +262,6 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				}
 				prj.setName(crs.getName().getCode() + " [" + crs.getName().getCodeSpace() + ": " + code + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				prj.setDefinition(crs.toWKT());
-				getSession().save(prj);
 				projections.add(prj);
 				listModified();
 			}else{
@@ -274,11 +279,11 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 			Object type = (Object) iterator.next();
 			if (Projection.class.isAssignableFrom(type.getClass())){
 				Projection p = (Projection)type;
+				projectionsToDelete.add(p);
 				projections.remove(p);
 				if (p.getIsDefault()){
 					projectionViewer.setSelection(null);
 				}
-				getSession().delete(p);
 			}
 		}
 		listModified();

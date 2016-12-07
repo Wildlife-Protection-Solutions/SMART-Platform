@@ -22,9 +22,9 @@ public class LabelConstants {
 	public static final String GROUND_NAME = Messages.PatrolType_GroundName;
 	public static final String MARINE_NAME = Messages.PatrolType_WaterName;
 	public static final String AIR_NAME = Messages.PatrolType_AirName;
+	public static final String MIXED_NAME =Messages.PatrolType_MixedName;
 	
 	
-	public static final String SC_OP_TYPE =Messages.ScreenOption_PatrolType;
 	public static final String SC_OP_TRANSPORT = Messages.ScreenOption_TransportType;
 	public static final String SC_OP_ARMED = Messages.ScreenOption_Armed;
 	public static final String SC_OP_STATION = Messages.ScreenOption_Station;
@@ -45,6 +45,7 @@ public class LabelConstants {
 			case AIR: return AIR_NAME;
 			case GROUND: return GROUND_NAME;
 			case MARINE: return MARINE_NAME;
+			case MIXED: return MIXED_NAME;
 		}
 		return null;
 	}
@@ -61,7 +62,6 @@ public class LabelConstants {
 		case STATION:return SC_OP_STATION;
 		case TEAM:return SC_OP_TEAM;
 		case TRANSPORT:return SC_OP_TRANSPORT;
-		case TYPE: return SC_OP_TYPE;
 		default:
 			return null;
 			

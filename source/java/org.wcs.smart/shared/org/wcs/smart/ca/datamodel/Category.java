@@ -448,6 +448,23 @@ RETURNS NULL ON NULL INPUT;
 			attributes.add(att.getAttribute());
 		}
 	}
+
+	/**
+	 * finds all category attributes, first looking at parent attributes
+	 * and working way down to the children
+	 * 
+	 * @param category attributes list to populate
+	 * @param onlyEnabled <code>true</code> to include only enabled, <code>false</code> to include 
+	 * only in-active and <code>null</code> to include all
+	 */
+	@Transient
+	public void getAllCategoryAttribute(List<CategoryAttribute> attributes, Boolean onlyEnabled){
+		if (getParent() != null){
+			getParent().getAllCategoryAttribute(attributes, onlyEnabled);
+		}
+		List<CategoryAttribute> atts = getAttributes(onlyEnabled);
+		attributes.addAll(atts);
+	}
 	
 	/**
 	 * 

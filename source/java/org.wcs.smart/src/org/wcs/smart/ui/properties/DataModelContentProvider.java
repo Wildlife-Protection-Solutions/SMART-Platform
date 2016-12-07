@@ -135,11 +135,9 @@ public class DataModelContentProvider implements ITreeContentProvider {
 				//add attributes
 
 				if (allAttributes){
-					List<Attribute> all = new ArrayList<Attribute>();
-					category.getAllAttribute(all, onlyEnabled ? true : null);
-					for (Attribute att : all){
-						children.add(new CategoryAttribute(category, att));	
-					}
+					List<CategoryAttribute> all = new ArrayList<>();
+					category.getAllCategoryAttribute(all, onlyEnabled ? true : null);
+					children.addAll(all);
 				}else{
 					children.addAll(category.getAttributes(onlyEnabled ? true : null));
 				}

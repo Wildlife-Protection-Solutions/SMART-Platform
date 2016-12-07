@@ -163,9 +163,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	public Composite createContent(Composite parent) {
-		getSession().beginTransaction();
+		Session s = HibernateManager.openSession();
 		try{
-			stations = new ArrayList<Station>(HibernateManager.getStations(currentCa,getSession()));
+			stations = new ArrayList<Station>(HibernateManager.getStations(currentCa,s));
 			Collections.sort(stations, new Comparator<Station>() {
 				@Override
 				public int compare(Station o1, Station o2) {
@@ -180,8 +180,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 					return nullStringComparator.compare(name1, name2);
 				}
 			});
+			stations.forEach(station -> station.getNames().size());
 		}finally{
-			getSession().getTransaction().rollback();
+			s.close();
 		}
 
 		Composite container = new Composite(parent, SWT.NONE);
@@ -356,10 +357,10 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.StationListPropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.StationListPropertyPage_ConfirmDeleteMessage, new Object[]{s.getName()}))){
 			return;
 		}
-
+		Session session = HibernateManager.openSession();
 		try{
 			if (s.getUuid() != null){
-				if (DeleteManager.canDelete(s, getSession())){
+				if (DeleteManager.canDelete(s, session)){
 					stations.remove(s);
 					toDelete.add(s);
 					setChangesMade(true);
@@ -370,7 +371,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.StationListPropertyPage_Error_CouldNotDelete + s.getName() + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-		}	
+		}	finally{
+			session.close();
+		}
 		
 		tableViewer.refresh();
 		
@@ -409,14 +412,19 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 			return value;
 		} else if (type == Column.DESCIPTION) {
-			String value = stn.findDescriptionNull(getSession(), lang);
-			if (value == null){
-				value = stn.findDescriptionNull(getSession(), SmartDB.getCurrentConservationArea().getDefaultLanguage());
+			Session s = HibernateManager.openSession();
+			try{
+				String value = stn.findDescriptionNull(s, lang);
 				if (value == null){
-					value = ""; //$NON-NLS-1$
+					value = stn.findDescriptionNull(s, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+					if (value == null){
+						value = ""; //$NON-NLS-1$
+					}
 				}
+				return value;
+			}finally{
+				s.close();
 			}
-			return value;
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -472,14 +480,27 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				setChangesMade(true);
 			}
 		} else if (type == Column.DESCIPTION) {
-			if (newValue.equals(stn.findDescriptionNull(getSession(), lang))){
+			String existing = null;
+			Session s = HibernateManager.openSession();
+			try{
+				existing = stn.findDescriptionNull(s, lang);
+			}finally{
+				s.close();
+			}
+			if (newValue.equals(existing)){
 				//no modification made
 				return;
 			}
 			if (validate(type, stn, newValue) == null){
-				stn.updateDescription(getSession(), lang, newValue.trim());
+				s = HibernateManager.openSession();
+				try{
+					stn.updateDescription(s, lang, newValue.trim());
+				}finally{
+					s.close();
+				}
 				setChangesMade(true);
 			}
+			
 		}
 	}
 
@@ -549,7 +570,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean  performSave() {
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
 		Transaction tx = s.beginTransaction();
 		try {
 			for(Station station : toDelete){
@@ -560,7 +581,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				Station stn = (Station) stations.get(i);
 				s.saveOrUpdate(stn);
 
-				for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions(getSession())) {
+				for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions(s)) {
 					if (lbl.getElementuuid() == null) {
 						if (stn.getDescUuid() == null) {
 							UUID uuid = (UUID) uuidGenerator.generate(
@@ -582,6 +603,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		} catch (RuntimeException ex) {
 			tx.rollback();
 			SmartPlugIn.displayLog(Messages.StationListPropertyPage_Error_Saving + ex.getLocalizedMessage(), ex);
+		}finally{
 			s.close();
 		}
 		return false;

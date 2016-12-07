@@ -48,6 +48,9 @@ public class QueryProxy {
 	}
 	
 	
+
+
+
 	public UUID getUuid() {
 		return uuid;
 	}

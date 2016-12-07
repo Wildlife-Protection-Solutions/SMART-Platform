@@ -64,6 +64,11 @@ public class DataQueueAction implements ISmartConnectAction {
 	public String[] getActionKeys() {
 		return new String[]{VIEW_KEY, DELETE_KEY, PROCESS_KEY, ADD_KEY};
 	}
+	
+	@Override
+	public String[] getCaAdminAccessibleActionKeys() {
+		return new String[]{VIEW_KEY, DELETE_KEY, PROCESS_KEY, ADD_KEY};
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -82,6 +87,21 @@ public class DataQueueAction implements ISmartConnectAction {
 		
 		return ops;
 	}
+	
+	@Override
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) {
+		List<ResourceOption> ops = new ArrayList<ResourceOption>();
+		
+		for (UUID id : uuidList){
+			ConservationAreaInfo info = (ConservationAreaInfo)s.createCriteria(ConservationAreaInfo.class)
+					.add(Restrictions.eq("uuid", id))
+					.uniqueResult(); //$NON-NLS-1$
+				
+			ResourceOption ro = new ResourceOption(info.getLabel(), info.getUuid());
+			ops.add(ro);
+		}
+		return ops;	
+	}
 
 	@Override
 	public String getResourceName(UUID resource, Session s, Locale l) {
@@ -92,5 +112,7 @@ public class DataQueueAction implements ISmartConnectAction {
 		if (info == null) return resource.toString();
 		return info.getLabel();
 	}
+
+
 
 }

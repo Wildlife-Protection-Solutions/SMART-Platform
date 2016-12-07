@@ -36,6 +36,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -53,6 +54,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class ChangeLogItemSerializer {
 
+	public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyyMMddHHmmssSSS"); //$NON-NLS-1$
+	
 	public abstract void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException;
 	
 	protected abstract int convertType(int type, int precision);
@@ -168,6 +171,16 @@ public abstract class ChangeLogItemSerializer {
 					stream.writeLong(clob.length());
 					try(Reader reader = clob.getCharacterStream() ){
 						IOUtils.copy(reader, stream);
+					}
+				}else if (type == Types.DATE){
+					//serialization of dates does not include timezone which causes a problem when deserializing as
+					//it assumes the jvms default timezone which causes dates to get shifted
+					//so we will serialize and deserialize dates a strings
+					Object obj = rs.getObject(i);
+					if (obj == null){
+						stream.writeObject(null);
+					}else{
+						stream.writeObject(DATE_FORMATTER.format(rs.getObject(i)));
 					}
 				}else{
 					Object x = rs.getObject(i);

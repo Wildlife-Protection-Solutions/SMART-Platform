@@ -39,7 +39,7 @@
 								<a href="" data-cauuid="${ca.getUuid()}" title="<fmt:message key="ca.downloadtooltip"/>" class="downloadca download-icon"></a>
 							</c:if>
 						</div>
-						<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="deleteca delete-icon"></a></div>
+						<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" data-version = "${ca.getVersion()}" data-label="${ca.getLabel()}" title="<fmt:message key="ca.deletetooltip"/>" class="deleteca delete-icon"></a></div>
 					</div>
 
 				</c:forEach>
@@ -60,6 +60,7 @@
 	  <form id="deleteform" onsubmit="return deleteca();" >
 	    <input type="hidden" name="cauuid"/>
 	    <input type="hidden" name="label"/>
+	    <input type="hidden" name="version"/>
 	    <div id="confirmtype">
 	    	<p><fmt:message key="ca.deleteconfirm"/></p>
 	    	<input type="radio" name="caoption" value="desktop" checked/><fmt:message key="ca.deletedesktop"/><br>
@@ -120,7 +121,7 @@
   <div id="downloadDialog" style="display: none;" class="dialog">
     <div class="dialog-title"><fmt:message key="ca.downloadtitle"/></div>
     <div id="dialogerror" class="errorsection"></div>
-    <p><fmt:message key="ca.downloadinfo"/></p>
+    <p id="downloadinfomsg"><fmt:message key="ca.downloadinfo"/></p>
    	<div id="statusurl" style="font-size:0.8em"></div>
    	<div class="block top-spacer" style="text-align:right">
      <input class="button" type="button" value="<fmt:message key="ca.cancelbutton"/>" onclick="return cancelCaDownload();" />

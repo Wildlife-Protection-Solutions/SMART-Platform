@@ -99,19 +99,21 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 			getShell().setText(Messages.EditIncidentDialog_ShellTitle);
 			setMessage(panel.getDescription());
 			
-			panel.initFields(incident, getSession());
+			Session s = openSession();
+			try{
+				panel.initFields(incident, s);	
+			}finally{
+				s.close();
+			}
+			
 			setChangesMade(false);
 			return center;
 		}
 		return parent;
 	}
 
-	@Override
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = HibernateManager.openSession(new AttachmentInterceptor());
-		}
-		return session;
+	private Session openSession(){
+		return HibernateManager.openSession(new AttachmentInterceptor());
 	}
 
 	@Override
@@ -122,7 +124,7 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 				MessageDialog.openError(getShell(), Messages.EditIncidentDialog_Error, Messages.EditIncidentDialog_ErrorExists + error );
 				return false;
 			}
-			Session session = getSession();
+			Session session = openSession();
 			session.beginTransaction();
 			try{
 				panel.updateIncident(incident);
@@ -131,6 +133,8 @@ public class EditIncidentDialog extends AbstractPropertyJHeaderDialog {
 			}catch (Exception ex){
 				session.getTransaction().rollback();
 				IncidentPlugIn.displayLog(Messages.EditIncidentDialog_SaveError, ex);
+			}finally{
+				session.close();
 			}
 			IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_MODIFIED, incident);
 			setChangesMade(false);

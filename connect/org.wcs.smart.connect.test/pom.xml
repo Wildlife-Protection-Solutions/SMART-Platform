@@ -5,13 +5,12 @@
 	<parent>
 		<groupId>org.wcs.smart.connect</groupId>
 		<artifactId>org.wcs.smart.connect</artifactId>
-		<version>4.0-SNAPSHOT</version>
+		<version>4.1-SNAPSHOT</version>
 	</parent>
 	
 	<groupId>org.wcs.smart.connect.test</groupId>
 	<artifactId>org.wcs.smart.connect.test</artifactId>
 	<packaging>jar</packaging>
-	<version>${smart.version}</version>
 	<name>SMART Connect Client Testing</name>
 
   	<build>

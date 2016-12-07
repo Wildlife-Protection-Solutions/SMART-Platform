@@ -64,8 +64,10 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.type.PostgresUUIDType;
 import org.mindrot.jbcrypt.BCrypt;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
@@ -189,31 +191,80 @@ public class ConservationAreas extends HttpServlet{
 	 * URL: ../server/api/conservationarea/
 	 * Call Type: GET
 	 * 
+	 * @parameter organizationFilter - optional - only return CAs that have the provided text in the organization field
+	 * @parameter caJsonFilter - optional - Must be a GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned.
+	 * 			be sure to encode the geojson, leave no spaces etc. An example of a simple polygon of the world:  caJsonFilter=%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-180%2C90%5D%2C%5B180%2C90%5D%2C%5B180%2C-90%5D%2C%5B-180%2C-90%5D%2C%5B-180%2C90%5D%5D%5D%7D
+	 * 			originally it is caJsonFilter={"type":"Polygon","coordinates":[[[-180,90],[180,90],[180,-90],[-180,-90],[-180,90]]]}  use you local programming language urlencoder, or an online tool like this to do it out manually: http://meyerweb.com/eric/tools/dencoder/ 
 	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
 	 */
 	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
-    public List<ConservationAreaProxy> getConservationAreas(){
+    public List<ConservationAreaProxy> getConservationAreas(@QueryParam("organizationFilter") String organizationFilter, @QueryParam("caJsonFilter") String caJsonFilter){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
 			List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
 			List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
 			for (ConservationAreaInfo ca : db){
-				//check to determine if ca is accessable by current user
+				ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());
+				ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
+				
+				//check to determine if ca is accessible by current user
 				try{
 					validateRead(ca.getUuid(), s);
-					ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
-					ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());
+
 					if (smartca != null){
 						proxy.setDescriptionDesignation(smartca.getDescription(), smartca.getDesignation());
+						
+						//add the extra metadata we have now
+						proxy.setLocation(smartca.getCountry());
+						proxy.setPointOfContact(smartca.getPointOfContact());
+						proxy.setOrganization(smartca.getOrganization());
+						proxy.setOwner(smartca.getOwner());
+						
+						proxy.setAdministrativeAreasJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)) )) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
+						proxy.setCaBoundaryJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)))) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "'").uniqueResult() );
+						proxy.setBufferedManagementAreaJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.BA + "'").uniqueResult() );
+						proxy.setManagementSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.MNGT + "'").uniqueResult() );
+						proxy.setPatrolSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.PATRL + "'").uniqueResult() );
 					}
 					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
-					conservationAreas.add(proxy);
+					if(ca.getVersion()== null){
+						proxy.setVersion(null);
+					}else{
+						proxy.setVersion(ca.getVersion());
+					}
+					
 				}catch(SmartConnectException ex){
-					//not valid; ignore
+					//not valid user; ignore
 				}
+
+				
+				//Check FILTERS
+				boolean passedBoundary = false;
+				if(caJsonFilter != null && !caJsonFilter.equals("")){
+					if(smartca == null){ //no-data CAs should not be returned when there is a geojson filter
+						passedBoundary = false;
+					}else{
+						//if the JSON passed in contains the CABoundry, return true;
+						Boolean result = (Boolean)s.createSQLQuery("Select st_contains(  (Select st_geomfromgeojson('" + caJsonFilter + "')) ,  (Select geom from area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "')  )").uniqueResult();
+						if(result != null && result == true){
+							passedBoundary=true;//can't cast straight to a bool because the result is null if there is no caBoundary layer
+						}else{
+							passedBoundary=false;
+						}
+					}
+				}else{
+					passedBoundary=true; //no filter provided or it is blank, assume they want everything
+				}
+				boolean passedOrg = false;
+				if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase().contains(organizationFilter.toUpperCase())) ){
+					passedOrg = true;
+				}else{
+					passedOrg = false;
+				}
+				if(passedOrg && passedBoundary)conservationAreas.add(proxy);
 				
 			}
 			
@@ -227,6 +278,10 @@ public class ConservationAreas extends HttpServlet{
 			return conservationAreas;
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			if(ex instanceof GenericJDBCException){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST,
+						Messages.getString("ConservationAreas.InvalidJson", SmartUtils.getRequestLocale(request))+ caJsonFilter, ex); //$NON-NLS-1$
+			}
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					Messages.getString("ConservationAreas.CaListError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
@@ -247,7 +302,7 @@ public class ConservationAreas extends HttpServlet{
     public List<ConservationAreaProxy> getConservationAreasWithData(){
 		
 		List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
-		List<ConservationAreaProxy> allConservationAreas = getConservationAreas();
+		List<ConservationAreaProxy> allConservationAreas = getConservationAreas(null,null);
 		for (ConservationAreaProxy ca : allConservationAreas){
 			if(ca.getStatus().equals(ConservationAreaInfo.Status.CCAA) || ca.getStatus().equals(ConservationAreaInfo.Status.DATA)){
 				conservationAreas.add(ca);
@@ -601,6 +656,17 @@ public class ConservationAreas extends HttpServlet{
 			ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, cuuid);
 			if (ca != null){
 				proxy.setDescriptionDesignation(ca.getDescription(), ca.getDesignation());
+				
+				proxy.setLocation(ca.getCountry());
+				proxy.setPointOfContact(ca.getPointOfContact());
+				proxy.setOrganization(ca.getOrganization());
+				proxy.setOwner(ca.getOwner());
+				
+				proxy.setAdministrativeAreasJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)) )) as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
+				proxy.setCaBoundaryJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)))) as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "'").uniqueResult() );
+				proxy.setBufferedManagementAreaJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.BA + "'").uniqueResult() );
+				proxy.setManagementSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.MNGT + "'").uniqueResult() );
+				proxy.setPatrolSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.PATRL + "'").uniqueResult() );
 			}
 			proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid()));
 			return Response.ok().entity(proxy).build();
@@ -631,7 +697,8 @@ public class ConservationAreas extends HttpServlet{
     public void deleteConservationArea(@PathParam("cauuid") String caUuid, 
     		@QueryParam("dataonly") String dataonly,
     		@QueryParam("username") String username,
-    		@QueryParam("password") String password){
+    		@QueryParam("password") String password,
+    		@QueryParam("version") String version){
 		
 		if (username == null || password == null || username.length() == 0 || password.length() == 0){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.UserAndPasswordRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -672,6 +739,11 @@ public class ConservationAreas extends HttpServlet{
 					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
 			if (serverDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			}
+			if((version.equals(null) || version.equals("")) && serverDelete.getVersion()==null){
+				//no problem, you can delete unversioned CAs without a version paramater.
+			}else if((version == null || version.equals("")) || !(serverDelete.getVersion().equals(UUID.fromString(version))) ){ //null version no longer acceptable at this point, or it doens't match the version
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			validateDelete(serverDelete.getUuid(), s);
 

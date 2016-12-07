@@ -254,11 +254,11 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 							needsObservationRate = true;
 						}
 					}
-					ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					parseConservationAreaFilterInternal(query);
 					
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupByParts, ldef.getValuePart(),
-							cafilter);
+							caFilter);
 					
 					sumResults.setData(data);
 					
@@ -1566,8 +1566,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			Locale l,
 			Session session) throws Exception{
 		
-		ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter); 
+		parseConservationAreaFilterInternal(query);
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();

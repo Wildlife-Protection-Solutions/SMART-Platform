@@ -33,7 +33,6 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -101,7 +100,7 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 		return session.doReturningWork(new ReturningWork<ErMissionQueryResult>() {
 			@Override
 			public ErMissionQueryResult execute(Connection c) throws SQLException {
-				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+				parseConservationAreaFilterInternal(query);
 				if (caFilter.getConservationAreaFilterIds().size() > 1){
 					throw new SQLException(MessageFormat.format(Messages.getString("PsqlErMissionEngine.QueryTypeNotSupported", getLocale()), query.getTypeKey())); //$NON-NLS-1$
 				}

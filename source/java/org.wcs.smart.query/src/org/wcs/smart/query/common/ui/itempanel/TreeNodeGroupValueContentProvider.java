@@ -230,7 +230,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 		
 	}
 	
-	private static final LabelProvider LBLPROVIDER =  new LabelProvider(){
+	private static final LabelProvider LBLPROVIDER =  new WrappedTreeNodeLabelProvider() {
 		
 		/**
 		 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
@@ -241,13 +241,10 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 				return ((IItemTreeNode) element).getImage();
 			}else if (element instanceof RootNode){
 				return ((RootNode) element).image;
-			}else if (element instanceof WrappedTreeNode){
-				return ((WrappedTreeNode) element).getParent().getLabelProvider().getImage(((WrappedTreeNode) element).getItem());
 			}
 			return super.getImage(element);
 			
 		}
-		
 		
 		/**
 		 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
@@ -258,11 +255,8 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 				return ((IItemTreeNode) element).getName();
 			}else if (element instanceof RootNode){
 				return ((RootNode) element).name;
-			}else if (element instanceof WrappedTreeNode){
-				return ((WrappedTreeNode) element).getParent().getLabelProvider().getText(((WrappedTreeNode) element).getItem());
 			}
 			return super.getText(element);
-			
 		}
 	};
 }

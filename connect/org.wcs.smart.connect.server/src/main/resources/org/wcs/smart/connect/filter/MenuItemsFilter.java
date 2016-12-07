@@ -43,6 +43,7 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 /**
@@ -58,8 +59,10 @@ public class MenuItemsFilter implements Filter {
 		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY), //$NON-NLS-1$ //$NON-NLS-2$
 		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null), //$NON-NLS-1$ //$NON-NLS-2$
 		REPORT("MenuItemsFilter.ReportLabel", ConnectRESTApplication.SERVLET_PATH + "report", null),  //$NON-NLS-1$ //$NON-NLS-2$
+		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY),  //$NON-NLS-1$ //$NON-NLS-2$
 		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$
 		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
+		CAUSERS("MenuItemsFilter.CaAccountsLabel", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
 		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY);   //$NON-NLS-1$//$NON-NLS-2$
 		
 		String nameKey;

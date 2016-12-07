@@ -114,6 +114,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	protected Locale locale = Locale.getDefault();
 	protected int categoryCount = -1;
 	
+	protected ConservationAreaFilter caFilter = null;
+	
 	/**
 	 * Maps database tables to a prefix to use in the query.
 	 */
@@ -462,24 +464,27 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param query
 	 * @return
 	 */
+	protected void parseConservationAreaFilterInternal(Query query){
+		this.caFilter = parseConservationAreaFilter(query);
+	}
+	
 	public static ConservationAreaFilter parseConservationAreaFilter(Query query){
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			ConservationAreaFilter caFilter = new ConservationAreaFilter();
+			ConservationAreaFilter tmp = new ConservationAreaFilter();
 			String uuids[] = query.getConservationAreaFilter().split(ConservationAreaFilter.CA_SPLITTER);
 			for (String uuid : uuids){
-				caFilter.addConservationArea(UuidUtils.stringToUuid(uuid));
+				tmp.addConservationArea(UuidUtils.stringToUuid(uuid));
 			}
-			return caFilter;
+			return tmp;
 			
 		}else{
 			//we don't care
-			ConservationAreaFilter caFilter = new ConservationAreaFilter();
-			caFilter.addConservationArea(query.getConservationArea());
-			return caFilter;
+			ConservationAreaFilter tmp = new ConservationAreaFilter();
+			tmp.addConservationArea(query.getConservationArea());
+			return tmp;
 		}
 		
 	}
-	
 	public String getEntityDmAttributeKey(String entityKey, ConservationAreaFilter caFilter, Connection c){
 		String dmEntityTypeAttributeKey;
 		StringBuilder sql = new StringBuilder();
@@ -770,5 +775,14 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 */
 	public String getDateFilterField() throws SQLException{
 		return null;
+	}
+	
+	/**
+	 * Returns the ca filter associated with the query engine; only available AFTER the
+	 * query has been executed
+	 * @return
+	 */
+	public ConservationAreaFilter getCaFilter(){
+		return this.caFilter;
 	}
 }

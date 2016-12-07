@@ -48,6 +48,7 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -82,6 +83,7 @@ public class ConfigurableModelFactory {
 		
 		monitor.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
 		ConfigurableModel clone = createBlankModel(name);
+		clone.setDisplayMode(cm.getDisplayMode());
 		ConfigurableModelCloneResult cloneResult = new ConfigurableModelCloneResult(clone);
 		Map<UUID, UuidItem> o2iMap = cloneResult.getOriginal2CloneItemMap();
 		o2iMap.put(cm.getUuid(), clone);
@@ -173,6 +175,7 @@ public class ConfigurableModelFactory {
 			node.setModel(model);
 			node.setParent(parent);
 			node.setName(c.getName());
+			
 			for (Label l : c.getNames()){
 				node.updateName(l.getLanguage(), l.getValue());
 			}
@@ -252,6 +255,18 @@ public class ConfigurableModelFactory {
 		copyTo.setName(copyFrom.getName());
 	}
 
+	/**
+	 * copies image from source to target
+	 * @param source
+	 * @param target
+	 */
+	private static void cloneImages(IImageAssociatedObject source, IImageAssociatedObject target){
+		if (source.getImageFile() != null){
+			target.setImageFile(source.getImageFile());
+		}
+	}
+	
+	
 	private static void loadCategoryInfo(Category c){
 		while(c != null){
 			c.getNames().size();
@@ -274,7 +289,8 @@ public class ConfigurableModelFactory {
 		clonedNode.setPhotoRequired(toCopy.isPhotoRequired());
 		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
 		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
-		
+		clonedNode.setDisplayMode(toCopy.getDisplayMode());
+		cloneImages(toCopy, clonedNode);
 		copyLabels(toCopy, clonedNode);
 		
 		if (toCopy.getCategory() != null){
@@ -361,6 +377,7 @@ public class ConfigurableModelFactory {
 			CmAttributeListItem clone = new CmAttributeListItem();
 			clone.setConfigurableModel(cm);
 			copyLabels(listItem, clone);
+			cloneImages(listItem, clone);
 			clone.setIsActive(listItem.getIsActive());
 			clone.setListOrder(listItem.getListOrder());
 			clone.setListItem(listItem.getListItem());
@@ -378,12 +395,14 @@ public class ConfigurableModelFactory {
 			CmAttributeTreeNode clone = new CmAttributeTreeNode();
 			clone.setConfigurableModel(cm);
 			copyLabels(treeItem, clone);
+			cloneImages(treeItem, clone);
 			clone.setIsActive(treeItem.getIsActive());
 			clone.setNodeOrder(treeItem.getNodeOrder());
 			clone.setDmTreeNode(treeItem.getDmTreeNode());
 			clone.setDmAttribute(treeItem.getDmAttribute());
 			clone.setAttribute(cmAttribute);
 			clone.setParent(parent);
+			clone.setDisplayMode(treeItem.getDisplayMode());
 			clone.setChildren(cloneCmAttributeTree(treeItem.getChildren(), clone, cm, cmAttribute, o2iMap));
 			clonedTree.add(clone);
 			o2iMap.put(treeItem.getUuid(), clone);

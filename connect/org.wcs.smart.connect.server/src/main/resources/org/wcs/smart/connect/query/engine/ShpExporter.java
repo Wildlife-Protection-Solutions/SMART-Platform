@@ -55,7 +55,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
@@ -77,12 +76,19 @@ public class ShpExporter {
 	
 	public static final String FORMAT_KEY = "shp"; //$NON-NLS-1$
 	
+	
+	
 	public static final String getName(Locale l){
 		return Messages.getString("ShpExporter.Shapefilename", l); //$NON-NLS-1$
 	}
 	
 	private final Logger logger = Logger.getLogger(ShpExporter.class.getName());
+	private IProjectionProvider prj;
 	
+	public void setPrj(IProjectionProvider prj) {
+		this.prj = prj;
+	}
+
 	private Path zipFile;
 	private Locale l;
 	
@@ -107,7 +113,7 @@ public class ShpExporter {
 		Files.createDirectory(outDirectory);
 		final Path shpfile = outDirectory.resolve(newName+ ".shp"); //$NON-NLS-1$
 		
-		final IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
+
 		
 		session.doWork(new Work(){
 			@SuppressWarnings("unchecked")

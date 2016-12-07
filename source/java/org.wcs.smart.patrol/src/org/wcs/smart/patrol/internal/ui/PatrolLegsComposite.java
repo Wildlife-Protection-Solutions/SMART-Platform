@@ -295,8 +295,18 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				return x;
 			}
 		});
+		patrolLegViewer.showPilotColum(isPilotColumnRequired());
 		patrolLegViewer.refresh();
 		patrolLegViewer.getTable().setSelection(null);
+	}
+
+	private boolean isPilotColumnRequired() {
+		for (PatrolLeg leg : legs) {
+			if (leg.getType().getPatrolType().requiresPilot()) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private void removeLeg(){
@@ -347,7 +357,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		session.beginTransaction();
 		try{
-			typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getConservationArea(), session, this.patrol.getPatrolType()); 
+			typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getConservationArea(), session); 
 			allEmployes = PatrolHibernateManager.getActiveEmployees(patrol.getConservationArea(), session);
 			session.getTransaction().rollback();
 		}catch (Exception ex){
@@ -469,6 +479,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		//create leg days
 		p.createLegDays(session);
+		p.recalculateType();
+		session.saveOrUpdate(p);
 		return true;
 			
 	}

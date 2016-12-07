@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -67,11 +68,31 @@ public class ConservationArea extends UuidItem {
 	 * Maximum designation length
 	 */
 	public static final int MAX_DESIGNATION_LENGTH = 1024;
+	/**
+	 * Maximum organization length
+	 */
+	public static final int MAX_ORGANIZATION_LENGTH = 256;
+	/**
+	 * Maximum point of contact length
+	 */
+	public static final int MAX_POINT_OF_CONTACT_LENGTH = 256;
+	/**
+	 * Maximum country length
+	 */
+	public static final int MAX_COUNTRY_LENGTH = 256;
+	/**
+	 * Maximum owner length
+	 */
+	public static final int MAX_OWNER_LENGTH = 256;
 	
 	private String id;
 	private String name;
 	private String designation;
 	private String description;
+	private String organization;
+	private String pointOfContact;
+	private String country;
+	private String owner;
 	
 	private List<Employee> employees;
 	private List<Agency> agencies;
@@ -106,6 +127,35 @@ public class ConservationArea extends UuidItem {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getOrganization() {
+		return organization;
+	}
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
+
+	@Column(name = "pointofcontact")
+	public String getPointOfContact() {
+		return pointOfContact;
+	}
+	public void setPointOfContact(String pointOfContact) {
+		this.pointOfContact = pointOfContact;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+	public void setOwner(String owner) {
+		this.owner = owner;
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY)

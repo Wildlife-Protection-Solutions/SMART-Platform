@@ -32,11 +32,16 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.connect.api.QueryApi;
+import org.wcs.smart.connect.api.QueryApi.Direction;
+import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.columns.QueryColumnUtils;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -62,6 +67,10 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	protected GeometryFactory gf = new GeometryFactory();
 	protected boolean isDisposed = false;
 	protected int itemCount;
+	public String sortColumn = null;
+	public QueryApi.Direction direction = Direction.UP;
+	
+	public boolean hasSortColumns = false;
 	
 	/**
 	 * Creates the geometry for the given row in the results set.
@@ -85,8 +94,6 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 */
 	public abstract String getGeometryType();
 
-	
-	
 	public String getValueAsString(IResultItem item, QueryColumn qc, Session session){
 		return qc.getValueAsString(getValue(item, qc, session));
 	}
@@ -156,6 +163,9 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 		throw new UnsupportedOperationException("Can not load all results into memory in this environment"); //$NON-NLS-1$
 	}
 	
+
+	public abstract void updateSortColumn(Session session) throws SQLException;
+	
 	public abstract List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
 	
 
@@ -178,10 +188,15 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 		return new QueryResultSetIterator<IResultItem>(this, pagesize, session);
 	}
 
+	public void setSorting(final String sortColumn, QueryApi.Direction direction) {
+		this.sortColumn = sortColumn;
+		this.direction = direction;
+	}
+
 	@Override
 	public void setSorting(QueryColumn arg0, int arg1) {
-		// Does not support sorting
-		throw new UnsupportedOperationException("Result set sorting not supported."); //$NON-NLS-1$
+		//NOT SUPPORTED
+		//Sorting only supported with String Argument, see above function.
 	}
 	
 	@Override
@@ -193,4 +208,110 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	public boolean isDisposed(){
 		return this.isDisposed;
 	}
+		
+	public void updateSortColumnGeneral(Session session, String queryDataTable, ConservationAreaFilter caFilter, String value, String typePrefix, String tableListSuffix, String tableTreeSuffix, String uuidColumn) throws SQLException {
+		updateSortColumnGeneral(session, queryDataTable, caFilter, value, typePrefix, tableListSuffix, tableTreeSuffix, uuidColumn, true);
+	}
+	
+	public void updateSortColumnGeneral(Session session, String queryDataTable, ConservationAreaFilter caFilter, String value, String typePrefix, 
+			String tableListSuffix, String tableTreeSuffix, String uuidColumn, boolean hasExtraTables) throws SQLException {
+		if(!hasExtraTables){
+			//I don't know how to sort these query types, they don't use temp tables so we can't use the same method as the rest.
+			throw new UnsupportedOperationException("Sorting not suppported for this Query Type"); //$NON-NLS-1$
+		}
+		if (!hasSortColumns) {
+			// add the sort columns
+			session.createSQLQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createSQLQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			hasSortColumns = true;
+		}
+
+		String key = sortColumn; //This is a bit horrible since users have to send in the attribute key of the column they want to sort. But I don't have a better solution at this point.
+
+		//TODO: this will not work for CCAA
+		Attribute.AttributeType type = QueryManager.INSTANCE.getAttributeType(session, key, caFilter); // session will not be closed on purpose
+
+		
+		if(type == null){
+			//update to the sort column
+			StringBuilder sql = new StringBuilder();
+			sql.append("UPDATE "); //$NON-NLS-1$
+			sql.append(queryDataTable);
+			sql.append(" SET sortKeyTxt = " + sortColumn); //$NON-NLS-1$
+			session.createSQLQuery(sql.toString()).executeUpdate();
+			
+		}else{
+			
+			switch (type) {
+			case BOOLEAN:
+			case NUMERIC:
+				StringBuilder sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(" SET sortKeyDbl = "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa.NUMBER_VALUE FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createSQLQuery(sql.toString()).executeUpdate();
+				break;
+			case TEXT:
+			case DATE:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa.STRING_VALUE FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createSQLQuery(sql.toString()).executeUpdate();
+				break;
+			case LIST:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+				sql.append("(SELECT rl." + value + " FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(tableListSuffix + " rl on rl." + uuidColumn + " = wpoa.list_element_uuid "); //$NON-NLS-1$
+				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createSQLQuery(sql.toString()).executeUpdate();
+				break;
+			case TREE:
+				sql = new StringBuilder();
+				sql.append("UPDATE ");//$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
+				sql.append("(SELECT rl." + value + " FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(tableTreeSuffix + " rl on rl." + uuidColumn + " = wpoa.tree_node_uuid "); //$NON-NLS-1$
+				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createSQLQuery(sql.toString()).executeUpdate();
+				break;
+			}
+		}
+		
+	}
+	
+	
 }

@@ -26,15 +26,26 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryFilterConfigManager;
+import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
+import org.wcs.smart.query.common.model.QueryFilterConfiguration;
+import org.wcs.smart.query.internal.DataModelManagerUtil;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.ui.itempanel.QueryItemView;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 /**
@@ -63,12 +74,34 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 			this.image = image;
 		}
 	}
+
+	private IConfigurationChangeListener queryConfChangeListener = new IConfigurationChangeListener() {
+		
+		@Override
+		public void configurationChanged(QueryFilterConfiguration config) {
+			provider.dispose();
+			boolean showInactive = config.isShowInactiveItems();
+			provider = new DataModelContentProvider(false, !showInactive, true);
+			
+			IWorkbenchPage[] pages = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPages();
+			for (IWorkbenchPage page : pages) {
+				IViewPart view = page.findView(QueryItemView.ID);
+				if (view instanceof DIViewPart) {
+					@SuppressWarnings("unchecked")
+					QueryItemView qView = ((DIViewPart<QueryItemView>)view).getComponent();
+					qView.refresh();
+				}
+			}
+		}
+	};
 	
 	/**
 	 * Creates a new content provider 
 	 */
 	public FiltersDataModelContentProvider(){
-		provider = new DataModelContentProvider(false, true, true);
+		QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
+		boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+		provider = new DataModelContentProvider(false, !showInactive, true);
 	}
 
 	/**
@@ -76,6 +109,7 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 	 */
 	@Override
 	public void dispose() {
+		QueryFilterConfigManager.getInstance().removeChangeListener(queryConfChangeListener);
 		provider.dispose();
 	}
 
@@ -122,7 +156,8 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 			if (parentElement == DataModelItem.CATEGORIES){
 					return provider.getChildren(provider.getElements(null)[0]);	
 			}else if (parentElement == DataModelItem.ATTRIBUTES){
-				List<Attribute> atts = QueryDataModelManager.getInstance().getActiveAttributes(this.dataModel);
+				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(this.dataModel, !showInactive);
 				
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override
@@ -170,32 +205,52 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 	}
 
 	
-	private DataModelLabelProvider dmLabelProvider;
 	private LabelProvider lp = null;
-	public LabelProvider getLabelProvider(){
+	public LabelProvider getLabelProvider() {
 		if (lp == null) {
-			dmLabelProvider = new DataModelLabelProvider();
-			
-			lp = new LabelProvider() {
-				@Override
-				public String getText(Object element) {
-					if (element instanceof DataModelItem) {
-						return ((DataModelItem) element).guiName;
-					} else {
-						return dmLabelProvider.getText(element);
-					}
-				}
-				@Override
-				public Image getImage(Object element){
-					if (element instanceof DataModelItem) {
-						return ((DataModelItem) element).image;
-					} else {
-						return dmLabelProvider.getImage(element);
-					}
-				}
-			};
+			lp = new FiltersDataModelLabelProvider();
 		}
 		return lp;
+	}
+	
+	/**
+	 * Label Provider for DataModel filter.
+	 * 
+	 * @author elitvin
+	 * @since 4.1.0
+	 */
+	private class FiltersDataModelLabelProvider extends LabelProvider implements IColorProvider {
+
+		private DataModelLabelProvider dmLabelProvider = new DataModelLabelProvider();
+
+		@Override
+		public String getText(Object element) {
+			if (element instanceof DataModelItem) {
+				return ((DataModelItem) element).guiName;
+			} else {
+				return dmLabelProvider.getText(element);
+			}
+		}
+		@Override
+		public Image getImage(Object element){
+			if (element instanceof DataModelItem) {
+				return ((DataModelItem) element).image;
+			} else {
+				return dmLabelProvider.getImage(element);
+			}
+		}
+		@Override
+		public Color getForeground(Object element) {
+			if (element instanceof Attribute) {
+				Attribute a = (Attribute) element;
+				return DataModelManagerUtil.isActive(a, dataModel) ? DataModelLabelProvider.BLACK : DataModelLabelProvider.GRAY;
+			}
+			return dmLabelProvider.getForeground(element);
+		}
+		@Override
+		public Color getBackground(Object element) {
+			return dmLabelProvider.getBackground(element);
+		}
 		
 	}
 }

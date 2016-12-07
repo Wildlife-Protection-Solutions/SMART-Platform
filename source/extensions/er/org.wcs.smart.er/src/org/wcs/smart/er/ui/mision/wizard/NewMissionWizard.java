@@ -283,7 +283,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		if (!session.isOpen()){
 			session = HibernateManager.openSession();
 			this.parentDesign = (SurveyDesign) session.merge(parentDesign);
-			newMission.getSurvey().setSurveyDesign(parentDesign);
+			if (newMission.getSurvey() != null) newMission.getSurvey().setSurveyDesign(parentDesign);
 		}
 		
 		//update design with page values

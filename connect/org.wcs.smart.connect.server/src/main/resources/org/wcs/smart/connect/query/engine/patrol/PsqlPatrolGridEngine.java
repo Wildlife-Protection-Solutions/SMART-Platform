@@ -166,7 +166,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 						denominator = ((CombinedValueItem)valueItem).getPart2();
 					}
 					
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
+					parseConservationAreaFilterInternal(lquery);
 					
 					//get numerator results
 					Collection<GridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), caFilter, c, session, true);

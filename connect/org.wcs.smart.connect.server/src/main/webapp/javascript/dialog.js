@@ -125,3 +125,37 @@ function getPosition(element) {
     }
     return { x: xPosition, y: yPosition };
 }
+
+
+function displayURLDialog(url){
+	var overlaydiv = document.createElement('div');
+	overlaydiv.setAttribute("class", "overlay-widgetlevel2");
+	document.body.appendChild(overlaydiv);
+
+	var linktext = document.getElementById('urllink');
+	linktext.value = url;
+	
+	document.getElementById("quickMinSelect").disabled=false;
+	var number = document.getElementById("quickMinSelect").value;
+	if (number > 0){
+		document.getElementById("expiresAfter").disabled=true;
+	}else{
+		document.getElementById("expiresAfter").disabled=false;
+	}
+	
+	var poselement = document.querySelector("#urlOptionsDialog");
+	var pos = getPosition(poselement);
+	displayDialogLocation('SharedLinksDialog', pos.x +30, window.pageYOffset + 50);
+	
+	linktext.focus();
+	linktext.select();
+}
+
+function resetUrlDialog(){
+	document.getElementById("createlinkbutton").style.display = 'block';
+	document.getElementById("createdlink").value = "";
+	document.getElementById("createdlink").style.display = 'none';
+	
+	document.getElementById('createcustomlink').style.display = 'none';
+	document.getElementById('createcustomlinktitle').style.display = 'block';
+}

@@ -50,6 +50,12 @@ public class AdminAccountAction implements ISmartConnectAction{
 	public String[] getActionKeys() {
 		return new String[]{KEY};
 	}
+	
+	@Override
+	public String[] getCaAdminAccessibleActionKeys(){
+		return new String[]{};
+	}
+	
 
 	@Override
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
@@ -58,6 +64,11 @@ public class AdminAccountAction implements ISmartConnectAction{
 
 	@Override
 	public String getResourceName(UUID resource, Session s, Locale l) {
+		return null;
+	}
+
+	@Override
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) {
 		return null;
 	}
 

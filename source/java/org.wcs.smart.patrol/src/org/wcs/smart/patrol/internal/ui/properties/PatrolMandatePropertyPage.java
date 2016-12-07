@@ -75,6 +75,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -143,17 +144,22 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected Composite createContent(Composite parent) {
 
-		mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(currentCa, getSession()));
-		Collections.sort(mandates, new Comparator<PatrolMandate>(){
-			@Override
-			public int compare(PatrolMandate o1, PatrolMandate o2) {
-				String a = o1.getName();
-				String b = o2.getName();
-				if (a != null) a = a.toLowerCase();
-				if (b != null) b = b.toLowerCase();
-				return Collator.getInstance().compare(a,b);
-			}});
-		
+		Session s = HibernateManager.openSession();
+		try{
+			mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(currentCa, s));
+			Collections.sort(mandates, new Comparator<PatrolMandate>(){
+				@Override
+				public int compare(PatrolMandate o1, PatrolMandate o2) {
+					String a = o1.getName();
+					String b = o2.getName();
+					if (a != null) a = a.toLowerCase();
+					if (b != null) b = b.toLowerCase();
+					return Collator.getInstance().compare(a,b);
+				}});
+			mandates.forEach(m -> m.getNames().size());
+		}finally{
+			s.close();
+		}
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
 
@@ -300,12 +306,13 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
-		Session s = getSession();
+		Session s = HibernateManager.openSession();
 		try {
 			s.beginTransaction();
 			for (PatrolMandate m : toDelete){
 				s.delete(m);
 			}
+			s.flush();
 			ArrayList<PatrolMandate> siblings = new ArrayList<PatrolMandate>();
 			for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
 				PatrolMandate pm = (PatrolMandate) iterator.next();
@@ -328,6 +335,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			SmartPatrolPlugIn.displayLog(
 					Messages.PatrolMandatePropertyPage_Error_SavingUpdates + ex.getLocalizedMessage(),
 					ex);
+		}finally{
+			s.close();
 		}
 		return false;
 	}
@@ -356,9 +365,10 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.PatrolMandatePropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.PatrolMandatePropertyPage_ConfirmDeleteMessage, new Object[]{mandate.getName()}))){
 			return;
 		}
+		Session s = HibernateManager.openSession();
 		try{
 			if (mandate.getUuid() != null){
-				if (DeleteManager.canDelete(mandate, getSession())){
+				if (DeleteManager.canDelete(mandate, s)){
 					mandates.remove(mandate);
 					toDelete.add(mandate);
 					setChangesMade(true);
@@ -370,7 +380,9 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog( 
 					MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_DeletingMandate + "\n\n" + ex.getLocalizedMessage(), new Object[]{mandate.getName()}), ex); //$NON-NLS-1$
-		}	
+		}finally{
+			s.close();
+		}
 		
 		tableViewer.refresh();
 		

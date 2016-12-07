@@ -154,6 +154,14 @@ public class PatrolListView implements IPatrolFilteringView {
 		}
 	};
 
+	private IPatrolEventListener saveListener = new IPatrolEventListener() {
+		@Override
+		public void eventFired(final int attributeChanged, Object source) {
+			if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG){
+				updateContent(1000);
+			}
+		}
+	};
 		
 	/**
 	 * Creates a new vies
@@ -185,6 +193,7 @@ public class PatrolListView implements IPatrolFilteringView {
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolListener);
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_SAVED, saveListener);
 	}
 
 	/**
@@ -242,6 +251,7 @@ public class PatrolListView implements IPatrolFilteringView {
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolListener);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_SAVED, saveListener);
 		
 		patrolListViewer.addDoubleClickListener(new IDoubleClickListener() {
 			

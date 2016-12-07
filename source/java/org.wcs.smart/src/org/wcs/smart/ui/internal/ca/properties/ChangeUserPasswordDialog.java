@@ -83,14 +83,6 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		super(parent, Messages.ChangeUserPasswordDialog_DialogTitle);
 		toUpdate = SmartDB.getCurrentEmployee();
 	}
-
-	@Override
-	public Session getSession(){
-		if (session == null || !session.isOpen()){
-			session = HibernateManager.openSession();
-		}
-		return session;
-	}
 	
 	@Override
 	public boolean close(){
@@ -147,25 +139,29 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 					return;
 				}
 				
-				List<?> otherUsers = getSession().createCriteria(Employee.class).add(Restrictions.eq("smartUserId", newUserName)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$ //$NON-NLS-2$
-				if (otherUsers.size() > 0){
-					MessageDialog.openError(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Error_DialogTitle, MessageFormat.format(Messages.ChangeUserPasswordDialog_Error_UserExists, new Object[]{ newUserName }));
-					return;
-				}
-				else{
-					String old = toUpdate.getSmartUserId();
-					try {
-						getSession().beginTransaction();
-						getSession().update(toUpdate);
-						toUpdate.setSmartUserId(newUserName);
-						getSession().getTransaction().commit();
-					} catch (Exception ex) {
-						toUpdate.setSmartUserId(old);
-						SmartPlugIn.displayLog(Messages.ChangeUserPasswordDialog_Error_CouldNoUpdateUser + ex.getLocalizedMessage(), ex);
-						getSession().close();
-					}
+				Session s = HibernateManager.openSession();
+				try{
+					List<?> otherUsers = s.createCriteria(Employee.class).add(Restrictions.eq("smartUserId", newUserName)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+					if (otherUsers.size() > 0){
+						MessageDialog.openError(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Error_DialogTitle, MessageFormat.format(Messages.ChangeUserPasswordDialog_Error_UserExists, new Object[]{ newUserName }));
+						return;
+					}else{
+						String old = toUpdate.getSmartUserId();
+						s.beginTransaction();
+						try {
+							s.update(toUpdate);
+							toUpdate.setSmartUserId(newUserName);
+							s.getTransaction().commit();
+						} catch (Exception ex) {
+							toUpdate.setSmartUserId(old);
+							s.getTransaction().rollback();
+							SmartPlugIn.displayLog(Messages.ChangeUserPasswordDialog_Error_CouldNoUpdateUser + ex.getLocalizedMessage(), ex);
+						}
 					
-					txtUserName.setText(toUpdate.getSmartUserId());
+						txtUserName.setText(toUpdate.getSmartUserId());
+					}
+				}finally{
+					s.close();
 				}
 				
 			}
@@ -305,20 +301,23 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 			//check to ensure old password is correct
 			if (HibernateManager.validatePassword(txtCurrentPassword.getText(), toUpdate)){
 				String old = toUpdate.getSmartPassword();
+				Session s = HibernateManager.openSession();
+				s.beginTransaction();
 				try {
-					getSession().beginTransaction();
-					getSession().update(toUpdate);
+					s.update(toUpdate);
 					toUpdate.setSmartPassword(HibernateManager.generatePassword(txtPassword1.getText()));
-					getSession().getTransaction().commit();
+					s.getTransaction().commit();
 					
 					MessageDialog.openInformation(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Updated_DialogTitle, Messages.ChangeUserPasswordDialog_Updated_DialogMessage);
 					setChangesMade(false);
 					return true;
 				} catch (Exception ex) {
+					if (s.getTransaction().isActive()) s.getTransaction().rollback();
 					toUpdate.setSmartPassword(old);	//reset password
 					SmartPlugIn.displayLog(Messages.ChangeUserPasswordDialog_Error_CouldNotUpdatePass + ex.getLocalizedMessage(), ex);
-					getSession().close();
-				}	
+				}finally{
+					s.close();
+				}
 			}else{
 				setErrorMessage(Messages.ChangeUserPasswordDialog_Error_NewPassNotSame);
 			}	

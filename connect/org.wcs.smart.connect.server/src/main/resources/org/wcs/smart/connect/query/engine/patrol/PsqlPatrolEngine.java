@@ -48,7 +48,6 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
@@ -61,16 +60,20 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	private String filterTable;
 	private String queryDataTable;
 	
+	public String getQueryDataTable() {
+		return queryDataTable;
+	}
+
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolQuery.KEY.equals(querytype);
 	}
 	
-	public String getDataQuery(){
-		return getDataQuery(true);
+	public String getDataQuery(String[] sortFields){
+		return getDataQuery(true, sortFields);
 	}
 
-	private String getDataQuery(boolean includetrack){
+	private String getDataQuery(boolean includetrack, String[] sortFields){
 		StringBuilder fields = new StringBuilder();
 		fields.append("ca_id,ca_name, r_p_ca_uuid, r_p_uuid,"); //$NON-NLS-1$
 		fields.append("r_p_id,r_p_start_date,r_p_end_date,r_p_station_uuid,"); //$NON-NLS-1$
@@ -78,7 +81,12 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		fields.append("r_p_is_armed,r_pl_transport_uuid,r_pl_id,r_pl_start_date,"); //$NON-NLS-1$
 		fields.append("r_pl_end_date,r_plm_leader,r_plm_pilot,r_pl_uuid,"); //$NON-NLS-1$
 		fields.append("p_station,p_team,p_mandate,p_transporttype,p_leader,p_pilot"); //$NON-NLS-1$
-		
+		if (sortFields != null){
+			for (String s : sortFields){
+				fields.append(",");
+				fields.append(s);
+			}
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT "); //$NON-NLS-1$
 		sb.append(fields.toString());
@@ -136,15 +144,15 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
-					ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, cafilter, false, false);
+					parseConservationAreaFilterInternal(lquery);
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, caFilter, false, false);
 					getResults(c, session);
 					
 					c.commit();
 
 					//item cnt
 					int itemcnt = 0;
-					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM (" + getDataQuery(false) + ") foo")){ //$NON-NLS-1$ //$NON-NLS-2$
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT count(*) FROM (" + getDataQuery(false, null) + ") foo")){ //$NON-NLS-1$ //$NON-NLS-2$
 						rs.next();
 						itemcnt = rs.getInt(1);
 					}

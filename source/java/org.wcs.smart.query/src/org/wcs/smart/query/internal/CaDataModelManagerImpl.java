@@ -44,7 +44,6 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.IDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 /**
  * Data model manager for when users are only performing 
@@ -52,7 +51,7 @@ import org.wcs.smart.query.QueryPlugIn;
  * @author Emily
  *
  */
-public class CaDataModelManagerImpl implements IDataModelManager {
+public class CaDataModelManagerImpl extends AbstractDataModelManager {
 
 	private volatile DataModel dm = null;
 	private Integer dmDepth = null;
@@ -278,6 +277,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
 		
+		@SuppressWarnings("unchecked")
 		List<Category> cats = q.list();
 		return cats;
 	}
@@ -385,14 +385,14 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	public List<Attribute> getActiveAttributes(DataModel dm){
 		List<Attribute> active = new ArrayList<Attribute>();
 		for (Attribute a : dm.getAttributes()){
-			if (isActive(a, dm)){
+			if (DataModelManagerUtil.isActive(a, dm)){
 				active.add(a);
 			}
 		}
 		return active;
 		
 	}
-	
+
 	@Override
 	public int getActiveDepth(){
 		if (dmDepth != null){
@@ -419,40 +419,6 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		}
 		return maxDepth + 1;
 	}
-	
-	
-	/*
-	 * determines if attribute in the data model
-	 * has an active category association
-	 */
-	private boolean isActive(Attribute a, DataModel dm){
-		for (Category c : dm.getActiveCategories()){
-			if (isActive(c, a)){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/*
-	 * determines if the attribute has an active association
-	 * with the given category or subcategory
-	 */
-	private boolean isActive(Category c, Attribute a){
-		for (CategoryAttribute ca : c.getAttributes()){
-			if (ca.getAttribute().equals(a) && ca.getIsActive()){
-				return true;
-			}
-		}
-		for (Category kid : c.getActiveChildren()){
-			if (isActive(kid,a)){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
 	
 	
 	private Job loadDataModelJob = new Job(Messages.CaDataModelManagerImpl_LoadDataModelJobName){
@@ -494,6 +460,11 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 		 * @param cat
 		 */
 		private void visitCategory(Category cat){
+			cat.getName();
+			for (Category child : cat.getChildren()){
+				visitCategory(child);
+				child.getName();
+			}
 			for (Category child : cat.getActiveChildren()){
 				visitCategory(child);
 				child.getName();

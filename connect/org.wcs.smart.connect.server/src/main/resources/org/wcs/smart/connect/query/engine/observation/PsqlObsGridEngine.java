@@ -55,7 +55,6 @@ import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -189,8 +188,8 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 			DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 			
 			try{
-				ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
-				filterer.processFilter(c, filter.getFilter(), dFilter, cafilter, needsObservation, false);
+				parseConservationAreaFilterInternal(query);
+				filterer.processFilter(c, filter.getFilter(), dFilter, caFilter, needsObservation, false);
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}

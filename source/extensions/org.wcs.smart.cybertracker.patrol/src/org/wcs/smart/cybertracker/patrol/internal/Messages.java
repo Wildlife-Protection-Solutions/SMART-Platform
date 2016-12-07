@@ -62,9 +62,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPatrol_Warn_Station;
 	public static String CyberTrackerPatrol_Warn_Team;
 	public static String DataModelWrapper_Dropdown_Label;
-	public static String EmployeeSelectorDialog_DialogTitle;
-	public static String EmployeeSelectorDialog_LeaderType;
-	public static String EmployeeSelectorDialog_PilotType;
 	public static String PatrolCTDataBuilder_Error_DefaultValue;
 	public static String PatrolCTDataBuilder_Error_JsonDefaultValue;
 	public static String PatrolCTExportDialog_AssociatedProfileLoad_Error;
@@ -88,8 +85,6 @@ public class Messages extends NLS {
 	public static String PatrolLegImporter_MetaWarning_Mandate;
 	public static String PatrolLegImporter_MetaWarning_Station;
 	public static String PatrolLegImporter_MetaWarning_Team;
-	public static String PatrolLegImporter_TypeError_Message;
-	public static String PatrolLegImporter_TypeError_Title;
 	public static String PatrolLegImporter_Warn_TimeGap_End;
 	public static String PatrolLegImporter_Warn_TimeGap_Start;
 	public static String PatrolScreens_Begin;
@@ -102,7 +97,6 @@ public class Messages extends NLS {
 	public static String PatrolScreens_Mandate;
 	public static String PatrolScreens_NewObservation;
 	public static String PatrolScreens_Objective;
-	public static String PatrolScreens_PatrolType;
 	public static String PatrolScreens_Paused;
 	public static String PatrolScreens_PausePatrol;
 	public static String PatrolScreens_Pilot;
@@ -118,7 +112,6 @@ public class Messages extends NLS {
 	public static String PatrolScreensUtil_Error_Meta_Transport;
 	public static String PatrolScreensUtil_Error_Meta_Type;
 	public static String PatrolScreensUtil_Error_TransportNotSet;
-	public static String PatrolScreensUtil_Error_TypesNotSet;
 	public static String PatrolScreensUtil_PauseScreen_Message;
 	public static String PatrolScreensUtil_PauseScreen_Title;
 	public static String PatrolScreensUtil_ResumeScreen_Message;
@@ -132,7 +125,6 @@ public class Messages extends NLS {
 	public static String SmartImporter_ImportErrorDialogTitle;
 	public static String SmartImporter_LeaderTitle;
 	public static String SmartImporter_NoEmployeesErrorMessage;
-	public static String SmartImporter_PatrolType_Load_Error;
 	public static String SmartImporter_PilotTitle;
 	public static String SmartImporter_SelectLeaderMessage;
 	public static String SmartImporter_SelectPilotTitle;

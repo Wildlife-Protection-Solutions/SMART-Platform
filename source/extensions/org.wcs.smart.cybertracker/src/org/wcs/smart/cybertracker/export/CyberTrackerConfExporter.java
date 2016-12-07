@@ -248,7 +248,7 @@ public class CyberTrackerConfExporter {
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
 		ScreensUtil screensUtil = createScreensUtil(ctUtil);
-		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session, ctProperties, alertDataProvider.getPingAlertData());
+		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session, ctProperties);
 		if (metaScreensData == null) {
 			//failed to generate patrol data
 			//error message is expected to be displayed be PatrolScreensUtil
@@ -259,7 +259,7 @@ public class CyberTrackerConfExporter {
 		rootId = metaScreensData.rootId;
 		tripUniqueElementId = metaScreensData.tripUniqueElementId;
 		monitor.worked(5);
-
+		
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
 		monitor.worked(70);
 		
@@ -366,6 +366,15 @@ public class CyberTrackerConfExporter {
 			return result;
 		}
 		Node categoryNode = ctUtil.createRadioNode(node, keyMap, getNodeLevelResultElementId(level).getItemId());
+		
+		if (level == 0){
+			for (AlertData data : alertDataProvider.getPingAlertData()) {
+				if (data != null) {
+					Controls.Control pingControl = screensFactory.createAlertControl(data, tripUniqueElementId, null);
+					ScreensObjectFactory.addControlToNode(categoryNode, pingControl);
+				}
+			}
+		}
 		Control headerControl = ScreensObjectFactory.getHeaderControl(categoryNode);
 		headerControl.setColor(NODE_HEADER_COLOR);
 		addAlerts(categoryNode, node.getChildren(), null, keyMap);
@@ -939,11 +948,13 @@ public class CyberTrackerConfExporter {
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
 		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, resultElementId, true, treeCmAttribute.getCurrentDisplayMode());
-		if (!treeCmAttribute.getAttribute().getIsRequired() && navId != null) {
-			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
-			navControl.setTranslateNextScreenId(navId.getNodeId());
+		if (!treeCmAttribute.getAttribute().getIsRequired()) {
 			Control control7 = ScreensObjectFactory.getRadioMainControl(treeRootNode);
 			control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
+		}
+		if (navId != null) {
+			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
+			navControl.setTranslateNextScreenId(navId.getNodeId());
 			if (!terminate) {
 				navId = null; //we are under mutli-select and if two next screens are defined that causes stacking problem (so we need to avoid next screen for leaves)
 			}
@@ -1035,6 +1046,10 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId addToLastId = new CyberTrackerId();
 		Node addToLastNode = ctUtil.createSaveNode(addToLastId, rootId, Messages.CyberTrackerExporter_Waypoint_AddToLast, Messages.CyberTrackerConfExporter_SaveWithoutGps, false);
 
+		//add snap to last waypoint control to page so that alerts come through with valid locations
+		Controls.Control snapToLast = ctUtil.getScreensFactory().createSnapLastGpsPosition();
+		ScreensObjectFactory.addControlToNode(addToLastNode, snapToLast);
+		
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
 		ids.add(new CyberTrackerIdMap(saveAsNewId, newWpElementsIds.get(0)));
 		ids.add(new CyberTrackerIdMap(addToLastId, newWpElementsIds.get(1)));

@@ -49,7 +49,10 @@ import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
+import org.wcs.smart.query.QueryFilterConfigManager;
+import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.QueryFilterConfiguration;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -85,7 +88,7 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				final List<ListItem> items = data.getAllActiveValues(s);
+				final List<ListItem> items = data.getAllValues(s);
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
@@ -111,7 +114,15 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 		}};
 	private Label lbl;
 		
-		
+
+	private IConfigurationChangeListener queryConfChangeListener = new IConfigurationChangeListener() {
+		@Override
+		public void configurationChanged(QueryFilterConfiguration config) {
+			loadItemsJobs.cancel();
+			loadItemsJobs.schedule();
+		}
+	};
+
 	/**
 	 * Creates a new patrol list drop item
 	 *  
@@ -122,11 +133,12 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 	public PatrolListDropItem(IPatrolQueryOption option) {
 		this.keyPart = "patrol:" + option.getKey(); //$NON-NLS-1$
 		this.text = option.getGuiName(Locale.getDefault());
-		this.option = option;		
+		this.option = option;
 	}
 
 	
 	public void dispose(){
+		QueryFilterConfigManager.getInstance().removeChangeListener(queryConfChangeListener);
 		super.dispose();
 		loadItemsJobs.cancel();
 		if (smallerFont != null){
@@ -250,6 +262,10 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 			this.currentSelection = this.data.getDefaultListItem();	
 		}else{
 			currentSelection = (ListItem)values[1];
+		}
+		//add configuration listener is data state depends on configuration
+		if (this.data.isDependOnQueryConfiguration()) {
+			QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
 		}
 	}
 	

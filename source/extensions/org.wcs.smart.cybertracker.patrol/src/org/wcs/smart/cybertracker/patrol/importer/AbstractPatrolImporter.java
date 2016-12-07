@@ -57,10 +57,10 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -73,46 +73,13 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 
-	protected boolean fixPatrolTypeError(final CyberTrackerPatrol ctPatrol) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				Session session = HibernateManager.openSession();
-				try {
-					List<PatrolType> types = PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
-					PatrolTypeSelectorDialog selectorDialog = new PatrolTypeSelectorDialog(Display.getDefault().getActiveShell(), types);
-					if (selectorDialog.open() != IDialogConstants.OK_ID) {
-						return;
-					}
-					PatrolType pt = selectorDialog.getSelectedType();
-					ctPatrol.setPatrolType(pt != null ? pt.getType() : null);
-				} catch (final Exception e) {
-					session.getTransaction().rollback();
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(Messages.SmartImporter_PatrolType_Load_Error, e);
-						}
-					});
-				}
-				finally {
-					if (session.getTransaction().isActive()){
-						session.getTransaction().rollback();
-					}
-					session.close();
-				}
-			}
-		});
-		return ctPatrol.getPatrolType() != null;
-	}
-	
 	protected boolean fixTransportError(final CyberTrackerPatrol ctPatrol) {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				Session session = HibernateManager.openSession();
 				try {
-					List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session, ctPatrol.getPatrolType());
+					List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session);
 					List<ImportError> trProblem = ctPatrol.getProblems().get(PatrolMeta.TRANSPORT);
 					String message = trProblem != null && !trProblem.isEmpty() ? trProblem.get(0).getMessage() : null;
 					TransportSelectorDialog selectorDialog = new TransportSelectorDialog(Display.getDefault().getActiveShell(), types, message);

@@ -1078,6 +1078,23 @@ public class ScreensObjectFactory {
 	}
 
 	/**
+	 * Creates a snap to last gps position control
+	 * <Control>
+	 * <Type>{582E62E2-C95B-4B87-94D3-EE8603C8056A}</Type>
+	 * <Id>20</Id>
+	 * <Required>True</Required>
+	 * </Control>
+	 * @return
+	 */
+	public Controls.Control createSnapLastGpsPosition(){
+		Controls.Control control = new Controls.Control();
+		control.setType("{582E62E2-C95B-4B87-94D3-EE8603C8056A}"); //$NON-NLS-1$
+		control.setId(20);
+		control.setRequired("True"); //$NON-NLS-1$
+		return control;
+	}
+
+	/**
     <Control>
 	    <Type>{DBDA4351-F047-4AA9-8B87-684CAF7EEFA9}</Type>
 	    <Id>16</Id>
@@ -1093,6 +1110,21 @@ public class ScreensObjectFactory {
 		control.setAlign(2);
 		control.setHeight(90);
 		control.setAutoConnect("True"); //$NON-NLS-1$
+		return control;
+	}
+	
+	/**
+	<Control>
+    	<Type>{06F58F58-A9BC-4C23-A10A-4A35CC465D06}</Type>
+        <Id>20</Id>
+        <Enabled>True</Enabled>
+	</Control>
+	 */
+	public Controls.Control createFlushOnSaveControl() {
+		Controls.Control control = new Controls.Control();
+		control.setType("{06F58F58-A9BC-4C23-A10A-4A35CC465D06}"); //$NON-NLS-1$
+		control.setId(20);
+		control.setEnabled("True"); //$NON-NLS-1$
 		return control;
 	}
 	

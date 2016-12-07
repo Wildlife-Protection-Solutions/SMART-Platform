@@ -38,7 +38,6 @@ import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.patrol.model.PatrolType.Type;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -59,10 +58,6 @@ public class PatrolJsonUtils {
 		
 		if (jsonValues == null) jsonValues = new JSONObject();
 		
-		String ptype = (String)jsonValues.get(PatrolScreensUtil.RESULT_PATROL_TYPE);
-		if (ptype == null){
-			ptype = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_PATROL_TYPE);	
-		}
 		String ptransport = (String)jsonValues.get(PatrolScreensUtil.RESULT_TRANSPORT);
 		if (ptransport == null){
 			ptransport = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_TRANSPORT);	
@@ -141,12 +136,6 @@ public class PatrolJsonUtils {
 				ctPatrol.addWarning(PatrolMeta.MANDATE, Messages.PatrolJsonUtils_MandatenotFound);
 			}
 			ctPatrol.setMandate(mandateObj);
-		}
-		if (ptype != null){
-			if (ptype.startsWith(JsonPatrolKey.PATROL_TYPE.key)){
-				ptype = ptype.substring(JsonPatrolKey.PATROL_TYPE.key.length() + 1);
-			}
-			ctPatrol.setPatrolType(Type.valueOf(ptype));
 		}
 		ctPatrol.setObjective(objective);
 		ctPatrol.setComment(comment);

@@ -52,6 +52,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 			return;
 		attrSql.append(')');
 
+		
 		PreparedStatement ps = c.prepareStatement(attrSql.toString());
 		for (int i = 0; i < uuids.size(); i++) {
 			ps.setObject(i + 1, uuids.get(i));

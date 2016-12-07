@@ -71,7 +71,7 @@ public class ConfigurableModel extends NamedItem {
 	private Map<Attribute, List<CmAttributeListItem>> attr2ListMap = null;
 	
 	private Map<Attribute, CmDmAttributeSettings> attributeSettings;
-    
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -102,7 +102,7 @@ public class ConfigurableModel extends NamedItem {
 	public void setDisplayMode(DisplayMode displayMode) {
 		this.displayMode = displayMode;
 	}
-	
+
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "parent_uuid is null and dm_attribute_uuid is not null")
 	@OrderBy(clause = "node_order")

@@ -21,16 +21,13 @@
  */
 package org.wcs.smart.patrol.meta;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -43,7 +40,6 @@ import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
 import org.wcs.smart.dataentry.meta.ScreenOptionGroup;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
@@ -55,141 +51,24 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  */
 public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 
-	private ScreenOption typeOption;
 	private ScreenOption transportOption;
 	
-	private List<PatrolType> patrolTypes;
+	private List<PatrolTransportType> transportTypes;
 
-	private ComboViewer typeViewer;
 	private ComboViewer transportViewer;
 
-	private TransportOptionGroup transportGroup;
-	
-	public TypeTransportScreenOptionComposite(Composite parent, ScreenOption typeOption, ScreenOption transportOption, List<PatrolType> patrolTypes) {
+	public TypeTransportScreenOptionComposite(Composite parent, ScreenOption transportOption, List<PatrolTransportType> transportTypes) {
 		super(parent);
-		this.typeOption = typeOption;
 		this.transportOption = transportOption;
-		this.patrolTypes = patrolTypes;
+		this.transportTypes = transportTypes;
 		
-		new TypeOptionGroup(this, this.typeOption, LabelConstants.getLabel(PatrolScreenOptionMeta.TYPE));
-		
-		transportGroup = new TransportOptionGroup(this, this.transportOption, LabelConstants.getLabel(PatrolScreenOptionMeta.TRANSPORT));
-		
-		if (typeOption.isVisible()) {
-			transportGroup.setEnabled(false);
-			transportGroup.getBtnDisplayPage().setSelection(true);
-			transportViewer.getControl().setEnabled(false);
-		}
+		new TransportOptionGroup(this, this.transportOption, LabelConstants.getLabel(PatrolScreenOptionMeta.TRANSPORT));
 	}
 
-	private PatrolType.Type getPatrolType(ScreenOption option) {
- 		String val = option.getStringValue();
- 		return val == null ? null : PatrolType.Type.valueOf(val);
-	}
-	
 	private List<PatrolTransportType> getTransportTypes() {
- 		PatrolType.Type type = getPatrolType(typeOption);
- 		if (type == null || patrolTypes.isEmpty())
- 			return new ArrayList<PatrolTransportType>();
-
- 		for (PatrolType item : patrolTypes) {
- 			if (item.getType() == type) {
- 				return item.getTransportTypes();
- 			}
- 		}
-
-		return new ArrayList<PatrolTransportType>();
+		return transportTypes;
 	}
 	
-	private class TypeOptionGroup extends ScreenOptionGroup {
-
-		public TypeOptionGroup(Composite parent, ScreenOption option, String title) {
-			super(parent, option, title);
-		}
-
-		@Override
-		protected void createDefaultControl(Group group) {
-			typeViewer = new ComboViewer(group, SWT.READ_ONLY);
-			typeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			typeViewer.getControl().setEnabled(!typeOption.isVisible());
-			typeViewer.setContentProvider(ArrayContentProvider.getInstance());
-			typeViewer.setLabelProvider(new LabelProvider() {
-				@Override
-				public String getText(Object element) {
-					if (element instanceof PatrolType) {
-						PatrolType i = (PatrolType) element;
-						return i.getType().getGuiName(Locale.getDefault());
-					}
-					return super.getText(element);
-				}
-			});
-	 		typeViewer.setInput(patrolTypes);
-	 		PatrolType.Type type = getPatrolType(typeOption);
-	 		if (type == null && !patrolTypes.isEmpty()) {
-	 			//try to GROUND as default if possible
-	 			for (PatrolType item : patrolTypes) {
-	 				if (PatrolType.Type.GROUND.equals(item.getType())) {
-	 					type = PatrolType.Type.GROUND;
-	 					break;
-	 				}
-	 			}
-	 			//if no ground present use first available as default
-	 			if (type == null) {
-	 				type = patrolTypes.get(0).getType();
-	 			}
-	 			typeOption.setStringValue(type.name());
-	 		}
-	 		if (type != null) {
-	 			for (PatrolType item : patrolTypes) {
-	 				if (item.getType() == type) {
-	 					typeViewer.setSelection(new StructuredSelection(item));
-	 					break;
-	 				}
-	 			}
-	 		}
-	 		typeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-	 			@Override
-	 			public void selectionChanged(SelectionChangedEvent event) {
-	 				IStructuredSelection selection = (IStructuredSelection) typeViewer.getSelection();
-	 				Object obj = selection.getFirstElement();
-	 				if (obj instanceof PatrolType) {
-	 					PatrolType pt = (PatrolType) obj;
-	 	 				typeOption.setStringValue(pt.getType().name());
-
-	 	 				List<PatrolTransportType> tTypes = getTransportTypes();
-	 	 		 		transportViewer.setInput(tTypes);
-	 	 		 		UUID uuid = tTypes.isEmpty() ? null : tTypes.get(0).getUuid();
-	 		 			transportOption.setUuidValue(uuid);
-	 	 		 		if (uuid != null) {
-	 	 		 			for (NamedItem item : tTypes) {
-	 	 		 				if (item.getUuid().equals(uuid)) {
-	 	 		 					transportViewer.setSelection(new StructuredSelection(item));
-	 	 		 					break;
-	 	 		 				}
-	 	 		 			}
-	 	 		 		}
-	 	 				fireScreenOptionListeners();
-	 				}
-	 			}
-	 		});
-		}
-
-		@Override
-		protected void onBtnDisplayPageClick() {
-			boolean display = getBtnDisplayPage().getSelection();
-			typeOption.setVisible(display);
-			
-			typeViewer.getControl().setEnabled(!display);
-			
-			transportGroup.setEnabled(!display);
-			transportViewer.getControl().setEnabled(!display && !transportOption.isVisible());
-			transportGroup.getBtnDisplayPage().setSelection(display || transportOption.isVisible()); //always true if type is visible
-
-			TypeTransportScreenOptionComposite.this.layout(true, true);
-			fireScreenOptionListeners();
-		}
-	}
-
 	private class TransportOptionGroup extends ScreenOptionGroup {
 
 		public TransportOptionGroup(Composite parent, ScreenOption option, String title) {

@@ -45,6 +45,49 @@ public class ConservationAreaProxy {
 	private String description;
 	private String designation;
 	
+	private String organization;
+	private String pointOfContact;
+	private String location;
+	private String owner;
+	
+	private String caBoundaryJson;
+	private String bufferedManagementAreaJson;
+	private String managementSectorsJson;
+	private String patrolSectorsJson;
+	private String administrativeAreasJson;
+	
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
+
+	public String getPointOfContact() {
+		return pointOfContact;
+	}
+
+	public void setPointOfContact(String pointOfContact) {
+		this.pointOfContact = pointOfContact;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
 	public ConservationAreaProxy(ConservationAreaInfo ca){
 		this.caUuid = ca.getUuid();
 		this.label = ca.getLabel();
@@ -100,5 +143,48 @@ public class ConservationAreaProxy {
 	}
 	public void setStatus(ConservationAreaInfo.Status status){
 		this.status = status;
+	}
+
+
+	
+	//Area Boundary getters/setters
+	public String getCaBoundaryJson() {
+		return caBoundaryJson;
+	}
+	
+	public void setCaBoundaryJson(String caBoundaryJson) {
+		this.caBoundaryJson = caBoundaryJson;
+	}
+
+	public String getBufferedManagementAreaJson() {
+		return bufferedManagementAreaJson;
+	}
+
+	public void setBufferedManagementAreaJson(String bufferedManagementAreaJson) {
+		this.bufferedManagementAreaJson = bufferedManagementAreaJson;
+	}
+
+	public String getManagementSectorsJson() {
+		return managementSectorsJson;
+	}
+
+	public void setManagementSectorsJson(String managementSectorsJson) {
+		this.managementSectorsJson = managementSectorsJson;
+	}
+
+	public String getPatrolSectorsJson() {
+		return patrolSectorsJson;
+	}
+
+	public void setPatrolSectorsJson(String patrolSectorsJson) {
+		this.patrolSectorsJson = patrolSectorsJson;
+	}
+
+	public String getAdministrativeAreasJson() {
+		return administrativeAreasJson;
+	}
+
+	public void setAdministrativeAreasJson(String administrativAreasJson) {
+		this.administrativeAreasJson = administrativAreasJson;
 	}
 }

@@ -540,6 +540,15 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.query.showinactive"
+                  label="%command.showinactive.label"
+                  style="toggle"
+                  tooltip="%command.showinactive.tooltip">
+            </command>
+            <separator
+                  name="org.wcs.smart.query.separator1">
+            </separator>
+            <command
                   commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/view16/querypatrol.gif"
                   label="%perspectivetoolbar.showquery.command.label"
@@ -904,6 +913,14 @@
             id="org.wcs.smart.query.exportmulti"
             name="%exportquerydefinitions.command.name">
       </command>
+      <command
+            id="org.wcs.smart.query.showinactive"
+            name="%command.showinactive.name">
+         <state
+               class="org.eclipse.jface.commands.ToggleState"
+               id="org.wcs.smart.query.state.showinactive">
+         </state>
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -1058,6 +1075,10 @@
       <handler
             class="org.wcs.smart.query.ui.importexport.ExportQueryDefHandler$ExportQueryDefHandlerWrapper"
             commandId="org.wcs.smart.query.exportmulti">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.ShowInactiveFilterItemsHandler$ShowInactiveFilterItemsHandlerWrapper"
+            commandId="org.wcs.smart.query.showinactive">
       </handler>
    </extension>
    <extension

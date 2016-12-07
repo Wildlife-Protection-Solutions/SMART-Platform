@@ -23,7 +23,6 @@ package org.wcs.smart.er.query.ui.panels.item;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
@@ -35,6 +34,7 @@ import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode.Type;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.WrappedTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.WrappedTreeNodeLabelProvider;
 
 /**
  * Survey filters data model tree node that supports configurable model
@@ -172,14 +172,11 @@ public class SurveyDataModelTreeNode implements IItemTreeNode{
 
 	@Override
 	public ILabelProvider getLabelProvider() {
-		return new LabelProvider(){
+		return new WrappedTreeNodeLabelProvider() {
 			@Override
 			public String getText(Object element){
 				if (element instanceof TreeNode){
 					return ((TreeNode) element).guiName;
-				}else if (element instanceof WrappedTreeNode){
-					WrappedTreeNode we = (WrappedTreeNode)element;
-					return we.getParent().getLabelProvider().getText(we.getItem());
 				}
 				return super.getText(element);
 			}
@@ -188,9 +185,6 @@ public class SurveyDataModelTreeNode implements IItemTreeNode{
 			public Image getImage(Object element){
 				if (element instanceof TreeNode){
 					return ((TreeNode) element).icon;
-				}else if (element instanceof WrappedTreeNode){
-					WrappedTreeNode we = (WrappedTreeNode)element;
-					return we.getParent().getLabelProvider().getImage(we.getItem());
 				}
 				return super.getImage(element);
 			}

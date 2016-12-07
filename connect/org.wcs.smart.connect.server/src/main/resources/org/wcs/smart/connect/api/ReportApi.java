@@ -153,9 +153,16 @@ public class ReportApi extends HttpServlet{
 			
 			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
 			
+			//for shared links; these links do not have a user but we want to check the j_username which is set to the link creator
+			String name="";
+			if( request.getUserPrincipal() == null){
+				name = (String)request.getAttribute("j_username");	
+			}else{
+				name = request.getUserPrincipal().getName();
+			}
 			//check for permission to this query for this user.
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, uuid)){
-				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid())){
+			if (!SecurityManager.INSTANCE.canAccess(s, name, ReportAction.RUNREPORT_KEY, uuid)){
+				if (SecurityManager.INSTANCE.canAccess(s, name, ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid())){
 					//access is OK since they have access to All Queries in this CA.
 				}else{
 					return createErrorResponse(Status.UNAUTHORIZED, Messages.getString("ReportApi.InvalidAccess", request.getLocale()));  //$NON-NLS-1$
@@ -195,7 +202,7 @@ public class ReportApi extends HttpServlet{
 						options.setImageHandler(new HTMLServerImageHandler());
 						options.setOutputStream(bos);
 		
-						IRunAndRenderTask task = new SmartReportRunner.SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal().getName());
+						IRunAndRenderTask task = new SmartReportRunner.SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal() == null ? "" : request.getUserPrincipal().getName());
 		
 						Map<Object,Object> items = task.getAppContext();
 						items.put(SmartReportRunner.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));

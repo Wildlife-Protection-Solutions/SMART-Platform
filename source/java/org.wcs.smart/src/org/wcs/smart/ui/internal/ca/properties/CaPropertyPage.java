@@ -276,7 +276,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		}
 		
-		Session session = getSession();
+		Session session = HibernateManager.openSession();
 		Transaction tx = session.beginTransaction();
 		try{
 			caComposite.updateConservationArea(ca);
@@ -300,8 +300,9 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			return true;
 		}catch (RuntimeException ex){
 			tx.rollback();
-			session.close();
 			SmartPlugIn.displayLog(Messages.CaPropertyPage_Error_SavingChanages + ex.getLocalizedMessage(), ex);
+		}finally{
+			session.close();
 		}
 		return false;
 	}

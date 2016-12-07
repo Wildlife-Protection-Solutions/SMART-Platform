@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.query.QueryManager;
@@ -56,6 +57,11 @@ public class QueryAction implements ISmartConnectAction{
 	public String[] getActionKeys() {
 		return new String[]{RUNQUERY_KEY};
 	}
+	
+	@Override
+	public String[] getCaAdminAccessibleActionKeys(){
+		return new String[]{RUNQUERY_KEY};
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -81,6 +87,31 @@ public class QueryAction implements ISmartConnectAction{
 		
 		return ops;
 	}
+	
+	@Override
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) {
+		List<ResourceOption> ops = new ArrayList<ResourceOption>();
+		
+		for (UUID id : uuidList){
+			ConservationAreaInfo info = (ConservationAreaInfo)s.createCriteria(ConservationAreaInfo.class)
+					.add(Restrictions.eq("uuid", id))
+					.uniqueResult(); //$NON-NLS-1$
+			ResourceOption ro =  new ResourceOption(Messages.getString("QueryAction.AllQueriesfromCA", l)+ info.getLabel(), info.getUuid()); //$NON-NLS-1$
+			ops.add(ro);
+		}
+		
+		List<QueryProxy> info = QueryManager.INSTANCE.getQueries(s, l);
+		for (QueryProxy i : info){
+			for (UUID id : uuidList){
+				if(i.getCaUuid().equals(id)){
+					ResourceOption ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+					ops.add(ro);
+				}
+			}
+		}
+		
+		return ops;
+	}
 
 	@Override
 	public String getResourceName(UUID resource, Session s, Locale l) {
@@ -96,5 +127,7 @@ public class QueryAction implements ISmartConnectAction{
 		if (q == null) return resource.toString();
 		return q.getName() + "[" + q.getConservationArea().getId() +"]";  //$NON-NLS-1$//$NON-NLS-2$
 	}
+
+
 
 }
