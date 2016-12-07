@@ -7,15 +7,23 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
+import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet {
 
@@ -285,5 +293,202 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 			}
 		}
 	}
+	
+	
+	@Override
+	public void updateSortColumnGeneral(Session session, String queryDataTable, ConservationAreaFilter caFilter, String value, String typePrefix, 
+			String tableListSuffix, String tableTreeSuffix, String uuidColumn, boolean hasExtraTables) throws SQLException {
+		if(!hasExtraTables){
+			//I don't know how to sort these query types, they don't use temp tables so we can't use the same method as the rest.
+			throw new UnsupportedOperationException("Sorting not suppported for this Query Type"); //$NON-NLS-1$
+		}
+		if (!hasSortColumns) {
+			// add the sort columns
+			session.createSQLQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createSQLQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			hasSortColumns = true;
+		}
 
+		
+		String key = sortColumn; //This is a bit horrible since users have to send in the attribute key of the column they want to sort. But I don't have a better solution at this point.
+
+		//TODO: this will not work for CCAA
+		Attribute.AttributeType type = QueryManager.INSTANCE.getAttributeType(session, key, caFilter); // session will not be closed on purpose
+
+		
+		if(type == null){
+			//lets see if this is a mission attribute
+			String tableSortField = "sortKeyTxt";
+			if (sortColumn.toLowerCase().startsWith("ma_")){
+				String missionAttributeKey = sortColumn.substring(3);
+				Attribute.AttributeType maType = getMissionAttributeType(session, missionAttributeKey, caFilter);
+				if (maType != null){
+				
+					sortColumn = engine.getMissionAttributeColumnName(missionAttributeKey);
+					if (maType != null && maType == Attribute.AttributeType.NUMERIC){
+						tableSortField = "sortKeyDbl";
+					}
+				}else{
+					//ma_0 etc. which would work but cannot be sure what column we are actually sorting on					
+				}
+
+			}
+			if (sortColumn.toLowerCase().startsWith("su_")){
+				String samplingUnitAttributeKey = sortColumn.substring(3);
+				Attribute.AttributeType maType = getSamplingUnitAttributeType(session, samplingUnitAttributeKey, caFilter);
+				if (maType != null){
+				
+					sortColumn = engine.getSamplingUnitAttributeColumnName(samplingUnitAttributeKey);
+					if (maType != null && maType == Attribute.AttributeType.NUMERIC){
+						tableSortField = "sortKeyDbl";
+					}
+				}else{
+					//ma_0 etc. which would work but cannot be sure what column we are actually sorting on					
+				}
+
+			}
+			
+			//update to the sort column
+			StringBuilder sql = new StringBuilder();
+			sql.append("UPDATE "); //$NON-NLS-1$
+			sql.append(queryDataTable);
+			sql.append(" SET " + tableSortField + " = " + sortColumn); //$NON-NLS-1$
+			session.createSQLQuery(sql.toString()).executeUpdate();
+			
+		}else{
+			
+			switch (type) {
+			case BOOLEAN:
+			case NUMERIC:
+				StringBuilder sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(" SET sortKeyDbl = "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa.NUMBER_VALUE FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createSQLQuery(sql.toString()).executeUpdate();
+				break;
+			case TEXT:
+			case DATE:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+				sql.append("(SELECT wpoa.STRING_VALUE FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append("and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createSQLQuery(sql.toString()).executeUpdate();
+				break;
+			case LIST:
+				sql = new StringBuilder();
+				sql.append("UPDATE "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
+				sql.append("(SELECT rl." + value + " FROM "); //$NON-NLS-1$
+				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(tableListSuffix + " rl on rl." + uuidColumn + " = wpoa.list_element_uuid "); //$NON-NLS-1$
+				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createSQLQuery(sql.toString()).executeUpdate();
+				break;
+			case TREE:
+				sql = new StringBuilder();
+				sql.append("UPDATE ");//$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
+				sql.append("(SELECT rl." + value + " FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(tableTreeSuffix + " rl on rl." + uuidColumn + " = wpoa.tree_node_uuid "); //$NON-NLS-1$
+				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
+				sql.append(key);
+				sql.append("'"); //$NON-NLS-1$
+				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(queryDataTable);
+				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
+				session.createSQLQuery(sql.toString()).executeUpdate();
+				break;
+			}
+		}
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	private Attribute.AttributeType getMissionAttributeType(Session session, String missionAttributeKey, ConservationAreaFilter caFilter){
+		if (caFilter.getConservationAreaFilterIds().size() == 1){
+			org.hibernate.Query q = session.createQuery("From MissionAttribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
+			q.setParameter("key", missionAttributeKey); //$NON-NLS-1$
+			q.setCacheable(true);
+			
+			List<MissionAttribute> results = q.list();
+			if (results.size() != 1 ){
+				return null;
+			}else{
+				return results.get(0).getType();
+			}
+		}else if (caFilter.getConservationAreaFilterIds().size() == 0){
+			//no conservation areas in filter; this should not be valid
+			return null;
+			
+		}else{
+			org.hibernate.Query q = session.createQuery("From MissionAttribute where conservationArea.uuid in (:cas) and keyid = :key"); //$NON-NLS-1$
+			q.setParameterList("cas", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+			q.setParameter("key", missionAttributeKey); //$NON-NLS-1$
+			
+			List<MissionAttribute> allAttributes = q.list();
+			if (allAttributes.size() == 0) return null;
+			
+			Set<AttributeType> types = allAttributes.stream().map(a->a.getType()).distinct().collect(Collectors.toSet());
+			if (types.size() == 1) return types.iterator().next();
+			return null;	//not a valid column as the key has different types in different cas (or is not valid in any cas)
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Attribute.AttributeType getSamplingUnitAttributeType(Session session, String smaplingUnitAttributeKey, ConservationAreaFilter caFilter){
+		if (caFilter.getConservationAreaFilterIds().size() == 1){
+			org.hibernate.Query q = session.createQuery("From SamplingUnitAttribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
+			q.setParameter("key", smaplingUnitAttributeKey); //$NON-NLS-1$
+			q.setCacheable(true);
+
+			List<SamplingUnitAttribute> results = q.list();
+			if (results.size() != 1 ){
+				return null;
+			}else{
+				return results.get(0).getType();
+			}
+		}else if (caFilter.getConservationAreaFilterIds().size() == 0){
+			//no conservation areas in filter; this should not be valid
+			return null;
+			
+		}else{
+			org.hibernate.Query q = session.createQuery("From SamplingUnitAttribute where conservationArea.uuid in (:cas) and keyid = :key"); //$NON-NLS-1$
+			q.setParameterList("cas", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
+			q.setParameter("key", smaplingUnitAttributeKey); //$NON-NLS-1$
+			
+			List<SamplingUnitAttribute> allAttributes = q.list();
+			if (allAttributes.size() == 0) return null;
+			
+			Set<AttributeType> types = allAttributes.stream().map(a->a.getType()).distinct().collect(Collectors.toSet());
+			if (types.size() == 1) return types.iterator().next();
+			return null;	//not a valid column as the key has different types in different cas (or is not valid in any cas)
+		}
+	}
 }

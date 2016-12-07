@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -114,6 +115,13 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		}
 	}
 
+	public String getMissionAttributeFromColumnName(String columnName){
+		for (Entry<String,String> e : missionColumnMap.entrySet()){
+			if (e.getValue().equalsIgnoreCase(columnName)) return e.getKey();
+		}
+		return null;
+	}
+	
 	public String getMissionAttributeColumnName(String missionAttributeKey){
 		return missionColumnMap.get(missionAttributeKey);
 	}
