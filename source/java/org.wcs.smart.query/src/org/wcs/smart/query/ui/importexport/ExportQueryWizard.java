@@ -92,6 +92,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private List<Projection> supportedProjections = null;
 	private Projection defaultProjection = null;
 	
+	@SuppressWarnings("unchecked")
 	private ExportQueryWizard(Query query, List<QueryEditorInput> initSelection) {
 		this.query = query;
 		if (this.query != null){
@@ -301,6 +302,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	/**
 	 * Exports a single query to the selected format/file.
 	 */
+	@SuppressWarnings("unchecked")
 	private void exportMultiDefs(IProgressMonitor monitor) {
 		File outputLocation = page4.getExportLocation();
 		List<ConservationArea> cas = page4.getConservationAreasToExport();

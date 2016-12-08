@@ -138,7 +138,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
+					if (filterer != null) filterer.dropTemporaryTables(c);
 					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
 				}

@@ -23,6 +23,7 @@ package org.wcs.smart.connect.dataqueue.cybertracker.patrol;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -95,7 +96,7 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 			
 			Double x = (Double) pntArray.get(0);
 			Double y = (Double) pntArray.get(1);
-			Date dt = JsonUtils.JSON_DATE_FORMAT.parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+			Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
 
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 			

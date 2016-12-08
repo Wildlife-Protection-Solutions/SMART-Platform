@@ -145,8 +145,9 @@ public class PlanTargetService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<PlanTargetGeoResource>();
-					members.add(new PlanTargetGeoResource(this));
+					ArrayList<PlanTargetGeoResource> temp = new ArrayList<>();
+					temp.add(new PlanTargetGeoResource(this));
+					this.members = temp;
 				}
 			}
 		}

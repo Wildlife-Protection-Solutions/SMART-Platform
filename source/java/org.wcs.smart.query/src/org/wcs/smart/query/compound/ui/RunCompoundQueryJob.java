@@ -122,12 +122,11 @@ public class RunCompoundQueryJob extends Job{
 				
 				//we want the ability to run with different date filters
 				//so we need to clone the query here
-				Query clone = q.clone(null);
-				clone.setId(q.getId());
-				clone.setUuid(q.getUuid());
 				if (q != null){
 					try{
-
+						Query clone = q.clone(null);
+						clone.setId(q.getId());
+						clone.setUuid(q.getUuid());
 						QueryItem qi = new QueryItem(layer, clone, type);
 						qi.setStatus(QueryItem.Status.PROCESSING);
 						items.add(qi);

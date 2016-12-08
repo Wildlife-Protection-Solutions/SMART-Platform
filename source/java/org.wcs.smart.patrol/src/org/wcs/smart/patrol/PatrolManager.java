@@ -121,7 +121,7 @@ public class PatrolManager {
 		
 		try{
 			patrol = (Patrol)session.load(Patrol.class, patrolUuid);
-			monitor.setTaskName(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{patrol.getId()}));
+			monitor.setTaskName(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{patrol == null ? patrolUuid.toString() : patrol.getId()}));
 			
 			// ensure can edit patrol 
 			String canEdit = canEdit(patrol, ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session));

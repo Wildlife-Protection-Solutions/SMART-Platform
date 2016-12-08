@@ -132,11 +132,10 @@ public class EntityQueryService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					
-					members = new ArrayList<EntityQueryGeoResource>();
+					ArrayList<EntityQueryGeoResource> temp = new ArrayList<>();
 					geoResource = new EntityQueryGeoResource(this);
-					members.add(geoResource);
-					
+					temp.add(geoResource);
+					this.members = temp;
 				}
 			}
 		}

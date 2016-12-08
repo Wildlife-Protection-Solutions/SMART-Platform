@@ -128,13 +128,14 @@ public class SmartService extends ISessionService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<SmartGeoResource>();
+					ArrayList<SmartGeoResource> temp = new ArrayList<>();
 					//these are only valid for single-cas
 					if (!isMultipleCa()){
 						for (int i = 0; i < Area.AreaType.values().length; i ++){
-							members.add(new SmartGeoResource(this, Area.AreaType.values()[i]));
+							temp.add(new SmartGeoResource(this, Area.AreaType.values()[i]));
 						}
 					}
+					this.members = temp;
 				}
 			}
 		}

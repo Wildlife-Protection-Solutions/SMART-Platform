@@ -92,7 +92,7 @@ public class EmptyGridCoverage {
 					AbstractGridFormat.READ_GRIDGEOMETRY2D.getName().toString(),
 					GridGeometry.class, null, world); 
 			
-			ParameterValueGroup empty =  new ParameterGroup(new DefaultParameterDescriptorGroup("", new GeneralParameterDescriptor[]{gridGeometryDescriptor}));
+			ParameterValueGroup empty =  new ParameterGroup(new DefaultParameterDescriptorGroup("", new GeneralParameterDescriptor[]{gridGeometryDescriptor})); //$NON-NLS-1$
 			
 			@Override
 			public String getDescription() {

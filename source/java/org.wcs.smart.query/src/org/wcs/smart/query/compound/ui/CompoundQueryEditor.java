@@ -182,7 +182,7 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 
 	@Override
 	public void reparseQuery() {
-		Job j = new Job("reparse compound query job"){
+		Job j = new Job(Messages.CompoundQueryEditor_jobname){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

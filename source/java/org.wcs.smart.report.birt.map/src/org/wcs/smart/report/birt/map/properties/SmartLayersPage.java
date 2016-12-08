@@ -773,14 +773,10 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			handle.setLayerStyles(ld.info.getMapStyle());
 			handle.setGeometryColumn(ld.info.getGeometryColumn());
 			handle.setLayerType(ld.info.getLayerType());
-			if (ld.handle != null){
-				handle.getHandle().setDataSet(ld.handle);
-				eihandle.setDataSet(ld.handle);
-				//find the column with the name matching ld.info.getGeometryColumnand update
-				//to the displayName value
-				//handle.setGeometryColumn(findLabel(ld.handle, ld.info.getGeometryColumn()));
-				//updateBindings(handle, (OdaDataSetHandle)handle.getHandle().getDataSet());
-			}
+			
+			handle.getHandle().setDataSet(ld.handle);
+			eihandle.setDataSet(ld.handle);
+			
 			mapItem.addLayers(Collections.singletonList(handle));
 
 		}catch (Exception ex){

@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
@@ -77,13 +78,16 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof DerbyPagedMissionResult) {
-			if (queryTempTable == null)
-				return super.equals(obj);
-			DerbyPagedMissionResult r2 = (DerbyPagedMissionResult) obj;
-			return queryTempTable.equals(r2.queryTempTable);
-		}
-		return super.equals(obj);
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		DerbyPagedMissionResult o = (DerbyPagedMissionResult)obj;
+		return Objects.equals(queryTempTable, o.queryTempTable);
+	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hash(queryTempTable);
 	}
 	
 	@Override

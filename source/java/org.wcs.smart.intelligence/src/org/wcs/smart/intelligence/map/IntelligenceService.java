@@ -128,8 +128,9 @@ public class IntelligenceService extends IService{
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<IntelligenceGeoResource>();
-					members.add(new IntelligenceGeoResource(this));
+					ArrayList<IntelligenceGeoResource> temp = new ArrayList<>();
+					temp.add(new IntelligenceGeoResource(this));
+					this.members = temp;
 				}
 			}
 		}

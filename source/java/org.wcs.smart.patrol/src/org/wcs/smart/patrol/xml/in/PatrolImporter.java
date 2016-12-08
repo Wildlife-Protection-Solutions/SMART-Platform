@@ -111,22 +111,23 @@ public class PatrolImporter {
 		
 		//file xml file
 		String[] files = directory.list();
-		
-		monitor.subTask(Messages.PatrolImporter_Progress_ReadingFile);
-		for (int i = 0; i < files.length; i ++){
-			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
-			if (f.isFile()){
-				//lets try reading the 
-				
-				try(FileInputStream in = new FileInputStream(f)){
-					ptype = PatrolXmlManager.readDataModel(in);
-				}catch (Exception ex){
-					SmartPatrolPlugIn.log(null, ex);
-					ptype = null;
-				}
-				if (ptype != null){
-					//we've found it!
-					break;
+		if (files != null){
+			monitor.subTask(Messages.PatrolImporter_Progress_ReadingFile);
+			for (int i = 0; i < files.length; i ++){
+				File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
+				if (f.isFile()){
+					//lets try reading the 
+					
+					try(FileInputStream in = new FileInputStream(f)){
+						ptype = PatrolXmlManager.readDataModel(in);
+					}catch (Exception ex){
+						SmartPatrolPlugIn.log(null, ex);
+						ptype = null;
+					}
+					if (ptype != null){
+						//we've found it!
+						break;
+					}
 				}
 			}
 		}

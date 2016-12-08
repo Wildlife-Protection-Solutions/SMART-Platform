@@ -239,7 +239,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 					Session s = HibernateManager.openSession();
 					try{
 						 p2 = (CyberTrackerPropertiesProfile) s.load(CyberTrackerPropertiesProfile.class, p.getUuid());
-						 p2.getOptions().size();
+						 if (p2 != null) p2.getOptions().size();
 					}finally{
 						s.close();
 					}

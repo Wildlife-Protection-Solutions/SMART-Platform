@@ -94,8 +94,8 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class MissionJsonProcessor implements IJsonProcessor {
 	
-	private static final DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd"); //$NON-NLS-1$
-	private static final DateFormat TIMEFORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
+	private DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd"); //$NON-NLS-1$
+	private DateFormat TIMEFORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
 	
 	private static final IWaypointSource SURVEY_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
 			.getSource(SurveyWaypointSource.KEY);
@@ -170,7 +170,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					//we have a new sampling unit
 					SamplingUnit su = null;
 					String suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT);
-					if (suKey != null & suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
+					if (suKey != null && suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
 						suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
 						if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
 							su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));
@@ -182,7 +182,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					link.setSamplingUnit(su);
 					
 					//add this point to track; this is not an observation
-					Date dt = JsonUtils.JSON_DATE_FORMAT.parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+					Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
 					addPointToTrack(link.getMission(), su, parser.readXYFromProperties(feature), dt, session);
 					
 					//update last observation count
@@ -197,7 +197,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
 					//for this patrol
-					Date dt = JsonUtils.JSON_DATE_FORMAT.parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+					Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
 					
 					if (link == null){
 						//create a new patrol object
@@ -593,7 +593,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		SamplingUnit su = null;
 		if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT)){
 			String suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT);
-			if (suKey != null & suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
+			if (suKey != null && suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
 				suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
 				if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
 					su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));

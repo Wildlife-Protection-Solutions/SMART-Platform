@@ -38,9 +38,8 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -75,9 +74,10 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	private Object lock = new Object();
 	private static volatile List<IJsonProcessor> jsonProcessors;
 	
-	private DisposeListener disposeListener = new DisposeListener() {
+	private Listener disposeListener = new Listener() {
+		
 		@Override
-		public void widgetDisposed(DisposeEvent e) {
+		public void handleEvent(Event event) {
 			synchronized (lock) {
 				lock.notifyAll();
 			}
@@ -135,8 +135,7 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 									break;
 								}
 							}
-							if (!found) s.removeDisposeListener(disposeListener);
-							s.addDisposeListener(disposeListener);
+							if (!found) s.addListener(SWT.Dispose,disposeListener);
 						}
 						
 						if (!wait[0]){
@@ -169,16 +168,17 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 		if (jsonProcessors == null){
 			synchronized (CybertrackerItemProcessor.class) {
 				if (jsonProcessors == null){
-					jsonProcessors = new ArrayList<IJsonProcessor>();
+					ArrayList<IJsonProcessor> temp = new ArrayList<IJsonProcessor>();
 					IConfigurationElement[] config = Platform.getExtensionRegistry()
 							.getConfigurationElementsFor(IJsonProcessor.EXTENSION_ID);
 					
 					for (IConfigurationElement e : config) {
 						if (e.getName().equalsIgnoreCase("JsonProcessor")){ //$NON-NLS-1$
 							IJsonProcessor proc = (IJsonProcessor) e.createExecutableExtension("class"); //$NON-NLS-1$
-							jsonProcessors.add(proc);
+							temp.add(proc);
 						}
 					}
+					jsonProcessors = temp;
 				}
 			}
 			

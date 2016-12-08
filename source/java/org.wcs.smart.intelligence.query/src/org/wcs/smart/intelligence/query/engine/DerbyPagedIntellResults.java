@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
@@ -69,14 +70,18 @@ public class DerbyPagedIntellResults extends AbstractPagedQueryResultSet impleme
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof DerbyPagedIntellResults) {
-			if (queryTempTable == null)
-				return super.equals(obj);
-			DerbyPagedIntellResults r2 = (DerbyPagedIntellResults) obj;
-			return queryTempTable.equals(r2.queryTempTable);
-		}
-		return super.equals(obj);
+		if (this == obj) return true;
+		if (obj == null ) return false;
+		if (getClass() != obj.getClass()) return false;
+		DerbyPagedIntellResults o = (DerbyPagedIntellResults)obj;
+		return Objects.equals(queryTempTable, o.queryTempTable);
 	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hash(queryTempTable);
+	}
+	
 	
 	@Override
 	public Envelope getEnvelope(){

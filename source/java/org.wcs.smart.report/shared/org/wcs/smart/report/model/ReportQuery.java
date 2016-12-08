@@ -93,12 +93,8 @@ public class ReportQuery {
 
 		private static final long serialVersionUID = 1L;
 		
-		private Report report;
-		private UUID queryUuid;
-		
-		public ReportQueryPk(){
-			
-		}
+		private Report report = null;
+		private UUID queryUuid = null;
 		
 		public ReportQueryPk(Report report, UUID queryUuid){
 			setReport(report);

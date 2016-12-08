@@ -186,7 +186,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 					}
 					if (allAttributes){
 						List<Attribute> kids = new ArrayList<Attribute>();
-						((Category)element).getAllAttribute(kids, onlyEnabled ? true : null);
+						((Category)element).getAllAttribute(kids, true);
 						if (kids.size() > 0){
 							return true;
 						}
@@ -198,7 +198,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 					}
 					if (allAttributes){
 						List<Attribute> kids = new ArrayList<Attribute>();
-						((Category)element).getAllAttribute(kids, onlyEnabled ? true : null);
+						((Category)element).getAllAttribute(kids, null);
 						if (kids.size() > 0){
 							return true;
 						}

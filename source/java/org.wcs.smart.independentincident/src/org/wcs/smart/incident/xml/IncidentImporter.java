@@ -109,21 +109,23 @@ public class IncidentImporter {
 		
 		//file xml file
 		String[] files = directory.list();
-		
-		monitor.subTask(Messages.IncidentImporter_ReadingXmlProgress);
-		for (int i = 0; i < files.length; i ++){
-			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
-			if (f.isFile()){
-				//lets try reading the
-				try(FileInputStream in = new FileInputStream(f)){
-					waypointtype = IncidentXmlManager.readIncident(in);
-				}catch (Exception ex){
-					IncidentPlugIn.log(null, ex);
-					waypointtype = null;
-				}
-				if (waypointtype != null){
-					//we've found it!
-					break;
+		if (files != null){
+			monitor.subTask(Messages.IncidentImporter_ReadingXmlProgress);
+			
+			for (int i = 0; i < files.length; i ++){
+				File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
+				if (f.isFile()){
+					//lets try reading the
+					try(FileInputStream in = new FileInputStream(f)){
+						waypointtype = IncidentXmlManager.readIncident(in);
+					}catch (Exception ex){
+						IncidentPlugIn.log(null, ex);
+						waypointtype = null;
+					}
+					if (waypointtype != null){
+						//we've found it!
+						break;
+					}
 				}
 			}
 		}

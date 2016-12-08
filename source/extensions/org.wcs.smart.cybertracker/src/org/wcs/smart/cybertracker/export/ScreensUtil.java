@@ -35,7 +35,6 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
-import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -45,7 +44,6 @@ import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
 import org.wcs.smart.cybertracker.model.filter.Categories;
 import org.wcs.smart.cybertracker.model.filter.ElementFilters;
 import org.wcs.smart.cybertracker.model.filter.Filter;
-import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.dataentry.model.DisplayMode;
@@ -163,6 +161,7 @@ public class ScreensUtil {
 		return idsBegin.get(0);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, 
 			List<CyberTrackerId> nodeIds, CyberTrackerPropertiesProfile ctProps, List<String>  jsonValues) {
 		if (nextTaskOptions.size() != nodeIds.size()) {

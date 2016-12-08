@@ -140,21 +140,22 @@ public class IntelligenceImporter {
 		
 		//file xml file
 		String[] files = directory.list();
-		
-		monitor.subTask(Messages.IntelligenceImporter_ReadingFile);
-		for (int i = 0; i < files.length; i ++){
-			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
-			if (f.isFile()){
-				//lets try reading the
-				try (FileInputStream in = new FileInputStream(f)){
-					itype = readDataModel(in);
-				} catch (Exception ex) {
-					IntelligencePlugIn.log(null, ex);
-					itype = null;
-				}
-				if (itype != null){
-					//we've found it!
-					break;
+		if (files != null){
+			monitor.subTask(Messages.IntelligenceImporter_ReadingFile);
+			for (int i = 0; i < files.length; i ++){
+				File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
+				if (f.isFile()){
+					//lets try reading the
+					try (FileInputStream in = new FileInputStream(f)){
+						itype = readDataModel(in);
+					} catch (Exception ex) {
+						IntelligencePlugIn.log(null, ex);
+						itype = null;
+					}
+					if (itype != null){
+						//we've found it!
+						break;
+					}
 				}
 			}
 		}

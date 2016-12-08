@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;
@@ -92,13 +93,17 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof DerbyPagedObservationResult) {
-			if (queryTempTable == null)
-				return super.equals(obj);
-			DerbyPagedObservationResult r2 = (DerbyPagedObservationResult) obj;
-			return queryTempTable.equals(r2.queryTempTable);
-		}
-		return super.equals(obj);
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		
+		DerbyPagedObservationResult o = (DerbyPagedObservationResult)obj;
+		return Objects.equals(queryTempTable, o.queryTempTable);
+	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hashCode(queryTempTable);
 	}
 	
 	@Override

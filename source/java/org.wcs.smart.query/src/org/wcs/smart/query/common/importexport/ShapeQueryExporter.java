@@ -215,7 +215,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		if (results instanceof IPagedQueryResultSet){
 			super.setData((IPagedQueryResultSet)results, columns, file);
 		}else if (results instanceof MemoryQueryResult){
-			super.setData(((MemoryQueryResult)results).getData(), columns, file);
+			super.setData(((MemoryQueryResult<?>)results).getData(), columns, file);
 		}else if (results instanceof GridQueryResult){
 			super.setData(((GridQueryResult)results).getData(), columns, file);
 		}

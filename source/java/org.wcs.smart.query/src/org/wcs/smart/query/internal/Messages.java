@@ -75,6 +75,7 @@ public class Messages extends NLS {
 	public static String CompoundQueryDefinitionImporter_QueryNotFound;
 	public static String CompoundQueryDefinitionImporter_SubImporterError;
 	public static String CompoundQueryDropFactory_NotFound;
+	public static String CompoundQueryEditor_jobname;
 	public static String CompoundQueryEditor_NewCompoundQueryName;
 	public static String CompoundQueryEditor_SummariesTabName;
 	public static String CompoundQueryExporter_DirectoryRequired;
@@ -340,6 +341,7 @@ public class Messages extends NLS {
 	public static String QueryHibernateManager_CaQueryFolderName;
 	public static String QueryHibernateManager_CouldNotSaveQueryError;
 	public static String QueryHibernateManager_MyQueryFolderName;
+	public static String QueryImportEngine_NoName;
 	public static String QueryImportEngine_QueryImporterNotFound1;
 	public static String QueryImporter_InvalidQueryType1;
 	public static String QueryImporter_InvalidQueryType2;

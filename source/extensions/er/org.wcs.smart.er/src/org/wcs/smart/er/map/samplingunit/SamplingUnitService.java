@@ -151,10 +151,11 @@ public class SamplingUnitService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<SamplingUnitGeoResource>();
+					ArrayList<SamplingUnitGeoResource> temp = new ArrayList<SamplingUnitGeoResource>();
 					//add two types
-					members.add(new SamplingUnitGeoResource(this, GeometryType.PLOT.name()));
-					members.add(new SamplingUnitGeoResource(this, GeometryType.TRANSECT.name()));
+					temp.add(new SamplingUnitGeoResource(this, GeometryType.PLOT.name()));
+					temp.add(new SamplingUnitGeoResource(this, GeometryType.TRANSECT.name()));
+					this.members = temp;
 				}
 			}
 		}

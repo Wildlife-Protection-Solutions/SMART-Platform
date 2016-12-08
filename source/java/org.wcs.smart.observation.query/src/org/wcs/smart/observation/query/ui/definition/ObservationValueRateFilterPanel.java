@@ -91,7 +91,7 @@ public class ObservationValueRateFilterPanel extends ValueRateFilterDeifnitionPa
 			}
 			session.getTransaction().rollback();
 			rateFilter.addItems(copies);
-			rateFilter.setFilterType(filterPart.getFilterType());
+			if (filterPart != null) rateFilter.setFilterType(filterPart.getFilterType());
 		}catch (Exception ex){
 			QueryPlugIn.displayLog(Messages.GriddedFilterPanel_CopyError, ex);
 			if (session != null && session.getTransaction().isActive()){

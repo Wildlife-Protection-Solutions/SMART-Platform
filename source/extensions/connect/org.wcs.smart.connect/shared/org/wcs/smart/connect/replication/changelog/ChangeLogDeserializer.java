@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -46,6 +47,8 @@ import org.wcs.smart.connect.model.ChangeLogItem.Source;
  */
 public abstract class ChangeLogDeserializer {
 
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat(ChangeLogItemSerializer.DATE_FORMAT_STR); 
+	
 	protected Path changeLogFile;
 	protected Path changeLogFilestoreDir;
 	protected Session session;
@@ -146,7 +149,7 @@ public abstract class ChangeLogDeserializer {
 				if( x == null){
 					data.put(colName, null);	
 				}else{
-					data.put(colName, new java.sql.Date(ChangeLogItemSerializer.DATE_FORMATTER.parse((String)x).getTime()));
+					data.put(colName, new java.sql.Date(dateFormatter.parse((String)x).getTime()));
 				}
 			}else if (type == Types.OTHER){
 				//uuid

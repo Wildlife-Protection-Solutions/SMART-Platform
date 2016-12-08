@@ -714,13 +714,9 @@ public class BirtMapLayer extends EObjectImpl implements Layer {
                 return Query.ALL;
             }
         } catch (Exception e) {
-            if (selection) {
-                Query q = new Query();
-                q.setFilter(Filter.EXCLUDE);
-                return q;
-            } else {
-                return Query.ALL;
-            }
+			Query q = new Query();
+			q.setFilter(Filter.EXCLUDE);
+			return q;
         }
     }
 
