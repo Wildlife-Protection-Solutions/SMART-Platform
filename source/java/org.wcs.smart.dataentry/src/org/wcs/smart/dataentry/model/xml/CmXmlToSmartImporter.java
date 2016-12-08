@@ -281,6 +281,10 @@ public class CmXmlToSmartImporter {
 			if (cmAttribute == null) {
 				//this is default mapping and it MUST be provided with datamodel attribute key
 				Attribute dmAttribute = fetchAttribute(xmlNode.getAttributeKey());
+				if (dmAttribute == null){
+					//attribute doesn't exist; skip this tree node
+					continue;
+				}
 				node.setDmAttribute(dmAttribute);
 				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), dmAttribute));
 			} else {
@@ -311,6 +315,10 @@ public class CmXmlToSmartImporter {
 			if (cmAttribute == null) {
 				//this is default mapping and it MUST be provided with datamodel attribute key
 				Attribute dmAttribute = fetchAttribute(xmlNode.getAttributeKey());
+				if (dmAttribute == null){
+					//attribute not found; do not add to list
+					continue;
+				}
 				item.setDmAttribute(dmAttribute);
 				item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute));
 			} else {
@@ -392,7 +400,12 @@ public class CmXmlToSmartImporter {
 			CmAttribute cmAttr = new CmAttribute();
 			cmAttr.setNode(parent);
 			updateNames(cmAttr, xmlAttr.getName());
-			cmAttr.setAttribute(fetchAttribute(xmlAttr.getAttributeKey()));
+			Attribute dmAttribute = fetchAttribute(xmlAttr.getAttributeKey());
+			if (dmAttribute == null){
+				//no attribute; skip this item
+				continue;
+			}
+			cmAttr.setAttribute(dmAttribute);
 			cmAttr.setOrder(i);
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
 			cmAttr.setTree(processCmTreeNodes(parent.getModel(), cmAttr, null, xmlAttr.getTreeNode(), monitor));
@@ -449,7 +462,12 @@ public class CmXmlToSmartImporter {
 			for (CmDmAttributeSettingsType sXml : setting.getSetting()) {
 				CmDmAttributeSettings s = new CmDmAttributeSettings();
 				s.setModel(cm);
-				s.setDmAttribute(fetchAttribute(sXml.getAttributeKey()));
+				Attribute dmAttribute = fetchAttribute(sXml.getAttributeKey());
+				if (dmAttribute == null){
+					//no data model attribute skip these settings
+					continue;
+				}
+				s.setDmAttribute(dmAttribute);
 				s.setDisplayMode(getDisplayMode(sXml.getDisplayMode()));
 				cm.getAttributeSettings().put(s.getDmAttribute(), s);
 			}
