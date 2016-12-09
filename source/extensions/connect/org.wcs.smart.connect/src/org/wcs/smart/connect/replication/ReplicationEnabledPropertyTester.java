@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 
 /**
  * Property tester for replication properties. 
@@ -44,7 +45,7 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 	@Override
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
-
+		
 		if (property.equals("isEnabled")){ //$NON-NLS-1$
 			//querying the database for the state causes session issues in other
 			//unless done in a job, and this is not necessary
@@ -53,6 +54,11 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 				
 				@Override
 				public IStatus run(IProgressMonitor monitor) {
+					if (!SmartHibernateManager.isSessionFactorySet()){
+						//for performance in particular for connect; skip this check if we don't have a session factory
+						isEnabled[0] = false;
+						return Status.OK_STATUS;
+					}
 					Session s = HibernateManager.openSession();
 					try{
 						isEnabled[0] = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);

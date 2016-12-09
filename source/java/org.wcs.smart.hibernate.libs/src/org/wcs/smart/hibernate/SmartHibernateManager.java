@@ -236,6 +236,14 @@ public class SmartHibernateManager {
 		return openSessionOnly(interceptor);	
 	}
 	
+	/**
+	 * Returns the current state of the session factory;
+	 * @return
+	 */
+	public static boolean isSessionFactorySet(){
+		return sessionFactory != null;
+	}
+	
 	private static Session openSessionOnly(Interceptor interceptor){
 		if (sessionFactory == null){
 			createSessionFactory();
