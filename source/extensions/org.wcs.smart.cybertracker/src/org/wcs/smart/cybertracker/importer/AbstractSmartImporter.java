@@ -183,8 +183,8 @@ public abstract class AbstractSmartImporter {
 			for (WaypointObservationAttribute woa : attributes){
 				if (allattributes.contains(woa.getAttribute())){
 					warnings.add(MessageFormat.format(
-							"Duplicate values found for attribute ''{0}'' for waypoint ''{1}''.  The value {2} will not be imported.",
-							woa.getAttribute().getName(), wp.getId() + " (" + DateFormat.getInstance().format(wp.getDateTime()) + ")", woa.getAttributeValueAsString(Locale.getDefault()) ));
+							Messages.AbstractSmartImporter_DuplicateWarning,
+							woa.getAttribute().getName(), wp.getId() + " (" + DateFormat.getInstance().format(wp.getDateTime()) + ")", woa.getAttributeValueAsString(Locale.getDefault()) )); //$NON-NLS-1$ //$NON-NLS-2$
 				}else{
 					allattributes.add(woa.getAttribute());
 					toAdd.add(woa);
