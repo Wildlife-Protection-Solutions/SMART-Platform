@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -171,7 +172,25 @@ public abstract class AbstractSmartImporter {
 			obs.setWaypoint(wp);
 			obs.setCategory(category);
 			obs.setObserver(observer);
-			obs.setAttributes(fetchAttributes(obs, attrList, eMap, session));
+			
+			List<WaypointObservationAttribute> attributes = fetchAttributes(obs, attrList, eMap, session);
+			
+			//check for duplicates here
+			//this should never happen; but it has happened at least once (#1955); so
+			//check and remove duplicates here
+			HashSet<Attribute> allattributes = new HashSet<Attribute>();
+			List<WaypointObservationAttribute> toAdd = new ArrayList<>();
+			for (WaypointObservationAttribute woa : attributes){
+				if (allattributes.contains(woa.getAttribute())){
+					warnings.add(MessageFormat.format(
+							"Duplicate values found for attribute ''{0}'' for waypoint ''{1}''.  The value {2} will not be imported.",
+							woa.getAttribute().getName(), wp.getId() + " (" + DateFormat.getInstance().format(wp.getDateTime()) + ")", woa.getAttributeValueAsString(Locale.getDefault()) ));
+				}else{
+					allattributes.add(woa.getAttribute());
+					toAdd.add(woa);
+				}
+			}
+			obs.setAttributes(toAdd);
 			
 			wp.getObservations().add(obs);
 		}
