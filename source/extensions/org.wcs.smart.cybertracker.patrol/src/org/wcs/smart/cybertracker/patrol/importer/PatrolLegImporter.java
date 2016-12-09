@@ -74,7 +74,7 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 		try {
 			session.beginTransaction();
 			
-			patrol = CyberTrackerHibernateManager.fetchByUuid(Patrol.class, patrol.getUuid(), session);
+			patrol = (Patrol) session.get(Patrol.class, patrol.getUuid());
 
 			PatrolLeg tmpLeg = new PatrolLeg();
 			initLegData(tmpLeg, ctPatrol, session);

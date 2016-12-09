@@ -55,6 +55,7 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -208,6 +209,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			if (e != null) {
 				if (e.getTag0() != null) {
 					SamplingUnit su = fetchFromTag0(SamplingUnit.class, e, session);
+					if (su != null && !su.getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())) su = null; //not valid for current conservation area
 					if (su == null)
 						ctSurvey.addWarning(SurveyMeta.START_SAMPLING_UNIT, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_NoSamplingUnit, e.getN()));
 					ctSurvey.setStartSamplingUnit(su);
@@ -243,6 +245,8 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 				{
 					E itemE = eMap.get(v);
 					MissionAttributeListItem item = fetchFromTag0(MissionAttributeListItem.class, itemE, session);
+					if (item != null && !item.getAttribute().getConservationArea().equals(SmartDB.getCurrentConservationArea())) item = null;
+					
 					if (item != null) {
 						mpv.setAttributeListItem(item);
 						ctSurvey.getMissionProperties().add(mpv);

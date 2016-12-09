@@ -438,6 +438,10 @@ public class MissionImporter extends AbstractSmartImporter {
 					SamplingUnit su = null;
 					if (e.getTag0() != null) {
 						su = CyberTrackerHibernateManager.fetchByUuid(SamplingUnit.class, e.getTag0(), session);
+						if (su != null && !su.getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+							//sampling unit is not valid for this conservation area
+							su = null;
+						}
 						if (su == null) {
 							addWarning(MessageFormat.format(Messages.MissionImporter_Warn_NoSamplingUnit, e.getN()));
 						}

@@ -123,7 +123,7 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 	@Override
 	protected Control createContents(Composite parent) {
 		Control control = super.createContents(parent);
-		getShell().setSize(getShell().computeSize(440, 200));
+	//	getShell().setSize(getShell().computeSize(440, 200));
 		return control;
 	}	
 	

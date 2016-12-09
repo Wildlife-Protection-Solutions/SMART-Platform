@@ -48,6 +48,7 @@ import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -174,6 +175,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		} else if (PatrolScreensUtil.RESULT_TRANSPORT.equals(n)) {
 			E e = eMap.get(v);
 			PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
+			if (transportType != null && !transportType.getConservationArea().equals(SmartDB.getCurrentConservationArea())) transportType = null; //transport type not valid for current conservation area
 			if (transportType == null)
 				ctPatrol.addError(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
 			ctPatrol.setCtTransport(e.getN());
@@ -187,6 +189,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		} else if (PatrolScreensUtil.RESULT_TEAM.equals(n)) {
 			E e = eMap.get(v);
 			Team t = fetchFromTag0(Team.class, e, session);
+			if (t != null && !t.getConservationArea().equals(SmartDB.getCurrentConservationArea())) t = null; //not valid for current conservation area
 			if (t == null && e.getTag0() != null)
 				ctPatrol.addWarning(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
 			ctPatrol.setCtTeam(e.getN());
@@ -194,6 +197,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		} else if (PatrolScreensUtil.RESULT_STATION.equals(n)) {
 			E e = eMap.get(v);
 			Station st = fetchFromTag0(Station.class, e, session);
+			if (st != null && !st.getConservationArea().equals(SmartDB.getCurrentConservationArea())) st = null; //not valid for current conservation area
 			if (st == null && e.getTag0() != null)
 				ctPatrol.addWarning(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
 			ctPatrol.setCtStation(e.getN());
@@ -201,6 +205,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		} else if (PatrolScreensUtil.RESULT_MANDATE.equals(n)) {
 			E e = eMap.get(v);
 			PatrolMandate m = fetchFromTag0(PatrolMandate.class, e, session);
+			if (m != null && !m.getConservationArea().equals(SmartDB.getCurrentConservationArea())) m = null; //not valid for current conservation area
 			if (m == null && e.getTag0() != null)
 				ctPatrol.addWarning(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
 			ctPatrol.setMandate(m);
