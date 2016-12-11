@@ -73,13 +73,14 @@ public interface IDataModelManager {
 			Attribute attribute, Session session);
 
 	/**
-	 * Determines the all attribute list items for the given attribute.
+	 * Determines the attribute list items for the given attribute.
 	 * 
 	 * @param attribute
 	 * @param session
+	 * @param onlyActive
 	 * @return
 	 */
-	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session);
+	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session, boolean onlyActive);
 	
 	/**
 	 * Determines the active attribute tree items for the given attribute
@@ -88,9 +89,16 @@ public interface IDataModelManager {
 	 * @param session
 	 * @return list of root attribute tree nodes
 	 */
-	public List<AttributeTreeNode> getActiveAttributeTreeNodes(
-			Attribute attribute, Session session);
+	public List<AttributeTreeNode> getActiveAttributeTreeNodes(Attribute attribute, Session session);
 
+	/**
+	 * Determines the attribute tree items for the given attribute (including inactive).
+	 * 
+	 * @param attribute
+	 * @param session
+	 * @return
+	 */
+	public List<AttributeTreeNode> getAllAttributeTreeNodes(Attribute attribute, Session session);
 	
 	/**
 	 * Returns the attribute with a given key for

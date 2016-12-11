@@ -48,6 +48,9 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryFilterConfigManager;
+import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
+import org.wcs.smart.query.common.model.QueryFilterConfiguration;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
@@ -84,9 +87,10 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				List<AttributeListItem> litems =QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, s);
+				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+				List<AttributeListItem> litems = QueryDataModelManager.getInstance().getAttributeListItems(attribute, s, !showInactive);
 				for (AttributeListItem item : litems){
-					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
+					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
 				}
 				//add the any item
 				items.add(0, BasicDropItemFactory.ANY_OPTION);				
@@ -117,7 +121,16 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 					getTargetPanel().redraw();
 				}});
 			return Status.OK_STATUS;
-		}};
+		}
+	};
+
+	private IConfigurationChangeListener queryConfChangeListener = new IConfigurationChangeListener() {
+		@Override
+		public void configurationChanged(QueryFilterConfiguration config) {
+			loadItemsJobs.cancel();
+			loadItemsJobs.schedule();
+		}
+	};
 		
 	/**
 	 * Creates a new attribute list drop item
@@ -160,6 +173,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	 */
 	@Override
 	public void dispose(){
+		QueryFilterConfigManager.getInstance().removeChangeListener(queryConfChangeListener);
 		super.dispose();
 		loadItemsJobs.cancel();
 		if (smallerFont != null){
@@ -247,6 +261,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 		
 		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
 		loadItemsJobs.schedule();
+		QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
 	}
 
 

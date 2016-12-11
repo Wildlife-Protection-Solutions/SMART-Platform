@@ -49,7 +49,10 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
+import org.wcs.smart.query.common.model.QueryFilterConfiguration;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.TreeDropDownViewer;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
@@ -67,7 +70,6 @@ import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 
 	private static AttributeTreeLabelProvider lProvider = null;
-	private final static AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(true, false);
 	
 	protected String text;
 	protected String key;
@@ -93,8 +95,9 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 			
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
+			boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
 			try{
-				roots = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
+				roots = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, s) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
 			}catch(Exception ex){
 				QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
 			}finally{
@@ -113,6 +116,8 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 								treeviewer.getTreeViewer().getControl().isDisposed()){
 							return;
 						}
+						AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(!showInactive, false);
+						treeviewer.getTreeViewer().setContentProvider(cProvider);
 						treeviewer.getTreeViewer().setInput(roots);
 						treeviewer.getTreeViewer().refresh();
 					}
@@ -123,6 +128,14 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 		}
 	};
 		
+	private IConfigurationChangeListener queryConfChangeListener = new IConfigurationChangeListener() {
+		@Override
+		public void configurationChanged(QueryFilterConfiguration config) {
+			loadItemsJobs.cancel();
+			loadItemsJobs.schedule();
+		}
+	};
+
 	/**
 	 * Creates a new attribute list drop item
 	 * 
@@ -164,6 +177,7 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 	 */
 	@Override
 	public void dispose(){
+		QueryFilterConfigManager.getInstance().removeChangeListener(queryConfChangeListener);
 		super.dispose();
 		if (smallerFont != null){
 			smallerFont.dispose();
@@ -256,6 +270,7 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 		
 		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
 		loadAttributes();
+		QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
 	}
 	
 	protected void loadAttributes(){
@@ -269,6 +284,8 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 			 return;
 		}
 		
+		boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+		AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(!showInactive, false);
 		treeviewer.getTreeViewer().setContentProvider(cProvider);
 		if (lProvider == null){
 			lProvider = new AttributeTreeLabelProvider();

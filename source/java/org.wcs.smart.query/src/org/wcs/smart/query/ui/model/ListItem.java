@@ -93,6 +93,14 @@ public class ListItem implements Comparable<ListItem>{
 		this.name = name;
 		this.key = key;
 	}
+
+	/**
+	 * Creates a new list item
+	 */
+	public ListItem(UUID uuid, String name, String key, boolean active) {
+		this(uuid, name, key);
+		this.active = active;
+	}
 	
 	/**
 	 * Creates a new list item

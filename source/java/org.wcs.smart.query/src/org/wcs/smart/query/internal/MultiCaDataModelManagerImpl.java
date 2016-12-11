@@ -55,11 +55,6 @@ import org.wcs.smart.util.SmartUtils;
  * conservation analysis.
  * 
  * @author Emily
- *
- */
-/**
- * @author Emily
- *
  */
 public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 
@@ -142,18 +137,26 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 	}
 	
 	/**
-	 * Determines all list items for the given
-	 * attribute. 
+	 * Determines the attribute list items for the given attribute.
 	 * 
 	 * @param attribute
 	 * @param session
+	 * @param onlyActive
 	 * @return
 	 */
 	@Override
-	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session){
+	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session, boolean onlyActive) {
 		return getActiveAttributeListItems(attribute, session);	
 	}
 	
+	/**
+	 * Determines the attribute tree items for the given attribute (including inactive).
+	 */
+	@Override
+	public List<AttributeTreeNode> getAllAttributeTreeNodes(Attribute attribute, Session session) {
+		return getActiveAttributeTreeNodes(attribute, session);
+	}	
+
 	/**
 	 * Returns only items shared across all conservation areas.
 	 * 
