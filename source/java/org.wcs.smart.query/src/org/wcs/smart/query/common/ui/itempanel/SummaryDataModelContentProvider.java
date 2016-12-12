@@ -34,10 +34,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -50,8 +56,13 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryFilterConfigManager;
+import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.QueryFilterConfiguration;
+import org.wcs.smart.query.internal.DataModelManagerUtil;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.ui.itempanel.QueryItemView;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
@@ -69,7 +80,6 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 	//data model 
 	private DataModel dataModel = null;
 	private DataModelContentProvider provider;
-	private DataModelLabelProvider dmLabelProvider;
 	private LabelProvider lp = null;
 	private Type type;
 	public enum Type{GROUPBY, VALUE};
@@ -90,6 +100,26 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 			this.image = image;
 		}
 	}
+
+	private IConfigurationChangeListener queryConfChangeListener = new IConfigurationChangeListener() {
+		
+		@Override
+		public void configurationChanged(QueryFilterConfiguration config) {
+			provider.dispose();
+			boolean showInactive = config.isShowInactiveItems();
+			provider = new DataModelContentProvider(false, !showInactive, true);
+			
+			IWorkbenchPage[] pages = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPages();
+			for (IWorkbenchPage page : pages) {
+				IViewPart view = page.findView(QueryItemView.ID);
+				if (view instanceof DIViewPart) {
+					@SuppressWarnings("unchecked")
+					QueryItemView qView = ((DIViewPart<QueryItemView>)view).getComponent();
+					qView.refresh();
+				}
+			}
+		}
+	};
 	
 	/**
 	 * Creates a new content provider 
@@ -97,7 +127,9 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 	 */
 	public SummaryDataModelContentProvider(Type type){
 		this.type = type;
-		provider = new DataModelContentProvider(false, true, true);
+		QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
+		boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+		provider = new DataModelContentProvider(false, !showInactive, true);
 	}
 
 	/**
@@ -105,6 +137,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 	 */
 	@Override
 	public void dispose() {
+		QueryFilterConfigManager.getInstance().removeChangeListener(queryConfChangeListener);
 		provider.dispose();
 	}
 
@@ -167,7 +200,8 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				return results;
 			}else if (parentElement == DataModelItem.ATTRIBUTES_GROUPBY){
 				//get all active attributes
-				List<Attribute> atts = QueryDataModelManager.getInstance().getActiveAttributes(dataModel);
+				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();				
+				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(dataModel, !showInactive);
 				
 				//filter out numeric only
 				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
@@ -192,7 +226,8 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				}
 				return Arrays.copyOf(results, cnt);			
 			}else if (parentElement == DataModelItem.ATTRIBUTES_VALUE){	
-				List<Attribute> atts = QueryDataModelManager.getInstance().getActiveAttributes(dataModel);
+				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();				
+				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(dataModel, !showInactive);
 				
 				//filter out numeric only
 				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
@@ -360,21 +395,22 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				try{
 					
 					List<AttributeTreeNode> nodes = null;
+					boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
 					
 					if (parent.getObject() instanceof Attribute){
 						Attribute attribute = (Attribute)parent.getObject();
 						attribute = QueryDataModelManager.getInstance().getAttribute(session, attribute);
 //						attribute.getName();
-						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
+						nodes = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, session) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
 						attribute = QueryDataModelManager.getInstance().getAttribute(session, attribute);
 //						attribute.getName();
-						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
+						nodes = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, session) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
 					}else if (parent.getObject() instanceof AttributeTreeNode){
 						AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
 						node.getAttribute().getName();
-						nodes = node.getActiveChildren();
+						nodes = showInactive ? node.getChildren() : node.getActiveChildren();
 					}
 					kids.addAll(nodes);					
 					session.getTransaction().rollback();
@@ -421,16 +457,17 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				Session session = HibernateManager.openSession();
 				session.beginTransaction();
 				try{
+					boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
 					List<AttributeListItem> nodes = null;
 					if (parent.getObject() instanceof Attribute){
 						Attribute attribute = (Attribute)parent.getObject();
-						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+						nodes = QueryDataModelManager.getInstance().getAttributeListItems(attribute, session, !showInactive);
 						for(AttributeListItem it : nodes){
 							it.getAttribute().getName();
 						}
 					}else if (parent.getObject() instanceof CategoryAttribute ){
 						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
-						nodes = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+						nodes = QueryDataModelManager.getInstance().getAttributeListItems(attribute, session, !showInactive);
 						for(AttributeListItem it : nodes){
 							it.getAttribute().getName();
 						}
@@ -473,56 +510,89 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 
 	public LabelProvider getLabelProvider(){
 		if (lp == null) {
-			dmLabelProvider = new DataModelLabelProvider();
-			
-			lp = new LabelProvider() {
-				@Override
-				public String getText(Object element) {
-					if (element instanceof DataModelItem) {
-						return ((DataModelItem) element).guiName;
-					}else if (element instanceof SummaryDmObject){
-						SummaryDmObject obj = (SummaryDmObject)element;
-						if (obj.getObject() instanceof Attribute){
-							return ((Attribute)obj.getObject()).getName();
-						}else if (obj.getObject() instanceof AttributeTreeNode){
-							String name = ((AttributeTreeNode)obj.getObject()).getName();
-							if (obj.isValue()){
-								return MessageFormat.format(Messages.SummaryDataModelContentProvider_CountLabel, new Object[]{name});
-							}else{
-								return name;
-							}
-						}else if (obj.getObject() instanceof AttributeListItem){
-							String name = ((AttributeListItem)obj.getObject()).getName();
-							if (obj.isValue()){
-								return MessageFormat.format(Messages.SummaryDataModelContentProvider_CountLabel, new Object[]{name});
-							}else{
-								return name;
-							}
-						}else if (obj.getObject() instanceof Category){
-							if (obj.isValue()){
-								return MessageFormat.format(Messages.SummaryDataModelContentProvider_CountLabel, new Object[]{((Category)obj.getObject()).getName()});
-							}else{
-								return ((Category)obj.getObject()).getName();
-							}
-						}else if (obj.getObject() instanceof CategoryAttribute){
-							return ((CategoryAttribute)obj.getObject()).getAttribute().getName();
-						}						
-					} 
-					return dmLabelProvider.getText(element);
-				}
-				@Override
-				public Image getImage(Object element){
-					if (element instanceof DataModelItem) {
-						return ((DataModelItem) element).image;
-					}else if (element instanceof SummaryDmObject){
-						return dmLabelProvider.getImage(((SummaryDmObject) element).getObject());
-					} else {
-						return dmLabelProvider.getImage(element);
-					}
-				}
-			};
+			lp = new SummaryDataModelLabelProvider();
 		}
 		return lp;
+	}
+	
+	/**
+	 * Label Provider for Summary DataModel filter.
+	 * 
+	 * @author elitvin
+	 * @since 4.1.0
+	 */
+	private class SummaryDataModelLabelProvider extends LabelProvider implements IColorProvider {
+
+		private DataModelLabelProvider dmLabelProvider = new DataModelLabelProvider();
+
+		@Override
+		public String getText(Object element) {
+			if (element instanceof DataModelItem) {
+				return ((DataModelItem) element).guiName;
+			}else if (element instanceof SummaryDmObject){
+				SummaryDmObject obj = (SummaryDmObject)element;
+				if (obj.getObject() instanceof Attribute){
+					return ((Attribute)obj.getObject()).getName();
+				}else if (obj.getObject() instanceof AttributeTreeNode){
+					String name = ((AttributeTreeNode)obj.getObject()).getName();
+					if (obj.isValue()){
+						return MessageFormat.format(Messages.SummaryDataModelContentProvider_CountLabel, new Object[]{name});
+					}else{
+						return name;
+					}
+				}else if (obj.getObject() instanceof AttributeListItem){
+					String name = ((AttributeListItem)obj.getObject()).getName();
+					if (obj.isValue()){
+						return MessageFormat.format(Messages.SummaryDataModelContentProvider_CountLabel, new Object[]{name});
+					}else{
+						return name;
+					}
+				}else if (obj.getObject() instanceof Category){
+					if (obj.isValue()){
+						return MessageFormat.format(Messages.SummaryDataModelContentProvider_CountLabel, new Object[]{((Category)obj.getObject()).getName()});
+					}else{
+						return ((Category)obj.getObject()).getName();
+					}
+				}else if (obj.getObject() instanceof CategoryAttribute){
+					return ((CategoryAttribute)obj.getObject()).getAttribute().getName();
+				}						
+			} 
+			return dmLabelProvider.getText(element);
+		}
+		@Override
+		public Image getImage(Object element){
+			if (element instanceof DataModelItem) {
+				return ((DataModelItem) element).image;
+			}else if (element instanceof SummaryDmObject){
+				return dmLabelProvider.getImage(((SummaryDmObject) element).getObject());
+			} else {
+				return dmLabelProvider.getImage(element);
+			}
+		}
+		@Override
+		public Color getForeground(Object element) {
+			if (element instanceof SummaryDmObject) {
+				return getForeground(((SummaryDmObject) element).getObject());
+			}
+			if (element instanceof Attribute) {
+				Attribute a = (Attribute) element;
+				return DataModelManagerUtil.isActive(a, dataModel) ? DataModelLabelProvider.BLACK : DataModelLabelProvider.GRAY;
+			}
+			if (element instanceof AttributeTreeNode) {
+				AttributeTreeNode node = (AttributeTreeNode) element;
+				return node.getIsActive() ? DataModelLabelProvider.BLACK : DataModelLabelProvider.GRAY;
+			}
+			if (element instanceof AttributeListItem) {
+				AttributeListItem li = (AttributeListItem) element;
+				return li.getIsActive() ? DataModelLabelProvider.BLACK : DataModelLabelProvider.GRAY;
+			}
+			return dmLabelProvider.getForeground(element);
+		}
+		@Override
+		public Color getBackground(Object element) {
+			return null;
+		}
 		
 	}
+	
 }
