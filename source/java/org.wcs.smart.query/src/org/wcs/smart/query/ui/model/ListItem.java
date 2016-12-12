@@ -24,8 +24,11 @@ package org.wcs.smart.query.ui.model;
 import java.text.Collator;
 import java.util.UUID;
 
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Color;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
 /**
  * A list item for drop item lists.  A list item can contain
@@ -115,6 +118,11 @@ public class ListItem implements Comparable<ListItem>{
 		this.shortName = shortName;
 	}
 	
+	public ListItem(UUID uuid, String name, String key, String shortName, boolean active){
+		this(uuid, name, key, shortName);
+		this.active = active;
+	}
+
 	/**
 	 * Updates the name
 	 * @param newName
@@ -161,9 +169,16 @@ public class ListItem implements Comparable<ListItem>{
 	 * @return label provider for list items
 	 */
 	public static LabelProvider createLabelProvider() {
-		return new ListItemLabelProvider();
+		return createLabelProvider(true);
 	}
 
+	/**
+	 * @return label provider for list items
+	 */
+	public static LabelProvider createLabelProvider(boolean addInactiveLabel) {
+		return new ListItemLabelProvider(addInactiveLabel);
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -213,14 +228,20 @@ public class ListItem implements Comparable<ListItem>{
 	 * @author elitvin
 	 * @since 4.1.0
 	 */
-	private static class ListItemLabelProvider extends LabelProvider {
+	private static class ListItemLabelProvider extends LabelProvider implements IColorProvider {
+		
+		private boolean addInactiveLabel;
+
+		public ListItemLabelProvider(boolean addInactiveLabel) {
+			this.addInactiveLabel = addInactiveLabel;
+		}
 
 		@Override
 		public String getText (Object element) {
 			if (element instanceof ListItem) {
 				ListItem li = (ListItem) element;
 				String name = li.getName();
-				if (!li.isActive()) {
+				if (addInactiveLabel && !li.isActive()) {
 					name += Messages.ListItem_Inactive;
 				}
 				return name;
@@ -228,5 +249,18 @@ public class ListItem implements Comparable<ListItem>{
 			return super.getText(element);
 		}
 
+		@Override
+		public Color getForeground(Object element) {
+			if (element instanceof ListItem) {
+				ListItem li = (ListItem) element;
+				return li.isActive() ? DataModelLabelProvider.BLACK : DataModelLabelProvider.GRAY;
+			}
+			return null;
+		}
+		
+		@Override
+		public Color getBackground(Object element) {
+			return null;
+		}
 	}
 }

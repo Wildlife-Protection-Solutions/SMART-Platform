@@ -43,6 +43,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -147,13 +148,14 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			List<AttributeTreeNode> nodes = QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute, level, true);
+			boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+			List<AttributeTreeNode> nodes = QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute, level, !showInactive);
 			for (AttributeTreeNode it : nodes) {
 				String name = it.getName();
 				if (it.getParent() != null){
 					name += "   (" + it.getParent().getFullCategoryName() +")" ;  //$NON-NLS-1$//$NON-NLS-2$
 				}
-				items.add(new ListItem(null, name, it.getHkey(), it.getName()));
+				items.add(new ListItem(null, name, it.getHkey(), it.getName(), it.getIsActive()));
 			}
 			for (ListItem filter: filters){
 				if (!items.contains(filter)){
