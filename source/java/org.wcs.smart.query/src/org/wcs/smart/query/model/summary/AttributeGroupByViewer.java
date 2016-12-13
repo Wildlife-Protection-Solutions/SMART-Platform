@@ -66,7 +66,7 @@ public class AttributeGroupByViewer extends AbstractGroupByViewer<AttributeGroup
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (att.getType() == AttributeType.LIST){
 			if (filterHkeys != null) {
-				for (AttributeListItem it : QueryDataModelManager.getInstance().getAttributeListItems(att, session)) {
+				for (AttributeListItem it : QueryDataModelManager.getInstance().getAttributeListItems(att, session, true)) {
 					for (String key : filterHkeys){
 						if (key.equals(it.getKeyId())){
 							items.add(new ListItem(null, it.getName(), it.getKeyId()));

@@ -31,6 +31,12 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
@@ -228,20 +234,49 @@ public class CyberTrackerHibernateManager {
 		if (isEmptyTag0(uuid))
 			return null;
 		try {
-			return fetchByUuid(clazz, UuidUtils.stringToUuid(uuid), session);
+			T value = fetchByUuid(clazz, UuidUtils.stringToUuid(uuid), session);
+			
+			if (value instanceof Category){
+				if (((Category)value).getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
+				return null;
+			}
+			if (value instanceof Attribute){
+				if (((Attribute)value).getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
+				return null;
+			}
+			if (value instanceof AttributeListItem){
+				if (((AttributeListItem)value).getAttribute().getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
+				return null;
+			}
+			if (value instanceof AttributeTreeNode){
+				if (((AttributeTreeNode)value).getAttribute().getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
+				return null;
+			}
+			if (value instanceof Employee){
+				if (((Employee)value).getConservationArea().equals(SmartDB.getCurrentConservationArea())) return value;
+				return null;
+			}
+
+			return value;
 		} catch (Exception e) {
 			CyberTrackerPlugIn.log(e.getMessage(), e);
 			return null;
 		}
 	}
 
+	/**
+	 * The function selects based on the uuid.  It is up to the user to ensure the 
+	 * returning objects is valid for the current conservation area.
+	 * 
+	 * @param clazz
+	 * @param byteUuid
+	 * @param session
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T fetchByUuid(Class<T> clazz, UUID byteUuid, Session session) {
-		if (byteUuid == null)
-			return null;
-		Criteria query = session.createCriteria(clazz)
-				.add(Restrictions.eq("uuid", byteUuid)); //$NON-NLS-1$
-		return (T) query.uniqueResult();
+		if (byteUuid == null) return null;
+		return (T) session.get(clazz, byteUuid);
 	}
 
 }

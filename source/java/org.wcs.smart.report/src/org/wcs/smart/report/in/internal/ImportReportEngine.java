@@ -146,6 +146,9 @@ public class ImportReportEngine {
 		//find the and read the .rpt file
 		File reportPropFile = null;
 		File[] f = tmpDir.listFiles();
+		if (f == null){
+			throw new Exception(Messages.ImportReportEngine_Error_NoPropertiesFile);
+		}
 		for (int i = 0; i < f.length; i ++){
 			if (f[i].getName().endsWith(".rpt")){ //$NON-NLS-1$
 				reportPropFile = f[i];

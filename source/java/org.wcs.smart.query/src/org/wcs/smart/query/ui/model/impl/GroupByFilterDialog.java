@@ -34,7 +34,6 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -140,19 +139,7 @@ public class GroupByFilterDialog extends TitleAreaDialog{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		viewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.MULTI);
-		viewer.setLabelProvider(new LabelProvider(){
-			/**
-			 * The <code>LabelProvider</code> implementation of this
-			 * <code>ILabelProvider</code> method returns the element's
-			 * <code>toString</code> string. Subclasses may override.
-			 */
-			public String getText(Object element) {
-				if (element instanceof ListItem){
-					return ((ListItem) element).getName();
-				}
-				return super.getText(element);
-			}
-		});
+		viewer.setLabelProvider(ListItem.createLabelProvider(false));
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 		viewer.setInput(new String[]{Messages.GroupByFilterDialog_LoadingLabel});
 		viewer.getControl().setEnabled(false);

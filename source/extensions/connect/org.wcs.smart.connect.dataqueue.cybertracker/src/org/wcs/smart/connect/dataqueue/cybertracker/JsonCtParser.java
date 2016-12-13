@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Time;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -238,7 +239,7 @@ public class JsonCtParser {
 		Double y = (Double)properties.get(LATITUDE_KEY);
 		if (y != null) newWaypoint.setY(y);
 			
-		Date dt = JsonUtils.JSON_DATE_FORMAT.parse((String)properties.get(DATETIME_KEY));
+		Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(DATETIME_KEY));
 		newWaypoint.setDateTime(dt);
 
 		newWaypoint.setObservations(new ArrayList<WaypointObservation>());

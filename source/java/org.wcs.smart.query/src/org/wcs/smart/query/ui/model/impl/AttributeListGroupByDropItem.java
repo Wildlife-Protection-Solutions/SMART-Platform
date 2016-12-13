@@ -45,6 +45,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -99,9 +100,10 @@ public class AttributeListGroupByDropItem extends DropItem implements
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
-			List<AttributeListItem> listitems = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute, session);
+			boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+			List<AttributeListItem> listitems = QueryDataModelManager.getInstance().getAttributeListItems(attribute, session, !showInactive);
 			for (AttributeListItem it : listitems){
-				items.add(new ListItem(null, it.getName(), it.getKeyId()));
+				items.add(new ListItem(null, it.getName(), it.getKeyId(), it.getIsActive()));
 			}
 			if (filters != null){
 				for(ListItem filter : filters){

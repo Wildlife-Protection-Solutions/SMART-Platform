@@ -159,16 +159,17 @@ public class QueryService extends IService implements IQueryService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<QueryGeoResource>();
+					ArrayList<QueryGeoResource> temp = new ArrayList<>();
 					if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
 						query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
-						members.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_TYPE));
-						members.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
+						temp.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_TYPE));
+						temp.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
 					}else if (query.getTypeKey().equals(MissionQuery.KEY)){
-						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
+						temp.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
 					}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
-						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
+						temp.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
 					}	
+					this.members = temp;
 				}
 			}
 		}

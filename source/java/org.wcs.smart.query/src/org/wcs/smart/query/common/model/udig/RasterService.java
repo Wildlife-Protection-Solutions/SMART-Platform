@@ -470,10 +470,12 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 						return (subpart.equals(namePrefix));
 					}
 				});
-				for (int i = 0; i < toDelete.length; i ++){
-					File f = new File(tempDirectory, toDelete[i]);
-					if( !f.delete()){
-						QueryPlugIn.log("cannot delete the file.  Should delete on shutdown " + f.toString(), null); //$NON-NLS-1$
+				if (toDelete != null){
+					for (int i = 0; i < toDelete.length; i ++){
+						File f = new File(tempDirectory, toDelete[i]);
+						if( !f.delete()){
+							QueryPlugIn.log("cannot delete the file.  Should delete on shutdown " + f.toString(), null); //$NON-NLS-1$
+						}
 					}
 				}
 				

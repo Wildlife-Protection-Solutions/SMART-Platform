@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -111,29 +112,28 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 * @param session
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<AttributeListItem> getActiveAttributeListItems(Attribute attribute, Session session){
-		List<AttributeListItem> items = session
-					.createCriteria(AttributeListItem.class)
-					.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
-					.add(Restrictions.eq("isActive", true)) //$NON-NLS-1$
-					.list();
-			return items;
-		
+	public List<AttributeListItem> getActiveAttributeListItems(Attribute attribute, Session session) {
+		return getAttributeListItems(attribute, session, true);
 	}
-	
+
 	/**
-	 * Determines all active attribute list items for the given
-	 * attribute. 
+	 * Determines the attribute list items for the given attribute.
 	 * 
 	 * @param attribute
 	 * @param session
+	 * @param onlyActive
 	 * @return
 	 */
 	@Override
-	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session){
-		return attribute.getActiveListItems();		
+	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session, boolean onlyActive) {
+		Criteria criteria = session.createCriteria(AttributeListItem.class).add(Restrictions.eq("attribute", attribute)); //$NON-NLS-1$
+		if (onlyActive) {
+			criteria = criteria.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
+		}
+		@SuppressWarnings("unchecked")
+		List<AttributeListItem> items = criteria.list();
+		return items;
 	}
 	
 	/**
@@ -146,23 +146,50 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public List<AttributeTreeNode> getActiveAttributeTreeNodes(Attribute attribute, Session session){
-		attribute = (Attribute) session.load(Attribute.class, attribute.getUuid());
-		if (attribute.getActiveTreeNodes() != null){
-			for (AttributeTreeNode node : attribute.getActiveTreeNodes()){
+		Attribute a = loadFullTreeAttribute(attribute, session);
+		return a.getActiveTreeNodes();
+	}
+
+	/**
+	 * Determines the attribute tree items for the given attribute (including inactive).
+	 * 
+	 * @param attribute
+	 * @param session
+	 * @return list of root attribute tree nodes
+	 */
+	@Override
+	public List<AttributeTreeNode> getAllAttributeTreeNodes(Attribute attribute, Session session) {
+		Attribute a = loadFullTreeAttribute(attribute, session);
+		return a.getTree();
+	}
+	
+	private Attribute loadFullTreeAttribute(Attribute attribute, Session session) {
+		Attribute a = (Attribute) session.load(Attribute.class, attribute.getUuid());
+		if (a.getActiveTreeNodes() != null) {
+			for (AttributeTreeNode node : a.getActiveTreeNodes()){
 				visitTreeNode(node);
 			}
 		}
-		return attribute.getActiveTreeNodes();
+		if (a.getTree() != null) {
+			for (AttributeTreeNode node : a.getTree()) {
+				visitTreeNode(node);
+			}
+		}
+		return a;
 	}
-	
 	private void visitTreeNode(AttributeTreeNode parent){
 		if (parent.getActiveChildren() != null){
 			for (AttributeTreeNode child: parent.getActiveChildren()){
 				visitTreeNode(child);
 			}
 		}
+		if (parent.getChildren() != null){
+			for (AttributeTreeNode child: parent.getChildren()){
+				visitTreeNode(child);
+			}
+		}
 	}
-	
+
 	/**
 	 * Returns the attribute with the given key
 	 * @param attributeKey

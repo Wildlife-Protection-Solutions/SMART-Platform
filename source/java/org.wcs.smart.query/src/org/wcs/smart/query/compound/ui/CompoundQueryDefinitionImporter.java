@@ -149,7 +149,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 					Session s = HibernateManager.openSession();
 					try{
 						localQuery = QueryHibernateManager.getInstance().findQuery(s, l.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()));
-						localQuery.getConservationArea().equals(ca);
+						if (localQuery != null) localQuery.getConservationArea().equals(ca);	//implemented to fix hibernate session loading problem
 					}finally{
 						s.close();
 					}

@@ -154,7 +154,7 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 				//do this to avoid time zone issues
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 				params.add(sdf.format((Date)obj));
-				sb.append("cast(? as timestamp),");
+				sb.append("cast(? as timestamp), ");
 			}else{
 				sb.append("?, "); //$NON-NLS-1$
 				params.add(obj);
@@ -167,7 +167,7 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		if (item.getFieldName2() != null){
 			sb.append(" AND " + item.getFieldName2()  + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+		//System.out.println(sb.toString());
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		for (int i = 1; i <= params.size(); i ++){
 			ps.setObject(i, params.get(i-1));

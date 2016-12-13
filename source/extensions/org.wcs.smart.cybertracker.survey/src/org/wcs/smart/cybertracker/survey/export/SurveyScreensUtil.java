@@ -43,7 +43,6 @@ import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.StartScreensContent;
-import org.wcs.smart.cybertracker.export.alert.AlertData;
 import org.wcs.smart.cybertracker.export.data.CtDataKeyValueRecord;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;

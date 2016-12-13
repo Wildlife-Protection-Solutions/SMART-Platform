@@ -126,7 +126,7 @@ public class SmartConnect {
 	 * 
 	 * @return
 	 */
-	public static final SmartConnect findInstance(ConnectServer server, String username, String password){
+	public synchronized static final SmartConnect findInstance(ConnectServer server, String username, String password){
 		if (lastConnect != null){
 			//if server; username; password and certification file are all the same
 			//we can reuse the last instance; otherwise we need to close and 
@@ -162,7 +162,7 @@ public class SmartConnect {
 	/**
 	 * Close all open Smart Connect instances
 	 */
-	public static final void closeAll(){
+	public synchronized static final void closeAll(){
 		if (lastConnect != null){ 
 			lastConnect.close();
 			lastConnect = null;

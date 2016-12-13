@@ -110,7 +110,6 @@ public class Messages extends NLS {
 	public static String PatrolScreensUtil_Error_Meta_Station;
 	public static String PatrolScreensUtil_Error_Meta_Team;
 	public static String PatrolScreensUtil_Error_Meta_Transport;
-	public static String PatrolScreensUtil_Error_Meta_Type;
 	public static String PatrolScreensUtil_Error_TransportNotSet;
 	public static String PatrolScreensUtil_PauseScreen_Message;
 	public static String PatrolScreensUtil_PauseScreen_Title;

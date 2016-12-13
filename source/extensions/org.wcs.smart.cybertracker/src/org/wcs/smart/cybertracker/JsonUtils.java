@@ -51,7 +51,7 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public class JsonUtils {
-	public static DateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"); //$NON-NLS-1$
+	public static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ParseResult parseDefaultAttributeValues(JSONObject defaultValues, Session session){
@@ -101,7 +101,7 @@ public class JsonUtils {
 				toUpdate.setNumberValue(0.0);
 			}	
 		}else if (att.getType() == AttributeType.DATE){
-			Date date = JSON_DATE_FORMAT.parse((String)value);
+			Date date = new SimpleDateFormat(JSON_DATE_FORMAT_STR).parse((String)value);
 			toUpdate.setDateValue(date);
 			
 		}else if (att.getType() == AttributeType.LIST){

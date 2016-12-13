@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.styling.LineSymbolizer;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;

@@ -158,7 +158,7 @@ public class QueryImportEngine {
 					if (qt.getName().size()>0) {
 						query.updateName(importCa.getDefaultLanguage(), qt.getName().get(0).getName());
 					}else{
-						query.updateName(importCa.getDefaultLanguage(), "(NoName)");
+						query.updateName(importCa.getDefaultLanguage(), Messages.QueryImportEngine_NoName);
 					}
 				}
 			}

@@ -157,13 +157,14 @@ public class QueryService extends IService implements IQueryService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<QueryGeoResource>();
+					ArrayList<QueryGeoResource> temp = new ArrayList<>();
 					if (query.getTypeKey().equals(ObsObservationQuery.KEY) || 
 							query.getTypeKey().equals(ObservationWaypointQuery.KEY) ){
-						members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
+						temp.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
 					}else if (query.getTypeKey().equals(ObservationGriddedQuery.KEY) ){
-						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
+						temp.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}
+					this.members = temp;
 				}
 			}
 		}

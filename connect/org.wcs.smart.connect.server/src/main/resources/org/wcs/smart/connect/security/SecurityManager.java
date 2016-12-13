@@ -51,11 +51,13 @@ public enum SecurityManager {
 	 * Determine if the user represented by the username is active
 	 */
 	private boolean isActive(Session s, String username){
-		SmartUserRole user = (SmartUserRole)s.createCriteria(SmartUserRole.class)
+		Long roleCnt = (Long)s.createCriteria(SmartUserRole.class)
 				.add(Restrictions.eq("id.username", username))
+				.setProjection(Projections.rowCount())
 				.uniqueResult();
-		if (user == null) return false;
-		return true;
+				
+		if (roleCnt > 0) return true;
+		return false;
 	}
 	
 	public boolean canAccess(Session s, String username, String action, UUID resource){

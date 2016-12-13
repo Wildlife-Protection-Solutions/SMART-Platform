@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
@@ -51,18 +52,21 @@ public class DerbyPagedWaypointResult extends AbstractSurveyPagedResult implemen
 		this.itemCount = itemCount;
 		this.engine = engine;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof DerbyPagedWaypointResult) {
-			if (queryTempTable == null)
-				return super.equals(obj);
-			DerbyPagedWaypointResult r2 = (DerbyPagedWaypointResult) obj;
-			return queryTempTable.equals(r2.queryTempTable);
-		}
-		return super.equals(obj);
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		DerbyPagedWaypointResult o = (DerbyPagedWaypointResult)obj;
+		return Objects.equals(queryTempTable, o.queryTempTable);
 	}
-
+	
+	@Override
+	public int hashCode(){
+		return Objects.hash(queryTempTable);
+	}
+	
 	/**
 	 * Opens a result set in the given session that accessed the query results
 	 */

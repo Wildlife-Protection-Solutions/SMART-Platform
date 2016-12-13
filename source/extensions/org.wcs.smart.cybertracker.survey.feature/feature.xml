@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.survey.feature"
       label="SMART CyberTracker Survey Module"
-      version="4.0.2.qualifier"
+      version="4.1.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 

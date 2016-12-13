@@ -83,6 +83,7 @@ public class ImportQueryCaListPage extends WizardPage {
 	}
 	
 	private Job loadQueriesJob = new Job(Messages.QueryListView_LoadQueryJobName){
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			HashMap<UUID, List<QueryEditorInput>> queries = new HashMap<UUID, List<QueryEditorInput>>();

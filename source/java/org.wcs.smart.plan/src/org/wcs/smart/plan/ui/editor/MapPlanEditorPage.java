@@ -249,15 +249,17 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 					try{
 						monitor.beginTask(Messages.MapPlanEditorPage_UpadingPatrolLayer, 2);
 						PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, new SubProgressMonitor(monitor, 1));
-						pq.setCachedResults(null); //clear cached results
+						
 						if (pq != null){
+							pq.setCachedResults(null); //clear cached results
 							pq.setQueryFilter(generateQueryString()); //update filter
-						}
-						Session session = HibernateManager.openSession();
-						try{
-							pq.setCachedResults(QueryExecutor.INSTANCE.executeQuery(pq, session, new SubProgressMonitor(monitor, 1)));
-						}finally{
-							session.close();
+						
+							Session session = HibernateManager.openSession();
+							try{
+								pq.setCachedResults(QueryExecutor.INSTANCE.executeQuery(pq, session, new SubProgressMonitor(monitor, 1)));
+							}finally{
+								session.close();
+							}
 						}
 					}catch (Exception e){
 						SmartPlanPlugIn.log("Error refreshing patrols layers." + e.getMessage(), e); //$NON-NLS-1$

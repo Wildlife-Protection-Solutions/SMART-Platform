@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Entity Query Reports
 Bundle-SymbolicName: org.wcs.smart.entity.query.report;singleton:=true
-Bundle-Version: 4.0.1.qualifier
+Bundle-Version: 4.1.0.qualifier
 Bundle-Activator: org.wcs.smart.entity.query.report.EntityReportPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

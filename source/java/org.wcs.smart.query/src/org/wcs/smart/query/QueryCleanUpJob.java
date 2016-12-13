@@ -50,8 +50,10 @@ public class QueryCleanUpJob extends Job{
 		File dir = QueryPlugIn.getDefault().getQueryTempDirectory();
 		if (dir.exists() && dir.isDirectory()){
 			File[] toDel = dir.listFiles();
-			for (int i = 0; i < toDel.length; i ++){
-				toDel[i].delete();
+			if (toDel != null){
+				for (int i = 0; i < toDel.length; i ++){
+					toDel[i].delete();
+				}
 			}
 		}
 		

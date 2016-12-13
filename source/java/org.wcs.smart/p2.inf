@@ -1,5 +1,5 @@
 instructions.configure=\
-  addRepository(name:Local Update Site (4.0.0),type:0,location:jar${#58}file${#58}./updatesite/site_4.0.1.v1.zip!/,enabled:true);\
-  addRepository(name:Local Update Site (4.0.0),type:1,location:jar${#58}file${#58}./updatesite/site_4.0.1.v1.zip!/,enabled:true);\
-  addRepository(name:Online Update Site (4.0.x),type:0,location:http://smartconservationtools.org/updatesite/4.0.1,enabled:true);\
-  addRepository(name:Online Update Site(4.0.x),type:1,location:http://smartconservationtools.org/updatesite/4.0.1,enabled:true);
+  addRepository(name:Local Update Site (4.1.0),type:0,location:jar${#58}file${#58}./updatesite/site_4.1.0.v1.zip!/,enabled:true);\
+  addRepository(name:Local Update Site (4.1.0),type:1,location:jar${#58}file${#58}./updatesite/site_4.1.0.v1.zip!/,enabled:true);\
+  addRepository(name:Online Update Site (4.1.x),type:0,location:http://smartconservationtools.org/updatesite/4.1.0,enabled:true);\
+  addRepository(name:Online Update Site(4.1.x),type:1,location:http://smartconservationtools.org/updatesite/4.1.0,enabled:true);

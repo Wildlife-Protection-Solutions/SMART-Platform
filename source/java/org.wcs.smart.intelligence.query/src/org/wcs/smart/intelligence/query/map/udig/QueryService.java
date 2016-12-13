@@ -150,10 +150,11 @@ public class QueryService extends IService implements IQueryService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<QueryGeoResource>();
+					ArrayList<QueryGeoResource> temp = new ArrayList<>();
 					if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY)){ 
-						members.add(new QueryGeoResource(this, IntelQueryDataSource.INTEL_TYPE));
+						temp.add(new QueryGeoResource(this, IntelQueryDataSource.INTEL_TYPE));
 					}
+					this.members = temp;
 				}
 			}
 		}

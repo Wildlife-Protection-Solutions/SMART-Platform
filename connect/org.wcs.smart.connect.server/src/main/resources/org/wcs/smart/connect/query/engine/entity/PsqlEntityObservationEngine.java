@@ -280,8 +280,9 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
             s.deleteCharAt(s.length()-1);
             s.append(")"); //$NON-NLS-1$
         
-            logger.finest(s.toString());
-            try(NamedPreparedStatement ps = parseQueryString(c, sql.toString())){
+            String query = s.toString();
+            logger.finest(query);
+            try(NamedPreparedStatement ps = parseQueryString(c, query)){
 				ps.executeUpdate();
 			}
 		}

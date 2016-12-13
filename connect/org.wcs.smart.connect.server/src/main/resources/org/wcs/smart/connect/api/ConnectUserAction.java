@@ -240,18 +240,21 @@ public class ConnectUserAction extends HttpServlet {
     @Path("/user/{username}")
     public List<SmartUserPermissionProxy> getUserPrivileges(@PathParam("username") String username){
 		boolean restricted = false;
-		if(!isCaAdminUser()){
+		try{
+			//admin users can access everything
 			validateAdmin();
-		}else{
-			restricted = true;
+		}catch (SmartConnectException e){
+			//maybe a ca admin user and has limited access
+			if (isCaAdminUser()){
+				restricted = true;
+			}else{
+				throw e;
+			}
 		}
 		
 		Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
 		s.beginTransaction();
 		try{
-					
-			
-			
 			@SuppressWarnings("unchecked")
 			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
 					.add(Restrictions.eq("username", username)) //$NON-NLS-1$

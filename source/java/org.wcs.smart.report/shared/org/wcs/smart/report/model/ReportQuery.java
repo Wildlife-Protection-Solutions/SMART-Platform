@@ -52,7 +52,7 @@ import javax.persistence.Transient;
 		joinColumns = @JoinColumn(name = "query_uuid")) })
 public class ReportQuery {
 
-	private ReportQueryPk id;
+	private ReportQueryPk id = new ReportQueryPk();
 	
 	/**
 	 * Creates a new report
@@ -93,8 +93,8 @@ public class ReportQuery {
 
 		private static final long serialVersionUID = 1L;
 		
-		private Report report;
-		private UUID queryUuid;
+		private Report report = null;
+		private UUID queryUuid = null;
 		
 		public ReportQueryPk(){
 			

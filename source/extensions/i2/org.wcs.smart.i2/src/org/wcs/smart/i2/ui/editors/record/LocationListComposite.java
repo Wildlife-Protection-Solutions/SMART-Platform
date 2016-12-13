@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ICellEditorValidator;
@@ -57,6 +58,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -82,7 +84,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class LocationListComposite extends Composite{
 	
-	public enum Column{ID,COMMENT,DATE,TIME};
+	public enum Column{ID,COMMENT,DATE,TIME,OBSERVATION};
 	
 	private TableViewer tblObservations;
 	private RecordEditor editor;
@@ -165,7 +167,7 @@ public class LocationListComposite extends Composite{
 				return super.getText(element);
 			}
 		});
-		idColumn.setEditingSupport(new TextTableEditor(tblObservations, Column.ID));
+		idColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.ID));
 		
 		TableViewerColumn dateColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		dateColumn.getColumn().setText("Date");
@@ -179,7 +181,7 @@ public class LocationListComposite extends Composite{
 				return super.getText(element);
 			}
 		});
-		dateColumn.setEditingSupport(new TextTableEditor(tblObservations, Column.DATE));
+		dateColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.DATE));
 		
 		TableViewerColumn timeColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		timeColumn.getColumn().setText("Time");
@@ -193,7 +195,7 @@ public class LocationListComposite extends Composite{
 				return super.getText(element);
 			}
 		});
-		timeColumn.setEditingSupport(new TextTableEditor(tblObservations, Column.TIME));
+		timeColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.TIME));
 		
 		TableViewerColumn commentColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
 		commentColumn.getColumn().setText("Comment");
@@ -207,7 +209,7 @@ public class LocationListComposite extends Composite{
 				return super.getText(element);
 			}
 		});
-		commentColumn.setEditingSupport(new TextTableEditor(tblObservations, Column.COMMENT));
+		commentColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.COMMENT));
 		
 		
 		TableViewerColumn obsColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
@@ -219,6 +221,7 @@ public class LocationListComposite extends Composite{
 				return "TODO:";
 			}
 		});
+		commentColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.OBSERVATION));
 		
 		
 		TableViewerColumn entityListColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
@@ -485,18 +488,20 @@ public class LocationListComposite extends Composite{
 		tblObservations.refresh();
 	}
 	
-	private class TextTableEditor extends EditingSupport {
+	private class LocationTableEditor extends EditingSupport {
 		
 		private CellEditor editor;
 		private Column col;
 		
-		TextTableEditor(TableViewer viewer, Column col) {
+		LocationTableEditor(TableViewer viewer, Column col) {
 			super(viewer);
 			this.col = col;
 			if (col == Column.DATE ){
 				this.editor = new DateCellEditor(viewer.getTable(), SWT.DATE | SWT.DROP_DOWN);
 			}else if (col == Column.TIME){
 				this.editor = new DateCellEditor(viewer.getTable(), SWT.TIME | SWT.DROP_DOWN);
+			}else if (col == Column.OBSERVATION){
+				this.editor = new RecordLocationObservationCellEditor();
 			}else{
 				this.editor = new TextCellEditor(viewer.getTable());
 			}
@@ -522,6 +527,8 @@ public class LocationListComposite extends Composite{
 					Date time = (Date)value;
 					Date date = ((IntelLocation)element).getDateTime();
 					((IntelLocation)element).setDateTime(SmartUtils.combineDateTime(date, time));
+				}else if (col == Column.OBSERVATION){
+					//TODO:
 				}
 				//Fire changes
 				LocationListComposite.this.editor.locationsUpdated();
@@ -540,6 +547,8 @@ public class LocationListComposite extends Composite{
 				return value;
 			}else if (col == Column.DATE || col == Column.TIME){
 				return ((IntelLocation)element).getDateTime();
+			}else if (col == Column.OBSERVATION){
+				return ((IntelLocation)element);
 			}
 			return null;
 		}

@@ -145,9 +145,10 @@ public class PatrolService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
-					members = new ArrayList<PatrolGeoResource>();
-					members.add(new PatrolGeoResource(this, PatrolDataSource.TRACK_TYPE));
-					members.add(new PatrolGeoResource(this, PatrolDataSource.WAYPOINT_TYPE));
+					ArrayList<PatrolGeoResource> temp = new ArrayList<>();
+					temp.add(new PatrolGeoResource(this, PatrolDataSource.TRACK_TYPE));
+					temp.add(new PatrolGeoResource(this, PatrolDataSource.WAYPOINT_TYPE));
+					this.members = temp;
 				}
 			}
 		}

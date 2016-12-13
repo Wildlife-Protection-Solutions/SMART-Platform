@@ -164,16 +164,16 @@ public class StationComposite extends PatrolItemComposite{
 	}
 
 	public void setInput(List<? extends Object> stations, Station station) {
-		Collections.sort(stations, new Comparator<Object>(){
-			@Override
-			public int compare(Object o1, Object o2) {
-				return Collator.getInstance().compare(((Station)o1).getName(), ((Station)o2).getName());
-		}});
-		
 		String none = Messages.StationComposite_NoStation_Label;
 		List<Object> stns = new ArrayList<Object>();
 		stns.add(none);
 		if (stations != null){
+			Collections.sort(stations, new Comparator<Object>(){
+				@Override
+				public int compare(Object o1, Object o2) {
+					return Collator.getInstance().compare(((Station)o1).getName(), ((Station)o2).getName());
+			}});
+			
 			stns.addAll(stations);
 		}
 		

@@ -919,7 +919,7 @@ public class FilterProcessor implements IFilterProcessor {
 				
 				if (dateFilter != null &&
 						(dateFilter.getDateFieldOption() instanceof MissionStartDateField ||
-								dateFilter.getDateFieldOption() instanceof MissionStartDateField)){
+								dateFilter.getDateFieldOption() instanceof MissionEndDateField)){
 					sql.append(" join "); //$NON-NLS-1$
 					sql.append(namePrefix(Mission.class));
 					sql.append(" on " + prefix(MissionDay.class) + ".mission_uuid = " + prefix(Mission.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

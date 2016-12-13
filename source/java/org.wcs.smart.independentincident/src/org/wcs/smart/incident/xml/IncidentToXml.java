@@ -44,11 +44,11 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
  */
 public class IncidentToXml {
 
-	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	public static final String DATE_FORMAT_STR = ("yyyy-MM-dd HH:mm:ss.SSS");  //$NON-NLS-1$
 	
 	public static WaypointType toXml(Waypoint incident) throws DatatypeConfigurationException{
 		WaypointType wt = new WaypointType();
-		wt.setDateTime(DATE_FORMAT.format(incident.getDateTime()));
+		wt.setDateTime(new SimpleDateFormat(DATE_FORMAT_STR).format(incident.getDateTime()));
 		wt.setComment(incident.getComment());
 		wt.setDirection(incident.getDirection());
 		wt.setDistance(incident.getDistance());

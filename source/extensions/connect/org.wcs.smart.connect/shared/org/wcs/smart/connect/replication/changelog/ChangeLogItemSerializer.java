@@ -54,7 +54,9 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class ChangeLogItemSerializer {
 
-	public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyyMMddHHmmssSSS"); //$NON-NLS-1$
+	public static final String DATE_FORMAT_STR = "yyyyMMddHHmmssSSS"; //$NON-NLS-1$
+	
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMAT_STR); 
 	
 	public abstract void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException;
 	
@@ -180,7 +182,7 @@ public abstract class ChangeLogItemSerializer {
 					if (obj == null){
 						stream.writeObject(null);
 					}else{
-						stream.writeObject(DATE_FORMATTER.format(rs.getObject(i)));
+						stream.writeObject(dateFormatter.format(rs.getObject(i)));
 					}
 				}else{
 					Object x = rs.getObject(i);

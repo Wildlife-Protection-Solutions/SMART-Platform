@@ -123,7 +123,8 @@ public class ExportQueryLocationPage extends WizardPage {
 		if (isDelimiter){
 			createDelimiterOption();
 		}
-		if (exporter.supportsProjection()){
+		
+		if (exporter != null && exporter.supportsProjection()){
 			createProjectionOption();
 		}
 		

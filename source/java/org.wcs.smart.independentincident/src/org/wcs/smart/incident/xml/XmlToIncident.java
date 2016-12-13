@@ -23,6 +23,7 @@ package org.wcs.smart.incident.xml;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -118,7 +119,7 @@ public class XmlToIncident {
 		incident.setDirection(xml.getDirection());
 		incident.setDistance(xml.getDistance());
 		incident.setId(xml.getId());
-		incident.setDateTime(IncidentToXml.DATE_FORMAT.parse(xml.getDateTime()));
+		incident.setDateTime(new SimpleDateFormat(IncidentToXml.DATE_FORMAT_STR).parse(xml.getDateTime()));
 		incident.setX(xml.getX());
 		incident.setY(xml.getY());
 		

@@ -183,7 +183,6 @@ public class Messages extends NLS {
 	public static String PatrolCaDeleteHandler_Progress_DeletingPatrols;
 	public static String PatrolCaDeleteHandler_Progress_DeletingTeams;
 	public static String PatrolCaDeleteHandler_Progress_DeletingTypes;
-	public static String PatrolDatabaseUpgrader_TaskName;
 	public static String PatrolDataSource_Error_CouldNoGenerateSchema;
 	public static String PatrolDataSourceFactory_Error_ReadOnlyStore;
 	public static String PatrolDataSourceFactory_Error_UnableReadPatrolDataSource;
@@ -623,7 +622,6 @@ public class Messages extends NLS {
 	public static String TeamPropertyPage_DuplicateTeamNameError;
 	public static String TeamPropertyPage_Error_DeletingTeam;
 	public static String TeamPropertyPage_Error_LoadingMandates;
-	public static String TeamPropertyPage_Error_LoadingTeams;
 	public static String TeamPropertyPage_Error_SavingUpdates;
 	public static String TeamPropertyPage_KeyErrorMessage;
 	public static String TeamPropertyPage_Language_Label;

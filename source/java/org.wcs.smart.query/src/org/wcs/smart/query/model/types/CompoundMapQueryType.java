@@ -24,8 +24,6 @@ package org.wcs.smart.query.model.types;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -48,7 +46,8 @@ import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 
 /**
- * Query type repesentation for Compound Map Queries
+ * Query type representation for Compound Map Queries
+ * 
  * @author Emily
  *
  */

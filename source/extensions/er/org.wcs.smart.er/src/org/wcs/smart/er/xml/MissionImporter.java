@@ -108,26 +108,27 @@ public class MissionImporter {
 		
 		monitor.worked(1);
 		
-		
-		monitor.subTask(Messages.MissionImporter_2);
-		for (int i = 0; i < files.length; i ++){
-			File f;
-			if(directory.isFile()){
-				f = new File(directory.getAbsolutePath());
-			}else{
-				f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
-			}
-			if (f.isFile()){
-				//lets try reading the
-				try(FileInputStream in = new FileInputStream(f)){
-					ptype = MissionXmlManager.readDataModel(in);
-				}catch (Exception ex){
-					EcologicalRecordsPlugIn.log(null, ex);
-					ptype = null;
+		if (files != null){
+			monitor.subTask(Messages.MissionImporter_2);
+			for (int i = 0; i < files.length; i ++){
+				File f;
+				if(directory.isFile()){
+					f = new File(directory.getAbsolutePath());
+				}else{
+					f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 				}
-				if (ptype != null){
-					//we've found it!
-					break;
+				if (f.isFile()){
+					//lets try reading the
+					try(FileInputStream in = new FileInputStream(f)){
+						ptype = MissionXmlManager.readDataModel(in);
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.log(null, ex);
+						ptype = null;
+					}
+					if (ptype != null){
+						//we've found it!
+						break;
+					}
 				}
 			}
 		}
