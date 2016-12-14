@@ -34,6 +34,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.SmartRoleAction;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserRole;
 
@@ -85,6 +86,24 @@ public enum SecurityManager {
 		if (cnt >  0){
 			return true;
 		}
+		
+
+		if (resource != null){
+			//Check for Roles that include CaAdmin actions
+			//API and other code checking for this access must call canAccess with the CAUUID as the resource for this check to work
+			queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
+			queryString += "WHERE a.role = role AND r.id.username = :username AND a.action = :caAdminAction AND a.resource = :resource"; //$NON-NLS-1$
+			query = s.createQuery(queryString);
+			query.setParameter("username",  username); //$NON-NLS-1$
+			query.setParameter("caAdminAction", CaAdminAccountAction.KEY); //$NON-NLS-1$
+			query.setParameter("resource", resource); //$NON-NLS-1$
+			cnt = (Long)query.uniqueResult();
+			if (cnt >  0){
+				return true;
+			}
+
+		}
+		
 		
 		//check actions for permission
 		Criterion r = null;
@@ -139,6 +158,29 @@ public enum SecurityManager {
 		//ensure the user is active
 		if (!isActive(s, username)) return false;
 		
+		
+		//Check for Roles that allow access to the actions
+		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
+		queryString += "WHERE a.role = role AND r.id.username = :username AND (a.action = :action ";
+		if(!action.equals(AdminAccountAction.KEY) && !action.equals(CaAdminAccountAction.KEY) ){ //if we are asking specifically about admin or caAdmin users (probably the menu filter) don't add this, or else it will return true for admin and caAdmin regardless
+			queryString += "OR  (a.action = :adminAction  OR a.action = :caAction)";
+		}
+
+		queryString += ")"; //$NON-NLS-1$
+		
+		Query query = s.createQuery(queryString);
+		query.setParameter("username",  username); //$NON-NLS-1$
+		query.setParameter("action", action); //$NON-NLS-1$
+		if(!action.equals(AdminAccountAction.KEY) && !action.equals(CaAdminAccountAction.KEY) ){
+			query.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
+			query.setParameter("caAction", CaAdminAccountAction.KEY); //$NON-NLS-1$
+		}
+		Long cnt = (Long)query.uniqueResult();
+		if (cnt >  0){
+			return true;
+		}
+
+		//Check for specific actions that allow access
 		Criterion r = null;
 		r = Restrictions.eq("action", action); //$NON-NLS-1$
 
@@ -156,7 +198,7 @@ public enum SecurityManager {
 		}
 		c.setProjection(Projections.rowCount());
 
-		Long cnt = (Long) c.uniqueResult();
+		cnt = (Long) c.uniqueResult();
 		if (cnt == 0){
 			return false;
 		}else{
@@ -198,7 +240,18 @@ public enum SecurityManager {
 
 	//is the user is CaAdmin of any CA?
 	public boolean isCaAdmin(Session s, String username, String key) {
-		//TODO: do we need to ensure the user is active first?
+
+		//Check for Roles that include CaAdmin actions
+		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
+		queryString += "WHERE a.role = role AND r.id.username = :username AND a.action = :caAdminAction "; //$NON-NLS-1$
+		Query query = s.createQuery(queryString);
+		query.setParameter("username",  username); //$NON-NLS-1$
+		query.setParameter("caAdminAction", CaAdminAccountAction.KEY); //$NON-NLS-1$
+		Long cnt = (Long)query.uniqueResult();
+		if (cnt >  0){
+			return true;
+		}
+		
 		Criteria c2 = s.createCriteria(SmartUserAction.class);
 		c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
 		.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$
