@@ -19,21 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.editors.record;
+package org.wcs.smart.i2.ui.editors;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -41,21 +35,19 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
 import org.wcs.smart.i2.ui.SmartShellDialog;
 
 /**
- * Shell dialog for displaying details of an intel location.
+ * Shell for displaying the observation details of an intel location.
  * 
  * @author Emily
  *
  */
-public class LocationDetailsShell extends SmartShellDialog{
+public class ObservationDetailsShell extends SmartShellDialog{
 	
 	private IntelLocation location;
-	private List<IntelEntityLocation> entityLocationLinks;
 	
 	private Color bgColor = null;
 	private Font boldFont = null;
@@ -64,34 +56,11 @@ public class LocationDetailsShell extends SmartShellDialog{
 	private int xPos, yPos;
 	private Label lblId;
 	
-//	private TreeViewer observationTree;
-	private ScrolledComposite sc;
-	private Composite main;
-	
-	@Override
-	public void open(Point position){
-		Point sizea = shell.getSize();
-		createContents(shell);
-		shell.setSize(shell.getSize().x, 400);
-		Point sizeb = shell.getSize();
-		int y = sizea.y - sizeb.y + position.y;
-		int x = sizea.x - sizeb.x + position.x;
-		shell.setLocation(x, y);
-		shell.open();
-		
-		sc.layout(true, true);
-		sc.setMinSize(main.computeSize(main.getBounds().width, SWT.DEFAULT));
-	}
-		
-	public LocationDetailsShell(Shell ownerShell, IntelLocation location, List<IntelEntityLocation> entityLocationLinks){
+
+	public ObservationDetailsShell(Shell ownerShell, IntelLocation location){
 		super(ownerShell, SWT.RESIZE);
 		this.location = location;
-		this.entityLocationLinks = new ArrayList<IntelEntityLocation>();
-		for (IntelEntityLocation l : entityLocationLinks){
-			if (l.getLocation().equals(location)){
-				this.entityLocationLinks.add(l);
-			}
-		}
+
 	}
 	
 	public void createContents(Composite parent){
@@ -114,83 +83,20 @@ public class LocationDetailsShell extends SmartShellDialog{
 		lblId.addListener(SWT.MouseEnter, this);
 		lblId.addListener(SWT.MouseExit, this);
 		
-		Label lblDate = new Label(owner, SWT.NONE);
-		lblDate.setText(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(location.getDateTime()));
 		
-		
-		sc = new ScrolledComposite(owner, SWT.V_SCROLL | SWT.H_SCROLL);
-		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		main = new Composite(sc, SWT.NONE);
-		main.setLayout(new GridLayout());
-		((GridLayout)main.getLayout()).marginWidth = 0;
-		((GridLayout)main.getLayout()).marginHeight = 0;
-		sc.setContent(main);
-		sc.setExpandHorizontal(true);
-		sc.setExpandVertical(true);
-		
-		
-		if (location.getComment() != null && !location.getComment().isEmpty()){
-			Label lblComment = new Label(main, SWT.WRAP);
-			lblComment.setText(location.getComment());
-			lblComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridData)lblComment.getLayoutData()).widthHint = 100;
-		}
-		
-		Composite entities = new Composite(main, SWT.NONE);
-		entities.setLayout(new GridLayout(2, false));
-		((GridLayout)entities.getLayout()).marginWidth = 0;
-		((GridLayout)entities.getLayout()).marginHeight = 0;
-		entities.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		
-		Label lblEntities = new Label(entities, SWT.NONE);
-		lblEntities.setText("Entities:");
-		lblEntities.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		if (!entityLocationLinks.isEmpty()){	
-			ListViewer lstViewer = new ListViewer(entities, SWT.NONE);
-			lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-			lstViewer.setLabelProvider(new LabelProvider(){
-				@Override
-				public String getText(Object element){
-					if (element instanceof IntelEntityLocation){
-						return ((IntelEntityLocation) element).getEntity().getIdAttributeAsText();
-					}
-					return super.getText(element);
-				}
-			});
-			
-			lstViewer.setInput(entityLocationLinks);
-		}else{
-			Label l = new Label(entities, SWT.NONE);
-			l.setText("(None)");
-		}
-		
-		
-		Composite obs = new Composite(main, SWT.NONE);
-		obs.setLayout(new GridLayout(2, false));
-		((GridLayout)obs.getLayout()).marginWidth = 0;
-		((GridLayout)obs.getLayout()).marginHeight = 0;
-		obs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		
-		Label lblObservations = new Label(obs, SWT.NONE);
-		lblObservations.setText("Observations:");
-		lblObservations.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		if (location.getObservations() != null && !location.getObservations().isEmpty()){
-			ObservationTreeViewer observationTree = new ObservationTreeViewer(obs, SWT.FULL_SELECTION);
-			observationTree.getViewer().getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			ObservationTreeViewer observationTree = new ObservationTreeViewer(owner, SWT.FULL_SELECTION | SWT.V_SCROLL);
+			observationTree.getViewer().getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			observationTree.setInput(location);
 			observationTree.expandToLevel(2);
+			
 		}else{
-			Label l = new Label(obs, SWT.NONE);
+			Label l = new Label(owner, SWT.NONE);
 			l.setText("(None)");
 		}
-		sc.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
 		//configure background color
 		bgColor = new Color(parent.getDisplay(), 255, 255, 225);
-		
 		List<Control> items = new ArrayList<Control>();
 		items.add(owner);
 		while(!items.isEmpty()){

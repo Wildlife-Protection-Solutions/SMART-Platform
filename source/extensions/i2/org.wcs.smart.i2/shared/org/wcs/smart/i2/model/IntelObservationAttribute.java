@@ -114,7 +114,7 @@ public class IntelObservationAttribute {
 		this.sValue = value;
 	}
 	
-	@Column(name="number_value")
+	@Column(name="double_value")
 	public Double getNumberValue(){
 		return this.dValue;
 	}

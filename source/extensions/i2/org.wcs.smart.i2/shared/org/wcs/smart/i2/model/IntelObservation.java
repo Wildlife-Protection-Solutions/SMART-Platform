@@ -23,6 +23,7 @@ package org.wcs.smart.i2.model;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -100,8 +101,7 @@ public class IntelObservation extends UuidItem{
 	 * 
 	 * @return The set of i_observation_attribute
 	 */
-	@OneToMany
-	@JoinColumn(name="observation_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.observation", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelObservationAttribute> getObservationAttributes() {
 		return this.attributes;
 	}

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +56,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.MenuEvent;
@@ -62,6 +64,7 @@ import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -116,12 +119,15 @@ import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelObservation;
+import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
+import org.wcs.smart.i2.ui.editors.record.LocationDetailsShell;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
@@ -158,7 +164,13 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			if (this==COMMENT) return location.getComment() == null ? "" : location.getComment();
 			if (this == RECORD) return location.getRecord().getTitle();
 			if (this == RECORDDATE) return DateFormat.getDateTimeInstance().format(location.getRecord().getDateCreated());
-			if (this == OBSERVATION) return "TODO:";
+			if (this == OBSERVATION){
+				int cnt = 0;
+				if (location.getObservations() != null ){
+					cnt = location.getObservations().size();
+				}
+				return MessageFormat.format("{0} Observations", cnt);
+			};
 			return "";
 			
 		}
@@ -563,6 +575,48 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			}
 		};
 
+		Listener tableListener = new Listener(){
+			private boolean doHover = true;
+			private ObservationDetailsShell detailsShell = null;
+			
+			@Override
+			public void handleEvent(Event event) {
+				switch(event.type){
+					case SWT.MouseDoubleClick:
+					case SWT.MouseDown:
+					case SWT.MouseUp:
+						doHover = false;
+						break;
+					case SWT.MouseMove:
+						doHover= true;
+						break;
+					case SWT.MouseHover:
+						if (doHover){
+							doHover(event.x,event.y);
+						}
+						break;
+				}
+					
+			}
+			private void doHover(int x, int y){
+				ViewerCell cell = locationTable.getCell(new Point(x, y));
+				if (cell != null && cell.getElement() instanceof IntelEntityLocation && cell.getColumnIndex() == 6){
+					IntelEntityLocation location = (IntelEntityLocation) cell.getElement();
+					if (detailsShell == null || detailsShell.isDisposed() || !detailsShell.getLocationRecord().equals(location.getLocation())){
+						detailsShell = new ObservationDetailsShell(getShell(),((IntelEntityLocation)cell.getElement()).getLocation());
+						int height = detailsShell.getSize().y;
+						Point p  = locationTable.getTable().toDisplay(x, y);
+						detailsShell.open(new Point(p.x, p.y - height));
+					}
+				}
+			}
+			
+		};
+		locationTable.getTable().addListener(SWT.MouseDoubleClick, tableListener);
+		locationTable.getTable().addListener(SWT.MouseDown, tableListener);
+		locationTable.getTable().addListener(SWT.MouseUp, tableListener);
+		locationTable.getTable().addListener(SWT.MouseMove, tableListener);
+		locationTable.getTable().addListener(SWT.MouseHover, tableListener);	
 		
 		Menu mnu = new Menu(locationTable.getTable());
 		locationTable.getTable().setMenu(mnu);
@@ -800,6 +854,19 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				for (IntelEntityLocation l : alllocations){
 					l.getLocation().getId();
 					l.getLocation().getRecord().getTitle();
+					
+					if (l.getLocation().getObservations() != null){
+						for (IntelObservation o : l.getLocation().getObservations()){
+							o.getCategory().getFullCategoryName();
+							if (o.getObservationAttributes() != null){
+								for (IntelObservationAttribute a : o.getObservationAttributes()){
+									a.getAttribute().getName();
+									if (a.getAttributeListItem() != null)a.getAttributeListItem().getName();
+									if (a.getAttributeTreeNode() != null)a.getAttributeTreeNode().getName();
+								}
+							}
+						}
+					}
 				}
 			}finally{
 				s.close();

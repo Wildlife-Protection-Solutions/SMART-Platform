@@ -302,6 +302,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						});
 					}
 				}
+				
 			}finally{
 				s.close();
 			}

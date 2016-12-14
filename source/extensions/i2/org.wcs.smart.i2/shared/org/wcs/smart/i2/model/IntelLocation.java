@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -169,8 +170,7 @@ public class IntelLocation extends UuidItem{
 		this.record = record;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="location_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="location", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelObservation> getObservations(){
 		return this.observations;
 	}

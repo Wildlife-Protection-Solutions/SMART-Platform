@@ -35,7 +35,6 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
-import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ICellEditorValidator;
@@ -47,6 +46,7 @@ import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
@@ -58,7 +58,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -68,12 +67,14 @@ import org.geotools.legend.Glyph;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.IntelSecurityManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.DateCellEditor;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.ObservationDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -94,6 +95,7 @@ public class LocationListComposite extends Composite{
 	private MenuItem deleteItem;
 	private MenuItem addLinkItem;
 	private MenuItem dropLinkItem;
+	private MenuItem editObsItem;
 		
 	public LocationListComposite(Composite parent, FormToolkit toolkit, RecordEditor editor){
 		super(parent, SWT.NONE);
@@ -218,10 +220,19 @@ public class LocationListComposite extends Composite{
 		obsColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				return "TODO:";
+				if (element instanceof IntelLocation){
+					int cnt = -1;
+					if (((IntelLocation)element).getObservations() == null){
+						cnt = 0;
+					}else{
+						cnt = ((IntelLocation)element).getObservations().size();
+					}
+					return MessageFormat.format("{0} Observation", cnt);
+				}
+				return super.getText(element);
 			}
 		});
-		commentColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.OBSERVATION));
+		obsColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.OBSERVATION));
 		
 		
 		TableViewerColumn entityListColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
@@ -297,6 +308,10 @@ public class LocationListComposite extends Composite{
 						deleteItem.dispose();
 						deleteItem = null;
 					}
+					if (editObsItem != null){
+						editObsItem.dispose();
+						editObsItem = null;
+					}
 					if (addLinkItem != null){
 						addLinkItem.dispose();
 						addLinkItem = null;
@@ -318,6 +333,24 @@ public class LocationListComposite extends Composite{
 								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
 								if (selection instanceof IntelLocation){
 									editor.deleteLocation(((IntelLocation)selection));
+								}
+							}
+						});
+					}
+					if(editObsItem  == null){
+						editObsItem = new MenuItem(linkEntities, SWT.PUSH);
+						editObsItem.setText("Edit Observations...");
+						editObsItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+						editObsItem.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+								if (selection instanceof IntelLocation){
+									ObservationDialog dialog = new ObservationDialog(getShell(), (IntelLocation)selection);
+									if (dialog.open() == Window.OK){
+										editor.setDirty(true);
+										tblObservations.refresh();
+									}
 								}
 							}
 						});
@@ -498,10 +531,10 @@ public class LocationListComposite extends Composite{
 			this.col = col;
 			if (col == Column.DATE ){
 				this.editor = new DateCellEditor(viewer.getTable(), SWT.DATE | SWT.DROP_DOWN);
-			}else if (col == Column.TIME){
+			}else if (col == Column.TIME){ 
 				this.editor = new DateCellEditor(viewer.getTable(), SWT.TIME | SWT.DROP_DOWN);
 			}else if (col == Column.OBSERVATION){
-				this.editor = new RecordLocationObservationCellEditor();
+				this.editor = new RecordLocationObservationCellEditor(viewer.getTable());
 			}else{
 				this.editor = new TextCellEditor(viewer.getTable());
 			}
@@ -573,6 +606,8 @@ public class LocationListComposite extends Composite{
 		
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
+			if (editor instanceof RecordLocationObservationCellEditor) return editor;
+			
 			this.editor.setValidator(new ICellEditorValidator() {
 				@Override
 				public String isValid(Object value) {

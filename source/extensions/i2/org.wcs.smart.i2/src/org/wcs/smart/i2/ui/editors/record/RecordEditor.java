@@ -32,6 +32,7 @@ import java.util.UUID;
 
 
 
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -71,10 +72,12 @@ import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
+import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+
 
 
 
@@ -159,6 +162,18 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					if (temp.getLocations() != null){
 						for (IntelLocation loc : temp.getLocations()){
 							loc.getId();
+							if (loc.getObservations() != null){
+								for (IntelObservation oo : loc.getObservations()){
+									oo.getCategory().getFullCategoryName();
+									if (oo.getObservationAttributes() != null){
+										for (IntelObservationAttribute a : oo.getObservationAttributes()){
+											a.getAttribute().getName();
+											if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
+											if (a.getAttributeTreeNode() != null) a.getAttributeTreeNode().getName();
+										}
+									}
+								}
+							}
 						}
 					}
 					if (!temp.getLocations().isEmpty()){
@@ -246,17 +261,17 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				modifiedEntities.add(locationlink.getEntity());
 			}
 			
-			
 			s.flush();
 			s.clear();
-			
 			s.saveOrUpdate(record);
+			s.flush();
 			
 			for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
 				s.save(entityAttachments);
 				entityAttachments.getEntity().getEntityAttachments().add(entityAttachments);
 				modifiedEntities.add(entityAttachments.getEntity());
 			}
+			
 			
 			for (IntelEntityLocation locationlink : newEntityLocationLinks){
 				s.saveOrUpdate(locationlink.getLocation());
