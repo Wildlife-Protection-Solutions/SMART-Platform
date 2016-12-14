@@ -74,7 +74,7 @@ public class TreeEditorField  {
 	private Composite dropDownComposite;
 	protected Text txtText;
 	private Button btnDownArrow;
-	
+	private Display focusDisplay = null;
 	private Collection<Listener> listeners = null; 
 	
 	private Listener focusListener = new Listener() {
@@ -155,7 +155,8 @@ public class TreeEditorField  {
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createComposite(Composite parent) {
-		parent.getShell().getDisplay().addFilter(SWT.FocusIn, focusListener);
+		focusDisplay = parent.getShell().getDisplay();
+		focusDisplay.addFilter(SWT.FocusIn, focusListener);
 		
 		dropDownComposite = new Composite(parent,  SWT.BORDER );
 		dropDownComposite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -365,10 +366,10 @@ public class TreeEditorField  {
 
 
 	public void dispose() {
-		if (tree != null){
+		if (tree != null ){
 			tree.dispose();
 		}
-		txtText.getShell().getDisplay().removeFilter(SWT.FocusIn, focusListener);
+		focusDisplay.removeFilter(SWT.FocusIn, focusListener);
 	}
 
 }

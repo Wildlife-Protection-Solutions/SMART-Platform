@@ -122,6 +122,7 @@ public class TreeDropDown{
 	 * Disposes of the tree viewer
 	 */
 	public void dispose(){
+		if (main.isDisposed()) return;
 		if (moveListener != null && main != null){
 			main.removeListener(SWT.Move, moveListener);
 		}
@@ -193,6 +194,7 @@ public class TreeDropDown{
 	 * @return true if drop down is visible
 	 */
 	public boolean isVisible(){
+		if (main == null) return false;
 		if (!main.isDisposed()){
 			return main.getVisible();
 		}
