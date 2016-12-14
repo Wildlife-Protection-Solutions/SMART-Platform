@@ -39,6 +39,7 @@ import org.wcs.smart.dataentry.meta.MetaConfigDialog;
 import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
 import org.wcs.smart.dataentry.meta.TextScreenOptionComposite;
 import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -85,6 +86,12 @@ public class MissionMetaConfigDialog extends MetaConfigDialog<MissionScreenOptio
 					cto.setResource(MissionScreenOptionMeta.MISSION_RESOURCE_ID);
 					cto.setType(meta.name());
 					options.put(meta, cto);
+				}
+				cto.getUuidList().size();
+				if (cto.getUuidList() != null){
+					for (ScreenOptionUuid uuid: cto.getUuidList()){
+						uuid.getUuidValue();
+					}
 				}
 			}
 	
