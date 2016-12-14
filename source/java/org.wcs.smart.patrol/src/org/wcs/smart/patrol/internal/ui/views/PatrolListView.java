@@ -47,6 +47,7 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
@@ -173,13 +174,18 @@ public class PatrolListView implements IPatrolFilteringView {
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
 		if (partEvent == null) return;
 		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
-//		if (activePart.getElementId().equals(PatrolEditor.ID)){ //this doesn't work as it returns compatibility id; not editor id
 		Object lpart = E3Utils.getSourceObject(activePart);
+
+		//if they are in the same stack; don't activate part as this will lead to stack recursion problem
+		if (activePart.getParent() == null) return;
+		if (localPart.getContext().get(EModelService.class).find(localPart.getElementId(), activePart.getParent()) != null) return;
+		
 		if (lpart instanceof PatrolEditor){
 			PatrolEditorInput pi = new PatrolEditorInput(	((PatrolEditor)lpart).getPatrol().getUuid(), null, null, null, null);	
 			patrolListViewer.setSelection(new StructuredSelection(pi));
 			pService.bringToTop(localPart);
 		}
+		
 	}
 	
 	@Optional

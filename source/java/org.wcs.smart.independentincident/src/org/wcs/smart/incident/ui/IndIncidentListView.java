@@ -43,6 +43,7 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
@@ -148,6 +149,10 @@ public class IndIncidentListView implements IIncidentFilteringView {
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
 		if (partEvent == null) return;
 		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		//if they are in the same stack; don't activate part as this will lead to stack recursion problem
+		if (activePart.getParent() == null) return;
+		if (localPart.getContext().get(EModelService.class).find(localPart.getElementId(), activePart.getParent()) != null) return;
+				
 		Object lpart = E3Utils.getSourceObject(activePart);
 		if (lpart instanceof IncidentEditor){
 			incidentListViewer.setSelection(new StructuredSelection(((IncidentEditor)lpart).getEditorInput()));
