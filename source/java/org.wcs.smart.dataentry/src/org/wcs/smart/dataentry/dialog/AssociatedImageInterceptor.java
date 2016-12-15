@@ -217,7 +217,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 			File from = imgObject.getImageFile();
 			File to = new File(imgObject.getImagePersistenceLocation());
 			
-			if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
+			if (from == null || from.equals(IImageAssociatedObject.NULL_FILE) || !from.exists()) {
 				//image was cleared
 				if (to.exists()) {
 					try {
