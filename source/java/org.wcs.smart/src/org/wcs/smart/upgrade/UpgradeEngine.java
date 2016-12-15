@@ -156,6 +156,7 @@ public class UpgradeEngine {
 			}
 			monitor.worked(1);
 			
+			//upgrade core
 			monitor.subTask(Messages.UpgradeEngine_subprogress2);
 			for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++){
 				UpgradeFromVersion v = UpgradeFromVersion.values()[i];

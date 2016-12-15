@@ -73,6 +73,8 @@ public class Upgrader401To410 implements IDatabaseUpgrader {
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
 		@SuppressWarnings("nls")
 		String[] sql = new String[]{
+			//disable replication
+			"CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('org.wcs.smart.isLogging', null)",
 			// #1445: Editing patrol type for existing patrols
 			"insert into smart.PATROL_TYPE (CA_UUID, PATROL_TYPE, IS_ACTIVE, MAX_SPEED) select DISTINCT CA_UUID, 'MIXED', true, 10000 from smart.PATROL_TYPE",
 			"delete from smart.screen_option where TYPE = 'TYPE'",
