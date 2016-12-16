@@ -31,13 +31,17 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 @SuppressWarnings("nls")
 public class Mergei18n {
 
-    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",
-    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er"};
+    public static final String IN_DIR[] = {
+    	"C:\\data\\SMART\\Source\\Version4.1.0\\source\\java",
+    	"C:\\data\\SMART\\Source\\Version4.1.0\\source\\extensions",
+		"C:\\data\\SMART\\Source\\Version4.1.0\\source\\extensions\\er",
+		"C:\\data\\SMART\\Source\\Version4.1.0\\source\\extensions\\connect"};
     
-    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\translations\\",
-    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations"};
+    public static final String TRANS_DIR[] = {
+    	"C:\\data\\SMART\\Source\\Version4.1.0\\source\\translations\\",
+    	"C:\\data\\SMART\\Source\\Version4.1.0\\source\\extensions",
+		"C:\\data\\SMART\\Source\\Version4.1.0\\source\\extensions\\er\\translations",
+		"C:\\data\\SMART\\Source\\Version4.1.0\\source\\extensions\\connect\\translations"};
 	
     public static final String LINE_SEP = "\n";
 
@@ -160,16 +164,16 @@ public class Mergei18n {
      */
     private void mergeFile(File sourceFile, File targetFile) throws Exception {
         boolean changes = false;
-
+//System.out.println(targetFile);
         HashMap<String, String> source = readFile(sourceFile);
         HashMap<String, String> target = readFile(targetFile);
 
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
-                System.out.println("add: " + e.getKey());
+//                System.out.println("add: " + e.getKey());
 //                target.put(e.getKey(), e.getValue());
-                target.put(e.getKey(), "**NEW**" + e.getValue());
-                changes = true;
+//                target.put(e.getKey(), "**NEW**" + e.getValue());
+//                changes = true;
             }
         }
 
