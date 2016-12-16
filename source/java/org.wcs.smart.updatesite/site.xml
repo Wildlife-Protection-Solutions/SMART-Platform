@@ -42,9 +42,6 @@
    <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature_4.1.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature" version="4.1.0.qualifier">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.es_4.0.1.jar" id="org.wcs.smart.es" version="4.0.1">
-      <category name="languagepacks"/>
-   </feature>
    <feature url="features/org.wcs.smart.fr_4.0.1.jar" id="org.wcs.smart.fr" version="4.0.1">
       <category name="languagepacks"/>
    </feature>
@@ -72,9 +69,6 @@
    <feature url="features/org.wcs.smart.mn_4.0.1.jar" id="org.wcs.smart.mn" version="4.0.1">
       <category name="languagepacks"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.es_4.0.1.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.es" version="4.0.1">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.fr_4.0.1.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.fr" version="4.0.1">
       <category name="cybertracker"/>
    </feature>
@@ -100,9 +94,6 @@
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.zh_4.0.1.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.zh" version="4.0.1">
-      <category name="cybertracker"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.es_4.0.1.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.es" version="4.0.1">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.fr_4.0.1.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.fr" version="4.0.1">
@@ -138,9 +129,6 @@
    <feature url="features/org.wcs.smart.er.feature.nl.th_4.0.1.jar" id="org.wcs.smart.er.feature.nl.th" version="4.0.1">
       <category name="ecologicalrecords"/>
    </feature>
-   <feature url="features/org.wcs.smart.entity.feature.nl.es_4.0.1.jar" id="org.wcs.smart.entity.feature.nl.es" version="4.0.1">
-      <category name="entity"/>
-   </feature>
    <feature url="features/org.wcs.smart.entity.feature.nl.fr_4.0.1.jar" id="org.wcs.smart.entity.feature.nl.fr" version="4.0.1">
       <category name="entity"/>
    </feature>
@@ -155,9 +143,6 @@
    </feature>
    <feature url="features/org.wcs.smart.entity.feature.nl.vi_4.0.1.jar" id="org.wcs.smart.entity.feature.nl.vi" version="4.0.1">
       <category name="entity"/>
-   </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature.nl.es_4.0.1.jar" id="org.wcs.smart.independentincident.feature.nl.es" version="4.0.1">
-      <category name="independentincident"/>
    </feature>
    <feature url="features/org.wcs.smart.independentincident.feature.nl.fr_4.0.1.jar" id="org.wcs.smart.independentincident.feature.nl.fr" version="4.0.1">
       <category name="independentincident"/>
@@ -183,9 +168,6 @@
    <feature url="features/org.wcs.smart.independentincident.feature.nl.zh_4.0.1.jar" id="org.wcs.smart.independentincident.feature.nl.zh" version="4.0.1">
       <category name="independentincident"/>
    </feature>
-   <feature url="features/org.wcs.smart.plan.feature.nl.es_4.0.1.jar" id="org.wcs.smart.plan.feature.nl.es" version="4.0.1">
-      <category name="planning"/>
-   </feature>
    <feature url="features/org.wcs.smart.plan.feature.nl.fr_4.0.1.jar" id="org.wcs.smart.plan.feature.nl.fr" version="4.0.1">
       <category name="planning"/>
    </feature>
@@ -209,9 +191,6 @@
    </feature>
    <feature url="features/org.wcs.smart.plan.feature.nl.zh_4.0.1.jar" id="org.wcs.smart.plan.feature.nl.zh" version="4.0.1">
       <category name="planning"/>
-   </feature>
-   <feature url="features/org.wcs.smart.intelligence.feature.nl.es_4.0.1.jar" id="org.wcs.smart.intelligence.feature.nl.es" version="4.0.1">
-      <category name="intelligence"/>
    </feature>
    <feature url="features/org.wcs.smart.intelligence.feature.nl.fr_4.0.1.jar" id="org.wcs.smart.intelligence.feature.nl.fr" version="4.0.1">
       <category name="intelligence"/>
@@ -245,6 +224,30 @@
    </feature>
    <feature url="features/org.wcs.smart.independentincident.feature.nl.mn_4.0.1.jar" id="org.wcs.smart.independentincident.feature.nl.mn" version="4.0.1">
       <category name="independentincident"/>
+   </feature>
+   <feature url="features/org.wcs.smart.es_4.0.2.jar" id="org.wcs.smart.es" version="4.0.2">
+      <category name="languagepacks"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.es_4.0.2.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.es" version="4.0.2">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.es_4.0.2.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.es" version="4.0.2">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.es_4.0.2.jar" id="org.wcs.smart.intelligence.feature.nl.es" version="4.0.2">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.es_4.0.2.jar" id="org.wcs.smart.plan.feature.nl.es" version="4.0.2">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.independentincident.feature.nl.es_4.0.2.jar" id="org.wcs.smart.independentincident.feature.nl.es" version="4.0.2">
+      <category name="independentincident"/>
+   </feature>
+   <feature url="features/org.wcs.smart.entity.feature.nl.es_4.0.2.jar" id="org.wcs.smart.entity.feature.nl.es" version="4.0.2">
+      <category name="entity"/>
+   </feature>
+   <feature url="features/org.wcs.smart.er.feature.nl.es_4.0.2.jar" id="org.wcs.smart.er.feature.nl.es" version="4.0.2">
+      <category name="ecologicalrecords"/>
    </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
