@@ -110,7 +110,7 @@ labels_es= {
 "users.errorcreatinguser": "Error al crear cuenta",
 "users.erroraddactionrole":"Error al agregar acción al rol.",
 "users.erroraddroleuser":"Error al agregar rol para el usuario: ",
-"users.deactivatewarning":"La desactivación de un usuario evitará que el usuario inicie sesión en Connect. También eliminará todas las funciones existentes del usuario. Está seguro de que desea desactivar el usuario? ", ",
+"users.deactivatewarning":"La desactivación de un usuario evitará que el usuario inicie sesión en Connect. También eliminará todas las funciones existentes del usuario. Está seguro de que desea desactivar el usuario? ",
 "users.roleupdated":"Rol actualizado",
 "users.userupdated":" actualizado",
 "users.userdeleted":" eliminado",
