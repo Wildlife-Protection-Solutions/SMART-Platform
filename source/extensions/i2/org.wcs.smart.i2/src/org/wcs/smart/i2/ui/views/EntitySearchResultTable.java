@@ -21,17 +21,21 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -60,13 +64,20 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.search.IntelSearchResult;
+import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
@@ -233,9 +244,87 @@ public class EntitySearchResultTable extends Composite {
 		layout(true);
 	}
 	
-	private void openEntity(){
+	private void openEntities(){
 		if (!getCurrentSelection().isEmpty()){
-			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0), context);
+			getCurrentSelection().forEach(e -> 	(new OpenEntityHandler()).openEntity(e, context));
+		}
+	}
+	private void exportEntities(){
+		EntityExportDialog dialog = new EntityExportDialog(getShell(), getCurrentSelection());
+		dialog.open();
+	}
+	
+	private void deleteEntities(){
+		List<IntelEntity> itemsToDelete = getCurrentSelection();
+		if (itemsToDelete.isEmpty()) return;
+		
+		if (!MessageDialog.openQuestion(getShell(), "Delete Entities", MessageFormat.format("Are you sure you want to delete the {0} selected entities?", itemsToDelete.size()))) return; 
+		
+		
+		//look for any dirty record editors and save them first
+		List<RecordEditor> editors = new ArrayList<>();
+		StringBuilder names = new StringBuilder();
+		for(MPart p : context.get(EPartService.class).getParts()){
+			Object x = E3Utils.getSourceObject(p);
+			if ( x instanceof RecordEditor && ((RecordEditor)x).isDirty()){
+				editors.add((RecordEditor)x);
+				names.append(((RecordEditor)x).getPartName());
+				names.append(", ");
+			}
+		}
+		if (!editors.isEmpty()){
+			StringBuilder sb = new StringBuilder();
+			sb.append("The following editors must be saved before you can delete this entity.  Do you want to save these editors and continue?");
+			sb.append("\n");
+			sb.append(names.substring(0, names.length() - 2));
+			
+			if (!MessageDialog.openQuestion(getShell(), "Delete Entities", sb.toString())){
+				return;
+			}
+			//TODO: I don't htink this works
+			for (RecordEditor p : editors){
+				try{
+					//context.get(EPartService.class).savePart(p, false); -> this doesn't work it still prompts the user; we do not want to prompt user
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().saveEditor(p, false);
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+				}
+			}
+		}
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask("Deleting Entities...", itemsToDelete.size());
+					Session s = HibernateManager.openSession(new AttachmentInterceptor());
+					try{
+						s.beginTransaction();
+						for (IntelEntity entity : itemsToDelete){	
+							EntityManager.INSTANCE.deleteEntity(entity, s);
+							monitor.worked(1);
+						}
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+						throw new InvocationTargetException(ex);
+						
+					}finally{
+						s.close();
+					}
+					try{
+						context.get(IEventBroker.class).send(IntelEvents.ENTITY_DELETE, itemsToDelete);
+					}catch (Exception ex){
+						//error with events;
+						Intelligence2PlugIn.displayLog("Entities deleted.  Error occurred refreshing UI: " + ex.getMessage(), ex);
+					}
+				}
+			});
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog("Could not delete entities: " + ex.getMessage(), ex);
+			return;
 		}
 	}
 	
@@ -247,12 +336,9 @@ public class EntitySearchResultTable extends Composite {
 		mnuOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				openEntity();
+				openEntities();
 			}
 		});
-		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
-		mnuExport.setText("Export...");
-		
 		
 		MenuItem mnuCompare = new MenuItem(menu, SWT.PUSH);
 		mnuCompare.setText("Compare...");
@@ -267,6 +353,27 @@ public class EntitySearchResultTable extends Composite {
 			}
 		});
 		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
+		mnuExport.setText("Export...");
+		mnuExport.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		mnuExport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				exportEntities();
+			}
+		});
+		
+		MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
+		mnuDelete.setText("Delete...");
+		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		mnuDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteEntities();
+			}
+		});
 		
 		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
 		mnuWorkingset.setText("Add to Working Set");
@@ -548,7 +655,7 @@ public class EntitySearchResultTable extends Composite {
 		@Override
 		public void handleEvent(Event event) {
 			if (event.type == SWT.MouseDoubleClick){
-				openEntity();
+				openEntities();
 			}else if (event.type == SWT.MouseEnter){
 				mouseOver = true;
 				colorAll();

@@ -25,7 +25,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -63,30 +66,48 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class EntityExportReportJob extends Job {
 
-	private IntelEntity entity;
+	private Collection<IntelEntity> entities;
 	private Date[] dFilter;
 	private EmitterInfo format;
 	
+	private Path outputDir;
+	
 	public EntityExportReportJob(IntelEntity entity, Date[] dFilter, EmitterInfo format) {
-		super("Exporting Entity Record");
-		this.entity = entity;
-		this.dFilter = dFilter;
-		this.format = format;
+		this(Collections.singleton(entity), dFilter, format, null);
 	}
 
+	public EntityExportReportJob(Collection<IntelEntity> entity, Date[] dFilter, EmitterInfo format, Path outputDir) {
+		super("Exporting Entity Records");
+		this.entities = entity;
+		this.dFilter = dFilter;
+		this.format = format;
+		this.outputDir = outputDir;
+	}
+	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		try{
-			final Path out = runEntityType(entity, dFilter);
-			Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out.toFile()));
-		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
-		}		
-							
+		monitor.beginTask("Export entities", entities.size());
+		for (IntelEntity e : entities){
+			monitor.subTask(e.getIdAttributeAsText());
+			try{
+				final Path out = runEntityType(e, dFilter);
+				if (outputDir == null){
+					Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out.toFile()));
+				}else{
+					Files.move(out, outputDir.resolve(out.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+				}
+				
+			}catch (Exception ex){
+				Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+			}
+			monitor.worked(1);
+		}
+									
 		return Status.OK_STATUS;
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	protected Path runEntityType(IntelEntity entity, Date[] dateFilter) throws Exception{
 		
 		//get the template

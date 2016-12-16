@@ -835,8 +835,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 		buttonBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		Menu formatsOpMenu = new Menu(getSite().getShell(), SWT.POP_UP);
+		buttonBar.addListener(SWT.Dispose, d->formatsOpMenu.dispose());
+		
 		for (EmitterInfo einfo : ReportEngineManager.getBirtReportEngine().getEmitterInfo()){
-			
 			MenuItem mi = new MenuItem(formatsOpMenu,SWT.PUSH);
 			mi.setText(einfo.getFormat());
 			if (einfo.getIcon() != null){
@@ -845,7 +846,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 					String pluginId = confElem.getDeclaringExtension( ).getNamespace( );
 					Bundle bundle = Platform.getBundle( pluginId );
 					mi.setImage( UIHelper.getImage( bundle, einfo.getIcon(), false ));
-					mi.addListener (SWT.Dispose, e-> {if (!mi.getImage().isDisposed()) mi.getImage().dispose();});
 				}
 			}
 			
