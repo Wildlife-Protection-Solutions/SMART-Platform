@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.survey.feature.nl.es"
       label="SMART Survey CyberTracker Spanish Language Pack"
-      version="4.0.1"
+      version="4.0.2"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 
@@ -16,6 +16,14 @@
 
    <plugin
          id="org.wcs.smart.cybertracker.survey.nl_es"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.cybertracker.nl_es"
          download-size="0"
          install-size="0"
          version="0.0.0"

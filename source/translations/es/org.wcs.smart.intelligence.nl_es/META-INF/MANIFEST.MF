@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Spanish Intelligence.nl.Fragment
 Bundle-SymbolicName: org.wcs.smart.intelligence.nl_es
-Bundle-Version: 4.0.1
+Bundle-Version: 4.0.2
 Fragment-Host: org.wcs.smart.intelligence;bundle-version="4.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

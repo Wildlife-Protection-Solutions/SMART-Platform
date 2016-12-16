@@ -3,6 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: SMART Spanish Vietnamese Patrol Fragment
 Bundle-SymbolicName: org.wcs.smart.cybertracker.patrol.nl_vi
 Bundle-Version: 4.0.1
-Fragment-Host: org.wcs.smart.cybertracker;bundle-version="4.0.1"
+Fragment-Host: org.wcs.smart.cybertracker.patrol;bundle-version="4.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart
