@@ -358,6 +358,12 @@ public class EntitySearchView {
 	
 	@Inject
 	@Optional
+	private void entityModified(@UIEventTopic(IntelEvents.ENTITY_ALL) List<IntelEntity> entity){
+		doSearch(null, searchDelay);
+	}
+	
+	@Inject
+	@Optional
 	private void entityTypesModified(@UIEventTopic(IntelEvents.ENTITY_TYPE_ALL) IntelEntityType type){
 		entityTypeJob.schedule();
 		doSearch(null, searchDelay);

@@ -290,6 +290,11 @@
                   </test>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.i2.entity.import"
+                  label="Import Entities..."
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.i2.separator3"
                   visible="true">
@@ -612,6 +617,10 @@
             id="org.wcs.smart.i2.birt.record.template.edit"
             name="Edit Record Template...">
       </command>
+      <command
+            id="org.wcs.smart.i2.entity.import"
+            name="Import Entities">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -690,6 +699,10 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.EditRecordTemplateHandler$EditRecordTemplateHandlerWrapper"
             commandId="org.wcs.smart.i2.birt.record.template.edit">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.entity.importer.ImportEntityHandler$ImportEntityHandlerWrapper"
+            commandId="org.wcs.smart.i2.entity.import">
       </handler>
    </extension>
    <extension

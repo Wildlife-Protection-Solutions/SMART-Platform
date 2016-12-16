@@ -3,6 +3,7 @@ package org.wcs.smart.i2.ui.editors;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -341,13 +342,21 @@ public class WorkingSetMapLayersJob extends Job {
 			Object data = event.getProperty(IEventBroker.DATA);
 			if (service == null) return;
 			boolean updateLayers = false;
-			if (data instanceof IntelRecord && ((IntelRecord)data).getUuid().equals(((IntelRecordService)service).getRecordUuid())){
-				((IntelRecordService)service).refreshNames();
-				updateLayers = true;
-				
-			}else if (data instanceof IntelEntity && ((IntelEntity)data).getUuid().equals(((IntelEntityService)service).getEntityUuid())){
-				((IntelEntityService)service).refreshNames();
-				updateLayers = true;
+			Collection<Object> items = null;
+			if (data instanceof Collection<?>){
+				items = (Collection<Object>)data;
+			}else{
+				items = new ArrayList<>();
+				items.add(data);
+			}
+			for (Object x : items){
+				if (x instanceof IntelRecord && ((IntelRecord)x).getUuid().equals(((IntelRecordService)service).getRecordUuid())){
+					((IntelRecordService)service).refreshNames();
+					updateLayers = true;
+				}else if (x instanceof IntelEntity && ((IntelEntity)x).getUuid().equals(((IntelEntityService)service).getEntityUuid())){
+					((IntelEntityService)service).refreshNames();
+					updateLayers = true;
+				}
 			}
 			
 			if (updateLayers){

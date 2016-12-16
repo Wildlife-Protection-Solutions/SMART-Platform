@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.views;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -690,7 +691,19 @@ public class WorkingSetView {
 	
 	@Inject
 	@Optional
+	private void entityRemoved(@UIEventTopic(IntelEvents.ENTITY_DELETE) Collection<IntelEntity> e){
+		refreshWithDelay();
+	}
+	
+	@Inject
+	@Optional
 	private void entityModified(@UIEventTopic(IntelEvents.ENTITY_MODIFIED) IntelEntity e){
+		refreshWithDelay();
+	}
+	
+	@Inject
+	@Optional
+	private void entityModified(@UIEventTopic(IntelEvents.ENTITY_MODIFIED) Collection<IntelEntity> e){
 		refreshWithDelay();
 	}
 	

@@ -312,9 +312,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}else{
 			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_MODIFIED, record);
 		}
-		for (IntelEntity modified : modifiedEntities){
-			parentContext.get(IEventBroker.class).post(IntelEvents.ENTITY_MODIFIED, modified);
-		}
+		if (!modifiedEntities.isEmpty()) parentContext.get(IEventBroker.class).post(IntelEvents.ENTITY_MODIFIED, modifiedEntities);
 		
 		setDirty(false);
 		summaryPage.doAfterSave();
@@ -367,10 +365,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 
 			//entity deleted
 			subscribeToEvent(IntelEvents.ENTITY_DELETE, (event)->{
-				IntelEntity entity = (IntelEntity) event.getProperty(IEventBroker.DATA);
 				if (isDirty){
-					//try to just remove this entity link
-					MessageDialog.openWarning(getSite().getShell(), "Warning", MessageFormat.format("The record {0} has local modifications and could not be refreshed after the entity {0} was deleted.  You may need to manually remove the entity or refresh the editor and drop all changes.", getEditorInput().getName(), entity.getIdAttributeAsText()) );
+					//TODO: try to just remove this entity link; 
+					//for now just a warning; note payload could be single intel entity or collection or entities
+					MessageDialog.openWarning(getSite().getShell(), "Warning", MessageFormat.format("The record {0} has local modifications and could not be refreshed after some entities were deleted.  You may need to manually remove the entity or refresh the editor and drop all changes.", getEditorInput().getName()) );
 				}else{
 					//refresh the entire editor
 					refresh();

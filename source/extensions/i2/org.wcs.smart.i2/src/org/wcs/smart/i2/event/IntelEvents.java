@@ -3,6 +3,10 @@ package org.wcs.smart.i2.event;
 
 public class IntelEvents {
 
+	/**
+	 * Payload for entity events can be a single entity or a collection
+	 * of entities
+	 */
 	public static final String ENTITY_ALL = "INTEL_ENTITY/*";
 	public static final String ENTITY_NEW = "INTEL_ENTITY/NEW";
 	public static final String ENTITY_DELETE = "INTEL_ENTITY/DELETE";

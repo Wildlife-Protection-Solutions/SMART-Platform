@@ -154,7 +154,7 @@ public class AttributeDialog extends TitleAreaDialog {
 			s.close();
 		}
 		
-		modifiedEntities.forEach(e -> eventBroker.send(IntelEvents.ENTITY_MODIFIED, e));		
+		if (!modifiedEntities.isEmpty()) eventBroker.send(IntelEvents.ENTITY_MODIFIED, modifiedEntities);		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 

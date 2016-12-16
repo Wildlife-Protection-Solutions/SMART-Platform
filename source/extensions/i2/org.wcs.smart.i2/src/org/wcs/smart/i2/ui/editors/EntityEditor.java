@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -453,14 +454,15 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
 		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
+		
+
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put(UIEvents.EventTags.ELEMENT, context.get(MPart.class));
 		data.put(IEventBroker.DATA, entity);
 		eventBroker.send(IntelEvents.ENTITY_MODIFIED, data);
 		
-		for (IntelEntity o : otherEntityModified){
-			eventBroker.send(IntelEvents.ENTITY_MODIFIED, o);
-		}
+		if (!otherEntityModified.isEmpty()) eventBroker.send(IntelEvents.ENTITY_MODIFIED, otherEntityModified);
+		
 		setDirty(false);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 		super.setPartName(entity.getIdAttributeAsText());
@@ -506,9 +508,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 			@Override
 			public void handleEvent(org.osgi.service.event.Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
-				if (data != null && data.equals(entity)){
-					getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
+				if (data != null ){
+					if (data.equals(entity)){
+						getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
+					}else if (data instanceof Collection){
+						Collection<?> items = (Collection<?>) data;
+						items.forEach(x->{
+							if (x.equals(entity))getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
+						});
+					}
 				}
+				
 			}
 		};
 		eventHandles.add(handler);
@@ -534,12 +544,33 @@ public class EntityEditor extends EditorPart implements MapPart{
 			@Override
 			public void handleEvent(org.osgi.service.event.Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
+				
+				boolean equalsEntity = false;
+				boolean equalsEntityType = false;
+				boolean hasRelation = false;
+				if (data.equals(entity)){
+					equalsEntity = true;
+				}else if (data.equals(entity.getEntityType())){
+					equalsEntityType = true;
+				}else if (data instanceof IntelRelationshipType){
+					hasRelation = hasRelation((IntelRelationshipType)data);
+				}else if (data instanceof Collection){
+					for (Object x : ((Collection)data)){
+						if (x.equals(entity)){
+							equalsEntity = true;
+							break;
+						}else if (x.equals(entity.getEntityType())){
+							equalsEntityType = true;
+							break;
+						}else if (data instanceof IntelRelationshipType){
+							hasRelation = hasRelation((IntelRelationshipType)data);
+						}
+					}
+				}
+				
 				if (context.get(MPart.class) != event.getProperty(UIEvents.EventTags.ELEMENT)){
 					if (data != null && (
-						data.equals(entity) || 
-					    (data instanceof IntelEntityType && ((IntelEntityType)data).equals(entity.getEntityType())) ||
-					    (data instanceof IntelRelationshipType && hasRelation((IntelRelationshipType)data)) 
-					    )){
+						equalsEntity || equalsEntityType || hasRelation )){
 						if (isDirty){
 							//the editor is dirty and the entity has changed behind the scenes; give the user the option of replacing 
 							//contents behind the scenes
