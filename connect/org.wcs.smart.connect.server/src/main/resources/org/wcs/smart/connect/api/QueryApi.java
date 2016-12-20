@@ -327,7 +327,6 @@ public class QueryApi extends HttpServlet{
 				}
 				return writeBinary(outputFile);
 			}else if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
-				//TODO: sort reuslts??
 				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
 				
 				if (result instanceof AbstractDbFeatureResultSet && query instanceof SimpleQuery){

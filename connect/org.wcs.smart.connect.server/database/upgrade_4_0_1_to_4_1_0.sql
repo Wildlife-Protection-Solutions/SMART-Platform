@@ -30,3 +30,14 @@ update connect.connect_plugin_version set version = '4.1.0' where plugin_id = 'o
 update connect.ca_plugin_version set version = '4.1.0' where plugin_id = 'org.wcs.smart';
 
 update connect.connect_version set version = '4.1.0';
+
+--The reverse commands to undo the above, useful for upgrade testing.
+--drop table connect.shared_links;
+--alter table smart.conservation_area drop column organization;
+--alter table smart.conservation_area drop column pointofcontact;
+--alter table smart.conservation_area drop column country;
+--alter table smart.conservation_area drop column owner;
+--delete from smart.PATROL_TYPE where PATROL_TYPE = 'MIXED';
+--update connect.connect_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';
+--update connect.ca_plugin_version set version = '4.0.1' where plugin_id = 'org.wcs.smart';
+--update connect.connect_version set version = '4.0.1';
