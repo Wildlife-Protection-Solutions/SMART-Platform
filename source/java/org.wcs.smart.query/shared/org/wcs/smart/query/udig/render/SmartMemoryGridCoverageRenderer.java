@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.styling.LineSymbolizer;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
@@ -70,6 +71,16 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
 		if (!getContext().getImageBounds().intersects((BoundingBox)layerBounds)){
 			//does not overlap image bounds do not render;  otherwise a npe exception is thrown
 			return;
+		}
+		
+		try {
+			AbstractGridCoverage2DReader reader = getContext().getGeoResource().resolve( AbstractGridCoverage2DReader.class, monitor);
+			if (reader == null){
+				//return;
+				throw new RenderException("Nothing to render");
+			}
+		} catch (IOException e1) {
+			throw new RenderException(e1);
 		}
 		
     	super.render(graphics, monitor);
