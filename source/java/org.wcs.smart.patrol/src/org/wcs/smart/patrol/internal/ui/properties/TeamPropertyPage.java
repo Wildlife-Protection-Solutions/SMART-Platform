@@ -163,7 +163,10 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 					if (b != null) b = b.toLowerCase();
 					return Collator.getInstance().compare(a,b);
 				}});
-			teams.forEach(t -> t.getNames().size());
+			teams.forEach(t -> {
+				t.getNames().size();
+				if (t.getMandate() != null) t.getMandate().getNames().size();
+			});
 			
 			ms = PatrolHibernateManager.getActiveMandates(currentCa, s);
 			Collections.sort(ms, new Comparator<PatrolMandate>(){
