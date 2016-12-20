@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.plan.report.oda;
 
-import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.ISmartParameterMetadata;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 /**
  * Combined query and plan parameter metadata for
@@ -31,7 +31,7 @@ import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
  * @author Emily
  *
  */
-public class PlanPatrolParameterMetaData implements IParameterMetaData {
+public class PlanPatrolParameterMetaData implements ISmartParameterMetadata {
 
 	private PlanTargetParameterMetaData plan;
 	private SmartParameterMetaData query;
@@ -41,6 +41,21 @@ public class PlanPatrolParameterMetaData implements IParameterMetaData {
 		query = new SmartParameterMetaData();
 	}
 
+	public Object findParameter(int index) throws OdaException{
+		if (isQuery(index)){
+			return query.findParameter(index);
+		}else{
+			return plan.findParameter(index - query.getParameterCount());
+		}
+	}
+
+	public Object findParameter(String name) throws OdaException{
+		Object x = query.findParameter(name);
+		if (x != null) return x;
+		return plan.findParameter(name);	
+	}
+	
+	
 	@Override
 	public int getParameterCount() throws OdaException {
 		return plan.getParameterCount() + query.getParameterCount();

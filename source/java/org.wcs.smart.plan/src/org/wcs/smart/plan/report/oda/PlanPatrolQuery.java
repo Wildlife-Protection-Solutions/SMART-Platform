@@ -26,11 +26,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.data.oda.smart.impl.ISmartParameterMetadata;
 import org.wcs.smart.data.oda.smart.impl.QueryDatasetExtensionManager;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
@@ -54,7 +54,6 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class PlanPatrolQuery extends SmartQuery {
 
-	private PlanPatrolParameterMetaData pMetadata;
 	
 	/**
 	 * Creates a new smart query
@@ -81,7 +80,7 @@ public class PlanPatrolQuery extends SmartQuery {
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#getParameterMetaData()
 	 */
-	public IParameterMetaData getParameterMetaData() throws OdaException {
+	public ISmartParameterMetadata getParameterMetaData() throws OdaException {
 		if (pMetadata == null) {
 			pMetadata = new PlanPatrolParameterMetaData();
 		}
@@ -93,7 +92,9 @@ public class PlanPatrolQuery extends SmartQuery {
 	 * Execute the query
 	 */
 	public IResultSet executeQuery() throws OdaException {
-		String[] planUuids = ((String)parameters.get(3)).split(","); //$NON-NLS-1$
+		String uuids = ((String)parameters.get(PlanTargetParameterMetaData.PLAN_UUID_PARAM));
+		if (uuids == null || uuids.isEmpty()) throw new OdaException("Plan UUUID parameter required"); //$NON-NLS-1$
+		String[] planUuids = uuids.split(","); //$NON-NLS-1$
 		try{
 			updateQueryFilter((PatrolQuery)this.smartQuery, planUuids[0], connection.getSession());
 		}catch (Exception ex){
@@ -172,6 +173,7 @@ public class PlanPatrolQuery extends SmartQuery {
 		return ;
 	}
 
+	@Override
 	public Object getParameterKey(int parameterId)  throws OdaException{
 		Object x = super.getParameterKey(parameterId);
 		if (x != null){
@@ -180,6 +182,7 @@ public class PlanPatrolQuery extends SmartQuery {
 		return parameterId;
 	}
 	
+	@Override
 	public Object getParameterKey(String parameterName)  throws OdaException{
 		Object x = super.getParameterKey(parameterName);
 		if (x != null){

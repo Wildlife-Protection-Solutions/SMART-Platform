@@ -23,6 +23,7 @@ package org.wcs.smart.plan.report.oda;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.ISmartParameterMetadata;
 
 /**
  * SMART Plan target query parameter metadata
@@ -30,8 +31,20 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
  * @since 2.0.0
  *
  */
-public class PlanTargetParameterMetaData implements IParameterMetaData {
+public class PlanTargetParameterMetaData implements ISmartParameterMetadata {
 
+	public static final String PLAN_UUID_PARAM = "PlanUUID"; //$NON-NLS-1$
+	
+	public Object findParameter(int index){
+		if (index == 1) return PLAN_UUID_PARAM;
+		return null;
+	}
+
+	public Object findParameter(String name){
+		if (name.equals(PLAN_UUID_PARAM)) return PLAN_UUID_PARAM;
+		return null;
+	}
+	
 	@Override
 	public int getParameterCount() throws OdaException {
 		return 1;
@@ -45,7 +58,7 @@ public class PlanTargetParameterMetaData implements IParameterMetaData {
 	@Override
 	public String getParameterName(int param) throws OdaException {
 		if (param == 1){
-			return "PlanUUID"; //$NON-NLS-1$
+			return PLAN_UUID_PARAM;
 		}
 		return null;
 	}

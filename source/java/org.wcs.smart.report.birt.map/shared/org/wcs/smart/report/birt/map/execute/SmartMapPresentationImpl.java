@@ -346,6 +346,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 	private void addErrorMessage(Graphics2D g, String error, int width,
 			int height) {
 		g.setFont(g.getFont().deriveFont(Font.BOLD));
+		if (error == null || error.isEmpty()) error = "Unknown Error";
 		String[] bits = error.split("\n"); //$NON-NLS-1$
 
 		int fh = g.getFontMetrics().getHeight();

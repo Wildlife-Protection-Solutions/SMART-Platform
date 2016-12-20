@@ -29,7 +29,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
@@ -62,7 +61,7 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	protected HashMap<Object, Object> parameters = null;
 	
 	//dataset metadata
-	protected SmartParameterMetaData pMetadata = null;
+	protected ISmartParameterMetadata pMetadata = null;
 	protected SmartConnection connection;
 
 	/**
@@ -366,13 +365,16 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	}
 
 	/**
+	 * Implementations must overwrite if they do not want to use the 
+	 * default SmartParameterMetaData;
+	 * 
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#getParameterMetaData()
 	 */
-	public IParameterMetaData getParameterMetaData() throws OdaException {
+	public ISmartParameterMetadata getParameterMetaData() throws OdaException {
 		return getParameterMetaDataLocal();
 	}
 
-	private IParameterMetaData getParameterMetaDataLocal() throws OdaException {
+	private ISmartParameterMetadata getParameterMetaDataLocal() throws OdaException {
 		if (pMetadata == null) {
 			pMetadata = new SmartParameterMetaData();
 		}
@@ -380,12 +382,12 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	}
 	
 	public Object getParameterKey(int parameterId)  throws OdaException{
-		getParameterMetaDataLocal();
+		getParameterMetaData();
 		return pMetadata.findParameter(parameterId);
 	}
 	
 	public Object getParameterKey(String parameterName)  throws OdaException{
-		getParameterMetaDataLocal();
+		getParameterMetaData();
 		return pMetadata.findParameter(parameterName);
 	}
 	

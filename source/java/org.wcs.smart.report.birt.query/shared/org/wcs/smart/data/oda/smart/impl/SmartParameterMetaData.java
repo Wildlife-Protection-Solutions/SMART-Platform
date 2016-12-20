@@ -17,7 +17,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
  */
 // In the future it may be possible to view the query
 // and parameterize certain parts of the queries (stations/teams etc)
-public class SmartParameterMetaData implements IParameterMetaData {
+public class SmartParameterMetaData implements ISmartParameterMetadata {
 
 	/**
 	 * Fixed start and end date parameters
