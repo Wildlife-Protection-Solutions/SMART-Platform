@@ -15,6 +15,14 @@ public enum IntelSecurityManager {
 	}
 	
 	/**
+	 * Determine if the current user can edit a query
+	 * @return
+	 */
+	public boolean canEditQuery(){
+		return true;
+	}
+	
+	/**
 	 * True if current user can link attachments to entities
 	 * @return
 	 */

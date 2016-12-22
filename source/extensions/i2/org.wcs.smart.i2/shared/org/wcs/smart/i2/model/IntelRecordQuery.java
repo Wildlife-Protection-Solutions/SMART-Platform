@@ -105,24 +105,26 @@ public class IntelRecordQuery extends NamedItem implements IIntelAuditItem{
 
 
 	/**
+	 * Get the date_modified.
+	 * 
+	 * @return date_modified
+	 */
+	@Column(name="last_modified_date")
+	public Date getDateModified() {
+		return this.dateModified;
+	}
+	
+	/**
 	 * Set the date_modified.
 	 * 
 	 * @param dateModified
 	 *            date_modified
 	 */
-	@Column(name="date_modified")
 	public void setDateModified(Date dateModified) {
 		this.dateModified = dateModified;
 	}
 
-	/**
-	 * Get the date_modified.
-	 * 
-	 * @return date_modified
-	 */
-	public Date getDateModified() {
-		return this.dateModified;
-	}
+	
 
 	/**
 	 * Get the created_by.

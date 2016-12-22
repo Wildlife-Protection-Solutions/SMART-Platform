@@ -177,13 +177,19 @@ public enum WorkingSetManager {
 		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void addToActiveWorkingSet(IntelRecordQuery query, IEclipseContext context){
+	public void addQueryToActiveWorkingSet(UUID queryUuid, IEclipseContext context){
 		if (activeWorkingSet == null) return;
 		IntelWorkingSet wset = null;
 		Session s = HibernateManager.openSession();
 		boolean found = false;
+		String queryName = queryUuid.toString();
 		try{
 			s.beginTransaction();
+			
+			IntelRecordQuery query = (IntelRecordQuery) s.get(IntelRecordQuery.class, queryUuid);
+			if (query == null) throw new Exception("Query not found.");
+			
+			queryName = query.getName();
 			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
 			if (wset != null){
 				
@@ -206,12 +212,16 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence query {0} to active working set. {1}", query.getName(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence query {0} to active working set. {1}", queryName, ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();
 		}
 		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
+	}
+	
+	public void addToActiveWorkingSet(IntelRecordQuery query, IEclipseContext context){
+		addQueryToActiveWorkingSet(query.getUuid(), context);
 	}
 	
 	public void removeFromWorkingSet(IntelRecordQuery query, IEclipseContext context){

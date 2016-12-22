@@ -178,12 +178,12 @@ public class QueryHeaderComposite extends Composite {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				cancelled = false;
-				if (e.keyCode == SWT.ESC) {
+				if (e.character == SWT.ESC) {
 					txtName.setText(name);
 					txtName.setVisible(false);
 					lblName.setVisible(true);
 					cancelled = true;
-				} else if (e.keyCode == SWT.CR) {
+				} else if (e.character == SWT.CR || e.character == SWT.LF) {
 					txtName.setVisible(false);
 				}
 			}

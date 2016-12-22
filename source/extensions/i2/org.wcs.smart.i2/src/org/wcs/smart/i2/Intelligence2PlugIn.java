@@ -50,6 +50,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_ATTRIBUTE_GROUP = "org.wcs.smart.i2.icon.attribute.group"; //$NON-NLS-1$
 	public static final String ICON_ATTRIBUTE_GROUP_NEW = "org.wcs.smart.i2.icon.attribute.group.new"; //$NON-NLS-1$
 	public static final String ICON_ENTITY = "org.wcs.smart.i2.icon.entity"; //$NON-NLS-1$
+	public static final String ICON_ENTITY_QUERY = "org.wcs.smart.i2.icon.query"; //$NON-NLS-1$
+	public static final String ICON_ENTITY_QUERY_NEW = "org.wcs.smart.i2.icon.query.new"; //$NON-NLS-1$
 	public static final String ICON_ENTITY_NEW = "org.wcs.smart.i2.icon.entity.new"; //$NON-NLS-1$
 	public static final String ICON_RECORD = "org.wcs.smart.i2.icon.record"; //$NON-NLS-1$
 	public static final String ICON_EDIT = "org.wcs.smart.i2.icon.edit"; //$NON-NLS-1$
@@ -61,6 +63,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_PDF = "org.wcs.smart.i2.icon.print.pdf"; //$NON-NLS-1$
 	public static final String ICON_RELATIONSHIP = "org.wcs.smart.i2.icon.relationship"; //$NON-NLS-1$
 	public static final String ICON_SECTION_EXPAND = "org.wcs.smart.i2.icon.section.expand"; //$NON-NLS-1$
+	public static final String ICON_RUN = "org.wcs.smart.i2.icon.query.run"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
@@ -90,6 +93,10 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_SECTION_EXPAND, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj12/section_expand.png")); //$NON-NLS-1$);
 		reg.put(ICON_ATTRIBUTE_GROUP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group.png")); //$NON-NLS-1$);
 		reg.put(ICON_ATTRIBUTE_GROUP_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group_new.png")); //$NON-NLS-1$);
+		reg.put(ICON_RUN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/run_query.png")); //$NON-NLS-1$);
+		
+		reg.put(ICON_ENTITY_QUERY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_query.png")); //$NON-NLS-1$);
+		reg.put(ICON_ENTITY_QUERY_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/new_entity_query.png")); //$NON-NLS-1$);
 		
 	}
 	

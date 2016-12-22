@@ -423,7 +423,7 @@ public class WorkingSetView {
 	private void addDropListener(Composite parent){
 		
 		DropTarget dropTarget = new DropTarget(parent, DND.DROP_LINK);
-		dropTarget.setTransfer(new Transfer[]{IntelEntitySelectionTransfer.getTransfer(), IntelRecordSelectionTransfer.getTransfer()});
+		dropTarget.setTransfer(new Transfer[]{IntelEntitySelectionTransfer.getTransfer(), IntelRecordSelectionTransfer.getTransfer(), IntelQuerySelectionTransfer.getTransfer()});
 		dropTarget.addDropListener(new DropTargetListener() {		
 			private PaintListener paintListener = new PaintListener() {
 				@Override
@@ -445,6 +445,8 @@ public class WorkingSetView {
 					s = IntelEntitySelectionTransfer.getTransfer().getSelection();
 				}else if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.currentDataType)){
 					s = IntelRecordSelectionTransfer.getTransfer().getSelection();
+				}else if (IntelQuerySelectionTransfer.getTransfer().isSupportedType(event.currentDataType)){
+					s = IntelQuerySelectionTransfer.getTransfer().getSelection();
 				}
 				if (s != null && s instanceof IStructuredSelection) {
 					IStructuredSelection sel = (IStructuredSelection)s;
@@ -459,6 +461,9 @@ public class WorkingSetView {
 							if (tmp == null){
 								tmp = ((IAdaptable)element).getAdapter(IntelEntity.class);
 							}
+							if (tmp == null){
+								tmp = ((IAdaptable)element).getAdapter(IntelRecordQuery.class);
+							}
 							if (tmp != null){
 								element = tmp;
 							}
@@ -470,6 +475,8 @@ public class WorkingSetView {
 							WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput)element, context);
 						}else if (element instanceof IntelEntity){
 							WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelEntity)element, context);		
+						}else if (element instanceof IntelRecordQuery){
+							WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(((IntelRecordQuery)element).getUuid(), context);
 						}
 						
 					}
@@ -844,6 +851,10 @@ public class WorkingSetView {
 						
 						for (IntelWorkingSetRecord record : ws.getRecords()){
 							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+							items.add(i);
+						}
+						for (IntelWorkingSetQuery query : ws.getQueries()){
+							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.QUERIES, query.getQuery().getName(), query.getIsVisible(), query.getQuery().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY_QUERY));
 							items.add(i);
 						}
 					}finally{

@@ -205,6 +205,11 @@
                   </test>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.query.record.new"
+                  label="New Record Query"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.i2.separator1"
                   visible="true">
@@ -495,6 +500,34 @@
                tooltip="fixes problems with query bindings in the reports">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.i2.view.entitysearch">
+         <command
+               commandId="org.wcs.smart.i2.command.entity.new"
+               label="New Entity"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.smartAdminUser"
+                     value="intel_analyst">
+               </test>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.i2.ui.view.queries">
+         <command
+               commandId="org.wcs.smart.i2.command.query.record.new"
+               style="push">
+         </command>
+         <command
+               commandId="org.wcs.smart.i2.command.query.refresh"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -523,6 +556,7 @@
       </view>
       <view
             class="org.wcs.smart.i2.ui.views.QueryView$QueryViewWrapper"
+            icon="images/icons/obj16/entity_query.png"
             id="org.wcs.smart.i2.ui.view.queries"
             name="Queries"
             restorable="true">
@@ -567,7 +601,14 @@
             class="org.wcs.smart.i2.ui.editors.EntityComparisonEditor"
             default="false"
             id="org.wcs.smart.i2.editor.entity.compare"
-            name="name">
+            name="Entity Comparison Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.query.IntelQueryEditor"
+            default="false"
+            icon="images/icons/obj16/entity_query.png"
+            id="org.wcs.smart.i2.editor.query"
+            name="Query Editor">
       </editor>
    </extension>
    <extension
@@ -620,6 +661,14 @@
       <command
             id="org.wcs.smart.i2.entity.import"
             name="Import Entities">
+      </command>
+      <command
+            id="org.wcs.smart.i2.command.query.record.new"
+            name="New Query">
+      </command>
+      <command
+            id="org.wcs.smart.i2.command.query.refresh"
+            name="Refresh Query List">
       </command>
    </extension>
    <extension
@@ -704,6 +753,14 @@
             class="org.wcs.smart.i2.ui.entity.importer.ImportEntityHandler$ImportEntityHandlerWrapper"
             commandId="org.wcs.smart.i2.entity.import">
       </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.NewQueryHandler$NewQueryHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.query.record.new">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.RefreshQueryViewHandler$RefreshQueryViewHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.query.refresh">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -730,6 +787,14 @@
       <image
             commandId="org.wcs.smart.i2.command.attributelist.show"
             icon="images/icons/obj16/attribute.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.i2.command.query.refresh"
+            icon="images/icons/obj16/refresh.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.i2.command.query.record.new"
+            icon="images/icons/obj16/new_entity_query.png">
       </image>
    </extension>
    <extension

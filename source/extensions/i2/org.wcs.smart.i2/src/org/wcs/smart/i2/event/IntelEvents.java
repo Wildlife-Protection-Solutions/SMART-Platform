@@ -42,6 +42,13 @@ public class IntelEvents {
 	public static final String WS_DELETE = "INTEL_WS/DELETE";
 	public static final String WS_MODIFIED = "INTEL_WS/UPDATED";
 	
+	
+	//payload can be a single query or a list of queries
+	public static final String QUERY_ALL = "INTEL_QUERY/*";
+	public static final String QUERY_NEW = "INTEL_QUERY/NEW";
+	public static final String QUERY_MODIFIED = "INTEL_QUERY/UPDATED";
+	public static final String QUERY_DELETED = "INTEL_QUERY/DELETED";
+	
 	public static final String ACTIVE_WS_SET = "INTEL_WS_SET";
 	
 	//payload needs to be an instance of LayerVisibleEvent

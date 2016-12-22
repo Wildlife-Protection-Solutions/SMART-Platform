@@ -71,16 +71,19 @@ public class DateFilterDropDownComposite extends Composite {
 
 	private DateFilterComposite.DateFilter[] filters;
 	private DateFilter defaultValue;
+	private boolean showDateRangeLabel;
+	
 	/**
 	 * create new composite
 	 * @param parent parent composite
 	 * @param fieldOps date field options; can be null
 	 * @param filterOps date filter options 
+	 * @param showDateRangeLabel true if the date range should be displayed next to the drop down
 	 */
 	public DateFilterDropDownComposite(Composite parent, 
-			DateFilterComposite.DateFilter[] filters, DateFilter defaultValue) {
+			DateFilterComposite.DateFilter[] filters, DateFilter defaultValue, boolean showDateRangeLabel) {
 		super(parent, SWT.NONE);
-		
+		this.showDateRangeLabel = showDateRangeLabel;
 		this.listeners = new ArrayList<ISelectionChangedListener>();
 		this.filters = filters;
 		this.defaultValue = defaultValue;
@@ -92,7 +95,10 @@ public class DateFilterDropDownComposite extends Composite {
 		setLayout(layout);
 		createComponent();
 	}
-	
+	public DateFilterDropDownComposite(Composite parent, 
+			DateFilterComposite.DateFilter[] filters, DateFilter defaultValue) {
+		this(parent, filters, defaultValue, false);
+	}
 	private ISelectionChangedListener fireListener = new ISelectionChangedListener() {
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
@@ -169,7 +175,11 @@ public class DateFilterDropDownComposite extends Composite {
 				DateFilterComposite.DateFilter filter = (DateFilterComposite.DateFilter) ((IStructuredSelection)cmbFilter.getSelection()).getFirstElement();
 				//lbl1.setText(filter.getGuiName());
 				setCustom(filter == DateFilterComposite.DateFilter.CUSTOM);
-				main.layout();
+				if (showDateRangeLabel && filter.getLabel() != null){
+					lbl1.setText("[" + filter.getLabel() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+					((GridData)lbl1.getLayoutData()).widthHint = lbl1.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+				}
+				main.layout(true, true);
 				validate();
 			}
 		});
@@ -179,7 +189,7 @@ public class DateFilterDropDownComposite extends Composite {
 		lbl1.setText(Messages.DateFilterDropDownComposite_Between);
 		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
+		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.DATE);
 		dtStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		Listener validateListener = new Listener(){
 			@Override

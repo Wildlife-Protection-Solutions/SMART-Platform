@@ -1,0 +1,172 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.i2.ui.editors.query;
+
+import java.text.MessageFormat;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+
+/**
+ * A header composite that contains a
+ * query name and id information allowing users to modify the 
+ * query name.
+ * 
+ * <b>Events:</b> SWT.Selection - the text field of 
+ * the event object is set to the new name
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class IntelQueryNameLabel extends Composite implements Listener{
+
+	private static final int MAX_NAME_LENGTH = 1024;
+	
+	private Label lblName;
+	private Text txtName;
+	
+	private boolean cancelled = false;
+	
+	/**
+	 * 
+	 */
+	public IntelQueryNameLabel(Composite parent, FormToolkit toolkit, Font headerFont, Color headerColor) {
+		super(parent, SWT.NONE);
+		toolkit.adapt(this);
+		createComposite(headerFont, headerColor, toolkit);
+	}
+
+	public void setText(String text){
+		this.lblName.setText(text);
+		this.txtName.setText(text);
+		super.layout();
+	}
+	
+	
+	private void createComposite(Font headerFont, Color headerColor, FormToolkit toolkit) {
+		
+		GridLayout gl = new GridLayout(3, false);
+		gl.marginHeight = 0;
+		gl.verticalSpacing = 0;
+		setLayout(gl);
+		
+		Composite it = toolkit.createComposite(this);
+		it.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		it.addListener(SWT.Resize, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				Point p = lblName.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				lblName.setBounds(0, 0, it.getBounds().width, p.y);
+				txtName.setBounds(0, 0, it.getBounds().width, p.y);
+
+			}
+		});
+		lblName = toolkit.createLabel(it, ""); //$NON-NLS-1$
+		txtName = toolkit.createText(it, ""); //$NON-NLS-1$
+		
+		txtName.setVisible(false);
+		txtName.setBounds(lblName.getBounds());
+		
+		lblName.setFont(headerFont);
+		txtName.setFont(headerFont);
+		lblName.setForeground(headerColor);
+		txtName.setForeground(headerColor);
+
+		txtName.addListener(SWT.FocusOut, this);
+		txtName.addListener(SWT.KeyUp, this);
+		lblName.addListener(SWT.MouseUp, this);
+	}
+	
+	private boolean validateName(String name){
+		if (name.length() > MAX_NAME_LENGTH){
+			MessageDialog.openError(getShell(), "Error",
+					MessageFormat.format("Query name must be fewer than {0} characters.", new Object[]{MAX_NAME_LENGTH}));
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean fireNameChange(){
+		//setText(lblName.getText());
+		Listener[] listeners = getListeners(SWT.Selection);
+		for (int i = 0; i < listeners.length; i ++){
+			Event e = new Event();
+			e.text = this.txtName.getText();
+			e.doit = true;
+			listeners[i].handleEvent(e);
+			if (!e.doit){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public void handleEvent(Event event) {
+		switch(event.type){
+		case SWT.FocusOut:
+			txtName.setVisible(false);
+			lblName.setVisible(true);
+			if (!cancelled){
+				String name = lblName.getText();
+				if (!name.equals(txtName.getText())){
+					if (validateName(txtName.getText())){
+						if (fireNameChange()){
+							lblName.setText(txtName.getText());
+						}
+						
+					}
+				}
+			}
+			break;
+		case SWT.MouseUp:
+			lblName.setVisible(false);
+			txtName.setVisible(true);
+			txtName.setText(lblName.getText());
+			txtName.selectAll();
+			txtName.setFocus();
+			break;
+		case SWT.KeyUp:
+			cancelled = false;
+			if (event.character == SWT.ESC) {
+				txtName.setText(lblName.getText());
+				txtName.setVisible(false);
+				lblName.setVisible(true);
+				cancelled = true;
+			} else if (event.character == SWT.CR || event.character == SWT.LF) {
+				txtName.setVisible(false);
+			}
+			break;
+		}		
+	}
+}

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.common.filter;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -45,6 +46,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
+
+import com.ibm.icu.text.DateFormat;
 
 /**
  * Composite with required controls for date filtering. Used inside filter dialogs
@@ -81,6 +84,30 @@ public class DateFilterComposite extends Composite {
 			return this.guiName;
 		}
 		
+		public String getLabel(){
+			switch(this){
+			case ALL:
+				return null;
+			case CURRENT_MONTH:
+			case MONTH_TO_DATE:
+				return (new SimpleDateFormat("MMM YYYY")).format(getEndDate()); //$NON-NLS-1$
+			case CURRENT_YEAR:
+			case LAST_YEAR:
+			case YEAR_TO_DATE:
+				return (new SimpleDateFormat("YYYY")).format(getEndDate()); //$NON-NLS-1$
+			case CUSTOM:
+				return null;
+			case LAST_30_DAYS:
+			case LAST_5_YEARS:
+			case LAST_60_DAYS:
+			case NEXT_30_DAYS:
+			case NEXT_60_DAYS:
+			case RANGE_30_DAYS:
+			case RANGE_60_DAYS:
+				return DateFormat.getDateInstance().format(getStartDate()) + "-" + DateFormat.getDateInstance().format(getEndDate()); //$NON-NLS-1$
+			}
+			return null;
+		}
 		/**
 		 * 
 		 * @return the start date associated with the filter or
