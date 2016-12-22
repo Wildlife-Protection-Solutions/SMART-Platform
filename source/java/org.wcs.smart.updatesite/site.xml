@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.intelligence.feature_4.1.0.qualifier.jar" id="org.wcs.smart.intelligence.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.intelligence.feature_4.1.0.201612211131.jar" id="org.wcs.smart.intelligence.feature" version="4.1.0.201612211131">
       <category name="intelligence"/>
    </feature>
-   <feature url="features/org.wcs.smart.plan.feature_4.1.0.qualifier.jar" id="org.wcs.smart.plan.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.plan.feature_4.1.0.201612211131.jar" id="org.wcs.smart.plan.feature" version="4.1.0.201612211131">
       <category name="planning"/>
    </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature_4.1.0.qualifier.jar" id="org.wcs.smart.independentincident.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.independentincident.feature_4.1.0.201612211131.jar" id="org.wcs.smart.independentincident.feature" version="4.1.0.201612211131">
       <category name="independentincident"/>
    </feature>
-   <feature url="features/org.wcs.smart.entity.feature_4.1.0.qualifier.jar" id="org.wcs.smart.entity.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.entity.feature_4.1.0.201612211131.jar" id="org.wcs.smart.entity.feature" version="4.1.0.201612211131">
       <category name="entity"/>
    </feature>
-   <feature url="features/org.wcs.smart.er.feature_4.1.0.qualifier.jar" id="org.wcs.smart.er.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.er.feature_4.1.0.201612211131.jar" id="org.wcs.smart.er.feature" version="4.1.0.201612211131">
       <category name="ecologicalrecords"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature_4.1.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.er.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature_4.1.0.201612211131.jar" id="org.wcs.smart.connect.dataqueue.er.feature" version="4.1.0.201612211131">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.feature_4.1.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.connect.dataqueue.feature_4.1.0.201612211131.jar" id="org.wcs.smart.connect.dataqueue.feature" version="4.1.0.201612211131">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature_4.1.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature_4.1.0.201612211131.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature" version="4.1.0.201612211131">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.feature_4.1.0.qualifier.jar" id="org.wcs.smart.connect.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.connect.feature_4.1.0.201612211131.jar" id="org.wcs.smart.connect.feature" version="4.1.0.201612211131">
       <category name="connect"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.cybertracker.feature_4.1.0.qualifier.jar" id="org.wcs.smart.connect.cybertracker.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.connect.cybertracker.feature_4.1.0.201612211131.jar" id="org.wcs.smart.connect.cybertracker.feature" version="4.1.0.201612211131">
       <category name="connect"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_4.1.0.qualifier.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_4.1.0.201612211131.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="4.1.0.201612211131">
       <category name="cybertracker"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature_4.1.0.qualifier.jar" id="org.wcs.smart.cybertracker.survey.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature_4.1.0.201612211131.jar" id="org.wcs.smart.cybertracker.survey.feature" version="4.1.0.201612211131">
       <category name="cybertracker"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.survey.feature_4.1.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.survey.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.survey.feature_4.1.0.201612211131.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.survey.feature" version="4.1.0.201612211131">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature_4.1.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature" version="4.1.0.qualifier">
+   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature_4.1.0.201612211131.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature" version="4.1.0.201612211131">
       <category name="connectdq"/>
    </feature>
    <feature url="features/org.wcs.smart.fr_4.0.1.jar" id="org.wcs.smart.fr" version="4.0.1">
