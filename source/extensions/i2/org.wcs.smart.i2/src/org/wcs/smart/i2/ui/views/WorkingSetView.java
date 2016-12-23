@@ -106,10 +106,17 @@ import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.WorkingSetListDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
+import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Working set view.
+ * 
+ * @author Emily
+ *
+ */
 public class WorkingSetView {
 	
 	public static final String ID = "org.wcs.smart.i2.ui.view.workingset"; //$NON-NLS-1$
@@ -581,15 +588,7 @@ public class WorkingSetView {
 					}
 					(new OpenRecordHandler()).openRecord(i, false);
 				}else if (toOpen.getCategory() == IntelWorkingSetCategory.QUERIES){
-					//TODO: Queries 
-//					IntelRecordQuery i = null;
-//					Session s = HibernateManager.openSession();
-//					try{
-//						i = (IntelRecordQuery) s.get(IntelRecordQuery.class, toOpen.getUuid());
-//					}finally{
-//						s.close();
-//					}
-//					(new OpenRecordHandler()).openRecord(i, false);
+					(new OpenQueryHandler()).openQuery(toOpen.getUuid(), false);
 				}
 				return;
 			}
@@ -723,6 +722,18 @@ public class WorkingSetView {
 	@Inject
 	@Optional
 	private void recordModified(@UIEventTopic(IntelEvents.RECORD_MODIFIED) IntelRecord e){
+		refreshWithDelay();
+	}
+	
+	@Inject
+	@Optional
+	private void queryDeleted(@UIEventTopic(IntelEvents.QUERY_DELETED) Object query){
+		refreshWithDelay();
+	}
+	
+	@Inject
+	@Optional
+	private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) Object query){
 		refreshWithDelay();
 	}
 	

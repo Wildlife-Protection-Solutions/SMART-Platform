@@ -54,11 +54,11 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
 import org.wcs.smart.query.common.model.QueryFilterConfiguration;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.ui.TreeDropDownViewer;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 

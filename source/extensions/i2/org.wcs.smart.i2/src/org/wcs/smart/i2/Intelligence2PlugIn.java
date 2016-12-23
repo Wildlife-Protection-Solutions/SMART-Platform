@@ -64,6 +64,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_RELATIONSHIP = "org.wcs.smart.i2.icon.relationship"; //$NON-NLS-1$
 	public static final String ICON_SECTION_EXPAND = "org.wcs.smart.i2.icon.section.expand"; //$NON-NLS-1$
 	public static final String ICON_RUN = "org.wcs.smart.i2.icon.query.run"; //$NON-NLS-1$
+	public static final String ICON_AREA = "org.wcs.smart.i2.icon.query.area"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
@@ -97,6 +98,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		
 		reg.put(ICON_ENTITY_QUERY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_query.png")); //$NON-NLS-1$);
 		reg.put(ICON_ENTITY_QUERY_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/new_entity_query.png")); //$NON-NLS-1$);
+		reg.put(ICON_AREA, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/area_polygon.png")); //$NON-NLS-1$);
 		
 	}
 	

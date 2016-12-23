@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors.query;
 
 import java.util.List;
@@ -12,6 +33,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -38,7 +60,16 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.ui.SmartSection;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.FilterDefinitionPanel;
 
+/**
+ * Intelligence query editor
+ * 
+ * @author Emily
+ *
+ */
 public class IntelQueryEditor extends EditorPart{
 
 	public static final String ID = "org.wcs.smart.i2.editor.query";
@@ -49,7 +80,7 @@ public class IntelQueryEditor extends EditorPart{
 	
 	private IntelQueryNameLabel header;
 	private DateFilterDropDownComposite datePart;
-	
+	private FilterDefinitionPanel panel;
 	private IEclipseContext context;
 	private IEventBroker eventBroker;
 	
@@ -71,10 +102,13 @@ public class IntelQueryEditor extends EditorPart{
 		}
 		if (isNew){
 			eventBroker.post(IntelEvents.QUERY_NEW, query);
+			((QueryEditorInput)getEditorInput()).setUuid(query.getUuid());
 		}else{
 			eventBroker.post(IntelEvents.QUERY_MODIFIED, query);
 		}
-		getSite().getShell().setText(query.getName());
+		
+		
+		setPartName(query.getName());
 		setDirty(false);
 		
 	}
@@ -122,14 +156,14 @@ public class IntelQueryEditor extends EditorPart{
 			public void handleEvent(Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
 				if (data instanceof IntelRecordQuery){
-					if (data == query){
+					if (data.equals(query)){
 						closeEditor();
 						return;
 					}
 				}else if (data instanceof List){
 					List dd = (List)data;
 					for (Object d: dd){
-						if (d == query){
+						if (d.equals(query)){
 							closeEditor();
 							return;
 						}
@@ -153,7 +187,6 @@ public class IntelQueryEditor extends EditorPart{
 		header = new IntelQueryNameLabel(main, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.addListener(SWT.Selection, e-> {
-			System.out.println("T: " +e.text);
 			if (query == null){
 				e.doit = false;
 				return;
@@ -165,10 +198,32 @@ public class IntelQueryEditor extends EditorPart{
 		
 		createDatePart(main, toolkit);
 		
+		SashForm core = new SashForm(main, SWT.VERTICAL);
+		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		SmartSection resultsSection = new SmartSection(core, toolkit, "Results");
+		Composite c = toolkit.createComposite(resultsSection);
+		c.setLayout(new GridLayout());
+		toolkit.createLabel(c, "results");
+		
+		SmartSection definitionSection = new SmartSection(core, toolkit, "Definition");
+		c = toolkit.createComposite(definitionSection);
+		c.setLayout(new GridLayout());
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		panel = new FilterDefinitionPanel();
+		Composite definitionPanel = panel.createComposite(c);
+		definitionPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		
 		loadQueryJob.schedule();
 	}
 	
+	public void addDropItems(DropItem[] item){
+		for (DropItem i : item){
+			panel.addItem(i);
+		}
+	}
 
 	@Override
 	public void setFocus() {

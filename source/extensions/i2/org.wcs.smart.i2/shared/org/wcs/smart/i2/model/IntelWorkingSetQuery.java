@@ -125,7 +125,7 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 	 * 
 	 */
 	@Embeddable
-	private static class IWorkingSetQueryPk implements Serializable {
+	public static class IWorkingSetQueryPk implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		private IntelRecordQuery query;

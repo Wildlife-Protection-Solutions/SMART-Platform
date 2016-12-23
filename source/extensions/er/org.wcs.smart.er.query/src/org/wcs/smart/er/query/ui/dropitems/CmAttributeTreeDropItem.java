@@ -46,8 +46,8 @@ import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.ui.TreeDropDownViewer;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
+import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.util.UuidUtils;
 
 /**

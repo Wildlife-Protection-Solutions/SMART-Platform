@@ -22,8 +22,8 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -43,11 +43,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -71,6 +71,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -87,6 +88,12 @@ import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
+/**
+ * View for listing all intelligence queries in the system
+ *  
+ * @author Emily
+ *
+ */
 public class QueryView {
 
 	public static final String ID = "org.wcs.smart.i2.ui.view.queries";
@@ -172,6 +179,11 @@ public class QueryView {
 	}
 	
 	private void deleteSelection(){
+		int cnt = ((IStructuredSelection)viewer.getSelection()).size();
+		if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Queries", MessageFormat.format("Are you sure you want to delete the {0} selected queries?  This action cannot be undone.", cnt))){
+			return;
+		}
+		
 		List<IntelRecordQuery> removed = new ArrayList<IntelRecordQuery>();
 		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
