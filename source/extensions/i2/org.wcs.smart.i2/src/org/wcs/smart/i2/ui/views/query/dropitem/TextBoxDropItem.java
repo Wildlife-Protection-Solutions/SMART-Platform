@@ -88,14 +88,7 @@ public class TextBoxDropItem extends DropItem {
 
 		operators = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		operators.setContentProvider(ArrayContentProvider.getInstance());
-		operators.setLabelProvider(new LabelProvider(){
-			public String getText(Object element){
-				if (element instanceof Operator){
-					return ((Operator) element).getLabel(Locale.getDefault());
-				}
-				return super.getText(element);
-			}
-		});
+		operators.setLabelProvider(new OperatorLabelProvider());
 		if (type == InputType.NUMERIC) {
 			operators.setInput(Operator.NUMERIC_OPS);
 		} else if (type == InputType.TEXT) {
@@ -109,7 +102,8 @@ public class TextBoxDropItem extends DropItem {
 		
 		operators.getControl().addListener(SWT.Modify, e->{
 			Operator current = (Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement();
-			if (current != null && current.equals(currentOperator)){
+			if (current != null && !current.equals(currentOperator)){
+				currentOperator = current;
 				queryChanged();
 			}
 		});		

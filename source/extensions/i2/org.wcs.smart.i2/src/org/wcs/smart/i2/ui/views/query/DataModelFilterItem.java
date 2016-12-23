@@ -1,19 +1,27 @@
 package org.wcs.smart.i2.ui.views.query;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ui.views.query.dropitem.AttributeTreeDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
 
@@ -21,49 +29,64 @@ public class DataModelFilterItem extends DeferredFilterItem{
 
 	private Object LOCK = new Object();
 	
-	private String categoryKey = null;
 	private UUID categoryUuid = null;
-	private String attributeKey = null;
-	private boolean hasKids = false;
-	private Attribute.AttributeType type;
+	private UUID attributeUuid = null;
 	
+	private Attribute.AttributeType type;
+
+	private String dropItemName;
+	private String queryKey;
+
 	public DataModelFilterItem(Category category){
 		super(category.getName());
-		this.categoryKey = category.getKeyId();
-		categoryUuid = category.getUuid();
-		hasKids = true;//!category.getChildren().isEmpty();
+		this.categoryUuid = category.getUuid();
+		queryKey = "dm_category:" + category.getKeyId();
+		dropItemName = category.getFullCategoryName();
 	}
 	
 	public DataModelFilterItem(Attribute attribute){
 		super(attribute.getName());
-		this.attributeKey = attribute.getKeyId();
+		this.attributeUuid = attribute.getUuid();
 		this.type = attribute.getType();
-		hasKids = false;
+		queryKey = "dm_attribute:" + attribute.getType().typeKey + "::" + attribute.getKeyId();
+		dropItemName = attribute.getName();
 	}
 	
 	public DataModelFilterItem(CategoryAttribute attribute){
 		super(attribute.getAttribute().getName());
-		this.attributeKey = attribute.getAttribute().getKeyId();
-		this.categoryKey = attribute.getCategory().getKeyId();
+		
+		this.categoryUuid = attribute.getCategory().getUuid();
+		this.attributeUuid = attribute.getAttribute().getUuid();
 		this.type = attribute.getAttribute().getType();
-		hasKids = false;
+		
+		queryKey = "dm_attribute:" + attribute.getAttribute().getType().typeKey + ":" + attribute.getCategory().getKeyId() + ":" + attribute.getAttribute().getKeyId();
+		dropItemName = MessageFormat.format("{0} ({1})", attribute.getAttribute().getName(), attribute.getCategory().getFullCategoryName());
 	}
 	
+//	private void processAttributeItems(Attribute a){
+//		if (a.getType() == AttributeType.LIST){
+//			int cnt = 0;
+//			attributeListLabels = new String[a.getAttributeList().size()];
+//			attributeListKeys = new String[a.getAttributeList().size()];
+//			for (AttributeListItem i : a.getActiveListItems()){
+//				attributeListLabels[cnt] = i.getName();
+//				attributeListKeys[cnt++] = i.getKeyId();
+//			}
+//		}
+//	}
 	public Attribute.AttributeType getType(){
 		return this.type;
 	}
-	public String getAttributeKey(){
-		return this.attributeKey;
-	}
+
 	@Override
 	public List<FilterItem> getChildren() {
 		if (kids == null ){
 			synchronized (LOCK) {
 				if (kids == null){
-					if (!hasKids){
+					if (attributeUuid != null){
+						//not kids; this is an attribute
 						kids = new ArrayList<FilterItem>();
 					}else{
-						System.out.println("loading kids:" + getName());
 						Session s = HibernateManager.openSession();
 						try{
 							Category c = (Category)s.get(Category.class, categoryUuid);
@@ -94,45 +117,64 @@ public class DataModelFilterItem extends DeferredFilterItem{
 	
 	@Override
 	public boolean hasChildren(){
-		if (attributeKey != null) return false;
+		if (attributeUuid != null) return false;
 		return super.hasChildren();
 	}
 	
 	
 	@Override
 	public DropItem[] asDropItem() {
-		if (attributeKey == null){
-			//category only
-			String queryKey = "dm_category:" + categoryKey;
-			return new DropItem[]{new TextDropItem(getName(), queryKey)};
+		if (attributeUuid == null){
+			//not attribute; this is definities a category
+			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		}
 		
-		//category and attribute
-		StringBuilder partKey =new StringBuilder();
-		partKey.append("dm_attribute:");
-		partKey.append(type.typeKey);
-		partKey.append(":");
-		if (categoryKey != null){
-			partKey.append(categoryKey);
-			partKey.append(":");
-		}else{
-			partKey.append(":");
-		}
-		partKey.append(attributeKey);
 		
 		switch(type){
 		case BOOLEAN:
-			return new DropItem[]{new TextDropItem(getName(), partKey.toString())};
+			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		case DATE:
-			break;
+			return new DropItem[]{new DateDropItem(dropItemName, queryKey)};
 		case LIST:
-			break;
+			final List<String> labels = new ArrayList<String>();
+			final List<String> keys = new ArrayList<String>();
+			labels.add("<ANY>");
+			keys.add("any");
+			Job j = new Job("creating attribute drop item"){
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Session s = HibernateManager.openSession();
+					try{
+						Attribute a = (Attribute) s.get(Attribute.class, attributeUuid);
+						if (a.getAttributeList() != null){
+							for (AttributeListItem i : a.getAttributeList()){
+								labels.add(i.getName());
+								keys.add(i.getKeyId());
+							}
+						}
+					}finally{
+						s.close();
+					}
+					
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
+			try {
+				j.join();
+			} catch (InterruptedException e) {
+				Intelligence2PlugIn.displayLog("Error loading attribute list items", e);
+			}
+			
+			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]))};
+			
 		case NUMERIC:
-			return new DropItem[]{new TextBoxDropItem(getName(), partKey.toString(), TextBoxDropItem.InputType.NUMERIC)};
+			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.NUMERIC)};
 		case TEXT:
-			return new DropItem[]{new TextBoxDropItem(getName(), partKey.toString(), TextBoxDropItem.InputType.TEXT)};
+			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT)};
 		case TREE:
-			break;
+			return new DropItem[]{new AttributeTreeDropItem(dropItemName, queryKey, attributeUuid)};
 		default:
 			break;
 			

@@ -36,8 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -169,7 +168,7 @@ public abstract class DropItem {
 		Label lblX = new Label(inner, SWT.NONE);
 		lblX.setToolTipText("Delete Item");
 		lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));
-		lblX.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_DELETE));
+		lblX.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_DELETE_SMALL));
 		lblX.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -178,6 +177,8 @@ public abstract class DropItem {
 			}
 			
 		});
+		lblX.addListener(SWT.MouseEnter, e-> lblX.setCursor(lblX.getDisplay().getSystemCursor(SWT.CURSOR_HAND)));
+		lblX.addListener(SWT.MouseExit, e-> lblX.setCursor(null));
 		
 		initDrag(main);
 		initDrag(inner);

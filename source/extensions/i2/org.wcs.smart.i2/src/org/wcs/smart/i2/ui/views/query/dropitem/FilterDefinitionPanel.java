@@ -14,6 +14,8 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -24,6 +26,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 
 public class FilterDefinitionPanel implements IDefinitionPanel {
@@ -41,8 +47,8 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 	
 	private DropItem dragItem;
 	
-	private Button btnWaypoint;
-	private Button btnObservation;
+	private ToolItem opWaypoint;
+	private ToolItem opObservation;
 	
 	/**
 	 * Creates a new drop target panel.
@@ -179,11 +185,19 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		if (items.size() > 0){
 			//TODO: operators here
-//			if (!(item instanceof NotDropItem || item instanceof BracketDropItem)){
-//				DropItem it = BasicDropItemFactory.createBooleanOpDropItem();
-//				it.createWidget(this, dropTargetContent);
-//				items.add(it);	
-//			}
+			boolean addBoolean = true;
+			if (item instanceof TextOperatorDropItem){
+				Operator op = ((TextOperatorDropItem)item).getOperator();
+				if (op.equals(Operator.NOT) || op.equals(Operator.BRACKET_CLOSE) || 
+						op.equals(Operator.BRACKET_OPEN) || op.equals(Operator.BRACKETS)){ 
+					addBoolean = false;
+				}
+			}
+			if (addBoolean){
+				DropItem it = OptionDropItem.createAndOrDropItem();
+				it.createWidget(this, dropTargetContent);
+				items.add(it);	
+			}
 		}
 		items.add(item);
 		orderElements();
@@ -272,36 +286,67 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 	protected void createFilterTypeComposite(Composite parent){
 		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(2, false);
 		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 5;
 		layout.marginHeight = 3;
 		
 		filterTypeComp.setLayout(layout);
-		Label l = new Label(filterTypeComp, SWT.NONE);
-		l.setText("Query Filter Type:");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		Listener selectListener = new Listener() {
+		ToolBar toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
+		toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		opWaypoint = new ToolItem(toolbar, SWT.RADIO);
+		opWaypoint.setToolTipText("Query across observations at a single location");
+		opWaypoint.setText("Waypoint");
+		opWaypoint.addSelectionListener(new SelectionAdapter() {
+			
 			@Override
-			public void handleEvent(Event event) {
+			public void widgetSelected(SelectionEvent e) {
+				clear();
 				fireQueryChangedListeners();
 			}
-		};
-		btnWaypoint = new Button(filterTypeComp, SWT.RADIO);
-		btnWaypoint.setText("Waypoint");
-		btnWaypoint.setToolTipText("Query accross observations at a single location");
-		btnWaypoint.setSelection(true);
-		btnWaypoint.addListener(SWT.Selection, selectListener);
+		});
+		opWaypoint.setSelection(true);
 		
-		btnObservation = new Button(filterTypeComp, SWT.RADIO);
-		btnObservation.setText("Observation");
-		btnObservation.addListener(SWT.Selection, selectListener);
-		btnObservation.setToolTipText("Query distinct observations");
-		Label lspacer = new Label(filterTypeComp, SWT.NONE);
-		lspacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		opObservation = new ToolItem(toolbar, SWT.RADIO);
+		opObservation.setToolTipText("Query distinct observations");
+		opObservation.setText("Observation");
+		opObservation.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				clear();
+				fireQueryChangedListeners();
+			}
+		});
 		
+		
+		toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
+		clear.setToolTipText("clear query");
+		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+		clear.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				clear();
+				fireQueryChangedListeners();
+			}
+		});
+		
+		ToolItem run = new ToolItem(toolbar, SWT.PUSH);
+		run.setToolTipText("run query");
+		run.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		run.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//TODO: run query
+				
+			}
+		});
 	}
 	
 	/**

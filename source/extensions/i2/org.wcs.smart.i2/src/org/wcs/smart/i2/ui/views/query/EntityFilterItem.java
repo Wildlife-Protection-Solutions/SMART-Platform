@@ -29,7 +29,7 @@ public class EntityFilterItem extends BasicFilterItem {
 		super(entity.getIdAttributeAsText());
 		this.entity = entity.getUuid();
 		typeKey = entity.getEntityType().getKeyId();
-		dropLabel = MessageFormat.format("{0} [{1}]", entity.getIdAttributeAsText(), entity.getEntityType().getName() );
+		dropLabel = MessageFormat.format("{0} ({1})", entity.getIdAttributeAsText(), entity.getEntityType().getName() );
 	}
 	
 	@Override

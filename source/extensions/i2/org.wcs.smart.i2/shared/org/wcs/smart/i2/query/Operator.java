@@ -68,7 +68,17 @@ public enum Operator {
 	/**
 	 * Brackets items 
 	 */
-	BRACKETS("()"); //$NON-NLS-1$ 
+	BRACKETS("()"), //$NON-NLS-1$
+	
+	/**
+	 * Open Bracket
+	 */
+	BRACKET_OPEN("("), //$NON-NLS-1$ 
+	
+	/**
+	 * Close bracket
+	 */
+	BRACKET_CLOSE(")"); //$NON-NLS-1$ 
 	/**
 	 * Valid numeric operators
 	 */
@@ -77,6 +87,10 @@ public enum Operator {
 	 * Valid string operators
 	 */
 	public static Operator[] STRING_OPS = {STR_EQUALS, STR_CONTAINS, STR_NOTCONTAINS};
+	/**
+	 * Valid date operators
+	 */
+	public static Operator[] DATE_OPS = {BETWEEN, NOT_BETWEEN};
 	/**
 	 * Valid boolean operators
 	 */

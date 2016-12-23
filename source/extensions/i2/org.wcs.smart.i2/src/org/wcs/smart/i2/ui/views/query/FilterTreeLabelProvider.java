@@ -31,7 +31,7 @@ public class FilterTreeLabelProvider extends LabelProvider {
 		Image img = toDispose.get(element);
 		if (img != null) return img;
 		if (element instanceof AttributeFilterItem){
-			return attributeInstance.getImage(((AttributeFilterItem) element).getAttribute());
+			return attributeInstance.getImage(((AttributeFilterItem) element).getType());
 		}
 		if (element instanceof EntityTypeFilterItem){
 			if (((EntityTypeFilterItem) element).getImage() != null){
