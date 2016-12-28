@@ -88,6 +88,8 @@ public class CmSmartToXmlConverter {
 			if (cm.getDisplayMode() != null) {
 				xml.setDisplayMode(cm.getDisplayMode().name());
 			}
+			xml.setInstantGps(cm.isInstantGps());
+			xml.setPhotoFirst(cm.isPhotoFirst());
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			

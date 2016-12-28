@@ -72,6 +72,9 @@ public class ConfigurableModel extends NamedItem {
 	
 	private Map<Attribute, CmDmAttributeSettings> attributeSettings;
 
+	private boolean instantGps = false;
+	private boolean photoFirst = false;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -101,6 +104,22 @@ public class ConfigurableModel extends NamedItem {
 	}
 	public void setDisplayMode(DisplayMode displayMode) {
 		this.displayMode = displayMode;
+	}
+
+	@Column(name="instant_gps")
+	public boolean isInstantGps() {
+		return instantGps;
+	}
+	public void setInstantGps(Boolean instantGps) {
+		this.instantGps = Boolean.TRUE.equals(instantGps); //null <==> false
+	}
+
+	@Column(name="photo_first")	
+	public boolean isPhotoFirst() {
+		return photoFirst;
+	}
+	public void setPhotoFirst(Boolean photoFirst) {
+		this.photoFirst = Boolean.TRUE.equals(photoFirst); //null <==> false
 	}
 
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)

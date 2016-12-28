@@ -60,6 +60,9 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 				"UPDATE smart.employee SET smartuserlevel = usertemp",
 				"ALTER TABLE smart.employee DROP COLUMN usertemp",
 
+	            // #1425: Enable CT to take waypoint at beginning rather than end of observation
+	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN instant_gps BOOLEAN",
+	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN photo_first BOOLEAN",
 		};
 
 		for (String s : sql) {

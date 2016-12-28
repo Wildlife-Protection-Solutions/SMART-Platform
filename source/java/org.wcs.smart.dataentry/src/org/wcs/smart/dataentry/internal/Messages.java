@@ -46,6 +46,10 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_PhotoRequired;
 	public static String CmNodeInfoComposite_RecordSingleGpsPoint;
 	public static String CmNodeInfoComposite_RecordSingleGpsPointTooltip;
+	public static String CmRootNodeInfoComposite_InstantGps;
+	public static String CmRootNodeInfoComposite_InstantGpsTooltip;
+	public static String CmRootNodeInfoComposite_PhotoFirst;
+	public static String CmRootNodeInfoComposite_PhotoFirstTooltip;
 	public static String CmSmartToXmlConverter_ProcessAttributeSettings;
 	public static String CmSmartToXmlConverter_ProcessCmNodes;
 	public static String CmSmartToXmlConverter_ProcessExtraData;

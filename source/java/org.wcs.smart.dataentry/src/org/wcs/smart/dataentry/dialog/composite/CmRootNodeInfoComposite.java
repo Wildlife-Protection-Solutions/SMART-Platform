@@ -22,13 +22,18 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
@@ -41,6 +46,9 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
 	private CmRootNode rootNode;
 
+	private Button btnInstantGps;
+	private Button btnPhotoFirst;
+	
 	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model) {
 		super(parent, model);
 		createControls();
@@ -55,6 +63,44 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		Composite container = createContentContainer(this);
 		createDisplayNameControls(container);
 		createDisplayModeControls(container);
+
+        Label lblInstantGps = new Label(container, SWT.NONE);
+        lblInstantGps.setText(Messages.CmRootNodeInfoComposite_InstantGps);
+        lblInstantGps.setToolTipText(Messages.CmRootNodeInfoComposite_InstantGpsTooltip);
+        btnInstantGps = new Button(container, SWT.CHECK);
+        btnInstantGps.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                getSourceObject().getModel().setInstantGps(btnInstantGps.getSelection());
+                fireModelChanged();
+            }
+        });
+
+        Label lblPhotoFirst = new Label(container, SWT.NONE);
+        lblPhotoFirst.setText(Messages.CmRootNodeInfoComposite_PhotoFirst);
+        lblPhotoFirst.setToolTipText(Messages.CmRootNodeInfoComposite_PhotoFirstTooltip);
+        btnPhotoFirst = new Button(container, SWT.CHECK);
+        btnPhotoFirst.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                getSourceObject().getModel().setPhotoFirst(btnPhotoFirst.getSelection());
+                fireModelChanged();
+            }
+        });
+        
+        addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+            @Override
+            public void sourceObjectChanged(Object newObject, Language language) {
+                ConfigurableModel cm = getSourceObject().getModel();
+                if (btnInstantGps != null) {
+                	btnInstantGps.setSelection(cm.isInstantGps());
+                }
+                if (btnPhotoFirst != null) {
+                	btnPhotoFirst.setSelection(cm.isPhotoFirst());
+                }
+            }
+        });
+
 	}
 
 	public boolean isButtonValid(ConfigurableModelEditorDefaultTab.ControlButton button){

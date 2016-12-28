@@ -35,6 +35,8 @@ elementFormDefault="qualified">
     		<element name="extraData" type="smrt:CmExtraDataType" maxOccurs="unbounded" minOccurs="0"/>
     	</sequence>
     	<attribute name="displayMode" type="string"></attribute>
+    	<attribute name="instantGps" type="boolean"/>
+    	<attribute name="photoFirst" type="boolean"/>
     </complexType>
 
     <complexType name="LanguageListType">

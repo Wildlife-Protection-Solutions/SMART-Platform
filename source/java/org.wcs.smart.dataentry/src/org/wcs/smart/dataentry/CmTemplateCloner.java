@@ -88,6 +88,8 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		ConfigurableModel clone = new ConfigurableModel();
 		clone.setConservationArea(engine.getNewCa());
 		clone.setDisplayMode(cm.getDisplayMode());
+		clone.setInstantGps(cm.isInstantGps());
+		clone.setPhotoFirst(cm.isPhotoFirst());
 		engine.copyLabels(cm, clone);
 		engine.getSession().saveOrUpdate(clone);
 		

@@ -176,6 +176,8 @@ public class CmXmlToSmartImporter {
 			cm.setConservationArea(SmartDB.getCurrentConservationArea());
 			updateNames(cm, xmlCm.getName());
 			cm.setDisplayMode(getDisplayMode(xmlCm.getDisplayMode()));
+			cm.setInstantGps(xmlCm.isInstantGps());
+			cm.setPhotoFirst(xmlCm.isPhotoFirst());
 			
 			cm.setNodes(processCmNodes(xmlCm.getNodes().getNode(), cm, null, monitor));
 			

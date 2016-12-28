@@ -84,6 +84,8 @@ public class ConfigurableModelFactory {
 		monitor.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
 		ConfigurableModel clone = createBlankModel(name);
 		clone.setDisplayMode(cm.getDisplayMode());
+		clone.setInstantGps(cm.isInstantGps());
+		clone.setPhotoFirst(cm.isPhotoFirst());
 		ConfigurableModelCloneResult cloneResult = new ConfigurableModelCloneResult(clone);
 		Map<UUID, UuidItem> o2iMap = cloneResult.getOriginal2CloneItemMap();
 		o2iMap.put(cm.getUuid(), clone);
