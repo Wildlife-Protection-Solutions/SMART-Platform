@@ -53,7 +53,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
@@ -82,7 +82,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
-import org.wcs.smart.i2.ui.SmartSection;
+import org.wcs.smart.i2.ui.editors.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -127,8 +127,12 @@ public class RecordsView {
 		((GridLayout)parent.getLayout()).marginWidth = 0;
 		
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		SashForm thisParent = new SashForm(parent, SWT.VERTICAL);
+		Composite thisParent = toolkit.createComposite(parent);
 		thisParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+ 		thisParent.setLayout(new GridLayout());
+ 		((GridLayout)thisParent.getLayout()).marginWidth = 0;
+ 		((GridLayout)thisParent.getLayout()).marginHeight = 0;
+ 		
  		
 		IDoubleClickListener openListener = new IDoubleClickListener() {
 			
@@ -144,29 +148,44 @@ public class RecordsView {
 			}
 		};
 		
-		SmartSection inProgress = new SmartSection(thisParent, toolkit, "In Progress");
-		lstInProgress = new ListViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
-		lstInProgress.setLabelProvider(new RecordLabelProvider());
-		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		lstInProgress.addDoubleClickListener(openListener);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.heightHint = 100;
-		lstInProgress.getControl().setLayoutData(gd);
-		lstInProgress.addSelectionChangedListener(selectOne);
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Unprocessed", "In Progress", "All"}, thisParent, toolkit);
+		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		SmartSection newRecords = new SmartSection(thisParent, toolkit, "New Records");
+		Composite tabPart = toolkit.createComposite(thisParent, SWT.NONE);
+		tabPart.setLayout(new StackLayout());
+		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite newRecords = toolkit.createComposite(tabPart);
+		newRecords.setLayout(new GridLayout());
+ 		((GridLayout)newRecords.getLayout()).marginWidth = 0;
+ 		((GridLayout)newRecords.getLayout()).marginHeight = 0;
 		lstNewRecords = new ListViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI);
 		lstNewRecords.setContentProvider(ArrayContentProvider.getInstance());
 		lstNewRecords.setLabelProvider(new RecordLabelProvider());
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstNewRecords.addDoubleClickListener(openListener);
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.heightHint = 100;
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		lstNewRecords.getControl().setLayoutData(gd);
 		lstNewRecords.addSelectionChangedListener(selectOne);
 		
-		SmartSection allRecords = new SmartSection(thisParent, toolkit, "All Records");
+		Composite inProgress = toolkit.createComposite(tabPart);
+		inProgress.setLayout(new GridLayout());
+		((GridLayout)inProgress.getLayout()).marginWidth = 0;
+ 		((GridLayout)inProgress.getLayout()).marginHeight = 0;
+		lstInProgress = new ListViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
+		lstInProgress.setLabelProvider(new RecordLabelProvider());
+		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		lstInProgress.addDoubleClickListener(openListener);
+		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		lstInProgress.getControl().setLayoutData(gd);
+		lstInProgress.addSelectionChangedListener(selectOne);
+		
+		Composite allRecords = toolkit.createComposite(tabPart);
+		allRecords.setLayout(new GridLayout());
+		((GridLayout)allRecords.getLayout()).marginWidth = 0;
+ 		((GridLayout)allRecords.getLayout()).marginHeight = 0;
+ 		
 		Composite allRecordsSection = toolkit.createComposite(allRecords);
 		allRecordsSection.setLayout(new GridLayout());
 		allRecordsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -197,9 +216,11 @@ public class RecordsView {
 		lstAllRecords.setLabelProvider(new RecordLabelProvider());
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstAllRecords.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)lstAllRecords.getControl().getLayoutData()).heightHint = 100;
 		lstAllRecords.addDoubleClickListener(openListener);
 		lstAllRecords.addSelectionChangedListener(selectOne);
+		
+		tabList.setContent(new Composite[]{newRecords,inProgress,allRecords}, tabPart);
+		tabList.selectTab(0);
 		
 		createMenu(lstAllRecords);
 		createMenu(lstInProgress);
