@@ -23,6 +23,7 @@ package org.wcs.smart.i2.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -54,7 +55,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	public enum Status{
 			NEW,
 			PROCESSING,
-			COMPLETE
+			COMPLETE;
 	};
 	
 	private ConservationArea ca;

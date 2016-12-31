@@ -85,6 +85,7 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -418,7 +419,7 @@ public class RecordSummaryPage extends EditorPart{
 				@Override
 				public String getText(Object element){
 					if (element instanceof IntelRecord.Status){
-						return ((Enum<Status>) element).name();
+						return RecordLabelProvider.getRecordStatusLabel((Status) element);
 					}
 					return super.getText(element);
 				}
@@ -435,7 +436,7 @@ public class RecordSummaryPage extends EditorPart{
 			});
 			
 		}else{
-			Label l = toolkit.createLabel(topPart, recordEditor.getRecord().getStatus().name());
+			Label l = toolkit.createLabel(topPart,  RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		}
 		

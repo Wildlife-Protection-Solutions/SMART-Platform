@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -78,5 +79,15 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 			return MessageFormat.format("{0} ({1})", ((RecordEditorInput) element).getName(), DateFormat.getDateInstance().format(((RecordEditorInput) element).getDateCreated()));
 		}
 		return super.getText(element);
+	}
+	
+	public static String getRecordStatusLabel(IntelRecord.Status status) {
+		if (status == IntelRecord.Status.NEW)
+			return "Unprocessed";
+		if (status == IntelRecord.Status.PROCESSING)
+			return "In Progress";
+		if (status == IntelRecord.Status.COMPLETE)
+			return "Complete";
+		return "";
 	}
 }
