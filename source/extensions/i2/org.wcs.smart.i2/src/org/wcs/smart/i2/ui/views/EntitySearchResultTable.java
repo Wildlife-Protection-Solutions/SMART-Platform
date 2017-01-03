@@ -56,6 +56,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -93,12 +94,30 @@ import org.wcs.smart.util.E3Utils;
  */
 public class EntitySearchResultTable extends Composite {
 
+	private static final String ICON_SIZE_KEY = "org.wcs.smart.i2.ui.views.EntitySearchResultTable.iconsize";
+	private enum IconSize{
+		SMALL(50, "Small"), 
+		MEDIUM(100, "Medium"),
+		LARGE(200, "Large");
+		
+		int size;
+		String label;
+		
+		IconSize(int size, String label){
+			this.size = size;
+			this.label = label;
+		}
+	}
+	
+	private IconSize iconSize = IconSize.SMALL;
+	
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
 	
 	private Composite core = null;
 	private Font smallerFont = null;
 	private Font boldFont = null;
+	private Label iconSizeLabel = null;
 	
 	private IntelSearchResult entities;
 	private FormToolkit toolkit = null;
@@ -106,7 +125,7 @@ public class EntitySearchResultTable extends Composite {
 	
 	private IEclipseContext context;
 	private ScrolledComposite sc;
-	
+
 	public EntitySearchResultTable(Composite parent, FormToolkit toolkit, IEclipseContext context) {
 		super(parent, SWT.NONE);
 		this.toolkit = toolkit;
@@ -127,8 +146,21 @@ public class EntitySearchResultTable extends Composite {
 					boldFont.dispose();
 					boldFont = null;
 				}
+				if (iconSize != null){
+					Intelligence2PlugIn.getDefault().getPreferenceStore().putValue(ICON_SIZE_KEY, iconSize.name());
+				}
 			}
 		});
+		
+		String initIconSize = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(ICON_SIZE_KEY);
+		if (initIconSize != null){
+			try{
+				iconSize = IconSize.valueOf(initIconSize);
+			}catch (Exception ex){
+				// use the default value
+			}
+			
+		}
 	}
 	
 	/**
@@ -173,6 +205,14 @@ public class EntitySearchResultTable extends Composite {
 		this.layout(true);
 	}
 	
+	private void setIconSize(IconSize newSize){
+		this.iconSize = newSize;
+		createTable();
+		core.layout(true);
+		if (sc != null){
+			sc.setMinSize(sc.getChildren()[0].computeSize(sc.getClientArea().width, SWT.DEFAULT));	
+		}
+	}
 	
 	private void createTable(){
 		if (core != null){
@@ -205,7 +245,42 @@ public class EntitySearchResultTable extends Composite {
 			toolkit.createLabel(core, "Searching...");
 			sc = null;
 		}else{
-			toolkit.createLabel(core, MessageFormat.format("{0} of {1}", entities.getResults().size(), entities.getTotalMatched()));
+			Composite top = toolkit.createComposite(core);
+			top.setLayout(new GridLayout(3, false));
+			top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)top.getLayout()).marginWidth = 0;
+			((GridLayout)top.getLayout()).marginHeight = 0;
+			((GridLayout)top.getLayout()).horizontalSpacing = 0;
+			((GridLayout)top.getLayout()).verticalSpacing = 0;
+			
+			toolkit.createLabel(top, MessageFormat.format("{0} of {1}", entities.getResults().size(), entities.getTotalMatched()));
+			
+			iconSizeLabel = toolkit.createLabel(top, iconSize.label);
+			iconSizeLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			iconSizeLabel.setToolTipText("Thumbnail Size");
+			Button btnDown = toolkit.createButton(top, "", SWT.ARROW | SWT.DOWN);
+			btnDown.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+			btnDown.setToolTipText("select thumbnail size");
+			Menu mnuIconSize = new Menu(btnDown);
+			MenuItem small = new MenuItem(mnuIconSize, SWT.RADIO);
+			MenuItem medium = new MenuItem(mnuIconSize, SWT.RADIO);
+			MenuItem large = new MenuItem(mnuIconSize, SWT.RADIO);
+			small.setText("Small");
+			medium.setText("Medium");
+			large.setText("Large");
+			
+			if(iconSize == IconSize.SMALL){
+				small.setSelection(true);
+			}else if (iconSize == IconSize.MEDIUM){
+				medium.setSelection(true);
+			}else if (iconSize == IconSize.LARGE){
+				large.setSelection(true);
+			}
+			small.addListener(SWT.Selection, e-> {if (small.getSelection()) setIconSize(IconSize.SMALL);});
+			medium.addListener(SWT.Selection, e-> {if (medium.getSelection()) setIconSize(IconSize.MEDIUM);});
+			large.addListener(SWT.Selection, e-> {if (large.getSelection()) setIconSize(IconSize.LARGE);});
+			btnDown.addListener(SWT.MouseDown, e->mnuIconSize.setVisible(true));
+			
 			
 			sc = new ScrolledComposite(core, SWT.V_SCROLL |  SWT.H_SCROLL);
 			toolkit.adapt(sc);
@@ -496,13 +571,13 @@ public class EntitySearchResultTable extends Composite {
 			((GridLayout)getLayout()).marginHeight = 2;
 			addListener(this);
 			
-			Thumbnail t = new Thumbnail(item.getEntity().getPrimaryAttachment(), 50);
+			Thumbnail t = new Thumbnail(item.getEntity().getPrimaryAttachment(), iconSize.size);
 			Composite c = t.createThumbnail(this);
 			addListener(c);
 			toolkit.adapt(c);
 			c.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-			((GridData)c.getLayoutData()).widthHint = 50;
-			((GridData)c.getLayoutData()).heightHint = 50;
+			((GridData)c.getLayoutData()).widthHint = iconSize.size;
+			((GridData)c.getLayoutData()).heightHint = iconSize.size;
 			
 			Composite right = toolkit.createComposite(this, SWT.NONE);
 			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
