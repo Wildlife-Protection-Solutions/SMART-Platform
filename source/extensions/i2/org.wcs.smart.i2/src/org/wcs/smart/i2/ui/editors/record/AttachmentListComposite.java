@@ -53,6 +53,7 @@ import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.AttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.editors.AttachmentTable;
 import org.wcs.smart.i2.ui.editors.IMenuCreator;
+import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -106,6 +107,7 @@ public class AttachmentListComposite extends Composite{
 		IMenuCreator thumbMenu = new IMenuCreator() {
 			private MenuItem mnuAdd;
 			private MenuItem mnuOpen;
+			private MenuItem mnuOpenThumbnail;
 			private MenuItem mnuDelete;
 			private MenuItem mnulinkTo;
 			private MenuItem mnuProperties;
@@ -133,9 +135,22 @@ public class AttachmentListComposite extends Composite{
 			}
 			
 			private void createMenu(){		
+				if (mnuOpenThumbnail == null){
+					mnuOpenThumbnail = new MenuItem(thumbMenu,SWT.DEFAULT);
+					mnuOpenThumbnail.setText("Open");
+					mnuOpenThumbnail.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							if (!attachmentTable.getSelection().isEmpty()){
+								(new OpenAttachmentViewHandler()).execute(attachmentTable.getSelection().get(0), editor.getContext());
+							}
+						}
+					});
+					
+				}
 				if (mnuOpen == null){
 					mnuOpen = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuOpen.setText("Open");
+					mnuOpen.setText("Open External");
 					mnuOpen.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -146,8 +161,10 @@ public class AttachmentListComposite extends Composite{
 					});
 					new MenuItem(thumbMenu, SWT.SEPARATOR);
 				}
+				
+				
 				if (editor.getEditMode()){
-					int index = 2;
+					int index = 3;
 					if (mnuAdd == null){
 						mnuAdd = new MenuItem(thumbMenu,SWT.DEFAULT,index);
 						mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);

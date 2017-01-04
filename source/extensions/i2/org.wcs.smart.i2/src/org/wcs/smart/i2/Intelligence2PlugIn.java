@@ -68,6 +68,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_DELETE_SMALL = "org.wcs.smart.i2.icon.delete.small"; //$NON-NLS-1$
 	public static final String ICON_CLEAR = "org.wcs.smart.i2.icon.clear"; //$NON-NLS-1$
 	
+	public static final String ICON_IMG_ZOOMIN = "org.wcs.smart.i2.icon.zoom.in"; //$NON-NLS-1$
+	public static final String ICON_IMG_ZOOMOUT = "org.wcs.smart.i2.icon.zoom.out"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
 
@@ -103,6 +106,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_AREA, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/area_polygon.png")); //$NON-NLS-1$);
 		reg.put(ICON_DELETE_SMALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/delete_small.png")); //$NON-NLS-1$);
 		reg.put(ICON_CLEAR, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/clear.png")); //$NON-NLS-1$);
+		
+		reg.put(ICON_IMG_ZOOMIN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_in.png")); //$NON-NLS-1$);
+		reg.put(ICON_IMG_ZOOMOUT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_out.png")); //$NON-NLS-1$);
 		
 	}
 	

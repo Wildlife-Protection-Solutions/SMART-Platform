@@ -74,7 +74,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
-import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.IntelSearchResult;
@@ -82,6 +81,7 @@ import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
+import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.E3Utils;
@@ -411,7 +411,21 @@ public class EntitySearchResultTable extends Composite {
 		mnuOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
 				openEntities();
+			}
+		});
+		
+		MenuItem mnuOpenThumb = new MenuItem(menu, SWT.PUSH);
+		mnuOpenThumb.setText("Open Thumbnail ...");
+		mnuOpenThumb.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (IntelEntity entity : getCurrentSelection()){
+					if (entity.getPrimaryAttachment() != null){
+						(new OpenAttachmentViewHandler()).execute(entity.getPrimaryAttachment(), context);
+					}
+				}
 			}
 		});
 		

@@ -758,6 +758,7 @@ public class WorkingSetView {
 	
 	@Focus
 	public void setFocus() {
+		lblWorkingSet.setFocus();
 	}
 
 	@PreDestroy
