@@ -236,35 +236,37 @@ public class ConservationAreas extends HttpServlet{
 						proxy.setVersion(ca.getVersion());
 					}
 					
+					
+					//Check FILTERS
+					boolean passedBoundary = false;
+					if(caJsonFilter != null && !caJsonFilter.equals("")){
+						if(smartca == null){ //no-data CAs should not be returned when there is a geojson filter
+							passedBoundary = false;
+						}else{
+							//if the JSON passed in contains the CABoundry, return true;
+							Boolean result = (Boolean)s.createSQLQuery("Select st_contains(  (Select st_geomfromgeojson('" + caJsonFilter + "')) ,  (Select geom from area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "')  )").uniqueResult();
+							if(result != null && result == true){
+								passedBoundary=true;//can't cast straight to a bool because the result is null if there is no caBoundary layer
+							}else{
+								passedBoundary=false;
+							}
+						}
+					}else{
+						passedBoundary=true; //no filter provided or it is blank, assume they want everything
+					}
+					boolean passedOrg = false;
+					if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase().contains(organizationFilter.toUpperCase())) ){
+						passedOrg = true;
+					}else{
+						passedOrg = false;
+					}
+					if(passedOrg && passedBoundary)conservationAreas.add(proxy);
+					
+				
 				}catch(SmartConnectException ex){
 					//not valid user; ignore
 				}
 
-				
-				//Check FILTERS
-				boolean passedBoundary = false;
-				if(caJsonFilter != null && !caJsonFilter.equals("")){
-					if(smartca == null){ //no-data CAs should not be returned when there is a geojson filter
-						passedBoundary = false;
-					}else{
-						//if the JSON passed in contains the CABoundry, return true;
-						Boolean result = (Boolean)s.createSQLQuery("Select st_contains(  (Select st_geomfromgeojson('" + caJsonFilter + "')) ,  (Select geom from area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "')  )").uniqueResult();
-						if(result != null && result == true){
-							passedBoundary=true;//can't cast straight to a bool because the result is null if there is no caBoundary layer
-						}else{
-							passedBoundary=false;
-						}
-					}
-				}else{
-					passedBoundary=true; //no filter provided or it is blank, assume they want everything
-				}
-				boolean passedOrg = false;
-				if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase().contains(organizationFilter.toUpperCase())) ){
-					passedOrg = true;
-				}else{
-					passedOrg = false;
-				}
-				if(passedOrg && passedBoundary)conservationAreas.add(proxy);
 				
 			}
 			
