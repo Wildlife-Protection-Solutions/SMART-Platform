@@ -92,19 +92,17 @@ public class AttributeTable {
 			gc.setFont(attributeTable.getTable().getFont());
 			for (int i = 0; i < attributes.size(); i ++){
 				TableColumn column = new TableColumn(attributeTable.getTable(),SWT.NONE);
-//				column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i)));
 				column.setText(SmartUtils.formatStringForLabel(attributes.get(i).getName()));
 				column.setResizable(true);
 				column.setMoveable(false);
-				
-				int width = gc.textExtent(attributes.get(i).getName() ).x + 20;
+				String name = attributes.get(i).getName();
+				int width = gc.textExtent(name == null? "" : name ).x + 20;
 				if (width < 60){
 					width = 60;
 				}
 				column.setWidth( width );
 			}
 			TableColumn column = new TableColumn(attributeTable.getTable(),SWT.NONE);
-//			column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i)));
 			column.setText(ATTACHMENT_COLUMN_NAME);
 			column.setResizable(true);
 			column.setMoveable(false);

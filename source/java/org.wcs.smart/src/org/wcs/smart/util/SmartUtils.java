@@ -511,6 +511,7 @@ public class SmartUtils {
 	 * @return
 	 */
 	public static String formatStringForLabel(String text){
+		if (text == null) return ""; //$NON-NLS-1$
 		return text.replaceAll("&", "&&");  //$NON-NLS-1$//$NON-NLS-2$
 	}
 
