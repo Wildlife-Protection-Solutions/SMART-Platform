@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.views.query;
 
 import java.text.MessageFormat;
@@ -17,39 +38,54 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
 
-public class AttributeFilterItem extends BasicFilterItem {
+/**
+ * Intelligence attribute tree filter item.
+ * 
+ * @author Emily
+ *
+ */
+public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 
 	private UUID attributeUuid;
 	private UUID entityTypeUuid;
 	
-	private IntelAttribute.IAttributeType type;
-	
+	private IntelAttribute.AttributeType type;
 	private String dropItemName = null;
 	private String queryKey = "";
-	public AttributeFilterItem(IntelEntityTypeAttribute attribute) {
+	
+	/**
+	 * Creates a new attribute filter for an entity type attribute
+	 * @param attribute
+	 */
+	public AttributeTreeFilterItem(IntelEntityTypeAttribute attribute) {
 		super(attribute.getAttribute().getName());
 		this.entityTypeUuid = attribute.getEntityType().getUuid();
 		this.attributeUuid = attribute.getAttribute().getUuid();
 		type = attribute.getAttribute().getType();
 		
-		dropItemName = MessageFormat.format("{0} ({1})", attribute.getAttribute().getName(), attribute.getEntityType().getName());
+		dropItemName = DropItemFactory.generateName(attribute.getAttribute(),  attribute.getEntityType());
 		
-		queryKey = "entity_attribute:" + attribute.getAttribute().getKeyId() + ":" + attribute.getEntityType().getKeyId();
+		queryKey = "e_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getAttribute().getKeyId() + ":" + attribute.getEntityType().getKeyId();
 	}
 
-	public AttributeFilterItem(IntelAttribute attribute) {
+	/**
+	 * Create a new attribute filter for an attribute across all entity types
+	 * @param attribute
+	 */
+	public AttributeTreeFilterItem(IntelAttribute attribute) {
 		super(attribute.getName());
 		this.attributeUuid = attribute.getUuid();
 		type = attribute.getType();
-		dropItemName = attribute.getName();
-		queryKey = "entity_attribute:" + attribute.getKeyId() + ":" ;
+		dropItemName = DropItemFactory.generateName(attribute, null);
+		queryKey = "e_attribute:" + attribute.getType().key + ":" + attribute.getKeyId() + ":" ;
 	}
 
-	public IntelAttribute.IAttributeType getType(){
+	public IntelAttribute.AttributeType getType(){
 		return this.type;
 	}
 	
@@ -64,7 +100,7 @@ public class AttributeFilterItem extends BasicFilterItem {
 		case LIST:
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
-			labels.add("<ANY>");
+			labels.add("<ANY>"); //TODO: make these constants
 			keys.add("any");
 			Job j = new Job("creating attribute drop item"){
 

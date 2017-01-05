@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.editors;
+package org.wcs.smart.i2.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -40,7 +40,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 
 /**
- * Editor section tab  header.
+ *  Header for tabs that displays a list of strings
  * 
  * @author Emily
  *
@@ -56,10 +56,10 @@ public class SectionTabHeader extends Composite implements IHyperlinkListener{
 	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit, Color background, Runnable onMaximize){
 		super(parent, SWT.NONE);
 		
-		setLayout(new GridLayout(tabs.length + (onMaximize == null ? 0 : 1), false));
+		setLayout(new GridLayout(tabs.length*2-1 + (onMaximize == null ? 0 : 1), false));
 		setBackground(background);
 		((GridLayout)getLayout()).marginHeight = 2;
-		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginWidth = 5;
 		
 		
 		headers = new Hyperlink[tabs.length];
@@ -70,6 +70,12 @@ public class SectionTabHeader extends Composite implements IHyperlinkListener{
 			normalFont = header.getFont();
 			header.setData(i);
 			header.addHyperlinkListener(this);
+			
+			if (i != tabs.length - 1){
+				Label l  = toolkit.createLabel(this, "");//, SWT.SEPARATOR | SWT.VERTICAL);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				
+			}
 		}
 		
 		FontData fd = headers[0].getFont().getFontData()[0];

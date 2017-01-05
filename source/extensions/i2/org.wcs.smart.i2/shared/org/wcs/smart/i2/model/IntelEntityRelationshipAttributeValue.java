@@ -35,7 +35,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 /**
  * Model class of i_entity_relationship_attribute.
@@ -137,15 +137,15 @@ public class IntelEntityRelationshipAttributeValue {
 	 */
 	@Transient
 	public Object getAttributeValue(){
-		IAttributeType type = getAttribute().getType();
-		if (type == IAttributeType.BOOLEAN ||
-				type == IAttributeType.NUMERIC){
+		AttributeType type = getAttribute().getType();
+		if (type == AttributeType.BOOLEAN ||
+				type == AttributeType.NUMERIC){
 			return getNumberValue();
-		}else if (type == IAttributeType.TEXT){
+		}else if (type == AttributeType.TEXT){
 			return getStringValue();
-		}else if (type == IAttributeType.LIST){
+		}else if (type == AttributeType.LIST){
 			return getAttributeListItem();
-		}else if (type == IAttributeType.DATE){
+		}else if (type == AttributeType.DATE){
 			return getDateValue();
 		}
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$

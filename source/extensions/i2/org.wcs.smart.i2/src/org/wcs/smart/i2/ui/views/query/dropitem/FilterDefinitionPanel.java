@@ -22,14 +22,17 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 
 public class FilterDefinitionPanel implements IDefinitionPanel {
@@ -49,6 +52,9 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 	
 	private ToolItem opWaypoint;
 	private ToolItem opObservation;
+	
+	private Composite infoPanel;
+	private ToolItem run ;
 	
 	/**
 	 * Creates a new drop target panel.
@@ -117,19 +123,17 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 	 */
 	public String getQueryPart(){
 		StringBuilder query = new StringBuilder();
-//		
-//		if (btnWaypoint != null){
-//			if (items.size() > 0){
-//				//if non-empty filter then include filter type
-//				if (btnWaypoint.getSelection()){
-//					query.append(IFilter.FilterType.WAYPOINT.getKey());
-//				}else{
-//					query.append(IFilter.FilterType.OBSERVATION.getKey());
-//				}
-//				query.append("|"); //$NON-NLS-1$
-//			}
-//		}
-//		
+		
+		if (items.size() > 0){
+			//if non-empty filter then include filter type
+			if (opWaypoint.getSelection()){
+				query.append(IQueryFilter.FilterType.WAYPOINT.getKey());
+			}else{
+				query.append(IQueryFilter.FilterType.OBSERVATION.getKey());
+			}
+			query.append("|"); //$NON-NLS-1$
+		}
+		
 		for (Object item : items){
 			if (item instanceof DropItem){
 				DropItem it = (DropItem)item;
@@ -184,7 +188,6 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 		item.createWidget(this, dropTargetContent);
 		
 		if (items.size() > 0){
-			//TODO: operators here
 			boolean addBoolean = true;
 			if (item instanceof TextOperatorDropItem){
 				Operator op = ((TextOperatorDropItem)item).getOperator();
@@ -278,6 +281,30 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 		orderElements();
 	}
 	
+	public void setErrorMessage(String message, Exception fullMessage){
+		for (Control c : infoPanel.getChildren()){
+			c.dispose();
+		}
+		if (message == null){
+			run.setEnabled(true);
+			infoPanel.getParent().layout(true,true);
+			return;
+		}
+		
+		run.setEnabled(false);
+		
+		infoPanel.setLayout(new GridLayout(2, false));
+		Label l = new Label(infoPanel, SWT.NONE);
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		l = new Label(infoPanel, SWT.NONE);
+		l.setText(message);
+		l.setToolTipText(fullMessage.getMessage());
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		infoPanel.getParent().layout(true,true);
+		
+	}
 	/**
 	 * Adds the filter type options to the parent composite.
 	 * @param parent
@@ -286,7 +313,7 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 	protected void createFilterTypeComposite(Composite parent){
 		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(3, false);
 		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 5;
@@ -301,10 +328,8 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 		opWaypoint.setToolTipText("Query across observations at a single location");
 		opWaypoint.setText("Waypoint");
 		opWaypoint.addSelectionListener(new SelectionAdapter() {
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				clear();
 				fireQueryChangedListeners();
 			}
 		});
@@ -314,17 +339,18 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 		opObservation.setToolTipText("Query distinct observations");
 		opObservation.setText("Observation");
 		opObservation.addSelectionListener(new SelectionAdapter() {
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				clear();
 				fireQueryChangedListeners();
 			}
 		});
 		
+		infoPanel = new Composite(filterTypeComp, SWT.NONE);
+		infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)infoPanel.getLayoutData()).heightHint = 30;
 		
 		toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
-		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
 		clear.setToolTipText("clear query");
 		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
@@ -337,7 +363,7 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 			}
 		});
 		
-		ToolItem run = new ToolItem(toolbar, SWT.PUSH);
+		run = new ToolItem(toolbar, SWT.PUSH);
 		run.setToolTipText("run query");
 		run.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
 		run.addSelectionListener(new SelectionAdapter() {
@@ -530,10 +556,16 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 		return dropTargetContent;
 	}
 
+	private List<Runnable> queryListeners = new ArrayList<>();
+	
+	public void addQueryChangedListener(Runnable r){
+		queryListeners.add(r);
+	}
 	@Override
 	public void fireQueryChangedListeners() {
-		// TODO Auto-generated method stub
-		
+		for (Runnable r : queryListeners){
+			r.run();
+		}
 	}
 
 

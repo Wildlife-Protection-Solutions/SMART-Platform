@@ -53,14 +53,20 @@ import org.wcs.smart.i2.IIntelligenceLabelProvider;
 @Table(name="smart.i_attribute")
 public class IntelAttribute extends NamedKeyItem{
 
-	public enum IAttributeType{
-		NUMERIC,
-		TEXT, 
-		BOOLEAN,
-		LIST,
-		DATE;
+	public enum AttributeType{
+		NUMERIC("n"),
+		TEXT("s"), 
+		BOOLEAN("b"),
+		LIST("l"),
+		DATE("d");
 		
+		public String key;
+		
+		AttributeType(String key){
+			this.key = key;
+		}
 		public Image getImage(){
+			//TODO: this cannot be in shared folder
 			String key = null;
 			if (this == NUMERIC){
 				key = SmartPlugIn.ATTRIBUTE_NUMBER_ICON;
@@ -83,7 +89,7 @@ public class IntelAttribute extends NamedKeyItem{
 		}
 	}
 	
-	private IAttributeType type;
+	private AttributeType type;
 	private ConservationArea ca;
 
 	private List<IntelAttributeListItem> listItems;
@@ -102,7 +108,7 @@ public class IntelAttribute extends NamedKeyItem{
 	 */
 	@Enumerated(EnumType.STRING)
 	@Column(name="type")
-	public IAttributeType getType() {
+	public AttributeType getType() {
 		return this.type;
 	}
 	
@@ -112,7 +118,7 @@ public class IntelAttribute extends NamedKeyItem{
 	 * @param type
 	 *            type
 	 */
-	public void setType(IAttributeType type) {
+	public void setType(AttributeType type) {
 		this.type = type;
 	}
 

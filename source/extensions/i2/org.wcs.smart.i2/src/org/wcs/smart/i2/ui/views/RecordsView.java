@@ -82,7 +82,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
-import org.wcs.smart.i2.ui.editors.SectionTabHeader;
+import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -148,8 +148,9 @@ public class RecordsView {
 			}
 		};
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Unprocessed", "In Progress", "All"}, thisParent, toolkit);
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Unprocessed", "In Progress", "All"}, thisParent, toolkit, thisParent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)tabList.getLayoutData()).verticalIndent = 2;
 		
 		Composite tabPart = toolkit.createComposite(thisParent, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
@@ -157,9 +158,7 @@ public class RecordsView {
 		
 		Composite newRecords = toolkit.createComposite(tabPart);
 		newRecords.setLayout(new GridLayout());
- 		((GridLayout)newRecords.getLayout()).marginWidth = 0;
- 		((GridLayout)newRecords.getLayout()).marginHeight = 0;
-		lstNewRecords = new ListViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI);
+		lstNewRecords = new ListViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER);
 		lstNewRecords.setContentProvider(ArrayContentProvider.getInstance());
 		lstNewRecords.setLabelProvider(new RecordLabelProvider());
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
@@ -170,9 +169,7 @@ public class RecordsView {
 		
 		Composite inProgress = toolkit.createComposite(tabPart);
 		inProgress.setLayout(new GridLayout());
-		((GridLayout)inProgress.getLayout()).marginWidth = 0;
- 		((GridLayout)inProgress.getLayout()).marginHeight = 0;
-		lstInProgress = new ListViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		lstInProgress = new ListViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER);
 		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
 		lstInProgress.setLabelProvider(new RecordLabelProvider());
 		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});

@@ -1,0 +1,609 @@
+ /*=============================================
+SMART Query Engine Language Syntax & Semantic actions 
+=============================================*/
+options
+{
+  LOOKAHEAD= 1;
+
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  FORCE_LA_CHECK = false;
+}
+
+PARSER_BEGIN(Parser)
+package org.wcs.smart.i2.query.observation.parser;
+
+import java.util.*;
+import java.text.SimpleDateFormat;
+import org.wcs.smart.i2.query.observation.filter.*;
+import org.wcs.smart.i2.query.Operator;
+import java.lang.Exception;
+
+public class Parser
+{
+	
+}
+
+PARSER_END(Parser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r"
+| "\n"
+}
+
+/*--------- Comments  -----------------*/
+SPECIAL_TOKEN :
+{
+  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >
+| < MULTI_LINE_COMMENT :
+    "/*" (~[ "*" ])* "*"
+    (
+      "*"
+    |
+      (
+        ~[ "*", "/" ] (~[ "*" ])* "*"
+      )
+    )*
+    "/" >
+}
+
+/*--------- Keywords  -----------------*/
+TOKEN [ IGNORE_CASE ] :
+{
+  < K_AND : "and" >
+| < K_NOT : "not" >
+| < K_OR : "or" >
+}
+
+
+TOKEN :
+{
+  < COMMA : "," >
+| < LESS : "<" >
+| < LESSEQUAL : "<=" >
+| < GREATER : ">" >
+| < GREATEREQUAL : ">=" >
+| < EQUAL : "=" >
+| < NOTEQUAL : "!=" >
+| < NOTEQUAL2 : "<>" >
+| < OPENPAREN : "(" >
+| < CLOSEPAREN : ")" >
+| < SLASH : "/" >
+| < PLUS : "+" >
+| < MINUS : "-" >
+| < CONTAINS : "contains" >
+| < NOT_CONTAINS : "notcontains" >
+| < STREQUALS : "equals" >
+| < BETWEEN : "between" >
+}
+
+TOKEN : /* Numeric Constants */
+{
+  < NUMBER :
+  	(["-","+"])?< FLOAT >
+  | (["-","+"])?< FLOAT >
+    (
+      [ "e", "E" ] ([ "-", "+" ])? < FLOAT >
+    )? 
+    >
+| < #FLOAT :
+    < INTEGER >
+  | < INTEGER > ("." < INTEGER >)?
+  | "." < INTEGER > 
+    >
+| < #INTEGER : (< DIGIT >)+ >
+| < #DIGIT : [ "0"-"9" ] >
+}
+
+TOKEN : /* Literal Constants */
+{
+  < S_CONST_LITERAL :
+    "true"
+  | "false"
+  | "null" >
+}
+
+/* Query Filters */
+TOKEN : 
+{
+ < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ |  < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
+ 
+ | < CATEGORY_KEY : "dm_category:"< DM_KEY > >
+ | < ATTRIBUTE_KEY_NUMERIC : "dm_attribute:n:"(< DM_KEY >)?":"< DM_KEY >>
+ | < ATTRIBUTE_KEY_STRING : "dm_attribute:s:"(< DM_KEY >)?":"< DM_KEY >>
+ | < ATTRIBUTE_KEY_BOOLEAN : "dm_attribute:b:"(< DM_KEY >)?":"< DM_KEY >>
+ | < ATTRIBUTE_KEY_DATE: "dm_attribute:d:"(< DM_KEY >)?":"< DM_KEY >>
+ | < ATTRIBUTE_KEY_LIST: "dm_attribute:l:"(< DM_KEY >)?":"< DM_KEY >>
+ | < ATTRIBUTE_KEY_TREE: "dm_attribute:t:"(< DM_KEY >)?":"< DM_KEY >>
+
+
+ | < EATTRIBUTE_KEY_NUMERIC : "e_attribute:n:"< DM_KEY >":"(< DM_KEY >)?>
+ | < EATTRIBUTE_KEY_STRING : "e_attribute:s:"< DM_KEY >":"(< DM_KEY >)?>
+ | < EATTRIBUTE_KEY_BOOLEAN : "e_attribute:b:"< DM_KEY >":"(< DM_KEY >)?>
+ | < EATTRIBUTE_KEY_DATE: "e_attribute:d:"< DM_KEY >":"(< DM_KEY >)?>
+ | < EATTRIBUTE_KEY_LIST: "e_attribute:l:"< DM_KEY >":"(< DM_KEY >)?>
+  
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
+
+ | < #UUIDLETTER : [ "a"-"f", "A"-"F", "-"] >
+ | < #LETTER : [ "a"-"z", "A"-"Z" ] >
+ | < #SPECIAL_CHARS : ("." | "_")>
+ | < AREA_TYPE_KEY : ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) >
+ | < AREA_KEY : "area:" < AREA_TYPE_KEY > ":" < DM_KEY > >
+
+ | < ENTITY_TYPE_KEY : "entitytype:" <DM_KEY> >
+ | < ENTITY_KEY : "entity:" <UUID >>
+
+ | < QUERY_SPLITTER : "|" >
+}
+
+
+TOKEN :
+{
+  < QUOTED_STRING :
+    "\""
+    (
+      (~[ "\"", "\\", "\n", "\r" ])
+    | ("\\" ~[ "\n", "\r" ])
+    )*
+    "\"" 
+    >
+}
+
+
+
+/* ------------ Expressions ----------------------*/
+ParsedObservationQuery ParseQuery() :
+{
+	ParsedObservationQuery expr;
+}
+{
+	expr = QueryFilterInternal()
+	< EOF >
+  	{
+    	return expr;
+  	}
+}
+
+ParsedObservationQuery QueryFilterInternal():
+{
+	IQueryFilter.FilterType filterType = IQueryFilter.FilterType.OBSERVATION;
+	IQueryFilter expr;
+}
+{
+	(
+	    (	      < DM_KEY > //must be one of observation or waypoint
+	    )
+	    {
+			filterType = IQueryFilter.FilterType.parse(token.image);
+		}
+	  	< QUERY_SPLITTER >
+	)
+	(  
+		expr = ExpressionPart()
+	)
+  	{
+    	return ParsedObservationQuery.create(filterType, expr);
+  	}
+}
+
+
+IQueryFilter ExpressionPart():
+{
+  IQueryFilter expr = null;
+  Operator op = null;
+  IQueryFilter expr2 = null;
+}
+{
+  expr = BooleanPart()
+  (
+    op = BooleanOp()
+    expr2 = BooleanPart()
+	{
+	  expr = BooleanFilter.create(expr, expr2, op);
+	}
+
+  )*
+	{
+
+	  return expr;
+	}
+}
+
+IQueryFilter BooleanPart() :
+{
+  IQueryFilter filter = null;
+  boolean hasNot = false;
+  
+}
+{
+	(< K_NOT > {hasNot = true;} )?
+	(
+		filter = DataModelCategoryFilter()
+		|
+		filter = DataModelAttributeFilter()
+		|
+		filter = EntityAttributeFilter()
+ 		|	 
+		filter = AreaFilter()
+		|	 
+		filter = EntityTypeFilter()
+		|	 
+		filter = EntityFilter()
+		|
+		(< OPENPAREN >filter = ExpressionPart()< CLOSEPAREN >)
+		{
+	  		filter = BracketFilter.create(filter);
+		}
+	)
+	{
+		if (hasNot){
+	      filter = NotFilter.create(filter);
+	    }
+  		return filter;
+	}
+}
+
+
+IQueryFilter DataModelAttributeFilter():
+{
+	IQueryFilter filter = null;
+	String key;
+	Operator op;
+	String value;	
+}
+{
+	(/* String comparison */
+	filter = DmStringExpression()
+	|
+	/* Numeric comparison */
+	filter = DmNumberExpression()
+	| 
+	/* boolean */
+	filter = DmBooleanExpression()
+	| 
+	/* date */
+	filter = DmDateExpression()
+	|
+	/* tree or list */
+	filter = DmKeyExpression()
+	
+	)
+	{
+		return filter;
+	}
+}
+
+IQueryFilter DmDateExpression():
+{
+  String key = null;
+  Date date1 = null;
+  Date date2 = null;
+  Operator op = null;
+}
+{
+	(
+		< ATTRIBUTE_KEY_DATE > {key = token.image;}
+		op = DateOp()
+		< DATE_STRING >  {
+		  String datestring = token.image;
+		  try		  {		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  }catch (Exception ex)		  {		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+		< K_AND >
+		< DATE_STRING > {
+		  datestring = token.image;
+		  try
+		  {
+		    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+	)
+	{
+  		return DataModelFilter.create(key, op, date1, date2);
+	}	
+}
+
+
+IQueryFilter DmStringExpression():
+{
+  Operator op = null;
+  String key = null;
+  String value = null;
+}
+{
+	( 
+		<ATTRIBUTE_KEY_STRING> {key = token.image;}
+		op = StringOp()
+		< QUOTED_STRING > {value = token.image;}
+	)
+	{
+  		return DataModelFilter.create(key, op, value);
+	}
+}
+
+IQueryFilter DmNumberExpression():
+{
+  Operator op = null;
+  String key = null;
+  Double value = null;
+}
+{
+	(  
+		<ATTRIBUTE_KEY_NUMERIC> {key = token.image;}
+		op = NumberOp()
+		< NUMBER > {value = Double.parseDouble(token.image);}
+	)
+	{
+  		return DataModelFilter.create(key, op, value);
+	}
+}
+
+IQueryFilter DmKeyExpression():
+{
+  String op = null;
+  String key = null;
+  String value = null;
+}
+{
+	( 
+		(		  <ATTRIBUTE_KEY_LIST> | < ATTRIBUTE_KEY_TREE >
+		)
+		{key = token.image;}
+		<  EQUAL > {op = token.image;}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+  		return DataModelFilter.create(key, value);
+	}
+}
+
+IQueryFilter DmBooleanExpression():{}
+{
+	( 
+		<ATTRIBUTE_KEY_BOOLEAN >
+	)
+	{
+  		return DataModelFilter.create(token.image);
+	}
+}
+
+IQueryFilter DataModelCategoryFilter() :
+{
+}
+{
+  < CATEGORY_KEY >
+{
+  return DataModelFilter.createCategory(token.image);
+}
+}
+
+
+
+IQueryFilter EntityAttributeFilter():
+{
+	IQueryFilter filter = null;
+	String key;
+	Operator op;
+	String value;	
+}
+{
+	(/* String comparison */
+	filter = EntityStringExpression()
+	|
+	/* Numeric comparison */
+	filter = EntityNumberExpression()
+	| 
+	/* boolean */
+	filter = EntityBooleanExpression()
+	| 
+	/* date */
+	filter = EntityDateExpression()
+	|
+	/* tree or list */
+	filter = EntityKeyExpression()
+	
+	)
+	{
+		return filter;
+	}
+}
+
+IQueryFilter EntityDateExpression():
+{
+  String key = null;
+  Date date1 = null;
+  Date date2 = null;
+  Operator op = null;
+}
+{
+	(
+		< EATTRIBUTE_KEY_DATE > {key = token.image;}
+		op = DateOp()
+		< DATE_STRING >  {
+		  String datestring = token.image;
+		  try
+		  {
+		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+		< K_AND >
+		< DATE_STRING > {
+		  datestring = token.image;
+		  try
+		  {
+		    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+	)
+	{
+  		return IntelAttributeFilter.create(key, op, date1, date2);
+	}	
+}
+
+
+IQueryFilter EntityStringExpression():
+{
+  Operator op = null;
+  String key = null;
+  String value = null;
+}
+{
+	( 
+		<EATTRIBUTE_KEY_STRING> {key = token.image;}
+		op = StringOp()
+		< QUOTED_STRING > {value = token.image;}
+	)
+	{
+  		return IntelAttributeFilter.create(key, op, value);
+	}
+}
+
+IQueryFilter EntityNumberExpression():
+{
+  Operator op = null;
+  String key = null;
+  Double value = null;
+}
+{
+	( 
+		<EATTRIBUTE_KEY_NUMERIC> {key = token.image;}
+		op = NumberOp()
+		<NUMBER> {value = Double.parseDouble(token.image);}
+	)
+	{
+  		return IntelAttributeFilter.create(key, op, value);
+	}
+}
+
+IQueryFilter EntityKeyExpression():
+{
+  String op = null;
+  String key = null;
+  String value = null;
+}
+{
+	( 
+		<EATTRIBUTE_KEY_LIST> {key = token.image;}
+		<  EQUAL > {op = token.image;}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+  		return IntelAttributeFilter.create(key, value);
+	}
+}
+
+IQueryFilter EntityBooleanExpression():
+{
+}
+{
+	
+	<EATTRIBUTE_KEY_BOOLEAN > {return IntelAttributeFilter.create(token.image);}	
+}
+
+IQueryFilter EntityTypeFilter():
+{
+}
+{
+  < ENTITY_TYPE_KEY >{return EntityTypeFilter.create(token.image);}  
+}
+
+IQueryFilter EntityFilter():
+{
+}
+{
+  < ENTITY_KEY >{return EntityFilter.create(token.image);}  
+}
+
+IQueryFilter AreaFilter():
+{
+}
+{
+  < AREA_KEY >{return AreaFilter.create(token.image);}  
+}
+
+
+Operator NumberOp() :
+{}
+{
+   (
+    < EQUAL >
+  | < NOTEQUAL >
+  | < NOTEQUAL2 >
+  | < GREATER >
+  | < GREATEREQUAL >
+  | < LESS >
+  | < LESSEQUAL >
+  )
+  {
+    return Operator.parse(token.image);
+  }
+}
+
+Operator StringOp() :
+{}
+{
+  (
+   < CONTAINS >
+  | < STREQUALS >
+	| < NOT_CONTAINS >
+  )
+  {
+    return Operator.parse(token.image);
+  }
+}
+
+Operator DateOp() :
+{
+  String fulltoken = null;
+}
+{
+  (
+   < BETWEEN > {fulltoken = token.image;}
+  |
+  	< K_NOT > {fulltoken = token.image;}
+  	< BETWEEN > {fulltoken = fulltoken + " " + token.image;}
+ )
+  {
+    return Operator.parse(fulltoken);
+  }
+}
+
+Operator BooleanOp() :
+{}
+{
+  (
+   < K_AND >
+  | < K_OR>
+  )
+  {
+    return Operator.parse(token.image);
+  }
+}

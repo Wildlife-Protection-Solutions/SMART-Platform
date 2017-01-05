@@ -31,7 +31,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -172,7 +172,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		if (index <= 8) return Column.values()[index-1].type;
 		index = index - 9;
 		if (index < type.getAttributes().size()){
-			IAttributeType attType = type.getAttributes().get(index).getAttribute().getType();
+			AttributeType attType = type.getAttributes().get(index).getAttribute().getType();
 			return AttributeManager.INSTANCE.getAttributeSqlType(attType);
 		}
 		return Column.PRIMARY_IMAGE.type;

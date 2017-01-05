@@ -37,7 +37,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -133,10 +133,10 @@ public class SearchDataGenerator {
 			attribute.setConservationArea(SmartDB.getCurrentConservationArea());
 			attribute.setKeyId("attribute_" + i);
 			attribute.updateName(SmartDB.getCurrentLanguage(), "Attribute " + i);
-			attribute.setType(IAttributeType.values()[i % IAttributeType.values().length]);
+			attribute.setType(AttributeType.values()[i % AttributeType.values().length]);
 			
 			
-			if (attribute.getType() == IAttributeType.LIST){
+			if (attribute.getType() == AttributeType.LIST){
 				attribute.setAttributeList(new ArrayList<>());
 				for (int k = 0;  k < numberOfListItems; k ++){
 					IntelAttributeListItem li = new IntelAttributeListItem();
@@ -183,7 +183,7 @@ public class SearchDataGenerator {
 				ia.setEntityType(type);
 				type.getAttributes().add(ia);
 				ia.setOrder(k);				
-				if (a.getType() == IAttributeType.TEXT && type.getIdAttribute() == null){
+				if (a.getType() == AttributeType.TEXT && type.getIdAttribute() == null){
 					type.setIdAttribute(a);
 				}
 						
@@ -204,16 +204,16 @@ public class SearchDataGenerator {
 		IntelEntityAttributeValue value = new IntelEntityAttributeValue();
 		value.setAttribute(a.getAttribute());
 		
-		if (a.getAttribute().getType() == IAttributeType.BOOLEAN){
+		if (a.getAttribute().getType() == AttributeType.BOOLEAN){
 			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
-		}else if (a.getAttribute().getType() == IAttributeType.DATE){
+		}else if (a.getAttribute().getType() == AttributeType.DATE){
 			value.setDateValue(new Date());
-		}else if (a.getAttribute().getType() == IAttributeType.LIST){
+		}else if (a.getAttribute().getType() == AttributeType.LIST){
 			int index = (int)Math.round((a.getAttribute().getAttributeList().size()-1) * Math.random());
 			value.setAttributeListItem(a.getAttribute().getAttributeList().get(index));
-		}else if (a.getAttribute().getType() == IAttributeType.NUMERIC){
+		}else if (a.getAttribute().getType() == AttributeType.NUMERIC){
 			value.setNumberValue(Math.random() * 100 * Math.random() + Math.random());
-		}else if (a.getAttribute().getType() == IAttributeType.TEXT){
+		}else if (a.getAttribute().getType() == AttributeType.TEXT){
 			StringBuilder sb= new StringBuilder();
 			int numWords = (int)Math.round(Math.random() * 15);
 			if (a.getEntityType().getIdAttribute().equals(a.getAttribute())){
@@ -233,16 +233,16 @@ public class SearchDataGenerator {
 		IntelEntityRelationshipAttributeValue value = new IntelEntityRelationshipAttributeValue();
 		value.setAttribute(a.getAttribute());
 		
-		if (a.getAttribute().getType() == IAttributeType.BOOLEAN){
+		if (a.getAttribute().getType() == AttributeType.BOOLEAN){
 			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
-		}else if (a.getAttribute().getType() == IAttributeType.DATE){
+		}else if (a.getAttribute().getType() == AttributeType.DATE){
 			value.setDateValue(new Date());
-		}else if (a.getAttribute().getType() == IAttributeType.LIST){
+		}else if (a.getAttribute().getType() == AttributeType.LIST){
 			int index = (int)Math.round((a.getAttribute().getAttributeList().size()-1) * Math.random());
 			value.setAttributeListItem(a.getAttribute().getAttributeList().get(index));
-		}else if (a.getAttribute().getType() == IAttributeType.NUMERIC){
+		}else if (a.getAttribute().getType() == AttributeType.NUMERIC){
 			value.setNumberValue(Math.random() * 100 * Math.random() + Math.random());
-		}else if (a.getAttribute().getType() == IAttributeType.TEXT){
+		}else if (a.getAttribute().getType() == AttributeType.TEXT){
 			StringBuilder sb= new StringBuilder();
 			for (int i = 0; i < Math.random() * 15; i ++){
 				sb.append(strings.get(  (int)Math.round(Math.random() * (strings.size() - 1) )) + " ");

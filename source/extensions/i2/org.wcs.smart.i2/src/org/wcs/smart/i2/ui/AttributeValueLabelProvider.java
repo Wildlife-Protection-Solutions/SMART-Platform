@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
@@ -65,7 +65,7 @@ public class AttributeValueLabelProvider extends LabelProvider {
 		if (value instanceof String){
 			return (String) value;
 		}else if (value instanceof Number){
-			if (attribute.getType() == IAttributeType.BOOLEAN){
+			if (attribute.getType() == AttributeType.BOOLEAN){
 				if (((Number)value).doubleValue() >= 0.5){
 					return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 				}else{

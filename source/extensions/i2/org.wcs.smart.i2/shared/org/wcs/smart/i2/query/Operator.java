@@ -110,6 +110,13 @@ public enum Operator {
 	public String getKey(){
 		return this.key;
 	}
+	
+	public static Operator parse(String op){
+		for (Operator o : Operator.values()){
+			if (op.equalsIgnoreCase(o.key)) return o;
+		}
+		throw new IllegalStateException("Operator not supported: " + op);
+	}
 }
 
 

@@ -124,12 +124,4 @@ public class ProxyItem extends DropItem {
 		
 	}
 
-	/**
-	 * Does nothing
-	 */
-	@Override
-	public void initializeData(Object data) {
-		
-	}
-
 }

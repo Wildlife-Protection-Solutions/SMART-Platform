@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
-import java.text.MessageFormat;
+import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -47,8 +49,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
@@ -72,12 +75,9 @@ public class AttributeTreeDropItem extends DropItem {
 	
 	private UUID attributeUuid;
 	
-//	private Attribute attribute = null;
-//	private List<AttributeTreeNode> roots = null;
-	
 	protected AttributeTreeNode currentSelection = null;
 	private Object input = Collections.singletonList(DialogConstants.LOADING_TEXT);
-	private TreeDropDownViewer treeviewer;
+	private TreeDropDownViewer treeviewer = null;
 	
 	/*
 	 * Job to load the attribute list options
@@ -87,37 +87,44 @@ public class AttributeTreeDropItem extends DropItem {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-//			Session s = HibernateManager.openSession();
-//			s.beginTransaction();
-//			boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
-//			try{
-//				roots = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, s) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
-//			}catch(Exception ex){
-//				QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
-//			}finally{
-//				s.getTransaction().rollback();
-//				s.close();
-//			}
-//			
-//			input = roots;
-//			if(treeviewer == null) return Status.OK_STATUS;
-//			Display d = treeviewer.getTreeViewer().getTree().getDisplay();
-//			if (d != null && !d.isDisposed()){
-//				d.asyncExec(new Runnable(){
-//					@Override
-//					public void run() {
-//						if (treeviewer == null || 
-//								treeviewer.getTreeViewer().getControl().isDisposed()){
-//							return;
-//						}
-//						AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(!showInactive, false);
-//						treeviewer.getTreeViewer().setContentProvider(cProvider);
-//						treeviewer.getTreeViewer().setInput(roots);
-//						treeviewer.getTreeViewer().refresh();
-//					}
-//					
-//				});
-//			}
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			List<AttributeTreeNode> roots = new ArrayList<>();
+			try{
+				Attribute a = (Attribute)s.get(Attribute.class, attributeUuid);
+				List<AttributeTreeNode> toVisit = new ArrayList<>();
+				toVisit.addAll(a.getTree());
+				while(!toVisit.isEmpty()){
+					AttributeTreeNode v = toVisit.remove(0);
+					if (v.getChildren() != null) toVisit.addAll(v.getChildren());
+				}
+				roots.addAll(a.getActiveTreeNodes());
+			}catch(Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+				roots.clear();
+			}finally{
+				s.getTransaction().rollback();
+				s.close();
+			}
+			
+			input = roots;
+			if(treeviewer == null) return Status.OK_STATUS;
+			Display d = treeviewer.getTreeViewer().getTree().getDisplay();
+			if (d != null && !d.isDisposed()){
+				d.asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						if (treeviewer == null || 
+								treeviewer.getTreeViewer().getControl().isDisposed()){
+							return;
+						}
+						treeviewer.getTreeViewer().setInput(roots);
+						treeviewer.getTreeViewer().expandToLevel(2);
+						treeviewer.getTreeViewer().refresh();
+					}
+					
+				});
+			}
 			return Status.OK_STATUS;
 		}
 	};
@@ -131,33 +138,18 @@ public class AttributeTreeDropItem extends DropItem {
 	}
 	
 	
-
-	
-	/**
-	 * @param data - the AttributeTreeNode
-	 */
-	@Override
-	public void initializeData(Object data){
-	
+	public void setInitialValue(AttributeTreeNode currentSelection) {
+		this.currentSelection = currentSelection;
 	}
 
 	/**
-	 * @see org.eclipse.swt.widgets.Widget#dispose()
-	 */
-	@Override
-	public void dispose(){
-	}
-
-	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#getText()
 	 */
 	@Override
 	public String getText() {
-		return this.text + " = " + (currentSelection == null ? "" : currentSelection.getHkey()); //$NON-NLS-1$ //$NON-NLS-2$
+		return this.text + " = " + (currentSelection == null ? "" : currentSelection.getName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#asQueryPart()
 	 */
 	@Override
 	public String asQueryPart() {
@@ -171,7 +163,6 @@ public class AttributeTreeDropItem extends DropItem {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	protected void createComposite(Composite parent) {
@@ -230,7 +221,6 @@ public class AttributeTreeDropItem extends DropItem {
 		}
 		
 		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
-//		loadAttributes();
 	}
 	
 	protected void loadAttributes(){
@@ -238,12 +228,14 @@ public class AttributeTreeDropItem extends DropItem {
 	}
 	
 	protected void showTree(){
-		
+		boolean load = false;
+		if (treeviewer == null){
+			load = true;
+		}
 		treeviewer = getTreeEditor();
 		if (treeviewer == null){
 			 return;
 		}
-		
 		
 		AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(false, false);
 		treeviewer.getTreeViewer().setContentProvider(cProvider);
@@ -270,6 +262,8 @@ public class AttributeTreeDropItem extends DropItem {
 				getTargetPanel().redraw();
 				AttributeTreeDropItem.this.queryChanged();
 			}});
+		
+		if (load) loadAttributes();
 	}
 
 	protected TreeDropDownViewer getTreeEditor(){

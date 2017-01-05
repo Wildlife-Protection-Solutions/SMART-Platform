@@ -34,7 +34,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelDatamodelEvent;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -69,7 +69,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 			clone.setKeyId(attribute.getKeyId());
 			clone.setType(attribute.getType());
 			
-			if (attribute.getType() == IAttributeType.LIST){
+			if (attribute.getType() == AttributeType.LIST){
 				clone.setAttributeList(new ArrayList<IntelAttributeListItem>());
 				for (IntelAttributeListItem item : attribute.getAttributeList()){
 					IntelAttributeListItem clonei = new IntelAttributeListItem();

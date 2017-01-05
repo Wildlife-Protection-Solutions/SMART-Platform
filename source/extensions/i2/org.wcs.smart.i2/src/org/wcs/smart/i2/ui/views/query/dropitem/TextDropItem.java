@@ -37,14 +37,6 @@ public class TextDropItem extends DropItem {
 	}
 
 	/**
-	 *  
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
-	 */
-	@Override
-	public void initializeData(Object data) {
-	}
-
-	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override

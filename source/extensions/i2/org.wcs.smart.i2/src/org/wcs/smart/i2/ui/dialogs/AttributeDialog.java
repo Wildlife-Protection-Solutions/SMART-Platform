@@ -61,7 +61,7 @@ import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -200,15 +200,15 @@ public class AttributeDialog extends TitleAreaDialog {
 		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbType.setLabelProvider(new AttributeTypeLabelProvider());
-		cmbType.setInput(IAttributeType.values());
+		cmbType.setInput(AttributeType.values());
 		cmbType.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				modified();
 				
-				IAttributeType type = (IAttributeType) ((IStructuredSelection)cmbType.getSelection()).getFirstElement();
-				if (type != IAttributeType.LIST){
+				AttributeType type = (AttributeType) ((IStructuredSelection)cmbType.getSelection()).getFirstElement();
+				if (type != AttributeType.LIST){
 					//clean out list items
 					listPanel.setVisible(false);
 					if (attribute.getAttributeList() != null){
@@ -280,7 +280,7 @@ public class AttributeDialog extends TitleAreaDialog {
 						if (attribute.getType() != null){
 							cmbType.setSelection(new StructuredSelection(attribute.getType()));
 						}else{
-							cmbType.setSelection(new StructuredSelection(IAttributeType.NUMERIC));
+							cmbType.setSelection(new StructuredSelection(AttributeType.NUMERIC));
 						}
 						
 						cmbType.getControl().setEnabled(attribute.getUuid() == null);

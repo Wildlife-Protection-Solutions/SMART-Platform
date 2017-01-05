@@ -43,7 +43,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -193,7 +193,7 @@ public class EntityDatasetResultSet implements IResultSet {
 				IntelAttribute attribute = type.getAttributes().get(colIndex-9).getAttribute();
 				IntelEntityAttributeValue v = i.findAttributeValue(attribute);
 				if (v == null) return null;
-				if (attribute.getType() == IAttributeType.LIST){
+				if (attribute.getType() == AttributeType.LIST){
 					return ((IntelAttributeListItem)v.getAttributeValue()).getName();
 				}
 				return v.getAttributeValue();

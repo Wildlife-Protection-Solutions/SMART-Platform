@@ -41,7 +41,7 @@ public class RefreshQueryViewHandler  {
 	public void refreshView(EPartService partService){
 		MPart part = partService.findPart(QueryView.ID);
 		if (part != null){
-			((QueryView)E3Utils.getSourceObject(part)).refresh();
+			((QueryView)E3Utils.getSourceObject(part)).refreshQueryList();
 		}
 		
 	}

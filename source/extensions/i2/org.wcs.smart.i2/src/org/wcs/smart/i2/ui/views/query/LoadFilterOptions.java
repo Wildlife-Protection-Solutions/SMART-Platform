@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.views.query;
 
 import java.awt.image.BufferedImage;
@@ -39,6 +60,12 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
 
+/**
+ * Job for loading roots for filter tree
+ * 
+ * @author Emily
+ *
+ */
 public class LoadFilterOptions extends Job {
 
 	private TreeViewer viewer;
@@ -51,7 +78,7 @@ public class LoadFilterOptions extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		List<FilterItem> roots = new ArrayList<FilterItem>();
+		List<FilterTreeItem> roots = new ArrayList<FilterTreeItem>();
 		Session s = HibernateManager.openSession();
 		try{
 			roots.add(loadEntity(s));
@@ -69,21 +96,21 @@ public class LoadFilterOptions extends Job {
 		return Status.OK_STATUS;
 	}
 
-	private FilterItem loadOperators(){
-		BasicFilterItem opRoot = new BasicFilterItem("Operators");
+	private FilterTreeItem loadOperators(){
+		BasicTreeFilterItem opRoot = new BasicTreeFilterItem("Operators");
 		Operator[] ops = new Operator[]{
 				Operator.NOT,
 				Operator.BRACKETS
 		};
 		for (Operator o : ops){
-			OperatorFilterItem item = new OperatorFilterItem(o);
+			OperatorTreeFilterItem item = new OperatorTreeFilterItem(o);
 			opRoot.addChild(item);
 		}
 		return opRoot;
 	}
 	
-	private FilterItem loadAreas(Session session){
-		BasicFilterItem locationFilters = new BasicFilterItem("Location Filters");
+	private FilterTreeItem loadAreas(Session session){
+		BasicTreeFilterItem locationFilters = new BasicTreeFilterItem("Location Filters");
 		locationFilters.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_AREA));
 		
 		Area.AreaType[] types = new Area.AreaType[]{
@@ -94,19 +121,19 @@ public class LoadFilterOptions extends Job {
 			AreaType.MNGT
 		};
 		for (Area.AreaType type : types){
-			AreaTypeFilterItem typeNode = new AreaTypeFilterItem(type);
+			AreaTypeTreeFilterItem typeNode = new AreaTypeTreeFilterItem(type);
 			typeNode.setImageDescriptor(locationFilters.getImage());
 			locationFilters.addChild(typeNode);
 		}
 		return locationFilters;
 	}
 	
-	private FilterItem loadDataModel(Session session){
+	private FilterTreeItem loadDataModel(Session session){
 		
-		BasicFilterItem dataModelItem = new BasicFilterItem("Data Model");
+		BasicTreeFilterItem dataModelItem = new BasicTreeFilterItem("Data Model");
 		dataModelItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON));
 		
-		BasicFilterItem categoryItem = new BasicFilterItem("Categories");
+		BasicTreeFilterItem categoryItem = new BasicTreeFilterItem("Categories");
 		categoryItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.CATEGORY_ICON));
 		dataModelItem.addChild(categoryItem);
 		
@@ -116,32 +143,32 @@ public class LoadFilterOptions extends Job {
 			.addOrder(Order.asc("categoryOrder"))
 			.list();
 		for (Category c : categories){
-			DataModelFilterItem item = new DataModelFilterItem(c);
+			DataModelTreeFilterItem item = new DataModelTreeFilterItem(c);
 			categoryItem.addChild(item);
 		}
 		
-		BasicFilterItem attributesItem = new BasicFilterItem("Attributes");
+		BasicTreeFilterItem attributesItem = new BasicTreeFilterItem("Attributes");
 		attributesItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ATTRIBUTE_NUMBER_ICON));
 		dataModelItem.addChild(attributesItem);
 		List<Attribute> attributes= 
 				session.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (Attribute a : attributes){
-			DataModelFilterItem item = new DataModelFilterItem(a);
+			DataModelTreeFilterItem item = new DataModelTreeFilterItem(a);
 			attributesItem.addChild(item);
 		}
 		
 		return dataModelItem;
 	}
 	
-	private FilterItem loadAttributes(Session session){
+	private FilterTreeItem loadAttributes(Session session){
 		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem("Entity Attributes", false);
 		
 		List<IntelAttribute> attributes= 
 				session.createCriteria(IntelAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (IntelAttribute a : attributes){
-			AttributeFilterItem item = new AttributeFilterItem(a);
+			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a);
 			attributeRoots.addChild(item);
 		}
 		
@@ -149,14 +176,14 @@ public class LoadFilterOptions extends Job {
 	}
 	
 		
-	private FilterItem loadEntity(Session session){
-		BasicFilterItem entityTypeRoot = new BasicFilterItem("Entity Types");
+	private FilterTreeItem loadEntity(Session session){
+		BasicTreeFilterItem entityTypeRoot = new BasicTreeFilterItem("Entity Types");
 		entityTypeRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY));
 		List<IntelEntityType> types = 
 				session.createCriteria(IntelEntityType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
-			BasicFilterItem entityNode = new BasicFilterItem(t.getName());
+			BasicTreeFilterItem entityNode = new BasicTreeFilterItem(t.getName());
 			entityTypeRoot.addChild(entityNode);
 			final byte[] icon = t.getIcon();
 			if (icon != null){
@@ -177,10 +204,10 @@ public class LoadFilterOptions extends Job {
 				
 			}
 			
-			EntityFilterItem anyNode = new EntityFilterItem(t);
+			EntityTreeFilterItem anyNode = new EntityTreeFilterItem(t);
 			entityNode.addChild(anyNode);
 						
-			EntityTypeFilterItem entitiesNode = new EntityTypeFilterItem(t);
+			EntityTypeTreeFilterItem entitiesNode = new EntityTypeTreeFilterItem(t);
 			entityNode.addChild(entitiesNode);
 			
 			AttributeHeaderFilterItem attributesNode = new AttributeHeaderFilterItem("Attributes", false);
@@ -209,7 +236,7 @@ public class LoadFilterOptions extends Job {
 				attributesNode.addChild(attributeGroupNode);
 				
 				attributeMapping.get(g).forEach(attribute->{
-					AttributeFilterItem attributeNode = new AttributeFilterItem(attribute);
+					AttributeTreeFilterItem attributeNode = new AttributeTreeFilterItem(attribute);
 					attributeGroupNode.addChild(attributeNode);
 				});
 				

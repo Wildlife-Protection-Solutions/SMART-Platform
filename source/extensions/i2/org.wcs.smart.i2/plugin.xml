@@ -568,12 +568,6 @@
             name="Intelligence Templates View"
             restorable="true">
       </view>
-      <view
-            class="org.wcs.smart.i2.ui.views.query.QueryFilterView$QueryFilterViewWrapper"
-            id="org.wcs.smart.i2.ui.view.query.filter"
-            name="Query Filter Items"
-            restorable="true">
-      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

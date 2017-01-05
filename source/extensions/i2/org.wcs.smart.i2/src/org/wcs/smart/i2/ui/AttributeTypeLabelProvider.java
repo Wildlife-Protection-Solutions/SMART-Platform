@@ -35,15 +35,15 @@ import org.wcs.smart.i2.model.IntelAttribute;
 public class AttributeTypeLabelProvider extends LabelProvider {
 	
 	public String getText(Object element){
-		if (element instanceof IntelAttribute.IAttributeType){
-			return ((IntelAttribute.IAttributeType) element).getGuiName(Locale.getDefault());
+		if (element instanceof IntelAttribute.AttributeType){
+			return ((IntelAttribute.AttributeType) element).getGuiName(Locale.getDefault());
 		}
 		return super.getText(element);
 	}
 	
 	public Image getImage(Object element){
-		if (element instanceof IntelAttribute.IAttributeType){
-			IntelAttribute.IAttributeType a = (IntelAttribute.IAttributeType)element;
+		if (element instanceof IntelAttribute.AttributeType){
+			IntelAttribute.AttributeType a = (IntelAttribute.AttributeType)element;
 			return a.getImage();
 		}
 		return super.getImage(element);

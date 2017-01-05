@@ -110,16 +110,6 @@ public abstract class DropItem {
 	 */
 	public abstract String asQueryPart();
 	
-	
-	/**
-	 * Initializes the selected values
-	 * associated with the drop item. Each drop
-	 * item specifies the expected data object
-	 * 
-	 * @param data
-	 */
-	public abstract void initializeData(Object data);
-	
 	/**
 	 * Called when a drop item modified the queries.
 	 * <p>This function notifies the required components

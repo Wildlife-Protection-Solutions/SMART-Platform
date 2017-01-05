@@ -92,8 +92,8 @@ public class QueryFilterView {
 				IStructuredSelection selection = (IStructuredSelection) filterTree.getSelection();
 				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 					Object element = (Object) iterator.next();
-					if (element instanceof FilterItem){
-						DropItem[] di = ((FilterItem) element).asDropItem();
+					if (element instanceof FilterTreeItem){
+						DropItem[] di = ((FilterTreeItem) element).asDropItem();
 						if (di == null) continue;
 						addTo.addDropItems(di);
 						

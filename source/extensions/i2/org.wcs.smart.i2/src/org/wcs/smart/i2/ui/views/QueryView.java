@@ -47,6 +47,8 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -54,9 +56,11 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
@@ -72,10 +76,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
@@ -84,9 +93,17 @@ import org.wcs.smart.i2.QueryManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.ui.SectionTabHeader;
+import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
 import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
+import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
+import org.wcs.smart.i2.ui.views.query.FilterTreeContentProvider;
+import org.wcs.smart.i2.ui.views.query.FilterTreeLabelProvider;
+import org.wcs.smart.i2.ui.views.query.LoadFilterOptions;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * View for listing all intelligence queries in the system
@@ -101,8 +118,11 @@ public class QueryView {
 	@Inject
 	private IEclipseContext context;
 	
-	private QueryViewerFilter filter;
-	private ListViewer viewer;
+	private QueryViewerFilter queryFilter;
+	private ListViewer queryList;
+	
+	private TreeViewer filterTree = null;
+	private Job refreshJob;
 	
 	public QueryView() {
 		super();
@@ -111,43 +131,67 @@ public class QueryView {
 	@PostConstruct
 	public void createPartControl(Composite parent) {
 		parent.setLayout(new GridLayout());
+		((GridLayout)parent.getLayout()).marginWidth = 0;
+		((GridLayout)parent.getLayout()).marginHeight = 0;
 		
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.adapt(parent);
 		
-		FilterComposite typeFilter = new FilterComposite(parent, SWT.NONE);
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Saved Queries", "Query Filters"}, parent, toolkit, parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)tabList.getLayoutData()).verticalIndent = 2;
+		
+		Composite tabPart = toolkit.createComposite(parent, SWT.NONE);
+		tabPart.setLayout(new StackLayout());
+		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite queryList = createQueryList(tabPart, toolkit);
+		Composite filterList = createFilterComposite(tabPart, toolkit);
+		
+		tabList.setContent(new Composite[]{queryList, filterList}, tabPart);
+		tabList.selectTab(0);
+		
+		refreshQueryList();
+		refreshFiltersView();
+	}
+	
+	private Composite createQueryList(Composite parent, FormToolkit toolkit){
+		Composite part = toolkit.createComposite(parent, SWT.NONE);
+		part.setLayout(new GridLayout());
+		
+		FilterComposite typeFilter = new FilterComposite(part, SWT.NONE);
 		toolkit.adapt(typeFilter);
 		typeFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		typeFilter.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				if (typeFilter.getPatternFilter() == null || typeFilter.getPatternFilter().isEmpty()){
-					viewer.removeFilter(filter);
-					filter = null;
+					queryList.removeFilter(queryFilter);
+					queryFilter = null;
 				}else{
-					if (filter == null){
-						filter = new QueryViewerFilter();
-						filter.setFilterString(typeFilter.getPatternFilter());
-						viewer.addFilter(filter);
+					if (queryFilter == null){
+						queryFilter = new QueryViewerFilter();
+						queryFilter.setFilterString(typeFilter.getPatternFilter());
+						queryList.addFilter(queryFilter);
 					}else{
-						filter.setFilterString(typeFilter.getPatternFilter());
-						viewer.refresh();
+						queryFilter.setFilterString(typeFilter.getPatternFilter());
+						queryList.refresh();
 					}
 				}
 			}
 		});
 		
-		viewer = new ListViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		viewer.setLabelProvider(new LabelProvider(){
+		queryList = new ListViewer(part, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		queryList.setContentProvider(ArrayContentProvider.getInstance());
+		queryList.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof QueryProxy) return ((QueryProxy) element).getName();
 				return super.getText(element);
 			}
 		});
-		viewer.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		viewer.addDoubleClickListener(new IDoubleClickListener() {
+		queryList.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		queryList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		queryList.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -156,15 +200,15 @@ public class QueryView {
 			}
 		});
 		//add drag support
-		viewer.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelQuerySelectionTransfer.getTransfer()}, new DragSourceAdapter(){
+		queryList.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelQuerySelectionTransfer.getTransfer()}, new DragSourceAdapter(){
 			@Override
 			public void dragStart(DragSourceEvent event) {
-				IntelQuerySelectionTransfer.getTransfer().setSelection(viewer.getSelection());				
+				IntelQuerySelectionTransfer.getTransfer().setSelection(queryList.getSelection());				
 			}
 			@Override
 			public void dragSetData(DragSourceEvent event) {
 				if (IntelQuerySelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
-					event.data = viewer.getSelection();
+					event.data = queryList.getSelection();
 				}
 			}
 			@Override
@@ -173,19 +217,83 @@ public class QueryView {
 			}
 		});
 		
-		createMenu(viewer);
+		createMenu(queryList);
+		return part;
+	}
+	
+	private Composite createFilterComposite(Composite parent, FormToolkit toolkit){
+		Composite part = new Composite(parent, SWT.NONE);
+		part.setLayout(new GridLayout());
+		ConservationAreaManager.getInstance().addAreaChangeListener(new IAreaModifiedListener() {
+			
+			@Override
+			public void areasUpdated(AreaType type) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
-		refresh();
+		ToolBar tb = new ToolBar(part, SWT.FLAT);
+		ToolItem refreshItem = new ToolItem(tb, SWT.PUSH);
+		refreshItem.setToolTipText("refresh tree");
+		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		refreshItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				refreshFiltersView();
+			}
+		});
+		filterTree = new TreeViewer(part, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		filterTree.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		filterTree.setLabelProvider(new FilterTreeLabelProvider());
+		filterTree.setContentProvider(new FilterTreeContentProvider());
+		
+		filterTree.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				IntelQueryEditor addTo = null;
+				EPartService pService = context.get(EPartService.class);
+				for (MPart part : context.get(EPartService.class).getParts()){
+					if (pService.isPartVisible(part)){
+						Object item = E3Utils.getSourceObject(part);
+						if (item instanceof IntelQueryEditor){
+							addTo = (IntelQueryEditor) item;
+							break;
+						}
+					}
+				}
+				
+				IStructuredSelection selection = (IStructuredSelection) filterTree.getSelection();
+				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+					Object element = (Object) iterator.next();
+					if (element instanceof FilterTreeItem){
+						DropItem[] di = ((FilterTreeItem) element).asDropItem();
+						if (di == null) continue;
+						addTo.addDropItems(di);
+						
+					}
+					
+				}
+			}
+		});
+		refreshJob = new LoadFilterOptions(filterTree);
+		
+		return part;
+	}
+	
+	public void refreshFiltersView(){	
+		filterTree.setInput(null);
+		refreshJob.schedule();
 	}
 	
 	private void deleteSelection(){
-		int cnt = ((IStructuredSelection)viewer.getSelection()).size();
+		int cnt = ((IStructuredSelection)queryList.getSelection()).size();
 		if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Queries", MessageFormat.format("Are you sure you want to delete the {0} selected queries?  This action cannot be undone.", cnt))){
 			return;
 		}
 		
 		List<IntelRecordQuery> removed = new ArrayList<IntelRecordQuery>();
-		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)queryList.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof QueryProxy){
 				IntelRecordQuery deletedItem = QueryManager.INSTANCE.deleteQuery(((QueryProxy) x).getUuid());
@@ -197,7 +305,7 @@ public class QueryView {
 		context.get(IEventBroker.class).post(IntelEvents.QUERY_DELETED, removed);
 	}
 	private void openSelection(){
-		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)queryList.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			//open query
 			if (x instanceof QueryProxy){
@@ -278,34 +386,34 @@ public class QueryView {
 	 @Optional
 	 @Inject
 	 private void dbModified(@UIEventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
-		 refresh();
+		 refreshQueryList();
 	 }
 	 
 	 @Optional
 	 @Inject
 	 private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) IntelRecordQuery data){
-		 viewer.refresh(new QueryProxy(data.getName(), data.getUuid()));
+		 queryList.refresh(new QueryProxy(data.getName(), data.getUuid()));
 	 }
 	 @Optional
 	 @Inject
 	 private void multiQueryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) List<IntelRecordQuery> data){
-		 data.forEach(i-> viewer.refresh(new QueryProxy(i.getName(), i.getUuid())));
+		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid())));
 	 }
 	 
 	 @Optional
 	 @Inject
 	 private void queryNew(@UIEventTopic(IntelEvents.QUERY_NEW) Object data){
-		 refresh();
+		 refreshQueryList();
 	 }
 	 
 	 @Optional
 	 @Inject
 	 private void queryDeleted(@UIEventTopic(IntelEvents.QUERY_DELETED) Object data){
-		 refresh();
+		 refreshQueryList();
 	 }
 	 
-	 public void refresh(){
-		 viewer.setInput(new String[]{DialogConstants.LOADING_TEXT});
+	 public void refreshQueryList(){
+		 queryList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		 refreshQueriesJob.schedule();
 	 }
 
@@ -342,7 +450,7 @@ public class QueryView {
 
 			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));
 			Display.getDefault().syncExec(() ->{
-				viewer.setInput(proxyItems);
+				queryList.setInput(proxyItems);
 			});
 			
 			return Status.OK_STATUS;

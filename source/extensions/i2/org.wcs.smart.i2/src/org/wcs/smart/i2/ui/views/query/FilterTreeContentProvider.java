@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.views.query;
 
 import java.util.List;
@@ -11,10 +32,17 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Content provider for tree that contains FilterTreeItems
+ * 
+ * @author Emily
+ *
+ */
 public class FilterTreeContentProvider implements ITreeContentProvider{
 
-	private List<FilterItem> items;
+	private List<FilterTreeItem> items;
 	private Viewer viewer;
+	
 	@Override
 	public void dispose() {
 	}
@@ -27,7 +55,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 			return;
 		}
 		if (newInput instanceof List){
-			items = (List<FilterItem>) newInput;
+			items = (List<FilterTreeItem>) newInput;
 		}
 		
 	}
@@ -41,15 +69,15 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		
-		if (parentElement instanceof DeferredFilterItem){
-			DeferredFilterItem di = (DeferredFilterItem)parentElement;
+		if (parentElement instanceof DeferredTreeFilterItem){
+			DeferredTreeFilterItem di = (DeferredTreeFilterItem)parentElement;
 			if (di.requiresLoad()){
 				
 				Job j = new Job("loading children"){
 	
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						((DeferredFilterItem)parentElement).getChildren();
+						((DeferredTreeFilterItem)parentElement).getChildren();
 						Display.getDefault().asyncExec(()->viewer.refresh());
 						
 						return Status.OK_STATUS;
@@ -64,8 +92,8 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 			}else{
 				return di.getChildren().toArray();
 			}
-		}else if (parentElement instanceof FilterItem){
-			return ((FilterItem) parentElement).getChildren().toArray();
+		}else if (parentElement instanceof FilterTreeItem){
+			return ((FilterTreeItem) parentElement).getChildren().toArray();
 		}
 			
 		return null;
@@ -73,19 +101,19 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 
 	@Override
 	public Object getParent(Object element) {
-		if (element instanceof FilterItem){
-			return ((FilterItem) element).getParent();
+		if (element instanceof FilterTreeItem){
+			return ((FilterTreeItem) element).getParent();
 		}
 		return null;
 	}
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof DeferredFilterItem){
-			return ((DeferredFilterItem)element).hasChildren();
+		if (element instanceof DeferredTreeFilterItem){
+			return ((DeferredTreeFilterItem)element).hasChildren();
 		}
-		if (element instanceof FilterItem){
-			FilterItem i = (FilterItem)element;
+		if (element instanceof FilterTreeItem){
+			FilterTreeItem i = (FilterTreeItem)element;
 			return ! (i.getChildren() == null || i.getChildren().isEmpty());
 		}
 		return false;

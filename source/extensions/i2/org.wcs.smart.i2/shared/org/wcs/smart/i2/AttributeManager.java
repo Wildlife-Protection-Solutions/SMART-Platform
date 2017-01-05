@@ -29,7 +29,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 /**
  * Tools for managing intelligence attributes
@@ -43,7 +43,7 @@ public enum AttributeManager {
 		
 	}
 	
-	public int getAttributeSqlType(IAttributeType type){
+	public int getAttributeSqlType(AttributeType type){
 		switch(type){
 		case BOOLEAN:
 			return java.sql.Types.BOOLEAN;

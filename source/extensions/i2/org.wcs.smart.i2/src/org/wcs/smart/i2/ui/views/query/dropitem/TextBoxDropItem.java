@@ -32,6 +32,7 @@ public class TextBoxDropItem extends DropItem {
 	private ComboViewer operators;
 	
 	private Operator currentOperator;
+	private String currentValue;
 	
 	/**
 	 * Creates a new are drop item that has 
@@ -57,16 +58,17 @@ public class TextBoxDropItem extends DropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		String strValue = value.getText().replaceAll("\"", "");
-		return queryKeyPart + " " + ((Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement()).getKey() + " \"" + strValue + "\"";
+		if (type == InputType.TEXT){
+			String strValue = value.getText().replaceAll("\"", "");
+			return queryKeyPart + " " + ((Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement()).getKey() + " \"" + strValue + "\"";
+		}else{
+			return queryKeyPart + " " + ((Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement()).getKey() + " " + value.getText();
+		}
 	}
 
-	/**
-	 *  
-	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
-	 */
-	@Override
-	public void initializeData(Object data) {
+	public void setInitialValue(Operator op, String data){
+		this.currentOperator = op;
+		this.currentValue = data;
 	}
 
 	/**
@@ -123,7 +125,9 @@ public class TextBoxDropItem extends DropItem {
 		}else{
 			operators.setSelection(new StructuredSelection(((Object[])operators.getInput())[0]));
 		}
-		
+		if (currentValue != null){
+			value.setText(currentValue);
+		}
 		
 	}
 

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.editors.query;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +32,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -60,6 +63,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.i2.query.observation.parser.Parser;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.FilterDefinitionPanel;
@@ -86,6 +91,13 @@ public class IntelQueryEditor extends EditorPart{
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
+		String queryString = parseQuery();
+		if (queryString == null){
+			MessageDialog.openError(getSite().getShell(), "ERROR", "Cannot save an invalid query.");
+			return;
+		}
+		query.setQueryString(queryString);
+		
 		boolean isNew = query.getUuid() == null;
 		Session s = HibernateManager.openSession();
 		try{
@@ -214,11 +226,37 @@ public class IntelQueryEditor extends EditorPart{
 		panel = new FilterDefinitionPanel();
 		Composite definitionPanel = panel.createComposite(c);
 		definitionPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+	
+		panel.addQueryChangedListener(()->{
+			setDirty(true);
+			String ok = parseQuery();
+			if (ok != null){
+				//run query ok 
+			}else{
+				//run query not ok
+			}
+		});
 		
 		loadQueryJob.schedule();
 	}
 	
+	private String parseQuery(){
+		String queryString = panel.getQueryPart();
+		
+		if (queryString.isEmpty()){
+			return "";
+		}
+		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+			Parser parser = new Parser(is);
+			parser.ParseQuery();
+			panel.setErrorMessage(null, null);
+			return queryString;
+		}catch (Exception ex){
+			panel.setErrorMessage("Query is invalid", ex);
+			ex.printStackTrace();
+			return null;
+		}
+	}
 	public void addDropItems(DropItem[] item){
 		for (DropItem i : item){
 			panel.addItem(i);

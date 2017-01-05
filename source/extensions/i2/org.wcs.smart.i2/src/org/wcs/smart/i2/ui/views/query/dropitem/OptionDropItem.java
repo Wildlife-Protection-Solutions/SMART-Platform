@@ -71,8 +71,14 @@ public class OptionDropItem extends DropItem {
 		return sb.toString();
 	}
 
-	@Override
-	public void initializeData(Object data) {
+	public void setInitialValue(String key) {
+		this.currentOption = null;
+		for (Option o : options){
+			if (o.key.equalsIgnoreCase(key)){
+				currentOption = o;
+				break;
+			}
+		}
 	}
 
 	@Override

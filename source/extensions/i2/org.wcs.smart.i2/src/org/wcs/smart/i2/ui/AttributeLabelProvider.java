@@ -54,8 +54,8 @@ public class AttributeLabelProvider extends LabelProvider {
 			return ((IntelEntityTypeAttribute)element).getAttribute().getType().getImage();
 		}else if (element instanceof IntelRelationshipTypeAttribute){
 			return ((IntelRelationshipTypeAttribute)element).getAttribute().getType().getImage();
-		}else if (element instanceof IntelAttribute.IAttributeType){
-			return ((IntelAttribute.IAttributeType) element).getImage();
+		}else if (element instanceof IntelAttribute.AttributeType){
+			return ((IntelAttribute.AttributeType) element).getImage();
 		}
 		return super.getImage(element);
 	}

@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
@@ -106,7 +106,7 @@ public class AttributeFieldEditor {
 	 */
 	public boolean updateValue(IntelEntityRelationshipAttributeValue value){
 		boolean add = false;
-		if (attribute.getType() == IAttributeType.BOOLEAN){
+		if (attribute.getType() == AttributeType.BOOLEAN){
 			if (((OnOffButton)btnOnOff).isEnabled()){
 				add = true;
 				if (((OnOffButton)btnOnOff).getSelection()){
@@ -115,12 +115,12 @@ public class AttributeFieldEditor {
 					value.setNumberValue(0d);
 				}
 			}
-		}else if (attribute.getType() == IAttributeType.DATE){
+		}else if (attribute.getType() == AttributeType.DATE){
 			if (((DateTime)dtDateTime).getEnabled()){
 				add = true;
 				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
-		}else if (attribute.getType() == IAttributeType.LIST){
+		}else if (attribute.getType() == AttributeType.LIST){
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
 			if (!selection.isEmpty()){
 				Object item = selection.getFirstElement();
@@ -129,7 +129,7 @@ public class AttributeFieldEditor {
 					value.setAttributeListItem((IntelAttributeListItem) item);
 				}
 			}
-		}else if (attribute.getType() == IAttributeType.NUMERIC){
+		}else if (attribute.getType() == AttributeType.NUMERIC){
 			try{
 				String dvalue = ((Text)txtValue).getText();
 				if (!dvalue.trim().isEmpty()){
@@ -140,7 +140,7 @@ public class AttributeFieldEditor {
 			}catch (Exception ex){
 				//
 			}
-		}else if (attribute.getType() == IAttributeType.TEXT){
+		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
 			if (!svalue.trim().isEmpty()){
 				value.setStringValue(svalue.trim());
@@ -151,13 +151,13 @@ public class AttributeFieldEditor {
 	}
 	
 	public void initControl(IntelEntityRelationshipAttributeValue value){
-		if (attribute.getType() == IAttributeType.TEXT){
+		if (attribute.getType() == AttributeType.TEXT){
 			txtValue.setText(value.getStringValue());
-		}else if (attribute.getType() == IAttributeType.NUMERIC){
+		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
-		}else if (attribute.getType() ==  IAttributeType.LIST){
+		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
-		}else if (attribute.getType() ==  IAttributeType.DATE){
+		}else if (attribute.getType() ==  AttributeType.DATE){
 			if(value.getDateValue() == null){
 				btnChDateTime.setSelection(false);
 				dtDateTime.setEnabled(false);
@@ -166,7 +166,7 @@ public class AttributeFieldEditor {
 				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
 				dtDateTime.setEnabled(true);
 			}
-		}else if (attribute.getType() ==  IAttributeType.BOOLEAN){
+		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
 			if (value.getNumberValue() == null){
 				btnChOnOff.setSelection(false);
 				btnOnOff.setEnabled(false);
@@ -186,7 +186,7 @@ public class AttributeFieldEditor {
 	 */
 	public boolean updateValue(IntelEntityAttributeValue value){
 		boolean add = false;
-		if (attribute.getType() == IAttributeType.BOOLEAN){
+		if (attribute.getType() == AttributeType.BOOLEAN){
 			if (((OnOffButton)btnOnOff).isEnabled()){
 				add = true;
 				if (((OnOffButton)btnOnOff).getSelection()){
@@ -195,12 +195,12 @@ public class AttributeFieldEditor {
 					value.setNumberValue(0d);
 				}
 			}
-		}else if (attribute.getType() == IAttributeType.DATE){
+		}else if (attribute.getType() == AttributeType.DATE){
 			if (((DateTime)dtDateTime).getEnabled()){
 				add = true;
 				value.setDateValue( SmartUtils.getTime((DateTime)dtDateTime));
 			}
-		}else if (attribute.getType() == IAttributeType.LIST){
+		}else if (attribute.getType() == AttributeType.LIST){
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
 			if (!selection.isEmpty()){
 				Object item = selection.getFirstElement();
@@ -209,7 +209,7 @@ public class AttributeFieldEditor {
 					value.setAttributeListItem((IntelAttributeListItem) item);
 				}
 			}
-		}else if (attribute.getType() == IAttributeType.NUMERIC){
+		}else if (attribute.getType() == AttributeType.NUMERIC){
 			try{
 				String dvalue = ((Text)txtValue).getText();
 				if (!dvalue.trim().isEmpty()){
@@ -220,7 +220,7 @@ public class AttributeFieldEditor {
 			}catch (Exception ex){
 				//
 			}
-		}else if (attribute.getType() == IAttributeType.TEXT){
+		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
 			if (!svalue.trim().isEmpty()){
 				value.setStringValue(svalue.trim());
@@ -231,13 +231,13 @@ public class AttributeFieldEditor {
 	}
 	
 	public void initControl(IntelEntityAttributeValue value){
-		if (attribute.getType() == IAttributeType.TEXT){
+		if (attribute.getType() == AttributeType.TEXT){
 			txtValue.setText(value.getStringValue());
-		}else if (attribute.getType() == IAttributeType.NUMERIC){
+		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
-		}else if (attribute.getType() ==  IAttributeType.LIST){
+		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
-		}else if (attribute.getType() ==  IAttributeType.DATE){
+		}else if (attribute.getType() ==  AttributeType.DATE){
 			if(value.getDateValue() == null){
 				btnChDateTime.setSelection(false);
 				dtDateTime.setEnabled(false);
@@ -246,7 +246,7 @@ public class AttributeFieldEditor {
 				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
 				dtDateTime.setEnabled(true);
 			}
-		}else if (attribute.getType() ==  IAttributeType.BOOLEAN){
+		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
 			if (value.getNumberValue() == null){
 				btnChOnOff.setSelection(false);
 				btnOnOff.setEnabled(false);
@@ -264,7 +264,7 @@ public class AttributeFieldEditor {
 		l.setText(attribute.getName() + ":");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		if (attribute.getType() == IAttributeType.TEXT){
+		if (attribute.getType() == AttributeType.TEXT){
 			txtValue = new Text(parent, SWT.BORDER);
 			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtValue.getLayoutData()).widthHint = 100;
@@ -275,7 +275,7 @@ public class AttributeFieldEditor {
 				}
 			});
 			
-		}else if (attribute.getType() == IAttributeType.NUMERIC){
+		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue = new Text(parent, SWT.BORDER);
 			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtValue.getLayoutData()).widthHint = 100;
@@ -298,7 +298,7 @@ public class AttributeFieldEditor {
 					modified();
 				}
 			});
-		}else if (attribute.getType() ==  IAttributeType.LIST){
+		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 			cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
@@ -314,7 +314,7 @@ public class AttributeFieldEditor {
 			});
 			cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
-		}else if (attribute.getType() ==  IAttributeType.DATE){
+		}else if (attribute.getType() ==  AttributeType.DATE){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));
 			((GridLayout)t.getLayout()).marginWidth = 0;
@@ -339,7 +339,7 @@ public class AttributeFieldEditor {
 					modified();
 				}
 			});
-		}else if (attribute.getType() ==  IAttributeType.BOOLEAN){
+		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));
 			((GridLayout)t.getLayout()).marginWidth = 0;

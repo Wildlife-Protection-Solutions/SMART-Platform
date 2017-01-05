@@ -39,7 +39,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -314,7 +314,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 				if (value instanceof String){
 					return (String) value;
 				}else if (value instanceof Number){
-					if (attribute.getType() == IAttributeType.BOOLEAN){
+					if (attribute.getType() == AttributeType.BOOLEAN){
 						if (((Number)value).doubleValue() >= 0.5){
 							return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 						}else{

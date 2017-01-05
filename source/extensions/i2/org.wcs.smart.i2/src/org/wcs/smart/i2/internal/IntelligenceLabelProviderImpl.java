@@ -26,7 +26,7 @@ import java.util.Locale;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.model.IntelAttribute.IAttributeType;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 
 /**
@@ -40,18 +40,18 @@ public class IntelligenceLabelProviderImpl implements
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item instanceof IAttributeType){
-			IAttributeType type = (IAttributeType) item;
+		if (item instanceof AttributeType){
+			AttributeType type = (AttributeType) item;
 			
-			if (type == IAttributeType.BOOLEAN){
+			if (type == AttributeType.BOOLEAN){
 				return "BOOLEAN";
-			}else if (type == IAttributeType.DATE){
+			}else if (type == AttributeType.DATE){
 				return "DATE";
-			}else if (type == IAttributeType.LIST){
+			}else if (type == AttributeType.LIST){
 				return "LIST";
-			}else if (type == IAttributeType.NUMERIC){
+			}else if (type == AttributeType.NUMERIC){
 				return "NUMERIC";
-			}else if (type == IAttributeType.TEXT){
+			}else if (type == AttributeType.TEXT){
 				return "TEXT";
 			}
 		}
