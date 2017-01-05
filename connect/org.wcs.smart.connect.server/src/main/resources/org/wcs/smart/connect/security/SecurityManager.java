@@ -198,7 +198,8 @@ public enum SecurityManager {
 
 	//is the user is CaAdmin of any CA?
 	public boolean isCaAdmin(Session s, String username, String key) {
-		//TODO: do we need to ensure the user is active first?
+		if (!isActive(s, username)) return false;
+		
 		Criteria c2 = s.createCriteria(SmartUserAction.class);
 		c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
 		.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$

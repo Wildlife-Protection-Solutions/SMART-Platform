@@ -133,12 +133,7 @@ public class QueryApi extends HttpServlet{
 	 * @param delimiter	delimiter override to use in CSV format
 	 * @param cafilter	comma separated list of CA uuids, only query these CAs.
 	 * @param sortcolumn	the attribute key of the column you wish to sort by. It is tricky to know what columns are valid here as the queries are all very dynamic and there are many type. eg, &sortcolumn=wp_id 
-	 * 						Any data model value "key" works, eg: numberofpeople for "People -> Number of people". 
-	 * 						For metadata type values it depends on the query type:
-	 * 						Patrol queries will allow: p_id - to sort by Patrol ID, p_objective, p_type, p_legid,
-	 * 						if Ca details are included in your query the column names are: ca_name, ca_id 
-	 * 						Any queries with waypoint allows: wp_date, wp_id, wp_x, wp_y, wp_direction, wp_distance, wp_time, wp_comment, (wp_source sometimes)
-	 * 						survey queries:  surveydesign_startdate, surveydesign_enddate, survey_id, survey_startdate, survey_enddate, mission_id, mission_startdate, mission_enddate, samplingunit_id
+	 * 						for details of valid columns see here:  https://app.assembla.com/spaces/smart-cs/wiki/SMART_Connect_Query_Sorting_Fields  
 	 * 
 	 * 						NOTE: you will get an error, "{"status": 500, "error:": "Error executing query: ERROR: column "abc" does not exist Position: 52"} if the provided column is not supported, change the sortcolumn parameter and try again.
 	 * @param sortdirection set this to "descending" (or "desc") to get reverse order, otherwise you will get ascending order by default.  eg: &sortdirection=descending 

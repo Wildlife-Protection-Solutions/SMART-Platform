@@ -191,8 +191,8 @@ public class ConservationAreas extends HttpServlet{
 	 * URL: ../server/api/conservationarea/
 	 * Call Type: GET
 	 * 
-	 * @parameter organizationFilter - optional - only return CAs that have the provided text in the organization field
-	 * @parameter caJsonFilter - optional - Must be a GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned.
+	 * @param organizationFilter String - optional - only return CAs that have the provided text in the organization field
+	 * @param caJsonFilter String - optional - must be valid GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned.
 	 * 			be sure to encode the geojson, leave no spaces etc. An example of a simple polygon of the world:  caJsonFilter=%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-180%2C90%5D%2C%5B180%2C90%5D%2C%5B180%2C-90%5D%2C%5B-180%2C-90%5D%2C%5B-180%2C90%5D%5D%5D%7D
 	 * 			originally it is caJsonFilter={"type":"Polygon","coordinates":[[[-180,90],[180,90],[180,-90],[-180,-90],[-180,90]]]}  use you local programming language urlencoder, or an online tool like this to do it out manually: http://meyerweb.com/eric/tools/dencoder/ 
 	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
@@ -692,6 +692,11 @@ public class ConservationAreas extends HttpServlet{
 	 * Call Type: DELETE
 	 * 
 	 * @param	caUuid	provided in the URL, the ca UUID you wish to delete
+	 * @param dataonly String that indicates you only want to delete the desktop data, not the alerts and other Connect-based data.
+	 * @param username String a valid admin username
+	 * @param password String the password for the admin user.
+	 * @param version String a valid UUID formatted string, this can be retrieved from the getCAs call, you get something like: version=008ffc5a-7228-4d9c-a342-5dbf1fbec21e
+	 * 
 	 * @return	void
 	 */
 	@DELETE

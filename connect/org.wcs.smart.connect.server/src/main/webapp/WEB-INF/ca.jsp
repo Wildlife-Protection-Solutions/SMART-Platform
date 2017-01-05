@@ -112,6 +112,23 @@
 			<div class="table-cell smart-table-cell"><fmt:message key="ca.revision"/>:</div>
 			<div id="inforevision" class="table-cell smart-table-cell"></div>
 		</div>
+		<div class="table-row">
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.organization"/>:</div>
+			<div id="infoorganization" class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row">
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.pointofcontact"/>:</div>
+			<div id="infopointofcontact" class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row">
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.location"/>:</div>
+			<div id="infolocation" class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row">
+			<div class="table-cell smart-table-cell"><fmt:message key="ca.owner"/>:</div>
+			<div id="infoowner" class="table-cell smart-table-cell"></div>
+		</div>
+		
 		<div class="block top-spacer" style="text-align:right">
      	<input class="button" type="button" value="<fmt:message key="ca.cancelbutton"/>" onclick="closeDialog('caInfoDialog'); return false;" />
     	</div>

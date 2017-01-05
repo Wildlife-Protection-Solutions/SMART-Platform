@@ -98,6 +98,10 @@ function showcainfodialog(){
 	document.querySelector("#infodesignation").innerHTML = ca.designation == null ? "" : ca.designation;
 	document.querySelector("#infoversion").innerHTML = ca.version;
 	document.querySelector("#inforevision").innerHTML = ca.revision;
+	document.querySelector("#infoorganization").innerHTML = ca.organization;
+	document.querySelector("#infopointofcontact").innerHTML = ca.pointOfContact;
+	document.querySelector("#infolocation").innerHTML = ca.location;
+	document.querySelector("#infoowner").innerHTML = ca.owner;
 	
 	displayDialog('caInfoDialog', 'main');
 	return false;

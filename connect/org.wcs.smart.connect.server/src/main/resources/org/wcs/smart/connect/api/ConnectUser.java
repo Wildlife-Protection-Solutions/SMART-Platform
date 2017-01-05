@@ -206,7 +206,11 @@ public class ConnectUser extends HttpServlet {
     public SmartUser addUser(@PathParam("username") String user, 
     		SmartUser newUser) {
 
-		isAdminUser();//throws an exception if invalid user.
+		if(isCaAdminUser()){
+			//you are allowed
+		}else{
+			isAdminUser();//throws an exception if you are not allowed still. 
+		};
 		
 		if (newUser.getUsername() != null && newUser.getUsername().length() > 0 && !newUser.getUsername().equals(user)){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.invalidusernames", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
