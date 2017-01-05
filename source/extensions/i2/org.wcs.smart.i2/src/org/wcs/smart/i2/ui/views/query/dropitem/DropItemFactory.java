@@ -76,7 +76,7 @@ public class DropItemFactory {
 			return generateDropItem((NotFilter) filter);
 		
 		ErrorDropItem error = new ErrorDropItem(MessageFormat.format("The query filter type {0} is not supported", filter.getClass().getName()));
-		return Collections.singleton(error);
+		return Collections.singletonList(error);
 	}
 	
 	
@@ -92,7 +92,7 @@ public class DropItemFactory {
 			ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find area of type {0} with key {1}.", filter.getType(), filter.getKey()));
 			return Collections.singletonList(item);	
 		}
-		return Collections.singleton(new TextDropItem(generateName(a), queryKey));
+		return Collections.singletonList(new TextDropItem(generateName(a), queryKey));
 		
 	}
 	
