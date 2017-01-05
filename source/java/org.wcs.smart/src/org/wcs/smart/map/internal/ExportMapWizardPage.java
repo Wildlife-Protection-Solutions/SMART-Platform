@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageWriterSpi;
@@ -46,6 +48,8 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
@@ -56,6 +60,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
@@ -82,6 +87,8 @@ public class ExportMapWizardPage extends WizardPage {
 	/*
 	 * Keys for storing dialog last values
 	 */
+	private static final String SIZE_KEY = "ExportMapWizardSizeValue"; //$NON-NLS-1$
+	private static final String CUSTOM_SIZE_KEY = "ExportMapWizardCustomSize"; //$NON-NLS-1$
 	private static final String WIDTH_KEY = "ExportMapWizardPageWidth"; //$NON-NLS-1$
 	private static final String HEIGHT_KEY = "ExportMapWizardPageHeight"; //$NON-NLS-1$
 	private static final String EXPORT_OP_KEY = "ExportMapWizardPageOption"; //$NON-NLS-1$
@@ -105,6 +112,11 @@ public class ExportMapWizardPage extends WizardPage {
 	private Spinner opWidth;
 	private Spinner opHeight;
 	private Button btnOpAspect;
+	
+	private Scale opSize;
+	private Button chCustomSize;
+	private Label low;
+	private Label high;
 	
 	/**
 	 * Creates a new page
@@ -179,12 +191,46 @@ public class ExportMapWizardPage extends WizardPage {
 	 */
 	public int getWidth() {
 		if (getSelectedFormat().useStandardDimensionControls()) {
+			if (!(Boolean)chCustomSize.getSelection()){
+				return getWidth(opSize.getSelection());
+			}
 			return opWidth.getSelection();
 		} else {
 			return getSelectedFormat().getWidth(getMap().getViewportModel().getWidth(), getMap().getViewportModel().getHeight());
 		}
 	}
 
+	/**
+	 * Predefined quality values for opSize
+	 * @param quality
+	 * @return
+	 */
+	private int getWidth(int quality){
+		switch(quality){
+		case 1:
+			return 512;
+		case 2:
+			return 750;
+		case 3:
+			return 1024;
+		case 4:
+			return 1250;
+		case 5:
+			return 1500;
+		case 6:
+			return 1750;
+		case 7:
+			return 2048;
+		case 8:
+			return 2500;
+		case 9:
+			return 3072;
+		case 10:
+			return 4096;
+		default:
+			return 1024;
+		}
+	}
 	/**
 	 * Computes the height of the output image based
 	 *  on the format settings, scale options
@@ -198,10 +244,14 @@ public class ExportMapWizardPage extends WizardPage {
 		double mapheight = map.getViewportModel().getHeight();
 		int height;
 		if (getSelectedFormat().useStandardDimensionControls()) {
-			if (btnOpAspect.getSelection()) {
+			if (!(Boolean)chCustomSize.getSelection()){
 				height = (int) (mapheight / (mapwidth / getWidth()));
-			} else {
-				height = opHeight.getSelection();
+			}else{
+				if (btnOpAspect.getSelection()) {
+					height = (int) (mapheight / (mapwidth / getWidth()));
+				} else {
+					height = opHeight.getSelection();
+				}
 			}
 		} else {
 			height = getSelectedFormat().getHeight(mapwidth, mapheight);
@@ -314,6 +364,13 @@ public class ExportMapWizardPage extends WizardPage {
          if (defaultMap != null){
         	 cmbMap.setSelection(new StructuredSelection(defaultMap));
          }
+         if (getWizard().getDialogSettings().get(CUSTOM_SIZE_KEY) != null){
+        	 chCustomSize.setSelection(getWizard().getDialogSettings().getBoolean(CUSTOM_SIZE_KEY));
+         }
+         if (getWizard().getDialogSettings().get(SIZE_KEY) != null){
+        	 opSize.setSelection(getWizard().getDialogSettings().getInt(SIZE_KEY));
+         }
+         updateCustomSizeEnabled();
     }
     
     private void validate(){
@@ -352,6 +409,9 @@ public class ExportMapWizardPage extends WizardPage {
     	}
     	
     	getWizard().getDialogSettings().put(DIR_KEY, destDir.getText());
+    	getWizard().getDialogSettings().put(CUSTOM_SIZE_KEY, chCustomSize.getSelection());
+    	getWizard().getDialogSettings().put(SIZE_KEY, opSize.getSelection());
+    	
     }
     
     private void createFileName(Composite parent){
@@ -373,10 +433,59 @@ public class ExportMapWizardPage extends WizardPage {
     private void createSizeOptions(Composite parent){
     	new Label(parent, SWT.NONE);
     	
-    	Composite a = new Composite(parent, SWT.NONE);
-    	a.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    	a.setLayout(new GridLayout(5, false));
+    	Composite outer = new Composite(parent, SWT.NONE);
+    	outer.setLayout(new GridLayout(2, false));
     	
+    	Label l = new Label(outer, SWT.NONE);
+    	l.setText("Image Quality:");
+    	l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+    	
+    	opSize = new Scale(outer, SWT.HORIZONTAL);
+    	opSize.setMinimum(1);
+    	opSize.setMaximum(10);
+    	opSize.setIncrement(1);
+    	opSize.setPageIncrement(1);
+    	opSize.setSelection(5);
+    	opSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	((GridData)opSize.getLayoutData()).heightHint = 23;
+    	
+    	opSize.addListener(SWT.MouseUp, (event)->{
+    		float percent = ((float)event.x) / ((float)opSize.getSize().x);
+    		float pos = (opSize.getMaximum() - opSize.getMinimum()) * percent;
+    		int value = Math.round(pos+opSize.getMinimum()) ;
+    		opSize.setSelection(value);
+    		event.doit = false;
+    	});
+    	new Label(outer, SWT.NONE); //spacer
+    	
+    	Composite b= new Composite(outer, SWT.NONE);
+    	b.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	b.setLayout(new GridLayout(2, false));
+    	((GridLayout)b.getLayout()).marginWidth = 0;
+    	((GridLayout)b.getLayout()).marginHeight = 0;
+    	
+    	low = new Label(b, SWT.NONE);
+    	low.setText("Low/Small");
+    	low.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+    	((GridData)low.getLayoutData()).horizontalIndent = 6;
+    	
+    	high = new Label(b, SWT.NONE);
+    	high.setText("High/Large");
+    	high.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));		
+    	((GridData)high.getLayoutData()).horizontalIndent = 10;
+    	
+    	new Label(outer, SWT.NONE); //spacer
+    	
+    	chCustomSize = new Button(outer, SWT.CHECK);
+    	chCustomSize.setText("Custom");
+    	chCustomSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    	((GridData)chCustomSize.getLayoutData()).verticalIndent = 3;
+    	new Label(outer, SWT.NONE); //spacer
+    	
+    	Composite a = new Composite(outer, SWT.NONE);
+    	a.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    	a.setLayout(new GridLayout(5, false));
+    	((GridLayout)a.getLayout()).marginWidth = 0;
     	opWidth = createSpinner(WIDTH_KEY, a);
     	opHeight = createSpinner(HEIGHT_KEY, a);
     	btnOpAspect = new Button(a, SWT.CHECK);
@@ -397,6 +506,27 @@ public class ExportMapWizardPage extends WizardPage {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+    	
+    	chCustomSize.addListener(SWT.Selection, (event) -> {
+    		updateCustomSizeEnabled();
+    	});
+    	updateCustomSizeEnabled();
+    }
+    
+    private void updateCustomSizeEnabled(){
+    	boolean enabled = chCustomSize.getSelection();
+    	opSize.setEnabled(!enabled);
+		opWidth.setEnabled(enabled);
+		btnOpAspect.setEnabled(enabled);
+		low.setEnabled(!enabled);
+		high.setEnabled(!enabled);
+		((Label)opWidth.getData()).setEnabled(enabled);
+		((Label)opHeight.getData()).setEnabled(enabled);
+		if (!enabled){
+			opHeight.setEnabled(false);
+		}else{
+			opHeight.setEnabled(!btnOpAspect.getSelection());
+		}
     }
     
     private Spinner createSpinner( String spinnerKey, Composite comp ) {
@@ -409,6 +539,7 @@ public class ExportMapWizardPage extends WizardPage {
         label.setLayoutData(new GridData());
 
         Spinner spinner = new Spinner(comp, SWT.BORDER);
+        spinner.setData(label);
         initSpinner(spinner, spinnerKey);
         return spinner;
     }
@@ -595,10 +726,16 @@ public class ExportMapWizardPage extends WizardPage {
         Iterator<ImageWriterSpi> writers = defaultInstance.getServiceProviders(
                 ImageWriterSpi.class, false);
         List<WorldImageExportFormat> formats = new ArrayList<WorldImageExportFormat>();
+        Set<String> items = new HashSet<String>();
+        
         while( writers.hasNext() ) {
             ImageWriterSpi writer = writers.next();
-            formats.add(new WorldImageExportFormat(writer.getFormatNames()[0], writer
+            String key = writer.getFormatNames()[0] + "_" + writer.getFileSuffixes()[0] + "_";
+            if (!items.contains(key)){
+            	formats.add(new WorldImageExportFormat(writer.getFormatNames()[0], writer
                     .getFileSuffixes()[0]));
+            	items.add(key);
+            }
         }
 
         return formats;
