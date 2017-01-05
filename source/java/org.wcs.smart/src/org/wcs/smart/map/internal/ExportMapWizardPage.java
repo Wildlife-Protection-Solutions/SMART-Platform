@@ -437,7 +437,7 @@ public class ExportMapWizardPage extends WizardPage {
     	outer.setLayout(new GridLayout(2, false));
     	
     	Label l = new Label(outer, SWT.NONE);
-    	l.setText("Image Quality:");
+    	l.setText(Messages.ExportMapWizardPage_ImageQualityLabel);
     	l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
     	
     	opSize = new Scale(outer, SWT.HORIZONTAL);
@@ -465,19 +465,19 @@ public class ExportMapWizardPage extends WizardPage {
     	((GridLayout)b.getLayout()).marginHeight = 0;
     	
     	low = new Label(b, SWT.NONE);
-    	low.setText("Low/Small");
+    	low.setText(Messages.ExportMapWizardPage_LowSmallLabel);
     	low.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
     	((GridData)low.getLayoutData()).horizontalIndent = 6;
     	
     	high = new Label(b, SWT.NONE);
-    	high.setText("High/Large");
+    	high.setText(Messages.ExportMapWizardPage_HighLargeLabel);
     	high.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));		
     	((GridData)high.getLayoutData()).horizontalIndent = 10;
     	
     	new Label(outer, SWT.NONE); //spacer
     	
     	chCustomSize = new Button(outer, SWT.CHECK);
-    	chCustomSize.setText("Custom");
+    	chCustomSize.setText(Messages.ExportMapWizardPage_CustomLabel);
     	chCustomSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	((GridData)chCustomSize.getLayoutData()).verticalIndent = 3;
     	new Label(outer, SWT.NONE); //spacer
@@ -730,7 +730,7 @@ public class ExportMapWizardPage extends WizardPage {
         
         while( writers.hasNext() ) {
             ImageWriterSpi writer = writers.next();
-            String key = writer.getFormatNames()[0] + "_" + writer.getFileSuffixes()[0] + "_";
+            String key = writer.getFormatNames()[0] + "_" + writer.getFileSuffixes()[0] + "_"; //$NON-NLS-1$ //$NON-NLS-2$
             if (!items.contains(key)){
             	formats.add(new WorldImageExportFormat(writer.getFormatNames()[0], writer
                     .getFileSuffixes()[0]));
