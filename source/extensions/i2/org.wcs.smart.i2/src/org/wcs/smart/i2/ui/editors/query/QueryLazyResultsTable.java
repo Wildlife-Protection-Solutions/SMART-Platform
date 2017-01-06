@@ -21,32 +21,25 @@
  */
 package org.wcs.smart.i2.ui.editors.query;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
+import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
@@ -61,17 +54,37 @@ import org.wcs.smart.i2.query.IntelQueryColumnProvider;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class QueryLazyResultsTable {
+public class QueryLazyResultsTable extends Composite{
 
 	private QueryLazyResultsContentProvider contentProvider;
 	
 	protected TableViewer table;
-	
+	private Label resultCnt;
 	protected QueryTableViewerColumn[] tableViewerColumns;
 	
 //	private QueryResultItemComparator sorter;
 	
 	private IProjectionProvider prjProvider;
+	
+	public QueryLazyResultsTable(Composite parent){
+		super(parent, SWT.NONE);
+		setLayout(new GridLayout());
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
+		
+		Composite comp = new Composite(this, SWT.NONE);
+		comp.setLayout(new GridLayout());
+		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)comp.getLayout()).marginWidth = 0;
+		((GridLayout)comp.getLayout()).marginHeight = 0;
+		
+		resultCnt = new Label(comp, SWT.NONE);
+		resultCnt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		resultCnt.setText("Counter");
+		
+		createTable(comp);
+		table.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	}
 	
 	public void clearColumns(){
 		if(table.getTable().isDisposed()) return;
@@ -116,7 +129,13 @@ public abstract class QueryLazyResultsTable {
 		}
 
 		//TODO: fix this
-		List<IQueryColumn> cols = IntelQueryColumnProvider.getInstance().getQueryColumns(query, Locale.getDefault(), session);
+		List<IQueryColumn> cols = null;
+		Session session = HibernateManager.openSession();
+		try{
+			cols = IntelQueryColumnProvider.getInstance().getQueryColumns(query, Locale.getDefault(), session);
+		}finally{
+			session.close();
+		}
 		tableViewerColumns = createColumns(table,cols);
 		table.refresh(true);
 						
@@ -177,7 +196,7 @@ public abstract class QueryLazyResultsTable {
 				if (element instanceof IResultItem){
 					return column.getValue((IResultItem)element, Locale.getDefault());
 				}
-				return "i don't know what to do with: " +element.getClass();
+				return super.getText(element);
 			}
 		};
 	}
@@ -194,16 +213,16 @@ public abstract class QueryLazyResultsTable {
 	 * 
 	 * @return the resulting table viewer.
 	 */
-	public TableViewer createTable(Composite parent){
+	
+	private void createTable(Composite parent){
 		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.SINGLE);
 		table.getTable().setHeaderVisible(true);
 		table.getTable().setLinesVisible(true);
+		table.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		contentProvider = new QueryLazyResultsContentProvider(table);
 		table.setContentProvider(contentProvider);
 		table.setItemCount(0);
-
-		return table;
 	}
 
 	public void setInput(IPagedQueryResultSet result) {
@@ -211,18 +230,23 @@ public abstract class QueryLazyResultsTable {
 			if (result == null){
 				table.setItemCount(0);
 				table.setInput(null);
+				
+				resultCnt.setText("");
 			}else{
 				table.setItemCount(result.getItemCount());
 				table.setInput(result);
+				
+				resultCnt.setText(MessageFormat.format("{0} observations",result.getItemCount()));
 			}
 
 			//update tooltip
-			for(QueryTableViewerColumn t : tableViewerColumns){
-				if (t.getColumn().getTooltip() != null){
-					t.getTableColumn().getColumn().setToolTipText(t.getColumn().getTooltip());
+			if (tableViewerColumns != null){
+				for(QueryTableViewerColumn t : tableViewerColumns){
+					if (t.getColumn().getTooltip() != null){
+						t.getTableColumn().getColumn().setToolTipText(t.getColumn().getTooltip());
+					}
 				}
 			}
-
 		}
 	}
 

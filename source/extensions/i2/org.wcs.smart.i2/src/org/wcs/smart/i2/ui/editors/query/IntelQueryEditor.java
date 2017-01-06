@@ -25,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,14 +39,18 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
@@ -65,6 +71,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.engine.IntelRecordQueryEngine;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
@@ -97,6 +105,11 @@ public class IntelQueryEditor extends EditorPart{
 	private IEventBroker eventBroker;
 	
 	private ToolItem runItem;
+	private Composite stackPanel;
+	private Composite progressViewer;
+	private QueryLazyResultsTable resultsTable;
+	private ProgressBar pbar;
+	private Label progressLabel;
 	
 	private boolean isInitializing = false;
 	
@@ -227,14 +240,21 @@ public class IntelQueryEditor extends EditorPart{
 		SmartSection resultsSection = new SmartSection(core, toolkit, "Results");
 		Composite c = toolkit.createComposite(resultsSection);
 		c.setLayout(new GridLayout());
-		toolkit.createLabel(c, "results");
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		createResultSection(c);
 		
 		SmartSection definitionSection = new SmartSection(core, toolkit, "Definition");
 		c = toolkit.createComposite(definitionSection);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		panel = new FilterDefinitionPanel();
+		panel = new FilterDefinitionPanel(){
+			public void runQuery(){
+				IntelQueryEditor.this.runQuery();
+			}
+		};
 		Composite definitionPanel = panel.createComposite(c);
 		definitionPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
@@ -247,6 +267,88 @@ public class IntelQueryEditor extends EditorPart{
 	}
 	
 
+	
+	private void createResultSection(Composite parent){
+		stackPanel = new Composite(parent, SWT.NONE);
+		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		stackPanel.setLayout(new StackLayout());
+		
+		progressViewer = new Composite(stackPanel, SWT.NONE);
+		progressViewer.setLayout(new GridLayout());
+		
+		pbar = new ProgressBar(progressViewer, SWT.HORIZONTAL | SWT.SMOOTH);
+		pbar.setMinimum(0);
+		pbar.setMaximum(100);
+		pbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		progressLabel = new Label(progressViewer, SWT.NONE);
+		progressLabel.setText("progress info");
+		progressLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		resultsTable = new QueryLazyResultsTable(stackPanel);
+		
+		((StackLayout)stackPanel.getLayout()).topControl = progressViewer;
+	}
+	
+	private void runQuery(){
+		
+		
+		resultsTable.setInput(null);
+		((StackLayout)stackPanel.getLayout()).topControl = progressViewer;
+		
+		Date[] dateFilter = null;
+		if (datePart.getDateFilter() == DateFilter.CUSTOM){
+			dateFilter = new Date[]{datePart.getCustomStartDate(), datePart.getCustomEndDate()};
+		}else if (datePart.getDateFilter() == DateFilter.ALL){
+			dateFilter = new Date[]{null, null};
+		}else{
+			dateFilter = new Date[]{datePart.getDateFilter().getStartDate(), datePart.getDateFilter().getEndDate()};
+		}
+		
+		
+		final Date[] fdateFilter = dateFilter;
+		
+		String queryString = panel.getQueryPart();
+		query.setQueryString(queryString);
+		
+		resultsTable.initQuery(query, null);
+		
+		Job j = new Job("running query job") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				
+				HashMap<String, Object> parameters = new HashMap<>();
+				parameters.put(Date.class.getName(), fdateFilter);
+				parameters.put(IProgressMonitor.class.getName(), new QueryProgressMonitor(pbar, progressLabel));
+				IPagedQueryResultSet results = null;
+				Session session = HibernateManager.openSession();
+				try{
+					parameters.put(Session.class.getName(), session);
+					results = (new IntelRecordQueryEngine()).executeQuery(query, parameters);	
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog("Error running query. " + ex.getMessage(), ex);
+					return Status.OK_STATUS;
+				}finally{
+					session.close();
+				}
+				
+				final IPagedQueryResultSet rset = results;
+				Display.getDefault().syncExec(()->{
+					resultsTable.setInput(rset);
+					((StackLayout)stackPanel.getLayout()).topControl = resultsTable;
+					stackPanel.layout(true);
+				});
+				
+				return Status.OK_STATUS;
+			}
+		};
+		
+		j.schedule();
+	}
+	
 	
 	private String validateQuery(){
 		if (isInitializing) return null; //do not valid while initializing
@@ -319,10 +421,6 @@ public class IntelQueryEditor extends EditorPart{
 		headerToolbar.layout(true, true);
 	}
 	
-	
-	private void runQuery(){
-		System.out.println("run query");
-	}
 	
 	private void initUiField(){
 		setPartName(query.getName());

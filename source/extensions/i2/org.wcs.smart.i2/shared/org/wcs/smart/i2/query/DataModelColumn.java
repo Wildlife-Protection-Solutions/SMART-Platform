@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.i2.query.engine.IntelRecordResultItem;
 
 public class DataModelColumn extends AbstractQueryColumn{
 
@@ -22,7 +23,12 @@ public class DataModelColumn extends AbstractQueryColumn{
 	
 	@Override
 	public String getValue(IResultItem item, Locale l) {
-		return null;
+		if (!(item instanceof IntelRecordResultItem)) return null;
+		
+		if (level >= 0){
+			return ((IntelRecordResultItem)item).getCategoryLabel(level);
+		}
+		return "";
 	}
 	
 

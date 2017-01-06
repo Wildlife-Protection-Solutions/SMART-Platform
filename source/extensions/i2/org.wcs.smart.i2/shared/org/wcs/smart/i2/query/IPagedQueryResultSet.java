@@ -68,25 +68,25 @@ public interface IPagedQueryResultSet {
 	 */
 	public Envelope getEnvelope();
 	
-	/**
-	 * Creates an iterator that will iterator over all 
-	 * elements in the result set loading the given pagesize
-	 * each time.
-	 * 
-	 * @param pageSize
-	 * @return
-	 */
-	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize);
-
-	/**
-	 * Creates an iterator that will iterator over all 
-	 * elements in the result set loading the given pagesize
-	 * each time.  Uses the provided session.
-	 * 
-	 * @param pageSize
-	 * @return
-	 */
-	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize, Session session);
+//	/**
+//	 * Creates an iterator that will iterator over all 
+//	 * elements in the result set loading the given pagesize
+//	 * each time.
+//	 * 
+//	 * @param pageSize
+//	 * @return
+//	 */
+//	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize);
+//
+//	/**
+//	 * Creates an iterator that will iterator over all 
+//	 * elements in the result set loading the given pagesize
+//	 * each time.  Uses the provided session.
+//	 * 
+//	 * @param pageSize
+//	 * @return
+//	 */
+//	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize, Session session);
 	
 	/**
 	 * Sets the current sorting column.

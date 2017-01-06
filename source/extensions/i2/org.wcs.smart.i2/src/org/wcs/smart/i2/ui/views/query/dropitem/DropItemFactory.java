@@ -59,6 +59,7 @@ import org.wcs.smart.util.UuidUtils;
 public class DropItemFactory {
 
 	public static List<DropItem> generateDropItems(IQueryFilter filter, Session session){
+		if (filter == null) return Collections.emptyList();
 		return (new DropItemFactory(session)).generateDropItems(filter);
 	}
 		
@@ -263,10 +264,10 @@ public class DropItemFactory {
 		if (filter.getCategoryKey() != null){
 			category = (Category) session.createCriteria(Category.class)
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.add(Restrictions.eq("keyId", filter.getCategoryKey()))
+					.add(Restrictions.eq("hkey", filter.getCategoryKey()))
 					.uniqueResult();
 			if (category == null){
-				DropItem di = new ErrorDropItem(MessageFormat.format("Category with key ''{0}'' not found.", filter.getCategoryKey()));
+				DropItem di = new ErrorDropItem(MessageFormat.format("Category with hkey ''{0}'' not found.", filter.getCategoryKey()));
 				return Collections.singletonList(di);
 			}
 		}

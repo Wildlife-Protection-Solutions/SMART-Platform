@@ -66,7 +66,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 	public DataModelTreeFilterItem(Category category){
 		super(category.getName());
 		this.categoryUuid = category.getUuid();
-		queryKey = "dm_category:" + category.getKeyId();
+		queryKey = "dm_category:" + category.getHkey();
 		dropItemName = DropItemFactory.generateName(null, category);
 	}
 	
@@ -85,7 +85,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		this.attributeUuid = attribute.getAttribute().getUuid();
 		this.type = attribute.getAttribute().getType();
 		
-		queryKey = "dm_attribute:" + attribute.getAttribute().getType().typeKey + ":" + attribute.getCategory().getKeyId() + ":" + attribute.getAttribute().getKeyId();
+		queryKey = "dm_attribute:" + attribute.getAttribute().getType().typeKey + ":" + attribute.getCategory().getHkey() + ":" + attribute.getAttribute().getKeyId();
 		dropItemName = DropItemFactory.generateName(attribute.getAttribute(),  attribute.getCategory());
 	}
 	

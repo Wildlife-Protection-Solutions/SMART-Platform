@@ -411,6 +411,7 @@ public class RecordsView {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
+					if (lstInProgress.getControl().isDisposed()) return;
 					lstInProgress.setInput(inProgress);
 				}
 			});
@@ -430,6 +431,7 @@ public class RecordsView {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
+					if (lstNewRecords.getControl().isDisposed()) return;
 					lstNewRecords.setInput(newRecords);
 				}
 			});
@@ -450,6 +452,7 @@ public class RecordsView {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
+					if (lstAllRecords.getControl().isDisposed()) return;
 					lstAllRecords.setInput(allRecords);
 				}
 			});

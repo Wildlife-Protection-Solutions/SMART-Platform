@@ -45,7 +45,8 @@ public class BracketFilter implements IQueryFilter {
 	
 	@Override
 	public void accept(IFilterVisitor visitor){
+		visitor.visitElement(this); //open
 		filter.accept(visitor);
-		visitor.visitElement(this);
+		visitor.visitElement(this); //close
 	}
 }

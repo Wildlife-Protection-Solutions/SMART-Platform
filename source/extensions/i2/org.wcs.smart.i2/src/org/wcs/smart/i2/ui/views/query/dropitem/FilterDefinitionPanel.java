@@ -62,7 +62,7 @@ import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
  * @author Emily
  *
  */
-public class FilterDefinitionPanel implements IDefinitionPanel {
+public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	
 	private Composite mainComposite;
 	private ScrolledComposite dropTarget = null;
@@ -396,11 +396,12 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 		run.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: run query
-				
+				runQuery();
 			}
 		});
 	}
+	
+	public abstract void runQuery();
 	
 	/**
 	 * Creates the drop target composite

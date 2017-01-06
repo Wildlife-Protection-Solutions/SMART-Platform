@@ -31,43 +31,42 @@ public class IntelQueryColumnProvider {
 	
 	
 	//TODO: cache data model ???
-	public List<AbstractQueryColumn> getQueryColumns (IntelRecordQuery query, Locale l, Session session) {
+	public List<IQueryColumn> getQueryColumns (IntelRecordQuery query, Locale l, Session session) {
 			
 			//add one column for each filter item that is true or false depending on column
 			//entity types -> true if has entity type associated
 			//entity -> true if specific entity is associated
 		
-		List<AbstractQueryColumn> columns = new ArrayList<AbstractQueryColumn>();
+		List<IQueryColumn> columns = new ArrayList<>();
 		
 		for (FixedQueryColumn.Column c : FixedQueryColumn.Column.values()){
 			columns.add(new FixedQueryColumn(c));
 		}
 		try{
 			IQueryFilter queryFilter = IntelRecordQuery.parseQuery(query.getQueryString()).getFilter();
-			
-			
-			queryFilter.accept(new IFilterVisitor() {
-				
-				@Override
-				public void visitElement(IQueryFilter filter) {
-					if (filter instanceof EntityFilter){
-						//TODO: name
-						EntityColumn ec = new EntityColumn(((EntityFilter) filter).getEntityUuid().toString(),  ((EntityFilter) filter).getEntityUuid());
-						if (!columns.contains(ec)){
-							columns.add(ec);
+			if (queryFilter != null){
+				queryFilter.accept(new IFilterVisitor() {
+					@Override
+					public void visitElement(IQueryFilter filter) {
+						if (filter instanceof EntityFilter){
+							//TODO: name
+							EntityColumn ec = new EntityColumn(((EntityFilter) filter).getEntityUuid().toString(),  ((EntityFilter) filter).getEntityUuid());
+							if (!columns.contains(ec)){
+								columns.add(ec);
+							}
+						}else if (filter instanceof EntityTypeFilter){
+							//TODO: name
+							EntityColumn ec = new EntityColumn(((EntityTypeFilter) filter).getTypeKey(), ((EntityTypeFilter) filter).getTypeKey());
+							if (!columns.contains(ec)){
+								columns.add(ec);
+							}
+						}else if (filter instanceof IntelAttributeFilter){
+							//TODO: do the same thing for intel entity attributes
 						}
-					}else if (filter instanceof EntityTypeFilter){
-						//TODO: name
-						EntityColumn ec = new EntityColumn(((EntityTypeFilter) filter).getTypeKey(), ((EntityTypeFilter) filter).getTypeKey());
-						if (!columns.contains(ec)){
-							columns.add(ec);
-						}
-					}else if (filter instanceof IntelAttributeFilter){
-						//TODO: do the same thing for intel entity attributes
+						//
 					}
-					//
-				}
-			});
+				});
+			}
 			
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog("Error loading query columns.  Unable to parse query: " + ex.getMessage(), ex);
@@ -78,7 +77,7 @@ public class IntelQueryColumnProvider {
 		//categories
 		SQLQuery sq = session.createSQLQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca");
 		sq.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
-		Long maxCategory = (Long) sq.uniqueResult();
+		Integer maxCategory = (Integer) sq.uniqueResult();
 		
 		for (int i = 0; i < maxCategory; i ++){
 			columns.add(new DataModelColumn(i));
@@ -87,7 +86,7 @@ public class IntelQueryColumnProvider {
 		//attributes
 		List<Attribute> attributes = session.createCriteria(Attribute.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("isActive", true))
+//				.add(Restrictions.eq("isActive", true))
 				.list();
 		for (Attribute attribute : attributes){
 			columns.add(new DataModelColumn(attribute));

@@ -33,7 +33,7 @@ public class EntityTypeFilter implements IQueryFilter {
 		return new EntityTypeFilter(key.split(":")[1]);
 	}
 	
-	public String typeKey;
+	private String typeKey;
 	
 	public EntityTypeFilter(String typeKey){
 		this.typeKey = typeKey;
