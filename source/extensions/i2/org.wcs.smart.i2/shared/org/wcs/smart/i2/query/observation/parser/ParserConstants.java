@@ -65,53 +65,51 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int S_CONST_LITERAL = 31;
   /** RegularExpression Id. */
-  int DM_KEY = 32;
+  int UUIDLETTER = 32;
   /** RegularExpression Id. */
-  int UUID = 33;
+  int LETTER = 33;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 34;
+  int SPECIAL_CHARS = 34;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_NUMERIC = 35;
+  int DM_KEY = 35;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_STRING = 36;
+  int CATEGORY_KEY = 36;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_BOOLEAN = 37;
+  int ATTRIBUTE_KEY_NUMERIC = 37;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_DATE = 38;
+  int ATTRIBUTE_KEY_STRING = 38;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_LIST = 39;
+  int ATTRIBUTE_KEY_BOOLEAN = 39;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_TREE = 40;
+  int ATTRIBUTE_KEY_DATE = 40;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_NUMERIC = 41;
+  int ATTRIBUTE_KEY_LIST = 41;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_STRING = 42;
+  int ATTRIBUTE_KEY_TREE = 42;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_BOOLEAN = 43;
+  int EATTRIBUTE_KEY_NUMERIC = 43;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_DATE = 44;
+  int EATTRIBUTE_KEY_STRING = 44;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_LIST = 45;
+  int EATTRIBUTE_KEY_BOOLEAN = 45;
   /** RegularExpression Id. */
-  int DATE_STRING = 46;
+  int EATTRIBUTE_KEY_DATE = 46;
   /** RegularExpression Id. */
-  int UUIDLETTER = 47;
+  int EATTRIBUTE_KEY_LIST = 47;
   /** RegularExpression Id. */
-  int LETTER = 48;
+  int DATE_STRING = 48;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 49;
+  int AREA_TYPE_KEY = 49;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 50;
+  int AREA_KEY = 50;
   /** RegularExpression Id. */
-  int AREA_KEY = 51;
+  int ENTITY_TYPE_KEY = 51;
   /** RegularExpression Id. */
-  int ENTITY_TYPE_KEY = 52;
+  int ENTITY_KEY = 52;
   /** RegularExpression Id. */
-  int ENTITY_KEY = 53;
+  int QUERY_SPLITTER = 53;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 54;
-  /** RegularExpression Id. */
-  int QUOTED_STRING = 55;
+  int QUOTED_STRING = 54;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -150,8 +148,10 @@ public interface ParserConstants {
     "<INTEGER>",
     "<DIGIT>",
     "<S_CONST_LITERAL>",
+    "<UUIDLETTER>",
+    "<LETTER>",
+    "<SPECIAL_CHARS>",
     "<DM_KEY>",
-    "<UUID>",
     "<CATEGORY_KEY>",
     "<ATTRIBUTE_KEY_NUMERIC>",
     "<ATTRIBUTE_KEY_STRING>",
@@ -165,9 +165,6 @@ public interface ParserConstants {
     "<EATTRIBUTE_KEY_DATE>",
     "<EATTRIBUTE_KEY_LIST>",
     "<DATE_STRING>",
-    "<UUIDLETTER>",
-    "<LETTER>",
-    "<SPECIAL_CHARS>",
     "<AREA_TYPE_KEY>",
     "<AREA_KEY>",
     "<ENTITY_TYPE_KEY>",

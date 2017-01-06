@@ -1,11 +1,38 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.query.observation.filter;
 
 import java.util.Date;
 
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.util.SharedUtils;
 
+/**
+ * Intelligence attribute filter.
+ * 
+ * @author Emily
+ *
+ */
 public class IntelAttributeFilter implements IQueryFilter {
 
 		
@@ -27,7 +54,7 @@ public class IntelAttributeFilter implements IQueryFilter {
 	public static IntelAttributeFilter create(String key, Operator operator, String value){
 		IntelAttributeFilter filter = createCore(key);
 		filter.operator = operator;
-		filter.stringValue = value;
+		filter.stringValue = SharedUtils.stripQuotes(value);
 		return filter;
 	}
 	
@@ -50,9 +77,10 @@ public class IntelAttributeFilter implements IQueryFilter {
 		String bits[] = key.split(":");
 		IntelAttribute.AttributeType type = parseType(bits[1]);
 		String attributeKey = bits[2];
-		String entityTypeKey = "";
+		String entityTypeKey = null;
 		if (bits.length > 3){
 			entityTypeKey = bits[3];
+			if (entityTypeKey.trim().isEmpty()) entityTypeKey = null;
 		}
 		return new IntelAttributeFilter(type,attributeKey,entityTypeKey);
 	}

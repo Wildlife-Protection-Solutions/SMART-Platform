@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,53 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.editors;
+package org.wcs.smart.i2.query;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.part.EditorPart;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Iterator;
 
-public class QueryEditor extends EditorPart{
+/**
+ * Iterator for query result set.
+ * 
+ * @author Emily
+ *
+ * @param <T>
+ */
+public interface IQueryResultSetIterator<T extends IResultItem> extends Iterator<IResultItem>, Closeable {
+
+	@Override
+	public boolean hasNext();
 	
-	public static final String ID = "org.wcs.smart.i2.editor.query";
-
 	@Override
-	public void doSave(IProgressMonitor monitor) {
-	}
-
+	public IResultItem next();
+	
 	@Override
-	public void doSaveAs() {		
-	}
-
+	public void remove();
+	
 	@Override
-	public void init(IEditorSite site, IEditorInput input)
-			throws PartInitException {
-	}
-
-	@Override
-	public boolean isDirty() {
-		return false;
-	}
-
-	@Override
-	public boolean isSaveAsAllowed() {
-		return false;
-	}
-
-	@Override
-	public void createPartControl(Composite parent) {
-		Label l = new Label(parent, SWT.NONE);
-		l.setText("Intelligence Query Editor");
-	}
-
-	@Override
-	public void setFocus() {
-
-	}
-
+	public void close() throws IOException;
+	
 }

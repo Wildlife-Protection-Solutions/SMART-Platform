@@ -243,7 +243,7 @@ public class QueryView {
 				refreshFiltersView();
 			}
 		});
-		filterTree = new TreeViewer(part, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		filterTree = new TreeViewer(part, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
 		filterTree.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filterTree.setLabelProvider(new FilterTreeLabelProvider());
 		filterTree.setContentProvider(new FilterTreeContentProvider());
@@ -251,34 +251,46 @@ public class QueryView {
 		filterTree.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				IntelQueryEditor addTo = null;
-				EPartService pService = context.get(EPartService.class);
-				for (MPart part : context.get(EPartService.class).getParts()){
-					if (pService.isPartVisible(part)){
-						Object item = E3Utils.getSourceObject(part);
-						if (item instanceof IntelQueryEditor){
-							addTo = (IntelQueryEditor) item;
-							break;
-						}
-					}
-				}
-				
-				IStructuredSelection selection = (IStructuredSelection) filterTree.getSelection();
-				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-					Object element = (Object) iterator.next();
-					if (element instanceof FilterTreeItem){
-						DropItem[] di = ((FilterTreeItem) element).asDropItem();
-						if (di == null) continue;
-						addTo.addDropItems(di);
-						
-					}
-					
-				}
+				addFilterSelectionToQuery();
 			}
 		});
+		
+		Menu mnu = new Menu(filterTree.getTree());
+		MenuItem addToQuery = new MenuItem(mnu,SWT.PUSH);
+		addToQuery.setText("Add to Query");
+		addToQuery.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addToQuery.addListener(SWT.Selection, event->addFilterSelectionToQuery());
+		filterTree.getTree().setMenu(mnu);
+		
 		refreshJob = new LoadFilterOptions(filterTree);
 		
 		return part;
+	}
+	
+	private void addFilterSelectionToQuery(){
+		IntelQueryEditor addTo = null;
+		EPartService pService = context.get(EPartService.class);
+		for (MPart part : context.get(EPartService.class).getParts()){
+			if (pService.isPartVisible(part)){
+				Object item = E3Utils.getSourceObject(part);
+				if (item instanceof IntelQueryEditor){
+					addTo = (IntelQueryEditor) item;
+					break;
+				}
+			}
+		}
+		
+		IStructuredSelection selection = (IStructuredSelection) filterTree.getSelection();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			Object element = (Object) iterator.next();
+			if (element instanceof FilterTreeItem){
+				DropItem[] di = ((FilterTreeItem) element).asDropItem();
+				if (di == null) continue;
+				addTo.addDropItems(di);
+				
+			}
+			
+		}
 	}
 	
 	public void refreshFiltersView(){	

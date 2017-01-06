@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
 import java.util.ArrayList;
@@ -20,7 +41,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -33,8 +53,15 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 
+/**
+ * Simple definition panel for creating filter queries
+ * 
+ * @author Emily
+ *
+ */
 public class FilterDefinitionPanel implements IDefinitionPanel {
 	
 	private Composite mainComposite;
@@ -65,19 +92,19 @@ public class FilterDefinitionPanel implements IDefinitionPanel {
 		targetPanels.add(this);
 	}
 
-//	/**
-//	 * Sets the filter type
-//	 * @param filterType
-//	 */
-//	public void setFilterType(IFilter.FilterType filterType){
-//		if (filterType.equals(FilterType.WAYPOINT)){
-//			btnWaypoint.setSelection(true);
-//			btnObservation.setSelection(false);
-//		}else{
-//			btnObservation.setSelection(true);
-//			btnWaypoint.setSelection(false);
-//		}
-//	}
+	/**
+	 * Sets the filter type
+	 * @param filterType
+	 */
+	public void setFilterType(IQueryFilter.FilterType filterType){
+		if (filterType.equals(FilterType.WAYPOINT)){
+			opWaypoint.setSelection(true);
+			opObservation.setSelection(false);
+		}else{
+			opObservation.setSelection(true);
+			opWaypoint.setSelection(false);
+		}
+	}
 
 	@Override
 	public void dispose(){

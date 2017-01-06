@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -29,10 +32,15 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
+import org.wcs.smart.i2.query.observation.parser.ParseException;
+import org.wcs.smart.i2.query.observation.parser.Parser;
 
 /**
  * Model class of i_record_query.
@@ -192,5 +200,16 @@ public class IntelRecordQuery extends NamedItem implements IIntelAuditItem{
 	}
 	public void setColumnFilter(String columnFilter){
 		this.columnFilter = columnFilter;
+	}
+	
+	
+	@Transient
+	public static ParsedObservationQuery parseQuery(String queryString) throws ParseException, IOException{
+		if (queryString.isEmpty()) return new ParsedObservationQuery(FilterType.OBSERVATION, null);
+			
+		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+			Parser parser = new Parser(is);
+			return parser.ParseQuery();
+		}
 	}
 }

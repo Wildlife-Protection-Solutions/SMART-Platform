@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.views.query;
 
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +41,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
@@ -67,7 +67,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		super(category.getName());
 		this.categoryUuid = category.getUuid();
 		queryKey = "dm_category:" + category.getKeyId();
-		dropItemName = category.getFullCategoryName();
+		dropItemName = DropItemFactory.generateName(null, category);
 	}
 	
 	public DataModelTreeFilterItem(Attribute attribute){
@@ -75,7 +75,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		this.attributeUuid = attribute.getUuid();
 		this.type = attribute.getType();
 		queryKey = "dm_attribute:" + attribute.getType().typeKey + "::" + attribute.getKeyId();
-		dropItemName = attribute.getName();
+		dropItemName = DropItemFactory.generateName(attribute, null);
 	}
 	
 	public DataModelTreeFilterItem(CategoryAttribute attribute){
@@ -86,7 +86,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		this.type = attribute.getAttribute().getType();
 		
 		queryKey = "dm_attribute:" + attribute.getAttribute().getType().typeKey + ":" + attribute.getCategory().getKeyId() + ":" + attribute.getAttribute().getKeyId();
-		dropItemName = MessageFormat.format("{0} ({1})", attribute.getAttribute().getName(), attribute.getCategory().getFullCategoryName());
+		dropItemName = DropItemFactory.generateName(attribute.getAttribute(),  attribute.getCategory());
 	}
 	
 //	private void processAttributeItems(Attribute a){

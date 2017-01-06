@@ -122,8 +122,12 @@ TOKEN : /* Literal Constants */
 /* Query Filters */
 TOKEN : 
 {
- < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
- |  < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
+  < #UUIDLETTER : [ "a"-"f", "A"-"F", "-"] >
+ | < #LETTER : [ "a"-"z", "A"-"Z" ] >
+ | < #SPECIAL_CHARS : ("." | "_")>
+ 
+ | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ //|  < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
  
  | < CATEGORY_KEY : "dm_category:"< DM_KEY > >
  | < ATTRIBUTE_KEY_NUMERIC : "dm_attribute:n:"(< DM_KEY >)?":"< DM_KEY >>
@@ -142,14 +146,12 @@ TOKEN :
   
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
 
- | < #UUIDLETTER : [ "a"-"f", "A"-"F", "-"] >
- | < #LETTER : [ "a"-"z", "A"-"Z" ] >
- | < #SPECIAL_CHARS : ("." | "_")>
+ 
  | < AREA_TYPE_KEY : ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) >
  | < AREA_KEY : "area:" < AREA_TYPE_KEY > ":" < DM_KEY > >
 
  | < ENTITY_TYPE_KEY : "entitytype:" <DM_KEY> >
- | < ENTITY_KEY : "entity:" <UUID >>
+ | < ENTITY_KEY : "entity:" (< DIGIT> | < UUIDLETTER >)+>
 
  | < QUERY_SPLITTER : "|" >
 }
@@ -607,3 +609,4 @@ Operator BooleanOp() :
     return Operator.parse(token.image);
   }
 }
+

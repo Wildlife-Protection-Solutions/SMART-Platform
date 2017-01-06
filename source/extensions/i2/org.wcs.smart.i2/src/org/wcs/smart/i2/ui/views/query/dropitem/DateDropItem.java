@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
@@ -42,6 +43,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.SmartUtils;
 
 public class DateDropItem extends DropItem {
@@ -87,11 +89,11 @@ public class DateDropItem extends DropItem {
 		querypart.append( " "); //$NON-NLS-1$
 		querypart.append(getOperatorSelection().getKey());
 		querypart.append( " "); //$NON-NLS-1$
-		querypart.append(new Date(SmartUtils.getDate(dtime1).getTime()).toString());
+		querypart.append((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(SmartUtils.getDate(dtime1)));
 		querypart.append( " "); //$NON-NLS-1$
 		querypart.append( Operator.AND.getKey() );
 		querypart.append( " "); //$NON-NLS-1$
-		querypart.append(new Date(SmartUtils.getDate(dtime2).getTime()).toString());
+		querypart.append((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(SmartUtils.getDate(dtime2)));
 		
 		return querypart.toString();
 	}

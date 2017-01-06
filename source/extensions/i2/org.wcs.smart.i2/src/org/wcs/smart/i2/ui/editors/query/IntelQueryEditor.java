@@ -22,7 +22,9 @@
 package org.wcs.smart.i2.ui.editors.query;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,10 +65,15 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
+import org.wcs.smart.i2.query.observation.parser.ParseException;
 import org.wcs.smart.i2.query.observation.parser.Parser;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
+import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.FilterDefinitionPanel;
 
 /**
@@ -89,9 +96,13 @@ public class IntelQueryEditor extends EditorPart{
 	private IEclipseContext context;
 	private IEventBroker eventBroker;
 	
+	private ToolItem runItem;
+	
+	private boolean isInitializing = false;
+	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		String queryString = parseQuery();
+		String queryString = validateQuery();
 		if (queryString == null){
 			MessageDialog.openError(getSite().getShell(), "ERROR", "Cannot save an invalid query.");
 			return;
@@ -229,31 +240,25 @@ public class IntelQueryEditor extends EditorPart{
 	
 		panel.addQueryChangedListener(()->{
 			setDirty(true);
-			String ok = parseQuery();
-			if (ok != null){
-				//run query ok 
-			}else{
-				//run query not ok
-			}
+			validateQuery();
 		});
 		
 		loadQueryJob.schedule();
 	}
 	
-	private String parseQuery(){
+
+	
+	private String validateQuery(){
+		if (isInitializing) return null; //do not valid while initializing
 		String queryString = panel.getQueryPart();
-		
-		if (queryString.isEmpty()){
-			return "";
-		}
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
-			Parser parser = new Parser(is);
-			parser.ParseQuery();
+		try{
+			IntelRecordQuery.parseQuery(queryString);
 			panel.setErrorMessage(null, null);
+			runItem.setEnabled(true);
 			return queryString;
 		}catch (Exception ex){
+			runItem.setEnabled(false);
 			panel.setErrorMessage("Query is invalid", ex);
-			ex.printStackTrace();
 			return null;
 		}
 	}
@@ -298,7 +303,7 @@ public class IntelQueryEditor extends EditorPart{
 		datePart.adapt(toolkit);
 		
 		ToolBar headerToolbar = new ToolBar(main, SWT.FLAT);
-		ToolItem runItem = new ToolItem(headerToolbar, SWT.PUSH);
+		runItem = new ToolItem(headerToolbar, SWT.PUSH);
 		runItem.setToolTipText("run query");
 		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
 		runItem.addSelectionListener(new SelectionAdapter() {
@@ -333,6 +338,10 @@ public class IntelQueryEditor extends EditorPart{
 		protected IStatus run(IProgressMonitor monitor) {
 			query = null;
 			UUID uuid = ((QueryEditorInput)getEditorInput()).getUuid();
+			
+			List<DropItem> generatedDropItems = new ArrayList<>();
+			IQueryFilter.FilterType filterType = IQueryFilter.FilterType.OBSERVATION;
+			
 			if (((QueryEditorInput)getEditorInput()).isNew()){
 				uuid = null;
 				IntelRecordQuery temp = new IntelRecordQuery();
@@ -343,6 +352,7 @@ public class IntelQueryEditor extends EditorPart{
 				
 				query = temp;
 			}else{
+				
 				Session s = HibernateManager.openSession();
 				try{
 					IntelRecordQuery temp = (IntelRecordQuery)s.get(IntelRecordQuery.class, uuid);
@@ -353,6 +363,16 @@ public class IntelQueryEditor extends EditorPart{
 					}
 					temp.getNames().size();
 					query = temp;
+					
+					try{
+						ParsedObservationQuery parsedQuery = IntelRecordQuery.parseQuery(query.getQueryString());
+						generatedDropItems = DropItemFactory.generateDropItems(parsedQuery.getFilter(), s);
+						filterType = parsedQuery.getFilterType();
+					}catch(Exception ex){
+						DropItem di = new ErrorDropItem("Unable to parse query: " + ex.getMessage());
+						generatedDropItems.add(di);
+					}
+					
 				}catch (Exception ex){
 					Intelligence2PlugIn.displayLog("Error loading query from database: " + ex.getMessage(), ex);
 					getSite().getPage().closeEditor(IntelQueryEditor.this, false);
@@ -361,8 +381,21 @@ public class IntelQueryEditor extends EditorPart{
 					s.close();
 				}
 			}
-			
-			Display.getDefault().syncExec(()->initUiField());
+			final List<DropItem> fGeneratedDropItems = generatedDropItems;
+			final IQueryFilter.FilterType fType = filterType;
+			Display.getDefault().syncExec(()->{
+				isInitializing = true;
+				try{
+					initUiField();
+					panel.setFilterType(fType);
+					panel.addItems(fGeneratedDropItems);
+				}finally{
+					isInitializing = false;
+				}
+				validateQuery();
+				setDirty(false);
+					
+			});
 			return Status.OK_STATUS;
 		}
 		
