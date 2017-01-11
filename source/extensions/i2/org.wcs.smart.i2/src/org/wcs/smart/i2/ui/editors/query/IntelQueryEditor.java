@@ -57,8 +57,13 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
@@ -70,9 +75,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
-import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
-import org.wcs.smart.i2.query.engine.IntelRecordQueryEngine;
+import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
@@ -96,20 +101,26 @@ public class IntelQueryEditor extends EditorPart{
 
 	private boolean isDirty = false;
 	
-	private IntelRecordQuery query;
-	
-	private IntelQueryNameLabel header;
-	private DateFilterDropDownComposite datePart;
-	private FilterDefinitionPanel panel;
+	//injects
 	private IEclipseContext context;
 	private IEventBroker eventBroker;
 	
+	//query
+	private IntelRecordObservationQuery query;
+	
+	//header & date part
+	private IntelQueryNameLabel header;
+	private DateFilterDropDownComposite datePart;
+	
+	//filter panel
+	private FilterDefinitionPanel panel;
 	private ToolItem runItem;
+
+	//results area
 	private Composite stackPanel;
-	private Composite progressViewer;
 	private QueryLazyResultsTable resultsTable;
-	private ProgressBar pbar;
-	private Label progressLabel;
+	private ProgressPanel progressPanel;
+	private ErrorPanel errorPanel;
 	
 	private boolean isInitializing = false;
 	
@@ -164,6 +175,7 @@ public class IntelQueryEditor extends EditorPart{
 
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
+		panel.setQueryState(isDirty);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
 	
@@ -191,7 +203,7 @@ public class IntelQueryEditor extends EditorPart{
 			@Override
 			public void handleEvent(Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
-				if (data instanceof IntelRecordQuery){
+				if (data instanceof IntelRecordObservationQuery){
 					if (data.equals(query)){
 						closeEditor();
 						return;
@@ -243,7 +255,7 @@ public class IntelQueryEditor extends EditorPart{
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
-		createResultSection(c);
+		createResultSection(c, toolkit);
 		
 		SmartSection definitionSection = new SmartSection(core, toolkit, "Definition");
 		c = toolkit.createComposite(definitionSection);
@@ -253,6 +265,9 @@ public class IntelQueryEditor extends EditorPart{
 		panel = new FilterDefinitionPanel(){
 			public void runQuery(){
 				IntelQueryEditor.this.runQuery();
+			}
+			public void saveQuery(){
+				IntelQueryEditor.this.getSite().getPage().saveEditor(IntelQueryEditor.this, false);
 			}
 		};
 		Composite definitionPanel = panel.createComposite(c);
@@ -268,34 +283,35 @@ public class IntelQueryEditor extends EditorPart{
 	
 
 	
-	private void createResultSection(Composite parent){
+	private void createResultSection(Composite parent, FormToolkit toolkit){
 		stackPanel = new Composite(parent, SWT.NONE);
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		stackPanel.setLayout(new StackLayout());
 		
-		progressViewer = new Composite(stackPanel, SWT.NONE);
-		progressViewer.setLayout(new GridLayout());
+		Composite runQueryComp = toolkit.createComposite(stackPanel);
+		runQueryComp.setLayout(new GridLayout());
+		Hyperlink l = toolkit.createHyperlink(runQueryComp, "Run Query...", SWT.NONE);
+		l.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				runQuery();
+			}
+		});
 		
-		pbar = new ProgressBar(progressViewer, SWT.HORIZONTAL | SWT.SMOOTH);
-		pbar.setMinimum(0);
-		pbar.setMaximum(100);
-		pbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		progressLabel = new Label(progressViewer, SWT.NONE);
-		progressLabel.setText("progress info");
-		progressLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+		progressPanel = new ProgressPanel(stackPanel);
 		resultsTable = new QueryLazyResultsTable(stackPanel);
 		
-		((StackLayout)stackPanel.getLayout()).topControl = progressViewer;
+		errorPanel = new ErrorPanel(stackPanel);
+		
+		((StackLayout)stackPanel.getLayout()).topControl = runQueryComp;
 	}
 	
 	private void runQuery(){
 		
-		
 		resultsTable.setInput(null);
-		((StackLayout)stackPanel.getLayout()).topControl = progressViewer;
+		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
+		stackPanel.layout(true);
 		
 		Date[] dateFilter = null;
 		if (datePart.getDateFilter() == DateFilter.CUSTOM){
@@ -322,14 +338,22 @@ public class IntelQueryEditor extends EditorPart{
 				
 				HashMap<String, Object> parameters = new HashMap<>();
 				parameters.put(Date.class.getName(), fdateFilter);
-				parameters.put(IProgressMonitor.class.getName(), new QueryProgressMonitor(pbar, progressLabel));
+				parameters.put(IProgressMonitor.class.getName(), new QueryProgressMonitor(progressPanel));
 				IPagedQueryResultSet results = null;
 				Session session = HibernateManager.openSession();
 				try{
 					parameters.put(Session.class.getName(), session);
-					results = (new IntelRecordQueryEngine()).executeQuery(query, parameters);	
+					results = (new IntelObservationQueryEngine()).executeQuery(query, parameters);	
 				}catch (Exception ex){
 					Intelligence2PlugIn.displayLog("Error running query. " + ex.getMessage(), ex);
+					
+					Display.getDefault().syncExec(()->{
+						resultsTable.setInput(null);
+						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
+						errorPanel.setError("Error running query: " + ex.getMessage());
+						stackPanel.layout(true);
+					});
+					
 					return Status.OK_STATUS;
 				}finally{
 					session.close();
@@ -354,7 +378,7 @@ public class IntelQueryEditor extends EditorPart{
 		if (isInitializing) return null; //do not valid while initializing
 		String queryString = panel.getQueryPart();
 		try{
-			IntelRecordQuery.parseQuery(queryString);
+			IntelRecordObservationQuery.parseQuery(queryString);
 			panel.setErrorMessage(null, null);
 			runItem.setEnabled(true);
 			return queryString;
@@ -442,7 +466,7 @@ public class IntelQueryEditor extends EditorPart{
 			
 			if (((QueryEditorInput)getEditorInput()).isNew()){
 				uuid = null;
-				IntelRecordQuery temp = new IntelRecordQuery();
+				IntelRecordObservationQuery temp = new IntelRecordObservationQuery();
 				temp.setName("<New Query>");
 				temp.updateName(SmartDB.getCurrentLanguage(), temp.getName());
 				temp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), temp.getName());
@@ -453,7 +477,7 @@ public class IntelQueryEditor extends EditorPart{
 				
 				Session s = HibernateManager.openSession();
 				try{
-					IntelRecordQuery temp = (IntelRecordQuery)s.get(IntelRecordQuery.class, uuid);
+					IntelRecordObservationQuery temp = (IntelRecordObservationQuery)s.get(IntelRecordObservationQuery.class, uuid);
 					if (temp == null){
 						Intelligence2PlugIn.displayLog("Query not found.", null);
 						closeEditor();
@@ -463,7 +487,7 @@ public class IntelQueryEditor extends EditorPart{
 					query = temp;
 					
 					try{
-						ParsedObservationQuery parsedQuery = IntelRecordQuery.parseQuery(query.getQueryString());
+						ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
 						generatedDropItems = DropItemFactory.generateDropItems(parsedQuery.getFilter(), s);
 						filterType = parsedQuery.getFilterType();
 					}catch(Exception ex){

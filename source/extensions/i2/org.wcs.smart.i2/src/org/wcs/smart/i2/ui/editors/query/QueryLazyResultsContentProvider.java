@@ -34,9 +34,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.SWT;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
-import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -47,18 +45,13 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author elitvin
  * @since 1.0.0
  */
-public class QueryLazyResultsContentProvider implements ILazyContentProvider { //, IQueryColumnSorter {
+public class QueryLazyResultsContentProvider implements ILazyContentProvider {
 	
 	private static final ISchedulingRule CELL_JOB_MUTEX = new LoadCellDataMutex();
 	
 	private TableViewer viewer;
 	private IPagedQueryResultSet input;
 	private int pageSize = IPagedQueryResultSet.TABLE_DEFAULT_PAGE_SIZE;
-	
-	private QueryTableViewerColumn sortColumn = null;
-	private int direction = SWT.UP;
-	
-	 
 	
 	/**
 	 * As viewer.replace(...) is executed in separate thread noticed that we might get
@@ -74,7 +67,6 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider { /
 	@Override
 	public void dispose() {
 		if (input != null) {
-//			CleanUpQueryJob.schedule(input);
 			input = null;
 		}
 	}
@@ -84,7 +76,6 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider { /
 		if (newInput == null || newInput instanceof IPagedQueryResultSet) {
 			if (input != null && !input.equals(newInput)) {
 				loadingIndexes.clear();
-//				CleanUpQueryJob.schedule(input);
 			}
 			input = (IPagedQueryResultSet) newInput;
 		}
@@ -135,44 +126,6 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider { /
 		
 	}
 	
-	/**
-	 * Sets the sort column
-	 * @param sort the column to sort on
-	 */
-	public void setSortColumn(QueryTableViewerColumn sort) {			
-		if (sortColumn != null && sortColumn == sort) {
-			if (direction == SWT.DOWN) {
-				direction = SWT.UP;
-			} else {
-				direction = SWT.DOWN;
-			}
-		}
-		this.sortColumn = sort;
-		viewer.getTable().setSortDirection(direction);
-		if (sort == null){
-			viewer.getTable().setSortColumn(null);
-		}else{
-			viewer.getTable().setSortColumn(sort.getTableColumn().getColumn());
-			//clearing all the data that was previously loaded
-			//there are other ways to clear data but this is the fastest (0.3s on 250k items comparing to 10+ seconds with other approaches)
-		}
-		
-		viewer.getTable().removeAll();
-		if (input == null){
-			viewer.getTable().setItemCount(0);
-		}else{
-			viewer.getTable().setItemCount(input.getItemCount());
-		}
-		
-		if (sort != null){
-			IQueryColumn sColumn = sortColumn.getColumn();
-			input.setSorting(sColumn, direction);
-		}
-		
-		loadingIndexes.clear();
-		viewer.refresh(true);
-		
-	}
 
 	/**
 	 * Job which is responsible for updating particular set of items in current table.

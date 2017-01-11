@@ -10,12 +10,15 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.observation.filter.EntityFilter;
 import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
 import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 
 public class IntelQueryColumnProvider {
 
@@ -31,7 +34,7 @@ public class IntelQueryColumnProvider {
 	
 	
 	//TODO: cache data model ???
-	public List<IQueryColumn> getQueryColumns (IntelRecordQuery query, Locale l, Session session) {
+	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, Locale l, Session session) {
 			
 			//add one column for each filter item that is true or false depending on column
 			//entity types -> true if has entity type associated
@@ -40,23 +43,38 @@ public class IntelQueryColumnProvider {
 		List<IQueryColumn> columns = new ArrayList<>();
 		
 		for (FixedQueryColumn.Column c : FixedQueryColumn.Column.values()){
-			columns.add(new FixedQueryColumn(c));
+			columns.add(new FixedQueryColumn(c, l));
 		}
 		try{
-			IQueryFilter queryFilter = IntelRecordQuery.parseQuery(query.getQueryString()).getFilter();
+			IQueryFilter queryFilter = IntelRecordObservationQuery.parseQuery(query.getQueryString()).getFilter();
 			if (queryFilter != null){
 				queryFilter.accept(new IFilterVisitor() {
 					@Override
 					public void visitElement(IQueryFilter filter) {
 						if (filter instanceof EntityFilter){
-							//TODO: name
-							EntityColumn ec = new EntityColumn(((EntityFilter) filter).getEntityUuid().toString(),  ((EntityFilter) filter).getEntityUuid());
+							IntelEntity entity = (IntelEntity) session.get(IntelEntity.class, ((EntityFilter) filter).getEntityUuid());
+							String name = null;
+							if (entity != null){
+								name = DropItemFactory.generateName(entity);
+							}else{
+								name= ((EntityFilter) filter).getEntityUuid().toString();
+							}
+							EntityColumn ec = new EntityColumn(name,  ((EntityFilter) filter).getEntityUuid());
 							if (!columns.contains(ec)){
 								columns.add(ec);
 							}
 						}else if (filter instanceof EntityTypeFilter){
-							//TODO: name
-							EntityColumn ec = new EntityColumn(((EntityTypeFilter) filter).getTypeKey(), ((EntityTypeFilter) filter).getTypeKey());
+							IntelEntityType entity = (IntelEntityType) session.createCriteria(IntelEntityType.class)
+									.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+									.add(Restrictions.eq("keyId", ((EntityTypeFilter) filter).getTypeKey()))
+									.uniqueResult();
+							String name = null;
+							if (entity != null){
+								name = entity.getName();
+							}else{
+								name= ((EntityTypeFilter) filter).getTypeKey();
+							}
+							EntityColumn ec = new EntityColumn(name, ((EntityTypeFilter) filter).getTypeKey());
 							if (!columns.contains(ec)){
 								columns.add(ec);
 							}

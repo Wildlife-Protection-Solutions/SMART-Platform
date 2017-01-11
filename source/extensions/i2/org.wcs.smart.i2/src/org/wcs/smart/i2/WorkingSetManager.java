@@ -33,7 +33,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
@@ -186,7 +186,7 @@ public enum WorkingSetManager {
 		try{
 			s.beginTransaction();
 			
-			IntelRecordQuery query = (IntelRecordQuery) s.get(IntelRecordQuery.class, queryUuid);
+			IntelRecordObservationQuery query = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
 			if (query == null) throw new Exception("Query not found.");
 			
 			queryName = query.getName();
@@ -220,11 +220,11 @@ public enum WorkingSetManager {
 		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void addToActiveWorkingSet(IntelRecordQuery query, IEclipseContext context){
+	public void addToActiveWorkingSet(IntelRecordObservationQuery query, IEclipseContext context){
 		addQueryToActiveWorkingSet(query.getUuid(), context);
 	}
 	
-	public void removeFromWorkingSet(IntelRecordQuery query, IEclipseContext context){
+	public void removeFromWorkingSet(IntelRecordObservationQuery query, IEclipseContext context){
 		if (activeWorkingSet == null) return;
 		IntelWorkingSet wset = null;
 		Session s = HibernateManager.openSession();

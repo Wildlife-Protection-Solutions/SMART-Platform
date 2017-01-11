@@ -28,19 +28,29 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
@@ -56,14 +66,13 @@ import org.wcs.smart.i2.query.IntelQueryColumnProvider;
  */
 public class QueryLazyResultsTable extends Composite{
 
-	private QueryLazyResultsContentProvider contentProvider;
-	
 	protected TableViewer table;
 	private Label resultCnt;
+	private Menu tableMenu;
+	
 	protected QueryTableViewerColumn[] tableViewerColumns;
 	
-//	private QueryResultItemComparator sorter;
-	
+	private IPagedQueryResultSet currentResults;
 	private IProjectionProvider prjProvider;
 	
 	public QueryLazyResultsTable(Composite parent){
@@ -84,6 +93,8 @@ public class QueryLazyResultsTable extends Composite{
 		
 		createTable(comp);
 		table.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		addListener(SWT.Dispose, (event)->disposeResults());
 	}
 	
 	public void clearColumns(){
@@ -105,7 +116,7 @@ public class QueryLazyResultsTable extends Composite{
 	}
 	
 	
-	public void initQuery(final IntelRecordQuery query, final IProjectionProvider prjProvider){
+	public void initQuery(final IntelRecordObservationQuery query, final IProjectionProvider prjProvider){
 		this.prjProvider = prjProvider;
 		
 		if (tableViewerColumns != null){
@@ -127,7 +138,8 @@ public class QueryLazyResultsTable extends Composite{
 			}
 			return;
 		}
-
+		
+		
 		//TODO: fix this
 		List<IQueryColumn> cols = null;
 		Session session = HibernateManager.openSession();
@@ -140,34 +152,32 @@ public class QueryLazyResultsTable extends Composite{
 		table.refresh(true);
 						
 		//TODO: add menu to open source
-//		IQueryType queryType = QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey());
-//		if (queryType.getResultProviders().length > 0) {
-//			Menu menuTable = new Menu(table.getControl());
-//			table.getControl().setMenu(menuTable);
-//
-//			for (final IQueryResultInfoProvider item : queryType.getResultProviders()) {
-//				// Create menu item
-//				if (!SmartDB.isMultipleAnalysis() || item.supportsCcaa()){
-//					MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
-//					if (item.getImage() != null){
-//						miTest.setImage(item.getImage());
-//					}
-//					miTest.setText(item.getName());
-//					miTest.addSelectionListener(new SelectionAdapter() {
-//						@Override
-//						public void widgetSelected(SelectionEvent e) {
-//							IStructuredSelection selection = (IStructuredSelection) table.getSelection();
-//							if (!selection.isEmpty()) {
-//								Object x = selection.getFirstElement();
-//								item.doWork(x);
-//							}
-//						}
-//					});
-//				}
-//			}
-//		}
-					
-
+		List<IQuerySourceFinder> finders = IQuerySourceFinder.getQuerySources(query);
+		if (tableMenu != null && !tableMenu.isDisposed()){
+			tableMenu.dispose();
+		}
+		if (finders != null && finders.size() > 0){
+			tableMenu = new Menu(table.getControl());
+			table.getControl().setMenu(tableMenu);
+			
+			for (IQuerySourceFinder f : finders){
+				MenuItem item = new MenuItem(tableMenu, SWT.PUSH);
+				if (f.getImage() != null){
+					item.setImage(f.getImage());
+				}
+				item.setText(f.getName());
+				item.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						IStructuredSelection selection = (IStructuredSelection) table.getSelection();
+						if (!selection.isEmpty()) {
+							Object x = selection.getFirstElement();
+							if (x instanceof IResultItem) f.openSource((IResultItem)x);
+						}
+					}
+				});
+			}
+		}
 	}
 	
 	/**
@@ -180,7 +190,7 @@ public class QueryLazyResultsTable extends Composite{
 	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<IQueryColumn> columns) {
 		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.size()];
 		for (int i = 0; i < columns.size(); i++) {
-			viewers[i] = new QueryTableViewerColumn(viewer,columns.get(i), getLabelProvider(columns.get(i), columns));
+			viewers[i] = new QueryTableViewerColumn(viewer,columns.get(i), getLabelProvider(columns.get(i), columns), this);
 		}
 		return viewers;
 	}
@@ -219,40 +229,82 @@ public class QueryLazyResultsTable extends Composite{
 		table.getTable().setHeaderVisible(true);
 		table.getTable().setLinesVisible(true);
 		table.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		contentProvider = new QueryLazyResultsContentProvider(table);
-		table.setContentProvider(contentProvider);
+		table.setContentProvider(new QueryLazyResultsContentProvider(table));
 		table.setItemCount(0);
-	}
+	}	
+	
+	private void disposeResults(){
+		if (currentResults == null) return;
+		final IPagedQueryResultSet toDispose = currentResults;
+		Job disposeJob = new Job("dispose query results"){
 
-	public void setInput(IPagedQueryResultSet result) {
-		if (!table.getTable().isDisposed()){
-			if (result == null){
-				table.setItemCount(0);
-				table.setInput(null);
-				
-				resultCnt.setText("");
-			}else{
-				table.setItemCount(result.getItemCount());
-				table.setInput(result);
-				
-				resultCnt.setText(MessageFormat.format("{0} observations",result.getItemCount()));
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session s = HibernateManager.openSession();
+				s.beginTransaction();
+				try{
+					toDispose.dispose(s);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					Intelligence2PlugIn.log("Error disposing of query results", ex);
+				}finally{
+					s.close();
+				}
+				return Status.OK_STATUS;
 			}
+		};
+		disposeJob.schedule();
+	}
+	
+	public void setInput(IPagedQueryResultSet result) {
+		if (table.getTable().isDisposed()) return;
+		disposeResults();
+		
+		currentResults = result;
+		if (result == null){
+			table.setItemCount(0);
+			table.setInput(null);
+				
+			resultCnt.setText("");
+		}else{
+			table.setItemCount(result.getItemCount());
+			table.setInput(result);
+			
+			resultCnt.setText(MessageFormat.format("{0} observations",result.getItemCount()));
+		}
 
-			//update tooltip
-			if (tableViewerColumns != null){
-				for(QueryTableViewerColumn t : tableViewerColumns){
-					if (t.getColumn().getTooltip() != null){
-						t.getTableColumn().getColumn().setToolTipText(t.getColumn().getTooltip());
-					}
+		//update tooltip
+		if (tableViewerColumns != null){
+			for(QueryTableViewerColumn t : tableViewerColumns){
+				if (t.getColumn().getTooltip() != null){
+					t.getTableColumn().getColumn().setToolTipText(t.getColumn().getTooltip());
 				}
 			}
-		}
+		}		
 	}
 
-//	@Override
-//	protected IQueryColumnSorter getColumnSorter() {
-//		return contentProvider;
-//	}
+	
+	public void setSortColumn(QueryTableViewerColumn sortColumn){
+		if (currentResults != null){
+			int sortDirection = table.getTable().getSortDirection();
+			if (table.getTable().getSortColumn() == sortColumn.getTableColumn().getColumn()){
+				if (sortDirection == SWT.DOWN || sortDirection == SWT.NONE){
+					sortDirection = SWT.UP;
+				}else{
+					sortDirection = SWT.DOWN;
+				}
+			}else{
+				sortDirection = SWT.UP;
+			}
+			table.getTable().setSortDirection(sortDirection);
+			table.getTable().setSortColumn(sortColumn.getTableColumn().getColumn());
+
+			//refresh results table
+			currentResults.setSorting(sortColumn.getColumn(), sortDirection == SWT.UP ? IPagedQueryResultSet.SortDirection.UP : IPagedQueryResultSet.SortDirection.DOWN);
+			table.setItemCount(0);
+			table.setItemCount(currentResults.getItemCount());
+			table.refresh(true);
+		}
+	}
 	
 }

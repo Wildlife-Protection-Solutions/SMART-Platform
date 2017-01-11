@@ -28,6 +28,7 @@ import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
+import org.wcs.smart.i2.query.FixedQueryColumn;
 
 /**
  * Desktop label provider for intelligence module.
@@ -60,6 +61,14 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == IntelWorkingSetCategory.RECORD) return "Records";
 		if (item == IntelWorkingSetCategory.QUERIES) return "Queries";
 		
+		if (item == FixedQueryColumn.Column.LOC_COMMENT) return "Comment";
+		if (item == FixedQueryColumn.Column.LOC_DATE) return "Date";
+		if (item == FixedQueryColumn.Column.LOC_TIME) return "Time";
+		if (item == FixedQueryColumn.Column.LOC_GEOMTRY) return "Geometry";
+		if (item == FixedQueryColumn.Column.LOC_ID) return "ID";
+		if (item == FixedQueryColumn.Column.RECORD_STATUS) return "Record Status";
+		if (item == FixedQueryColumn.Column.RECORD_TITLE) return "Record Title";
+						
 		return null;
 		
 	}

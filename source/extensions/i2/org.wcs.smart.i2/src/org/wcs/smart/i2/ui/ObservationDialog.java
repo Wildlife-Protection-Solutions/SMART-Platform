@@ -123,7 +123,6 @@ public class ObservationDialog extends Dialog {
 					acopy.setAttribute(a.getAttribute());
 					acopy.setAttributeListItem(a.getAttributeListItem());
 					acopy.setAttributeTreeNode(a.getAttributeTreeNode());
-					acopy.setDateValue(a.getDateValue());
 					acopy.setNumberValue(a.getNumberValue());
 					acopy.setObservation(copy);
 					acopy.setStringValue(a.getStringValue());

@@ -92,7 +92,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.QueryManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
-import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
 import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
@@ -304,11 +304,11 @@ public class QueryView {
 			return;
 		}
 		
-		List<IntelRecordQuery> removed = new ArrayList<IntelRecordQuery>();
+		List<IntelRecordObservationQuery> removed = new ArrayList<IntelRecordObservationQuery>();
 		for (Iterator<?> iterator = ((IStructuredSelection)queryList.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof QueryProxy){
-				IntelRecordQuery deletedItem = QueryManager.INSTANCE.deleteQuery(((QueryProxy) x).getUuid());
+				IntelRecordObservationQuery deletedItem = QueryManager.INSTANCE.deleteQuery(((QueryProxy) x).getUuid());
 				if (deletedItem != null){
 					removed.add(deletedItem);
 				}
@@ -403,12 +403,12 @@ public class QueryView {
 	 
 	 @Optional
 	 @Inject
-	 private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) IntelRecordQuery data){
+	 private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) IntelRecordObservationQuery data){
 		 queryList.refresh(new QueryProxy(data.getName(), data.getUuid()));
 	 }
 	 @Optional
 	 @Inject
-	 private void multiQueryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) List<IntelRecordQuery> data){
+	 private void multiQueryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) List<IntelRecordObservationQuery> data){
 		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid())));
 	 }
 	 
@@ -451,7 +451,7 @@ public class QueryView {
 			List<QueryProxy> proxyItems;
 			Session s = HibernateManager.openSession();
 			try{
-				List<IntelRecordQuery> items = s.createCriteria(IntelRecordQuery.class)
+				List<IntelRecordObservationQuery> items = s.createCriteria(IntelRecordObservationQuery.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 				.list();
 				
@@ -487,8 +487,8 @@ public class QueryView {
 
 		@Override
 		public Object getAdapter(Class adapter) {
-			if (adapter.equals(IntelRecordQuery.class)){
-				IntelRecordQuery q = new IntelRecordQuery();
+			if (adapter.equals(IntelRecordObservationQuery.class)){
+				IntelRecordObservationQuery q = new IntelRecordObservationQuery();
 				q.setUuid(getUuid());
 				return q;
 			}

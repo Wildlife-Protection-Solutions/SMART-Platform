@@ -26,7 +26,7 @@ import java.util.UUID;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 
 /**
  * Query manager for intelligence queries.
@@ -45,12 +45,12 @@ public enum QueryManager {
 	 * @param queryUuid
 	 * @return
 	 */
-	public IntelRecordQuery deleteQuery(UUID queryUuid){
-		IntelRecordQuery removed = null;
+	public IntelRecordObservationQuery deleteQuery(UUID queryUuid){
+		IntelRecordObservationQuery removed = null;
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			removed = (IntelRecordQuery) s.get(IntelRecordQuery.class, queryUuid);
+			removed = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
 			if (removed == null) throw new Exception("Query not found - could not delete query.");
 			
 			Query wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query");

@@ -32,7 +32,7 @@ import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -86,7 +86,7 @@ public class DeleteEmployeeAdvisor implements IDeleteAdvisor {
 			sb.append(MessageFormat.format("The employee {0} is associated with {1,number,integer} intelligence working sets.", SmartLabelProvider.getFullLabel(em), cnt));
 		}
 		
-		query = session.createCriteria(IntelRecordQuery.class);
+		query = session.createCriteria(IntelRecordObservationQuery.class);
 		query.add(Restrictions.or(Restrictions.eq("createdBy", em), Restrictions.eq("lastModifiedBy", em))); //$NON-NLS-1$ //$NON-NLS-2$
 		query.setProjection(Projections.rowCount());
 		cnt = (Long)query.uniqueResult();

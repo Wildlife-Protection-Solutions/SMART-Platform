@@ -99,15 +99,15 @@ public class RecordMapPage extends SmartMapEditorPart {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			//wait for job to finish
+			if (getMap() == null) return Status.OK_STATUS;
 			try {
 				loadDefaultLayers.join();
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				Intelligence2PlugIn.log(e1.getMessage(), e1);
 			}
+			if (getMap() == null) return Status.OK_STATUS;
 			boolean added = false;
 			try {
-				
 				if (polygonFeatureType == null){
 					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POLYGON);
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POLYGON, recordEditor.getRecord().getUuid());

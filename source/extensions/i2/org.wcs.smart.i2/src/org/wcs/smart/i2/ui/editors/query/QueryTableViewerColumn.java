@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.util.SmartUtils;
 
@@ -48,7 +47,7 @@ public class QueryTableViewerColumn {
 	 * @param viewer the table viewer
 	 * @param column the column
 	 */
-	public QueryTableViewerColumn(TableViewer viewer, IQueryColumn column, CellLabelProvider lblProvider) { //, final IQueryColumnSorter sorter
+	public QueryTableViewerColumn(TableViewer viewer, IQueryColumn column, CellLabelProvider lblProvider, QueryLazyResultsTable resultsTable) { //, final IQueryColumnSorter sorter
 		this.column = column;
 		
 		tcolumn = new TableViewerColumn(viewer, SWT.NONE);
@@ -64,13 +63,14 @@ public class QueryTableViewerColumn {
 		if (column.getTooltip() != null){
 			tcolumn.getColumn().setToolTipText(column.getTooltip());
 		}
-//		tcolumn.getColumn().addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e){
-//				sorter.setSortColumn(QueryTableViewerColumn.this);
-//			}
-//			
-//		});
+		if (column.canSort()){
+			tcolumn.getColumn().addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					resultsTable.setSortColumn(QueryTableViewerColumn.this);
+				}
+			});
+		}
 	}
 
 	

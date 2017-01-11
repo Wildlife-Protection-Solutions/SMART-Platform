@@ -7,32 +7,27 @@ import org.eclipse.swt.widgets.ProgressBar;
 
 public class QueryProgressMonitor implements IProgressMonitor {
 
-	private ProgressBar pbar;
-	private Label progressLabel;
+	private ProgressPanel panel;
 	
 	private String taskName;
+	private String subTaskName;
+	
 	private int totalWork = 0;
-	private int worked = 0;
+	private double worked = 0;
 	
 	private boolean cancel = false;
 	
-	public QueryProgressMonitor(ProgressBar pbar, Label progressLabel){
-		this.pbar = pbar;
-		this.progressLabel = progressLabel;
-		Display.getDefault().syncExec(()->{
-			pbar.setMinimum(0);
-			pbar.setMaximum(100);
-		});
+	public QueryProgressMonitor(ProgressPanel panel){
+		this.panel = panel;
+		Display.getDefault().asyncExec(()->panel.clear());
 	}
 
 	public void updateGui(){
 		Display.getDefault().asyncExec(()->{
-			progressLabel.setText(taskName);
-			
-			int progress = Math.round(worked / (float)totalWork);
-			pbar.setSelection(progress);
-			
-			progressLabel.getParent().layout(true);
+			panel.setLabel(taskName + " - " + subTaskName);
+			int progress = (int) Math.round( (worked / totalWork) * 100.0 ) ;
+			panel.setProgress(progress);
+			panel.layout(true);
 		});
 	}
 	
@@ -40,18 +35,20 @@ public class QueryProgressMonitor implements IProgressMonitor {
 	public void beginTask(String name, int totalWork) {
 		this.taskName = name;
 		this.totalWork = totalWork;
+		updateGui();
 	}
 
 	@Override
 	public void done() {
-		pbar.setSelection(pbar.getMaximum());
-		progressLabel.setText("");
+		Display.getDefault().asyncExec(()->{
+			panel.done();
+		});
 	}
 
 	@Override
 	public void internalWorked(double work) {
 		worked += work;
-
+		updateGui();
 	}
 
 	@Override
@@ -67,13 +64,13 @@ public class QueryProgressMonitor implements IProgressMonitor {
 	@Override
 	public void setTaskName(String name) {
 		taskName = name;
+		updateGui();
 	}
 
 	@Override
 	public void subTask(String name) {
-		taskName = taskName + " -  " + name;
-		// TODO Auto-generated method stub
-
+		subTaskName = name;
+		updateGui();
 	}
 
 	@Override

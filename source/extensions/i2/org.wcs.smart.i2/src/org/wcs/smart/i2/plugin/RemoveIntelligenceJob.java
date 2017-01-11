@@ -125,7 +125,7 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_entity_attachment",
 				"DROP TABLE smart.i_entity",
 				"DROP TABLE smart.i_entity_type_attribute_group",
-				"DROP TABLE smart.i_record_query",
+				"DROP TABLE smart.i_record_obs_query",
 				"DROP TABLE smart.i_relationship_type",
 				"DROP TABLE smart.i_attachment",
 				"DROP TABLE smart.i_entity_type",

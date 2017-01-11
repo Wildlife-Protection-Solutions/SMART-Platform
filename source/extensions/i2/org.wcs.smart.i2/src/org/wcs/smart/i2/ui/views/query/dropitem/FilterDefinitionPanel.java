@@ -49,6 +49,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.SharedImages;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.query.Operator;
@@ -81,7 +84,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	private ToolItem opObservation;
 	
 	private Composite infoPanel;
-	private ToolItem run ;
+	private ToolItem runItem;
+	private ToolItem saveItem;
 	
 	/**
 	 * Creates a new drop target panel.
@@ -313,12 +317,12 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 			c.dispose();
 		}
 		if (message == null){
-			run.setEnabled(true);
+			runItem.setEnabled(true);
 			infoPanel.getParent().layout(true,true);
 			return;
 		}
 		
-		run.setEnabled(false);
+		runItem.setEnabled(false);
 		
 		infoPanel.setLayout(new GridLayout(2, false));
 		Label l = new Label(infoPanel, SWT.NONE);
@@ -330,8 +334,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		l.setToolTipText(fullMessage.getMessage());
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		infoPanel.getParent().layout(true,true);
-		
 	}
+	
 	/**
 	 * Adds the filter type options to the parent composite.
 	 * @param parent
@@ -378,6 +382,17 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		saveItem = new ToolItem(toolbar, SWT.PUSH);
+		saveItem.setToolTipText("save query");
+		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		saveItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				saveQuery();
+			}
+		});
+		
 		ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
 		clear.setToolTipText("clear query");
 		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
@@ -390,18 +405,31 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 			}
 		});
 		
-		run = new ToolItem(toolbar, SWT.PUSH);
-		run.setToolTipText("run query");
-		run.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
-		run.addSelectionListener(new SelectionAdapter() {
+		runItem = new ToolItem(toolbar, SWT.PUSH);
+		runItem.setToolTipText("run query");
+		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				runQuery();
 			}
 		});
+		
+		
 	}
 	
+	public void setQueryState(boolean isDirty){
+		this.saveItem.setEnabled(isDirty);
+	}
+	/**
+	 * Runs the current query
+	 */
 	public abstract void runQuery();
+	
+	/**
+	 * Saves the current query
+	 */
+	public abstract void saveQuery();
 	
 	/**
 	 * Creates the drop target composite

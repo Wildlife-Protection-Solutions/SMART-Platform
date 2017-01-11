@@ -94,7 +94,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
@@ -469,7 +469,7 @@ public class WorkingSetView {
 								tmp = ((IAdaptable)element).getAdapter(IntelEntity.class);
 							}
 							if (tmp == null){
-								tmp = ((IAdaptable)element).getAdapter(IntelRecordQuery.class);
+								tmp = ((IAdaptable)element).getAdapter(IntelRecordObservationQuery.class);
 							}
 							if (tmp != null){
 								element = tmp;
@@ -482,8 +482,8 @@ public class WorkingSetView {
 							WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput)element, context);
 						}else if (element instanceof IntelEntity){
 							WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelEntity)element, context);		
-						}else if (element instanceof IntelRecordQuery){
-							WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(((IntelRecordQuery)element).getUuid(), context);
+						}else if (element instanceof IntelRecordObservationQuery){
+							WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(((IntelRecordObservationQuery)element).getUuid(), context);
 						}
 						
 					}
@@ -548,10 +548,10 @@ public class WorkingSetView {
 				}
 				WorkingSetManager.INSTANCE.removeFromWorkingSet(i, context);
 			}else if (toDelete.getCategory() == IntelWorkingSetCategory.QUERIES){
-				IntelRecordQuery i = null;
+				IntelRecordObservationQuery i = null;
 				Session s = HibernateManager.openSession();
 				try{
-					i = (IntelRecordQuery) s.get(IntelRecordQuery.class, toDelete.getUuid());
+					i = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, toDelete.getUuid());
 				}finally{
 					s.close();
 				}

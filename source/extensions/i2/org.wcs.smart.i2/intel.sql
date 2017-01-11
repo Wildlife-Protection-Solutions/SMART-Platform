@@ -23,7 +23,7 @@ DROP TABLE smart.i_working_set;
 DROP TABLE smart.i_entity_attachment;
 DROP TABLE smart.i_entity;
 DROP TABLE smart.i_entity_type_attribute_group;
-DROP TABLE smart.i_record_query;
+DROP TABLE smart.i_record_obs_query;
 DROP TABLE smart.i_relationship_type;
 DROP TABLE smart.i_attachment;
 DROP TABLE smart.i_entity_type;
@@ -456,14 +456,14 @@ ALTER TABLE smart.i_entity ADD CONSTRAINT ientity_cauuid_fk
 	ON DELETE RESTRICT
 DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery_cauuid_fk
+ALTER TABLE smart.i_record_obs_query ADD CONSTRAINT irecordquery_cauuid_fk
 	FOREIGN KEY (ca_uuid)
 	REFERENCES smart.conservation_area (uuid)
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery_createdby_fk
+ALTER TABLE smart.i_record_obs_query ADD CONSTRAINT irecordquery_createdby_fk
 	FOREIGN KEY (created_by)
 	REFERENCES smart.employee (uuid)
 	ON UPDATE RESTRICT
@@ -471,7 +471,7 @@ ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery_createdby_fk
 DEFERRABLE INITIALLY IMMEDIATE;
 
 
-ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery_modifiedby_fk
+ALTER TABLE smart.i_record_obs_query ADD CONSTRAINT irecordquery_modifiedby_fk
 	FOREIGN KEY (last_modified_by)
 	REFERENCES smart.employee (uuid)
 	ON UPDATE RESTRICT
@@ -764,7 +764,7 @@ DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE smart.i_working_set_query ADD CONSTRAINT iworkingsetquery_query_fk
 	FOREIGN KEY (query_uuid)
-	REFERENCES smart.i_record_query (uuid)
+	REFERENCES smart.i_record_obs_query (uuid)
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 DEFERRABLE INITIALLY IMMEDIATE;

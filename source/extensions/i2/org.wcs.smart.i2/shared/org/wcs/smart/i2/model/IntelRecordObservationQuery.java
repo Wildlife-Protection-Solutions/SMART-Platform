@@ -49,8 +49,8 @@ import org.wcs.smart.i2.query.observation.parser.Parser;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.i_record_query")
-public class IntelRecordQuery extends NamedItem implements IIntelAuditItem{
+@Table(name="smart.i_record_obs_query")
+public class IntelRecordObservationQuery extends NamedItem implements IIntelAuditItem{
 
 	private ConservationArea ca;
 
@@ -68,7 +68,7 @@ public class IntelRecordQuery extends NamedItem implements IIntelAuditItem{
 	/**
 	 * Constructor.
 	 */
-	public IntelRecordQuery() {
+	public IntelRecordObservationQuery() {
 	}
 
 	/**

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -39,6 +40,7 @@ public class ObservationFilterProcessor {
 	private Session s;
 	
 	private Exception visitorException;
+	private HashMap<IQueryFilter, String> filterToColumnName = new HashMap<IQueryFilter, String>();
 	
 	public ObservationFilterProcessor(IQueryFilter filter, Date[] dFilter, Session s){
 		this.filter = filter;
@@ -46,15 +48,43 @@ public class ObservationFilterProcessor {
 		this.s = s;
 	}
 	
+	public HashMap<IQueryFilter, String> getFilterToColumnNames(){
+		return filterToColumnName;
+	}
 	/**
 	 * Returns a table with a list of observations that match filters
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
-	public String processFilter() throws Exception{
+	public String processFilter(IProgressMonitor monitor) throws Exception{
+		
+
+		final int[] filtercnt = new int[]{0};
+		if(filter != null){	
+			//get filter count for progress monitor
+			filter.accept(new IFilterVisitor() {
+				@Override
+				public void visitElement(IQueryFilter filter) {
+					if (visitorException != null) return;
+					try{
+						if (filter instanceof AreaFilter || 
+							filter instanceof DataModelFilter ||
+							filter instanceof EntityFilter ||
+							filter instanceof EntityTypeFilter ||
+							filter instanceof IntelAttributeFilter){
+							filtercnt[0] = filtercnt[0]+1;
+						}
+					}catch(Exception e){
+						visitorException = e;
+					}
+				}
+			});
+		}
+		monitor.beginTask("Processing Filter", filtercnt[0] + 2);
 		//1. - Observation Query Filter
 		//create a table of all observations using date filter
+		monitor.subTask("Creating temporary observation table");
 		String obsTable = SqlGenerator.createTempTableName();
 				
 		StringBuilder sql = new StringBuilder();
@@ -74,17 +104,18 @@ public class ObservationFilterProcessor {
 				
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
+		monitor.worked(1);
 		
 		//TODO: look into creating index on location and observation field
-		
 		//for each filter add a column for that filter
 		//set the filter value to true or false depending on the filter
-		HashMap<IQueryFilter, String> filterToColumnName = new HashMap<IQueryFilter, String>();
+		
 		if(filter != null){	
 			filter.accept(new IFilterVisitor() {
-				private int columnCnt = 0;
+				private int columnCnt = 1;
 				
 				private String createColumn(IQueryFilter filter){
+					monitor.subTask(MessageFormat.format("Processing filter {0}/{1}", columnCnt,filtercnt[0] ));
 					String columnName = "filter_" + columnCnt++;
 					StringBuilder sql = new StringBuilder();
 					sql.append("ALTER TABLE " + obsTable + " ADD COLUMN " + columnName + " boolean ");
@@ -93,6 +124,7 @@ public class ObservationFilterProcessor {
 					s.createSQLQuery(sql.toString()).executeUpdate();
 					
 					filterToColumnName.put(filter, columnName);
+					monitor.worked(1);
 					return columnName;
 				}
 				
@@ -125,18 +157,16 @@ public class ObservationFilterProcessor {
 			);
 			if (visitorException != null) throw visitorException;
 		}					
-				
+		
 		//run the query; getting a list of observations
 		
 		//create a results table based on that list of observations; adding the fields necessary
+		monitor.subTask("Filtering observations");
 		if (filter != null){
 			final StringBuilder deleteSql = new StringBuilder();
 			deleteSql.append("DELETE FROM " + obsTable );
 			deleteSql.append(" WHERE NOT (");
-			
-			
 			filter.accept(new IFilterVisitor() {
-	
 				private Set<BracketFilter> filters = new HashSet<>();
 				@Override
 				public void visitElement(IQueryFilter filter) {
@@ -167,8 +197,10 @@ public class ObservationFilterProcessor {
 			if (visitorException != null) throw visitorException;
 			
 			logString(deleteSql.toString());
-			s.createSQLQuery(deleteSql.toString()).executeUpdate();
+			s.createSQLQuery(deleteSql.toString()).executeUpdate();	
 		}
+		monitor.worked(1);
+		
 		return obsTable;
 	}
 	
@@ -356,6 +388,7 @@ public class ObservationFilterProcessor {
 		
 		if (attribute == null) throw new Exception(MessageFormat.format("Unable to find intelligence attribute with key {0}", filter.getAttributeKey()));
 		IntelAttributeListItem listItem = null;
+		//TODO: filter.getKeyValue() == ANY
 		if (filter.getAttributeType() == AttributeType.LIST && filter.getKeyValue() != null){
 			listItem = (IntelAttributeListItem)s.createCriteria(IntelAttributeListItem.class)
 					.add(Restrictions.eq("attribute", attribute))

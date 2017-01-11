@@ -15,4 +15,8 @@ public interface IQueryColumn {
 	default public String getTooltip(){
 		return null;
 	}
+	
+	default public boolean canSort(){
+		return true;
+	}
 }

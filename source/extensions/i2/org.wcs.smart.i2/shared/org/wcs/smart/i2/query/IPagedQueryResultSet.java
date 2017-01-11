@@ -37,6 +37,13 @@ import com.vividsolutions.jts.geom.Envelope;
  *
  */
 public interface IPagedQueryResultSet {
+	
+	public static enum SortDirection{
+		UP,
+		DOWN
+	}
+	
+	
 	/**
 	 * Reasonable page size for ui tables
 	 */
@@ -93,7 +100,7 @@ public interface IPagedQueryResultSet {
 	 * @param sortColumn
 	 * @param direction SWT.UP or SWT.DOWN
 	 */
-	public void setSorting(IQueryColumn sortColumn, int direction) ;
+	public void setSorting(IQueryColumn sortColumn, SortDirection direction) ;
 		
 	/**
 	 * 

@@ -92,7 +92,7 @@
             supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.i2.model.IntelRecordQuery"
+            class="org.wcs.smart.i2.model.IntelRecordObservationQuery"
             supportsCcaa="false">
       </class>
       <class

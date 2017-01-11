@@ -82,11 +82,11 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 	}
 	
 	@Transient
-	public IntelRecordQuery getQuery() {
+	public IntelRecordObservationQuery getQuery() {
 		return id.getQuery();
 	}
 
-	public void setQuery(IntelRecordQuery entity) {
+	public void setQuery(IntelRecordObservationQuery entity) {
 		id.setQuery(entity);
 	}
 	
@@ -128,7 +128,7 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 	public static class IWorkingSetQueryPk implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
-		private IntelRecordQuery query;
+		private IntelRecordObservationQuery query;
 		private IntelWorkingSet workingSet;
 		
 
@@ -138,11 +138,11 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
 		@JoinColumn(name="query_uuid")
-		public IntelRecordQuery getQuery() {
+		public IntelRecordObservationQuery getQuery() {
 			return query;
 		}
 
-		public void setQuery(IntelRecordQuery query) {
+		public void setQuery(IntelRecordObservationQuery query) {
 			this.query = query;
 		}
 		
