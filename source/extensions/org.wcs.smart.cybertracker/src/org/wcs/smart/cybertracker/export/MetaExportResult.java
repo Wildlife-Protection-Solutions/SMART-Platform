@@ -14,6 +14,7 @@ import org.wcs.smart.cybertracker.model.screens.Node;
  */
 public class MetaExportResult {
 	public List<Node> screenNodes = new ArrayList<>();
+	public Node nextTaskNode = null;
 	public List<IdNamePair> resultElements = new ArrayList<>();
 	public CyberTrackerId rootId = null;
 	public List<CtDataKeyValueRecord> defaultValues = new ArrayList<>();

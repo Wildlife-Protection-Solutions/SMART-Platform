@@ -245,21 +245,40 @@ public class CyberTrackerConfExporter {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
 		CmNode root = ctUtil.buildRoot(configurableModel);
 		Map<CmNode, CyberTrackerId> keyMap = ctUtil.buildMap(root);
+		CyberTrackerId firstScreenForNewTaskId = keyMap.get(root);
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
 		ScreensUtil screensUtil = createScreensUtil(ctUtil);
-		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session, ctProperties);
+
+		List<Node> beforeRootNodes = new ArrayList<Node>();
+		//create photo nodes if "photo first" option is enabled
+		if (configurableModel.isPhotoFirst()) {
+			firstScreenForNewTaskId = new CyberTrackerId(); //override first screen for new task as it will be a photo screen
+			CyberTrackerId nextId = addPhotos(firstScreenForNewTaskId, beforeRootNodes, false, ctUtil.getCtProperties().getMaxPhotoCount());
+			keyMap.put(root, nextId); //need this to properly reference CM root located after photo screens
+		}
+		
+		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, firstScreenForNewTaskId, session, ctProperties);
 		if (metaScreensData == null) {
 			//failed to generate patrol data
 			//error message is expected to be displayed be PatrolScreensUtil
 			return null;
 		}
+		
+		//add "Snap GPS Position" control if instantaneous mode is set
+		if (configurableModel.isInstantGps()) {
+			Control snapGpsCtrl = screensFactory.createSnaGpsPosition();
+			ScreensObjectFactory.addControlToNode(metaScreensData.nextTaskNode, snapGpsCtrl);
+		}
+		
 		List<Node> screenNodes = new ArrayList<Node>();
 		screenNodes.addAll(metaScreensData.screenNodes);
 		rootId = metaScreensData.rootId;
 		tripUniqueElementId = metaScreensData.tripUniqueElementId;
 		monitor.worked(5);
-		
+
+		screenNodes.addAll(beforeRootNodes);
+
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
 		monitor.worked(70);
 		
@@ -399,7 +418,7 @@ public class CyberTrackerConfExporter {
 		BuildNodesResult buildResult = null;
 		CyberTrackerId nextId = startId;
 		
-		if (cmNode.isUseSingleGpsPoint()) {
+		if (cmNode.isUseSingleGpsPoint() && !cmNode.getModel().isInstantGps()) {
 			CyberTrackerId saveTargetId = new CyberTrackerId();
 			Node singleGpsNode = ctUtil.createSaveNode(nextId, saveTargetId, Messages.CyberTrackerConfExporter_SingleGps, Messages.CyberTrackerConfExporter_SingleGpsMessage, true);
 			nodeList.add(singleGpsNode);
@@ -411,21 +430,23 @@ public class CyberTrackerConfExporter {
 		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
 		nodeList.addAll(buildResult.getNodes());
 		
-		//adding all attributes that are supposed to be displayed
 		CyberTrackerId loopBackId = nextId;
+
+		//adding all attributes that are supposed to be displayed
 		buildResult = buildBasicAttributeNodes(splitResult.getToShow(), keyMap, nextId, 0, true, null);
 		nodeList.addAll(buildResult.getNodes());
 		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
 		
 		
-		//add photo nodes if required
-		if (cmNode.isPhotoAllowed()) {
+		//add photo nodes if required (at the end)
+		if (cmNode.isPhotoAllowed() && !cmNode.getModel().isPhotoFirst()) {
 			nextId = addPhotos(nextId, nodeList, cmNode.isPhotoRequired(), ctUtil.getCtProperties().getMaxPhotoCount());
 		}
 		
 		if (cmNode.isCollectMultipleObservations()) {
 			//loop for collecting multiple observations
-			buildResult = createEndGroupNodes(nextId, loopBackId, !cmNode.isUseSingleGpsPoint());
+			boolean takeGpsReading = !cmNode.isUseSingleGpsPoint() && !cmNode.getModel().isInstantGps();
+			buildResult = createEndGroupNodes(nextId, loopBackId, takeGpsReading);
 			nodeList.addAll(buildResult.getNodes());
 			nextId = buildResult.getNextId(); //id for next screen
 		}
@@ -439,12 +460,13 @@ public class CyberTrackerConfExporter {
 		String defaultAttrValues = recordDefaultValues(splitResult.getInvisibleList());
 		if (cmNode.isCollectMultipleObservations()) {
 			//this is observation group and we show simple "save" screen as it will always be added as new waypoint
-			Node saveGrpNode = ctUtil.createSaveNode(nextId, rootId, Messages.CyberTrackerConfExporter_EndGroup, Messages.CyberTrackerConfExporter_EndGroupMessage, !cmNode.isUseSingleGpsPoint());
+			boolean takeGpsReading = !cmNode.isUseSingleGpsPoint() && !cmNode.getModel().isInstantGps();
+			Node saveGrpNode = ctUtil.createSaveNode(nextId, rootId, Messages.CyberTrackerConfExporter_EndGroup, Messages.CyberTrackerConfExporter_EndGroupMessage, takeGpsReading);
 			addAttributesDefaultValues(saveGrpNode, defaultAttrValues);
 			nodeList.add(saveGrpNode);
 		} else {
 			//this is a regular single observation -> show "save as new" / "add to last" options
-			nodeList.addAll(createSaveWaypointNodes(nextId, defaultAttrValues));
+			nodeList.addAll(createSaveWaypointNodes(nextId, defaultAttrValues, cmNode.getModel().isInstantGps()));
 		}
 		return nodeList;
 	}
@@ -1037,11 +1059,12 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private List<Node> createSaveWaypointNodes(CyberTrackerId id, String defaultAttrValues) {
+	private List<Node> createSaveWaypointNodes(CyberTrackerId id, String defaultAttrValues, boolean isInstantGpsUsed) {
 		List<Node> nodeList = new ArrayList<Node>();
 		
 		CyberTrackerId saveAsNewId = new CyberTrackerId();
-		Node saveAsNewNode = ctUtil.createSaveNode(saveAsNewId, rootId, Messages.CyberTrackerExporter_Waypoint_SaveAsNew, Messages.CyberTrackerConfExporter_SaveAndGps, true);
+		String saveAsNewMsg = isInstantGpsUsed ? Messages.CyberTrackerConfExporter_SaveAndInstantGps : Messages.CyberTrackerConfExporter_SaveAndGps;
+		Node saveAsNewNode = ctUtil.createSaveNode(saveAsNewId, rootId, Messages.CyberTrackerExporter_Waypoint_SaveAsNew, saveAsNewMsg, !isInstantGpsUsed);
 		
 		CyberTrackerId addToLastId = new CyberTrackerId();
 		Node addToLastNode = ctUtil.createSaveNode(addToLastId, rootId, Messages.CyberTrackerExporter_Waypoint_AddToLast, Messages.CyberTrackerConfExporter_SaveWithoutGps, false);
@@ -1070,12 +1093,12 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private BuildNodesResult createEndGroupNodes(CyberTrackerId id, CyberTrackerId loopBackId, boolean takeGPsReading) {
+	private BuildNodesResult createEndGroupNodes(CyberTrackerId id, CyberTrackerId loopBackId, boolean takeGpsReading) {
 		List<Node> nodeList = new ArrayList<Node>(2);
 		CyberTrackerId nextId = new CyberTrackerId();
 		CyberTrackerId loopSaveId = new CyberTrackerId();
 		
-		Node loopSaveNode = ctUtil.createSaveNode(loopSaveId, loopBackId, Messages.CyberTrackerConfExporter_SaveGroup, Messages.CyberTrackerConfExporter_SaveGroupMessage, takeGPsReading);
+		Node loopSaveNode = ctUtil.createSaveNode(loopSaveId, loopBackId, Messages.CyberTrackerConfExporter_SaveGroup, Messages.CyberTrackerConfExporter_SaveGroupMessage, takeGpsReading);
 
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
 		ids.add(new CyberTrackerIdMap(loopSaveId, wpEndGroupElementsIds.get(0))); //"Make Another Observation" navigate loop start screen

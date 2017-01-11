@@ -215,6 +215,7 @@ public class ScreensUtil {
 		addGpsConfiguration(node, ctProps);
 		
 		container.screenNodes.add(node);
+		container.nextTaskNode = node;
 	}
 	
 	protected CyberTrackerId createEndTripNodes(MetaExportResult container, CyberTrackerId appStartId, String confirmMsg) {
