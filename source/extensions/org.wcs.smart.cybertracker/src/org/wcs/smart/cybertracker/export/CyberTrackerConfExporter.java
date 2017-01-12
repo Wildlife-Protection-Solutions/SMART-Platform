@@ -417,8 +417,9 @@ public class CyberTrackerConfExporter {
 		List<Node> nodeList = new ArrayList<Node>();
 		BuildNodesResult buildResult = null;
 		CyberTrackerId nextId = startId;
+		boolean isSingleGps = cmNode.isCollectMultipleObservations() && (cmNode.isUseSingleGpsPoint() || cmNode.getModel().isInstantGps() || cmNode.getModel().isPhotoFirst()); 
 		
-		if (cmNode.isUseSingleGpsPoint() && !cmNode.getModel().isInstantGps()) {
+		if (isSingleGps && !cmNode.getModel().isInstantGps()) {
 			CyberTrackerId saveTargetId = new CyberTrackerId();
 			Node singleGpsNode = ctUtil.createSaveNode(nextId, saveTargetId, Messages.CyberTrackerConfExporter_SingleGps, Messages.CyberTrackerConfExporter_SingleGpsMessage, true);
 			nodeList.add(singleGpsNode);
@@ -445,7 +446,7 @@ public class CyberTrackerConfExporter {
 		
 		if (cmNode.isCollectMultipleObservations()) {
 			//loop for collecting multiple observations
-			boolean takeGpsReading = !cmNode.isUseSingleGpsPoint() && !cmNode.getModel().isInstantGps();
+			boolean takeGpsReading = !isSingleGps; //in cases of instant_gps and always_photo_first we do not take gps readings (e.g. act as using single_gps)
 			buildResult = createEndGroupNodes(nextId, loopBackId, takeGpsReading);
 			nodeList.addAll(buildResult.getNodes());
 			nextId = buildResult.getNextId(); //id for next screen
@@ -460,7 +461,7 @@ public class CyberTrackerConfExporter {
 		String defaultAttrValues = recordDefaultValues(splitResult.getInvisibleList());
 		if (cmNode.isCollectMultipleObservations()) {
 			//this is observation group and we show simple "save" screen as it will always be added as new waypoint
-			boolean takeGpsReading = !cmNode.isUseSingleGpsPoint() && !cmNode.getModel().isInstantGps();
+			boolean takeGpsReading = !isSingleGps; //in cases of instant_gps and always_photo_first we do not take gps readings (e.g. act as using single_gps)
 			Node saveGrpNode = ctUtil.createSaveNode(nextId, rootId, Messages.CyberTrackerConfExporter_EndGroup, Messages.CyberTrackerConfExporter_EndGroupMessage, takeGpsReading);
 			addAttributesDefaultValues(saveGrpNode, defaultAttrValues);
 			nodeList.add(saveGrpNode);

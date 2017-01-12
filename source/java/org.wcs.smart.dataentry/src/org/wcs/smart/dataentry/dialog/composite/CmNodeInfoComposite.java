@@ -164,7 +164,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setPhotoAllowed(btnPhoto.getSelection());
-				btnPhotoRequired.setEnabled(getSourceObject().isPhotoAllowed());
+				btnPhotoRequired.setEnabled(isPhotoRequiredEnabled(getSourceObject()));
 				fireModelChanged();
 			}
 		});
@@ -194,7 +194,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				
 				if (isMulti){
 					//ensure non of the attributes are multi-select
-					//for multiple observation categories we do not support multi-selecte lists or numeric lists
+					//for multiple observation categories we do not support multi-select lists or numeric lists
 					for (CmAttribute kid : getSourceObject().getCmAttributes()){
 						CmAttributeOption op = kid.getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
 						if (op != null) op.setBooleanValue(false);
@@ -204,7 +204,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 						
 					}
 				}
-				btnSingleGpsPoint.setEnabled(getSourceObject().isCollectMultipleObservations());
+				btnSingleGpsPoint.setEnabled(isUseSingleGpsPointEnabled(getSourceObject()));
 				fireModelChanged();
 			}
 		});
@@ -234,17 +234,19 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 						lblCategory.setText(n.getCategory().getFullCategoryName(language));
 					if (lblKey != null)
 						lblKey.setText(n.getCategory().getKeyId());
-					if (btnPhoto != null)
-						btnPhoto.setSelection(n.isPhotoAllowed());
+					if (btnPhoto != null) {
+						btnPhoto.setSelection(getPhotoAllowedValue(n));
+						btnPhoto.setEnabled(isPhotoAllowedEnabled(n));
+					}
 					if (btnPhotoRequired != null) {
-						btnPhotoRequired.setSelection(n.isPhotoRequired());
-						btnPhotoRequired.setEnabled(n.isPhotoAllowed());
+						btnPhotoRequired.setSelection(getPhotoRequiredValue(n));
+						btnPhotoRequired.setEnabled(isPhotoRequiredEnabled(n));
 					}
 					if (btnCollectMultiple != null)
 						btnCollectMultiple.setSelection(n.isCollectMultipleObservations());
 					if (btnSingleGpsPoint != null) {
-						btnSingleGpsPoint.setSelection(n.isUseSingleGpsPoint());
-						btnSingleGpsPoint.setEnabled(n.isCollectMultipleObservations());
+						btnSingleGpsPoint.setSelection(getUseSingleGpsPointValue(n));
+						btnSingleGpsPoint.setEnabled(isUseSingleGpsPointEnabled(n));
 					}
 					imageControl.redrawCanvas();
 					CmNodeInfoComposite.this.layout(true, true);
@@ -304,6 +306,29 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		fireModelChanged();
 	}
 	
+	private boolean isPhotoAllowedEnabled(CmNode node) {
+		return !node.getModel().isPhotoFirst();
+	}
+
+	private boolean getPhotoAllowedValue(CmNode node) {
+		return node.isPhotoAllowed() || node.getModel().isPhotoFirst();
+	}
+
+	private boolean isPhotoRequiredEnabled(CmNode node) {
+		return node.isPhotoAllowed() && !node.getModel().isPhotoFirst();
+	}
+
+	private boolean getPhotoRequiredValue(CmNode node) {
+		return node.isPhotoRequired() && !node.getModel().isPhotoFirst();
+	}
+
+	private boolean isUseSingleGpsPointEnabled(CmNode node) {
+		return node.isCollectMultipleObservations() && !node.getModel().isInstantGps() && !node.getModel().isPhotoFirst();
+	}
+
+	private boolean getUseSingleGpsPointValue(CmNode node) {
+		return node.isUseSingleGpsPoint() || node.getModel().isInstantGps() || node.getModel().isPhotoFirst();
+	}
 	
 	@Override
 	public CmNode getSourceObject() {
