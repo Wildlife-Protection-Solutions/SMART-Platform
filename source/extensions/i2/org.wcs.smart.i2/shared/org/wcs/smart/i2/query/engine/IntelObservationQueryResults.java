@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.query.engine;
 
 import java.sql.Blob;
@@ -19,11 +40,13 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.query.DataModelColumn;
+import org.wcs.smart.i2.query.FilterQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn.Column;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.UuidUtils;
 
@@ -31,30 +54,74 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBReader;
 
+/**
+ * Intelligence observation query results
+ * 
+ * @author Emily
+ *
+ */
 public class IntelObservationQueryResults implements IPagedQueryResultSet {
 
+	//data details
 	private String resultsTable = null;
 	private int totalItems;
 	private int categoryCnt;
 	
+	//sorting
+	private IQueryColumn lastSortColumn = null;
 	private IQueryColumn sortColumn = null;
 	private IPagedQueryResultSet.SortDirection sortDirection = null;
 	
+	//filters to column
 	private HashMap<IQueryFilter, String> filterToColumn;
+	
+	//column names to results index
 	private HashMap<String, Integer> columnNameToIndex;
 	
-	public IntelObservationQueryResults(String resultsTable, int totalItems, int categoryCnt, HashMap<IQueryFilter, String> filterToColumn, HashMap<String, Integer> columnNameToIndex){
+	private List<IQueryColumn> queryColumns;
+	
+	public IntelObservationQueryResults(){
+	}
+	
+	public void setResultsTable(String resultsTable){
 		this.resultsTable = resultsTable;
-		this.totalItems = totalItems;
-		this.categoryCnt = categoryCnt;
-		this.filterToColumn = filterToColumn;
+	}
+	
+	public void setResultCount(int count){
+		this.totalItems = count;
+	}
+	
+	public void setCategoryCount(int catCnt){
+		this.categoryCnt = catCnt;
+	}
+	
+	public void setColumnNameToIndexMap(HashMap<String, Integer> columnNameToIndex){
 		this.columnNameToIndex = columnNameToIndex;
 	}
-
+	
+	public void setFilterToColumnMap(HashMap<IQueryFilter, String> filterToColumn){
+		this.filterToColumn = filterToColumn;
+	}
+	
+	public void setQueryColumns(List<IQueryColumn> columns){
+		this.queryColumns = columns;
+	}
+	
+	public String getResultsTable(){
+		return this.resultsTable;
+	}
+	
+	
 	public void setSortColumn(IQueryColumn sortColumn, IPagedQueryResultSet.SortDirection sortDirection){
 		this.sortColumn = sortColumn;
 		this.sortDirection = sortDirection;
 	}
+	
+	@Override
+	public List<IQueryColumn> getQueryColumns(){
+		return this.queryColumns;
+	}
+	
 	
 	private UUID asUuid(ScrollableResults sc, int index){
 		Object x = sc.get(index);
@@ -131,18 +198,18 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		
 		return item;
 	}
+	
+	
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pageSize) {
 		final List<IntelObservationResultItem> items = new ArrayList<>();
 
 		Session session = HibernateManager.openSession();
 		try{
-			
 			String sortSql = configureSort(session);
 			String sql = "SELECT * FROM " + resultsTable + sortSql;
 			SqlGenerator.logString(sql);
 			ScrollableResults sc = session.createSQLQuery(sql).scroll();
-
 			try{
 				if (!sc.setRowNumber(offset)) return items;
 				for (int i = 0; i <= pageSize; i ++){
@@ -158,7 +225,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		return items;
 	}
 
-	private IQueryColumn lastSortColumn = null;
+	
 	private String configureSort(Session session){
 		if (sortColumn == null || sortDirection == null) return "";
 		
@@ -178,8 +245,16 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_TITLE){
 				return sql + "lower(record_title)" + getSortDirectionSql();
 			}
-		}
-		if (sortColumn instanceof DataModelColumn){
+		}else if (sortColumn instanceof FilterQueryColumn){
+			String filterKey = ((FilterQueryColumn)sortColumn).getFilterKey();
+			for (Entry<IQueryFilter,String> filter : filterToColumn.entrySet()){
+				if (filter.getKey() instanceof IColumnIdentifierProvider){
+					if (((IColumnIdentifierProvider)filter.getKey()).getUniqueColumnIdentifier().equals(filterKey)){
+						return sql + " " + filter.getValue() + getSortDirectionSql();
+					}
+				}
+			}
+		}else if (sortColumn instanceof DataModelColumn){
 			DataModelColumn dm =(DataModelColumn)sortColumn;
 			if (dm.getLevel() >= 0 && dm.getLevel() < categoryCnt){
 				return sql + " category_" + dm.getLevel() + getSortDirectionSql();
@@ -211,9 +286,15 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 						session.createSQLQuery(updateQuery).executeUpdate();
 						
 						String attribute = "SELECT distinct a.list_element_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.list_element_uuid is not null";
-						List<byte[]> listitems = session.createSQLQuery(attribute).list();
-						for (byte[] b : listitems){
-							AttributeListItem item = (AttributeListItem) session.get(AttributeListItem.class, UuidUtils.byteToUUID(b));
+						List<Object> listitems = session.createSQLQuery(attribute).list();
+						for (Object b : listitems){
+							UUID uuid = null;
+							if (b instanceof UUID){ 
+								uuid = (UUID) b;
+							}else if (b instanceof byte[]){
+								uuid = UuidUtils.byteToUUID((byte[]) b);
+							}
+							AttributeListItem item = (AttributeListItem) session.get(AttributeListItem.class, uuid);
 							if (item != null){
 								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.list_element_uuid = :listitem)";
 								
@@ -271,8 +352,6 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 				default:
 					break;
 				}
-				//attribute
-				//TODO:
 			}
 		}
 		
@@ -316,7 +395,6 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		resultsTable = null;
 		SqlGenerator.logString(sql);
 		session.createSQLQuery(sql).executeUpdate();
-		
 	}
 
 	@Override

@@ -22,12 +22,13 @@
 package org.wcs.smart.i2.query.observation.filter;
 
 
+
 /**
  * Filter for a specific entity type 
  * @author Emily
  *
  */
-public class EntityTypeFilter implements IQueryFilter {
+public class EntityTypeFilter implements IQueryFilter, IColumnIdentifierProvider {
 
 	public static EntityTypeFilter create(String key){
 		return new EntityTypeFilter(key.split(":")[1]);
@@ -43,4 +44,11 @@ public class EntityTypeFilter implements IQueryFilter {
 		return this.typeKey;
 	}
 
+	@Override
+	public String getUniqueColumnIdentifier(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("et_");
+		sb.append(typeKey);
+		return sb.toString();
+	}
 }

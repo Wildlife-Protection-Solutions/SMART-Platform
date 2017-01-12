@@ -21,10 +21,17 @@
  */
 package org.wcs.smart.i2.ui.views.query;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.ImageData;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -50,6 +57,25 @@ public class EntityTreeFilterItem extends BasicTreeFilterItem {
 		dropLabel = getName();
 		entity = null;
 		typeKey = type.getKeyId();
+		
+		final byte[] icon = type.getIcon();
+		if (icon != null){
+			setImageDescriptor(new ImageDescriptor() {
+				@Override
+				public ImageData getImageData() {
+					try(ByteArrayInputStream in = new ByteArrayInputStream(icon)){
+						BufferedImage image = ImageIO.read(in);
+						if (image != null){
+							return AWTSWTImageUtils.convertToSWTImage(image).getImageData();
+						}
+					}catch (Exception ex){
+						
+					}
+					return null;
+				}
+			});
+			
+		}
 	}
 	
 	public EntityTreeFilterItem(IntelEntity entity){

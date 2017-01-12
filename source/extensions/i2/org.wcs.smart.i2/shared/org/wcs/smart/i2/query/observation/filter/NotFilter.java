@@ -28,7 +28,6 @@ package org.wcs.smart.i2.query.observation.filter;
  */
 public class NotFilter implements IQueryFilter {
 	
-	
 	public static NotFilter create(IQueryFilter filter){
 		return new NotFilter(filter);
 	}
@@ -45,7 +44,7 @@ public class NotFilter implements IQueryFilter {
 	
 	@Override
 	public void accept(IFilterVisitor visitor){
-		filter.accept(visitor);
 		visitor.visitElement(this);
+		filter.accept(visitor);
 	}
 }

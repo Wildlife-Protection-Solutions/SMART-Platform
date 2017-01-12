@@ -33,7 +33,7 @@ import org.wcs.smart.util.SharedUtils;
  * @author Emily
  *
  */
-public class IntelAttributeFilter implements IQueryFilter {
+public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProvider {
 
 		
 	//boolean
@@ -134,6 +134,50 @@ public class IntelAttributeFilter implements IQueryFilter {
 		this(type, attributeKey, entityTypeKey);
 		this.operator = operator;
 		this.dateValues = dates;
+	}
+	
+	/**
+	 * Combines the various filter fields to generate a unique 
+	 * string identifier for the filter
+	 * 
+	 * @return
+	 */
+	@Override
+	public String getUniqueColumnIdentifier(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("ia_");
+		sb.append(attributeKey);
+		sb.append("_");
+		if (entityTypeKey != null){
+			sb.append(entityTypeKey);
+			sb.append("_");
+		}
+		
+		switch(attributeType){
+		case BOOLEAN:
+			break;
+		case DATE:
+			sb.append(operator.name());
+			sb.append("_");
+			sb.append(dateValues[0].getTime());
+			sb.append("_");
+			sb.append(dateValues[1].getTime());
+			break;
+		case LIST:
+			sb.append(keyValue);
+			break;
+		case NUMERIC:
+			sb.append(operator.name());
+			sb.append("_");
+			sb.append(numberValue);
+			break;
+		case TEXT:
+			sb.append(operator.name());
+			sb.append("_");
+			sb.append(stringValue);
+			break;
+		}
+		return sb.toString();
 	}
 	
 	public IntelAttribute.AttributeType getAttributeType(){

@@ -34,6 +34,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -58,6 +59,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DropItemFactory {
 
+	public static final String ANY_LABEL = "<Any>";
+	
 	public static List<DropItem> generateDropItems(IQueryFilter filter, Session session){
 		if (filter == null) return Collections.emptyList();
 		return (new DropItemFactory(session)).generateDropItems(filter);
@@ -155,10 +158,7 @@ public class DropItemFactory {
 	public List<DropItem> generateDropItem(EntityTypeFilter filter){
 		IntelEntityType type = null; 
 		if (filter.getTypeKey() != null){
-			type = (IntelEntityType) session.createCriteria(IntelEntityType.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.add(Restrictions.eq("keyId", filter.getTypeKey()))
-					.uniqueResult();;
+			type = IntelHibernateManager.getEntityType(filter.getTypeKey(), session);
 			if (type == null){
 				ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence entity type with key: {0}", filter.getTypeKey()));
 				return Collections.singletonList(item);	
@@ -201,11 +201,7 @@ public class DropItemFactory {
 			queryKeyPart += filter.getEntityTypeKey();
 		}
 		
-		IntelAttribute ia = (IntelAttribute) session.createCriteria(IntelAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("keyId", filter.getAttributeKey()))
-				.uniqueResult();
-		
+		IntelAttribute ia = IntelHibernateManager.getAttribute(filter.getAttributeKey(), session);
 		if (ia == null){
 			ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence attribute with key: {0}", filter.getAttributeKey()));
 			return Collections.singletonList(item);
@@ -213,10 +209,7 @@ public class DropItemFactory {
 		
 		IntelEntityType type = null; 
 		if (filter.getEntityTypeKey() != null){
-			type = (IntelEntityType) session.createCriteria(IntelEntityType.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.add(Restrictions.eq("keyId", filter.getEntityTypeKey()))
-					.uniqueResult();;
+			type = IntelHibernateManager.getEntityType(filter.getEntityTypeKey(), session);
 			if (type == null){
 				ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence entity type with key: {0}", filter.getEntityTypeKey()));
 				return Collections.singletonList(item);	
@@ -242,8 +235,8 @@ public class DropItemFactory {
 		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.LIST){
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
-			labels.add("<ANY>"); //TODO: make these constants
-			keys.add("any");
+			labels.add(ANY_LABEL); //TODO: make these constants
+			keys.add(IQueryFilter.ANY_OPTION_KEY);
 			
 			if (ia.getAttributeList() != null){
 				for (IntelAttributeListItem i : ia.getAttributeList()){

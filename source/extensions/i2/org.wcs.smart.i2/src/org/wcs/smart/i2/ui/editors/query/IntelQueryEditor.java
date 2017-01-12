@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.i2.ui.editors.query;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,10 +33,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
@@ -48,24 +45,24 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.common.filter.DateFilterComposite;
@@ -80,9 +77,7 @@ import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
-import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
-import org.wcs.smart.i2.query.observation.parser.ParseException;
-import org.wcs.smart.i2.query.observation.parser.Parser;
+import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
@@ -95,7 +90,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.FilterDefinitionPanel;
  * @author Emily
  *
  */
-public class IntelQueryEditor extends EditorPart{
+public class IntelQueryEditor extends EditorPart implements MapPart{
 
 	public static final String ID = "org.wcs.smart.i2.editor.query";
 
@@ -121,6 +116,8 @@ public class IntelQueryEditor extends EditorPart{
 	private QueryLazyResultsTable resultsTable;
 	private ProgressPanel progressPanel;
 	private ErrorPanel errorPanel;
+	
+	private QueryMapPanel mapPanel;
 	
 	private boolean isInitializing = false;
 	
@@ -249,7 +246,14 @@ public class IntelQueryEditor extends EditorPart{
 		SashForm core = new SashForm(main, SWT.VERTICAL);
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartSection resultsSection = new SmartSection(core, toolkit, "Results");
+		SmartSection resultsSection = new SmartSection(core, toolkit, "Results"){
+			public void populateHeaderAdditions(Composite parent){
+				dataTabList = new SectionTabHeader(new String[]{"Table", "Map"}, parent, toolkit);
+				((GridLayout)dataTabList.getLayout()).marginHeight = 0;
+				((GridLayout)dataTabList.getLayout()).marginWidth = 20;
+			}
+		};
+		
 		Composite c = toolkit.createComposite(resultsSection);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -282,11 +286,16 @@ public class IntelQueryEditor extends EditorPart{
 	}
 	
 
-	
+	private SectionTabHeader dataTabList;
 	private void createResultSection(Composite parent, FormToolkit toolkit){
-		stackPanel = new Composite(parent, SWT.NONE);
-		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		
+		Composite outerStackPanel = new Composite(parent, SWT.NONE);
+		outerStackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		outerStackPanel.setLayout(new StackLayout());
+		
+		stackPanel = new Composite(outerStackPanel, SWT.NONE);
+		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		stackPanel.setLayout(new StackLayout());
 		
 		Composite runQueryComp = toolkit.createComposite(stackPanel);
@@ -301,10 +310,15 @@ public class IntelQueryEditor extends EditorPart{
 		
 		progressPanel = new ProgressPanel(stackPanel);
 		resultsTable = new QueryLazyResultsTable(stackPanel);
-		
 		errorPanel = new ErrorPanel(stackPanel);
-		
 		((StackLayout)stackPanel.getLayout()).topControl = runQueryComp;
+		
+		mapPanel = new QueryMapPanel(outerStackPanel, this);
+		((StackLayout)outerStackPanel.getLayout()).topControl = stackPanel;
+		
+		dataTabList.setContent(new Composite[]{stackPanel, mapPanel}, outerStackPanel);
+		dataTabList.selectTab(0);
+		
 	}
 	
 	private void runQuery(){
@@ -328,7 +342,7 @@ public class IntelQueryEditor extends EditorPart{
 		String queryString = panel.getQueryPart();
 		query.setQueryString(queryString);
 		
-		resultsTable.initQuery(query, null);
+		resultsTable.setQuery(query);
 		
 		Job j = new Job("running query job") {
 			
@@ -522,4 +536,30 @@ public class IntelQueryEditor extends EditorPart{
 		}
 		
 	};
+
+	@Override
+	public Map getMap() {
+		return mapPanel.getMap();
+	}
+
+	@Override
+	public void openContextMenu() {
+		mapPanel.openContextMenu();		
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+		mapPanel.setFont(textArea);
+	}
+
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		mapPanel.setSelectionProvider(selectionProvider);
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return mapPanel.getStatusLineManager();
+	}
 }

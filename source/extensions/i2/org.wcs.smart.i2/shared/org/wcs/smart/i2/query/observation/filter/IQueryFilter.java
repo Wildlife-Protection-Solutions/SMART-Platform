@@ -29,6 +29,8 @@ package org.wcs.smart.i2.query.observation.filter;
  */
 public interface IQueryFilter {
 
+	public static final String ANY_OPTION_KEY = "list.any"; //$NON-NLS-1$
+	
 	public static String DATE_FORMAT_STR = "yyyy-MM-dd";
 	
 	public enum FilterType{

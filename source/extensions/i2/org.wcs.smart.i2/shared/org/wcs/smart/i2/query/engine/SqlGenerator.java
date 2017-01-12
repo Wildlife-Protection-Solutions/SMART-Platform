@@ -1,22 +1,47 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.query.engine;
 
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.eclipse.core.runtime.dynamichelpers.IFilter;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-import org.wcs.smart.i2.query.observation.filter.NotFilter;
 
+/**
+ * SQL Generation utilities for query engines
+ * 
+ * @author Emily
+ *
+ */
 public class SqlGenerator {
 
+	private static AtomicLong tableCnter = new AtomicLong();
+	
 	/**
-	 * Creates a temporary query table 
+	 * Creates a temporary query table with unique name.   
 	 * 
 	 * @return
 	 */
-	private static AtomicLong tableCnter = new AtomicLong();
 	public static synchronized String createTempTableName(){
 		return "query_temp_i2_" + tableCnter.incrementAndGet();//$NON-NLS-1$ 
 	}

@@ -114,7 +114,7 @@ public class SectionTabHeader extends Composite implements IHyperlinkListener{
 	}
 	
 	public void selectTab(int tab){
-		linkActivated(new HyperlinkEvent(headers[0], null, null, -1));
+		linkActivated(new HyperlinkEvent(headers[tab], null, null, -1));
 	}
 
 	@Override

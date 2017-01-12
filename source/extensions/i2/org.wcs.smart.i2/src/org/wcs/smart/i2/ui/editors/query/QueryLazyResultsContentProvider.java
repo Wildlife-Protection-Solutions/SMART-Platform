@@ -43,7 +43,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * QueryResultsContentProvider allows to lazy load required data from database.
  * 
  * @author elitvin
- * @since 1.0.0
  */
 public class QueryLazyResultsContentProvider implements ILazyContentProvider {
 	

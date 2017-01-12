@@ -27,8 +27,10 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.query.FixedQueryColumn;
+import org.wcs.smart.i2.query.Operator;
 
 /**
  * Desktop label provider for intelligence module.
@@ -69,6 +71,31 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.RECORD_STATUS) return "Record Status";
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return "Record Title";
 						
+		if (item == IntelRecord.Status.NEW) return "Unprocessed";
+		if (item == IntelRecord.Status.PROCESSING) return "In Progress";
+		if (item == IntelRecord.Status.COMPLETE) return "Complete";
+		
+		if (item instanceof Operator){
+			switch((Operator)item){
+				case AND: return "And";
+				case BETWEEN: return "Between";
+				case BRACKETS: return "( )";
+				case BRACKET_CLOSE: return ")";
+				case BRACKET_OPEN: return "(";
+				case EQUALS: return "=";
+				case GREATERTHAN: return ">";
+				case GREATERTHANEQUALS: return ">=";
+				case LESSTHAN: return "<";
+				case LESSTHANEQUALS: return "<=";
+				case NOT: return "Not";
+				case NOTEQUALS: return "!=";
+				case NOT_BETWEEN: return "Not Between";
+				case OR: return "Or";
+				case STR_CONTAINS: return "Contains";
+				case STR_EQUALS: return "Equals";
+				case STR_NOTCONTAINS: return "Not Contains";
+			}
+		}
 		return null;
 		
 	}

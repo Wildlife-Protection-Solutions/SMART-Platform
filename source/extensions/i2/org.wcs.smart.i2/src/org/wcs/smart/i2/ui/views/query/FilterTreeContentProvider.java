@@ -73,7 +73,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 			DeferredTreeFilterItem di = (DeferredTreeFilterItem)parentElement;
 			if (di.requiresLoad()){
 				
-				Job j = new Job("loading children"){
+				Job j = new Job(DialogConstants.LOADING_TEXT){
 	
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
@@ -86,7 +86,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 				};
 				j.schedule();
 				
-				return new Object[]{"Loading"};
+				return new Object[]{DialogConstants.LOADING_TEXT};
 			}else if (di.getChildren().isEmpty()){
 				return null;
 			}else{

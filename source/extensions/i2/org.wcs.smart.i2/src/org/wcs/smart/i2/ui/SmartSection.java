@@ -106,7 +106,7 @@ public class SmartSection extends Composite{
 		((GridLayout)getLayout()).marginHeight = 0;
 		
 		header = toolkit.createComposite(this, SWT.NONE);
-		header.setLayout(new GridLayout(3, false));
+		header.setLayout(new GridLayout(4, false));
 		header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)header.getLayout()).marginWidth = 2;
@@ -121,7 +121,7 @@ public class SmartSection extends Composite{
 		img.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		img.setExpanded(true);
 		Label l =toolkit.createLabel(header, text);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		l.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -129,6 +129,14 @@ public class SmartSection extends Composite{
 		l.addDisposeListener((e) -> {boldFont.dispose();});
 		l.setFont(boldFont);
 
+		Composite middle = new Composite(header, SWT.NONE);
+		middle.setLayout(new GridLayout());
+		((GridLayout)middle.getLayout()).marginWidth = 0;
+		((GridLayout)middle.getLayout()).marginHeight = 0;
+		
+		populateHeaderAdditions(middle);
+		middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		Label exp = toolkit.createLabel(header, text);
 		exp.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SECTION_EXPAND));
 		exp.addListener(SWT.MouseUp, (e)-> maximize());
@@ -221,6 +229,10 @@ public class SmartSection extends Composite{
 		l.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
 		img.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
 		exp.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
+		
+	}
+	
+	public void populateHeaderAdditions(Composite parent){
 		
 	}
 	

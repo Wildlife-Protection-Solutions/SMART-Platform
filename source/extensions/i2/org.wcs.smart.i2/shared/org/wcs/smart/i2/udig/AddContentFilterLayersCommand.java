@@ -111,7 +111,7 @@ public class AddContentFilterLayersCommand extends AbstractCommand implements Un
             }
         }
         if (!layers.isEmpty()) {
-            if (index < 0) {
+            if (index < 0 || index > map.getLayersInternal().size()) {
                 index = map.getLayersInternal().size();
             }
             map.getLayersInternal().addAll(index, layers);

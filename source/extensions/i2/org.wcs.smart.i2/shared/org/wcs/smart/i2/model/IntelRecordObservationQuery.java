@@ -37,8 +37,8 @@ import javax.persistence.Transient;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
+import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.query.observation.parser.ParseException;
 import org.wcs.smart.i2.query.observation.parser.Parser;
 

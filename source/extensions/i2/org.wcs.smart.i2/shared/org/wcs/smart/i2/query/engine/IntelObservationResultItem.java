@@ -30,6 +30,11 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * Intelligence query results item
+ * @author Emily
+ *
+ */
 public class IntelObservationResultItem implements IResultItem {
 
 	private UUID observationUuid;

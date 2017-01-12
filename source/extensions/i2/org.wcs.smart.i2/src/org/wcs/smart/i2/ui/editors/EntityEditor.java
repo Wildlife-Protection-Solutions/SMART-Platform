@@ -1879,8 +1879,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 		return "";
 		}
-		
-		
 	}
 
 	@Override

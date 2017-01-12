@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.editors.query;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -57,9 +58,8 @@ import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 
 /**
- * Lazy query results table for a given query.
- * Provides similar to {@link QueryResultsTable} but uses lazy data provider
- * instead of loading all data into memory.
+ * Displays results of a query in a table lazily loading
+ * data from the database as requested.
  * 
  * @author elitvin
  * @since 1.0.0
@@ -74,6 +74,8 @@ public class QueryLazyResultsTable extends Composite{
 	
 	private IPagedQueryResultSet currentResults;
 	private IProjectionProvider prjProvider;
+	
+	private IntelRecordObservationQuery query;
 	
 	public QueryLazyResultsTable(Composite parent){
 		super(parent, SWT.NONE);
@@ -97,61 +99,58 @@ public class QueryLazyResultsTable extends Composite{
 		addListener(SWT.Dispose, (event)->disposeResults());
 	}
 	
-	public void clearColumns(){
-		if(table.getTable().isDisposed()) return;
-		
-		table.getTable().setRedraw(false);
-		try{
-			for (TableColumn tc : table.getTable().getColumns()){
-				tc.dispose();
+	public void setQuery(IntelRecordObservationQuery query){
+		this.query = query;
+	}
+
+	/*
+	 * Creates label providers for various column
+	 */
+	private CellLabelProvider getLabelProvider(IQueryColumn column){
+		return new ColumnLabelProvider(){
+			public String getText(Object element){
+				if (element instanceof IResultItem){
+					return column.getValue((IResultItem)element, Locale.getDefault());
+				}
+				return super.getText(element);
 			}
-			tableViewerColumns = null;
-//			if (getColumnSorter() != null){
-//				getColumnSorter().setSortColumn(null);
-//			}
-		}finally{
-			table.getTable().setRedraw(true);
-		}
-		setInput(null);
+		};
 	}
 	
+	/*
+	 * Creates the table widget
+	 */
+	private void createTable(Composite parent){
+		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.SINGLE);
+		table.getTable().setHeaderVisible(true);
+		table.getTable().setLinesVisible(true);
+		table.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		table.setContentProvider(new QueryLazyResultsContentProvider(table));
+		table.setItemCount(0);
+	}	
 	
-	public void initQuery(final IntelRecordObservationQuery query, final IProjectionProvider prjProvider){
-		this.prjProvider = prjProvider;
+	private void createTableColumns(List<IQueryColumn> columns){
+		if (table.getTable().isDisposed()) return;
 		
-		if (tableViewerColumns != null){
-			//columns already created; lets update visibility
-			if (query.getColumnFilter() == null){
-				for (QueryTableViewerColumn column : tableViewerColumns){
-					column.show();
-				}
-			}else{
-				String[] bits = query.getColumnFilter().split(",");
-				Set<String> visibleColumns = Arrays.stream(bits).collect(Collectors.toSet());
-				for (QueryTableViewerColumn column : tableViewerColumns){
-					if (visibleColumns.contains(column.getColumn().getKey())){
-						column.show();
-					}else{
-						column.hide();
-					}
-				}
-			}
-			return;
-		}
-		
-		
-		//TODO: fix this
-		List<IQueryColumn> cols = null;
-		Session session = HibernateManager.openSession();
+		//dispose of existing columns;
+		table.getTable().setRedraw(false);
 		try{
-			cols = IntelQueryColumnProvider.getInstance().getQueryColumns(query, Locale.getDefault(), session);
+			for (TableColumn tc : table.getTable().getColumns()) tc.dispose();
+			tableViewerColumns = null;
+			
+			tableViewerColumns = new QueryTableViewerColumn[columns.size()];
+			for (int i = 0; i < columns.size(); i++) {
+				tableViewerColumns[i] = new QueryTableViewerColumn(table,columns.get(i), getLabelProvider(columns.get(i)), this);
+			}
+			
+			addQueryFinders();
 		}finally{
-			session.close();
+			table.getTable().setRedraw(true);	
 		}
-		tableViewerColumns = createColumns(table,cols);
-		table.refresh(true);
-						
-		//TODO: add menu to open source
+	}
+	
+	private void addQueryFinders(){
+		if (query == null) return;
 		List<IQuerySourceFinder> finders = IQuerySourceFinder.getQuerySources(query);
 		if (tableMenu != null && !tableMenu.isDisposed()){
 			tableMenu.dispose();
@@ -172,67 +171,16 @@ public class QueryLazyResultsTable extends Composite{
 						IStructuredSelection selection = (IStructuredSelection) table.getSelection();
 						if (!selection.isEmpty()) {
 							Object x = selection.getFirstElement();
-							if (x instanceof IResultItem) f.openSource((IResultItem)x);
+							if (x instanceof IResultItem) f.runAction((IResultItem)x);
 						}
 					}
 				});
 			}
 		}
 	}
-	
-	/**
-	 * Creates the table viewer columns.
-	 * 
-	 * @param viewer table viewer
-	 * @param columns table column definition
-	 * @return list of table viewer columns
+	/*
+	 * disposes of query results 
 	 */
-	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<IQueryColumn> columns) {
-		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.size()];
-		for (int i = 0; i < columns.size(); i++) {
-			viewers[i] = new QueryTableViewerColumn(viewer,columns.get(i), getLabelProvider(columns.get(i), columns), this);
-		}
-		return viewers;
-	}
-
-	/**
-	 * Creates label providers for various columns
-	 * @param column
-	 * @return
-	 */
-	public CellLabelProvider getLabelProvider(IQueryColumn column, List<IQueryColumn> allColumns){
-		return new ColumnLabelProvider(){
-			public String getText(Object element){
-				if (element instanceof IResultItem){
-					return column.getValue((IResultItem)element, Locale.getDefault());
-				}
-				return super.getText(element);
-			}
-		};
-	}
-	
-	
-//	protected IQueryColumnSorter getColumnSorter() {
-//		return sorter;
-//	}
-	
-	/**
-	 * Creates the table widget
-	 * @param parent the parent widget
-	 * @param query the query being represented by the table.
-	 * 
-	 * @return the resulting table viewer.
-	 */
-	
-	private void createTable(Composite parent){
-		table = new TableViewer(parent, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.SINGLE);
-		table.getTable().setHeaderVisible(true);
-		table.getTable().setLinesVisible(true);
-		table.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		table.setContentProvider(new QueryLazyResultsContentProvider(table));
-		table.setItemCount(0);
-	}	
-	
 	private void disposeResults(){
 		if (currentResults == null) return;
 		final IPagedQueryResultSet toDispose = currentResults;
@@ -256,21 +204,26 @@ public class QueryLazyResultsTable extends Composite{
 		disposeJob.schedule();
 	}
 	
+	/**
+	 * Sets the table input
+	 * @param result
+	 */
 	public void setInput(IPagedQueryResultSet result) {
 		if (table.getTable().isDisposed()) return;
 		disposeResults();
 		
 		currentResults = result;
+		
 		if (result == null){
 			table.setItemCount(0);
 			table.setInput(null);
-				
 			resultCnt.setText("");
 		}else{
 			table.setItemCount(result.getItemCount());
-			table.setInput(result);
-			
+			table.setInput(result);	
 			resultCnt.setText(MessageFormat.format("{0} observations",result.getItemCount()));
+			
+			createTableColumns( result.getQueryColumns() );
 		}
 
 		//update tooltip
@@ -283,7 +236,11 @@ public class QueryLazyResultsTable extends Composite{
 		}		
 	}
 
-	
+	/**
+	 * Sets the sort column & updates the query results
+	 * 
+	 * @param sortColumn
+	 */
 	public void setSortColumn(QueryTableViewerColumn sortColumn){
 		if (currentResults != null){
 			int sortDirection = table.getTable().getSortDirection();

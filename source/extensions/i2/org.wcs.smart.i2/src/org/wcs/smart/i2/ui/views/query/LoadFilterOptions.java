@@ -31,7 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+
+
 import javax.imageio.ImageIO;
+
+
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,6 +44,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
@@ -59,6 +64,7 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.ui.views.QueryView;
 
 /**
  * Job for loading roots for filter tree
@@ -92,6 +98,13 @@ public class LoadFilterOptions extends Job {
 		
 		Display.getDefault().syncExec(()->{
 			viewer.setInput(roots);
+			viewer.getTree().setEnabled(true);
+			Object label = viewer.getTree().getData(QueryView.REFRESHLABEL_KEY);
+			if (label != null && label instanceof Control){
+				((Control)label).dispose();
+				viewer.getTree().setData(QueryView.REFRESHLABEL_KEY, null);
+			}
+			
 		});
 		return Status.OK_STATUS;
 	}
@@ -165,7 +178,9 @@ public class LoadFilterOptions extends Job {
 		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem("Entity Attributes", false);
 		
 		List<IntelAttribute> attributes= 
-				session.createCriteria(IntelAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+				session.createCriteria(IntelAttribute.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.list();
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (IntelAttribute a : attributes){
 			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a);
@@ -180,7 +195,9 @@ public class LoadFilterOptions extends Job {
 		BasicTreeFilterItem entityTypeRoot = new BasicTreeFilterItem("Entity Types");
 		entityTypeRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY));
 		List<IntelEntityType> types = 
-				session.createCriteria(IntelEntityType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+				session.createCriteria(IntelEntityType.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.list();
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
 			BasicTreeFilterItem entityNode = new BasicTreeFilterItem(t.getName());

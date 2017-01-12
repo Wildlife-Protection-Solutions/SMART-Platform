@@ -60,7 +60,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class ObservationFilterProcessor {
+public class WaypointFilterProcessor {
 
 	private IQueryFilter filter;
 	private Date[] dFilter;
@@ -69,7 +69,7 @@ public class ObservationFilterProcessor {
 	private Exception visitorException;
 	private HashMap<IQueryFilter, String> filterToColumnName = new HashMap<IQueryFilter, String>();
 	
-	public ObservationFilterProcessor(IQueryFilter filter, Date[] dFilter, Session s){
+	public WaypointFilterProcessor(IQueryFilter filter, Date[] dFilter, Session s){
 		this.filter = filter;
 		this.dFilter = dFilter;
 		this.s = s;
@@ -116,14 +116,13 @@ public class ObservationFilterProcessor {
 		String obsTable = SqlGenerator.createTempTableName();
 				
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + obsTable + " ( location_uuid char(16) for bit data, observation_uuid char(16) for bit data ) ");
+		sql.append("CREATE TABLE " + obsTable + " ( location_uuid char(16) for bit data ) ");
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 				
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + obsTable);
-		sql.append(" SELECT l.uuid, o.uuid FROM smart.i_location l ");
-		sql.append(" LEFT JOIN smart.i_observation o on l.uuid = o.location_uuid ");
+		sql.append(" SELECT l.uuid FROM smart.i_location l ");
 		String dateFilter = SqlGenerator.generateDateClause(dFilter, "datetime");
 		if (dateFilter != null){
 			sql.append( " WHERE ");
@@ -240,9 +239,9 @@ public class ObservationFilterProcessor {
 			StringBuilder sql = new StringBuilder();
 			sql.append("UPDATE " + obsTable );
 			sql.append(" SET " + columnName + " = true ");
-			sql.append(" WHERE observation_uuid IN ( ");	
-			sql.append("SELECT a.observation_uuid FROM " + obsTable + " a ");
-			sql.append(" JOIN smart.i_observation o on a.observation_uuid = o.uuid ");
+			sql.append(" WHERE location_uuid IN ( ");	
+			sql.append("SELECT a.location_uuid FROM " + obsTable + " a ");
+			sql.append(" JOIN smart.i_observation o on a.location_uuid = o.location_uuid ");
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid ");
 			sql.append(" WHERE c.ca_uuid = :cauuid ");
 			sql.append(" AND c.hkey >= :hkey1 and c.hkey < :hkey2 ) ");
@@ -269,9 +268,9 @@ public class ObservationFilterProcessor {
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE " + obsTable );
 		sql.append(" SET " + columnName + " = true ");
-		sql.append(" WHERE observation_uuid IN ( ");	
-		sql.append("SELECT a.observation_uuid FROM " + obsTable + " a ");
-		sql.append(" JOIN smart.i_observation o on a.observation_uuid = o.uuid ");
+		sql.append(" WHERE location_uuid IN ( ");	
+		sql.append("SELECT a.location_uuid FROM " + obsTable + " a ");
+		sql.append(" JOIN smart.i_observation o on a.location_uuid = l.location_uuid ");
 		
 		if (filter.getCategoryKey() != null){
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid ");

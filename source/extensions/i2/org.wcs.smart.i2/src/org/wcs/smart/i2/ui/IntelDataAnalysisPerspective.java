@@ -30,7 +30,6 @@ import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.RecordsView;
 import org.wcs.smart.i2.ui.views.WorkingSetView;
-import org.wcs.smart.i2.ui.views.query.QueryFilterView;
 
 /**
  * Data analysis perspective 

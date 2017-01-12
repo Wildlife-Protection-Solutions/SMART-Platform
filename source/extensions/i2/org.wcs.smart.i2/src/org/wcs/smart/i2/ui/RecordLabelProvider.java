@@ -26,6 +26,8 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
@@ -81,13 +83,12 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 		return super.getText(element);
 	}
 	
+	/**
+	 * Converts record status to GUI label
+	 * @param status
+	 * @return
+	 */
 	public static String getRecordStatusLabel(IntelRecord.Status status) {
-		if (status == IntelRecord.Status.NEW)
-			return "Unprocessed";
-		if (status == IntelRecord.Status.PROCESSING)
-			return "In Progress";
-		if (status == IntelRecord.Status.COMPLETE)
-			return "Complete";
-		return "";
+		return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(status, Locale.getDefault());
 	}
 }

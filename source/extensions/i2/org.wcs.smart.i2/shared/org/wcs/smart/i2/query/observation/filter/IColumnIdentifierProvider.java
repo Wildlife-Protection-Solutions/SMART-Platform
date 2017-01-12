@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,31 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.query;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Iterator;
+package org.wcs.smart.i2.query.observation.filter;
 
 /**
- * Iterator for query result set.
+ * A filter that provides a unique identifier for uniquely identifying 
+ * filters.
  * 
  * @author Emily
  *
- * @param <T>
  */
-public interface IQueryResultSetIterator<T extends IResultItem> extends Iterator<IResultItem>, Closeable {
+public interface IColumnIdentifierProvider {
 
-	@Override
-	public boolean hasNext();
-	
-	@Override
-	public IResultItem next();
-	
-	@Override
-	public void remove();
-	
-	@Override
-	public void close() throws IOException;
-	
+	String getUniqueColumnIdentifier();
 }

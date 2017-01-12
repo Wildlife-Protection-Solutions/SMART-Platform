@@ -34,7 +34,6 @@ import org.wcs.smart.util.SmartUtils;
  * A table viewer column for the query results table viewer.
  * 
  * @author Emily
- * @since 1.0.0
  */
 public class QueryTableViewerColumn {
 	
@@ -73,10 +72,10 @@ public class QueryTableViewerColumn {
 		}
 	}
 
-	
 	public boolean isVisible(){
 		return tcolumn.getColumn().getWidth() > 0;
 	}
+	
 	/**
 	 * Shows the column
 	 */

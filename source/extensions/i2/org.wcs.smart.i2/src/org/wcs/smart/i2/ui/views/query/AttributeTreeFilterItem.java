@@ -35,6 +35,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
@@ -51,8 +52,6 @@ import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
 public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 
 	private UUID attributeUuid;
-	private UUID entityTypeUuid;
-	
 	private IntelAttribute.AttributeType type;
 	private String dropItemName = null;
 	private String queryKey = "";
@@ -63,12 +62,9 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 	 */
 	public AttributeTreeFilterItem(IntelEntityTypeAttribute attribute) {
 		super(attribute.getAttribute().getName());
-		this.entityTypeUuid = attribute.getEntityType().getUuid();
 		this.attributeUuid = attribute.getAttribute().getUuid();
 		type = attribute.getAttribute().getType();
-		
 		dropItemName = DropItemFactory.generateName(attribute.getAttribute(),  attribute.getEntityType());
-		
 		queryKey = "e_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getAttribute().getKeyId() + ":" + attribute.getEntityType().getKeyId();
 	}
 
@@ -99,8 +95,8 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 		case LIST:
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
-			labels.add("<ANY>"); //TODO: make these constants
-			keys.add("any");
+			labels.add(DropItemFactory.ANY_LABEL);
+			keys.add(IQueryFilter.ANY_OPTION_KEY);
 			Job j = new Job("creating attribute drop item"){
 
 				@Override

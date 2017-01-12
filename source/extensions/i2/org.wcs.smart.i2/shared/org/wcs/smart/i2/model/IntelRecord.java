@@ -23,7 +23,6 @@ package org.wcs.smart.i2.model;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

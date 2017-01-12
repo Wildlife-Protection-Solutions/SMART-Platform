@@ -43,25 +43,45 @@ public class DataModelColumn extends AbstractQueryColumn{
 	private String attributeKey;
 	private Attribute.AttributeType type;
 	
+	/**
+	 * Creates a new category data model column
+	 * @param level
+	 */
 	public DataModelColumn(int level) {
-		super(MessageFormat.format("Level {0}", level), "category:" + level);
+		super(MessageFormat.format("Category {0}", level), "category:" + level);
 		this.level = level;
 	}
 
+	/**
+	 * Creates a new attribute data model column
+	 * @param attribute
+	 */
 	public DataModelColumn(Attribute attribute){
 		super(attribute.getName(), "attribute:" + attribute.getKeyId());
 		this.attributeKey = attribute.getKeyId();
 		this.type = attribute.getType();
 	}
 	
+	/**
+	 * The category level
+	 * @return
+	 */
 	public int getLevel(){
 		return this.level;
 	}
 	
+	/**
+	 * The attribute key
+	 * @return
+	 */
 	public String getAttributeKey(){
 		return this.attributeKey;
 	}
 	
+	/**
+	 * The attribute type
+	 * @return
+	 */
 	public Attribute.AttributeType getAttributeType(){
 		return this.type;
 	}

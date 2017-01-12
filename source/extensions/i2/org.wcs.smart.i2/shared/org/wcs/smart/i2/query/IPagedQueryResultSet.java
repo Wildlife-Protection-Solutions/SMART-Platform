@@ -29,15 +29,19 @@ import org.hibernate.Session;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * Interface for paging results.  This is currently used
- * for observation queries but can be used for other large
- * query types as well.
+ * Interface for paging query results
+ * 
  * 
  * @author Emily
  *
  */
 public interface IPagedQueryResultSet {
 	
+	/**
+	 * Sort direction
+	 * @author Emily
+	 *
+	 */
 	public static enum SortDirection{
 		UP,
 		DOWN
@@ -118,5 +122,11 @@ public interface IPagedQueryResultSet {
 	 * @return true if result set has been disposed of
 	 */
 	public boolean isDisposed();
+	
+	/**
+	 * 
+	 * @return the query columns to include in the results table
+	 */
+	public List<IQueryColumn> getQueryColumns() ;
 
 }

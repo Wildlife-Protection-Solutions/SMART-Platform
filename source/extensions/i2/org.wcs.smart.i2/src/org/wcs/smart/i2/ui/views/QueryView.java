@@ -69,22 +69,28 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
-import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
@@ -96,8 +102,8 @@ import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
 import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
-import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
 import org.wcs.smart.i2.ui.views.query.FilterTreeContentProvider;
+import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
 import org.wcs.smart.i2.ui.views.query.FilterTreeLabelProvider;
 import org.wcs.smart.i2.ui.views.query.LoadFilterOptions;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -113,6 +119,8 @@ import org.wcs.smart.util.E3Utils;
  */
 public class QueryView {
 
+	public static final String REFRESHLABEL_KEY = "refreshlabel";
+
 	public static final String ID = "org.wcs.smart.i2.ui.view.queries";
 	
 	@Inject
@@ -124,12 +132,42 @@ public class QueryView {
 	private TreeViewer filterTree = null;
 	private Job refreshJob;
 	
+	//query filter tree
+	private Composite treePart;
+	private Listener refreshListener = (event)->refreshFiltersView();
+	
+	private IAreaModifiedListener areaListener = new IAreaModifiedListener() {
+		@Override
+		public void areasUpdated(AreaType type) {
+			sourceModified();
+		}
+	};
+	private IDataModelListener dmListener = new IDataModelListener() {
+		@Override
+		public void modified() {
+			sourceModified();
+		}
+	};
+	private EventHandler entityEvent = new EventHandler() {
+		
+		@Override
+		public void handleEvent(Event event) {
+			sourceModified();
+		}
+	};
+	
 	public QueryView() {
 		super();
 	}
 
 	@PostConstruct
 	public void createPartControl(Composite parent) {
+		
+		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
+		DataModelManager.INSTANCE.addChangeListener(dmListener);
+		context.get(IEventBroker.class).subscribe(IntelEvents.ENTITY_ALL, entityEvent);
+		context.get(IEventBroker.class).subscribe(IntelEvents.ENTITY_TYPE_ALL, entityEvent);
+		
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginWidth = 0;
 		((GridLayout)parent.getLayout()).marginHeight = 0;
@@ -150,6 +188,7 @@ public class QueryView {
 		
 		tabList.setContent(new Composite[]{queryList, filterList}, tabPart);
 		tabList.selectTab(0);
+		
 		
 		refreshQueryList();
 		refreshFiltersView();
@@ -192,13 +231,12 @@ public class QueryView {
 		queryList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		queryList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		queryList.addDoubleClickListener(new IDoubleClickListener() {
-			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				openSelection();
-				
 			}
 		});
+		
 		//add drag support
 		queryList.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelQuerySelectionTransfer.getTransfer()}, new DragSourceAdapter(){
 			@Override
@@ -221,40 +259,49 @@ public class QueryView {
 		return part;
 	}
 	
+	private void sourceModified(){
+		filterTree.getTree().setEnabled(false);
+		if (filterTree.getTree().getData(REFRESHLABEL_KEY) == null){
+			Label modifiedLabel = new Label(treePart, SWT.NONE);
+			modifiedLabel.setText("Elements modified, click to refresh");
+			
+			Rectangle r = filterTree.getTree().getBounds();
+			Point size = modifiedLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			
+			int x = (int) Math.round((r.width - size.x) / 2.0);
+			int y = (int) Math.round((r.height - size.y) / 2.0);
+			
+			modifiedLabel.setBounds(x, y, size.x, size.y);
+			filterTree.getTree().setData(REFRESHLABEL_KEY, modifiedLabel);
+			modifiedLabel.moveAbove(filterTree.getTree());
+			treePart.layout(true);
+			
+			modifiedLabel.addListener(SWT.MouseDown, refreshListener);
+		}
+	}
+	
+	
 	private Composite createFilterComposite(Composite parent, FormToolkit toolkit){
 		Composite part = new Composite(parent, SWT.NONE);
 		part.setLayout(new GridLayout());
-		ConservationAreaManager.getInstance().addAreaChangeListener(new IAreaModifiedListener() {
-			
-			@Override
-			public void areasUpdated(AreaType type) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
 		
-		ToolBar tb = new ToolBar(part, SWT.FLAT);
-		ToolItem refreshItem = new ToolItem(tb, SWT.PUSH);
-		refreshItem.setToolTipText("refresh tree");
-		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		refreshItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				refreshFiltersView();
-			}
-		});
-		filterTree = new TreeViewer(part, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
-		filterTree.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		treePart = new Composite(part, SWT.NONE);
+		treePart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		treePart.addListener(SWT.MouseDown, refreshListener);
+		
+		filterTree = new TreeViewer(treePart, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
 		filterTree.setLabelProvider(new FilterTreeLabelProvider());
 		filterTree.setContentProvider(new FilterTreeContentProvider());
-		
 		filterTree.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				addFilterSelectionToQuery();
 			}
 		});
-		
+		treePart.addListener(SWT.Resize, e->{
+			filterTree.getTree().setBounds(0,0,treePart.getBounds().width, treePart.getBounds().height);
+		});
+
 		Menu mnu = new Menu(filterTree.getTree());
 		MenuItem addToQuery = new MenuItem(mnu,SWT.PUSH);
 		addToQuery.setText("Add to Query");
@@ -293,7 +340,7 @@ public class QueryView {
 		}
 	}
 	
-	public void refreshFiltersView(){	
+	private void refreshFiltersView(){	
 		filterTree.setInput(null);
 		refreshJob.schedule();
 	}
@@ -399,6 +446,7 @@ public class QueryView {
 	 @Inject
 	 private void dbModified(@UIEventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
 		 refreshQueryList();
+		 refreshFiltersView();
 	 }
 	 
 	 @Optional
@@ -412,29 +460,40 @@ public class QueryView {
 		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid())));
 	 }
 	 
-	 @Optional
-	 @Inject
-	 private void queryNew(@UIEventTopic(IntelEvents.QUERY_NEW) Object data){
-		 refreshQueryList();
-	 }
-	 
-	 @Optional
-	 @Inject
-	 private void queryDeleted(@UIEventTopic(IntelEvents.QUERY_DELETED) Object data){
-		 refreshQueryList();
-	 }
-	 
-	 public void refreshQueryList(){
-		 queryList.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		 refreshQueriesJob.schedule();
-	 }
+	@Optional
+	@Inject
+	private void queryNew(@UIEventTopic(IntelEvents.QUERY_NEW) Object data) {
+		refreshQueryList();
+	}
 
+	@Optional
+	@Inject
+	private void queryDeleted(
+			@UIEventTopic(IntelEvents.QUERY_DELETED) Object data) {
+		refreshQueryList();
+	}
+
+	public void refreshView() {
+		refreshQueryList();
+		refreshFiltersView();	
+	}
+
+	private void refreshQueryList() {
+		queryList.setInput(new String[] { DialogConstants.LOADING_TEXT });
+		refreshQueriesJob.schedule();
+		
+	}
+	 
 	@Focus
 	public void setFocus() {
+		queryList.getList().setFocus();
 	}
 
 	@PreDestroy
 	public void dispose() {
+		ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
+		DataModelManager.INSTANCE.removeChangeListener(dmListener);
+		context.get(IEventBroker.class).unsubscribe(entityEvent);
 	}
 	
 	public static class QueryViewWrapper extends DIViewPart<QueryView>{

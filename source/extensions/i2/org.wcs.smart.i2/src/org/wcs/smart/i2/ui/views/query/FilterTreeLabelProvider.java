@@ -40,13 +40,9 @@ import org.wcs.smart.i2.ui.AttributeLabelProvider;
 public class FilterTreeLabelProvider extends LabelProvider {
 
 	private AttributeLabelProvider attributeInstance = new AttributeLabelProvider();
-	
 	private Map<Object, Image> toDispose = new HashMap<Object, Image>();
-	
-	public void dispose(){
-		attributeInstance.dispose();
-		toDispose.values().forEach(e->e.dispose());
-	}
+
+	@Override
 	public String getText(Object element){
 		if (element instanceof FilterTreeItem) return ((FilterTreeItem) element).getName();
 		return super.getText(element);
@@ -97,5 +93,11 @@ public class FilterTreeLabelProvider extends LabelProvider {
 			}
 		}
 		return null;
+	}
+	
+	@Override
+	public void dispose(){
+		attributeInstance.dispose();
+		toDispose.values().forEach(e->e.dispose());
 	}
 }

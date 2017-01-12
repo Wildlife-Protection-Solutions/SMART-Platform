@@ -26,7 +26,6 @@ import java.util.Date;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Data model item filter.
