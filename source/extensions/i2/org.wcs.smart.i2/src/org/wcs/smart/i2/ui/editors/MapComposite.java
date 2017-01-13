@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,28 +27,20 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -56,24 +48,17 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.IEditorInput;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.internal.ui.IDropTargetProvider;
-import org.locationtech.udig.project.ILayer;
-import org.locationtech.udig.project.ILayerListener;
-import org.locationtech.udig.project.LayerEvent;
-import org.locationtech.udig.project.LayerEvent.EventType;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
@@ -92,176 +77,42 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.IBlockingSelection;
-import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.Filter;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.WorkingSetManager;
-import org.wcs.smart.i2.event.IntelEvents;
-import org.wcs.smart.i2.model.IntelWorkingSet;
-import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
-import org.wcs.smart.i2.udig.IWorkingSetResource;
-import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
-import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
-import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
-import org.wcs.smart.i2.ui.views.LayerVisibleEvent;
-import org.wcs.smart.i2.ui.views.WorkingSetView;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
 import org.wcs.smart.ui.map.ScaleRatioComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
-import org.wcs.smart.util.E3Utils;
+import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-/*
- * implementing as an editor; but we only ever want one 
- * 
+/**
+ * A map composite 
+ * @author Emily
+ *
  */
-public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropTargetProvider {
+public class MapComposite extends Composite implements MapPart{
 
-	public static final String ID = "org.wcs.smart.i2.editor.map"; //$NON-NLS-1$
+	protected EditorPart editor;
 
-	
-	private IEclipseContext parentContext;
-	
-	protected MapViewer mapViewer;
+	// map components
 	private Label lblCoordinates;
 	private Button lblSRID;
+	protected MapViewer mapViewer;
 	protected MapToolComposite tools;
-	private FlashFeatureListener selectFeatureListener = new FlashFeatureListener();
-    private boolean flashFeatureRegistered = false;
-    private List<EventHandler> handlers = null;
-    private WorkingSetMapLayersJob configureLayersJob = null;
-    private WorkingSetQueryLayersJob queryLayersJob = null;
-    
-    private boolean handlingLayerVisibility = false;
-    
-    private ILayerListener visibilityListener = new ILayerListener() {
-
-		@Override
-		public void refresh(LayerEvent event) {
-			if (event.getType() != EventType.VISIBILITY) return;
-			if(handlingLayerVisibility) return;
-			try{
-				handlingLayerVisibility = true;
-				
-				ILayer layer = event.getSource();
-				if (layer == null) return;
-				
-				Object x = layer.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
-				if (x == null) return; //not a working set layer
-				if (!((Boolean)x)) return; //not a working set layer
-				if (!layer.getGeoResource().canResolve(IWorkingSetResource.class)) return;
-				
-				IWorkingSetResource resource = null;
-				try {
-					resource = layer.getGeoResource().resolve(IWorkingSetResource.class, null);
-				} catch (IOException e) {
-					Intelligence2PlugIn.log(e.getMessage(), e);
-				}
-				if (resource == null) return;
-				boolean visibility = layer.isVisible();
-				
-				boolean allVisible = true;
-				LayerVisibleEvent newevent = new  LayerVisibleEvent();
-				
-				List<IGeoResource> allItems = null;
-				try{
-					allItems = (List<IGeoResource>) layer.getGeoResource().resolve(IService.class, null).resources(null);
-				}catch (Exception ex){
-					Intelligence2PlugIn.log(ex.getMessage(), ex);
-				}
-				for (IGeoResource rr : allItems){
-					for (Layer l : getMap().getLayersInternal()){
-						if (l.getGeoResource().getID().equals(rr.getID())){
-							if (l.isVisible() != visibility){
-								allVisible = false;
-							}
-							break;
-						}
-					}
-					if (!allVisible) break;
-				}
-				if (allVisible){
-					if (!visibility){
-						newevent.notVisible.add(resource.getResourceId());
-					}else{
-						newevent.allVisible.add(resource.getResourceId());
-					}
-				}else{
-					newevent.partVisible.add(resource.getResourceId());
-				}
-				parentContext.get(IEventBroker.class).send(IntelEvents.ACTIVE_WS_LAYER_VISIBILITY, newevent);
-			}finally{
-				handlingLayerVisibility = false;
-			}
-			
-		}
-    	
-    };
-	public static IEditorInput MAPINPUT = new IEditorInput() {
-		
-		@Override
-		public Object getAdapter(Class adapter) {
-			return null;
-		}
-		
-		@Override
-		public String getToolTipText() {
-			return null;
-		}
-		
-		@Override
-		public IPersistableElement getPersistable() {
-			return null;
-		}
-		
-		@Override
-		public String getName() {
-			return "Map";
-		}
-		
-		@Override
-		public ImageDescriptor getImageDescriptor() {
-			return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.MAP_ICON);
-		}
-		
-		@Override
-		public boolean exists() {
-			return false;
-		}
-	}; 
 	
-
+	private Date[] dateFilter = null;
 	
-	IPartListener2 partlistener = new IPartListener2(){
+	private IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {
-	            if (partRef.getPart(false) == IntelligenceMapEditor.this) {
-	            	
+	            if (partRef.getPart(false) == editor) {
 	                IToolManager toolManager = ApplicationGIS.getToolManager();
-	                toolManager.setCurrentEditor( IntelligenceMapEditor.this.mapViewer );
-	                IntelligenceMapEditor.this.tools.selectLastTool();
-	                
-	                //make sure the table does not display the close button
-	                //I tried this with css styles but it didn't work properly; the 
-	                //active editor ended up with the wrong styling
-	                MPart part = parentContext.get(MPart.class);
-	        		CTabFolder folder = (CTabFolder)part.getParent().getWidget();
-	        		for (CTabItem item : folder.getItems()){
-	        			if (item.getControl() == part.getWidget()){
-	        				item.setShowClose(false);
-	        				break;
-	        			}			
-	        		}
+	                toolManager.setCurrentEditor( mapViewer );
+                	tools.selectLastTool();
 	            }
 	        }
 
@@ -278,13 +129,13 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	        }
 
 	        public void partHidden( IWorkbenchPartReference partRef ) {
-	        	if (partRef.getPart(false) == IntelligenceMapEditor.this) {
+	        	if (partRef.getPart(false) == editor) {
 	        		deregisterFeatureFlasher();
 	        	}
 	        }
 
 	        public void partVisible( IWorkbenchPartReference partRef ) {
-	        	if (partRef.getPart(false) == IntelligenceMapEditor.this) {
+	        	if (partRef.getPart(false) == editor) {
 	        		registerFeatureFlasher();
 	        	}
 	        }
@@ -294,16 +145,28 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 
 	    };
 	    
-	  
+    private FlashFeatureListener selectFeatureListener = new FlashFeatureListener();
+    private boolean flashFeatureRegistered = false;
+	
+	public MapComposite(Composite parent, EditorPart parentEditor) {
+		super(parent, SWT.NONE);
+		this.editor = parentEditor;		
+		createPartControl();
+		
+		//add default layers
+		new LoadDefaultLayersJob(getMap()).schedule();
+	}
 
-    /**
+	
+	
+	 /**
      * registers a listener with the current page that flashes a feature each time the current
      * selected feature changes.
      */
     protected synchronized void registerFeatureFlasher() {
         if (!flashFeatureRegistered) {
             flashFeatureRegistered = true;
-            IWorkbenchPage page = getSite().getPage();
+            IWorkbenchPage page = editor.getSite().getPage();
             page.addPostSelectionListener(selectFeatureListener);
         }
     }
@@ -311,168 +174,28 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
     protected synchronized void deregisterFeatureFlasher() {
         flashFeatureRegistered = false;
         //AnimationUpdater.cancel(getMap().getRenderManager().getMapDisplay());
-        getSite().getPage().removePostSelectionListener(selectFeatureListener);
+        editor.getSite().getPage().removePostSelectionListener(selectFeatureListener);
     }
     
 	
-	/**
-	 * Does nothing; there is nothing to save.
-	 * @see org.eclipse.ui.part.EditorPart#doSave(org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	@Override
-	public void doSave(IProgressMonitor monitor) {
-		
-	}
-
-
-	/** Does nothing; there is nothing to save.
-	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
-	 */
-	@Override
-	public void doSaveAs() {
-	}
-
-	/**
-	 * @see org.eclipse.ui.part.EditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
-	 */
-	@Override
-	public void init(IEditorSite site, IEditorInput input)
-			throws PartInitException {
-		setSite(site);
-		setInput(input);
-	}
-
-	/**
-	 * Nothing to save; always not dirty.
-	 * 
-	 * @see org.eclipse.ui.part.EditorPart#isDirty()
-	 * @return <code>false</code>
-	 */
-	@Override
-	public boolean isDirty() {
-		return false;
-	}
-
-	/**
-	 * Nothing to save.
-	 * 
-	 * @see org.eclipse.ui.part.EditorPart#isSaveAsAllowed()
-	 * @return <code>false</code>
-	 */
-	@Override
-	public boolean isSaveAsAllowed() {
-		return false;
-	}
 	
-	/** Creates the map
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	
+	/**
+	 *  Creates the map
+	 * 
 	 */
-	@Override
-	public void createPartControl(Composite parent) {
-		handlers = new ArrayList<EventHandler>();
+	public void createPartControl() {
+		setLayout(new GridLayout());
 		
-		
-		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
-		MPart part = parentContext.get(MPart.class);
-		//disable close button on map editor
-		part.setCloseable(false);
-		part.getTags().add(E3Utils.DO_NOT_CLOSE_TAG);
-
-		//configure tags so editors show in both perspectives
-		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
-		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
-		//part.get
-		EventHandler handler = new EventHandler() {
+		Composite composite = new Composite(this, SWT.NONE);
+		this.addListener(SWT.Resize, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				setWorkingSet();
+				composite.setBounds(0,0,getBounds().width-5,getBounds().height-5);		
 			}
-		};
-		parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_SET, handler);
-		handlers.add(handler);
-		
-		handler = new EventHandler() {
-			@Override
-			public void handleEvent(Event event) {
-				IntelWorkingSet set = (IntelWorkingSet) event.getProperty(IEventBroker.DATA);
-				if (set != null && set.getUuid().equals(WorkingSetManager.INSTANCE.getActiveWorkingSet())){
-					setWorkingSet();
-				}
-			}
-		};
-		parentContext.get(IEventBroker.class).subscribe(IntelEvents.WS_MODIFIED, handler);
-		handlers.add(handler);
-		
-		handler = new EventHandler() {
-			
-			@Override
-			public void handleEvent(Event event) {
-				if (handlingLayerVisibility) return;
-				handlingLayerVisibility = true;
-				try{
-					LayerVisibleEvent visibleLayers = (LayerVisibleEvent) event.getProperty(IEventBroker.DATA);
-					for (Layer l : getMap().getLayersInternal()){
-						Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
-						if (x == null || !x) continue;
-						if (!l.getGeoResource().canResolve(IWorkingSetResource.class)) continue;
-						try {
-							UUID uuid = (l.getGeoResource().resolve(IWorkingSetResource.class, null)).getResourceId();
-							if (visibleLayers.allVisible.contains(uuid)){
-								l.setVisible(true);
-							}
-							if (visibleLayers.notVisible.contains(uuid)){
-								l.setVisible(false);
-							}
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}finally{
-					handlingLayerVisibility = false;
-				}
-			}
-		};
-		parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_LAYER_VISIBILITY, handler);
-		handlers.add(handler);
-		
-		
-		handler = new EventHandler() {
-			@Override
-			public void handleEvent(Event event) {
-				Date[] newDates = (Date[]) event.getProperty(IEventBroker.DATA);
-				if (newDates != null){
-					Filter udigDateFilter = IntelEntityDataSource.createDateFilter(newDates[0], newDates[1]);
-					boolean refresh = false;
-					for (Layer l : getMap().getLayersInternal()){
-						Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
-						if (x == null || !x) continue;
-						if (!l.getGeoResource().canResolve(IWorkingSetResource.class)) continue;
-						
-						if (l instanceof ContentFilterLayerImpl){
-							((ContentFilterLayerImpl) l).setContentFilter(udigDateFilter);
-							refresh = true;
-						}
-					}
-					rerunQueryLayers();
-					if (refresh) getMap().getRenderManager().refresh(null);
-				}
-			}
-		};
-		parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_LAYER_DATEFILTER, handler);
-		handlers.add(handler);
-		
-		GridLayout layout = new GridLayout(1,false);
-    	layout.marginBottom=0;
-    	layout.marginHeight = 0;
-    	layout.marginLeft = 0;
-    	layout.marginRight = 0;
-    	layout.marginTop = 0;
-    	layout.marginWidth = 0;
-        parent.setLayout(layout);
-        
-		Composite composite = new Composite(parent, SWT.NONE);
+        });
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		layout = new GridLayout(2,false);
+		GridLayout layout = new GridLayout(2,false);
     	layout.marginBottom=0;
     	layout.marginHeight = 0;
     	layout.marginLeft = 0;
@@ -481,25 +204,24 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
     	layout.marginWidth = 0;
     	layout.horizontalSpacing = 0;
     	layout.verticalSpacing = 2;
-        parent.setLayout(layout);
 		composite.setLayout(layout);
 
         mapViewer = new MapViewer(composite,  SWT.SINGLE | SWT.DOUBLE_BUFFERED);
         mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         Map map = (Map) ProjectFactory.eINSTANCE.createMap();
-        map.setName(getEditorInput().getName());
+        map.setName(editor.getEditorInput().getName());
         mapViewer.setMap(map);
         //set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
-	      
-        ApplicationGIS.getToolManager().setCurrentEditor(this);
-        
-		tools = new MapToolComposite();
+	    
+		String[] strtools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 1);
+		strtools[strtools.length - 1] = ClearSelectionTool.ID;
+       	tools = new MapToolComposite(strtools);
 		tools.createComposite(composite);
 		tools.selectTool("org.locationtech.udig.tools.Pan"); //$NON-NLS-1$
 		
-        Composite infoArea = new Composite(parent, SWT.NONE);
+        Composite infoArea = new Composite(composite, SWT.NONE);
         GridLayout gl = new GridLayout(5, false);
         gl.marginTop = gl.marginBottom = gl.marginHeight= 0;
         gl.marginRight = 0;
@@ -531,7 +253,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
         lblSRID.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectionDialog pd = new ProjectionDialog(getSite().getShell(), mapViewer.getMap().getViewportModel().getCRS());
+				ProjectionDialog pd = new ProjectionDialog(editor.getSite().getShell(), mapViewer.getMap().getViewportModel().getCRS());
 				if (pd.open() == IDialogConstants.OK_ID){
 					try{
 						ChangeCRSCommand command = new ChangeCRSCommand(
@@ -552,7 +274,10 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
         			updateLabel();
         		}
         	}
+        	
         });
+        
+      
         
         mapViewer.getViewport().addMouseMotionListener(new MapMouseMotionListener() {
 			@Override
@@ -578,56 +303,20 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 			public void mouseDragged(MapMouseEvent event) {
 			}
 		});   
-        mapViewer.init(this);
+        mapViewer.init(editor);
  
         
-        getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
+        editor.getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
         registerFeatureFlasher();
-
-        UDIGDragDropUtilities.addDropSupport(mapViewer.getViewport().getControl(), this);
-        
-        (new LoadDefaultLayersJob(getMap())).schedule();
-        
-		//initialize from preference store
-		String uuid = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(WorkingSetView.LAST_WS_PREFERENCE);
-		if (uuid != null && !uuid.isEmpty()){
-			try{
-				UUID wset = UuidUtils.stringToUuid(uuid);
-				IntelWorkingSet s = new IntelWorkingSet();
-				s.setUuid(wset);
-				WorkingSetManager.INSTANCE.setActiveWorkingSet(s, parentContext);
-			}catch (Exception ex){
-				
-			}
-		}
-        
 	}
 
-	@Override
-	public Object getTarget(DropTargetEvent event) {
-		return this;
+	public Date[] getDateFilter(){
+		return dateFilter;
 	}
 	
-	private void setWorkingSet(){
-		if (configureLayersJob == null){
-			configureLayersJob = new WorkingSetMapLayersJob(getMap(), parentContext, visibilityListener);
-		}
-		if (queryLayersJob== null){
-			queryLayersJob = new WorkingSetQueryLayersJob(getMap(), parentContext, visibilityListener);
-		}
-		configureLayersJob.schedule();
-		queryLayersJob.schedule();
-	}
-	
-	private void rerunQueryLayers(){
-		if (queryLayersJob== null){
-			queryLayersJob = new WorkingSetQueryLayersJob(getMap(), parentContext, visibilityListener);
-		}
-		queryLayersJob.schedule();
-	}
-	
+		
 	private void updateLabel() {
-		getSite().getShell().getDisplay().asyncExec(new Runnable() {
+		editor.getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				if (lblSRID == null || lblSRID.isDisposed()) return;
@@ -639,6 +328,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 
 	}
         
+	@Override
     public Map getMap() {
         return mapViewer.getMap();
     }
@@ -647,28 +337,23 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
     public void dispose() {
         super.dispose();
         deregisterFeatureFlasher();
-        getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
+        editor.getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
         
         this.partlistener = null;
         this.selectFeatureListener = null;
         
-        if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null) {
+        if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null){
         	mapViewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
-        if (getMap() != null){
-                getMap().getViewportModelInternal().setInitialized(false);
-        }
+        if (getMap() != null)  getMap().getViewportModelInternal().setInitialized(false);
         if (mapViewer != null){
-        	if ( mapViewer.getRenderManager() != null){
+        	if (mapViewer.getRenderManager() != null){
         		mapViewer.getRenderManager().disableRendering();
-        		mapViewer.getRenderManager().stopRendering();
-        		mapViewer.getRenderManager().dispose();
+                mapViewer.getRenderManager().stopRendering();
+               	mapViewer.getRenderManager().dispose();		
         	}
-        	mapViewer.dispose();
+            mapViewer.dispose();
         }
-        
-        IEventBroker events = parentContext.get(IEventBroker.class);
-        if (handlers != null) handlers.forEach(h -> events.unsubscribe(h));
     }
 
     public void openContextMenu() {
@@ -690,20 +375,12 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 
 	
 
-	/**
-	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
-	 */
-	@Override
-	public void setFocus() {
-		mapViewer.getViewport().getControl().setFocus();
-	}
-
 	/* (non-Javadoc)
 	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {
-		return ((IEditorSite)getSite()).getActionBars().getStatusLineManager();		
+		return ((IEditorSite)editor.getSite()).getActionBars().getStatusLineManager();		
 	}
 	
 	
@@ -711,7 +388,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 
 		
         public void selectionChanged( IWorkbenchPart part, final ISelection selection ) {
-            if (part == IntelligenceMapEditor.this || getSite().getPage().getActivePart() != part
+            if (part == editor || editor.getSite().getPage().getActivePart() != part
                     || selection instanceof IBlockingSelection)
                 return;
             
@@ -781,5 +458,10 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
         }
     }
 	
-
+	/* initial zoom function */
+	protected ReferencedEnvelope initialZoom = null;
+	
+	public void setInitialZoom(ReferencedEnvelope zoom){
+		this.initialZoom = zoom;
+	}
 }

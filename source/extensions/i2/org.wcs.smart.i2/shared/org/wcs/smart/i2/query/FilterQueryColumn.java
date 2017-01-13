@@ -21,12 +21,9 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
@@ -50,12 +47,12 @@ public class FilterQueryColumn extends AbstractQueryColumn {
 	}
 	
 	@Override
-	public String getValue(IResultItem item, Locale l) {
+	public Object getValue(IResultItem item) {
 		if (item instanceof IntelObservationResultItem){
 			for (Entry<IQueryFilter, Boolean> filterValue : ((IntelObservationResultItem) item).getFilterValues().entrySet()){
 				if (filterValue.getKey() instanceof IColumnIdentifierProvider){
 					if (((IColumnIdentifierProvider)filterValue.getKey()).getUniqueColumnIdentifier().equals(filterKey)){
-						return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(filterValue.getValue(), l);
+						return filterValue.getValue();
 					}
 				}
 			}
@@ -76,4 +73,8 @@ public class FilterQueryColumn extends AbstractQueryColumn {
 		return Objects.hash(getFilterKey());
 	}
 
+	@Override
+	public Type getDataType() {
+		return Type.BOOLEAN;
+	}
 }

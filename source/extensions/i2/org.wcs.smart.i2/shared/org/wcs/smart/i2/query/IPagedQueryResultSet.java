@@ -24,6 +24,7 @@ package org.wcs.smart.i2.query;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -69,6 +70,22 @@ public interface IPagedQueryResultSet {
 	 */
 	public List<? extends IResultItem> getData(int offset, int pageSize);
 	
+	
+	/**
+	 * Converts a record in the results table to a result item
+	 * 
+	 * @param sc
+	 * @param session
+	 * @return
+	 */
+	public IResultItem asResultItem(ScrollableResults sc, Session session);
+
+	/**
+	 * 
+	 * @return the name of the query data table containin the results data
+	 */
+	public String getQueryDataTable();
+		
 	/**
 	 * This is only applicable to result sets that
 	 * return spatial data.  Returns the extends of the spatial
@@ -78,26 +95,18 @@ public interface IPagedQueryResultSet {
 	 * @return
 	 */
 	public Envelope getEnvelope();
-	
-//	/**
-//	 * Creates an iterator that will iterator over all 
-//	 * elements in the result set loading the given pagesize
-//	 * each time.
-//	 * 
-//	 * @param pageSize
-//	 * @return
-//	 */
-//	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize);
-//
-//	/**
-//	 * Creates an iterator that will iterator over all 
-//	 * elements in the result set loading the given pagesize
-//	 * each time.  Uses the provided session.
-//	 * 
-//	 * @param pageSize
-//	 * @return
-//	 */
-//	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize, Session session);
+
+	/**
+	 * Creates an iterator that will iterator over all 
+	 * elements in the result set using the provided session.
+	 * Does not do paging (useful for mapping or exporting query results) 
+	 * 
+	 * Sort order and sort column are ignored
+	 * 
+	 * @param pageSize
+	 * @return
+	 */
+	public PagedResultSetIterator iterator(Session session);
 	
 	/**
 	 * Sets the current sorting column.

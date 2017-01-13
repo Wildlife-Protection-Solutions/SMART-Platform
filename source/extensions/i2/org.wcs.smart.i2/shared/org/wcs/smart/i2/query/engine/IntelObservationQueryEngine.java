@@ -98,7 +98,7 @@ public class IntelObservationQueryEngine {
 			monitor.worked(1);
 			
 			monitor.subTask("Loading Results");
-			Integer cnt = (Integer) session.createSQLQuery("SELECT count(*) FROM " + queryResults.getResultsTable()).uniqueResult();
+			Integer cnt = (Integer) session.createSQLQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult();
 			queryResults.setResultCount(cnt);
 			monitor.worked(1);
 			
@@ -125,7 +125,7 @@ public class IntelObservationQueryEngine {
 			monitor.worked(1);
 			
 			monitor.subTask("Loading Results");
-			Integer cnt = (Integer) session.createSQLQuery("SELECT count(*) FROM " + queryResults.getResultsTable()).uniqueResult();
+			Integer cnt = (Integer) session.createSQLQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult();
 			queryResults.setResultCount(cnt);
 			monitor.worked(1);
 			
@@ -145,13 +145,16 @@ public class IntelObservationQueryEngine {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT distinct a.keyid FROM ");
 		sb.append(" smart.dm_attribute a join smart.i_observation_attribute b ON a.uuid = b.attribute_uuid ");
-		sb.append(" join " + queryResults.getResultsTable() + " c on c.observation_uuid = b.observation_uuid ");
+		sb.append(" join " + queryResults.getQueryDataTable() + " c on c.observation_uuid = b.observation_uuid ");
 		List<String> populatedAttributes = session.createSQLQuery(sb.toString()).list();
 		for (Iterator<IQueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
 			IQueryColumn column = (IQueryColumn) iterator.next();
 			if (column instanceof DataModelColumn ){
 				String attribute = ((DataModelColumn)column).getAttributeKey();
-				if (attribute != null && !populatedAttributes.contains(attribute)) iterator.remove();
+				if (attribute != null && !populatedAttributes.contains(attribute)){
+					//iterator.remove();
+					((DataModelColumn) column).setVisible(false);
+				}
 			}
 			
 		}

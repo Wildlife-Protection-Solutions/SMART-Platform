@@ -22,19 +22,12 @@
 package org.wcs.smart.i2.ui.editors.query;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -48,14 +41,12 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
-import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 
 /**
  * Displays results of a query in a table lazily loading
@@ -73,7 +64,6 @@ public class QueryLazyResultsTable extends Composite{
 	protected QueryTableViewerColumn[] tableViewerColumns;
 	
 	private IPagedQueryResultSet currentResults;
-	private IProjectionProvider prjProvider;
 	
 	private IntelRecordObservationQuery query;
 	
@@ -103,19 +93,6 @@ public class QueryLazyResultsTable extends Composite{
 		this.query = query;
 	}
 
-	/*
-	 * Creates label providers for various column
-	 */
-	private CellLabelProvider getLabelProvider(IQueryColumn column){
-		return new ColumnLabelProvider(){
-			public String getText(Object element){
-				if (element instanceof IResultItem){
-					return column.getValue((IResultItem)element, Locale.getDefault());
-				}
-				return super.getText(element);
-			}
-		};
-	}
 	
 	/*
 	 * Creates the table widget
@@ -140,7 +117,7 @@ public class QueryLazyResultsTable extends Composite{
 			
 			tableViewerColumns = new QueryTableViewerColumn[columns.size()];
 			for (int i = 0; i < columns.size(); i++) {
-				tableViewerColumns[i] = new QueryTableViewerColumn(table,columns.get(i), getLabelProvider(columns.get(i)), this);
+				tableViewerColumns[i] = new QueryTableViewerColumn(table,columns.get(i), ColumnLabelProviderGenerator.createLabelProvider(columns.get(i)), this);
 			}
 			
 			addQueryFinders();

@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -35,7 +35,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Emily
  *
  */
-public class IntelObservationResultItem implements IResultItem {
+public class IntelObservationResultItem implements IGeometryResultItem {
 
 	private UUID observationUuid;
 	private UUID locationUuid;
@@ -112,6 +112,8 @@ public class IntelObservationResultItem implements IResultItem {
 	public void setLocationComment(String comment){
 		this.locationComment = comment;
 	}
+	
+	@Override
 	public Geometry getGeometry(){
 		return this.locationGeometry;
 	}

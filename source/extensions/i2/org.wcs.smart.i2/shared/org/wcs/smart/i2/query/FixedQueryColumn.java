@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.text.DateFormat;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -69,25 +68,24 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 
 
 	@Override
-	public String getValue(IResultItem item, Locale l) {
+	public Object getValue(IResultItem item) {
 		if (!(item instanceof  IntelObservationResultItem)) return null;
 		IntelObservationResultItem i = (IntelObservationResultItem) item;
 		switch(column){
 		case LOC_COMMENT:
 			return i.getLocationComment();
 		case LOC_DATE:
-			return DateFormat.getDateInstance().format(i.getLocationDate());
+			return i.getLocationDate();
 		case LOC_GEOMTRY:
 			if (i.getGeometryError() != null) return "Parse Error";
 			if (i.getGeometry() == null) return "";
-			return i.getGeometry().toText();
+			return i.getGeometry();
 		case LOC_ID:
 			return i.getLocationId();
-			
 		case LOC_TIME:
-			return DateFormat.getTimeInstance().format(i.getLocationDate());
+			return i.getLocationDate();
 		case RECORD_STATUS:
-			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase()), l);
+			return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase());
 		case RECORD_TITLE:
 			return i.getRecordTitle();
 		}
@@ -98,5 +96,23 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 	public boolean canSort(){
 		if (column == Column.LOC_GEOMTRY) return false;
 		return true;
+	}
+	
+	@Override
+	public Type getDataType() {
+		switch(column){
+			case LOC_DATE:
+				return Type.DATE;
+			case LOC_GEOMTRY:
+				return Type.GEOMETRY;
+			case LOC_TIME:
+				return Type.TIME;
+			case LOC_COMMENT:
+			case LOC_ID:
+			case RECORD_STATUS:
+			case RECORD_TITLE:
+				return Type.STRING;
+		}
+		return Type.STRING;
 	}
 }

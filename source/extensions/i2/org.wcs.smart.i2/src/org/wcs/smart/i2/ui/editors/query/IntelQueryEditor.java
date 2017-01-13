@@ -74,6 +74,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
@@ -106,6 +107,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 	//header & date part
 	private IntelQueryNameLabel header;
 	private DateFilterDropDownComposite datePart;
+	private SectionTabHeader dataTabList;
 	
 	//filter panel
 	private FilterDefinitionPanel panel;
@@ -120,6 +122,8 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 	private QueryMapPanel mapPanel;
 	
 	private boolean isInitializing = false;
+	private RunQueryJob runJob;
+	
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -284,12 +288,8 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 		loadQueryJob.schedule();
 	}
-	
 
-	private SectionTabHeader dataTabList;
 	private void createResultSection(Composite parent, FormToolkit toolkit){
-		
-		
 		Composite outerStackPanel = new Composite(parent, SWT.NONE);
 		outerStackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		outerStackPanel.setLayout(new StackLayout());
@@ -344,47 +344,8 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 		resultsTable.setQuery(query);
 		
-		Job j = new Job("running query job") {
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				
-				
-				HashMap<String, Object> parameters = new HashMap<>();
-				parameters.put(Date.class.getName(), fdateFilter);
-				parameters.put(IProgressMonitor.class.getName(), new QueryProgressMonitor(progressPanel));
-				IPagedQueryResultSet results = null;
-				Session session = HibernateManager.openSession();
-				try{
-					parameters.put(Session.class.getName(), session);
-					results = (new IntelObservationQueryEngine()).executeQuery(query, parameters);	
-				}catch (Exception ex){
-					Intelligence2PlugIn.displayLog("Error running query. " + ex.getMessage(), ex);
-					
-					Display.getDefault().syncExec(()->{
-						resultsTable.setInput(null);
-						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
-						errorPanel.setError("Error running query: " + ex.getMessage());
-						stackPanel.layout(true);
-					});
-					
-					return Status.OK_STATUS;
-				}finally{
-					session.close();
-				}
-				
-				final IPagedQueryResultSet rset = results;
-				Display.getDefault().syncExec(()->{
-					resultsTable.setInput(rset);
-					((StackLayout)stackPanel.getLayout()).topControl = resultsTable;
-					stackPanel.layout(true);
-				});
-				
-				return Status.OK_STATUS;
-			}
-		};
-		
-		j.schedule();
+		runJob.setDateFilter(fdateFilter);
+		runJob.schedule();
 	}
 	
 	
@@ -467,6 +428,9 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		if (query.getUuid() == null) setDirty(true);
 	}
 	
+	public IntelRecordObservationQuery getQuery(){
+		return this.query;
+	}
 	
 	private Job loadQueryJob = new Job("loading query"){
 
@@ -519,6 +483,33 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 			}
 			final List<DropItem> fGeneratedDropItems = generatedDropItems;
 			final IQueryFilter.FilterType fType = filterType;
+			
+			//configure run query job
+			runJob = new RunQueryJob(query) {
+				@Override
+				protected void onError(Exception ex) {
+					// TODO Auto-generated method stub
+					Display.getDefault().syncExec(()->{
+						resultsTable.setInput(null);
+						mapPanel.updateQueryLayers(null);
+						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
+						errorPanel.setError("Error running query: " + ex.getMessage());
+						stackPanel.layout(true);
+					});
+				}
+				
+				@Override
+				protected void onComplete(IPagedQueryResultSet results) {
+					Display.getDefault().syncExec(()->{
+						resultsTable.setInput(results);
+						mapPanel.updateQueryLayers(results);
+						((StackLayout)stackPanel.getLayout()).topControl = resultsTable;
+						stackPanel.layout(true);
+					});
+				}
+			};
+			runJob.configureParameter(IProgressMonitor.class.getName(), new QueryProgressMonitor(progressPanel));
+			
 			Display.getDefault().syncExec(()->{
 				isInitializing = true;
 				try{

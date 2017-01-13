@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.util.Locale;
 
 /**
  * A query column.
@@ -31,6 +30,26 @@ import java.util.Locale;
  */
 public interface IQueryColumn {
 
+	public enum Type {
+		STRING("String"),
+		DATE("Date"),
+		TIME("String"),
+		NUMERIC("Double"),
+		BOOLEAN("Integer"),
+		GEOMETRY("Geometry");
+		
+		private String geoToolsType;
+		
+		private Type(String geoType){
+			this.geoToolsType = geoType;
+		}
+		
+		public String getFeatureType(){
+			return geoToolsType;
+		}
+	}
+	
+	
 	/**
 	 * The column name
 	 * @return
@@ -56,7 +75,14 @@ public interface IQueryColumn {
 	 * @param l
 	 * @return
 	 */
-	public abstract String getValue(IResultItem item, Locale l);
+	public Object getValue(IResultItem item);
+	
+	
+	/**
+	 * The column data type
+	 * @return
+	 */
+	public Type getDataType();
 	
 	/**
 	 * The column tooltip (for longer column names)

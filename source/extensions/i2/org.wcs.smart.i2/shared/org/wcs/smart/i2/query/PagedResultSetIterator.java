@@ -1,34 +1,28 @@
 package org.wcs.smart.i2.query;
 
-import java.util.List;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 
 public class PagedResultSetIterator {
 
 	private IPagedQueryResultSet results;
 	
-	private int pageCount = -1;
-	private int index = 0;
+	private Session session;
+	private ScrollableResults resultSet;
 	
-	List<? extends IResultItem> currentData = null;
 	
-	public PagedResultSetIterator(IPagedQueryResultSet results){
+	public PagedResultSetIterator(IPagedQueryResultSet results, Session session){
 		this.results = results;
-		
-		results.getItemCount();
+		this.session = session;
+		resultSet = session.createSQLQuery("SELECT * FROM " + results.getQueryDataTable()).scroll();
 	}
 	
 	public boolean hasNext(){
-		return (pageCount * IPagedQueryResultSet.MAP_PAGE_SIZE) + index < results.getItemCount();
+		return resultSet.next();
 	}
 	
 	public IResultItem next(){
-		if (currentData == null || index >= currentData.size()){
-			pageCount++;
-			index = 0;
-			currentData = results.getData(pageCount*IPagedQueryResultSet.MAP_PAGE_SIZE, IPagedQueryResultSet.MAP_PAGE_SIZE);
-		}
-		
-		return currentData.get(index++);
+		return results.asResultItem(resultSet, session);
 	}
 	
 }

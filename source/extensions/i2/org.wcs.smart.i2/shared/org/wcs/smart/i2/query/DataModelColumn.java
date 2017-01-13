@@ -21,13 +21,9 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
-import java.util.Locale;
 
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 
@@ -87,7 +83,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 	}
 	
 	@Override
-	public String getValue(IResultItem item, Locale l) {
+	public Object getValue(IResultItem item) {
 		if (!(item instanceof IntelObservationResultItem)) return null;
 		
 		if (level >= 0){
@@ -98,14 +94,15 @@ public class DataModelColumn extends AbstractQueryColumn{
 			if (value == null) return "";
 			switch(type){
 			case BOOLEAN:
-				if ((Double)value > 0.5) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l);
-				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);
+				if ((Double)value > 0.5) return Boolean.TRUE;
+				return Boolean.FALSE;
+				
 			case DATE:
-				return DateFormat.getDateInstance().format((Date)value);
+				return (Date)value;
 			case LIST:
 				return value.toString();
 			case NUMERIC:
-				return ((Double)value).toString();
+				return ((Double)value);
 			case TEXT:
 				return value.toString();
 			case TREE:
@@ -114,6 +111,22 @@ public class DataModelColumn extends AbstractQueryColumn{
 		}
 		return "";
 	}
-	
 
+	@Override
+	public Type getDataType() {
+		if (level >= 0 ) return Type.STRING;
+		switch(type){
+			case BOOLEAN:
+				return Type.BOOLEAN;
+			case DATE:
+				return Type.DATE;
+			case NUMERIC:
+				return Type.NUMERIC;
+			case TEXT:
+			case TREE:
+			case LIST:
+				return Type.STRING;
+		}
+		return Type.STRING;
+	}
 }

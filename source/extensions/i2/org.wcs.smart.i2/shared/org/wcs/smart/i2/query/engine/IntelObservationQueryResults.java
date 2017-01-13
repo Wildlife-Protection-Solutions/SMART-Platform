@@ -46,6 +46,7 @@ import org.wcs.smart.i2.query.FixedQueryColumn.Column;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.UuidUtils;
@@ -107,7 +108,8 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		this.queryColumns = columns;
 	}
 	
-	public String getResultsTable(){
+	@Override
+	public String getQueryDataTable(){
 		return this.resultsTable;
 	}
 	
@@ -141,7 +143,8 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		return reader.read(b.getBytes(1l, (int) b.length()));
 	}
 	
-	private IntelObservationResultItem asResultItem(ScrollableResults sc, Session session){
+	@Override
+	public IResultItem asResultItem(ScrollableResults sc, Session session){
 		
 		IntelObservationResultItem item = new IntelObservationResultItem();
 		
@@ -202,7 +205,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pageSize) {
-		final List<IntelObservationResultItem> items = new ArrayList<>();
+		final List<IResultItem> items = new ArrayList<>();
 
 		Session session = HibernateManager.openSession();
 		try{
@@ -400,6 +403,11 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	@Override
 	public boolean isDisposed() {
 		return resultsTable == null;
+	}
+
+	@Override
+	public PagedResultSetIterator iterator(Session session) {
+		return new PagedResultSetIterator(this, session);
 	}
 
 }

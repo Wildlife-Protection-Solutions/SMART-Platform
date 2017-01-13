@@ -222,14 +222,7 @@ public class WorkingSetView {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (isInitializing) return;
-				Date[] dFilters = new Date[2];
-				if (dateComp.getDateFilter() == DateFilter.CUSTOM){
-					dFilters[0] = dateComp.getCustomStartDate();
-					dFilters[1] = dateComp.getCustomEndDate();
-				}else{
-					dFilters[0] = dateComp.getDateFilter().getStartDate();
-					dFilters[1] = dateComp.getDateFilter().getEndDate();
-				}
+				Date[] dFilters = getDateFilters();		
 				
 				String dateFilter = dateComp.getDateFilter().name();
 				if (dateComp.getDateFilter() == DateFilter.CUSTOM){
@@ -425,6 +418,26 @@ public class WorkingSetView {
 			}
 		});
 		addDropListener(parent);
+	}
+	
+	/**
+	 * Updates the working set with the date selected in the date
+	 * filter.  Returns the new dates.
+	 * @return
+	 */
+	private Date[] getDateFilters(){
+		Date[] dFilters = new Date[2];
+		if (dateComp.getDateFilter() == DateFilter.CUSTOM){
+			dFilters[0] = dateComp.getCustomStartDate();
+			dFilters[1] = dateComp.getCustomEndDate();
+		}else{
+			dFilters[0] = dateComp.getDateFilter().getStartDate();
+			dFilters[1] = dateComp.getDateFilter().getEndDate();
+		}
+		
+
+
+		return dFilters;
 	}
 	
 	private void addDropListener(Composite parent){
@@ -799,7 +812,7 @@ public class WorkingSetView {
 		workingSet.updateName(SmartDB.getCurrentLanguage(), name);
 		workingSet.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
 		workingSet.setName(name);
-		
+		workingSet.setEntityDateFilter(DateFilter.LAST_YEAR.name());
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
@@ -854,7 +867,7 @@ public class WorkingSetView {
 					Session s = HibernateManager.openSession();
 					try{
 						ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, workingSetUuid);
-						
+						if (ws == null) return Status.OK_STATUS;//TODO: fix this
 						ws.getName();
 						for (IntelWorkingSetEntity entity : ws.getEntities()){
 							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()));
@@ -873,21 +886,21 @@ public class WorkingSetView {
 						s.close();
 					}
 				}
+				
 				DateFilter initFilter = DateFilter.LAST_YEAR;
-				Date[] dates = null;
+				Date[] dates = new Date[]{initFilter.getStartDate(), initFilter.getEndDate()};
 				if (ws != null){
 					String dateFilter = ws.getEntityDateFilter();
-					if (dateFilter != null){
-						try{
-							String[] bits = dateFilter.split(":");
-							initFilter = DateFilter.valueOf(bits[0]);
-							if (initFilter == DateFilter.CUSTOM){
-								dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
-							}
-						}catch (Exception ex){
-							Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
+					try{
+						String[] bits = dateFilter.split(":");
+						initFilter = DateFilter.valueOf(bits[0]);
+						if (initFilter == DateFilter.CUSTOM){
+							dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
 						}
+					}catch (Exception ex){
+						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
 					}
+					
 				}
 				final DateFilter dfilter = initFilter;
 				final Date[] dates2 = dates;
