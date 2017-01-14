@@ -181,6 +181,10 @@ public class QueryLazyResultsTable extends Composite{
 		disposeJob.schedule();
 	}
 	
+	public IPagedQueryResultSet getCurrentResults(){
+		return this.currentResults;
+	}
+	
 	/**
 	 * Sets the table input
 	 * @param result

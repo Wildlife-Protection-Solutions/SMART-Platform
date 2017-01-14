@@ -21,12 +21,16 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Collection of fixed query columns.
@@ -89,7 +93,28 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		case RECORD_TITLE:
 			return i.getRecordTitle();
 		}
-		return "";
+		return null;
+	}
+	
+	@Override
+	public String getValue(IResultItem item, Locale l){
+		Object toFormat = getValue(item);
+		if (toFormat == null) return "";
+		switch(column){
+			case LOC_DATE:
+				return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
+			case LOC_GEOMTRY:
+				return ((Geometry)toFormat).toText();
+			case LOC_TIME:
+				return DateFormat.getTimeInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
+			case RECORD_STATUS:
+				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(toFormat, l);
+			case LOC_COMMENT:
+			case LOC_ID:
+			case RECORD_TITLE:
+				return (String)toFormat;
+		}
+		return toFormat.toString();
 	}
 	
 	@Override

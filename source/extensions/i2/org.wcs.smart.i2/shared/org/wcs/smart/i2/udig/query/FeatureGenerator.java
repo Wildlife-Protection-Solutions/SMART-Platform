@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.udig.query;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryColumn.Type;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Tools for generating features and feature schemas for intelligence queries.
@@ -60,14 +62,16 @@ public class FeatureGenerator {
 	public static SimpleFeature toFeature(SimpleFeatureType ftype, IResultItem item, List<IQueryColumn> columns){
 		List<Object> data = new ArrayList<Object>();
 		data.add(((IGeometryResultItem)item).getGeometry());
-		
+
 		if (item instanceof IntelObservationResultItem){
 			IntelObservationResultItem ii = (IntelObservationResultItem)item;
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append(ii.getLocationId());
 			sb.append(".");
-			sb.append(DateFormat.getInstance().format(ii.getLocationDate()));
+			sb.append((new SimpleDateFormat("yyyMMdd")).format(ii.getLocationDate()));
+			sb.append(".");
+			sb.append(ii.getObservationUuid() == null ? UuidUtils.uuidToString(ii.getLocationUuid()) : UuidUtils.uuidToString(ii.getObservationUuid()));
 			data.add(sb.toString()); 
 		}else{
 			data.add(System.nanoTime());
@@ -119,8 +123,8 @@ public class FeatureGenerator {
 	 * @return
 	 * @throws SchemaException
 	 */
-	public static SimpleFeatureType generateFeatureType(String geometryType, Name typeName, List<IQueryColumn> columns) throws SchemaException{
-		
+	public static SimpleFeatureType generateFeatureType(String geometryType, Name typeName, List<IQueryColumn> columns, boolean forShape) throws SchemaException{
+
 		Set<String> usedNames = new HashSet<>();
 		usedNames.add("name");//not a valid column name
 		usedNames.add("the_geom");
@@ -131,7 +135,7 @@ public class FeatureGenerator {
 		sb.append("fid:String,");
 		for (IQueryColumn c : columns){
 			if (c.getDataType() != Type.GEOMETRY && c.isVisible()){
-				String name = generateFieldName(c.getColumnName(), usedNames);
+				String name = generateFieldName(c.getColumnName(), usedNames, forShape);
 				usedNames.add(name.toLowerCase());
 				sb.append(name);
 				sb.append(":");
@@ -143,6 +147,10 @@ public class FeatureGenerator {
 		return DataUtilities.createType(typeName.getNamespaceURI(), typeName.getLocalPart(), sb.toString());
 	}
 	
+	public static SimpleFeatureType generateFeatureType(String geometryType, Name typeName, List<IQueryColumn> columns) throws SchemaException{
+		return generateFeatureType(geometryType, typeName, columns, false);
+	}
+	
 	
 	/**
 	 * Generates the name for a simple feature type field 
@@ -150,9 +158,8 @@ public class FeatureGenerator {
 	 * @param usedNames list of names already used for the simple feautre type
 	 * @return
 	 */
-	private static String generateFieldName(String name, Set<String> usedNames){
+	private static String generateFieldName(String name, Set<String> usedNames, boolean forShape){
 		
-		boolean forShape = false;
 		name = name.replaceAll(" ", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 		name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		

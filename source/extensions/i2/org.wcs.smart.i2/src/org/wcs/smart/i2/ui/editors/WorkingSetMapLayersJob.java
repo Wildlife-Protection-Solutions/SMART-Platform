@@ -42,16 +42,12 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
-import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
-import org.wcs.smart.i2.query.IPagedQueryResultSet;
-import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
-import org.wcs.smart.i2.udig.query.QueryGeoResource;
 import org.wcs.smart.i2.udig.query.QueryService;
 import org.wcs.smart.i2.udig.record.IntelRecordService;
 import org.wcs.smart.i2.udig.record.IntelRecordServiceExtension;
@@ -307,10 +303,7 @@ public class WorkingSetMapLayersJob extends Job {
 					 
 					 for (Layer layer : getLayers()){
 						 layer.getBlackboard().put(WS_MAP_LAYER_KEY, Boolean.TRUE);
-						 layer.addListener(styleListener);
-						 for (ILayerListener l : listeners){
-							 layer.addListener(l);	 
-						 }
+						 //configure style and visibility
 						 ID styleId = getLayerStyleIdentifier(layer.getGeoResource());
 						 StyleBlackboard bb = layerStyles.get(styleId);
 						 if (bb != null){
@@ -325,6 +318,12 @@ public class WorkingSetMapLayersJob extends Job {
 							 }
 						 }
 						 if(!visible) layer.setVisible(visible);
+
+						 //then add listeners
+						 layer.addListener(styleListener);
+						 for (ILayerListener l : listeners){
+							 layer.addListener(l);	 
+						 }
 					 }
 				 }
 			};
@@ -336,10 +335,8 @@ public class WorkingSetMapLayersJob extends Job {
 					for (Layer layer : getLayers()) {
 						layer.getBlackboard().put(WS_MAP_LAYER_KEY,
 								Boolean.TRUE);
-						layer.addListener(styleListener);
-						for (ILayerListener l : listeners) {
-							layer.addListener(l);
-						}
+						
+						//configure style and visibility
 						ID styleId = getLayerStyleIdentifier(layer.getGeoResource());
 						StyleBlackboard bb = layerStyles.get(styleId);
 						if (bb != null) {
@@ -354,6 +351,11 @@ public class WorkingSetMapLayersJob extends Job {
 						}
 						if (!visible)layer.setVisible(visible);
 						
+						//then add listeners
+						layer.addListener(styleListener);
+						for (ILayerListener l : listeners) {
+							layer.addListener(l);
+						}
 						
 					}
 				}

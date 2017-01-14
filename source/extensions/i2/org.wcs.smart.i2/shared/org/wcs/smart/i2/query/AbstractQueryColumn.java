@@ -30,13 +30,16 @@ package org.wcs.smart.i2.query;
  */
 public abstract class AbstractQueryColumn implements IQueryColumn{
 
-	private String name = null;
-	private String key = null;
-	private boolean isVisible = true;
+	protected String name = null;
+	protected String key = null;
+	protected boolean isVisible = true;
+	
+	protected String tooltip = null;
 	
 	public AbstractQueryColumn(String columnName, String key){
 		this.name = columnName;
 		this.key = key;
+		this.tooltip = columnName;
 	}
 	
 	@Override
@@ -58,4 +61,7 @@ public abstract class AbstractQueryColumn implements IQueryColumn{
 		this.isVisible = isVisible;
 	}
 	
+	public String getTooltip(){
+		return tooltip;
+	}
 }

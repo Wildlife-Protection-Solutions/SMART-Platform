@@ -61,6 +61,7 @@ public class QueryProgressMonitor implements IProgressMonitor {
 	public void beginTask(String name, int totalWork) {
 		this.taskName = name;
 		this.totalWork = totalWork;
+		this.worked = 0;
 		updateGui();
 	}
 

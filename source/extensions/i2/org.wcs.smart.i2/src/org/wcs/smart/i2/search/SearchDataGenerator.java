@@ -22,7 +22,10 @@
 package org.wcs.smart.i2.search;
 
 import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,23 +37,34 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelObservation;
+import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 /**
  * Generates a large quantity of intelligence data for testing.
  * 
@@ -224,6 +238,38 @@ public class SearchDataGenerator {
 			}
 			value.setStringValue(sb.toString());
 //			System.out.println(sb.toString());
+		}
+		
+		return value;
+	}
+	
+	private static IntelObservationAttribute generateValue(Attribute a, List<String> strings, Session session){
+		IntelObservationAttribute value = new IntelObservationAttribute();
+		value.setAttribute(a);
+		
+		if (a.getType() == Attribute.AttributeType.BOOLEAN){
+			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
+		}else if (a.getType() == Attribute.AttributeType.DATE){
+			value.setDateValue(new Date());
+		}else if (a.getType() == Attribute.AttributeType.LIST){
+			int index = (int)Math.round((a.getAttributeList().size()-1) * Math.random());
+			value.setAttributeListItem(a.getAttributeList().get(index));
+		}else if (a.getType() == Attribute.AttributeType.NUMERIC){
+			value.setNumberValue(Math.random() * 100 * Math.random() + Math.random());
+		}else if (a.getType() == Attribute.AttributeType.TEXT){
+			StringBuilder sb= new StringBuilder();
+			int numWords = (int)Math.round(Math.random() * 15);
+			if (numWords < 0) numWords = 1;
+			for (int i = 0; i < numWords; i ++){
+				sb.append(strings.get(  (int)Math.round(Math.random() * (strings.size() - 1) )) + " ");
+			}
+			value.setStringValue(sb.toString());
+		}else if (a.getType() == Attribute.AttributeType.TREE){
+			List<AttributeTreeNode> nodes = session.createCriteria(AttributeTreeNode.class)
+					.add(Restrictions.eq("attribute", a))
+					.list();
+			int index = (int)Math.round((nodes.size()-1) * Math.random());
+			value.setAttributeTreeNode(nodes.get(index));
 		}
 		
 		return value;
@@ -412,6 +458,8 @@ public class SearchDataGenerator {
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 				.list();
 
+		Long cnt = (Long) session.createCriteria(IntelRecord.class).setProjection(Projections.rowCount()).uniqueResult();
+		DecimalFormat df = new DecimalFormat("000");
 		for (int i = 0; i < numberRecords; i ++){
 			monitor.subTask("Generated Records " + i + " / " + numberRecords);
 			
@@ -433,7 +481,10 @@ public class SearchDataGenerator {
 				title.append(" ");
 			}
 			title.deleteCharAt(title.length() - 1);
-			record.setTitle(WordUtils.capitalize(title.toString()));
+//			record.setTitle(WordUtils.capitalize(title.toString()));
+			
+			
+			record.setTitle("Generated Record " + df.format(i+1 + cnt));
 			
 			
 			int descTitle = (int)Math.round(Math.random() * 10000);
@@ -464,8 +515,102 @@ public class SearchDataGenerator {
 					used.add(e);
 				}
 			}
+			
+			
+			//generate some location
+			
+			long range = 365*24*60*60*(long)1000 + 30 * 24*60*60*(long)1000;
+			Calendar c = Calendar.getInstance();
+			c.set(2016, 1, 1);
+			long start = c.getTimeInMillis();
+			
 			session.save(record);
 			session.flush();
+			
+			List<Category> categories = session.createCriteria(Category.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.list();
+			
+			for (int lcnt = 0; lcnt < 20; lcnt ++){
+				IntelLocation loc = new IntelLocation();
+				loc.setRecord(record);
+				
+				StringBuilder sb = new StringBuilder();
+				for (int itemcnt = 0; itemcnt < 15; itemcnt++){
+					sb.append(items.get( (int)(Math.random() * items.size()) ));
+				}
+				loc.setComment(sb.toString());
+				loc.setId("Location " + (i+1));
+				loc.setConservationArea(SmartDB.getCurrentConservationArea());
+				loc.setDateTime(new Date(Math.round(Math.random() * range)  + start));
+				
+
+				
+				if (Math.random() < 0.75){
+					double d1 = Math.random() * 360;
+					double d2 = Math.random() * 360;
+					if (Math.random() < 0.5) d1 = d1 * -1;
+					if (Math.random() < 0.5) d2 = d2 * -1;
+					
+					GeometryFactory gf = new GeometryFactory();
+					loc.setGeometry(gf.createPoint(new Coordinate(d1, d2)));
+					
+				}else{
+					double d1 = Math.random() * 360;
+					double d2 = Math.random() * 360;
+					if (Math.random() < 0.5) d1 = d1 * -1;
+					if (Math.random() < 0.5) d2 = d2 * -1;
+					
+					Coordinate[] cds = new Coordinate[12];
+					cds[0] = new Coordinate(d1, d2);
+					for (int cc = 1; cc < cds.length-2; cc++){
+						cds[cc] = new Coordinate(cds[cc-1].x + 1, cds[cc-1].y+1);
+					}
+					cds[cds.length - 2] = new Coordinate(cds[0].x, cds[cds.length - 3].y);
+					cds[cds.length - 1] = cds[0];
+					
+					loc.setGeometry((new GeometryFactory()).createPolygon(cds));
+				}
+				
+				session.save(loc);
+				session.flush();
+				
+				//add three observations
+				for (int oc = 0; oc < 3; oc++){
+					Category cat = categories.get(  (int)Math.round( (Math.random() * (categories.size()-1))) );
+					
+					IntelObservation ob = new IntelObservation();
+					ob.setCategory(cat);
+					ob.setLocation(loc);
+					ob.setObservationAttributes(new ArrayList<>());
+					
+					for (CategoryAttribute a : cat.getAttributes()){
+						IntelObservationAttribute attributeValue = generateValue(a.getAttribute(), items, session);
+						ob.getObservationAttributes().add(attributeValue);
+						attributeValue.setObservation(ob);
+					}
+					
+					session.save(ob);
+				}
+				
+				session.flush();
+				
+				
+				
+				for (IntelEntityRecord r : record.getEntities()){
+					if (Math.random() <= 0.25){
+						IntelEntityLocation elocation = new IntelEntityLocation();
+						elocation.setEntity(r.getEntity());
+						elocation.setLocation(loc);
+						if (r.getEntity().getLocations() == null){
+							r.getEntity().setLocations(new ArrayList<IntelEntityLocation>());
+						}						
+						session.save(elocation);
+					}
+				}
+				session.flush();
+			}
+			
 			session.clear();
 			monitor.worked(1);
 		}

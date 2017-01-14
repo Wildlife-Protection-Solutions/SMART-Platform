@@ -23,7 +23,6 @@ package org.wcs.smart.i2.ui.editors.query;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +36,7 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
@@ -52,7 +52,9 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
@@ -75,15 +77,14 @@ import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.RunQueryJob;
-import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.SmartSection;
+import org.wcs.smart.i2.ui.dialogs.query.ExportQueryWizard;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.FilterDefinitionPanel;
 
 /**
  * Intelligence query editor
@@ -111,7 +112,8 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 	
 	//filter panel
 	private FilterDefinitionPanel panel;
-	private ToolItem runItem;
+	private ToolItem[] runItem = new ToolItem[2];
+	private ToolItem saveItem;
 
 	//results area
 	private Composite stackPanel;
@@ -176,6 +178,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
+		saveItem.setEnabled(isDirty);
 		panel.setQueryState(isDirty);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
@@ -233,7 +236,13 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		Composite main = pageForm.getBody();
 		main.setLayout(new GridLayout());
 		
-		header = new IntelQueryNameLabel(main, toolkit, pageForm.getFont(), pageForm.getForeground());
+		Composite headerComp = toolkit.createComposite(main);
+		headerComp.setLayout(new GridLayout(2, false));
+		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)headerComp.getLayout()).marginWidth = 0;
+		((GridLayout)headerComp.getLayout()).marginHeight = 0;
+		
+		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.addListener(SWT.Selection, e-> {
 			if (query == null){
@@ -244,6 +253,23 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 			query.updateName(SmartDB.getCurrentLanguage(), e.text);
 			setDirty(true);
 		});
+		
+		ToolBar headerToolbar = new ToolBar(headerComp, SWT.FLAT);
+		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		saveItem = new ToolItem(headerToolbar, SWT.PUSH);
+		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		saveItem.addListener(SWT.Selection, (event)->IntelQueryEditor.this.getSite().getPage().saveEditor(IntelQueryEditor.this, false));
+		saveItem.setToolTipText("save query");
+		
+		ToolItem exportItem = new ToolItem(headerToolbar, SWT.PUSH);
+		exportItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EXPORT_QUERY));
+		exportItem.addListener(SWT.Selection, (event)->exportQuery());
+		exportItem.setToolTipText("export query results");
+		
+		runItem[0] = new ToolItem(headerToolbar, SWT.PUSH);
+		runItem[0].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem[0].addListener(SWT.Selection, (event)->runQuery());
+		runItem[0].setToolTipText("run query");
 		
 		createDatePart(main, toolkit);
 		
@@ -321,6 +347,17 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 	}
 	
+	private void exportQuery(){
+		if (resultsTable.getCurrentResults() == null){
+			MessageDialog.openInformation(getSite().getShell(), "Export", "Query must be run before you can export the query results");
+			return;
+		}
+		
+		ExportQueryWizard wizard = new ExportQueryWizard(query, resultsTable.getCurrentResults());
+		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		wd.open();
+	}
+	
 	private void runQuery(){
 		
 		resultsTable.setInput(null);
@@ -355,10 +392,11 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		try{
 			IntelRecordObservationQuery.parseQuery(queryString);
 			panel.setErrorMessage(null, null);
-			runItem.setEnabled(true);
+			for(ToolItem i : runItem) i.setEnabled(true);
+			
 			return queryString;
 		}catch (Exception ex){
-			runItem.setEnabled(false);
+			for(ToolItem i : runItem) i.setEnabled(false);
 			panel.setErrorMessage("Query is invalid", ex);
 			return null;
 		}
@@ -404,10 +442,10 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		datePart.adapt(toolkit);
 		
 		ToolBar headerToolbar = new ToolBar(main, SWT.FLAT);
-		runItem = new ToolItem(headerToolbar, SWT.PUSH);
-		runItem.setToolTipText("run query");
-		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
-		runItem.addSelectionListener(new SelectionAdapter() {
+		runItem[1] = new ToolItem(headerToolbar, SWT.PUSH);
+		runItem[1].setToolTipText("run query");
+		runItem[1].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem[1].addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				runQuery();

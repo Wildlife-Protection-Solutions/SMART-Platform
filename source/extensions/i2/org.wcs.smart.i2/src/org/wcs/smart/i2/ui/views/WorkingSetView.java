@@ -728,7 +728,7 @@ public class WorkingSetView {
 	
 	@Inject
 	@Optional
-	private void recordRemoved(@UIEventTopic(IntelEvents.RECORD_DELETE) IntelRecord e){
+	private void recordRemoved(@UIEventTopic(IntelEvents.RECORD_DELETE) Object payload){
 		refreshWithDelay();
 	}
 	

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -38,6 +39,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
 /**
  * Functions for managing intelligence records
@@ -76,6 +78,51 @@ public enum RecordManager {
 		}
 	}
 
+	public void deleteRecords(List<Object> records, IEclipseContext context, IProgressMonitor monitor){
+		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
+			MessageDialog.openError(context.get(Shell.class), "Error", "Insufficient privileges");
+			return;
+		}
+		monitor.beginTask("Deleting records", records.size());
+		Session s = HibernateManager.openSession(new AttachmentInterceptor());
+		List<IntelEntity> entities = new ArrayList<IntelEntity>();
+		List<IntelRecord> deleted = new ArrayList<IntelRecord>();
+		try{
+			s.beginTransaction();
+			for (Object x : records){
+				IntelRecord record = null;
+				if (x instanceof IntelRecord){
+					record = (IntelRecord) s.get(IntelRecord.class, ((IntelRecord) x).getUuid());		
+				}else if (x instanceof RecordEditorInput){
+					record = (IntelRecord) s.get(IntelRecord.class, ((RecordEditorInput) x).getUuid());
+				}
+				monitor.subTask(record.getTitle());
+				for (IntelEntityRecord r : record.getEntities()){
+					entities.add(r.getEntity());
+				}
+				
+				deleteRecord(record, s);
+				deleted.add(record);
+				monitor.worked(1);
+				if (monitor.isCanceled()){
+					s.getTransaction().rollback();
+					return;
+				}
+			}
+			
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			Intelligence2PlugIn.displayLog("Error deleting record. " + ex.getMessage(), ex);
+			return;
+		}finally{
+			s.close();
+			monitor.done();
+		}
+		IEventBroker broker = context.get(IEventBroker.class);
+		broker.send(IntelEvents.RECORD_DELETE, deleted);
+		if (!entities.isEmpty()) broker.send(IntelEvents.ENTITY_MODIFIED, entities);
+	}
 	public void deleteRecord(IntelRecord record, IEclipseContext context){
 		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			MessageDialog.openError(context.get(Shell.class), "Error", "Insufficient privileges");

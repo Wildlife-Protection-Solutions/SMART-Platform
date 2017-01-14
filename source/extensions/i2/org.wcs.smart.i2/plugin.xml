@@ -470,6 +470,27 @@
                </or>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.eclipse.ui.file.export"
+               id="x"
+               label="Export Map"
+               style="push"
+               tooltip="export the current map">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                     </equals>
+                  </or>
+               </with>
+            </visibleWhen>
+         </command>
          <separator
                name="org.wcs.smart.query.separator3"
                visible="true">
@@ -528,6 +549,7 @@
                style="push">
          </command>
       </menuContribution>
+      
    </extension>
    <extension
          point="org.eclipse.ui.views">

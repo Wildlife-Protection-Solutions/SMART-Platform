@@ -203,10 +203,13 @@ public class ObservationFilterProcessor {
 					String columnName = filterToColumnName.get(filter);
 					if (columnName != null){
 						deleteSql.append(" ( " + columnName + " is not null ) ");
+						deleteSql.append(" ");
 					}else if (filter.getClass().equals(BooleanFilter.class)){
 						deleteSql.append(  SqlGenerator.operatorToSql(((BooleanFilter)filter).getOperator()));
+						deleteSql.append(" ");
 					}else if (filter.getClass().equals(NotFilter.class)){
 						deleteSql.append( SqlGenerator.operatorToSql(Operator.NOT));
+						deleteSql.append(" ");
 					}else if (filter.getClass().equals(BracketFilter.class)){
 						if (filters.contains(filter)){
 							deleteSql.append(SqlGenerator.operatorToSql(Operator.BRACKET_CLOSE));
@@ -214,6 +217,7 @@ public class ObservationFilterProcessor {
 							deleteSql.append(SqlGenerator.operatorToSql(Operator.BRACKET_OPEN));
 							filters.add((BracketFilter) filter);
 						}
+						deleteSql.append(" ");
 					}
 					}catch (Exception ex){
 						visitorException = ex;
@@ -297,28 +301,28 @@ public class ObservationFilterProcessor {
 					.add(Restrictions.eq("attribute", attribute))
 					.uniqueResult();	
 		}
-		sql.append(" JOIN smart.i_observation_attribute a on a.observation_uuid = a.uuid ");
+		sql.append(" JOIN smart.i_observation_attribute ia on ia.observation_uuid = o.uuid ");
 		
 		sql.append(" WHERE ");
 		
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
-			sql.append(" v.double_value " + SqlGenerator.operatorToSql(Operator.GREATERTHAN) + " 0.5");
+			sql.append(" ia.double_value " + SqlGenerator.operatorToSql(Operator.GREATERTHAN) + " 0.5");
 			break;
 		case DATE:
-			sql.append(" cast(v.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(value2 as date)");
+			sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(value2 as date)");
 			break;
 		case LIST:
-			sql.append(" v.list_item_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value");
+			sql.append(" ia.list_element_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value");
 			break;
 		case NUMERIC:
-			sql.append(" v.double_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value");
+			sql.append(" ia.double_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value");
 			break;
 		case TEXT:
-			sql.append(" v.string_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value");
+			sql.append(" ia.string_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value");
 			break;
 		case TREE:
-			sql.append(" v.tree_node_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value");
+			sql.append(" ia.tree_node_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value");
 			break;
 		default:
 			break;

@@ -21,9 +21,15 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.text.DateFormat;
 import java.util.Map.Entry;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.query.IQueryColumn.Type;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
@@ -59,6 +65,17 @@ public class FilterQueryColumn extends AbstractQueryColumn {
 			
 		}
 		return null;
+	}
+	
+	@Override
+	public String getValue(IResultItem item, Locale l){
+		Object toFormat = getValue(item);
+		if (toFormat == null) return "";
+		if ((Boolean)toFormat){
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, Locale.getDefault());
+		}else{
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());
+		}
 	}
 
 	@Override

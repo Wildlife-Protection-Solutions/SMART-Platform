@@ -23,12 +23,16 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+
 
 
 
@@ -77,6 +81,8 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+
+
 
 
 
@@ -352,8 +358,17 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			//on delete close editor
 			subscribeToEvent(IntelEvents.RECORD_DELETE, (event)->{
 				Object data = event.getProperty(IEventBroker.DATA);
-				if (data != null && data.equals(record)){
-					getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
+				Collection<IntelRecord> items = null;
+				if (data instanceof IntelRecord){
+					items = Collections.singletonList((IntelRecord)data);
+				}else if(data instanceof Collection){
+					items = (Collection<IntelRecord>) data;
+				}
+				
+				if (data != null){
+					for (IntelRecord r : items){
+						if (r.equals(record)) getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
+					}
 				}
 			});
 			

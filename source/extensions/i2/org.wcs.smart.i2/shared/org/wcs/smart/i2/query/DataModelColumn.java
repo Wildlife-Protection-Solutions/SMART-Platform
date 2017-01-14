@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.Locale;
 
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 
@@ -91,7 +95,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 		}
 		if (attributeKey != null){
 			Object value = ((IntelObservationResultItem)item).getAttributeValue(attributeKey);
-			if (value == null) return "";
+			if (value == null) return null;
 			switch(type){
 			case BOOLEAN:
 				if ((Double)value > 0.5) return Boolean.TRUE;
@@ -109,9 +113,26 @@ public class DataModelColumn extends AbstractQueryColumn{
 				return value.toString();
 			}
 		}
-		return "";
+		return null;
 	}
 
+	@Override
+	public String getValue(IResultItem item, Locale l){
+		Object toFormat = getValue(item);
+		if (toFormat == null) return "";
+		if (getDataType() == Type.STRING) return (String)toFormat;
+		if (getDataType() == Type.DATE) return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
+		if (getDataType() == Type.NUMERIC) return ((Number)toFormat).toString();
+		if (getDataType() == Type.BOOLEAN){
+			if ((Boolean)toFormat){
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, Locale.getDefault());
+			}else{
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());
+			}
+		}
+		return toFormat.toString();
+	}
+	
 	@Override
 	public Type getDataType() {
 		if (level >= 0 ) return Type.STRING;

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,6 +44,9 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -68,6 +72,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -87,6 +92,8 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
+
+import com.ibm.icu.text.MessageFormat;
 
 public class RecordsView {
 
@@ -313,14 +320,21 @@ public class RecordsView {
 			miDelete.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
+					List<Object> toDelete = new ArrayList<>();
 					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
 						Object x = (Object) iterator.next();
-						
-						if (x instanceof IntelRecord){
-							RecordManager.INSTANCE.deleteRecord((IntelRecord)x, context);
-						}else if (x instanceof RecordEditorInput){
-							RecordManager.INSTANCE.deleteRecord(((RecordEditorInput)x).getUuid(), context);
+						if (x instanceof IntelRecord || x instanceof RecordEditorInput){
+							toDelete.add(x);
 						}
+					}
+					if (MessageDialog.openConfirm(context.get(Shell.class), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected records?", toDelete.size()))){
+						ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
+						try {
+							pmd.run(true, true, (monitor)-> RecordManager.INSTANCE.deleteRecords(toDelete, context,monitor));
+						} catch (Exception ex) {
+							Intelligence2PlugIn.displayLog("Error deleting records: " + ex.getMessage(), ex);
+						}
+						refreshView();
 					}
 				}
 			});
@@ -366,6 +380,9 @@ public class RecordsView {
 	}
 	
 	public void refreshView(){
+		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		loadRecordsJob.schedule();
 	}
 

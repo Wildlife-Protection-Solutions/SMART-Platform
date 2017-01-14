@@ -31,6 +31,8 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.export.CsvQueryExporter;
+import org.wcs.smart.i2.query.export.ShpQueryExporter;
 
 /**
  * Desktop label provider for intelligence module.
@@ -96,6 +98,9 @@ public class IntelligenceLabelProviderImpl implements
 				case STR_NOTCONTAINS: return "Not Contains";
 			}
 		}
+		
+		if (item instanceof CsvQueryExporter) return "Comma Separated Values";
+		if (item instanceof ShpQueryExporter) return "Shapefile";
 		return null;
 		
 	}

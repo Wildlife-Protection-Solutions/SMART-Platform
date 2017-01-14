@@ -1,5 +1,6 @@
 package org.wcs.smart.i2.ui.editors;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,13 +23,14 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.udig.query.QueryGeoResource;
 import org.wcs.smart.i2.udig.query.QueryService;
-import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
+import org.wcs.smart.i2.udig.query.QueryServiceExtension;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -41,10 +43,21 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 	
 	public static final String WS_MAP_LAYER_KEY = "org.wcs.smart.i2.ws.map.wslayer"; //$NON-NLS-1$
 
+	private List<IntelRecordObservationQuery> queriesToUpdate = null;
+	
 	public WorkingSetQueryLayersJob(Map map, IEclipseContext context, ILayerListener... layerlisteners){
 		super(map, context, layerlisteners);
 		setName("loading working set query map layers");
 	}
+	
+	public WorkingSetQueryLayersJob clone(){
+		return new WorkingSetQueryLayersJob(map, context, listeners);
+	}
+	
+	public void setQueriesToUpdate(List<IntelRecordObservationQuery> queriesToUpdate){
+		this.queriesToUpdate = queriesToUpdate;
+	}
+	
 	
 	@Override
 	protected ID getLayerStyleIdentifier(IGeoResource resource){
@@ -54,6 +67,26 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 			return null;
 		}
 	}
+	
+	private boolean canDelete(ILayer layer, IProgressMonitor monitor) throws IOException{
+		
+		Object x = layer.getBlackboard().get(WS_MAP_LAYER_KEY) ;
+		if (x != null && ((Boolean)x)){
+			if (layer.getGeoResource().canResolve(QueryService.class)){
+				if (queriesToUpdate == null) return true;
+				
+				QueryService service = layer.getGeoResource().resolve(QueryService.class, monitor);
+				for (IntelRecordObservationQuery q : queriesToUpdate){
+					if (q.getUuid().equals(service.getConnectionParams().get(QueryServiceExtension.QUERY_UUID_KEY))){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+		
+	}
+	
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
@@ -73,20 +106,18 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 		//remove all existing query layers from map
 		List<ILayer> layersToRemove = new ArrayList<ILayer>();
 		for (ILayer l : map.getLayersInternal()){
-			Object x = l.getBlackboard().get(WS_MAP_LAYER_KEY) ;
-			if (x != null && ((Boolean)x)){
-				if (l.getGeoResource().canResolve(QueryService.class)){
+			try{
+				if (canDelete(l, monitor)){
 					layersToRemove.add(l);
-					try{
-						QueryService service = l.getGeoResource().resolve(QueryService.class, monitor);
-						if (!service.isDisposed()){
-							service.dispose(monitor);
-							CatalogPlugin.getDefault().getLocalCatalog().remove(service);
-						}
-					}catch (Exception ex){
-						Intelligence2PlugIn.log(ex.getMessage(), ex);
+					//dispose of query service
+					QueryService service = l.getGeoResource().resolve(QueryService.class, monitor);
+					if (!service.isDisposed()){
+						service.dispose(monitor);
+						CatalogPlugin.getDefault().getLocalCatalog().remove(service);
 					}
 				}
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
 			}
 		}
 		if (!layersToRemove.isEmpty()){
@@ -109,7 +140,22 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 				Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
 			}
 						
-			for (IntelWorkingSetQuery query: workingset.getQueries()){
+			List<IntelWorkingSetQuery> queries = null;
+			if (queriesToUpdate != null){
+				queries = new ArrayList<IntelWorkingSetQuery>();
+				for (IntelRecordObservationQuery q : queriesToUpdate){
+					for (IntelWorkingSetQuery wq : workingset.getQueries()){
+						if (wq.getQuery().equals(q)){
+							queries.add(wq);
+						}
+					}
+					
+				}
+			}else{
+				queries= workingset.getQueries();
+				
+			}
+			for (IntelWorkingSetQuery query: queries){
 				
 				RunQueryJob job = new RunQueryJob(query.getQuery()) {
 					

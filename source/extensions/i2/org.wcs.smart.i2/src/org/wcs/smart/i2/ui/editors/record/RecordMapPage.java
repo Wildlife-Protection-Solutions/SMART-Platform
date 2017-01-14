@@ -108,7 +108,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 			if (getMap() == null) return Status.OK_STATUS;
 			boolean added = false;
 			try {
-				if (polygonFeatureType == null){
+				if (polygonFeatureType == null || polygonResource == null){
 					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POLYGON);
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POLYGON, recordEditor.getRecord().getUuid());
 					polygonFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
@@ -125,7 +125,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 					getMap().sendCommandASync(command);
 					added = true;
 				}
-				if (pointFeatureType == null){
+				if (pointFeatureType == null || pointResource == null){
 					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POINT);
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POINT, recordEditor.getRecord().getUuid());
 					pointFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);

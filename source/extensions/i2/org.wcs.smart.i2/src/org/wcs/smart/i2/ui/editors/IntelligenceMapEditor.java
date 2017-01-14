@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -102,6 +103,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
@@ -401,6 +403,26 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 			}
 		};
 		parentContext.get(IEventBroker.class).subscribe(IntelEvents.WS_MODIFIED, handler);
+		handlers.add(handler);
+		
+		
+		handler = new EventHandler() {
+			@Override
+			public void handleEvent(Event event) {
+				Object data = (Object) event.getProperty(IEventBroker.DATA);
+				List<IntelRecordObservationQuery> queries = Collections.emptyList();
+				if (data instanceof IntelRecordObservationQuery){
+					queries = Collections.singletonList((IntelRecordObservationQuery)data);
+				}else if (data instanceof List){
+					queries = (List<IntelRecordObservationQuery>) data;
+				}
+				//rerun query
+				WorkingSetQueryLayersJob refreshJob = queryLayersJob.clone();
+				refreshJob.setQueriesToUpdate(queries);
+				refreshJob.schedule();
+			}
+		};
+		parentContext.get(IEventBroker.class).subscribe(IntelEvents.QUERY_MODIFIED, handler);
 		handlers.add(handler);
 		
 		handler = new EventHandler() {

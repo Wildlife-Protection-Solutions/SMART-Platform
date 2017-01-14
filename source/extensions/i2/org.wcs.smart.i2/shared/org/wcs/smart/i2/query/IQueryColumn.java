@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.util.Locale;
+
 
 /**
  * A query column.
@@ -76,6 +78,14 @@ public interface IQueryColumn {
 	 * @return
 	 */
 	public Object getValue(IResultItem item);
+	
+	/**
+	 * Convert the object value for this column to a string representation
+	 * 
+	 * @param item
+	 * @return
+	 */
+	public String getValue(IResultItem item, Locale l);
 	
 	
 	/**

@@ -64,6 +64,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_RELATIONSHIP = "org.wcs.smart.i2.icon.relationship"; //$NON-NLS-1$
 	public static final String ICON_SECTION_EXPAND = "org.wcs.smart.i2.icon.section.expand"; //$NON-NLS-1$
 	public static final String ICON_RUN = "org.wcs.smart.i2.icon.query.run"; //$NON-NLS-1$
+	public static final String ICON_EXPORT_QUERY = "org.wcs.smart.i2.icon.query.export"; //$NON-NLS-1$
 	public static final String ICON_AREA = "org.wcs.smart.i2.icon.query.area"; //$NON-NLS-1$
 	public static final String ICON_DELETE_SMALL = "org.wcs.smart.i2.icon.delete.small"; //$NON-NLS-1$
 	public static final String ICON_CLEAR = "org.wcs.smart.i2.icon.clear"; //$NON-NLS-1$
@@ -109,6 +110,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		
 		reg.put(ICON_IMG_ZOOMIN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_in.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMG_ZOOMOUT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_out.png")); //$NON-NLS-1$);
+		
+		reg.put(ICON_EXPORT_QUERY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_export.png")); //$NON-NLS-1$);
+		
 		
 	}
 	

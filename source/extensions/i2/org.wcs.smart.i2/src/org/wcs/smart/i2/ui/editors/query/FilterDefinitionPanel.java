@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.views.query.dropitem;
+package org.wcs.smart.i2.ui.editors.query;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,6 +41,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -57,6 +58,11 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.IDefinitionPanel;
+import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.ProxyItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 
 /**
@@ -80,8 +86,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	
 	private DropItem dragItem;
 	
-	private ToolItem opWaypoint;
-	private ToolItem opObservation;
+	private Button opWaypoint;
+	private Button opObservation;
 	
 	private Composite infoPanel;
 	private ToolItem runItem;
@@ -344,7 +350,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	protected void createFilterTypeComposite(Composite parent){
 		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		GridLayout layout = new GridLayout(3, false);
+		GridLayout layout = new GridLayout(5, false);
 		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 5;
@@ -352,12 +358,13 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		filterTypeComp.setLayout(layout);
 		
-		ToolBar toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
-		toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		Label l = new Label(filterTypeComp, SWT.NONE);
+		l.setText("Filter Type:");
 		
-		opWaypoint = new ToolItem(toolbar, SWT.RADIO);
+		
+		opWaypoint = new Button(filterTypeComp, SWT.RADIO);
 		opWaypoint.setToolTipText("Query across observations at a single location");
-		opWaypoint.setText("Waypoint");
+		opWaypoint.setText("Incident");
 		opWaypoint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -366,7 +373,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		});
 		opWaypoint.setSelection(true);
 		
-		opObservation = new ToolItem(toolbar, SWT.RADIO);
+		opObservation = new Button(filterTypeComp, SWT.RADIO);
 		opObservation.setToolTipText("Query distinct observations");
 		opObservation.setText("Observation");
 		opObservation.addSelectionListener(new SelectionAdapter() {
@@ -380,7 +387,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)infoPanel.getLayoutData()).heightHint = 30;
 		
-		toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
+		ToolBar toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		saveItem = new ToolItem(toolbar, SWT.PUSH);
