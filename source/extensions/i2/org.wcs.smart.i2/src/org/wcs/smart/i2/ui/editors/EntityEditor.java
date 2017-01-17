@@ -1175,7 +1175,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		relationshipEditPanel.setLayout(createGridLayoutNoMargin(1));
 		relationshipEditPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		Button btnAddRelationship = toolkit.createButton(relationshipEditPanel, "New Relationship...", SWT.PUSH);
+		Composite menuPanel = toolkit.createComposite(relationshipEditPanel);
+		menuPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		menuPanel.setLayout(new GridLayout(2, false));
+		((GridLayout)menuPanel.getLayout()).marginWidth = 0;
+		((GridLayout)menuPanel.getLayout()).marginHeight = 0;
+		
+		Button btnAddRelationship = toolkit.createButton(menuPanel, "New Relationship...", SWT.PUSH);
+		btnAddRelationship.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAddRelationship.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -1192,6 +1199,27 @@ public class EntityEditor extends EditorPart implements MapPart{
 				int x = btnAddRelationship.getLocation().x + btnAddRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				int y =  btnAddRelationship.getLocation().y;
 				shell.open(btnAddRelationship.toDisplay(x,y));
+			}
+		});
+		
+		
+		ToolBar toolbar = new ToolBar(menuPanel, SWT.FLAT);
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		
+		ToolItem deleteRelationship = new ToolItem(toolbar, SWT.NONE);
+		deleteRelationship.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		deleteRelationship.setToolTipText("delete the selected relationship");
+		deleteRelationship.addListener(SWT.Selection, e-> deleteRelationship());
+		
+		ToolItem editRelationship = new ToolItem(toolbar, SWT.NONE);
+		editRelationship.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		editRelationship.setToolTipText("edit the selected relationship");
+		editRelationship.addListener(SWT.Selection, e-> {
+			IStructuredSelection sel = (IStructuredSelection) treeRelationships.getSelection();
+			if (!sel.isEmpty()){
+				if (sel.getFirstElement() instanceof IntelEntityRelationship){
+					editRelationshipAttributes((IntelEntityRelationship) sel.getFirstElement());
+				}
 			}
 		});
 		

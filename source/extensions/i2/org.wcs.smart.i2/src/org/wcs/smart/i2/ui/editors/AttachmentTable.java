@@ -105,9 +105,10 @@ public class AttachmentTable extends Composite implements Listener {
 		if (event == null || event.type == SWT.Resize){
 			if (infoSection.isDisposed()) return;
 			if (thumb != null){
-				int mainWidth = infoSection.getClientArea().width - infoSection.getVerticalBar().getSize().x;
+				int mainWidth = infoSection.getClientArea().width - infoSection.getVerticalBar().getSize().x ;
 				int width = infoSection.getSize().x - infoSection.getVerticalBar().getSize().x;	
-				int cols = (int)Math.floor(width / 100.0);
+				
+				int cols = (int)Math.floor(width / (100.0 + 5 ));  //5 margin between images
 				if (cols < 1) cols = 1;
 				thumb.updateLayout(cols);
 				((GridData)thumb.getLayoutData()).widthHint = mainWidth;

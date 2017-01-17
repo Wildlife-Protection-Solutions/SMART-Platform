@@ -69,6 +69,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	private IntelRelationshipType type;
 	
 	private Composite core;
+	private boolean modified = false;
 	
 	public RelationshipAttributeDialog(Shell parentShell, IntelEntityRelationship relationship) {
 		super(parentShell);
@@ -139,6 +140,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	}
 	
 	private void modified(){
+		modified = true;
 		getButton(IDialogConstants.OK_ID).setEnabled(true);
 	}
 	
@@ -173,7 +175,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	
 	@Override
 	protected void cancelPressed(){
-		if (getButton(IDialogConstants.OK_ID).isEnabled()){
+		if (modified){
 			if (MessageDialog.openQuestion(getShell(), "Save Changes", "Would you like the save the changes before closing?")){
 				okPressed();
 				return;

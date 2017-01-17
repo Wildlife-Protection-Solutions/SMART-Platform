@@ -25,7 +25,11 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MenuEvent;
@@ -40,20 +44,30 @@ import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
+import org.wcs.smart.i2.ui.editors.RelationshipSearchJob;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -80,8 +94,9 @@ public class EntityList extends Composite {
 	private EntityListComposite listParent;
 	private MenuItem mnuDelete;
 	private MenuItem mnuOpen;
+	private MenuItem mnuRelationship;
 	
-	public int entityColumnCnt = 2;
+	private int entityColumnCnt = 2;
 	
 	public EntityList(EntityListComposite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
@@ -189,11 +204,14 @@ public class EntityList extends Composite {
 			
 			@Override
 			public void menuShown(MenuEvent e) {
-				
 				if (!listParent.getEditor().getEditMode()){
 					if (mnuDelete != null){
 						mnuDelete.dispose();
 						mnuDelete = null;
+					}
+					if (mnuRelationship != null){
+						mnuRelationship.dispose();
+						mnuRelationship = null;
 					}
 				}else{
 					if (mnuDelete == null || mnuDelete.isDisposed()){
@@ -208,15 +226,87 @@ public class EntityList extends Composite {
 							}
 						});
 					}
+					if (mnuRelationship == null || mnuRelationship.isDisposed()){
+						mnuRelationship = new MenuItem(mnuEntities, SWT.CASCADE);
+						mnuRelationship.setText("New Relationship...");
+						
+						if (!getCurrentSelection().isEmpty()){
+							
+							final IntelEntity srcEntity = getCurrentSelection().get(0);
+							List<IntelEntity> targets = listParent.getEditor().getRecord().getEntities()
+								.stream()
+								.map(ie->ie.getEntity())
+								.collect(Collectors.toList());
+							targets.remove(srcEntity);
+							Menu mm = new Menu(mnuRelationship);
+							mnuRelationship.setMenu(mm);
+							
+							for (IntelEntity targetEntity : targets){
+								MenuItem m = new MenuItem(mm, SWT.CASCADE);
+								m.setText(targetEntity.getIdAttributeAsText());
+								m.setData(targetEntity);
+														
+								Menu rMenu = new Menu(m);
+								m.setMenu(rMenu);
+								rMenu.addMenuListener(new MenuListener() {
+									
+									@Override
+									public void menuShown(MenuEvent e) {
+										for (MenuItem kid : rMenu.getItems()) kid.dispose();
+										
+										MenuItem loading = new MenuItem(rMenu, SWT.PUSH);
+										loading.setText(DialogConstants.LOADING_TEXT);
+										loading.setEnabled(false);
+										
+										(new RelationshipSearchJob(srcEntity.getEntityType(), targetEntity.getEntityType()) {
+											@Override
+											protected void afterLoad() {
+												Display.getDefault().syncExec(()->{
+													
+													loading.dispose();
+													if (rtypes.isEmpty()){
+														MenuItem loading = new MenuItem(rMenu, SWT.PUSH);
+														loading.setText("(No Relationship Types Found)");
+														loading.setEnabled(false);
+														return;
+													}
+													for (IntelRelationshipType t : rtypes){
+														MenuItem mi = new MenuItem(rMenu, SWT.PUSH);
+														mi.setText(t.getName());
+														mi.addSelectionListener(new SelectionAdapter(){
+
+															@Override
+															public void widgetSelected(
+																	SelectionEvent e) {
+																createRelationship(srcEntity, targetEntity, t);																
+															}
+															
+														});
+													}
+												});
+											}
+										}).schedule(0); 
+									}
+									
+									@Override
+									public void menuHidden(MenuEvent e) {
+									}
+								});
+							}
+						}
+					}
 				}
 				mnuOpen.setEnabled(!getCurrentSelection().isEmpty());
 				if (mnuDelete != null && !mnuDelete.isDisposed()) mnuDelete.setEnabled(!getCurrentSelection().isEmpty());
+				if (mnuRelationship != null && !mnuRelationship.isDisposed()) mnuRelationship.setEnabled(!getCurrentSelection().isEmpty());
 				
 				
 			}
 			
 			@Override
-			public void menuHidden(MenuEvent e) {}
+			public void menuHidden(MenuEvent e) {
+				
+			}
 		});
 		
 		mnuOpen = new MenuItem(mnuEntities, SWT.PUSH);
@@ -227,8 +317,6 @@ public class EntityList extends Composite {
 				openEntity();
 			}
 		});
-		
-		
 		
 		List<Control> kids = new ArrayList<Control>();
 		kids.add(parent);
@@ -245,6 +333,92 @@ public class EntityList extends Composite {
 		}
 	}
 	
+	private void createRelationship(IntelEntity srcEntity, IntelEntity targetEntity, IntelRelationshipType rType){
+		IntelEntity e1 = srcEntity;
+		IntelEntity e2 = targetEntity;
+		
+		IntelEntityRelationship newRelationship = new IntelEntityRelationship();
+		newRelationship.setRelationshipType(rType);
+		
+		boolean add = false;
+		if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
+			newRelationship.setSourceEntity(e1);
+			newRelationship.setTargetEntity(e2);
+			add = true;
+		}else if (rType.getSourceEntityType() == null && rType.getTargetEntityType() != null){
+			if (rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+				newRelationship.setSourceEntity(e2);
+				newRelationship.setTargetEntity(e1);
+				add = true;
+			}else if (rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+				newRelationship.setSourceEntity(e1);
+				newRelationship.setTargetEntity(e2);
+				add = true;
+			}
+		}else if (rType.getTargetEntityType() == null && rType.getSourceEntityType() != null){
+			if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+				newRelationship.setSourceEntity(e1);
+				newRelationship.setTargetEntity(e2);
+				add = true;
+			}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+				newRelationship.setSourceEntity(e2);
+				newRelationship.setTargetEntity(e1);
+				add = true;
+			}
+		}else if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid()) &&
+				rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
+			newRelationship.setSourceEntity(e1);
+			newRelationship.setTargetEntity(e2);
+			add = true;
+		}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid()) &&
+				rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
+			newRelationship.setSourceEntity(e2);
+			newRelationship.setTargetEntity(e1);
+			add = true;
+		} 
+		//check duplicates
+		if (add){
+			try{
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					IntelEntityRelationship existing = (IntelEntityRelationship) s.createCriteria(IntelEntityRelationship.class)
+							.add(Restrictions.eq("sourceEntity", newRelationship.getSourceEntity()))
+							.add(Restrictions.eq("targetEntity", newRelationship.getTargetEntity()))
+							.add(Restrictions.eq("relationshipType", newRelationship.getRelationshipType()))
+							.uniqueResult();
+					if (existing != null){
+						MessageDialog.openInformation(getShell(), "Create Relationship", MessageFormat.format("The relationship of type {0} already exists between {1} and {2}.  Cannot duplicate relationship", rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
+						return;
+					}
+				
+					s.save(newRelationship);
+					
+					if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
+						RelationshipAttributeDialog dialog = new RelationshipAttributeDialog(getShell(), newRelationship);
+						if (dialog.open() != Window.OK){
+							//cancel creating relationship
+							return;
+						}
+					}
+					s.getTransaction().commit();
+				}finally{
+					s.close();
+				}
+				
+				ArrayList<IntelEntity> modified = new ArrayList<IntelEntity>();
+				modified.add(newRelationship.getSourceEntity());
+				modified.add(newRelationship.getTargetEntity());
+				listParent.getEditor().getContext().get(IEventBroker.class).send(IntelEvents.ENTITY_MODIFIED, modified);
+				MessageDialog.openInformation(getShell(), "Relationship Created", MessageFormat.format("Relationship Created.\n\nA relationship of type {0} was successfully created between {1} and {2}", rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
+			}catch (Exception ex){
+				Intelligence2PlugIn.displayLog("Error occurred while creating new relationship." + ex.getMessage(), ex);
+			}
+		}else{
+			MessageDialog.openInformation(getShell(), "Create Relationship", MessageFormat.format("Could not create a valide relationship of type {0} between {1} and {2}.  Cannot duplicate relationship", rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
+		}
+		
+	}
 	
 	public List<IntelEntity> getCurrentSelection(){
 		ArrayList<IntelEntity> selections = new ArrayList<IntelEntity>();

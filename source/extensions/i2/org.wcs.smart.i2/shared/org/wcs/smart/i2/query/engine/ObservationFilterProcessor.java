@@ -531,13 +531,19 @@ public class ObservationFilterProcessor {
 		query.setParameter("keyid", filter.getKey());
 		query.setParameter("type", filter.getType().name());
 		
-		UUID areaUuid = (UUID) query.uniqueResult();
+		Object x = query.uniqueResult();
+		UUID areaUuid = null;
+		if (x instanceof UUID){
+			areaUuid = (UUID) x;
+		}else if (x instanceof byte[]){
+			areaUuid = UuidUtils.byteToUUID((byte[])x);
+		}
 		
 		sql = new StringBuilder();
 		sql.append("UPDATE " + obsTable);
 		sql.append(" SET " + columnName + " = true ");
 		sql.append(" WHERE location_uuid IN ( ");
-		sql.append(" SELECT uuid FROM smart.i_location l, smart.area_geometries a where a.uuid = :areauuid AND smart.intersection(a.geom, l.geometry ) ");
+		sql.append(" SELECT l.uuid FROM smart.i_location l, smart.area_geometries a where a.uuid = :areauuid AND smart.intersects(a.geom, l.geometry ) ");
 		sql.append(")");
 		
 		

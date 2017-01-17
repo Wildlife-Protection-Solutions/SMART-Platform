@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -60,10 +62,25 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 	private IntelEntity targetEntity;
 	
 	private TableViewer types;
-		
-	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity){
+	
+	private List<? extends Object> entityOptions = null;
+	
+	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity, List<IntelEntity> entityOptions){
 		super(owner);
 		this.srcEntity = srcEntity;
+		this.entityOptions = entityOptions;
+	}
+	
+	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity){
+		this(owner, srcEntity, null);
+		
+		EntitySearchView view = ((EntitySearchViewWrapper) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+				.findView(EntitySearchView.ID)).getComponent();
+		if (view != null){
+			entityOptions = view.getEntities().stream().map(e->e.getEntity()).collect(Collectors.toList());
+		}else{
+			entityOptions = Collections.singletonList("No Entities Found");
+		}
 	}
 	
 	@Override
@@ -118,6 +135,7 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 				}
 			}
 		});
+		entityListTable.setInput(entityOptions);
 		
 		types = new TableViewer(parent, SWT.BORDER);
 		types.setContentProvider(ArrayContentProvider.getInstance());
@@ -138,23 +156,31 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 				doEvent();
 			}
 		});
-		
-		EntitySearchView view = ((EntitySearchViewWrapper) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-				.findView(EntitySearchView.ID)).getComponent();
-		if (view != null){
-			entityListTable.setInput(view.getEntities().stream().map(e->e.getEntity()).collect(Collectors.toList()));
-		}
 	}
 	
+	/**
+	 * Called once an entity and relationship type are selected
+	 */
 	protected abstract void doEvent();
 	
+	/*
+	 * Updates the relationship type
+	 */
 	private void setRelationshipType(IntelRelationshipType type){
 		this.type = type;
 	}
+	/**
+	 * Gets the selected relationships type
+	 * @return
+	 */
 	public IntelRelationshipType getRelationshipType(){
 		return this.type;
 	}
 	
+	/**
+	 * Gets the target entity
+	 * @return
+	 */
 	public IntelEntity getTargetEntity(){
 		return this.targetEntity;
 	}
