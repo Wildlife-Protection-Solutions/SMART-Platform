@@ -215,7 +215,7 @@ public class EntityList extends Composite {
 					}
 				}else{
 					if (mnuDelete == null || mnuDelete.isDisposed()){
-						mnuDelete = new MenuItem(mnuEntities, SWT.PUSH);
+						mnuDelete = new MenuItem(mnuEntities, SWT.PUSH, 0);
 						mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 						mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 						mnuDelete.addSelectionListener(new SelectionAdapter() {
@@ -227,7 +227,7 @@ public class EntityList extends Composite {
 						});
 					}
 					if (mnuRelationship == null || mnuRelationship.isDisposed()){
-						mnuRelationship = new MenuItem(mnuEntities, SWT.CASCADE);
+						mnuRelationship = new MenuItem(mnuEntities, SWT.CASCADE, 0);
 						mnuRelationship.setText("New Relationship...");
 						
 						if (!getCurrentSelection().isEmpty()){
@@ -272,7 +272,11 @@ public class EntityList extends Composite {
 													}
 													for (IntelRelationshipType t : rtypes){
 														MenuItem mi = new MenuItem(rMenu, SWT.PUSH);
-														mi.setText(t.getName());
+														String name = t.getName();
+														if (t.getRelationshipGroup() != null){
+															name = name + " (" + t.getRelationshipGroup().getName() + ")";
+														}
+														mi.setText(name);
 														mi.addSelectionListener(new SelectionAdapter(){
 
 															@Override

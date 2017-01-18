@@ -80,6 +80,7 @@ import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.views.entity.search.AdvancedEntitySearchPanel;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -288,13 +289,15 @@ public class EntitySearchView {
 	}
 	
 	private void createAdvancedSearch(Composite parent){
-		Composite core = toolkit.createComposite(parent, SWT.NONE);
+		Composite core = toolkit.createComposite(parent, SWT.BORDER);
 		core.setLayout(new GridLayout(2, false));
-		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		toolkit.createLabel(core, "TODO");
-		//TODO: Advanced Search
+		AdvancedEntitySearchPanel search = new AdvancedEntitySearchPanel(core);
+		search.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
+	
+	
 	private void createBasicSearch(Composite parent){
 		
 		Composite search = toolkit.createComposite(parent, SWT.NONE);

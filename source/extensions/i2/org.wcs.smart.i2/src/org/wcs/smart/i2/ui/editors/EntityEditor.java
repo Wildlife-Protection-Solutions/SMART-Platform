@@ -1172,16 +1172,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private void createRelationshipPanel(Composite parent){
 
 		relationshipEditPanel = toolkit.createComposite(parent, SWT.NONE);
-		relationshipEditPanel.setLayout(createGridLayoutNoMargin(1));
+		relationshipEditPanel.setLayout(createGridLayoutNoMargin(2));
 		relationshipEditPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		Composite menuPanel = toolkit.createComposite(relationshipEditPanel);
-		menuPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		menuPanel.setLayout(new GridLayout(2, false));
-		((GridLayout)menuPanel.getLayout()).marginWidth = 0;
-		((GridLayout)menuPanel.getLayout()).marginHeight = 0;
-		
-		Button btnAddRelationship = toolkit.createButton(menuPanel, "New Relationship...", SWT.PUSH);
+		Button btnAddRelationship = toolkit.createButton(relationshipEditPanel, "New Relationship...", SWT.PUSH);
 		btnAddRelationship.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAddRelationship.addSelectionListener(new SelectionAdapter() {
 
@@ -1203,7 +1197,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		});
 		
 		
-		ToolBar toolbar = new ToolBar(menuPanel, SWT.FLAT);
+		ToolBar toolbar = new ToolBar(relationshipEditPanel, SWT.FLAT);
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
 		ToolItem deleteRelationship = new ToolItem(toolbar, SWT.NONE);

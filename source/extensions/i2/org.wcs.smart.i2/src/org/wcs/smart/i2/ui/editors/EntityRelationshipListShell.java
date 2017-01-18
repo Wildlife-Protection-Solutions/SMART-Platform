@@ -50,7 +50,7 @@ import org.wcs.smart.i2.ui.views.EntitySearchView.EntitySearchViewWrapper;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Shell dialog for relating to entities
+ * Shell dialog for relating entities
  * 
  * @author Emily
  *
