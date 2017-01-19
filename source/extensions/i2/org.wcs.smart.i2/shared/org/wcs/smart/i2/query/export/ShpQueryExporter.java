@@ -44,6 +44,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class ShpQueryExporter implements IQueryExporter {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void exportQuery(IPagedQueryResultSet results, Path destination,
 			HashMap<ExportOption, Object> exportOptions) throws Exception {

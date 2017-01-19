@@ -198,7 +198,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.DATE){
 			if (((DateTime)dtDateTime).getEnabled()){
 				add = true;
-				value.setDateValue( SmartUtils.getTime((DateTime)dtDateTime));
+				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();

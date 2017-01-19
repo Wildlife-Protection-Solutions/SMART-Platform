@@ -65,6 +65,7 @@ public class IntelQueryColumnProvider {
 	
 	
 	//TODO: cache data model ???
+	@SuppressWarnings("unchecked")
 	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, Locale l, Session session) {
 		
 		List<IQueryColumn> columns = new ArrayList<>();

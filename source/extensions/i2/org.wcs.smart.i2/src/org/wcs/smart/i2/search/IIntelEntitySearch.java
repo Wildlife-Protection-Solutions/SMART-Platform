@@ -23,6 +23,8 @@ package org.wcs.smart.i2.search;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelEntity;
 
 /**
  * Intelligence search interface 
@@ -51,5 +53,28 @@ public interface IIntelEntitySearch {
 	 * @return
 	 */
 	public String serialize();
+
 	
+	/**
+	 * Loads necessary fields from entity for query results returning the
+	 * same entity object for convienence
+	 * 
+	 * @param it
+	 * @param session
+	 * @return
+	 */
+	public default IntelEntity lazyLoadEntity(IntelEntity it, Session session){
+		it.getIdAttributeAsText();
+		it.getEntityType();
+		it.getEntityType().getIcon();
+		if (it.getPrimaryAttachment() != null){
+			try {
+				it.getPrimaryAttachment().getCopyFromLocation();
+				it.getPrimaryAttachment().computeFileLocation(session);
+			} catch (Exception e) {
+				Intelligence2PlugIn.log("Unable to compute attachment location", e);
+			}
+		}
+		return it;
+	}
 }

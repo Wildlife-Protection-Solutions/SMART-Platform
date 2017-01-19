@@ -40,6 +40,7 @@ import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 public class OpenQueryHandler {
 
 	public void openQuery(QueryEditorInput editorInput, boolean editMode){
+		//TODO:
 		try {
 //			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
 			

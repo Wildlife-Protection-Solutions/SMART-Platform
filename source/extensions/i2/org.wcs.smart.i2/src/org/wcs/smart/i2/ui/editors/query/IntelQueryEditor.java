@@ -526,7 +526,6 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 			runJob = new RunQueryJob(query) {
 				@Override
 				protected void onError(Exception ex) {
-					// TODO Auto-generated method stub
 					Display.getDefault().syncExec(()->{
 						resultsTable.setInput(null);
 						mapPanel.updateQueryLayers(null);

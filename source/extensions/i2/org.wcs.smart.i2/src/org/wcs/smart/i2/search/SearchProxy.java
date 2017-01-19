@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,36 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.handler;
+package org.wcs.smart.i2.search;
 
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.wcs.smart.i2.ui.views.QueryView;
-import org.wcs.smart.util.E3Utils;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
- * Open dialog handler
+ * Proxy class for saved searches
  * 
  * @author Emily
  *
  */
-public class RefreshQueryViewHandler  {
-
-	@Execute
-	public void refreshView(EPartService partService){
-		MPart part = partService.findPart(QueryView.ID);
-		if (part != null){
-			((QueryView)E3Utils.getSourceObject(part)).refreshView();
-		}
-		
+public  class SearchProxy{
+	
+	private UUID queryUUID;
+	private String name;
+	
+	public SearchProxy(UUID uuid, String name){
+		this.queryUUID = uuid;
+		this.name = name;
 	}
-	// E3
-	public static class RefreshQueryViewHandlerWrapper extends DIHandler<RefreshQueryViewHandler> {
-		public RefreshQueryViewHandlerWrapper() {
-			super(RefreshQueryViewHandler.class);
-		}
+	public String getName(){
+		return this.name;
+	}
+	public UUID getUuid(){
+		return this.queryUUID;
 	}
 	
+	public int hashCode(){
+		return Objects.hashCode(queryUUID);
+	}
+	
+	public boolean equals(Object other){
+		if (this == other) return true;
+		if (other == null) return false;
+		if (!getClass().equals(other.getClass())) return false;
+		return Objects.equals(queryUUID, ((SearchProxy)other).queryUUID);
+	}
 }

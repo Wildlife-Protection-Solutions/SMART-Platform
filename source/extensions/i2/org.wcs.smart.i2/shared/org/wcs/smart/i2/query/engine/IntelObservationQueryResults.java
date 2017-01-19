@@ -143,6 +143,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		return reader.read(b.getBytes(1l, (int) b.length()));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public IResultItem asResultItem(ScrollableResults sc, Session session){
 		
@@ -229,6 +230,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	private String configureSort(Session session){
 		if (sortColumn == null || sortDirection == null) return "";
 		

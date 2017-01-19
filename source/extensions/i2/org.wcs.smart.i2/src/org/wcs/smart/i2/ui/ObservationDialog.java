@@ -467,7 +467,6 @@ public class ObservationDialog extends Dialog {
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: add observation
 				createObservation();
 			}
 		});

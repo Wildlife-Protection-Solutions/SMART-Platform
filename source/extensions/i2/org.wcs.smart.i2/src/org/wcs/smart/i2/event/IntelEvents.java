@@ -81,7 +81,13 @@ public class IntelEvents {
 	//payload needs to be an instance of LayerVisibleEvent
 	public static final String ACTIVE_WS_LAYER_VISIBILITY = "INTEL_WS_LAYER_VISIBILITY";
 	
-	//playload needs to be a array of two dates [startdate, enddate]
+	//payload needs to be a array of two dates [startdate, enddate]
 	public static final String ACTIVE_WS_LAYER_DATEFILTER = "INTEL_WS_LAYER_DATEFILTER";
+	
+	//payload will be a single intelentitysearch
+	public static final String ENTITY_SEARCH_ALL = "INTEL_ENTITY_SEARCH/*";
+	public static final String ENTITY_SEARCH_NEW = "INTEL_ENTITY_SEARCH/NEW";
+	public static final String ENTITY_SEARCH_MODIFIED = "INTEL_ENTITY_SEARCH/UPDATED";
+	public static final String ENTITY_SEARCH_DELETED = "INTEL_ENTITY_SEARCH/DELETED";
 	
 }

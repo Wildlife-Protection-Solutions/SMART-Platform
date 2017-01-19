@@ -45,6 +45,7 @@ import org.wcs.smart.i2.udig.LocationLayerType;
  * @author Emily
  *
  */
+@SuppressWarnings("unchecked")
 public class IntelEntityFeatureSource extends ContentFeatureSource {
 
 	private UUID entityUuid;

@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.i2.ui.views;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -46,7 +46,6 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -93,8 +92,12 @@ import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
-import com.ibm.icu.text.MessageFormat;
 
+/**
+ * View for displaying records 
+ * @author Emily
+ *
+ */
 public class RecordsView {
 
 	public static final String ID = "org.wcs.smart.i2.ui.view.records"; //$NON-NLS-1$

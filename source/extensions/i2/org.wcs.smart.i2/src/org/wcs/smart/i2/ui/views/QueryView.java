@@ -505,6 +505,7 @@ public class QueryView {
 	
 	Job refreshQueriesJob = new Job("refresh query list"){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<QueryProxy> proxyItems;

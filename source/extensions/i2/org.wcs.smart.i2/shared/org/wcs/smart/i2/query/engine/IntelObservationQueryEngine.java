@@ -139,6 +139,7 @@ public class IntelObservationQueryEngine {
 	/*
 	 * Configures the query columns; removing non populated attribute columns
 	 */
+	@SuppressWarnings("unchecked")
 	private void computeQueryColumns(Session session, Locale locale, IntelRecordObservationQuery query){
 		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, locale, session);
 		//remove unused attribute columns
@@ -164,6 +165,7 @@ public class IntelObservationQueryEngine {
 	/*
 	 * configure results table added necessary results columsn
 	 */
+	@SuppressWarnings("unchecked")
 	private void configureTableContents(String observationTable, HashMap<IQueryFilter, String> filterToColumn, boolean obsFilter, Session session){
 		
 		HashMap<String, Integer> columnNameToIndex = new HashMap<>();

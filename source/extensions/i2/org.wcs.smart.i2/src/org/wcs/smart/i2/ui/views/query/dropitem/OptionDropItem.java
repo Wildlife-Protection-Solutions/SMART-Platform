@@ -119,6 +119,7 @@ public class OptionDropItem extends DropItem {
 		if (this.label != null){
 			Label l = new Label(parent, SWT.NONE);
 			l.setText(formatStringForLabel(label + " = "));
+			initDrag(l);
 		}
 		combo = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		combo.setContentProvider(ArrayContentProvider.getInstance());
@@ -148,6 +149,7 @@ public class OptionDropItem extends DropItem {
 		}
 		
 		combo.setSelection(new StructuredSelection(currentOption));
+		initDrag(combo.getControl());
 	}
 
 	private class Option{

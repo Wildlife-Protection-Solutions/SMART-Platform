@@ -115,10 +115,15 @@ public class EntitySearchPanel implements IDefinitionPanel {
 			if (item instanceof DropItem){
 				DropItem it = (DropItem)item;
 				query.append(it.asQueryPart());
-				query.append(" "); //$NON-NLS-1$
+				query.append("|"); //$NON-NLS-1$
 			}
 		}
-		return query.toString().trim();
+		
+		if (query.length() > 0 && query.charAt(query.length() - 1) == '|'){
+			query.deleteCharAt(query.length() - 1);
+		}
+		
+		return query.toString();
 	}
 	
 	
@@ -445,7 +450,6 @@ public class EntitySearchPanel implements IDefinitionPanel {
 
 	@Override
 	public void fireQueryChangedListeners() {
-		// TODO Auto-generated method stub
-		
+
 	}
 }

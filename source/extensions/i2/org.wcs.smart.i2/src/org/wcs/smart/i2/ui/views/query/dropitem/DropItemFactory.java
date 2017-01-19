@@ -235,7 +235,7 @@ public class DropItemFactory {
 		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.LIST){
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
-			labels.add(ANY_LABEL); //TODO: make these constants
+			labels.add(ANY_LABEL);
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
 			
 			if (ia.getAttributeList() != null){
@@ -306,9 +306,8 @@ public class DropItemFactory {
 		}else if (filter.getAttributeType() == Attribute.AttributeType.LIST){
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
-			labels.add("<ANY>"); //TODO: make these constants
-			keys.add("any");
-			
+			labels.add(ANY_LABEL);
+			keys.add(IQueryFilter.ANY_OPTION_KEY);//TODO: test this
 			if (attribute.getAttributeList() != null){
 				for (AttributeListItem i : attribute.getAttributeList()){
 					labels.add(i.getName());

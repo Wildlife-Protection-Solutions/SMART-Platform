@@ -31,14 +31,19 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 
+/**
+ * Basic search implementation 
+ * 
+ * @author Emily
+ *
+ */
 public class BasicEntitySearch implements IIntelEntitySearch{
 
-	
 	private int maxResultCnt = MAX_RESULT_CNT;
+	
 	private String searchString = null;
 	private List<String> entityTypes = null;
 	
@@ -113,29 +118,17 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		return new IntelSearchResult(0, Collections.emptyList(), 0);
 	}
 	
-	private void lazyLoadEntity(IntelEntity it, Session session){
-		it.getIdAttributeAsText();
-		it.getEntityType();
-		it.getEntityType().getIcon();
-		if (it.getPrimaryAttachment() != null){
-			try {
-				it.getPrimaryAttachment().getCopyFromLocation();
-				it.getPrimaryAttachment().computeFileLocation(session);
-			} catch (Exception e) {
-				Intelligence2PlugIn.log("Unable to compute attachment location", e);
-			}
-		}
-	}
+
 	
 	@Override
 	public String serialize(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("basic");
-		sb.append(":");
+		sb.append(";");
 		sb.append(maxResultCnt);
-		sb.append(":");
+		sb.append(";");
 		sb.append(searchString);
-		sb.append(":");
+		sb.append(";");
 		if (entityTypes != null){
 			entityTypes.forEach(a -> sb.append(a + ":"));
 		}

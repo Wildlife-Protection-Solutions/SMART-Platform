@@ -43,6 +43,17 @@ public class IntelSearchResultItem implements IAdaptable {
 	private Double matchRate;
 
 	/**
+	 * Creates a new result item with entity
+	 * @param entity
+	 * @param matchedString
+	 * @param rate
+	 */
+	public IntelSearchResultItem(UUID entity, String matchedString, double rate, IntelEntity entityObj) {
+		this(entity, matchedString, rate);
+		setEntity(entityObj);
+	}
+	
+	/**
 	 * Creates a new result item
 	 * @param entity
 	 * @param matchedString

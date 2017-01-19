@@ -32,11 +32,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-
-
-
-
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -81,11 +76,6 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
-
-
-
-
-
 
 import com.drew.lang.annotations.NotNull;
 import com.vividsolutions.jts.geom.Geometry;
