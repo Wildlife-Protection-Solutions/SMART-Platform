@@ -24,7 +24,6 @@ package org.wcs.smart.i2.ui.views.query;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
 
 /**

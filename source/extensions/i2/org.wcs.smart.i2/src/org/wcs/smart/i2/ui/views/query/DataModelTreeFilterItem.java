@@ -116,7 +116,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 								c.getAllCategoryAttribute(cas, null);
 								cas.sort((a,b)->Collator.getInstance().compare(a.getAttribute().getName(), b.getAttribute().getName()));
 								for (CategoryAttribute ca : cas){
-									temp.add(new DataModelTreeFilterItem(ca));
+									temp.add(new DataModelTreeFilterItem(new CategoryAttribute(c, ca.getAttribute())));
 								}
 							}
 							kids = temp;

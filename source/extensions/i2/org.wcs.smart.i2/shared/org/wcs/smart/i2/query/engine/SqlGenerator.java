@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.hibernate.Session;
 import org.wcs.smart.i2.query.Operator;
 
 /**
@@ -100,6 +101,32 @@ public class SqlGenerator {
 		}
 		throw new Exception(MessageFormat.format("Operator {0}  not supported.", op.getKey()));
 	}
+	
+	public static void switchTables(String tempTable, String obsTable, boolean locationIndex, boolean observationIndex, Session s){
+		StringBuilder sql = new StringBuilder();
+		sql.append("DROP TABLE " + obsTable);
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append("RENAME TABLE " + tempTable + " TO " + obsTable);
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+		
+		if (locationIndex){
+			sql = new StringBuilder();
+			sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)");
+			logString(sql.toString());
+			s.createSQLQuery(sql.toString()).executeUpdate();
+		}
+		if (observationIndex){
+			sql = new StringBuilder();
+			sql.append("CREATE INDEX observation_uuid_idx on " + obsTable + " (observation_uuid)");
+			logString(sql.toString());
+			s.createSQLQuery(sql.toString()).executeUpdate();
+		}
+	}
+	
 	
 	public static void logString(String string){
 		System.out.println(string);

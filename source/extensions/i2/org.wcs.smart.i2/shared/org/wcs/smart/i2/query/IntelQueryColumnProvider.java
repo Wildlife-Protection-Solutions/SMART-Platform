@@ -140,14 +140,10 @@ public class IntelQueryColumnProvider {
 		}
 		
 		//attributes
-		//TODO: test this
-		Query q = session.createSQLQuery("SELECT distinct id.attribute FROM CatetoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive ");
+		Query q = session.createQuery("SELECT distinct id.attribute FROM CategoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive = 'true'");
+		q.setParameter("ca", SmartDB.getCurrentConservationArea());
 		List<Attribute> attributes = q.list();
-//		
-//		List<CategoryAttribute> attributes = session.createCriteria(CategoryAttribute.class)
-//				.add(Restrictions.eq("id.attribute.conservationArea", SmartDB.getCurrentConservationArea()))
-//				.add(Restrictions.eq("isActive", true))
-//				.list();
+
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 		for (Attribute attribute : attributes){
 			columns.add(new DataModelColumn(attribute));
