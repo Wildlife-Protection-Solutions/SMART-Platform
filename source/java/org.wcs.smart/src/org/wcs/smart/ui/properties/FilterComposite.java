@@ -222,6 +222,14 @@ public class FilterComposite extends Composite {
 	}
 	
 	/**
+	 * Initializes the text box with the given text
+	 * @param text
+	 */
+	public void setText(String text){
+		txtFilter.setText(text);
+	}
+	
+	/**
 	 * Adds a change listener.
 	 * <p>
 	 * Listeners are fired when the text changes.
