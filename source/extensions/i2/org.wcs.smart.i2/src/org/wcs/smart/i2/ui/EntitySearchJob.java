@@ -68,6 +68,7 @@ public abstract class EntitySearchJob extends Job{
 			s.close();
 		}
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+		
 		afterSearch(entities, new SubProgressMonitor(monitor, 1));		
 		return Status.OK_STATUS;
 	}

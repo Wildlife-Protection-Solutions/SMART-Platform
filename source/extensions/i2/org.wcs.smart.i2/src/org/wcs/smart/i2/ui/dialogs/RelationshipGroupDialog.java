@@ -25,10 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -66,9 +63,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class RelationshipGroupDialog extends TitleAreaDialog {
 
-	@Inject
-	private IEclipseContext context;
-	
 	private NameKeyComposite nameKeyInfo;
 	private IntelRelationshipGroup group;
 	private List<IntelRelationshipGroup> groupSiblings;

@@ -330,10 +330,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		handlers.add(handler);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void createPages() {
-		
-		
 		showBusy(true);
 		try {
 			handlers = new ArrayList<EventHandler>();

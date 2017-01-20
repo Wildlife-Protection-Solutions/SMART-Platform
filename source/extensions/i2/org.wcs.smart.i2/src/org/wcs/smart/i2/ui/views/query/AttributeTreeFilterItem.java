@@ -35,6 +35,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -64,7 +65,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 		super(attribute.getAttribute().getName());
 		this.attributeUuid = attribute.getAttribute().getUuid();
 		type = attribute.getAttribute().getType();
-		dropItemName = DropItemFactory.generateName(attribute.getAttribute(),  attribute.getEntityType());
+		dropItemName = IntelQueryColumnProvider.generateName(attribute.getAttribute(),  attribute.getEntityType());
 		queryKey = "e_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getAttribute().getKeyId() + ":" + attribute.getEntityType().getKeyId();
 	}
 
@@ -76,7 +77,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 		super(attribute.getName());
 		this.attributeUuid = attribute.getUuid();
 		type = attribute.getType();
-		dropItemName = DropItemFactory.generateName(attribute, null);
+		dropItemName = IntelQueryColumnProvider.generateName(attribute, null);
 		queryKey = "e_attribute:" + attribute.getType().key + ":" + attribute.getKeyId() + ":" ;
 	}
 

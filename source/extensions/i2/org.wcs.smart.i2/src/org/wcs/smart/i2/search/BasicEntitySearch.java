@@ -47,6 +47,29 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	private String searchString = null;
 	private List<String> entityTypes = null;
 	
+	public static BasicEntitySearch parse(String queryString){
+		String[] bits = queryString.split(SEPARATOR);
+		if (!bits[0].equals(Type.BASIC.key)) return null; //not a basic search
+		
+		int maxResultsCnt = Integer.parseInt(bits[1]);
+		String searchString = bits[2];
+		String[] types = null;
+		if (bits.length >= 3){
+			types = bits[3].split(":");
+		}
+		
+		BasicEntitySearch search = new BasicEntitySearch(searchString, maxResultsCnt);
+		if (types != null){
+			search.entityTypes = new ArrayList<>();
+			for (String t : types){
+				search.entityTypes.add(t);
+			}
+		}
+		return search;
+	}
+	
+
+	
 	public BasicEntitySearch(String searchString){
 		this.searchString = searchString;
 	}
@@ -60,6 +83,14 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		this(searchString);
 		this.entityTypes = new ArrayList<String>();
 		entityTypeFilter.forEach(e -> entityTypes.add(e.getKeyId()));
+	}
+	
+	public String getSearchString(){
+		return this.searchString;
+	}
+	
+	public List<String> getEntityTypes(){
+		return this.entityTypes;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -123,12 +154,12 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	@Override
 	public String serialize(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("basic");
-		sb.append(";");
+		sb.append(Type.BASIC.key);
+		sb.append(SEPARATOR);
 		sb.append(maxResultCnt);
-		sb.append(";");
-		sb.append(searchString);
-		sb.append(";");
+		sb.append(SEPARATOR);
+		if (searchString != null) sb.append(searchString);
+		sb.append(SEPARATOR);
 		if (entityTypes != null){
 			entityTypes.forEach(a -> sb.append(a + ":"));
 		}

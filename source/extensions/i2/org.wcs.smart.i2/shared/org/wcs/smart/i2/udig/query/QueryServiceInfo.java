@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.udig.query;
 
 import org.locationtech.udig.catalog.IServiceInfo;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 
 /**
  * Smart service information.
@@ -33,7 +32,6 @@ public class QueryServiceInfo extends IServiceInfo{
 
 	public QueryServiceInfo(QueryService service){
 		this.description = "Intelligence query service";
-		this.icon = Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY_QUERY);
 		this.keywords = new String[]{"Intelligence", "Query", "Observation", "Record"};
 		this.title = "Intelligence Queries";
 	}

@@ -68,6 +68,7 @@ public class QueryEditorInput implements IEditorInput{
 		return this.uuid;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		return null;

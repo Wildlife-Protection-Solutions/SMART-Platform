@@ -21,18 +21,23 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.text.Collator;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -43,7 +48,6 @@ import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
 import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
-import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 
 /**
  * Manages columns for intelligence queries.
@@ -55,18 +59,40 @@ public class IntelQueryColumnProvider {
 
 	private static IntelQueryColumnProvider instance;
 	
+	public static Object ANY_ITEM = new Object(); 
+			
+	public static String generateName(Area area){
+		return MessageFormat.format("{0} [{1}]", area.getName(), area.getType().name());
+	}
+	
+	public static String generateName(IntelAttribute attribute, IntelEntityType type){
+		if (type == null){
+			return attribute.getName();
+		}else{
+			return MessageFormat.format("{0} ({1})", attribute.getName(), type.getName());
+		}
+	}
+	
+	public static String generateName(IntelEntity entity){
+		return MessageFormat.format("{0} ({1})", entity.getIdAttributeAsText(), entity.getEntityType().getName() );
+	}
+	
+	public static String generateName(Attribute attribute, Category category){
+		if (attribute != null && category == null) return attribute.getName();
+		if (category != null && attribute == null) return category.getFullCategoryName();
+		if (category != null && attribute != null) return  MessageFormat.format("{0} ({1})", attribute.getName(), category.getFullCategoryName());
+		return null;
+	}
+	
 	public synchronized static IntelQueryColumnProvider getInstance(){
 		if (instance == null){
 			instance = new IntelQueryColumnProvider();
 		}
-		return instance;
-		
+		return instance;	
 	}
 	
-	
-	//TODO: cache data model ???
 	@SuppressWarnings("unchecked")
-	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, Locale l, Session session) {
+	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, Locale l, Session session) throws Exception{
 		
 		List<IQueryColumn> columns = new ArrayList<>();
 		
@@ -99,7 +125,7 @@ public class IntelQueryColumnProvider {
 			}
 			
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error loading query columns.  Unable to parse query: " + ex.getMessage(), ex);
+			throw new Exception("Error loading query columns.  Unable to parse query: " + ex.getMessage(), ex);
 		}
 		
 
@@ -114,10 +140,15 @@ public class IntelQueryColumnProvider {
 		}
 		
 		//attributes
-		List<Attribute> attributes = session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+		//TODO: test this
+		Query q = session.createSQLQuery("SELECT distinct id.attribute FROM CatetoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive ");
+		List<Attribute> attributes = q.list();
+//		
+//		List<CategoryAttribute> attributes = session.createCriteria(CategoryAttribute.class)
+//				.add(Restrictions.eq("id.attribute.conservationArea", SmartDB.getCurrentConservationArea()))
 //				.add(Restrictions.eq("isActive", true))
-				.list();
+//				.list();
+		attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 		for (Attribute attribute : attributes){
 			columns.add(new DataModelColumn(attribute));
 		}
@@ -135,11 +166,12 @@ public class IntelQueryColumnProvider {
 		}
 		return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
 	}
+	
 	private IQueryColumn generateColumn(EntityFilter filter, Session session){
 		IntelEntity entity = IntelHibernateManager.getEntity(filter.getEntityUuid(), session);
 		String name = null;
 		if (entity != null){
-			name = DropItemFactory.generateName(entity);
+			name = generateName(entity);
 		}else{
 			name= filter.getEntityUuid().toString();
 		}
@@ -157,7 +189,7 @@ public class IntelQueryColumnProvider {
 		}
 		
 		if (attribute != null){
-			sb.append(DropItemFactory.generateName(attribute, etype));
+			sb.append(generateName(attribute, etype));
 		}else{
 			sb.append(filter.getAttributeKey());
 			if (filter.getEntityTypeKey() != null){
@@ -177,7 +209,7 @@ public class IntelQueryColumnProvider {
 			case LIST:
 				if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
 					sb.append(": ");
-					sb.append(DropItemFactory.ANY_LABEL);
+					sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
 				}else{
 					sb.append(": ");
 					IntelAttributeListItem i = IntelHibernateManager.getAttributeListItem(attribute, filter.getKeyValue(), session);

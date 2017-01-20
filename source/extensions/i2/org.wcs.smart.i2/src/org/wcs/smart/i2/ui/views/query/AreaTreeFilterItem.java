@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.views.query;
 
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
@@ -42,7 +43,7 @@ public class AreaTreeFilterItem extends BasicTreeFilterItem{
 		super(area.getName());
 		this.key = area.getKeyId();
 		this.type = area.getType().name();
-		this.name = DropItemFactory.generateName(area);
+		this.name = IntelQueryColumnProvider.generateName(area);
 	}
 	
 	@Override

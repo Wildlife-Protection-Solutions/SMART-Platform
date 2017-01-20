@@ -90,7 +90,9 @@ public class OptionDropItem extends DropItem {
 		StringBuilder sb = new StringBuilder();
 		if (key  != null){
 			sb.append(key);
+			sb.append(" ");
 			sb.append(Operator.EQUALS.getKey());
+			sb.append(" ");
 		}
 		Option x = getSelection();
 		if (x != null){

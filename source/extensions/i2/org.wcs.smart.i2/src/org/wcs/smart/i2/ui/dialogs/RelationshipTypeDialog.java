@@ -178,6 +178,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
 		boolean attributesModified = false;
@@ -360,6 +361,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		cmbGroup.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbGroup.addSelectionChangedListener(new ISelectionChangedListener() {
 			private boolean isNew = false;
+			@SuppressWarnings("unchecked")
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object x = ((IStructuredSelection)cmbGroup.getSelection()).getFirstElement();

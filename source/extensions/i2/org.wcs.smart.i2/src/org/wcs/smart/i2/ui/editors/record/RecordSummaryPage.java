@@ -173,6 +173,7 @@ public class RecordSummaryPage extends EditorPart{
 		wsetItem.setEnabled(enable);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void createPartControl(Composite parent) {
 		

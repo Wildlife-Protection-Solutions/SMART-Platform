@@ -556,7 +556,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}else if (data instanceof IntelRelationshipType){
 					hasRelation = hasRelation((IntelRelationshipType)data);
 				}else if (data instanceof Collection){
-					for (Object x : ((Collection)data)){
+					for (Object x : ((Collection<?>)data)){
 						if (x.equals(entity)){
 							equalsEntity = true;
 							break;

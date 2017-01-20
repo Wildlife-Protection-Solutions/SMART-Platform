@@ -545,6 +545,7 @@ public class QueryView {
 			return this.uuid;
 		}
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public Object getAdapter(Class adapter) {
 			if (adapter.equals(IntelRecordObservationQuery.class)){

@@ -203,18 +203,7 @@ public class QueryService extends IService {
                 	if (results != null){
                 		ds = new QueryDataSource(getResultSet());
                 	}else{
-                		//TODO:
-//                		//use factory
-//                		QueryDataSourceFactory dsf = new QueryDataSourceFactory();
-//                		try {
-//                			Map<String, Serializable> paramsLocal = new HashMap<String, Serializable>();
-//                			paramsLocal.put(QueryDataSourceFactory.QUERY_UUID.key, params.get(QueryServiceExtension.QUERY_UUID_KEY));
-//                			if (dsf.canProcess(paramsLocal)) {
-//                				this.ds = (QueryDataSource) dsf.createDataStore(paramsLocal);
-//                			}
-//                		} catch (IOException e) {
-//                			throw e;
-//                		}
+                		throw new IOException("Unable to create datastore - query results not provided.");
                     }
                 }
             } finally {

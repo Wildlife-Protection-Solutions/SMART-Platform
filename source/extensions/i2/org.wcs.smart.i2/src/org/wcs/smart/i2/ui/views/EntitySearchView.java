@@ -46,6 +46,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -82,7 +83,7 @@ import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
@@ -136,8 +137,6 @@ public class EntitySearchView {
 	private Font hlFont;
 	
 	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob();
-	private LoadSavedSearchJob savedSearches = new LoadSavedSearchJob();
-
 	
 	private Hyperlink basicSearch;
 	private Hyperlink advancedSearch;
@@ -148,16 +147,24 @@ public class EntitySearchView {
 	private SashForm sashForm;
 	
 	private IntelEntitySearch lastSearch = null;
+	private AdvancedEntitySearchPanel advancedSearchPanel;
 	
 	private HashMap<Control, int[]> weightMap = new HashMap<>();
 	
 	private LoadSavedSearches loadSearchJob = new LoadSavedSearches() {
+		ISelection lastSelection;
 		@Override
-		public void searchesLoaded(List<SearchProxy> queries) {
+		protected void beforeSearch(){
 			Display.getDefault().syncExec(()->{
-				ISelection s = cmbSavedSearch.getSelection();
+				lastSelection = cmbSavedSearch.getSelection();
+				cmbSavedSearch.setInput(new String[]{DialogConstants.LOADING_TEXT});
+			});
+		}
+		@Override
+		protected  void searchesLoaded(List<SearchProxy> queries) {
+			Display.getDefault().syncExec(()->{
 				cmbSavedSearch.setInput(queries);
-				cmbSavedSearch.setSelection(s);
+				cmbSavedSearch.setSelection(lastSelection);
 				if(cmbSavedSearch.getSelection().isEmpty() && !queries.isEmpty()){
 					cmbSavedSearch.setSelection(new StructuredSelection(queries.get(0)));	
 				}
@@ -232,13 +239,11 @@ public class EntitySearchView {
 		
 		sashForm = new SashForm(parent, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		innerParent.setLayout(new GridLayout());
 		
 		Composite topPanel = toolkit.createComposite(sashForm);
 		topPanel.setLayout(new GridLayout());
 		((GridLayout)topPanel.getLayout()).marginWidth = 0;
 		((GridLayout)topPanel.getLayout()).marginHeight = 0;
-//		topPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		createHeaderOptions(topPanel);
 		
@@ -266,20 +271,18 @@ public class EntitySearchView {
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		entityTypeJob.schedule();
-		savedSearches.schedule();
+		loadSearchJob.schedule();
 		
 		sashForm.setWeights(new int[]{20,80});
 		
+		//enforce a minimum size
 		entityList.addListener(SWT.Resize, new Listener(){
-
 			@Override
 			public void handleEvent(Event event) {
 				Point topSize = topPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 				int topHeight = topSize.y;
 				int totalHeight = sashForm.getBounds().height;
-				
 				if (topHeight > totalHeight) return;
-				
 				if (sashForm.getChildren()[0].getBounds().height < topHeight){
 					sashForm.setWeights(new int[]{topHeight - sashForm.getSashWidth(), totalHeight - topHeight});
 				}
@@ -288,7 +291,6 @@ public class EntitySearchView {
 		});
 		
 		doBasicSearch(0);
-
 		context.get(EPartService.class).activate(context.get(MPart.class), true);
 	}
 	
@@ -326,15 +328,7 @@ public class EntitySearchView {
 		basicSearch.setToolTipText("searches all entity identifiers and entity type attributes flagged as include in basic search");
 		advancedSearch = toolkit.createHyperlink(header, "Advanced Search", SWT.NONE);
 		savedSearch = toolkit.createHyperlink(header, "Saved Search", SWT.NONE);
-		IHyperlinkListener hlistener = new IHyperlinkListener() {
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-			}
-			
+		IHyperlinkListener hlistener = new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				updateHyperlink(e);
@@ -355,61 +349,20 @@ public class EntitySearchView {
 	private void createSavedSearch(Composite parent){
 
 		Composite core = toolkit.createComposite(parent, SWT.NONE);
-		core.setLayout(new GridLayout(3, false));
+		core.setLayout(new GridLayout(2, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(core, "Saved Search:");
-		
-		cmbSavedSearch = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
-		toolkit.adapt(cmbSavedSearch.getCombo());
-		cmbSavedSearch.setContentProvider(ArrayContentProvider.getInstance());
-		cmbSavedSearch.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbSavedSearch.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof SearchProxy){
-					return ((SearchProxy) element).getName();
-				}
-				return super.getText(element);
-			}
-		});
-		cmbSavedSearch.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		
 		ToolBar tb = new ToolBar(core, SWT.FLAT);
-		ToolItem refresh = new ToolItem(tb, SWT.PUSH);
-		refresh.addListener(SWT.Selection, (event)->loadSearchJob.schedule());
-		refresh.setToolTipText("refresh saved search list");
-		refresh.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
 		
-		Composite buttonComposite = toolkit.createComposite(core, SWT.NONE);
-		buttonComposite.setLayout(new GridLayout(3, false));
-		buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		ToolItem delete = new ToolItem(tb, SWT.PUSH);
+		delete.addListener(SWT.Selection, (event)->deleteSavedSearch());
 		
-		Button btnDelete = toolkit.createButton(buttonComposite, "Delete", SWT.PUSH);
-		btnDelete.addListener(SWT.Selection, (event)-> {
-			if (cmbSavedSearch.getSelection().isEmpty()) return;
-			Object x = ((IStructuredSelection)cmbSavedSearch.getSelection()).getFirstElement();
-			if (x instanceof SearchProxy){
-				IntelEntitySearch toDelete = null;
-				Session s = HibernateManager.openSession();
-				try{
-					s.beginTransaction();
-					toDelete = (IntelEntitySearch) s.get(IntelEntitySearch.class, ((SearchProxy) x).getUuid());
-					if (toDelete != null){
-						s.delete(toDelete);
-					}
-					s.getTransaction().commit();
-				}catch (Exception ex){
-					Intelligence2PlugIn.displayLog(MessageFormat.format("Error occured while deleting search {0}: {1}", ((SearchProxy) x).getName(), ex.getMessage()), ex);
-					return;
-				}finally{
-					s.close();
-				}
-				if (toDelete != null) context.get(IEventBroker.class).send(IntelEvents.ENTITY_SEARCH_DELETED, toDelete);
-			}
-		});
-		Button btnRename = toolkit.createButton(buttonComposite, "Rename", SWT.PUSH);
-		btnRename.addListener(SWT.Selection, (event)->{
+		delete.setToolTipText("delete selected search");
+		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		
+		ToolItem rename = new ToolItem(tb, SWT.PUSH);
+		rename.addListener(SWT.Selection, (event)->{
 			Object x = ((IStructuredSelection)cmbSavedSearch.getSelection()).getFirstElement();
 			if (x instanceof SearchProxy){
 				IntelEntitySearch toEdit = null;
@@ -435,8 +388,35 @@ public class EntitySearchView {
 				
 			}
 		});
-		Button btnLoad = toolkit.createButton(buttonComposite, "Load", SWT.PUSH);
-		loadSearchJob.schedule();
+		rename.setToolTipText("rename search");
+		rename.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		
+		ToolItem refresh = new ToolItem(tb, SWT.PUSH);
+		refresh.addListener(SWT.Selection, (event)->loadSearchJob.schedule());
+		refresh.setToolTipText("refresh saved search list");
+		refresh.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		
+		
+		toolkit.createLabel(core, "Saved Search:");
+		
+		cmbSavedSearch = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
+		toolkit.adapt(cmbSavedSearch.getCombo());
+		cmbSavedSearch.setContentProvider(ArrayContentProvider.getInstance());
+		cmbSavedSearch.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbSavedSearch.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof SearchProxy){
+					return ((SearchProxy) element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		cmbSavedSearch.setInput(new String[]{DialogConstants.LOADING_TEXT});
+	
+		Button btnLoad = toolkit.createButton(core, "Load", SWT.PUSH);
+		btnLoad.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
+		btnLoad.addListener(SWT.Selection, (event)->loadSearch());
 	}
 	
 	private void createAdvancedSearch(Composite parent){
@@ -444,13 +424,95 @@ public class EntitySearchView {
 		core.setLayout(new GridLayout(2, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		AdvancedEntitySearchPanel search = new AdvancedEntitySearchPanel(core, this, toolkit);
-		search.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		advancedSearchPanel = new AdvancedEntitySearchPanel(core, this, toolkit);
+		advancedSearchPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
 	
-	
-	private Composite createBasicSearch(Composite parent){
+	private void loadSearch(){
+		if (cmbSavedSearch.getSelection().isEmpty()) return;
+		Object x = ((IStructuredSelection)cmbSavedSearch.getSelection()).getFirstElement();
+		if (!(x instanceof SearchProxy)) return;
 		
+		IntelEntitySearch search = null;
+		Session s = HibernateManager.openSession();
+		try{
+			search = (IntelEntitySearch)s.get(IntelEntitySearch.class, ((SearchProxy)x).getUuid());
+		}finally{
+			s.close();
+		}
+		if (search == null) return; //not found
+		
+		String searchString = search.getSearchString();
+		if (searchString.startsWith(IIntelEntitySearch.Type.BASIC.key + IIntelEntitySearch.SEPARATOR)){
+			//basic search
+			BasicEntitySearch basicsearch = BasicEntitySearch.parse(searchString);
+			setSearch(basicsearch);
+			updateHyperlink(new HyperlinkEvent(basicSearch, null, null, -1));
+			doSearch(null, searchDelay);
+		}else if (searchString.startsWith(IIntelEntitySearch.Type.ADVANCED.key + IIntelEntitySearch.SEPARATOR)){
+			//advanced search
+			AdvancedEntitySearch advsearch = AdvancedEntitySearch.parse(searchString);
+			advancedSearchPanel.initPanel(advsearch);
+			updateHyperlink(new HyperlinkEvent(advancedSearch, null, null, -1));
+			advancedSearchPanel.doSearch();
+		}
+		this.lastSearch =  search;
+		
+	}
+	
+	/*
+	 * deletes the selected saved search
+	 */
+	private void deleteSavedSearch(){
+		if (cmbSavedSearch.getSelection().isEmpty()) return;
+		Object x = ((IStructuredSelection)cmbSavedSearch.getSelection()).getFirstElement();
+		if (x instanceof SearchProxy){
+			if (!MessageDialog.openConfirm(cmbSavedSearch.getControl().getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the search {0}?", ((SearchProxy) x).getName()))){
+				return;
+			}
+			
+			IntelEntitySearch toDelete = null;
+			Session s = HibernateManager.openSession();
+			try{
+				s.beginTransaction();
+				toDelete = (IntelEntitySearch) s.get(IntelEntitySearch.class, ((SearchProxy) x).getUuid());
+				if (toDelete != null){
+					s.delete(toDelete);
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				Intelligence2PlugIn.displayLog(MessageFormat.format("Error occured while deleting search {0}: {1}", ((SearchProxy) x).getName(), ex.getMessage()), ex);
+				return;
+			}finally{
+				s.close();
+			}
+			if (toDelete != null) context.get(IEventBroker.class).send(IntelEvents.ENTITY_SEARCH_DELETED, toDelete);
+		}
+	}
+	
+	/*
+	 * Initializes the basic search panel with the provided search
+	 */
+	@SuppressWarnings("unchecked")
+	private void setSearch(BasicEntitySearch search){
+		if (search.getSearchString() != null ){
+			txtSearch.setText(search.getSearchString());
+			List<Object> types = (List<Object>) cmbEntityType.getInput();
+			List<IntelEntityType> selections = new ArrayList<>();
+			if (search.getEntityTypes() != null){
+				for (Object t : types){
+					if (t instanceof IntelEntityType && search.getEntityTypes().contains(((IntelEntityType)t).getKeyId()))
+						selections.add((IntelEntityType)t);
+				}
+			}
+			cmbEntityType.setSelection(new StructuredSelection(selections));
+		}
+	}
+	
+	/*
+	 * Creates the basic search panel
+	 */
+	private Composite createBasicSearch(Composite parent){
 		Composite search = toolkit.createComposite(parent, SWT.NONE);
 		search.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		search.setLayout(new GridLayout());
@@ -515,8 +577,6 @@ public class EntitySearchView {
 	@Inject
 	@Optional
 	private void searchModified(@UIEventTopic(IntelEvents.ENTITY_SEARCH_ALL) IntelEntitySearch search){
-		//TODO: sort this out
-//		cmbSavedSearch.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		loadSearchJob.schedule();
 	}
 	
@@ -538,14 +598,10 @@ public class EntitySearchView {
 		entityTypeJob.schedule();
 		doSearch(null, searchDelay);
 	}
-	
-	// @Optional
-	// @Inject
-	// private void
-	// dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object
-	// data){
-	// }
 
+	/*
+	 * Creates a basic search object from the basic search panel
+	 */
 	private BasicEntitySearch createBasicSearch(){
 		List<IntelEntityType> filters = new ArrayList<IntelEntityType>();
 		for (Iterator<?> iterator = ((IStructuredSelection)cmbEntityType.getSelection()).iterator(); iterator.hasNext();) {
@@ -559,10 +615,16 @@ public class EntitySearchView {
 		return search;
 	}
 	
+	/*
+	 * saves the basic search
+	 */
 	private void saveBasicSearch(){
 		saveSearch(createBasicSearch());
 	}
 	
+	/*
+	 * Saves a search
+	 */
 	public void saveSearch(IIntelEntitySearch search){
 		SaveSearchDialog dd = new SaveSearchDialog(context.get(Shell.class), search, lastSearch);
 		ContextInjectionFactory.inject(dd, context);
@@ -581,14 +643,23 @@ public class EntitySearchView {
 		if (boldFont != null) boldFont.dispose();
 	}
 	
+	/*
+	 * execute basic search
+	 */
 	private void doBasicSearch(long delay){
 		doSearch(createBasicSearch(), delay);
 	}
 	
+	/**
+	 * executes an advanced search
+	 */
 	public void doAdvancedSearch(AdvancedEntitySearch search, long delay){
 		doSearch(search, delay);	
 	}
 	
+	/*
+	 * executes search
+	 */
 	private void doSearch(IIntelEntitySearch search, long delay){
 		if (search != null){
 			searchJob.setSearch(search);
@@ -603,6 +674,9 @@ public class EntitySearchView {
 		}
 	}
 	
+	/*
+	 * job for loading entity types
+	 */
 	private class LoadEntityTypeJob extends Job{
 
 			public LoadEntityTypeJob() {
@@ -630,36 +704,6 @@ public class EntitySearchView {
 			}
 	    }
 	    
-	    private class LoadSavedSearchJob extends Job{
-
-			public LoadSavedSearchJob() {
-				super("Refreshing Saved Searches");
-			}
-
-			@SuppressWarnings("unchecked")
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				List<Object> types = new ArrayList<Object>();
-				Session session = HibernateManager.openSession();
-				try{
-					
-					types.addAll(session.createCriteria(IntelEntitySearch.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-							.list());
-									
-				}finally{
-					session.close();
-				}
-				
-				types.add(0, "");
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						cmbSavedSearch.setInput(types);
-					}		
-				});
-				return Status.OK_STATUS;
-			}
-	    }
+	
 
 }

@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataStore;
@@ -51,6 +53,8 @@ import org.wcs.smart.util.UuidUtils;
  * @since 1.0.0
  */
 public class QueryGeoResource extends IGeoResource implements IWorkingSetResource {
+	
+	private Logger logger = Logger.getLogger(QueryGeoResource.class.getName());
 	
 	private URL url = null;
 	private URL fixedURL = null;
@@ -174,8 +178,7 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {
-				//PatrolQueryPlugIn.log(Messages.QueryGeoResource_Error_NoDatasource, null);
-				//TODO: log a message
+				logger.log(Level.WARNING, "No datasource found.");
 				return null;
 			}
 		}

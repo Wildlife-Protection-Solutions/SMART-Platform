@@ -90,7 +90,7 @@ public class IntelObservationQueryEngine {
 			
 			String sql = "DROP TABLE " + dataTable;
 			SqlGenerator.logString(sql);
-			session.createSQLQuery(sql);
+			session.createSQLQuery(sql).executeUpdate();
 			monitor.worked(1);
 			
 			monitor.subTask("Computing Query Columns");
@@ -117,7 +117,7 @@ public class IntelObservationQueryEngine {
 			
 			String sql = "DROP TABLE " + dataTable;
 			SqlGenerator.logString(sql);
-			session.createSQLQuery(sql);
+			session.createSQLQuery(sql).executeUpdate();
 			monitor.worked(1);
 			
 			monitor.subTask("Computing Query Columns");
@@ -140,7 +140,7 @@ public class IntelObservationQueryEngine {
 	 * Configures the query columns; removing non populated attribute columns
 	 */
 	@SuppressWarnings("unchecked")
-	private void computeQueryColumns(Session session, Locale locale, IntelRecordObservationQuery query){
+	private void computeQueryColumns(Session session, Locale locale, IntelRecordObservationQuery query) throws Exception{
 		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, locale, session);
 		//remove unused attribute columns
 		StringBuilder sb = new StringBuilder();

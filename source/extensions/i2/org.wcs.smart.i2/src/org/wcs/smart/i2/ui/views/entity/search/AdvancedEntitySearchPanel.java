@@ -21,6 +21,12 @@
  */
 package org.wcs.smart.i2.ui.views.entity.search;
 
+import java.text.Collator;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -45,6 +51,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -53,9 +61,13 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -63,11 +75,14 @@ import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem.InputType;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Advanced search panel for entity searches
@@ -110,8 +125,22 @@ public class AdvancedEntitySearchPanel extends Composite {
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
 		
-		btnAddFilter = toolkit.createButton(this, "Add Filter ...", SWT.PUSH);
+		Composite top = toolkit.createComposite(this);
+		top.setLayout(new GridLayout(2, false));
+		((GridLayout)top.getLayout()).marginWidth = 0;
+		((GridLayout)top.getLayout()).marginHeight = 0;
+		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnAddFilter = toolkit.createButton(top, "Add Filter ...", SWT.PUSH);
 		btnAddFilter.addListener(SWT.Selection, e-> showFilterMenu(e));
+		
+		ToolBar tb = new ToolBar(top, SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		
+		ToolItem clear = new ToolItem(tb, SWT.PUSH);
+		clear.setToolTipText("clear search panel");
+		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+		clear.addListener(SWT.Selection, (event)->searchPanel.clear());
 		
 		searchPanel = new EntitySearchPanel(){
 			public String validate(){
@@ -122,6 +151,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 				return validate;
 			}
 		};
+		searchPanel.addQueryModifiedListener((event)->searchPanel.validate());
 
 		
 		Composite c = searchPanel.createComposite(this);
@@ -148,25 +178,27 @@ public class AdvancedEntitySearchPanel extends Composite {
 	}
 	
 	private void saveSearch(){
-		configureSearch();	
+		if (!configureSearch()) return;	
 		view.saveSearch(search);
 	}
-	private void doSearch(){
-		configureSearch();
+	
+	public void doSearch(){
+		if (!configureSearch()) return;
 		view.doAdvancedSearch(search, 0);
 	}
 	
-	private void configureSearch(){
+	private boolean configureSearch(){
 		String error = searchPanel.validate();
 		if (error != null){
-			MessageDialog.openError(getShell(), "Search", "Invalid search filter.");
-			return ;
+			MessageDialog.openError(getShell(), "Search", "Search error - the search must be valid before you can run or save the search.");
+			return false;
 		}
 		
 		if (search == null){
 			search = new AdvancedEntitySearch();
 		}
 		search.setSearchString(searchPanel.getQueryPart());
+		return true;
 	}
 	
 	private void showFilterMenu(Event e){
@@ -175,7 +207,96 @@ public class AdvancedEntitySearchPanel extends Composite {
 		optionShell.open(btnAddFilter.toDisplay(r.x + r.width, r.y));
 	}
 
-	
+	public void initPanel(AdvancedEntitySearch search){
+		searchPanel.clear();
+		
+		List<DropItem> toAdd = new ArrayList<DropItem>();
+		
+		String[] parts = search.getSearchString().split("\\|");
+		
+		for(String p : parts){
+			if (p.equalsIgnoreCase(Operator.BRACKET_OPEN.getKey())){
+				toAdd.add(createOpenBracketDropItem());
+			}else if (p.equalsIgnoreCase(Operator.BRACKET_CLOSE.getKey())){
+				toAdd.add(createCloseBracketDropItem());
+			}else if (p.equalsIgnoreCase(Operator.NOT.getKey())){
+				toAdd.add(createNotDropItem());
+			}else if (p.equalsIgnoreCase(Operator.AND.getKey())){
+				OptionDropItem di = OptionDropItem.createAndOrDropItem();
+				di.setInitialValue(Operator.AND.getKey());
+				toAdd.add(di);
+			}else if (p.equalsIgnoreCase(Operator.OR.getKey())){
+				OptionDropItem di = OptionDropItem.createAndOrDropItem();
+				di.setInitialValue(Operator.OR.getKey());
+				toAdd.add(di);
+			}else if (p.startsWith(AdvancedEntitySearch.ENTITYTYPE_KEY)){
+				String entityTypeKey = p.split("=")[1];
+				toAdd.add(createEntityTypeDropItem(entityTypeKey));				
+			}else if (p.startsWith(AdvancedEntitySearch.ATTRIBUTE_KEY + ":")){
+				String[] bits = p.split(" ")[0].split(":");
+				String key = bits[2];
+				IntelAttribute ia = null;
+				Session session = HibernateManager.openSession();
+				try{
+					ia = (IntelAttribute)session.createCriteria(IntelAttribute.class)
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+							.add(Restrictions.eq("keyId", key))
+							.uniqueResult();
+					
+					if (ia != null && ia.getType() == AttributeType.LIST){
+						String listKey = p.split(" ")[2];
+						boolean found = false;
+						if (ia.getAttributeList() != null){
+							for (IntelAttributeListItem listitem : ia.getAttributeList()){
+								listitem.getName();
+								if (listitem.getKeyId().equalsIgnoreCase(listKey)){
+									found = true;
+								}
+							}
+						}
+						if (!found){
+							toAdd.add(new ErrorDropItem(MessageFormat.format("Intelligence list item {0} not found for attribute {1}", listKey, ia.getName())));
+							continue;
+						}
+					}
+				}finally{
+					session.close();
+				}
+				if (ia == null){
+					toAdd.add(new ErrorDropItem(MessageFormat.format("Intelligence Attribute {0} not found", key)));
+				}else{
+					try{
+						DropItem di = createAttributeDropItem(ia);
+						if (ia.getType() == IntelAttribute.AttributeType.TEXT){
+							String[] queryParts = p.split(" ");
+							Operator op = Operator.parse(queryParts[1]);
+							String value = SharedUtils.stripQuotes(queryParts[2]);
+							((TextBoxDropItem)di).setInitialValue(op, value);
+						}else if (ia.getType() == IntelAttribute.AttributeType.NUMERIC){
+							String[] queryParts = p.split(" ");
+							Operator op = Operator.parse(queryParts[1]);
+							String value = queryParts[2];
+							((TextBoxDropItem)di).setInitialValue(op, value);
+						}else if (ia.getType() == IntelAttribute.AttributeType.DATE){
+							String[] queryParts = p.split(" ");
+							Operator op = Operator.parse(queryParts[1]);
+							Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[2]);
+							Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[4]);
+							((DateDropItem)di).setInitialValue(op, d1, d2);
+						}else if (ia.getType() == IntelAttribute.AttributeType.LIST){
+							String listKey = p.split(" ")[2];
+							((OptionDropItem)di).setInitialValue(listKey);
+						}
+						toAdd.add(di);
+					}catch (Exception ex){
+						toAdd.add(new ErrorDropItem(MessageFormat.format("Error parsing saved search: {0}", ex.getMessage())));
+					}
+				}
+					
+			}
+		}
+		searchPanel.initializeItems(toAdd);
+	}
 	
 	private class FilterOptionShell extends SmartShellDialog {
 
@@ -208,14 +329,18 @@ public class AdvancedEntitySearchPanel extends Composite {
 				@Override
 				public void doubleClick(DoubleClickEvent event) {
 					FilterOption op = (FilterOption) ((IStructuredSelection)optionsTable.getSelection()).getFirstElement();
+					List<DropItem> dis = null;
 					if (op == FilterOption.ENTITY_TYPE){
-						createEntityTypeDropItem(null);
-						FilterOptionShell.this.close();
+						DropItem di = createEntityTypeDropItem(null);
+						if (di != null) dis = Collections.singletonList(di);
 					}else if (op == FilterOption.NOT){
-						createNotDropItem();
-						FilterOptionShell.this.close();
+						DropItem di = createNotDropItem();
+						if (di != null) dis = Collections.singletonList(di);
 					}else if (op == FilterOption.BRACKET){
-						createBracketDropItem();
+						dis = createBracketDropItem();
+					}
+					if (dis != null){
+						dis.forEach(di -> searchPanel.addItem(di));
 						FilterOptionShell.this.close();
 					}
 				}
@@ -267,11 +392,14 @@ public class AdvancedEntitySearchPanel extends Composite {
 					if (attributeTable.getSelection().isEmpty()) return;
 					
 					Object x =((IStructuredSelection) attributeTable.getSelection()).getFirstElement();
+					DropItem di = null;
 					if (x instanceof IntelEntityType){
-						createEntityTypeDropItem((IntelEntityType)x);	
-						FilterOptionShell.this.close();
+						di = createEntityTypeDropItem(((IntelEntityType)x).getKeyId());
 					}else if (x instanceof IntelAttribute){
-						createAttributeDropItem((IntelAttribute)x);	
+						di = createAttributeDropItem((IntelAttribute)x);
+					}
+					if (di != null){
+						searchPanel.addItem(di);
 						FilterOptionShell.this.close();
 					}
 				}
@@ -330,10 +458,12 @@ public class AdvancedEntitySearchPanel extends Composite {
 										a.getAttributeList().forEach(li -> li.getName());
 									}
 								});
+								
 								attributes = ats;
 							}finally{
 								s.close();
 							}
+							attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 							Display.getDefault().syncExec(()->{if (!attributeTable.getControl().isDisposed()) attributeTable.setInput(attributes);});
 							return Status.OK_STATUS;
 						}
@@ -346,80 +476,96 @@ public class AdvancedEntitySearchPanel extends Composite {
 			
 			}
 		}
+	}
+	
+	
+	private DropItem createAttributeDropItem(IntelAttribute a){
+		DropItem di = null;
+		String key = AdvancedEntitySearch.ATTRIBUTE_KEY + ":" + a.getType().key + ":" + a.getKeyId();
+		switch(a.getType()){
+		case BOOLEAN:
+			di = new TextDropItem(a.getName(), key);
+			break;
+		case DATE:
+			di = new DateDropItem(a.getName(), key);
+			break;
+		case LIST:
+			String[] names = new String[a.getAttributeList().size()];
+			String[] keys = new String[a.getAttributeList().size()];
+			for (int i = 0; i < a.getAttributeList().size(); i ++){
+				names[i] = a.getAttributeList().get(i).getName();
+				keys[i] = a.getAttributeList().get(i).getKeyId();
+			}
+			di = new OptionDropItem(a.getName(), key, names, keys);
+			break;
+		case NUMERIC:
+			di = new TextBoxDropItem(a.getName(), key, InputType.NUMERIC);
+			break;
+		case TEXT:
+			di = new TextBoxDropItem(a.getName(), key, InputType.TEXT);
+			break;
+		default:
+			break;
 		
-		
-		private void createAttributeDropItem(IntelAttribute a){
-			DropItem di = null;
-			String key = "a:" + a.getType().key + ":" + a.getKeyId();
-			switch(a.getType()){
-			case BOOLEAN:
-				di = new TextDropItem(a.getName(), key);
-				break;
-			case DATE:
-				di = new DateDropItem(a.getName(), key);
-				break;
-			case LIST:
-				String[] names = new String[a.getAttributeList().size()];
-				String[] keys = new String[a.getAttributeList().size()];
-				for (int i = 0; i < a.getAttributeList().size(); i ++){
-					names[i] = a.getAttributeList().get(i).getName();
-					keys[i] = a.getAttributeList().get(i).getKeyId();
+		}
+		return di;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private DropItem createEntityTypeDropItem(String entityTypeKey){
+		String[][] values = new String[2][];
+		Job j = new Job("loading entity types"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session s = HibernateManager.openSession();
+				try{
+					List<IntelEntityType> types = s.createCriteria(IntelEntityType.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.list();
+					
+					values[0] = new String[types.size()];
+					values[1] = new String[types.size()];
+					for (int i = 0;i < types.size(); i ++){
+						values[0][i] = types.get(i).getName();
+						values[1][i] = types.get(i).getKeyId();
+					}
+				}finally{
+					s.close();
 				}
-				di = new OptionDropItem(a.getName(), key, names, keys);
-				break;
-			case NUMERIC:
-				di = new TextBoxDropItem(a.getName(), key, InputType.NUMERIC);
-				break;
-			case TEXT:
-				di = new TextBoxDropItem(a.getName(), key, InputType.TEXT);
-				break;
-			default:
-				break;
-			
+				return Status.OK_STATUS;
 			}
-			if (di != null){
-				searchPanel.addItem(di);
-			}
-			
-		}
-		@SuppressWarnings("unchecked")
-		private void createEntityTypeDropItem(IntelEntityType type){
-			//TODO: do this outside a display thread
-			
-			String[] names = null;
-			String[] keys = null;
-			
-			Session s = HibernateManager.openSession();
-			try{
-				List<IntelEntityType> types = s.createCriteria(IntelEntityType.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.list();
-				
-				names = new String[types.size()];
-				keys = new String[types.size()];
-				for (int i = 0;i < types.size(); i ++){
-					names[i] = types.get(i).getName();
-					keys[i] = types.get(i).getKeyId();
-				}
-			}finally{
-				s.close();
-			}
-			
-			OptionDropItem dropItem = new OptionDropItem("Entity Type", "et", names, keys);
-			if (type != null){
-				dropItem.setInitialValue(type.getKeyId());
-			}
-			searchPanel.addItem(dropItem);
+		};
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			return new ErrorDropItem(e.getMessage());
 		}
 		
-		private void createNotDropItem(){
-			TextDropItem di = new TextDropItem(FilterOption.NOT.guiName, Operator.NOT.getKey());
-			searchPanel.addItem(di);
+		OptionDropItem dropItem = new OptionDropItem("Entity Type", AdvancedEntitySearch.ENTITYTYPE_KEY, values[0], values[1]);
+		if (entityTypeKey != null){
+			dropItem.setInitialValue(entityTypeKey);
 		}
-		
-		private void createBracketDropItem(){
-			searchPanel.addItem(new TextDropItem("(", "("));
-			searchPanel.addItem(new TextDropItem(")", ")"));
-		}
+		return dropItem;
+	}
+	
+	private TextOperatorDropItem createNotDropItem(){
+		return new TextOperatorDropItem(Operator.NOT);
+	}
+	
+	private List<DropItem> createBracketDropItem(){
+		List<DropItem> newList = new ArrayList<DropItem>();
+		newList.add(createOpenBracketDropItem());
+		newList.add(createCloseBracketDropItem());
+		return newList;
+	}
+	
+	private TextOperatorDropItem createOpenBracketDropItem(){
+		return new TextOperatorDropItem(Operator.BRACKET_OPEN);
+	}
+	private TextOperatorDropItem createCloseBracketDropItem(){
+		return new TextOperatorDropItem(Operator.BRACKET_CLOSE);
 	}
 }

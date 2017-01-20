@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.dialogs.query;
 
 import java.lang.reflect.InvocationTargetException;
@@ -24,7 +45,13 @@ import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.export.IQueryExporter;
 
-public class ExportQueryWizard  extends Wizard implements IPageChangingListener{
+/**
+ * Export query wizard.
+ * 
+ * @author Emily
+ *
+ */
+public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	
 	public static final String LAST_DIR_KEY = "org.wcs.smart.i2.query.export.directory"; //$NON-NLS-1$
 
@@ -34,21 +61,16 @@ public class ExportQueryWizard  extends Wizard implements IPageChangingListener{
 	private QueryFormatPage page1;
 	private QueryFormatOptionPage page2;
 	
-//	private boolean hasError = false;
-//	
 	private List<Projection> supportedProjections = null;
 	private Projection defaultProjection = null;
 	
-	
+	@SuppressWarnings("unchecked")
 	public ExportQueryWizard(IntelRecordObservationQuery query, IPagedQueryResultSet results) {
 		this.query = query;
 		this.queryResults = results;
 		
-		
 		setWindowTitle("Export Query");
-		
 		setDialogSettings(Intelligence2PlugIn.getDefault().getDialogSettings());
-		
 		Session s = HibernateManager.openSession();
 		try{
 			supportedProjections = s.createCriteria(Projection.class)
@@ -93,15 +115,6 @@ public class ExportQueryWizard  extends Wizard implements IPageChangingListener{
 		super.addPage(page2);
 
 	}
-
-//	@Override
-//	public void createPageControls(Composite pageContainer) {
-//		super.createPageControls(pageContainer);
-//		if (this.query == null){
-//			page3.initValues(initSelection);
-//		}
-//	}
-
 	/**
 	 * @return the query exporter for the format selected
 	 * on the first query page.

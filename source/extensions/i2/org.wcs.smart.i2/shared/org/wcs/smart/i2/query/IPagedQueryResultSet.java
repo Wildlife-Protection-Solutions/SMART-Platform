@@ -111,7 +111,7 @@ public interface IPagedQueryResultSet {
 	/**
 	 * Sets the current sorting column.
 	 * @param sortColumn
-	 * @param direction SWT.UP or SWT.DOWN
+	 * @param direction
 	 */
 	public void setSorting(IQueryColumn sortColumn, SortDirection direction) ;
 		

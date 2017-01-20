@@ -85,6 +85,7 @@ public class RecordExportJob extends Job {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	protected Path runRecord() throws Exception{
 		
 		//get the template

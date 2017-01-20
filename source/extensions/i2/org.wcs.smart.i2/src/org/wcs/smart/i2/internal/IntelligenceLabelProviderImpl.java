@@ -30,6 +30,7 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.query.FixedQueryColumn;
+import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvQueryExporter;
 import org.wcs.smart.i2.query.export.ShpQueryExporter;
@@ -101,6 +102,7 @@ public class IntelligenceLabelProviderImpl implements
 		
 		if (item instanceof CsvQueryExporter) return "Comma Separated Values";
 		if (item instanceof ShpQueryExporter) return "Shapefile";
+		if (item == IntelQueryColumnProvider.ANY_ITEM) return "<Any>";
 		return null;
 		
 	}

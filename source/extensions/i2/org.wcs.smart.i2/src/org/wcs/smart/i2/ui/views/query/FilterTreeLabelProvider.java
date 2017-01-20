@@ -29,7 +29,6 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 
 /**
@@ -53,7 +52,7 @@ public class FilterTreeLabelProvider extends LabelProvider {
 		Image img = toDispose.get(element);
 		if (img != null) return img;
 		if (element instanceof AttributeTreeFilterItem){
-			return attributeInstance.getImage(((AttributeTreeFilterItem) element).getType());
+			return attributeInstance.getImage((Object)((AttributeTreeFilterItem) element).getType());
 		}
 		if (element instanceof EntityTypeTreeFilterItem){
 			if (((EntityTypeTreeFilterItem) element).getImage() != null){
@@ -69,7 +68,7 @@ public class FilterTreeLabelProvider extends LabelProvider {
 			if (((AttributeHeaderFilterItem) element).isGroup()){
 				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 			}
-			return AttributeType.NUMERIC.getImage();
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
 		}
 		
 		if (element instanceof AreaTreeFilterItem){

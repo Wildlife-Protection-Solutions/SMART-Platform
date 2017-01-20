@@ -123,14 +123,15 @@ import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-/*
- * implementing as an editor; but we only ever want one 
+/**
+ * Intelligence working set map.  Implementing as an editor but we only
+ * ever want one of these.
+ * 
  * 
  */
 public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropTargetProvider {
 
 	public static final String ID = "org.wcs.smart.i2.editor.map"; //$NON-NLS-1$
-
 	
 	private IEclipseContext parentContext;
 	

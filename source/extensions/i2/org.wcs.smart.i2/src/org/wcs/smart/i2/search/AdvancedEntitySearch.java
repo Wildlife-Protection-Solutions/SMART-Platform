@@ -57,12 +57,34 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	
 	private String searchString = null;
 	
+	public static final String ENTITYTYPE_KEY = "et";
+	
+	public static final String ATTRIBUTE_KEY = "a";
+	
+	
+	public static AdvancedEntitySearch parse(String searchString){
+		String[] bits = searchString.split(SEPARATOR);
+		if (!bits[0].equals(Type.ADVANCED.key)) return null;
+		
+		int maxCnt = Integer.parseInt(bits[1]);
+		String ss = bits[2];
+		AdvancedEntitySearch search = new AdvancedEntitySearch();
+		search.searchString = ss;
+		search.maxResultCnt = maxCnt;
+		return search;
+	}
+	
+	
 	public AdvancedEntitySearch(){
 		
 	}
 	
 	public void setSearchString(String searchString){
 		this.searchString = searchString;
+	}
+	
+	public String getSearchString(){
+		return this.searchString;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -89,10 +111,15 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			IntelSearchResult results = new IntelSearchResult(eCount, items, (done - now)); 
 			return results;
 		}else{
+			Long now = System.nanoTime();
+			Query q = null;
 			try{
-				Long now = System.nanoTime();
-				Query q = parseQueryString(session);
-				
+				q = parseQueryString(session);
+			}catch (Exception ex){
+				Intelligence2PlugIn.displayLog("Error parsing search query.  Ensure query is valid and try again. " + ex.getMessage(), ex);
+				return new IntelSearchResult(0, Collections.emptyList(), 0);
+			}
+			try{
 				List<UUID> uuids = q.list();
 				int totalCount = uuids.size();
 				List<IntelSearchResultItem> items = new ArrayList<>();
@@ -105,7 +132,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				IntelSearchResult results = new IntelSearchResult(totalCount, items, (done - now));
 				return results;
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+				Intelligence2PlugIn.displayLog("Error executing search query: " + ex.getMessage(), ex);
 				return new IntelSearchResult(0, Collections.emptyList(), 0);
 			}
 		}
@@ -114,10 +141,10 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	@Override
 	public String serialize() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("adv");
-		sb.append(";");
+		sb.append(Type.ADVANCED.key);
+		sb.append(SEPARATOR);
 		sb.append(maxResultCnt);
-		sb.append(";");
+		sb.append(SEPARATOR);
 		sb.append(searchString);
 		
 		return sb.toString();
@@ -134,7 +161,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		
 		HashSet<String> usedKeys = new HashSet<String>();
 		for (String t : stokens){
-			if (t.startsWith("a:")){
+			if (t.startsWith(ATTRIBUTE_KEY + ":")){
 				String[] qbits = t.split(" ");
 				String[] bits = qbits[0].split(":");
 				String attributeKey = bits[2].split("=")[0];
@@ -157,22 +184,23 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		params.put("ca", SmartDB.getCurrentConservationArea());
 		
 		for (String t : stokens){
-			if (t.equalsIgnoreCase("and")){
+			t = t.trim();
+			if (t.equalsIgnoreCase(Operator.AND.getKey())){
 				sb.append(" AND ");
-			}else if (t.equalsIgnoreCase("or")){
+			}else if (t.equalsIgnoreCase(Operator.OR.getKey())){
 				sb.append( " OR ");
-			}else if (t.equalsIgnoreCase("not")){
+			}else if (t.equalsIgnoreCase(Operator.NOT.getKey())){
 				sb.append( " NOT ");
-			}else if (t.equalsIgnoreCase( "(")){
+			}else if (t.equalsIgnoreCase(Operator.BRACKET_OPEN.getKey())){
 				sb.append(" ( ");
-			}else if (t.equalsIgnoreCase( ")")){
+			}else if (t.equalsIgnoreCase(Operator.BRACKET_CLOSE.getKey())){
 				sb.append(" ) ");
-			}else if (t.startsWith("et")){
-				String[] bits = t.split("=");
+			}else if (t.startsWith(ENTITYTYPE_KEY)){
+				String[] bits = t.split(" ");
 				String pname = "p" + (pcnt++);
 				sb.append(" t.keyId = :" + pname);
-				params.put(pname, bits[1]);
-			}else if (t.startsWith("a:")){
+				params.put(pname, bits[2]);
+			}else if (t.startsWith(ATTRIBUTE_KEY + ":")){
 				String[] qbits = t.split(" ");
 				String[] bits = qbits[0].split(":");
 				if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.BOOLEAN.key)){
@@ -210,10 +238,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					
 					
 				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.DATE.key)){
-					
 					String attributeKey = bits[2];
-					
-					
 					String pname1 = "p" + (pcnt++);
 					String pname2 = "p" + (pcnt++);
 					
@@ -234,8 +259,8 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					params.put(pname2, d2);
 					
 				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.LIST.key)){
-					String attributeKey = bits[2].split("=")[0];
-					String listKey = t.split("=")[1];
+					String attributeKey = bits[2];
+					String listKey = qbits[2];
 					sb.append(" ( at_" + attributeKey + ".keyId = '" + attributeKey + "' AND li_" + attributeKey + ".keyId = ");
 					
 					String pname = "p" + (pcnt++);
@@ -251,7 +276,8 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			}
 		}
 		sb.append(" ) ");
-		System.out.println(sb.toString());
+		
+		//System.out.println(sb.toString());
 		Query q = session.createQuery(sb.toString());
 		for (Entry<String,Object> param : params.entrySet()){
 			q.setParameter(param.getKey(), param.getValue());

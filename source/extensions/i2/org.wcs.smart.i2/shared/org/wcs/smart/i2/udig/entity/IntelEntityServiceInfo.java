@@ -30,7 +30,6 @@ public class IntelEntityServiceInfo extends IServiceInfo{
 
 	public IntelEntityServiceInfo(IntelEntityService service){
 		this.description = "service for providing intel record locations for entities";
-		//this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
 		this.keywords = new String[]{"Intelligence", "Location", "Record", "Entity"};
 		this.title = "Intelligence Record Entity Service";
 	}

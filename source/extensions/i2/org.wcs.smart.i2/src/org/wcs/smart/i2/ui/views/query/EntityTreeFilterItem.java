@@ -34,6 +34,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
@@ -82,7 +83,7 @@ public class EntityTreeFilterItem extends BasicTreeFilterItem {
 		super(entity.getIdAttributeAsText());
 		this.entity = entity.getUuid();
 		typeKey = entity.getEntityType().getKeyId();
-		dropLabel = DropItemFactory.generateName(entity);
+		dropLabel = IntelQueryColumnProvider.generateName(entity);
 	}
 	
 	@Override

@@ -38,6 +38,8 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.query.IntelQueryColumnProvider;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -67,7 +69,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		super(category.getName());
 		this.categoryUuid = category.getUuid();
 		queryKey = "dm_category:" + category.getHkey();
-		dropItemName = DropItemFactory.generateName(null, category);
+		dropItemName = IntelQueryColumnProvider.generateName(null, category);
 	}
 	
 	public DataModelTreeFilterItem(Attribute attribute){
@@ -75,7 +77,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		this.attributeUuid = attribute.getUuid();
 		this.type = attribute.getType();
 		queryKey = "dm_attribute:" + attribute.getType().typeKey + "::" + attribute.getKeyId();
-		dropItemName = DropItemFactory.generateName(attribute, null);
+		dropItemName = IntelQueryColumnProvider.generateName(attribute, null);
 	}
 	
 	public DataModelTreeFilterItem(CategoryAttribute attribute){
@@ -86,20 +88,9 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		this.type = attribute.getAttribute().getType();
 		
 		queryKey = "dm_attribute:" + attribute.getAttribute().getType().typeKey + ":" + attribute.getCategory().getHkey() + ":" + attribute.getAttribute().getKeyId();
-		dropItemName = DropItemFactory.generateName(attribute.getAttribute(),  attribute.getCategory());
+		dropItemName = IntelQueryColumnProvider.generateName(attribute.getAttribute(),  attribute.getCategory());
 	}
 	
-//	private void processAttributeItems(Attribute a){
-//		if (a.getType() == AttributeType.LIST){
-//			int cnt = 0;
-//			attributeListLabels = new String[a.getAttributeList().size()];
-//			attributeListKeys = new String[a.getAttributeList().size()];
-//			for (AttributeListItem i : a.getActiveListItems()){
-//				attributeListLabels[cnt] = i.getName();
-//				attributeListKeys[cnt++] = i.getKeyId();
-//			}
-//		}
-//	}
 	public Attribute.AttributeType getType(){
 		return this.type;
 	}
@@ -155,7 +146,6 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		}
 		
-		
 		switch(type){
 		case BOOLEAN:
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
@@ -164,8 +154,8 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		case LIST:
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
-			labels.add("<ANY>");
-			keys.add("any");
+			labels.add(DropItemFactory.ANY_LABEL);
+			keys.add(IQueryFilter.ANY_OPTION_KEY);
 			Job j = new Job("creating attribute drop item"){
 
 				@Override

@@ -325,6 +325,7 @@ public class ObservationDialog extends Dialog {
 		return main;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void editObservation(){
 		 Object x = ((IStructuredSelection)observationTable.getSelection()).getFirstElement();
 		 if (x != null && x instanceof IntelObservation){
@@ -333,7 +334,6 @@ public class ObservationDialog extends Dialog {
 			 
 			 List<IAttributeField<?>> fields = (List<IAttributeField<?>>) attributeComposite.getData(IAttributeField.class.getName());
 			 for (IAttributeField<?> field: fields){
-				 IntelObservationAttribute obs = null;
 				 for (IntelObservationAttribute oba : editObs.getObservationAttributes()){
 					 if (oba.getAttribute().equals(field.getAttribute())){
 						 field.setValue(oba.getAttributeValue());
@@ -375,6 +375,8 @@ public class ObservationDialog extends Dialog {
 	private void createAttributePanel(Category category){
 		createAttributePanel(category, true);
 	}
+	
+	@SuppressWarnings("unchecked")
 	private void createAttributePanel(Category category, boolean confirmChanges){
 		if (confirmChanges){
 			List<IAttributeField<?>> currentFields = (List<IAttributeField<?>>) attributeComposite.getData(IAttributeField.class.getName());
@@ -425,7 +427,7 @@ public class ObservationDialog extends Dialog {
 			c.getAllAttribute(allAttributes, true);
 			
 			
-			List<IAttributeField> fields = new ArrayList<>();
+			List<IAttributeField<?>> fields = new ArrayList<>();
 			for (Attribute a :allAttributes){
 				IAttributeField<?> field = AttributeFieldFactory.findAttributeField(a);
 				field.createComposite(attributes);
@@ -473,6 +475,7 @@ public class ObservationDialog extends Dialog {
 		attributeComposite.layout(true);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void createObservation(){
 		IntelObservation oo = new IntelObservation();
 		if (editObs != null){

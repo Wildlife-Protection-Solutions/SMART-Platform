@@ -373,16 +373,6 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		return null;
 	}
 
-//	@Override
-//	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize) {
-//		return null;
-//	}
-//
-//	@Override
-//	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize, Session session) {
-//		return null;
-//	}
-
 	@Override
 	public void setSorting(IQueryColumn sortColumn, SortDirection direction) {
 		this.sortColumn = sortColumn;

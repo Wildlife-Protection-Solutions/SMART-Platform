@@ -102,14 +102,14 @@ public abstract class AbstractEntityEditorShellListener<T,D extends SmartShellDi
 
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void doHover(int x, int y) {
-
 		ViewerCell cell = viewer.getCell(new Point(x, y));
 		if (cell == null){
 			closeShell();
 			return;
-			
 		}
+		
 		if (column != -1){
 			if (cell.getColumnIndex() != column) {
 				closeShell();

@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.views.entity.search;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -41,6 +42,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.IDefinitionPanel;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.ProxyItem;
@@ -62,14 +64,18 @@ public class EntitySearchPanel implements IDefinitionPanel {
 	protected ArrayList<DropItem> items = new ArrayList<DropItem>();	//list of controls in formula
 	private DropItem dragItem;
 	
-	
+	private List<Listener> modifiedEvents = null;
 	/**
 	 * Creates a new drop target panel.
 	 * 
 	 */
 	public EntitySearchPanel(){
+		modifiedEvents= new ArrayList<Listener>();
 	}
 
+	public void addQueryModifiedListener(Listener l){
+		modifiedEvents.add(l);
+	}
 
 	@Override
 	public void dispose(){
@@ -132,26 +138,29 @@ public class EntitySearchPanel implements IDefinitionPanel {
 	 */
 	@Override
 	public String validate(){
+		for (DropItem di : items){
+			if (di instanceof ErrorDropItem) return ((ErrorDropItem)di).getText();
+		}
 		return null;
 	}
 	
-//	/**
-//	 * Adds all items to the current query.  
-//	 * <p>This does not fire the query changed event.
-//	 * </p>
-//	 * 
-//	 * @param items
-//	 */
-//	
-//	public void addItems(Collection<DropItem> items) {
-//		if (items != null) {
-//			for (DropItem item : items) {
-//				item.createWidget(this, dropTargetContent);
-//				this.items.add(item);
-//			}
-//		}
-//		orderElements();
-//	}
+	/**
+	 * Adds all items to the current query.  
+	 * <p>This does not fire the query changed event.
+	 * </p>
+	 * 
+	 * @param items
+	 */
+	
+	public void initializeItems(List<DropItem> items) {
+		if (items != null) {
+			for (DropItem item : items) {
+				item.createWidget(this, dropTargetContent);
+				this.items.add(item);
+			}
+		}
+		orderElements();
+	}
 	
 	/**
 	 * Adds a drop item to the query formula; fires a query changed
@@ -258,32 +267,6 @@ public class EntitySearchPanel implements IDefinitionPanel {
 	public void redraw(){
 		orderElements();
 	}
-//	
-//	public void setErrorMessage(String message, Exception fullMessage){
-//		for (Control c : infoPanel.getChildren()){
-//			c.dispose();
-//		}
-//		if (message == null){
-//			runItem.setEnabled(true);
-//			infoPanel.getParent().layout(true,true);
-//			return;
-//		}
-//		
-//		runItem.setEnabled(false);
-//		
-//		infoPanel.setLayout(new GridLayout(2, false));
-//		Label l = new Label(infoPanel, SWT.NONE);
-//		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
-//		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-//		
-//		l = new Label(infoPanel, SWT.NONE);
-//		l.setText(message);
-//		l.setToolTipText(fullMessage.getMessage());
-//		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		infoPanel.getParent().layout(true,true);
-//	}
-	
-	
 	
 	/**
 	 * Creates the drop target composite
@@ -450,6 +433,8 @@ public class EntitySearchPanel implements IDefinitionPanel {
 
 	@Override
 	public void fireQueryChangedListeners() {
-
+		for (Listener l : modifiedEvents){
+			l.handleEvent(new Event());
+		}
 	}
 }

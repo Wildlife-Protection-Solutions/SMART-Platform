@@ -35,11 +35,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
@@ -64,23 +62,6 @@ public class IntelAttribute extends NamedKeyItem{
 		
 		AttributeType(String key){
 			this.key = key;
-		}
-		public Image getImage(){
-			//TODO: this cannot be in shared folder
-			String key = null;
-			if (this == NUMERIC){
-				key = SmartPlugIn.ATTRIBUTE_NUMBER_ICON;
-			}else if (this == TEXT){
-				key = SmartPlugIn.ATTRIBUTE_TEXT_ICON;
-			}else if (this == BOOLEAN){
-				key = SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON;
-			}else if (this == LIST){
-				key = SmartPlugIn.ATTRIBUTE_LIST_ICON;
-			}else if (this == DATE){
-				key = SmartPlugIn.ATTRIBUTE_DATE_ICON;
-			}
-			if (key == null) return null;
-			return SmartPlugIn.getDefault().getImageRegistry().get(key);
 		}
 		
 		public String getGuiName(Locale l){

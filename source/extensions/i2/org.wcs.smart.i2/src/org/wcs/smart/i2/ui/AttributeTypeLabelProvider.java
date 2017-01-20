@@ -44,7 +44,7 @@ public class AttributeTypeLabelProvider extends LabelProvider {
 	public Image getImage(Object element){
 		if (element instanceof IntelAttribute.AttributeType){
 			IntelAttribute.AttributeType a = (IntelAttribute.AttributeType)element;
-			return a.getImage();
+			return AttributeLabelProvider.getImage(a);
 		}
 		return super.getImage(element);
 	}

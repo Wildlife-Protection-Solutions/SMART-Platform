@@ -115,8 +115,14 @@ public class ObservationFilterProcessor {
 		monitor.subTask("Creating temporary observation table");
 		String obsTable = SqlGenerator.createTempTableName();
 				
+		StringBuilder tableColumns = new StringBuilder();
+		tableColumns.append("location_uuid char(16) for bit data, observation_uuid char(16) for bit data");
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + obsTable + " ( location_uuid char(16) for bit data, observation_uuid char(16) for bit data ) ");
+		sql.append("CREATE TABLE ");
+		sql.append(obsTable);
+		sql.append("(");
+		sql.append(tableColumns);
+		sql.append(")");
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 				
@@ -124,29 +130,52 @@ public class ObservationFilterProcessor {
 		sql.append("INSERT INTO " + obsTable);
 		sql.append(" SELECT l.uuid, o.uuid FROM smart.i_location l ");
 		sql.append(" LEFT JOIN smart.i_observation o on l.uuid = o.location_uuid ");
+		sql.append( " WHERE ");
+		sql.append(" l.ca_uuid = :ca ");
+		
 		String dateFilter = SqlGenerator.generateDateClause(dFilter, "datetime");
 		if (dateFilter != null){
-			sql.append( " WHERE ");
+			sql.append(" AND ");
 			sql.append(dateFilter);
 		}
-				
+		
+		logString(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));		
+		logString(sql.toString());
+		SQLQuery query = s.createSQLQuery(sql.toString());
+		query.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
+		query.executeUpdate();
+		
+		//create indexes to help with performance
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)");
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX observation_uuid_idx on " + obsTable + " (observation_uuid)");
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+		
 		monitor.worked(1);
 		
-		//TODO: look into creating index on location and observation field
 		//for each filter add a column for that filter
 		//set the filter value to true or false depending on the filter
-		
 		if(filter != null){	
 			filter.accept(new IFilterVisitor() {
 				private int columnCnt = 1;
 				
+				String tempTable = SqlGenerator.createTempTableName();
+				
 				private String createColumn(IQueryFilter filter){
 					monitor.subTask(MessageFormat.format("Processing filter {0}/{1}", columnCnt,filtercnt[0] ));
 					String columnName = "filter_" + columnCnt++;
+					tableColumns.append(", " + columnName + " boolean ");
+					
 					StringBuilder sql = new StringBuilder();
-					sql.append("ALTER TABLE " + obsTable + " ADD COLUMN " + columnName + " boolean ");
+					sql.append("CREATE TABLE ");
+					sql.append(tempTable);
+					sql.append(" (");
+					sql.append(tableColumns);
+					sql.append (")");
 					
 					logString(sql.toString());
 					s.createSQLQuery(sql.toString()).executeUpdate();
@@ -162,19 +191,24 @@ public class ObservationFilterProcessor {
 					try{
 						if (filter instanceof AreaFilter){
 							String columnName = createColumn(filter);
-							addFilterColumn((AreaFilter) filter, obsTable, columnName);
+							addFilterColumn((AreaFilter) filter, obsTable, tempTable, columnName);
+							switchTables(tempTable, obsTable);
 						}else if (filter instanceof DataModelFilter){
 							String columnName = createColumn(filter);
-							addFilterColumn((DataModelFilter) filter, obsTable, columnName);
+							addFilterColumn((DataModelFilter) filter, obsTable, tempTable, columnName);
+							switchTables(tempTable, obsTable);
 						}else if (filter instanceof EntityFilter){
 							String columnName = createColumn(filter);
-							addFilterColumn((EntityFilter) filter, obsTable, columnName);
+							addFilterColumn((EntityFilter) filter, obsTable, tempTable,  columnName);
+							switchTables(tempTable, obsTable);
 						}else if (filter instanceof EntityTypeFilter){
 							String columnName = createColumn(filter);
-							addFilterColumn((EntityTypeFilter) filter, obsTable, columnName);
+							addFilterColumn((EntityTypeFilter) filter, obsTable, tempTable, columnName);
+							switchTables(tempTable, obsTable);
 						}else if (filter instanceof IntelAttributeFilter){
 							String columnName = createColumn(filter);
-							addFilterColumn((IntelAttributeFilter) filter, obsTable, columnName);
+							addFilterColumn((IntelAttributeFilter) filter, obsTable, tempTable, columnName);
+							switchTables(tempTable, obsTable);
 						}
 							
 					}catch(Exception e){
@@ -191,9 +225,21 @@ public class ObservationFilterProcessor {
 		//create a results table based on that list of observations; adding the fields necessary
 		monitor.subTask("Filtering observations");
 		if (filter != null){
+			String tempTable = SqlGenerator.createTempTableName();
+			
+			sql = new StringBuilder();
+			sql.append("CREATE TABLE " + tempTable );
+			sql.append("(");
+			sql.append(tableColumns);
+			sql.append(")");
+			logString(sql.toString());
+			s.createSQLQuery(sql.toString()).executeUpdate();	
+			
 			final StringBuilder deleteSql = new StringBuilder();
-			deleteSql.append("DELETE FROM " + obsTable );
-			deleteSql.append(" WHERE NOT (");
+			deleteSql.append("INSERT INTO " + tempTable );
+			deleteSql.append(" SELECT * FROM ");
+			deleteSql.append( obsTable );
+			deleteSql.append(" WHERE ");
 			filter.accept(new IFilterVisitor() {
 				private Set<BracketFilter> filters = new HashSet<>();
 				@Override
@@ -224,12 +270,13 @@ public class ObservationFilterProcessor {
 					}
 				}
 				
-			});
-			deleteSql.append(")");		
+			});		
 			if (visitorException != null) throw visitorException;
 			
 			logString(deleteSql.toString());
-			s.createSQLQuery(deleteSql.toString()).executeUpdate();	
+			s.createSQLQuery(deleteSql.toString()).executeUpdate();
+			
+			switchTables(tempTable, obsTable);
 		}
 		monitor.worked(1);
 		
@@ -238,28 +285,23 @@ public class ObservationFilterProcessor {
 	
 	
 	
-	private void addFilterColumn(DataModelFilter filter, String obsTable, String columnName) throws Exception{
+	private void addFilterColumn(DataModelFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
 		if (filter.getAttributeKey() == null){
 			//only a category filter
 			StringBuilder sql = new StringBuilder();
-			sql.append("UPDATE " + obsTable );
-			sql.append(" SET " + columnName + " = true ");
-			sql.append(" WHERE observation_uuid IN ( ");	
-			sql.append("SELECT a.observation_uuid FROM " + obsTable + " a ");
-			sql.append(" JOIN smart.i_observation o on a.observation_uuid = o.uuid ");
-			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid ");
-			sql.append(" WHERE c.ca_uuid = :cauuid ");
-			sql.append(" AND c.hkey >= :hkey1 and c.hkey < :hkey2 ) ");
+			sql.append("INSERT INTO " + tempTable + " " );
+			sql.append(" SELECT a.*, CASE WHEN c.hkey is null IS NULL THEN NULL ELSE case when (c.hkey >= :hkey1 and c.hkey < :hkey2 ) then TRUE else null end END ");
+			sql.append(" FROM " + obsTable + " a LEFT JOIN ");
+			sql.append(" smart.i_observation o on a.observation_uuid = o.uuid ");
+			sql.append(" LEFT JOIN smart.dm_category c on c.uuid = o.category_uuid ");
 			
 			String hkey1 = filter.getCategoryKey();
 			String hkey2 = filter.getCategoryKey().substring(0, filter.getCategoryKey().length() - 1) + "/";
 			
-			logString(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));
 			logString(hkey1);
 			logString(hkey2);
 			
 			SQLQuery query = s.createSQLQuery(sql.toString());
-			query.setParameter("cauuid", SmartDB.getCurrentConservationArea().getUuid());
 			query.setParameter("hkey1", hkey1);
 			query.setParameter("hkey2", hkey2);
 			logString(sql.toString());
@@ -269,51 +311,51 @@ public class ObservationFilterProcessor {
 			
 		}
 		//category and perhaps an attribute filter
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE " + obsTable );
-		sql.append(" SET " + columnName + " = true ");
-		sql.append(" WHERE observation_uuid IN ( ");	
-		sql.append("SELECT a.observation_uuid FROM " + obsTable + " a ");
-		sql.append(" JOIN smart.i_observation o on a.observation_uuid = o.uuid ");
-		
-		if (filter.getCategoryKey() != null){
-			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid ");
-			sql.append(" AND c.ca_uuid = :cauuid ");
-			sql.append(" AND c.hkey >= :hkey1 and c.hkey < :hkey2 ");
-		}
-		
+
 		Attribute attribute = (Attribute)s.createCriteria(Attribute.class)
 				.add(Restrictions.eq("keyId", filter.getAttributeKey()))
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 				.uniqueResult();
-		
+		if (attribute == null){
+			throw new Exception(MessageFormat.format("No attribute with key {0} found in data model." , filter.getAttributeKey()));
+		}
 		AttributeListItem li = null;
 		AttributeTreeNode treenode = null;
 		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
-			li = (AttributeListItem)s.createCriteria(AttributeListItem.class)
+			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
+				li = (AttributeListItem)s.createCriteria(AttributeListItem.class)
 					.add(Restrictions.eq("keyId", filter.getKeyValue()))
 					.add(Restrictions.eq("attribute", attribute))
-					.uniqueResult();	
+					.uniqueResult();
+				if (li == null) throw new Exception(MessageFormat.format("No list item with key {0} found for attribute {1}.", filter.getKeyValue(), attribute.getName()));
+			}
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
 			treenode = (AttributeTreeNode)s.createCriteria(AttributeTreeNode.class)
 					.add(Restrictions.eq("hkey", filter.getKeyValue()))
 					.add(Restrictions.eq("attribute", attribute))
-					.uniqueResult();	
+					.uniqueResult();
+			if (treenode == null) throw new Exception(MessageFormat.format("No tree node item with key {0} found for attribute {1}.", filter.getKeyValue(), attribute.getName()));
 		}
-		sql.append(" JOIN smart.i_observation_attribute ia on ia.observation_uuid = o.uuid ");
 		
-		sql.append(" WHERE ");
-		
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO " + tempTable );
+		sql.append(" SELECT a.*, CASE WHEN o.uuid IS NULL THEN NULL ELSE CASE WHEN ");
+		if (filter.getCategoryKey() != null){
+			sql.append(" (c.hkey >= :hkey1 and c.hkey < :hkey2) AND ");
+		}
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
 			sql.append(" ia.double_value " + SqlGenerator.operatorToSql(Operator.GREATERTHAN) + " 0.5");
 			break;
 		case DATE:
-			sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(value2 as date)");
+			sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date)");
 			break;
 		case LIST:
-			sql.append(" ia.list_element_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value");
+			if (li == null){
+				sql.append(" ia.list_element_uuid is not null ");
+			}else{
+				sql.append(" ia.list_element_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value");
+			}
 			break;
 		case NUMERIC:
 			sql.append(" ia.double_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value");
@@ -327,10 +369,17 @@ public class ObservationFilterProcessor {
 		default:
 			break;
 		}
-		sql.append(" )");
-		
+		sql.append(" THEN TRUE ELSE NULL END END ");
+		sql.append(" FROM " + obsTable + " a LEFT JOIN ");
+		sql.append(" smart.i_observation o on a.observation_uuid = o.uuid ");
+		if (filter.getCategoryKey() != null){
+			sql.append(" LEFT JOIN smart.dm_category c on c.uuid = o.category_uuid ");
+		}
+		sql.append(" LEFT JOIN smart.i_observation_attribute ia on ia.observation_uuid = o.uuid and ia.attribute_uuid = :attributeUuid ");
 		
 		SQLQuery query = s.createSQLQuery(sql.toString());
+		query.setParameter("attributeUuid", attribute.getUuid());
+		logString(UuidUtils.uuidToString(attribute.getUuid()));
 		
 		if (filter.getCategoryKey() != null){
 			String hkey1 = filter.getCategoryKey();
@@ -341,7 +390,6 @@ public class ObservationFilterProcessor {
 			
 			query.setParameter("hkey1", hkey1);
 			query.setParameter("hkey2", hkey2);
-			query.setParameter("cauuid", SmartDB.getCurrentConservationArea().getUuid());
 		}
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
@@ -353,8 +401,10 @@ public class ObservationFilterProcessor {
 			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  );
 			break;
 		case LIST:
-			logString(UuidUtils.uuidToString(li.getUuid()));
-			query.setParameter("value", li.getUuid());
+			if (li != null){
+				logString(UuidUtils.uuidToString(li.getUuid()));
+				query.setParameter("value", li.getUuid());
+			}
 			break;
 		case TREE:
 			logString(UuidUtils.uuidToString(treenode.getUuid()));
@@ -377,13 +427,13 @@ public class ObservationFilterProcessor {
 	}
 	
 	//select * from table where (column name is not null) OR NOT (columnname is not null)
-	private void addFilterColumn(EntityFilter filter, String obsTable, String columnName){
+	private void addFilterColumn(EntityFilter filter, String obsTable, String tempTable, String columnName){
 		//todo: configure uuid
 		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE " + obsTable );
-		sql.append(" SET " + columnName + " = true ");
-		sql.append(" WHERE location_uuid IN ( ");
-		sql.append(" SELECT location_uuid FROM smart.i_entity_location WHERE entity_uuid = :uuid )");
+		sql.append(" INSERT INTO " + tempTable);
+		sql.append(" SELECT a.*, CASE WHEN l.location_uuid IS NULL THEN NULL ELSE case when l.entity_uuid = :uuid then true else null end END ");
+		sql.append(" FROM " + obsTable + " a LEFT JOIN ");
+		sql.append(" smart.i_entity_location l ON a.location_uuid = l.location_uuid");
 		
 		logString(sql.toString());
 		logString(UuidUtils.uuidToString(filter.getEntityUuid()));
@@ -393,14 +443,14 @@ public class ObservationFilterProcessor {
 		query.executeUpdate();
 	}
 	
-	private void addFilterColumn(EntityTypeFilter filter, String obsTable, String columnName){
+	private void addFilterColumn(EntityTypeFilter filter, String obsTable, String tempTable, String columnName){
 		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE " + obsTable );
-		sql.append(" SET " + columnName + " = true ");
-		sql.append(" WHERE location_uuid IN ( ");
-		sql.append(" SELECT location_uuid FROM smart.i_entity_location l ");
-		sql.append(" JOIN smart.i_entity e on l.entity_uuid = e.uuid ");
-		sql.append(" JOIN smart.i_entity_type t on e.entity_type_uuid = t.uuid and t.keyId = :typeKey )");
+		sql.append(" INSERT INTO " + tempTable);
+		sql.append(" SELECT a.*, CASE WHEN t.keyId IS NULL THEN NULL ELSE CASE WHEN t.keyId = :typeKey then true else null end END ");
+		sql.append(" FROM " + obsTable + " a LEFT JOIN ");
+		sql.append(" smart.i_entity_location l ON a.location_uuid = l.location_uuid ");
+		sql.append(" LEFT JOIN smart.i_entity e ON l.entity_uuid = e.uuid  ");
+		sql.append(" LEFT JOIN smart.i_entity_type t on e.entity_type_uuid = t.uuid ");
 		
 		logString(sql.toString());
 		logString(filter.getTypeKey());
@@ -410,7 +460,7 @@ public class ObservationFilterProcessor {
 		query.executeUpdate();
 	}
 	
-	private void addFilterColumn(IntelAttributeFilter filter, String obsTable, String columnName) throws Exception{
+	private void addFilterColumn(IntelAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
 		
 		
 		IntelAttribute attribute = (IntelAttribute)s.createCriteria(IntelAttribute.class)
@@ -438,17 +488,16 @@ public class ObservationFilterProcessor {
 					.uniqueResult();
 		}
 		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE " + obsTable );
-		sql.append(" SET " + columnName + " = true ");
-		sql.append(" WHERE location_uuid IN ( ");	
-		sql.append("SELECT a.location_uuid FROM " + obsTable + " a ");
-		sql.append(" JOIN smart.i_entity_location l on a.location_uuid = l.location_uuid ");
-		sql.append(" JOIN smart.i_entity_attribute_value v on v.entity_uuid = l.entity_uuid and v.attribute_uuid = :attributeUuid ");
+		sql.append("INSERT INTO " + tempTable);
+		sql.append(" SELECT a.*, cast when l.location_uuid is null then null else true end ");
+		sql.append(" FROM " + obsTable + " a LEFT JOIN ");
+		sql.append(" smart.i_entity_location l on a.location_uuid = l.location_uuid ");
+		sql.append(" LEFT JOIN smart.i_entity_attribute_value v on v.entity_uuid = l.entity_uuid and (v.attribute_uuid is null OR v.attribute_uuid = :attributeUuid) ");
 		if (filter.getEntityTypeKey() != null){
-			sql.append("JOIN smart.i_entity e on l.entity_uuid = e.uuid and e.entity_type_uuid = :entityTypeUuid ");
+			sql.append("LEFT JOIN smart.i_entity e on l.entity_uuid = e.uuid and (e.entity_type_uuid is null OR e.entity_type_uuid = :entityTypeUuid) ");
 		}
 		sql.append(" WHERE ");
-		
+		sql.append(" l.location_uuid is null OR ( ");
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
 			sql.append(" v.double_value " + SqlGenerator.operatorToSql(Operator.GREATERTHAN) + " 0.5");
@@ -473,7 +522,7 @@ public class ObservationFilterProcessor {
 		default:
 			break;
 		}
-		sql.append(" )");
+		sql.append(" ))");
 		
 		logString(sql.toString());
 		
@@ -516,7 +565,7 @@ public class ObservationFilterProcessor {
 		
 	}
 	
-	private void addFilterColumn(AreaFilter filter, String obsTable, String columnName){
+	private void addFilterColumn(AreaFilter filter, String obsTable, String tempTable, String columnName){
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT uuid FROM smart.area_geometries WHERE ca_uuid = :ca AND keyId = :keyid AND area_type = :type");
@@ -540,12 +589,11 @@ public class ObservationFilterProcessor {
 		}
 		
 		sql = new StringBuilder();
-		sql.append("UPDATE " + obsTable);
-		sql.append(" SET " + columnName + " = true ");
-		sql.append(" WHERE location_uuid IN ( ");
-		sql.append(" SELECT l.uuid FROM smart.i_location l, smart.area_geometries a where a.uuid = :areauuid AND smart.intersects(a.geom, l.geometry ) ");
-		sql.append(")");
-		
+		sql.append("INSERT INTO " + tempTable + " ");
+		sql.append("SELECT a.*, CASE WHEN l.uuid IS NULL then null else case when smart.intersects(a.geom, l.geometry) then true ELSE null end end ");
+		sql.append(" FROM ");
+		sql.append(obsTable + " ss LEFT JOIN ");
+		sql.append(" smart.i_location l on ss.location_uuid = l.uuid, smart.area_geometries a where a.uuid = :areauuid ");
 		
 		logString(sql.toString());
 		logString(UuidUtils.uuidToString(areaUuid));
@@ -554,6 +602,27 @@ public class ObservationFilterProcessor {
 		query.executeUpdate();
 	}
 	
+	private void switchTables(String tempTable, String obsTable){
+		StringBuilder sql = new StringBuilder();
+		sql.append("DROP TABLE " + obsTable);
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append("RENAME TABLE " + tempTable + " TO " + obsTable);
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)");
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX observation_uuid_idx on " + obsTable + " (observation_uuid)");
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+	}
 	
 	private void logString(String string){
 		SqlGenerator.logString(string);

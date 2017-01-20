@@ -30,7 +30,6 @@ public class IntelRecordServiceInfo extends IServiceInfo{
 
 	public IntelRecordServiceInfo(IntelRecordService service){
 		this.description = "service for providing intel record locations";
-		//this.icon = AbstractUIPlugin.imageDescriptorFromPlugin(SmartPlugIn.PLUGIN_ID,"images/icons/smart16.gif"); //$NON-NLS-1$
 		this.keywords = new String[]{"Intelligence", "Location", "Record"};
 		this.title = "Intelligence Record Service";
 	}

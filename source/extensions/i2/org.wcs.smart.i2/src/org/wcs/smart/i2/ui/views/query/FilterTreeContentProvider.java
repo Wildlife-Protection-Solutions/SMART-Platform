@@ -47,6 +47,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 	public void dispose() {
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;

@@ -3,7 +3,6 @@ package org.wcs.smart.i2.query.export;
 import java.io.Serializable;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,10 +47,6 @@ public class ShpQueryExporter implements IQueryExporter {
 	@Override
 	public void exportQuery(IPagedQueryResultSet results, Path destination,
 			HashMap<ExportOption, Object> exportOptions) throws Exception {
-		Locale l = Locale.getDefault();
-		if (exportOptions.containsKey(ExportOption.LOCALE) && exportOptions.get(ExportOption.LOCALE) instanceof Locale){
-			l = (Locale) exportOptions.get(ExportOption.LOCALE);
-		}
 		
 		Projection pp  = null;
 		if (exportOptions.containsKey(ExportOption.PROJECTION) && exportOptions.get(ExportOption.PROJECTION) instanceof Projection){

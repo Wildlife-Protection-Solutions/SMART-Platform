@@ -204,6 +204,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		eventBroker = context.get(IEventBroker.class);
 		
 		eventBroker.subscribe(IntelEvents.QUERY_DELETED, new EventHandler() {
+			@SuppressWarnings("rawtypes")
 			@Override
 			public void handleEvent(Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);

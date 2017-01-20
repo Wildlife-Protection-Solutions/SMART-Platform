@@ -67,9 +67,9 @@ public class SqlGenerator {
 		case BRACKETS:
 			return "()";
 		case BRACKET_CLOSE:
-			return "(";
-		case BRACKET_OPEN:
 			return ")";
+		case BRACKET_OPEN:
+			return "(";
 		case EQUALS:
 			return "=";
 		case GREATERTHAN:

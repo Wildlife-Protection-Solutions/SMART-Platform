@@ -24,7 +24,6 @@ package org.wcs.smart.i2.ui.handler;
 import java.text.MessageFormat;
 import java.util.UUID;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -40,16 +39,9 @@ import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 public class OpenQueryHandler {
 
 	public void openQuery(QueryEditorInput editorInput, boolean editMode){
-		//TODO:
+		//TODO:check/implement correct perspective
 		try {
-//			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
-			
-			IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelQueryEditor.ID);
-//			if (editor instanceof RecordEditor){
-//				if (pId.equals(IntelDataAssessmentPerspective.ID) || editMode){
-//					((RecordEditor)editor).setEditMode(true);
-//				}
-//			}
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelQueryEditor.ID);
 		} catch (PartInitException e) {
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to open intelligence query. {0}", e.getMessage()), e);
 		}
@@ -58,7 +50,5 @@ public class OpenQueryHandler {
 	public void openQuery(UUID queryUuid, boolean editMode){
 		QueryEditorInput input = new QueryEditorInput(null, queryUuid);
 		openQuery(input, editMode);
-		
-		
 	}
 }

@@ -35,6 +35,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 
+import com.ibm.icu.text.Collator;
+
 /**
  * Job for loading searches saved in the database
  * 
@@ -50,6 +52,7 @@ public abstract class LoadSavedSearches extends Job{
 	@SuppressWarnings("unchecked")
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		beforeSearch();
 		List<SearchProxy> searches = new ArrayList<SearchProxy>();
 		Session session = HibernateManager.openSession();
 		try{
@@ -65,12 +68,17 @@ public abstract class LoadSavedSearches extends Job{
 		}finally{	
 			session.close();
 		}
-		
+		searches.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 		searchesLoaded(searches);
 		
 		return Status.OK_STATUS;
 	}
 
-	public abstract void searchesLoaded(List<SearchProxy> queries);
+	/**
+	 * Executed before the search is performed
+	 */
+	protected void beforeSearch(){ }
+	
+	protected abstract void searchesLoaded(List<SearchProxy> queries);
 
 }

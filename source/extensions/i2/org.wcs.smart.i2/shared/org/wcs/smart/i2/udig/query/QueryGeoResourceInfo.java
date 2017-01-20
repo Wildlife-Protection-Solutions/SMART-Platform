@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.i2.udig.query;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -41,6 +44,7 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class QueryGeoResourceInfo extends IGeoResourceInfo {
 
+	private Logger logger = Logger.getLogger(QueryGeoResourceInfo.class.getName());
 	
 	public QueryGeoResourceInfo( QueryGeoResource resource, IProgressMonitor monitor){
 		this.title = resource.getQueryName() + " (" + resource.getDataType() + ")";
@@ -61,7 +65,6 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
 			this.bounds = env;
 
-			//TODO: cache bound in feature results
 			fs.getFeatures().accepts(new FeatureVisitor() {
 				@Override
 				public void visit(Feature f) {
@@ -71,8 +74,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 			}, null);
 		
 		} catch (Exception e) {
-			//TODO: log me
-			e.printStackTrace();
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 
 	}

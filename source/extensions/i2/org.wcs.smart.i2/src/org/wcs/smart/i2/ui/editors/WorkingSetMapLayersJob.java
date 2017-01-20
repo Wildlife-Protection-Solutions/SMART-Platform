@@ -374,6 +374,7 @@ public class WorkingSetMapLayersJob extends Job {
 		
 		private IService service;
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		public void handleEvent(Event event) {
 			Object data = event.getProperty(IEventBroker.DATA);

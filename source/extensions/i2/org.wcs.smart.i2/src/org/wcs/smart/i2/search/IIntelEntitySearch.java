@@ -34,6 +34,19 @@ import org.wcs.smart.i2.model.IntelEntity;
  */
 public interface IIntelEntitySearch {
 
+	public enum Type{
+		BASIC("basic"),
+		ADVANCED("adv");
+		
+		public String key;
+		
+		Type(String key){
+			this.key = key;
+		}
+	}
+	
+	public static final String SEPARATOR = ";";
+	
 	/**
 	 * Maximum number of results returned in an entity search
 	 */

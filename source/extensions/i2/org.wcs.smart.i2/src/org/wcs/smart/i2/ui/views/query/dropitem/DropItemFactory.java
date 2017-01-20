@@ -25,20 +25,24 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.AreaFilter;
 import org.wcs.smart.i2.query.observation.filter.BooleanFilter;
@@ -59,36 +63,13 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DropItemFactory {
 
-	public static final String ANY_LABEL = "<Any>";
+	public static final String ANY_LABEL = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IntelQueryColumnProvider.ANY_ITEM, Locale.getDefault());
 	
 	public static List<DropItem> generateDropItems(IQueryFilter filter, Session session){
 		if (filter == null) return Collections.emptyList();
 		return (new DropItemFactory(session)).generateDropItems(filter);
 	}
-		
-	public static String generateName(Area area){
-		return MessageFormat.format("{0} [{1}]", area.getName(), area.getType().name());
-	}
-	
-	public static String generateName(IntelAttribute attribute, IntelEntityType type){
-		if (type == null){
-			return attribute.getName();
-		}else{
-			return MessageFormat.format("{0} ({1})", attribute.getName(), type.getName());
-		}
-	}
-	
-	public static String generateName(IntelEntity entity){
-		return MessageFormat.format("{0} ({1})", entity.getIdAttributeAsText(), entity.getEntityType().getName() );
-	}
-	
-	public static String generateName(Attribute attribute, Category category){
-		if (attribute != null && category == null) return attribute.getName();
-		if (category != null && attribute == null) return category.getFullCategoryName();
-		if (category != null && attribute != null) return  MessageFormat.format("{0} ({1})", attribute.getName(), category.getFullCategoryName());
-		return null;
-	}
-	
+
 	private Session session;
 	
 	private DropItemFactory(Session session){
@@ -141,7 +122,7 @@ public class DropItemFactory {
 			ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find area of type {0} with key {1}.", filter.getType(), filter.getKey()));
 			return Collections.singletonList(item);	
 		}
-		return Collections.singletonList(new TextDropItem(generateName(a), queryKey));
+		return Collections.singletonList(new TextDropItem(IntelQueryColumnProvider.generateName(a), queryKey));
 		
 	}
 	
@@ -152,7 +133,7 @@ public class DropItemFactory {
 			return Collections.singletonList(item);	
 			
 		}
-		return Collections.singletonList(new TextDropItem(generateName(entity), "entity:"+UuidUtils.uuidToString(entity.getUuid())));
+		return Collections.singletonList(new TextDropItem(IntelQueryColumnProvider.generateName(entity), "entity:"+UuidUtils.uuidToString(entity.getUuid())));
 	}
 	
 	public List<DropItem> generateDropItem(EntityTypeFilter filter){
@@ -215,7 +196,7 @@ public class DropItemFactory {
 				return Collections.singletonList(item);	
 			}
 		}
-		String name = generateName(ia, type);
+		String name = IntelQueryColumnProvider.generateName(ia, type);
 		
 		if (filter.getAttributeType() == IntelAttribute.AttributeType.NUMERIC){
 			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC);
@@ -267,7 +248,7 @@ public class DropItemFactory {
 		
 		if (filter.getAttributeKey() == null){
 			String queryKeyPart = "dm_category:" + filter.getCategoryKey();
-			DropItem di = new TextDropItem(generateName(null, category), queryKeyPart);
+			DropItem di = new TextDropItem(IntelQueryColumnProvider.generateName(null, category), queryKeyPart);
 			return Collections.singletonList(di);
 		}
 		
@@ -286,7 +267,7 @@ public class DropItemFactory {
 			return Collections.singletonList(di);
 		}
 	
-		String name = generateName(attribute, category);
+		String name = IntelQueryColumnProvider.generateName(attribute, category);
 		
 		if (filter.getAttributeType() == Attribute.AttributeType.NUMERIC){
 			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC);
@@ -307,7 +288,7 @@ public class DropItemFactory {
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
 			labels.add(ANY_LABEL);
-			keys.add(IQueryFilter.ANY_OPTION_KEY);//TODO: test this
+			keys.add(IQueryFilter.ANY_OPTION_KEY);
 			if (attribute.getAttributeList() != null){
 				for (AttributeListItem i : attribute.getAttributeList()){
 					labels.add(i.getName());

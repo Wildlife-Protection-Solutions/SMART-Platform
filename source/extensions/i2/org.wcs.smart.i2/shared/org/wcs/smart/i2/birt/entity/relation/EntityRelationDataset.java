@@ -74,7 +74,6 @@ public class EntityRelationDataset  implements IQuery {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		//TODO: support CCAA
 		type = (IntelEntityType) connection.getSession().createCriteria(IntelEntityType.class)
 				.add(Restrictions.in("conservationArea", connection.getConservationAreas()))
 			.add(Restrictions.eq("keyId", queryText))

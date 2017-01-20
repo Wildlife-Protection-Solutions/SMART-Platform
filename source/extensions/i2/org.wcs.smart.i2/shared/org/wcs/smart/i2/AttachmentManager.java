@@ -51,8 +51,7 @@ public enum AttachmentManager {
 	 */
 	public boolean canDelete(IntelAttachment attachment, Session session) throws Exception{
 		//attachments are linked to:
-		//entities; records; observations
-		
+		//entities; records
 		Long recordCnt = (Long)session.createCriteria(IntelRecordAttachment.class)
 			.add(Restrictions.eq("id.attachment", attachment))
 			.setProjection(Projections.rowCount())
@@ -65,13 +64,6 @@ public enum AttachmentManager {
 				.uniqueResult();
 		if (recordCnt != 0) return false;
 		
-		//TODO: check observations
-//		Long recordCnt = (Long)session.createCriteria(IntelL.class)
-//				.add(Restrictions.eq("id.attachment", attachment))
-//				.setProjection(Projections.rowCount())
-//				.uniqueResult();
-//			if (recordCnt != 0) return false;
 		return true;
-			
 	}
 }

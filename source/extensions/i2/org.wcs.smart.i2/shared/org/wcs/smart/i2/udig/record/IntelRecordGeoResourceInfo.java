@@ -22,6 +22,8 @@
 package org.wcs.smart.i2.udig.record;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
@@ -32,7 +34,6 @@ import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
-import org.wcs.smart.SmartPlugIn;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -43,6 +44,7 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class IntelRecordGeoResourceInfo extends IGeoResourceInfo {
 
+	private Logger logger = Logger.getLogger(IntelRecordGeoResourceInfo.class.getName());
 	
 	public IntelRecordGeoResourceInfo( IntelRecordGeoResource resource, IProgressMonitor monitor){
 		this.title = "Intelligence Record" ;
@@ -72,7 +74,7 @@ public class IntelRecordGeoResourceInfo extends IGeoResourceInfo {
 			}, null);
 			this.bounds = env;
 		} catch (IOException e) {
-			SmartPlugIn.log("Could not determine bounds for smart inelligence record resource.", e); //$NON-NLS-1$
+			logger.log(Level.WARNING,"Could not determine bounds for smart inelligence record resource.", e); //$NON-NLS-1$
 		}
 	}
 }

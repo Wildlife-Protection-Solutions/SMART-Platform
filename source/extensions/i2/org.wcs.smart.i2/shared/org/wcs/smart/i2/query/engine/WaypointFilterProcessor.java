@@ -131,12 +131,17 @@ public class WaypointFilterProcessor {
 				
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
-		monitor.worked(1);
 		
-		//TODO: look into creating index on location and observation field
+		//index to improve performance
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)");
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+
+		monitor.worked(1);
+
 		//for each filter add a column for that filter
 		//set the filter value to true or false depending on the filter
-		
 		if(filter != null){	
 			filter.accept(new IFilterVisitor() {
 				private int columnCnt = 1;
@@ -289,17 +294,22 @@ public class WaypointFilterProcessor {
 		AttributeListItem li = null;
 		AttributeTreeNode treenode = null;
 		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
-			li = (AttributeListItem)s.createCriteria(AttributeListItem.class)
+			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
+				li = (AttributeListItem)s.createCriteria(AttributeListItem.class)
 					.add(Restrictions.eq("keyId", filter.getKeyValue()))
 					.add(Restrictions.eq("attribute", attribute))
-					.uniqueResult();	
+					.uniqueResult();
+				if (li == null) throw new Exception(MessageFormat.format("No list item with key {0} found for attribute {1}.", filter.getKeyValue(), attribute.getName()));
+			}
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
 			treenode = (AttributeTreeNode)s.createCriteria(AttributeTreeNode.class)
 					.add(Restrictions.eq("hkey", filter.getKeyValue()))
 					.add(Restrictions.eq("attribute", attribute))
-					.uniqueResult();	
+					.uniqueResult();
+			if (treenode == null) throw new Exception(MessageFormat.format("No tree node item with key {0} found for attribute {1}.", filter.getKeyValue(), attribute.getName()));
 		}
-		sql.append(" JOIN smart.i_observation_attribute ia on ia.observation_uuid = o.uuid ");
+		sql.append(" JOIN smart.i_observation_attribute ia on ia.observation_uuid = o.uuid and ia.attribute_uuid = :attributeUuid ");
+		
 		
 		sql.append(" WHERE ");
 		
@@ -311,7 +321,11 @@ public class WaypointFilterProcessor {
 			sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(value2 as date)");
 			break;
 		case LIST:
-			sql.append(" ia.list_element_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value");
+			if (li == null){
+				sql.append(" ia.list_element_uuid is not null ");
+			}else{
+				sql.append(" ia.list_element_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value");
+			}
 			break;
 		case NUMERIC:
 			sql.append(" ia.double_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value");
@@ -329,6 +343,9 @@ public class WaypointFilterProcessor {
 		
 		
 		SQLQuery query = s.createSQLQuery(sql.toString());
+		query.setParameter("attributeUuid", attribute.getUuid());
+		logString(UuidUtils.uuidToString(attribute.getUuid()));
+
 		
 		if (filter.getCategoryKey() != null){
 			String hkey1 = filter.getCategoryKey();
@@ -351,8 +368,10 @@ public class WaypointFilterProcessor {
 			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  );
 			break;
 		case LIST:
-			logString(UuidUtils.uuidToString(li.getUuid()));
-			query.setParameter("value", li.getUuid());
+			if (li != null){
+				logString(UuidUtils.uuidToString(li.getUuid()));
+				query.setParameter("value", li.getUuid());
+			}
 			break;
 		case TREE:
 			logString(UuidUtils.uuidToString(treenode.getUuid()));

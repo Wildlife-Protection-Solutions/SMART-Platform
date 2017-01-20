@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
@@ -34,6 +35,7 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
  *
  */
 public class AttributeLabelProvider extends LabelProvider {
+	
 	
 	public String getText(Object element){
 		if (element instanceof IntelAttribute){
@@ -49,14 +51,39 @@ public class AttributeLabelProvider extends LabelProvider {
 	public Image getImage(Object element){
 		if (element instanceof IntelAttribute){
 			IntelAttribute a = (IntelAttribute)element;
-			return a.getType().getImage();
+			return getImage(a.getType());
 		}else if (element instanceof IntelEntityTypeAttribute){
-			return ((IntelEntityTypeAttribute)element).getAttribute().getType().getImage();
+			return getImage(((IntelEntityTypeAttribute)element).getAttribute().getType());
 		}else if (element instanceof IntelRelationshipTypeAttribute){
-			return ((IntelRelationshipTypeAttribute)element).getAttribute().getType().getImage();
+			return getImage(((IntelRelationshipTypeAttribute)element).getAttribute().getType());
 		}else if (element instanceof IntelAttribute.AttributeType){
-			return ((IntelAttribute.AttributeType) element).getImage();
+			return getImage(((IntelAttribute.AttributeType) element));
 		}
 		return super.getImage(element);
+	}
+	
+	public static Image getImage(IntelAttribute.AttributeType type){
+		String key = null;
+		switch(type){
+		case BOOLEAN:
+			key = SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON;
+			break;
+		case DATE:
+			key = SmartPlugIn.ATTRIBUTE_DATE_ICON;
+			break;
+		case LIST:
+			key = SmartPlugIn.ATTRIBUTE_LIST_ICON;
+			break;
+		case NUMERIC:
+			key = SmartPlugIn.ATTRIBUTE_NUMBER_ICON;
+			break;
+		case TEXT:
+			key = SmartPlugIn.ATTRIBUTE_TEXT_ICON;
+			break;
+		default:
+			break;
+		}
+		if (key == null) return null;
+		return SmartPlugIn.getDefault().getImageRegistry().get(key);
 	}
 }
