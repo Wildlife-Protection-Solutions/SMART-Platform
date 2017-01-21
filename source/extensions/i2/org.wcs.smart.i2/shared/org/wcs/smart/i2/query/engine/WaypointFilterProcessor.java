@@ -689,9 +689,16 @@ public class WaypointFilterProcessor {
 		
 	}
 	
-	private void addFilterColumn(AreaFilter filter, String obsTable, String tempTable, String columnName){
+	private void addFilterColumn(AreaFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
 		
+		String t2 = SqlGenerator.createTempTableName();
 		StringBuilder sql = new StringBuilder();
+		sql.append(" CREATE TABLE " + t2);
+		sql.append ("(location_uuid char(16) for bit data) ");
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+		
+		sql = new StringBuilder();
 		sql.append("SELECT uuid FROM smart.area_geometries WHERE ca_uuid = :ca AND keyId = :keyid AND area_type = :type");
 		
 		logString(sql.toString());
@@ -705,6 +712,7 @@ public class WaypointFilterProcessor {
 		query.setParameter("type", filter.getType().name());
 		
 		Object x = query.uniqueResult();
+		if (x == null) throw new Exception(MessageFormat.format("No area with key {0} found.", filter.getKey()));
 		UUID areaUuid = null;
 		if (x instanceof UUID){
 			areaUuid = (UUID) x;
@@ -713,17 +721,37 @@ public class WaypointFilterProcessor {
 		}
 		
 		sql = new StringBuilder();
-		sql.append("INSERT INTO " + tempTable + " ");
-		sql.append("SELECT a.*, CASE WHEN l.uuid IS NULL then null else case when smart.intersects(a.geom, l.geometry) then true ELSE null end end ");
+		sql.append("INSERT INTO " + t2 + " ");
+		sql.append("SELECT distinct l.uuid " );
 		sql.append(" FROM ");
-		sql.append(obsTable + " ss LEFT JOIN ");
-		sql.append(" smart.i_location l on ss.location_uuid = l.uuid, smart.area_geometries a where a.uuid = :areauuid ");
+		sql.append(obsTable + " ss JOIN smart.i_location l on ss.location_uuid = l.uuid, ");
+		sql.append( " smart.area_geometries a ");
+		sql.append(" WHERE a.uuid = :areauuid ");
+		sql.append(" AND smart.intersects(a.geom, l.geometry) ");
 		
 		logString(sql.toString());
 		logString(UuidUtils.uuidToString(areaUuid));
 		query = s.createSQLQuery(sql.toString());
 		query.setParameter("areauuid", areaUuid);
 		query.executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX location_uuid_tmp_idx on " + t2 + " (location_uuid)");
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append(" INSERT INTO " + tempTable);
+		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end ");
+		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid");
+		logString(sql.toString());
+		query = s.createSQLQuery(sql.toString());
+		query.executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append(" DROP TABLE " + t2);
+		logString(sql.toString());
+		s.createSQLQuery(sql.toString()).executeUpdate();
 	}
 	
 	private void logString(String string){

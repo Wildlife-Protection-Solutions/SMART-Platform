@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.editors.query;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,10 +33,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -79,6 +84,8 @@ import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
+import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.query.ExportQueryWizard;
@@ -165,7 +172,52 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 
 	@Override
 	public void doSaveAs() {
+		String queryString = validateQuery();
+		if (queryString == null){
+			MessageDialog.openError(getSite().getShell(), "ERROR", "Cannot save an invalid query.");
+			return;
+		}
+		query.setQueryString(queryString);
 		
+		InputDialog newName = new InputDialog(getSite().getShell(), "Save As", "Enter the name for the query", MessageFormat.format("Copy of {0}", query.getName()), new IInputValidator() {
+			@Override
+			public String isValid(String newText) {
+				if (newText == null || newText.trim().length() == 0) return "Name must be provided.";
+				return null;
+			}
+		});
+		if (newName.open() != Window.OK){
+			return;
+		}
+		
+		IntelRecordObservationQuery clone = new IntelRecordObservationQuery();
+		clone.setConservationArea(SmartDB.getCurrentConservationArea());
+		clone.setColumnFilter(query.getColumnFilter());
+		clone.setQueryString(query.getQueryString());
+		clone.setStyle(query.getStyle());
+		clone.setName(newName.getValue());
+		clone.updateName(SmartDB.getCurrentLanguage(), clone.getName());
+		clone.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), clone.getName());
+		
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			s.save(clone);
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			Intelligence2PlugIn.displayLog("Error cloning query: " + ex.getMessage(), ex);
+			return;
+		}finally{
+			s.close();
+		}
+		
+		eventBroker.post(IntelEvents.QUERY_NEW, query);
+		setInput(new QueryEditorInput(clone));
+		
+		this.query = clone;
+		initUiField();
+		setDirty(false);
 	}
 
 	@Override
@@ -190,7 +242,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 
 	@Override
 	public boolean isSaveAsAllowed() {
-		return false;
+		return true;
 	}
 	
 	private void closeEditor(){
@@ -199,8 +251,11 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 
 	@Override
 	public void createPartControl(Composite parent) {
-		//TODO: add tags so it works in both perspectives
 		context = (IEclipseContext) getSite().getService(IEclipseContext.class);
+		MPart part = context.get(MPart.class);
+		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
+		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+				
 		eventBroker = context.get(IEventBroker.class);
 		
 		eventBroker.subscribe(IntelEvents.QUERY_DELETED, new EventHandler() {
@@ -257,10 +312,16 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 		ToolBar headerToolbar = new ToolBar(headerComp, SWT.FLAT);
 		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
 		saveItem = new ToolItem(headerToolbar, SWT.PUSH);
 		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
 		saveItem.addListener(SWT.Selection, (event)->IntelQueryEditor.this.getSite().getPage().saveEditor(IntelQueryEditor.this, false));
 		saveItem.setToolTipText("save query");
+		
+		ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
+		saveAsItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEAS_EDIT));
+		saveAsItem.addListener(SWT.Selection, (event)->doSaveAs());
+		saveAsItem.setToolTipText("save query as new query");
 		
 		ToolItem exportItem = new ToolItem(headerToolbar, SWT.PUSH);
 		exportItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EXPORT_QUERY));
@@ -374,7 +435,6 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 			dateFilter = new Date[]{datePart.getDateFilter().getStartDate(), datePart.getDateFilter().getEndDate()};
 		}
 		
-		
 		final Date[] fdateFilter = dateFilter;
 		
 		String queryString = panel.getQueryPart();
@@ -463,7 +523,6 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 	private void initUiField(){
 		setPartName(query.getName());
 		header.setText(query.getName());
-		
 		if (query.getUuid() == null) setDirty(true);
 	}
 	

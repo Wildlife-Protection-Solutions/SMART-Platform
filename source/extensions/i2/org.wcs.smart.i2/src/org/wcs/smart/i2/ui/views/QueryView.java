@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -56,6 +57,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -107,6 +109,7 @@ import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
 import org.wcs.smart.i2.ui.views.query.FilterTreeLabelProvider;
 import org.wcs.smart.i2.ui.views.query.LoadFilterOptions;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 import org.wcs.smart.util.E3Utils;
@@ -345,6 +348,35 @@ public class QueryView {
 		refreshJob.schedule();
 	}
 	
+	private void renameQuery(){
+		Object x = ((IStructuredSelection)queryList.getSelection()).getFirstElement();
+		if (x == null) return;
+		if (x instanceof QueryProxy){
+			IntelRecordObservationQuery toEdit = null;
+			Session s = HibernateManager.openSession();
+			try{
+				toEdit = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, ((QueryProxy) x).getUuid());
+				if (toEdit != null){
+					toEdit.getNames();
+				}
+			}finally{
+				s.close();
+			}
+			if (toEdit == null){
+				Intelligence2PlugIn.log("Query not found.", null);
+				return; //query not found
+			}
+			
+			try {
+				(new TranslateNamesHandler()).execute(new StructuredSelection(toEdit), context.get(Shell.class));
+				context.get(IEventBroker.class).send(IntelEvents.QUERY_MODIFIED, toEdit);
+			} catch (ExecutionException e) {
+				Intelligence2PlugIn.displayLog(MessageFormat.format("Error occurred while renaming query: {0}", e.getMessage()), e);
+			}
+		}
+		
+	}
+	
 	private void deleteSelection(){
 		int cnt = ((IStructuredSelection)queryList.getSelection()).size();
 		if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Queries", MessageFormat.format("Are you sure you want to delete the {0} selected queries?  This action cannot be undone.", cnt))){
@@ -390,6 +422,8 @@ public class QueryView {
 
 		
 		if (IntelSecurityManager.INSTANCE.canEditQuery()){
+			new MenuItem(m, SWT.SEPARATOR);
+			
 			MenuItem miDelete = new MenuItem(m, SWT.PUSH);
 			miDelete.setText("Delete");
 			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -399,11 +433,23 @@ public class QueryView {
 					deleteSelection();
 				}
 			});
-			items.add(miOpen);
+			items.add(miDelete);
 
+			MenuItem miRename = new MenuItem(m, SWT.PUSH);
+			miRename.setText("Rename");
+			miRename.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+			miRename.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					renameQuery();
+				}
+			});
+			items.add(miRename);
 		}
 		
 		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
+			new MenuItem(m, SWT.SEPARATOR);
+			
 			MenuItem miAdd = new MenuItem(m, SWT.PUSH);
 			miAdd.setText("Add To Working Set");
 			miAdd.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));

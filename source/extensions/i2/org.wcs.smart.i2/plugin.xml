@@ -435,6 +435,28 @@
                   </or>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.eclipse.ui.file.saveAs"
+                  label="Save As..."
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                        </equals>
+                     </with>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                        </equals>
+                     </with>
+                  </or>
+               </visibleWhen>
+            </command>
          </toolbar>
       </menuContribution>
       <menuContribution
@@ -465,6 +487,27 @@
                         variable="activeWorkbenchWindow.activePerspective">
                      <equals
                            value="org.wcs.smart.i2.report.entity.edit">
+                     </equals>
+                  </with>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.ui.file.saveAs"
+               label="Save As...">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                     </equals>
+                  </with>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
                      </equals>
                   </with>
                </or>

@@ -379,8 +379,7 @@ public class EntitySearchView {
 				}
 				
 				try {
-					TranslateNamesHandler handler = ContextInjectionFactory.make(TranslateNamesHandler.class, context);
-					handler.execute(new StructuredSelection(toEdit), context.get(Shell.class));
+					(new TranslateNamesHandler ()).execute(new StructuredSelection(toEdit), context.get(Shell.class));
 					context.get(IEventBroker.class).send(IntelEvents.ENTITY_SEARCH_MODIFIED, toEdit);
 				} catch (Exception ex) {
 					Intelligence2PlugIn.displayLog(MessageFormat.format("Error occured renaming search {0}: {1}", ((SearchProxy) x).getName(), ex.getMessage()), ex);
