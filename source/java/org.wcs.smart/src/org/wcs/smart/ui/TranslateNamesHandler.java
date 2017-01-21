@@ -21,14 +21,12 @@
  */
 package org.wcs.smart.ui;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
@@ -44,8 +42,6 @@ import org.wcs.smart.internal.Messages;
  *
  */
 public class TranslateNamesHandler {
-
-	@Inject ESelectionService selection;
 	
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, Shell activeShell) throws ExecutionException {
