@@ -316,7 +316,7 @@ public class Messages extends NLS {
 	public static String SightsMultiObsUtil_GroupNotEndedProperly;
 	public static String SightsMultiObsUtil_GroupNotEndedProperlyEOF;
 	public static String SightsMultiObsUtil_NonendedGroup;
-	public static String SightsMultiObsUtil_SigleGpsGroup_NoGps;
+	public static String SightsMultiObsUtil_SigleGpsGroup_NoData;
 	public static String SightsMultiObsUtil_UnknownCategory;
 	public static String SmartImporter_Warn_AttributeTag0_Missing;
 	public static String SmartImporter_Warn_BooleanValueProblem;

@@ -67,7 +67,7 @@ public class SightsMultiObsUtil {
 					//ensure that it is the same multi-obs
 					if (groupCategory != catE) {
 						//this should never happen
-						//TODO: error: unexpected end of multiple observations group in category groupCategory
+						//error: unexpected end of multiple observations group in category groupCategory
 						SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_NonendedGroup, null);
 					}
 				}
@@ -78,7 +78,7 @@ public class SightsMultiObsUtil {
 					} else if (ElementsUtil.isCategoryMultiObsMultiGps(groupCategory)) {
 						result.addAll(adoptMultiGps(adoptList, s, fakeData));
 					} else {
-						//TODO: unexpected group type
+						//unexpected group type
 						SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_UnknownCategory, null);
 						result.addAll(adoptList);
 						result.add(s);
@@ -91,7 +91,7 @@ public class SightsMultiObsUtil {
 				//this is a regular <S> item
 				//multiple observations group should be ended already if we are here
 				if (!adoptList.isEmpty()) {
-					//TODO: error: observations group in category groupCategory was not ended properly
+					//error: observations group in category groupCategory was not ended properly
 					//need to end group
 					SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_GroupNotEndedProperly, null);
 					result.addAll(adoptList);
@@ -102,7 +102,7 @@ public class SightsMultiObsUtil {
 		}
 
 		if (!adoptList.isEmpty()) {
-			//TODO: error: observations group in category groupCategory was not ended properly
+			//error: observations group in category groupCategory was not ended properly
 			//need to end group
 			SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_GroupNotEndedProperlyEOF, null);
 			result.addAll(adoptList);
@@ -114,9 +114,17 @@ public class SightsMultiObsUtil {
 	private static List<S> adoptSingleGps(List<S> adoptList, S lastS, FakeData fakeData) {
 		List<S> result = new ArrayList<S>(adoptList.size()+1);
 		if (!adoptList.isEmpty()) {
-			result.add(cloneS(adoptList.get(0), fakeData.aAddAsNew));
-			//we are not adding onceAfterA to the first record, because it only contain GPS data 
 			List<A> onceAfterAList = getEnterOnceAterList(lastS);
+
+			S firstS = cloneS(adoptList.get(0));
+			//we need to add onceAfterA to the first record only if it was recorded in "instantGps" mode
+			//otherwise we are not adding onceAfterA to the first record, because it only contain GPS data
+			if (hasGroupData(firstS)) {
+				firstS.getA().addAll(onceAfterAList);
+			}
+			firstS.getA().add(fakeData.aAddAsNew);
+			result.add(firstS);
+			
 			onceAfterAList.add(fakeData.aAddToLast);
 			A[] onceAfterA = onceAfterAList.toArray(new A[onceAfterAList.size()]);
 			for (int i = 1; i < adoptList.size(); i++) {
@@ -124,9 +132,11 @@ public class SightsMultiObsUtil {
 			}
 			result.add(cloneS(lastS, fakeData.aAddToLast));
 		} else {
-			//observation group contain single (lastS) record
-			//NOTE: this is invalid case because GPS data need to e recorded separately
-			SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_SigleGpsGroup_NoGps, null);
+			if (!hasGroupData(lastS)) {
+				//observation group contain single (lastS) record with no group data
+				//NOTE: this is invalid case because looks like it is only a GPS data
+				SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_SigleGpsGroup_NoData, null);
+			}
 			result.add(cloneS(lastS, fakeData.aAddAsNew));
 		}
 		return result;
@@ -166,6 +176,21 @@ public class SightsMultiObsUtil {
 		return false;
 	}
 
+	/**
+	 * Checks if this S contains information related to group record. Can be used to check if this is only GPS data or some actual data for the observation.
+	 * @param s
+	 * @return
+	 */
+	private static boolean hasGroupData(S s) {
+		for (int i = s.getA().size()-1; i >= 0; i--) {
+			A a = s.getA().get(i);
+			if (ScreensUtil.RESULT_END_WAYPOINT_GROUP.equals(a.getN())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private static List<A> getEnterOnceAterList(S s) {
 		List<A> list = new ArrayList<A>();
 		for (int i = s.getA().size()-1; i >= 0; i--) {
