@@ -38,8 +38,8 @@ import javax.media.jai.TiledImage;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
-import org.wcs.smart.query.common.model.GridQueryResultMetadata;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.map.raster.GridMetadata;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 
 
 /**
@@ -70,7 +70,7 @@ final class RasterBuilder {
 	
 	/** a table where x,y values are the position in the raster grid. (0,0) is the bottom left tile and (360 180) is the top right tile */
 	private GridQueryResults table; 
-	private GridQueryResultMetadata metadata;
+	private GridMetadata metadata;
 	
 	private Path file;
 	private Envelope2D envelope = null;
@@ -116,7 +116,7 @@ final class RasterBuilder {
 	 * @param table query result data
 	 * @param metadata query result metadata
 	 */
-	public void setTable(GridQueryResults data, GridQueryResultMetadata metadata ) {
+	public void setTable(GridQueryResults data, GridMetadata metadata ) {
 		this.table = data;
 		this.metadata = metadata;
 	}
@@ -170,8 +170,8 @@ final class RasterBuilder {
 		}
 		
 		//add data points
-		for (Iterator<GridResultItem> iterator = table.getIterator(); iterator.hasNext();) {
-			GridResultItem item = (GridResultItem) iterator.next();
+		for (Iterator<QueryGridResultItem> iterator = table.getIterator(); iterator.hasNext();) {
+			QueryGridResultItem item = (QueryGridResultItem) iterator.next();
 		
 			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
 			if (item.getTileX() >= metadata.getMinXTile()&& item.getTileX() <= metadata.getMaxXTile() 

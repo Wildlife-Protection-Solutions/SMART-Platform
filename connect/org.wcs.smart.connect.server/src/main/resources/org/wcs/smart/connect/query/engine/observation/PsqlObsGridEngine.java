@@ -53,7 +53,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
@@ -130,10 +130,10 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();				
 					//get numerator results
-					Collection<GridResultItem> numeratorResults = getItems(gridDef, valueItem, query.getQueryDefinition().getValueFilter(), c, session, true);
+					Collection<QueryGridResultItem> numeratorResults = getItems(gridDef, valueItem, query.getQueryDefinition().getValueFilter(), c, session, true);
 					//combine with the patrol existance value
-					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
-					for (GridResultItem it : numeratorResults){
+					HashMap<String, QueryGridResultItem> items = new HashMap<String, QueryGridResultItem>();
+					for (QueryGridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
 					}
 					result = new GridQueryResults(items.values());
@@ -156,7 +156,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	 * @param needsFilter if the values need to be filtered or if previous filter can be used
 	 * 
 	 */
-	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
+	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, Connection c, Session session, 
 			boolean needsFilter) throws Exception{
 		if (needsFilter) {
@@ -206,7 +206,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	 * 
 	 * @throws SQLException
 	 */
-	protected Collection<GridResultItem> getGridResults(Connection c, 
+	protected Collection<QueryGridResultItem> getGridResults(Connection c, 
 			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
 
@@ -411,9 +411,9 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 			}
 		
 			try {
-				List<GridResultItem> items = new ArrayList<GridResultItem>();
+				List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();
 				while (rs.next()) {
-					GridResultItem it = new GridResultItem();
+					QueryGridResultItem it = new QueryGridResultItem();
 				
 					String tid = rs.getString("TILE_ID"); //$NON-NLS-1$
 					String[] tileids = tid.split("_"); //$NON-NLS-1$

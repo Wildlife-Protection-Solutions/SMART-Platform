@@ -321,7 +321,7 @@
 		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.report.birt.map</artifactId>
+    			<artifactId>org.wcs.smart.birt.map</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
 		<dependency>

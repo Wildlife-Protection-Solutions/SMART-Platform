@@ -25,9 +25,9 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.query.common.model.GridQueryResult;
-import org.wcs.smart.query.common.model.GridQueryResultMetadata;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -37,27 +37,27 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public class GridQueryResults extends GridQueryResult implements IMemoryTableResultSet<GridResultItem> {
+public class GridQueryResults extends GridQueryResult implements IMemoryTableResultSet<QueryGridResultItem> {
 
 	
-	public GridQueryResults(Collection<GridResultItem> items){
+	public GridQueryResults(Collection<QueryGridResultItem> items){
 		super(items);
 	}
 
 	@Override
-	public Iterator<GridResultItem> getIterator() throws SQLException {
+	public Iterator<QueryGridResultItem> getIterator() throws SQLException {
 		return getData().iterator();
 	}
 
-	public GridQueryResultMetadata getTileBounds(){
+	public GridMetadata getTileBounds(){
 		if (resultMetadata != null) return resultMetadata;
 		
-		resultMetadata = GridQueryResultMetadata.computeMetadata(getData());
+		resultMetadata = GridMetadata.computeMetadata(getData());
 		return resultMetadata;
 	}
 
 	@Override
-	public String getValueAsString(GridResultItem item, QueryColumn column)
+	public String getValueAsString(QueryGridResultItem item, QueryColumn column)
 			throws SQLException {
 		if (column instanceof GridQueryColumn){
 			Object v = ((GridQueryColumn)column).getValue(item);

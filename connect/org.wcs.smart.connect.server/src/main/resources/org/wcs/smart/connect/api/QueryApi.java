@@ -73,10 +73,11 @@ import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.map.raster.GridResultItem;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
@@ -286,7 +287,7 @@ public class QueryApi extends HttpServlet{
 					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
 				}else if (result instanceof IMemoryTableResultSet
 					&& query instanceof GriddedQuery){
-					exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<GridResultItem>)result, s);
+					exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, s);
 				}else if (result instanceof SummaryQueryResult){
 					exporter.exportResults(query, (SummaryQueryResult)result, s);
 				}else{

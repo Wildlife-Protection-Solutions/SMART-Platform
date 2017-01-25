@@ -33,7 +33,7 @@ import org.geotools.geometry.Envelope2D;
 import org.hibernate.Session;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.query.common.model.GridQueryResultMetadata;
+import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.query.common.model.GriddedQuery;
 
 /**
@@ -80,7 +80,7 @@ public class TiffRasterExporter {
 			RasterBuilder rb = new RasterBuilder();
 			rb.setFileName(rasterFile);
 			
-			GridQueryResultMetadata pnts = results.getTileBounds();
+			GridMetadata pnts = results.getTileBounds();
 			
 			long width = pnts.getMaxXTile() - pnts.getMinXTile() + 1;
 			long height = pnts.getMaxYTile() - pnts.getMinYTile()+ 1;

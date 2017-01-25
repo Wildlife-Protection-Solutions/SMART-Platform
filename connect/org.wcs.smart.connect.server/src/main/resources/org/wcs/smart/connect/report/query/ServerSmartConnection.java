@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
+import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
@@ -53,7 +54,7 @@ public class ServerSmartConnection extends SmartConnection {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void openSession(){
-		localSession = (Session) ((Map)appContext).get(SmartReportRunner.SESSION_PARAM);
+		localSession = (Session) ((Map)appContext).get(BirtConstants.SESSION_PARAM);
 	}
 	
 	@Override

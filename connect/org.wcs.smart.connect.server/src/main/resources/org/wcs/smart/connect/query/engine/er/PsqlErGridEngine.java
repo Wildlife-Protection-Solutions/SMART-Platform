@@ -83,7 +83,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -185,7 +185,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 					
 					
 					//get numerator results
-					Collection<GridResultItem> numeratorResults = getItems(
+					Collection<QueryGridResultItem> numeratorResults = getItems(
 							gridDef, numerator, query.getQueryDefinition().getValueFilter(), 
 							dsFilter, caFilter, c, session, true);
 					
@@ -199,14 +199,14 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 						}
 						//computer denominator results
 						//only recompute filter if filter is different
-						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), dsFilter, caFilter, c, session,  !isSame);
+						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), dsFilter, caFilter, c, session,  !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
-						for (GridResultItem it : denominatorResults){
+						for (QueryGridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
 						}
 						
 						//compute value
-						for (GridResultItem i : numeratorResults){
+						for (QueryGridResultItem i : numeratorResults){
 							Double v = items.get(i.getTileId());
 							if (v == null){
 								i.setValue(0);
@@ -219,15 +219,15 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 					}
 
 					//combine with the patrol existance value
-					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
-					for (GridResultItem it : numeratorResults){
+					HashMap<String, QueryGridResultItem> items = new HashMap<String, QueryGridResultItem>();
+					for (QueryGridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
 					}
 
-					List<GridResultItem> missionLocations = computeMissionExistance(c, gridDef, dsFilter, caFilter);
-					for (GridResultItem it : missionLocations){
+					List<QueryGridResultItem> missionLocations = computeMissionExistance(c, gridDef, dsFilter, caFilter);
+					for (QueryGridResultItem it : missionLocations){
 						if (items.get(it.getTileId()) == null){ 
-							GridResultItem newitem = new GridResultItem();
+							QueryGridResultItem newitem = new QueryGridResultItem();
 							newitem.setTileX(it.getTileX());
 							newitem.setTileY(it.getTileY());
 							newitem.setValue(0);
@@ -259,7 +259,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 	 * @param needsFilter if the values need to be filtered or if previous filter can be used
 	 * 
 	 */
-	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
+	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, SurveyDesignFilter sdFilter, 
 			ConservationAreaFilter caFilter, Connection c, Session session, 
 			boolean needsFilter) throws Exception{
@@ -314,7 +314,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 				filterer.dropTemporaryTables(c);
 			}
 		}
-		Collection<GridResultItem> results = getGridResults(c, session, gridDef, value);
+		Collection<QueryGridResultItem> results = getGridResults(c, session, gridDef, value);
 		return results;
 	}
 	/**
@@ -327,7 +327,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 	 * 
 	 * @throws SQLException
 	 */
-	protected Collection<GridResultItem> getGridResults(Connection c, 
+	protected Collection<QueryGridResultItem> getGridResults(Connection c, 
 			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
 
@@ -528,9 +528,9 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		}
 		
 		try {
-			List<GridResultItem> items = new ArrayList<GridResultItem>();
+			List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();
 			while (rs.next()) {
-				GridResultItem it = new GridResultItem();
+				QueryGridResultItem it = new QueryGridResultItem();
 			
 				String tid = rs.getString("TILE_ID"); //$NON-NLS-1$
 				String[] tileids = tid.split("_"); //$NON-NLS-1$
@@ -551,7 +551,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		
 	}
 
-	private List<GridResultItem> computeMissionExistance(Connection c, Grid gridDef, 
+	private List<QueryGridResultItem> computeMissionExistance(Connection c, Grid gridDef, 
 			SurveyDesignFilter dsFilter,
 			ConservationAreaFilter caFilter) throws Exception{
 		GridAnalysisEngine<?> engine = null;
@@ -576,7 +576,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 	 * @return
 	 * @throws Exception
 	 */
-	private List<GridResultItem> computeMissionTrackNoFilter(Connection c, 
+	private List<QueryGridResultItem> computeMissionTrackNoFilter(Connection c, 
 			GridAnalysisEngine<?> engine, SurveyDesignFilter dsFilter,
 			ConservationAreaFilter caFilter) throws Exception{
 		
@@ -628,10 +628,10 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		}
 		
 		
-		List<GridResultItem> items = new ArrayList<GridResultItem>();
+		List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
 			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
-			GridResultItem it = new GridResultItem();
+			QueryGridResultItem it = new QueryGridResultItem();
 			it.setTileX(object.getKey().getXId()+1);
 			it.setTileY(object.getKey().getYId()+1);
 			it.setValue(object.getValue());
@@ -740,7 +740,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 	}
 
 
-	private Collection<GridResultItem> computeSurveyValue(Connection c,
+	private Collection<QueryGridResultItem> computeSurveyValue(Connection c,
 			MissionValueItem item, 
 			Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
@@ -774,7 +774,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		}
 	}
 	
-	private Collection<GridResultItem> computeMissionTrack(Connection c, 
+	private Collection<QueryGridResultItem> computeMissionTrack(Connection c, 
 			GridAnalysisEngine<?> engine, String[] dataField) throws Exception{
 		
 		StringBuilder sql = new StringBuilder();
@@ -844,10 +844,10 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			}
 		}
 		
-		List<GridResultItem> items = new ArrayList<GridResultItem>();	
+		List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();	
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
 			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
-			GridResultItem it = new GridResultItem();
+			QueryGridResultItem it = new QueryGridResultItem();
 			it.setTileX(object.getKey().getXId()+1);
 			it.setTileY(object.getKey().getYId()+1);
 			it.setValue(object.getValue());

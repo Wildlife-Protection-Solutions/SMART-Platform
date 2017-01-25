@@ -38,8 +38,8 @@ import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
@@ -125,7 +125,7 @@ public class CsvExporter {
 	 * @param results
 	 * @param session
 	 */
-	public void exportResults(GriddedQuery query, IMemoryTableResultSet<GridResultItem> results, Session session) throws Exception{
+	public void exportResults(GriddedQuery query, IMemoryTableResultSet<QueryGridResultItem> results, Session session) throws Exception{
 	
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
 				new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
@@ -138,9 +138,9 @@ public class CsvExporter {
 			}
 			writer.writeNext(data);
 
-			for (Iterator<GridResultItem> iterator = results.getIterator(); iterator
+			for (Iterator<QueryGridResultItem> iterator = results.getIterator(); iterator
 					.hasNext();) {
-				GridResultItem item = (GridResultItem) iterator.next();
+				QueryGridResultItem item = (QueryGridResultItem) iterator.next();
 
 				data = new String[cols.size()];
 				for (int i = 0; i < cols.size(); i++) {

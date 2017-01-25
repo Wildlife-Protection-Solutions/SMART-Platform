@@ -80,7 +80,7 @@ import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -169,7 +169,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 					parseConservationAreaFilterInternal(lquery);
 					
 					//get numerator results
-					Collection<GridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), caFilter, c, session, true);
+					Collection<QueryGridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), caFilter, c, session, true);
 					
 					//apply denominator results
 					if (denominator != null){
@@ -181,14 +181,14 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 						}
 						//computer denominator results
 						//only recompute filter if filter is different
-						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), caFilter, c, session, !isSame);
+						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), caFilter, c, session, !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
-						for (GridResultItem it : denominatorResults){
+						for (QueryGridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
 						}
 						
 						//compute value
-						for (GridResultItem i : numeratorResults){
+						for (QueryGridResultItem i : numeratorResults){
 							Double v = items.get(i.getTileId());
 							if (v == null){
 								i.setValue(0);
@@ -201,15 +201,15 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 					}
 
 					//combine with the patrol existance value
-					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
-					for (GridResultItem it : numeratorResults){
+					HashMap<String, QueryGridResultItem> items = new HashMap<String, QueryGridResultItem>();
+					for (QueryGridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
 					}
 
-					List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef, caFilter);
-					for (GridResultItem it : patrolLocations){
+					List<QueryGridResultItem> patrolLocations = computePatrolExistance(c, gridDef, caFilter);
+					for (QueryGridResultItem it : patrolLocations){
 						if (items.get(it.getTileId()) == null){ 
-							GridResultItem newitem = new GridResultItem();
+							QueryGridResultItem newitem = new QueryGridResultItem();
 							newitem.setTileX(it.getTileX());
 							newitem.setTileY(it.getTileY());
 							newitem.setValue(0);
@@ -249,7 +249,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 	 * @param needsFilter if the values need to be filtered or if previous filter can be used
 	 * 
 	 */
-	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
+	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, ConservationAreaFilter caFilter, Connection c, Session session, 
 			boolean needsFilter) throws Exception{
 		
@@ -293,7 +293,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 	 * 
 	 * @throws SQLException
 	 */
-	protected Collection<GridResultItem> getGridResults(Connection c, 
+	protected Collection<QueryGridResultItem> getGridResults(Connection c, 
 			Session session, Grid gridDef, IValueItem value)
 			throws Exception {
 
@@ -497,9 +497,9 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			}
 		
 			try {
-				List<GridResultItem> items = new ArrayList<GridResultItem>();
+				List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();
 				while (rs.next()) {
-					GridResultItem it = new GridResultItem();
+					QueryGridResultItem it = new QueryGridResultItem();
 				
 					String tid = rs.getString("TILE_ID"); //$NON-NLS-1$
 					String[] tileids = tid.split("_"); //$NON-NLS-1$
@@ -520,7 +520,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		}
 	}
 
-	private List<GridResultItem> computePatrolExistance(Connection c, 
+	private List<QueryGridResultItem> computePatrolExistance(Connection c, 
 			Grid gridDef, ConservationAreaFilter caFilter) throws Exception{
 		GridAnalysisEngine<?> engine = null;
 		
@@ -531,7 +531,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		return computePatrolTrackNoFilter(c, engine, caFilter);
 	}
 	
-	private Collection<GridResultItem> computePatrolValue(Connection c,
+	private Collection<QueryGridResultItem> computePatrolValue(Connection c,
 			PatrolValueItem item, 
 			Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
@@ -559,7 +559,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		return computePatrolTrack(c, engine, dataField);
 	}
 	
-	private Collection<GridResultItem> computePatrolTrack(Connection c, 
+	private Collection<QueryGridResultItem> computePatrolTrack(Connection c, 
 			GridAnalysisEngine<?> engine, 
 			String[] dataField) throws Exception{
 		
@@ -620,10 +620,10 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			}
 		}
 		
-		List<GridResultItem> items = new ArrayList<GridResultItem>();	
+		List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();	
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
 			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
-			GridResultItem it = new GridResultItem();
+			QueryGridResultItem it = new QueryGridResultItem();
 			it.setTileX(object.getKey().getXId()+1);
 			it.setTileY(object.getKey().getYId()+1);
 			it.setValue(object.getValue());
@@ -643,7 +643,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 	 * @return
 	 * @throws Exception
 	 */
-	private List<GridResultItem> computePatrolTrackNoFilter(Connection c, 
+	private List<QueryGridResultItem> computePatrolTrackNoFilter(Connection c, 
 			GridAnalysisEngine<?> engine, ConservationAreaFilter caFilter) throws Exception{
 		clearParameters();
 		StringBuilder sql = new StringBuilder();
@@ -685,10 +685,10 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			}
 		}
 		
-		List<GridResultItem> items = new ArrayList<GridResultItem>();
+		List<QueryGridResultItem> items = new ArrayList<QueryGridResultItem>();
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
 			Entry<Tile,Double> object = (Entry<Tile,Double>) iterator.next();
-			GridResultItem it = new GridResultItem();
+			QueryGridResultItem it = new QueryGridResultItem();
 			it.setTileX(object.getKey().getXId()+1);
 			it.setTileY(object.getKey().getYId()+1);
 			it.setValue(object.getValue());

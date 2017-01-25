@@ -72,6 +72,8 @@ import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
+import org.wcs.smart.birt.BirtConstants;
+import org.wcs.smart.birt.SmartRunAndRender;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -202,12 +204,12 @@ public class ReportApi extends HttpServlet{
 						options.setImageHandler(new HTMLServerImageHandler());
 						options.setOutputStream(bos);
 		
-						IRunAndRenderTask task = new SmartReportRunner.SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal() == null ? "" : request.getUserPrincipal().getName());
+						IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal() == null ? "" : request.getUserPrincipal().getName());
 		
 						Map<Object,Object> items = task.getAppContext();
-						items.put(SmartReportRunner.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
+						items.put(BirtConstants.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
 						items.put(SmartConnection.LOCALE_CONTEXT_VAR, request.getLocale());
-						items.put(SmartReportRunner.CA_PARAM, report.getConservationArea());
+						items.put(BirtConstants.CA_PARAM, report.getConservationArea());
 						items.put(ServerSmartConnection.CCAA_FILTER_KEY, conservationAreas);
 						
 						try{
