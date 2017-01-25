@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query.engine;
 
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +31,9 @@ import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
@@ -42,6 +45,9 @@ import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.util.UuidUtils;
+
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Query engine for intelligence observation queries.
@@ -63,7 +69,10 @@ public class IntelObservationQueryEngine {
 	public IPagedQueryResultSet executeQuery(IntelRecordObservationQuery query,  HashMap<String, Object> parameters) throws Exception{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
-		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+		IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+		if (monitor == null){
+			monitor = new NullProgressMonitor();
+		}
 		monitor.beginTask("Processing Query", 6);
 		//one or both element of array may be null
 		Date[] dfilter = (Date[]) parameters.get(Date.class.getName());
@@ -83,8 +92,10 @@ public class IntelObservationQueryEngine {
 			session.beginTransaction();
 			ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, session); 
 			String dataTable = parser.processFilter(new SubProgressMonitor(monitor, 2));
+			if (monitor.isCanceled()) return null;
 			queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
 			
+			if (monitor.isCanceled()) return null;
 			monitor.subTask("Configuring results table");
 			configureTableContents(dataTable, parser.getFilterToColumnNames(), true, session);
 			
@@ -93,13 +104,15 @@ public class IntelObservationQueryEngine {
 			session.createSQLQuery(sql).executeUpdate();
 			monitor.worked(1);
 			
+			if (monitor.isCanceled()) return null;
 			monitor.subTask("Computing Query Columns");
 			computeQueryColumns(session, locale, query);
 			monitor.worked(1);
 			
-			monitor.subTask("Loading Results");
-			Integer cnt = (Integer) session.createSQLQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult();
-			queryResults.setResultCount(cnt);
+			if (monitor.isCanceled()) return null;
+			computeCount(session);
+			computeBounds(session);
+			
 			monitor.worked(1);
 			
 			session.getTransaction().commit();
@@ -110,8 +123,10 @@ public class IntelObservationQueryEngine {
 			session.beginTransaction();
 			WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, session); 
 			String dataTable = parser.processFilter(new SubProgressMonitor(monitor, 2));
+			if (monitor.isCanceled()) return null;
 			queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
 			
+			if (monitor.isCanceled()) return null;
 			monitor.subTask("Configuring results table");
 			configureTableContents(dataTable, parser.getFilterToColumnNames(), false, session);
 			
@@ -120,13 +135,16 @@ public class IntelObservationQueryEngine {
 			session.createSQLQuery(sql).executeUpdate();
 			monitor.worked(1);
 			
+			if (monitor.isCanceled()) return null;
 			monitor.subTask("Computing Query Columns");
 			computeQueryColumns(session, locale, query);
 			monitor.worked(1);
 			
+			if (monitor.isCanceled()) return null;
 			monitor.subTask("Loading Results");
-			Integer cnt = (Integer) session.createSQLQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult();
-			queryResults.setResultCount(cnt);
+			computeCount(session);
+			computeBounds(session);
+			
 			monitor.worked(1);
 			
 			session.getTransaction().commit();
@@ -136,6 +154,36 @@ public class IntelObservationQueryEngine {
 		return null;		
 	}
 	
+	private void computeCount(Session session){
+		Integer obs = (Integer) session.createSQLQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult();
+		Integer wp = (Integer) session.createSQLQuery("SELECT count(distinct location_uuid) FROM " + queryResults.getQueryDataTable()).uniqueResult();
+		queryResults.setResultCount(obs, wp);
+	}
+	
+	private void computeBounds(Session session){
+//		very slow: Query q = session.createSQLQuery("SELECT geometry FROM smart.i_location WHERE uuid in (select location_uuid FROM " + queryResults.getQueryDataTable() + ")");
+		Query q = session.createSQLQuery("SELECT loc_geometry FROM " + queryResults.getQueryDataTable() );
+		List<?> geoms = q.list();
+		Envelope env = null;
+		for (Object x : geoms){
+			if (x == null)  continue;
+			if (!(x instanceof Blob))  continue;
+			
+			Blob b = (Blob)x;
+			WKBReader reader = new WKBReader();
+			try{
+				Envelope e = reader.read(b.getBytes(1l, (int) b.length())).getEnvelopeInternal();
+				if (env == null){
+					env = e;
+				}else{
+					env.expandToInclude(e);
+				}
+			}catch(Exception ex){
+				//eat this
+			}
+		}
+		queryResults.setBounds(env);
+	}
 	/*
 	 * Configures the query columns; removing non populated attribute columns
 	 */

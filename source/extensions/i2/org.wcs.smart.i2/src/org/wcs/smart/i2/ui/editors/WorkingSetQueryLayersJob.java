@@ -161,7 +161,12 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 					
 					@Override
 					protected void onError(Exception ex) {
-						
+						//TODO: it might be possible to iconify the layer in the tree						
+					}
+					
+					@Override
+					protected void onCancel() {
+						//TODO: it might be possible to iconify the layer in the tree
 					}
 					
 					@Override

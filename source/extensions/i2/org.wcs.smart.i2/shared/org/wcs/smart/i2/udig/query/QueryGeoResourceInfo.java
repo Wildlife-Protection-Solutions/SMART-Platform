@@ -21,18 +21,14 @@
  */
 package org.wcs.smart.i2.udig.query;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
-import org.opengis.feature.Feature;
-import org.opengis.feature.FeatureVisitor;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.geometry.BoundingBox;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -57,25 +53,18 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 	 * @param resource resource source
 	 */
 	public void computeBounds(QueryGeoResource resource, IProgressMonitor monitor){
-
-		try {
-			@SuppressWarnings("unchecked")
-			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
-
-			final ReferencedEnvelope env = new ReferencedEnvelope(fs.getSchema().getCoordinateReferenceSystem());
-			this.bounds = env;
-
-			fs.getFeatures().accepts(new FeatureVisitor() {
-				@Override
-				public void visit(Feature f) {
-					BoundingBox bb = f.getBounds();
-					env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
+		//get bounds from result set
+		try{
+			QueryService service = ((QueryService)resource.resolve(QueryService.class, monitor));
+			if (service != null && service.getResultSet() != null){
+				Envelope env = service.getResultSet().getEnvelope();
+				if (env == null){
+					env = new Envelope();
 				}
-			}, null);
-		
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+				this.bounds =  new ReferencedEnvelope(env, GeometryUtils.SMART_CRS);
+			}
+		}catch (IOException ex){
+			logger.log(Level.INFO, "Unable to read bounds from query results", this.bounds);
 		}
-
 	}
 }

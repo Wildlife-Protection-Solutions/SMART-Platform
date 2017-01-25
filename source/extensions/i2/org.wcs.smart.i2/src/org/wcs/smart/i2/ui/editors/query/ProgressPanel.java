@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.i2.ui.editors.query;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
@@ -38,22 +40,44 @@ public class ProgressPanel extends Composite {
 
 	private ProgressBar pbar;
 	private Label progressLabel;
+	private Button btnCancel;
+	
+	private IProgressMonitor currentMonitor;
 	
 	public ProgressPanel(Composite parent) {
 		super(parent, SWT.NONE);
 		
-		setLayout(new GridLayout());
+		setLayout(new GridLayout(2, false));
 		
 		pbar = new ProgressBar(this, SWT.HORIZONTAL | SWT.SMOOTH);
 		pbar.setMinimum(0);
 		pbar.setMaximum(100);
-		pbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		pbar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		btnCancel = new Button(this, SWT.PUSH);
+		btnCancel.setText("Cancel");
+		btnCancel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnCancel.addListener(SWT.Selection, event->{
+			if (currentMonitor != null){
+				currentMonitor.setCanceled(true);
+			}
+		});
 		
 		progressLabel = new Label(this, SWT.NONE);
 		progressLabel.setText("");
-		progressLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		progressLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		
 	}
 
+	/**
+	 * Set the current progress monitor; required for cancel feature
+	 * @param currentMonitor
+	 */
+	public void setProgressMonitor(IProgressMonitor currentMonitor){
+		this.currentMonitor = currentMonitor;
+	}
+	
 	public void setLabel(String label){
 		this.progressLabel.setText(label);
 	}
@@ -72,6 +96,7 @@ public class ProgressPanel extends Composite {
 	public void clear(){
 		setProgress(0);
 		setLabel("");
+		setProgressMonitor(null);
 		layout(true);
 	}
 	
@@ -81,6 +106,7 @@ public class ProgressPanel extends Composite {
 	public void done(){
 		setProgress(pbar.getMaximum());
 		setLabel("");
+		setProgressMonitor(null);
 		layout(true);
 	}
 }

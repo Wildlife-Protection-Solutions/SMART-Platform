@@ -425,6 +425,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		resultsTable.setInput(null);
 		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
 		stackPanel.layout(true);
+		mapPanel.updateQueryLayers(null);
 		
 		Date[] dateFilter = null;
 		if (datePart.getDateFilter() == DateFilter.CUSTOM){
@@ -439,7 +440,6 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 		String queryString = panel.getQueryPart();
 		query.setQueryString(queryString);
-		
 		resultsTable.setQuery(query);
 		
 		runJob.setDateFilter(fdateFilter);
@@ -604,8 +604,19 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 						stackPanel.layout(true);
 					});
 				}
+				
+				@Override
+				protected void onCancel(){
+					Display.getDefault().syncExec(()->{
+						resultsTable.setInput(null);
+						mapPanel.updateQueryLayers(null);
+						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
+						errorPanel.setError("Cancelled");
+						stackPanel.layout(true);
+					});
+				}
 			};
-			runJob.configureParameter(IProgressMonitor.class.getName(), new QueryProgressMonitor(progressPanel));
+			runJob.setProgresPanel(progressPanel);
 			
 			Display.getDefault().syncExec(()->{
 				isInitializing = true;

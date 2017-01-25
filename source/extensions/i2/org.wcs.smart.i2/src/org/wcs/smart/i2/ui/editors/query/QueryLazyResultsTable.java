@@ -47,6 +47,7 @@ import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.engine.IntelObservationQueryResults;
 
 /**
  * Displays results of a query in a table lazily loading
@@ -202,7 +203,11 @@ public class QueryLazyResultsTable extends Composite{
 		}else{
 			table.setItemCount(result.getItemCount());
 			table.setInput(result);	
-			resultCnt.setText(MessageFormat.format("{0} observations",result.getItemCount()));
+			if (result instanceof IntelObservationQueryResults){
+				resultCnt.setText(MessageFormat.format("{0} observations | {1} locations",result.getItemCount(), ((IntelObservationQueryResults)result).getWaypointCount()));
+			}else{
+				resultCnt.setText(MessageFormat.format("{0} observations",result.getItemCount()));
+			}
 			
 			createTableColumns( result.getQueryColumns() );
 		}

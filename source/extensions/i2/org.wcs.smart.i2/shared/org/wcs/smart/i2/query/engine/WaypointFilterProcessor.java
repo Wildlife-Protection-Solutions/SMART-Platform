@@ -140,6 +140,7 @@ public class WaypointFilterProcessor {
 				
 		logString(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));		
 		logString(sql.toString());
+		if (monitor.isCanceled()) return null;
 		SQLQuery query = s.createSQLQuery(sql.toString());
 		query.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
 		query.executeUpdate();
@@ -148,6 +149,7 @@ public class WaypointFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)");
 		logString(sql.toString());
+		if (monitor.isCanceled()) return null;
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		
 		monitor.worked(1);
@@ -183,6 +185,7 @@ public class WaypointFilterProcessor {
 				@Override
 				public void visitElement(IQueryFilter filter) {
 					if (visitorException != null) return;
+					if (monitor.isCanceled()) return;
 					try{
 						if (filter instanceof AreaFilter){
 							String columnName = createColumn(filter);
@@ -216,7 +219,7 @@ public class WaypointFilterProcessor {
 		}					
 		
 		//run the query; getting a list of observations
-		
+		if (monitor.isCanceled()) return null;
 		//create a results table based on that list of observations; adding the fields necessary
 		monitor.subTask("Filtering observations");
 		if (filter != null){
@@ -268,6 +271,7 @@ public class WaypointFilterProcessor {
 			});		
 			if (visitorException != null) throw visitorException;
 			
+			if (monitor.isCanceled()) return null;
 			logString(deleteSql.toString());
 			s.createSQLQuery(deleteSql.toString()).executeUpdate();
 			

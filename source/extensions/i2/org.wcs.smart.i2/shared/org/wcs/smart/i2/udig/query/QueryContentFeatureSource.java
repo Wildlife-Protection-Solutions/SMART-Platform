@@ -99,7 +99,11 @@ public class QueryContentFeatureSource extends ContentFeatureSource {
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(
 			Query arg0) throws IOException {
-		return new QueryFeatureReader(source.getResultSet(), getSchema());
+		try{
+			return new QueryFeatureReader(source.getResultSet(), getSchema());
+		}catch (Exception ex){
+			throw new IOException(ex);
+		}
 	}
 
 }

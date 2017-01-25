@@ -74,6 +74,7 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.DateCellEditor;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.GeometryDialog;
 import org.wcs.smart.i2.ui.ObservationDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -96,7 +97,8 @@ public class LocationListComposite extends Composite{
 	private MenuItem addLinkItem;
 	private MenuItem dropLinkItem;
 	private MenuItem editObsItem;
-		
+	private MenuItem editGeometry;
+	
 	public LocationListComposite(Composite parent, FormToolkit toolkit, RecordEditor editor){
 		super(parent, SWT.NONE);
 		this.editor = editor;
@@ -322,39 +324,7 @@ public class LocationListComposite extends Composite{
 					}
 					
 				}else{
-					if (deleteItem == null){
-						deleteItem = new MenuItem(linkEntities, SWT.PUSH);
-						deleteItem.setText(MessageFormat.format("{0} Location", DialogConstants.DELETE_BUTTON_TEXT));
-						deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-						deleteItem.addSelectionListener(new SelectionAdapter() {
-							
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-								if (selection instanceof IntelLocation){
-									editor.deleteLocation(((IntelLocation)selection));
-								}
-							}
-						});
-					}
-					if(editObsItem  == null){
-						editObsItem = new MenuItem(linkEntities, SWT.PUSH);
-						editObsItem.setText("Edit Observations...");
-						editObsItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-						editObsItem.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-								if (selection instanceof IntelLocation){
-									ObservationDialog dialog = new ObservationDialog(getShell(), (IntelLocation)selection);
-									if (dialog.open() == Window.OK){
-										editor.setDirty(true);
-										tblObservations.refresh();
-									}
-								}
-							}
-						});
-					}
+					
 					if (IntelSecurityManager.INSTANCE.canLinkLocationsToEntities()){
 						if (addLinkItem == null){
 							addLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
@@ -451,6 +421,64 @@ public class LocationListComposite extends Composite{
 							dropLinkItem.dispose();
 							dropLinkItem = null;
 						}
+					}
+					
+					if (deleteItem == null){
+						new MenuItem(linkEntities, SWT.SEPARATOR);
+						
+						deleteItem = new MenuItem(linkEntities, SWT.PUSH);
+						deleteItem.setText(MessageFormat.format("{0} Location", DialogConstants.DELETE_BUTTON_TEXT));
+						deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+						deleteItem.addSelectionListener(new SelectionAdapter() {
+							
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+								if (selection instanceof IntelLocation){
+									editor.deleteLocation(((IntelLocation)selection));
+								}
+							}
+						});
+					}
+					if(editObsItem  == null){
+						editObsItem = new MenuItem(linkEntities, SWT.PUSH);
+						editObsItem.setText("Edit Observations...");
+						editObsItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+						editObsItem.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+								if (selection instanceof IntelLocation){
+									ObservationDialog dialog = new ObservationDialog(getShell(), (IntelLocation)selection);
+									if (dialog.open() == Window.OK){
+										editor.setDirty(true);
+										tblObservations.refresh();
+									}
+								}
+							}
+						});
+					}
+					if(editGeometry  == null){
+						editGeometry = new MenuItem(linkEntities, SWT.PUSH);
+						editGeometry.setText("Edit Geometry...");
+						editGeometry.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+						editGeometry.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+								if (selection instanceof IntelLocation){
+									try{
+										GeometryDialog gd = new GeometryDialog(getShell(), ((IntelLocation)selection).getGeometry());
+										if (gd.open() == Window.OK){
+											((IntelLocation)selection).setGeometry(gd.getNewGeometry());
+											editor.locationsUpdated();
+										}
+									}catch (Exception ex){
+										Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+									}
+								}
+							}
+						});
 					}
 				}
 			}

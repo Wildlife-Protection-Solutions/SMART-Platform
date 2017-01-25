@@ -141,6 +141,7 @@ public class ObservationFilterProcessor {
 		
 		logString(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));		
 		logString(sql.toString());
+		if (monitor.isCanceled()) return null;
 		SQLQuery query = s.createSQLQuery(sql.toString());
 		query.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
 		query.executeUpdate();
@@ -149,10 +150,13 @@ public class ObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)");
 		logString(sql.toString());
+		if (monitor.isCanceled()) return null;
 		s.createSQLQuery(sql.toString()).executeUpdate();
+		
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX observation_uuid_idx on " + obsTable + " (observation_uuid)");
 		logString(sql.toString());
+		if (monitor.isCanceled()) return null;
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		
 		monitor.worked(1);
@@ -187,6 +191,7 @@ public class ObservationFilterProcessor {
 				
 				@Override
 				public void visitElement(IQueryFilter filter) {
+					if (monitor.isCanceled()) return ;
 					if (visitorException != null) return;
 					try{
 						if (filter instanceof AreaFilter){
@@ -210,7 +215,6 @@ public class ObservationFilterProcessor {
 							addFilterColumn((IntelAttributeFilter) filter, obsTable, tempTable, columnName);
 							SqlGenerator.switchTables(tempTable, obsTable, true, true, s);
 						}
-							
 					}catch(Exception e){
 						visitorException = e;
 					}
@@ -223,6 +227,7 @@ public class ObservationFilterProcessor {
 		//run the query; getting a list of observations
 		
 		//create a results table based on that list of observations; adding the fields necessary
+		if (monitor.isCanceled()) return null;
 		monitor.subTask("Filtering observations");
 		if (filter != null){
 			String tempTable = SqlGenerator.createTempTableName();
@@ -273,6 +278,7 @@ public class ObservationFilterProcessor {
 			});		
 			if (visitorException != null) throw visitorException;
 			
+			if (monitor.isCanceled()) return null;
 			logString(deleteSql.toString());
 			s.createSQLQuery(deleteSql.toString()).executeUpdate();
 			

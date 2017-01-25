@@ -45,7 +45,10 @@ public class QueryProgressMonitor implements IProgressMonitor {
 	
 	public QueryProgressMonitor(ProgressPanel panel){
 		this.panel = panel;
-		Display.getDefault().asyncExec(()->panel.clear());
+		Display.getDefault().syncExec(()->{
+			panel.clear();
+			panel.setProgressMonitor(QueryProgressMonitor.this);
+		});
 	}
 
 	public void updateGui(){

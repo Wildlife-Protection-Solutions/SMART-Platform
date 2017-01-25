@@ -65,7 +65,8 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 
 	//data details
 	private String resultsTable = null;
-	private int totalItems;
+	private int obsCount;
+	private int wpCount;
 	private int categoryCnt;
 	
 	//sorting
@@ -80,6 +81,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	private HashMap<String, Integer> columnNameToIndex;
 	
 	private List<IQueryColumn> queryColumns;
+	private Envelope bounds;
 	
 	public IntelObservationQueryResults(){
 	}
@@ -88,12 +90,17 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		this.resultsTable = resultsTable;
 	}
 	
-	public void setResultCount(int count){
-		this.totalItems = count;
+	public void setResultCount(int obsCount, int wpCount){
+		this.obsCount = obsCount;
+		this.wpCount = wpCount;
 	}
 	
 	public void setCategoryCount(int catCnt){
 		this.categoryCnt = catCnt;
+	}
+	
+	public void setBounds(Envelope env){
+		this.bounds = env;
 	}
 	
 	public void setColumnNameToIndexMap(HashMap<String, Integer> columnNameToIndex){
@@ -370,7 +377,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	
 	@Override
 	public Envelope getEnvelope() {
-		return null;
+		return this.bounds;
 	}
 
 	@Override
@@ -381,7 +388,11 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 
 	@Override
 	public int getItemCount() {
-		return totalItems;
+		return obsCount;
+	}
+	
+	public int getWaypointCount(){
+		return this.wpCount;
 	}
 
 	@Override
@@ -401,5 +412,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	public PagedResultSetIterator iterator(Session session) {
 		return new PagedResultSetIterator(this, session);
 	}
+
+
 
 }

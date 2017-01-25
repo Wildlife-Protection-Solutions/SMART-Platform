@@ -68,8 +68,12 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	public QueryFeatureReader(IPagedQueryResultSet results, SimpleFeatureType ftype) {
 		
 		session = HibernateManager.openSession();
-		
-		this.iterator = new PagedResultSetIterator(results, session);
+		try{
+			this.iterator = new PagedResultSetIterator(results, session);
+		}catch (Throwable t){
+			session.close();
+			throw t;
+		}
 		this.ftype = ftype;
 		this.results = results;
 		isPoint = ftype.getName().equals(QueryDataSource.POINT_TYPE);
@@ -113,6 +117,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 				return;
 			}
 		}
+		
 	}
 	
 	
