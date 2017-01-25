@@ -385,8 +385,8 @@ public class DataQueueView{
 					}
 					return -1;
 				}
-				if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED || o1.getStatus() == LocalDataQueueItem.Status.REQUEUED){
-					if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED|| o2.getStatus() == LocalDataQueueItem.Status.REQUEUED){
+				if (o2.getStatus() == LocalDataQueueItem.Status.QUEUED || o2.getStatus() == LocalDataQueueItem.Status.REQUEUED){
+					if (o1.getStatus() == LocalDataQueueItem.Status.QUEUED|| o1.getStatus() == LocalDataQueueItem.Status.REQUEUED){
 						return o2.getOrder().compareTo(o1.getOrder());
 					}
 					return 1;
