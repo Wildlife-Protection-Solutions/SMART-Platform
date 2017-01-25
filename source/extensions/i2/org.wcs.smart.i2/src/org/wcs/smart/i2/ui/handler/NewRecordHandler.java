@@ -24,12 +24,15 @@ package org.wcs.smart.i2.ui.handler;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
+import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
 /**
@@ -41,7 +44,7 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 public class NewRecordHandler {
 	
 	@Execute
-	public void createNewRecord(){
+	public void createNewRecord(IEclipseContext context){
 		IntelRecord newRecord = new IntelRecord();
 		newRecord.setTitle("New Record");
 		newRecord.setStatus(Status.NEW);
@@ -50,6 +53,11 @@ public class NewRecordHandler {
 		newRecord.setEntities(new ArrayList<IntelEntityRecord>());
 		
 		RecordEditorInput input = new RecordEditorInput(newRecord);
+		
+		//open perspective
+		IEclipseContext kid = context.createChild();
+		kid.set( org.wcs.smart.ui.ShowPerspectiveHandler.PERSPECTIVE_ID_PARAM, IntelDataAssessmentPerspective.ID);
+		ContextInjectionFactory.invoke(new ShowPerspectiveHandler(), Execute.class, kid);
 		
 		//open editor
 		(new OpenRecordHandler()).openRecord(input, true);

@@ -42,8 +42,8 @@ import org.wcs.smart.i2.ui.editors.EntityEditorInput;
 public class OpenEntityHandler {
 
 	public void openEntity(IntelEntity entity, IEclipseContext context){
+		//open entity
 		EntityEditorInput input = new EntityEditorInput(entity.getIdAttributeAsText(), entity.getUuid(), entity.getEntityType());
-
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
 			IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityEditor.ID);

@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 
 /**
@@ -34,11 +37,14 @@ import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 public class NewQueryHandler {
 	
 	@Execute
-	public void createNewRecord(){
-		
-		QueryEditorInput input = new QueryEditorInput("New Query", null);
-		
+	public void createNewRecord(IEclipseContext context){
+		//open perspective
+		IEclipseContext kid = context.createChild();
+		kid.set( org.wcs.smart.ui.ShowPerspectiveHandler.PERSPECTIVE_ID_PARAM, IntelDataAnalysisPerspective.ID);
+		ContextInjectionFactory.invoke(new ShowPerspectiveHandler(), Execute.class, kid);
+
 		//open editor
+		QueryEditorInput input = new QueryEditorInput("New Query", null);
 		(new OpenQueryHandler()).openQuery(input, true);
 	}
 	

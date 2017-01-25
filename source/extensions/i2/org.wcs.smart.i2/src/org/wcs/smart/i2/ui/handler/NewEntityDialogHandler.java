@@ -21,7 +21,15 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
+import javax.inject.Named;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 
 /**
@@ -34,6 +42,17 @@ public class NewEntityDialogHandler extends ShowDialogHandler {
 
 	public NewEntityDialogHandler(){
 		super(NewEntityDialog.class);
+	}
+	
+	@Override
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context) {
+		//open perspective
+		IEclipseContext kid = context.createChild();
+		kid.set( org.wcs.smart.ui.ShowPerspectiveHandler.PERSPECTIVE_ID_PARAM, IntelDataAssessmentPerspective.ID);
+		ContextInjectionFactory.invoke(new ShowPerspectiveHandler(), Execute.class, kid);
+		//open dialog to create entity
+		super.execute(activeShell, context);
 	}
 	
 	// E3
