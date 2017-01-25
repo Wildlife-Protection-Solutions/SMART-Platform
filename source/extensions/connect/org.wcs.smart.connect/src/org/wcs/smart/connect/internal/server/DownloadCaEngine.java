@@ -198,7 +198,7 @@ public class DownloadCaEngine {
 						.uniqueResult();
 				if (smartUser != null &&  HibernateManager.validatePassword(password, smartUser)){
 					break;
-				}else if (smartUser != null && !smartUser.supportsUser(UserLevelManager.ADMIN)){
+				}else if (smartUser != null && !UserLevelManager.INSTANCE.supportsUser(smartUser, UserLevelManager.ADMIN)){
 					MessageDialog.openError(activeShell, Messages.DownloadCaEngine_ErrorDialogTitle, Messages.DownloadCaEngine_InvalidPermission);
 					return false;
 				}

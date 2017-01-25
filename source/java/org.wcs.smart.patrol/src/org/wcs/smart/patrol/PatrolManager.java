@@ -80,7 +80,7 @@ public class PatrolManager {
 	 * that described reason why can't be edited.
 	 */
 	public String canEdit(Patrol patrol, ObservationOptions ops){
-		if (!SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST, UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
+		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST, UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
 			return "Insufficient privileges"; 
 		}
 			
@@ -88,7 +88,7 @@ public class PatrolManager {
 			return null;
 		}else if (patrol.getStartDate() == null){
 			return null;
-		}else if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){				
+		}else if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){				
 			Date d = new Date();
 			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
 			if (patrol.getStartDate().after(d)){

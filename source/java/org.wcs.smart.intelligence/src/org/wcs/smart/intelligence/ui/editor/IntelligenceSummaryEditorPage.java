@@ -332,7 +332,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	
 	private boolean canEdit() {
 		//analyst users can never edit
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.DATA_ENTRY);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.DATA_ENTRY);
 	}
 	
 	/**

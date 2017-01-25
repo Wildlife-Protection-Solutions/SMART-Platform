@@ -112,7 +112,7 @@ public class DerbyRestoreEngine {
 				
 				boolean found = false;
 				for (Employee e : matching){
-					if (e.supportsUser(UserLevelManager.ADMIN) &&
+					if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN) &&
 							HibernateManager.validatePassword(password, e)){
 						found = true;
 						break;

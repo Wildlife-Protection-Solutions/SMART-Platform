@@ -78,6 +78,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.BirtUiUtils;
 import org.wcs.smart.report.birt.map.ExtensionManager;
+import org.wcs.smart.report.birt.map.LayerDefinition;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
@@ -760,23 +761,23 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		// attempt to parse id out of name; users do not want ids appearing the legends on maps
 		//#1051
-		String name = ld.handle.getDisplayName();
+		String name = ld.getHandle().getDisplayName();
 		int start = name.lastIndexOf('[');
 		int end = name.lastIndexOf(']');
 		if (start >= 0 && end >= 0 && start < end){
 			name = name.substring(0, start);
 		}
-		ld.info.setLayerName(name);
+		ld.getInfo().setLayerName(name);
 		try{
 			ExtendedItemHandle eihandle = itemHandle.getModuleHandle().getElementFactory().newExtendedItem(null, LayerItem.EXTENSION_NAME);
 			LayerItem handle = (LayerItem)(new LayerItemFactory()).newReportItem(eihandle);
-			handle.setLayerName(ld.info.getLayerName());
-			handle.setLayerStyles(ld.info.getMapStyle());
-			handle.setGeometryColumn(ld.info.getGeometryColumn());
-			handle.setLayerType(ld.info.getLayerType());
-			if (ld.handle != null){
-				handle.getHandle().setDataSet(ld.handle);
-				eihandle.setDataSet(ld.handle);
+			handle.setLayerName(ld.getInfo().getLayerName());
+			handle.setLayerStyles(ld.getInfo().getMapStyle());
+			handle.setGeometryColumn(ld.getInfo().getGeometryColumn());
+			handle.setLayerType(ld.getInfo().getLayerType());
+			if (ld.getHandle() != null){
+				handle.getHandle().setDataSet(ld.getHandle());
+				eihandle.setDataSet(ld.getHandle());
 				//find the column with the name matching ld.info.getGeometryColumnand update
 				//to the displayName value
 				//handle.setGeometryColumn(findLabel(ld.handle, ld.info.getGeometryColumn()));

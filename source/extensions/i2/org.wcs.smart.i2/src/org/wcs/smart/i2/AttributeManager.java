@@ -21,15 +21,9 @@
  */
 package org.wcs.smart.i2;
 
-import java.text.Collator;
-import java.util.List;
-
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 /**
  * Tools for managing intelligence attributes
@@ -42,41 +36,7 @@ public enum AttributeManager {
 	private AttributeManager(){
 		
 	}
-	
-	public int getAttributeSqlType(AttributeType type){
-		switch(type){
-		case BOOLEAN:
-			return java.sql.Types.BOOLEAN;
-		case DATE:
-			return java.sql.Types.DATE;
-		case NUMERIC:
-			return java.sql.Types.DOUBLE;
-		case LIST:
-		case TEXT:
-			return java.sql.Types.VARCHAR;
-		default:
-			break;
-		
-		};
-		return -1;
-	}
-	
-	/**
-	 * Gets all attributes sorted by name. Does not lazily load list items, translations etc.
-	 * 
-	 * @param session
-	 * @param ca
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public List<IntelAttribute> getAttributes(Session session, ConservationArea ca){
-		List<IntelAttribute> types = session.createCriteria(IntelAttribute.class)
-			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-			.list();
-		types.sort((IntelAttribute a, IntelAttribute b) -> Collator.getInstance().compare(a.getName(), b.getName()));
-		return types;
-	}
-	
+
 	public void canDelete(IntelAttribute type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
 			throw new Exception("Unknown error occurrs while deleteing entity type.");

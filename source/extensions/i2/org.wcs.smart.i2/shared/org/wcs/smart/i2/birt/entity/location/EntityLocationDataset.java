@@ -35,7 +35,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
@@ -53,12 +53,12 @@ public class EntityLocationDataset  implements IQuery {
 	private int m_maxRows;
 	
 	private IntelEntityType type = null;
-	private IntelBirtConnection connection;
+	private AbstractIntelBirtConnection connection;
 	
 	private HashMap<Integer, Object> parameters;
 	
-	public EntityLocationDataset(IntelBirtConnection connection){
-		this.connection = connection;
+	public EntityLocationDataset(AbstractIntelBirtConnection abstractIntelBirtConnection){
+		this.connection = abstractIntelBirtConnection;
 		parameters = new HashMap<Integer,Object>();
 		
 	}

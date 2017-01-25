@@ -19,41 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.birt.map.properties;
+package org.wcs.smart.i2.birt.datasource;
 
-import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 
-/**
- * Map layer definition
- * @author Emily
- *
- */
-public class LayerDefinition {
-	
-	OdaDataSetHandle handle;
-	MapLayerInfo info;
-	
-	public LayerDefinition(){
-		this(null, null);
-	}
-	
-	public LayerDefinition(OdaDataSetHandle handle, MapLayerInfo info){
-		this.handle = handle;
-		this.info = info;
-	}
-	
+public class DesktopConnectionFactory implements IConnectionFactory{
+
 	@Override
-	public boolean equals(Object other){
-		if (!(other instanceof LayerDefinition)){
-			return false;
-		}
-		LayerDefinition o = (LayerDefinition) other;
-		if (o.handle != null && this.handle != null){
-			return (o.handle.equals(this.handle))
-				&& this.info.equals(o.info);
-		}else{
-			return super.equals(other);
-		}
+	public AbstractIntelBirtConnection createConnection() {
+		return new DesktopIntelBirtConnection();
 	}
+
+	@Override
+	public Session openSession() {
+		return HibernateManager.openSession();
+	}
+
 }

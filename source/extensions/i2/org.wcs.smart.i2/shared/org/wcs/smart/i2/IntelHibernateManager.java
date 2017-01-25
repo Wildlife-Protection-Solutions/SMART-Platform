@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.i2;
 
+import java.text.Collator;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -39,9 +42,9 @@ import org.wcs.smart.i2.model.IntelEntityType;
  */
 public class IntelHibernateManager {
 	
-	public static IntelAttribute getAttribute(String keyId, Session session){ 
+	public static IntelAttribute getAttribute(String keyId, ConservationArea ca, Session session){ 
 		IntelAttribute attribute = (IntelAttribute)session.createCriteria(IntelAttribute.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+			.add(Restrictions.eq("conservationArea", ca))
 			.add(Restrictions.eq("keyId", keyId))
 			.uniqueResult();
 		return attribute;
@@ -57,9 +60,9 @@ public class IntelHibernateManager {
 		return listitem;
 	}
 	
-	public static IntelEntityType getEntityType(String keyId, Session session){ 
+	public static IntelEntityType getEntityType(String keyId, ConservationArea ca, Session session){ 
 		IntelEntityType type = (IntelEntityType)session.createCriteria(IntelEntityType.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+			.add(Restrictions.eq("conservationArea", ca))
 			.add(Restrictions.eq("keyId", keyId))
 			.uniqueResult();
 		return type;
@@ -67,5 +70,44 @@ public class IntelHibernateManager {
 	
 	public static IntelEntity getEntity(UUID entityUuid, Session session){
 		return (IntelEntity) session.get(IntelEntity.class, entityUuid);
+	}
+	
+	/**
+	 * Gets all attributes sorted by name. Does not lazily load list items, translations etc.
+	 * 
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<IntelAttribute> getAttributes(Session session, ConservationArea ca){
+		List<IntelAttribute> types = session.createCriteria(IntelAttribute.class)
+			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+			.list();
+		types.sort((IntelAttribute a, IntelAttribute b) -> Collator.getInstance().compare(a.getName(), b.getName()));
+		return types;
+	}
+	
+	/**
+	 * converts an attribute type to an sql type
+	 * @param type
+	 * @return
+	 */
+	public static int getAttributeSqlType(AttributeType type){
+		switch(type){
+		case BOOLEAN:
+			return java.sql.Types.BOOLEAN;
+		case DATE:
+			return java.sql.Types.DATE;
+		case NUMERIC:
+			return java.sql.Types.DOUBLE;
+		case LIST:
+		case TEXT:
+			return java.sql.Types.VARCHAR;
+		default:
+			break;
+		
+		};
+		return -1;
 	}
 }

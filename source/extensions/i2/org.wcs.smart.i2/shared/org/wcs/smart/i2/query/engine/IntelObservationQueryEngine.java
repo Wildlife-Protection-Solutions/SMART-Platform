@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.DataModelColumn;
@@ -83,6 +84,10 @@ public class IntelObservationQueryEngine {
 			locale = Locale.getDefault();
 		}
 		
+		ConservationArea ca = (ConservationArea)parameters.get(ConservationArea.class.getName());
+		if (ca == null){
+			 throw new Exception("A valid conservation area must be provided in the query parameters.");
+		}
 		monitor.subTask("Parsing Query");
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
 		monitor.worked(1);
@@ -90,7 +95,7 @@ public class IntelObservationQueryEngine {
 			queryResults = new IntelObservationQueryResults();
 			
 			session.beginTransaction();
-			ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, session); 
+			ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session); 
 			String dataTable = parser.processFilter(new SubProgressMonitor(monitor, 2));
 			if (monitor.isCanceled()) return null;
 			queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -121,7 +126,7 @@ public class IntelObservationQueryEngine {
 			queryResults = new IntelObservationQueryResults();
 			
 			session.beginTransaction();
-			WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, session); 
+			WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session); 
 			String dataTable = parser.processFilter(new SubProgressMonitor(monitor, 2));
 			if (monitor.isCanceled()) return null;
 			queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());

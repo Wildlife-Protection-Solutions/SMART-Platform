@@ -29,7 +29,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
@@ -81,6 +83,7 @@ public abstract class RunQueryJob extends Job {
 			parameters.put(IProgressMonitor.class.getName(), monitor);
 		}
 		if (!parameters.containsKey(IProgressMonitor.class.getName())) parameters.put(IProgressMonitor.class.getName(), monitor);
+		if (!parameters.containsKey(ConservationArea.class.getName())) parameters.put(ConservationArea.class.getName(), SmartDB.getCurrentConservationArea());
 		
 		IPagedQueryResultSet results = null;
 		Session session = HibernateManager.openSession();

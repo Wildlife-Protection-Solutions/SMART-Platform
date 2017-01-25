@@ -151,7 +151,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
 		
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.DATA_ENTRY, UserLevelManager.MANAGER)){
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.DATA_ENTRY, UserLevelManager.MANAGER)){
 			Hyperlink btnCreate = toolkit.createHyperlink(main, Messages.ReportedIntelligenceContribution_Create_Button, SWT.NONE);
 			btnCreate.setToolTipText(Messages.ReportedIntelligenceContribution_Create_Button_Tooltip);
 			btnCreate.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));

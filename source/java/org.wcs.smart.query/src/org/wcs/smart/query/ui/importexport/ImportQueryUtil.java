@@ -81,7 +81,7 @@ public class ImportQueryUtil {
 					.add(Restrictions.isNotNull("smartUserLevelKeys")) //$NON-NLS-1$
 					.list();
 			for (Employee o : others){
-				if (o.supportsUser(UserLevelManager.ADMIN)) return o;
+				if (UserLevelManager.INSTANCE.supportsUser(o, UserLevelManager.ADMIN)) return o;
 			}
 			
 			//this should never happen

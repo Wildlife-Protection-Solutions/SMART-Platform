@@ -23,8 +23,8 @@ package org.wcs.smart.i2.birt.entity;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 
 /**
  * Entity parameter metadata
@@ -70,7 +70,7 @@ public class EntityParameterMetadata implements IParameterMetaData{
 	@Override
 	public String getParameterTypeName(int param) throws OdaException {
 		int nativeTypeCode = getParameterType(param);
-		return IntelBirtConnection.getNativeDataTypeName(nativeTypeCode, EntityDataset.DATASET_TYPE);
+		return AbstractIntelBirtConnection.getNativeDataTypeName(nativeTypeCode, EntityDataset.DATASET_TYPE);
 	}
 
 	@Override

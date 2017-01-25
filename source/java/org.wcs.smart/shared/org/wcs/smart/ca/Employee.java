@@ -39,7 +39,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -132,7 +131,7 @@ public class Employee {
 	private String smartPassword;
 	private String userLevelKey;
 	
-	private Set<SmartUserLevel> userLevels;
+	private Set<String> userLevels;
 	
 	private ConservationArea ca;
 	private Agency agency;
@@ -249,14 +248,10 @@ public class Employee {
 	
 	public void setSmartUserLevelKeys(String userLevelKey) {
 		this.userLevelKey = userLevelKey;
-		
-		userLevels = new HashSet<SmartUserLevel>();
+		userLevels = new HashSet<>();
 		if (userLevelKey != null && !userLevelKey.isEmpty()){
 			String[] parts = userLevelKey.split(USER_LEVEL_SEP);
-			for (String p : parts){
-				SmartUserLevel level = UserLevelManager.INSTANCE.getUserLevel(p);
-				if (level != null) userLevels.add(level);
-			}
+			for (String p : parts) userLevels.add(p);
 		}
 	}
 	
@@ -272,24 +267,16 @@ public class Employee {
 		}
 		
 	}
+	
 	/**
 	 * 
 	 * @return set of user levels associated with this employee
 	 */
 	@Transient
-	public Collection<SmartUserLevel> getSmartUserLevels(){
+	public Collection<String> getSmartUserLevels(){
 		return this.userLevels;
 	}
 	
-	@Transient
-	public boolean supportsUser(SmartUserLevel... l){
-		for (SmartUserLevel ll : getSmartUserLevels()){
-			for (SmartUserLevel c : l){
-				if (ll.equals(c)) return true;
-			}
-		}
-		return false;
-	}
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {

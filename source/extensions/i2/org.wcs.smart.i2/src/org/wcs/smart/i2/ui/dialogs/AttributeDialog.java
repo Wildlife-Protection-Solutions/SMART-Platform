@@ -57,7 +57,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.AttributeManager;
+import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -261,7 +261,7 @@ public class AttributeDialog extends TitleAreaDialog {
 							}
 						}
 					}
-					attributeSiblings = AttributeManager.INSTANCE.getAttributes(s, SmartDB.getCurrentConservationArea());
+					attributeSiblings = IntelHibernateManager.getAttributes(s, SmartDB.getCurrentConservationArea());
 					attributeSiblings.remove(attribute);
 				}finally{
 					s.close();

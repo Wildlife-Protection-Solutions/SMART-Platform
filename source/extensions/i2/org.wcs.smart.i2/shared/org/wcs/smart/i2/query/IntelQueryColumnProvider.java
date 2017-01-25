@@ -33,9 +33,9 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -73,8 +73,8 @@ public class IntelQueryColumnProvider {
 		}
 	}
 	
-	public static String generateName(IntelEntity entity){
-		return MessageFormat.format("{0} ({1})", entity.getIdAttributeAsText(), entity.getEntityType().getName() );
+	public static String generateName(IntelEntity entity, Locale l){
+		return MessageFormat.format("{0} ({1})", entity.getIdAttributeAsText(l), entity.getEntityType().getName() );
 	}
 	
 	public static String generateName(Attribute attribute, Category category){
@@ -100,6 +100,7 @@ public class IntelQueryColumnProvider {
 		for (FixedQueryColumn.Column c : FixedQueryColumn.Column.values()){
 			columns.add(new FixedQueryColumn(c, l));
 		}
+		ConservationArea ca = query.getConservationArea();
 		
 		//Columns for various filter items in queries
 		try{
@@ -110,12 +111,12 @@ public class IntelQueryColumnProvider {
 					public void visitElement(IQueryFilter filter) {
 						IQueryColumn column = null;
 						if (filter instanceof EntityFilter){
-							column = generateColumn((EntityFilter)filter, session);
+							column = generateColumn((EntityFilter)filter, l, session);
 						}else if (filter instanceof EntityTypeFilter){
-							column = generateColumn((EntityTypeFilter)filter, session);
+							column = generateColumn((EntityTypeFilter)filter, ca, session);
 						}else if (filter instanceof IntelAttributeFilter){
 							IntelAttributeFilter afilter = (IntelAttributeFilter)filter;
-							column = new FilterQueryColumn(generateColumnName(afilter, session, l), afilter.getUniqueColumnIdentifier(), afilter);
+							column = new FilterQueryColumn(generateColumnName(afilter, ca, session, l), afilter.getUniqueColumnIdentifier(), afilter);
 						}
 						if (column != null && !columns.contains(column)){
 							columns.add(column);
@@ -132,7 +133,7 @@ public class IntelQueryColumnProvider {
 		//data model columns
 		//categories
 		SQLQuery sq = session.createSQLQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca");
-		sq.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
+		sq.setParameter("ca", ca.getUuid());
 		Integer maxCategory = (Integer) sq.uniqueResult();
 		
 		for (int i = 0; i < maxCategory; i ++){
@@ -141,7 +142,7 @@ public class IntelQueryColumnProvider {
 		
 		//attributes
 		Query q = session.createQuery("SELECT distinct id.attribute FROM CategoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive = 'true'");
-		q.setParameter("ca", SmartDB.getCurrentConservationArea());
+		q.setParameter("ca", ca);
 		List<Attribute> attributes = q.list();
 
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
@@ -152,8 +153,8 @@ public class IntelQueryColumnProvider {
 		return columns;
 	}
 	
-	private IQueryColumn generateColumn(EntityTypeFilter filter, Session session){
-		IntelEntityType entity = IntelHibernateManager.getEntityType(filter.getTypeKey(), session);
+	private IQueryColumn generateColumn(EntityTypeFilter filter, ConservationArea ca, Session session){
+		IntelEntityType entity = IntelHibernateManager.getEntityType(filter.getTypeKey(), ca, session);
 		String name = null;
 		if (entity != null){
 			name = entity.getName();
@@ -163,25 +164,25 @@ public class IntelQueryColumnProvider {
 		return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
 	}
 	
-	private IQueryColumn generateColumn(EntityFilter filter, Session session){
+	private IQueryColumn generateColumn(EntityFilter filter, Locale l, Session session){
 		IntelEntity entity = IntelHibernateManager.getEntity(filter.getEntityUuid(), session);
 		String name = null;
 		if (entity != null){
-			name = generateName(entity);
+			name = generateName(entity, l);
 		}else{
 			name= filter.getEntityUuid().toString();
 		}
 		return new FilterQueryColumn(name,  filter.getUniqueColumnIdentifier(), filter);
 	}
 	
-	private String generateColumnName(IntelAttributeFilter filter, Session session, Locale l){
+	private String generateColumnName(IntelAttributeFilter filter, ConservationArea ca, Session session, Locale l){
 		
 		StringBuilder sb = new StringBuilder();
 		
-		IntelAttribute attribute = IntelHibernateManager.getAttribute(filter.getAttributeKey(), session);
+		IntelAttribute attribute = IntelHibernateManager.getAttribute(filter.getAttributeKey(), ca, session);
 		IntelEntityType etype = null;
 		if (filter.getEntityTypeKey() != null){
-			etype = IntelHibernateManager.getEntityType(filter.getEntityTypeKey(), session);
+			etype = IntelHibernateManager.getEntityType(filter.getEntityTypeKey(), ca, session);
 		}
 		
 		if (attribute != null){

@@ -118,8 +118,7 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 	}
 	
 	private boolean isEditable(){
-		return (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN) ||
-				SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.MANAGER) );
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER);
 	}
 	
 	@Override

@@ -37,8 +37,8 @@ import org.hibernate.Criteria;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.util.UuidUtils;
 
@@ -67,7 +67,7 @@ public class RecordDatasetResultSet implements IResultSet {
 	 *            the metadata
 	 */
 	public RecordDatasetResultSet( RecordDatasetResultSetMetadata metadata,
-			IntelBirtConnection connection, 
+			AbstractIntelBirtConnection connection, 
 			HashMap<Integer, Object> parameters,
 			RecordParameterMetadata pmetadata) {
 		

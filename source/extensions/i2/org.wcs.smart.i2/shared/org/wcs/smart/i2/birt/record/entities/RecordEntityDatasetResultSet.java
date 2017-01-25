@@ -38,8 +38,8 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.util.UuidUtils;
@@ -59,7 +59,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	
 	private ScrollableResults results;
 	private RecordEntityDatasetResultSetMetadata metadata;
-	private IntelBirtConnection connection;
+	private AbstractIntelBirtConnection connection;
 	
 	/**
 	 * Creates a new summary results set
@@ -70,7 +70,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	 *            the metadata
 	 */
 	public RecordEntityDatasetResultSet( RecordEntityDatasetResultSetMetadata metadata,
-			IntelBirtConnection connection, 
+			AbstractIntelBirtConnection connection, 
 			HashMap<Integer, Object> parameters,
 			RecordParameterMetadata pmetadata) {
 		this.connection = connection;
@@ -170,7 +170,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelEntityRecord i = (IntelEntityRecord) ((Object[])currentItem)[0];
-		return RecordEntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		return RecordEntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
 	}
 
 	/**

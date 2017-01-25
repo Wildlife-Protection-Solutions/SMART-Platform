@@ -70,9 +70,11 @@ import org.eclipse.datatools.connectivity.oda.design.ParameterDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetResultSetMetadata;
@@ -157,7 +159,7 @@ public enum EntityReportGenerator {
 			dsDesign.setQueryText(entityType.getKeyId());
 			dsDesign.setOdaExtensionDataSetId(d);
 			
-			IntelBirtConnection connection = new IntelBirtConnection();
+			AbstractIntelBirtConnection connection  = SmartContext.INSTANCE.getClass(IConnectionFactory.class).createConnection();
 			connection.open(null);
 			try{
 				IQuery query = connection.newQuery(d);

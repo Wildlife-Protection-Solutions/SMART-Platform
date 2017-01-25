@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.report.birt.map.LayerDefinition;
 import org.wcs.smart.report.birt.map.internal.Messages;
 
 /**
@@ -239,7 +240,7 @@ public class DatasetComobInputDialog extends Dialog {
 			@Override
 			public String getText(Object element){
 				if (element instanceof LayerDefinition){
-					return ((LayerDefinition)element).handle.getDisplayName() + " [" + ((LayerDefinition) element).info.getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					return ((LayerDefinition)element).getHandle().getDisplayName() + " [" + ((LayerDefinition) element).getInfo().getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return super.getText(element);
 			}

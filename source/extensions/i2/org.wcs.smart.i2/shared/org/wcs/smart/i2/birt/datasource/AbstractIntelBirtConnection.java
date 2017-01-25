@@ -40,8 +40,6 @@ import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
@@ -61,7 +59,7 @@ import com.ibm.icu.util.ULocale;
  * @author Emily
  *
  */
-public class IntelBirtConnection implements IConnection {
+public abstract class AbstractIntelBirtConnection implements IConnection {
 	
 	/**
 	 * App context locale variable
@@ -76,9 +74,7 @@ public class IntelBirtConnection implements IConnection {
 	protected boolean m_isOpen = false;
 	protected Session localSession;
 	protected Map<Object,Object> appContext;
-	
-	private boolean cleanup;
-	
+		
 	private final static IProjectionProvider defaultProjectionProvider = new IProjectionProvider() {
 		private Projection p; 
 		@Override
@@ -108,28 +104,11 @@ public class IntelBirtConnection implements IConnection {
 	}
 
 	
-	public void openSession(){
-		cleanup = false;
-		if (appContext != null){
-			localSession = (Session) appContext.get(BirtConstants.SESSION_PARAM);
-		}
-		if (localSession == null){
-			cleanup = true;
-			localSession = HibernateManager.openSession();
-			localSession.beginTransaction();
-		}
-	}
+	public abstract void openSession();
 	
-	public void closeSession(){
-		if (cleanup){
-			localSession.getTransaction().rollback();
-			localSession.close();
-		}
-	}
+	public abstract void closeSession();
 
-	public Collection<ConservationArea> getConservationAreas() {
-		return SmartDB.getConservationAreaConfiguration().getConservationAreas();
-	}
+	public abstract Collection<ConservationArea> getConservationAreas();
 
 	
 	@SuppressWarnings("unchecked")
@@ -137,7 +116,7 @@ public class IntelBirtConnection implements IConnection {
 	public void setAppContext(Object context) throws OdaException {
 		if (context instanceof Map){
 			this.appContext = (Map<Object,Object>)context;
-			this.appContext.put(IntelBirtConnection.class.getCanonicalName(), this);
+			this.appContext.put(AbstractIntelBirtConnection.class.getCanonicalName(), this);
 		}
 	}
 	

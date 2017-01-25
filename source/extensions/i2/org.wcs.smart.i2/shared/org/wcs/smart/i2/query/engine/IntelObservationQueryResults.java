@@ -34,10 +34,11 @@ import org.hibernate.SQLQuery;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.FilterQueryColumn;
@@ -215,7 +216,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	public List<? extends IResultItem> getData(int offset, int pageSize) {
 		final List<IResultItem> items = new ArrayList<>();
 
-		Session session = HibernateManager.openSession();
+		Session session = SmartContext.INSTANCE.getClass(IConnectionFactory.class).openSession();
 		try{
 			String sortSql = configureSort(session);
 			String sql = "SELECT * FROM " + resultsTable + sortSql;

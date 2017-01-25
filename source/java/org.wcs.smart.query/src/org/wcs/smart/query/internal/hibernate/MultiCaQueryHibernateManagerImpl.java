@@ -53,7 +53,7 @@ public class MultiCaQueryHibernateManagerImpl extends
 	@Override
 	public boolean canModifyCaQueries(){
 		for (Employee e : SmartDB.getConservationAreaConfiguration().getEmployees()){
-			if (!(e.supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER))){
+			if (!(UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER))){
 				return false;
 			}
 		}

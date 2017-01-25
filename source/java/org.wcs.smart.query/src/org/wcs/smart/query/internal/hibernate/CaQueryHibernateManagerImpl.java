@@ -49,7 +49,7 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 	 */
 	@Override
 	public boolean canModifyCaQueries(){
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER);
 	}
 
 	/**

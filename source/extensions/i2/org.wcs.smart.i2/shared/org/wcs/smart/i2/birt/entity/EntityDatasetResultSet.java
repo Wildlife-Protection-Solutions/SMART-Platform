@@ -40,8 +40,8 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -64,7 +64,7 @@ public class EntityDatasetResultSet implements IResultSet {
 	private Object lastRowItem;
 	
 	private EntityDatasetResultSetMetadata metadata;
-	private IntelBirtConnection connection;
+	private AbstractIntelBirtConnection connection;
 	private IntelEntityType type;
 	private ScrollableResults results;
 	
@@ -78,7 +78,7 @@ public class EntityDatasetResultSet implements IResultSet {
 	 */
 	public EntityDatasetResultSet(IntelEntityType type,
 			EntityDatasetResultSetMetadata metadata, 
-			IntelBirtConnection connection, HashMap<Integer, Object> parameters,
+			AbstractIntelBirtConnection connection, HashMap<Integer, Object> parameters,
 			EntityParameterMetadata pmetadata) {
 		
 		this.metadata = metadata;
@@ -187,7 +187,7 @@ public class EntityDatasetResultSet implements IResultSet {
 		}
 		try {
 			if (colIndex <= 8){
-				return EntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+				return EntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
 			}
 			if (colIndex - 9 < type.getAttributes().size()){
 				IntelAttribute attribute = type.getAttributes().get(colIndex-9).getAttribute();
@@ -198,7 +198,7 @@ public class EntityDatasetResultSet implements IResultSet {
 				}
 				return v.getAttributeValue();
 			}else{
-				return EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getValue(i);
+				return EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getValue(i, connection.getCurrentLocale());
 			}
 		} catch (IOException e) {
 			Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.SEVERE, e.getMessage(), e); //$NON-NLS-1$

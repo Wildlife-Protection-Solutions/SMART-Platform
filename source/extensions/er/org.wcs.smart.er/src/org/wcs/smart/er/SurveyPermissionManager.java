@@ -50,7 +50,7 @@ public class SurveyPermissionManager {
 	 * @return error string if the current user cannot delete a survey design
 	 */
 	public String canDeleteSurveyDesign(){
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
 			return null;
 		}
 		return Messages.SurveyPermissionManager_InsufficientPrivileges;
@@ -66,10 +66,10 @@ public class SurveyPermissionManager {
 	 * @return
 	 */
 	public String canEditSurvey(Survey survey, ObservationOptions op){
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
 			return null;
 		}
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
 			if (op.getEditTime() == null || op.getEditTime() < 0){
 				return null;
 			}else if (survey.getStartDate() == null){
@@ -98,9 +98,9 @@ public class SurveyPermissionManager {
 	 */
 	public String canEditMission(Mission mission, ObservationOptions op){
 		
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)) return null;
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)) return null;
 		
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
 			if (op.getEditTime() == null || op.getEditTime() < 0){
 				return null;
 			}else if (mission.getStartDate() == null){
@@ -128,7 +128,7 @@ public class SurveyPermissionManager {
 	 * @return
 	 */
 	public String canEditSurveyDesign(){
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER)) return null;
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)) return null;
 		return Messages.SurveyPermissionManager_InsufficientPrivileges;
 	}
 	
@@ -150,7 +150,7 @@ public class SurveyPermissionManager {
 	 * @return true if the current user can create/edit new surveys and mission
 	 */
 	public boolean canEditMissionSurvery(){
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, 
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER, 
 				UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)) return true;
 		return false;
 	}

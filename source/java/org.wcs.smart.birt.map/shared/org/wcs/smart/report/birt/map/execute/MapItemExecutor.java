@@ -47,7 +47,6 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
@@ -153,7 +152,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 				creators = ExtensionManager.INSTANCE.getRasterCreators();
 			}catch (Exception ex){
 				creators = new ArrayList<IRasterCreator>();
-				SmartPlugIn.log(ex.getMessage(), ex);
+				Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 			}
 		}
 		return creators;
@@ -194,7 +193,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 									break;
 								}
 							}catch (Exception ex){
-								SmartPlugIn.log(ex.getMessage(), ex);
+								Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 							}
 						}
 						

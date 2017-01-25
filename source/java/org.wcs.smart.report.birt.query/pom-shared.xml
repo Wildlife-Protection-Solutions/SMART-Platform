@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart</artifactId>
-		<version>4.1.0-SNAPSHOT</version>
+		<version>5.0.0-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 	
@@ -33,6 +33,11 @@
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.report</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.birt.map</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>

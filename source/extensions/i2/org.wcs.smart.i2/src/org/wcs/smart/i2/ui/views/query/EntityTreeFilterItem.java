@@ -25,6 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
@@ -83,7 +84,7 @@ public class EntityTreeFilterItem extends BasicTreeFilterItem {
 		super(entity.getIdAttributeAsText());
 		this.entity = entity.getUuid();
 		typeKey = entity.getEntityType().getKeyId();
-		dropLabel = IntelQueryColumnProvider.generateName(entity);
+		dropLabel = IntelQueryColumnProvider.generateName(entity, Locale.getDefault());
 	}
 	
 	@Override

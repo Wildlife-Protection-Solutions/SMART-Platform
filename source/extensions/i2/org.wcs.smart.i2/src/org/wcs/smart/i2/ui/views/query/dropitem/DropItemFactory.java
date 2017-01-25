@@ -133,13 +133,13 @@ public class DropItemFactory {
 			return Collections.singletonList(item);	
 			
 		}
-		return Collections.singletonList(new TextDropItem(IntelQueryColumnProvider.generateName(entity), "entity:"+UuidUtils.uuidToString(entity.getUuid())));
+		return Collections.singletonList(new TextDropItem(IntelQueryColumnProvider.generateName(entity, Locale.getDefault()), "entity:"+UuidUtils.uuidToString(entity.getUuid())));
 	}
 	
 	public List<DropItem> generateDropItem(EntityTypeFilter filter){
 		IntelEntityType type = null; 
 		if (filter.getTypeKey() != null){
-			type = IntelHibernateManager.getEntityType(filter.getTypeKey(), session);
+			type = IntelHibernateManager.getEntityType(filter.getTypeKey(),SmartDB.getCurrentConservationArea(), session);
 			if (type == null){
 				ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence entity type with key: {0}", filter.getTypeKey()));
 				return Collections.singletonList(item);	
@@ -182,7 +182,7 @@ public class DropItemFactory {
 			queryKeyPart += filter.getEntityTypeKey();
 		}
 		
-		IntelAttribute ia = IntelHibernateManager.getAttribute(filter.getAttributeKey(), session);
+		IntelAttribute ia = IntelHibernateManager.getAttribute(filter.getAttributeKey(), SmartDB.getCurrentConservationArea(), session);
 		if (ia == null){
 			ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence attribute with key: {0}", filter.getAttributeKey()));
 			return Collections.singletonList(item);
@@ -190,7 +190,7 @@ public class DropItemFactory {
 		
 		IntelEntityType type = null; 
 		if (filter.getEntityTypeKey() != null){
-			type = IntelHibernateManager.getEntityType(filter.getEntityTypeKey(), session);
+			type = IntelHibernateManager.getEntityType(filter.getEntityTypeKey(), SmartDB.getCurrentConservationArea(), session);
 			if (type == null){
 				ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence entity type with key: {0}", filter.getEntityTypeKey()));
 				return Collections.singletonList(item);	

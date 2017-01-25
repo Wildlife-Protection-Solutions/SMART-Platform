@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelLocation;
 
 import com.vividsolutions.jts.io.ParseException;
@@ -129,7 +129,7 @@ public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaDat
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return IntelBirtConnection.getNativeDataTypeName( nativeTypeCode, RecordLocationDataset.DATASET_TYPE );
+	     return AbstractIntelBirtConnection.getNativeDataTypeName( nativeTypeCode, RecordLocationDataset.DATASET_TYPE );
 	}
 
 	/**

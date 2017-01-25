@@ -206,7 +206,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 			RootReportFolder folder = null;
 			if (ReportManager.canModifyCaReports()){
 				folder = RootReportFolder.CA_ROOT_FOLDER;
-			}else if (e.supportsUser(UserLevelManager.ANALYST)){
+			}else if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ANALYST)){
 				folder = RootReportFolder.USER_ROOT_FOLDER;
 			}else{
 				//error

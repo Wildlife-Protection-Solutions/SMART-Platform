@@ -23,6 +23,7 @@ package org.wcs.smart.i2;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -169,7 +170,7 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence entity {0} to active working set. {1}", entity.getIdAttributeAsText(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence entity {0} to active working set. {1}", entity.getIdAttributeAsText(Locale.getDefault()), ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();

@@ -23,7 +23,7 @@ package org.wcs.smart.i2.birt.entity.records;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 
 /**
@@ -117,7 +117,7 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return IntelBirtConnection.getNativeDataTypeName( nativeTypeCode, EntityRecordDataset.DATASET_TYPE );
+	     return AbstractIntelBirtConnection.getNativeDataTypeName( nativeTypeCode, EntityRecordDataset.DATASET_TYPE );
 	}
 
 	/**

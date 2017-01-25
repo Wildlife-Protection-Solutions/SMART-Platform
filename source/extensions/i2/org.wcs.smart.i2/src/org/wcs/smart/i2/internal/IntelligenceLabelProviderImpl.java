@@ -34,6 +34,7 @@ import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvQueryExporter;
 import org.wcs.smart.i2.query.export.ShpQueryExporter;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Desktop label provider for intelligence module.
@@ -103,6 +104,8 @@ public class IntelligenceLabelProviderImpl implements
 		if (item instanceof CsvQueryExporter) return "Comma Separated Values";
 		if (item instanceof ShpQueryExporter) return "Shapefile";
 		if (item == IntelQueryColumnProvider.ANY_ITEM) return "<Any>";
+		if (item == Boolean.TRUE) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
+		if (item == Boolean.FALSE) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 		return null;
 		
 	}

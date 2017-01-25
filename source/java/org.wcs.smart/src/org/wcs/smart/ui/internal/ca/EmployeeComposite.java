@@ -311,7 +311,7 @@ public class EmployeeComposite extends Composite {
 				});
 				cmbUserLevel.setContentProvider(ArrayContentProvider.getInstance());
 				List<SmartUserLevel> levels = new ArrayList<SmartUserLevel>();
-				levels.addAll(UserLevelManager.INSTANCE.getUserLevels());
+				levels.addAll(UserLevelManager.INSTANCE.getUserLevels().values());
 				levels.sort((a,b) -> Collator.getInstance().compare(a.getGuiName(Locale.getDefault()), b.getGuiName(Locale.getDefault())));
 				cmbUserLevel.setInput(levels);
 				cmbUserLevel.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -761,7 +761,7 @@ public class EmployeeComposite extends Composite {
 				}
 			}else{
 				e.setSmartUserId(null);
-				e.setSmartUserLevel(null);
+				e.setSmartUserLevelKeys(null);
 				e.setSmartPassword(null);
 			}
 		}

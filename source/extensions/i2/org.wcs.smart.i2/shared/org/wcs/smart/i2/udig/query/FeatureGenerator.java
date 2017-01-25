@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.geotools.data.DataUtilities;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
@@ -51,6 +52,15 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class FeatureGenerator {
 
+	/**
+	 * Point location layer
+	 */
+	public static final Name POINT_TYPE = new NameImpl("org.wcs.smart.i2.query.point", "Point Locations");
+	/**
+	 * Polygon location layer
+	 */
+	public static final Name POLYGON_TYPE = new NameImpl("org.wcs.smart.i2.query.polygon", "Polygon Locations");
+	
 	/**
 	 * Converts a query result item to a feature
 	 * 

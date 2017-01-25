@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.AttributeManager;
+import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 
 /**
@@ -52,7 +52,7 @@ public abstract class LoadAttributesJob extends Job {
 		attributes = null;
 		Session session = HibernateManager.openSession();
 		try{
-			attributes  = AttributeManager.INSTANCE.getAttributes(session, SmartDB.getCurrentConservationArea());
+			attributes  = IntelHibernateManager.getAttributes(session, SmartDB.getCurrentConservationArea());
 			for (IntelAttribute ia : attributes){
 				ia.getName();
 			}

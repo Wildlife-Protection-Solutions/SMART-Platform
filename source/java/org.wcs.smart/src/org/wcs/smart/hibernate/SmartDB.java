@@ -225,13 +225,13 @@ public class SmartDB {
 	 */
 	public static DbUser findDbUser(Employee user){
 
-		if (user.supportsUser(UserLevelManager.ADMIN)){
+		if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ADMIN)){
 			return DbUser.ADMIN;
-		}else if (user.supportsUser(UserLevelManager.MANAGER)){
+		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.MANAGER)){
 			return DbUser.MANAGER;
-		}else if (user.supportsUser(UserLevelManager.ANALYST)){
+		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ANALYST)){
 			return DbUser.ANALYST;
-		}else if (user.supportsUser(UserLevelManager.DATA_ENTRY)){
+		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.DATA_ENTRY)){
 			return DbUser.DATAENTRY;
 		}
 		return DbUser.ADMIN;

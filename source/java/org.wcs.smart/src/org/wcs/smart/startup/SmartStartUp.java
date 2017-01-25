@@ -254,7 +254,7 @@ public class SmartStartUp {
 							ccaaUser.setStartEmploymentDate(new Date());
 							ccaaUser.setId(ccaaUser.getSmartUserId());
 							ccaaUser.setConservationArea(ca);
-							ccaaUser.setSmartUserLevel(UserLevelManager.INSTANCE.getUserLevels()); //give them all seeing access
+							ccaaUser.setSmartUserLevel(UserLevelManager.INSTANCE.getUserLevels().values()); //give them all seeing access
 							session.save(ccaaUser);
 							session.flush();
 						}

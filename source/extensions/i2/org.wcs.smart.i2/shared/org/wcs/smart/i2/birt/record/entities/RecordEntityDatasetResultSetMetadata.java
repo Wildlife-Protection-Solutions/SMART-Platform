@@ -22,12 +22,13 @@
 package org.wcs.smart.i2.birt.record.entities;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetResultSetMetadata;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.util.UuidUtils;
@@ -61,14 +62,14 @@ public class RecordEntityDatasetResultSetMetadata implements IResultSetMetaData 
 			return this.id;
 		}
 		
-		public Object getValue(IntelEntityRecord entityrecord) {
+		public Object getValue(IntelEntityRecord entityrecord, Locale l) {
 			switch(this){
 			case UUID:
 				return UuidUtils.uuidToString(entityrecord.getRecord().getUuid());
 			case ENTITY_UUID:
 				return UuidUtils.uuidToString(entityrecord.getEntity().getUuid());
 			case ENTITY_ID:
-				return entityrecord.getEntity().getIdAttributeAsText();
+				return entityrecord.getEntity().getIdAttributeAsText(l);
 			case ENTITY_IMAGE:
 				if (entityrecord.getEntity().getPrimaryAttachment() == null) return null;
 				try {
@@ -135,7 +136,7 @@ public class RecordEntityDatasetResultSetMetadata implements IResultSetMetaData 
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return IntelBirtConnection.getNativeDataTypeName( nativeTypeCode, RecordEntityDataset.DATASET_TYPE );
+	     return AbstractIntelBirtConnection.getNativeDataTypeName( nativeTypeCode, RecordEntityDataset.DATASET_TYPE );
 	}
 
 	/**

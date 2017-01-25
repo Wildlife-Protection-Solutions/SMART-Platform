@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.birt.report.engine.api.IRenderOption;
@@ -88,7 +89,7 @@ public class EntityExportReportJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask("Export entities", entities.size());
 		for (IntelEntity e : entities){
-			monitor.subTask(e.getIdAttributeAsText());
+			monitor.subTask(e.getIdAttributeAsText(Locale.getDefault()));
 			try{
 				final Path out = runEntityType(e, dFilter);
 				if (outputDir == null){

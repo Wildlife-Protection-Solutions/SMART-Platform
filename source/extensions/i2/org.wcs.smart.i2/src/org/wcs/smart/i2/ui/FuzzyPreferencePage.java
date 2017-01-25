@@ -55,6 +55,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.search.SearchDataGenerator;
 import org.wcs.smart.i2.search.SearchManager;
+import org.wcs.smart.user.UserLevelManager;
 
 public class FuzzyPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
@@ -80,7 +81,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 
 	@Override
 	protected Control createContents(Composite parent) {
-		if (!SmartDB.getCurrentEmployee().supportsUser(IntelAnalystUserLevel.INSTANCE)){
+		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE)){
 			Label l = new Label(parent, SWT.NONE);
 			l.setText(MessageFormat.format("Only {0} users can access this page.", IntelAnalystUserLevel.INSTANCE.getGuiName(Locale.getDefault())));
 			return l;

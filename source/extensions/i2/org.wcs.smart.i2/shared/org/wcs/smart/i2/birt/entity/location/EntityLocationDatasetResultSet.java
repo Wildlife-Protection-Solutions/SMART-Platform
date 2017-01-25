@@ -36,8 +36,8 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
@@ -69,7 +69,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 */
 	public EntityLocationDatasetResultSet(IntelEntityType type,
 			EntityLocationDatasetResultSetMetadata metadata, 
-			IntelBirtConnection connection, HashMap<Integer, Object> parameters,
+			AbstractIntelBirtConnection connection, HashMap<Integer, Object> parameters,
 			EntityLocationParameterMetadata pmetadata) {
 		
 		this.metadata = metadata;

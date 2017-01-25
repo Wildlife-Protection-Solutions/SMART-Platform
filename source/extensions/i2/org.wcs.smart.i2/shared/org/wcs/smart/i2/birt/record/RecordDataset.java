@@ -34,7 +34,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 
 /**
  * Record details dataset
@@ -50,11 +50,11 @@ public class RecordDataset implements IQuery {
 	private RecordParameterMetadata pMetadata = null;
 	private int m_maxRows;
 	
-	private IntelBirtConnection connection;
+	private AbstractIntelBirtConnection connection;
 	
 	private HashMap<Integer, Object> parameters;
 	
-	public RecordDataset(IntelBirtConnection connection){
+	public RecordDataset(AbstractIntelBirtConnection connection){
 		this.connection = connection;
 		parameters = new HashMap<Integer,Object>();
 		

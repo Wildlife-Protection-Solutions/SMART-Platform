@@ -181,11 +181,14 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private boolean exportQuery(IProgressMonitor monitor, Path output,
 			IQueryExporter exporter, HashMap<IQueryExporter.ExportOption, Object> options){
 
+		Session s = HibernateManager.openSession();
 		try{
-			exporter.exportQuery(queryResults, output, options);
+			exporter.exportQuery(s, queryResults, output, options);
 		}catch (Exception ex){
 			displayError(ex);
 			return false;
+		}finally{
+			s.close();
 		}
 		return true;
 	}

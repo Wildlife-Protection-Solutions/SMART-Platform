@@ -89,13 +89,13 @@ public class ReportManager {
 	public static boolean canModifyCaReports(){
 		if (SmartDB.getCurrentConservationArea().getIsCcaa()){
 			for (Employee e : SmartDB.getConservationAreaConfiguration().getEmployees()){
-				if (!(e.supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER))){
+				if (!(UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER))){
 					return false;
 				}
 			}
 			return true;
 		}else{
-			return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.MANAGER, UserLevelManager.ADMIN);
+			return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.MANAGER, UserLevelManager.ADMIN);
 		}
 	}
 	/**

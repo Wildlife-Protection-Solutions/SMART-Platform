@@ -365,7 +365,7 @@ public class HibernateManager extends SmartHibernateManager{
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();
 			for (Employee e : es){
 				if (!e.getConservationArea().getIsCcaa()){
-					if (e.supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.ANALYST)){
+					if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.ANALYST)){
 						if (validatePassword(password, e)){
 							areas.add(e.getConservationArea());
 						}
@@ -661,14 +661,14 @@ public class HibernateManager extends SmartHibernateManager{
 		List<Employee> otherEmployees = crit.list();
 		for (Employee other : otherEmployees){
 			//some other employee in this ca is admin; we don't have anything to worry about
-			if (other.supportsUser(UserLevelManager.ADMIN)) return null;
+			if (UserLevelManager.INSTANCE.supportsUser(other, UserLevelManager.ADMIN)) return null;
 		}
 		
 		//no other admin users so I must be an active smart admin user
 		if (e.getEndEmploymentDate() != null){
 			return Messages.HibernateManager_Error_CannotDeleteLastAdminUser;
 		}
-		if (!e.supportsUser(UserLevelManager.ADMIN)){
+		if (!UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN)){
 			return Messages.HibernateManager_CannotChangeLastAdminUser;
 		}
 			

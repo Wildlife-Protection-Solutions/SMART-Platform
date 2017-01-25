@@ -72,6 +72,6 @@ public class SitesPreferencePage extends RepositoryManipulationPage {
 	}
 	
 	private boolean isEditable(){
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER);
 	}
 }

@@ -60,7 +60,7 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 				.add(Restrictions.isNotNull("smartUserLevelKeys")) //$NON-NLS-1$
 				.list();
 		for (Employee other : others){
-			if (other.supportsUser(UserLevelManager.ADMIN)) return null;
+			if (UserLevelManager.INSTANCE.supportsUser(other, UserLevelManager.ADMIN)) return null;
 		}
 		
 		return Messages.EmployeeDeleteAdvisor_Error_NoMoreAdmin;

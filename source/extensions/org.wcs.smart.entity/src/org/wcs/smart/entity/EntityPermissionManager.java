@@ -42,7 +42,7 @@ public class EntityPermissionManager {
 		if (SmartDB.isMultipleAnalysis()){
 			return false;
 		}
-		if (SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.DATA_ENTRY, UserLevelManager.MANAGER)){
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.DATA_ENTRY, UserLevelManager.MANAGER)){
 			return true;
 		}
 		return false;
@@ -56,7 +56,7 @@ public class EntityPermissionManager {
 		if (SmartDB.isMultipleAnalysis()){
 			return false;
 		}
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN);
 	}
 	
 	/**
@@ -67,6 +67,6 @@ public class EntityPermissionManager {
 		if (SmartDB.isMultipleAnalysis()){
 			return true;
 		}
-		return SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.ANALYST, UserLevelManager.MANAGER);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.ANALYST, UserLevelManager.MANAGER);
 	}
 }

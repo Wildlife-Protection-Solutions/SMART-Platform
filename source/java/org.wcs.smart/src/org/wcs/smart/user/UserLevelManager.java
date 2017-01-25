@@ -21,15 +21,12 @@
  */
 package org.wcs.smart.user;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SmartUserLevel;
 
 /**
@@ -50,39 +47,36 @@ public enum UserLevelManager {
 	public final static SmartUserLevel ANALYST = new SmartUserLevel("ANALYST"); //$NON-NLS-1$
 	public final static SmartUserLevel MANAGER = new SmartUserLevel("MANAGER"); //$NON-NLS-1$
 	
-	private volatile Set<SmartUserLevel> levels = null;
+	private volatile HashMap<String, SmartUserLevel> keyToLevel = null;
 	
 	public SmartUserLevel getUserLevel(String key){
-		for (SmartUserLevel l : getUserLevels()){
-			if (l.getKey().equals(key)) return l;
-		}
-		return null;
+		return getUserLevels().get(key);
 	}
 	
-	public Collection<SmartUserLevel> getUserLevels(){
-		if (levels == null){
+	public HashMap<String, SmartUserLevel> getUserLevels(){
+		if (keyToLevel == null){
 			synchronized (UserLevelManager.class) {
-				if (levels == null){
-					levels = new HashSet<SmartUserLevel>();
-					levels.add(ADMIN);
-					levels.add(DATA_ENTRY);
-					levels.add(ANALYST);
-					levels.add(MANAGER);		
-					levels.addAll(readExtensionUserLevels());		
+				if (keyToLevel == null){
+					keyToLevel = new HashMap<>();
+					keyToLevel.put(ADMIN.getKey(), ADMIN);
+					keyToLevel.put(DATA_ENTRY.getKey(), DATA_ENTRY);
+					keyToLevel.put(ANALYST.getKey(), ANALYST);
+					keyToLevel.put(MANAGER.getKey(), MANAGER);		
+					keyToLevel.putAll(readExtensionUserLevels());		
 				}
 			}
 		}
-		return levels;
+		return keyToLevel;
 	}
 	
-	private List<SmartUserLevel> readExtensionUserLevels(){
+	private HashMap<String, SmartUserLevel> readExtensionUserLevels(){
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
-		List<SmartUserLevel> levels = new ArrayList<>();
+		HashMap<String, SmartUserLevel> levels = new HashMap<>();
 		for (IConfigurationElement e : config) {
 			 if (e.getName().equals("SMARTUserLevel")){ //$NON-NLS-1$
 				 try{
 					 SmartUserLevel level = (SmartUserLevel) e.createExecutableExtension("class"); //$NON-NLS-1$
-					 levels.add(level);
+					 levels.put(level.getKey(), level);
 				 }catch (Exception ex){
 					 SmartPlugIn.log(ex.getMessage(), ex);;
 				 }
@@ -90,4 +84,14 @@ public enum UserLevelManager {
 		}
 		return levels;
 	}
+	
+	public boolean supportsUser(Employee e, SmartUserLevel... l){
+		for (String s : e.getSmartUserLevels()){
+			SmartUserLevel level = getUserLevel(s);
+			for (SmartUserLevel c : l){
+				if (level.equals(c)) return true;
+			}
+		}
+		return false;
+	} 
 }

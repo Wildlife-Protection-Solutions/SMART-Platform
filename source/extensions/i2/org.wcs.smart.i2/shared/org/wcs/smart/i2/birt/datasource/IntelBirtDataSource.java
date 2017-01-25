@@ -25,6 +25,7 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDriver;
 import org.eclipse.datatools.connectivity.oda.LogConfiguration;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
 
 /**
  * BIRT Datasource for intelligence data sources.
@@ -41,7 +42,7 @@ public class IntelBirtDataSource implements IDriver {
 	public IConnection getConnection(String dataSourceType) throws OdaException {
 		// assumes that this driver supports only one type of data source,
 		// ignores the specified dataSourceType
-		return new IntelBirtConnection();
+		return SmartContext.INSTANCE.getClass(IConnectionFactory.class).createConnection();
 	}
 
 	/**

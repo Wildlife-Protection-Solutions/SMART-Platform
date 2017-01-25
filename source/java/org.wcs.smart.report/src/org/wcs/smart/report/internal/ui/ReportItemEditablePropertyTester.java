@@ -79,7 +79,7 @@ public class ReportItemEditablePropertyTester extends PropertyTester {
 			return false;
 		}
 		
-		if (!SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN,UserLevelManager.ANALYST, UserLevelManager.MANAGER)){
+		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN,UserLevelManager.ANALYST, UserLevelManager.MANAGER)){
 			//data entry can't do anything with reports
 			return false;
 		}

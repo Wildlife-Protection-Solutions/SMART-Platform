@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<parent>
+		<groupId>org.wcs.smart</groupId>
+		<artifactId>smart</artifactId>
+		<version>5.0.0-SNAPSHOT</version>
+		<relativePath>../../../java/pom-shared.xml</relativePath>
+	</parent>
+	
+	<modelVersion>4.0.0</modelVersion>
+	
+	<artifactId>org.wcs.smart.i2</artifactId>
+	<name>Survey Module</name>
+	<packaging>jar</packaging>
+	
+	<dependencies>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.core</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.birt</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.birt.map</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.catalog.shp</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+          		<groupId>net.sf.opencsv</groupId>
+          		<artifactId>opencsv</artifactId>
+        		<version>2.3</version>
+        	</dependency>
+        	<dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-shapefile</artifactId>
+        		<version>${geotools.version}</version>
+        	</dependency> 
+	</dependencies>
+	
+</project>

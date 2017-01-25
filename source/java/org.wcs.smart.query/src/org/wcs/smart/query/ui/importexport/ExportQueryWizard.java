@@ -403,13 +403,12 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			QueryFolder root = new QueryFolder();
 			root.setRootFolder(true);
 			Employee e = ImportQueryUtil.findEmployee(ca);
-			if (e.supportsUser(UserLevelManager.ADMIN) || 
-					e.supportsUser(UserLevelManager.MANAGER)){
+			if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
 				root.setUuid(IQueryHibernateManager.CA_QUERY_KEY);	
-			}else if (e.supportsUser(UserLevelManager.ANALYST) ){
+			}else if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ANALYST) ){
 				//store in my queries folder
 				root.setUuid(IQueryHibernateManager.USER_QUERY_KEY);
-			}else if (e.supportsUser(UserLevelManager.DATA_ENTRY) ){
+			}else if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.DATA_ENTRY) ){
 				//data entry queries do not have access to import queries
 				errors.add(MessageFormat.format(Messages.ExportQueryWizard_UserError, ca.getNameLabel(), SmartLabelProvider.getFullLabel(e)));
 			}

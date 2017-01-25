@@ -22,12 +22,13 @@
 package org.wcs.smart.i2.birt.entity.relation;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.i2.AttributeManager;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.IntelHibernateManager;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 
@@ -67,7 +68,7 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 			return this.id;
 		}
 		
-		public Object getValue(UUID entity, IntelEntityRelationship relation) {
+		public Object getValue(UUID entity, IntelEntityRelationship relation, Locale l) {
 			switch(this){
 			case ENTITY_UUID:
 				if (entity == null){
@@ -89,11 +90,11 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 			case RELATIONSHIP_TYPE_KEY:
 				return relation.getRelationshipType().getKeyId();
 			case TARGET_RELATION_ID:
-				return relation.getTargetEntity().getIdAttributeAsText();
+				return relation.getTargetEntity().getIdAttributeAsText(l);
 			case TARGET_RELATION_UUID:
 				return relation.getTargetEntity().getUuid();
 			case SOURCE_RELATION_ID:
-				return relation.getSourceEntity().getIdAttributeAsText();
+				return relation.getSourceEntity().getIdAttributeAsText(l);
 			case SOURCE_RELATION_UUID:
 				return relation.getSourceEntity().getUuid();
 			
@@ -165,7 +166,7 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 		}
 		index = index - 1 - Column.values().length;
 		if (index >= 0){
-			return AttributeManager.INSTANCE.getAttributeSqlType(validAttributes.get(index).getType());
+			return IntelHibernateManager.getAttributeSqlType(validAttributes.get(index).getType());
 		}
 		return -1;
 	}
@@ -176,7 +177,7 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return IntelBirtConnection.getNativeDataTypeName( nativeTypeCode, EntityRelationDataset.DATASET_TYPE );
+	     return AbstractIntelBirtConnection.getNativeDataTypeName( nativeTypeCode, EntityRelationDataset.DATASET_TYPE );
 	}
 
 	/**

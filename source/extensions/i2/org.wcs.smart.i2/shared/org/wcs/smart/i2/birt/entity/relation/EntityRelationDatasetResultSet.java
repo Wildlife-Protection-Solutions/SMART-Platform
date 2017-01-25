@@ -38,9 +38,8 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata.Column;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -68,6 +67,7 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 	private UUID entityUuid;
 	
 	private List<IntelAttribute> validAttributes;
+	private AbstractIntelBirtConnection connection;
 	
 	/**
 	 * Creates a new summary results set
@@ -79,14 +79,16 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 	 */
 	public EntityRelationDatasetResultSet(IntelEntityType type,
 			 List<IntelAttribute> validAttributes,
-			EntityRelationDatasetResultSetMetadata metadata, 
-			IntelBirtConnection connection, HashMap<Integer, Object> parameters,
+			EntityRelationDatasetResultSetMetadata metadata,
+			AbstractIntelBirtConnection connection,
+			HashMap<Integer, Object> parameters,
 			EntityRelationParameterMetadata pmetadata) {
 		
 		this.metadata = metadata;
 		this.entityUuid = null;
 		this.validAttributes = validAttributes;
-
+		this.connection = connection;
+		
 		//add the conservation area filter here otherwise we will
 		//get data from other conservation areas if no entity is provided
 		String q1 = "SELECT count(*) FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
@@ -112,8 +114,8 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 			query1.setParameter(e.getKey(), e.getValue());
 			query2.setParameter(e.getKey(), e.getValue());
 		}
-		query1.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas());
-		query2.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas());
+		query1.setParameterList("ca", connection.getConservationAreas());
+		query2.setParameterList("ca", connection.getConservationAreas());
 		
 		m_maxRows = (Long)query1.uniqueResult();
 		results = query2.setReadOnly(true)
@@ -194,7 +196,7 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 		IntelEntityRelationship i = (IntelEntityRelationship) ((Object[])currentItem)[0];
 		
 		if (colIndex <= Column.values().length){
-			return EntityRelationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(entityUuid, i);
+			return EntityRelationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(entityUuid, i, connection.getCurrentLocale());
 		}
 		colIndex = colIndex - 1 - Column.values().length;
 		if (colIndex >= 0){

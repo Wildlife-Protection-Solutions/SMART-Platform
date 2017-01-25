@@ -38,8 +38,8 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.util.UuidUtils;
@@ -59,7 +59,7 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 	
 	private ScrollableResults results;
 	private RecordAttachmentDatasetResultSetMetadata metadata;
-	private IntelBirtConnection connection;
+	private AbstractIntelBirtConnection connection;
 	
 	/**
 	 * Creates a new summary results set
@@ -70,7 +70,7 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 	 *            the metadata
 	 */
 	public RecordAttachmentDatasetResultSet( RecordAttachmentDatasetResultSetMetadata metadata,
-			IntelBirtConnection connection, 
+			AbstractIntelBirtConnection connection, 
 			HashMap<Integer, Object> parameters,
 			RecordParameterMetadata pmetadata) {
 		this.connection = connection;

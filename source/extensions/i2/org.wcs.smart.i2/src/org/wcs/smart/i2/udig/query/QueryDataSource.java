@@ -28,7 +28,6 @@ import java.util.List;
 import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
-import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.Name;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 
@@ -40,11 +39,11 @@ import org.wcs.smart.i2.query.IPagedQueryResultSet;
  */
 public class QueryDataSource extends ContentDataStore{
 
-	/**
-	 * waypoint query data source
+	/*
+	 * Query have both point and polygon result layers
 	 */
-	public static final Name POINT_TYPE = new NameImpl("org.wcs.smart.i2.query.point", "Point Locations");
-	public static final Name POLYGON_TYPE = new NameImpl("org.wcs.smart.i2.query.polygon", "Polygon Locations");
+	public static final Name POINT_TYPE = FeatureGenerator.POINT_TYPE;
+	public static final Name POLYGON_TYPE = FeatureGenerator.POLYGON_TYPE;
 	
 	private IPagedQueryResultSet results;
 	

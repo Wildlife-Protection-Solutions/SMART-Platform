@@ -37,8 +37,8 @@ import org.hibernate.Criteria;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.util.UuidUtils;
@@ -69,7 +69,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 	 *            the metadata
 	 */
 	public RecordLocationDatasetResultSet( RecordLocationDatasetResultSetMetadata metadata,
-			IntelBirtConnection connection, 
+			AbstractIntelBirtConnection connection, 
 			HashMap<Integer, Object> parameters,
 			RecordParameterMetadata pmetadata) {
 //		this.connection = connection;

@@ -33,10 +33,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -65,14 +65,16 @@ public class WaypointFilterProcessor {
 	private IQueryFilter filter;
 	private Date[] dFilter;
 	private Session s;
+	private ConservationArea ca;
 	
 	private Exception visitorException;
 	private HashMap<IQueryFilter, String> filterToColumnName = new HashMap<IQueryFilter, String>();
 	
-	public WaypointFilterProcessor(IQueryFilter filter, Date[] dFilter, Session s){
+	public WaypointFilterProcessor(IQueryFilter filter, Date[] dFilter, ConservationArea ca, Session s){
 		this.filter = filter;
 		this.dFilter = dFilter;
 		this.s = s;
+		this.ca = ca;
 	}
 	
 	public HashMap<IQueryFilter, String> getFilterToColumnNames(){
@@ -138,11 +140,11 @@ public class WaypointFilterProcessor {
 		}
 				
 				
-		logString(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));		
+		logString(UuidUtils.uuidToString(ca.getUuid()));		
 		logString(sql.toString());
 		if (monitor.isCanceled()) return null;
 		SQLQuery query = s.createSQLQuery(sql.toString());
-		query.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
+		query.setParameter("ca", ca.getUuid());
 		query.executeUpdate();
 		
 		//create indexes to help with performance
@@ -336,7 +338,7 @@ public class WaypointFilterProcessor {
 
 		Attribute attribute = (Attribute)s.createCriteria(Attribute.class)
 				.add(Restrictions.eq("keyId", filter.getAttributeKey()))
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", ca))
 				.uniqueResult();
 		if (attribute == null){
 			throw new Exception(MessageFormat.format("No attribute with key {0} found in data model." , filter.getAttributeKey()));
@@ -412,7 +414,7 @@ public class WaypointFilterProcessor {
 			String hkey2 = filter.getCategoryKey().substring(0, filter.getCategoryKey().length() - 1) + "/";
 			logString(hkey1);
 			logString(hkey2);
-			logString(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));
+			logString(UuidUtils.uuidToString(ca.getUuid()));
 			
 			query.setParameter("hkey1", hkey1);
 			query.setParameter("hkey2", hkey2);
@@ -563,7 +565,7 @@ public class WaypointFilterProcessor {
 		
 		
 		IntelAttribute attribute = (IntelAttribute)s.createCriteria(IntelAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", ca))
 				.add(Restrictions.eq("keyId", filter.getAttributeKey()))
 				.uniqueResult();		
 		if (attribute == null) throw new Exception(MessageFormat.format("Unable to find intelligence attribute with key {0}", filter.getAttributeKey()));
@@ -583,7 +585,7 @@ public class WaypointFilterProcessor {
 		if (filter.getEntityTypeKey() != null){
 			type = (IntelEntityType)s.createCriteria(IntelEntityType.class)
 					.add(Restrictions.eq("keyId", filter.getEntityTypeKey()))
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.add(Restrictions.eq("conservationArea", ca))
 					.uniqueResult();
 			if (type == null) throw new Exception(MessageFormat.format("Unable to find entity type with key {0}", filter.getEntityTypeKey()));
 		}
@@ -708,10 +710,10 @@ public class WaypointFilterProcessor {
 		logString(sql.toString());
 		logString(filter.getKey());
 		logString(filter.getType().name());
-		logString(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));
+		logString(UuidUtils.uuidToString(ca.getUuid()));
 		
 		SQLQuery query = s.createSQLQuery(sql.toString());
-		query.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid());
+		query.setParameter("ca", ca.getUuid());
 		query.setParameter("keyid", filter.getKey());
 		query.setParameter("type", filter.getType().name());
 		

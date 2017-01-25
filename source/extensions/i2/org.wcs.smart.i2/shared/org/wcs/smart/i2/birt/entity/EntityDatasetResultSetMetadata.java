@@ -26,11 +26,12 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.i2.AttributeManager;
-import org.wcs.smart.i2.birt.datasource.IntelBirtConnection;
+import org.wcs.smart.i2.IntelHibernateManager;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -70,9 +71,9 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		public String getId(){
 			return this.id;
 		}
-		public Object getValue(IntelEntity entity) throws IOException {
+		public Object getValue(IntelEntity entity, Locale l) throws IOException {
 			if (this == ENTITY_UUID) return entity.getUuid();
-			if (this == ID) return entity.getIdAttributeAsText();
+			if (this == ID) return entity.getIdAttributeAsText(l);
 			if (this == TYPE_KEY) return entity.getEntityType().getKeyId();
 			if (this == TYPE) return entity.getEntityType().getName();
 			if (this == DATE_CREATED) return entity.getDateCreated();
@@ -173,7 +174,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		index = index - 9;
 		if (index < type.getAttributes().size()){
 			AttributeType attType = type.getAttributes().get(index).getAttribute().getType();
-			return AttributeManager.INSTANCE.getAttributeSqlType(attType);
+			return IntelHibernateManager.getAttributeSqlType(attType);
 		}
 		return Column.PRIMARY_IMAGE.type;
 	}
@@ -184,7 +185,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return IntelBirtConnection.getNativeDataTypeName( nativeTypeCode, EntityDataset.DATASET_TYPE );
+	     return AbstractIntelBirtConnection.getNativeDataTypeName( nativeTypeCode, EntityDataset.DATASET_TYPE );
 	}
 
 	/**

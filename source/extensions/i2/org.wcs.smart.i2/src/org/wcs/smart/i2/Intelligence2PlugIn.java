@@ -30,6 +30,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.i2.birt.datasource.DesktopConnectionFactory;
+import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.handlers.DeleteCaHandler;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 
@@ -125,6 +127,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		plugin = this;
 	
 		SmartContext.INSTANCE.setClass(IIntelligenceLabelProvider.class, new IntelligenceLabelProviderImpl());
+		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new DesktopConnectionFactory());
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteCaHandler(), DeleteCaHandler.EXECUTE_ORDER);
 	}
 

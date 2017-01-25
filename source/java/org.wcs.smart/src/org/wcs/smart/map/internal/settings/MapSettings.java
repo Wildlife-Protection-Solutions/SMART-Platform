@@ -253,7 +253,7 @@ public class MapSettings {
 				final Double minScaleDenominator = layer.getMinScaleDenominator();
 				
 				// only administrator level can add new layers
-				if(user.supportsUser(UserLevelManager.ADMIN)){
+				if(UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ADMIN)){
 					if(uri != null){
 						if(URIUtil.isFileURI(uri) ){
 							uri = importFile(uri);

@@ -22,7 +22,6 @@
 package org.wcs.smart;
 
 import org.eclipse.core.expressions.PropertyTester;
-import org.wcs.smart.ca.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -47,8 +46,8 @@ public class SmartUserTester extends PropertyTester {
 		if (SmartDB.getCurrentEmployee() == null) return false;
 		String userLevel = (String)expectedValue;
 		
-		for (SmartUserLevel l : SmartDB.getCurrentEmployee().getSmartUserLevels()){
-			if (l.getKey().equals(userLevel.toUpperCase())){
+		for (String key : SmartDB.getCurrentEmployee().getSmartUserLevels()){
+			if (key.toUpperCase().equals(userLevel.toUpperCase())){
 				return true;
 			}
 		}

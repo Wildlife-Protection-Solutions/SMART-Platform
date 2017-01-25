@@ -292,7 +292,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 
 	public boolean canEdit() {
 		//analyst users can never edit
-		return  SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.DATA_ENTRY);
+		return UserLevelManager.INSTANCE.supportsUser( SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.DATA_ENTRY);
 	}
 	
 	/**

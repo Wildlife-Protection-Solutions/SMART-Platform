@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -35,12 +36,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Model class of i_entity.
@@ -303,9 +305,25 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 		this.entityLocations = entityLocations;
 	}
 	
-	
+	 
+	/**
+	 * Gets the label for the default locale
+	 * @param l
+	 * @return
+	 */
 	@Transient
 	public String getIdAttributeAsText(){
+		return getIdAttributeAsText(null);
+	}
+	
+	/**
+	 * Gets the label for the given locale. If locale is null uses the default locale.
+	 * @param l
+	 * @return
+	 */
+	@Transient
+	public String getIdAttributeAsText(Locale l){
+		if (l == null) l = Locale.getDefault();
 		for (IntelEntityAttributeValue v : getAttributes()){
 			if (v.getAttribute().equals(getEntityType().getIdAttribute())){
 				
@@ -316,9 +334,9 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 				}else if (value instanceof Number){
 					if (attribute.getType() == AttributeType.BOOLEAN){
 						if (((Number)value).doubleValue() >= 0.5){
-							return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
+							return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Boolean.TRUE, l);
 						}else{
-							return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
+							return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Boolean.FALSE, l);
 						}
 					}
 					return ((Number)value).toString();

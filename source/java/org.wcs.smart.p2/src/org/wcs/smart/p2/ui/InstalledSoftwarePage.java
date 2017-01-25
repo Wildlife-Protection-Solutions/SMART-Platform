@@ -156,7 +156,7 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 
 		
 		if (!SmartDB.isMultipleAnalysis() &&
-				SmartDB.getCurrentEmployee().supportsUser(UserLevelManager.ADMIN)){
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN)){
  			// Uninstall action
 			Action uninstallAction = new UninstallAction(getProvisioningUI(), 
 					installedIUGroup.getStructuredViewer(), profileId) {
