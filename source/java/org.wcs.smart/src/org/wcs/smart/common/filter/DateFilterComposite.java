@@ -90,11 +90,11 @@ public class DateFilterComposite extends Composite {
 				return null;
 			case CURRENT_MONTH:
 			case MONTH_TO_DATE:
-				return (new SimpleDateFormat("MMM YYYY")).format(getEndDate()); //$NON-NLS-1$
+				return (new SimpleDateFormat("MMM yyyy")).format(getEndDate()); //$NON-NLS-1$
 			case CURRENT_YEAR:
 			case LAST_YEAR:
 			case YEAR_TO_DATE:
-				return (new SimpleDateFormat("YYYY")).format(getEndDate()); //$NON-NLS-1$
+				return (new SimpleDateFormat("yyyy")).format(getEndDate()); //$NON-NLS-1$
 			case CUSTOM:
 				return null;
 			case LAST_30_DAYS:
@@ -116,26 +116,34 @@ public class DateFilterComposite extends Composite {
 		 */
 		public Date getStartDate(){
 			Calendar cal = Calendar.getInstance();
-			if (this == LAST_30_DAYS || this == RANGE_30_DAYS){
+			switch(this){
+			case LAST_30_DAYS:
+			case RANGE_30_DAYS:
 				cal.add(Calendar.DAY_OF_MONTH, -30);
 				return cal.getTime(); 	
-			}else if (this == LAST_60_DAYS || this == RANGE_60_DAYS){
+			case LAST_60_DAYS:
+			case RANGE_60_DAYS:
 				cal.add(Calendar.DAY_OF_MONTH, -60);
 				return cal.getTime();
-			}else if (this == NEXT_30_DAYS || this == NEXT_60_DAYS){
+			case NEXT_30_DAYS:
+			case NEXT_60_DAYS:
 				return cal.getTime();
-			}else if (this == YEAR_TO_DATE || this == CURRENT_YEAR){
+			case YEAR_TO_DATE:
+			case CURRENT_YEAR:
 				cal.set(cal.get(Calendar.YEAR), 0, 01, 0, 0, 0);
 				return cal.getTime();
-			}else if (this == MONTH_TO_DATE || this == CURRENT_MONTH){
+			case MONTH_TO_DATE:
+			case CURRENT_MONTH:
 				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
 				return cal.getTime();
-			}else if (this == LAST_YEAR){
-				cal.add(Calendar.YEAR, -1);
+			case LAST_YEAR:
+				cal.set(cal.get(Calendar.YEAR)-1, 0, 01, 0, 0, 0);
 				return cal.getTime();
-			}else if (this == LAST_5_YEARS){
+			case LAST_5_YEARS:
 				cal.add(Calendar.YEAR, -5);
 				return cal.getTime();
+			case ALL: return null;
+			case CUSTOM: return null;
 			}
 			return null;
 		}
@@ -148,24 +156,34 @@ public class DateFilterComposite extends Composite {
 		 */
 		public Date getEndDate(){
 			Calendar cal = Calendar.getInstance();
-			if (this == LAST_30_DAYS || this == LAST_60_DAYS 
-					|| this == YEAR_TO_DATE
-					|| this == MONTH_TO_DATE
-					|| this == LAST_YEAR
-					|| this == LAST_5_YEARS){
-				return cal.getTime(); 	
-			}else if (this == NEXT_30_DAYS || this == RANGE_30_DAYS){
-				cal.add(Calendar.DAY_OF_MONTH, 30);
-				return cal.getTime();
-			}else if (this == NEXT_60_DAYS || this == RANGE_60_DAYS){
-				cal.add(Calendar.DAY_OF_MONTH, 60);
-				return cal.getTime();
-			}else if (this == CURRENT_YEAR){
-				cal.set(cal.get(Calendar.YEAR), 11, 31, 23, 59, 59);
-				return cal.getTime();
-			}else if (this == CURRENT_MONTH){
-				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.MONTH), 23, 59, 59);
-				return cal.getTime();
+			switch(this){
+				case LAST_30_DAYS:
+				case LAST_60_DAYS: 
+				case YEAR_TO_DATE:
+				case MONTH_TO_DATE:
+				case LAST_5_YEARS:
+					return cal.getTime();
+				case LAST_YEAR: 	
+					cal.set(cal.get(Calendar.YEAR)-1, cal.getActualMaximum(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), cal.getActualMaximum(Calendar.HOUR), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
+					return cal.getTime();
+				case NEXT_30_DAYS:
+				case RANGE_30_DAYS:
+					cal.add(Calendar.DAY_OF_MONTH, 30);
+					return cal.getTime();
+				case NEXT_60_DAYS:
+				case RANGE_60_DAYS:
+					cal.add(Calendar.DAY_OF_MONTH, 60);
+					return cal.getTime();
+				case CURRENT_YEAR:
+					cal.set(cal.get(Calendar.YEAR), cal.getActualMinimum(Calendar.DAY_OF_MONTH), cal.getActualMaximum(Calendar.HOUR), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
+					return cal.getTime();
+				case CURRENT_MONTH:
+					cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
+					return cal.getTime();
+				case ALL:
+					return null;
+				case CUSTOM:
+					return null;
 			}
 			return null;
 		}

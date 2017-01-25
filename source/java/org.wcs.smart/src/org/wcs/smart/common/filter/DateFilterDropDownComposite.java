@@ -175,8 +175,9 @@ public class DateFilterDropDownComposite extends Composite {
 				DateFilterComposite.DateFilter filter = (DateFilterComposite.DateFilter) ((IStructuredSelection)cmbFilter.getSelection()).getFirstElement();
 				//lbl1.setText(filter.getGuiName());
 				setCustom(filter == DateFilterComposite.DateFilter.CUSTOM);
-				if (showDateRangeLabel && filter.getLabel() != null){
-					lbl1.setText("[" + filter.getLabel() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+				String ll = filter.getLabel();
+				if (showDateRangeLabel && ll != null){
+					lbl1.setText("[" + ll + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 					((GridData)lbl1.getLayoutData()).widthHint = lbl1.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				}
 				main.layout(true, true);
