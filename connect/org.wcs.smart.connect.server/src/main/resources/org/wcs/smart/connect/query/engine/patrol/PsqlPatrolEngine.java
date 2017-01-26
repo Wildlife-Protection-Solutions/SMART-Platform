@@ -290,7 +290,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				"pl_end_date", //$NON-NLS-1$
 				//"pld_patrol_day", 
 				"plm_leader",  //$NON-NLS-1$
-				"plm_pilot", "track", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"plm_pilot", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < ca.length; i++) {
@@ -304,6 +304,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 			sb.append(","); //$NON-NLS-1$
 			sb.append("r." + results[i] + " as r_" + results[i]); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		sb.append(", t.geometry as r_track"); //$NON-NLS-1$
 		return sb.toString();
 	}
 
@@ -322,7 +323,11 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		sql.append(tablePrefix.get(ConservationArea.class));
 		sql.append(" on " + tablePrefix.get(ConservationArea.class) //$NON-NLS-1$
 				+ ".uuid = r.p_ca_uuid "); //$NON-NLS-1$
-
+		
+		sql.append("LEFT JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(Track.class));
+		sql.append(" ON " + tablePrefix(Track.class) + ".patrol_leg_day_uuid = r.pld_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		return sql.toString();
 	}
 	
@@ -358,8 +363,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
 		sql.append("plm_leader uuid,"); //$NON-NLS-1$
-		sql.append("plm_pilot uuid,"); //$NON-NLS-1$
-		sql.append("track bytea)"); //$NON-NLS-1$
+		sql.append("plm_pilot uuid)"); //$NON-NLS-1$
 		
 		return sql.toString();
 	}
@@ -403,8 +407,8 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 			sql.append("cast(null as uuid),");	//wpob_uuid //$NON-NLS-1$
 		}
 		sql.append(tablePrefix(PatrolLegMember.class) + "_leader.employee_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(PatrolLegMember.class) + "_pilot.employee_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Track.class) + ".geometry"); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegMember.class) + "_pilot.employee_uuid "); //$NON-NLS-1$
+		
 		return sql.toString();
 	}
 	
