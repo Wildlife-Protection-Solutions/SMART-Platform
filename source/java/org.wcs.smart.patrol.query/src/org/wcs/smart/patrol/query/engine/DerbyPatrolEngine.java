@@ -183,7 +183,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 				if (Arrays.equals(pluuid, lastPlUuid)){
 					if (!Arrays.equals(plduuid, lastPldUuid)){
 						//same patrol; different leg
-						lastItem.addTrack(rs.getBytes(20));
+						lastItem.addTrack(rs.getBytes("r_track"));
 					}
 				}else{
 					PatrolQueryResultItem it = asQueryResultItem(rs, session);
@@ -214,7 +214,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 				"pl_end_date", //$NON-NLS-1$
 				//"pld_patrol_day", 
 				"plm_leader",  //$NON-NLS-1$
-				"plm_pilot", "track", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"plm_pilot", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < ca.length; i++) {
@@ -228,6 +228,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 			sb.append(","); //$NON-NLS-1$
 			sb.append("r." + results[i] + " as r_" + results[i]); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		
+		sb.append(", t.geometry as r_track");
 		return sb.toString();
 	}
 
@@ -247,6 +249,10 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append(" on " + tablePrefix.get(ConservationArea.class) //$NON-NLS-1$
 				+ ".uuid = r.p_ca_uuid "); //$NON-NLS-1$
 
+		sql.append("LEFT JOIN ");
+		sql.append(tableNamePrefix(Track.class));
+		sql.append(" ON " + tablePrefix(Track.class) + ".patrol_leg_day_uuid = r.pld_uuid");
+		
 		return sql.toString();
 	}
 	
@@ -282,8 +288,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_pilot char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("track blob)"); //$NON-NLS-1$
+		sql.append("plm_pilot char(16) for bit data)"); //$NON-NLS-1$
+		
 		return sql.toString();
 	}
 	
@@ -326,8 +332,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 			sql.append("cast(null as char for bit data),");	//wpob_uuid //$NON-NLS-1$
 		}
 		sql.append(tablePrefix(PatrolLegMember.class) + "_leader.employee_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(PatrolLegMember.class) + "_pilot.employee_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Track.class) + ".geometry"); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegMember.class) + "_pilot.employee_uuid "); //$NON-NLS-1$
+		
 		return sql.toString();
 	}
 	
@@ -381,7 +387,6 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		it.setLeader(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_leader")), session)); //$NON-NLS-1$
 		it.setPilot(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_pilot")), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$
-	
 
 		return it;
 	}
