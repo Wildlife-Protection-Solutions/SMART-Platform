@@ -153,6 +153,29 @@ public class GeometryUtils {
 		try{
 			Geometry g1 = gFromWKB(wkb1.getBytes(1, (int)wkb1.length()));
 			Geometry g2 = gFromWKB(wkb2.getBytes(1, (int)wkb2.length()));
+			
+			return g1.intersects(g2);
+		}catch (SQLException e){
+			throw new RuntimeException ( e );
+		}
+	}
+	
+	/**
+	 * Determines if a linestring intersects and area.  This accounts
+	 * for the case where the linestring is of zero length.
+	 * 
+	 * @param track
+	 * @param area
+	 * @return
+	 */
+	public static boolean trackIntersects (Blob track, Blob area){
+		if (track == null || area == null) return false;
+		try{
+			Geometry g1 = gFromWKB(track.getBytes(1, (int)track.length()));
+			if (g1.getLength() == 0){
+				return pointInPolygon(g1.getCoordinate().x, g1.getCoordinate().y, area);
+			}
+			Geometry g2 = gFromWKB(area.getBytes(1, (int)area.length()));
 			return g1.intersects(g2);
 		}catch (SQLException e){
 			throw new RuntimeException ( e );

@@ -134,7 +134,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			sb.append( filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(")");  //$NON-NLS-1$
 		}else if (filter.getGeometryType() == AreaFilterGeometryType.TRACK){
-			sb.append("smart.intersects(");  //$NON-NLS-1$
+			sb.append("smart.trackIntersects(");  //$NON-NLS-1$
 			sb.append(engine.tablePrefix(MissionTrack.class) + ".geometry, ");  //$NON-NLS-1$
 			sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(")");  //$NON-NLS-1$

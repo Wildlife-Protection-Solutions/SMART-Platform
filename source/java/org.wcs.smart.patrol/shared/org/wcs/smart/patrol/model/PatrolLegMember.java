@@ -113,6 +113,19 @@ public class PatrolLegMember {
 		return clone;
 	}
 	
+	@Override
+	public boolean equals(Object other){
+		if (other == null) return false;
+		if (other == this) return true;
+		if (getClass() != other.getClass()) return false;
+		return Objects.equals(id, ((PatrolLegMember)other).id);
+	}
+	
+	@Override
+	public int hashCode(){
+		return id.hashCode();
+	}
+	
 	@Embeddable
 	private static class PatrolLegMemberPk implements Serializable{
 		/**

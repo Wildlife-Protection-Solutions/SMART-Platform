@@ -1196,7 +1196,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					fromSql.append(tableNames.get(Area.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
-					fromSql.append(" on smart.intersects("); //$NON-NLS-1$
+					fromSql.append(" on smart.trackIntersects("); //$NON-NLS-1$
 					fromSql.append(tablePrefix(MissionTrack.class) + ".geometry, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$

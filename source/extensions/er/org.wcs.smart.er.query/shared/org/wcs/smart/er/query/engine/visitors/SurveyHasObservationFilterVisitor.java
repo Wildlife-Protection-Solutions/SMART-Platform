@@ -25,7 +25,9 @@ import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
+import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 
 /**
  * Has observation filter visitor for survey visitors.
@@ -36,7 +38,8 @@ import org.wcs.smart.query.model.filter.IFilter;
 public class SurveyHasObservationFilterVisitor extends HasObservationFilterVisitor {
 
 	private boolean hasSu = false;
-
+	private boolean hasWpArea = false;
+	
 	@Override
 	public void visit(IFilter filter) {
 		super.visit(filter);
@@ -50,7 +53,12 @@ public class SurveyHasObservationFilterVisitor extends HasObservationFilterVisit
 			if (((SamplingUnitAttributeFilter) filter).getSource() == Source.OBSERVATION) {
 				hasSu = true;
 			}
+		} else if (filter instanceof AreaFilter ){
+			if (((AreaFilter)filter).getGeometryType() == AreaFilterGeometryType.WAYPOINT){
+				hasWpArea = true;
+			}
 		}
+		 
 	}
 
 	/**
@@ -65,12 +73,13 @@ public class SurveyHasObservationFilterVisitor extends HasObservationFilterVisit
 	 * True if filter has category, attribute, observer or sampling unit observation
 	 * filter.
 	 * 
-	 * @return true if the filter filters on any observeration related item
+	 * @return true if the filter filters on any observation related item
 	 */
 	public boolean hasObservationFilter(){
 		return hasCategoryFilter() || 
 				hasAttributeFilter() || 
 				hasObserverFilter() || 
-				hasSamplingUnitObservationFilter();
+				hasSamplingUnitObservationFilter() ||
+				hasWpArea;
 	}
 }

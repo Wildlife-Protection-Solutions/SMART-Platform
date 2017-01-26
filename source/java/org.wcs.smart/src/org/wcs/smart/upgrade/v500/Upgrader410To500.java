@@ -63,6 +63,8 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 	            // #1425: Enable CT to take waypoint at beginning rather than end of observation
 	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN instant_gps BOOLEAN",
 	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN photo_first BOOLEAN",
+	            
+	            "CREATE FUNCTION smart.trackIntersects(wkb1 blob, wkb2 blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.trackIntersects' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT"
 		};
 
 		for (String s : sql) {

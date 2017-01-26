@@ -202,7 +202,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		allGroupByParts = new GroupByPart(all);
 		
 		valuePart = def.getValuePart();
-			
+		long now = System.nanoTime();
 		final SumQueryDefinition ldef = def;
 		session.doWork(new Work() {
 			@Override
@@ -284,7 +284,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				c.commit();
 			}
 		});
-
+		long then = System.nanoTime();
+		
+		System.out.println(  "time:" + ((then-now) / 1000000000) );
 		return sumResults ;
 	}
 
@@ -1188,7 +1190,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					fromSql.append(tableNames.get(Area.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
-					fromSql.append(" on smart.intersects("); //$NON-NLS-1$
+					fromSql.append(" on smart.trackIntersects("); //$NON-NLS-1$
 					fromSql.append(tablePrefix(Track.class) + ".geometry, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$

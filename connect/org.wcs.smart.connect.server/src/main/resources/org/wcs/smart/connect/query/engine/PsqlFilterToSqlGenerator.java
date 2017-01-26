@@ -243,7 +243,7 @@ public enum PsqlFilterToSqlGenerator {
 					engine.canExecute(PatrolWaypointQuery.KEY)){
 				//For Patrol Queries use track
 				//user track table
-				sb.append("smart.intersects(");  //$NON-NLS-1$
+				sb.append("smart.trackIntersects(");  //$NON-NLS-1$
 				sb.append(engine.tablePrefix(Track.class) + ".geometry, ");  //$NON-NLS-1$
 				sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(")");  //$NON-NLS-1$
@@ -254,7 +254,7 @@ public enum PsqlFilterToSqlGenerator {
 					engine.canExecute(SurveySummaryQuery.KEY) ||
 					engine.canExecute(SurveyWaypointQuery.KEY)){
 				//survey queries use mission track table
-				sb.append("smart.intersects(");  //$NON-NLS-1$
+				sb.append("smart.trackIntersects(");  //$NON-NLS-1$
 				sb.append(engine.tablePrefix(MissionTrack.class) + ".geometry, ");  //$NON-NLS-1$
 				sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(")");  //$NON-NLS-1$
