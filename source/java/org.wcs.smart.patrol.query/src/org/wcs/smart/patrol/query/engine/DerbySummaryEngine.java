@@ -202,7 +202,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		allGroupByParts = new GroupByPart(all);
 		
 		valuePart = def.getValuePart();
-		long now = System.nanoTime();
+		
 		final SumQueryDefinition ldef = def;
 		session.doWork(new Work() {
 			@Override
@@ -284,9 +284,6 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				c.commit();
 			}
 		});
-		long then = System.nanoTime();
-		
-		System.out.println(  "time:" + ((then-now) / 1000000000) );
 		return sumResults ;
 	}
 
