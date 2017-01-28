@@ -24,13 +24,7 @@ package org.wcs.smart.i2.ui.editors.record;
 import java.text.DateFormat;
 import java.util.List;
 
-import org.eclipse.birt.core.framework.IConfigurationElement;
-import org.eclipse.birt.report.designer.internal.ui.util.UIHelper;
-import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -42,43 +36,25 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
-import org.osgi.framework.Bundle;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.birt.ui.ReportEngineManager;
-import org.wcs.smart.i2.IntelSecurityManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
-import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -87,7 +63,7 @@ import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.SmartSection;
-import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
+import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -100,12 +76,6 @@ public class RecordSummaryPage extends EditorPart{
 
 	private FormToolkit  toolkit;
 
-	private ToolItem wsetItem;
-	private ToolItem deleteItem;
-	private ToolItem editItem;
-	private ToolItem printItem;
-	private ToolItem saveItem;
-	
 	private Composite topPart;
 	private Label headerLabel;
 	
@@ -121,6 +91,7 @@ public class RecordSummaryPage extends EditorPart{
 	private Label lblLastModifiedBy;
 	
 	private SashForm sashForm;
+	private RecordButtonToolbar buttonToolBar; 
 	
 	public RecordSummaryPage(RecordEditor parent){
 		this.recordEditor =  parent;
@@ -170,7 +141,7 @@ public class RecordSummaryPage extends EditorPart{
 	}
 
 	public void enableWs(boolean enable){
-		wsetItem.setEnabled(enable);
+		buttonToolBar.enableWs(enable);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -184,12 +155,12 @@ public class RecordSummaryPage extends EditorPart{
 		((GridLayout)parent.getLayout()).marginHeight = 0;
 		((GridLayout)parent.getLayout()).verticalSpacing= 0;
 		
-		
 		Composite buttonPanel = toolkit.createComposite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(3, false));
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)buttonPanel.getLayout()).marginWidth= 5;
-		((GridLayout)buttonPanel.getLayout()).marginHeight =5;
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 5;
+		((GridLayout)buttonPanel.getLayout()).marginHeight = 5;
+		((GridLayout)buttonPanel.getLayout()).horizontalSpacing = 0;
 		
 		headerLabel = toolkit.createLabel(buttonPanel, "");
 		FontData fd = headerLabel.getFont().getFontData()[0];
@@ -205,142 +176,66 @@ public class RecordSummaryPage extends EditorPart{
 		headerLabel.setFont(headerFont);
 		headerLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		ToolBar buttonBar = new ToolBar(buttonPanel, SWT.HORIZONTAL | SWT.FLAT);
-		buttonBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-				
-		Menu formatsOpMenu = new Menu(getSite().getShell(), SWT.POP_UP);
-		buttonBar.addListener(SWT.Dispose, e->formatsOpMenu.dispose());
-		EmitterInfo pdfEmitter = null;
-		for (EmitterInfo einfo : ReportEngineManager.getBirtReportEngine().getEmitterInfo()){
-			if (einfo.getFormat().equalsIgnoreCase("PDF")){
-				pdfEmitter = einfo;
-			}
-			MenuItem mi = new MenuItem(formatsOpMenu,SWT.PUSH);
-			mi.setText(einfo.getFormat());
-			if (einfo.getIcon() != null){
-				IConfigurationElement confElem = einfo.getEmitter();
-				if ( confElem != null ){
-					String pluginId = confElem.getDeclaringExtension( ).getNamespace( );
-					Bundle bundle = Platform.getBundle( pluginId );
-					mi.setImage( UIHelper.getImage( bundle, einfo.getIcon(), false ));
-				}
-			}
-			
-			mi.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					IntelReportManager.INSTANCE.exportRecord(recordEditor.getRecord(), einfo);
-				}
-			});
-		}
-		saveItem = new ToolItem(buttonBar, SWT.PUSH);
-		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-		saveItem.setToolTipText("save");
-		saveItem.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent event){
-				getSite().getPage().saveEditor(recordEditor, false);
-			}
-		});
-		saveItem.setEnabled(recordEditor.isDirty());
-		recordEditor.addPropertyListener((source, propId) -> {
-			if (propId == IEditorPart.PROP_DIRTY){
-				Display.getDefault().syncExec(()->saveItem.setEnabled(isDirty()));
-			}
-		});
-		
-		final EmitterInfo pdfFormat = pdfEmitter;
-		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
-		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
-		printItem.setToolTipText("print to pdf");
-		printItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent event){
-				 if (event.detail == SWT.ARROW) {
-			          Rectangle rect = printItem.getBounds();
-			          Point pt = new Point(rect.x, rect.y + rect.height);
-			          pt = buttonBar.toDisplay(pt);
-			          formatsOpMenu.setLocation(pt.x, pt.y);
-			          formatsOpMenu.setVisible(true);
-			    }else{
-			    	if (pdfFormat != null){
-			    		IntelReportManager.INSTANCE.exportRecord(recordEditor.getRecord(), pdfFormat);
-			    	}else{	
-			    		MessageDialog.openError(getSite().getShell(), "Error", "Could not find PDF exporter.");
-			    	}
-			    }
-			}	
-		});
-		
-		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
-		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		refreshItem.setToolTipText("refresh record");
-		refreshItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				boolean doAction = true;
-				if (recordEditor.isDirty()){
-					if (!MessageDialog.openConfirm(getSite().getShell(), "Refresh", "Changes will be lost.  Are you sure you want to refresh?")){
-						doAction = false;
-					}
-				}
-				if (doAction){
-					recordEditor.setDirty(false);
-					clearLists();
-					recordEditor.refresh();				
-				}
-			}
-		});
-		
-		deleteItem = new ToolItem(buttonBar, SWT.PUSH);
-		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteItem.setToolTipText("delete record");
-		deleteItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(getSite().getShell(), "Delete", "Are you sure you want to delete this record.  This action cannot be undone.")){
-					RecordManager.INSTANCE.deleteRecord(recordEditor.getRecord(), recordEditor.getContext());
-				}
-			}
-		});
-		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
-			deleteItem.setEnabled(recordEditor.getEditMode());	
-		}else{
-			deleteItem.setEnabled(false);
-		}
-		
-		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
-		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-		wsetItem.setToolTipText("add to current working set");
-		wsetItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				WorkingSetManager.INSTANCE.addToActiveWorkingSet(recordEditor.getRecord(), recordEditor.getContext());
-			}
-		});
-		wsetItem.setEnabled(false);
-		
-		editItem = new ToolItem(buttonBar, SWT.CHECK);
-		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-		editItem.setToolTipText("enable or disable editing of record");
-		editItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				recordEditor.setEditMode(!recordEditor.getEditMode());
-				
-			}
-		});
-		
-
+		buttonToolBar = new RecordButtonToolbar(buttonPanel, recordEditor, toolkit);
 		
 		sashForm = new SashForm(parent, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		detailSection = createSectionHeader(sashForm, toolkit, "Narrative");
+		detailSection = createSectionHeader(sashForm, toolkit, "Details");
 		topPart = toolkit.createComposite(detailSection, SWT.NONE);
-		topPart.setLayout(new GridLayout(5, false));
+		topPart.setLayout(new GridLayout(6, false));
 		topPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartSection expEntities = createSectionHeader(sashForm, toolkit, "Entities");
+		SmartSection expEntities = new SmartSection(sashForm, toolkit, "Entities"){
+			@Override
+			public void populateHeaderAdditions(Composite parent){
+			
+				Composite bits = toolkit.createComposite(parent);
+				bits.setLayout(new GridLayout(2, false));
+				((GridLayout)bits.getLayout()).marginWidth = 0;
+				((GridLayout)bits.getLayout()).marginHeight = 0;
+				bits.setBackground(parent.getBackground());
+				bits.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+				
+				FontData fd = bits.getFont().getFontData()[0];
+				fd.setHeight(fd.getHeight() - 2);
+				Font smallerfont = new Font(bits.getDisplay(), fd);
+				
+				fd.setStyle(SWT.BOLD);
+				Font boldfont = new Font(bits.getDisplay(), fd);
+				
+				bits.addListener(SWT.Dispose, e->{smallerfont.dispose();boldfont.dispose();});
+				Hyperlink list = toolkit.createHyperlink(bits, "list", SWT.NONE);
+				Hyperlink details = toolkit.createHyperlink(bits, "details", SWT.NONE);
+				list.setBackground(bits.getBackground());
+				details.setBackground(bits.getBackground());
+				list.setFont(boldfont);
+				details.setFont(smallerfont);
+				
+				list.addHyperlinkListener(new HyperlinkAdapter() {
+					@Override
+					public void linkActivated(HyperlinkEvent e) {
+						list.setFont(boldfont);
+						details.setFont(smallerfont);
+						entityPanel.setType(EntityListComposite.Type.LIST);
+						bits.layout(true);
+					}
+				});
+				details.addHyperlinkListener(new HyperlinkAdapter() {
+					@Override
+					public void linkActivated(HyperlinkEvent e) {
+						list.setFont(smallerfont);
+						details.setFont(boldfont);
+						entityPanel.setType(EntityListComposite.Type.DETAILS);
+						bits.layout(true);
+					}
+				});
+				
+			}
+		};
+		toolkit.adapt(expEntities);
+		
+		
 		entityPanel = new EntityListComposite(expEntities, toolkit, recordEditor);
 		entityPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)entityPanel.getLayoutData()).horizontalSpan = 0;
@@ -378,11 +273,7 @@ public class RecordSummaryPage extends EditorPart{
 	}
 	
 	public void setEditMode(boolean editMode){		
-		if (editItem.isDisposed()) return;
-		editItem.setSelection(editMode);
-		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
-			deleteItem.setEnabled(editMode);		
-		}
+		buttonToolBar.setEditMode(editMode);
 	}
 	
 	public void initPage(){
@@ -407,14 +298,14 @@ public class RecordSummaryPage extends EditorPart{
 			}
 		});
 		txtShortName.setEditable(recordEditor.getEditMode());
-		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
 		txtShortName.setTextLimit(IntelRecord.MAX_TITLE_LENGTH);
 		
 		toolkit.createLabel(topPart, "Status:");
 		if (recordEditor.getEditMode()){
 			ComboViewer cmbStatus = new ComboViewer(topPart, SWT.DROP_DOWN | SWT.READ_ONLY);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
-			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
 			cmbStatus.setContentProvider(ArrayContentProvider.getInstance());
 			cmbStatus.setLabelProvider(new LabelProvider(){
 				@Override
@@ -438,143 +329,40 @@ public class RecordSummaryPage extends EditorPart{
 			
 		}else{
 			Label l = toolkit.createLabel(topPart,  RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
 		}
 		
 		
 		toolkit.createLabel(topPart, "");
 		toolkit.createLabel(topPart, "Date Created:");
-		
 		Label l = toolkit.createLabel(topPart, recordEditor.getRecord().getDateCreated() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateCreated()));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
 		toolkit.createLabel(topPart, "Created By:");
 		l = toolkit.createLabel(topPart, recordEditor.getRecord().getCreatedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getCreatedBy()));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+		Hyperlink lnkNarrative = toolkit.createHyperlink(topPart, "Narrative...", SWT.NONE);
+		lnkNarrative.setToolTipText("opens narrative in new window");
+		lnkNarrative.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				recordEditor.openExternalText(FieldType.NARRATIVE);
+			}
+		});
 		toolkit.createLabel(topPart, "");
 		toolkit.createLabel(topPart, "Date Last Modified:");
 		lblLastModified = toolkit.createLabel(topPart, recordEditor.getRecord().getDateModified() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
 		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
 		toolkit.createLabel(topPart, "Last Modified By:");
 		lblLastModifiedBy = toolkit.createLabel(topPart, recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
 		lblLastModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		
-		l = toolkit.createLabel(topPart, "Narrative:");
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-		l.addListener(SWT.MouseDoubleClick, (e)->detailSection.maximize());
-		
-		Text txtDescription = toolkit.createText(topPart, recordEditor.getRecord().getDescription(), SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
-		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
-//		txtDescription.addListener(SWT.MouseDoubleClick, (e)->maximizePosition(0));
-		if (recordEditor.getEditMode()){
-			txtDescription.addModifyListener(new ModifyListener() {
-				
-				@Override
-				public void modifyText(ModifyEvent e) {
-					recordEditor.getRecord().setDescription(txtDescription.getText());
-					recordEditor.setDirty(true);
-				}
-			});
-			
-			Menu menu = new Menu(txtDescription);
-			txtDescription.setMenu(menu);
-			
-			MenuItem search = new MenuItem(menu, SWT.CASCADE);
-			search.setText("Search Entity -> ");
-			search.addSelectionListener(new SelectionAdapter() {			
-				@Override
-				public void widgetSelected(SelectionEvent e) {				
-					EntitySearchShell shell = new EntitySearchShell(getSite().getShell(), txtDescription.getSelectionText(), recordEditor);
-					shell.open(Display.getDefault().getCursorLocation());
-				}
-			});
-			
-			if (IntelSecurityManager.INSTANCE.canCreateEntity()){
-				MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
-				newEntity.setText("New Entity ... ");
-				newEntity.addSelectionListener(new SelectionAdapter() {			
-					@Override
-					public void widgetSelected(SelectionEvent e) {				
-						NewEntityDialog dialog = new NewEntityDialog(getSite().getShell());
-						ContextInjectionFactory.inject(dialog, recordEditor.getContext());
-						if (dialog.open() == NewEntityDialog.OK){
-							recordEditor.linkEntity(dialog.getNewEntity());
-						}
-					}
-				});
+		Hyperlink lnkScratchpad = toolkit.createHyperlink(topPart, "Scratchpad...", SWT.NONE);
+		lnkScratchpad.setToolTipText("opens scratchpad in new window");
+		lnkScratchpad.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				recordEditor.openExternalText(FieldType.SCRATCHPAD);
 			}
-			
-			new MenuItem(menu, SWT.SEPARATOR);
-			
-			MenuItem cut = new MenuItem(menu, SWT.PUSH);
-			cut.setText("Cut");
-			cut.addSelectionListener(new SelectionAdapter() {			
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					txtDescription.cut();
-				}
-			});
-			MenuItem copy = new MenuItem(menu, SWT.PUSH);
-			copy.setText("Copy");
-			copy.addSelectionListener(new SelectionAdapter() {			
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					txtDescription.copy();
-				}
-			});
-			MenuItem paste = new MenuItem(menu, SWT.PUSH);
-			paste.setText("Paste");
-			paste.addSelectionListener(new SelectionAdapter() {			
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					txtDescription.paste();
-				}
-			});
-			
-			MenuItem delete = new MenuItem(menu, SWT.PUSH);
-			delete.setText("Delete");
-			delete.addSelectionListener(new SelectionAdapter() {			
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					Point sel = txtDescription.getSelection();
-					int from = sel.x;
-					int to = sel.y;
-					txtDescription.setText(txtDescription.getText().substring(0, from) + txtDescription.getText().substring(to));
-				}
-			});
-			
-			new MenuItem(menu, SWT.SEPARATOR);
-
-			MenuItem selectAll = new MenuItem(menu, SWT.PUSH);
-			selectAll.setText("Select All");
-			selectAll.addSelectionListener(new SelectionAdapter() {			
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					txtDescription.selectAll();
-				}
-			});
-			
-			menu.addMenuListener(new MenuListener() {
-				
-				@Override
-				public void menuShown(MenuEvent e) {
-					delete.setEnabled(!txtDescription.getSelectionText().isEmpty());
-					cut.setEnabled(!txtDescription.getSelectionText().isEmpty());
-					copy.setEnabled(!txtDescription.getSelectionText().isEmpty());
-				}
-				
-				@Override
-				public void menuHidden(MenuEvent e) {
-					
-				}
-			});
-		}else{
-			txtDescription.setEditable(false);
-		}
-	
+		});
 		topPart.layout();
 		
 		entityPanel.init();

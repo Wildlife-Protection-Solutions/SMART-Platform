@@ -633,6 +633,14 @@
             name="Intelligence Templates View"
             restorable="true">
       </view>
+      <view
+            allowMultiple="true"
+            class="org.wcs.smart.i2.ui.views.RecordNarrativeView$RecordsNarrativeViewWrapper"
+            icon="images/icons/obj16/script.png"
+            id="org.wcs.smart.i2.record.editor.narrative"
+            name="Record View Part"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

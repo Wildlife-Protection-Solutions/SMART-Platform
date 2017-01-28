@@ -60,6 +60,7 @@ public class IntelEvents {
 	
 	public static final String RECORD_ALL = "INTEL_RECORD/*";
 	public static final String RECORD_NEW = "INTEL_RECORD/NEW";
+	public static final String RECORD_SAVED = "INTEL_RECORD/SAVED";
 	//payload can be single record or collection or records
 	public static final String RECORD_DELETE = "INTEL_RECORD/DELETE";
 	public static final String RECORD_MODIFIED = "INTEL_RECORD/UPDATED";

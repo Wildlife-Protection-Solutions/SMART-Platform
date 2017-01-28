@@ -121,7 +121,7 @@ public class SmartSection extends Composite{
 		img.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		img.setExpanded(true);
 		Label l =toolkit.createLabel(header, text);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		l.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);

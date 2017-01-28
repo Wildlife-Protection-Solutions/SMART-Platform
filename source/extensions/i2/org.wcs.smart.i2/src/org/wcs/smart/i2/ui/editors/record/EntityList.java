@@ -68,6 +68,7 @@ import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.editors.RelationshipSearchJob;
+import org.wcs.smart.i2.ui.editors.record.EntityListComposite.Type;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -98,6 +99,8 @@ public class EntityList extends Composite {
 	
 	private int entityColumnCnt = 2;
 	
+	private EntityListComposite.Type type = EntityListComposite.Type.LIST;
+	
 	public EntityList(EntityListComposite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
 		this.toolkit = toolkit;
@@ -117,6 +120,11 @@ public class EntityList extends Composite {
 		});
 	}
 	
+	public void setType(Type type){
+		if (this.type == type) return;
+		this.type = type;
+		refreshTable();
+	}
 	/**
 	 * set to null to configure loading message; set to empty list of results return 
 	 * no records
@@ -166,6 +174,11 @@ public class EntityList extends Composite {
 			sc.setExpandVertical(true);
 			main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			if (type == Type.DETAILS){
+				entityColumnCnt = 2;
+			}else{
+				entityColumnCnt = 3;
+			}
 			main.setLayout(new GridLayout(entityColumnCnt, true));
 			((GridLayout)main.getLayout()).marginWidth = 0;
 			((GridLayout)main.getLayout()).marginHeight = 0;
@@ -179,7 +192,7 @@ public class EntityList extends Composite {
 			
 			
 			for (IntelEntityRecord i : entities){		
-				EntityComponent entityComposite = new EntityComponent(main, i, locationCounter.get(i.getEntity()), cnt++, components);
+				EntityComponent entityComposite = new EntityComponent(main, i, locationCounter.get(i.getEntity()), cnt++, components, type);
 				components.add(entityComposite);
 				toolkit.adapt(entityComposite);
 				entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -448,9 +461,11 @@ public class EntityList extends Composite {
 		private int locationCount;
 		private String locationTooltip = null;
 		
+		private EntityListComposite.Type type;
 		
-		public EntityComponent(Composite parent, IntelEntityRecord item, List<IntelLocation> locationCnt, int index, List<EntityComponent> siblings){
+		public EntityComponent(Composite parent, IntelEntityRecord item, List<IntelLocation> locationCnt, int index, List<EntityComponent> siblings, EntityListComposite.Type type){
 			super(parent, SWT.BORDER);
+			this.type = type;
 			this.locationCount = locationCnt == null ? 0 : locationCnt.size();
 			if (locationCnt != null){
 				StringBuilder sb = new StringBuilder();
@@ -478,94 +493,104 @@ public class EntityList extends Composite {
 			addListener(this);
 			
 			Thumbnail t = new Thumbnail(item.getEntity().getPrimaryAttachment(), THUMB_SIZE);
-			Composite c = t.createThumbnail(this);
+			Composite c = t.createThumbnail(this, type == Type.LIST ?  SWT.NONE : SWT.BORDER);
 			addListener(c);
 			toolkit.adapt(c);
 			c.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			((GridData)c.getLayoutData()).widthHint = THUMB_SIZE;
 			((GridData)c.getLayoutData()).heightHint = THUMB_SIZE;
 			
-			Composite info = toolkit.createComposite(this, SWT.NONE);
-			info.setLayout(new GridLayout());
-			((GridLayout)info.getLayout()).marginWidth = 0;
-			((GridLayout)info.getLayout()).marginHeight = 0;
-			info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			addListener(info);
+			if (type == Type.LIST){
+				Label l = toolkit.createLabel(this, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+				((GridData)l.getLayoutData()).widthHint = 100;
+				addListener(l);
+				
+			}else if (type == Type.DETAILS){
 			
-			Label l = toolkit.createLabel(info, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			((GridData)l.getLayoutData()).widthHint = 100;
-			addListener(l);
-			
-			
-			
-			List<IntelRecordAttachment> allAttachments = listParent.getEditor().getRecord().getAttachments();
-			List<IntelAttachment> toShow1 = new ArrayList<IntelAttachment>();
-			List<IntelEntityAttachment> toShow2 = new ArrayList<IntelEntityAttachment>();
-			if(allAttachments != null){
-				for (IntelEntityAttachment att : item.getEntity().getEntityAttachments()){
-					for (IntelRecordAttachment a : allAttachments){
-						if (att.getAttachment().equals(a.getAttachment())){
-							toShow1.add(a.getAttachment());
-							break;
-						}
-					}
-				}
-				for (IntelEntityAttachment att : listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments()){
-					if(att.getEntity().equals(item.getEntity())){
+				Composite info = toolkit.createComposite(this, SWT.NONE);
+				info.setLayout(new GridLayout());
+				((GridLayout)info.getLayout()).marginWidth = 0;
+				((GridLayout)info.getLayout()).marginHeight = 0;
+				info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				addListener(info);
+				
+				Label l = toolkit.createLabel(info, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+				((GridData)l.getLayoutData()).widthHint = 100;
+				addListener(l);
+				
+				
+				
+				List<IntelRecordAttachment> allAttachments = listParent.getEditor().getRecord().getAttachments();
+				List<IntelAttachment> toShow1 = new ArrayList<IntelAttachment>();
+				List<IntelEntityAttachment> toShow2 = new ArrayList<IntelEntityAttachment>();
+				if(allAttachments != null){
+					for (IntelEntityAttachment att : item.getEntity().getEntityAttachments()){
 						for (IntelRecordAttachment a : allAttachments){
 							if (att.getAttachment().equals(a.getAttachment())){
-								toShow2.add(att);
+								toShow1.add(a.getAttachment());
 								break;
 							}
 						}
 					}
-				}
-			}
-			
-			Composite attach = toolkit.createComposite(info, SWT.NONE);
-			attach.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
-			((GridData)attach.getLayoutData()).widthHint = 100;
-			RowLayout layout = new RowLayout();
-			layout.wrap = true;
-			layout.marginBottom = layout.marginLeft = layout.marginRight = layout.marginTop = 0;
-			attach.setLayout(layout);
-			addListener(attach);
-			
-			for (IntelAttachment att : toShow1){
-				Thumbnail thumb = new Thumbnail(att, THUMB_SIZE-5);
-				Composite c2 = thumb.createThumbnail(attach, SWT.NONE);
-				toolkit.adapt(c2);
-				c2.setLayoutData(new RowData(THUMB_SIZE-5,THUMB_SIZE-5));
-				c2.setToolTipText(att.getFilename());
-				addListener(c2);
-				
-			}
-			for (IntelEntityAttachment att : toShow2){
-				Thumbnail thumb = new Thumbnail(att.getAttachment(), THUMB_SIZE-2);
-				Composite c2 = thumb.createThumbnail(attach, SWT.BORDER);
-				toolkit.adapt(c2);
-				c2.setLayoutData(new RowData(THUMB_SIZE-2,THUMB_SIZE-2));
-				c2.setToolTipText(att.getAttachment().getFilename());
-				
-				Menu menu = new Menu(c2);
-				c2.setMenu(menu);
-				MenuItem mi = new MenuItem(menu, SWT.PUSH);
-				mi.setText("Remove Attachment");
-				mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-				mi.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments().remove(att);
-						setEntities(listParent.getEditor().getRecord().getEntities());
+					for (IntelEntityAttachment att : listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments()){
+						if(att.getEntity().equals(item.getEntity())){
+							for (IntelRecordAttachment a : allAttachments){
+								if (att.getAttachment().equals(a.getAttachment())){
+									toShow2.add(att);
+									break;
+								}
+							}
+						}
 					}
-				});
+				}
+				
+				Composite attach = toolkit.createComposite(info, SWT.NONE);
+				attach.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
+				((GridData)attach.getLayoutData()).widthHint = 100;
+				RowLayout layout = new RowLayout();
+				layout.wrap = true;
+				layout.marginBottom = layout.marginLeft = layout.marginRight = layout.marginTop = 0;
+				attach.setLayout(layout);
+				addListener(attach);
+				
+				for (IntelAttachment att : toShow1){
+					Thumbnail thumb = new Thumbnail(att, THUMB_SIZE-5);
+					Composite c2 = thumb.createThumbnail(attach, SWT.NONE);
+					toolkit.adapt(c2);
+					c2.setLayoutData(new RowData(THUMB_SIZE-5,THUMB_SIZE-5));
+					c2.setToolTipText(att.getFilename());
+					addListener(c2);
+					
+				}
+				for (IntelEntityAttachment att : toShow2){
+					Thumbnail thumb = new Thumbnail(att.getAttachment(), THUMB_SIZE-2);
+					Composite c2 = thumb.createThumbnail(attach, SWT.BORDER);
+					toolkit.adapt(c2);
+					c2.setLayoutData(new RowData(THUMB_SIZE-2,THUMB_SIZE-2));
+					c2.setToolTipText(att.getAttachment().getFilename());
+					
+					Menu menu = new Menu(c2);
+					c2.setMenu(menu);
+					MenuItem mi = new MenuItem(menu, SWT.PUSH);
+					mi.setText("Remove Attachment");
+					mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+					mi.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments().remove(att);
+							setEntities(listParent.getEditor().getRecord().getEntities());
+						}
+					});
+				}
+				
+				l = toolkit.createLabel(info, MessageFormat.format("Locations: {0}", locationCount));
+				l.setToolTipText(locationTooltip);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+				addListener(l);
 			}
 			
-			l = toolkit.createLabel(info, MessageFormat.format("Locations: {0}", locationCount));
-			l.setToolTipText(locationTooltip);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-			addListener(l);
 		}
 		
 		private void addListener(Control c){

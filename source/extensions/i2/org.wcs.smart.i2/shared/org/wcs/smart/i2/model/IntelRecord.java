@@ -71,6 +71,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 
 	private String title;
 	private String description;
+	private String comment;
 
 	private List<IntelEntityRecord> entities;
 	private List<IntelLocation> locations;
@@ -243,6 +244,14 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	}
 	public void setDescription(String description){
 		this.description = description;
+	}
+	
+	@Column(name="comment")
+	public String getComment(){
+		return this.comment;
+	}
+	public void setComment(String comment){
+		this.comment = comment;
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.record", orphanRemoval = true, cascade={CascadeType.ALL})

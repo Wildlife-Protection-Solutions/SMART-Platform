@@ -245,15 +245,20 @@ public class LocationListComposite extends Composite{
 			public String getText(Object element) {
 				if (element instanceof IntelLocation){
 					StringBuilder sb = new StringBuilder();
+					int cnt = 0;
 					for (IntelEntityLocation l : editor.getEntityLocationLinks()){
 						if (l.getLocation().equals(element)){
 							sb.append(l.getEntity().getIdAttributeAsText());
 							sb.append("; ");
+							cnt++;
 						}
 					}
+					
 					if (sb.length() > 0){
+						sb.insert(0, "(" + cnt + ") ");
 						return sb.substring(0, sb.length() - 2);
 					}
+					
 					return "";
 				}
 				return super.getText(element);

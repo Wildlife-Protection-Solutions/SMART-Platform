@@ -27,6 +27,7 @@ import org.eclipse.ui.IPerspectiveFactory;
 import org.locationtech.udig.project.ui.internal.LayersView;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
+import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordsView;
 import org.wcs.smart.i2.ui.views.WorkingSetView;
 
@@ -56,7 +57,7 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 		IFolderLayout right = layout.createFolder("org.wcs.smart.i2.assessment.right", IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA);
 		right.addView(EntitySearchView.ID);
 		right.addView(LayersView.ID);
-		
+		right.addPlaceholder(RecordNarrativeView.ID);
 		layout.getViewLayout(RecordsView.ID).setCloseable(false);
 		layout.getViewLayout(EntitySearchView.ID).setCloseable(false);		
 	}

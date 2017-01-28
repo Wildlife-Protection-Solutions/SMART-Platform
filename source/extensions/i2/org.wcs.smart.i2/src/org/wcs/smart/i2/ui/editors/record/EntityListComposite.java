@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -77,6 +79,8 @@ public class EntityListComposite extends Composite{
 	
 	private Composite compEntityEdit;
 	
+	public enum Type {LIST, DETAILS};
+	
 	public EntityListComposite(Composite parent, FormToolkit toolkit, RecordEditor editor){
 		super(parent, SWT.NONE);
 		this.editor = editor;
@@ -86,7 +90,7 @@ public class EntityListComposite extends Composite{
 		gl.marginHeight = 2;
 		gl.marginWidth = 2;
 		setLayout(gl);
-		
+				
 		compEntityEdit = toolkit.createComposite(this, SWT.NONE);
 		compEntityEdit.setLayout(new GridLayout());
 		compEntityEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -175,6 +179,10 @@ public class EntityListComposite extends Composite{
 		
 	}
 	
+	public void setType(Type type){
+		lstEntities.setType(type);
+		
+	}
 	public RecordEditor getEditor(){
 		return this.editor;
 	}
@@ -234,8 +242,14 @@ public class EntityListComposite extends Composite{
 							editor.setDirty(true);
 							
 							intelLinksAdded.add(r);
+							
+							final String idText = toadd.getIdAttributeAsText();
+							Display.getDefault().syncExec(() -> {
+								init();
+								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Entity Added", MessageFormat.format("{0} added to {1}", idText, getEditor().getRecord().getTitle()));
+							});
 						}
-						Display.getDefault().syncExec(() -> init());
+						
 					}
 				}
 				return Status.OK_STATUS;

@@ -26,9 +26,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,6 +42,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Control;
@@ -76,6 +80,10 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+import org.wcs.smart.i2.ui.views.RecordNarrativeView;
+import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
+import org.wcs.smart.util.E3Utils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.drew.lang.annotations.NotNull;
 import com.vividsolutions.jts.geom.Geometry;
@@ -94,6 +102,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private RecordSummaryPage summaryPage;
 	private RecordMapPage mapPage;
+	private RecordDescriptionPage descPage;
 	
 	private IntelRecord record;
 	
@@ -102,6 +111,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private List<IntelEntityLocation> deleteEntityLocationLinks = new ArrayList<IntelEntityLocation>();
 	
 	private List<IntelLocation> locationsToDelete = new ArrayList<IntelLocation>();
+	
+	//link text field editors
+	private HashMap<RecordNarrativeView.FieldType, RecordNarrativeView> links = new HashMap<RecordNarrativeView.FieldType, RecordNarrativeView>();
 	
 	private Job loadRecordJob = new Job("load intelligence record"){
 
@@ -225,8 +237,6 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					s.saveOrUpdate(a.getAttachment());
 				}
 			}
-
-			
 			
 			for (IntelEntityRecord r : summaryPage.getDeleteEntityLinks()){
 				if (r.getRecord().getUuid() != null){
@@ -309,11 +319,14 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			//TODO: something was null here once during testing when i was switching perspectives
 			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_MODIFIED, record);
 		}
+		parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_SAVED, record);
 		if (!modifiedEntities.isEmpty()) parentContext.get(IEventBroker.class).post(IntelEvents.ENTITY_MODIFIED, modifiedEntities);
 		
 		setDirty(false);
 		summaryPage.doAfterSave();
 		summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
+		descPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
+		
 		mapPage.refresh();
 		super.setPartName(record.getTitle());
 	}
@@ -329,6 +342,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private void subscribeToEvent(String eventTopic, EventHandler handler){
 		parentContext.get(IEventBroker.class).subscribe(eventTopic, handler);
 		handlers.add(handler);
+	}
+	
+	public void updateText(RecordNarrativeView.FieldType type, String text){
+		this.descPage.updateText(type, text);
+		setDirty(true);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -397,6 +415,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			int i = addPage(summaryPage, getEditorInput());
 			setPageText(i, "Summary");
 			
+			descPage = new RecordDescriptionPage(this);
+			i = addPage(descPage, getEditorInput());
+			setPageText(i, "Narrative/Scratchpad");
+			
 			mapPage = new RecordMapPage(this);
 			i = addPage(mapPage, getEditorInput());
 			setPageText(i, "Map");
@@ -409,7 +431,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 	
 
-
+	//not supported
 	@Override
 	public void doSaveAs() {		
 	}
@@ -608,16 +630,26 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		summaryPage.setEditMode(editMode);
 		mapPage.setEditMode(editMode);
+		descPage.setEditMode(editMode);
 		
 		if (record != null){
 			initPage();
 		}		
+		
+		for (Iterator<Entry<FieldType, RecordNarrativeView>> it  = links.entrySet().iterator(); it.hasNext();){
+			Entry<FieldType, RecordNarrativeView> entry = it.next();
+			if (entry.getValue().isDisposed()){
+				it.remove();
+			}else{
+				entry.getValue().setEditMode(editMode);
+			}
+		}
 	}
 	
 	private void initPage(){
 		summaryPage.initPage();
 		mapPage.initPage();
-		
+		descPage.initPage();		
 		
 		super.setPartName(record.getTitle());
 	}
@@ -626,7 +658,6 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void setFocus() {
 	}
 	
-
 	public boolean getEditMode() {
 		return this.isEditMode;
 	}
@@ -661,5 +692,38 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public IStatusLineManager getStatusLineManager() {
 		return mapPage.getStatusLineManager();
 	}
-
+	
+	
+	/**
+	 * update text field links
+	 * @param type
+	 * @param text
+	 */
+	public void updateTextLink(RecordNarrativeView.FieldType type, String text){
+		RecordNarrativeView view = links.get(type);
+		if (view == null) return;
+		view.updateText(text);
+	}
+	
+	/**
+	 * Opens one of the text fields in an external view and links the two text boxes
+	 */
+	public void openExternalText(RecordNarrativeView.FieldType type){
+		EPartService pService = parentContext.get(EPartService.class);
+		
+		String pId = RecordNarrativeView.ID + ":" + UuidUtils.uuidToString(getRecord().getUuid()) + ":" + type.name();
+		MPart part = pService.findPart(pId);
+		if (part == null){
+			part = pService.createPart(RecordNarrativeView.ID);
+		
+			part.getTransientData().put(RecordNarrativeView.TYPE_KEY, type);
+			part.getTransientData().put(RecordNarrativeView.EDITOR_KEY, RecordEditor.this);
+			part.setElementId(pId); //$NON-NLS-1$
+		}
+		pService.showPart(part, PartState.VISIBLE);
+		RecordNarrativeView view = (RecordNarrativeView) E3Utils.getSourceObject(part);
+		view.configureName();
+		
+		links.put(type,  view);
+	}
 }

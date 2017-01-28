@@ -756,10 +756,8 @@ public class WorkingSetView {
 	
 	private void selectWorkingSet(){
 		WorkingSetListDialog dialog = ContextInjectionFactory.make(WorkingSetListDialog.class, context);
-		dialog.open();
-		
-		IntelWorkingSet selection = dialog.getSelection();
-		if (selection != null){
+		if ( dialog.open() == Window.OK ){
+			IntelWorkingSet selection = dialog.getSelection();
 			WorkingSetManager.INSTANCE.setActiveWorkingSet(selection, context);
 		}
 	}
