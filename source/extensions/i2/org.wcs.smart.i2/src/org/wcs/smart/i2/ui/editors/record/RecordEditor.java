@@ -715,11 +715,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		MPart part = pService.findPart(pId);
 		if (part == null){
 			part = pService.createPart(RecordNarrativeView.ID);
-		
 			part.getTransientData().put(RecordNarrativeView.TYPE_KEY, type);
 			part.getTransientData().put(RecordNarrativeView.EDITOR_KEY, RecordEditor.this);
 			part.setElementId(pId); //$NON-NLS-1$
 		}
+		
 		pService.showPart(part, PartState.VISIBLE);
 		RecordNarrativeView view = (RecordNarrativeView) E3Utils.getSourceObject(part);
 		view.configureName();

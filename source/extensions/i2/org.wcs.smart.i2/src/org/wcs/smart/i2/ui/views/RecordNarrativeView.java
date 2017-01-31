@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISaveablePart;
 import org.eclipse.ui.IViewPart;
 import org.osgi.service.event.Event;
+import org.wcs.smart.PerspectiveEditorTracker;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -143,9 +144,12 @@ public class RecordNarrativeView {
 	
 	@PostConstruct
 	public void createPartControl(final Composite parent) {
-		part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
-		part.getTags().add(IntelDataAnalysisPerspective.ID);
-		part.getTags().add(IntelDataAssessmentPerspective.ID);
+		
+//		part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
+		if (!part.getTags().contains(PerspectiveEditorTracker.EDITOR_TAG)) part.getTags().add(PerspectiveEditorTracker.EDITOR_TAG);
+		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
+		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+		part.getTags().remove("View");
 		
 		this.type = (FieldType) part.getTransientData().get(TYPE_KEY);
 		this.recordEditor = (RecordEditor) part.getTransientData().get(EDITOR_KEY);
@@ -225,7 +229,7 @@ public class RecordNarrativeView {
 	
 	@Focus
 	public void setFocus() {
-		
+		txt.setFocus();
 	}
 
 	@PreDestroy

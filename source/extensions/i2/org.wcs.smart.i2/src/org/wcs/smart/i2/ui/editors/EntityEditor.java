@@ -213,6 +213,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private Composite compAttributes;
 	private Composite compAttachments;
+	private Text txtScratchpad;
 	private SashForm mainSash;
 	private int[] mainSashMinSize;
 	
@@ -379,6 +380,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 			}
 		}
+		entity.setComment(txtScratchpad.getText());
 
 		List<IntelEntity> otherEntityModified = new ArrayList<IntelEntity>();
 		
@@ -1004,7 +1006,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Attributes", "Files"}, rightPart, toolkit, ()->maximizeMainPanel(0));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Attributes", "Files", "Scratchpad"}, rightPart, toolkit, ()->maximizeMainPanel(0));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(rightPart, SWT.NONE);
@@ -1023,7 +1025,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		createAttachmentPanel(compAttachments);
 		
-		tabList.setContent(new Composite[]{compAttributes,  compAttachments}, tabPart);
+		Composite compScratchpad = toolkit.createComposite(tabPart, SWT.NONE);
+		compScratchpad.setLayout(new GridLayout());
+		((GridLayout)compScratchpad.getLayout()).marginHeight = 0;
+		((GridLayout)compScratchpad.getLayout()).marginWidth = 0;
+		
+		txtScratchpad = toolkit.createText(compScratchpad, "", SWT.MULTI | SWT.V_SCROLL | SWT.BORDER);
+		txtScratchpad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		txtScratchpad.addListener(SWT.Modify, e->setDirty(true));
+		
+		tabList.setContent(new Composite[]{compAttributes,  compAttachments, compScratchpad}, tabPart);
 		tabList.selectTab(0);
 		
 		if (!IntelSecurityManager.INSTANCE.canEditEntity()){
@@ -1660,6 +1671,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 		lblModified.getParent().layout();
 		lblModified.redraw();
 		
+		Listener[] ls = txtScratchpad.getListeners(SWT.Modify);
+		for (Listener l : ls) txtScratchpad.removeListener(SWT.Modify, l);
+		if (entity.getComment() == null){ 
+			txtScratchpad.setText("");
+		}else{
+			txtScratchpad.setText(entity.getComment());
+		}
+		txtScratchpad.setEditable(isEditMode);
+		for (Listener l : ls) txtScratchpad.addListener(SWT.Modify, l);
+		
 		if (entity.getPrimaryAttachment() != null){
 			File imageFile = entity.getPrimaryAttachment().getAttachmentFile();
 			if (imageFile.exists()){
@@ -1725,6 +1746,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			part.setLayout(createGridLayoutNoMargin(2));
 			part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			part.setVisible(false);
+			((GridLayout)part.getLayout()).horizontalSpacing = 7; 
 			for (IntelEntityTypeAttribute a : entity.getEntityType().getAttributes()){
 				if (group == null){
 					if (a.getAttributeGroup() != null) continue;
@@ -1742,6 +1764,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 							EntityEditor.this.setDirty(true);
 						}
 					});
+					if (a.getAttribute().equals(entity.getEntityType().getIdAttribute())){
+						addDuplicateIdChecker(e);
+					}
 					fieldEditors.add(e);
 				}else{
 					Label key = toolkit.createLabel(part, a.getAttribute().getName() + ":");
@@ -1795,6 +1820,32 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		mapPart.refresh();
 		loadRecords.schedule(0);
+	}
+	
+	private void addDuplicateIdChecker(AttributeFieldEditor editor){
+		//check for duplicate identifiers
+		editor.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Session session = HibernateManager.openSession();
+				try{
+					IntelEntityType etype = (IntelEntityType)session.get(IntelEntityType.class, entity.getEntityType().getUuid());
+					IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
+					tmp.setAttribute(etype.getIdAttribute());
+					editor.updateValue(tmp);
+					if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, entity.getUuid())){
+						String warnMessage = "Duplicate Identifiers - an entity with this identifier already exists in the database"; 
+						editor.setWarningMessage(warnMessage);
+					}else{
+						editor.setWarningMessage(null);
+					}
+				}finally{
+					session.close();
+				}
+			}
+		});
+		
 	}
 	
 	private GridLayout createGridLayoutNoMargin(int col){

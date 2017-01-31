@@ -27,6 +27,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -48,7 +50,8 @@ public class AttributeFieldEditor {
 	private DateTime dtDateTime;
 	private Button btnChDateTime;
 	private Button btnChOnOff;
-	private ControlDecoration cdNumber;
+	private ControlDecoration cd;
+	private String warnMessage;
 	
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
 	
@@ -76,9 +79,55 @@ public class AttributeFieldEditor {
 			}
 		}
 	}
+	
+	/**
+	 * Validates field before returning
+	 * @return true if field is valid; false otherwise.  
+	 */
 	public boolean isValid(){
-		if (cdNumber != null) return !cdNumber.isVisible();
-		return true;
+		return validate();
+	}
+	
+	/*
+	 * validates and updates control decoration icon/message
+	 */
+	private boolean validate(){
+		String msg = null;
+		
+		if (attribute.getType() == AttributeType.NUMERIC){
+			try{
+				if (!txtValue.getText().trim().isEmpty()){
+					Double.parseDouble(txtValue.getText());
+				}
+			}catch(Exception ex){
+				msg = "Unable to parse number from text";
+			}
+		}
+		
+		if (msg != null){
+			cd.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_ERROR));
+			cd.setDescriptionText(msg);
+			cd.show();
+			return false;
+		}else if (warnMessage != null){
+			cd.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
+			cd.setDescriptionText(warnMessage);
+			cd.show();
+			return true;
+		}else{
+			cd.hide();
+			return true;
+		}	
+	}
+	
+	/**
+	 * Sets a warning message for the field.  This does not affect the validity of the field; but if the
+	 * field is valid this warning message will be shown.  Set to null to clear; 
+	 * @param warnMessage
+	 */
+	public void setWarningMessage(String warnMessage){
+		this.warnMessage = warnMessage;
+		validate();
 	}
 	
 	public IntelAttribute getAttribute(){
@@ -268,6 +317,7 @@ public class AttributeFieldEditor {
 			txtValue = new Text(parent, SWT.BORDER);
 			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtValue.getLayoutData()).widthHint = 100;
+			cd = createDecoration(txtValue);
 			txtValue.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
@@ -279,26 +329,16 @@ public class AttributeFieldEditor {
 			txtValue = new Text(parent, SWT.BORDER);
 			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtValue.getLayoutData()).widthHint = 100;
-			cdNumber = createDecoration(txtValue);
+			cd = createDecoration(txtValue);
 			txtValue.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
-					
-					try{
-						if (txtValue.getText().trim().isEmpty()){
-							cdNumber.hide();
-						}else{
-							Double.parseDouble(txtValue.getText());
-							cdNumber.hide();
-						}
-					}catch(Exception ex){
-						cdNumber.show();
-						cdNumber.setDescriptionText("Unable to parse number from text");
-					}
+					validate();
 					modified();
 				}
 			});
 		}else if (attribute.getType() ==  AttributeType.LIST){
+			
 			cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 			cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
@@ -314,6 +354,8 @@ public class AttributeFieldEditor {
 			});
 			cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
+			
+			cd = createDecoration(cmbViewer.getControl());
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));
@@ -339,6 +381,7 @@ public class AttributeFieldEditor {
 					modified();
 				}
 			});
+			cd = createDecoration(btnChDateTime);
 		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));
@@ -363,6 +406,7 @@ public class AttributeFieldEditor {
 				}
 			});
 			btnOnOff.setSelection(true);
+			cd = createDecoration(btnOnOff);
 		}
 	}
 	

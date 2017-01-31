@@ -259,6 +259,7 @@ public class SmartSection extends Composite{
 			}
 		}		
 		for (SmartSection s : sections) s.processingEvent = true;
+		for (int i : newweights) if (i< 0){ return;}
 		try{
 			sashForm.setWeights(newweights);
 		}finally{

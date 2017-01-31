@@ -69,6 +69,8 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	private List<IntelEntityAttachment> entityAttachments;
 	private List<IntelEntityRecord> intelligenceRecords;
 	private List<IntelEntityLocation> entityLocations;
+	
+	private String comment;
 
 	/**
 	 * Constructor.
@@ -303,6 +305,23 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	
 	public void setLocations(List<IntelEntityLocation> entityLocations) {
 		this.entityLocations = entityLocations;
+	}
+	
+	/**
+	 * Scratchpad associated with entity
+	 * @return
+	 */
+	@Column(name="comment")
+	public String getComment(){
+		return this.comment;
+	}
+	
+	/**
+	 * scratchpad associated with eneity
+	 * @param comment
+	 */
+	public void setComment(String comment){
+		this.comment = comment;
 	}
 	
 	 

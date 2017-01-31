@@ -187,7 +187,6 @@ public class RecordDescriptionPage extends EditorPart{
 		}else{
 			txtDescription.setEditable(false);
 		}
-		createHyperlink(narrativePart, RecordNarrativeView.FieldType.NARRATIVE);
 		
 		txtScratchpad = toolkit.createText(scratchpadPart, recordEditor.getRecord().getComment(), SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		txtScratchpad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -203,9 +202,7 @@ public class RecordDescriptionPage extends EditorPart{
 			createMenu(txtScratchpad);
 		}else{
 			txtScratchpad.setEditable(false);
-		}
-		createHyperlink(scratchpadPart, RecordNarrativeView.FieldType.SCRATCHPAD);
-		
+		}	
 		
 		narrativePart.layout();
 		scratchpadPart.layout();

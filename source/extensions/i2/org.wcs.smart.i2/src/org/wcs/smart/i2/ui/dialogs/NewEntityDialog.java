@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -62,6 +63,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -85,6 +87,8 @@ import org.wcs.smart.util.UuidUtils;
 public class NewEntityDialog extends TitleAreaDialog{
 
 	private static final String LAST_TYPE_KEY = "org.wcs.smart.i2.ui.dialogs.newentity.lasttype";
+	
+	private static final String MESSAGE = "Create a new entity";
 	
 	private TableComboViewer cmbEntityType;	
 	private Composite attributePanel;
@@ -281,7 +285,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		
 		setTitle("New Entity");
 		getShell().setText("New Entity");
-		setMessage("Create a new entity");
+		setMessage(MESSAGE);
 		
 		loadEntityTypes.setSystem(true);
 		loadEntityTypes.schedule(0);
@@ -311,7 +315,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		
 		attributeControls = new ArrayList<AttributeFieldEditor>();
 		attributePanel.setLayout(new GridLayout(2, false));
-		
+		((GridLayout)attributePanel.getLayout()).horizontalSpacing = 7;
 		SelectionListener listener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -320,6 +324,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		};
 		AttributeFieldEditor editor = new AttributeFieldEditor(attributePanel, type.getIdAttribute());
 		editor.addSelectionListener(listener);
+		addDuplicateIdChecker(editor);
 		attributeControls.add(editor);
 		
 		Label ll = new Label(attributePanel, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -333,6 +338,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		Composite content = new Composite(sc, SWT.NONE);
 		sc.setContent(content);
 		content.setLayout(new GridLayout(2, false));
+		((GridLayout)content.getLayout()).horizontalSpacing = 7;
 		type.getAttributes().stream()
 			.filter(a -> a.getAttributeGroup() != null)
 			.map(a -> a.getAttributeGroup())
@@ -393,5 +399,34 @@ public class NewEntityDialog extends TitleAreaDialog{
 		return true;
 	}
 	
+	private void addDuplicateIdChecker(AttributeFieldEditor editor){
+		//check for duplicate identifiers
+		editor.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Object type = ((IStructuredSelection)cmbEntityType.getSelection()).getFirstElement();
+				if (!(type instanceof IntelEntityType)) return;
+				
+				Session session = HibernateManager.openSession();
+				try{
+					IntelEntityType etype = (IntelEntityType)session.get(IntelEntityType.class, ((IntelEntityType)type).getUuid());
+					IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
+					tmp.setAttribute(etype.getIdAttribute());
+					editor.updateValue(tmp);
+					if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, null)){
+						String warnMessage = "Duplicate Identifiers - an entity with this identifier already exists in the database"; 
+						setMessage(warnMessage, IMessageProvider.WARNING);
+						editor.setWarningMessage(warnMessage);
+					}else{
+						setMessage(MESSAGE);
+						editor.setWarningMessage(null);
+					}
+				}finally{
+					session.close();
+				}
+			}
+		});
+		
+	}
 	
 }

@@ -28,9 +28,12 @@ import java.util.UUID;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
+import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
  * Entity manager
@@ -41,6 +44,69 @@ import org.wcs.smart.i2.model.IntelEntityLocation;
 public enum EntityManager {
 	
 	INSTANCE;
+	
+	/**
+	 * Checks for another entity of the same type in the same conservation area with the provided
+	 * id.
+	 * 
+	 * @param newId
+	 * @param type
+	 * @param ca
+	 * @param session
+	 * @return
+	 */
+	public boolean isDuplicateId(Object newId, IntelEntityType type, ConservationArea ca, Session session, UUID currentEntity){
+		if (newId == null) return false;
+		
+		IntelAttribute attribute = type.getIdAttribute();
+		String query = "SELECT count(*) FROM IntelEntity e join e.attributes as v where e.conservationArea = :ca and e.entityType = :type and v.id.attribute = :attribute ";
+		switch(attribute.getType()){
+			case BOOLEAN:
+				return false;	//don't both checking we will always have duplicates
+			case DATE:
+				query += " and v.stringValue = :test";
+				break;
+			case LIST:
+				query += " and v.attributeListItem = :test";
+				break;
+			case NUMERIC:
+				query += " and v.numberValue = :test";
+				break;
+			case TEXT:
+				query += " and v.stringValue = :test "; 
+				break;		
+		}
+		
+		if (currentEntity != null){
+			query += " AND e.uuid != :entity ";
+		}
+		Query hql = session.createQuery(query);
+		hql.setParameter("attribute", type.getIdAttribute());
+		hql.setParameter("ca", ca);
+		hql.setParameter("type", type);
+		switch(attribute.getType()){
+			case BOOLEAN: 
+				return false; // not supported
+			case DATE:
+				hql.setParameter("test", ((java.sql.Date)newId).toString());
+				break;
+			case LIST:
+			case NUMERIC:
+			case TEXT:
+				hql.setParameter("test", newId);
+				break;
+				
+		}
+		if (currentEntity != null){
+			hql.setParameter("entity",  currentEntity);
+		}
+
+		long cnt = (Long) hql.uniqueResult();
+		if (cnt > 0) return true;
+		return false;
+		
+	}
+	
 	
 	public void deleteEntity(IntelEntity entity, Session session) throws Exception{
 

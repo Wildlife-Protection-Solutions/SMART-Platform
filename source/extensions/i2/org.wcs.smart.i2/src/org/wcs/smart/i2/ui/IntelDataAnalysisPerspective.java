@@ -28,6 +28,7 @@ import org.locationtech.udig.project.ui.internal.LayersView;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.QueryView;
+import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordsView;
 import org.wcs.smart.i2.ui.views.WorkingSetView;
 
@@ -67,6 +68,7 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
 			IFolderLayout bottomFolder = layout.createFolder("org.wcs.smart.i2.analysis.rightbottom", IPageLayout.BOTTOM, 0.7f, "org.wcs.smart.i2.analysis.right");
 			bottomFolder.addView(WorkingSetView.ID);
+			bottomFolder.addPlaceholder(RecordNarrativeView.ID);
 			layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 		}
 	}
