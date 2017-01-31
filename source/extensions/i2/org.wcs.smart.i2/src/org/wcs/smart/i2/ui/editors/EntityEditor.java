@@ -159,6 +159,7 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.i2.model.IntelEntityRelationship.Source;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -303,6 +304,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 								e.getAttributeListItem().getName();
 							}
 						});
+					}
+					if (r.getSourceId() != null){
+						if (r.getSource().equals(Source.ENTITY)){
+							IntelEntity src = (IntelEntity) s.get(IntelEntity.class, r.getSourceId());
+							src.getIdAttributeAsText();
+							r.setSourceObject(src);
+						}else if (r.getSource().equals(Source.RECORD)){
+							IntelRecord src = (IntelRecord)s.get(IntelRecord.class, r.getSourceId());
+							src.getTitle();
+							r.setSourceObject(src);
+						}
 					}
 				}
 				
@@ -1091,7 +1103,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		return this.isDirty;
 	}
 	
-	private void openRelationship(IntelEntity toOpen){
+	private void openEntity(IntelEntity toOpen){
 		(new OpenEntityHandler()).openEntity(toOpen, context);
 	}
 	private void deleteRelationship(){
@@ -1115,7 +1127,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 		IntelEntity e2 = targetEntity;
 		IntelEntityRelationship newRelationship = new IntelEntityRelationship();
 		newRelationship.setRelationshipType(rType);
-		
+		newRelationship.setSource(IntelEntityRelationship.Source.ENTITY);
+		newRelationship.setSourceId(entity.getUuid());
+		newRelationship.setSourceObject(entity);
 		boolean add = false;
 		if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
 			newRelationship.setSourceEntity(e1);
@@ -1240,17 +1254,30 @@ public class EntityEditor extends EditorPart implements MapPart{
 			@Override
 			public void handleEvent(Event event) {
 				int colIndex = treeRelationships.getCell(new Point(event.x, event.y)).getColumnIndex();
-				if (colIndex == 3){
+				if (colIndex == 4){
 					Object x = ((IStructuredSelection)treeRelationships.getSelection()).getFirstElement();
 					if (x instanceof IntelEntityRelationship){
 						editRelationshipAttributes((IntelEntityRelationship) x);
+					}
+				}else if (colIndex == 3){
+					//source
+					Object x = ((IStructuredSelection)treeRelationships.getSelection()).getFirstElement();
+					if (x instanceof IntelEntityRelationship){
+						IntelEntityRelationship r = (IntelEntityRelationship)x;
+						if (r.getSourceObject() != null){
+							if (r.getSource() == Source.ENTITY && !r.getSourceObject().equals(getEntity())){
+								openEntity((IntelEntity)r.getSourceObject());
+							}else if (r.getSource() == Source.RECORD){
+								openRecord((IntelRecord)r.getSourceObject());
+							}
+						}
 					}
 				}else if (colIndex == 1){
 					Object x = ((IStructuredSelection)treeRelationships.getSelection()).getFirstElement();
 					if (x instanceof IntelEntityRelationship){
 						IntelEntityRelationship r = (IntelEntityRelationship)x;
 						if (!r.getSourceEntity().equals(getEntity())){
-							openRelationship(r.getSourceEntity());
+							openEntity(r.getSourceEntity());
 						}
 					}
 				}else if (colIndex == 2){
@@ -1258,7 +1285,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					if (x instanceof IntelEntityRelationship){
 						IntelEntityRelationship r = (IntelEntityRelationship)x;
 						if (!r.getTargetEntity().equals(getEntity())){
-							openRelationship(r.getTargetEntity());
+							openEntity(r.getTargetEntity());
 						}
 					}
 				}
@@ -1282,9 +1309,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		colRelationshipTrg.getColumn().setWidth(150);
 		colRelationshipTrg.setLabelProvider(new RelationshipLabelProvider(2));
 		
+		TreeViewerColumn colSource = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
+		colSource.getColumn().setText("Source");
+		colSource.getColumn().setWidth(75);
+		colSource.setLabelProvider(new RelationshipLabelProvider(3));
+		
 		TreeViewerColumn colAttributes = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
 		colAttributes.getColumn().setText("Attributes");
-		colAttributes.setLabelProvider(new RelationshipLabelProvider(3));
+		colAttributes.setLabelProvider(new RelationshipLabelProvider(4));
 		treeRelationships.getTree().addPaintListener(new PaintListener() {			
 			@Override
 			public void paintControl(PaintEvent e) {
@@ -1295,7 +1327,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		//create table listener for displaying entity relationship info
-		new AbstractEntityEditorShellListener<IntelEntityRelationship, EntityRelationshipDetailsShell>(treeRelationships, 3) {			
+		new AbstractEntityEditorShellListener<IntelEntityRelationship, EntityRelationshipDetailsShell>(treeRelationships, 4) {			
 			@Override
 			protected EntityRelationshipDetailsShell getShellDialog(IntelEntityRelationship currentSelection) {
 				if (currentSelection instanceof IntelEntityRelationship){
@@ -1351,7 +1383,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						mnuOpen.addSelectionListener(new SelectionAdapter() {
 							@Override
 							public void widgetSelected(SelectionEvent e) {
-								openRelationship(r.getTargetEntity());
+								openEntity(r.getTargetEntity());
 							}
 						});
 					}else if (r.getTargetEntity().equals(getEntity())){
@@ -1359,7 +1391,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						mnuOpen.addSelectionListener(new SelectionAdapter() {
 							@Override
 							public void widgetSelected(SelectionEvent e) {
-								openRelationship(r.getSourceEntity());
+								openEntity(r.getSourceEntity());
 							}
 						});
 					}
@@ -1484,9 +1516,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (tblRecords.getSelection().isEmpty()) return;
 		Object x = ((IStructuredSelection)tblRecords.getSelection()).getFirstElement();
 		if (x instanceof IntelRecord){
-			(new OpenRecordHandler()).openRecord((IntelRecord) x, false);
+			openRecord((IntelRecord)x);
 		}
 	}
+	
+	private void openRecord(IntelRecord record){
+		(new OpenRecordHandler()).openRecord((IntelRecord) record, false);
+	}
+	
 	private void createAttachmentPanel(Composite parent){
 		
 		attachmentEditPanel = toolkit.createComposite(parent);
@@ -1927,6 +1964,25 @@ public class EntityEditor extends EditorPart implements MapPart{
 				return r.getTargetEntity().getIdAttributeAsText();
 			}
 		}else if (columnIndex == 3){
+			if (element instanceof IntelEntityRelationship){
+				IntelEntityRelationship r = (IntelEntityRelationship) element;
+				if (r.getSourceObject() == null){
+					switch(r.getSource()){
+					case ENTITY:
+						return "Entity";
+					case RECORD: 
+						return "Record";
+					}
+				}else{
+					switch(r.getSource()){
+					case ENTITY:
+						return MessageFormat.format("Entity: {0}", ((IntelEntity)r.getSourceObject()).getIdAttributeAsText());
+					case RECORD: 
+						return MessageFormat.format("Record: {0}", ((IntelRecord)r.getSourceObject()).getTitle());
+					}
+				}
+			}
+		}else if (columnIndex == 4){
 			if (element instanceof IntelEntityRelationship){
 				
 				StringBuilder sb = new StringBuilder();

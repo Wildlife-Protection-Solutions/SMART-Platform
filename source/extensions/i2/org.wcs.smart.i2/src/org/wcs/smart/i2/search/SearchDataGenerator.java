@@ -43,6 +43,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelEntityRelationship.Source;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -389,6 +390,8 @@ public class SearchDataGenerator {
 			int rcnt = 0;
 			for (IntelRelationshipType t : relationshipTypes){
 				IntelEntityRelationship relation = new IntelEntityRelationship();
+				relation.setSource(Source.ENTITY);
+				relation.setSourceId(entity.getUuid());
 				relation.setRelationshipType(t);
 				if (t.getSourceEntityType() == null || t.getSourceEntityType().equals(entity.getEntityType())){
 					relation.setSourceEntity(entity);

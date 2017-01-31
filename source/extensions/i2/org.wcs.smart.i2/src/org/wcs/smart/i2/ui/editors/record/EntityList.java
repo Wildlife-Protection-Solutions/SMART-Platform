@@ -356,7 +356,9 @@ public class EntityList extends Composite {
 		
 		IntelEntityRelationship newRelationship = new IntelEntityRelationship();
 		newRelationship.setRelationshipType(rType);
-		
+		newRelationship.setSource(IntelEntityRelationship.Source.RECORD);
+		newRelationship.setSourceId(listParent.getEditor().getRecord().getUuid());
+		newRelationship.setSourceObject(listParent.getEditor().getRecord());
 		boolean add = false;
 		if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
 			newRelationship.setSourceEntity(e1);

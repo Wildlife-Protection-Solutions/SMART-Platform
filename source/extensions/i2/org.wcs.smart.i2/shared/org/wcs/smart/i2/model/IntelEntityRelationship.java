@@ -22,14 +22,19 @@
 package org.wcs.smart.i2.model;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
 
@@ -43,6 +48,10 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.i_entity_relationship")
 public class IntelEntityRelationship extends UuidItem{
 
+	public enum Source{
+		ENTITY,
+		RECORD
+	}
 	private IntelEntity srcEntity;
 	private IntelEntity targetEntity;
 	
@@ -50,6 +59,11 @@ public class IntelEntityRelationship extends UuidItem{
 
 	private List<IntelEntityRelationshipAttributeValue> attributes;
 
+	//source of relationship
+	private Source source;
+	private UUID sourceId;
+	private Object sourceObject;	//transient and must be loaded by user if expect to use
+	
 	/**
 	 * Constructor.
 	 */
@@ -140,4 +154,51 @@ public class IntelEntityRelationship extends UuidItem{
 		this.attributes = attributes;
 	}
 
+	/**
+	 * Get the relationship source
+	 * @return
+	 */
+	@Column(name="source")
+	@Enumerated(EnumType.STRING)
+	public Source getSource(){
+		return this.source;
+	}
+	
+	/**
+	 * Sets the relationship srouce
+	 * @param source
+	 */
+	public void setSource(Source source){
+		this.source = source;
+	}
+	
+	/**
+	 * Get the relationship source identifier; if applicable
+	 * @return
+	 */
+	@Column(name="source_uuid")
+	public UUID getSourceId(){
+		return this.sourceId;
+	}
+	
+	/**
+	 * Sets the relationship srouce
+	 * @param source
+	 */
+	public void setSourceId(UUID sourceId){
+		this.sourceId = sourceId;
+	}
+	
+	/**
+	 * Source object; transient and must be set by user
+	 * @param source
+	 */
+	@Transient
+	public void setSourceObject(Object source){
+		this.sourceObject = source;
+	}
+	@Transient
+	public Object getSourceObject(){
+		return this.sourceObject;
+	}
 }

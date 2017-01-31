@@ -38,8 +38,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.IntelEntityRelationship.Source;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
@@ -120,11 +123,37 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		topDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label ll = new Label(topDetails, SWT.NONE);
-		ll.setText("Source Entity:");
+		ll.setText("Source:");
 		ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		fd = ll.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		boldFont = new Font(owner.getDisplay(), fd);
+		ll.setFont(boldFont);
+		ll.addDisposeListener(e->boldFont.dispose());
+		
+		ll = new Label(topDetails, SWT.NONE);
+		String text = "Unknown";
+		if (relationship.getSource() == Source.ENTITY ){
+			if (relationship.getSourceObject() != null){
+				text = MessageFormat.format("Entity - {0}", ((IntelEntity)relationship.getSourceObject()).getIdAttributeAsText());
+			}else{
+				text = "Entity";
+			}
+		}else if (relationship.getSource() == Source.RECORD){
+			if (relationship.getSourceObject() != null){
+				text = MessageFormat.format("Record - {0}", ((IntelRecord)relationship.getSourceObject()).getTitle());
+			}else{
+				text = "Record";
+			}
+		}else if (relationship.getSource() != null){
+			text = relationship.getSource().name();
+		}
+		ll.setText(text);
+		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		ll = new Label(topDetails, SWT.NONE);
+		ll.setText("Source Entity:");
+		ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		ll.setFont(boldFont);
 		
 		ll = new Label(topDetails, SWT.NONE);
