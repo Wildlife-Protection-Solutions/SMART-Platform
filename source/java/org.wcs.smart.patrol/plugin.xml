@@ -8,7 +8,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.fielddata?before=org.wcs.smart.fielddata">
+            locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.fielddata">
          <menu
                id="org.wcs.smart.menu.patrol"
                label="%patrol.menu.label"
