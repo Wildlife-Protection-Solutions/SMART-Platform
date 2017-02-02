@@ -326,6 +326,8 @@ function showParamaterSelection(){
 	document.getElementById("paramaters_fieldset").style.display = "none";
 	parent.innerHTML = "";
 	var json = JSON.parse(this.responseText);
+	parameterNames.length = 0; //clear the array so we don't parameters from the last report that was run.
+	
  	for (var i = 0; i < json.length; i++){
  		if(json[i].type == "GROUP"){
  			if (json[i].name=="Report Dates"){
