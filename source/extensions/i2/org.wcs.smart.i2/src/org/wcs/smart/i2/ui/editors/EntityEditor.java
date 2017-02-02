@@ -308,12 +308,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 					if (r.getSourceId() != null){
 						if (r.getSource().equals(Source.ENTITY)){
 							IntelEntity src = (IntelEntity) s.get(IntelEntity.class, r.getSourceId());
-							src.getIdAttributeAsText();
-							r.setSourceObject(src);
+							if (src != null){
+								src.getIdAttributeAsText();
+								r.setSourceObject(src);
+							}
 						}else if (r.getSource().equals(Source.RECORD)){
 							IntelRecord src = (IntelRecord)s.get(IntelRecord.class, r.getSourceId());
-							src.getTitle();
-							r.setSourceObject(src);
+							if (src != null){
+								src.getTitle();
+								r.setSourceObject(src);
+							}
 						}
 					}
 				}

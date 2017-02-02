@@ -41,9 +41,9 @@ public class AttributeLabelProvider extends LabelProvider {
 		if (element instanceof IntelAttribute){
 			return ((IntelAttribute) element).getName();
 		}else if (element instanceof IntelEntityTypeAttribute){
-			return ((IntelEntityTypeAttribute)element).getAttribute().getName();
+			return getText(((IntelEntityTypeAttribute)element).getAttribute());
 		}else if (element instanceof IntelRelationshipTypeAttribute){
-			return ((IntelRelationshipTypeAttribute)element).getAttribute().getName();
+			return getText(((IntelRelationshipTypeAttribute)element).getAttribute());
 		}
 		return super.getText(element);
 	}

@@ -104,7 +104,7 @@ public class AddIntelligenceJob extends Job {
 				 "CREATE TABLE smart.i_location(uuid char(16) for bit data NOT NULL,ca_uuid char(16) for bit data NOT NULL,geometry blob NOT NULL,datetime timestamp,comment varchar(4096),id varchar(1028),record_uuid char(16) for bit data,PRIMARY KEY (uuid))",
 				 "CREATE TABLE smart.i_observation(uuid char(16) for bit data NOT NULL,location_uuid char(16) for bit data NOT NULL,category_uuid char(16)for bit data ,PRIMARY KEY (uuid))",
 				 "CREATE TABLE smart.i_observation_attribute(observation_uuid char(16) for bit data NOT NULL,attribute_uuid char(16) for bit data NOT NULL,list_element_uuid char(16) for bit data,tree_node_uuid char(16) for bit data,string_value varchar(1024),double_value double,PRIMARY KEY (observation_uuid, attribute_uuid))",
-				 "CREATE TABLE smart.i_record(uuid char(16) for bit data NOT NULL,ca_uuid char(16) for bit data NOT NULL,title varchar(1024) NOT NULL,date_created timestamp NOT NULL,last_modified_date timestamp,created_by char(16) for bit data NOT NULL,last_modified_by char(16) for bit data,date_exported timestamp,status varchar(16) NOT NULL,description long varchar,comment long varchar, PRIMARY KEY (uuid))",
+				 "CREATE TABLE smart.i_record(uuid char(16) for bit data NOT NULL,ca_uuid char(16) for bit data NOT NULL,source_uuid char(16) for bit data not null, title varchar(1024) NOT NULL,date_created timestamp NOT NULL,last_modified_date timestamp,created_by char(16) for bit data NOT NULL,last_modified_by char(16) for bit data,date_exported timestamp,status varchar(16) NOT NULL,description long varchar,comment long varchar, PRIMARY KEY (uuid))",
 				 "CREATE TABLE smart.i_record_attachment(record_uuid char(16) for bit data NOT NULL,attachment_uuid char(16) for bit data NOT NULL,PRIMARY KEY (record_uuid, attachment_uuid))",
 				 "CREATE TABLE smart.i_record_obs_query(uuid char(16) for bit data NOT NULL,ca_uuid char(16) for bit data NOT NULL,style long varchar,query_string long varchar,column_filter long varchar,date_created timestamp NOT NULL,last_modified_date timestamp,created_by char(16) for bit data NOT NULL,last_modified_by char(16) for bit data,PRIMARY KEY (uuid))",
 				 "CREATE TABLE smart.i_relationship_type_attribute(relationship_type_uuid char(16) for bit data NOT NULL,attribute_uuid char(16) for bit data NOT NULL,seq_order integer not null,PRIMARY KEY (relationship_type_uuid, attribute_uuid))",
@@ -114,8 +114,15 @@ public class AddIntelligenceJob extends Job {
 				 "CREATE TABLE smart.i_working_set_entity(working_set_uuid char(16) for bit data NOT NULL,entity_uuid char(16) for bit data NOT NULL,map_style long varchar,is_visible boolean not null default true,PRIMARY KEY (working_set_uuid, entity_uuid))",
 				 "CREATE TABLE smart.i_working_set_query(working_set_uuid char(16) for bit data NOT NULL,query_uuid char(16) for bit data NOT NULL,date_filter varchar(1024),map_style long varchar,is_visible boolean not null default true,PRIMARY KEY (working_set_uuid, query_uuid))",
 				 "CREATE TABLE smart.i_working_set_record(working_set_uuid char(16) for bit data NOT NULL,record_uuid char(16) for bit data NOT NULL,map_style long varchar,is_visible boolean not null default true,PRIMARY KEY (working_set_uuid, record_uuid))",
+				 
+				"CREATE TABLE smart.i_record_attribute_value(uuid char(16) for bit data NOT NULL, record_uuid char(16) for bit data NOT NULL,attribute_uuid char(16) for bit data NOT NULL,string_value varchar(1024),double_value double, PRIMARY KEY (uuid), UNIQUE(record_uuid, attribute_uuid))",
+				"CREATE TABLE smart.i_record_attribute_value_list(value_uuid char(16) for bit data not null, element_uuid char(16) for bit data not null, primary key (value_uuid, element_uuid))",
+				"CREATE TABLE smart.i_recordsource_attribute(uuid char(16) for bit data, source_uuid char(16) for bit data NOT NULL,attribute_uuid char(16) for bit data, entity_type_uuid char(16) for bit data, seq_order integer,  is_multi boolean, PRIMARY KEY(uuid), UNIQUE (source_uuid, attribute_uuid, entity_type_uuid))",
+				"CREATE TABLE smart.i_recordsource (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, keyid varchar(128) not null, icon blob, PRIMARY KEY (uuid))",
+					
 				 // Create Foreign Keys
 				 "ALTER TABLE smart.i_location ADD CONSTRAINT ilocation_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				 "ALTER TABLE smart.i_location ADD CONSTRAINT location_recorduuid_fk FOREIGN KEY (record_uuid) REFERENCES smart.i_record (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 				 "ALTER TABLE smart.i_entity_search ADD CONSTRAINT ientitysearch_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 				 "ALTER TABLE smart.i_attribute ADD CONSTRAINT iattribute_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 				 "ALTER TABLE smart.i_datamodel_event ADD CONSTRAINT idatamodelevent_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
@@ -180,6 +187,18 @@ public class AddIntelligenceJob extends Job {
 				 "ALTER TABLE smart.i_working_set_record ADD CONSTRAINT iworkingsetrecord_workingset_fk FOREIGN KEY (working_set_uuid) REFERENCES smart.i_working_set (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 				 "ALTER TABLE smart.i_working_set_entity ADD CONSTRAINT iworkginsetentity_workingset_fk FOREIGN KEY (working_set_uuid) REFERENCES smart.i_working_set (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 				 "ALTER TABLE smart.i_relationship_group ADD CONSTRAINT relationshipgroup_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				 
+				"ALTER TABLE smart.i_recordsource ADD CONSTRAINT irecordsource_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_recordsource_attribute ADD CONSTRAINT irecordsourceattribute_sourceuuid_fk FOREIGN KEY (source_uuid) REFERENCES smart.i_recordsource (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_recordsource_attribute ADD CONSTRAINT irecordsourceattribute_attributeuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.i_attribute (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_recordsource_attribute ADD CONSTRAINT irecordsourceattribute_entitytypeuuid_fk FOREIGN KEY (entity_type_uuid) REFERENCES smart.i_entity_type (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_record_attribute_value ADD CONSTRAINT irecordattvalue_sourceuuid_fk FOREIGN KEY (record_uuid) REFERENCES smart.i_record (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_record_attribute_value ADD CONSTRAINT irecordattvalue_attributeuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.i_recordsource_attribute (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_record_attribute_value ADD CONSTRAINT irecordattvalue_list_fk FOREIGN KEY (list_item_uuid) REFERENCES smart.i_attribute_list_item (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_record ADD CONSTRAINT irecord_sourceuuid_fk FOREIGN KEY (source_uuid) REFERENCES smart.i_recordsource (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_record_attribute_value_list ADD CONSTRAINT i_recordattributelist_valueuuid_fk FOREIGN KEY (value_uuid) REFERENCES smart.i_record_attribute_value (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				
+				 
 				 // FUNCTIONS AND TRIGGERS FOR METAPHONE FUZZY SEARCH
 				 "create function smart.metaphoneContains (metaphone varchar(4), searchstring varchar(32600))  returns boolean LANGUAGE JAVA PARAMETER STYLE JAVA DETERMINISTIC NO SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME 'org.wcs.smart.i2.search.DerbyFuzzyFunctions.metaphoneContains'",
 				 "create function smart.double_metaphone (string varchar(32600))  returns varchar(32600) LANGUAGE JAVA PARAMETER STYLE JAVA DETERMINISTIC NO SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME 'org.wcs.smart.i2.search.DerbyFuzzyFunctions.doubleMetaphone'",

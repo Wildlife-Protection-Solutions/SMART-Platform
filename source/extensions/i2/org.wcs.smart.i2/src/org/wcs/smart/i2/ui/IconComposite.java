@@ -140,6 +140,11 @@ public class IconComposite extends Composite {
 	}
 	
 	public void setImage(byte[] img){
+		if (img == null){
+			imageData = null;
+			image.setImage(null);
+			return;
+		}
 		imageData = img;
 		try(ByteArrayInputStream in = new ByteArrayInputStream(img)){
 			BufferedImage swtImage = ImageIO.read(in);

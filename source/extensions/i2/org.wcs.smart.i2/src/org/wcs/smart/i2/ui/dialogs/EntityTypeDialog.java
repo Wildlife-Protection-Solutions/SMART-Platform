@@ -30,12 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -48,7 +46,6 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -61,7 +58,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -69,8 +65,6 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -101,19 +95,16 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.IconComposite;
-import org.wcs.smart.i2.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
  * Dialog for editing entity types.
@@ -123,7 +114,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class EntityTypeDialog extends TitleAreaDialog {
 
-	private IntelEntityType type;
+	IntelEntityType type;
 	private NameKeyComposite nameKeyInfo;
 	private IconComposite icon;
 	private List<IntelEntityType> entityTypeSiblings;
@@ -145,13 +136,12 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private ControlDecoration cdList;
 	private ControlDecoration cdId;
 	
-	private List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
+	List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
 	private List<IntelEntityTypeAttributeGroup> groups = new ArrayList<IntelEntityTypeAttributeGroup>();
 	
 	@Inject
 	private IEventBroker broker;
-	@Inject
-	private IEclipseContext context;
+	@Inject IEclipseContext context;
 	
 	@Inject
 	public EntityTypeDialog(Shell parentShell, IntelEntityType type) {
@@ -756,8 +746,20 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				parent = ((IntelEntityTypeAttribute) x).getAttributeGroup();
 			}
 		}
-		AttributeListDialog dialog = new AttributeListDialog(getShell(), parent);
+		
+		SelectAttributeDialog dialog = new SelectAttributeDialog(getShell(), MessageFormat.format("Add attributes for entity type {0}", type.getName()));
+		ContextInjectionFactory.inject(dialog, context);
 		if (dialog.open() == Window.OK){
+			
+			for (IntelAttribute ia : dialog.getSelectedAttributes()){
+				IntelEntityTypeAttribute a  = new IntelEntityTypeAttribute();
+				a.setAttribute((IntelAttribute) ia);
+				a.setEntityType(type);
+				a.setAttributeGroup(parent);
+				if (!attributeList.contains(a)) attributeList.add(a);
+			}
+			
+			
 			treeAttributes.refresh();
 			if (type.getIdAttribute() == null){
 				type.setIdAttribute(attributeList.get(0).getAttribute());
@@ -975,157 +977,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	
-	private class AttributeListDialog extends TitleAreaDialog{
-		private CheckboxTableViewer attributeList;
-		private NamedItemViewerFilter filter;
-		private IntelEntityTypeAttributeGroup group;
-		
-		private Job loadAttributes = new LoadAttributesJob(){
-			@Override
-			public void afterLoad() {
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						attributeList.setInput(attributes);
-					}					
-				});
-			}
-			
-		};
-		public AttributeListDialog(Shell parentShell, IntelEntityTypeAttributeGroup group) {
-			super(parentShell);
-			this.group = group;
-		}
-
-		@Override
-		protected Point getInitialSize() {
-			Point p = super.getInitialSize();
-			return new Point(p.x,(int)(p.y*1.4));
-		}
-
-		
-		protected void okPressed() {
-			for (Object selection : attributeList.getCheckedElements()){
-				if (selection instanceof IntelAttribute){
-					IntelEntityTypeAttribute a  = new IntelEntityTypeAttribute();
-					a.setAttribute((IntelAttribute) selection);
-					a.setEntityType(EntityTypeDialog.this.type);
-					a.setAttributeGroup(group);
-					if (!EntityTypeDialog.this.attributeList.contains(a)) EntityTypeDialog.this.attributeList.add(a);
-				}
-			}
-			super.okPressed();
-		}
-
-		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,true);
-			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
-		}
-		
-		
-		@Override
-		protected Control createDialogArea(Composite parent) {
-			parent = (Composite) super.createDialogArea(parent);
-			parent = new Composite(parent, SWT.NONE);
-			parent.setLayout(new GridLayout());
-			parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-			FilterComposite typeFilter = new FilterComposite(parent, SWT.NONE);
-			typeFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			typeFilter.addChangeListener(new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					filter.setFilterString(typeFilter.getPatternFilter());
-				}
-			});
-			
-			attributeList = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
-			attributeList.setContentProvider(ArrayContentProvider.getInstance());
-			attributeList.setLabelProvider(new AttributeLabelProvider());
-			attributeList.setInput(new String[]{DialogConstants.LOADING_TEXT});
-			attributeList.getControl().setFocus();
-			attributeList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			attributeList.getTable().addKeyListener(new KeyAdapter() {
-				//spacebar check
-				@Override
-				public void keyPressed(KeyEvent e) {
-					if (attributeList.getSelection().isEmpty()){
-						return;
-					}
-					if (e.keyCode == SWT.SPACE){
-						IStructuredSelection selection = ((IStructuredSelection)attributeList.getSelection());
-						selection.getFirstElement();
-						boolean value = attributeList.getChecked(selection.getFirstElement() );
-						for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-							Object tp = (Object) iterator.next();
-							attributeList.setChecked(tp, !value);
-						}
-						e.doit = false;
-								
-					}
-					
-				}
-			});
-			filter = new NamedItemViewerFilter(attributeList);
-			attributeList.setFilters(new ViewerFilter[]{filter});
-			attributeList.addDoubleClickListener(new IDoubleClickListener() {
-				
-				@Override
-				public void doubleClick(DoubleClickEvent event) {
-					attributeList.setChecked( ((IStructuredSelection)attributeList.getSelection()).getFirstElement(), true );
-					okPressed();
-					
-				}
-			});
-			Button btnNew = new Button(parent, SWT.PUSH);
-			btnNew.setText("Create New Attribute");
-			btnNew.addSelectionListener(new SelectionAdapter() {
-				
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					if (newAttribute()){
-						AttributeListDialog.this.okPressed();
-					}
-				}
-			});
-			setTitle("Entity Type Attributes");
-			getShell().setText("Entity Type Attributes");
-			setMessage(MessageFormat.format("Add attributes for entity type {0}", type.getName()));
-			
-			loadAttributes.setSystem(true);
-			loadAttributes.schedule(0);
-			
-			return parent;
-		}
-		
-		private boolean newAttribute(){
-			IntelAttribute attribute = new IntelAttribute();
-			attribute.setConservationArea(SmartDB.getCurrentConservationArea());
-			attribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
-			if (type.getAttributes() == null) type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
-			AttributeDialog.showAttributeDialog(getShell(), attribute, context);
-			
-			if (attribute.getUuid() != null){
-				IntelEntityTypeAttribute eta = new IntelEntityTypeAttribute();
-				eta.setAttribute(attribute);
-				eta.setEntityType(type);
-				eta.setAttributeGroup(group);
-				if (!EntityTypeDialog.this.attributeList.contains(eta)) EntityTypeDialog.this.attributeList.add(eta);
-				
-				attributeList.refresh();
-				return true;
-			}else{
-				return false;
-			}
-		}
-		
-		
-		@Override
-		public boolean isResizable(){
-			return true;
-		}	
-	}
 	
 	private class AttributeTreeContentProvider implements ITreeContentProvider{
 

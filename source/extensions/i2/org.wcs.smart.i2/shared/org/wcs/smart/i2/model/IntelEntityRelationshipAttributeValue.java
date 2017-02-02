@@ -22,20 +22,16 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 /**
  * Model class of i_entity_relationship_attribute.
@@ -45,13 +41,10 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
  */
 @Entity
 @Table(name="smart.i_entity_relationship_attribute_value")
-public class IntelEntityRelationshipAttributeValue {
+public class IntelEntityRelationshipAttributeValue extends IntelValueItem{
 
 	private IEntityRelationshipAttributeValuePk id = new IEntityRelationshipAttributeValuePk();
 	
-	private String stringValue;
-	private Double doubleValue;
-	private IntelAttributeListItem listItem;
 
 	/**
 	 * Constructor.
@@ -75,6 +68,7 @@ public class IntelEntityRelationshipAttributeValue {
 		id.setRelationship(entity);
 	}
 	
+	@Override
 	@Transient
 	public IntelAttribute getAttribute(){
 		return id.getAttribute();
@@ -82,31 +76,6 @@ public class IntelEntityRelationshipAttributeValue {
 	
 	public void setAttribute(IntelAttribute attribute){
 		id.setAttribute(attribute);
-	}
-	
-	@ManyToOne(fetch =FetchType.LAZY)
-	@JoinColumn(name="list_item_uuid", referencedColumnName="uuid")
-	public IntelAttributeListItem getAttributeListItem(){
-		return this.listItem;
-	}
-	public void setAttributeListItem(IntelAttributeListItem listItem){
-		this.listItem = listItem;
-	}
-		
-	@Column(name="string_value")
-	public String getStringValue(){
-		return this.stringValue;
-	}
-	public void setStringValue(String stringValue){
-		this.stringValue = stringValue;
-	}
-	
-	@Column(name="double_value")
-	public Double getNumberValue(){
-		return this.doubleValue;
-	}
-	public void setNumberValue(Double doubleValue){
-		this.doubleValue = doubleValue;
 	}
 	
 	/**
@@ -127,55 +96,6 @@ public class IntelEntityRelationshipAttributeValue {
 	@Override
 	public int hashCode(){
 		return id.hashCode();
-	}
-	
-	
-	/**
-	 * 
-	 * @return the value of the observation based
-	 * on the attribute type.
-	 */
-	@Transient
-	public Object getAttributeValue(){
-		AttributeType type = getAttribute().getType();
-		if (type == AttributeType.BOOLEAN ||
-				type == AttributeType.NUMERIC){
-			return getNumberValue();
-		}else if (type == AttributeType.TEXT){
-			return getStringValue();
-		}else if (type == AttributeType.LIST){
-			return getAttributeListItem();
-		}else if (type == AttributeType.DATE){
-			return getDateValue();
-		}
-		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
-	}
-	
-	@Transient
-	public void setDateValue(Date date){
-		if (date == null){
-			setStringValue(null);
-			return;
-		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
-	}
-	
-	/**
-	 * Date attribute types are stored
-	 * as in the string field in the ISO8601 format
-	 * of yyyy-mm-dd.  This is a transient
-	 * function which converts the string value to 
-	 * a date.
-	 * 
-	 * @return
-	 */
-	@Transient
-	public Date getDateValue(){
-		if (getStringValue() == null){
-			return null;
-		}
-		return java.sql.Date.valueOf(getStringValue());
 	}
 	
 	/**
@@ -215,32 +135,16 @@ public class IntelEntityRelationshipAttributeValue {
 		
 		@Override
 		public boolean equals(Object key) {
-			if (! (key instanceof IEntityRelationshipAttributeValuePk)){
-				return false;
-			}
+			if (this == key) return true;
+			if (key == null) return false;
+			if (getClass() != key.getClass()) return false;
 			IEntityRelationshipAttributeValuePk p = (IEntityRelationshipAttributeValuePk)key;
-			
-			if (p.relationship == null || this.relationship == null ||
-				p.attribute == null || this.attribute == null ){
-				
-				if (p.relationship == null && this.relationship == null && 
-					p.attribute == null && this.attribute == null){
-						return true;
-				}
-				return false;
-			}
-			
-			return p.relationship.equals(this.relationship) &&
-					p.attribute.equals(this.attribute);
+			return Objects.equals(relationship, p.relationship) && Objects.equals(attribute, p.attribute);
 		}
 		
 		@Override
 		public int hashCode() {
-		    int code = 0;
-		    if (relationship != null) {code += relationship.hashCode();}
-		    code *= 31;
-		    if (attribute != null) {code += attribute.hashCode(); }
-		    return code;
+			return Objects.hash(relationship, attribute);
 		  }
 	}
 }

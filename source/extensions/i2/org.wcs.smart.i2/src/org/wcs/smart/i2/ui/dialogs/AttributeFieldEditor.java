@@ -35,6 +35,7 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ui.OnOffButton;
 import org.wcs.smart.util.SmartUtils;
@@ -199,6 +200,53 @@ public class AttributeFieldEditor {
 		return add;
 	}
 	
+	public boolean updateValue(IntelRecordAttributeValue value){
+		boolean add = false;
+		if (attribute.getType() == AttributeType.BOOLEAN){
+			if (((OnOffButton)btnOnOff).isEnabled()){
+				add = true;
+				if (((OnOffButton)btnOnOff).getSelection()){
+					value.setNumberValue(1d);
+				}else{
+					value.setNumberValue(0d);
+				}
+			}
+		}else if (attribute.getType() == AttributeType.DATE){
+			if (((DateTime)dtDateTime).getEnabled()){
+				add = true;
+				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
+			}
+		}else if (attribute.getType() == AttributeType.LIST){
+			//TODO:
+//			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
+//			if (!selection.isEmpty()){
+//				Object item = selection.getFirstElement();
+//				if (item instanceof IntelAttributeListItem){
+//					add = true;
+//					value.setAttributeListItem((IntelAttributeListItem) item);
+//				}
+//			}
+		}else if (attribute.getType() == AttributeType.NUMERIC){
+			try{
+				String dvalue = ((Text)txtValue).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue(d);
+					add = true;
+				}
+			}catch (Exception ex){
+				//
+			}
+		}else if (attribute.getType() == AttributeType.TEXT){
+			String svalue = ((Text)txtValue).getText();
+			if (!svalue.trim().isEmpty()){
+				value.setStringValue(svalue.trim());
+				add = true;
+			}
+		}
+		return add;
+	}
+	
 	public void initControl(IntelEntityRelationshipAttributeValue value){
 		if (attribute.getType() == AttributeType.TEXT){
 			txtValue.setText(value.getStringValue());
@@ -307,6 +355,36 @@ public class AttributeFieldEditor {
 		}
 	}
 	
+	public void initControl(IntelRecordAttributeValue value){
+		if ( value.getAttribute() == null ) return;
+		if (attribute.getType() == AttributeType.TEXT){
+			txtValue.setText(value.getStringValue());
+		}else if (attribute.getType() == AttributeType.NUMERIC){
+			txtValue.setText(String.valueOf(value.getNumberValue()));
+		}else if (attribute.getType() ==  AttributeType.LIST){
+			
+			//TODO:
+//			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
+		}else if (attribute.getType() ==  AttributeType.DATE){
+			if(value.getDateValue() == null){
+				btnChDateTime.setSelection(false);
+				dtDateTime.setEnabled(false);
+			}else{
+				btnChDateTime.setSelection(true);
+				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
+				dtDateTime.setEnabled(true);
+			}
+		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
+			if (value.getNumberValue() == null){
+				btnChOnOff.setSelection(false);
+				btnOnOff.setEnabled(false);
+			}else{
+				btnChOnOff.setSelection(true);
+				btnOnOff.setSelection(value.getNumberValue() >= 0.5);
+				btnOnOff.setEnabled(true);
+			}
+		}
+	}
 	
 	private void createControl(){
 		Label l = new Label(parent, SWT.NONE);

@@ -22,20 +22,17 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 /**
  * Model class of i_entity_attribute_value.
@@ -45,13 +42,11 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
  */
 @Entity
 @Table(name="smart.i_entity_attribute_value")
-public class IntelEntityAttributeValue {
+public class IntelEntityAttributeValue extends IntelValueItem{
 
 	private EntityAttributeValuePk id = new EntityAttributeValuePk();
 	
-	private String stringValue;
-	private Double doubleValue;
-	private IntelAttributeListItem listItem;
+	private String meta;
 
 	/**
 	 * Constructor.
@@ -75,6 +70,7 @@ public class IntelEntityAttributeValue {
 		id.setEntity(entity);
 	}
 	
+	@Override
 	@Transient
 	public IntelAttribute getAttribute(){
 		return id.getAttribute();
@@ -84,80 +80,14 @@ public class IntelEntityAttributeValue {
 		id.setAttribute(attribute);
 	}
 	
-	@ManyToOne(fetch =FetchType.LAZY)
-	@JoinColumn(name="list_item_uuid", referencedColumnName="uuid")
-	public IntelAttributeListItem getAttributeListItem(){
-		return this.listItem;
-	}
-	public void setAttributeListItem(IntelAttributeListItem listItem){
-		this.listItem = listItem;
-	}
-		
-	@Column(name="string_value")
-	public String getStringValue(){
-		return this.stringValue;
-	}
-	public void setStringValue(String stringValue){
-		this.stringValue = stringValue;
-	}
-	
-	@Column(name="double_value")
-	public Double getNumberValue(){
-		return this.doubleValue;
-	}
-	public void setNumberValue(Double doubleValue){
-		this.doubleValue = doubleValue;
-	}
-	private String meta;
 	@Column(name="metaphone")
 	public String getMetaphone(){
 		return this.meta;
 	}
+	
 	public void setMetaphone(String meta){
 		this.meta = meta;
 	}
-	
-	@Transient
-	public Date getDateValue(){
-		if (getStringValue() == null){
-			return null;
-		}
-		try{
-			return java.sql.Date.valueOf(getStringValue());
-		}catch (Exception ex){
-			return null;
-		}
-	}
-	@Transient
-	public void setDateValue(Date date){
-		if (date == null){
-			setStringValue(null);
-			return;
-		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
-	}
-	/**
-	 * 
-	 * @return the value of the observation based
-	 * on the attribute type.
-	 */
-	@Transient
-	public Object getAttributeValue(){
-		AttributeType type = getAttribute().getType();
-		if (type == AttributeType.BOOLEAN ||
-				type == AttributeType.NUMERIC){
-			return getNumberValue();
-		}else if (type == AttributeType.TEXT){
-			return getStringValue();
-		}else if (type == AttributeType.LIST){
-			return getAttributeListItem();
-		}else if (type == AttributeType.DATE){
-			return getDateValue();
-		}
-		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
-	}
-	
 	
 	/**
 	 * @param o
@@ -217,32 +147,17 @@ public class IntelEntityAttributeValue {
 		
 		@Override
 		public boolean equals(Object key) {
-			if (! (key instanceof EntityAttributeValuePk)){
-				return false;
-			}
+			if (this == key) return true;
+			if (key == null) return false;
+			if (!getClass().equals(key.getClass())) return false;
+			
 			EntityAttributeValuePk p = (EntityAttributeValuePk)key;
-			
-			if (p.entity == null || this.entity == null ||
-				p.attribute == null || this.attribute == null ){
-				
-				if (p.entity == null && this.entity == null && 
-					p.attribute == null && this.attribute == null){
-						return true;
-				}
-				return false;
-			}
-			
-			return p.entity.equals(this.entity) &&
-					p.attribute.equals(this.attribute);
+			return Objects.equals(entity, p.entity) && Objects.equals(attribute, p.attribute);
 		}
 		
 		@Override
 		public int hashCode() {
-		    int code = 0;
-		    if (entity != null) {code += entity.hashCode();}
-		    code *= 31;
-		    if (attribute != null) {code += attribute.hashCode(); }
-		    return code;
+			return Objects.hash(entity, attribute);
 		  }
 	}
 }

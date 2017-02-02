@@ -76,7 +76,9 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	private List<IntelEntityRecord> entities;
 	private List<IntelLocation> locations;
 	private List<IntelRecordAttachment> attachments;
-
+	private List<IntelRecordAttributeValue> attributes;
+	private IntelRecordSource source;
+	
 	/**
 	 * Constructor.
 	 */
@@ -277,5 +279,29 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	}
 	public void setLocations(List<IntelLocation> locations){
 		this.locations = locations;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="record", orphanRemoval=true, cascade={CascadeType.ALL})
+	public List<IntelRecordAttributeValue> getAttributes(){
+		return this.attributes;
+	}
+	public void setAttributes(List<IntelRecordAttributeValue> attributes){
+		this.attributes = attributes;
+	}
+	
+	/**
+	 * Get the record source
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="source_uuid", referencedColumnName="uuid")
+	public IntelRecordSource getRecordSource() {
+		return this.source;
+	}
+	
+	/**
+	 * Set the record source;
+	 */
+	public void setRecordSource(IntelRecordSource source) {
+		this.source = source;
 	}
 }

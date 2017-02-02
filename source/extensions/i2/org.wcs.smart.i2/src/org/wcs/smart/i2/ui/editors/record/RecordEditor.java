@@ -78,6 +78,7 @@ import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
@@ -468,9 +469,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		links.addAll(newEntityLocationLinks);
 		return links;
 	}
+	
 	public IntelRecord getRecord(){
 		return this.record;
 	}
+	
 	
 	public void locationsUpdated(){
 		setDirty(true);

@@ -132,6 +132,25 @@
             class="org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.i2.model.IntelRecordSource"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property="id.source.conservationArea"
+            class="org.wcs.smart.i2.model.IntelRecordSourceAttribute"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property="id.record.conservationArea"
+            class="org.wcs.smart.i2.model.IntelRecordAttributeValue"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".id.value.record.conservationArea"
+            class="org.wcs.smart.i2.model.IntelRecordAttributeValueList"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.ca.deleteAdvisor">
@@ -253,6 +272,18 @@
             <command
                   commandId="org.wcs.smart.i2.command.relationshipgrouplist.show"
                   label="Relationship Groups..."
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.record.configuration"
+                  label="Configure Records..."
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -743,6 +774,10 @@
             id="org.wcs.smart.i2.command.query.refresh"
             name="Refresh Query List">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.record.configuration"
+            name="Configure Records...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -834,6 +869,16 @@
             class="org.wcs.smart.i2.ui.handler.RefreshQueryViewHandler$RefreshQueryViewHandlerWrapper"
             commandId="org.wcs.smart.i2.command.query.refresh">
       </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ConfigureRecordAttributesHandler$ConfigureRecordAttributesHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.record.configuration">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.smartAdminUser"
+                  value="intel_analyst">
+            </test>
+         </enabledWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -868,6 +913,10 @@
       <image
             commandId="org.wcs.smart.i2.command.query.record.new"
             icon="images/icons/obj16/new_entity_query.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.i2.command.record.configuration"
+            icon="images/icons/obj16/script.png">
       </image>
    </extension>
    <extension

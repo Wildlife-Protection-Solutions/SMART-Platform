@@ -103,6 +103,8 @@ public class RemoveIntelligenceJob extends Job {
 
 	private void uninstall(Session s){
 		String[] sql = new String[]{
+				"DROP TABLE smart.i_record_attribute_value",
+				"DROP TABLE smart.i_recordsource_attribute",
 				"DROP TABLE smart.i_entity_location",
 				"DROP TABLE smart.i_observation_attribute",
 				"DROP TABLE smart.i_datamodel_event",
@@ -131,6 +133,7 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_entity_type",
 				"DROP TABLE smart.i_attribute",
 				"DROP TABLE smart.i_relationship_group",
+				"DROP TABLE smart.i_recordsource",
 				"DROP FUNCTION smart.double_metaphone",
 				"DROP FUNCTION smart.metaphoneContains",
 		};

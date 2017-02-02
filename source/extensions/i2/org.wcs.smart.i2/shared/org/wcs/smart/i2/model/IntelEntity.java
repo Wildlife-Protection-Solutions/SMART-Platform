@@ -348,6 +348,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 				
 				Object value = v.getAttributeValue();
 				IntelAttribute attribute = v.getAttribute();
+				if (value == null) return "";
 				if (value instanceof String){
 					return (String) value;
 				}else if (value instanceof Number){

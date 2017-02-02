@@ -22,9 +22,12 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -38,12 +41,15 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
@@ -54,6 +60,10 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -61,8 +71,13 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
+import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.SmartSection;
+import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -183,7 +198,7 @@ public class RecordSummaryPage extends EditorPart{
 		
 		detailSection = createSectionHeader(sashForm, toolkit, "Details");
 		topPart = toolkit.createComposite(detailSection, SWT.NONE);
-		topPart.setLayout(new GridLayout(6, false));
+		topPart.setLayout(new GridLayout());
 		topPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		SmartSection expEntities = new SmartSection(sashForm, toolkit, "Entities"){
@@ -284,12 +299,23 @@ public class RecordSummaryPage extends EditorPart{
 		}
 		
 		headerLabel.setText(recordEditor.getRecord().getTitle() == null ? "" : recordEditor.getRecord().getTitle());
-		toolkit.createLabel(topPart, "Title:");
+		
+		Composite header = new Composite(topPart, SWT.BORDER);
+		header.setLayout(new GridLayout(2, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite leftPart = new Composite(header, SWT.BORDER);
+		leftPart.setLayout(new GridLayout(2, false));
+		leftPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(leftPart, "Title:");
 		int style = SWT.BORDER;
 		if (!recordEditor.getEditMode()){
 			style = SWT.NONE;
 		}
-		Text txtShortName = toolkit.createText(topPart, recordEditor.getRecord().getTitle(), style);
+		Text txtShortName = toolkit.createText(leftPart, recordEditor.getRecord().getTitle(), style);
 		txtShortName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -298,14 +324,14 @@ public class RecordSummaryPage extends EditorPart{
 			}
 		});
 		txtShortName.setEditable(recordEditor.getEditMode());
-		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
+		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtShortName.setTextLimit(IntelRecord.MAX_TITLE_LENGTH);
 		
-		toolkit.createLabel(topPart, "Status:");
+		toolkit.createLabel(leftPart, "Status:");
 		if (recordEditor.getEditMode()){
-			ComboViewer cmbStatus = new ComboViewer(topPart, SWT.DROP_DOWN | SWT.READ_ONLY);
+			ComboViewer cmbStatus = new ComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
-			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
+			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			cmbStatus.setContentProvider(ArrayContentProvider.getInstance());
 			cmbStatus.setLabelProvider(new LabelProvider(){
 				@Override
@@ -328,19 +354,93 @@ public class RecordSummaryPage extends EditorPart{
 			});
 			
 		}else{
-			Label l = toolkit.createLabel(topPart,  RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
+			Label l = toolkit.createLabel(leftPart,  RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		}
+		
+		toolkit.createLabel(leftPart, "Source:");
+		if (recordEditor.getEditMode()){
+			ComboViewer cmbSource = new ComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY);
+			toolkit.adapt(cmbSource.getControl(), true, true);
+			cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			cmbSource.setContentProvider(ArrayContentProvider.getInstance());
+			cmbSource.setLabelProvider(new RecordSourceLabelProvider());
+			
+//			cmbSource.setInput(IntelRecord.Status.values());
+			cmbSource.setSelection(new StructuredSelection(recordEditor.getRecord().getStatus()));
+			cmbSource.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					IntelRecordSource recordSource = (IntelRecordSource) ((IStructuredSelection)cmbSource.getSelection()).getFirstElement();
+					recordEditor.getRecord().setRecordSource( recordSource );
+					recordEditor.setDirty(true);
+					
+					configureAttributePanel( recordSource );
+				}
+			});
+			
+			
+			Job srcLoader = new Job("load record sources"){
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					List<IntelRecordSource> sources = new ArrayList<IntelRecordSource>();
+					Session s = HibernateManager.openSession();
+					try{
+						sources.addAll(
+								s.createCriteria(IntelRecordSource.class)
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+								.list());
+						sources.forEach(src -> {
+							src.getName();
+							if (src.getAttributes() != null){
+								src.getAttributes().forEach(a -> {
+									a.getName();
+									if (a.getAttribute() != null && a.getAttribute().getAttributeList() != null){
+										a.getAttribute().getAttributeList().forEach(l -> l.getName());
+									}
+								});
+							}
+						});
+						
+						
+					}finally{
+						s.close();
+					}
+					Display.getDefault().syncExec(()->cmbSource.setInput(sources));
+					return org.eclipse.core.runtime.Status.OK_STATUS;
+				}
+				
+			};
+			srcLoader.setSystem(false);
+			srcLoader.schedule();
+		}else{
+			Label l = toolkit.createLabel(leftPart,  recordEditor.getRecord().getRecordSource().getName());
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
 		}
 		
+		Composite rightPart = new Composite(header, SWT.NONE);
+		rightPart.setLayout(new GridLayout(2, false));
+		rightPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		toolkit.createLabel(topPart, "");
-		toolkit.createLabel(topPart, "Date Created:");
-		Label l = toolkit.createLabel(topPart, recordEditor.getRecord().getDateCreated() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateCreated()));
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		toolkit.createLabel(topPart, "Created By:");
-		l = toolkit.createLabel(topPart, recordEditor.getRecord().getCreatedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getCreatedBy()));
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Hyperlink lnkNarrative = toolkit.createHyperlink(topPart, "Narrative...", SWT.NONE);
+		Label l = toolkit.createLabel(rightPart, "Created:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		l = toolkit.createLabel(rightPart, recordEditor.getRecord().getDateCreated() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateCreated()));
+		
+		l = toolkit.createLabel(rightPart, "Modified:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		lblLastModified = toolkit.createLabel(rightPart, recordEditor.getRecord().getDateModified() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
+		
+		l = toolkit.createLabel(rightPart, "Created By:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		l = toolkit.createLabel(rightPart, recordEditor.getRecord().getCreatedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getCreatedBy()));
+		
+		l = toolkit.createLabel(rightPart, "Modified By:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		lblLastModifiedBy = toolkit.createLabel(rightPart, recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
+		
+//		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Hyperlink lnkNarrative = toolkit.createHyperlink(header, "Narrative...", SWT.NONE);
 		lnkNarrative.setToolTipText("opens narrative in new window");
 		lnkNarrative.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -348,14 +448,12 @@ public class RecordSummaryPage extends EditorPart{
 				recordEditor.openExternalText(FieldType.NARRATIVE);
 			}
 		});
-		toolkit.createLabel(topPart, "");
-		toolkit.createLabel(topPart, "Date Last Modified:");
-		lblLastModified = toolkit.createLabel(topPart, recordEditor.getRecord().getDateModified() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
-		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		toolkit.createLabel(topPart, "Last Modified By:");
-		lblLastModifiedBy = toolkit.createLabel(topPart, recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
-		lblLastModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Hyperlink lnkScratchpad = toolkit.createHyperlink(topPart, "Scratchpad...", SWT.NONE);
+//		toolkit.createLabel(topPart, "");
+		
+//		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+//		lblLastModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Hyperlink lnkScratchpad = toolkit.createHyperlink(header, "Scratchpad...", SWT.NONE);
 		lnkScratchpad.setToolTipText("opens scratchpad in new window");
 		lnkScratchpad.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -363,6 +461,11 @@ public class RecordSummaryPage extends EditorPart{
 				recordEditor.openExternalText(FieldType.SCRATCHPAD);
 			}
 		});
+		
+		srcAttributePanel = toolkit.createComposite(header);
+		srcAttributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		configureAttributePanel( recordEditor.getRecord().getRecordSource() );
+		
 		topPart.layout();
 		
 		entityPanel.init();
@@ -374,6 +477,85 @@ public class RecordSummaryPage extends EditorPart{
 		
 		enableWs(WorkingSetManager.INSTANCE.isSet() && recordEditor.getRecord().getUuid() != null);
 	}
+	
+	private Composite srcAttributePanel;
+	
+	private void configureAttributePanel(IntelRecordSource source){
+		if (srcAttributePanel.isDisposed()) return;
+		for (Control kid : srcAttributePanel.getChildren()){
+			kid.dispose();
+		}
+		
+		if (source == null) return;
+		
+		srcAttributePanel.setLayout(new GridLayout(2, false));
+		for (IntelRecordSourceAttribute a : source.getAttributes()){
+			String name = a.getName();
+			if (name == null || name.isEmpty()){
+				if (a.getAttribute() != null){
+					name = a.getAttribute().getName();
+				}else if (a.getEntityType() != null){
+					name = a.getEntityType().getName();
+				}
+			}
+			
+			
+			if (recordEditor.getEditMode()){
+				if (recordEditor.getRecord().getAttributes() == null){
+					recordEditor.getRecord().setAttributes(new ArrayList<>());
+				}
+				if (a.getAttribute() != null){
+					AttributeFieldEditor af = new AttributeFieldEditor(srcAttributePanel, a.getAttribute());
+					for (IntelRecordAttributeValue v  : recordEditor.getRecord().getAttributes()){
+						if (v.getAttribute().equals(a)){
+							af.initControl(v);
+							break;
+						}
+					}
+					
+					af.adapt(toolkit);
+					af.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							boolean found = false;
+							for (IntelRecordAttributeValue v  : recordEditor.getRecord().getAttributes()){
+								if (v.getAttribute().equals(a)){
+									af.updateValue(v);
+									found = true;
+									break;
+									
+								}
+							}
+							if (!found){
+								IntelRecordAttributeValue newValue = new IntelRecordAttributeValue();
+								newValue.setAttribute(a);
+								newValue.setRecord(recordEditor.getRecord());
+								af.updateValue(newValue);
+								recordEditor.getRecord().getAttributes().add(newValue);
+							}
+							recordEditor.setDirty(true);
+						}
+					});
+				}else{
+					toolkit.createLabel(srcAttributePanel, name);
+					toolkit.createLabel(srcAttributePanel, "ENTITY TODO:");
+				}
+			
+			}else{
+				String value = "NO VALUETOTOD";
+				for (IntelRecordAttributeValue v  : recordEditor.getRecord().getAttributes()){
+					if (v.getAttribute().equals(a)){
+						value = v.getAttributeValueAsString();
+						break;
+					}
+				}
+				toolkit.createLabel(srcAttributePanel, name);
+				toolkit.createLabel(srcAttributePanel,value);
+			}
+		}
+		srcAttributePanel.layout(true, true);
+	}
+	
 	
 	@Override
 	public void setFocus() {
