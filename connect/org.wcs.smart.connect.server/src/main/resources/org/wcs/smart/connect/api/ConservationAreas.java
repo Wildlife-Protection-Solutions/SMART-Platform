@@ -194,13 +194,15 @@ public class ConservationAreas extends HttpServlet{
 	 * @param organizationFilter String - optional - only return CAs that have the provided text in the organization field
 	 * @param caJsonFilter String - optional - must be valid GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned.
 	 * 			be sure to encode the geojson, leave no spaces etc. An example of a simple polygon of the world:  caJsonFilter=%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-180%2C90%5D%2C%5B180%2C90%5D%2C%5B180%2C-90%5D%2C%5B-180%2C-90%5D%2C%5B-180%2C90%5D%5D%5D%7D
-	 * 			originally it is caJsonFilter={"type":"Polygon","coordinates":[[[-180,90],[180,90],[180,-90],[-180,-90],[-180,90]]]}  use you local programming language urlencoder, or an online tool like this to do it out manually: http://meyerweb.com/eric/tools/dencoder/ 
+	 * 			originally it is caJsonFilter={"type":"Polygon","coordinates":[[[-180,90],[180,90],[180,-90],[-180,-90],[-180,90]]]}  use you local programming language urlencoder, or an online tool like this to do it out manually: http://meyerweb.com/eric/tools/dencoder/
+	 * @param includeSpatialBoundaries Boolean - true to get GeoJson data on CA boundaries, false to skip it as this can take a long time for lots of CAs and lots of boundaries.  
 	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
 	 */
 	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
-    public List<ConservationAreaProxy> getConservationAreas(@QueryParam("organizationFilter") String organizationFilter, @QueryParam("caJsonFilter") String caJsonFilter){
+    public List<ConservationAreaProxy> getConservationAreas(@QueryParam("organizationFilter") String organizationFilter, @QueryParam("caJsonFilter") String caJsonFilter, @QueryParam("includeSpatialBoundaries") Boolean includeSpatialBoundaries){
+		if(includeSpatialBoundaries == null)includeSpatialBoundaries=true;//default to send boundary data, since we used to, I don't want to break existing API user's stuff.
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -223,11 +225,13 @@ public class ConservationAreas extends HttpServlet{
 						proxy.setOrganization(smartca.getOrganization());
 						proxy.setOwner(smartca.getOwner());
 						
-						proxy.setAdministrativeAreasJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)) )) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
-						proxy.setCaBoundaryJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)))) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "'").uniqueResult() );
-						proxy.setBufferedManagementAreaJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.BA + "'").uniqueResult() );
-						proxy.setManagementSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.MNGT + "'").uniqueResult() );
-						proxy.setPatrolSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.PATRL + "'").uniqueResult() );
+						if(includeSpatialBoundaries){
+							proxy.setAdministrativeAreasJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)) )) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
+							proxy.setCaBoundaryJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom)))) as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "'").uniqueResult() );
+							proxy.setBufferedManagementAreaJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.BA + "'").uniqueResult() );
+							proxy.setManagementSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.MNGT + "'").uniqueResult() );
+							proxy.setPatrolSectorsJson((String)s.createSQLQuery("select st_asgeojson(1, CAST( st_asbinary(st_force2d(st_geomfromwkb(st_union(geom))))as geometry) ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.PATRL + "'").uniqueResult() );
+						}
 					}
 					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
 					if(ca.getVersion()== null){
@@ -304,7 +308,7 @@ public class ConservationAreas extends HttpServlet{
     public List<ConservationAreaProxy> getConservationAreasWithData(){
 		
 		List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
-		List<ConservationAreaProxy> allConservationAreas = getConservationAreas(null,null);
+		List<ConservationAreaProxy> allConservationAreas = getConservationAreas(null,null,false);
 		for (ConservationAreaProxy ca : allConservationAreas){
 			if(ca.getStatus().equals(ConservationAreaInfo.Status.CCAA) || ca.getStatus().equals(ConservationAreaInfo.Status.DATA)){
 				conservationAreas.add(ca);

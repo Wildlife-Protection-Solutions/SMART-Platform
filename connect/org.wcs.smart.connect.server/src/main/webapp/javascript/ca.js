@@ -273,7 +273,7 @@ function refreshCaList(){
 		
  	var oReq = new XMLHttpRequest();
  	oReq.onload = createCaTable;
- 	oReq.open("Get", CAURL + '/', true);
+ 	oReq.open("Get", CAURL + '/?includeSpatialBoundaries=false', true);
  	oReq.send();
 }
 
