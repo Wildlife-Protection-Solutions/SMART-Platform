@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.ui;
 
 import java.text.Collator;
@@ -6,7 +27,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -25,6 +48,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * Drop down check box viewer for selecting mutliple items from a list
+ * 
+ * @author Emily
+ *
+ */
 public class CheckBoxDropDown extends Composite implements Listener {
 
 	private Text txtInfo;
@@ -37,13 +66,13 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	private boolean mouseOver = false;
 	
 	private Shell popup;
-	private CheckboxTableViewer table;
-	
-	private ILabelProvider labelProvider;
-	private IContentProvider contentProvider;
-	private Object input;
+	protected CheckboxTableViewer table;
+	protected ILabelProvider labelProvider;
+	protected IContentProvider contentProvider;
+	protected Collection<?> input;
 	
 	private List<ISelectionChangedListener> listeners;
+	protected boolean checkChanged = false;	//if checked items changes
 	
 	public CheckBoxDropDown(Composite parent) {
 		super(parent, SWT.NONE);
@@ -149,25 +178,37 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		contentProvider = provider;
 		if (table != null && !table.getTable().isDisposed()) table.setContentProvider(provider);
 	}
-	public void setInput(Object input){
+	public void setInput(Collection<?> input){
 		this.input = input;
 		if (table != null && !table.getTable().isDisposed()) table.setInput(input);
 	}
+	
+	public Collection<?> getInput(){
+		return this.input;
+	}
+	
 	
 	public Collection<?> getCheckObjects(){
 		if (txtInfo.getData() == null) return Collections.emptyList();
 		return (Collection<?>) txtInfo.getData();
 	}
 	
-	public void setValue(Collection<?> object){
-		txtInfo.setData(object);
-		
+	/**
+	 * Sets the initial checked items
+	 * @param object
+	 */
+	public void setValue(Collection<?> objects){
+		txtInfo.setData(objects);
+		txtInfo.setText(getTextLabel(objects));
+	}
+	
+	protected String getTextLabel(Collection<?> objects){
 		StringBuilder sb = new StringBuilder();
-		List<Object> objects = new ArrayList<>();
-		object.forEach(a -> objects.add(a));
-		objects.sort((a,b) ->
+		List<Object> sortobjects = new ArrayList<>();
+		objects.forEach(a -> sortobjects.add(a));
+		sortobjects.sort((a,b) ->
 		Collator.getInstance().compare(labelProvider.getText(a), labelProvider.getText(b)));
-		for (Object o : objects){
+		for (Object o : sortobjects){
 			sb.append(labelProvider.getText(o));
 			sb.append(", "); //$NON-NLS-1$
 		}
@@ -175,12 +216,15 @@ public class CheckBoxDropDown extends Composite implements Listener {
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
 		}
-		txtInfo.setText(sb.toString());
+		return sb.toString();
 	}
-	
-	private void createPopup(){
+	/**
+	 * If overwritten Must populate the table value
+	 * @return
+	 */
+	protected Shell createPopup(){
 		// create shell and table
-		popup = new Shell(getShell(),  SWT.NO_TRIM | SWT.ON_TOP);
+		Shell popup = new Shell(getShell(),  SWT.NO_TRIM | SWT.ON_TOP);
 		popup.setLayout(new GridLayout());
 		((GridLayout)popup.getLayout()).marginWidth = 1;
 		((GridLayout)popup.getLayout()).marginHeight = 1;
@@ -195,18 +239,41 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		// create table
 		table = CheckboxTableViewer.newCheckList(popup, SWT.V_SCROLL);
 		table.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		table.addCheckStateListener(new ICheckStateListener() {
+			@Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				checkChanged = true;				
+			}
+		});
 		
 		if (labelProvider != null) table.setLabelProvider(labelProvider);
 		if (contentProvider != null) table.setContentProvider(contentProvider);
 		if (input != null) table.setInput(input);
 		popup.pack();
 		
+		return popup;
 	}
 	
+	private void createPopupInternal(){
+		this.popup = createPopup(); 
+		popup.addListener(SWT.Deactivate, (event)->dropDown(false));
+		popup.addListener(SWT.Paint, event->{
+			Rectangle bounds = popup.getBounds();
+            event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
+            event.gc.setLineWidth(1);
+            event.gc.drawRectangle(0, 0, bounds.width - 1, bounds.height - 1);
+		});
+		
+		//createpopup must create table
+		if (labelProvider != null) table.setLabelProvider(labelProvider);
+		if (contentProvider != null) table.setContentProvider(contentProvider);
+		if (input != null) table.setInput(input);
+	}
 	/**
 	 * handle DropDown request
 	 * @param drop
 	 */
+	
 	private void dropDown (boolean drop) {
 		
 		// if already dropped then return
@@ -217,11 +284,13 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	    // closing the dropDown
 	    if (!drop) {
 	    	//update value
-	    	Object[] selected = table.getCheckedElements();
-	    	List<Object> elements = new ArrayList<Object>();
-	    	for (Object xx : selected) elements.add(xx);
-	    	setValue(elements);
-	    	fireChangeListener();
+	    	if (checkChanged){
+	    		Object[] selected = table.getCheckedElements();
+	    		List<Object> elements = new ArrayList<Object>();
+	    		for (Object xx : selected) elements.add(xx);
+	    		setValue(elements);
+	    		fireChangeListener();
+	    	}
 	    	
 	        popup.setVisible (false);
 	        if (!isDisposed() && isFocusControl()) {
@@ -229,6 +298,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	        }
 	        return;
 	    }
+	    checkChanged = false;
 	    
 	    // if not visible then return
 	    if (!isVisible()) return;
@@ -239,7 +309,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	        popup = null;
 	        
 	    }
-	    if (popup == null) createPopup();
+	    if (popup == null) createPopupInternal();
 		
 	    Control c = (Composite)txtInfo.getParent();
 	    Rectangle l = c.getBounds();
@@ -248,6 +318,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	    
 
 		// set the popup visible
+	    popupVisible();
 		popup.setVisible (true);
 		popup.getChildren()[0].setFocus();
 		for (int i = 0; i < 150; i +=2){
@@ -259,4 +330,11 @@ public class CheckBoxDropDown extends Composite implements Listener {
 			table.setCheckedElements(items.toArray(new Object[items.size()]));
 		}
 	}	
+	
+	/**
+	 * Called before the popup is made visible
+	 */
+	protected void popupVisible(){
+		
+	}
 }

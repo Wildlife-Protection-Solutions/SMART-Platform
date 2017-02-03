@@ -29,9 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -60,7 +57,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.hibernate.Session;
@@ -261,9 +260,9 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		final AttributeNameFilter viewerFilter = new AttributeNameFilter();
 		txtFilter = new FilterComposite(compAddExisting, SWT.NONE);
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtFilter.addChangeListener(new ChangeListener() {	
+		txtFilter.addChangeListener(new Listener() {
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void handleEvent(Event event) {
 				viewerFilter.setFilterString(txtFilter.getPatternFilter());
 				checkboxTableViewer.refresh();
 			}

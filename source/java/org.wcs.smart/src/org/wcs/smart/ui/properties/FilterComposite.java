@@ -24,9 +24,6 @@ package org.wcs.smart.ui.properties;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -56,7 +53,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -73,7 +72,7 @@ public class FilterComposite extends Composite {
 	private Text txtFilter;
 	private Control clearButtonContro;
 
-	private List<ChangeListener> listeners = new ArrayList<ChangeListener>();
+	private List<Listener> listeners = new ArrayList<Listener>();
 	
 	private String initialText = Messages.FilterComposite_Default_SearchText;
 	private String patternFilter = null;
@@ -236,20 +235,22 @@ public class FilterComposite extends Composite {
 	 * </p>
 	 * @param listener
 	 */
-	public void addChangeListener(ChangeListener listener){
+	public void addChangeListener(Listener listener){
 		listeners.add(listener);
 	} 
 	/**
 	 * Removes a change listener.
 	 * @param listener
 	 */
-	public void removeChangeListener(ChangeListener listener){
+	public void removeChangeListener(Listener listener){
 		listeners.remove(listener);
 	}
 	private void fireChangeListeners(){
-		ChangeEvent evt = new ChangeEvent(this);
-		for (ChangeListener listener : listeners) {
-			listener.stateChanged(evt);
+		Event event = new Event();
+		event.text = getText();
+		event.widget = this;
+		for (Listener listener : listeners) {
+			listener.handleEvent(event);
 		}
 	}
 	
