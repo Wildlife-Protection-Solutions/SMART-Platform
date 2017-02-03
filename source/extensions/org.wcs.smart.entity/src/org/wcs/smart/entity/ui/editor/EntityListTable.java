@@ -27,9 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -52,7 +49,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -202,9 +201,9 @@ public class EntityListTable extends Composite {
 		});
 		
 		txtFilter = new FilterComposite(filtercomp, SWT.NONE);
-		txtFilter.addChangeListener(new ChangeListener() {	
+		txtFilter.addChangeListener(new Listener() {			
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void handleEvent(Event event) {
 				tableFilter.setText(txtFilter.getPatternFilter());
 				entityTable.refresh();	
 			}
