@@ -28,8 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -64,7 +62,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -155,13 +155,12 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		
 		FilterComposite typeFilter = new FilterComposite(parent, SWT.NONE);
 		typeFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		typeFilter.addChangeListener(new ChangeListener() {
+		typeFilter.addChangeListener(new Listener() {
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void handleEvent(Event event) {
 				filter.setFilterString(typeFilter.getPatternFilter());
 			}
 		});
-		
 		Label l = new Label(parent, SWT.NONE);
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));

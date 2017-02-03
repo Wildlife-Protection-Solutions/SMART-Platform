@@ -1,6 +1,29 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -35,24 +58,37 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
+import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.OnOffButton;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Attribute field editor 
+ * 
+ * @author Emily
+ *
+ */
 public class AttributeFieldEditor {
 
 	private IntelAttribute attribute;
+	private boolean isMulti;
 	private Composite parent;
 	
 	private Text txtValue;
 	private OnOffButton btnOnOff;
-	private ComboViewer cmbViewer ;
+	private ComboViewer cmbViewer;
+	private CheckBoxDropDown cmbMultiSelect;
 	private DateTime dtDateTime;
 	private Button btnChDateTime;
 	private Button btnChOnOff;
 	private ControlDecoration cd;
 	private String warnMessage;
+	
+	private String name = null;
 	
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
 	
@@ -62,8 +98,25 @@ public class AttributeFieldEditor {
 	 * @param attribute
 	 */
 	public AttributeFieldEditor(Composite parent, IntelAttribute attribute) {
+		this(parent, attribute, false, null);
+	}
+	
+	/**
+	 * Assumption is the parent layout is a 2 column grid layout
+	 * @param parent
+	 * @param attribute
+	 * @param name field name or null if attribute name to be used
+	 * @param multiSelect - if multiple list items can be selected; only valid for list attributes
+	 */
+	public AttributeFieldEditor(Composite parent, IntelAttribute attribute, Boolean multiSelect, String name) {
 		this.parent = parent;
 		this.attribute = attribute;
+		this.isMulti = multiSelect == null ? false : multiSelect;
+		if (name == null){
+			this.name = attribute.getName();
+		}else{
+			this.name = name;
+		}
 		createControl();
 	}
 
@@ -171,6 +224,7 @@ public class AttributeFieldEditor {
 				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
+			if (isMulti) throw new IllegalStateException("Multi select lists not supported for entity relationship attributes");
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
 			if (!selection.isEmpty()){
 				Object item = selection.getFirstElement();
@@ -217,15 +271,39 @@ public class AttributeFieldEditor {
 				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
-			//TODO:
-//			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
-//			if (!selection.isEmpty()){
-//				Object item = selection.getFirstElement();
-//				if (item instanceof IntelAttributeListItem){
-//					add = true;
-//					value.setAttributeListItem((IntelAttributeListItem) item);
-//				}
-//			}
+			if (value.getAttributeListItems() == null){
+				value.setAttributeListItems(new ArrayList<>());
+			}
+			ArrayList<IntelRecordAttributeValueList> listValues = new ArrayList<IntelRecordAttributeValueList>();
+			
+			Collection<?> objects = Collections.emptyList();
+			if (!isMulti){
+				if (!cmbViewer.getSelection().isEmpty()){
+					objects = Collections.singletonList(  ((IStructuredSelection)((ComboViewer)cmbViewer).getSelection()).getFirstElement() );
+				}
+			}else{
+				objects = cmbMultiSelect.getCheckObjects();
+			}
+			for (Object item : objects) {					
+				if (item instanceof IntelAttributeListItem){
+					IntelRecordAttributeValueList list = new IntelRecordAttributeValueList();
+					list.getId().setElementUuid(((IntelAttributeListItem) item).getUuid());
+					list.getId().setValue(value);
+					listValues.add(list);
+					add = true;
+				}
+			}
+			List<IntelRecordAttributeValueList> delete = new ArrayList<IntelRecordAttributeValueList>();
+			for (IntelRecordAttributeValueList existing : value.getAttributeListItems()){
+				if (!listValues.contains(existing)) delete.add(existing);
+			}
+			value.getAttributeListItems().removeAll(delete);
+			for (IntelRecordAttributeValueList newItem: listValues){
+				if (!value.getAttributeListItems().contains(newItem)){
+					value.getAttributeListItems().add(newItem);
+				}
+			}
+			
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			try{
 				String dvalue = ((Text)txtValue).getText();
@@ -298,6 +376,7 @@ public class AttributeFieldEditor {
 				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
+			if (isMulti) throw new IllegalStateException("Multi select lists not supported for entity attributes");
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
 			if (!selection.isEmpty()){
 				Object item = selection.getFirstElement();
@@ -362,9 +441,43 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() ==  AttributeType.LIST){
+			List<Object> selectedObjects = new ArrayList<>();
+			if (value.getAttributeListItems() != null){
+				for (IntelRecordAttributeValueList i : value.getAttributeListItems()){
+					if (value.getAttribute().getAttribute() != null){
+						IntelAttributeListItem temp = new IntelAttributeListItem();
+						temp.setUuid(i.getId().getElementUuid());
+						selectedObjects.add(temp);
+					}
+					if (value.getAttribute().getEntityType() != null){
+						IntelEntityType temp = new IntelEntityType();
+						temp.setUuid(i.getId().getElementUuid());
+						selectedObjects.add(temp);
+					}
+				}
+			}
 			
-			//TODO:
-//			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
+			Collection<?> items = null;
+			if (isMulti){
+				items = cmbMultiSelect.getInput();
+			}else{
+				items = (Collection<?>)cmbViewer.getInput();
+			}
+			
+			List<Object> selectedObjs = new ArrayList<Object>();
+			for (Object x : selectedObjects){
+				for (Object y : items){
+					if (x.equals(y)){
+						selectedObjs.add(y);
+						break;
+					}
+				}
+			}
+			if (isMulti){
+				cmbMultiSelect.setValue(selectedObjs);
+			}else{
+				cmbViewer.setSelection(new StructuredSelection(selectedObjs));
+			}
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			if(value.getDateValue() == null){
 				btnChDateTime.setSelection(false);
@@ -388,7 +501,7 @@ public class AttributeFieldEditor {
 	
 	private void createControl(){
 		Label l = new Label(parent, SWT.NONE);
-		l.setText(attribute.getName() + ":");
+		l.setText(this.name + ":");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		if (attribute.getType() == AttributeType.TEXT){
@@ -416,24 +529,27 @@ public class AttributeFieldEditor {
 				}
 			});
 		}else if (attribute.getType() ==  AttributeType.LIST){
-			
-			cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
-			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-			cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
-			List<Object> items = new ArrayList<Object>();
-			items.add("");
-			items.addAll(attribute.getAttributeList());
-			cmbViewer.setInput(items);
-			cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					modified();
-				}
-			});
-			cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
-			
-			cd = createDecoration(cmbViewer.getControl());
+			if (!isMulti){
+				cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
+				cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
+				List<Object> items = new ArrayList<Object>();
+				items.add("");
+				items.addAll(attribute.getAttributeList());
+				cmbViewer.setInput(items);
+				cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+					@Override
+					public void selectionChanged(SelectionChangedEvent event) {
+						modified();
+					}
+				});
+				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
+				
+				cd = createDecoration(cmbViewer.getControl());
+			}else{
+				createMultiSelectWidget(parent);
+			}
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));
@@ -488,6 +604,31 @@ public class AttributeFieldEditor {
 		}
 	}
 	
+	private void createMultiSelectWidget(Composite parent){
+		cmbMultiSelect = new CheckBoxDropDown(parent){
+			@Override
+			protected String getTextLabel(Collection<?> objects){
+				String value = super.getTextLabel(objects);
+				if (!objects.isEmpty()){
+					value = "(" + objects.size() + ") " + value;
+				}
+				return value;
+			}
+		};
+		cmbMultiSelect.setContentProvider(ArrayContentProvider.getInstance());
+		cmbMultiSelect.setLabelProvider(new AttributeListItemLabelProvider());
+		cmbMultiSelect.setInput(attribute.getAttributeList());
+		cmbMultiSelect.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				modified();
+			}
+		});
+		cmbMultiSelect.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)cmbMultiSelect.getLayoutData()).widthHint = 100;
+		
+		cd = createDecoration(cmbMultiSelect);
+	}
 	/*
 	 * Creates a control decoration for a wizard page field.
 	 */

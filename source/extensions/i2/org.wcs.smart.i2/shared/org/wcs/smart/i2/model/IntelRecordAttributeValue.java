@@ -101,8 +101,7 @@ public class IntelRecordAttributeValue extends UuidItem{
 		setStringValue(tmp.toString());
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="value_uuid", referencedColumnName="uuid")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.value", orphanRemoval=true, cascade={CascadeType.ALL})
 	public List<IntelRecordAttributeValueList> getAttributeListItems(){
 		return this.listItems;
 	}
@@ -164,7 +163,7 @@ public class IntelRecordAttributeValue extends UuidItem{
 		return null;
 	}
 	
-	@ManyToOne(cascade = {CascadeType.ALL})
+	@ManyToOne
 	@JoinColumn(name="record_uuid")
 	public IntelRecord getRecord() {
 		return record;
@@ -174,7 +173,7 @@ public class IntelRecordAttributeValue extends UuidItem{
 		this.record = record;
 	}
 	
-	@ManyToOne(cascade = {CascadeType.ALL})
+	@ManyToOne
 	@JoinColumn(name="attribute_uuid")
 	public IntelRecordSourceAttribute getAttribute() {
 		return attribute;

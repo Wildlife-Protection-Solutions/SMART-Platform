@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -90,5 +91,14 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 	 */
 	public static String getRecordStatusLabel(IntelRecord.Status status) {
 		return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(status, Locale.getDefault());
+	}
+	
+	/**
+	 * Gets an image for the record status
+	 * @param status
+	 * @return
+	 */
+	public static Image getRecordStatusImage(IntelRecord.Status status) {
+		return null;
 	}
 }

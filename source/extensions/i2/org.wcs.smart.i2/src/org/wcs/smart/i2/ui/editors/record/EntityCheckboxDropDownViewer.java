@@ -1,0 +1,287 @@
+package org.wcs.smart.i2.ui.editors.record;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
+import org.wcs.smart.ui.CheckBoxDropDown;
+import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.FilterComposite;
+
+public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
+
+	private FilterComposite txtSearch;
+	private Pattern pattern = null;
+	
+	private IntelEntityType type;
+	private Set<EntityItem> selected = new HashSet<EntityItem>();
+	private boolean isLoading;
+	
+	private ViewerFilter filter = new ViewerFilter() {
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (pattern == null) return true;
+			return pattern.matcher(labelProvider.getText(element).toLowerCase()).matches();
+		}
+	}; 
+	
+	public EntityCheckboxDropDownViewer(Composite parent, IntelEntityType type) {
+		super(parent);
+		this.type = type;
+		
+		setContentProvider(ArrayContentProvider.getInstance());
+		setLabelProvider(new ColumnLabelProvider(){
+			public String getText(Object element){
+				if (element instanceof EntityItem){
+					return ((EntityItem) element).name;
+				}
+				return super.getText(element);
+			}
+		});
+	}
+
+	public void initControl(final Collection<IntelRecordAttributeValueList> items){
+		if (items == null || items.isEmpty()){
+			List<EntityItem> eitems = new ArrayList<EntityItem>();
+			selected.addAll(eitems);		
+			setValue(eitems);
+			txtSearch.setText("");
+			return;
+		}
+		
+		Job j = new Job("initialize entity drop dwon"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<EntityItem> eitems = new ArrayList<EntityItem>();
+				isLoading = true;
+				try{
+					Display.getDefault().syncExec(()->{
+						setValue(null);
+					});
+					
+					Session s = HibernateManager.openSession();
+					try{
+						for (IntelRecordAttributeValueList item : items){
+							IntelEntity e = (IntelEntity) s.get(IntelEntity.class, item.getId().getElementUuid());
+							if (e != null){
+								eitems.add(new EntityItem(e.getUuid(), e.getIdAttributeAsText()));
+							}
+						}
+					}finally{
+						s.close();
+					}
+				}finally{
+					isLoading = false;
+				}
+				selected.addAll(eitems);
+				Display.getDefault().syncExec(()->{
+					setValue(eitems);
+				});
+				
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.setSystem(true);
+		j.schedule();
+		
+	}
+	
+	
+	protected Shell createPopup(){
+		// create shell and table
+		Shell popup = new Shell(getShell(),  SWT.NO_TRIM | SWT.ON_TOP);
+		popup.setLayout(new GridLayout());
+		((GridLayout)popup.getLayout()).marginWidth = 1;
+		((GridLayout)popup.getLayout()).marginHeight = 1;
+	
+		// create filter fields
+		txtSearch = new FilterComposite(popup, SWT.NONE);
+		txtSearch.setText("");
+		txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtSearch.addChangeListener(new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				if (txtSearch.getPatternFilter() == null || txtSearch.getPatternFilter().trim().isEmpty()){
+					pattern = null;
+					table.setFilters(new ViewerFilter[]{});
+				}else{
+					pattern = Pattern.compile(".*" + txtSearch.getPatternFilter().toLowerCase() + ".*");
+					table.setFilters(new ViewerFilter[]{filter});
+				}
+				table.refresh();
+				table.setCheckedElements(selected.toArray());
+			}
+		});
+		
+		// create table
+		Table ttable = new Table(popup, SWT.CHECK | SWT.V_SCROLL);
+        table = new CheckboxTableViewer(ttable){
+			@Override
+			public Object[] getCheckedElements() {
+				return selected.toArray();
+			}
+		};
+		table.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		table.addCheckStateListener(new ICheckStateListener() {
+			@Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				if (event.getElement() instanceof EntityItem){
+					if (event.getChecked()){
+						selected.add((EntityItem)event.getElement());
+					}else{
+						selected.remove(event.getElement());
+					}
+				}
+				
+				checkChanged = true;				
+			}
+		});
+		table.setContentProvider(contentProvider);
+		table.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		popup.pack();		
+		
+		loadEntities();
+		return popup;
+	}
+		
+	@Override
+	protected String getTextLabel(Collection<?> objects){
+		if (isLoading) return DialogConstants.LOADING_TEXT;
+		String value = super.getTextLabel(objects);
+		if (!objects.isEmpty()){
+			value = "(" + objects.size() + ") " + value;
+		}
+		return value;
+	}
+	
+	public boolean updateValue(IntelRecordAttributeValue value){
+		boolean add = false;
+		if (value.getAttributeListItems() == null){
+			value.setAttributeListItems(new ArrayList<>());
+		}
+		ArrayList<IntelRecordAttributeValueList> listValues = new ArrayList<IntelRecordAttributeValueList>();
+		Collection<?> objects = getCheckObjects();
+		for (Object item : objects) {					
+			if (item instanceof EntityItem){
+				IntelRecordAttributeValueList list = new IntelRecordAttributeValueList();
+				list.getId().setElementUuid(((EntityItem) item).uuid);
+				list.getId().setValue(value);
+				listValues.add(list);
+				add = true;
+			}
+		}
+		List<IntelRecordAttributeValueList> delete = new ArrayList<IntelRecordAttributeValueList>();
+		for (IntelRecordAttributeValueList existing : value.getAttributeListItems()){
+			if (!listValues.contains(existing)) delete.add(existing);
+		}
+		value.getAttributeListItems().removeAll(delete);
+		for (IntelRecordAttributeValueList newItem: listValues){
+			if (!value.getAttributeListItems().contains(newItem)){
+				value.getAttributeListItems().add(newItem);
+			}
+		}
+		return add;
+	}
+	
+	/**
+	 * Called before the popup is made visible
+	 */
+	@Override
+	protected void popupVisible(){
+		txtSearch.setText("");
+	}
+
+	private void loadEntities(){
+		Job j = new Job("loading entities"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<EntityItem> entities = new ArrayList<>();
+				Session s = HibernateManager.openSession();
+				try{
+					ScrollableResults r = s.createCriteria(IntelEntity.class)
+					.add(Restrictions.eq("entityType", type))
+					.scroll();
+					while(r.next()){
+						IntelEntity e = (IntelEntity)r.get()[0];
+						EntityItem i = new EntityItem(e.getUuid(), e.getIdAttributeAsText());
+						entities.add(i);
+					}
+				}finally{
+					s.close();
+				}
+				Display.getDefault().syncExec(()->{
+					
+					if (table.getTable().isDisposed()) return;
+					txtSearch.setText("");
+					table.setInput(entities);
+					table.setCheckedElements(selected.toArray());
+				});
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.setSystem(true);
+		j.schedule();
+	}
+	
+	public class EntityItem{
+		String name;
+		UUID uuid;
+		
+		public EntityItem(UUID uuid, String name){
+			this.uuid = uuid;
+			this.name = name;
+		}
+		
+		@Override
+		public int hashCode(){
+			return uuid.hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (this == other) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			return uuid.equals(((EntityItem)other).uuid);
+		}
+	}
+}

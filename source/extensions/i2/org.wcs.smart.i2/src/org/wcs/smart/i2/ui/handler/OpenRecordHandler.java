@@ -43,13 +43,13 @@ public class OpenRecordHandler {
 	public void openRecord(RecordEditorInput input, boolean editMode){
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
-			
+			input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || editMode);
 			IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, RecordEditor.ID);
-			if (editor instanceof RecordEditor){
-				if (pId.equals(IntelDataAssessmentPerspective.ID) || editMode){
-					((RecordEditor)editor).setEditMode(true);
-				}
-			}
+//			if (editor instanceof RecordEditor){
+//				if (pId.equals(IntelDataAssessmentPerspective.ID) || editMode){
+//					((RecordEditor)editor).setEditMode(true);
+//				}
+//			}
 		} catch (PartInitException e) {
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to open record. {0}", e.getMessage()), e);
 		}

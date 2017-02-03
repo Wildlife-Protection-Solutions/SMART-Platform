@@ -32,8 +32,6 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -69,6 +67,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -199,9 +199,9 @@ public class RecordsView {
 		
 		FilterComposite typeFilter = new FilterComposite(allRecordsSection, SWT.NONE);
 		typeFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		typeFilter.addChangeListener(new ChangeListener() {
+		typeFilter.addChangeListener(new Listener() {
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void handleEvent(Event event) {
 				if (typeFilter.getPatternFilter() == null || typeFilter.getPatternFilter().isEmpty()){
 					lstAllRecords.removeFilter(filter);
 					filter = null;

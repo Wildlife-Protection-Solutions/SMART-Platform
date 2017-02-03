@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -204,9 +202,9 @@ public class QueryView {
 		FilterComposite typeFilter = new FilterComposite(part, SWT.NONE);
 		toolkit.adapt(typeFilter);
 		typeFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		typeFilter.addChangeListener(new ChangeListener() {
+		typeFilter.addChangeListener(new Listener() {
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void handleEvent(org.eclipse.swt.widgets.Event event) {
 				if (typeFilter.getPatternFilter() == null || typeFilter.getPatternFilter().isEmpty()){
 					queryList.removeFilter(queryFilter);
 					queryFilter = null;

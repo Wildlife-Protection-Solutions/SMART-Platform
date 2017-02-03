@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -50,6 +51,19 @@ public class IntelRecordAttributeValueList {
 		this.id = id;
 	}
 		
+	@Override
+	public int hashCode(){
+		return id.hashCode();
+	}
+	
+	public boolean equals(Object other){
+		if (other.getClass().equals(IntelRecordAttributeValueList.class)){
+			return id.equals(((IntelRecordAttributeValueList)other).id);
+		}
+		return false;
+	}
+	
+	
 	@Embeddable
 	public static class IntelRecordAttributeValueListPk implements Serializable{
 		private static final long serialVersionUID = 1L;
@@ -75,6 +89,20 @@ public class IntelRecordAttributeValueList {
 		}
 		public void setElementUuid(UUID uuid){
 			this.uuid = uuid;
+		}
+		
+		@Override
+		public int hashCode(){
+			return Objects.hash(uuid, valueItem);
+		}
+		
+		@Override
+		public boolean equals(Object other){
+			if (this == other) return true;
+			if (other == null) return false;
+			if (getClass() != other.getClass()) return false;
+			IntelRecordAttributeValueListPk pk = (IntelRecordAttributeValueListPk) other;
+			return Objects.equals(uuid, pk.uuid) && Objects.equals(valueItem, pk.valueItem);
 		}
 	}
 }

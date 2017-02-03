@@ -117,4 +117,11 @@ public class RecordEditorInput implements IEditorInput{
 		return super.hashCode();
 	}
 
+	private boolean initMode;
+	public boolean getIsEditable(){
+		return this.initMode;
+	}
+	public void setIsInitEditable(boolean isEditable){
+		this.initMode = isEditable;
+	}
 }

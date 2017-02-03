@@ -30,8 +30,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -525,12 +523,13 @@ public class EntitySearchView {
 		
 		txtSearch = new FilterComposite(core, SWT.NONE);
 		txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtSearch.addChangeListener(new ChangeListener() {
+		txtSearch.addChangeListener(new Listener() {
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void handleEvent(Event event) {
 				doBasicSearch(searchDelay);
 			}
 		});
+
 		
 		toolkit.createLabel(core, "EntityType:");
 		

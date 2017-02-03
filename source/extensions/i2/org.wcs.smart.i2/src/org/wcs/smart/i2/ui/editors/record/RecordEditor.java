@@ -78,7 +78,9 @@ import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
@@ -146,6 +148,28 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							}
 						}
 					}
+					if (temp.getRecordSource() != null){
+						temp.getRecordSource().getName();
+						if (temp.getRecordSource().getAttributes() != null){
+							for (IntelRecordSourceAttribute a : temp.getRecordSource().getAttributes()){
+								a.getName();
+								if (a.getAttribute() != null){
+									a.getAttribute().getName();
+									a.getAttribute().getAttributeList().size();
+								}
+								if (a.getEntityType() != null) a.getEntityType().getName();
+								a.getEntityType();
+							}
+						}
+					}
+					if (temp.getAttributes() != null){
+						for (IntelRecordAttributeValue a : temp.getAttributes()){
+							if (a.getAttributeListItems() != null){
+								a.getAttributeListItems().size();
+							}
+						}
+					}
+					
 					if (temp.getEntities() != null){
 						for (IntelEntityRecord rr : temp.getEntities()){
 							rr.getEntity().getIdAttributeAsText();
@@ -226,6 +250,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	@SuppressWarnings("unchecked")
 	@Override
 	public void doSave(IProgressMonitor monitor) {
+		summaryPage.doSave(monitor);
 		Set<IntelEntity> modifiedEntities = new HashSet<IntelEntity>();
 		boolean isnew = record.getUuid() == null;
 		
@@ -238,6 +263,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					s.saveOrUpdate(a.getAttachment());
 				}
 			}
+			
 			
 			for (IntelEntityRecord r : summaryPage.getDeleteEntityLinks()){
 				if (r.getRecord().getUuid() != null){
@@ -445,6 +471,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		this.input = (RecordEditorInput)input;
 		super.setPartName(input.getName());
+		if (this.input.getIsEditable()){
+			this.isEditMode = true;
+		}
 	}
 
 	@Override

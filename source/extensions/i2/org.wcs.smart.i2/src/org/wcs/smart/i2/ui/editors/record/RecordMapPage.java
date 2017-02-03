@@ -100,6 +100,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 		protected IStatus run(IProgressMonitor monitor) {
 			//wait for job to finish
 			if (getMap() == null) return Status.OK_STATUS;
+			if (loadDefaultLayers == null) return Status.OK_STATUS;
 			try {
 				loadDefaultLayers.join();
 			} catch (InterruptedException e1) {
