@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
@@ -66,7 +67,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	private boolean mouseOver = false;
 	
 	private Shell popup;
-	protected CheckboxTableViewer table;
+	protected StructuredViewer table;
 	protected ILabelProvider labelProvider;
 	protected IContentProvider contentProvider;
 	protected Collection<?> input;
@@ -172,15 +173,15 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	
 	public void setLabelProvider(ILabelProvider provider){
 		labelProvider = provider;
-		if (table != null && !table.getTable().isDisposed()) table.setLabelProvider(provider);
+		if (table != null && !table.getControl().isDisposed()) table.setLabelProvider(provider);
 	}
 	public void setContentProvider(IContentProvider provider){
 		contentProvider = provider;
-		if (table != null && !table.getTable().isDisposed()) table.setContentProvider(provider);
+		if (table != null && !table.getControl().isDisposed()) table.setContentProvider(provider);
 	}
 	public void setInput(Collection<?> input){
 		this.input = input;
-		if (table != null && !table.getTable().isDisposed()) table.setInput(input);
+		if (table != null && !table.getControl().isDisposed()) table.setInput(input);
 	}
 	
 	public Collection<?> getInput(){
@@ -228,7 +229,11 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		popup.setLayout(new GridLayout());
 		((GridLayout)popup.getLayout()).marginWidth = 1;
 		((GridLayout)popup.getLayout()).marginHeight = 1;
-		
+		popup.addListener(SWT.Traverse, e-> {
+	    	if (e.detail == SWT.TRAVERSE_ESCAPE) {
+	    		e.doit = false;
+	    	}
+		});
 		popup.addListener(SWT.Deactivate, (event)->dropDown(false));
 		popup.addListener(SWT.Paint, event->{
 			Rectangle bounds = popup.getBounds();
@@ -239,7 +244,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		// create table
 		table = CheckboxTableViewer.newCheckList(popup, SWT.V_SCROLL);
 		table.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		table.addCheckStateListener(new ICheckStateListener() {
+		((CheckboxTableViewer)table).addCheckStateListener(new ICheckStateListener() {
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				checkChanged = true;				
@@ -269,12 +274,20 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		if (contentProvider != null) table.setContentProvider(contentProvider);
 		if (input != null) table.setInput(input);
 	}
+	
+	protected Object[] getCheckedElements(){
+		return ((CheckboxTableViewer)table).getCheckedElements();
+	}
+	
+	protected void setCheckedElements(Object[] elements){
+		((CheckboxTableViewer)table).setCheckedElements(elements);
+	}
+	
 	/**
 	 * handle DropDown request
 	 * @param drop
 	 */
-	
-	private void dropDown (boolean drop) {
+	protected void dropDown (boolean drop) {
 		
 		// if already dropped then return
 		if (popup == null && !drop) return;
@@ -285,11 +298,12 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	    if (!drop) {
 	    	//update value
 	    	if (checkChanged){
-	    		Object[] selected = table.getCheckedElements();
+	    		Object[] selected = getCheckedElements();
 	    		List<Object> elements = new ArrayList<Object>();
 	    		for (Object xx : selected) elements.add(xx);
 	    		setValue(elements);
 	    		fireChangeListener();
+	    		checkChanged = false;
 	    	}
 	    	
 	        popup.setVisible (false);
@@ -327,7 +341,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	    
 		Collection<Object> items = (Collection<Object>) txtInfo.getData();
 		if (items != null && !items.isEmpty()){
-			table.setCheckedElements(items.toArray(new Object[items.size()]));
+			setCheckedElements(items.toArray(new Object[items.size()]));
 		}
 	}	
 	
