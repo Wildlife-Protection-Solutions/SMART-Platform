@@ -1,24 +1,3 @@
-/*
- * Copyright (C) 2012 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package org.wcs.smart.i2.birt.record;
 
 import java.math.BigDecimal;
@@ -39,15 +18,10 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.util.UuidUtils;
 
-/**
- * Entity record datasets results
- * @author Emily
- *
- */
-public class RecordDatasetResultSet implements IResultSet {
+public class RecordAttributeDatasetResultSet implements IResultSet {
 
 	private long m_maxRows = -1;
 	private int m_currentRowId = -1;
@@ -56,9 +30,8 @@ public class RecordDatasetResultSet implements IResultSet {
 	private Object lastRowItem;
 	
 	private ScrollableResults results;
-	private RecordDatasetResultSetMetadata metadata;
+	private RecordAttributeDatasetResultSetMetadata metadata;
 	private AbstractIntelBirtConnection connection;
-	
 	/**
 	 * Creates a new summary results set
 	 * 
@@ -67,19 +40,20 @@ public class RecordDatasetResultSet implements IResultSet {
 	 * @param metadata
 	 *            the metadata
 	 */
-	public RecordDatasetResultSet( RecordDatasetResultSetMetadata metadata,
+	public RecordAttributeDatasetResultSet( RecordAttributeDatasetResultSetMetadata metadata,
 			AbstractIntelBirtConnection connection, 
 			HashMap<Integer, Object> parameters,
 			RecordParameterMetadata pmetadata) {
 		this.connection = connection;
 		this.metadata = metadata;
-		Criteria c = connection.getSession().createCriteria(IntelRecord.class)
-				.add(Restrictions.in("conservationArea",connection.getConservationAreas()));
+		Criteria c = connection.getSession().createCriteria(IntelRecordAttributeValue.class)
+				.createAlias("record", "r")
+				.add(Restrictions.in("r.conservationArea",connection.getConservationAreas()));
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		if (index >= 0){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
-			c.add(Restrictions.eq("uuid", recordUuid));
+			c.add(Restrictions.eq("r.uuid", recordUuid));
 		}
 		
 		results = c.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
@@ -155,8 +129,8 @@ public class RecordDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelRecord i = (IntelRecord) ((Object[])currentItem)[0];
-		return RecordDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
+		IntelRecordAttributeValue i = (IntelRecordAttributeValue) ((Object[])currentItem)[0];
+		return RecordAttributeDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale(), connection.getSession());
 	}
 
 	/**
@@ -308,9 +282,7 @@ public class RecordDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getBlob(int)
 	 */
 	public IBlob getBlob(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		return (IBlob) lastRowItem;
-//		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException();
 	}
 
 	/**

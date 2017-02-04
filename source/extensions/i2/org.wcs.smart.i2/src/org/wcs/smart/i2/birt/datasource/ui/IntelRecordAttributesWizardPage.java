@@ -19,35 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.handler;
+package org.wcs.smart.i2.birt.datasource.ui;
 
-import java.text.MessageFormat;
-import java.util.UUID;
-
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
-import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
 
 /**
- * Opens an entity record.
+ * Intelligence record attributes.  A wizard page with no options. 
  * 
  * @author Emily
  *
  */
-public class OpenQueryHandler {
+public class IntelRecordAttributesWizardPage extends IntelRecordDetailsWizardPage {
 
-	public void openQuery(QueryEditorInput editorInput, boolean editMode){
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelQueryEditor.ID);
-		} catch (PartInitException e) {
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to open intelligence query. {0}", e.getMessage()), e);
-		}
+	public IntelRecordAttributesWizardPage(String pageName) {
+		super(pageName);
+	}
+
+	public IntelRecordAttributesWizardPage(String pageName, String title,
+			ImageDescriptor titleImage) {
+		super(pageName, title, titleImage);
+	}
+
+	@Override
+	public void createPageCustomControl(Composite parent) {
+		Label l = new Label(parent, SWT.NONE);
+		l.setText("There are no configuration options for this layer.");
+		setControl(parent);
+	}
+
+	@Override
+	public String getDatasetType(){
+		return RecordAttributeDataset.DATASET_TYPE;
 	}
 	
-	public void openQuery(UUID queryUuid, boolean editMode){
-		QueryEditorInput input = new QueryEditorInput(null, queryUuid);
-		openQuery(input, editMode);
+	@Override
+	public String getName(){
+		return "Record Attributes";
 	}
 }

@@ -25,18 +25,20 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -51,6 +53,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -71,9 +74,12 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.themes.ColorUtil;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -81,6 +87,7 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
@@ -103,6 +110,8 @@ public class RecordSummaryPage extends EditorPart{
 	private FormToolkit  toolkit;
 
 	private Composite summaryPart;
+	private Composite historyPart;
+	
 	private Label headerLabel;
 	
 	private EntityListComposite entityPanel;
@@ -119,7 +128,22 @@ public class RecordSummaryPage extends EditorPart{
 	private SashForm sashForm;
 	private RecordButtonToolbar buttonToolBar;
 
-	private Composite historyPart; 
+	//attribute panel
+	private Composite srcAttributePanel;
+	private HashMap<IntelRecordSourceAttribute, Object> editorFields;
+	private SelectionAdapter dirtyListener = new SelectionAdapter(){
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			recordEditor.setDirty(true);
+		}
+	};
+	
+	private ISelectionChangedListener dirtyListener2 = new ISelectionChangedListener() {
+		@Override
+		public void selectionChanged(SelectionChangedEvent event) {
+			recordEditor.setDirty(true);
+		}
+	};
 	
 	public RecordSummaryPage(RecordEditor parent){
 		this.recordEditor =  parent;
@@ -366,7 +390,7 @@ public class RecordSummaryPage extends EditorPart{
 		
 		toolkit.createLabel(leftPart, "Status:");
 		if (recordEditor.getEditMode()){
-			ComboViewer cmbStatus = new ComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY);
+			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
 			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			cmbStatus.setContentProvider(ArrayContentProvider.getInstance());
@@ -377,6 +401,14 @@ public class RecordSummaryPage extends EditorPart{
 						return RecordLabelProvider.getRecordStatusLabel((Status) element);
 					}
 					return super.getText(element);
+				}
+				
+				@Override
+				public Image getImage(Object element){
+					if (element instanceof IntelRecord.Status){
+						return RecordLabelProvider.getRecordStatusImage((Status)element);
+					}
+					return super.getImage(element);
 				}
 			});
 			cmbStatus.setInput(IntelRecord.Status.values());
@@ -391,8 +423,17 @@ public class RecordSummaryPage extends EditorPart{
 			});
 			
 		}else{
-			Label l = toolkit.createLabel(leftPart,  RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			Composite temp = toolkit.createComposite(leftPart);
+			temp.setLayout(new GridLayout(2, false));
+			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)temp.getLayout()).marginWidth = 0;
+			((GridLayout)temp.getLayout()).marginHeight = 0;
+			Label l = toolkit.createLabel(temp, "");
+			l.setImage(RecordLabelProvider.getRecordStatusImage(recordEditor.getRecord().getStatus()));
+			
+			l = toolkit.createLabel(temp,  RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			
 		}
 		
 		toolkit.createLabel(leftPart, "Source:");
@@ -403,63 +444,28 @@ public class RecordSummaryPage extends EditorPart{
 			cmbSource.setContentProvider(ArrayContentProvider.getInstance());
 			cmbSource.setLabelProvider(new RecordSourceLabelProvider());
 			cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
-			
-			Job srcLoader = new Job("load record sources"){
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					List<Object> allInput = new ArrayList<Object>();
-					Session s = HibernateManager.openSession();
-					try{
-						List<IntelRecordSource> sources = s.createCriteria(IntelRecordSource.class)
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-								.list();
-						sources.forEach(src -> {
-							src.getName();
-							if (src.getAttributes() != null){
-								src.getAttributes().forEach(a -> {
-									a.getName();
-									if (a.getAttribute() != null && a.getAttribute().getAttributeList() != null){
-										a.getAttribute().getAttributeList().forEach(l -> l.getName());
-									}
-								});
-							}
-						});
-						allInput.addAll(sources);
-						
-						
-					}finally{
-						s.close();
-					}
-					Display.getDefault().syncExec(()->{
-						if (cmbSource.getControl().isDisposed()) return;
-						allInput.add(0, "");
-						cmbSource.setInput(allInput);
-						if (recordEditor.getRecord().getRecordSource() != null) cmbSource.setSelection(new StructuredSelection(recordEditor.getRecord().getRecordSource()));
-						cmbSource.addSelectionChangedListener(new ISelectionChangedListener() {
-							@Override
-							public void selectionChanged(SelectionChangedEvent event) {
-								Object x =  ((IStructuredSelection)cmbSource.getSelection()).getFirstElement();
-								if (x == null || !(x instanceof IntelRecordSource)){
-									recordEditor.getRecord().setRecordSource( null);	
-								}else{
-									recordEditor.getRecord().setRecordSource( (IntelRecordSource)x );
-								}
-								recordEditor.setDirty(true);
-								
-								configureAttributePanel( recordEditor.getRecord().getRecordSource() );
-							}
-						});
-					});
-					return org.eclipse.core.runtime.Status.OK_STATUS;
-				}
-				
-			};
-			srcLoader.setSystem(false);
-			srcLoader.schedule();
+			loadRecordSources(cmbSource);
 		}else{
-			Label l = toolkit.createLabel(leftPart,  recordEditor.getRecord().getRecordSource().getName());
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			Composite temp = toolkit.createComposite(leftPart);
+			temp.setLayout(new GridLayout(2, false));
+			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)temp.getLayout()).marginWidth = 0;
+			((GridLayout)temp.getLayout()).marginHeight = 0;
+			
+			Label l = toolkit.createLabel(temp, "");
+			Image img = null;
+			if (recordEditor.getRecord().getRecordSource() != null && recordEditor.getRecord().getRecordSource().getIcon() != null){
+				try{
+					img = AWTSWTImageUtils.convertToSWTImage(recordEditor.getRecord().getRecordSource().getIconAsImage());
+				}catch (Exception ex){
+					
+				}
+			}
+			final Image toDispose= img;
+			l.setImage(toDispose);
+			l.addDisposeListener(e->{if (toDispose != null) toDispose.dispose();});
+			l = toolkit.createLabel(temp,  recordEditor.getRecord().getRecordSource().getName());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		}
 			
 		Composite rightPart = new Composite(header, SWT.NONE);
@@ -534,22 +540,9 @@ public class RecordSummaryPage extends EditorPart{
 			
 	}
 	
-	private Composite srcAttributePanel;
-	private HashMap<IntelRecordSourceAttribute, Object> editorFields;
-	
-	private SelectionAdapter dirtyListener = new SelectionAdapter(){
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-			recordEditor.setDirty(true);
-		}
-	};
-	
-	private ISelectionChangedListener dirtyListener2 = new ISelectionChangedListener() {
-		@Override
-		public void selectionChanged(SelectionChangedEvent event) {
-			recordEditor.setDirty(true);
-		}
-	};
+	/*
+	 * configures controls for record attributes
+	 */
 	private void configureAttributePanel(IntelRecordSource source){
 		if (srcAttributePanel.isDisposed()) return;
 		for (Control kid : srcAttributePanel.getChildren()){
@@ -573,15 +566,11 @@ public class RecordSummaryPage extends EditorPart{
 		((GridLayout)content.getLayout()).marginWidth = 5;
 		((GridLayout)content.getLayout()).marginHeight = 0;
 		
+		HashMap<IntelRecordAttributeValue, Label> readOnlyLabels = new HashMap<>();
+		
 		for (IntelRecordSourceAttribute a : source.getAttributes()){
-			String name = a.getName();
-			if (name == null || name.isEmpty()){
-				if (a.getAttribute() != null){
-					name = a.getAttribute().getName();
-				}else if (a.getEntityType() != null){
-					name = a.getEntityType().getName();
-				}
-			}
+			String name = getName(a);
+			IntelRecordAttributeValue v = findAttributeValue(a);
 			
 			if (recordEditor.getEditMode()){
 				if (recordEditor.getRecord().getAttributes() == null){
@@ -589,8 +578,7 @@ public class RecordSummaryPage extends EditorPart{
 				}
 				if (a.getAttribute() != null){
 					AttributeFieldEditor af = new AttributeFieldEditor(content, a.getAttribute(), a.getIsMultiple(), name);
-					editorFields.put(a, af);
-					IntelRecordAttributeValue v = findAttributeValue(a);
+					editorFields.put(a, af);					
 					if (v != null) af.initControl(v);
 					af.addSelectionListener(dirtyListener);
 					af.adapt(toolkit);
@@ -598,34 +586,126 @@ public class RecordSummaryPage extends EditorPart{
 					Label l = toolkit.createLabel(content, name + ":");
 					l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-					EntityCheckboxDropDownViewer editor = new EntityCheckboxDropDownViewer(content, a.getEntityType());
+					Composite tmp  = toolkit.createComposite(content, SWT.NONE);
+					tmp.setLayout(new GridLayout(2, false));
+					((GridLayout)tmp.getLayout()).marginWidth = 0;
+					((GridLayout)tmp.getLayout()).marginHeight = 0;
+					tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					
+					EntityCheckboxDropDownViewer editor = new EntityCheckboxDropDownViewer(tmp, a.getEntityType(), a.getIsMultiple());
 					editorFields.put(a, editor);
-					IntelRecordAttributeValue v = findAttributeValue(a);
 					if (v != null) editor.initControl(v.getAttributeListItems());
 					editor.addSelectionChangedListener(dirtyListener2);
+					editor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					toolkit.adapt(editor);
 					
+					Hyperlink link = toolkit.createHyperlink(tmp, "link...", SWT.NONE);
+					link.setToolTipText("Link entities to record");
+					link.addHyperlinkListener(new HyperlinkAdapter() {
+						@Override
+						public void linkActivated(HyperlinkEvent e) {
+							for (Object x : editor.getCheckObjects()){
+								if (x instanceof EntityCheckboxDropDownViewer.EntityItem){
+									IntelEntity tmp = new IntelEntity();
+									tmp.setUuid(((EntityCheckboxDropDownViewer.EntityItem) x).uuid);
+									recordEditor.linkEntity(tmp);
+								}
+							}
+							
+						}
+					});
 				}
-			
 			}else{
-				String value = "NO VALUETOTOD";
-				for (IntelRecordAttributeValue v  : recordEditor.getRecord().getAttributes()){
-					if (v.getAttribute().equals(a)){
-						value = v.getAttributeValueAsString();
-						break;
-					}
+				String value = "";
+				if (v != null){
+					value = v.getAttributeValueAsString(Locale.getDefault());
 				}
+				
 				Label l = toolkit.createLabel(content, name + ":");
 				l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				
-				toolkit.createLabel(content,value);
+				l = toolkit.createLabel(content,value);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				if (v != null){
+					if (a.isListAttribute()){
+						readOnlyLabels.put(v, l);
+					}
+				}
 			}
+		}
+		if (!recordEditor.getEditMode()){
+			loadListAttribute(readOnlyLabels);
 		}
 		sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		srcAttributePanel.layout(true, true);
 	}
 	
+	/*
+	 * loads list attribute names for labels when editor is in read only mode;
+	 * when not in read only mode we do not need to do this
+	 */
+	private void loadListAttribute(final HashMap<IntelRecordAttributeValue, Label> attributes){
+		Job j = new Job("loading attribute values"){
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				final HashMap<Label, String> labels = new HashMap<>();
+				
+				Session session =  HibernateManager.openSession();
+				try{
+					for (Entry<IntelRecordAttributeValue,Label> v : attributes.entrySet()){
+						if (v.getKey().getAttributeListItems().isEmpty()){
+							labels.put(v.getValue(), "");
+						}else{
+							StringBuilder sb = new StringBuilder();
+							sb.append("(" + v.getKey().getAttributeListItems().size() + ") ");
+							if (v.getKey().getAttribute().getAttribute() != null){
+								//attributes
+								for (IntelRecordAttributeValueList l : v.getKey().getAttributeListItems()){
+									String lbl = ((IntelAttributeListItem)session.get(IntelAttributeListItem.class, l.getId().getElementUuid())).getName();
+									sb.append(lbl);
+									sb.append(", ");
+								}
+							}else if(v.getKey().getAttribute().getEntityType() != null){
+								//entity types
+								for (IntelRecordAttributeValueList l : v.getKey().getAttributeListItems()){
+									String lbl = ((IntelEntity)session.get(IntelEntity.class, l.getId().getElementUuid())).getIdAttributeAsText();
+									sb.append(lbl);
+									sb.append(", ");
+								}
+							}
+							labels.put(v.getValue(), sb.substring(0, sb.length()-2));
+						}
+					}
+				}finally{
+					session.close();
+				}
+				Display.getDefault().syncExec(()->{
+					for(Entry<Label,String> v : labels.entrySet()){
+						if (v.getKey().isDisposed()) return;
+						v.getKey().setText(v.getValue());
+					}
+				});
+				return org.eclipse.core.runtime.Status.OK_STATUS;
+			}
+		};
+		j.setSystem(true);
+		j.schedule();
+	}
+	
+	/*
+	 * finds the name for a record attribute
+	 */
+	private String getName(IntelRecordSourceAttribute a){
+		String name = a.getName();
+		if (name == null || name.isEmpty()){
+			if (a.getAttribute() != null){
+				name = a.getAttribute().getName();
+			}else if (a.getEntityType() != null){
+				name = a.getEntityType().getName();
+			}
+		}
+		return name;
+	}
 	
 	@Override
 	public void setFocus() {
@@ -645,6 +725,9 @@ public class RecordSummaryPage extends EditorPart{
 		if (toolkit != null) toolkit.dispose();
 	}
 
+	/*
+	 * finds the record attribute value for a given attribute; null if not found
+	 */
 	private IntelRecordAttributeValue findAttributeValue(IntelRecordSourceAttribute a ){
 		for (IntelRecordAttributeValue v  : recordEditor.getRecord().getAttributes()){
 			if (v.getAttribute().equals(a)){
@@ -654,8 +737,34 @@ public class RecordSummaryPage extends EditorPart{
 		return null;
 	}
 	
+	/*
+	 * updates record attribute values
+	 */
 	@Override
 	public void doSave(IProgressMonitor monitor) {
+		
+	}
+	
+	/**
+	 * updates the record attribute values with values from ui fields 
+	 * @param monitor
+	 * @return
+	 */
+	public boolean saveAttributes(IProgressMonitor monitor) {
+		boolean showError = false;
+		for (Entry<IntelRecordSourceAttribute, Object> editor: editorFields.entrySet()){
+			if (editor.getValue() instanceof AttributeFieldEditor){
+				if (!((AttributeFieldEditor)editor.getValue()).isValid()){
+					showError = true;
+					break;
+				}
+			}
+		}
+		if (showError){
+			MessageDialog.openError(getSite().getShell(), "Error", "Record contains invalid attribute values.  You must fix these before you can save the editor");
+			return false;
+		}
+			
 		IntelRecord r = recordEditor.getRecord();
 		if (r.getRecordSource() == null){
 			r.getAttributes().clear();
@@ -692,6 +801,7 @@ public class RecordSummaryPage extends EditorPart{
 				r.getAttributes().remove(toUpdate);
 			}				
 		}
+		return true;
 	}
 
 	@Override
@@ -708,5 +818,66 @@ public class RecordSummaryPage extends EditorPart{
 		return false;
 	}
 
-	
+	/*
+	 * Loads all possible record sources from db and populates 
+	 * provided combo
+	 * @param cmbSource
+	 */
+	private void loadRecordSources(final Viewer cmbSource){
+		Job srcLoader = new Job("load record sources"){
+
+			@SuppressWarnings("unchecked")
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<Object> allInput = new ArrayList<Object>();
+				Session s = HibernateManager.openSession();
+				try{
+					List<IntelRecordSource> sources = s.createCriteria(IntelRecordSource.class)
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+							.list();
+					sources.forEach(src -> {
+						src.getName();
+						if (src.getAttributes() != null){
+							src.getAttributes().forEach(a -> {
+								a.getName();
+								if (a.getAttribute() != null && a.getAttribute().getAttributeList() != null){
+									a.getAttribute().getAttributeList().forEach(l -> l.getName());
+								}
+							});
+						}
+					});
+					allInput.addAll(sources);
+				}finally{
+					s.close();
+				}
+				allInput.add(0, "");
+				Display.getDefault().syncExec(()->{
+					if (cmbSource.getControl().isDisposed()) return;
+					
+					cmbSource.setInput(allInput);
+					if (recordEditor.getRecord().getRecordSource() != null) cmbSource.setSelection(new StructuredSelection(recordEditor.getRecord().getRecordSource()));
+					
+					cmbSource.addSelectionChangedListener(new ISelectionChangedListener() {
+						@Override
+						public void selectionChanged(SelectionChangedEvent event) {
+							Object x =  ((IStructuredSelection)cmbSource.getSelection()).getFirstElement();
+							if (x == null || !(x instanceof IntelRecordSource)){
+								recordEditor.getRecord().setRecordSource( null);	
+							}else{
+								recordEditor.getRecord().setRecordSource( (IntelRecordSource)x );
+							}
+							recordEditor.setDirty(true);
+							
+							configureAttributePanel( recordEditor.getRecord().getRecordSource() );
+						}
+					});
+				});
+				return org.eclipse.core.runtime.Status.OK_STATUS;
+			}
+			
+		};
+		srcLoader.setSystem(false);
+		srcLoader.schedule();
+		
+	}
 }

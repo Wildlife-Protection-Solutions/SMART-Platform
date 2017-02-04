@@ -27,7 +27,7 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 
 /**
- * Entity record parameter metadata
+ * Intelligence record parameter metadata
  * 
  * @author Emily
  *

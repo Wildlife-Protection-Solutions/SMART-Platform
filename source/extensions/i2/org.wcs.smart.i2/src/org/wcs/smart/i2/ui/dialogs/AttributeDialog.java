@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -136,6 +137,9 @@ public class AttributeDialog extends TitleAreaDialog {
 						s.delete(item);
 					}
 					
+					Query q = s.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid");
+					q.setParameter("uuid", i.getUuid());
+					q.executeUpdate();
 				}
 			}
 			s.flush();

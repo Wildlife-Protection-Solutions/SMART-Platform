@@ -28,6 +28,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 
 /**
@@ -55,7 +56,7 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 		
 		if (!links.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following entity types reference the intelligence attribute.  These links must be removed first: ");
+			sb.append("The following entity types reference this intelligence attribute and must be removed before the attribute can be deleted. ");
 			for (IntelEntityTypeAttribute a : links){
 				sb.append(a.getEntityType().getName());
 				sb.append(", ");
@@ -71,11 +72,29 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 			.add(Restrictions.eq("id.attribute", attribute)) //$NON-NLS-1$
 			.list();
 		
-		if (!links.isEmpty()){
+		if (!links2.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following relationship types reference the intelligence attribute.  These links must be removed first: ");
+			sb.append("The following relationship types reference this intelligence attribute and must be removed before the attribute can be deleted. ");
 			for (IntelRelationshipTypeAttribute a : links2){
 				sb.append(a.getRelationshipType().getName());
+				sb.append(", ");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
+			sb.append(".");
+			return sb.toString();
+		}
+		
+		List<IntelRecordSourceAttribute> links3 = 
+				session.createCriteria(IntelRecordSourceAttribute.class)
+			.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
+			.list();
+		
+		if (!links3.isEmpty()){
+			StringBuilder sb = new StringBuilder();
+			sb.append("The following record source options reference this intelligence attribute and must be removed before the attribute can be deleted. ");
+			for (IntelRecordSourceAttribute a : links3){
+				sb.append(a.getSource().getName());
 				sb.append(", ");
 			}
 			sb.deleteCharAt(sb.length() - 1);

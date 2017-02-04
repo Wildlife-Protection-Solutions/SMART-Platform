@@ -1,24 +1,3 @@
-/*
- * Copyright (C) 2012 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package org.wcs.smart.i2.birt.record;
 
 import java.math.BigDecimal;
@@ -36,15 +15,9 @@ import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 
-/**
- * Record details dataset
- * 
- * @author Emily
- *
- */
-public class RecordDataset implements IQuery {
+public class RecordAttributeDataset implements IQuery {
 	
-	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.record.details";
+	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.record.details.attributes";
 
 	private IResultSetMetaData r_metadata = null;
 	protected RecordParameterMetadata pMetadata = null;
@@ -54,7 +27,7 @@ public class RecordDataset implements IQuery {
 	
 	protected HashMap<Integer, Object> parameters;
 	
-	public RecordDataset(AbstractIntelBirtConnection connection){
+	public RecordAttributeDataset(AbstractIntelBirtConnection connection){
 		this.connection = connection;
 		parameters = new HashMap<Integer,Object>();
 		
@@ -89,14 +62,14 @@ public class RecordDataset implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new RecordDatasetResultSetMetadata();
+			r_metadata = new RecordAttributeDatasetResultSetMetadata();
 		}
 		return r_metadata;
 	}
 
 	@Override
 	public IResultSet executeQuery() throws OdaException {
-		RecordDatasetResultSet set = new RecordDatasetResultSet((RecordDatasetResultSetMetadata)getMetaData(), 
+		RecordAttributeDatasetResultSet set = new RecordAttributeDatasetResultSet((RecordAttributeDatasetResultSetMetadata)getMetaData(), 
 				connection, parameters,
 				(RecordParameterMetadata)getParameterMetaData());
 		return set;

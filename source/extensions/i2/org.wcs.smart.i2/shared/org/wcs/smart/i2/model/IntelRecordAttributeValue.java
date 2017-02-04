@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -35,6 +36,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
@@ -141,24 +144,27 @@ public class IntelRecordAttributeValue extends UuidItem{
 	 * on the attribute type.
 	 */
 	@Transient
-	public String getAttributeValueAsString(){
+	public String getAttributeValueAsString(Locale l){
 		if(attribute.getAttribute() != null){
 			AttributeType type = attribute.getAttribute().getType();
-			if (type == AttributeType.BOOLEAN ||
-				type == AttributeType.NUMERIC){
+			switch(type){
+			case BOOLEAN:
+				if (getNumberValue() > 0.5){
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l);
+				}else{
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);
+				}
+			case DATE:
+				return DateFormat.getDateInstance().format(getDateValue());
+			case LIST:
+				return String.valueOf(listItems.size());
+			case NUMERIC:
 				return String.valueOf(getNumberValue());
-			}else if (type == AttributeType.TEXT){
+			case TEXT:
 				return getStringValue();
-			}else if (type == AttributeType.LIST){
-//				return getAttributeListItems();
-				return "TODO: multi list";
-			}else if (type == AttributeType.DATE){
-				return DateFormat.getInstance().format(getDateValue());
 			}
-			throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 		}else if (attribute.getEntityType() != null){
-//			return getAttributeListItems();
-			return "TODO: multi entities";
+			return String.valueOf(listItems.size());
 		}
 		return null;
 	}
@@ -182,5 +188,6 @@ public class IntelRecordAttributeValue extends UuidItem{
 	public void setAttribute(IntelRecordSourceAttribute attribute) {
 		this.attribute = attribute;
 	}
+	
 	
 }

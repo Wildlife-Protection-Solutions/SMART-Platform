@@ -90,5 +90,7 @@ public class IntelEvents {
 	public static final String ENTITY_SEARCH_NEW = "INTEL_ENTITY_SEARCH/NEW";
 	public static final String ENTITY_SEARCH_MODIFIED = "INTEL_ENTITY_SEARCH/UPDATED";
 	public static final String ENTITY_SEARCH_DELETED = "INTEL_ENTITY_SEARCH/DELETED";
-	
+
+	//record sources modified; no payload
+	public static final String RECORD_SOURCE_ALL = "INTEL_RECORD_SOURCE";
 }

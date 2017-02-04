@@ -594,7 +594,6 @@ public class LocationListComposite extends Composite{
 					Date date = ((IntelLocation)element).getDateTime();
 					((IntelLocation)element).setDateTime(SmartUtils.combineDateTime(date, time));
 				}else if (col == Column.OBSERVATION){
-					//TODO:
 				}
 				//Fire changes
 				LocationListComposite.this.editor.locationsUpdated();

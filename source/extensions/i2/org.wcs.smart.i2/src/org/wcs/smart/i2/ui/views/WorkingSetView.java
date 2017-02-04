@@ -865,20 +865,21 @@ public class WorkingSetView {
 					Session s = HibernateManager.openSession();
 					try{
 						ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, workingSetUuid);
-						if (ws == null) return Status.OK_STATUS;//TODO: fix this
-						ws.getName();
-						for (IntelWorkingSetEntity entity : ws.getEntities()){
-							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()));
-							items.add(i);
-						}
-						
-						for (IntelWorkingSetRecord record : ws.getRecords()){
-							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
-							items.add(i);
-						}
-						for (IntelWorkingSetQuery query : ws.getQueries()){
-							IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.QUERIES, query.getQuery().getName(), query.getIsVisible(), query.getQuery().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY_QUERY));
-							items.add(i);
+						if (ws != null){
+							ws.getName();
+							for (IntelWorkingSetEntity entity : ws.getEntities()){
+								IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()));
+								items.add(i);
+							}
+							
+							for (IntelWorkingSetRecord record : ws.getRecords()){
+								IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+								items.add(i);
+							}
+							for (IntelWorkingSetQuery query : ws.getQueries()){
+								IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.QUERIES, query.getQuery().getName(), query.getIsVisible(), query.getQuery().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY_QUERY));
+								items.add(i);
+							}
 						}
 					}finally{
 						s.close();

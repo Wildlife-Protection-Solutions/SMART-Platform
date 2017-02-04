@@ -34,12 +34,16 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -47,6 +51,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -65,20 +70,20 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.ui.IconComposite;
 import org.wcs.smart.i2.ui.RecordSourceAttributeLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
@@ -101,6 +106,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 	
 	private List<IntelRecordSource> toDelete;
 	private List<IntelRecordSourceAttribute> attributesToDelete;
+	private List<IntelRecordSourceAttribute> attributesMultiToSingle;	//tracks attribute which are changed from multi to single
 		
 	private Label sourceLabel;
 	private TableViewer lstAttributes;
@@ -150,6 +156,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		super(parent);		
 		toDelete = new ArrayList<>();
 		attributesToDelete = new ArrayList<>();	
+		attributesMultiToSingle = new ArrayList<>();
 	}
 	
 	@Override
@@ -268,6 +275,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			public void modifyText(ModifyEvent e) {
 				if (currentSelection != null){
 					currentSelection.setIcon(iconComp.getImage());
+					((RecordSourceLabelProvider)lstSources.getLabelProvider()).disposeImages();
 					lstSources.refresh();
 					modified();
 				}
@@ -285,6 +293,17 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAttributes.getTable().setHeaderVisible(true);
 		
+		ColumnViewerEditorActivationStrategy activationSupport = new ColumnViewerEditorActivationStrategy(lstAttributes) {
+		    protected boolean isEditorActivationEvent(ColumnViewerEditorActivationEvent event) {
+				return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
+						|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
+						|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
+						|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
+		    }
+		};
+		
+		TableViewerEditor.create(lstAttributes, activationSupport, ColumnViewerEditor.TABBING_HORIZONTAL);
+		
 		RecordSourceAttributeLabelProvider provider = new RecordSourceAttributeLabelProvider();
 		TableViewerColumn colIcon = new TableViewerColumn(lstAttributes, SWT.NONE);
 		colIcon.getColumn().setWidth(150);
@@ -295,6 +314,8 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		colName.getColumn().setWidth(150);
 		colName.setLabelProvider(new RecordSourceAttributeLabelProvider(RecordSourceAttributeLabelProvider.Column.NAME));
 		colName.getColumn().setText("Field Name");
+		
+
 		colName.setEditingSupport(new EditingSupport(colName.getViewer()) {
 			TextCellEditor editor = new TextCellEditor(lstAttributes.getTable());
 			@Override
@@ -311,9 +332,14 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 						}
 						((IntelRecordSourceAttribute) element).setName(null);
 					}else{
-						//TODO: also add to default language; 
-						((IntelRecordSourceAttribute) element).updateName(SmartDB.getCurrentLanguage(), (String)value);
-						((IntelRecordSourceAttribute) element).setName((String)value);
+						//TODO: also add to default language;
+						IntelRecordSourceAttribute e = (IntelRecordSourceAttribute)element;
+						e.updateName(SmartDB.getCurrentLanguage(), (String)value);
+						e.setName((String)value);
+						
+						if (e.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage()) == null){
+							e.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), (String)value);
+						}
 					}
 					lstAttributes.refresh();
 					modified();
@@ -354,7 +380,20 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			@Override
 			protected void setValue(Object element, Object value) {
 				if (element instanceof IntelRecordSourceAttribute){
+					IntelRecordSourceAttribute a = (IntelRecordSourceAttribute)element;
 					Boolean newValue = (Boolean)value;
+					
+					if (a.getIsMultiple() != null && a.getIsMultiple() && !newValue){
+						if (!MessageDialog.openQuestion(getShell(), "Warning", "By changing this attribute from a mutli-select list to a single-select list all values for this attribute associated with any record of this type will be delete.  Area you sure you want to continue?")){
+							//do not update
+							return;
+						}
+						attributesMultiToSingle.add(a);
+					}
+					if (a.getIsMultiple() != null && newValue && attributesMultiToSingle.contains(a)){
+						//change from single to multi back to multi so we do not want to delete
+						attributesMultiToSingle.remove(a);
+					}
 					((IntelRecordSourceAttribute)element).setIsMultiple(newValue);
 					lstAttributes.refresh();
 					modified();
@@ -380,8 +419,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			protected boolean canEdit(Object element) {
 				if (element instanceof IntelRecordSourceAttribute){
 					IntelRecordSourceAttribute a = (IntelRecordSourceAttribute) element;
-					if (a.getEntityType() != null || (a.getAttribute() != null && a.getAttribute().getType() == AttributeType.LIST))
-						return true;
+					if (a.isListAttribute()) return true;
 				}
 				return false;
 			}
@@ -646,7 +684,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			}
 		}
 		if (delete.isEmpty()) return;
-		if (!MessageDialog.openConfirm(getShell(), "Delete Sources", MessageFormat.format("Are you sure you want to delete the {0} selected sources.  This will also delete all intelligence records that are associated with this source?  This action cannot be undone.", delete.size()))){
+		if (!MessageDialog.openConfirm(getShell(), "Delete Sources", MessageFormat.format("Are you sure you want to delete the {0} selected sources?  This will also update all intelligence records that are associated with this source. ", delete.size()))){
 			return;
 		}
 		sources.removeAll(delete);
@@ -676,38 +714,49 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		}
 	}
 	private boolean doSave(){
+		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
 			
 			//delete all attribute values for attributes removed from given source
 			for (IntelRecordSourceAttribute a : attributesToDelete){
-				if (a.getAttribute() != null){
-					//TODO: fix this
-//					Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute and a.record IN (FROM IntelRecord WHERE recordSource = :source )");
-//					q.setParameter("attribute", a.getAttribute());
-//					q.setParameter("source", a.getSource());
-//					q.executeUpdate();
-					
-					//TODO: do the same for entity types
-				}
+				//delete any values associated with this attribute 
+				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ");
+				q.setParameter("attribute", a);
+				q.executeUpdate();
+				
+				//delete the attributes
 				session.delete(a);
+			}
+			
+			//delete all attributes values for attributes that changes from multi to single
+			for (IntelRecordSourceAttribute a : attributesMultiToSingle){
+				//delete any values associated with this attribute 
+				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ");
+				q.setParameter("attribute", a);
+				q.executeUpdate();
 			}
 			
 			//delete all records for removed sources
 			for (IntelRecordSource source : toDelete){
 				if (source.getUuid() == null) continue;
-				Long cnt = (Long) session.createCriteria(IntelRecord.class)
-						.add(Restrictions.eq("recordSource", source))
-						.setProjection(Projections.rowCount())
-						.uniqueResult();
-				if (cnt > 0){
-					//TODO: move this outside the open session/transaction
-					if (!MessageDialog.openConfirm(getShell(), "Confirm", MessageFormat.format("Deleting the source {0} is also going to delete {1} intelligence records.  This cannot be undone.  Do you want to continue?", source.getName(), cnt))){
-						session.getTransaction().rollback();
-						return false;
-					}
+				
+				//update intelligence records to have no source
+				Query q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source");
+				q.setParameter("source", source);
+				q.executeUpdate();
+				
+				//remove all attributes associated with source
+				for (IntelRecordSourceAttribute a : source.getAttributes()){
+					//delete any values associated with this attribute 
+					q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ");
+					q.setParameter("attribute", a);
+					q.executeUpdate();
+					//delete the attributes
+					session.delete(a);
 				}
+				//delete source
 				session.delete(source);
 			}
 			
@@ -716,14 +765,16 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				session.saveOrUpdate(source);
 			}
 			session.getTransaction().commit();
-			return true;
-			
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog("Error saving changes to record sources: " + ex.getMessage(), ex);
+			return false;
 		}finally{
 			session.close();
 		}
-		return false;
+		
+		context.get(IEventBroker.class).send(IntelEvents.RECORD_SOURCE_ALL, null);
+		
+		return true;
 	}
 	
 	@Override

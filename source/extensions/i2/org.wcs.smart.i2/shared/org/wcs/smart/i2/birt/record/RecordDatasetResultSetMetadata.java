@@ -22,9 +22,13 @@
 package org.wcs.smart.i2.birt.record;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.eclipse.datatools.connectivity.oda.impl.Blob;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.util.UuidUtils;
@@ -40,12 +44,15 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 		UUID("record:uuid", "UUID", java.sql.Types.VARCHAR),
 		TITLE("record:title", "Title", java.sql.Types.VARCHAR),
 		DESCRIPTION("record:description", "Description", java.sql.Types.VARCHAR),
+		SCRATCHPAD("record:scratchpad", "Scatchpad", java.sql.Types.VARCHAR),
 		CREATED_BY("record:createdby", "Created By", java.sql.Types.VARCHAR),
 		LAST_MODIFIED_BY("record:lastmodifiedby", "Last Modified By", java.sql.Types.VARCHAR),
 		CREATED("record:created", "Date Created", java.sql.Types.DATE),
 		LAST_MODIFIED("record:lastmodified", "Date Last Modified", java.sql.Types.DATE),
 		STATUS("record:status", "Status", java.sql.Types.VARCHAR),
-		STATUS_KEY("record:status_key", "Status Key", java.sql.Types.VARCHAR);
+		STATUS_KEY("record:status_key", "Status Key", java.sql.Types.VARCHAR),
+		SOURCE("record:source", "Record Source", java.sql.Types.VARCHAR),
+		SOURCE_ICON("record:source_icon", "Record Source Image", java.sql.Types.BLOB);
 		
 		String id;
 		String name;
@@ -63,7 +70,7 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 			return this.id;
 		}
 		
-		public Object getValue(IntelRecord record) {
+		public Object getValue(IntelRecord record, Locale l) {
 			switch(this){
 			case UUID:
 				return UuidUtils.uuidToString(record.getUuid());
@@ -71,6 +78,8 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 				return record.getTitle();
 			case DESCRIPTION:
 				return record.getDescription();
+			case SCRATCHPAD:
+				return record.getComment();
 			case CREATED_BY:
 				return MessageFormat.format("{0} {1}", record.getCreatedBy().getGivenName(), record.getCreatedBy().getFamilyName());
 			case LAST_MODIFIED_BY:
@@ -80,12 +89,16 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 			case LAST_MODIFIED:
 				return record.getDateModified();
 			case STATUS:
-				return record.getStatus().name();
+				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(record.getStatus(), l);
 			case STATUS_KEY:
 				return record.getStatus().name();
-			
+			case SOURCE:
+				return record.getRecordSource().getName();
+			case SOURCE_ICON:
+				return new Blob(record.getRecordSource().getIcon());			
 			default:
 				break;
+			
 			}
 			return null;
 		}

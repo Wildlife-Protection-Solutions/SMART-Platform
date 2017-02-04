@@ -43,7 +43,8 @@ public class ObservationQuerySourceFinder implements IQuerySourceFinder {
 	public void runAction(IResultItem item){
 		if (!(item instanceof IntelObservationResultItem)) return;	
 		IntelObservationResultItem i = (IntelObservationResultItem)item;
-		(new OpenRecordHandler()).openRecord(new RecordEditorInput(i.getRecordTitle(), i.getRecordUuid(),null), false);
+		//TODO: add record source to query results?
+		(new OpenRecordHandler()).openRecord(new RecordEditorInput(i.getRecordTitle(), i.getRecordUuid(), null, null), false);
 	}
 
 	@Override

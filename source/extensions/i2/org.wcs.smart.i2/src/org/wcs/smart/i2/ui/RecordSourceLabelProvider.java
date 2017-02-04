@@ -30,7 +30,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRecordSource;
 
 /**
@@ -81,6 +80,10 @@ public class RecordSourceLabelProvider extends LabelProvider {
 		super.dispose();
 	}
 	
+	public void disposeImages(){
+		images.values().forEach(i -> i.dispose());
+		images.clear();
+	}
 	
 	public static ImageDescriptor createImageDescriptor(IntelRecordSource type){
 		if (type.getIcon() == null) return null;

@@ -110,12 +110,19 @@ public enum EntityManager {
 	
 	public void deleteEntity(IntelEntity entity, Session session) throws Exception{
 
+		//delete all record attribute links 
+		Query q = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :entityUuid"); 
+		q.setParameter("entityUuid", entity.getUuid());
+		q.executeUpdate();
+
+				
 		//delete all entity relationships attributes
-		Query q = session.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity))"); 
+		q = session.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity))"); 
 		q.setParameter("srcentity", entity);
 		q.setParameter("trgentity", entity);
 		q.executeUpdate();
 
+		
 		//delete all entity relationships 
 		q = session.createQuery("DELETE FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity)");
 		q.setParameter("srcentity", entity);

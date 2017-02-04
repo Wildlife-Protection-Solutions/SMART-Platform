@@ -21,12 +21,21 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.ui.dialogs.RecordSourceAttributeDialog;
+import org.wcs.smart.i2.ui.editors.record.RecordEditor;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Opens dialog for configuring record attributes
@@ -37,6 +46,34 @@ public class ConfigureRecordAttributesHandler {
 
 	@Execute
 	public void execute(IEclipseContext context){
+		
+		//save or close all dirty RecordEditors
+		List<MPart> parts = new ArrayList<>();
+		StringBuilder names = new StringBuilder();
+		for (MPart p : context.get(EPartService.class).getParts()){
+			if (p.isDirty()){
+				Object x = E3Utils.getSourceObject(p);
+				if (x instanceof RecordEditor){
+					//save or discard changes
+					parts.add(p);
+					names.append(((RecordEditor) x).getRecord().getTitle() + "\n");
+				}
+			}
+		}
+		if (!parts.isEmpty()){
+			if(!MessageDialog.openQuestion(context.get(Shell.class),"Configure Records", MessageFormat.format("Changes to the following {0} records must be saved before you can continue.  Do you want to save now?\n\n{1}",  parts.size(), names.toString()))){
+				return;
+			}
+			for (MPart p : parts){
+				//save parts; part service doesn't work as it still prompt user
+				RecordEditor x = (RecordEditor)E3Utils.getSourceObject(p);
+				if (!x.getSite().getPage().saveEditor(x,  false)){
+					MessageDialog.openError(context.get(Shell.class), "Configure Records", MessageFormat.format("Cannot save record {0}.", x.getRecord().getTitle()));
+					return;
+				}
+			}
+		}
+		
 		RecordSourceAttributeDialog dialog = new RecordSourceAttributeDialog(context.get(Shell.class));
 		ContextInjectionFactory.inject(dialog,context);
 		dialog.open();

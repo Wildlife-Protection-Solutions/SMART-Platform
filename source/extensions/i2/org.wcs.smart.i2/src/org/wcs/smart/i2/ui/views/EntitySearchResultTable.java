@@ -356,7 +356,6 @@ public class EntitySearchResultTable extends Composite {
 			if (!MessageDialog.openQuestion(getShell(), "Delete Entities", sb.toString())){
 				return;
 			}
-			//TODO: I don't htink this works
 			for (RecordEditor p : editors){
 				try{
 					//context.get(EPartService.class).savePart(p, false); -> this doesn't work it still prompts the user; we do not want to prompt user

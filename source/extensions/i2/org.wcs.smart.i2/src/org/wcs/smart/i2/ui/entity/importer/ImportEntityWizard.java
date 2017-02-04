@@ -90,10 +90,7 @@ public class ImportEntityWizard extends Wizard implements IPageChangingListener 
 							Display.getDefault().syncExec(()->{
 								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Import Entities", MessageFormat.format("Imported {0} entities.", numEntities));
 							});
-							//TODO: fire events for new entities
 						}
-						
-						
 					}catch (Exception ex){
 						Intelligence2PlugIn.displayLog(MessageFormat.format("Error importing entities: {0}",  ex.getMessage()), ex);
 						r[0] = false;

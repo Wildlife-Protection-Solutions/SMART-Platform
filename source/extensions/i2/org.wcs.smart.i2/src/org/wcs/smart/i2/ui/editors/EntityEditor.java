@@ -126,6 +126,7 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
@@ -150,16 +151,17 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.IntelEntityRelationship.Source;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
-import org.wcs.smart.i2.model.IntelEntityRelationship.Source;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -345,6 +347,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelRecord> records = new ArrayList<IntelRecord>();
+			Set<IntelRecordSource> sources = new HashSet<IntelRecordSource>();
 			Session s = HibernateManager.openSession();
 			try{
 				List<IntelEntityRecord> entityRecords = s.createCriteria(IntelEntityRecord.class)
@@ -355,14 +358,31 @@ public class EntityEditor extends EditorPart implements MapPart{
 					r.getRecord().getDateCreated();
 					r.getRecord().getDateModified();
 					r.getRecord().getTitle();
+					if (r.getRecord().getRecordSource() != null){
+						r.getRecord().getRecordSource().getIcon();
+						sources.add(r.getRecord().getRecordSource());
+					}
 				}
 			}finally{
 				s.close();
 			}
 			
+			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
+					HashMap<IntelRecordSource, Image> images = new HashMap<>();
+					for (IntelRecordSource s : sources){
+						if (s.getIcon() != null){
+							try{
+								images.put(s, AWTSWTImageUtils.convertToSWTImage(s.getIconAsImage()));
+							}catch (Exception ex){}
+						}
+					}
+					Object x = tblRecords.getTable().getData("LBLPROVIDER");
+					if (x != null && x instanceof RecordLabelProvider){
+						((RecordLabelProvider)x).setSourceImages(images);
+					}
 					tblRecords.setInput(records);
 					tblRecords.refresh();
 				}
@@ -1470,7 +1490,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				new RecordLabelProvider(RecordLabelProvider.RecordField.LAST_MODIFIED)
 		};
 		int[] width = new int[]{400, 100, 100};
-		
+		tblRecords.getTable().setData("LBLPROVIDER", lbls[0]);
 		for (int i = 0; i < columns.length; i ++){
 			TableViewerColumn col = new TableViewerColumn(tblRecords, SWT.NONE);
 			col.setLabelProvider(lbls[i]);

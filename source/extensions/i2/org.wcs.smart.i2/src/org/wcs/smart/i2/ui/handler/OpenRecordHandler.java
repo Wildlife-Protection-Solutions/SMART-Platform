@@ -23,7 +23,6 @@ package org.wcs.smart.i2.ui.handler;
 
 import java.text.MessageFormat;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -44,12 +43,7 @@ public class OpenRecordHandler {
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
 			input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || editMode);
-			IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, RecordEditor.ID);
-//			if (editor instanceof RecordEditor){
-//				if (pId.equals(IntelDataAssessmentPerspective.ID) || editMode){
-//					((RecordEditor)editor).setEditMode(true);
-//				}
-//			}
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, RecordEditor.ID);
 		} catch (PartInitException e) {
 			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to open record. {0}", e.getMessage()), e);
 		}

@@ -46,6 +46,7 @@ import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
+import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
 import org.wcs.smart.i2.birt.record.RecordDataset;
 import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
@@ -188,6 +189,8 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 				return new EntityRelationDataset(this);
 			}else if (dataSetType.equals(RecordDataset.DATASET_TYPE)){
 				return new RecordDataset(this);
+			}else if (dataSetType.equals(RecordAttributeDataset.DATASET_TYPE)){
+				return new RecordAttributeDataset(this);
 			}else if (dataSetType.equals(RecordEntityDataset.DATASET_TYPE)){
 				return new RecordEntityDataset(this);
 			}else if (dataSetType.equals(RecordLocationDataset.DATASET_TYPE)){

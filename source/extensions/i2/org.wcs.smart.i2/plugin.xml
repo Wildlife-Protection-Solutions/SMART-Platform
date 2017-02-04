@@ -1288,6 +1288,11 @@
                nativeDataTypeCode="2000"
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Blob"
+               nativeDataTypeCode="2004"
+               odaScalarDataType="Blob">
+         </dataTypeMapping>
       </dataSet>
       <dataSet
             defaultDisplayName="Record Entity Links"
@@ -1401,6 +1406,60 @@
             defaultDisplayName="Record Locations"
             id="org.wcs.smart.i2.birt.dataset.record.location">
 		<dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
+      <dataSet
+            defaultDisplayName="Record Attributes"
+            id="org.wcs.smart.i2.birt.dataset.record.details.attributes">
+         <dataTypeMapping
                nativeDataType="Double"
                nativeDataTypeCode="8"
                odaScalarDataType="Double">
@@ -1582,6 +1641,20 @@
                wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordDetailsWizardPage">
          </dataSetPage>
       </dataSetUI>
+       <dataSetUI
+             id="org.wcs.smart.i2.birt.dataset.record.details.attributes"
+             supportsInParameters="true"
+             supportsOutParameters="false">
+          <dataSetWizard
+                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+                windowTitle="Record Attributes">
+          </dataSetWizard>
+          <dataSetPage
+                displayName="Record Attributes Details"
+                id="org.wcs.smart.i2.birt.ui.dataset.record.details.wizard.page.list"
+                wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordAttributesWizardPage">
+          </dataSetPage>
+       </dataSetUI>
    </extension>
    <extension
          point="org.wcs.smart.report.birt.maplayer">

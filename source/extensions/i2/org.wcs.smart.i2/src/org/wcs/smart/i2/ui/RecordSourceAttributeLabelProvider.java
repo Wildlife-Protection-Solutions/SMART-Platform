@@ -27,8 +27,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 
 /**
  * Record source label provider that provides the attribute label or entity type as label
@@ -135,5 +135,6 @@ public class RecordSourceAttributeLabelProvider extends ColumnLabelProvider impl
 //		if (attributeColor != null) attributeColor.dispose();
 		attributeProvider.dispose();
 		etProvider.dispose();
+		super.dispose();
 	}
 }

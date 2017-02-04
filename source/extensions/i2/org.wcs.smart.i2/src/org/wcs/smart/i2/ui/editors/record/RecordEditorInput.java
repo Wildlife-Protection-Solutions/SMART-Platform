@@ -41,17 +41,24 @@ public class RecordEditorInput implements IEditorInput{
 	private UUID uuid;
 	private Date date;
 	private IntelRecord record;
+	private UUID sourceUuid;
 	
-	public RecordEditorInput(String name, UUID uuid, Date date){
+	public RecordEditorInput(String name, UUID uuid, Date date, UUID sourceUuid){
 		this.name = name;
 		this.uuid = uuid;
 		this.date = date;
+		this.sourceUuid = sourceUuid;
 	}
 	
 	public RecordEditorInput(IntelRecord record){
 		this.record = record;
 		this.name = record.getTitle();
 		this.date = record.getDateCreated();
+		if (record.getRecordSource() != null) this.sourceUuid = record.getRecordSource().getUuid();
+	}
+	
+	public UUID getRecordSourceUuid(){
+		return this.sourceUuid;
 	}
 	
 	public IntelRecord getRecord(){

@@ -116,8 +116,7 @@ public class QueryMapPanel extends MapComposite {
 				};
 				getMap().sendCommandASync(addLayers);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Intelligence2PlugIn.log(e.getMessage(), e);
 			}
 		}
 	}

@@ -53,6 +53,7 @@ import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
+import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
 import org.wcs.smart.i2.birt.record.RecordDataset;
 import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
@@ -158,6 +159,8 @@ public enum IntelReportManager {
 			return MessageFormat.format("{0} - Records", entityType.getName());
 		}else if (dataSetId.equals(RecordDataset.DATASET_TYPE)){
 			return "Record Details";
+		}else if (dataSetId.equals(RecordAttributeDataset.DATASET_TYPE)){
+			return "Record Attributes";
 		}else if (dataSetId.equals(RecordEntityDataset.DATASET_TYPE)){
 			return "Record Entities";
 		}else if (dataSetId.equals(RecordLocationDataset.DATASET_TYPE)){

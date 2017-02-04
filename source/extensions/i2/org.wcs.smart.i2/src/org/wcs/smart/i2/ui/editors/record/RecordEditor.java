@@ -79,7 +79,6 @@ import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
-import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -250,7 +249,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	@SuppressWarnings("unchecked")
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		summaryPage.doSave(monitor);
+		if (!summaryPage.saveAttributes(monitor)){
+			monitor.setCanceled(true);
+			return;
+		}
+		
 		Set<IntelEntity> modifiedEntities = new HashSet<IntelEntity>();
 		boolean isnew = record.getUuid() == null;
 		
@@ -412,6 +415,13 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
 			});
 		
+			subscribeToEvent(IntelEvents.RECORD_SOURCE_ALL,(event)->{
+				//if it's dirty we just throw away changes; 
+				//have a test in source editor to save all records before we only it so 
+				//it should never be dirty
+				setDirty(false);
+				refresh();
+			});
 
 			//entity deleted
 			subscribeToEvent(IntelEvents.ENTITY_DELETE, (event)->{

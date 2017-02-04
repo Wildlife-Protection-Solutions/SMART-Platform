@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.util.ArrayList;
@@ -16,12 +37,17 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -30,7 +56,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -43,6 +68,12 @@ import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
+/**
+ * Entity selection dialog for selecting entities for record attributes
+ * 
+ * @author Emily
+ *
+ */
 public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 
 	private FilterComposite txtSearch;
@@ -51,6 +82,8 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 	private IntelEntityType type;
 	private Set<EntityItem> selected = new HashSet<EntityItem>();
 	private boolean isLoading;
+	private boolean isMulti;
+	private boolean isInitializing = false;
 	
 	private ViewerFilter filter = new ViewerFilter() {
 		@Override
@@ -60,9 +93,10 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 		}
 	}; 
 	
-	public EntityCheckboxDropDownViewer(Composite parent, IntelEntityType type) {
+	public EntityCheckboxDropDownViewer(Composite parent, IntelEntityType type, boolean isMulti) {
 		super(parent);
 		this.type = type;
+		this.isMulti = isMulti;
 		
 		setContentProvider(ArrayContentProvider.getInstance());
 		setLabelProvider(new ColumnLabelProvider(){
@@ -78,9 +112,9 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 	public void initControl(final Collection<IntelRecordAttributeValueList> items){
 		if (items == null || items.isEmpty()){
 			List<EntityItem> eitems = new ArrayList<EntityItem>();
-			selected.addAll(eitems);		
+			selected.clear();		
 			setValue(eitems);
-			txtSearch.setText("");
+			if (txtSearch != null) txtSearch.setText("");
 			return;
 		}
 		
@@ -130,7 +164,11 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 		popup.setLayout(new GridLayout());
 		((GridLayout)popup.getLayout()).marginWidth = 1;
 		((GridLayout)popup.getLayout()).marginHeight = 1;
-	
+		popup.addListener(SWT.Traverse, e-> {
+	    	if (e.detail == SWT.TRAVERSE_ESCAPE) {
+	    		e.doit = false;
+	    	}
+		});
 		// create filter fields
 		txtSearch = new FilterComposite(popup, SWT.NONE);
 		txtSearch.setText("");
@@ -146,33 +184,67 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 					table.setFilters(new ViewerFilter[]{filter});
 				}
 				table.refresh();
-				table.setCheckedElements(selected.toArray());
+				if (isMulti){
+					((CheckboxTableViewer)table).setCheckedElements(selected.toArray());
+				}else{
+					if (selected.isEmpty()){
+						table.setSelection(null);
+					}else{
+						table.setSelection(new StructuredSelection(selected.iterator().next()));
+					}
+				}
 			}
 		});
 		
 		// create table
-		Table ttable = new Table(popup, SWT.CHECK | SWT.V_SCROLL);
-        table = new CheckboxTableViewer(ttable){
-			@Override
-			public Object[] getCheckedElements() {
-				return selected.toArray();
-			}
-		};
-		table.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		table.addCheckStateListener(new ICheckStateListener() {
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				if (event.getElement() instanceof EntityItem){
-					if (event.getChecked()){
-						selected.add((EntityItem)event.getElement());
-					}else{
-						selected.remove(event.getElement());
+		if (isMulti){
+			Table ttable = new Table(popup, SWT.CHECK | SWT.V_SCROLL);
+			table = new CheckboxTableViewer(ttable){
+				@Override
+				public Object[] getCheckedElements() {
+					return selected.toArray();
+				}
+			};
+			
+			((CheckboxTableViewer)table).addCheckStateListener(new ICheckStateListener() {
+				@Override
+				public void checkStateChanged(CheckStateChangedEvent event) {
+					if (event.getElement() instanceof EntityItem){
+						if (event.getChecked()){
+							selected.add((EntityItem)event.getElement());
+						}else{
+							selected.remove(event.getElement());
+						}
+					}
+					checkChanged = true;				
+				}
+			});
+		}else{
+			table = new ListViewer(popup, SWT.V_SCROLL);
+			table.addSelectionChangedListener(new ISelectionChangedListener() {
+				
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					if (!isInitializing){
+						selected.clear();
+						Object element = ((IStructuredSelection)event.getSelection()).getFirstElement();
+						if (element instanceof EntityItem){
+							selected.clear();
+							selected.add((EntityItem)element);
+						}
+						checkChanged = true;
 					}
 				}
-				
-				checkChanged = true;				
-			}
-		});
+			});
+			table.addDoubleClickListener(new IDoubleClickListener() {
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					dropDown(false);
+				}
+			});
+		}
+		
+		table.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		table.setContentProvider(contentProvider);
 		table.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		popup.pack();		
@@ -220,11 +292,50 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 		return add;
 	}
 	
+	@Override
+	protected Object[] getCheckedElements(){
+		if (isMulti){
+			return ((CheckboxTableViewer)table).getCheckedElements();
+		}else{
+			if (table.getSelection().isEmpty()){
+				return new Object[]{};
+			}else{
+				Object x = ((StructuredSelection)table.getSelection()).getFirstElement();
+				if (x instanceof EntityItem){
+					return new Object[]{x};
+				}else{
+					return new Object[]{};
+				}
+			}
+		}
+	}
+	@Override
+	protected void setCheckedElements(Object[] elements){
+		isInitializing = true;
+		try{
+			if (isMulti){
+				((CheckboxTableViewer)table).setCheckedElements(elements);
+			}else{
+				if (elements.length == 0){
+					table.setSelection(null);
+				}else{
+					table.setSelection(new StructuredSelection(elements[0]));
+					((ListViewer)table).reveal(elements[0]);
+				}
+			}
+		}finally{
+			isInitializing = false;
+		}
+	}
+	
+	
 	/**
 	 * Called before the popup is made visible
 	 */
 	@Override
 	protected void popupVisible(){
+		table.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		loadEntities();
 		txtSearch.setText("");
 	}
 
@@ -249,10 +360,10 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 				}
 				Display.getDefault().syncExec(()->{
 					
-					if (table.getTable().isDisposed()) return;
+					if (table.getControl().isDisposed()) return;
 					txtSearch.setText("");
 					table.setInput(entities);
-					table.setCheckedElements(selected.toArray());
+					setCheckedElements(selected.toArray());
 				});
 				return Status.OK_STATUS;
 			}

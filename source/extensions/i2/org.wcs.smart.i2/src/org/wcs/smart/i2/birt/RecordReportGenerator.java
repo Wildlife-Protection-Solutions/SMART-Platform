@@ -57,6 +57,7 @@ import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
 import org.eclipse.birt.report.model.api.elements.structures.ComputedColumn;
 import org.eclipse.birt.report.model.api.elements.structures.HideRule;
 import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter;
+import org.eclipse.birt.report.model.elements.interfaces.IImageItemModel;
 import org.eclipse.birt.report.model.elements.interfaces.IReportItemModel;
 import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
 import org.eclipse.birt.report.model.elements.interfaces.ITableColumnModel;
@@ -77,6 +78,8 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
+import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
+import org.wcs.smart.i2.birt.record.RecordAttributeDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.RecordDataset;
 import org.wcs.smart.i2.birt.record.RecordDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
@@ -126,6 +129,7 @@ public enum RecordReportGenerator {
 		//add datasets
 		String[] datasets = new String[]{
 				 RecordDataset.DATASET_TYPE,
+				 RecordAttributeDataset.DATASET_TYPE,
 				 RecordEntityDataset.DATASET_TYPE,
 				 RecordAttachmentDataset.DATASET_TYPE,
 				 RecordLocationDataset.DATASET_TYPE
@@ -254,6 +258,7 @@ public enum RecordReportGenerator {
 		headerGrid.setDataSet(recordDataset);
 		headerGrid.setStyleName(tableStyle.getName());
 		((ColumnHandle)headerGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "10em");
+		((ColumnHandle)headerGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(IStyleModel.VERTICAL_ALIGN_PROP, DesignChoiceConstants.VERTICAL_ALIGN_MIDDLE);
 		
 		List<ComputedColumn> entityColumns = DataUtil.generateComputedColumns(headerGrid);
 		for (ComputedColumn c : entityColumns){
@@ -306,19 +311,89 @@ public enum RecordReportGenerator {
 		headerGrid.getCell(row,2).getContent().add(di);
 		row++;
 		
-		//modified details
+		l = factory.newLabel(null);
+		l.setText("Source:");
+		headerGrid.getCell(row,1).getContent().add(l);
+		
+		GridHandle srcGrid = factory.newGridItem(null, 2, 1);
+		srcGrid.setStyleName(tableStyle.getName());
+		((ColumnHandle)srcGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20px");
+		
+		
+		ImageHandle mi = factory.newImage(null);
+		mi.setProperty(IReportItemModel.HEIGHT_PROP, "16px");
+		mi.setProperty(IReportItemModel.WIDTH_PROP, "16px");
+		mi.setDataSet(recordDataset);
+		mi.setProperty(IImageItemModel.SOURCE_PROP, "expr");
+		mi.setProperty(IImageItemModel.VALUE_EXPR_PROP, "row[\"" + RecordDatasetResultSetMetadata.Column.SOURCE_ICON.getColumnName() + "\"]");
+		srcGrid.getCell(1,1).getContent().add(mi);
+		
+		di = factory.newDataItem(null);
+		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.SOURCE.getColumnName());
+		srcGrid.getCell(1,2).getContent().add(di);
+		
+		headerGrid.getCell(row,2).getContent().add(srcGrid);
+		row++;
+		
+		
+		/* Record Attributes */
+		OdaDataSetHandle attributeDataset = datasetHandles.get(RecordAttributeDataset.DATASET_TYPE);
+		TableHandle attributeTable = factory.newTableItem(null, 2);
+		rdh.getBody().add(attributeTable);
+		attributeTable.setDataSet(attributeDataset);
+		attributeTable.setStyleName(tableStyle.getName());
+		((ColumnHandle)attributeTable.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "10em");
+		List<ComputedColumn> computedColumns = DataUtil.generateComputedColumns(attributeTable);
+		for (ComputedColumn c : computedColumns){
+			attributeTable.getColumnBindings().addItem(c);
+		}
+		di = factory.newDataItem(null);
+		di.setResultSetColumn(RecordAttributeDatasetResultSetMetadata.Column.ATTRIBUTE.getColumnName());
+		attributeTable.getCell(attributeTable.getDetail().getSlotID(), -1, 1, 1).getContent().add(di);
+		
+		di = factory.newDataItem(null);
+		di.setResultSetColumn(RecordAttributeDatasetResultSetMetadata.Column.TEXT.getColumnName());
+		attributeTable.getCell(attributeTable.getDetail().getSlotID(), -1, 1, 2).getContent().add(di);
+		
+		/* Narrative Scratchpad */
+		
+		GridHandle narrativeGrid = factory.newGridItem(null, 2, 2);
+		rdh.getBody().add(narrativeGrid);
+		narrativeGrid.setDataSet(recordDataset);
+		narrativeGrid.setStyleName(tableStyle.getName());
+		((ColumnHandle)narrativeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "10em");
+		
+		computedColumns = DataUtil.generateComputedColumns(narrativeGrid);
+		for (ComputedColumn c : computedColumns){
+			narrativeGrid.getColumnBindings().addItem(c);
+		}
+		
+		row = 1;
 		l = factory.newLabel(null);
 		l.setText("Narrative:");
-		headerGrid.getCell(row,1).getContent().add(l);
+		narrativeGrid.getCell(row,1).getContent().add(l);
 				
 		di = factory.newDataItem(null);
 		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.DESCRIPTION.getColumnName());
-		headerGrid.getCell(row,2).getContent().add(di);	
+		narrativeGrid.getCell(row,2).getContent().add(di);	
+		row++;
+		
+		//modified details
+		l = factory.newLabel(null);
+		l.setText("Scratchpad:");
+		narrativeGrid.getCell(row,1).getContent().add(l);
+				
+		di = factory.newDataItem(null);
+		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.SCRATCHPAD.getColumnName());
+		narrativeGrid.getCell(row,2).getContent().add(di);	
+		row++;
 		
 		//spacer
 		l = factory.newLabel(null);
 		rdh.getBody().add(l);
 	
+		
+		
 		
 		/* Entity Links */
 		l = factory.newLabel(null);
@@ -333,7 +408,7 @@ public enum RecordReportGenerator {
 		entityTable.setStyleName(tableStyle.getName());
 		((ColumnHandle)entityTable.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, ".7in");
 		
-		List<ComputedColumn> computedColumns = DataUtil.generateComputedColumns(entityTable);
+		computedColumns = DataUtil.generateComputedColumns(entityTable);
 		for (ComputedColumn c : computedColumns){
 			entityTable.getColumnBindings().addItem(c);
 		}

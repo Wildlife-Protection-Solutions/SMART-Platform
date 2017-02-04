@@ -77,7 +77,7 @@ public class IntelEntityService extends IService {
 			try{
 				IntelEntity r = (IntelEntity) s.get(IntelEntity.class, entityUuid);
 				if (r != null){
-					recordName = r.getIdAttributeAsText(Locale.getDefault()); //TODO:
+					recordName = r.getIdAttributeAsText(Locale.getDefault());
 				}
 			}catch (Exception e){	
 				Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);

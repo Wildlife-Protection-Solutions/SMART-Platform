@@ -28,8 +28,10 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 /**
  * Link between intelligence source and valid
@@ -92,6 +94,12 @@ public class IntelRecordSourceAttribute extends NamedItem{
 	}
 	public void setIsMultiple(Boolean isMultiple){
 		this.isMultiple = isMultiple;
+	}
+	
+
+	@Transient
+	public boolean isListAttribute(){
+		return getEntityType() != null || getAttribute().getType() == AttributeType.LIST;
 	}
 	
 	@Override
