@@ -494,7 +494,7 @@ function generateUrl(root){
 function getCaList(){
 	var oReq = new XMLHttpRequest();
 		oReq.onload = populateCaList;
-		oReq.open("Get", CAURL + '/?includeSpatialBoundaries=false', true);
+		oReq.open("Get", CAURL + '?includeSpatialBoundaries=false', true);
 		oReq.send();
 }
 
