@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -60,6 +59,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -246,7 +246,12 @@ public class EntityListComposite extends Composite{
 							final String idText = toadd.getIdAttributeAsText();
 							Display.getDefault().syncExec(() -> {
 								init();
-								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Entity Added", MessageFormat.format("{0} added to {1}", idText, getEditor().getRecord().getTitle()));
+								
+								String message = MessageFormat.format("{0} added to {1}", idText, getEditor().getRecord().getTitle());
+								TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), message);
+								ti.open();
+								
+//								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Entity Added", );
 							});
 						}
 						

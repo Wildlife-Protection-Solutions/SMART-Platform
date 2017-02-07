@@ -15,6 +15,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Criteria;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
@@ -48,7 +49,9 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		Criteria c = connection.getSession().createCriteria(IntelRecordAttributeValue.class)
 				.createAlias("record", "r")
-				.add(Restrictions.in("r.conservationArea",connection.getConservationAreas()));
+				.createAlias("attribute", "a")
+				.add(Restrictions.in("r.conservationArea",connection.getConservationAreas()))
+				.addOrder(Order.asc("a.order"));
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		if (index >= 0){

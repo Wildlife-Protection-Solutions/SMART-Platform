@@ -300,24 +300,12 @@
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/template.png"
-                  label="Edit Entity Templates..."
+                  label="Edit BIRT Templates..."
                   style="push">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.report.entity.edit">
                </parameter>
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.birt.record.template.edit"
-                  label="Edit Record Template..."
-                  style="push">
                <visibleWhen
                      checkEnabled="false">
                   <test
@@ -759,10 +747,6 @@
             name="Refresh DataSet Query Bindings">
       </command>
       <command
-            id="org.wcs.smart.i2.birt.record.template.edit"
-            name="Edit Record Template...">
-      </command>
-      <command
             id="org.wcs.smart.i2.entity.import"
             name="Import Entities">
       </command>
@@ -852,10 +836,6 @@
                   value="intel_analyst">
             </test>
          </enabledWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.i2.ui.handler.EditRecordTemplateHandler$EditRecordTemplateHandlerWrapper"
-            commandId="org.wcs.smart.i2.birt.record.template.edit">
       </handler>
       <handler
             class="org.wcs.smart.i2.ui.entity.importer.ImportEntityHandler$ImportEntityHandlerWrapper"

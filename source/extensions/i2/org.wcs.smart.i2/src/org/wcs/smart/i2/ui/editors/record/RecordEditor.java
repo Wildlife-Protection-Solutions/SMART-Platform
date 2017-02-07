@@ -454,11 +454,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			descPage = new RecordDescriptionPage(this);
 			i = addPage(descPage, getEditorInput());
-			setPageText(i, "Narrative/Scratchpad");
+			setPageText(i, "Narrative / Scratchpad");
 			
 			mapPage = new RecordMapPage(this);
 			i = addPage(mapPage, getEditorInput());
-			setPageText(i, "Map");
+			setPageText(i, "Map / Locations");
 		} catch (final Throwable t) {
 			Intelligence2PlugIn.log(t.getMessage(), t);
 		}finally{
@@ -516,7 +516,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	public void locationsUpdated(){
 		setDirty(true);
-		summaryPage.getLocationPanel().refreshTable();
+//		summaryPage.getLocationPanel().refreshTable();
 		mapPage.refresh();
 	}
 	
@@ -544,7 +544,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 		
 		summaryPage.getEntityPanel().init();
-		summaryPage.getLocationPanel().refreshTable();
+//		summaryPage.getLocationPanel().refreshTable();
 		mapPage.refresh();
 		setDirty(true);
 	}
@@ -560,7 +560,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			newEntityLocationLinks.add(newitem);
 		}
 		summaryPage.getEntityPanel().init();
-		summaryPage.getLocationPanel().refreshTable();
+//		summaryPage.getLocationPanel().refreshTable();
 		mapPage.refresh();
 		setDirty(true);
 	}
@@ -585,7 +585,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		record.getLocations().add(newLocation);
 		
-		summaryPage.getLocationPanel().refreshTable();
+//		summaryPage.getLocationPanel().refreshTable();
 		mapPage.refresh();
 		setDirty(true);
 	}
@@ -611,7 +611,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		newEntityLocationLinks.removeAll(toRemove);
 		
 		summaryPage.getEntityPanel().init();
-		summaryPage.getLocationPanel().refreshTable();
+//		summaryPage.getLocationPanel().refreshTable();
 		mapPage.refresh();
 		setDirty(true);
 	}

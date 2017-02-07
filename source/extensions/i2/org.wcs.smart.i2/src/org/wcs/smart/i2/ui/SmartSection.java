@@ -241,21 +241,34 @@ public class SmartSection extends Composite{
 		List<SmartSection> sections = (List<SmartSection>) sashForm.getData(KIDS_KEY);
 		int[] newweights = new int[sections.size()];
 		Arrays.fill(newweights, -1);
-		int cnt = 0;
+		
 		int off = 0;
+		
+		double[] percentage = new double[sections.size()];
+		Arrays.fill(percentage, -1);
+		double total = 0;
 		for (int i = 0; i < sections.size(); i ++){
-			
-			if (sections.get(i).isMinimized){
+			if (sections.get(i).isMinimized || sections.get(i).getBounds().height < sections.get(i).getMinSize()){
 				newweights[i] = sections.get(i).getMinSize();
 				off += newweights[i];
 			}else{
-				cnt++;
+				total += sashForm.getWeights()[i];
+				percentage[i] = sashForm.getWeights()[i];
 			}
 		}
+		if (total == 0){
+			//everything is minimized; stick with initial weights
+			Arrays.fill(newweights, -1);
+		}else{
+			for (int i = 0; i < percentage.length; i ++){
+				percentage[i] = percentage[i] / total;
+			}
+		}
+		
 		int totalHeight = sashForm.getClientArea().height - off;
 		for (int i = 0; i < sections.size(); i ++){
 			if (newweights[i] == -1){
-				newweights[i] = totalHeight / cnt;
+				newweights[i] = (int)(totalHeight * percentage[i]);/// cnt;
 			}
 		}		
 		for (SmartSection s : sections) s.processingEvent = true;

@@ -78,7 +78,6 @@ import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.WorkingSetManager;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -116,7 +115,7 @@ public class RecordSummaryPage extends EditorPart{
 	
 	private EntityListComposite entityPanel;
 	private AttachmentListComposite attachmentPanel;
-	private LocationListComposite locationPanel;
+//	private LocationListComposite locationPanel;
 	
 	private RecordEditor recordEditor;
 	
@@ -157,9 +156,9 @@ public class RecordSummaryPage extends EditorPart{
 	}
 
 
-	public LocationListComposite getLocationPanel(){
-		return this.locationPanel;
-	}
+//	public LocationListComposite getLocationPanel(){
+//		return this.locationPanel;
+//	}
 	public List<IntelEntityAttachment> getNewAttachments(){
 		return attachmentPanel.getNewEntityAttachments();
 	}
@@ -315,23 +314,21 @@ public class RecordSummaryPage extends EditorPart{
 		attachmentPanel = new AttachmentListComposite(expAttachments, toolkit, recordEditor);
 		attachmentPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartSection expLocation = createSectionHeader(sashForm, toolkit, "Locations");
-		locationPanel = new LocationListComposite(expLocation, toolkit, recordEditor);
-		locationPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true)); 
-		
-		
+//		SmartSection expLocation = createSectionHeader(sashForm, toolkit, "Locations");
+//		locationPanel = new LocationListComposite(expLocation, toolkit, recordEditor);
+//		locationPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true)); 
+//		
+		sashForm.setWeights(new int[]{3,1,1});
 		sashForm.addListener(SWT.Resize, (e)->{
 			List<SmartSection> sections = (List<SmartSection>) sashForm.getData(SmartSection.KIDS_KEY);
 			int max = (Integer)sashForm.getData(SmartSection.MAX_KEY);
 			if ( max >= 0){
 				sections.get(max).maximize();
-				
 			}else{
+				sections.get(0).resizeMinSize();
 				//resize all so that the minimum size is respected
-				sections.forEach(s->s.resizeMinSize());
 			}
 		});
-		
 	}
 	
 	
@@ -502,7 +499,7 @@ public class RecordSummaryPage extends EditorPart{
 		summaryPart.layout();
 		
 		entityPanel.init();
-		locationPanel.init();
+//		locationPanel.init();
 		
 		attachmentPanel.refreshAttachmentTable();
 		attachmentPanel.updateEditMode();
@@ -537,7 +534,11 @@ public class RecordSummaryPage extends EditorPart{
 		
 		lblLastModifiedBy = toolkit.createLabel(infoComp, recordEditor.getRecord().getLastModifiedBy() == null ? "" :  SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
 		lblLastModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			
+
+		
+
+		
+		sashForm.setWeights(new int[]{3,1,1});
 	}
 	
 	/*
@@ -729,6 +730,7 @@ public class RecordSummaryPage extends EditorPart{
 	 * finds the record attribute value for a given attribute; null if not found
 	 */
 	private IntelRecordAttributeValue findAttributeValue(IntelRecordSourceAttribute a ){
+		if (recordEditor.getRecord().getAttachments() == null) return null;
 		for (IntelRecordAttributeValue v  : recordEditor.getRecord().getAttributes()){
 			if (v.getAttribute().equals(a)){
 				return v;

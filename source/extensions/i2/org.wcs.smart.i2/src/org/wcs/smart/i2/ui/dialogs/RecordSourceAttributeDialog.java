@@ -70,6 +70,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -87,6 +90,8 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.IconComposite;
 import org.wcs.smart.i2.ui.RecordSourceAttributeLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
+import org.wcs.smart.i2.ui.handler.EditRecordTemplateHandler;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 
@@ -100,23 +105,22 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 	@Inject
 	protected IEclipseContext context;
 	
-	private TableViewer lstSources ;
-	
-	private List<IntelRecordSource> sources;
-	
-	private List<IntelRecordSource> toDelete;
-	private List<IntelRecordSourceAttribute> attributesToDelete;
-	private List<IntelRecordSourceAttribute> attributesMultiToSingle;	//tracks attribute which are changed from multi to single
-		
+	private TableViewer lstSources;
 	private Label sourceLabel;
 	private TableViewer lstAttributes;
 	private IconComposite iconComp;
-	private IntelRecordSource currentSelection = null;
 	
 	private Button[] attributeButtons;
 	private Button[] srcButtons;
 	private MenuItem[] srcMenu;
 	private MenuItem[] attributeMenu;
+	
+	private List<IntelRecordSource> sources;
+	private List<IntelRecordSource> toDelete;
+	private List<IntelRecordSourceAttribute> attributesToDelete;
+	private List<IntelRecordSourceAttribute> attributesMultiToSingle;	//tracks attribute which are changed from multi to single
+		
+	private IntelRecordSource currentSelection = null;
 	
 	private Job loadSources = new Job("load intelligence sources"){
 		@SuppressWarnings("unchecked")
@@ -480,8 +484,41 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		mnuDelete.setText("Delete");
 		mnuDelete.addListener(SWT.Selection, e->deleteAttribute());
 		
+		MenuItem mnuEdit = new MenuItem(attributeMenu,SWT.PUSH);
+		mnuEdit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		mnuEdit.setText("Translate...");
+		mnuEdit.addListener(SWT.Selection, e->editAttribute());
+		
+		new MenuItem(attributeMenu,SWT.SEPARATOR);
+		
+		MenuItem mnuMoveUp = new MenuItem(attributeMenu,SWT.PUSH);
+		mnuMoveUp.setText("Move Up");
+		mnuMoveUp.addListener(SWT.Selection, e->moveAttribute(-1));
+		
+		MenuItem mnuMoveDown = new MenuItem(attributeMenu,SWT.PUSH);
+		mnuMoveDown.setText("Move Down");
+		mnuMoveDown.addListener(SWT.Selection, e->moveAttribute(1));
+		
 		attributeButtons = new Button[]{btnAdd, btnDelete, btnMoveUp, btnMoveDown};
 		this.attributeMenu = new MenuItem[]{mnuAdd, mnuDelete};
+	}
+	
+	private void editAttribute(){
+		StructuredSelection s = (StructuredSelection) lstAttributes.getSelection();
+		IntelRecordSourceAttribute toEdit = null;
+		for (Iterator<?> iterator = s.iterator(); iterator.hasNext();) {
+			Object x = (Object)iterator.next();
+			if (x instanceof IntelRecordSourceAttribute){
+				toEdit = (IntelRecordSourceAttribute)x;
+				break;
+			}
+		}
+		if (toEdit == null) return;
+		TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toEdit);
+		if (dialog.open() == TranslateSimpleListItemDialog.OK){
+			modified();
+		}
+		lstAttributes.refresh();
 	}
 	
 	private void moveAttribute(int amount){
@@ -596,6 +633,9 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				editSource();
 			}
 		});
+		
+		
+		
 		Composite buttonPanel = new Composite(srcPanel, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
 		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
@@ -649,6 +689,23 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			mnuDelete.setEnabled(!e.getSelection().isEmpty());
 			mnuEdit.setEnabled(!e.getSelection().isEmpty());
 			updateSourceSelection();
+		});
+		
+		
+		Hyperlink hk = new Hyperlink(srcPanel, SWT.NONE);
+		hk.setText("Edit Record BIRT Template...");
+		hk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		hk.setUnderlined(true);
+		hk.setForeground(hk.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
+		
+		hk.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				if (doSave()){
+					RecordSourceAttributeDialog.this.cancelPressed();
+					(new EditRecordTemplateHandler()).execute();
+				}
+			}
 		});
 		
 		srcButtons = new Button[]{btnAdd, btnEdit, btnDelete};
