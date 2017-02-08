@@ -119,6 +119,8 @@ public class RecordsView {
 	private TableViewer lstAllRecords;
 	
 	private RecordViewerFilter filter;
+	private BasicRecordSearchPanel basicSearchPnl;
+	
 	
 	private ISelectionChangedListener selectOne = new ISelectionChangedListener() {
 		
@@ -163,7 +165,7 @@ public class RecordsView {
 			}
 		};
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Unprocessed", "In Progress", "All"}, thisParent, toolkit, thisParent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Unprocessed", "In Progress", "All", "Basic Search"}, thisParent, toolkit, thisParent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)tabList.getLayoutData()).verticalIndent = 2;
 		
@@ -231,7 +233,14 @@ public class RecordsView {
 		lstAllRecords.addDoubleClickListener(openListener);
 		lstAllRecords.addSelectionChangedListener(selectOne);
 		
-		tabList.setContent(new Composite[]{newRecords,inProgress,allRecords}, tabPart);
+		Composite basicSearch = toolkit.createComposite(tabPart);
+		basicSearch.setLayout(new GridLayout());
+		((GridLayout)basicSearch.getLayout()).marginWidth = 0;
+ 		((GridLayout)basicSearch.getLayout()).marginHeight = 0;
+		basicSearchPnl = new BasicRecordSearchPanel(basicSearch);
+		basicSearchPnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		tabList.setContent(new Composite[]{newRecords,inProgress,allRecords, basicSearch}, tabPart);
 		tabList.selectTab(0);
 		
 		createMenu(lstAllRecords);
@@ -405,6 +414,7 @@ public class RecordsView {
 	@Optional
 	private void recordSourcesModified(@UIEventTopic(IntelEvents.RECORD_SOURCE_ALL) Object value){
 		loadRecordsJob.schedule();
+		basicSearchPnl.refreshSource();
 	}
 	
 	@Focus
