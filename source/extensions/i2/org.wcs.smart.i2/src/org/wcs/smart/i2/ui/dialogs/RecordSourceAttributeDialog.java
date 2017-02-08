@@ -723,6 +723,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		};
 		if (dialog.open() == Window.OK){
 			IntelRecordSource updatedItem = dialog.getUpdatedItem();
+			if (updatedItem.getAttributes() == null) updatedItem.setAttributes(new ArrayList<>());
 			sources.add(updatedItem);
 			lstSources.refresh();
 			lstSources.setSelection(new StructuredSelection(updatedItem));
@@ -778,6 +779,8 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			
 			//delete all attribute values for attributes removed from given source
 			for (IntelRecordSourceAttribute a : attributesToDelete){
+				if (a.getUuid() == null) continue; //not saved skip
+				
 				//delete any values associated with this attribute 
 				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ");
 				q.setParameter("attribute", a);
@@ -789,6 +792,8 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			
 			//delete all attributes values for attributes that changes from multi to single
 			for (IntelRecordSourceAttribute a : attributesMultiToSingle){
+				if (a.getUuid() == null) continue; //not saved skip 
+				
 				//delete any values associated with this attribute 
 				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ");
 				q.setParameter("attribute", a);
@@ -822,6 +827,11 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				session.saveOrUpdate(source);
 			}
 			session.getTransaction().commit();
+			
+			//clear all delete lists
+			attributesToDelete.clear();
+			attributesMultiToSingle.clear();
+			toDelete.clear();
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog("Error saving changes to record sources: " + ex.getMessage(), ex);
 			return false;

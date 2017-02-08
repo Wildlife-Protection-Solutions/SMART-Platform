@@ -70,12 +70,6 @@ public class SectionTabHeader extends Composite implements IHyperlinkListener{
 			normalFont = header.getFont();
 			header.setData(i);
 			header.addHyperlinkListener(this);
-			
-			if (i != tabs.length - 1){
-				Label l  = toolkit.createLabel(this, "");//, SWT.SEPARATOR | SWT.VERTICAL);
-				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-				
-			}
 		}
 		
 		FontData fd = headers[0].getFont().getFontData()[0];

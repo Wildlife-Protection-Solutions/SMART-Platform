@@ -44,6 +44,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -51,7 +53,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
@@ -80,6 +81,7 @@ public class BasicRecordSearchPanel extends Composite {
 	private TableViewer tblResults;
 	private FilterComposite txtNarrative;
 	private FilterComposite txtSearch;
+	private StyledText txtMatchString;
 	
 	private Label searchCount;
 	private Label searchTime;
@@ -119,28 +121,40 @@ public class BasicRecordSearchPanel extends Composite {
 		cmbSource.setContentProvider(ArrayContentProvider.getInstance());
 		cmbSource.setLabelProvider(new RecordSourceLabelProvider());
 		cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbSource.getControl().addListener(SWT.KeyDown, e->{
+			if (e.character == SWT.CR){
+				doSearch();
+			}
+		});
 		
 		l = new Label(top, SWT.NONE);
 		l.setText("Narrative:");
 		
 		txtNarrative = new FilterComposite(top, SWT.NONE);
 		txtNarrative.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtNarrative.getControl().addListener(SWT.KeyDown, e->{
+			if (e.character == SWT.CR){
+				doSearch();
+			}
+		});
 
 		l = new Label(top, SWT.NONE);
 		l.setText("Title:");
 		
-		//TODO: make return run the search
 		txtSearch = new FilterComposite(top, SWT.NONE);
 		txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
+		txtSearch.getControl().addListener(SWT.KeyDown, e->{
+			if (e.character == SWT.CR){
+				doSearch();
+			}
+		});
+		
 		Button btnSearch = new Button(top, SWT.NONE);
 		btnSearch.setText("Search");
 		btnSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
 		btnSearch.addListener(SWT.Selection, e->doSearch());
 	}
 
-	private Text txtMatchString;
-	
 	private void createSearchResults(Composite parent){
 		Composite results = new Composite(parent, SWT.NONE);
 		results.setLayout(new GridLayout());
@@ -241,11 +255,37 @@ public class BasicRecordSearchPanel extends Composite {
 				// TODO Auto-generated method stub
 				Object x = ((IStructuredSelection)event.getSelection()).getFirstElement();
 				String value = null;
+				int[][] ranges = null;
 				if (x != null && x instanceof IntelRecordSearchResultItem){
 					value = ((IntelRecordSearchResultItem)x).getLocalMatch();
+					ranges = ((IntelRecordSearchResultItem)x).getMatchRanges();
 					
 				}
-				txtMatchString.setText(value == null ? "" : value );
+				if(value != null){
+					txtMatchString.setText( value );
+					if (ranges != null){
+						StyleRange[] styles = new StyleRange[ranges.length];
+						int index = 0;
+						for (int[] range : ranges){
+							StyleRange r = new StyleRange(range[0], range[1] - range[0], getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION_TEXT), getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
+							r.fontStyle = SWT.BOLD;
+							styles[index++] = r;
+						}
+						txtMatchString.setStyleRanges(styles);
+					}
+					
+					if (!txtMatchString.isVisible()){
+						((GridData)txtMatchString.getLayoutData()).heightHint = (int)(tblResults.getControl().getBounds().height / 3.0);
+						txtMatchString.getParent().layout(true, true);
+						txtMatchString.setVisible(true);
+					}
+				}else{
+					txtMatchString.setText("");
+					txtMatchString.setStyleRange(null);
+					((GridData)txtMatchString.getLayoutData()).heightHint = 0;
+					txtMatchString.getParent().layout(true, true);
+					txtMatchString.setVisible(false);
+				}
 			}
 		});
 		
@@ -253,9 +293,10 @@ public class BasicRecordSearchPanel extends Composite {
 		searchTime = new Label(results, SWT.NONE);
 		searchTime.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		txtMatchString = new Text(results, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		txtMatchString.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		txtMatchString = new StyledText (results, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+		txtMatchString.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)txtMatchString.getLayoutData()).heightHint = 0;
+		txtMatchString.setVisible(false);
 	}
 	
 	private void doSearch(){

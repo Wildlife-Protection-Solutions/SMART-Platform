@@ -167,7 +167,7 @@ public class RecordsView {
 		
 		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Unprocessed", "In Progress", "All", "Basic Search"}, thisParent, toolkit, thisParent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)tabList.getLayoutData()).verticalIndent = 2;
+//		((GridData)tabList.getLayoutData()).verticalIndent = 2;
 		
 		Composite tabPart = toolkit.createComposite(thisParent, SWT.NONE);
 		tabPart.setLayout(new StackLayout());

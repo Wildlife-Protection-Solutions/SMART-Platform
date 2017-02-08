@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -96,22 +94,8 @@ public class IntelRecordSourceAttribute extends NamedItem{
 		this.isMultiple = isMultiple;
 	}
 	
-
 	@Transient
 	public boolean isListAttribute(){
 		return getEntityType() != null || getAttribute().getType() == AttributeType.LIST;
-	}
-	
-	@Override
-	public int hashCode(){
-		return Objects.hash(source, attribute, type);
-	}
-	
-	public boolean equals(Object other){
-		if (other == this) return true;
-		if (other == null) return false;
-		if (!other.getClass().equals(getClass())) return false;
-		IntelRecordSourceAttribute o = (IntelRecordSourceAttribute)other;
-		return Objects.equals(source, o.source) && Objects.equals(attribute, o.attribute) && Objects.equals(type, o.type);
 	}
 }

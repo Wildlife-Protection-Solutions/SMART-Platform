@@ -322,10 +322,10 @@ public class EntitySearchView {
 		((GridLayout)header.getLayout()).marginHeight = 0;
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		basicSearch = toolkit.createHyperlink(header, "Basic Search", SWT.NONE);
+		basicSearch = toolkit.createHyperlink(header, "Basic", SWT.NONE);
 		basicSearch.setToolTipText("searches all entity identifiers and entity type attributes flagged as include in basic search");
-		advancedSearch = toolkit.createHyperlink(header, "Advanced Search", SWT.NONE);
-		savedSearch = toolkit.createHyperlink(header, "Saved Search", SWT.NONE);
+		advancedSearch = toolkit.createHyperlink(header, "Advanced", SWT.NONE);
+		savedSearch = toolkit.createHyperlink(header, "Saved", SWT.NONE);
 		IHyperlinkListener hlistener = new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {

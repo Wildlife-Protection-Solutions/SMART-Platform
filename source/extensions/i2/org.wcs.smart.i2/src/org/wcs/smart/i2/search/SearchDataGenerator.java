@@ -25,10 +25,12 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -57,6 +59,10 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
@@ -231,6 +237,82 @@ public class SearchDataGenerator {
 			if (a.getEntityType().getIdAttribute().equals(a.getAttribute())){
 				if (numWords == 0) numWords = 1;
 			}
+			for (int i = 0; i < numWords; i ++){
+				sb.append(strings.get(  (int)Math.round(Math.random() * (strings.size() - 1) )) + " ");
+			}
+			value.setStringValue(sb.toString());
+//			System.out.println(sb.toString());
+		}
+		
+		return value;
+	}
+	
+	private static IntelRecordAttributeValue generateEntityValue(IntelRecordSourceAttribute a, List<String> strings, Session session){
+		IntelRecordAttributeValue value = new IntelRecordAttributeValue();
+		value.setAttribute(a);
+		
+		List<IntelEntity> entities = session.createCriteria(IntelEntity.class)
+				.add(Restrictions.eq("entityType", a.getEntityType()))
+				.list();
+		
+		List<IntelRecordAttributeValueList> items = new ArrayList<IntelRecordAttributeValueList>();
+		if (a.getIsMultiple()){
+			for (IntelEntity item : entities){
+				if (Math.random() < 0.35){
+					IntelRecordAttributeValueList newItem = new IntelRecordAttributeValueList();
+					newItem.getId().setValue(value);
+					newItem.getId().setElementUuid(item.getUuid());
+					items.add(newItem);
+				}
+			}
+		}
+		if (items.size() == 0){
+			int index = (int)Math.round((entities.size()-1) * Math.random());
+			IntelRecordAttributeValueList newItem = new IntelRecordAttributeValueList();
+			newItem.getId().setValue(value);
+			newItem.getId().setElementUuid(entities.get(index).getUuid());
+			items.add(newItem);
+		}
+		value.setAttributeListItems(items);
+		return value;
+	}
+	
+	
+	private static IntelRecordAttributeValue generateAttributeValue(IntelRecordSourceAttribute a, List<String> strings){
+		IntelRecordAttributeValue value = new IntelRecordAttributeValue();
+		
+		value.setAttribute(a);
+		
+		if (a.getAttribute().getType() == AttributeType.BOOLEAN){
+			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
+		}else if (a.getAttribute().getType() == AttributeType.DATE){
+			value.setDateValue(new Date());
+		}else if (a.getAttribute().getType() == AttributeType.LIST){
+			List<IntelRecordAttributeValueList> items = new ArrayList<IntelRecordAttributeValueList>();
+			if (a.getIsMultiple()){
+				for (IntelAttributeListItem item : a.getAttribute().getAttributeList()){
+					if (Math.random() < 0.35){
+						IntelRecordAttributeValueList newItem = new IntelRecordAttributeValueList();
+						newItem.getId().setValue(value);
+						newItem.getId().setElementUuid(item.getUuid());
+						items.add(newItem);
+					}
+				}
+			}
+			if (items.size() == 0){
+				
+				int index = (int)Math.round((a.getAttribute().getAttributeList().size()-1) * Math.random());
+				IntelRecordAttributeValueList newItem = new IntelRecordAttributeValueList();
+				newItem.getId().setValue(value);
+				newItem.getId().setElementUuid(a.getAttribute().getAttributeList().get(index).getUuid());
+				items.add(newItem);
+			}
+			value.setAttributeListItems(items);
+		}else if (a.getAttribute().getType() == AttributeType.NUMERIC){
+			value.setNumberValue(Math.random() * 100 * Math.random() + Math.random());
+		}else if (a.getAttribute().getType() == AttributeType.TEXT){
+			StringBuilder sb= new StringBuilder();
+			int numWords = (int)Math.round(Math.random() * 15);
 			for (int i = 0; i < numWords; i ++){
 				sb.append(strings.get(  (int)Math.round(Math.random() * (strings.size() - 1) )) + " ");
 			}
@@ -443,6 +525,10 @@ public class SearchDataGenerator {
 	public static void generateRecords(int numberRecords, IProgressMonitor monitor, Session session){
 		InputStream is = SearchDataGenerator.class.getClassLoader().getResourceAsStream("org/wcs/smart/i2/search/words.txt");
 		
+		Random random = new Random();
+		
+		
+		
 		List<String> items = new ArrayList<String>();
 		try(Scanner s = new Scanner(is).useDelimiter("\\n")){
 			while(s.hasNext()){
@@ -463,16 +549,38 @@ public class SearchDataGenerator {
 		for (int i = 0; i < numberRecords; i ++){
 			monitor.subTask("Generated Records " + i + " / " + numberRecords);
 			
+			List<IntelRecordSource> sources = session.createCriteria(IntelRecordSource.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.list();
+			
 			IntelRecord record = new IntelRecord();
 //			record.setAttachments(attachments);
 			record.setConservationArea(SmartDB.getCurrentConservationArea());		
 			record.setEntities(new ArrayList<IntelEntityRecord>());
 			record.setLocations(new ArrayList<IntelLocation>());
 			
+			IntelRecordSource src = sources.get(random.nextInt(sources.size() - 1));
+			record.setRecordSource(src);
+			record.setAttributes(new ArrayList<>());
+			
+			for (IntelRecordSourceAttribute attribute :src.getAttributes()){
+				
+				if (attribute.getAttribute() != null){
+					IntelRecordAttributeValue value = generateAttributeValue(attribute, items);
+					value.setRecord(record);
+					record.getAttributes().add(value);
+				}else if (attribute.getEntityType() != null){
+					IntelRecordAttributeValue value = generateEntityValue(attribute, items, session);
+					value.setRecord(record);
+					record.getAttributes().add(value);
+				}
+				
+			}
+			
 			int status = (int)Math.round(Math.random() * 2);
 			record.setStatus(IntelRecord.Status.values()[status]);
 			
-			int wordsTitle = (int)Math.round(Math.random() * 6);
+			int wordsTitle = (int)Math.round(Math.random() * 4);
 			if (wordsTitle == 0) wordsTitle = 1;
 			StringBuilder title = new StringBuilder();
 			for (int j = 0; j < wordsTitle; j ++){

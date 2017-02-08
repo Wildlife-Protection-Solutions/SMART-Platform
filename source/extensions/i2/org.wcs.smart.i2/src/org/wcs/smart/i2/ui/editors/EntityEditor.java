@@ -256,6 +256,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			Session s = HibernateManager.openSession();
 			try{
 				temp = (IntelEntity) s.get(IntelEntity.class, input.getUuid());
+				temp.getEntityType().getIcon();
 				for(IntelEntityTypeAttribute a : temp.getEntityType().getAttributes()){
 					a.getAttribute().getName();
 					if (a.getAttribute().getAttributeList() != null){
@@ -523,9 +524,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		this.input = (EntityEditorInput) input;
 		setInput(input);
 		setSite(site);
-		if (input.getImageDescriptor() != null){
-			super.setTitleImage(input.getImageDescriptor().createImage());
-		}
+		
 		super.setPartName(input.getName());
 	}
 
@@ -1721,6 +1720,15 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	private void initControl(IntelEntity entity){
+		
+		if (entity.getEntityType().getIcon() != null){
+			try {
+				super.setTitleImage( AWTSWTImageUtils.createImageDescriptor(entity.getEntityType().getIconAsImage()).createImage() );
+			} catch (Exception e) {
+				
+			}
+		}
+		
 		fieldEditors = new ArrayList<AttributeFieldEditor>();
 		if (lblCreated.isDisposed()) return;
 		 
