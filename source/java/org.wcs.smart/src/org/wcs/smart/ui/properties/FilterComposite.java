@@ -69,7 +69,7 @@ import org.wcs.smart.internal.Messages;
  *
  */
 public class FilterComposite extends Composite {
-	private Text txtFilter;
+	protected Text txtFilter;
 	private Control clearButtonContro;
 
 	private List<Listener> listeners = new ArrayList<Listener>();
@@ -205,6 +205,13 @@ public class FilterComposite extends Composite {
 		clearText(true);
 	}
 
+	/**
+	 * 
+	 * @return the underlying text control widget
+	 */
+	public Control getControl(){
+		return this.txtFilter;
+	}
 	
 	/**
 	 * Clears the text in the text box
