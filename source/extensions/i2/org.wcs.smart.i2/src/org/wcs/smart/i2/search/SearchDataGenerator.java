@@ -242,6 +242,13 @@ public class SearchDataGenerator {
 			}
 			value.setStringValue(sb.toString());
 //			System.out.println(sb.toString());
+		}else if (a.getAttribute().getType() == AttributeType.POSITION){
+			double d1 = Math.random() * 360;
+			double d2 = Math.random() * 360;
+			if (Math.random() < 0.5) d1 = d1 * -1;
+			if (Math.random() < 0.5) d2 = d2 * -1;
+			value.setNumberValue(d1);
+			value.setNumberValue2(d1);
 		}
 		
 		return value;
@@ -318,6 +325,13 @@ public class SearchDataGenerator {
 			}
 			value.setStringValue(sb.toString());
 //			System.out.println(sb.toString());
+		}else if (a.getAttribute().getType() == AttributeType.POSITION){
+			double d1 = Math.random() * 360;
+			double d2 = Math.random() * 360;
+			if (Math.random() < 0.5) d1 = d1 * -1;
+			if (Math.random() < 0.5) d2 = d2 * -1;
+			value.setNumberValue(d1);
+			value.setNumberValue2(d1);
 		}
 		
 		return value;
@@ -375,6 +389,13 @@ public class SearchDataGenerator {
 			}
 			value.setStringValue(sb.toString());
 //			System.out.println(sb.toString());
+		}else if (a.getAttribute().getType() == AttributeType.POSITION){
+			double d1 = Math.random() * 360;
+			double d2 = Math.random() * 360;
+			if (Math.random() < 0.5) d1 = d1 * -1;
+			if (Math.random() < 0.5) d2 = d2 * -1;
+			value.setNumberValue(d1);
+			value.setNumberValue2(d1);
 		}
 		
 		return value;

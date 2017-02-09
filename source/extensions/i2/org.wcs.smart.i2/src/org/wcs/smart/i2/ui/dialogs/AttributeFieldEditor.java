@@ -79,6 +79,7 @@ public class AttributeFieldEditor {
 	private Composite parent;
 	
 	private Text txtValue;
+	private Text txtValue2;
 	private OnOffButton btnOnOff;
 	private ComboViewer cmbViewer;
 	private CheckBoxDropDown cmbMultiSelect;
@@ -157,7 +158,18 @@ public class AttributeFieldEditor {
 				msg = "Unable to parse number from text";
 			}
 		}
-		
+		if (attribute.getType() == AttributeType.POSITION){
+			try{
+				if (!txtValue.getText().trim().isEmpty()){
+					Double.parseDouble(txtValue.getText());
+				}
+				if (!txtValue2.getText().trim().isEmpty()){
+					Double.parseDouble(txtValue2.getText());
+				}
+			}catch(Exception ex){
+				msg = "Unable to positiong coorindate numbers from text";
+			}
+		}
 		if (msg != null){
 			cd.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_ERROR));
 			cd.setDescriptionText(msg);
@@ -244,6 +256,26 @@ public class AttributeFieldEditor {
 			}catch (Exception ex){
 				//
 			}
+		}else if (attribute.getType() == AttributeType.POSITION){
+			try{
+				String dvalue = ((Text)txtValue).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue(d);
+					add = true;
+				}
+			}catch (Exception ex){
+			}
+			try{
+				String dvalue = ((Text)txtValue2).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue2(d);
+					add = true;
+				}
+			}catch (Exception ex){
+				//
+			}
 		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
 			if (!svalue.trim().isEmpty()){
@@ -313,6 +345,32 @@ public class AttributeFieldEditor {
 					add = true;
 				}
 			}catch (Exception ex){
+			}
+			try{
+				String dvalue = ((Text)txtValue2).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue2(d);
+					add = true;
+				}
+			}catch (Exception ex){
+				//
+			}
+		}else if (attribute.getType() == AttributeType.POSITION){
+			try{
+				String dvalue = ((Text)txtValue).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue(d);
+					add = true;
+				}
+				dvalue = ((Text)txtValue2).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue2(d);
+					add = true;
+				}
+			}catch (Exception ex){
 				//
 			}
 		}else if (attribute.getType() == AttributeType.TEXT){
@@ -350,6 +408,9 @@ public class AttributeFieldEditor {
 				btnOnOff.setSelection(value.getNumberValue() >= 0.5);
 				btnOnOff.setEnabled(true);
 			}
+		}else if (attribute.getType() == AttributeType.POSITION){
+			txtValue.setText(String.valueOf(value.getNumberValue()));
+			txtValue2.setText(String.valueOf(value.getNumberValue2()));
 		}
 	}
 	/**
@@ -396,6 +457,27 @@ public class AttributeFieldEditor {
 			}catch (Exception ex){
 				//
 			}
+		}else if (attribute.getType() == AttributeType.POSITION){
+			try{
+				String dvalue = ((Text)txtValue).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue(d);
+					add = true;
+				}
+			}catch (Exception ex){
+				//
+			}
+			try{
+				String dvalue = ((Text)txtValue2).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue2(d);
+					add = true;
+				}
+			}catch (Exception ex){
+				//
+			}
 		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
 			if (!svalue.trim().isEmpty()){
@@ -411,6 +493,9 @@ public class AttributeFieldEditor {
 			txtValue.setText(value.getStringValue());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
+		}else if (attribute.getType() == AttributeType.POSITION){
+			txtValue.setText(String.valueOf(value.getNumberValue()));
+			txtValue2.setText(String.valueOf(value.getNumberValue2()));
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
 		}else if (attribute.getType() ==  AttributeType.DATE){
@@ -440,6 +525,9 @@ public class AttributeFieldEditor {
 			txtValue.setText(value.getStringValue());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
+		}else if (attribute.getType() == AttributeType.POSITION){
+			txtValue.setText(String.valueOf(value.getNumberValue()));
+			txtValue2.setText(String.valueOf(value.getNumberValue2()));
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			List<Object> selectedObjects = new ArrayList<>();
 			if (value.getAttributeListItems() != null){
@@ -601,6 +689,43 @@ public class AttributeFieldEditor {
 			});
 			btnOnOff.setSelection(true);
 			cd = createDecoration(btnOnOff);
+		}else if (attribute.getType() == AttributeType.POSITION){
+			Composite c = new Composite(parent, SWT.NONE);
+			c.setLayout(new GridLayout(4, false));
+			((GridLayout)c.getLayout()).marginWidth = 0;
+			((GridLayout)c.getLayout()).marginHeight = 0;
+			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			l = new Label(c, SWT.NONE);
+			l.setText("X:");
+			l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+			
+			txtValue = new Text(c, SWT.BORDER);
+			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)txtValue.getLayoutData()).widthHint = 50;
+			cd = createDecoration(txtValue);
+			txtValue.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					validate();
+					modified();
+				}
+			});
+			
+			l = new Label(c, SWT.NONE);
+			l.setText("Y:");
+			l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+			
+			txtValue2 = new Text(c, SWT.BORDER);
+			txtValue2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)txtValue2.getLayoutData()).widthHint = 50;
+			txtValue2.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					validate();
+					modified();
+				}
+			});
 		}
 	}
 	

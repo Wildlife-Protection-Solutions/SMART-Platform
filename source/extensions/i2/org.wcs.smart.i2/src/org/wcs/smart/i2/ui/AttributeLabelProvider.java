@@ -80,8 +80,10 @@ public class AttributeLabelProvider extends LabelProvider {
 		case TEXT:
 			key = SmartPlugIn.ATTRIBUTE_TEXT_ICON;
 			break;
-		default:
+		case POSITION:
+			key = SmartPlugIn.ATTRIBUTE_LOCATION_ICON;
 			break;
+			
 		}
 		if (key == null) return null;
 		return SmartPlugIn.getDefault().getImageRegistry().get(key);

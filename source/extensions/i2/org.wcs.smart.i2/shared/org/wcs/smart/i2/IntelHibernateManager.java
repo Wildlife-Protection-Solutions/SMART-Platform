@@ -101,12 +101,11 @@ public class IntelHibernateManager {
 			return java.sql.Types.DATE;
 		case NUMERIC:
 			return java.sql.Types.DOUBLE;
+		case POSITION:
+			return java.sql.Types.DOUBLE;
 		case LIST:
 		case TEXT:
 			return java.sql.Types.VARCHAR;
-		default:
-			break;
-		
 		};
 		return -1;
 	}

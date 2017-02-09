@@ -48,17 +48,20 @@ public class IntelligenceLabelProviderImpl implements
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item instanceof AttributeType){
-			AttributeType type = (AttributeType) item;
 			
-			if (type == AttributeType.BOOLEAN){
+			AttributeType type = (AttributeType) item;
+			switch(type){
+			case BOOLEAN:
 				return "BOOLEAN";
-			}else if (type == AttributeType.DATE){
+			case DATE:
 				return "DATE";
-			}else if (type == AttributeType.LIST){
+			case LIST:
 				return "LIST";
-			}else if (type == AttributeType.NUMERIC){
+			case NUMERIC:
 				return "NUMERIC";
-			}else if (type == AttributeType.TEXT){
+			case POSITION:
+				return "POSITION";
+			case TEXT:
 				return "TEXT";
 			}
 		}

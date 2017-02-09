@@ -62,6 +62,7 @@ public enum EntityManager {
 		String query = "SELECT count(*) FROM IntelEntity e join e.attributes as v where e.conservationArea = :ca and e.entityType = :type and v.id.attribute = :attribute ";
 		switch(attribute.getType()){
 			case BOOLEAN:
+			case POSITION:
 				return false;	//don't both checking we will always have duplicates
 			case DATE:
 				query += " and v.stringValue = :test";
@@ -74,7 +75,7 @@ public enum EntityManager {
 				break;
 			case TEXT:
 				query += " and v.stringValue = :test "; 
-				break;		
+				break;
 		}
 		
 		if (currentEntity != null){
@@ -86,6 +87,7 @@ public enum EntityManager {
 		hql.setParameter("type", type);
 		switch(attribute.getType()){
 			case BOOLEAN: 
+			case POSITION:
 				return false; // not supported
 			case DATE:
 				hql.setParameter("test", ((java.sql.Date)newId).toString());

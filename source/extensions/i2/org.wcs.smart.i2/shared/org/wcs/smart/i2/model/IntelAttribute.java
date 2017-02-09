@@ -56,7 +56,8 @@ public class IntelAttribute extends NamedKeyItem{
 		TEXT("s"), 
 		BOOLEAN("b"),
 		LIST("l"),
-		DATE("d");
+		DATE("d"),
+		POSITION("p");
 		
 		public String key;
 		

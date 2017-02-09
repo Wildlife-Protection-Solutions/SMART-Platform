@@ -31,6 +31,9 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.map.GeometryFactoryProvider;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Class that contains "value" fields for classes that record attribute
@@ -43,6 +46,7 @@ public abstract class IntelValueItem {
 	
 	protected String stringValue;
 	protected Double doubleValue;
+	protected Double doubleValue2;
 	protected IntelAttributeListItem listItem;
 	
 	@ManyToOne(fetch =FetchType.LAZY)
@@ -68,6 +72,14 @@ public abstract class IntelValueItem {
 	}
 	public void setNumberValue(Double doubleValue){
 		this.doubleValue = doubleValue;
+	}
+	
+	@Column(name="double_value2")
+	public Double getNumberValue2(){
+		return this.doubleValue2;
+	}
+	public void setNumberValue2(Double doubleValue){
+		this.doubleValue2 = doubleValue;
 	}
 	
 	@Transient
@@ -98,15 +110,18 @@ public abstract class IntelValueItem {
 	@Transient
 	public Object getAttributeValue(){
 		AttributeType type = getAttribute().getType();
-		if (type == AttributeType.BOOLEAN ||
-				type == AttributeType.NUMERIC){
-			return getNumberValue();
-		}else if (type == AttributeType.TEXT){
-			return getStringValue();
-		}else if (type == AttributeType.LIST){
-			return getAttributeListItem();
-		}else if (type == AttributeType.DATE){
-			return getDateValue();
+		switch(type){
+			case BOOLEAN:
+			case NUMERIC:
+				return getNumberValue();
+			case DATE:
+				return getDateValue();
+			case LIST:
+				return getAttributeListItem();
+			case POSITION:
+				return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getNumberValue(), getNumberValue2()));
+			case TEXT:
+				return getStringValue();
 		}
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 	}

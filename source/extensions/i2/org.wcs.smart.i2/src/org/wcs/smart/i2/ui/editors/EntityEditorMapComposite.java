@@ -70,8 +70,11 @@ import org.geotools.legend.Glyph;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.render.ViewportModel;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
@@ -93,6 +96,7 @@ import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.UuidUtils;
 
 public class EntityEditorMapComposite extends Composite implements MapPart{
@@ -213,12 +217,12 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		DateFilterComposite.DateFilter[] defaultFilters = new DateFilter[]{
 					DateFilter.LAST_30_DAYS,
 					DateFilter.LAST_60_DAYS,
-					DateFilter.LAST_YEAR,
+					DateFilter.LAST_1_YEARS,
 					DateFilter.LAST_5_YEARS,
 					DateFilter.ALL,
 					DateFilter.CUSTOM
 		};
-		DateFilterComposite.DateFilter initialDateFilter = DateFilter.LAST_YEAR;
+		DateFilterComposite.DateFilter initialDateFilter = DateFilter.LAST_1_YEARS;
 		dateFilter = new Date[]{initialDateFilter.getStartDate(), initialDateFilter.getEndDate()};
 		dateComp = new DateFilterDropDownComposite(mapArea, defaultFilters, initialDateFilter);
         dateComp.setBounds(0, 0, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
@@ -238,7 +242,6 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			}
         });
 		
-       
         Composite tableArea = createTableArea(parent);
         tableArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         

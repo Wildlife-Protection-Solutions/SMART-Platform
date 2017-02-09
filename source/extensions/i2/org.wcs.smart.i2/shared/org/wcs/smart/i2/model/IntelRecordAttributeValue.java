@@ -40,6 +40,9 @@ import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.map.GeometryFactoryProvider;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Provides attribute values for a given record
@@ -56,7 +59,8 @@ public class IntelRecordAttributeValue extends UuidItem{
 	
 	private String stringValue;
 	private Double doubleValue;
-
+	private Double doubleValue2;
+	
 	private List<IntelRecordAttributeValueList> listItems;
 	
 	
@@ -81,6 +85,14 @@ public class IntelRecordAttributeValue extends UuidItem{
 	}
 	public void setNumberValue(Double doubleValue){
 		this.doubleValue = doubleValue;
+	}
+	
+	@Column(name="double_value2")
+	public Double getNumberValue2(){
+		return this.doubleValue2;
+	}
+	public void setNumberValue2(Double doubleValue){
+		this.doubleValue2 = doubleValue;
 	}
 	
 	@Transient
@@ -121,15 +133,19 @@ public class IntelRecordAttributeValue extends UuidItem{
 	public Object getAttributeValue(){
 		if(attribute.getAttribute() != null){
 			AttributeType type = attribute.getAttribute().getType();
-			if (type == AttributeType.BOOLEAN ||
-				type == AttributeType.NUMERIC){
+			switch(type){
+			case BOOLEAN:
+			case NUMERIC:
 				return getNumberValue();
-			}else if (type == AttributeType.TEXT){
-				return getStringValue();
-			}else if (type == AttributeType.LIST){
-				return getAttributeListItems();
-			}else if (type == AttributeType.DATE){
+			case DATE:
 				return getDateValue();
+			case LIST:
+				return getAttributeListItems();
+			case POSITION:
+				return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getNumberValue(), getNumberValue2()));
+			case TEXT:
+				return getStringValue();
+			
 			}
 			throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 		}else if (attribute.getEntityType() != null){
@@ -162,6 +178,8 @@ public class IntelRecordAttributeValue extends UuidItem{
 				return String.valueOf(getNumberValue());
 			case TEXT:
 				return getStringValue();
+			case POSITION:
+				return "POINT(" + getNumberValue() +" " + getNumberValue2() + ")";
 			}
 		}else if (attribute.getEntityType() != null){
 			return String.valueOf(listItems.size());
