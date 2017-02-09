@@ -108,6 +108,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Image descriptor for attribute text icon
 	 */
 	public static final String ATTRIBUTE_TEXT_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_TEXT_ICON"; //$NON-NLS-1$
+
+	/**
+	 * Image descriptor for attribute location icon
+	 */
+	public static final String ATTRIBUTE_LOCATION_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_LOCATION_ICON"; //$NON-NLS-1$
 	
 	/**
 	 * Image descriptor for attribute boolean icon
@@ -353,6 +358,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		super.initializeImageRegistry(reg);
 	     reg.put(CATEGORY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/category_obj.gif")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_TEXT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_text.png")); //$NON-NLS-1$
+	     reg.put(ATTRIBUTE_LOCATION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_location.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_NUMBER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_number.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_BOOLEAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_boolean.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_LIST_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_list.png")); //$NON-NLS-1$

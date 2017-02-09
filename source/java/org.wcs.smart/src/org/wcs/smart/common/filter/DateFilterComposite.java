@@ -72,8 +72,10 @@ public class DateFilterComposite extends Composite {
 		CURRENT_MONTH(Messages.DateFilterComposite_CurrentMonth),
 		CUSTOM(Messages.DateFilter_Custom),
 		ALL(Messages.DateFilterComposite_All),
-		LAST_YEAR(Messages.DateFilterComposite_LastYear),
+		LAST_YEAR(Messages.DateFilterComposite_LastYear), //last year from jan to dec
+		LAST_1_YEARS("Last 1 Years"),	//last 365 days
 		LAST_5_YEARS(Messages.DateFilterComposite_Last5Year);
+		
 		
 		private String guiName;
 		
@@ -97,6 +99,7 @@ public class DateFilterComposite extends Composite {
 				return (new SimpleDateFormat("yyyy")).format(getEndDate()); //$NON-NLS-1$
 			case CUSTOM:
 				return null;
+			case LAST_1_YEARS:
 			case LAST_30_DAYS:
 			case LAST_5_YEARS:
 			case LAST_60_DAYS:
@@ -139,6 +142,9 @@ public class DateFilterComposite extends Composite {
 			case LAST_YEAR:
 				cal.set(cal.get(Calendar.YEAR)-1, 0, 01, 0, 0, 0);
 				return cal.getTime();
+			case LAST_1_YEARS:
+				cal.add(Calendar.YEAR, -1);
+				return cal.getTime();
 			case LAST_5_YEARS:
 				cal.add(Calendar.YEAR, -5);
 				return cal.getTime();
@@ -162,6 +168,7 @@ public class DateFilterComposite extends Composite {
 				case YEAR_TO_DATE:
 				case MONTH_TO_DATE:
 				case LAST_5_YEARS:
+				case LAST_1_YEARS:
 					return cal.getTime();
 				case LAST_YEAR: 	
 					cal.set(cal.get(Calendar.YEAR)-1, cal.getActualMaximum(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), cal.getActualMaximum(Calendar.HOUR), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
