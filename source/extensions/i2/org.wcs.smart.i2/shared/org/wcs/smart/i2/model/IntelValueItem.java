@@ -119,6 +119,7 @@ public abstract class IntelValueItem {
 			case LIST:
 				return getAttributeListItem();
 			case POSITION:
+				if (getNumberValue() == null || getNumberValue2() == null) return null;
 				return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getNumberValue(), getNumberValue2()));
 			case TEXT:
 				return getStringValue();

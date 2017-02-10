@@ -25,6 +25,7 @@ import java.awt.Color;
 
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.Graphic;
 import org.geotools.styling.Mark;
 import org.geotools.styling.PointSymbolizer;
 import org.geotools.styling.PolygonSymbolizer;
@@ -41,7 +42,8 @@ import org.geotools.styling.StyleFactory;
  */
 public enum LocationLayerType {
 	POINT("Point"), 
-	POLYGON("Polygon");
+	POLYGON("Polygon"),
+	ATTRIBUTE("Point");
 	
 	private String geomType;
 	
@@ -89,6 +91,13 @@ public enum LocationLayerType {
     		r.symbolizers().add(sym);
     		fts.rules().add(r);
     		return style;
+    	}else if (this == ATTRIBUTE){
+    		StyleBuilder sb = new StyleBuilder();
+    		Color darkRed = new Color(153, 0, 0);
+			Mark mark = sb.createMark("star", sb.createFill(Color.RED),sb.createStroke(darkRed, 1));
+			Graphic g = sb.createGraphic(null, mark, null, 1.0, 13.0,0.0);
+			Style style = sb.createStyle(sb.createPointSymbolizer(g));
+			return style;
     	}
     	return null;
 	}

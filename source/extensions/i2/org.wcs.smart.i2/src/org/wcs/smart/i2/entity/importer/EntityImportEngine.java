@@ -40,7 +40,11 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -51,8 +55,14 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Import entity engine.
@@ -77,6 +87,11 @@ public enum EntityImportEngine {
 		monitor.beginTask("Importing Entities", 5);
 		//ensure the file exists
 		if (!Files.exists(config.getFile())) throw new FileNotFoundException(config.getFile().toString());
+		
+		CoordinateReferenceSystem fromCrs = ReprojectUtils.stringToCrs(config.getProjection().getDefinition());
+		CoordinateReferenceSystem toCrs = GeometryUtils.SMART_CRS;
+		MathTransform transform = CRS.findMathTransform(fromCrs, toCrs);
+		
 		
 		monitor.subTask("Loading attribute information");
 		//load the attributes 
@@ -143,20 +158,20 @@ public enum EntityImportEngine {
 					avalue.setAttribute(a);
 					avalue.setEntity(entity);
 					
-					int columnIndex = config.getColumn(a);
+					Integer[] columnIndex = config.getColumn(a);
 					boolean add = false;
-					String value = data[columnIndex];
-					if (value.trim().isEmpty()) continue;	//skip empty lines
+					String value1 = data[columnIndex[0]];
+					if (value1.trim().isEmpty()) continue;	//skip empty lines
 					switch(a.getType()){
 					case BOOLEAN:
 						Boolean bvalue = null;
-						if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("yes")){
+						if (value1.equalsIgnoreCase("true") || value1.equalsIgnoreCase("yes")){
 							bvalue = true;
-						}else if (value.equalsIgnoreCase("false") || value.equalsIgnoreCase("no")){
+						}else if (value1.equalsIgnoreCase("false") || value1.equalsIgnoreCase("no")){
 							bvalue = false;
 						}else{
 							try{
-								Integer i = Integer.parseInt(value);
+								Integer i = Integer.parseInt(value1);
 								if (i == 0){
 									bvalue = false;
 								}else if (i == 1){
@@ -172,22 +187,22 @@ public enum EntityImportEngine {
 							add = true;
 							break;
 						}
-						warnings.add(MessageFormat.format("Cannot convert the value {0} to valid boolean.  Attribute will not be imported. (Line {1} Attribute {2})", value, line, a.getName()));
+						warnings.add(MessageFormat.format("Cannot convert the value {0} to valid boolean.  Attribute will not be imported. (Line {1} Attribute {2})", value1, line, a.getName()));
 						break;
 					case DATE:
 						try{
-							Date d = Date.from(LocalDate.parse(value, dateFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+							Date d = Date.from(LocalDate.parse(value1, dateFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 							avalue.setDateValue(d);
 							add = true;
 						}catch (Exception ex){
 							ex.printStackTrace();
-							warnings.add(MessageFormat.format("Cannot convert the value {0} to valid date.  Attribute will not be imported. (Line {1} Attribute {2})", value, line, a.getName()));	
+							warnings.add(MessageFormat.format("Cannot convert the value {0} to valid date.  Attribute will not be imported. (Line {1} Attribute {2})", value1, line, a.getName()));	
 						}
 						break;
 					case LIST:
 						//search names
 						for (IntelAttributeListItem i : a.getAttributeList()){
-							if (i.getName().equalsIgnoreCase(value)){
+							if (i.getName().equalsIgnoreCase(value1)){
 								avalue.setAttributeListItem(i);
 								add = true;
 								break;
@@ -196,7 +211,7 @@ public enum EntityImportEngine {
 						//search keys
 						if (avalue.getAttributeListItem() == null){
 							for (IntelAttributeListItem i : a.getAttributeList()){
-								if (i.getKeyId().equalsIgnoreCase(value)){
+								if (i.getKeyId().equalsIgnoreCase(value1)){
 									avalue.setAttributeListItem(i);
 									add = true;
 									break;
@@ -205,32 +220,47 @@ public enum EntityImportEngine {
 						}
 						//not found ask the user if they want to add it
 						if (avalue.getAttributeListItem() == null){
-							IntelAttributeListItem addedItem = confirmAddListItem(value, a);
+							IntelAttributeListItem addedItem = confirmAddListItem(value1, a);
 							if (addedItem != null){
 								avalue.setAttributeListItem(addedItem);
 								addedItems.add(addedItem);
 								add = true;
 								break;	
 							}
-							warnings.add(MessageFormat.format("Cannot find a list value for value ''{0}''.  Attribute will not be imported. (Line {1} Attribute {2})", value, line, a.getName()));
+							warnings.add(MessageFormat.format("Cannot find a list value for value ''{0}''.  Attribute will not be imported. (Line {1} Attribute {2})", value1, line, a.getName()));
 						}
 						
 						break;
 					case NUMERIC:
 						try{
-							Double d = Double.parseDouble(value);
+							Double d = Double.parseDouble(value1);
 							avalue.setNumberValue(d);
 							add = true;
 						}catch (NumberFormatException e ){
 							//cannot parse a value; skip this attribute
-							warnings.add(MessageFormat.format("Cannot convert the value {0} to a number. Attribute will not be imported. (Line {1} Attribute {2})", value, line, a.getName()));
+							warnings.add(MessageFormat.format("Cannot convert the value {0} to a number. Attribute will not be imported. (Line {1} Attribute {2})", value1, line, a.getName()));
 						}
 						break;
 					case TEXT:
-						avalue.setStringValue(value);
+						avalue.setStringValue(value1);
 						add=true;
 						break;
-
+					case POSITION:
+						String value2 = data[columnIndex[1]];
+						if (value2.trim().isEmpty()) continue;	//skip empty lines
+						try{
+							Double x = Double.parseDouble(value1);
+							Double y = Double.parseDouble(value2);
+							
+							Point pnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x,y));
+							pnt = (Point) JTS.transform(pnt, transform);
+							avalue.setNumberValue(pnt.getX());
+							avalue.setNumberValue2(pnt.getY());
+							add = true;
+						}catch (Exception e ){
+							//cannot parse a value; skip this attribute
+							warnings.add(MessageFormat.format("Cannot convert the values ({0} and {1}) to a position. Attribute will not be imported. (Line {1} Attribute {2})", value1, value2, line, a.getName()));
+						}
 					}
 					
 					if (add){

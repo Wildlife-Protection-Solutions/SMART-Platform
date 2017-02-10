@@ -49,17 +49,18 @@ import org.wcs.smart.i2.udig.LocationLayerType;
 public class IntelEntityFeatureSource extends ContentFeatureSource {
 
 	private UUID entityUuid;
+	private LocationLayerType geomType = null;
 	
 	public IntelEntityFeatureSource(ContentEntry entry, UUID entityUuid) {
 		super(entry, null);
 		this.entityUuid = entityUuid;
-		
+		geomType = LocationLayerType.valueOf(entry.getName().getLocalPart());
 	}
 
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
 		try {
-			LocationLayerType geomType = LocationLayerType.valueOf(entry.getName().getLocalPart());
+
 			return DataUtilities.createType(entry.getTypeName(), getFeatureSchemaString(geomType));
 		} catch (SchemaException e) {
 			throw new IOException(e);
@@ -81,7 +82,16 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query) throws IOException {
 		//do something special for single between dates filter
+		if (geomType == LocationLayerType.ATTRIBUTE){
+			try{
+				return new IntelEntityAttributeFeatureReader(entityUuid, getSchema());
+			}catch (Exception ex){
+				throw new IOException (ex);
+			}
+		}
+		
 		IntelEntityFeatureReader[] reader = new IntelEntityFeatureReader[]{new IntelEntityFeatureReader(entityUuid, getSchema())};
+		
 		
 		query.getFilter().accept(new AbstractFilterVisitor() {
 			@Override
@@ -104,10 +114,21 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 
 	
 	public static String getFeatureSchemaString(LocationLayerType geomType){
-		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:");
-		sb.append(geomType.getGeomType());
-		sb.append(":srid=4326,fid:String,id:String,date:Date,comment:String,record:String,record_date:Date,record_uuid:String,system_id:String");
-		return sb.toString();
+		switch(geomType){
+			case POINT:
+			case POLYGON:
+				StringBuilder sb = new StringBuilder();
+				sb.append("the_geom:");
+				sb.append(geomType.getGeomType());
+				sb.append(":srid=4326,fid:String,id:String,date:Date,comment:String,record:String,record_date:Date,record_uuid:String,system_id:String");
+				return sb.toString();
+			case ATTRIBUTE:
+				sb = new StringBuilder();
+				sb.append("the_geom:");
+				sb.append(geomType.getGeomType());
+				sb.append(":srid=4326,fid:String,attribute:String");
+				return sb.toString();
+		}
+		return null;
 	}
 }

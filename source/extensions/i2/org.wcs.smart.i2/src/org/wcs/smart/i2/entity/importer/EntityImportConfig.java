@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
 
@@ -39,11 +40,12 @@ public class EntityImportConfig {
 
 	private Path file;
 	private IntelEntityType type;
-	private Map<IntelAttribute, Integer> columnMapping;
+	private Map<IntelAttribute, Integer[]> columnMapping;
 	private boolean skipFirstLine = false;
 	
 	private char delimiter;
 	private String dateFormatStr;
+	private Projection projection;
 	
 	public EntityImportConfig(){
 		
@@ -59,9 +61,17 @@ public class EntityImportConfig {
 		this.file = file;
 		this.type = type;
 		this.skipFirstLine = skipFirstLine;
-		columnMapping = new HashMap<IntelAttribute, Integer>();
+		columnMapping = new HashMap<IntelAttribute, Integer[]>();
 		this.delimiter = delimiter;
 		this.dateFormatStr = dateFormat;
+	}
+	
+	public void setProjection(Projection projection){
+		this.projection = projection;
+	}
+	
+	public Projection getProjection(){
+		return this.projection;
 	}
 	
 	public String getDateFormatString(){
@@ -84,7 +94,11 @@ public class EntityImportConfig {
 		return this.skipFirstLine;
 	}
 	public void addMapping(IntelAttribute attribute, int column){
-		columnMapping.put(attribute, column);
+		columnMapping.put(attribute, new Integer[]{column});
+	}
+	
+	public void addMapping(IntelAttribute attribute, int column1, int column2){
+		columnMapping.put(attribute, new Integer[]{column1, column2});
 	}
 	
 	public Collection<IntelAttribute> getMappedAttributes(){
@@ -92,9 +106,15 @@ public class EntityImportConfig {
 	}
 	
 	public int getMaxColumn(){
-		return columnMapping.values().stream().max(Integer::compare).get();
+		int max = -9999;
+		for (Integer[] ints : columnMapping.values()){
+			for (int i : ints){
+				if (i > max) max = i;
+			}
+		}
+		return max;
 	}
-	public int getColumn(IntelAttribute attribute){
+	public Integer[] getColumn(IntelAttribute attribute){
 		return columnMapping.get(attribute);
 	}
 }

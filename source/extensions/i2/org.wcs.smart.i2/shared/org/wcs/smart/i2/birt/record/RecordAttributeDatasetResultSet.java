@@ -133,7 +133,13 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelRecordAttributeValue i = (IntelRecordAttributeValue) ((Object[])currentItem)[0];
-		return RecordAttributeDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale(), connection.getSession());
+		try{
+			return RecordAttributeDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale(), 
+				connection.getProjectionProvider().getProjection().getParsedCoordinateReferenceSystem(), 
+				connection.getSession());
+		}catch (Exception ex){
+			return "ERROR: " + ex.getMessage();
+		}
 	}
 
 	/**

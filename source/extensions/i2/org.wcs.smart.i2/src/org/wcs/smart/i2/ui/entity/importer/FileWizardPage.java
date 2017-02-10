@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
@@ -56,6 +57,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -79,6 +81,7 @@ public class FileWizardPage extends WizardPage{
 	private DelimiterCombo delimCombo;
 	
 	private ComboViewer cmbDateFormat;
+	private ComboViewer cmbProjection;
 	
 	protected FileWizardPage() {
 		super(FILE_PAGE);
@@ -107,6 +110,10 @@ public class FileWizardPage extends WizardPage{
 		return chSkipFirstLine.getSelection();
 	}
 	
+	public Projection getProjection(){
+		return (Projection) ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
+	}
+	
     @Override
 	public boolean isPageComplete() {
     	if (!super.isPageComplete()) return false;
@@ -133,6 +140,11 @@ public class FileWizardPage extends WizardPage{
     		return false;
     	}
         
+    	Object x= ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
+    	if ( x == null || !(x instanceof Projection)){
+    		setErrorMessage("valid projection not selected");
+    		return false;
+    	}
     	
     	try{
     		DateTimeFormatter.ofPattern(cmbDateFormat.getCombo().getText());
@@ -232,6 +244,27 @@ public class FileWizardPage extends WizardPage{
 		cmbDateFormat.setSelection(new StructuredSelection(dateFormats[0]));
 		cmbDateFormat.getCombo().addListener(SWT.Modify, e-> getWizard().getContainer().updateButtons());
 		
+		
+		l = new Label(upper, SWT.NONE);
+		l.setText("Projection:");
+		l.setToolTipText("for entities with position attributes select the projection of the import data");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		cmbProjection = new ComboViewer(upper, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
+		cmbProjection.setLabelProvider(new LabelProvider(){
+			@Override
+			public String getText(Object element){
+				if (element instanceof Projection){
+					return ((Projection) element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		cmbProjection.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbProjection.getCombo().addListener(SWT.Modify, e-> getWizard().getContainer().updateButtons());
+		
 		loadEntityTypes.schedule();
 		setControl(upper);
 		
@@ -245,18 +278,33 @@ public class FileWizardPage extends WizardPage{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<IntelEntityType> types = new ArrayList<>();
+			final List<Projection> projections = new ArrayList<>();
 			Session s = HibernateManager.openSession();
 			try{
 				types.addAll(s.createCriteria(IntelEntityType.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 				.list());
 				types.forEach(t -> t.getName());
+				
+				
+				projections.addAll(s.createCriteria(Projection.class)
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+						.list());
+				projections.forEach(p->{
+					p.getName();
+				});
 			}finally{
 				s.close();
 			}
 			types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			projections.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			Display.getDefault().syncExec(() -> {
 				if (!cmbEntityType.getControl().isDisposed()) cmbEntityType.setInput(types);
+				if (!cmbProjection.getControl().isDisposed()){
+					cmbProjection.setInput(projections);
+					cmbProjection.setSelection(new StructuredSelection(projections.get(0)));
+				}
+				
 			});
 			return Status.OK_STATUS;
 		}

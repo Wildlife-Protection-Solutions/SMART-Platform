@@ -172,20 +172,26 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		sep = new Label(owner, SWT.SEPARATOR | SWT.HORIZONTAL);
 		sep.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		scroll = new ScrolledComposite(owner, SWT.V_SCROLL | SWT.H_SCROLL);
+		scroll = new ScrolledComposite(owner, SWT.V_SCROLL );
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		
 		details = new Composite(scroll, SWT.NONE);
 		details.setLayout(new GridLayout(2, false));
 		details.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)details.getLayout()).marginWidth = 0;
 		((GridLayout)details.getLayout()).marginHeight = 0;
 		
-		scroll.setContent(details);
-		scroll.setExpandHorizontal(true);
-		scroll.setExpandVertical(true);
-		scroll.addListener(SWT.Resize, e->scroll.setSize(details.computeSize(scroll.getClientArea().width, SWT.DEFAULT)));
-		
 		initDetails(relationship.getRelationshipType());
+		
+		scroll.setContent(details);
+		
+		scroll.setMinSize(details.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		scroll.addListener(SWT.Resize, e->scroll.setMinSize(details.computeSize(scroll.getClientArea().width, SWT.DEFAULT)));
+		
+		
 		
 		//configure background color
 		bgColor = new Color(parent.getDisplay(), 255, 255, 225);
@@ -211,7 +217,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		List<IntelRelationshipTypeAttribute> all = new ArrayList<IntelRelationshipTypeAttribute>();
 		all.addAll(type.getAttributes());
 		Collections.sort(all, (a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
-		
+
 		for (IntelRelationshipTypeAttribute a : all){
 			Label ll = new Label(details, SWT.NONE);
 			ll.setText(MessageFormat.format("{0}:", a.getAttribute().getName()));

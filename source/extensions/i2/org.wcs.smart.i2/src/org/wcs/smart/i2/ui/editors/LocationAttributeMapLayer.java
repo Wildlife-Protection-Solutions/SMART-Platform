@@ -154,7 +154,6 @@ public class LocationAttributeMapLayer {
 						store.addFeatures(DataUtilities.collection(sf));
 						transaction.commit();
 					}
-					return;
 				} else {
 					try (Transaction transaction = new DefaultTransaction("edittransaction")) {
 						store.setTransaction(transaction);

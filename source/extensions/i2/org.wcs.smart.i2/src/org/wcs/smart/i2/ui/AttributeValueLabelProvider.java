@@ -26,12 +26,22 @@ import java.util.Date;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.Projection;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Label provider for attribute values.  Supports IntelEntityAttributeValue,
@@ -41,6 +51,27 @@ import org.wcs.smart.ui.SmartLabelProvider;
  *
  */
 public class AttributeValueLabelProvider extends LabelProvider {
+	
+	private CoordinateReferenceSystem crs = null;
+
+	private synchronized CoordinateReferenceSystem getCrs(){
+		if (crs != null) return crs;
+		
+		CoordinateReferenceSystem  temp = GeometryUtils.SMART_CRS;
+		Projection currentProjection = HibernateManager.getCurrentViewProjection();
+		if (currentProjection != null ){
+			try{
+				CoordinateReferenceSystem parsed = ReprojectUtils.stringToCrs(currentProjection.getDefinition());
+				if (!CRS.equalsIgnoreMetadata(crs, parsed)){
+					temp = parsed;
+				}
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}
+		}
+		this.crs = temp;
+		return crs;
+	}
 	
 	public String getText(Object element){
 		Object value = null;
@@ -76,6 +107,17 @@ public class AttributeValueLabelProvider extends LabelProvider {
 			return DateFormat.getDateInstance().format((Date)value);
 		}else if (value instanceof NamedItem){
 			return ((NamedItem) value).getName();
+		}else if (value instanceof Point){
+			if(crs == GeometryUtils.SMART_CRS){
+				return ((Point)value).toString(); 
+			}else{
+				try{
+					Coordinate c = ReprojectUtils.reproject(((Point) value).getX(), ((Point) value).getY(), GeometryUtils.SMART_CRS, getCrs());
+					return "POINT (" + c.x + " " + c.y + ")";
+				}catch (Exception ex){
+					return "ERROR: " + ex.getMessage();
+				}
+			}
 		}else{
 			return value.toString();
 		}

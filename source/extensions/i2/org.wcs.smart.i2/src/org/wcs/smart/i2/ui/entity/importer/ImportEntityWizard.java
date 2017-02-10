@@ -135,6 +135,7 @@ public class ImportEntityWizard extends Wizard implements IPageChangingListener 
 	public void handlePageChanging(PageChangingEvent event) {
 		if (event.getCurrentPage() == filePage){
 			config.setFile(filePage.getFile(), filePage.getEntityType(), filePage.getSkipFirstLine(), filePage.getDelimiter(), filePage.getDateFormatStr());
+			config.setProjection(filePage.getProjection());
 		}
 		
 		if (event.getTargetPage() == mappingPage){

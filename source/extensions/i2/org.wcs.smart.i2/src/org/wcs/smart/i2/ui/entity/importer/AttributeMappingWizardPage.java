@@ -55,6 +55,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -66,6 +67,10 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class AttributeMappingWizardPage extends WizardPage{
 	
+
+	private static final String Y_ATTRIBUTE_DATA_KEY = "Y_ATTRIBUTE";
+
+	private static final String ATTRIBUTE_DATA_KEY = "ATTRIBUTE";
 
 	public static final String FILE_PAGE = "org.wcs.smart.i2.ui.entity.importer.mapping";
 		
@@ -114,10 +119,27 @@ public class AttributeMappingWizardPage extends WizardPage{
 	public void updateConfiguration(EntityImportConfig configuration){
 		for (ComboViewer viewer : mappings){
 			if (!viewer.getSelection().isEmpty()){
-				IntelAttribute attribute = (IntelAttribute) viewer.getData("ATTRIBUTE");
-				Object[] items = (Object[]) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-				int index = (int) items[1];
-				if (index >=0 ) configuration.addMapping(attribute, index);
+				IntelAttribute attribute = (IntelAttribute) viewer.getData(ATTRIBUTE_DATA_KEY);
+				
+				if (attribute.getType() == AttributeType.POSITION){
+					ComboViewer yField = (ComboViewer) viewer.getData(Y_ATTRIBUTE_DATA_KEY);
+					
+					Object[] items = (Object[]) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+					if (items != null){
+						int xindex = (int) items[1];
+						items = (Object[]) ((IStructuredSelection)yField.getSelection()).getFirstElement();
+						if (items != null){
+							int yindex = (int) items[1];
+							if (xindex > 0 && yindex > 0) configuration.addMapping(attribute, xindex, yindex);
+						}
+					}
+				}else{
+					Object[] items = (Object[]) ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+					if (items != null){
+						int index = (int) items[1];
+						if (index >= 0 ) configuration.addMapping(attribute, index);
+					}
+				}
 			}
 		}
 	}
@@ -199,24 +221,70 @@ public class AttributeMappingWizardPage extends WizardPage{
 					l = new Label(t, SWT.SEPARATOR | SWT.HORIZONTAL);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 					for (IntelAttribute a : attributes.get(g)){
+						
 						l = new Label(mappingPanel, SWT.NONE);
 						l.setText(a.getName());
 						
-						ComboViewer viewer = new ComboViewer(mappingPanel, SWT.READ_ONLY | SWT.DROP_DOWN);
-						viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-						viewer.setContentProvider(ArrayContentProvider.getInstance());
-						viewer.setLabelProvider(new LabelProvider(){
-								@Override
-								public String getText(Object element){
-									if (element instanceof Object[]){
-										return (String)((Object[])element)[0];
+						if (a.getType() == AttributeType.POSITION){
+							Composite xy = new Composite(mappingPanel, SWT.NONE);
+							xy.setLayout(new GridLayout(4, false));
+							xy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							
+							l = new Label(xy, SWT.NONE);
+							l.setText("X:");
+							
+							ComboViewer xviewer = new ComboViewer(xy, SWT.READ_ONLY | SWT.DROP_DOWN);
+							xviewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							xviewer.setContentProvider(ArrayContentProvider.getInstance());
+							xviewer.setLabelProvider(new LabelProvider(){
+									@Override
+									public String getText(Object element){
+										if (element instanceof Object[]){
+											return (String)((Object[])element)[0];
+										}
+										return super.getText(element);
 									}
-									return super.getText(element);
-								}
-						});
-						viewer.setInput(fheaders);
-						viewer.setData("ATTRIBUTE", a);
-						mappings.add(viewer);
+							});
+							xviewer.setInput(fheaders);
+							xviewer.setData(ATTRIBUTE_DATA_KEY, a);
+							
+							l = new Label(xy, SWT.NONE);
+							l.setText("Y:");
+							
+							ComboViewer yviewer = new ComboViewer(xy, SWT.READ_ONLY | SWT.DROP_DOWN);
+							yviewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							yviewer.setContentProvider(ArrayContentProvider.getInstance());
+							yviewer.setLabelProvider(new LabelProvider(){
+									@Override
+									public String getText(Object element){
+										if (element instanceof Object[]){
+											return (String)((Object[])element)[0];
+										}
+										return super.getText(element);
+									}
+							});
+							yviewer.setInput(fheaders);
+							yviewer.setData(ATTRIBUTE_DATA_KEY, a);
+							
+							mappings.add(xviewer);
+							xviewer.setData(Y_ATTRIBUTE_DATA_KEY, yviewer);
+						}else{
+							ComboViewer viewer = new ComboViewer(mappingPanel, SWT.READ_ONLY | SWT.DROP_DOWN);
+							viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							viewer.setContentProvider(ArrayContentProvider.getInstance());
+							viewer.setLabelProvider(new LabelProvider(){
+									@Override
+									public String getText(Object element){
+										if (element instanceof Object[]){
+											return (String)((Object[])element)[0];
+										}
+										return super.getText(element);
+									}
+							});
+							viewer.setInput(fheaders);
+							viewer.setData(ATTRIBUTE_DATA_KEY, a);
+							mappings.add(viewer);
+						}
 					}
 				}
 				mappingPanel.layout(true, true);

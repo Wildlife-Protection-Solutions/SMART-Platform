@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -42,6 +43,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -58,9 +61,14 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.geotools.referencing.CRS;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
-import org.locationtech.udig.project.ui.tool.IToolManager;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ca.Projection;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -72,7 +80,11 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.OnOffButton;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Attribute field editor 
@@ -89,6 +101,7 @@ public class AttributeFieldEditor {
 	
 	private Text txtValue;
 	private Text txtValue2;
+	private Label lblProj;
 	private OnOffButton btnOnOff;
 	private ComboViewer cmbViewer;
 	private CheckBoxDropDown cmbMultiSelect;
@@ -101,6 +114,10 @@ public class AttributeFieldEditor {
 	private String name = null;
 	
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
+	
+	private CoordinateReferenceSystem crs = GeometryUtils.SMART_CRS;
+	private String crsLabel = null;
+	
 	
 	/**
 	 * Assumption is the parent layout is a 2 column grid layout
@@ -126,6 +143,28 @@ public class AttributeFieldEditor {
 			this.name = attribute.getName();
 		}else{
 			this.name = name;
+		}
+		
+		if (attribute.getType() == AttributeType.POSITION){
+			
+			crs = GeometryUtils.SMART_CRS;
+			Projection currentProjection = HibernateManager.getCurrentViewProjection();
+			if (currentProjection != null ){
+				try{
+					CoordinateReferenceSystem parsed = ReprojectUtils.stringToCrs(currentProjection.getDefinition());
+					if (!CRS.equalsIgnoreMetadata(crs, parsed)){
+						crs= parsed;
+					}
+				}catch (Exception ex){
+					Intelligence2PlugIn.log(ex.getMessage(), ex);
+				}
+			}
+			
+			if (currentProjection != null){
+				crsLabel = currentProjection.getName();
+			}else{
+				crsLabel = GeometryUtils.SMART_CRS.getName().toString();
+			}
 		}
 		createControl();
 	}
@@ -172,15 +211,28 @@ public class AttributeFieldEditor {
 			}
 		}
 		if (attribute.getType() == AttributeType.POSITION){
+			Double x = null;
+			Double y = null;
 			try{
 				if (!txtValue.getText().trim().isEmpty()){
-					Double.parseDouble(txtValue.getText());
+					x = Double.parseDouble(txtValue.getText());
 				}
 				if (!txtValue2.getText().trim().isEmpty()){
-					Double.parseDouble(txtValue2.getText());
+					y = Double.parseDouble(txtValue2.getText());
 				}
 			}catch(Exception ex){
 				msg = "Unable to positiong coorindate numbers from text";
+			}
+			//try to reproject to database crs
+			if (x != null && y != null){
+				if (crs != null && crs != GeometryUtils.SMART_CRS){
+					//reproject to lat lon
+					try{
+						ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
+					}catch (Exception ex){
+						msg = "Unable to reproject position attribute to database projection";
+					}
+				}
 			}
 		}
 		if (msg != null){
@@ -270,25 +322,14 @@ public class AttributeFieldEditor {
 				//
 			}
 		}else if (attribute.getType() == AttributeType.POSITION){
-			boolean add1 = false;
-			boolean add2 = false;
-			try{
-				String dvalue = ((Text)txtValue).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue(d);
-					add1 = true;
-				}
-			}catch (Exception ex){ }
-			try{
-				String dvalue = ((Text)txtValue2).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue2(d);
-					add2 = true;
-				}
-			}catch (Exception ex){ }
-			add = add1 && add2;
+			Double[] values = parsePositionValues();
+			if (values == null){
+				add = false;
+			}else{
+				value.setNumberValue(values[0]);
+				value.setNumberValue2(values[1]);
+				add = true;
+			}
 			
 		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
@@ -371,25 +412,14 @@ public class AttributeFieldEditor {
 				//
 			}
 		}else if (attribute.getType() == AttributeType.POSITION){
-			boolean add1 = false;
-			boolean add2 = false;
-			try{
-				String dvalue = ((Text)txtValue).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue(d);
-					add1 = true;
-				}
-			}catch (Exception ex){ }
-			try{
-				String dvalue = ((Text)txtValue2).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue2(d);
-					add2 = true;
-				}
-			}catch (Exception ex){ }
-			add = add1 && add2;
+			Double[] values = parsePositionValues();
+			if (values == null){
+				add = false;
+			}else{
+				value.setNumberValue(values[0]);
+				value.setNumberValue2(values[1]);
+				add = true;
+			}
 			
 		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
@@ -400,6 +430,9 @@ public class AttributeFieldEditor {
 		}
 		return add;
 	}
+	
+
+	
 	
 	public void initControl(IntelEntityRelationshipAttributeValue value){
 		if (attribute.getType() == AttributeType.TEXT){
@@ -427,8 +460,7 @@ public class AttributeFieldEditor {
 				btnOnOff.setEnabled(true);
 			}
 		}else if (attribute.getType() == AttributeType.POSITION){
-			txtValue.setText(String.valueOf(value.getNumberValue()));
-			txtValue2.setText(String.valueOf(value.getNumberValue2()));
+			initPositionValues(value.getNumberValue(), value.getNumberValue2());
 		}
 	}
 	/**
@@ -476,26 +508,14 @@ public class AttributeFieldEditor {
 				//
 			}
 		}else if (attribute.getType() == AttributeType.POSITION){
-			boolean add1 = false;
-			boolean add2 = false;
-			try{
-				String dvalue = ((Text)txtValue).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue(d);
-					add1 = true;
-				}
-			}catch (Exception ex){ }
-			try{
-				String dvalue = ((Text)txtValue2).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue2(d);
-					add2 = true;
-				}
-			}catch (Exception ex){ }
-			add = add1 && add2;
-			
+			Double[] values = parsePositionValues();
+			if (values == null){
+				add = false;
+			}else{
+				value.setNumberValue(values[0]);
+				value.setNumberValue2(values[1]);
+				add = true;
+			}
 		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
 			if (!svalue.trim().isEmpty()){
@@ -512,8 +532,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() == AttributeType.POSITION){
-			txtValue.setText(String.valueOf(value.getNumberValue()));
-			txtValue2.setText(String.valueOf(value.getNumberValue2()));
+			initPositionValues(value.getNumberValue(), value.getNumberValue2());
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
 		}else if (attribute.getType() ==  AttributeType.DATE){
@@ -544,8 +563,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() == AttributeType.POSITION){
-			txtValue.setText(String.valueOf(value.getNumberValue()));
-			txtValue2.setText(String.valueOf(value.getNumberValue2()));
+			initPositionValues(value.getNumberValue(), value.getNumberValue2());
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			List<Object> selectedObjects = new ArrayList<>();
 			if (value.getAttributeListItems() != null){
@@ -604,6 +622,70 @@ public class AttributeFieldEditor {
 			}
 		}
 	}
+	
+	private void initPositionValues(Double value1, Double value2){
+		if (value1 == null || value2 == null){
+			txtValue.setText("");
+			txtValue2.setText("");
+		}
+		
+		//get view projection
+		
+		lblProj.setToolTipText(crsLabel);
+		if (crsLabel.length() > 10){
+			crsLabel = crsLabel.substring(0, 10) + "...";
+		}
+		lblProj.setText(crsLabel);
+		if (crs == GeometryUtils.SMART_CRS){
+			txtValue.setText(String.valueOf(value1));
+			txtValue2.setText(String.valueOf(value2));
+		}else{
+			try {
+				Coordinate viewCoordinate = ReprojectUtils.reproject(value1, value2, GeometryUtils.SMART_CRS, crs);
+				txtValue.setText(String.valueOf(viewCoordinate.x));
+				txtValue2.setText(String.valueOf(viewCoordinate.y));
+			} catch (Exception e) {
+				Intelligence2PlugIn.displayLog("Unable to reproject position attribute to view projection.", e);
+				txtValue.setText(String.valueOf(value1));
+				txtValue2.setText(String.valueOf(value2));
+			}
+		}		
+	}
+	
+	private Double[] parsePositionValues(){
+		Double x = null;
+		Double y = null;
+		try{
+			String dvalue = ((Text)txtValue).getText();
+			if (!dvalue.trim().isEmpty()){
+				x = Double.parseDouble(dvalue);
+			}
+		}catch (Exception ex){ }
+		
+		try{
+			String dvalue = ((Text)txtValue2).getText();
+			if (!dvalue.trim().isEmpty()){
+				y = Double.parseDouble(dvalue);
+			}
+		}catch (Exception ex){ }
+		
+		if (x == null || y == null) return null;
+		
+		
+		if (crs == null || crs == GeometryUtils.SMART_CRS){
+			return new Double[]{x,y};
+		}else{
+			//reproject to lat lon
+			try{
+				Coordinate c = ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
+				return new Double[]{c.x, c.y};
+			}catch (Exception ex){
+				Intelligence2PlugIn.displayLog("Unable to reproject position attribute to database projection", ex);
+				return new Double[]{x,y};
+			}
+		}
+	}
+	
 	
 	private void createControl(){
 		Label l = new Label(parent, SWT.NONE);
@@ -710,7 +792,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.POSITION){
 			
 			Composite c = new Composite(parent, SWT.NONE);
-			c.setLayout(new GridLayout(4, false));
+			c.setLayout(new GridLayout(5, false));
 			((GridLayout)c.getLayout()).marginWidth = 1;
 			((GridLayout)c.getLayout()).marginHeight = 2;
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -760,6 +842,8 @@ public class AttributeFieldEditor {
 				});
 			}
 
+			
+			
 			Hyperlink link = new Hyperlink(c, SWT.NONE);
 			link.setText("map...");
 			link.setUnderlined(true);
@@ -771,45 +855,39 @@ public class AttributeFieldEditor {
 					selectOnMap(link.getShell());
 				}
 			});
+			
+			lblProj = new Label(c, SWT.NONE);
+			lblProj.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+//			((GridData)lblProj.getLayoutData()).widthHint = 20;
+			FontData fc = lblProj.getFont().getFontData()[0];
+			fc.setHeight(fc.getHeight() - 2);
+			Font smaller = new Font(lblProj.getDisplay(), fc);
+			lblProj.setFont(smaller);
+			lblProj.addListener(SWT.Dispose, e-> smaller.dispose());
 		}
 	}
 	
 	private void selectOnMap(Shell parent){
 		
 		SelectPointMapDialog md = new SelectPointMapDialog(parent);
+		Double[] position = parsePositionValues();
+		if (position != null){
+			md.setInitPoint(position[0], position[1]);
+		}
 		
-		try{
-			Double x = Double.valueOf(txtValue.getText());
-			Double y = Double.valueOf(txtValue2.getText());
-			md.setInitPoint(x, y);
-		}catch (Exception ex){}
-		
-////		ApplicationGIS.
-//		IToolManager toolManager = ApplicationGIS.getToolManager();
-//		toolManager.
-////		toolManager.
-//		IMap map = ApplicationGIS.getActiveMap();
-////		map.getEditManager()
-		
-//		ApplicationGIS.getToolManager()
-//		ApplicationGIS.getToolManager()
+		MapPart currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
+		IAction lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
 		try{
 			if (md.open() == SelectPointMapDialog.OK){
 				if (md.getPoint() != null){
 					double x = md.getPoint().getX();
 					double y = md.getPoint().getY();
-					int ratio = 100000;
-					x = ((int)Math.round(x * ratio))/(ratio*1.0);
-					y = ((int)Math.round(y * ratio))/(ratio*1.0);
-					txtValue.setText(String.valueOf(x));
-					txtValue2.setText(String.valueOf(y));
+					initPositionValues(x, y);
 				}
 			}
 		}finally{
-//			ApplicationGIS.getToolManager().setCurrentEditor(null);
-			//TODO: figure out how to do this
-//			if ()
-//            toolManager.setCurrentEditor( SmartMapEditorPart.this.mapViewer );
+			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
+			lastToolAction.run();
 		}
 	}
 	

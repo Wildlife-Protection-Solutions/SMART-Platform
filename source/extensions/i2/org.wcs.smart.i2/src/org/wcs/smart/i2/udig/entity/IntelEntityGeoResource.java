@@ -40,6 +40,7 @@ import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
+import org.wcs.smart.i2.udig.IFilteringResource;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.LocationLayerType;
 
@@ -49,7 +50,7 @@ import org.wcs.smart.i2.udig.LocationLayerType;
  * @author Emily
  * @since 1.0.0
  */
-public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetResource {
+public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetResource, IFilteringResource {
 	
 	private URL url = null;
 	private LocationLayerType type;
@@ -68,6 +69,10 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
 		
 	}
 
+	@Override
+	public boolean canFilter(){
+		return type == LocationLayerType.POINT || type == LocationLayerType.POLYGON;
+	}
 	
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()

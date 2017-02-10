@@ -36,11 +36,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -160,7 +164,7 @@ public class IntelRecordAttributeValue extends UuidItem{
 	 * on the attribute type.
 	 */
 	@Transient
-	public String getAttributeValueAsString(Locale l){
+	public String getAttributeValueAsString(Locale l, CoordinateReferenceSystem crs){
 		if(attribute.getAttribute() != null){
 			AttributeType type = attribute.getAttribute().getType();
 			switch(type){
@@ -179,7 +183,16 @@ public class IntelRecordAttributeValue extends UuidItem{
 			case TEXT:
 				return getStringValue();
 			case POSITION:
-				return "POINT(" + getNumberValue() +" " + getNumberValue2() + ")";
+				if (crs == null || crs == GeometryUtils.SMART_CRS || CRS.equalsIgnoreMetadata(crs, GeometryUtils.SMART_CRS)){
+					return "POINT( " + getNumberValue() +" " + getNumberValue2() + ")";
+				}else{
+					try{
+						Coordinate c = ReprojectUtils.reproject(getNumberValue(), getNumberValue2(), GeometryUtils.SMART_CRS, crs);
+						return "POINT( " + c.x + " " + c.y + ")";
+					}catch (Exception ex){
+						return "ERROR: " + ex.getMessage();
+					}
+				}
 			}
 		}else if (attribute.getEntityType() != null){
 			return String.valueOf(listItems.size());

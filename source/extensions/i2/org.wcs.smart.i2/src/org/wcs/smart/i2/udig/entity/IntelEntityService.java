@@ -24,6 +24,7 @@ package org.wcs.smart.i2.udig.entity;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -36,12 +37,14 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
@@ -86,7 +89,11 @@ public class IntelEntityService extends IService {
 			}
 			try{
 				for (IGeoResource lresource : resources(monitor)){
-					((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(recordName);
+					if (lresource.getIdentifier().getRef().equals(LocationLayerType.ATTRIBUTE.name())){
+						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format("{0} - Position Attributes", recordName));
+					}else{
+						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(recordName);
+					}
 				}
 			}catch (Exception e){
 				Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
@@ -154,6 +161,7 @@ public class IntelEntityService extends IService {
 		return this.url;
 	}
 
+	private Boolean hasPosition = null;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -167,10 +175,42 @@ public class IntelEntityService extends IService {
 		if (members == null){
 			synchronized (this) {
 				if (members == null){
+					
+					if (hasPosition == null){
+						Job j = new Job("loading attributes"){
+
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								Session s = HibernateManager.openSession();
+								try{
+									
+									Query q = s.createQuery("SELECT count(*) FROM IntelEntity e join e.entityType t join t.attributes ta join ta.id.attribute a WHERE a.type = :type and e.uuid = :uuid");
+									q.setParameter("type", IntelAttribute.AttributeType.POSITION);
+									q.setParameter("uuid", entityUuid);
+									Long cnt = (Long) q.uniqueResult();
+									hasPosition = cnt > 0;
+									
+								}finally{
+									s.close();
+								}
+								
+								return org.eclipse.core.runtime.Status.OK_STATUS;
+							}
+							
+						};
+						j.setSystem(true);
+						j.schedule();
+						try {
+							j.join();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
 					ArrayList<IntelEntityGeoResource> list = new ArrayList<>();
 					//two resources per entity one for points and one for polygons
 					list.add(new IntelEntityGeoResource(this, LocationLayerType.POINT));
 					list.add(new IntelEntityGeoResource(this, LocationLayerType.POLYGON));
+					if (hasPosition != null && hasPosition) list.add(new IntelEntityGeoResource(this, LocationLayerType.ATTRIBUTE));
 					members = list;
 				}
 			}

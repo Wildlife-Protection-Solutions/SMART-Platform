@@ -72,11 +72,15 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.themes.ColorUtil;
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -98,6 +102,8 @@ import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Summary Page for record editor.
@@ -546,6 +552,20 @@ public class RecordSummaryPage extends EditorPart{
 	 * configures controls for record attributes
 	 */
 	private void configureAttributePanel(IntelRecordSource source){
+		//get CRS
+		CoordinateReferenceSystem  crs = GeometryUtils.SMART_CRS;
+		Projection currentProjection = HibernateManager.getCurrentViewProjection();
+		if (currentProjection != null ){
+			try{
+				CoordinateReferenceSystem parsed = ReprojectUtils.stringToCrs(currentProjection.getDefinition());
+				if (!CRS.equalsIgnoreMetadata(crs, parsed)){
+					crs = parsed;
+				}
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}
+		}
+		
 		if (srcAttributePanel.isDisposed()) return;
 		for (Control kid : srcAttributePanel.getChildren()){
 			kid.dispose();
@@ -633,7 +653,7 @@ public class RecordSummaryPage extends EditorPart{
 			}else{
 				String value = "";
 				if (v != null){
-					value = v.getAttributeValueAsString(Locale.getDefault());
+					value = v.getAttributeValueAsString(Locale.getDefault(), crs);
 				}
 				
 				Label l = toolkit.createLabel(content, name + ":");

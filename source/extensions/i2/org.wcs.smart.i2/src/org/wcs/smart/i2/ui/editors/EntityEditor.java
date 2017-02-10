@@ -1843,8 +1843,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 							public void widgetSelected(SelectionEvent event) {
 								IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
 								tmp.setAttribute(e.getAttribute());
-								e.updateValue(tmp);
-								
+								e.updateValue(tmp);						
 								mapPart.refreshLayerValue(tmp);
 							}
 						});
@@ -1945,19 +1944,25 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 	private class RelationshipLabelProvider extends ColumnLabelProvider{
 		private int columnIndex;
-		private RelationshipTypeLabelProvider ll = new RelationshipTypeLabelProvider();
-		private RelationshipGroupLabelProvider lg = new RelationshipGroupLabelProvider();
-		private AttributeValueLabelProvider la = new AttributeValueLabelProvider();
+		private RelationshipTypeLabelProvider ll = null;
+		private RelationshipGroupLabelProvider lg = null;
+		private AttributeValueLabelProvider la = null;
 		public RelationshipLabelProvider(int columnIndex){
 			this.columnIndex = columnIndex;
+			if (columnIndex == 0){
+				ll = new RelationshipTypeLabelProvider();
+				lg = new RelationshipGroupLabelProvider();
+			}else if (columnIndex == 4){
+				la = new AttributeValueLabelProvider();
+			}
 		}
 		
 		@Override
 		public void dispose(){
 			super.dispose();
-			ll.dispose();
-			lg.dispose();
-			la.dispose();
+			if (ll != null) ll.dispose();
+			if (lg != null) lg.dispose();
+			if (la != null) la.dispose();
 		}
 		@Override
 		public Font getFont(Object element) {

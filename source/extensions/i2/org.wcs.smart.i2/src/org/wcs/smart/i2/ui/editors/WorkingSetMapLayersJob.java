@@ -6,16 +6,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.ICatalog;
 import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
@@ -292,6 +296,21 @@ public class WorkingSetMapLayersJob extends Job {
 	//add layers to map
 	protected void addLayers(List<IGeoResource> toAdd, List<IGeoResource> visibleLayers, java.util.Map<ID, StyleBlackboard> layerStyles, 
 			boolean canFilter, Date[] dates){
+		Set<IService> services = new HashSet<IService>();
+		IProgressMonitor m = new NullProgressMonitor();
+		for (IGeoResource r : toAdd){
+			try {
+				IService s = (IService)r.resolve(IService.class, m);
+				if (s != null) services.add(s);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		ICatalog c = CatalogPlugin.getDefault().getLocalCatalog();
+		services.forEach(x -> c.remove(x));
+		
 		if (canFilter){
 			Filter f = null;
 			 if (dates != null){

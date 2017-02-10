@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -68,6 +69,7 @@ import org.geotools.data.FeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.legend.Glyph;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
@@ -183,6 +185,14 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				service = new IntelEntityService(params);
 				try {
 					Filter dateFilter = IntelEntityDataSource.createDateFilter(dFilters[0], dFilters[1]);
+					List<? extends IGeoResource> resources = service.resources(monitor);
+					for (Iterator<? extends IGeoResource> iterator = resources.iterator(); iterator.hasNext();) {
+						IGeoResource iGeoResource = (IGeoResource) iterator.next();
+						if (iGeoResource.getIdentifier().getRef().equals(LocationLayerType.ATTRIBUTE.name())){
+							iterator.remove();
+						}
+						
+					}
 					AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(service.resources(monitor), 1, dateFilter){
 						 public void run( IProgressMonitor monitor ) throws Exception {
 							 super.run(monitor);

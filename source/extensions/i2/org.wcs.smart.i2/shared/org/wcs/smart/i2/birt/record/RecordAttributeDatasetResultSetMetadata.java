@@ -5,6 +5,7 @@ import java.util.Locale;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -37,7 +38,7 @@ public class RecordAttributeDatasetResultSetMetadata implements IResultSetMetaDa
 			return this.id;
 		}
 		
-		public Object getValue(IntelRecordAttributeValue record, Locale l, Session s) {
+		public Object getValue(IntelRecordAttributeValue record, Locale l, CoordinateReferenceSystem crs, Session s) {
 			switch(this){
 			case RECORD_UUID:
 				return record.getRecord().getUuid();
@@ -76,7 +77,7 @@ public class RecordAttributeDatasetResultSetMetadata implements IResultSetMetaDa
 					}
 					return sb.substring(0, sb.length()- 2);
 				}else{
-					return record.getAttributeValueAsString(l);
+					return record.getAttributeValueAsString(l, crs);
 				}
 			}
 			return null;

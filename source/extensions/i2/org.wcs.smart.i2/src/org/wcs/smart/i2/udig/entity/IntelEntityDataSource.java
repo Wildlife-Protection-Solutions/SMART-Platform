@@ -67,6 +67,9 @@ public class IntelEntityDataSource extends ContentDataStore{
 	}
 	
 	public static Name generateName(LocationLayerType type, UUID entityUuid){
+		if (type == LocationLayerType.ATTRIBUTE){
+			return new NameImpl("org.wcs.smart.i2.entity." + UuidUtils.uuidToString(entityUuid), type.name());	
+		}
 		return new NameImpl("org.wcs.smart.i2.entity.location." + UuidUtils.uuidToString(entityUuid), type.name());
 	}
 

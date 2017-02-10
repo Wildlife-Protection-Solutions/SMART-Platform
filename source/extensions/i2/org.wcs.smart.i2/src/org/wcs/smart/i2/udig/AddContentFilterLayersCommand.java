@@ -30,6 +30,7 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.command.AbstractCommand;
 import org.locationtech.udig.project.command.UndoableCommand;
 import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.LayerFactory;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectPlugin;
 import org.opengis.filter.Filter;
@@ -82,33 +83,42 @@ public class AddContentFilterLayersCommand extends AbstractCommand implements Un
     
     public void run( IProgressMonitor monitor ) throws Exception {
         Map map = getMap();
-        if (layers == null) {
-            layers = new ArrayList<Layer>();
-
-            for( Object o : resources ) {
-                try {
-                    Layer layer = null;
-                    if (o instanceof IGeoResource) {
-                        // ensure that the service is part of the Catalog so that the find method in
-                        // layer turn into layer
-                        IGeoResource resource = (IGeoResource) o;
-                        layer = (new ContentFilterLayerFactory(getMap())).createLayer(resource);
-                    }
-                    if (o instanceof Layer) {
-                        // leave as is; may not be a ContentFilterLayerImpl but add anyways
-                        layer = (Layer) o;
-                    }
-                    if (layer != null) {
-                    	if (layer instanceof ContentFilterLayerImpl){
-                    		((ContentFilterLayerImpl) layer).setContentFilter(initialFilter);
-                    	}
-                        layers.add(layer);
-                    }
-                }
-                catch (Throwable t){
-                    ProjectPlugin.log("Unable to add "+o,t); //$NON-NLS-1$
-                }
-            }
+        LayerFactory defaultFactory = map.getLayerFactory();
+        try{
+	        if (layers == null) {
+	            layers = new ArrayList<Layer>();
+	
+	            for( Object o : resources ) {
+	                try {
+	                    Layer layer = null;
+	                    if (o instanceof IGeoResource) {
+	                        // ensure that the service is part of the Catalog so that the find method in
+	                        // layer turn into layer
+	                        IGeoResource resource = (IGeoResource) o;
+	                        if (resource instanceof IFilteringResource && ((IFilteringResource)resource).canFilter()){
+	                        	layer = (new ContentFilterLayerFactory(getMap())).createLayer(resource);
+	                        }else{
+	                        	layer = defaultFactory.createLayer(resource);
+	                        }
+	                    }
+	                    if (o instanceof Layer) {
+	                        // leave as is; may not be a ContentFilterLayerImpl but add anyways
+	                        layer = (Layer) o;
+	                    }
+	                    if (layer != null) {
+	                    	if (layer instanceof ContentFilterLayerImpl){
+	                    		((ContentFilterLayerImpl) layer).setContentFilter(initialFilter);
+	                    	}
+	                        layers.add(layer);
+	                    }
+	                }
+	                catch (Throwable t){
+	                    ProjectPlugin.log("Unable to add "+o,t); //$NON-NLS-1$
+	                }
+	            }
+	        }
+        }finally{
+        	map.setLayerFactory(defaultFactory);
         }
         if (!layers.isEmpty()) {
             if (index < 0 || index > map.getLayersInternal().size()) {
