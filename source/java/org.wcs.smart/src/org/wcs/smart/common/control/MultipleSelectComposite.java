@@ -306,7 +306,7 @@ public class MultipleSelectComposite<T> extends Composite {
 	
 	public List<T> getSelectedItems() {
 		List<T> list = (List<T>) this.selectedItemsListViewer.getInput();
-		return list != null ? list : Collections.EMPTY_LIST;
+		return list != null ? list : Collections.emptyList();
 	}
 	
 	/**

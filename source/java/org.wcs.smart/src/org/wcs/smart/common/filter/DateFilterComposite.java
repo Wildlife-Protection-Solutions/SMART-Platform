@@ -73,7 +73,7 @@ public class DateFilterComposite extends Composite {
 		CUSTOM(Messages.DateFilter_Custom),
 		ALL(Messages.DateFilterComposite_All),
 		LAST_YEAR(Messages.DateFilterComposite_LastYear), //last year from jan to dec
-		LAST_1_YEARS("Last 1 Years"),	//last 365 days
+		LAST_1_YEARS(Messages.DateFilterComposite_LAST_ONE_YEAR),	//last 365 days
 		LAST_5_YEARS(Messages.DateFilterComposite_Last5Year);
 		
 		

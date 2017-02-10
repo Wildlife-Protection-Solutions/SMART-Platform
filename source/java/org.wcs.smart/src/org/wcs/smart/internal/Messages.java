@@ -545,6 +545,7 @@ public class Messages extends NLS {
 	public static String DateFilterComposite_EndDateRange_Error;
 	public static String DateFilterComposite_FilterDates_Label;
 	public static String DateFilterComposite_IncludeAllDates_Label;
+	public static String DateFilterComposite_LAST_ONE_YEAR;
 	public static String DateFilterComposite_Last5Year;
 	public static String DateFilterComposite_LastYear;
 	public static String DateFilterDropDownComposite_And;

@@ -27,6 +27,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -330,7 +331,9 @@ public class MapSettings {
 
 			// determine which layers need to be added/removed
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-			final HashMap<URL, LayerRegister> definitionMap = new HashMap<URL, LayerRegister>();
+			//use URI not URL and URL will be slow for equals method as it attempts to resolve URLS
+			//see: http://www.eishay.com/2008/04/javas-url-little-secret.html
+			final HashMap<URI, LayerRegister> definitionMap = new HashMap<>();
 
 			synchronized (currentMapLayers) {
 				for (LayerRegister basemapLayer : userMap.getLayerList()) {
@@ -344,7 +347,7 @@ public class MapSettings {
 									layersToRemove.remove(mapLayer);
 								}
 								basemapLayers.add(mapLayer);
-								definitionMap.put(mapLayer.getID(), basemapLayer);
+								definitionMap.put(mapLayer.getID().toURI(), basemapLayer);
 								break;
 
 							}
@@ -361,7 +364,11 @@ public class MapSettings {
 						if (resources != null) {
 							toAdd.addAll(resources);
 							for (IGeoResource geo : resources) {
-								definitionMap.put(geo.getIdentifier(), basemapLayer);
+								try{
+									definitionMap.put(geo.getIdentifier().toURI(), basemapLayer);
+								} catch (URISyntaxException e) {
+									SmartPlugIn.log(e.getMessage(),e);
+								}
 							}
 						}
 					}
@@ -398,7 +405,11 @@ public class MapSettings {
 				//than the georesource used to create the layer
 				//and currently in the definition map
 				for (ILayer l : addedLayers){
-					definitionMap.put(l.getID(), definitionMap.get(l.getGeoResource().getIdentifier()));
+					try {
+						definitionMap.put(l.getID().toURI(), definitionMap.get(l.getGeoResource().getIdentifier().toURI()));
+					} catch (URISyntaxException e) {
+						SmartPlugIn.log(e.getMessage(),e);
+					}
 				}
 			}
 
@@ -409,15 +420,20 @@ public class MapSettings {
 			Collections.sort(orderedLayers, new Comparator<Layer>() {
 				@Override
 				public int compare(Layer o1, Layer o2) {
-					LayerRegister info1 = definitionMap.get(o1.getID());
-					LayerRegister info2 = definitionMap.get(o2.getID());
-					
-					int index1 = userMap.getLayerList().indexOf(info1);
-					int index2 = userMap.getLayerList().indexOf(info2);
-					if (index1 < index2)
-						return -1;
-					if (index1 > index2)
-						return 1;
+					try{
+						LayerRegister info1 = definitionMap.get(o1.getID().toURI());
+						LayerRegister info2 = definitionMap.get(o2.getID().toURI());
+						
+						int index1 = userMap.getLayerList().indexOf(info1);
+						int index2 = userMap.getLayerList().indexOf(info2);
+						if (index1 < index2)
+							return -1;
+						if (index1 > index2)
+							return 1;
+						return 0;
+					} catch (URISyntaxException e) {
+						SmartPlugIn.log(e.getMessage(),e);
+					}
 					return 0;
 				}
 
@@ -437,13 +453,26 @@ public class MapSettings {
 			updateMap(currentMap, userMap);
 
 			for (ILayer layer : basemapLayers) {
-				LayerRegister info = definitionMap.get(layer.getID());
+				LayerRegister info = null;
+			
+				try {
+					info = definitionMap.get(layer.getID().toURI());
+				} catch (URISyntaxException e) {
+					SmartPlugIn.log(e.getMessage(),e);
+				}
+				
 				if (currentMap.getRenderManager() == null) return;	//map was closed
-				((Layer) layer).setVisible(info.getVisible());
-				((Layer) layer).eSetDeliver(false);
-				updateLayer(((Layer) layer), info);
-				((Layer) layer).eSetDeliver(true);
-				((Layer) layer).eNotify(new ENotificationImpl(
+				Layer llayer = (Layer)layer;
+				if (info == null){
+					llayer.setVisible(true);
+				}else{
+					llayer.setVisible(info.getVisible());
+					llayer.eSetDeliver(false);
+					updateLayer(((Layer) layer), info);
+					llayer.eSetDeliver(true);
+				}
+				
+				llayer.eNotify(new ENotificationImpl(
 						(InternalEObject) layer, Notification.SET,
 						ProjectPackage.LAYER__STYLE_BLACKBOARD, layer
 								.getStyleBlackboard(), layer
