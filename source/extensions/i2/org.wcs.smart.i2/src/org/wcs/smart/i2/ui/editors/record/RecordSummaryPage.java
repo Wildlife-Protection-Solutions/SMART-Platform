@@ -78,6 +78,7 @@ import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -583,6 +584,19 @@ public class RecordSummaryPage extends EditorPart{
 					if (v != null) af.initControl(v);
 					af.addSelectionListener(dirtyListener);
 					af.adapt(toolkit);
+					
+					if (a.getAttribute().getType() == IntelAttribute.AttributeType.POSITION){
+						//modify position attributes we need to update map
+						af.addSelectionListener(new SelectionAdapter() {	
+							@Override
+							public void widgetSelected(SelectionEvent event) {
+								IntelRecordAttributeValue tmp = new IntelRecordAttributeValue();
+								tmp.setAttribute(a);
+								af.updateValue(tmp);
+								recordEditor.getMapPage().updateLocationAttribute(tmp);
+							}
+						});
+					}
 				}else{
 					Label l = toolkit.createLabel(content, name + ":");
 					l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));

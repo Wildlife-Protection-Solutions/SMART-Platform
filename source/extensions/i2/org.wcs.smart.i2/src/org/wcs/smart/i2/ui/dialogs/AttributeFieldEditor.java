@@ -42,6 +42,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -49,10 +50,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
+import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -74,6 +82,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AttributeFieldEditor {
 
+	private static final String SELELECTION_KEY = "sel";
 	private IntelAttribute attribute;
 	private boolean isMulti;
 	private Composite parent;
@@ -126,10 +135,14 @@ public class AttributeFieldEditor {
 		kids.add(parent);
 		while(!kids.isEmpty()){
 			Control kid = kids.remove(0);
-			toolkit.adapt(kid, true, true);
+			toolkit.adapt(kid, false, false);
+			if (kid instanceof Hyperlink){
+				kid.setForeground(kid.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
+			}
+			
 			if (kid instanceof Composite){
 				for (Control c : ((Composite)kid).getChildren()){
-				 kids.add(c);
+					kids.add(c);
 				}
 			}
 		}
@@ -257,25 +270,26 @@ public class AttributeFieldEditor {
 				//
 			}
 		}else if (attribute.getType() == AttributeType.POSITION){
+			boolean add1 = false;
+			boolean add2 = false;
 			try{
 				String dvalue = ((Text)txtValue).getText();
 				if (!dvalue.trim().isEmpty()){
 					Double d = Double.parseDouble(dvalue);
 					value.setNumberValue(d);
-					add = true;
+					add1 = true;
 				}
-			}catch (Exception ex){
-			}
+			}catch (Exception ex){ }
 			try{
 				String dvalue = ((Text)txtValue2).getText();
 				if (!dvalue.trim().isEmpty()){
 					Double d = Double.parseDouble(dvalue);
 					value.setNumberValue2(d);
-					add = true;
+					add2 = true;
 				}
-			}catch (Exception ex){
-				//
-			}
+			}catch (Exception ex){ }
+			add = add1 && add2;
+			
 		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
 			if (!svalue.trim().isEmpty()){
@@ -357,22 +371,26 @@ public class AttributeFieldEditor {
 				//
 			}
 		}else if (attribute.getType() == AttributeType.POSITION){
+			boolean add1 = false;
+			boolean add2 = false;
 			try{
 				String dvalue = ((Text)txtValue).getText();
 				if (!dvalue.trim().isEmpty()){
 					Double d = Double.parseDouble(dvalue);
 					value.setNumberValue(d);
-					add = true;
+					add1 = true;
 				}
-				dvalue = ((Text)txtValue2).getText();
+			}catch (Exception ex){ }
+			try{
+				String dvalue = ((Text)txtValue2).getText();
 				if (!dvalue.trim().isEmpty()){
 					Double d = Double.parseDouble(dvalue);
 					value.setNumberValue2(d);
-					add = true;
+					add2 = true;
 				}
-			}catch (Exception ex){
-				//
-			}
+			}catch (Exception ex){ }
+			add = add1 && add2;
+			
 		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
 			if (!svalue.trim().isEmpty()){
@@ -458,26 +476,26 @@ public class AttributeFieldEditor {
 				//
 			}
 		}else if (attribute.getType() == AttributeType.POSITION){
+			boolean add1 = false;
+			boolean add2 = false;
 			try{
 				String dvalue = ((Text)txtValue).getText();
 				if (!dvalue.trim().isEmpty()){
 					Double d = Double.parseDouble(dvalue);
 					value.setNumberValue(d);
-					add = true;
+					add1 = true;
 				}
-			}catch (Exception ex){
-				//
-			}
+			}catch (Exception ex){ }
 			try{
 				String dvalue = ((Text)txtValue2).getText();
 				if (!dvalue.trim().isEmpty()){
 					Double d = Double.parseDouble(dvalue);
 					value.setNumberValue2(d);
-					add = true;
+					add2 = true;
 				}
-			}catch (Exception ex){
-				//
-			}
+			}catch (Exception ex){ }
+			add = add1 && add2;
+			
 		}else if (attribute.getType() == AttributeType.TEXT){
 			String svalue = ((Text)txtValue).getText();
 			if (!svalue.trim().isEmpty()){
@@ -690,42 +708,108 @@ public class AttributeFieldEditor {
 			btnOnOff.setSelection(true);
 			cd = createDecoration(btnOnOff);
 		}else if (attribute.getType() == AttributeType.POSITION){
+			
 			Composite c = new Composite(parent, SWT.NONE);
 			c.setLayout(new GridLayout(4, false));
-			((GridLayout)c.getLayout()).marginWidth = 0;
-			((GridLayout)c.getLayout()).marginHeight = 0;
+			((GridLayout)c.getLayout()).marginWidth = 1;
+			((GridLayout)c.getLayout()).marginHeight = 2;
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+			c.addListener(SWT.Paint, e->{
+				GC gc = e.gc;
+				if (c.getData(SELELECTION_KEY) != null && (boolean)c.getData(SELELECTION_KEY)){
+					gc.setForeground(c.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
+				}else{
+					gc.setForeground(c.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
+				}
+				gc.setLineWidth(1);
+				gc.drawRectangle(0, 0, c.getBounds().width-1, c.getBounds().height-1);
+			});
 			
-			l = new Label(c, SWT.NONE);
-			l.setText("X:");
-			l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-			
-			txtValue = new Text(c, SWT.BORDER);
-			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			txtValue = new Text(c, SWT.NONE);
+			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)txtValue.getLayoutData()).widthHint = 50;
 			cd = createDecoration(txtValue);
-			txtValue.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					validate();
-					modified();
-				}
-			});
-			
+				
 			l = new Label(c, SWT.NONE);
-			l.setText("Y:");
+			l.setText(":");
 			l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-			
-			txtValue2 = new Text(c, SWT.BORDER);
-			txtValue2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+			txtValue2 = new Text(c, SWT.NONE);
+			txtValue2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)txtValue2.getLayoutData()).widthHint = 50;
-			txtValue2.addModifyListener(new ModifyListener() {
+			
+			for (Text t : new Text[]{txtValue, txtValue2}){
+				t.addModifyListener(new ModifyListener() {
+					@Override
+					public void modifyText(ModifyEvent e) {
+						validate();
+						modified();
+					}
+				});
+				t.addListener(SWT.FocusIn, e->{
+					c.setData(SELELECTION_KEY, true);
+					c.redraw();
+					t.setBackground(txtValue.getDisplay().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+				});
+				t.addListener(SWT.FocusOut, e->{
+					c.setData(SELELECTION_KEY, false);
+					c.redraw();
+					t.setBackground(c.getBackground());
+					t.setSelection(0);
+				});
+			}
+
+			Hyperlink link = new Hyperlink(c, SWT.NONE);
+			link.setText("map...");
+			link.setUnderlined(true);
+			link.setForeground(link.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
+			link.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			link.addHyperlinkListener(new HyperlinkAdapter() {
 				@Override
-				public void modifyText(ModifyEvent e) {
-					validate();
-					modified();
+				public void linkActivated(HyperlinkEvent e) {
+					selectOnMap(link.getShell());
 				}
 			});
+		}
+	}
+	
+	private void selectOnMap(Shell parent){
+		
+		SelectPointMapDialog md = new SelectPointMapDialog(parent);
+		
+		try{
+			Double x = Double.valueOf(txtValue.getText());
+			Double y = Double.valueOf(txtValue2.getText());
+			md.setInitPoint(x, y);
+		}catch (Exception ex){}
+		
+////		ApplicationGIS.
+//		IToolManager toolManager = ApplicationGIS.getToolManager();
+//		toolManager.
+////		toolManager.
+//		IMap map = ApplicationGIS.getActiveMap();
+////		map.getEditManager()
+		
+//		ApplicationGIS.getToolManager()
+//		ApplicationGIS.getToolManager()
+		try{
+			if (md.open() == SelectPointMapDialog.OK){
+				if (md.getPoint() != null){
+					double x = md.getPoint().getX();
+					double y = md.getPoint().getY();
+					int ratio = 100000;
+					x = ((int)Math.round(x * ratio))/(ratio*1.0);
+					y = ((int)Math.round(y * ratio))/(ratio*1.0);
+					txtValue.setText(String.valueOf(x));
+					txtValue2.setText(String.valueOf(y));
+				}
+			}
+		}finally{
+//			ApplicationGIS.getToolManager().setCurrentEditor(null);
+			//TODO: figure out how to do this
+//			if ()
+//            toolManager.setCurrentEditor( SmartMapEditorPart.this.mapViewer );
 		}
 	}
 	

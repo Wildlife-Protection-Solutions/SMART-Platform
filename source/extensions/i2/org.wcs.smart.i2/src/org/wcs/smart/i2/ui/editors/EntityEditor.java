@@ -123,12 +123,9 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
-import org.locationtech.udig.project.internal.ProjectFactory;
-import org.locationtech.udig.project.internal.render.ViewportModel;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
-import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.service.event.EventHandler;
@@ -181,10 +178,8 @@ import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.Thumbnail;
-import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
-import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Entity editor.
@@ -1841,6 +1836,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 					if (a.getAttribute().equals(entity.getEntityType().getIdAttribute())){
 						addDuplicateIdChecker(e);
 					}
+					if (e.getAttribute().getType() == IntelAttribute.AttributeType.POSITION){
+						//modify position attributes we need to update map
+						e.addSelectionListener(new SelectionAdapter() {	
+							@Override
+							public void widgetSelected(SelectionEvent event) {
+								IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
+								tmp.setAttribute(e.getAttribute());
+								e.updateValue(tmp);
+								
+								mapPart.refreshLayerValue(tmp);
+							}
+						});
+					}
 					fieldEditors.add(e);
 				}else{
 					Label key = toolkit.createLabel(part, a.getAttribute().getName() + ":");
@@ -2049,6 +2057,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 	@Override
 	public Map getMap() {
+		if (mapPart == null) return null;
 		return mapPart.getMap();
 	}
 

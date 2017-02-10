@@ -70,11 +70,8 @@ import org.geotools.legend.Glyph;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
-import org.locationtech.udig.project.internal.ProjectFactory;
-import org.locationtech.udig.project.internal.render.ViewportModel;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
-import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
@@ -83,11 +80,15 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityLocation;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelValueItem;
 import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -96,9 +97,13 @@ import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Entity map editor composite 
+ * @author Emily
+ *
+ */
 public class EntityEditorMapComposite extends Composite implements MapPart{
 
 	private enum LocationTableColumn{
@@ -147,6 +152,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
     private TableViewer locationTable;
     
     private IntelEntityService service = null;
+    private LocationAttributeMapLayer locationLayer;
     
 	public EntityEditorMapComposite(Composite parent, EntityEditor parentEditor, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
@@ -156,8 +162,6 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		createPartControl();
 	}
 
-	
-	
 	private void addLayers(){
 		locationLayers = new ArrayList<ContentFilterLayerImpl>();
 		final Date[] dFilters = new Date[2];
@@ -199,6 +203,19 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		};
 		j.setSystem(true);
 		j.schedule();
+		
+		
+		//add location attributes
+		boolean hasPosition = false;
+		for (IntelEntityTypeAttribute a : editor.getEntity().getEntityType().getAttributes()){
+			if (a.getAttribute().getType() == AttributeType.POSITION){
+				hasPosition = true;
+			}
+		}
+		if (hasPosition){
+			locationLayer = new LocationAttributeMapLayer(getMap(), "Position Attributes", UuidUtils.uuidToString(editor.getEntity().getUuid()));
+			locationLayer.createValueLayers(editor.getEntity().getAttributes());
+		}
 	}
 	
 	
@@ -465,8 +482,19 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		}else{
 			//refresh existing layers
 			getMap().getRenderManager().refresh(null);
+
+			//refresh attribute geometries
+			for (IntelEntityAttributeValue v : editor.getEntity().getAttributes()){
+				if (v.getAttribute().getType() == AttributeType.POSITION){
+					locationLayer.refreshLayerValue(v);
+				}
+			}
 		}
 		loadLocationsLink.schedule();
+	}
+	
+	public void refreshLayerValue(IntelValueItem value) {
+		locationLayer.refreshLayerValue(value);
 	}
 	
     @Override

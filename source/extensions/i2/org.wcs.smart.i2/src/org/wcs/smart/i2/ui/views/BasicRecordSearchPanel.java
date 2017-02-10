@@ -175,7 +175,7 @@ public class BasicRecordSearchPanel extends Composite {
 				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 					Object item = (Object) iterator.next();
 					if (item instanceof IntelRecordSearchResultItem){
-						RecordEditorInput in = new RecordEditorInput(null, ((IntelRecordSearchResultItem) item).getRecordUuid(), null, null);
+						RecordEditorInput in = new RecordEditorInput(null, ((IntelRecordSearchResultItem) item).getRecordUuid(), null, null, ((IntelRecordSearchResultItem)item).getStatus());
 						(new OpenRecordHandler()).openRecord(in, false);
 					}
 					

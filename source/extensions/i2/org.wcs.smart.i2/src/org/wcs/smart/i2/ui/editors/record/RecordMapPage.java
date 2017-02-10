@@ -61,15 +61,18 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.record.IntelRecordDataSource;
 import org.wcs.smart.i2.udig.record.IntelRecordFeatureReader;
 import org.wcs.smart.i2.udig.record.IntelRecordFeatureSource;
+import org.wcs.smart.i2.ui.editors.LocationAttributeMapLayer;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.JobUtil;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Map page for intelligence record.
@@ -90,8 +93,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 	private IGeoResource polygonResource;
 	private SimpleFeatureType polygonFeatureType = null;
 	private SimpleFeatureType pointFeatureType = null;
-	
-	private LocationListComposite locationPanel ;
+	private LocationAttributeMapLayer attributeLayer;
+	private LocationListComposite locationPanel;
 	
 	private Job localMapLayerJob = new Job("configuring locations layer") {
 		
@@ -196,15 +199,29 @@ public class RecordMapPage extends SmartMapEditorPart {
     	}
 
     	locationPanel.refreshTable();
+    	for (IntelRecordAttributeValue v : recordEditor.getRecord().getAttributes()){
+    		attributeLayer.refreshLayerRecord(v);
+    	}
 	}
 
 	public void setEditMode(boolean editMode){
 		tools.getTool(DrawPolygonTool.ID).setEnabled(editMode);
 	}
 	
-	public void initPage(){
+	
+	public void updateLocationAttribute(IntelRecordAttributeValue value){
+		attributeLayer.refreshLayerRecord(value);
+	}
+	
+	public synchronized void initPage(){
 		locationPanel.init();
 		localMapLayerJob.schedule();
+		
+		if (attributeLayer != null){
+			attributeLayer.dispose();
+		}
+		attributeLayer = new LocationAttributeMapLayer(getMap(), "Position Attributes", UuidUtils.uuidToString(recordEditor.getRecord().getUuid()));
+		attributeLayer.createLayersRecord(recordEditor.getRecord().getAttributes());
 	}
 	
 	private void addLayers(){

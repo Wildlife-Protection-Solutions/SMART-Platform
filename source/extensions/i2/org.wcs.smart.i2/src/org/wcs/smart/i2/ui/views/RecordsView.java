@@ -46,12 +46,14 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
@@ -121,6 +123,7 @@ public class RecordsView {
 	private RecordViewerFilter filter;
 	private BasicRecordSearchPanel basicSearchPnl;
 	
+	private List<RecordLabelProvider> labelProviders = new ArrayList<>();
 	
 	private ISelectionChangedListener selectOne = new ISelectionChangedListener() {
 		
@@ -175,9 +178,11 @@ public class RecordsView {
 		
 		Composite newRecords = toolkit.createComposite(tabPart);
 		newRecords.setLayout(new GridLayout());
+		RecordLabelProvider provider = new RecordLabelProvider();
+		labelProviders.add(provider);
 		lstNewRecords = new TableViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER);
 		lstNewRecords.setContentProvider(ArrayContentProvider.getInstance());
-		lstNewRecords.setLabelProvider(new RecordLabelProvider());
+		lstNewRecords.setLabelProvider(provider);
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstNewRecords.addDoubleClickListener(openListener);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -185,15 +190,18 @@ public class RecordsView {
 		lstNewRecords.addSelectionChangedListener(selectOne);
 		
 		Composite inProgress = toolkit.createComposite(tabPart);
+		provider = new RecordLabelProvider();
+		labelProviders.add(provider);
 		inProgress.setLayout(new GridLayout());
 		lstInProgress = new TableViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER);
 		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
-		lstInProgress.setLabelProvider(new RecordLabelProvider());
+		lstInProgress.setLabelProvider(provider);
 		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstInProgress.addDoubleClickListener(openListener);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		lstInProgress.getControl().setLayoutData(gd);
 		lstInProgress.addSelectionChangedListener(selectOne);
+		
 		
 		Composite allRecords = toolkit.createComposite(tabPart);
 		allRecords.setLayout(new GridLayout());
@@ -225,13 +233,39 @@ public class RecordsView {
 			}
 		});
 		
-		lstAllRecords = new TableViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		lstAllRecords = new TableViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
 		lstAllRecords.setContentProvider(ArrayContentProvider.getInstance());
-		lstAllRecords.setLabelProvider(new RecordLabelProvider());
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstAllRecords.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAllRecords.addDoubleClickListener(openListener);
 		lstAllRecords.addSelectionChangedListener(selectOne);
+		lstAllRecords.getTable().setLinesVisible(false);
+		lstAllRecords.getTable().setHeaderVisible(false);
+		
+		TableViewerColumn statusColumn = new TableViewerColumn(lstAllRecords, SWT.NONE);
+		statusColumn.getColumn().setWidth(24);
+		statusColumn.setLabelProvider(new ColumnLabelProvider(){
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof RecordEditorInput){
+					switch(((RecordEditorInput) element).getStatus()){
+					case COMPLETE:
+						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_DONE);
+					case NEW:
+						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_NEW);
+					case PROCESSING:
+						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_IP);					
+					}
+				}
+				return null;
+			}
+			
+		});
+		provider = new RecordLabelProvider();
+		labelProviders.add(provider);
+		TableViewerColumn nameColumn = new TableViewerColumn(lstAllRecords, SWT.NONE);
+		nameColumn.setLabelProvider(provider);
+		nameColumn.getColumn().setWidth(200);
 		
 		Composite basicSearch = toolkit.createComposite(tabPart);
 		basicSearch.setLayout(new GridLayout());
@@ -466,10 +500,9 @@ public class RecordsView {
 					
 					
 					if (lstAllRecords.getControl().isDisposed()) return;
-					((RecordLabelProvider)lstAllRecords.getLabelProvider()).setSourceImages(srcImages);
-					((RecordLabelProvider)lstInProgress.getLabelProvider()).setSourceImages(srcImages);
-					((RecordLabelProvider)lstNewRecords.getLabelProvider()).setSourceImages(srcImages);
-					
+					for (RecordLabelProvider l : labelProviders){
+						l.setSourceImages(srcImages);
+					}					
 				}
 			});
 			
@@ -513,11 +546,11 @@ public class RecordsView {
 			s = HibernateManager.openSession();
 			final List<RecordEditorInput> allRecords = new ArrayList<RecordEditorInput>();
 			try{
-				Query q = s.createQuery("SELECT title, uuid, dateCreated, recordSource.uuid FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc");
+				Query q = s.createQuery("SELECT title, uuid, dateCreated, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc");
 				q.setParameter("ca", SmartDB.getCurrentConservationArea());
 				List<Object[]> items = q.list();
 				for (Object[] item : items){
-					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1], (Date)item[2], (UUID)item[3]));
+					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1], (Date)item[2], (UUID)item[3], (IntelRecord.Status)item[4]));
 				}
 			}finally{
 				s.close();

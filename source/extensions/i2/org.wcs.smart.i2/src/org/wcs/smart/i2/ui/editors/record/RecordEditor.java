@@ -246,6 +246,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		super.dispose();
 	}
 	
+	public RecordMapPage getMapPage(){
+		return this.mapPage;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void doSave(IProgressMonitor monitor) {
