@@ -201,4 +201,19 @@ public class IntelEntityRelationship extends UuidItem{
 	public Object getSourceObject(){
 		return this.sourceObject;
 	}
+	
+	/**
+	 * Find the relationship attribute value for the given attribute
+	 * @param attribute
+	 * @return
+	 */
+	@Transient
+	public IntelEntityRelationshipAttributeValue findAttributeValue(IntelAttribute attribute){
+		for (IntelEntityRelationshipAttributeValue v : getAttributes()){
+			if (v.getAttribute().equals(attribute)){
+				return v;
+			}
+		}
+		return null;
+	}
 }

@@ -35,4 +35,3 @@ Bundle-ClassPath: lib/metadata-extractor-2.9.1.jar,
  lib/java-string-similarity-0.19.jar,
  lib/jcip-annotations-1.0.jar,
  lib/commons-codec-1.6.jar
-Import-Package: org.wcs.smart.query.common.engine
