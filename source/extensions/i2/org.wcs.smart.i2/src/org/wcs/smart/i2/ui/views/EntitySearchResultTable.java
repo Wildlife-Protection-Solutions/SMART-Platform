@@ -74,12 +74,14 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
+import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
 import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
 import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
@@ -324,7 +326,16 @@ public class EntitySearchResultTable extends Composite {
 			getCurrentSelection().forEach(e -> 	(new OpenEntityHandler()).openEntity(e, context));
 		}
 	}
-	private void exportEntities(){
+	
+	private void exportEntity(){
+		if (getCurrentSelection().isEmpty()) return;
+		IntelEntity ie = getCurrentSelection().get(0);
+		
+		EntityRelationshipExportDialog dialog = new EntityRelationshipExportDialog(ie, getShell());
+		dialog.open();
+	}
+	
+	private void printEntities(){
 		EntityExportDialog dialog = new EntityExportDialog(getShell(), getCurrentSelection());
 		dialog.open();
 	}
@@ -443,13 +454,23 @@ public class EntitySearchResultTable extends Composite {
 		
 		new MenuItem(menu, SWT.SEPARATOR);
 		
+		MenuItem mnuPrint = new MenuItem(menu, SWT.PUSH);
+		mnuPrint.setText("Print Entities...");
+		mnuPrint.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		mnuPrint.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				printEntities();
+			}
+		});
+		
 		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
-		mnuExport.setText("Export...");
-		mnuExport.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		mnuExport.setText("Export Entity...");
+		mnuExport.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_EXPORT));
 		mnuExport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				exportEntities();
+				exportEntity();
 			}
 		});
 		
@@ -484,7 +505,7 @@ public class EntitySearchResultTable extends Composite {
 			public void menuShown(MenuEvent e) {
 				boolean hasSelection = !getCurrentSelection().isEmpty();
 				mnuOpen.setEnabled(hasSelection);
-				mnuExport.setEnabled(hasSelection);
+				mnuPrint.setEnabled(hasSelection);
 				mnuWorkingset.setEnabled(hasSelection && WorkingSetManager.INSTANCE.isSet());
 				mnuCompare.setEnabled(getCurrentSelection().size() > 0);
 				

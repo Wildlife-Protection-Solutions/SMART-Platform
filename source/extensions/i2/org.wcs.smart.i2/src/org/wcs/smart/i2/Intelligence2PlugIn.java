@@ -70,6 +70,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_AREA = "org.wcs.smart.i2.icon.query.area"; //$NON-NLS-1$
 	public static final String ICON_DELETE_SMALL = "org.wcs.smart.i2.icon.delete.small"; //$NON-NLS-1$
 	public static final String ICON_CLEAR = "org.wcs.smart.i2.icon.clear"; //$NON-NLS-1$
+	public static final String ICON_ENTITY_EXPORT = "org.wcs.smart.i2.icon.entity.export"; //$NON-NLS-1$
 	
 	public static final String ICON_IMG_ZOOMIN = "org.wcs.smart.i2.icon.zoom.in"; //$NON-NLS-1$
 	public static final String ICON_IMG_ZOOMOUT = "org.wcs.smart.i2.icon.zoom.out"; //$NON-NLS-1$
@@ -122,7 +123,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_SRC_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/src_new.png")); //$NON-NLS-1$);
 		reg.put(ICON_SRC_IP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/src_inprogress.png")); //$NON-NLS-1$);
 		reg.put(ICON_SRC_DONE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/src_done.png")); //$NON-NLS-1$);
-		
+
+		reg.put(ICON_ENTITY_EXPORT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_export.png")); //$NON-NLS-1$);
 	}
 	
 	/*

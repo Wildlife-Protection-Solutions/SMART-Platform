@@ -24,6 +24,10 @@ package org.wcs.smart.i2.ui;
 import java.text.DateFormat;
 import java.util.Date;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.geotools.referencing.CRS;
@@ -57,19 +61,34 @@ public class AttributeValueLabelProvider extends LabelProvider {
 	private synchronized CoordinateReferenceSystem getCrs(){
 		if (crs != null) return crs;
 		
-		CoordinateReferenceSystem  temp = GeometryUtils.SMART_CRS;
-		Projection currentProjection = HibernateManager.getCurrentViewProjection();
-		if (currentProjection != null ){
-			try{
-				CoordinateReferenceSystem parsed = ReprojectUtils.stringToCrs(currentProjection.getDefinition());
-				if (!CRS.equalsIgnoreMetadata(crs, parsed)){
-					temp = parsed;
+		//this opens a session so do in job
+		Job j = new Job("load projection"){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				CoordinateReferenceSystem  temp = GeometryUtils.SMART_CRS;
+				Projection currentProjection = HibernateManager.getCurrentViewProjection();
+				if (currentProjection != null ){
+					try{
+						CoordinateReferenceSystem parsed = ReprojectUtils.stringToCrs(currentProjection.getDefinition());
+						if (!CRS.equalsIgnoreMetadata(crs, parsed)){
+							temp = parsed;
+						}
+					}catch (Exception ex){
+						Intelligence2PlugIn.log(ex.getMessage(), ex);
+					}
 				}
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
+				AttributeValueLabelProvider.this.crs = temp;
+				return Status.OK_STATUS;
 			}
+		};
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
-		this.crs = temp;
 		return crs;
 	}
 	

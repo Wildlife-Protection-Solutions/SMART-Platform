@@ -174,6 +174,7 @@ import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.dialogs.RelationshipSelectorDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
+import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
@@ -241,6 +242,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private ToolItem editItem;
 	private ToolItem wsetItem;
 	private ToolItem printItem;
+	private ToolItem exportItem;
 	private ToolItem saveItem;
 	
 	private List<EventHandler> eventHandles = null;
@@ -904,6 +906,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		saveItem.setEnabled(false);
+		
+		exportItem = new ToolItem(buttonBar, SWT.PUSH);
+		exportItem.setToolTipText("Export entity and relationships to csv file");
+		exportItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_EXPORT));
+		exportItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				EntityRelationshipExportDialog dialog = new EntityRelationshipExportDialog(entity, getSite().getShell());
+				dialog.open();
+			}
+		});
 		
 		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
 		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
