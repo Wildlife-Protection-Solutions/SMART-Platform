@@ -38,6 +38,11 @@ public class EntityParameterMetadata implements IParameterMetaData{
 		DataSourceParameter.ENTITY_UUID
 	};
 	
+	private String datasetType;
+	
+	public EntityParameterMetadata(String datasetType){
+		this.datasetType = datasetType;
+	}
 	public int findParameterIndex(String parameterName){
 		for (int i = 1; i < parameters.length; i ++){
 			if (parameters[i].getName().equalsIgnoreCase(parameterName)){
@@ -70,7 +75,7 @@ public class EntityParameterMetadata implements IParameterMetaData{
 	@Override
 	public String getParameterTypeName(int param) throws OdaException {
 		int nativeTypeCode = getParameterType(param);
-		return AbstractIntelBirtConnection.getNativeDataTypeName(nativeTypeCode, EntityDataset.DATASET_TYPE);
+		return AbstractIntelBirtConnection.getNativeDataTypeName(nativeTypeCode, datasetType);
 	}
 
 	@Override

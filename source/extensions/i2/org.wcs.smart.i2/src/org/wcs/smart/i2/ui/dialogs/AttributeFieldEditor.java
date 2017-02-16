@@ -731,7 +731,7 @@ public class AttributeFieldEditor {
 						modified();
 					}
 				});
-				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 				((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
 				
 				cd = createDecoration(cmbViewer.getControl());

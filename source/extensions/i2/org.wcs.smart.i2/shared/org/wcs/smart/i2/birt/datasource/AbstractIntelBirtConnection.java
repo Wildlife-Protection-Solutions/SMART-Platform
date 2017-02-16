@@ -42,6 +42,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetMetadata;
+import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
@@ -179,6 +180,8 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 		try {
 			if (dataSetType.equals(EntityDataset.DATASET_TYPE)) {
 				return new EntityDataset(this);
+			}else if (dataSetType.equals(EntityLocationAttributeDataset.DATASET_TYPE)) {
+				return new EntityLocationAttributeDataset(this);
 			}else if (dataSetType.equals(EntityLocationDataset.DATASET_TYPE)) {
 				return new EntityLocationDataset(this);
 			}else if (dataSetType.equals(EntityRecordDataset.DATASET_TYPE)) {

@@ -78,6 +78,8 @@ import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetResultSetMetadata;
+import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
+import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
@@ -85,6 +87,7 @@ import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
@@ -142,13 +145,21 @@ public enum EntityReportGenerator {
 		DataSourceDesign dSource = modelAdapter.createDataSourceDesign(datasource);
 		
 		//add datasets
-		String[] datasets = new String[]{
-				 EntityDataset.DATASET_TYPE,
-				 EntityRecordDataset.DATASET_TYPE,
-				 EntityAttachmentDataset.DATASET_TYPE,
-				 EntityLocationDataset.DATASET_TYPE,
-				 EntityRelationDataset.DATASET_TYPE
-		};
+		List<String> datasets = new ArrayList<>();
+		datasets.add(EntityDataset.DATASET_TYPE);
+		datasets.add(EntityRecordDataset.DATASET_TYPE);
+		datasets.add(EntityAttachmentDataset.DATASET_TYPE);
+		datasets.add(EntityLocationDataset.DATASET_TYPE);
+		datasets.add(EntityRelationDataset.DATASET_TYPE);
+		boolean hasPosition = false;
+		for (IntelEntityTypeAttribute a : entityType.getAttributes()){
+			if (a.getAttribute().getType() == AttributeType.POSITION){
+				datasets.add(EntityLocationAttributeDataset.DATASET_TYPE);
+				hasPosition = true;
+				break;
+			}
+		}
+	
 		
 		HashMap<String, OdaDataSetHandle> datasetHandles = new HashMap<>();
 		for (String d : datasets){
@@ -222,13 +233,13 @@ public enum EntityReportGenerator {
 			datasetHandles.put(d,  dataset);
 		}
 		
-		initializeValue(rdh, datasetHandles, entityType);
+		initializeValue(rdh, datasetHandles, entityType, hasPosition);
 		rdh.save();
 		rdh.close();
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void initializeValue(ReportDesignHandle rdh, HashMap<String,OdaDataSetHandle> datasetHandles, IntelEntityType type) throws Exception{
+	private void initializeValue(ReportDesignHandle rdh, HashMap<String,OdaDataSetHandle> datasetHandles, IntelEntityType type, boolean hasPosition) throws Exception{
 		ElementFactory factory = rdh.getElementFactory();
 		
 		StyleHandle headerStyle = factory.newStyle("HeaderStyle");
@@ -625,7 +636,16 @@ public enum EntityReportGenerator {
 		layershandle.add(pointLayer);
 		layershandle.add(polyLayer);
 		
-		
+		if (hasPosition){
+			layersHandle = datasetHandles.get(EntityLocationAttributeDataset.DATASET_TYPE);
+			pointLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
+			pointLayer.setDataSet(layersHandle);
+			pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName());
+			pointLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POINT.toString());
+			pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, EntityLocationAttributeDatasetResultSetMetadata.Column.GEOMETRY.getId());
+			layershandle.add(pointLayer);
+		}
+	
 		/* footer */
 		SimpleMasterPageHandle masterHandle = factory.newSimpleMasterPage("MasterPage");
 		rdh.getMasterPages().add(masterHandle);

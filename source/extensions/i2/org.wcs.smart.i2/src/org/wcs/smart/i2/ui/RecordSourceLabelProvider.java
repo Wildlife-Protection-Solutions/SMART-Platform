@@ -76,7 +76,7 @@ public class RecordSourceLabelProvider extends LabelProvider {
 	
 	@Override
 	public void dispose(){
-		images.values().forEach(i -> i.dispose());
+		disposeImages();
 		super.dispose();
 	}
 	

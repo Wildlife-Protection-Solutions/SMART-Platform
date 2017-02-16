@@ -215,10 +215,15 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 						InterruptedException {
 					
 					EntityRelationshipExporter exporter = new EntityRelationshipExporter();
-					if (!exporter.exportEntity(entity, degrees, outputDir, monitor)){
+					try{
+						if (!exporter.exportEntity(entity, degrees, outputDir, monitor)){
+							isOk[0] = false;
+						}else{
+							isOk[0] = true;
+						}
+					}catch (Exception ex){
 						isOk[0] = false;
-					}else{
-						isOk[0] = true;
+						Intelligence2PlugIn.displayLog("Error exporting entities and relationships: " + ex.getMessage(), ex);
 					}
 					
 					if (monitor.isCanceled()){

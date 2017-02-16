@@ -52,10 +52,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.entity.importer.EntityImportConfig;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -223,12 +223,14 @@ public class AttributeMappingWizardPage extends WizardPage{
 					for (IntelAttribute a : attributes.get(g)){
 						
 						l = new Label(mappingPanel, SWT.NONE);
-						l.setText(a.getName());
+						l.setText(MessageFormat.format("{0}:", a.getName()));
 						
 						if (a.getType() == AttributeType.POSITION){
 							Composite xy = new Composite(mappingPanel, SWT.NONE);
 							xy.setLayout(new GridLayout(4, false));
 							xy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							((GridLayout)xy.getLayout()).marginWidth = 0;
+							((GridLayout)xy.getLayout()).marginHeight = 0;
 							
 							l = new Label(xy, SWT.NONE);
 							l.setText("X:");

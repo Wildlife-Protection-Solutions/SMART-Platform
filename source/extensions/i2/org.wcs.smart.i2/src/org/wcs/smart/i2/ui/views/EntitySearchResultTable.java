@@ -74,7 +74,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
-import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.IntelSearchResult;

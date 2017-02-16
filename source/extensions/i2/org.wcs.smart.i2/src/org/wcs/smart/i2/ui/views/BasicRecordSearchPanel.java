@@ -33,6 +33,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -46,6 +49,10 @@ import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -53,18 +60,31 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.RecordManager;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.search.BasicRecordSearch;
 import org.wcs.smart.i2.search.IntelRecordResult;
 import org.wcs.smart.i2.search.IntelRecordSearchResultItem;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
+import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -86,19 +106,21 @@ public class BasicRecordSearchPanel extends Composite {
 	private Label searchCount;
 	private Label searchTime;
 	
+	private IEclipseContext context;
+	
 	private List<IntelRecordSource> sources = null;
 	
-	public BasicRecordSearchPanel(Composite parent) {
+	public BasicRecordSearchPanel(Composite parent, FormToolkit toolkit, IEclipseContext context) {
 		super(parent, SWT.NONE);
-		
-		createControls();
+		this.context = context;
+		createControls(toolkit);
 	}
 	
-	private void createControls(){
+	private void createControls(FormToolkit toolkit){
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
-		createSearchPart(this);
+		createSearchPart(this, toolkit);
 		Label l = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createSearchResults(this);
@@ -107,15 +129,14 @@ public class BasicRecordSearchPanel extends Composite {
 		
 	}
 	
-	private void createSearchPart(Composite parent){
-		Composite top = new Composite(parent, SWT.NONE);
+	private void createSearchPart(Composite parent,FormToolkit toolkit){
+		Composite top = toolkit.createComposite(parent);
 		top.setLayout(new GridLayout(2, false));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 //		((GridLayout)top.getLayout()).marginWidth = 0;
 //		((GridLayout)top.getLayout()).marginHeight = 0;
 		
-		Label l = new Label(top, SWT.NONE);
-		l.setText("Source:");
+		toolkit.createLabel(top, "Source:");
 		
 		cmbSource = new TableComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		cmbSource.setContentProvider(ArrayContentProvider.getInstance());
@@ -127,8 +148,7 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 		});
 		
-		l = new Label(top, SWT.NONE);
-		l.setText("Narrative:");
+		toolkit.createLabel(top, "Narrative:");
 		
 		txtNarrative = new FilterComposite(top, SWT.NONE);
 		txtNarrative.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -138,8 +158,8 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 		});
 
-		l = new Label(top, SWT.NONE);
-		l.setText("Title:");
+		toolkit.createLabel(top, "Title:");
+		
 		
 		txtSearch = new FilterComposite(top, SWT.NONE);
 		txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -149,10 +169,27 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 		});
 		
-		Button btnSearch = new Button(top, SWT.NONE);
-		btnSearch.setText("Search");
-		btnSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
+		Composite btnComp = toolkit.createComposite(top);
+		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		btnComp.setLayout(new GridLayout(2, false));
+		((GridLayout)btnComp.getLayout()).marginWidth  = 0;
+		((GridLayout)btnComp.getLayout()).marginHeight  = 0;
+		
+		Hyperlink btnExport = toolkit.createHyperlink(btnComp, "Export...", SWT.NONE);
+		btnExport.setText("Export...");
+		btnExport.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		btnExport.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				doExport();
+			}
+		});
+		btnExport.setToolTipText("export search results to csv file");
+		
+		Button btnSearch = toolkit.createButton(btnComp, "Search",  SWT.PUSH);
+		btnSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		btnSearch.addListener(SWT.Selection, e->doSearch());
+	
 	}
 
 	private void createSearchResults(Composite parent){
@@ -163,24 +200,14 @@ public class BasicRecordSearchPanel extends Composite {
 		searchCount = new Label(results, SWT.NONE);
 		searchCount.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		tblResults = new TableViewer(results, SWT.FULL_SELECTION | SWT.BORDER);
+		tblResults = new TableViewer(results, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		tblResults.getTable().setLinesVisible(false);
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
 		tblResults.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblResults.addDoubleClickListener(new IDoubleClickListener() {
-			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection sel = (IStructuredSelection) tblResults.getSelection();
-				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-					Object item = (Object) iterator.next();
-					if (item instanceof IntelRecordSearchResultItem){
-						RecordEditorInput in = new RecordEditorInput(null, ((IntelRecordSearchResultItem) item).getRecordUuid(), null, null, ((IntelRecordSearchResultItem)item).getStatus());
-						(new OpenRecordHandler()).openRecord(in, false);
-					}
-					
-				}
-				
+				openSelection();
 			}
 		});
 		
@@ -252,7 +279,6 @@ public class BasicRecordSearchPanel extends Composite {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				// TODO Auto-generated method stub
 				Object x = ((IStructuredSelection)event.getSelection()).getFirstElement();
 				String value = null;
 				int[][] ranges = null;
@@ -297,7 +323,114 @@ public class BasicRecordSearchPanel extends Composite {
 		txtMatchString.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txtMatchString.getLayoutData()).heightHint = 0;
 		txtMatchString.setVisible(false);
+		
+		
+		Menu mnu = new Menu(tblResults.getControl());
+		
+		final MenuItem open = new MenuItem(mnu, SWT.PUSH);
+		open.setText("Open...");
+		open.addListener(SWT.Selection, e->openSelection());
+		
+		MenuItem ws = null;
+		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
+				ws = new MenuItem(mnu, SWT.PUSH);
+				ws.setText("Add to Working Set");
+				ws.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+				ws.addListener(SWT.Selection, e->addToWorkingset());
+		}
+		final MenuItem wsItem = ws;
+		
+		MenuItem delete = null;
+		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
+			delete = new MenuItem(mnu, SWT.PUSH);
+			delete.setText("Delete");
+			delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			delete.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					List<RecordEditorInput> toDelete = new ArrayList<>();
+					for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
+						Object x = (Object) iterator.next();
+						if (x instanceof IntelRecordSearchResultItem){
+							IntelRecordSearchResultItem item = (IntelRecordSearchResultItem) x;
+							toDelete.add(new RecordEditorInput(null, item.getRecordUuid(), null, item.getRecordSourceUuid(), null));
+						}
+					}
+					if (MessageDialog.openConfirm(context.get(Shell.class), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected records?", toDelete.size()))){
+						ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
+						try {
+							pmd.run(true, true, (monitor)-> RecordManager.INSTANCE.deleteRecords(toDelete, context,monitor));
+						} catch (Exception ex) {
+							Intelligence2PlugIn.displayLog("Error deleting records: " + ex.getMessage(), ex);
+						}
+						doSearch();
+					}
+				}
+			});
+		}
+		final MenuItem miDelete = delete;
+		tblResults.getControl().setMenu(mnu);
+		
+		tblResults.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)event.getSelection()).getFirstElement();
+				open.setEnabled(x != null && x instanceof IntelRecordSearchResultItem);
+			}
+		});
+		
+		mnu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				if (wsItem != null) wsItem.setEnabled(open.isEnabled() && WorkingSetManager.INSTANCE.isSet());
+				if (miDelete != null) miDelete.setEnabled(open.isEnabled());
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {}
+		});
+		
 	}
+	
+	private void addToWorkingset(){
+		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();	
+			if (x instanceof IntelRecordSearchResultItem){
+				RecordEditorInput e = new RecordEditorInput(null, ((IntelRecordSearchResultItem) x).getRecordUuid(), null, ((IntelRecordSearchResultItem) x).getRecordSourceUuid(), null);
+				WorkingSetManager.INSTANCE.addToActiveWorkingSet(e, context);
+			}
+		}
+	}
+	private void openSelection(){
+		IStructuredSelection sel = (IStructuredSelection) tblResults.getSelection();
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object item = (Object) iterator.next();
+			if (item instanceof IntelRecordSearchResultItem){
+				RecordEditorInput in = new RecordEditorInput(null, ((IntelRecordSearchResultItem) item).getRecordUuid(), null, null, ((IntelRecordSearchResultItem)item).getStatus());
+				(new OpenRecordHandler()).openRecord(in, false);
+			}
+			
+		}
+	}
+	
+	private void doExport(){
+		List<UUID> toExport = new ArrayList<UUID>();
+		List<?> sel = (List<?>) tblResults.getInput();
+		if (sel == null) return;
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object item = (Object) iterator.next();
+			if (item instanceof IntelRecordSearchResultItem){
+				toExport.add(((IntelRecordSearchResultItem) item).getRecordUuid());
+			}
+		}
+		if (toExport.isEmpty()) return;
+		
+		RecordCsvExporter exporter = new RecordCsvExporter(toExport);
+		CsvExportDialog dialog = new CsvExportDialog(getShell(), exporter.createExportConfiguration());
+		dialog.open();		
+	}
+	
+	
 	
 	private void doSearch(){
 		String narrative = txtNarrative.getPatternFilter() == null ? null : txtNarrative.getPatternFilter().trim();

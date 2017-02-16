@@ -46,6 +46,7 @@ import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
+import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
@@ -69,6 +70,7 @@ public class IntelReportEditorManager implements IReportEditorManager{
 	
 	private static final Set<String> SUPPORTED_DATASETS = new HashSet<String>();
 	static{
+		SUPPORTED_DATASETS.add(EntityLocationAttributeDataset.DATASET_TYPE);
 		SUPPORTED_DATASETS.add(EntityDataset.DATASET_TYPE);
 		SUPPORTED_DATASETS.add(EntityLocationDataset.DATASET_TYPE);
 		SUPPORTED_DATASETS.add(EntityRecordDataset.DATASET_TYPE);

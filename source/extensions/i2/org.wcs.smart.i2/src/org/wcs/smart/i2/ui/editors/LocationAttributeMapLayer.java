@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,10 +34,6 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.styling.Graphic;
-import org.geotools.styling.Mark;
-import org.geotools.styling.Style;
-import org.geotools.styling.StyleBuilder;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -49,6 +44,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
+import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -216,15 +212,7 @@ public class LocationAttributeMapLayer {
 					super.run(monitor);
 					LocationAttributeMapLayer.this.layer = getLayers().get(0);
 					layer.setName(layerName);
-
-					// configure style
-					StyleBuilder sb = new StyleBuilder();
-					Color darkRed = new Color(153, 0, 0);
-					Mark mark = sb.createMark("star", sb.createFill(Color.RED),sb.createStroke(darkRed, 1));
-					Graphic g = sb.createGraphic(null, mark, null, 1.0, 13.0,0.0);
-					Style style = sb.createStyle(sb.createPointSymbolizer(g));
-
-					layer.getStyleBlackboard().put("org.locationtech.udig.style.sld", style);
+					layer.getStyleBlackboard().put("org.locationtech.udig.style.sld", EntityManager.INSTANCE.buildRedStarStyle());
 					layer.refresh(null);
 				}
 			};

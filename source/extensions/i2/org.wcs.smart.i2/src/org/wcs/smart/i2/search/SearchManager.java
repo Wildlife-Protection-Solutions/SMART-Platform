@@ -94,7 +94,13 @@ public enum SearchManager {
 			sql.deleteCharAt(sql.length() - 1);
 			sql.deleteCharAt(sql.length() - 1);
 			sql.deleteCharAt(sql.length() - 1);
+			
+			sql.append(" OR ");
+			sql.append(" a.string_value like :ml");
 			sql.append(" ) ");
+		}else{
+			sql.append(" AND ");
+			sql.append(" a.string_value like :ml");
 		}
 
 		// create the query and parameters
@@ -106,6 +112,7 @@ public enum SearchManager {
 		for (int i = 0; i < metas.size(); i ++){
 			q.setParameter("m" + i, metas.get(i));
 		}
+		q.setParameter("ml", "%" + searchFor + "%");
 		List<Object[]> items = q.list();
 		
 		ParsedString searchString = new ParsedString(searchFor);
@@ -171,6 +178,15 @@ public enum SearchManager {
 		}
 		value= (value / words.getNumWords());
 		
+		if (value == 0){
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < words.getNumWords(); i ++){
+				sb.append(words.getWord(i));
+				sb.append(" ");
+			}
+			String searchFor = sb.toString();
+			value = 1 - (LEVENSHTEIN_DISTANCE.distance(searchFor, searchIn) / Math.max(searchFor.length(), searchIn.length()));
+		}
 		return value;
 	}
 	

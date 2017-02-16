@@ -78,7 +78,7 @@ public enum RecordManager {
 		}
 	}
 
-	public void deleteRecords(List<Object> records, IEclipseContext context, IProgressMonitor monitor){
+	public void deleteRecords(List<? extends Object> records, IEclipseContext context, IProgressMonitor monitor){
 		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			MessageDialog.openError(context.get(Shell.class), "Error", "Insufficient privileges");
 			return;

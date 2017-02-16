@@ -46,6 +46,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -61,7 +62,9 @@ import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.osgi.service.event.EventHandler;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -345,7 +348,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}finally{
 			s.close();
 		}
-		
+		try{
+			updateImageIcon();
+		}catch (Exception ex){
+			Intelligence2PlugIn.log(ex.getMessage(), ex);
+		}
 		//fire events; one for record and one for each modified entity
 		if (isnew){
 			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_NEW, record);
@@ -455,14 +462,17 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			summaryPage = new RecordSummaryPage(this);
 			int i = addPage(summaryPage, getEditorInput());
 			setPageText(i, "Summary");
+			setPageImage(i, Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
 			
 			descPage = new RecordDescriptionPage(this);
 			i = addPage(descPage, getEditorInput());
 			setPageText(i, "Narrative / Scratchpad");
+			setPageImage(i, Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
 			
 			mapPage = new RecordMapPage(this);
 			i = addPage(mapPage, getEditorInput());
 			setPageText(i, "Map / Locations");
+			setPageImage(i, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		} catch (final Throwable t) {
 			Intelligence2PlugIn.log(t.getMessage(), t);
 		}finally{
@@ -698,8 +708,31 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		descPage.initPage();		
 		
 		super.setPartName(record.getTitle());
+		updateImageIcon();
+		
 	}
 	
+	
+	private Image lastIcon = null;
+	private void updateImageIcon(){
+		if (lastIcon != null){
+			lastIcon.dispose();
+			lastIcon = null;
+		}
+		if (record.getRecordSource() == null){
+			super.setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
+		}else{
+			
+			try {
+				lastIcon = AWTSWTImageUtils.createSWTImage(record.getRecordSource().getIconAsImage());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			super.setTitleImage(lastIcon);
+		}
+	}
+    
+    
 	@Override
 	public void setFocus() {
 	}

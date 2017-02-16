@@ -49,6 +49,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
+import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
@@ -149,6 +150,8 @@ public enum IntelReportManager {
 	public String getName(IntelEntityType entityType, String dataSetId){
 		if (dataSetId.equals(EntityDataset.DATASET_TYPE)){
 			return entityType.getName();
+		}else if (dataSetId.equals(EntityLocationAttributeDataset.DATASET_TYPE)){
+			return MessageFormat.format("{0} - Position Attribute Locations", entityType.getName());
 		}else if (dataSetId.equals(EntityLocationDataset.DATASET_TYPE)){
 			return MessageFormat.format("{0} - Locations", entityType.getName());
 		}else if (dataSetId.equals(EntityRelationDataset.DATASET_TYPE)){

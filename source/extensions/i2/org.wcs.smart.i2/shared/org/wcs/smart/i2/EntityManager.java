@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.i2;
 
+import java.awt.Color;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.geotools.styling.Graphic;
+import org.geotools.styling.Mark;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -173,5 +178,14 @@ public enum EntityManager {
 				.list();
 		}
 		return alllocations;
+	}
+	
+	public Style buildRedStarStyle(){
+		StyleBuilder sb = new StyleBuilder();
+		Color darkRed = new Color(153, 0, 0);
+		Mark mark = sb.createMark("star", sb.createFill(Color.RED),sb.createStroke(darkRed, 1));
+		Graphic g = sb.createGraphic(null, mark, null, 1.0, 13.0,0.0);
+		Style style = sb.createStyle(sb.createPointSymbolizer(g));
+		return style;
 	}
 }

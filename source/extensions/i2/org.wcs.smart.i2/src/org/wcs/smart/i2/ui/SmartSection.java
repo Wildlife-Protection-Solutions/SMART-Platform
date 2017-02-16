@@ -272,9 +272,13 @@ public class SmartSection extends Composite{
 			}
 		}		
 		for (SmartSection s : sections) s.processingEvent = true;
-		for (int i : newweights) if (i< 0){ return;}
+		for (int i : newweights) if (i <= 0){ return;}
 		try{
 			sashForm.setWeights(newweights);
+		}catch (Throwable ex){
+			System.err.print("error setting weights: ");
+			for (int i : newweights) System.out.print(i);
+			System.err.println();
 		}finally{
 			for (SmartSection s : sections) s.processingEvent = false;
 		}

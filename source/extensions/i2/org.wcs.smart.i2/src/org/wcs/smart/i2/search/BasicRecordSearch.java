@@ -51,6 +51,7 @@ public class BasicRecordSearch implements IRecordSearch{
 		this.titleSearch = titleSearch;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public IntelRecordResult doSearch(Session session, IProgressMonitor monitor) {
 		Long startTime = System.nanoTime();

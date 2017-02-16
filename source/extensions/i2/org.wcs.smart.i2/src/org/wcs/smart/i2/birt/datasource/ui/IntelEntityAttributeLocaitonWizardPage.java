@@ -19,41 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.editors.query;
+package org.wcs.smart.i2.birt.datasource.ui;
 
-import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.query.IResultItem;
-import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
-import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
-import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
 
 /**
- * Opens the record that is identified as the source for the result item.
+ * Dataset wizard page for entities dataset
  * 
  * @author Emily
  *
  */
-public class ObservationQuerySourceFinder implements IQuerySourceFinder {
+public class IntelEntityAttributeLocaitonWizardPage extends AbstractIntelEntityTypeListWizardPage {
 
-	public static ObservationQuerySourceFinder INSTANCE = new ObservationQuerySourceFinder();
+	private static final String SELECT_ENTITY_TYPE = "Select the entity type to use";
 	
-	private ObservationQuerySourceFinder(){}
-	
-	public void runAction(IResultItem item){
-		if (!(item instanceof IntelObservationResultItem)) return;	
-		IntelObservationResultItem i = (IntelObservationResultItem)item;
-		//TODO: add record source to query results?
-		(new OpenRecordHandler()).openRecord(new RecordEditorInput(i.getRecordTitle(), i.getRecordUuid(), null, null, null), false);
+	/**
+	 * Constructor
+	 * 
+	 * @param pageName
+	 */
+	public IntelEntityAttributeLocaitonWizardPage(String pageName) {
+		super(pageName, SELECT_ENTITY_TYPE);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param pageName
+	 * @param title
+	 * @param titleImage
+	 */
+	public IntelEntityAttributeLocaitonWizardPage(String pageName, String title,
+			ImageDescriptor titleImage) {
+		super(pageName, title, titleImage, SELECT_ENTITY_TYPE);
 	}
 
 	@Override
-	public Image getImage() {
-		return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
-	}
-
-	@Override
-	public String getName() {
-		return "Open Record...";
+	protected String getDatasetType(){
+		return EntityLocationAttributeDataset.DATASET_TYPE;
 	}
 }

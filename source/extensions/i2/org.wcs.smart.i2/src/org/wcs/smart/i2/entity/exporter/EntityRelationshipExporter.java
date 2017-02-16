@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.entity.exporter;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -36,6 +35,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -62,10 +62,12 @@ public class EntityRelationshipExporter {
 		
 	}
 	
-	public boolean exportEntity(IntelEntity entity, int degrees, Path outputDirectory, IProgressMonitor monitor){
+	@SuppressWarnings("unchecked")
+	public boolean exportEntity(IntelEntity entity, int degrees, Path outputDirectory, IProgressMonitor monitor) throws Exception{
 		if (monitor == null) monitor = new NullProgressMonitor();
 		
 		monitor.beginTask("Exporting entity and relationships", 4);
+		AttributeValueLabelProvider provider = new AttributeValueLabelProvider();
 		Session s = HibernateManager.openSession();
 		try{
 			entity = (IntelEntity)s.get(IntelEntity.class,  entity.getUuid());
@@ -145,14 +147,12 @@ public class EntityRelationshipExporter {
 			Path entities = getEntityFile(outputDirectory, entity.getIdAttributeAsText());
 			Path relationships = getRelationshipFile(outputDirectory, entity.getIdAttributeAsText());
 			
-			AttributeValueLabelProvider provider = new AttributeValueLabelProvider();
-			
 			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(entities))){
 				String[] data = new String[entityAttributes.size() + 3];
 				int i = 0;
 				data[i++] = "UUID";
 				data[i++] = "Entity Name";
-				data[i++] = "Entity Name";
+				data[i++] = "Entity Type";
 				for (IntelAttribute ia : entityAttributes){
 					data[i++] = ia.getName();
 				}
@@ -175,9 +175,8 @@ public class EntityRelationshipExporter {
 					writer.writeNext(data);
 					if (monitor.isCanceled()) return false;
 				}
-			} catch (IOException e) {
-				
 			}
+			
 			monitor.worked(1);
 			monitor.setTaskName("Exporting Attributes...");
 			
@@ -215,18 +214,22 @@ public class EntityRelationshipExporter {
 					
 					if (monitor.isCanceled()) return false;
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				//TODO:
 			}
 			monitor.worked(1);
 			monitor.done();
 			
-			provider.dispose();
-			
 			
 		}finally{
-			s.close();
+			try{
+				s.close();
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}
+			try{
+				provider.dispose();
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}
 		}
 		
 		return true;

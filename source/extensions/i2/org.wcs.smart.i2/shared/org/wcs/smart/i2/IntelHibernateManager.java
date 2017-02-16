@@ -102,7 +102,7 @@ public class IntelHibernateManager {
 		case NUMERIC:
 			return java.sql.Types.DOUBLE;
 		case POSITION:
-			return java.sql.Types.DOUBLE;
+			return java.sql.Types.VARCHAR;
 		case LIST:
 		case TEXT:
 			return java.sql.Types.VARCHAR;

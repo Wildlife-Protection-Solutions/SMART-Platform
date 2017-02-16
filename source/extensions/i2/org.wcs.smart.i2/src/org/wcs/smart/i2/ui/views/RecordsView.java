@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.views;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -76,13 +77,17 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
@@ -95,6 +100,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
+import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -267,11 +273,22 @@ public class RecordsView {
 		nameColumn.setLabelProvider(provider);
 		nameColumn.getColumn().setWidth(200);
 		
+		Hyperlink export = toolkit.createHyperlink(allRecordsSection, "Export...", SWT.NONE);
+		export.setToolTipText("exports list of records to csv file");
+		export.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				doExport();
+			}
+		});
+		
+		
+		
 		Composite basicSearch = toolkit.createComposite(tabPart);
 		basicSearch.setLayout(new GridLayout());
 		((GridLayout)basicSearch.getLayout()).marginWidth = 0;
  		((GridLayout)basicSearch.getLayout()).marginHeight = 0;
-		basicSearchPnl = new BasicRecordSearchPanel(basicSearch);
+		basicSearchPnl = new BasicRecordSearchPanel(basicSearch, toolkit, context);
 		basicSearchPnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		tabList.setContent(new Composite[]{newRecords,inProgress,allRecords, basicSearch}, tabPart);
@@ -339,7 +356,7 @@ public class RecordsView {
 		control.getControl().setMenu(m);
 	
 		MenuItem mi = new MenuItem(m, SWT.PUSH);
-		mi.setText("Open");
+		mi.setText("Open...");
 		mi.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -437,10 +454,31 @@ public class RecordsView {
 		loadRecordsJob.schedule();
 	}
 
+	private void doExport(){
+		List<UUID> toExport = new ArrayList<UUID>();
+		
+		List<?> sel = (List<?>) lstAllRecords.getInput();
+		if (lstAllRecords.getFilters().length > 0){
+			Object[] x = lstAllRecords.getFilters()[0].filter(lstAllRecords, (Object)null, sel.toArray());
+			sel = Arrays.asList(x);
+		}
+		
+		if (sel == null) return;
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object item = (Object) iterator.next();
+			if (item instanceof RecordEditorInput){
+				toExport.add(((RecordEditorInput) item).getUuid());
+			}
+		}
+		if (toExport.isEmpty()) return;
+		RecordCsvExporter exporter = new RecordCsvExporter(toExport);
+		CsvExportDialog dialog = new CsvExportDialog(context.get(Shell.class), exporter.createExportConfiguration());
+		dialog.open();		
+	}
 	
 	@Inject
 	@Optional
-	private void recordModified(@UIEventTopic(IntelEvents.RECORD_ALL) IntelRecord record){
+	private void recordModified(@UIEventTopic(IntelEvents.RECORD_ALL) Object records){
 		loadRecordsJob.schedule();
 	}
 

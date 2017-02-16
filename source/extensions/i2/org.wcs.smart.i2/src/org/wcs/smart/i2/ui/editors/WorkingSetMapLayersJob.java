@@ -303,8 +303,7 @@ public class WorkingSetMapLayersJob extends Job {
 				IService s = (IService)r.resolve(IService.class, m);
 				if (s != null) services.add(s);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Intelligence2PlugIn.log(e.getMessage(), e);
 			}
 		}
 		
