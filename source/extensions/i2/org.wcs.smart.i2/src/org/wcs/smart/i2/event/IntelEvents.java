@@ -93,4 +93,9 @@ public class IntelEvents {
 
 	//record sources modified; no payload
 	public static final String RECORD_SOURCE_ALL = "INTEL_RECORD_SOURCE";
+	
+	
+	//event to fire with list of attachments of items to
+	//search
+	public static final String ATTACHMENT_SEARCH = "INTEL_ATTACHMENT_SEARCH";
 }

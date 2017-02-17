@@ -198,6 +198,16 @@
                visible="true">
          </view>
       </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+         <view
+               id="org.wcs.smart.i2.ui.view.filesearch"
+               minimized="false"
+               relationship="bottom"
+               relative="org.wcs.smart.i2.assessment.right"
+               visible="false">
+         </view>
+      </perspectiveExtension>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -658,6 +668,13 @@
             icon="images/icons/obj16/script.png"
             id="org.wcs.smart.i2.record.editor.narrative"
             name="Record View Part"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            class="org.wcs.smart.i2.ui.views.FileSearchView$FileSearchViewWrapper"
+            id="org.wcs.smart.i2.ui.view.filesearch"
+            name="File Search"
             restorable="true">
       </view>
    </extension>

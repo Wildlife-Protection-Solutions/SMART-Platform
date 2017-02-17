@@ -49,6 +49,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -177,6 +178,7 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.wcs.smart.i2.ui.views.FileSearchView;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -1602,6 +1604,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			private MenuItem mnuDelete;
 			private MenuItem mnuPrimary;
 			private MenuItem mnuProperties;
+			private MenuItem mnuSearch;
 			private MenuItem mnuSep;
 			
 			private Menu thumbMenu;
@@ -1701,6 +1704,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}
 				
+				if (mnuSearch == null){
+					mnuSearch = new MenuItem(thumbMenu, SWT.DEFAULT);
+					mnuSearch.setText("Search");
+					mnuSearch.addSelectionListener(new SelectionAdapter(){
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							context.get(EPartService.class).showPart(FileSearchView.ID, PartState.ACTIVATE);
+							context.get(IEventBroker.class).send(IntelEvents.ATTACHMENT_SEARCH, attachmentTable.getSelection());
+						}
+					});
+				}
 				if (mnuProperties == null){
 					new MenuItem(thumbMenu, SWT.SEPARATOR);
 					mnuProperties = new MenuItem(thumbMenu, SWT.DEFAULT);
@@ -1714,7 +1728,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}
 						}
 					});
-					
 				}
 			}
 		};
