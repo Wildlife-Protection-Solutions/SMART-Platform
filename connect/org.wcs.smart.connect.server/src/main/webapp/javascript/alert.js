@@ -595,10 +595,10 @@ function hideShowFilters(){
 	var current = document.getElementById('filter-form').style.display;
 	if(current == "none"){
 		document.getElementById('filter-form').style.display = "block";
-		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>' + i18n("alert.hidefilters");
+		document.getElementById('filter-link').innerHTML = i18n("alert.hidefilters");
 	}else{
 		document.getElementById('filter-form').style.display = "none";
-		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>' + i18n("alert.showfilters");
+		document.getElementById('filter-link').innerHTML = i18n("alert.showfilters");
 	}
 }
 

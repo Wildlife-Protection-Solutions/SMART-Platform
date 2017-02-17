@@ -88,6 +88,9 @@
 	<section id="tab1" class="">
 		<h2 id="tab1text" class=""><a onclick="settab(1)"><fmt:message key="alert.shortmaptitle" /></a></h2>
 		<div id="map"></div>
+		<div id="map-info-box" class="link_small">
+			<fmt:message key="alert.lastupdated"/><a href='javascript:refreshAlerts()'><fmt:message key="alert.udpatenow"/></a>
+		</div>
 	</section>
 	
 	<section id="tab2" class="">
@@ -137,13 +140,10 @@
 		</table>
 		</div> 
 	</section>
-	
-	<div id="map-info-box" class="link_small">
-		<fmt:message key="alert.lastupdated"/><a href='javascript:refreshAlerts()'><fmt:message key="alert.udpatenow"/></a>
-	</div>
+
 	
 	<div id="filter-controls">
-		<a id="filter-link" onClick="hideShowFilters()" style="cursor: pointer;"><img id="filter-button" style="cursor: pointer;"/><fmt:message key="alert.hidefilters" /></a>
+		<p style="text-align:center;font-weight:bold;"><a id="filter-link" onClick="hideShowFilters()" style="cursor: pointer;"><fmt:message key="alert.hidefilters"/></a></p>
 
 		<form id="filter-form" name="filter-form" action="" onsubmit="return false;">
 			<input id="sortBy" type="hidden" name="sortBy" value="date"/>
@@ -167,7 +167,7 @@
 			
 			<p>
 			<br><input type="text" id="datePickerFrom" class="date-input">
-			<font class="date-text"><fmt:message key="alert.dateto"/> </font><input type="text" id="datePickerTo" class="date-input">
+			<font class="date-text">&nbsp &nbsp&nbsp<fmt:message key="alert.dateto"/>&nbsp &nbsp&nbsp</font><input type="text" id="datePickerTo" class="date-input">
 			</p>
 			
 			<p style="clear:both;">

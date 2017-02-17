@@ -6,6 +6,8 @@
 <%@include file="includes.jsp" %>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/myaccount.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/sharedlinkfunctions.js"></script>
 
 <title><fmt:message key="myaccount.pagetitle"/></title>
 
@@ -135,3 +137,46 @@
   </div>
 </body>
 </html>
+
+
+
+
+<div id="SharedLinksDialog" style="display: none;" class="level2dialog">
+  <div class="dialog-title"><fmt:message key="query.sharequery" /></div>
+  	<form id="sharedlinkform" name="sharedlinkform">
+     		<div style="text-align: right">
+				<div id='createcustomlink' >
+					<fieldset class="linkdialog">
+						<p><fmt:message key="sharedlinks.tokenexplanation"/> </p>
+						
+						<table class="top-spacer" style="width:100%">
+						  <tr>
+						   <td><fmt:message key="query.numminutes" /></td>
+						   <td>
+							<select id="quickMinSelect">
+								<option value=60>1 hour</option>
+								<option value=1440>1 day</option>
+								<option value=10080>1 week</option>
+								<option value=43200>1 month</option>
+								<option value=259200>6 months</option>
+								<option value=518400>1 year</option>
+								<option value=-1>Custom...</option>
+							</select>
+						  </td>
+						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
+						  </tr>
+						  <tr >
+						     <td colspan=3 align="center"><input id="createlinkbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
+						  </tr>
+						  <tr >
+						     <td colspan=3><input id="createdlink" class="hide linkdialog" type="text"/></td>
+						  </tr>
+						</table>
+	   				</fieldset>	   				
+	   			</div>
+	   			<div>
+	   				<input id="close" class="close" type="button" value="<fmt:message key="query.closebutton"/>" />
+	   			</div>
+   			</div>
+    	</form>
+</div>

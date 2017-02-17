@@ -8,6 +8,12 @@ ALTER TABLE smart.employee DROP COLUMN usertemp;
 alter table smart.CONFIGURABLE_MODEL ADD COLUMN instant_gps BOOLEAN;
 alter table smart.CONFIGURABLE_MODEL ADD COLUMN photo_first BOOLEAN;
 
+alter table connect.shared_links ADD COLUMN is_user_token BOOLEAN;
+alter table connect.shared_links ADD COLUMN allowed_ip VARCHAR(24);
+update connect.shared_links set is_user_token = false;
+ALTER TABLE connect.shared_links ALTER COLUMN is_user_token set NOT NULL;
+ALTER TABLE connect.shared_links ALTER COLUMN ca_uuid DROP NOT null;
+ALTER TABLE connect.shared_links ALTER COLUMN url DROP NOT null;
 
 CREATE OR REPLACE FUNCTION smart.trackIntersects(geom1 bytea, geom2 bytea) RETURNS BOOLEAN AS $$
 DECLARE

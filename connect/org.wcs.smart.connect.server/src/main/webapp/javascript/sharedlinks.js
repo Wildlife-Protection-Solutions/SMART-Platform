@@ -5,8 +5,34 @@ var links = {};
 
 /* configure events on html elements */
 window.onload = function(){
-	
 	refreshLinkList();
+	
+	document.getElementById("opentokendialog").onclick = function(){
+		displayDialog('SharedLinksDialog','main');
+	};
+	document.getElementById("close").onclick = function(){
+		closeDialog('SharedLinksDialog');
+		document.getElementById("createtokenbutton").style.display = "block";
+		document.getElementById("createdlink").style = "display: none";
+		document.getElementById("quickMinSelect").disabled=false;
+		document.getElementById("expiresAfter").disabled=false;
+	};
+	
+	
+	document.getElementById("quickMinSelect").onchange = function(){
+		var number = document.getElementById("quickMinSelect").value;
+		if (number > 0){
+			document.getElementById("expiresAfter").value = number;
+			document.getElementById("expiresAfter").disabled=true;
+		}else{
+			document.getElementById("expiresAfter").disabled=false;
+		}
+	}
+	
+	document.getElementById("createtokenbutton").onclick = function(){
+		createToken();
+	};
+	
 }
 
 function confirmdeletelink(){
@@ -90,7 +116,7 @@ function createLinkTable(){
  		
  		var date = new Date(links[i].expiresAt);
  		var row = tableCreateRow(parent,
- 				[null, links[i].url, links[i].ownerUsername, date.toString() , null], 
+ 				[null, links[i].url, links[i].allowedIp, links[i].ownerUsername, date.toString() , null], 
  				"linkrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.uuid = links[i].uuid;
@@ -108,7 +134,7 @@ function createLinkTable(){
  		deleteicon.dataset.uuid = links[i].uuid;
  		deleteicon.onclick = confirmdeletelink;
  		deleteicon.href="";
- 		row.childNodes[4].appendChild(deleteicon);
+ 		row.childNodes[5].appendChild(deleteicon);
  	}
  	
 }
@@ -150,6 +176,8 @@ function dynamicSort(property) {
         property = property.substr(1);
     }
     return function (a,b) {
+    	if(a[property] == null)a[property]=" ";
+    	if(b[property] == null)b[property]=" ";
     	if (isNaN(a[property])){//text sort
         	var result = (a[property].toUpperCase() < b[property].toUpperCase()) ? -1 : (a[property].toUpperCase() > b[property].toUpperCase()) ? 1 : 0;
         	return result * sortOrder;

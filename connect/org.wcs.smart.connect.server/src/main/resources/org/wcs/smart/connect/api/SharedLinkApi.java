@@ -225,6 +225,8 @@ public class SharedLinkApi extends HttpServlet{
 			SmartUser user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
 			newLink.setOwnerUuid(user.getUuid());
 			
+			//set is_user_token
+			newLink.setUserToken(false);
 			
 			s.save(newLink);
 			
@@ -236,6 +238,60 @@ public class SharedLinkApi extends HttpServlet{
 		}
 		return newLink;
 	}
+	
+	
+	/**
+	 * Create a new full-access token
+	 * URL: ../server/api/sharedlink/token/
+	 * Call Type: POST
+	 * Payload: A JSON object of the required attributes: expiresAfter  ex: 
+	 * 		{expiresAfter: 525600"}  
+	 * 		<expires in 1 year>
+	 * @param expiresAfter - 0  means the link will never expire, otherwise it is # of minutes until the link expires
+	 * @return Returns a JSON ShareLink object for the created user, the link_uuid attribute is the token 
+	 */
+	@POST
+    @Path("/token/")
+    public SharedLink createToken(SharedLink newLink) {
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+		    
+			//set expiration date			
+			int mins = newLink.getExpiresAfter();
+			if (mins == 0){
+				//never expire
+				newLink.setExpiresAt(new Timestamp(4102444800000l));
+			}else if (mins > 0){
+				//long is important here or else anything over 35790 mins or so breaks the Integer limit when converted to milliseconds 
+				java.util.Date date= new java.util.Date();
+				long now = date.getTime();
+				long ex = now + ((long)mins*1000*60);
+				newLink.setExpiresAt(new Timestamp(ex));
+			}else{
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "invalid expiresAfter value provided (valid values: 0 - 2147483647).");
+			}
+
+			
+			//set the ownerUUID
+			SmartUser user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
+			newLink.setOwnerUuid(user.getUuid());
+			
+			//set is_user_token
+			newLink.setUserToken(true);
+			
+			s.save(newLink);
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			throw e;
+		}finally{
+			s.getTransaction().commit();
+		}
+		return newLink;
+	}
+	
+	
 	
 	/**
 	 * Delete a shared link

@@ -40,7 +40,7 @@
 				</div>
   			</div>  
 		</div>
-		<div><a class="link_small" id="selectNone" href="#"><fmt:message key="dataqueue.checknone"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="link_small" id="selectCompleted" href="#"><fmt:message key="dataqueue.checkcomplete"/></a></div>
+		<div><a class="link_small" id="selectNone" href="#"><fmt:message key="dataqueue.checknone"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="link_small" id="selectCompleted" href="#"><fmt:message key="dataqueue.checkcomplete"/></a> <a class="link_small" id="selectAll" href="#"><fmt:message key="dataqueue.checkall"/></a></div>
 		
 		<div class="top-spacer">
 		

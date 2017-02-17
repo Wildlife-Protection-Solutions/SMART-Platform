@@ -229,12 +229,7 @@ public class QueryApi extends HttpServlet{
 			}
 			
 			//for shared links; these links do not have a user but we want to check the j_username which is set to the link creator
-			String name="";
-			if( request.getUserPrincipal() == null){
-				name = (String)request.getAttribute("j_username");	
-			}else{
-				name = request.getUserPrincipal().getName();
-			}
+			String name = request.getUserPrincipal().getName();
 			
 			//check for permission to this query for this user.
 			if (!SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY, uuid)){

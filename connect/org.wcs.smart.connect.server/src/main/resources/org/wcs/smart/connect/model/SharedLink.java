@@ -44,6 +44,17 @@ public class SharedLink extends ConnectUuidItem{
 	private Timestamp expiresAt;
 	private String url; 
 	private int expiresAfter;
+	private boolean isUserToken;
+	private String allowedIp;
+	
+	
+	@Column(name="allowed_ip")
+	public String getAllowedIp() {
+		return allowedIp;
+	}
+	public void setAllowedIp(String allowedIp) {
+		this.allowedIp = allowedIp;
+	}
 	
 	@Transient
 	public String ownerUsername;
@@ -95,5 +106,13 @@ public class SharedLink extends ConnectUuidItem{
 	}
 	public void setOwnerUsername(String ownerUsername){
 		this.ownerUsername = ownerUsername;
+	}
+	
+	@Column(name="is_user_token")
+	public boolean isUserToken() {
+		return isUserToken;
+	}
+	public void setUserToken(boolean isUserToken) {
+		this.isUserToken = isUserToken;
 	}
 }

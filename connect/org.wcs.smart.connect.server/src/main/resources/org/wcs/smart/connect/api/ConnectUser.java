@@ -154,7 +154,9 @@ public class ConnectUser extends HttpServlet {
 	 * URL: ../server/api/connectuser/{username}
 	 * Call Type: GET
 	 * 
-	 * @param	username	provided in the URL, the username of the requested user.
+	 * @param username	provided in the URL, the username of the requested user.
+	 * @param validate Boolean, optional, set to true if you only want to validate this user and not get their full details back. 
+	 * 
 	 * @return Returns a JSON SmartUser object for the selected user 
 	 */
 	
@@ -501,8 +503,8 @@ public class ConnectUser extends HttpServlet {
  
     /**
      * Validates usernames
-     * @param username
-     * @param l
+     * @param username String of the username
+     * @param l language locale 
      * @return
      */
     public static String validateUserName(String username, Locale l){
@@ -516,8 +518,8 @@ public class ConnectUser extends HttpServlet {
     
     /**
      * Validates passwords - ensures between required length.
-     * @param password
-     * @param l
+     * @param password Strin of password
+     * @param l language locale
      * @return
      */
     public static String validatePassword(String password, Locale l){

@@ -17,6 +17,7 @@ window.onload = function(){
 	
 	document.getElementById("btnDeleteSelected").onclick = deleteSelected;
 	document.getElementById("selectCompleted").onclick = checkCompleted;
+	document.getElementById("selectAll").onclick = checkAll;
 	document.getElementById("selectNone").onclick = checkNone;
 	
 	document.getElementById("refreshnow").onclick = refreshFileList;
@@ -291,6 +292,14 @@ function checkCompleted(){
 	}
 	return false;
 }
+function checkAll(){
+	var checkedBoxes = document.querySelectorAll('input[name=dataqueueitem]');
+	for (var i = 0; i< checkedBoxes.length; i ++){
+			checkedBoxes[i].checked = true;
+	}
+	return false;
+}
+
 
 function deleteFile(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');

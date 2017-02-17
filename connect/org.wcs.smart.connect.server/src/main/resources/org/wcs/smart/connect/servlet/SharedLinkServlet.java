@@ -22,7 +22,9 @@
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
@@ -40,7 +42,7 @@ import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.query.QueryManager;
 
 /**
- * Shared Link servlet. Used to allowed shared links access to Queries and Report, uses a sharedLink instead of Basic Auth
+ * Shared Link servlet. Used to allowed shared links/token access to Queries and Report, uses a sharedLink instead of Basic Auth
  * 
  * @author Jeff
  *
@@ -51,18 +53,26 @@ public class SharedLinkServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
     
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 * 
+	 * @param uuid - the uuid of the sharedlink / token 
+	 * @param request  - optional. The relative url of the service request being made with your token eg &request="server/connect/query/api/559f91b4-acd7-4122-b374-33a776b3c42c?format=csv&date_filter=waypointdate" 
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		UUID uuid = UUID.fromString(request.getParameter("uuid"));
+		SharedLink link;
+		UUID uuid; 
+		try{
+			uuid = UUID.fromString(request.getParameter("uuid"));
+		}catch(Exception e){
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidUuid", request.getLocale()));
+			return;
+		}
 		String path = null;
 		String username = "";
 		
 		Session s = HibernateManager.getSession(request.getServletContext());
 		s.beginTransaction();
 		try{
-			SharedLink link = QueryManager.INSTANCE.findSharedLink(uuid, s);
+			link = QueryManager.INSTANCE.findSharedLink(uuid, s);
 			if (link == null){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
@@ -74,6 +84,15 @@ public class SharedLinkServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale()));
 				return;
 			}
+			
+			String userip = request.getRemoteAddr();
+			if(link.getAllowedIp() == null || link.getAllowedIp().equals(userip)){
+				//all good, IP is blank or matches
+			}else{
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidIp", request.getLocale())+ " " + userip );
+				return;
+			}
+			
 			path =  link.getUrl();
 			username = QueryManager.INSTANCE.findUser(link.getOwnerUuid(), s).getUsername();
 		}finally{
@@ -81,14 +100,35 @@ public class SharedLinkServlet extends HttpServlet {
 		}
 		//Fill out the username to the link creator. This allows the Query Api to re-check if this user still has access to the query, or if it was revoked, which should revoke all links that user created. 
 		request.setAttribute("j_username", username);
+	
+		UserRoleRequestWrapper wrappedRequest = new UserRoleRequestWrapper(username, request);
 		
-		if(path != null){
+		//Forward the request to the specified URL if it is a user-token instead of a shared link with a single URL from the database.
+		if(link.isUserToken()){
+			path = request.getParameter("request");
+			if(path == null || path.charAt(1)!= '/' || path.isEmpty()){
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.invalidRequest", request.getLocale()));
+				return;
+			}
+			path = path.substring(1, path.length()-1);
 			RequestDispatcher rd = request.getRequestDispatcher(path);
-			rd.forward(request, response);
+			rd.forward(wrappedRequest, response); //pass the new, wrapped request 
+		}else if(path != null){
+			RequestDispatcher rd = request.getRequestDispatcher(path);
+			rd.forward(wrappedRequest, response); //wrapped request actually works nicer here to, no code to look for j_username anymore.
 		}else{
 			response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkNotFound", request.getLocale()));
 		}
 	}
 
-
+	/**
+	 * People may need to use POST to access some type of requests. We treat them the same as Gets
+	 * 
+	 * @param uuid - the uuid of the sharedlink / token 
+	 * @param request  - optional. The relative url of the service request being made with your token eg &request=%22%2Fapi%2Fconservationarea%2F%3FincludeSpatialBoundaries%3Dfalse%22 
+	 */
+	
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
+	}
 }

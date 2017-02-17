@@ -7,6 +7,7 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/query.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/sharedlinkfunctions.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
