@@ -79,6 +79,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_SRC_IP = "org.wcs.smart.i2.icon.record.source.ip"; //$NON-NLS-1$
 	public static final String ICON_SRC_DONE = "org.wcs.smart.i2.icon.record.source.done"; //$NON-NLS-1$
 	
+	public static final String ICON_ATTACHMENT_SEARCH = "org.wcs.smart.i2.icon.attachment.search"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
 
@@ -125,6 +127,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_SRC_DONE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/src_done.png")); //$NON-NLS-1$);
 
 		reg.put(ICON_ENTITY_EXPORT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_export.png")); //$NON-NLS-1$);
+		
+		reg.put(ICON_ATTACHMENT_SEARCH, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attachment_search.png")); //$NON-NLS-1$);
+		
 	}
 	
 	/*

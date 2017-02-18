@@ -34,6 +34,10 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.ui.views.AttachmentView;
 
@@ -46,36 +50,49 @@ import org.wcs.smart.i2.ui.views.AttachmentView;
 public class OpenAttachmentViewHandler {
 
 	public void execute(IntelAttachment attachment, IEclipseContext context){
-		IEclipseContext kid = context.createChild();
-		kid.set(IntelAttachment.class, attachment);
-
-		EPartService pService = context.get(EPartService.class);
-		EModelService mService = context.get(EModelService.class);
+		Image rawImage = null;
+		try{
+			rawImage = new Image(Display.getDefault(), attachment
+					.getAttachmentFile().getAbsolutePath());
+		}catch (Exception ex){
+			MessageDialog.openError(context.get(Shell.class), "Invalid File", "Not a supported image format");
+			return;
+		}
 		
-		MPart viewPart = MBasicFactory.INSTANCE.createInputPart();
-		viewPart.setContributionURI("bundleclass://org.wcs.smart.i2/org.wcs.smart.i2.ui.views.AttachmentView"); //$NON-NLS-1$
-		viewPart.setCloseable(true);
-		viewPart.setContext(kid);
-		viewPart.setLabel(attachment.getFilename());
-		viewPart.setElementId(AttachmentView.ID);
-		
-		List<MArea> areas2 = mService.findElements(context.get(MApplication.class),
-				"org.eclipse.ui.editorss", MArea.class, null); //$NON-NLS-1$
-		
-		if (areas2.size() > 0){
-			MArea editorArea = areas2.get(0);
-			List<MPartSashContainerElement> kids = new ArrayList<>();
-			kids.addAll(editorArea.getChildren());
-			while(!kids.isEmpty()){
-				MPartSashContainerElement e = kids.remove(0);
-				if (e instanceof MPartStack ){
-					((MPartStack )e).getChildren().add(viewPart);
-					break;
+		try{
+			IEclipseContext kid = context.createChild();
+			kid.set(IntelAttachment.class, attachment);
+			kid.set(Image.class, rawImage);
+			
+			EPartService pService = context.get(EPartService.class);
+			EModelService mService = context.get(EModelService.class);
+			
+			MPart viewPart = MBasicFactory.INSTANCE.createInputPart();
+			viewPart.setContributionURI("bundleclass://org.wcs.smart.i2/org.wcs.smart.i2.ui.views.AttachmentView"); //$NON-NLS-1$
+			viewPart.setCloseable(true);
+			viewPart.setContext(kid);
+			viewPart.setLabel(attachment.getFilename());
+			viewPart.setElementId(AttachmentView.ID);
+			
+			List<MArea> areas2 = mService.findElements(context.get(MApplication.class),
+					"org.eclipse.ui.editorss", MArea.class, null); //$NON-NLS-1$
+			
+			if (areas2.size() > 0){
+				MArea editorArea = areas2.get(0);
+				List<MPartSashContainerElement> kids = new ArrayList<>();
+				kids.addAll(editorArea.getChildren());
+				while(!kids.isEmpty()){
+					MPartSashContainerElement e = kids.remove(0);
+					if (e instanceof MPartStack ){
+						((MPartStack )e).getChildren().add(viewPart);
+						break;
+					}
 				}
 			}
+				
+			pService.showPart(viewPart, PartState.VISIBLE);
+		}catch (Exception ex){
+			rawImage.dispose();
 		}
-			
-		pService.showPart(viewPart, PartState.VISIBLE);
-		
 	}
 }

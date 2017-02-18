@@ -45,6 +45,7 @@ import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -54,6 +55,7 @@ import org.wcs.smart.i2.ui.dialogs.AttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.editors.AttachmentTable;
 import org.wcs.smart.i2.ui.editors.IMenuCreator;
 import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
+import org.wcs.smart.i2.ui.views.FileSearchView;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -106,6 +108,7 @@ public class AttachmentListComposite extends Composite{
 		updateEditMode();
 		IMenuCreator thumbMenu = new IMenuCreator() {
 			private MenuItem mnuAdd;
+			private MenuItem mnuSearch;
 			private MenuItem mnuOpen;
 			private MenuItem mnuOpenThumbnail;
 			private MenuItem mnuDelete;
@@ -137,7 +140,7 @@ public class AttachmentListComposite extends Composite{
 			private void createMenu(){		
 				if (mnuOpenThumbnail == null){
 					mnuOpenThumbnail = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuOpenThumbnail.setText("Open");
+					mnuOpenThumbnail.setText("Open Image");
 					mnuOpenThumbnail.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -150,7 +153,7 @@ public class AttachmentListComposite extends Composite{
 				}
 				if (mnuOpen == null){
 					mnuOpen = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuOpen.setText("Open External");
+					mnuOpen.setText("Open System Editor");
 					mnuOpen.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -159,15 +162,27 @@ public class AttachmentListComposite extends Composite{
 							}
 						}
 					});
+					
+				}
+				if (mnuSearch == null){
+					mnuSearch = new MenuItem(thumbMenu,SWT.DEFAULT);
+					mnuSearch.setText("Search");
+					mnuSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTACHMENT_SEARCH));
+					mnuSearch.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							FileSearchView.doSearch(editor.getContext(), attachmentTable.getSelection());
+						}
+					});
+					
 					new MenuItem(thumbMenu, SWT.SEPARATOR);
 				}
 				
-				
 				if (editor.getEditMode()){
-					int index = 3;
+					int index = 4;
 					if (mnuAdd == null){
 						mnuAdd = new MenuItem(thumbMenu,SWT.DEFAULT,index);
-						mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+						mnuAdd.setText("Add Attachment");
 						mnuAdd.addSelectionListener(new SelectionAdapter() {
 							@Override
 							public void widgetSelected(SelectionEvent e) {
@@ -185,14 +200,13 @@ public class AttachmentListComposite extends Composite{
 							@Override
 							public void widgetSelected(SelectionEvent e) {
 								if (!attachmentTable.getSelection().isEmpty()){
-									IntelAttachment toDelete = attachmentTable.getSelection().get(0);
-									
-									
-									for (IntelRecordAttachment ea : editor.getRecord().getAttachments()){
-										if (ea.getAttachment().equals(toDelete)){
-											attachmentsToDelete.add(ea);
-											editor.getRecord().getAttachments().remove(ea);
-											break;
+									for (IntelAttachment toDelete : attachmentTable.getSelection()){
+										for (IntelRecordAttachment ea : editor.getRecord().getAttachments()){
+											if (ea.getAttachment().equals(toDelete)){
+												attachmentsToDelete.add(ea);
+												editor.getRecord().getAttachments().remove(ea);
+												break;
+											}
 										}
 									}
 									refreshAttachmentTable();
@@ -226,27 +240,27 @@ public class AttachmentListComposite extends Composite{
 								
 								@Override
 								public void widgetSelected(SelectionEvent e) {
-									if (!attachmentTable.getSelection().isEmpty()){
+									for (IntelAttachment attachment : attachmentTable.getSelection()){
 										IntelEntityAttachment a = new IntelEntityAttachment();
 										a.setEntity(entity.getEntity());
-										a.setAttachment(attachmentTable.getSelection().get(0));
+										a.setAttachment(attachment);
 										
 										//determine if this attachment already exists
 										for (IntelEntityAttachment existing : getNewEntityAttachments()){
 											if (existing.getAttachment().equals(a.getAttachment())){
-												return;
+												continue;
 											}
 										}
 										for (IntelEntityAttachment existing : entity.getEntity().getEntityAttachments()){
 											if (existing.getAttachment().equals(a.getAttachment())){
-												return;
+												continue;
 											}
 										}
 										
 										getNewEntityAttachments().add(a);
-										editor.setDirty(true);
-										editor.getSummaryPage().getEntityPanel().init();
 									}
+									editor.setDirty(true);
+									editor.getSummaryPage().getEntityPanel().init();
 									
 								}
 							});
@@ -329,7 +343,8 @@ public class AttachmentListComposite extends Composite{
 						
 					}
 				}catch (Exception ex){
-					ex.printStackTrace();
+					//cannot create thumbnail
+					//ex.printStackTrace();
 				}
 			}
 			editor.setDirty(true);

@@ -72,6 +72,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -139,6 +140,7 @@ public class EntitySearchResultTable extends Composite {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				selectionColor.dispose();
+				mouseOverColor.dispose();
 				if (smallerFont != null){
 					smallerFont.dispose();
 					smallerFont = null;
@@ -464,7 +466,7 @@ public class EntitySearchResultTable extends Composite {
 		});
 		
 		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
-		mnuExport.setText("Export Entity...");
+		mnuExport.setText("Export Entity & Relationships...");
 		mnuExport.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_EXPORT));
 		mnuExport.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -473,15 +475,19 @@ public class EntitySearchResultTable extends Composite {
 			}
 		});
 		
-		MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
-		mnuDelete.setText("Delete...");
-		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		mnuDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteEntities();
-			}
-		});
+		if (IntelSecurityManager.INSTANCE.canEditEntity()){
+			MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
+			mnuDelete.setText("Delete...");
+			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			mnuDelete.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					deleteEntities();
+				}
+			});
+		}
+		
+		new MenuItem(menu, SWT.SEPARATOR);
 		
 		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
 		mnuWorkingset.setText("Add to Working Set");
@@ -656,30 +662,6 @@ public class EntitySearchResultTable extends Composite {
 			l.setFont(smallerFont);
 			addListener(l);
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, true));
-			
-//			Composite right = toolkit.createComposite(this, SWT.NONE);
-//			right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-//			right.setLayout(new GridLayout(2, false));
-//			addListener(right);
-			
-		
-//			l = toolkit.createLabel(right, "Modified:");
-//			l.setFont(smallerFont);
-//			addListener(l);
-//			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getEntity().getDateModified()));
-//			l.setFont(smallerFont);
-//			addListener(l);
-			
-			
-			
-			
-//			l = toolkit.createLabel(right, "Created:");
-//			l.setFont(smallerFont);
-//			addListener(l);
-//			
-//			l = toolkit.createLabel(right, DateFormat.getDateInstance().format(item.getEntity().getDateCreated()));
-//			l.setFont(smallerFont);
-//			addListener(l);
 			
 			addDragSources();
 		}

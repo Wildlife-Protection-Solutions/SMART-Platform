@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-public class FileCharSequence implements CharSequence {
+public class FileCharSequence implements CharSequence, AutoCloseable{
 	
 	private RandomAccessFile randomAccess; 
 	private long start; 
@@ -14,12 +14,6 @@ public class FileCharSequence implements CharSequence {
 		randomAccess = new RandomAccessFile(file, "r");
 		start = 0;
 		end = randomAccess.length();
-	} 
-	 
-	private FileCharSequence(FileCharSequence prototype, long start, long end) {
-		this.randomAccess = prototype.randomAccess;
-		this.start = start;
-		this.end = end;
 	}
 	
 	@Override
@@ -39,7 +33,15 @@ public class FileCharSequence implements CharSequence {
 
 	@Override
 	public CharSequence subSequence(int start, int end) {
-		return new FileCharSequence(this, this.start + start, this.start + end);
+		throw new UnsupportedOperationException();
+		
+	}
+	
+	public String getSubString(int start, int end) throws IOException{
+		byte[] bytes = new byte[end-start];
+		randomAccess.seek(start);
+		randomAccess.readFully(bytes);
+		return new String(bytes);
 	}
 	
 	@Override
@@ -52,6 +54,11 @@ public class FileCharSequence implements CharSequence {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public void close() throws Exception {
+		randomAccess.close();
 	}
 
 }

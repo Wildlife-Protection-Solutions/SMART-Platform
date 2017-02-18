@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -67,7 +66,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -151,25 +149,26 @@ public class EntityComparisonEditor extends EditorPart{
 		((GridLayout)parent.getLayout()).horizontalSpacing = 0;
 		toolkit.adapt(parent);
 		
-		if (IntelSecurityManager.INSTANCE.canEditEntity()){
-			Hyperlink l = toolkit.createHyperlink(parent, "Merge...", SWT.NONE);
-			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-			
-			l.addHyperlinkListener(new IHyperlinkListener() {
-				@Override
-				public void linkExited(HyperlinkEvent e) {
-				}
-				
-				@Override
-				public void linkEntered(HyperlinkEvent e) {
-				}
-				
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					MessageDialog.openInformation(getSite().getShell(), "TODO", "TODO: implement a dialog where users can pick which attributes to use in merged entity");
-				}
-			});
-		}
+		//TODO: when we merge entities
+//		if (IntelSecurityManager.INSTANCE.canEditEntity()){
+//			Hyperlink l = toolkit.createHyperlink(parent, "Merge...", SWT.NONE);
+//			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+//			
+//			l.addHyperlinkListener(new IHyperlinkListener() {
+//				@Override
+//				public void linkExited(HyperlinkEvent e) {
+//				}
+//				
+//				@Override
+//				public void linkEntered(HyperlinkEvent e) {
+//				}
+//				
+//				@Override
+//				public void linkActivated(HyperlinkEvent e) {
+//					MessageDialog.openInformation(getSite().getShell(), "TODO", "TODO: implement a dialog where users can pick which attributes to use in merged entity");
+//				}
+//			});
+//		}
 		table = new EntityComparisonTable(parent);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		addDropTarget(parent);

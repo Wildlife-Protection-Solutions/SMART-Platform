@@ -673,6 +673,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.i2.ui.views.FileSearchView$FileSearchViewWrapper"
+            icon="images/icons/obj16/attachment_search.png"
             id="org.wcs.smart.i2.ui.view.filesearch"
             name="File Search"
             restorable="true">

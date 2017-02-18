@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -64,6 +66,11 @@ public class AttachmentTable extends Composite implements Listener {
 	
 	private Menu thumbMenu;
 	
+	private Color selectionColor = null;
+	private Color mouseOverColor = null;
+	private Color backgroundColor = null;
+	private Color selectionBorderColor = null;
+	
 	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, int style){
 		super(parent, style);
 		this.toolkit = toolkit;
@@ -71,10 +78,20 @@ public class AttachmentTable extends Composite implements Listener {
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
 		
+		Color color = getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
+		selectionColor = new Color(getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
+		mouseOverColor = new Color(getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 90));
+		selectionBorderColor = new Color(getDisplay(), blend(new RGB(0, 0, 0), color.getRGB(), 40));
+		addListener(SWT.Dispose, e->{
+			selectionColor.dispose();
+			mouseOverColor.dispose();
+			selectionBorderColor.dispose();
+		});
+		
 		infoSection = toolkit.createScrolledForm(this);
 		infoSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		infoSection.addListener(SWT.Resize, this);
-
+		
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginWidth = gl.marginHeight = 0;
 		gl.horizontalSpacing = 0;
@@ -177,7 +194,7 @@ public class AttachmentTable extends Composite implements Listener {
 	/*
 	 * A composite for thumbnails
 	 */
-	private class ThumbnailComposite extends Composite {
+	private class ThumbnailComposite extends Composite  {
 		private List<ThumbInfo> thumbs;
 		
 		public ThumbnailComposite(Composite parent){
@@ -187,6 +204,7 @@ public class AttachmentTable extends Composite implements Listener {
 			setLayout(gl);
 			
 			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			addListener(SWT.MouseUp, e->clearSelection());
 		}
 
 		public void updateLayout(int numCols){
@@ -205,7 +223,6 @@ public class AttachmentTable extends Composite implements Listener {
 				//let's merge file
 				List<ThumbInfo> old = thumbs;
 				thumbs = new ArrayList<AttachmentTable.ThumbnailComposite.ThumbInfo>();
-				
 				for (ISmartAttachment file : fileNames){
 					ThumbInfo found = null;
 					for (ThumbInfo o : old){
@@ -228,16 +245,20 @@ public class AttachmentTable extends Composite implements Listener {
 					}
 				}
 			}
+			int index = 0;
+			for(ThumbInfo t : thumbs){
+				t.index = index++;
+			}
 		}
 		
-		public void initThumbs(){
+		private void initThumbs(){
 			if (thumbs == null) return;
 			for (ThumbInfo info : thumbs){
 				info.createThumb();
 			}
 		}
 		
-		public void createThumbs(){
+		private void createThumbs(){
 			if (thumbs == null) return;
 			if (isDisposed()) return;
 			for (ThumbInfo t : thumbs){
@@ -255,45 +276,29 @@ public class AttachmentTable extends Composite implements Listener {
 						thumbNameComp.setMenu(null);
 					}
 				});
-				Listener l = new Listener(){
-					@Override
-					public void handleEvent(Event event) {
-						if (event.type == SWT.MouseEnter){
-							t.isMouseIn = true;
-							thumbNameComp.redraw();
-						}else if (event.type == SWT.MouseDown){
-							for (ThumbInfo kid : thumbs){
-								kid.isSelected = false;
-							}
-							t.isSelected = true;
-						}else if (event.type == SWT.MouseExit){
-							t.isMouseIn = false;
-							thumbNameComp.redraw();
-						}else if (event.type == SWT.Paint){
-							if (t.isMouseIn){
-								event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
-								event.gc.setLineWidth(4);
-								event.gc.drawRectangle(0, 0, thumbNameComp.getClientArea().width, thumbNameComp.getClientArea().height);
-							}else{
-								event.gc.setForeground(toolkit.getColors().getBorderColor());
-								event.gc.setLineWidth(2);
-								event.gc.drawRectangle(0, 0, thumbNameComp.getClientArea().width, thumbNameComp.getClientArea().height);
-							}
-						}	
-					}
-				};
-				I2SwtUtils.cascadeAdd(thumbNameComp,l, SWT.MouseEnter,SWT.MouseExit, SWT.Paint, SWT.MouseDown);
+				t.thumbGui = thumbNameComp;
+
+				I2SwtUtils.cascadeAdd(thumbNameComp,t, SWT.MouseEnter,SWT.MouseExit, SWT.MouseDown, SWT.MouseUp, SWT.MouseMove, SWT.Paint);
 			}
 		}
-
-
-		private class ThumbInfo{
+		
+		
+		private void clearSelection(){
+			for (ThumbInfo c : thumbs){
+				c.isSelected = false;
+				c.colorAll();
+			}
+		}
+		
+		private class ThumbInfo implements Listener{
 			ISmartAttachment file;
 			Thumbnail thumb;
 			String tooltip;
+			Composite thumbGui;
 			
-			boolean isMouseIn;
 			boolean isSelected;
+			boolean mouseOver;
+			int index;
 			
 			public ThumbInfo(ISmartAttachment file){
 				this.file = file;
@@ -308,7 +313,125 @@ public class AttachmentTable extends Composite implements Listener {
 					thumb = new Thumbnail(file, false);
 				}
 			}
+			
+			private void colorAll(){
+				if (backgroundColor == null){
+					backgroundColor = thumbGui.getBackground();
+				}
+				Color color = null;
+				if(isSelected){
+					color = selectionColor;
+				}else{
+					if (mouseOver){
+						color = mouseOverColor;
+					}else{
+						color = backgroundColor;
+					}
+				}
+				List<Control> kids = new ArrayList<Control>();
+				kids.add(thumbGui);
+				while(!kids.isEmpty()){
+					Control c = kids.remove(0);
+					c.setBackground(color);
+					if (c instanceof Composite){
+						for (Control cc : ((Composite)c).getChildren()){
+							kids.add(cc);
+						}
+					}
+				}
+			}
+			
+			@Override
+			public void handleEvent(Event event) {
+				if (event.type == SWT.MouseEnter){
+					mouseOver = true;
+					colorAll();
+					thumbGui.redraw();
+				}else if (event.type == SWT.MouseExit){
+					mouseOver = false;
+					colorAll();
+					thumbGui.redraw();
+				}else if (event.type == SWT.MouseMove){
+				}else if (event.type == SWT.MouseDown){
+					if (event.stateMask == 0 && !isSelected) changeSelection(event);
+				}else if (event.type == SWT.MouseUp){
+					changeSelection(event);
+				}else if (event.type == SWT.Paint){
+					if (mouseOver){					
+						event.gc.setForeground(selectionBorderColor);
+						event.gc.setLineWidth(4);
+						event.gc.drawRectangle(0, 0, thumbGui.getClientArea().width, thumbGui.getClientArea().height);
+					}else if (isSelected){
+						event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
+						event.gc.setLineWidth(4);
+						event.gc.drawRectangle(0, 0, thumbGui.getClientArea().width, thumbGui.getClientArea().height);
+					}else{
+						event.gc.setForeground(toolkit.getColors().getBorderColor());
+						event.gc.setLineWidth(2);
+						event.gc.drawRectangle(0, 0, thumbGui.getClientArea().width, thumbGui.getClientArea().height);
+					}
+				}
+			}
+			
+			private void changeSelection(Event event){
+				Integer lastSelection = (Integer) getParent().getData("last_selection_index");
+				if (lastSelection == null) lastSelection = 0;
+				getParent().setData("last_selection_index", index);
+				
+				if ((event.stateMask & SWT.CTRL) != 0){
+					if (event.button == 1) isSelected = !isSelected;
+				}else if ((event.stateMask & SWT.SHIFT) != 0){
+					boolean newSelection = !isSelected;
+					//clearSelection();
+					int from = lastSelection;
+					int to = index;
+					if (index < lastSelection){
+						from = index;
+						to = lastSelection;
+					}
+					for (int i = from; i <= to; i ++){
+						if (i == index){
+							thumbs.get(i).isSelected = true;
+						}else{
+							thumbs.get(i).isSelected = newSelection;		
+						}
+						thumbs.get(i).colorAll();
+					}
+					
+				}else{
+					if (event.button == 1){
+						clearSelection();
+					}else if (!isSelected){
+						clearSelection();
+					}
+					isSelected = true;
+				}
+				colorAll();
+			}
 		}
+	}
+	
+	private static int blend(int v1, int v2, int ratio) {
+		int b = (ratio * v1 + (100 - ratio) * v2) / 100;
+		return Math.min(255, b);
+	}
 
+	/**
+	 * Blends c1 and c2 based in the provided ratio.
+	 * 
+	 * @param c1
+	 *            first color
+	 * @param c2
+	 *            second color
+	 * @param ratio
+	 *            percentage of the first color in the blend (0-100)
+	 * @return the RGB value of the blended color
+	 * @since 3.1
+	 */
+	private static RGB blend(RGB c1, RGB c2, int ratio) {
+		int r = blend(c1.red, c2.red, ratio);
+		int g = blend(c1.green, c2.green, ratio);
+		int b = blend(c1.blue, c2.blue, ratio);
+		return new RGB(r, g, b);
 	}
 }

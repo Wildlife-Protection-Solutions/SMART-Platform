@@ -49,7 +49,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -1640,18 +1639,28 @@ public class EntityEditor extends EditorPart implements MapPart{
 						}
 					});
 				}
+				if (mnuSearch == null){
+					mnuSearch = new MenuItem(thumbMenu, SWT.DEFAULT);
+					mnuSearch.setText("Search");
+					mnuSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTACHMENT_SEARCH));
+					mnuSearch.addSelectionListener(new SelectionAdapter(){
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							FileSearchView.doSearch(context, attachmentTable.getSelection());
+						}
+					});
+				}
+				
 				if (isEditMode){
 					if (mnuDelete == null){
-						mnuSep = new MenuItem(thumbMenu, SWT.SEPARATOR, 1);
-						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT, 2);
+						mnuSep = new MenuItem(thumbMenu, SWT.SEPARATOR);
+						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT);
 						mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 						mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 						mnuDelete.addSelectionListener(new SelectionAdapter(){
 							@Override
 							public void widgetSelected(SelectionEvent e) {
-								if (!attachmentTable.getSelection().isEmpty()){
-									IntelAttachment toDelete = attachmentTable.getSelection().get(0);
-									
+								for (IntelAttachment toDelete : attachmentTable.getSelection()){
 									if (toDelete.equals(entity.getPrimaryAttachment())){
 										entity.setPrimaryAttachment(null);
 										if (imgMain != null) imgMain.dispose();
@@ -1664,14 +1673,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 											break;
 										}
 									}
-									refreshAttachmentTable();
-									setDirty(true);
 								}
+								refreshAttachmentTable();
+								setDirty(true);
 							}	
 						});
 					}
 					if (mnuPrimary == null){
-						mnuPrimary = new MenuItem(thumbMenu,SWT.DEFAULT,2);
+						mnuPrimary = new MenuItem(thumbMenu,SWT.DEFAULT);
 						mnuPrimary.setText("Set as Primary Image");
 						mnuPrimary.addSelectionListener(new SelectionAdapter(){
 							@Override
@@ -1704,17 +1713,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}
 				
-				if (mnuSearch == null){
-					mnuSearch = new MenuItem(thumbMenu, SWT.DEFAULT);
-					mnuSearch.setText("Search");
-					mnuSearch.addSelectionListener(new SelectionAdapter(){
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							context.get(EPartService.class).showPart(FileSearchView.ID, PartState.ACTIVATE);
-							context.get(IEventBroker.class).send(IntelEvents.ATTACHMENT_SEARCH, attachmentTable.getSelection());
-						}
-					});
-				}
+				
 				if (mnuProperties == null){
 					new MenuItem(thumbMenu, SWT.SEPARATOR);
 					mnuProperties = new MenuItem(thumbMenu, SWT.DEFAULT);

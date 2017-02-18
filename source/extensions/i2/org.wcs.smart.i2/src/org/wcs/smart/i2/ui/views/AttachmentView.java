@@ -45,7 +45,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
@@ -110,8 +109,8 @@ public class AttachmentView {
 		Composite thisParent = parent;
 		parent.addListener(SWT.Resize, e-> draw.setBounds(thisParent.getClientArea()));
 		
-		rawImage = new Image(Display.getDefault(), attachment
-				.getAttachmentFile().getAbsolutePath());
+		rawImage = context.get(Image.class);
+		
 		draw.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		draw.addPaintListener(new PaintListener() {
 			@Override
@@ -224,7 +223,9 @@ public class AttachmentView {
 			}
 		});
 		draw.addListener(SWT.Dispose, d -> {
-			rawImage.dispose();
+			if (rawImage != null){
+				rawImage.dispose();
+			}
 			if (screenImage != null)
 				screenImage.dispose();
 		});

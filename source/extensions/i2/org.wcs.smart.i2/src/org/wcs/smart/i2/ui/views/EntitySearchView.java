@@ -127,7 +127,6 @@ public class EntitySearchView {
 	private EntitySearchResultTable entityList;
 	private FormToolkit toolkit;
 	
-	
 	private ComboViewer cmbSavedSearch;
 	private TableComboViewer cmbEntityType;
 	private FilterComposite txtSearch;
