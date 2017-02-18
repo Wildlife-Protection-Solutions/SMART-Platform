@@ -223,7 +223,7 @@ public class Thumbnail {
 						}else{
 							List<String> toDraw = new ArrayList<String>();
 							
-							int width = c.getClientArea().width;
+							int width = c.getClientArea().width - 8;
 							
 							int size = 0;
 							StringBuilder sb = new StringBuilder();
@@ -238,11 +238,11 @@ public class Thumbnail {
 									size = e.gc.stringExtent(sb.toString()).x;
 								}
 							}
-							if (sb.length() >0) toDraw.add(sb.toString());
-							int y = 0;
+							if (sb.length() > 0) toDraw.add(sb.toString());
+							int y = 4;
 							
 							for (String x : toDraw){
-								e.gc.drawText(x, 0, y);
+								e.gc.drawText(x, 4, y);
 								y += e.gc.stringExtent(x).y;
 							}
 						}

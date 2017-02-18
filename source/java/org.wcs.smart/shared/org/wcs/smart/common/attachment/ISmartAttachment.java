@@ -108,7 +108,7 @@ public abstract class ISmartAttachment extends UuidItem{
 	 * @throws Exception
 	 */
 	@Transient
-	public void computeFileLocation(File location) throws Exception{
+	public void computeFileLocation(File location) {
 		this.attachmentFile = location; 
 	}
 	
