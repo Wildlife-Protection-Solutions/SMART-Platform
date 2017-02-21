@@ -90,7 +90,6 @@ import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.report.execute.ParameterFinder;
-import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
 
@@ -156,7 +155,8 @@ public class ReportApi extends HttpServlet{
 			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
 			
 			//for shared links; these links do not have a user but we want to check the j_username which is set to the link creator
-			String name = (String)request.getAttribute("j_username");	
+			//String name = (String)request.getAttribute("j_username");
+			String name = request.getUserPrincipal().getName();
 			
 			//check for permission to this query for this user.
 			if (!SecurityManager.INSTANCE.canAccess(s, name, ReportAction.RUNREPORT_KEY, uuid)){

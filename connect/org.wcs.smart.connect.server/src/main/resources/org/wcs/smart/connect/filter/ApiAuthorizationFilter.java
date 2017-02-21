@@ -23,6 +23,8 @@ package org.wcs.smart.connect.filter;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.sql.Timestamp;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -36,8 +38,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.hibernate.Session;
 import org.jboss.resteasy.util.Base64;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
+import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.SharedLink;
+import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.servlet.UserRoleRequestWrapper;
 
 
 /**
@@ -84,8 +93,47 @@ public class ApiAuthorizationFilter implements Filter {
 			chain.doFilter(request, response);
 			return;
 		}
+		String tokenString= request.getParameter("token");
 		
-		if (s == null || r.getRemoteUser() == null){
+		if(tokenString != null){
+			UUID token = UUID.fromString(tokenString);
+			Session session = HibernateManager.getSession(request.getServletContext());
+			session.beginTransaction();
+			SharedLink link;
+			try{
+				link = QueryManager.INSTANCE.findSharedLink(token, session);
+				if(link == null){
+					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidUuid", request.getLocale()));
+					return;
+				}
+				link.setOwnerUsername( ((SmartUser)session.get(SmartUser.class, link.getOwnerUuid())).getUsername() );
+			}finally{
+				session.getTransaction().commit();
+			}
+			
+			if (link != null){
+				//check if link is still valid
+				java.util.Date today = new java.util.Date();
+				Timestamp now = new Timestamp(today.getTime());
+				if(link.getExpiresAt().before(now)){
+					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale()));
+					return;
+				}else{
+					String userip = request.getRemoteAddr();
+					if(link.getAllowedIp() == null || link.getAllowedIp().isEmpty() || link.getAllowedIp().equals(userip)){
+						//Fill out the username with the link creator. This allows the Query Api to re-check if this user still has access to the query, or if it was revoked, which should revoke all links that user created.
+						
+						UserRoleRequestWrapper wrappedRequest = new UserRoleRequestWrapper(link.getOwnerUsername(), r);
+						
+						// pass the wrapped request along the filter chain
+						chain.doFilter(wrappedRequest, response);
+						return;
+					}
+				}
+			}			
+		}
+		
+		if (s == null || r.getRemoteUser() == null ){ 
 			//here we want to try basic authentication
 			boolean isOk = false;
 			logger.finer("Attempting basic authorization"); //$NON-NLS-1$

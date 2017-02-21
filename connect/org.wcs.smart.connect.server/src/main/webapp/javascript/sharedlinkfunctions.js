@@ -75,7 +75,7 @@ function tokenCreated(){
 			document.getElementById("createdlink").value = "There was an error creating the link: " + link.error;
 		}
 	}else{
-		document.getElementById("createdlink").value = resolve(SHAREDLINKSERVLETURL) + "?uuid=" + link.uuid + "&request=<enter your request url here;It must be in brackets, start with a / and be url-encoded eg. &request=%22%2Fapi%2Fconservationarea%2F%3FincludeSpatialBoundaries%3Dfalse%22   >";
+		document.getElementById("createdlink").value = "&token=" + link.uuid;
 	}
 	document.getElementById("createtokenbutton").style.display = "none";
 	document.getElementById("createdlink").style = "display: block;";

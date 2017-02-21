@@ -22,9 +22,7 @@
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
@@ -98,22 +96,11 @@ public class SharedLinkServlet extends HttpServlet {
 		}finally{
 			s.getTransaction().rollback();
 		}
-		//Fill out the username to the link creator. This allows the Query Api to re-check if this user still has access to the query, or if it was revoked, which should revoke all links that user created. 
-		request.setAttribute("j_username", username);
-	
+		//Fill out the username in a new wrapped request that will return this username just like the tomcat session-version would. 
 		UserRoleRequestWrapper wrappedRequest = new UserRoleRequestWrapper(username, request);
 		
-		//Forward the request to the specified URL if it is a user-token instead of a shared link with a single URL from the database.
-		if(link.isUserToken()){
-			path = request.getParameter("request");
-			if(path == null || path.charAt(1)!= '/' || path.isEmpty()){
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.invalidRequest", request.getLocale()));
-				return;
-			}
-			path = path.substring(1, path.length()-1);
-			RequestDispatcher rd = request.getRequestDispatcher(path);
-			rd.forward(wrappedRequest, response); //pass the new, wrapped request 
-		}else if(path != null){
+		//Forward the request to the URL from the database.
+		if(path != null){
 			RequestDispatcher rd = request.getRequestDispatcher(path);
 			rd.forward(wrappedRequest, response); //wrapped request actually works nicer here to, no code to look for j_username anymore.
 		}else{

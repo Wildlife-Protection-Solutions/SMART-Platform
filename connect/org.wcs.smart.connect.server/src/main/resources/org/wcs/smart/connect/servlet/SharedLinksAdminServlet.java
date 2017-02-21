@@ -23,7 +23,6 @@
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -34,9 +33,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
-import org.wcs.smart.connect.dataqueue.DataQueueAction;
 import org.wcs.smart.connect.hibernate.HibernateManager;
-import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
