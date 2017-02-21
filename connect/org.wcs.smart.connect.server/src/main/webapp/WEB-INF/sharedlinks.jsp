@@ -76,13 +76,13 @@
 						   <td><fmt:message key="query.numminutes" /></td>
 						   <td>
 							<select id="quickMinSelect">
-								<option value=60>1 hour</option>
-								<option value=1440>1 day</option>
-								<option value=10080>1 week</option>
-								<option value=43200>1 month</option>
-								<option value=259200>6 months</option>
-								<option value=518400>1 year</option>
-								<option value=-1>Custom...</option>
+								<option value=60><fmt:message key="sharedlinks.onehour"/></option>
+								<option value=1440><fmt:message key="sharedlinks.oneday"/></option>
+								<option value=10080><fmt:message key="sharedlinks.oneweek"/></option>
+								<option value=43200><fmt:message key="sharedlinks.onemonth"/></option>
+								<option value=259200><fmt:message key="sharedlinks.sixmonths"/></option>
+								<option value=518400><fmt:message key="sharedlinks.oneyear"/></option>
+								<option value=-1><fmt:message key="sharedlinks.custom"/></option>
 							</select>
 						  </td>
 						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>

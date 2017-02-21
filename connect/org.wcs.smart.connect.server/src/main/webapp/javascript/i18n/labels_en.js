@@ -172,6 +172,8 @@ labels_en= {
 "sharedlink.error":"An error occurred getting the list of Shared Links",
 "sharedlink.refreshing":"The Shared Link list is being refreshed, please wait.",
 "sharedlink.unauthorized":"You are unauthorized to delete this link or your session has timed out, login and try again",
+"sharedlinksfunctions.sessiontimeout":"Session has timed out / Unauthorized",
+"sharedlinksfunctions.linkerror":"There was an error creating the link:", 
 "users.errorupdatinguser" : " Error updating user information.",
 "dataqueue.fileuploaded":"File Uploaded",
 "dataqueue.fileupdated":"File Status Updated",

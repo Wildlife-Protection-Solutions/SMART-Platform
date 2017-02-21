@@ -48,9 +48,9 @@ function linkCreated(){
 	var status = this.status;
 	if(status != 200){
 		if(status == 401){
-			document.getElementById("createdlink").value = "Session has timed out / Unauthorized" + link.error;
+			document.getElementById("createdlink").value = i18n("sharedlinksfunctions.sessiontimeout")  + link.error;
 		}else{
-			document.getElementById("createdlink").value = "There was an error creating the link: " + link.error;
+			document.getElementById("createdlink").value = i18n("sharedlinksfunctions.linkerror") + link.error;
 		}
 	}else{
 		document.getElementById("createdlink").value = resolve(SHAREDLINKSERVLETURL) + "?uuid=" + link.uuid;
@@ -70,9 +70,9 @@ function tokenCreated(){
 	var status = this.status;
 	if(status != 200){
 		if(status == 401){
-			document.getElementById("createdlink").value = "Session has timed out / Unauthorized" + link.error;
+			document.getElementById("createdlink").value = i18n("sharedlinksfunctions.sessiontimeout")  + link.error;
 		}else{
-			document.getElementById("createdlink").value = "There was an error creating the link: " + link.error;
+			document.getElementById("createdlink").value = i18n("sharedlinksfunctions.linkerror") + link.error;
 		}
 	}else{
 		document.getElementById("createdlink").value = "&token=" + link.uuid;
