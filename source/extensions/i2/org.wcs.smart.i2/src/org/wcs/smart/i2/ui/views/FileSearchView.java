@@ -58,11 +58,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.Twistie;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -78,6 +80,10 @@ import org.wcs.smart.ui.properties.FilterComposite;
  *
  */
 public class FileSearchView {
+
+	private static final String SECTION_LABEL_KEY = "LABEL";
+
+	private static final String SECTION_STATE_KEY = "STATE";
 
 	public static final String ID = "org.wcs.smart.i2.ui.view.filesearch";
 	
@@ -254,20 +260,31 @@ public class FileSearchView {
 			
 		});
 		layoutResults();
-		
-		
-	
 	}
 	
 	private HashMap<ISmartAttachment, Composite> attachmentsToComp;
 	
 	private Composite createFileHeaderComp(Composite parent, ISmartAttachment attachment){
-		Composite c = new Composite(parent, SWT.NONE);
+		final Composite c = new Composite(parent, SWT.NONE);
 		attachmentsToComp.put(attachment, c);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		c.setLayout(new GridLayout());
-		Label l = new Label(c, SWT.NONE);
+		
+		Composite header = new Composite(c, SWT.NONE);
+		header.setLayout(new GridLayout(2, false));
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
+		
+		Twistie img = new Twistie(header, SWT.NONE);
+		img.setExpanded(true);
+		
+		final Label l = new Label(header, SWT.NONE);
+		l.setData(SECTION_STATE_KEY, true);
 		l.setText(attachment.getFilename());
+		
+		img.setBackground(c.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		header.setBackground(c.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		c.setBackground(c.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		l.setBackground(c.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
@@ -277,8 +294,28 @@ public class FileSearchView {
 		l.setFont(f);
 		l.addListener(SWT.Dispose, e->f.dispose());
 		
-		l = new Label(c, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label sep = new Label(c, SWT.SEPARATOR | SWT.HORIZONTAL);
+		sep.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Listener clickListener = e-> {
+				Boolean state = (Boolean)l.getData(SECTION_STATE_KEY);
+				state = !state;
+				img.setExpanded(state);
+				for (Control kid: c.getChildren()){
+					if (kid != header && kid != sep){
+						kid.setVisible(state);
+						((GridData)kid.getLayoutData()).exclude = !state;
+					}
+				}
+				c.pack();
+				l.setData(SECTION_STATE_KEY, state);
+				layoutResults();
+		};
+		l.addListener(SWT.MouseUp, clickListener);
+		l.setCursor(l.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
+		img.addListener(SWT.MouseUp, clickListener);
+			
+		c.setData(SECTION_LABEL_KEY, l);
 		return c;
 	}
 	
@@ -310,7 +347,7 @@ public class FileSearchView {
 		if (c == null){
 			c = createFileHeaderComp(compResults, attachment);
 		}
-		Label l = (Label)c.getChildren()[0];
+		Label l = (Label)c.getData(SECTION_LABEL_KEY);
 		l.setText(MessageFormat.format("{0} ({1} of {2})", attachment.getFilename(), displayCount, matchCount));
 		l.getParent().layout(true);
 		

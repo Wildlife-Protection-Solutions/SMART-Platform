@@ -37,9 +37,17 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -280,9 +288,36 @@ public class RecordMapPage extends SmartMapEditorPart {
 			}
 		});
 		
-		sash.setWeights(new int[]{8,2});
+		ToolBar bar = super.tools.getToolbar();
 		
-        
+		ToolItem importItem = new ToolItem(bar, SWT.DROP_DOWN);
+		importItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_LOCATION_IMPORT));
+		importItem.setToolTipText("import locations from file or GPS device");
+		
+		Menu dd = new Menu(bar);
+		
+		MenuItem fromFile = new MenuItem(dd, SWT.PUSH);
+		fromFile.setText("Import From File...");
+		fromFile.addListener(SWT.Selection, e->locationPanel.importLocationsFromFile());
+		
+		MenuItem fromGps = new MenuItem(dd, SWT.PUSH);
+		fromGps.setText("Import From GPS Device...");
+		fromGps.addListener(SWT.Selection, e->locationPanel.importLocationsFromGps());
+		
+		importItem.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent event){
+				 if (event.detail == SWT.ARROW) {
+			          Rectangle rect = importItem.getBounds();
+			          Point pt = new Point(rect.x, rect.y + rect.height);
+			          pt = bar.toDisplay(pt);
+			          dd.setLocation(pt.x, pt.y);
+			          dd.setVisible(true);
+			    }
+			}	
+		});
+		
+		sash.setWeights(new int[]{8,2});
         getMap().getBlackboard().put(RecordEditor.class.getName(), recordEditor);
         addLayers();
 	}

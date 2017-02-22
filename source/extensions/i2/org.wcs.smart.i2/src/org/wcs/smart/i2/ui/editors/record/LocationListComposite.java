@@ -22,9 +22,11 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.awt.Color;
+import java.io.File;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -59,6 +61,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -66,6 +69,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.geotools.legend.Glyph;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.gpx.GPSBabel;
+import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -74,8 +79,11 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.DateCellEditor;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.FileLocationParser;
 import org.wcs.smart.i2.ui.GeometryDialog;
 import org.wcs.smart.i2.ui.ObservationDialog;
+import org.wcs.smart.i2.ui.TransparentInfoDialog;
+import org.wcs.smart.i2.ui.dialogs.GPSDeviceSelectionDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -98,6 +106,7 @@ public class LocationListComposite extends Composite{
 	private MenuItem dropLinkItem;
 	private MenuItem editObsItem;
 	private MenuItem editGeometry;
+	private MenuItem importItem;
 	
 	public LocationListComposite(Composite parent, FormToolkit toolkit, RecordEditor editor){
 		super(parent, SWT.NONE);
@@ -310,182 +319,166 @@ public class LocationListComposite extends Composite{
 		linkEntities.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
+				for (MenuItem mi : linkEntities.getItems()){
+					if (mi.getMenu() != null) mi.getMenu().dispose();
+					mi.dispose();
+				}
+				
 				if (!editor.getEditMode()){
-					if (deleteItem != null){
-						deleteItem.dispose();
-						deleteItem = null;
-					}
-					if (editObsItem != null){
-						editObsItem.dispose();
-						editObsItem = null;
-					}
-					if (addLinkItem != null){
-						addLinkItem.dispose();
-						addLinkItem = null;
-					}
-					if (dropLinkItem != null){
-						dropLinkItem.dispose();
-						dropLinkItem = null;
-					}
+					return;
+				}
+				Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+				if (!(selection instanceof IntelLocation)) return;
+				
+				if (IntelSecurityManager.INSTANCE.canLinkLocationsToEntities()){
+					addLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
+					addLinkItem.setText("Add Entity Link ");
+				
+					dropLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
+					dropLinkItem.setText("Drop Entity Link ");
+						
+					Menu linkSubMenu = new Menu(addLinkItem);
+					addLinkItem.setMenu(linkSubMenu);
+						
+					Menu dropLinkSubMenu = new Menu(dropLinkItem);
+					dropLinkItem.setMenu(dropLinkSubMenu);
+						
 					
-				}else{
-					
-					if (IntelSecurityManager.INSTANCE.canLinkLocationsToEntities()){
-						if (addLinkItem == null){
-							addLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
-							addLinkItem.setText("Add Entity Link ");
-						}
-						
-						if (addLinkItem.getMenu() != null && !addLinkItem.getMenu().isDisposed()){
-							addLinkItem.getMenu().dispose();					
-						}
-						
-						if (dropLinkItem == null){
-							dropLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
-							dropLinkItem.setText("Drop Entity Link ");
-						}
-						if (dropLinkItem.getMenu() != null && !dropLinkItem.getMenu().isDisposed()){
-							dropLinkItem.getMenu().dispose();						
-						}
-						
-						Menu linkSubMenu = new Menu(addLinkItem);
-						addLinkItem.setMenu(linkSubMenu);
-						
-						Menu dropLinkSubMenu = new Menu(dropLinkItem);
-						dropLinkItem.setMenu(dropLinkSubMenu);
-						
-						Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-						if (!(selection instanceof IntelLocation)) return;
-						IntelLocation location = (IntelLocation)selection;
+					IntelLocation location = (IntelLocation)selection;
 							
-						List<IntelEntityRecord> allEntities = editor.getRecord().getEntities();
-						List<IntelEntity> toAdd = new ArrayList<IntelEntity>();
-						List<IntelEntity> toDrop= new ArrayList<IntelEntity>();
-						for (IntelEntityRecord record : allEntities){
-							boolean add = true;
-							for (IntelEntityLocation elocation: editor.getEntityLocationLinks()){
-								if (elocation.getLocation().equals(location)){
-									if (elocation.getEntity().equals(record.getEntity())){
-										add = false;
-										break;
-									}
+					List<IntelEntityRecord> allEntities = editor.getRecord().getEntities();
+					List<IntelEntity> toAdd = new ArrayList<IntelEntity>();
+					List<IntelEntity> toDrop= new ArrayList<IntelEntity>();
+					for (IntelEntityRecord record : allEntities){
+						boolean add = true;
+						for (IntelEntityLocation elocation: editor.getEntityLocationLinks()){
+							if (elocation.getLocation().equals(location)){
+								if (elocation.getEntity().equals(record.getEntity())){
+									add = false;
+									break;
 								}
-							}
-							if (add){
-								toAdd.add(record.getEntity());
-							}else{
-								toDrop.add(record.getEntity());
 							}
 						}
-						if (toAdd.size() > 0){
-							MenuItem linkToAll = new MenuItem(linkSubMenu, SWT.PUSH);
-							linkToAll.setText("All");
-							linkToAll.addSelectionListener(addEntityLinkListener);
-							new MenuItem(linkSubMenu, SWT.SEPARATOR);
-							for (IntelEntity entity : toAdd){
-								MenuItem linkTo = new MenuItem(linkSubMenu, SWT.PUSH);
-								linkTo.setText(entity.getIdAttributeAsText());
-								if (entity.getEntityType().getIcon() != null){
-									linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
-									linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
-								}
-								linkTo.setData(entity);
-								linkTo.addSelectionListener(addEntityLinkListener);
-							}
+						if (add){
+							toAdd.add(record.getEntity());
 						}else{
-							MenuItem noMore = new MenuItem(linkSubMenu, SWT.PUSH);
-							noMore.setEnabled(false);
-							noMore.setText("No Options");
+							toDrop.add(record.getEntity());
 						}
-						if (toDrop.size() > 0){
-							MenuItem linkToAll = new MenuItem(dropLinkSubMenu, SWT.PUSH);
-							linkToAll.setText("All");
-							linkToAll.addSelectionListener(dropEntityLinkListener);
-							new MenuItem(dropLinkSubMenu, SWT.SEPARATOR);
-							for (IntelEntity entity : toDrop){
-								MenuItem linkTo = new MenuItem(dropLinkSubMenu, SWT.PUSH);
-								linkTo.setText(entity.getIdAttributeAsText());
-								if (entity.getEntityType().getIcon() != null){
-									linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
-									linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
-								}
-								linkTo.setData(entity);
-								linkTo.addSelectionListener(dropEntityLinkListener);
+					}
+					if (toAdd.size() > 0){
+						MenuItem linkToAll = new MenuItem(linkSubMenu, SWT.PUSH);
+						linkToAll.setText("All");
+						linkToAll.addSelectionListener(addEntityLinkListener);
+						new MenuItem(linkSubMenu, SWT.SEPARATOR);
+						for (IntelEntity entity : toAdd){
+							MenuItem linkTo = new MenuItem(linkSubMenu, SWT.PUSH);
+							linkTo.setText(entity.getIdAttributeAsText());
+							if (entity.getEntityType().getIcon() != null){
+								linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
+								linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
 							}
-						}else{
-							MenuItem noMore = new MenuItem(dropLinkSubMenu, SWT.PUSH);
-							noMore.setEnabled(false);
-							noMore.setText("No Options");
+							linkTo.setData(entity);
+							linkTo.addSelectionListener(addEntityLinkListener);
 						}
 					}else{
-						if (addLinkItem != null){
-							addLinkItem.dispose();
-							addLinkItem = null;
+						MenuItem noMore = new MenuItem(linkSubMenu, SWT.PUSH);
+						noMore.setEnabled(false);
+						noMore.setText("No Options");
+					}
+					if (toDrop.size() > 0){
+						MenuItem linkToAll = new MenuItem(dropLinkSubMenu, SWT.PUSH);
+						linkToAll.setText("All");
+						linkToAll.addSelectionListener(dropEntityLinkListener);
+						new MenuItem(dropLinkSubMenu, SWT.SEPARATOR);
+						for (IntelEntity entity : toDrop){
+							MenuItem linkTo = new MenuItem(dropLinkSubMenu, SWT.PUSH);
+							linkTo.setText(entity.getIdAttributeAsText());
+							if (entity.getEntityType().getIcon() != null){
+								linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
+								linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
+							}
+							linkTo.setData(entity);
+							linkTo.addSelectionListener(dropEntityLinkListener);
 						}
-						if (dropLinkItem != null){
-							dropLinkItem.dispose();
-							dropLinkItem = null;
-						}
-					}
-					
-					if (deleteItem == null){
-						new MenuItem(linkEntities, SWT.SEPARATOR);
-						
-						deleteItem = new MenuItem(linkEntities, SWT.PUSH);
-						deleteItem.setText(MessageFormat.format("{0} Location", DialogConstants.DELETE_BUTTON_TEXT));
-						deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-						deleteItem.addSelectionListener(new SelectionAdapter() {
-							
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-								if (selection instanceof IntelLocation){
-									editor.deleteLocation(((IntelLocation)selection));
-								}
-							}
-						});
-					}
-					if(editObsItem  == null){
-						editObsItem = new MenuItem(linkEntities, SWT.PUSH);
-						editObsItem.setText("Edit Observations...");
-						editObsItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-						editObsItem.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-								if (selection instanceof IntelLocation){
-									ObservationDialog dialog = new ObservationDialog(getShell(), (IntelLocation)selection);
-									if (dialog.open() == Window.OK){
-										editor.setDirty(true);
-										tblObservations.refresh();
-									}
-								}
-							}
-						});
-					}
-					if(editGeometry  == null){
-						editGeometry = new MenuItem(linkEntities, SWT.PUSH);
-						editGeometry.setText("Edit Geometry...");
-						editGeometry.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-						editGeometry.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-								if (selection instanceof IntelLocation){
-									try{
-										GeometryDialog gd = new GeometryDialog(getShell(), ((IntelLocation)selection).getGeometry());
-										if (gd.open() == Window.OK){
-											((IntelLocation)selection).setGeometry(gd.getNewGeometry());
-											editor.locationsUpdated();
-										}
-									}catch (Exception ex){
-										Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
-									}
-								}
-							}
-						});
+					}else{
+						MenuItem noMore = new MenuItem(dropLinkSubMenu, SWT.PUSH);
+						noMore.setEnabled(false);
+						noMore.setText("No Options");
 					}
 				}
+				
+				new MenuItem(linkEntities, SWT.SEPARATOR);
+						
+				deleteItem = new MenuItem(linkEntities, SWT.PUSH);
+				deleteItem.setText(MessageFormat.format("{0} Location", DialogConstants.DELETE_BUTTON_TEXT));
+				deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+				deleteItem.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+						if (selection instanceof IntelLocation){
+							editor.deleteLocation(((IntelLocation)selection));
+						}
+					}
+				});
+				
+				editObsItem = new MenuItem(linkEntities, SWT.PUSH);
+				editObsItem.setText("Edit Observations...");
+				editObsItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+				editObsItem.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+						if (selection instanceof IntelLocation){
+							ObservationDialog dialog = new ObservationDialog(getShell(), (IntelLocation)selection);
+							if (dialog.open() == Window.OK){
+								editor.setDirty(true);
+								tblObservations.refresh();
+							}
+						}
+					}
+				});
+				
+				editGeometry = new MenuItem(linkEntities, SWT.PUSH);
+				editGeometry.setText("Edit Geometry...");
+				editGeometry.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+				editGeometry.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+						if (selection instanceof IntelLocation){
+							try{
+								GeometryDialog gd = new GeometryDialog(getShell(), ((IntelLocation)selection).getGeometry());
+								if (gd.open() == Window.OK){
+									((IntelLocation)selection).setGeometry(gd.getNewGeometry());
+									editor.locationsUpdated();
+								}
+							}catch (Exception ex){
+								Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+							}
+						}
+					}
+				});
+				
+				new MenuItem(linkEntities, SWT.SEPARATOR);
+						
+				importItem = new MenuItem(linkEntities, SWT.CASCADE);
+				importItem.setText("Import Locations...");
+					
+				Menu importOp = new Menu(importItem);
+				importItem.setMenu(importOp);
+						
+				MenuItem importFile = new MenuItem(importOp, SWT.PUSH);
+				importFile.setText("Import From File...");
+				importFile.addListener(SWT.Selection, evt->{
+					importLocationsFromFile();
+				});
+				MenuItem importGps = new MenuItem(importOp, SWT.PUSH);
+				importGps.setText("Import From GPS Device...");
+				importGps.addListener(SWT.Selection, evt->{
+					importLocationsFromGps();
+				});
+				
 			}
 			
 			
@@ -537,6 +530,48 @@ public class LocationListComposite extends Composite{
 		tblObservations.getTable().addListener(SWT.MouseUp, tableListener);
 		tblObservations.getTable().addListener(SWT.MouseMove, tableListener);
 		tblObservations.getTable().addListener(SWT.MouseHover, tableListener);	
+	}
+	
+	/**
+	 * imports locations from the gps device
+	 */
+	public void importLocationsFromGps(){
+		GPSDeviceSelectionDialog gpsDialog = new GPSDeviceSelectionDialog(getShell());
+		if (gpsDialog.open() != Window.OK) return;
+		
+		try{
+			File f = GPSBabel.getData(gpsDialog.getDeviceType(), Collections.singleton(GPSDataImport.ImportType.WAYPOINT));
+			importGpx(f);
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog("Unable to import waypoints from GPS device.", ex);
+			return;
+		}
+	} 
+	
+	/**
+	 * imports locations from a gpx file
+	 */
+	public void importLocationsFromFile(){
+		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
+		fd.setFilterExtensions(new String[]{"*.gpx", "*.*"});
+		fd.setFilterNames(new String[]{"GPX Files (*.gpx)", "All Files (*.*)"});
+		String file = fd.open();
+		if (file == null) return;
+		
+		importGpx(new File(file));
+	}
+	
+	/*
+	 * imports location from the given file
+	 */
+	private void importGpx(File f){
+		List<IntelLocation> locations = FileLocationParser.INSTANCE.parseFromGpx(f);
+		editor.addNewLocations(locations);
+			
+		if (locations != null && locations.size() > 0){
+			TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format("{0} locations imported and added to the record.", locations.size()));
+			infodialog.open();
+		}
 	}
 	
 	public void addSelectionListener(ISelectionChangedListener listener){

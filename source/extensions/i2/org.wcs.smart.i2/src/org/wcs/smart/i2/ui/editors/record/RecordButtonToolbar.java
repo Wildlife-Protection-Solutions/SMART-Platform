@@ -189,6 +189,7 @@ public class RecordButtonToolbar extends Composite{
 				
 			}
 		});
+		editItem.setSelection(recordEditor.getEditMode());
 	}
 	
 	

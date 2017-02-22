@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -82,6 +83,8 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -100,6 +103,8 @@ import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
+
+import com.vividsolutions.jts.io.ParseException;
 
 /**
  * Entity map editor composite 
@@ -427,9 +432,9 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		Menu mnu = new Menu(locationTable.getTable());
 		locationTable.getTable().setMenu(mnu);
 		
-		MenuItem mi = new MenuItem(mnu, SWT.PUSH);
-		mi.setText("Open Record");
-		mi.addSelectionListener(new SelectionAdapter() {
+		MenuItem openItem = new MenuItem(mnu, SWT.PUSH);
+		openItem.setText("Open Record");
+		openItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (getSelectedLocation() != null){
@@ -437,10 +442,73 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				}
 			}
 		});
+		
+		mnu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				for (MenuItem mi : mnu.getItems()){
+					if (mi != openItem){
+						mi.dispose();
+					}
+				}
+				if (!editor.getEditMode()) return;
+				
+				IntelLocation loc = getSelectedLocation();
+				try {
+					if (!(loc.getGeometry() instanceof com.vividsolutions.jts.geom.Point)) return;
+				} catch (ParseException e1) {
+					Intelligence2PlugIn.log(e1.getMessage(),e1);
+					return;
+				}
+				
+				List<IntelAttribute> attributes = new ArrayList<IntelAttribute>();
+				for (IntelEntityTypeAttribute a: editor.getEntity().getEntityType().getAttributes()){
+					if (a.getAttribute().getType() == AttributeType.POSITION){
+						attributes.add(a.getAttribute());
+					}
+				}
+				
+				if (!attributes.isEmpty()){
+					 new MenuItem(mnu, SWT.SEPARATOR);
+				}
+				for (IntelAttribute ia : attributes){			
+					MenuItem setAttribute = new MenuItem(mnu, SWT.PUSH);
+					
+					setAttribute.setText(MessageFormat.format("Update {0} To Selection", ia.getName()));
+					setAttribute.addSelectionListener(new SelectionAdapter() {
+						
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							com.vividsolutions.jts.geom.Point p = null;
+							try{
+								IntelLocation loc = getSelectedLocation();
+								if (!(loc.getGeometry() instanceof com.vividsolutions.jts.geom.Point)){
+									MessageDialog.openError(getShell(), "Update Attribute", "Invalid location type.  Can only update position attributes to point locations");
+									return;
+								}
+								p = (com.vividsolutions.jts.geom.Point) loc.getGeometry();
+							}catch (Exception ex){
+								Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+								return;
+							}
+							editor.updatePositionAttribute(ia, p.getX(), p.getY());
+						}
+					});					
+				}
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
+
 		mnu.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
-				mi.setEnabled(getSelectedLocation() != null);
+				for (MenuItem mi : mnu.getItems()){
+					mi.setEnabled(getSelectedLocation() != null);
+				}
 			}
 			
 			@Override

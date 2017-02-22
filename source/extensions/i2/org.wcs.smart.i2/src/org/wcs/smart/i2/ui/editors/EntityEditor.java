@@ -331,14 +331,13 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}finally{
 				s.close();
 			}
+			
 			entity = temp;
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					
-					initControl(entity);
+					initControl();
 				}
-				
 			});
 			return Status.OK_STATUS;
 		}
@@ -1114,16 +1113,21 @@ public class EntityEditor extends EditorPart implements MapPart{
 		return false;
 	}
 	
+	public boolean getEditMode(){
+		return this.isEditMode;
+	}
+	
 	public void setEditMode(boolean isEdit){
 		if (isEdit && !IntelSecurityManager.INSTANCE.canEditEntity()){
 			//cannot change the edit more; this user cannot edit entities
 			return;
 		}
+		
 		if (isEditMode && !isEdit && isDirty){
 			doSave(new NullProgressMonitor());
 		}
 		this.isEditMode = isEdit;
-		if (entity != null) initControl(entity);
+		if (entity != null) initControl();
 	
 		if (!deleteItem.isDisposed()) deleteItem.setEnabled(isEdit);
 		if (!editItem.isDisposed()) editItem.setSelection(isEdit);
@@ -1280,7 +1284,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		});
 		
 		Tree rTree = new Tree(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-		
+
 		treeRelationships = new TreeViewer(rTree);
 		toolkit.adapt(treeRelationships.getTree());
 		treeRelationships.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1744,7 +1748,21 @@ public class EntityEditor extends EditorPart implements MapPart{
 		attachmentTable.setAttachments(attachments);
 	}
 	
-	private void initControl(IntelEntity entity){
+	public void updatePositionAttribute(IntelAttribute ia, Double x, Double y){
+		IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
+		tmp.setNumberValue(x);
+		tmp.setNumberValue2(y);
+		for (AttributeFieldEditor e : fieldEditors){
+			if (e.getAttribute().equals(ia)){
+				e.initControl(tmp);
+				setDirty(true);
+				return;
+			}
+		}
+	}
+	
+	private synchronized void initControl(){
+		IntelEntity entity = getEntity();
 		
 		if (entity.getEntityType().getIcon() != null){
 			try {

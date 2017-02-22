@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,23 +48,19 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.FileLocationParser;
+import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.dialogs.AttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.editors.AttachmentTable;
 import org.wcs.smart.i2.ui.editors.IMenuCreator;
 import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
 import org.wcs.smart.i2.ui.views.FileSearchView;
-import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.lang.GeoLocation;
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.exif.GpsDirectory;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Composite for displaying attachments and thumbnails
@@ -98,13 +93,14 @@ public class AttachmentListComposite extends Composite{
 		((GridLayout)compAttachmentEdit.getLayout()).verticalSpacing = 0;
 		compAttachmentEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Button btnAddAttachment = toolkit.createButton(compAttachmentEdit, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
+		final Button btnAddAttachment = toolkit.createButton(compAttachmentEdit, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
 		btnAddAttachment.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {	
 				addAttachment();
 			}
 		});
+		
 		updateEditMode();
 		IMenuCreator thumbMenu = new IMenuCreator() {
 			private MenuItem mnuAdd;
@@ -304,8 +300,7 @@ public class AttachmentListComposite extends Composite{
 			}
 		};
 		attachmentTable = new AttachmentTable(this, toolkit, thumbMenu, SWT.NONE);
-		attachmentTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		attachmentTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
 	}
 	
 	private void addAttachment(){
@@ -313,6 +308,8 @@ public class AttachmentListComposite extends Composite{
 		dialog.open();
 		
 		if (dialog.getFileNames() != null){
+			int fileCnt = 0;
+			int locationCnt = 0;
 			for (String file : dialog.getFileNames()){
 				IntelAttachment ia = new IntelAttachment();
 				ia.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -329,24 +326,18 @@ public class AttachmentListComposite extends Composite{
 				}
 				editor.getRecord().getAttachments().add(iea);
 				
-				File imageFile = ia.getCopyFromLocation();
-				try{
-					Metadata metadata = ImageMetadataReader.readMetadata(imageFile);
-					for (Directory directory : metadata.getDirectoriesOfType(GpsDirectory.class)) {
-						GeoLocation geoLocation = ((GpsDirectory)directory).getGeoLocation();
-						if (geoLocation != null){
-							Date dateTime = ((GpsDirectory) directory).getGpsDate();
-							Point pnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(geoLocation.getLongitude(), geoLocation.getLatitude()));
-							editor.addNewLocation(pnt, dateTime);
-							break;
-						}
-						
-					}
-				}catch (Exception ex){
-					//cannot create thumbnail
-					//ex.printStackTrace();
-				}
+				//parse locations from file
+				List<IntelLocation> locations = FileLocationParser.INSTANCE.parseFile(ia.getCopyFromLocation());
+				editor.addNewLocations(locations);
+				fileCnt++;
+				locationCnt += locations.size();
 			}
+			
+			if (locationCnt > 0){
+				TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format("{0} locations parsed from {1} selected files and added to the record.", locationCnt, fileCnt));
+				infodialog.open();
+			}
+			
 			editor.setDirty(true);
 			refreshAttachmentTable();
 		}

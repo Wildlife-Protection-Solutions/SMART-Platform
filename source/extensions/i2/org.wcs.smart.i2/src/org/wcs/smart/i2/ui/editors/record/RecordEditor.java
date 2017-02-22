@@ -586,20 +586,27 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 * @param dateTime
 	 */
 	public void addNewLocation(@NotNull Geometry p, Date dateTime){
-		if (record.getLocations() == null) record.setLocations(new ArrayList<IntelLocation>());
-		
 		IntelLocation newLocation = new IntelLocation();
 		newLocation.setComment(null);
-		newLocation.setConservationArea(SmartDB.getCurrentConservationArea());
 		newLocation.setDateTime(dateTime == null ? record.getDateCreated() : dateTime);
 		newLocation.setGeometry(p);
-		newLocation.setId(MessageFormat.format("Location {0}", record.getLocations().size()+1));
-		newLocation.setRecord(record);
-		newLocation.setObservations(new ArrayList<IntelObservation>());
+		addNewLocations(Collections.singletonList(newLocation));
+	}
+	
+	public void addNewLocations(@NotNull List<IntelLocation> newLocations){
+		if (record.getLocations() == null) record.setLocations(new ArrayList<IntelLocation>());
 		
-		record.getLocations().add(newLocation);
+		for (IntelLocation newLocation : newLocations){
+			newLocation.setConservationArea(SmartDB.getCurrentConservationArea());
+			if (newLocation.getId() == null){
+				newLocation.setId(MessageFormat.format("Location {0}", record.getLocations().size()+1));
+			}
+			newLocation.setRecord(record);
+			newLocation.setObservations(new ArrayList<IntelObservation>());
 		
-//		summaryPage.getLocationPanel().refreshTable();
+			record.getLocations().add(newLocation);
+		}
+		
 		mapPage.refresh();
 		setDirty(true);
 	}
