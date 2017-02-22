@@ -6,33 +6,37 @@
 //
 
 
-package org.wcs.smart.observation.common.gpx;
+package org.wcs.smart.gpx.xml;
 
 import java.math.BigDecimal;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
  * 
- * 	 Two lat/lon pairs defining the extent of an element.
+ * 	 A geographic point with optional elevation and time.  Available for use by other schemas.
  *     
  * 
- * <p>Java class for boundsType complex type.
+ * <p>Java class for ptType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="boundsType">
+ * &lt;complexType name="ptType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="minlat" use="required" type="{http://www.topografix.com/GPX/1/1}latitudeType" />
- *       &lt;attribute name="minlon" use="required" type="{http://www.topografix.com/GPX/1/1}longitudeType" />
- *       &lt;attribute name="maxlat" use="required" type="{http://www.topografix.com/GPX/1/1}latitudeType" />
- *       &lt;attribute name="maxlon" use="required" type="{http://www.topografix.com/GPX/1/1}longitudeType" />
+ *       &lt;sequence>
+ *         &lt;element name="ele" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
+ *         &lt;element name="time" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
+ *       &lt;/sequence>
+ *       &lt;attribute name="lat" use="required" type="{http://www.topografix.com/GPX/1/1}latitudeType" />
+ *       &lt;attribute name="lon" use="required" type="{http://www.topografix.com/GPX/1/1}longitudeType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -41,112 +45,114 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "boundsType")
-public class BoundsType {
+@XmlType(name = "ptType", propOrder = {
+    "ele",
+    "time"
+})
+public class PtType {
 
+    protected BigDecimal ele;
+    @XmlSchemaType(name = "dateTime")
+    protected XMLGregorianCalendar time;
     @XmlAttribute(required = true)
-    protected BigDecimal minlat;
+    protected BigDecimal lat;
     @XmlAttribute(required = true)
-    protected BigDecimal minlon;
-    @XmlAttribute(required = true)
-    protected BigDecimal maxlat;
-    @XmlAttribute(required = true)
-    protected BigDecimal maxlon;
+    protected BigDecimal lon;
 
     /**
-     * Gets the value of the minlat property.
+     * Gets the value of the ele property.
      * 
      * @return
      *     possible object is
      *     {@link BigDecimal }
      *     
      */
-    public BigDecimal getMinlat() {
-        return minlat;
+    public BigDecimal getEle() {
+        return ele;
     }
 
     /**
-     * Sets the value of the minlat property.
+     * Sets the value of the ele property.
      * 
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
      *     
      */
-    public void setMinlat(BigDecimal value) {
-        this.minlat = value;
+    public void setEle(BigDecimal value) {
+        this.ele = value;
     }
 
     /**
-     * Gets the value of the minlon property.
+     * Gets the value of the time property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link XMLGregorianCalendar }
+     *     
+     */
+    public XMLGregorianCalendar getTime() {
+        return time;
+    }
+
+    /**
+     * Sets the value of the time property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link XMLGregorianCalendar }
+     *     
+     */
+    public void setTime(XMLGregorianCalendar value) {
+        this.time = value;
+    }
+
+    /**
+     * Gets the value of the lat property.
      * 
      * @return
      *     possible object is
      *     {@link BigDecimal }
      *     
      */
-    public BigDecimal getMinlon() {
-        return minlon;
+    public BigDecimal getLat() {
+        return lat;
     }
 
     /**
-     * Sets the value of the minlon property.
+     * Sets the value of the lat property.
      * 
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
      *     
      */
-    public void setMinlon(BigDecimal value) {
-        this.minlon = value;
+    public void setLat(BigDecimal value) {
+        this.lat = value;
     }
 
     /**
-     * Gets the value of the maxlat property.
+     * Gets the value of the lon property.
      * 
      * @return
      *     possible object is
      *     {@link BigDecimal }
      *     
      */
-    public BigDecimal getMaxlat() {
-        return maxlat;
+    public BigDecimal getLon() {
+        return lon;
     }
 
     /**
-     * Sets the value of the maxlat property.
+     * Sets the value of the lon property.
      * 
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
      *     
      */
-    public void setMaxlat(BigDecimal value) {
-        this.maxlat = value;
-    }
-
-    /**
-     * Gets the value of the maxlon property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigDecimal }
-     *     
-     */
-    public BigDecimal getMaxlon() {
-        return maxlon;
-    }
-
-    /**
-     * Sets the value of the maxlon property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigDecimal }
-     *     
-     */
-    public void setMaxlon(BigDecimal value) {
-        this.maxlon = value;
+    public void setLon(BigDecimal value) {
+        this.lon = value;
     }
 
 }

@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.patrol.gpx;
+package org.wcs.smart.gpx.xml;
 
 import java.util.ArrayList;
 import java.util.List;

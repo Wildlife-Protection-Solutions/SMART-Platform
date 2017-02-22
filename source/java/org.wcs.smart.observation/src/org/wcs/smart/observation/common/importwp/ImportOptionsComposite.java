@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.internal.Messages;
 
 /**

@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.patrol.gpx;
+package org.wcs.smart.gpx.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

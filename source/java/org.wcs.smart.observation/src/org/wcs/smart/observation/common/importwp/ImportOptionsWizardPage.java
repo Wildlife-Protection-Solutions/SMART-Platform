@@ -26,7 +26,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 
 import org.eclipse.jface.wizard.WizardPage;
-import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.internal.Messages;
 

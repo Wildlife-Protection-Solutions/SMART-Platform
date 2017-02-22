@@ -44,8 +44,8 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.editor.SaveMissionTracksJob;
 import org.wcs.smart.er.ui.mision.editor.SaveWaypointJob;
-import org.wcs.smart.observation.common.importwp.GPSDataImport;
-import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
+import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SharedUtils;
@@ -213,7 +213,7 @@ public class MissionDataImport {
 			return Collections.emptyList();
 		}
 		if (!useSource){
-			LineString track = GPSDataImport.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
+			LineString track = ObservationGPSDataImport.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
 			MissionTrack t = new MissionTrack();
 			t.setLineString(track);
 			t.setId(Messages.MissionDataImport_TrackLabel);

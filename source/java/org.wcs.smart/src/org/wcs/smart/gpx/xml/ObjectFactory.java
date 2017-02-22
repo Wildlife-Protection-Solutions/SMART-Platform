@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.observation.common.gpx;
+package org.wcs.smart.gpx.xml;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;

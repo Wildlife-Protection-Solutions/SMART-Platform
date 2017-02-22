@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.patrol.gpx;
+package org.wcs.smart.gpx.xml;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -20,15 +20,16 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * 
- * 		trk represents a track - an ordered list of points describing a path.
+ * 
+ * 		rte represents route - an ordered list of waypoints representing a series of turn points leading to a destination.
  * 	  
  * 
- * <p>Java class for trkType complex type.
+ * <p>Java class for rteType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="trkType">
+ * &lt;complexType name="rteType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -40,7 +41,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="number" type="{http://www.w3.org/2001/XMLSchema}nonNegativeInteger" minOccurs="0"/>
  *         &lt;element name="type" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="extensions" type="{http://www.topografix.com/GPX/1/1}extensionsType" minOccurs="0"/>
- *         &lt;element name="trkseg" type="{http://www.topografix.com/GPX/1/1}trksegType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="rtept" type="{http://www.topografix.com/GPX/1/1}wptType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -50,7 +51,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "trkType", propOrder = {
+@XmlType(name = "rteType", propOrder = {
     "name",
     "cmt",
     "desc",
@@ -59,9 +60,9 @@ import javax.xml.bind.annotation.XmlType;
     "number",
     "type",
     "extensions",
-    "trkseg"
+    "rtept"
 })
-public class TrkType {
+public class RteType {
 
     protected String name;
     protected String cmt;
@@ -72,7 +73,7 @@ public class TrkType {
     protected BigInteger number;
     protected String type;
     protected ExtensionsType extensions;
-    protected List<TrksegType> trkseg;
+    protected List<WptType> rtept;
 
     /**
      * Gets the value of the name property.
@@ -272,32 +273,32 @@ public class TrkType {
     }
 
     /**
-     * Gets the value of the trkseg property.
+     * Gets the value of the rtept property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the trkseg property.
+     * This is why there is not a <CODE>set</CODE> method for the rtept property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getTrkseg().add(newItem);
+     *    getRtept().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link TrksegType }
+     * {@link WptType }
      * 
      * 
      */
-    public List<TrksegType> getTrkseg() {
-        if (trkseg == null) {
-            trkseg = new ArrayList<TrksegType>();
+    public List<WptType> getRtept() {
+        if (rtept == null) {
+            rtept = new ArrayList<WptType>();
         }
-        return this.trkseg;
+        return this.rtept;
     }
 
 }

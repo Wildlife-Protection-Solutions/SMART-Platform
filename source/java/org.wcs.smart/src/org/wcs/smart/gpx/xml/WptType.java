@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.observation.common.gpx;
+package org.wcs.smart.gpx.xml;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

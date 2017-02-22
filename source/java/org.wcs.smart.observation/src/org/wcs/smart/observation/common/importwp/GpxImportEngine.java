@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
@@ -58,7 +58,7 @@ public abstract class GpxImportEngine implements IImportEngine{
 		if (options == ImportOption.DATE){
 			day = currentDate;
 		}
-		return GPSDataImport.convertGpx(files, day, Collections.singleton(type), monitor).get(type);
+		return ObservationGPSDataImport.convertGpx(files, day, Collections.singleton(type), monitor).get(type);
 		
 	}
 

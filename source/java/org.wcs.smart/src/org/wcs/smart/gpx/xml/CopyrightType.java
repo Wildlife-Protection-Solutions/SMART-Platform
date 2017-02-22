@@ -6,33 +6,36 @@
 //
 
 
-package org.wcs.smart.patrol.gpx;
+package org.wcs.smart.gpx.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
  * 
- * 	 A link to an external resource (Web page, digital photo, video clip, etc) with additional information.
+ * 
+ * 	 Information about the copyright holder and any license governing use of this file.  By linking to an appropriate license,
+ * 	 you may place your data into the public domain or grant additional usage rights.
  *     
  * 
- * <p>Java class for linkType complex type.
+ * <p>Java class for copyrightType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="linkType">
+ * &lt;complexType name="copyrightType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="text" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="type" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="year" type="{http://www.w3.org/2001/XMLSchema}gYear" minOccurs="0"/>
+ *         &lt;element name="license" type="{http://www.w3.org/2001/XMLSchema}anyURI" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="href" use="required" type="{http://www.w3.org/2001/XMLSchema}anyURI" />
+ *       &lt;attribute name="author" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -41,88 +44,89 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "linkType", propOrder = {
-    "text",
-    "type"
+@XmlType(name = "copyrightType", propOrder = {
+    "year",
+    "license"
 })
-public class LinkType {
+public class CopyrightType {
 
-    protected String text;
-    protected String type;
-    @XmlAttribute(required = true)
+    @XmlSchemaType(name = "gYear")
+    protected XMLGregorianCalendar year;
     @XmlSchemaType(name = "anyURI")
-    protected String href;
+    protected String license;
+    @XmlAttribute(required = true)
+    protected String author;
 
     /**
-     * Gets the value of the text property.
+     * Gets the value of the year property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link XMLGregorianCalendar }
+     *     
+     */
+    public XMLGregorianCalendar getYear() {
+        return year;
+    }
+
+    /**
+     * Sets the value of the year property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link XMLGregorianCalendar }
+     *     
+     */
+    public void setYear(XMLGregorianCalendar value) {
+        this.year = value;
+    }
+
+    /**
+     * Gets the value of the license property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getText() {
-        return text;
+    public String getLicense() {
+        return license;
     }
 
     /**
-     * Sets the value of the text property.
+     * Sets the value of the license property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setText(String value) {
-        this.text = value;
+    public void setLicense(String value) {
+        this.license = value;
     }
 
     /**
-     * Gets the value of the type property.
+     * Gets the value of the author property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getType() {
-        return type;
+    public String getAuthor() {
+        return author;
     }
 
     /**
-     * Sets the value of the type property.
+     * Sets the value of the author property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setType(String value) {
-        this.type = value;
-    }
-
-    /**
-     * Gets the value of the href property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getHref() {
-        return href;
-    }
-
-    /**
-     * Sets the value of the href property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setHref(String value) {
-        this.href = value;
+    public void setAuthor(String value) {
+        this.author = value;
     }
 
 }

@@ -11,13 +11,10 @@ Require-Bundle: org.wcs.smart,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.observation,
- org.wcs.smart.observation.common.gpx,
  org.wcs.smart.observation.common.importwp,
  org.wcs.smart.observation.common.importwp.csv,
- org.wcs.smart.observation.common.importwp.gpsbabel,
  org.wcs.smart.observation.events,
  org.wcs.smart.observation.model,
  org.wcs.smart.observation.ui,
  org.wcs.smart.observation.ui.input
-Bundle-ClassPath: lib/commons-exec-1.3.jar,
- .
+Bundle-ClassPath: .

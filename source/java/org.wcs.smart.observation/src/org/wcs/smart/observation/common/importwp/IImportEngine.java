@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -42,7 +42,7 @@ public interface IImportEngine {
 	 * @param type
 	 * @return <code>true</code> if given type supported 
 	 */
-	public boolean supportsType(GPSDataImport.ImportType type);
+	public boolean supportsType(ObservationGPSDataImport.ImportType type);
 	
 	/**
 	 * Loads all waypoints from the source.
@@ -67,7 +67,7 @@ public interface IImportEngine {
 	 * @return String success message to display on UI
 	 * @throws Exception
 	 */
-	public String updateSourceObject(ImportOption option, GPSDataImport.ImportType type, Object object, List<Waypoint> data, IProgressMonitor monitor) throws Exception;
+	public String updateSourceObject(ImportOption option, ObservationGPSDataImport.ImportType type, Object object, List<Waypoint> data, IProgressMonitor monitor) throws Exception;
 
 	/**
 	 * Fist wizard page to display

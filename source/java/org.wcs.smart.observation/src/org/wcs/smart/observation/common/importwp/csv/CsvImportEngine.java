@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.IImportEngine;
 import org.wcs.smart.observation.common.importwp.IImportWizardPage;
 import org.wcs.smart.observation.common.importwp.ImportCsvWizardPage;

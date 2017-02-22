@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.common.importwp.gpsbabel;
+package org.wcs.smart.gpx;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,10 +34,9 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
-import org.wcs.smart.observation.ObservationPlugIn;
-import org.wcs.smart.observation.common.importwp.GPSDataImport;
-import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Class to interface with GPS babel to read
@@ -97,7 +96,7 @@ public class GPSBabel {
 				try {
 					inputReader.close();
 				} catch (IOException e) {
-					ObservationPlugIn.log(Messages.GPSBabel_Error_ReadingBabelOps, e);
+					SmartPlugIn.log(Messages.GPSBabel_Error_ReadingBabelOps, e);
 				}
 			}
 
@@ -172,7 +171,7 @@ public class GPSBabel {
 		cmdLine.addArgument("gpx,gpxver=1.1"); //$NON-NLS-1$
 		cmdLine.addArgument("-F"); //$NON-NLS-1$
 		cmdLine.addArgument(file.getAbsolutePath());
-		ObservationPlugIn.logInfo("Running: " + cmdLine.toString()); //$NON-NLS-1$
+		SmartPlugIn.logInfo("Running: " + cmdLine.toString()); //$NON-NLS-1$
 		
 		DefaultExecutor exec = new DefaultExecutor();
 		// 2 minute timeout

@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
+import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.GpsImportEngine;
 import org.wcs.smart.observation.common.importwp.IImportWizardPage;
 import org.wcs.smart.observation.common.importwp.ImportGPSWizardPage;

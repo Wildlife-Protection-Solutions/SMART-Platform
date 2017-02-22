@@ -80,6 +80,7 @@ public class MapToolComposite {
 	
 	private List<ToolItem> items = new ArrayList<ToolItem>();
 	private String currentToolId = null;
+	private ToolBar toolBar;
 	
 	public MapToolComposite(){
 		
@@ -90,6 +91,9 @@ public class MapToolComposite {
 		this.tools = tools;
 	}
 
+	public ToolBar getToolbar(){
+		return this.toolBar;
+	}
 	
 	public void createComposite(Composite parent){
 		items.clear();
@@ -106,16 +110,16 @@ public class MapToolComposite {
 		
 		toolBarComp.setLayout(gl);
 		toolBarComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		ToolBar toolBar = new ToolBar (toolBarComp, SWT.FLAT | SWT.NONE | SWT.VERTICAL);
+		toolBar = new ToolBar (toolBarComp, SWT.FLAT | SWT.NONE | SWT.VERTICAL);
 		IToolManager toolManager = ApplicationGIS.getToolManager();
 		
 		for (int i = 0; i < tools.length; i ++){
 			ToolProxy found = ((ToolManager)toolManager).findToolProxy(tools[i]);
 			if (found instanceof ModalTool){
 				int style = SWT.CHECK;
-				 if (found.getType() != 1){	//modal tool proxy
+				if (found.getType() != 1){	//modal tool proxy
 					 style = SWT.PUSH;
-				 }
+				}
 				final ToolItem item = new ToolItem (toolBar, style);
 				item.setImage (found.getImage());
     			item.setToolTipText(found.getToolTipText());
