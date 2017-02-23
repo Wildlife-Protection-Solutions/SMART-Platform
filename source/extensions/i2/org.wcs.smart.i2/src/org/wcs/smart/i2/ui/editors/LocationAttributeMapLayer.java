@@ -175,37 +175,36 @@ public class LocationAttributeMapLayer {
 			}
 			
 			List<SimpleFeature> features = new ArrayList<>();
-			for (Object value : values) {
-				
-				IntelAttribute attribute = null;
-				if (value instanceof IntelValueItem){
-					attribute = ((IntelValueItem) value).getAttribute();
+			if (values != null){
+				for (Object value : values) {
+					IntelAttribute attribute = null;
+					if (value instanceof IntelValueItem){
+						attribute = ((IntelValueItem) value).getAttribute();
+						
+					}else if (value instanceof IntelRecordAttributeValue){
+						attribute = ((IntelRecordAttributeValue) value).getAttribute().getAttribute();
+						
+					}
+					if (attribute == null || attribute.getType() != IntelAttribute.AttributeType.POSITION){
+						continue;
+						//not a position attribute
+					}
 					
-				}else if (value instanceof IntelRecordAttributeValue){
-					attribute = ((IntelRecordAttributeValue) value).getAttribute().getAttribute();
-					
+					Point p = null;				
+					if (value instanceof IntelValueItem){
+						p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(((IntelValueItem)value).getNumberValue(), ((IntelValueItem)value).getNumberValue2()));
+					}else if (value instanceof IntelRecordAttributeValue){
+						p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(((IntelRecordAttributeValue)value).getNumberValue(), ((IntelRecordAttributeValue)value).getNumberValue2()));
+					}
+					if (p == null) continue;
+						
+					SimpleFeature sf = SimpleFeatureBuilder.build(
+							featureType,
+							new Object[] {p, UuidUtils.uuidToString(attribute.getUuid()), attribute.getName() }, null);
+					features.add(sf);
+					sf.setDefaultGeometry(p);
 				}
-				if (attribute == null || attribute.getType() != IntelAttribute.AttributeType.POSITION){
-					continue;
-					//not a position attribute
-				}
-				
-				Point p = null;				
-				if (value instanceof IntelValueItem){
-					p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(((IntelValueItem)value).getNumberValue(), ((IntelValueItem)value).getNumberValue2()));
-				}else if (value instanceof IntelRecordAttributeValue){
-					p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(((IntelRecordAttributeValue)value).getNumberValue(), ((IntelRecordAttributeValue)value).getNumberValue2()));
-				}
-				if (p == null) continue;
-					
-				SimpleFeature sf = SimpleFeatureBuilder.build(
-						featureType,
-						new Object[] {p, UuidUtils.uuidToString(attribute.getUuid()), attribute.getName() }, null);
-				features.add(sf);
-				sf.setDefaultGeometry(p);
-				
 			}
-			
 			attributeResource.resolve(FeatureStore.class, null).addFeatures(DataUtilities.collection(features));
 
 			AddLayersCommand addLayers = new AddLayersCommand(Collections.singleton(attributeResource)) {

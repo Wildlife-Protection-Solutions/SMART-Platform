@@ -17,10 +17,6 @@
             supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.i2.model.IntelDatamodelEvent"
-            supportsCcaa="false">
-      </class>
-      <class
             ca_property=".entityType.conservationArea"
             class="org.wcs.smart.i2.model.IntelEntity"
             supportsCcaa="false">
@@ -137,12 +133,12 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property="id.source.conservationArea"
+            ca_property=".id.source.conservationArea"
             class="org.wcs.smart.i2.model.IntelRecordSourceAttribute"
             supportsCcaa="false">
       </class>
       <class
-            ca_property="id.record.conservationArea"
+            ca_property=".id.record.conservationArea"
             class="org.wcs.smart.i2.model.IntelRecordAttributeValue"
             supportsCcaa="false">
       </class>
@@ -335,6 +331,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/assessment.png"
                   label="Data Assessment Mode">
                <parameter
                      name="org.wcs.smart.perspectiveid"
@@ -343,6 +340,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/analysis.png"
                   label="Data Analysis Mode">
                <parameter
                      name="org.wcs.smart.perspectiveid"
@@ -437,8 +435,7 @@
                </visibleWhen>
             </command>
             <separator
-                  name="org.wcs.smart.i2.separator1"
-                  visible="true">
+                  name="org.wcs.smart.i2.toolbar.seperator">
             </separator>
             <command
                   commandId="org.eclipse.ui.file.save">

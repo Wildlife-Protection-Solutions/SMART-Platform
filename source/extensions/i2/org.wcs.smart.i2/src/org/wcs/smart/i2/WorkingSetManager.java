@@ -60,11 +60,30 @@ public enum WorkingSetManager {
 	public UUID getActiveWorkingSet(){
 		return this.activeWorkingSet;
 	}
-	public void setActiveWorkingSet(IntelWorkingSet active, IEclipseContext context){
-		this.activeWorkingSet = active == null ? null : active.getUuid();
+	
+	/**
+	 * Sets the active working set 
+	 * @param active
+	 * @param context
+	 * @throws Exception
+	 */
+	public void setActiveWorkingSet(IntelWorkingSet active, IEclipseContext context) throws Exception{
+		if(active == null){
+			this.activeWorkingSet = null;
+		}else{
+			if (!active.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+				throw new Exception("Working set not valid for current Conservation Area");
+			}
+			this.activeWorkingSet = active.getUuid();
+		}
 		fireEvent(IntelEvents.ACTIVE_WS_SET, active, context);
 	}
 	
+	/**
+	 * Deletes the provided working set
+	 * @param s
+	 * @param set
+	 */
 	public void deleteWorkingSet(Session s, IntelWorkingSet set){
 		s.delete(set);
 	}

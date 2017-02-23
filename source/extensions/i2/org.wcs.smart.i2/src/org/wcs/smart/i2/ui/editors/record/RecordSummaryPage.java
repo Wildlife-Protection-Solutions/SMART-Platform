@@ -764,7 +764,7 @@ public class RecordSummaryPage extends EditorPart{
 	 * finds the record attribute value for a given attribute; null if not found
 	 */
 	private IntelRecordAttributeValue findAttributeValue(IntelRecordSourceAttribute a ){
-		if (recordEditor.getRecord().getAttachments() == null) return null;
+		if (recordEditor.getRecord().getAttributes() == null) return null;
 		for (IntelRecordAttributeValue v  : recordEditor.getRecord().getAttributes()){
 			if (v.getAttribute().equals(a)){
 				return v;
@@ -824,8 +824,7 @@ public class RecordSummaryPage extends EditorPart{
 				toUpdate.setRecord(r);
 				toUpdate.setAttribute(editor.getKey());
 				isNew = true;
-			}
-			
+			}			
 			if (editor.getValue() instanceof AttributeFieldEditor){
 				add = ((AttributeFieldEditor)editor.getValue()).updateValue(toUpdate);  
 			}else if (editor.getValue() instanceof EntityCheckboxDropDownViewer){

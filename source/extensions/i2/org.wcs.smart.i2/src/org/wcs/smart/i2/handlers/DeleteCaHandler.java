@@ -67,11 +67,6 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelDatamodelEvent"));
-		q = session.createQuery("delete from IntelDatamodelEvent where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-		
 		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelEntitySearch"));
 		q = session.createQuery("delete from IntelEntitySearch where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$

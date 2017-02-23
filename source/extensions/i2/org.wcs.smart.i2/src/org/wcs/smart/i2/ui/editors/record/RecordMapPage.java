@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -233,7 +234,10 @@ public class RecordMapPage extends SmartMapEditorPart {
 		if (attributeLayer != null){
 			attributeLayer.dispose();
 		}
-		attributeLayer = new LocationAttributeMapLayer(getMap(), "Position Attributes", UuidUtils.uuidToString(recordEditor.getRecord().getUuid()));
+		UUID id = recordEditor.getRecord().getUuid();
+		if (id == null) id = UUID.randomUUID();
+		
+		attributeLayer = new LocationAttributeMapLayer(getMap(), "Position Attributes", UuidUtils.uuidToString(id));
 		attributeLayer.createLayersRecord(recordEditor.getRecord().getAttributes());
 	}
 	

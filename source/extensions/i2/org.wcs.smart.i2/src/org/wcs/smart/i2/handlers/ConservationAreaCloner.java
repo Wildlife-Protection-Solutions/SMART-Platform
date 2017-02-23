@@ -200,10 +200,10 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setConservationArea(engine.getNewCa());
 			clone.setKeyId(g.getKeyId());
 			clone.setIcon(g.getIcon());
-			if (clone.getSourceEntityType() != null){
+			if (g.getSourceEntityType() != null){
 				clone.setSourceEntityType((IntelEntityType)engine.getNewConservationItem(g.getSourceEntityType()));
 			}
-			if (clone.getTargetEntityType() != null){
+			if (g.getTargetEntityType() != null){
 				clone.setTargetEntityType((IntelEntityType)engine.getNewConservationItem(g.getTargetEntityType()));
 			}
 			if (g.getRelationshipGroup() != null){
@@ -238,14 +238,14 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			
 			for (IntelRecordSourceAttribute attribute : source.getAttributes()){
 				IntelRecordSourceAttribute aclone = new IntelRecordSourceAttribute();
-				if (aclone.getAttribute() != null){
-					aclone.setAttribute( (IntelAttribute)engine.getNewConservationItem(aclone.getAttribute()) );
+				if (attribute.getAttribute() != null){
+					aclone.setAttribute( (IntelAttribute)engine.getNewConservationItem(attribute.getAttribute()) );
 				}
-				if (aclone.getEntityType() != null){
-					aclone.setEntityType( (IntelEntityType)engine.getNewConservationItem(aclone.getEntityType()) );
+				if (attribute.getEntityType() != null){
+					aclone.setEntityType( (IntelEntityType)engine.getNewConservationItem(attribute.getEntityType()) );
 				}
-				aclone.setIsMultiple(aclone.getIsMultiple());
-				aclone.setOrder(aclone.getOrder());
+				aclone.setIsMultiple(attribute.getIsMultiple());
+				aclone.setOrder(attribute.getOrder());
 				aclone.setSource(clone);
 				engine.copyLabels(attribute, aclone);
 				clone.getAttributes().add(aclone);

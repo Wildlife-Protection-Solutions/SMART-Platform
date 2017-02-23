@@ -155,7 +155,6 @@ public class WorkingSetMapLayersJob extends Job {
 			Session s = HibernateManager.openSession();
 			try{
 				workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-				
 				if (workingset.getEntities() != null){
 					workingset.getEntities().forEach(e->e.getEntity().getIdAttributeAsText());
 				}

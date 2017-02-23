@@ -391,7 +391,6 @@ public class AttributeFieldEditor {
 					value.getAttributeListItems().add(newItem);
 				}
 			}
-			
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			try{
 				String dvalue = ((Text)txtValue).getText();

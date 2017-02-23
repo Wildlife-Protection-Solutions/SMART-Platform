@@ -121,7 +121,14 @@ public class WorkingSetView {
 	
 	public static final String ID = "org.wcs.smart.i2.ui.view.workingset"; //$NON-NLS-1$
 	
-	public static final String LAST_WS_PREFERENCE = "org.wcs.smart.i2.workingset.uuid";
+	/**
+	 * The preference store key for the last loaded working set.  The make conservation area specific
+	 * need to append the uuid for the current conservation area to the end before loading
+	 * or storing the preference.
+	 * LAST_WS_PREFERENCE + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid())
+	 * 
+	 */
+	public static final String LAST_WS_PREFERENCE = "org.wcs.smart.i2.workingset.uuid.";
 	@Inject
 	private IEclipseContext context;
 
@@ -613,7 +620,7 @@ public class WorkingSetView {
 		IntelWorkingSet newWorkingSet = createWorkingSet(activeShell);
 		if (newWorkingSet != null){
 			context.get(IEventBroker.class).send(IntelEvents.WS_NEW, newWorkingSet);
-			WorkingSetManager.INSTANCE.setActiveWorkingSet(newWorkingSet, context);
+			setWorkingSet(newWorkingSet, context);
 		}
 	}
 
@@ -645,7 +652,7 @@ public class WorkingSetView {
 		}
 		if (set != null){
 			context.get(IEventBroker.class).send(IntelEvents.WS_NEW, set);
-			WorkingSetManager.INSTANCE.setActiveWorkingSet(set, context);
+			setWorkingSet(set, context);
 		}
 		
 	}
@@ -698,7 +705,7 @@ public class WorkingSetView {
 	@Optional
 	private void workingSetDelete(@UIEventTopic(IntelEvents.WS_DELETE) IntelWorkingSet set){
 		if (set.getUuid().equals(WorkingSetManager.INSTANCE.getActiveWorkingSet())){
-			WorkingSetManager.INSTANCE.setActiveWorkingSet(null, context);
+			setWorkingSet(null, context);
 		}
 	}
 	
@@ -758,7 +765,15 @@ public class WorkingSetView {
 		WorkingSetListDialog dialog = ContextInjectionFactory.make(WorkingSetListDialog.class, context);
 		if ( dialog.open() == Window.OK ){
 			IntelWorkingSet selection = dialog.getSelection();
-			WorkingSetManager.INSTANCE.setActiveWorkingSet(selection, context);
+			setWorkingSet(selection, context);
+		}
+	}
+	
+	private void setWorkingSet(IntelWorkingSet ws, IEclipseContext context){
+		try{
+			WorkingSetManager.INSTANCE.setActiveWorkingSet(ws, context);
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 		}
 	}
 	
@@ -905,10 +920,11 @@ public class WorkingSetView {
 				final Date[] dates2 = dates;
 				final IntelWorkingSet wss = ws;
 				
+				String key = LAST_WS_PREFERENCE + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid());
 				if (wss != null){
-					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_WS_PREFERENCE, UuidUtils.uuidToString(wss.getUuid()));
+					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(key, UuidUtils.uuidToString(wss.getUuid()));
 				}else{
-					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_WS_PREFERENCE, "");
+					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(key, "");
 				}
 				
 				Display.getDefault().syncExec(()->{

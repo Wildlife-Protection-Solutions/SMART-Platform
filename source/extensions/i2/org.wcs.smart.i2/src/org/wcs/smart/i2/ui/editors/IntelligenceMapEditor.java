@@ -36,6 +36,9 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -68,6 +71,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.internal.ui.IDropTargetProvider;
@@ -99,6 +104,8 @@ import org.opengis.filter.Filter;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -611,16 +618,35 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
         (new LoadDefaultLayersJob(getMap())).schedule();
         
 		//initialize from preference store
-		String uuid = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(WorkingSetView.LAST_WS_PREFERENCE);
+		String uuid = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(WorkingSetView.LAST_WS_PREFERENCE + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));
 		if (uuid != null && !uuid.isEmpty()){
-			try{
-				UUID wset = UuidUtils.stringToUuid(uuid);
-				IntelWorkingSet s = new IntelWorkingSet();
-				s.setUuid(wset);
-				WorkingSetManager.INSTANCE.setActiveWorkingSet(s, parentContext);
-			}catch (Exception ex){
-				
-			}
+		
+			Job loadWs = new Job("loading working set"){
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					UUID wset = UuidUtils.stringToUuid(uuid);
+					IntelWorkingSet ws = null;
+					Session s = HibernateManager.openSession();
+					try{
+						ws = (IntelWorkingSet)s.createCriteria(IntelWorkingSet.class)
+								.add(Restrictions.eq("uuid", wset))
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+								.uniqueResult();
+					}finally{
+						s.close();
+					}
+					try {
+						WorkingSetManager.INSTANCE.setActiveWorkingSet(ws, parentContext);
+					} catch (Exception e) {
+						Intelligence2PlugIn.log(e.getMessage(), e);
+					}
+					return Status.OK_STATUS;
+				}
+					
+			};
+			loadWs.setSystem(true);
+			loadWs.schedule();
+			
 		}
         
 	}

@@ -107,7 +107,6 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_recordsource_attribute",
 				"DROP TABLE smart.i_entity_location",
 				"DROP TABLE smart.i_observation_attribute",
-				"DROP TABLE smart.i_datamodel_event",
 				"DROP TABLE smart.i_observation",
 				"DROP TABLE smart.i_location",
 				"DROP TABLE smart.i_entity_search",
@@ -135,7 +134,7 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_relationship_group",
 				"DROP TABLE smart.i_recordsource",
 				"DROP TABLE smart.I_RECORD_ATTRIBUTE_VALUE_LIST",
-				"DROP TABLE smart.I_RECORD_QUERY",
+				
 				"DROP FUNCTION smart.double_metaphone",
 				"DROP FUNCTION smart.metaphoneContains",
 		};

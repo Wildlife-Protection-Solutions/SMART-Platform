@@ -144,8 +144,8 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		if (index <= 8) return Column.values()[index-1].name;
-		index = index - 9;
+		if (index < Column.values().length) return Column.values()[index-1].name;
+		index = index - Column.values().length;
 		if (index < type.getAttributes().size()){
 			return attributeColumnLabels.get(index);
 		}
@@ -157,8 +157,8 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		if (index <= 8) return Column.values()[index-1].id;
-		index = index - 9;
+		if (index < Column.values().length) return Column.values()[index-1].id;
+		index = index - Column.values().length;
 		if (index < type.getAttributes().size()){
 			return attributeColumnNames.get(index);
 		}
