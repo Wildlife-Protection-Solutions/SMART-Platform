@@ -638,7 +638,12 @@ public class EmployeeComposite extends Composite {
 				txtSmartPassword.setText(e.getSmartPassword());
 				txtSmartPassword2.setText(e.getSmartPassword());
 				if (cmbUserLevel != null){
-					cmbUserLevel.setValue(e.getSmartUserLevels());
+					List<SmartUserLevel> levels = new ArrayList<SmartUserLevel>();
+					for (String s : e.getSmartUserLevels()){
+						SmartUserLevel l = UserLevelManager.INSTANCE.getUserLevel(s);
+						if (l != null) levels.add(l);
+					}
+					cmbUserLevel.setValue(levels);
 				}
 				enableSmartUser(true);
 			}else{

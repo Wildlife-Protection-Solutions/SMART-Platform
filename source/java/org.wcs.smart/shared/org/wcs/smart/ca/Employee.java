@@ -241,6 +241,10 @@ public class Employee {
 		this.smartPassword = smartPassword;
 	}
 
+	/**
+	 * 
+	 * @return a comma delimited list of supported user levels
+	 */
 	@Column(name="smartuserlevel")
 	public String getSmartUserLevelKeys() {
 		return userLevelKey;
