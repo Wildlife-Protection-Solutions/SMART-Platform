@@ -47,6 +47,8 @@ import org.wcs.smart.internal.Messages;
  */
 public class GPSBabel {
 
+	public static final String DEFAULT_DEVICE_TYPE = "garmin"; //$NON-NLS-1$
+	
 	private static final String ERROR_MSG_COULD_NOT_IMPORT = Messages.GPSBabel_Error_CouldNotImport;
 
 	private static final String ERROR_MSG_PROCESS_TOLONG = Messages.GPSBabel_Error_ProcessTerminatedTooLong;
@@ -151,7 +153,7 @@ public class GPSBabel {
 	public static File getData(String deviceType, Set<GPSDataImport.ImportType> types) throws IOException{
 		
 		//create temporary file
-		File file = File.createTempFile("smart_import", null); //$NON-NLS-1$
+		File file = File.createTempFile("smart_import", ".gpx"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//CommandLine cmdLine = CommandLine.parse(getGpsBabelLocation());
 		CommandLine cmdLine = new CommandLine(getGpsBabelLocation());

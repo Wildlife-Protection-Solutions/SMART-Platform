@@ -121,7 +121,7 @@ public class ImportGPSWizardPage extends ImportOptionsWizardPage {
 				Entry<String, String> type = iterator.next();
 				DeviceSelection ds = new DeviceSelection(type.getKey(), type.getValue());;
 				devices[i++] = ds;
-				if (type.getKey().toLowerCase().contains("garmin")){ //$NON-NLS-1$
+				if (type.getKey().toLowerCase().contains(GPSBabel.DEFAULT_DEVICE_TYPE)){ 
 					toSelect = ds;
 				}
 				
