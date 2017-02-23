@@ -71,7 +71,7 @@ public class AttributeValueLabelProvider extends LabelProvider {
 				if (currentProjection != null ){
 					try{
 						CoordinateReferenceSystem parsed = ReprojectUtils.stringToCrs(currentProjection.getDefinition());
-						if (!CRS.equalsIgnoreMetadata(crs, parsed)){
+						if (!CRS.equalsIgnoreMetadata(temp, parsed)){
 							temp = parsed;
 						}
 					}catch (Exception ex){
@@ -92,6 +92,10 @@ public class AttributeValueLabelProvider extends LabelProvider {
 		return crs;
 	}
 	
+	public AttributeValueLabelProvider(){
+		super();
+		getCrs();
+	}
 	public String getText(Object element){
 		Object value = null;
 		IntelAttribute attribute = null;
@@ -127,6 +131,7 @@ public class AttributeValueLabelProvider extends LabelProvider {
 		}else if (value instanceof NamedItem){
 			return ((NamedItem) value).getName();
 		}else if (value instanceof Point){
+			CoordinateReferenceSystem crs = getCrs();
 			if(crs == GeometryUtils.SMART_CRS){
 				return ((Point)value).toString(); 
 			}else{

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -39,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.gpx.GPSBabel;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 
 /**
  * Simple dialog for selecting the device type from the GPS Babel device options.
@@ -90,16 +92,16 @@ public class GPSDeviceSelectionDialog extends TitleAreaDialog{
 		try {
 			options = GPSBabel.getDeviceOptions();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Intelligence2PlugIn.displayLog("Unable to load gps device options: " +e.getMessage(), e);
 		}
+		
 		String[][] stroptions = new String[options.size()][2];
 		int index = 0;
 		String[] toSelect = null;
 		for (Entry<String,String> op : options.entrySet()){
 			stroptions[index][0] = op.getKey();
 			stroptions[index++][1] = op.getValue();
-			if (op.getKey().toLowerCase().contains("garmin")){ //$NON-NLS-1$
+			if (op.getKey().toLowerCase().contains(GPSBabel.DEFAULT_DEVICE_TYPE)){ //$NON-NLS-1$
 				toSelect = stroptions[index-1];
 			}
 		}
@@ -117,13 +119,24 @@ public class GPSDeviceSelectionDialog extends TitleAreaDialog{
 				return super.getText(element);
 			}
 		});
-		cmbDevice.setSelection(new StructuredSelection((Object)toSelect));
+		if (toSelect != null) cmbDevice.setSelection(new StructuredSelection((Object)toSelect));
+		cmbDevice.addSelectionChangedListener(e->getButton(IDialogConstants.OK_ID).setEnabled(validate()));
+		
 		super.setMessage("Select the type of device to import from");
 		super.setTitle("Import Waypoints");
 		getShell().setText("Import Waypoints");
 		
-		
 		return parent;
+	}
+	
+	private boolean validate(){
+		return !cmbDevice.getSelection().isEmpty() && ((IStructuredSelection)cmbDevice.getSelection()).getFirstElement() instanceof String[];
+	}
+	
+	@Override
+	public void createButtonsForButtonBar(Composite parent){
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setEnabled(validate());
 	}
 	
 	@Override

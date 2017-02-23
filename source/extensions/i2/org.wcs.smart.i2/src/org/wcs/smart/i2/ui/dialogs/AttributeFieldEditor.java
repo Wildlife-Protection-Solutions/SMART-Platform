@@ -235,6 +235,7 @@ public class AttributeFieldEditor {
 				}
 			}
 		}
+		
 		if (msg != null){
 			cd.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_ERROR));
 			cd.setDescriptionText(msg);
@@ -736,7 +737,8 @@ public class AttributeFieldEditor {
 				
 				cd = createDecoration(cmbViewer.getControl());
 			}else{
-				createMultiSelectWidget(parent);
+				CheckBoxDropDown control = createMultiSelectWidget(parent);
+				cd = createDecoration(control);
 			}
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			Composite t = new Composite(parent, SWT.NONE);
@@ -891,7 +893,7 @@ public class AttributeFieldEditor {
 		}
 	}
 	
-	private void createMultiSelectWidget(Composite parent){
+	private CheckBoxDropDown createMultiSelectWidget(Composite parent){
 		cmbMultiSelect = new CheckBoxDropDown(parent){
 			@Override
 			protected String getTextLabel(Collection<?> objects){
@@ -914,7 +916,7 @@ public class AttributeFieldEditor {
 		cmbMultiSelect.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridData)cmbMultiSelect.getLayoutData()).widthHint = 100;
 		
-		cd = createDecoration(cmbMultiSelect);
+		return cmbMultiSelect;
 	}
 	/*
 	 * Creates a control decoration for a wizard page field.

@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
@@ -308,8 +312,8 @@ public class AttachmentListComposite extends Composite{
 		dialog.open();
 		
 		if (dialog.getFileNames() != null){
-			int fileCnt = 0;
-			int locationCnt = 0;
+			
+			final List<IntelAttachment> toSearch = new ArrayList<IntelAttachment>();
 			for (String file : dialog.getFileNames()){
 				IntelAttachment ia = new IntelAttachment();
 				ia.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -325,17 +329,40 @@ public class AttachmentListComposite extends Composite{
 					editor.getRecord().setAttachments(new ArrayList<IntelRecordAttachment>());
 				}
 				editor.getRecord().getAttachments().add(iea);
-				
-				//parse locations from file
-				List<IntelLocation> locations = FileLocationParser.INSTANCE.parseFile(ia.getCopyFromLocation());
-				editor.addNewLocations(locations);
-				fileCnt++;
-				locationCnt += locations.size();
+				toSearch.add(ia);
 			}
 			
-			if (locationCnt > 0){
-				TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format("{0} locations parsed from {1} selected files and added to the record.", locationCnt, fileCnt));
-				infodialog.open();
+			//parse locations from file in pmd dialog incase files are large
+			@SuppressWarnings("unchecked")
+			List<IntelLocation>[] locations = new List[]{null}; 
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+			try{
+				pmd.run(true, false, new IRunnableWithProgress() {
+						
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,
+							InterruptedException {
+						List<IntelLocation> addedLocations = new ArrayList<IntelLocation>();
+						monitor.beginTask("Processing files for locations", IProgressMonitor.UNKNOWN);
+						for (IntelAttachment ia : toSearch){
+							List<IntelLocation> toAdd = FileLocationParser.INSTANCE.parseFile(ia.getCopyFromLocation());
+							if (toAdd != null) addedLocations.addAll(toAdd);
+						}
+						locations[0] = addedLocations;
+						monitor.done();
+					}
+				});
+			}catch (Exception ex){
+				Intelligence2PlugIn.displayLog("Error processing files for locations: " +ex.getMessage(), ex);
+			}
+			
+			if (locations[0] != null){
+				List<IntelLocation> added =  (List<IntelLocation>)locations[0];
+				editor.addNewLocations(added);
+				if (added.size() > 0){
+					TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format("{0} locations parsed from {1} selected files and added to the record.", added.size(), toSearch.size()));
+					infodialog.open();	
+				}
 			}
 			
 			editor.setDirty(true);

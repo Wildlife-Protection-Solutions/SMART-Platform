@@ -48,7 +48,7 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		monitor.subTask("Deleting Intelligence Plugin Data...");
 		
 		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelObservationAttribute"));
-		Query q = session.createQuery("delete from IntelObservationAttribute ioa where ioa.id.attribute in (select a from IntelAttribute a where conservationArea = :ca)"); //$NON-NLS-1$
+		Query q = session.createQuery("delete from IntelObservationAttribute ioa where ioa.id.attribute in (select a from Attribute a where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -168,13 +168,28 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
+		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelRecordAttributeValue"));
+		q = session.createQuery("delete from IntelRecordAttributeValue ii where ii.record in (from IntelRecord where conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelRecord"));
 		q = session.createQuery("delete from IntelRecord where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelRecordQuery"));
-		q = session.createQuery("delete from IntelRecordQuery where conservationArea = :ca"); //$NON-NLS-1$
+		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelRecordObservationQuery"));
+		q = session.createQuery("delete from IntelRecordObservationQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelRecordSourceAttribute"));
+		q = session.createQuery("delete from IntelRecordSourceAttribute ii where ii.source in (from IntelRecordSource where conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		monitor.subTask(MessageFormat.format("Deleting Intelligence Plugin Data ({0}) ...", "IntelRecordSource"));
+		q = session.createQuery("delete from IntelRecordSource where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		

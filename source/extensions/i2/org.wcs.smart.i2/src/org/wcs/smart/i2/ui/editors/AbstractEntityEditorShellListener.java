@@ -105,6 +105,7 @@ public abstract class AbstractEntityEditorShellListener<T,D extends SmartShellDi
 	@SuppressWarnings("unchecked")
 	private void doHover(int x, int y) {
 		ViewerCell cell = viewer.getCell(new Point(x, y));
+	
 		if (cell == null){
 			closeShell();
 			return;
@@ -119,13 +120,10 @@ public abstract class AbstractEntityEditorShellListener<T,D extends SmartShellDi
 		
 		if (cell != null) {
 			T element = (T) cell.getElement();
+			closeShell();
 			D d = getShellDialog(element);
-			if (d == null || d != shellDialog){
-				closeShell();	
-			}
-			if (d != null && d != shellDialog){
+			if (d != null ){
 				shellDialog = d;
-				
 				int height = shellDialog.getSize().y;
 				Point p = viewer.getControl().toDisplay(x, y);
 				shellDialog.open(new Point(p.x, p.y - height));

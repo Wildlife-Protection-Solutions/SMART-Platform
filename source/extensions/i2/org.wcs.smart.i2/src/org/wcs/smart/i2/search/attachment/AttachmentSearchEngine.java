@@ -42,7 +42,6 @@ public enum AttachmentSearchEngine {
 		return Collections.singletonList(new TextFileSearcher());
 	}
 	
-	//TODO: only have on search job running at a time
 	/**
 	 * Creates and starts a new search job.  
 	 * @param toSearch

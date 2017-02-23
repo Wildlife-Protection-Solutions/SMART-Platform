@@ -231,7 +231,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Composite compRecords;
 	private Composite compRelationships;
 	private TableViewer tblRecords;
-	private TreeViewer treeRelationships;
+	private TreeViewer relationshipTree;
 	private List<IntelEntityAttachment> attachmentsToDelete = new ArrayList<IntelEntityAttachment>();
 	private List<IntelEntityRelationship> relationshipsToAdd = new ArrayList<IntelEntityRelationship>();
 	private List<IntelEntityRelationship> relationshipsToDelete = new ArrayList<IntelEntityRelationship>();
@@ -1148,14 +1148,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		(new OpenEntityHandler()).openEntity(toOpen, context);
 	}
 	private void deleteRelationship(){
-		IStructuredSelection sel = (IStructuredSelection) treeRelationships.getSelection();
+		IStructuredSelection sel = (IStructuredSelection) relationshipTree.getSelection();
 		if (!sel.isEmpty()){
 			if (sel.getFirstElement() instanceof IntelEntityRelationship){
 				IntelEntityRelationship r = (IntelEntityRelationship)sel.getFirstElement();
 				relationships.remove(r);
 				relationshipsToDelete.add(r);
-				((RelationshipContentProvider)treeRelationships.getContentProvider()).refresh();
-				treeRelationships.refresh();
+				((RelationshipContentProvider)relationshipTree.getContentProvider()).refresh();
+				relationshipTree.refresh();
 				setDirty(true);
 			}
 		}
@@ -1224,12 +1224,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 			relationships.add(newRelationship);
 			relationshipsToAdd.add(newRelationship);
 			setDirty(true);
-			((RelationshipContentProvider)treeRelationships.getContentProvider()).refresh();
+			((RelationshipContentProvider)relationshipTree.getContentProvider()).refresh();
 			if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
 				//edit 
 				editRelationshipAttributes(newRelationship);
 			}else{
-				treeRelationships.refresh();
+				relationshipTree.refresh();
 				setDirty(true);
 			}
 		}
@@ -1275,7 +1275,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		editRelationship.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 		editRelationship.setToolTipText("edit the selected relationship");
 		editRelationship.addListener(SWT.Selection, e-> {
-			IStructuredSelection sel = (IStructuredSelection) treeRelationships.getSelection();
+			IStructuredSelection sel = (IStructuredSelection) relationshipTree.getSelection();
 			if (!sel.isEmpty()){
 				if (sel.getFirstElement() instanceof IntelEntityRelationship){
 					editRelationshipAttributes((IntelEntityRelationship) sel.getFirstElement());
@@ -1285,24 +1285,24 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		Tree rTree = new Tree(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 
-		treeRelationships = new TreeViewer(rTree);
-		toolkit.adapt(treeRelationships.getTree());
-		treeRelationships.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		treeRelationships.setContentProvider(new RelationshipContentProvider( input.getUuid() ));
-		treeRelationships.getTree().setHeaderVisible(true);
+		relationshipTree = new TreeViewer(rTree);
+		toolkit.adapt(relationshipTree.getTree());
+		relationshipTree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		relationshipTree.setContentProvider(new RelationshipContentProvider( input.getUuid() ));
+		relationshipTree.getTree().setHeaderVisible(true);
 
-		treeRelationships.getTree().addListener(SWT.MouseDoubleClick, new Listener(){
+		relationshipTree.getTree().addListener(SWT.MouseDoubleClick, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				int colIndex = treeRelationships.getCell(new Point(event.x, event.y)).getColumnIndex();
+				int colIndex = relationshipTree.getCell(new Point(event.x, event.y)).getColumnIndex();
 				if (colIndex == 4){
-					Object x = ((IStructuredSelection)treeRelationships.getSelection()).getFirstElement();
+					Object x = ((IStructuredSelection)relationshipTree.getSelection()).getFirstElement();
 					if (x instanceof IntelEntityRelationship){
 						editRelationshipAttributes((IntelEntityRelationship) x);
 					}
 				}else if (colIndex == 3){
 					//source
-					Object x = ((IStructuredSelection)treeRelationships.getSelection()).getFirstElement();
+					Object x = ((IStructuredSelection)relationshipTree.getSelection()).getFirstElement();
 					if (x instanceof IntelEntityRelationship){
 						IntelEntityRelationship r = (IntelEntityRelationship)x;
 						if (r.getSourceObject() != null){
@@ -1314,7 +1314,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						}
 					}
 				}else if (colIndex == 1){
-					Object x = ((IStructuredSelection)treeRelationships.getSelection()).getFirstElement();
+					Object x = ((IStructuredSelection)relationshipTree.getSelection()).getFirstElement();
 					if (x instanceof IntelEntityRelationship){
 						IntelEntityRelationship r = (IntelEntityRelationship)x;
 						if (!r.getSourceEntity().equals(getEntity())){
@@ -1322,7 +1322,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						}
 					}
 				}else if (colIndex == 2){
-					Object x = ((IStructuredSelection)treeRelationships.getSelection()).getFirstElement();
+					Object x = ((IStructuredSelection)relationshipTree.getSelection()).getFirstElement();
 					if (x instanceof IntelEntityRelationship){
 						IntelEntityRelationship r = (IntelEntityRelationship)x;
 						if (!r.getTargetEntity().equals(getEntity())){
@@ -1335,49 +1335,45 @@ public class EntityEditor extends EditorPart implements MapPart{
 		});
 		
 		
-		TreeViewerColumn colType = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
+		TreeViewerColumn colType = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
 		colType.getColumn().setText("Relationship");
 		colType.getColumn().setWidth(150);
 		colType.setLabelProvider(new RelationshipLabelProvider(0));
 		
-		TreeViewerColumn colRelationshipSrc = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
+		TreeViewerColumn colRelationshipSrc = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
 		colRelationshipSrc.getColumn().setText("Source Relation");
 		colRelationshipSrc.getColumn().setWidth(150);
 		colRelationshipSrc.setLabelProvider(new RelationshipLabelProvider(1));
 		
-		TreeViewerColumn colRelationshipTrg = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
+		TreeViewerColumn colRelationshipTrg = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
 		colRelationshipTrg.getColumn().setText("Target Relation");
 		colRelationshipTrg.getColumn().setWidth(150);
 		colRelationshipTrg.setLabelProvider(new RelationshipLabelProvider(2));
 		
-		TreeViewerColumn colSource = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
+		TreeViewerColumn colSource = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
 		colSource.getColumn().setText("Source");
 		colSource.getColumn().setWidth(75);
 		colSource.setLabelProvider(new RelationshipLabelProvider(3));
 		
-		TreeViewerColumn colAttributes = new TreeViewerColumn(treeRelationships, SWT.DEFAULT);
+		TreeViewerColumn colAttributes = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
 		colAttributes.getColumn().setText("Attributes");
 		colAttributes.setLabelProvider(new RelationshipLabelProvider(4));
-		treeRelationships.getTree().addPaintListener(new PaintListener() {			
+		relationshipTree.getTree().addPaintListener(new PaintListener() {			
 			@Override
 			public void paintControl(PaintEvent e) {
-				treeRelationships.getTree().removePaintListener(this);
+				relationshipTree.getTree().removePaintListener(this);
 				int size = parent.getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT).x - 350;
 				if (size < 350) size = 350;
 				colAttributes.getColumn().setWidth(size);		
 			}
 		});
 		//create table listener for displaying entity relationship info
-		new AbstractEntityEditorShellListener<IntelEntityRelationship, EntityRelationshipDetailsShell>(treeRelationships, 4) {			
+		new AbstractEntityEditorShellListener<Object, EntityRelationshipDetailsShell>(relationshipTree, 4) {			
 			@Override
-			protected EntityRelationshipDetailsShell getShellDialog(IntelEntityRelationship currentSelection) {
+			protected EntityRelationshipDetailsShell getShellDialog(Object currentSelection) {
 				if (currentSelection instanceof IntelEntityRelationship){
 					IntelEntityRelationship relationship = (IntelEntityRelationship) currentSelection;
-					if (shellDialog == null || !shellDialog.getRelationship().equals(relationship)){
-						return new EntityRelationshipDetailsShell(getSite().getShell(),relationship);
-					}else if (shellDialog != null && shellDialog.getRelationship().equals(relationship)){
-						return shellDialog;
-					}
+					return new EntityRelationshipDetailsShell(getSite().getShell(),relationship);
 				}
 				return null;
 			}
@@ -1414,7 +1410,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					mnuOpen = null;
 				}
 
-				Object x = ((IStructuredSelection)treeRelationships.getSelection()).getFirstElement();
+				Object x = ((IStructuredSelection)relationshipTree.getSelection()).getFirstElement();
 				if (x instanceof IntelEntityRelationship){
 					IntelEntityRelationship r = (IntelEntityRelationship)x;
 					mnuOpen = new MenuItem(thumbMenu,SWT.DEFAULT,0);
@@ -1447,7 +1443,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						mnuEdit.addSelectionListener(new SelectionAdapter(){
 							@Override
 							public void widgetSelected(SelectionEvent e) {
-								IStructuredSelection sel = (IStructuredSelection) treeRelationships.getSelection();
+								IStructuredSelection sel = (IStructuredSelection) relationshipTree.getSelection();
 								if (!sel.isEmpty()){
 									if (sel.getFirstElement() instanceof IntelEntityRelationship){
 										editRelationshipAttributes((IntelEntityRelationship)sel.getFirstElement());
@@ -1482,13 +1478,13 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		};
 		
-		treeRelationships.getTree().setMenu(mnuRelationship.createMenu(treeRelationships.getTree()));
+		relationshipTree.getTree().setMenu(mnuRelationship.createMenu(relationshipTree.getTree()));
 	}
 
 	private void editRelationshipAttributes(IntelEntityRelationship relation){
-		RelationshipAttributeDialog dialog = new RelationshipAttributeDialog(treeRelationships.getControl().getShell(), relation);
+		RelationshipAttributeDialog dialog = new RelationshipAttributeDialog(relationshipTree.getControl().getShell(), relation);
 		if (dialog.open() == Window.OK){
-			treeRelationships.refresh();
+			relationshipTree.refresh();
 			setDirty(true);
 		}
 	}
@@ -1938,9 +1934,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		refreshAttachmentTable();
 		
-		treeRelationships.setInput(relationships);
-		treeRelationships.refresh();
-		treeRelationships.expandAll();
+		relationshipTree.setInput(relationships);
+		relationshipTree.refresh();
+		relationshipTree.expandAll();
 		
 		mapPart.refresh();
 		loadRecords.schedule(0);
@@ -1990,6 +1986,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		private RelationshipTypeLabelProvider ll = null;
 		private RelationshipGroupLabelProvider lg = null;
 		private AttributeValueLabelProvider la = null;
+		
 		public RelationshipLabelProvider(int columnIndex){
 			this.columnIndex = columnIndex;
 			if (columnIndex == 0){

@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 
 /**
  * Attachment search job.  Only a single search job runs at a time.
@@ -91,7 +92,8 @@ public class AttachmentSearchJob extends Job {
 				}
 			}
 		}catch (Exception ex){
-			//TODO:
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+			return Status.CANCEL_STATUS;
 		}finally{
 			collector.done();
 		}

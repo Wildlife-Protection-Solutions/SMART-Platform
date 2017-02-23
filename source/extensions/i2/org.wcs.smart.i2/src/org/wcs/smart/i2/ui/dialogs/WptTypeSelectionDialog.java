@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.dialogs;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -116,9 +117,14 @@ public class WptTypeSelectionDialog extends TitleAreaDialog{
 					if (wp.getCmt() != null && !wp.getCmt().toLowerCase().equals("null")){ //$NON-NLS-1$
 						value.append (" (" + wp.getCmt() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					value.append( " [");
-					value.append(DateFormat.getInstance().format(GPSDataImport.findWaypointDate(wp)));
-					value.append( " ]");
+					
+					Date d = GPSDataImport.findWaypointDate(wp);
+					if (d != null){
+						value.append( " [");
+						value.append(DateFormat.getInstance().format(GPSDataImport.findWaypointDate(wp)));
+						value.append( " ]");
+					}
+					
 					return value.toString();
 				}
 				return super.getText(element);

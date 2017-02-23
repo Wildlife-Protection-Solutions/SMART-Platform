@@ -21,181 +21,241 @@
  */
 package org.wcs.smart.i2.handlers;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.model.IntelDatamodelEvent;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
-import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 
 /**
- * Clones required components of the intelligence plugin.
+ * Clones intelligence template details
  * 
  * @author Emily
  *
  */
-public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
+@SuppressWarnings("unchecked")
+public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
+		monitor.beginTask("Cloning Intelligence Details...", 6);
+		try{
+			monitor.subTask("Processing Attributes");
+			cloneAttributes(engine);
+			monitor.worked(1);
+			
+			monitor.setTaskName("Processing Entity Types");
+			cloneEntityTypes(engine);
+			monitor.worked(1);
+			
+			monitor.setTaskName("Processing Relationship Groups");
+			cloneRelationshipGroups(engine);
+			monitor.worked(1);
+			
+			monitor.setTaskName("Processing Relationship Types");
+			cloneRelationshipTypes(engine);
+			monitor.worked(1);
+			
+			monitor.setTaskName("Processing Record Source Types");
+			cloneRecordSource(engine);
+			monitor.worked(1);
+			
+			//clone record template
+			Path source = IntelReportManager.INSTANCE.getRecordTemplate(engine.getTemplateCa());
+			Path target = IntelReportManager.INSTANCE.getRecordTemplate(engine.getNewCa());
+			FileUtils.copyFile(source.toFile(), target.toFile());
+			monitor.worked(1);
+		}finally{
+			monitor.done();
+		}
+	}
 
-		//clone attributes and attribute list items
-		List<IntelAttribute> attributes = engine.getSession().createCriteria(IntelAttribute.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.list();
+	
+	private void cloneAttributes(ConservationAreaClonerEngine engine){
+		List<IntelAttribute> attributes = engine.getSession()
+				.createCriteria(IntelAttribute.class)
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
 		
-		for (IntelAttribute attribute: attributes){
+		
+		for (IntelAttribute ia : attributes){
 			IntelAttribute clone = new IntelAttribute();
-			
 			clone.setConservationArea(engine.getNewCa());
-			engine.copyLabels(attribute, clone);
-			clone.setKeyId(attribute.getKeyId());
-			clone.setType(attribute.getType());
+			clone.setKeyId(ia.getKeyId());
+			engine.copyLabels(ia, clone);
+			clone.setType(ia.getType());
 			
-			if (attribute.getType() == AttributeType.LIST){
+			if (ia.getAttributeList() != null){
 				clone.setAttributeList(new ArrayList<IntelAttributeListItem>());
-				for (IntelAttributeListItem item : attribute.getAttributeList()){
+				for (IntelAttributeListItem i : ia.getAttributeList()){
 					IntelAttributeListItem clonei = new IntelAttributeListItem();
 					clonei.setAttribute(clone);
-					clonei.setKeyId(item.getKeyId());
-					engine.copyLabels(item, clonei);
-					
+					clonei.setKeyId(i.getKeyId());
+					engine.copyLabels(i, clonei);
 					clone.getAttributeList().add(clonei);
 				}
 			}
-			
+			engine.addConservationItemMapping(ia, clone);
 			engine.getSession().save(clone);
 			engine.getSession().flush();
-			
-			engine.addConservationItemMapping(attribute, clone);
-		}
+		}	
+	}
+	
+	private void cloneEntityTypes(ConservationAreaClonerEngine engine) throws Exception{
+		List<IntelEntityType> entityTypes = engine.getSession()
+				.createCriteria(IntelEntityType.class)
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
 		
-		//clone relationship groups
-		List<IntelRelationshipGroup> groups = engine.getSession().createCriteria(IntelRelationshipGroup.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.list();
 		
-		for (IntelRelationshipGroup group : groups){
-			IntelRelationshipGroup clone = new IntelRelationshipGroup();
-			clone.setConservationArea(engine.getNewCa());
-			clone.setKeyId(group.getKeyId());
-			engine.copyLabels(group, clone);
-			clone.setRelationshipTypes(new ArrayList<IntelRelationshipType>());
-			
-			engine.getSession().save(clone);
-			engine.getSession().flush();
-			
-			engine.addConservationItemMapping(group, clone);
-		}
-		
-		//clone entity types
-		List<IntelEntityType> entityTypes = engine.getSession().createCriteria(IntelEntityType.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.list();
-		
-		for (IntelEntityType etype : entityTypes){
+		for (IntelEntityType ia : entityTypes){
 			IntelEntityType clone = new IntelEntityType();
 			clone.setConservationArea(engine.getNewCa());
-			clone.setKeyId(etype.getKeyId());
-			engine.copyLabels(etype, clone);
-			
-			File src = new File(engine.getTemplateCa().getFileDataStoreLocation(), etype.getBirtTemplate());
-			File dest = new File(engine.getNewCa().getFileDataStoreLocation(), etype.getBirtTemplate());
-			FileUtils.copyFile(src, dest);
-			
-			clone.setBirtTemplate(etype.getBirtTemplate());
-			clone.setIcon(etype.getIcon());
-			clone.setIdAttribute((IntelAttribute)engine.getNewConservationItem(etype.getIdAttribute()));
-			clone.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
-			for (IntelEntityTypeAttribute atype : etype.getAttributes()){
-				IntelEntityTypeAttribute aclone = new IntelEntityTypeAttribute();
-				aclone.setAttribute( (IntelAttribute)engine.getNewConservationItem(atype.getAttribute()) );
-				aclone.setEntityType(clone);
-				clone.getAttributes().add(aclone);
+			clone.setKeyId(ia.getKeyId());
+			engine.copyLabels(ia, clone);
+			clone.setIcon(ia.getIcon());
+			clone.setIdAttribute((IntelAttribute)engine.getNewConservationItem(ia.getIdAttribute()));
+			if (ia.getBirtTemplate() != null){
+				clone.setBirtTemplate(ia.getBirtTemplate());
+				Path source = IntelReportManager.INSTANCE.getEntityTemplate(ia);
+				Path target = IntelReportManager.INSTANCE.getEntityTemplate(clone);
+				FileUtils.copyFile(source.toFile(), target.toFile());
 			}
 			
 			engine.getSession().save(clone);
-			engine.getSession().flush();
 			
-			engine.addConservationItemMapping(etype, clone);
-			
-		}
-		
-		
-		//clone relationship types
-		List<IntelRelationshipType> types = engine.getSession().createCriteria(IntelRelationshipType.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.list();
-		
-		for (IntelRelationshipType type : types){
-			IntelRelationshipType clone = new IntelRelationshipType();
-			clone.setConservationArea(engine.getNewCa());
-			clone.setKeyId(type.getKeyId());
-			engine.copyLabels(type, clone);
-			
-			clone.setAttributes(new ArrayList<IntelRelationshipTypeAttribute>());
-			for (IntelRelationshipTypeAttribute attribute : type.getAttributes()){
-				IntelRelationshipTypeAttribute aclone = new IntelRelationshipTypeAttribute();
+			if (ia.getAttributes() != null){
+				clone.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
+				HashMap<UUID, IntelEntityTypeAttributeGroup> groups = new HashMap<>();
 				
-				
-				IntelAttribute newAttribute = (IntelAttribute) engine.getNewConservationItem(attribute.getAttribute());
-				aclone.setAttribute(newAttribute);
-				aclone.setRelationshipType(clone);
-				
-				clone.getAttributes().add(aclone);
+				for (IntelEntityTypeAttribute i : ia.getAttributes()){
+					IntelEntityTypeAttribute iclone = new IntelEntityTypeAttribute();
+					iclone.setAttribute((IntelAttribute)engine.getNewConservationItem(i.getAttribute()));
+					
+					if (i.getAttributeGroup() != null){
+						IntelEntityTypeAttributeGroup group = groups.get(i.getAttributeGroup().getUuid());
+						if (group == null){
+							group = new IntelEntityTypeAttributeGroup();
+							group.setEntityType(clone);
+							group.setOrder(i.getAttributeGroup().getOrder());
+							engine.copyLabels(i.getAttributeGroup(), group);
+							groups.put(i.getAttributeGroup().getUuid(), group);
+							engine.getSession().save(group);
+						}
+						iclone.setAttributeGroup(group);
+					}
+					iclone.setEntityType(clone);
+					iclone.setOrder(i.getOrder());
+					clone.getAttributes().add(iclone);
+				}
 			}
+			engine.addConservationItemMapping(ia, clone);
 			
-			clone.setIcon(type.getIcon());
-			IntelRelationshipGroup group = (IntelRelationshipGroup) engine.getNewConservationItem(type.getRelationshipGroup());
-			group.getRelationshipTypes().add(clone);
-			clone.setRelationshipGroup(group);
 			
-			clone.setSourceEntityType((IntelEntityType)engine.getNewConservationItem(type.getSourceEntityType()));
-			clone.setTargetEntityType((IntelEntityType)engine.getNewConservationItem(type.getTargetEntityType()));
-			
-			engine.getSession().save(clone);
 			engine.getSession().flush();
-			
-			engine.addConservationItemMapping(type, clone);
 		}
+	}
+	
 
-		//clone data model events
-		List<IntelDatamodelEvent> dmEvents = engine.getSession().createCriteria(IntelDatamodelEvent.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.list();
-		for (IntelDatamodelEvent dmEvent : dmEvents){
-			IntelDatamodelEvent clone = new IntelDatamodelEvent();
-			if (dmEvent.getAttributeListItem() != null){
-				clone.setAttributeListItem( (AttributeListItem)engine.getNewConservationItem(dmEvent.getAttributeListItem()) );
-			}
-			if (dmEvent.getAttributeTreeNode() != null){
-				clone.setAttributeTreeNode( (AttributeTreeNode)engine.getNewConservationItem(dmEvent.getAttributeTreeNode()) );
-			}
-			
+	private void cloneRelationshipGroups(ConservationAreaClonerEngine engine){
+		List<IntelRelationshipGroup> relationshipGroups = engine.getSession()
+				.createCriteria(IntelRelationshipGroup.class)
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+		
+		for (IntelRelationshipGroup g : relationshipGroups){
+			IntelRelationshipGroup clone = new IntelRelationshipGroup();
+			engine.copyLabels(g, clone);
 			clone.setConservationArea(engine.getNewCa());
-			if (dmEvent.getCategory() != null){
-				clone.setCategory((Category)engine.getNewConservationItem(dmEvent.getCategory()));
+			clone.setKeyId(g.getKeyId());
+			engine.addConservationItemMapping(g, clone);
+			
+			engine.getSession().save(clone);
+			engine.getSession().flush();
+		}
+	}
+	
+	private void cloneRelationshipTypes(ConservationAreaClonerEngine engine){
+		List<IntelRelationshipType> relationshipGroups = engine.getSession()
+				.createCriteria(IntelRelationshipType.class)
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+		
+		for (IntelRelationshipType g : relationshipGroups){
+			IntelRelationshipType clone = new IntelRelationshipType();
+			engine.copyLabels(g, clone);
+			clone.setConservationArea(engine.getNewCa());
+			clone.setKeyId(g.getKeyId());
+			clone.setIcon(g.getIcon());
+			if (clone.getSourceEntityType() != null){
+				clone.setSourceEntityType((IntelEntityType)engine.getNewConservationItem(g.getSourceEntityType()));
+			}
+			if (clone.getTargetEntityType() != null){
+				clone.setTargetEntityType((IntelEntityType)engine.getNewConservationItem(g.getTargetEntityType()));
+			}
+			if (g.getRelationshipGroup() != null){
+				IntelRelationshipGroup group = (IntelRelationshipGroup)engine.getNewConservationItem(g.getRelationshipGroup());
+				clone.setRelationshipGroup(group);
+				if (group.getRelationshipTypes() == null){
+					group.setRelationshipTypes(new ArrayList<IntelRelationshipType>());
+				}
+				group.getRelationshipTypes().add(clone);
+				engine.getSession().save(group);	
 			}
 			
 			engine.getSession().save(clone);
+			engine.getSession().flush();
 		}
+		
+	}
+	
+	private void cloneRecordSource(ConservationAreaClonerEngine engine){
+		
+		List<IntelRecordSource> sources = engine.getSession()
+				.createCriteria(IntelRecordSource.class)
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+		
+		for (IntelRecordSource source : sources){
+			IntelRecordSource clone = new IntelRecordSource();
+			engine.copyLabels(source, clone);
+			clone.setConservationArea(engine.getNewCa());
+			clone.setIcon(source.getIcon());
+			clone.setKeyId(source.getKeyId());
+			clone.setAttributes(new ArrayList<IntelRecordSourceAttribute>());
+			
+			for (IntelRecordSourceAttribute attribute : source.getAttributes()){
+				IntelRecordSourceAttribute aclone = new IntelRecordSourceAttribute();
+				if (aclone.getAttribute() != null){
+					aclone.setAttribute( (IntelAttribute)engine.getNewConservationItem(aclone.getAttribute()) );
+				}
+				if (aclone.getEntityType() != null){
+					aclone.setEntityType( (IntelEntityType)engine.getNewConservationItem(aclone.getEntityType()) );
+				}
+				aclone.setIsMultiple(aclone.getIsMultiple());
+				aclone.setOrder(aclone.getOrder());
+				aclone.setSource(clone);
+				engine.copyLabels(attribute, aclone);
+				clone.getAttributes().add(aclone);
+					
+			}
+			
+			engine.getSession().save(clone);
+			engine.getSession().flush();
+		}
+		
 	}
 
 }

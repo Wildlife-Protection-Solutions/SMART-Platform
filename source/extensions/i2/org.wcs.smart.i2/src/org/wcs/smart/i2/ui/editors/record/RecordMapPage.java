@@ -123,8 +123,11 @@ public class RecordMapPage extends SmartMapEditorPart {
 				if (polygonFeatureType == null || polygonResource == null){
 					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POLYGON);
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POLYGON, recordEditor.getRecord().getUuid());
-					polygonFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
-					polygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(polygonFeatureType);
+					polygonFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(), formatString);
+					synchronized (CatalogPlugin.getDefault().getLocalCatalog()) {
+						polygonResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(polygonFeatureType);
+					}
+					
 					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(polygonResource), getMap().getLayersInternal().size()){
 						 public void run( IProgressMonitor monitor ) throws Exception {
 							 super.run(monitor);
@@ -141,7 +144,9 @@ public class RecordMapPage extends SmartMapEditorPart {
 					String formatString = IntelRecordFeatureSource.getFeatureSchemaString(LocationLayerType.POINT);
 					Name name = IntelRecordDataSource.generateName(LocationLayerType.POINT, recordEditor.getRecord().getUuid());
 					pointFeatureType = DataUtilities.createType(name.getNamespaceURI(), name.getLocalPart(),formatString);
-					pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(pointFeatureType);
+					synchronized (CatalogPlugin.getDefault().getLocalCatalog()) {
+						pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(pointFeatureType);
+					}
 					AddLayersCommand command = new AddLayersCommand(Collections.singletonList(pointResource), getMap().getLayersInternal().size()){
 						 public void run( IProgressMonitor monitor ) throws Exception {
 							 super.run(monitor);

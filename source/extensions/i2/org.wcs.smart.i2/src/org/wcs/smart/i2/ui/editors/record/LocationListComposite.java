@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import java.awt.Color;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -30,7 +31,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -60,6 +64,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
@@ -328,15 +333,17 @@ public class LocationListComposite extends Composite{
 					return;
 				}
 				Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-				if (!(selection instanceof IntelLocation)) return;
+				if (selection != null && !(selection instanceof IntelLocation)) return;
 				
 				if (IntelSecurityManager.INSTANCE.canLinkLocationsToEntities()){
 					addLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
 					addLinkItem.setText("Add Entity Link ");
-				
+					addLinkItem.setEnabled(selection != null);
+					
 					dropLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
 					dropLinkItem.setText("Drop Entity Link ");
-						
+					dropLinkItem.setEnabled(selection != null);
+					
 					Menu linkSubMenu = new Menu(addLinkItem);
 					addLinkItem.setMenu(linkSubMenu);
 						
@@ -421,6 +428,7 @@ public class LocationListComposite extends Composite{
 						}
 					}
 				});
+				deleteItem.setEnabled(selection != null);
 				
 				editObsItem = new MenuItem(linkEntities, SWT.PUSH);
 				editObsItem.setText("Edit Observations...");
@@ -438,6 +446,7 @@ public class LocationListComposite extends Composite{
 						}
 					}
 				});
+				editObsItem.setEnabled(selection != null);
 				
 				editGeometry = new MenuItem(linkEntities, SWT.PUSH);
 				editGeometry.setText("Edit Geometry...");
@@ -459,6 +468,7 @@ public class LocationListComposite extends Composite{
 						}
 					}
 				});
+				editGeometry.setEnabled(selection != null);
 				
 				new MenuItem(linkEntities, SWT.SEPARATOR);
 						
@@ -535,43 +545,83 @@ public class LocationListComposite extends Composite{
 	/**
 	 * imports locations from the gps device
 	 */
+	@SuppressWarnings("unchecked")
 	public void importLocationsFromGps(){
+		List<IntelLocation>[] locations = new List[]{null};
 		GPSDeviceSelectionDialog gpsDialog = new GPSDeviceSelectionDialog(getShell());
 		if (gpsDialog.open() != Window.OK) return;
 		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
-			File f = GPSBabel.getData(gpsDialog.getDeviceType(), Collections.singleton(GPSDataImport.ImportType.WAYPOINT));
-			importGpx(f);
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask("Loading waypoints from GPS device", IProgressMonitor.UNKNOWN);
+					try{
+						File f = GPSBabel.getData(gpsDialog.getDeviceType(), Collections.singleton(GPSDataImport.ImportType.WAYPOINT));
+						locations[0] = importGpx(f, monitor);
+					}catch (Exception ex){
+						Intelligence2PlugIn.displayLog("Unable to import waypoints from GPS device.", ex);
+						return;
+					}
+				}
+			});
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Unable to import waypoints from GPS device.", ex);
-			return;
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 		}
+		displayInfo(locations[0]);
 	} 
 	
 	/**
 	 * imports locations from a gpx file
 	 */
+	@SuppressWarnings("unchecked")
 	public void importLocationsFromFile(){
-		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-		fd.setFilterExtensions(new String[]{"*.gpx", "*.*"});
-		fd.setFilterNames(new String[]{"GPX Files (*.gpx)", "All Files (*.*)"});
-		String file = fd.open();
-		if (file == null) return;
+		List<IntelLocation>[] locations = new List[]{null};
 		
-		importGpx(new File(file));
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask("Loading locations from GPX File", IProgressMonitor.UNKNOWN);
+					final String[] file = new String[]{null};
+					Display.getDefault().syncExec(()->{
+						FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
+						fd.setFilterExtensions(new String[]{"*.gpx", "*.*"});
+						fd.setFilterNames(new String[]{"GPX Files (*.gpx)", "All Files (*.*)"});
+						file[0] = fd.open();	
+					});
+					
+					if (file[0] == null) return;
+					
+					locations[0] = importGpx(new File(file[0]), monitor);
+					monitor.done();
+				}
+			});
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+		}
+		displayInfo(locations[0]);
 	}
 	
+	private void displayInfo(List<?> items){
+		if (items != null && items.size() > 0){
+			TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format("{0} locations imported and added to the record.", items.size()));
+			infodialog.open();
+		}
+	}
 	/*
 	 * imports location from the given file
 	 */
-	private void importGpx(File f){
-		List<IntelLocation> locations = FileLocationParser.INSTANCE.parseFromGpx(f);
-		editor.addNewLocations(locations);
-			
-		if (locations != null && locations.size() > 0){
-			TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format("{0} locations imported and added to the record.", locations.size()));
-			infodialog.open();
-		}
+	private List<IntelLocation> importGpx(File f, IProgressMonitor monitor){
+		List<IntelLocation> locations = FileLocationParser.INSTANCE.parseFromGpx(f, monitor);
+		
+		Display.getDefault().syncExec(()->editor.addNewLocations(locations));
+		return locations;
 	}
 	
 	public void addSelectionListener(ISelectionChangedListener listener){

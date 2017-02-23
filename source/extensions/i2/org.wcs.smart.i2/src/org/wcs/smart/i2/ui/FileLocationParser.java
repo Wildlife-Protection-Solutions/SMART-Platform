@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
@@ -64,7 +65,7 @@ public enum FileLocationParser {
 	 */
 	public List<IntelLocation> parseFile(File f){
 		List<IntelLocation> locations = new ArrayList<IntelLocation>();
-		locations.addAll(parseFromGpx(f));
+		locations.addAll(parseFromGpx(f, null));
 		locations.addAll(parseFromImage(f));
 		return locations;
 	}
@@ -76,27 +77,32 @@ public enum FileLocationParser {
 	 * @param gpxFile
 	 * @return
 	 */
-	public List<IntelLocation> parseFromGpx(File gpxFile){
+	public List<IntelLocation> parseFromGpx(File gpxFile, IProgressMonitor monitor){
+		if (monitor == null) monitor = new NullProgressMonitor();
 		if (!gpxFile.getName().toLowerCase().endsWith(".gpx")) return Collections.emptyList();
 		List<IntelLocation> locations = new ArrayList<IntelLocation>();
 		try{
-			List<WptType> waypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), new NullProgressMonitor());
-			WptTypeSelectionDialog dialog = new WptTypeSelectionDialog(Display.getDefault().getActiveShell(), waypoints, MessageFormat.format("Import locations from gpx file: {0}", gpxFile.getName()));
-			if (dialog.open() == Window.OK){
-				for (WptType wp : dialog.getWaypoints()){
-					IntelLocation l = new IntelLocation();
-					
-					Point pnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getLon().doubleValue(), wp.getLat().doubleValue()));
-					Date dt = GPSDataImport.findWaypointDate(wp);
-					l.setGeometry(pnt);
-					l.setDateTime(dt);
-					l.setId(wp.getName());
-					if (wp.getCmt() != null && !"null".equals(wp.getCmt().toLowerCase())){
-						l.setComment(wp.getCmt());
-					}
-					locations.add(l);
-					
+			List<WptType> waypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), monitor);
+			
+			List<WptType> selectedPoints = new ArrayList<WptType>();
+			Display.getDefault().syncExec(()->{
+				WptTypeSelectionDialog dialog = new WptTypeSelectionDialog(Display.getDefault().getActiveShell(), waypoints, MessageFormat.format("Import locations from gpx file: {0}", gpxFile.getName()));
+				if (dialog.open() == Window.OK){
+					selectedPoints.addAll(dialog.getWaypoints());
 				}
+			});
+			for (WptType wp : selectedPoints){
+				IntelLocation l = new IntelLocation();
+				Point pnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getLon().doubleValue(), wp.getLat().doubleValue()));
+				Date dt = GPSDataImport.findWaypointDate(wp);
+				if (dt == null) dt = new Date();
+				l.setGeometry(pnt);
+				l.setDateTime(dt);
+				l.setId(wp.getName());
+				if (wp.getCmt() != null && !"null".equals(wp.getCmt().toLowerCase())){
+					l.setComment(wp.getCmt());
+				}
+				locations.add(l);
 			}
 		}catch (Exception ex){
 			SmartPlugIn.log(ex.getMessage(), ex);

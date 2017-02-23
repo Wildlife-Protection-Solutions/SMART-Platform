@@ -384,6 +384,7 @@
                id="org.wcs.smart.i2.toolbar.perspective">
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/analysis.png"
                   label="Data Analysis Mode"
                   tooltip="open intelligence analysis mode">
                <parameter
@@ -408,6 +409,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/assessment.png"
                   label="Data Assessment Mode"
                   tooltip="open intelligence assessment mode">
                <parameter
@@ -1806,6 +1808,13 @@
             touchpointType="org.eclipse.equinox.p2.osgi"
             version="1.0.0">
       </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.i2.handlers.ConservationAreaCloner"
+            id="org.wcs.smart.i2.ca.clone">
+      </templateCloner>
    </extension>
 
 </plugin>

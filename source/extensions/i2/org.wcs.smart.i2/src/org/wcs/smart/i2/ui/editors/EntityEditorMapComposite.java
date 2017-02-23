@@ -376,13 +376,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		new AbstractEntityEditorShellListener<IntelEntityLocation, RecordDetailsShell>(locationTable, 4) {			
 			@Override
 			protected RecordDetailsShell getShellDialog(IntelEntityLocation currentSelection) {
-				
-				if (shellDialog == null || shellDialog.isDisposed()){
-					return  new RecordDetailsShell(locationTable.getControl().getShell(),currentSelection.getLocation().getRecord());
-				}else if (!shellDialog.getRecord().equals(currentSelection)){
-					shellDialog.setRecord(currentSelection.getLocation().getRecord());
-				}
-				return shellDialog;
+				return  new RecordDetailsShell(locationTable.getControl().getShell(),currentSelection.getLocation().getRecord());
 			}
 		};
 

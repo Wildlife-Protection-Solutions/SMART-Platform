@@ -170,9 +170,10 @@ public class LocationAttributeMapLayer {
 		try {
 			SimpleFeatureType featureType = createFeatureType();
 
-			attributeResource = CatalogPlugin.getDefault().getLocalCatalog()
-					.createTemporaryResource(featureType);
-
+			synchronized (CatalogPlugin.getDefault().getLocalCatalog()) {
+				attributeResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
+			}
+			
 			List<SimpleFeature> features = new ArrayList<>();
 			for (Object value : values) {
 				
