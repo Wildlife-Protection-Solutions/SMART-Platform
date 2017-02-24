@@ -289,13 +289,21 @@ public class ConnectDialog extends TitleAreaDialog {
 	}
 	
 	protected void okPressed(){
-		
-		final String[] msgerror = new String[]{null};
 		final String server = cs.getServerUrl();
 		final String user = txtUser.getText().trim();
-		
 		final String pass = txtPassword.getText().trim();
 		final boolean savePass = chSavePassword.getSelection();
+		
+		String error = validateConnection(server, user, pass, savePass);
+		if (error != null){
+			MessageDialog.openError(getShell(), Messages.ConnectDialog_ErrorDialogTitle, error);
+			return;
+		}
+		super.okPressed();
+	}
+	
+	protected String validateConnection(String server, String user, String pass, boolean savePass){
+		final String[] msgerror = new String[]{null};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -364,16 +372,10 @@ public class ConnectDialog extends TitleAreaDialog {
 			});
 		}catch(Exception ex){
 			ConnectPlugIn.displayLog(ex.getMessage(), ex);
-			return;
+			msgerror[0] = ex.getMessage();
 		}
-		
-		if (msgerror[0] != null){
-			MessageDialog.openError(getShell(), Messages.ConnectDialog_ErrorDialogTitle, msgerror[0]);
-			return;
-		}
-		super.okPressed();
+		return msgerror[0];
 	}
-	
 	public SmartConnect getConnection(){
 		return this.connect;
 	}

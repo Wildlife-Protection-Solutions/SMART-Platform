@@ -244,6 +244,11 @@ public class Messages extends NLS {
 	public static String EditConnectServerInfoDialog_ServerError;
 	public static String EditConnectServerInfoDialog_Shell;
 	public static String EditConnectServerInfoDialog_Title;
+	public static String EditConnectServerInfoDialog_ValidateError1;
+	public static String EditConnectServerInfoDialog_ValidateError2;
+	public static String EditConnectServerInfoDialog_ValidateErrorTitle;
+	public static String EditConnectServerInfoDialog_ValidateUrlMsg;
+	public static String EditConnectServerInfoDialog_ValidateUrlTitle;
 	public static String FileStoreWatcher_Error;
 	public static String FileStoreWatcher_Error2;
 	public static String FileStoreWatcher_FilestoreLogError;

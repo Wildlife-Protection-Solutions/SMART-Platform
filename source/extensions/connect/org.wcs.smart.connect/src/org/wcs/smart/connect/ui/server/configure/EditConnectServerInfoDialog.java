@@ -21,12 +21,16 @@
  */
 package org.wcs.smart.connect.ui.server.configure;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -38,9 +42,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
+import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -64,7 +70,103 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		this.server = server;
 	}
 
+	private boolean validateServer(){
+		ConnectServer temp = new ConnectServer(){
+			Path cert = null;
+			@Override
+			public void setCertificateFile(Path newFile) throws Exception{
+				cert = newFile;
+			}
+			
+			@Override
+			public String getCertificateFileName(){
+				return String.valueOf(System.nanoTime());
+			}
+			@Override
+			public Path getLocalCertificateFile(){
+				return cert;
+			}
+		};
+		
+		
+		temp.setConservationArea(SmartDB.getCurrentConservationArea());
+		try {
+			if (serverpnl.getCertificateFile() != null){
+				temp.setCertificateFile(Paths.get(serverpnl.getCertificateFile()));
+			}else{
+				temp.setCertificateFile(server.getLocalCertificateFile());
+			}
+			temp.setServerUrl(serverpnl.getServerUrl());
+
+			final String[] error = new String[]{null};
+			ConnectDialog cd = new ConnectDialog(getShell(), true, SmartDB.getCurrentEmployee()){
+				@Override
+				protected void loadDatabaseInformation(){
+					cs = temp;
+					Session s = HibernateManager.openSession();
+					try{
+						s.beginTransaction();
+						user = ConnectHibernateManager.getConnectUser(employee, s);			
+						s.getTransaction().commit();
+					}finally{
+						s.close();
+					}
+				}
+				@Override
+				protected Control createDialogArea(Composite parent) {
+					Control c = super.createDialogArea(parent);
+					getShell().setText(Messages.EditConnectServerInfoDialog_ValidateUrlTitle);
+					setTitle(Messages.EditConnectServerInfoDialog_ValidateUrlTitle);
+					setMessage(Messages.EditConnectServerInfoDialog_ValidateUrlMsg);
+					return c;
+				}
+				@Override
+				protected void okPressed(){
+					final String server = cs.getServerUrl();
+					final String user = txtUser.getText().trim();
+					final String pass = txtPassword.getText().trim();
+					final boolean savePass = chSavePassword.getSelection();
+					error[0] = validateConnection(server, user, pass, savePass);
+					setReturnCode(OK);
+					close();
+				}
+			};
+			
+			if (cd.open() != Window.OK){
+				MessageDialog md = new MessageDialog(getShell(), 
+						Messages.EditConnectServerInfoDialog_ValidateErrorTitle, null, Messages.EditConnectServerInfoDialog_ValidateError1, 
+						MessageDialog.ERROR,
+						new String[]{IDialogConstants.NO_LABEL, IDialogConstants.YES_LABEL}, 0);
+				if (md.open() == 0)
+					return false;
+					
+			}else if(error[0] != null){
+				MessageDialog md = new MessageDialog(getShell(), 
+						Messages.EditConnectServerInfoDialog_ValidateErrorTitle, null, 
+						 MessageFormat.format(Messages.EditConnectServerInfoDialog_ValidateError2, error[0] ), 
+						MessageDialog.ERROR,
+						new String[]{IDialogConstants.NO_LABEL, IDialogConstants.YES_LABEL}, 0);
+				if (md.open() == 0)
+					return false;
+			}
+		} catch (Exception e) {
+			MessageDialog md = new MessageDialog(getShell(), 
+					Messages.EditConnectServerInfoDialog_ValidateErrorTitle, null, 
+					 MessageFormat.format(Messages.EditConnectServerInfoDialog_ValidateError2, e.getMessage() ), 
+					MessageDialog.ERROR,
+					new String[]{IDialogConstants.NO_LABEL, IDialogConstants.YES_LABEL}, 0);
+			if (md.open() == 0)
+				return false;
+		}
+		return true;
+	}
+	
 	protected void okPressed() {
+		//validate server url
+		if (!server.getServerUrl().toLowerCase().equals(serverpnl.getServerUrl().toLowerCase())){
+			if (!validateServer()) return;
+		}
+		
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
@@ -101,6 +203,8 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		}finally{
 			s.close();
 		}
+		
+		
 		super.okPressed();
 	}
 	
@@ -138,7 +242,15 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		for(IServerOptionsPanel pnl : optionPanels){
 			TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
 			ti.setText(pnl.getName());
-			ti.setControl(pnl.createComposite(tabConfig, true));
+						
+			ScrolledComposite scroll = new ScrolledComposite(tabConfig, SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
+			Composite part = pnl.createComposite(scroll, true);
+			scroll.setContent(part);
+			scroll.setExpandHorizontal(true);
+			scroll.setExpandVertical(true);
+			scroll.setMinSize(part.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			
+			ti.setControl(scroll);
 			
 			pnl.initValues(server);
 			pnl.addChangeListener(validateListener);

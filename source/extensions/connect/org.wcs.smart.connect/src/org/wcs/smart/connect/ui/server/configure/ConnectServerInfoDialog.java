@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -165,7 +166,14 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		for (IServerOptionsPanel p : optionPanels){
 			ti = new TabItem(tabConfig, SWT.DEFAULT);
 			ti.setText(p.getName());
-			ti.setControl(p.createComposite(tabConfig, false));
+			
+			ScrolledComposite scroll = new ScrolledComposite(tabConfig, SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
+			Composite part = p.createComposite(scroll, false);
+			scroll.setContent(part);
+			scroll.setExpandHorizontal(true);
+			scroll.setExpandVertical(true);
+			scroll.setMinSize(part.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			ti.setControl(scroll);
 		}
 		
 		btnShowReplication = new Button(main, SWT.PUSH);
