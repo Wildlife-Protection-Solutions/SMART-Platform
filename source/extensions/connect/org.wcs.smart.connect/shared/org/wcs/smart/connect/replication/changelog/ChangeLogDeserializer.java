@@ -133,9 +133,13 @@ public abstract class ChangeLogDeserializer {
 				//both (blob and clob) of these are going to cause problems if the 
 				//length is greater than integer max value
 				long length = is.readLong();
-				byte[] bytes = new byte[(int)length];
-				is.readFully(bytes);
-				data.put(colName, bytes);
+				if (length == 0){
+					data.put(colName, null);
+				}else{
+					byte[] bytes = new byte[(int)length];
+					is.readFully(bytes);
+					data.put(colName, bytes);
+				}
 			}else if (type == Types.CLOB){
 				long length = is.readLong();
 				byte[] cdata = new byte[(int)length];

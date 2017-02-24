@@ -147,14 +147,22 @@ public abstract class ChangeLogItemSerializer {
 				
 				if (type == Types.BLOB){
 					Blob b = rs.getBlob(i);
-					stream.writeLong(b.length());
-					IOUtils.copy(b.getBinaryStream(), stream);
+					if (b == null){
+						stream.writeLong(0);
+					}else{
+						stream.writeLong(b.length());
+						IOUtils.copy(b.getBinaryStream(), stream);
+					}
 				}else if (type == Types.BINARY){
 						
 					byte[] parts = rs.getBytes(i);
-					stream.writeLong(parts.length);
-					try(ByteArrayInputStream bis = new ByteArrayInputStream(parts)){
-						IOUtils.copy(bis, stream);
+					if (parts == null){
+						stream.writeLong(0);
+					}else{
+						stream.writeLong(parts.length);
+						try(ByteArrayInputStream bis = new ByteArrayInputStream(parts)){
+							IOUtils.copy(bis, stream);
+						}
 					}
 				}else if (type == Types.OTHER){
 					//uuid
