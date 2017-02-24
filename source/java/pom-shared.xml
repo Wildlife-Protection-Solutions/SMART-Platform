@@ -45,6 +45,7 @@
 		<module>../extensions/er/org.wcs.smart.er/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er.query/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er.query.report/pom-shared.xml</module>
+		<module>../extensions/i2/org.wcs.smart.i2/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.cybertracker/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect.dataqueue/pom-shared.xml</module>
