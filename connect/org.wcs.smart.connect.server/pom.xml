@@ -334,6 +334,11 @@
     			<artifactId>org.wcs.smart.connect.dataqueue.cybertracker.survey</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+				<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.i2</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
 		<!-- JTS -->
 		<dependency>
     			<groupId>com.vividsolutions</groupId>

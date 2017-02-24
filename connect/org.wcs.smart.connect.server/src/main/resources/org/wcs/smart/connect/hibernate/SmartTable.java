@@ -95,6 +95,37 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.i2.model.IntelAttachment;
+import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
+import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityLocation;
+import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
+import org.wcs.smart.i2.model.IntelEntitySearch;
+import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelObservation;
+import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.model.IntelRelationshipGroup;
+import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
+import org.wcs.smart.i2.model.IntelWorkingSet;
+import org.wcs.smart.i2.model.IntelWorkingSetEntity;
+import org.wcs.smart.i2.model.IntelWorkingSetQuery;
+import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceAttachment;
@@ -283,7 +314,39 @@ public enum SmartTable {
 	WAYPOINTATTACHMENT(WaypointAttachment.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATION(WaypointObservation.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.waypoint.conservationArea"),
-	WAYPOINTQUERY(WaypointQuery.class, null);
+	WAYPOINTQUERY(WaypointQuery.class, null),
+	
+	I2_ATTACHMENT(IntelAttachment.class, null),
+	I2_ATTRIBUTE(IntelAttribute.class, null),
+	I2_ATTRIBUTE_LIST_ITEM(IntelAttributeListItem.class, ".attribute.conservationArea"),
+	I2_ENTITY(IntelEntity.class, ".entityType.conservationArea"),
+	I2_ENTITY_ATTACHMENT(IntelEntityAttachment.class, ".id.attachment.conservationArea"),
+	I2_ENTITY_ATTRIBUTE_VALUE(IntelEntityAttributeValue.class, ".id.attribute.conservationArea"),
+	I2_ENTITY_RECORD(IntelEntityRecord.class, ".id.record.conservationArea"),
+	I2_ENTITY_LOCATION(IntelEntityLocation.class, ".id.location.conservationArea"),
+	I2_ENTITY_RELATIONSHIP(IntelEntityRelationship.class, ".relationshipType.conservationArea"),
+	I2_ENTITY_RELATIONSHIP_ATT_VALUE(IntelEntityRelationshipAttributeValue.class, ".id.attribute.conservationArea"),
+	I2_ENTITY_SEARCH(IntelEntitySearch.class, null),
+	I2_ENTITYTYPE(IntelEntityType.class, null),
+	I2_ENTITYTYPE_ATTRIBUTE(IntelEntityTypeAttribute.class, ".id.entityType.conservationArea"),
+	I2_LOCATION(IntelLocation.class, null),
+	I2_OBSERVATION(IntelObservation.class, ".location.conservationArea"),
+	I2_OBSERVATION_ATTRIBUTE(IntelObservationAttribute.class,".id.attribute.conservationArea"),
+	I2_RECORD(IntelRecord.class, null),
+	I2_RECORD_ATTACHMENT(IntelRecordAttachment.class,".id.record.conservationArea"),
+	I2_RECORD_QUERY(IntelRecordObservationQuery.class, null),
+	I2_RELATION_GROUP(IntelRelationshipGroup.class, null),
+	I2_RELATIONTYPE(IntelRelationshipType.class, null),
+	I2_RELATIONTYPE_ATTRIBUTE(IntelRelationshipTypeAttribute.class, ".id.relationshipType.conservationArea"),
+	I2_WSET(IntelWorkingSet.class, null),
+	I2_WSET_ENTITY(IntelWorkingSetEntity.class, ".id.workingSet.conservationArea"),
+	I2_WSET_QUERY(IntelWorkingSetQuery.class, ".id.workingSet.conservationArea"),
+	I2_WSET_RECORD(IntelWorkingSetRecord.class, ".id.workingSet.conservationArea"),
+	I2_ENTITYTYPE_ATTGROUP(IntelEntityTypeAttributeGroup.class, ".entityType.conservationArea"),
+	I2_RECORD_SOURCE(IntelRecordSource.class, null),
+	I2_RECORD_ATTRIBUTE(IntelRecordSourceAttribute.class, ".id.source.conservationArea"),
+	I2_RECORD_ATTRIBUTE_VALUE(IntelRecordAttributeValue.class, ".id.record.conservationArea"),
+	I2_RECORD_ATTRIBUTE_LIST_VALUE(IntelRecordAttributeValueList.class, ".id.value.record.conservationArea");
 	
 	public Class<?> hibernateClass;
 	public String caProperty;

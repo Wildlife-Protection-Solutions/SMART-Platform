@@ -374,7 +374,9 @@ public class PostgresqlCaLoader {
 			String[] line = null;
 			while( (line = reader.readNext()) != null){
 				for (int i : colsToModify){
-					line[i] = "\\x" + line[i]; //$NON-NLS-1$
+					if (!line[i].isEmpty()){
+						line[i] = "\\x" + line[i]; //$NON-NLS-1$	
+					}
 				}
 				for (int i = 0; i < line.length; i ++){
 					if (line[i].length() == 0) line[i]=null;
