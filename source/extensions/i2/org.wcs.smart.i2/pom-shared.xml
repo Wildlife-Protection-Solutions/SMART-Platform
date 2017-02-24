@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<artifactId>org.wcs.smart.i2</artifactId>
-	<name>Survey Module</name>
+	<name>Intelligence II Module</name>
 	<packaging>jar</packaging>
 	
 	<dependencies>

@@ -103,8 +103,6 @@ public class RemoveIntelligenceJob extends Job {
 
 	private void uninstall(Session s){
 		String[] sql = new String[]{
-				"DROP TABLE smart.i_record_attribute_value",
-				"DROP TABLE smart.i_recordsource_attribute",
 				"DROP TABLE smart.i_entity_location",
 				"DROP TABLE smart.i_observation_attribute",
 				"DROP TABLE smart.i_observation",
@@ -118,6 +116,8 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_entity_record",
 				"DROP TABLE smart.i_working_set_record",
 				"DROP TABLE smart.i_record_attachment",
+				"DROP TABLE smart.I_record_attribute_value_list",
+				"DROP TABLE smart.i_record_attribute_value",
 				"DROP TABLE smart.i_record",
 				"DROP TABLE smart.i_entity_relationship",
 				"DROP TABLE smart.i_working_set_query",
@@ -129,11 +129,11 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_record_obs_query",
 				"DROP TABLE smart.i_relationship_type",
 				"DROP TABLE smart.i_attachment",
+				"DROP TABLE smart.i_relationship_group",
+				"DROP TABLE smart.i_recordsource_attribute",
 				"DROP TABLE smart.i_entity_type",
 				"DROP TABLE smart.i_attribute",
-				"DROP TABLE smart.i_relationship_group",
 				"DROP TABLE smart.i_recordsource",
-				"DROP TABLE smart.I_RECORD_ATTRIBUTE_VALUE_LIST",
 				
 				"DROP FUNCTION smart.double_metaphone",
 				"DROP FUNCTION smart.metaphoneContains",

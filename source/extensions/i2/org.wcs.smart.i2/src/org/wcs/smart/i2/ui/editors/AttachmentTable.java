@@ -284,6 +284,7 @@ public class AttachmentTable extends Composite implements Listener {
 		
 		
 		private void clearSelection(){
+			if (thumbs == null) return;
 			for (ThumbInfo c : thumbs){
 				c.isSelected = false;
 				c.colorAll();
