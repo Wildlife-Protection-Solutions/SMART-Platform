@@ -24,6 +24,7 @@ package org.wcs.smart.i2.birt.entity;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -90,21 +91,24 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		}
 	}
 	
-	private IntelEntityType type;
-	
 	private List<String> attributeColumnNames;
 	private List<String> attributeColumnLabels;
+	private List<IntelEntityTypeAttribute> attributes;
 	
 	public EntityDatasetResultSetMetadata(IntelEntityType type){
-		this.type = type;
-		
 		HashSet<String> fixedLabels = new HashSet<>();
 		for (Column c : Column.values()){
 			fixedLabels.add(c.name);
 		}
-		attributeColumnNames = new ArrayList<String>(type.getAttributes().size());
-		attributeColumnLabels = new ArrayList<String>(type.getAttributes().size());
-		for (IntelEntityTypeAttribute attribute : type.getAttributes()){
+		if (type.getAttributes() == null){
+			attributes = Collections.emptyList();
+		}else{
+			attributes = type.getAttributes();
+		}
+			
+		attributeColumnNames = new ArrayList<String>(attributes.size());
+		attributeColumnLabels = new ArrayList<String>(attributes.size());
+		for (IntelEntityTypeAttribute attribute : attributes){
 			String corelabel = attribute.getAttribute().getName();
 			String name = "attribute:" + attribute.getAttribute().getKeyId();
 			
@@ -117,6 +121,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			}
 			attributeColumnLabels.add(label);
 		}
+		
 	}
 	
 	/**
@@ -125,9 +130,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public int getColumnCount() throws OdaException {
 		int cnt = Column.values().length;
-		if (type.getAttributes() != null){
-			cnt += type.getAttributes().size();
-		}
+		cnt += attributes.size();
 		return cnt;
 	}
 
@@ -146,7 +149,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	public String getColumnLabel(int index) throws OdaException {
 		if (index < Column.values().length) return Column.values()[index-1].name;
 		index = index - Column.values().length;
-		if (index < type.getAttributes().size()){
+		if (index < attributes.size()){
 			return attributeColumnLabels.get(index);
 		}
 		return Column.PRIMARY_IMAGE.name;
@@ -159,7 +162,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	public String getColumnName(int index) throws OdaException {
 		if (index < Column.values().length) return Column.values()[index-1].id;
 		index = index - Column.values().length;
-		if (index < type.getAttributes().size()){
+		if (index < attributes.size()){
 			return attributeColumnNames.get(index);
 		}
 		return Column.PRIMARY_IMAGE.id;
@@ -172,8 +175,8 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	public int getColumnType(int index) throws OdaException {
 		if (index <= 8) return Column.values()[index-1].type;
 		index = index - 9;
-		if (index < type.getAttributes().size()){
-			AttributeType attType = type.getAttributes().get(index).getAttribute().getType();
+		if (index < attributes.size()){
+			AttributeType attType = attributes.get(index).getAttribute().getType();
 			return IntelHibernateManager.getAttributeSqlType(attType);
 		}
 		return Column.PRIMARY_IMAGE.type;

@@ -108,7 +108,9 @@ public class AttributeListDialog extends TitleAreaDialog {
 				@Override
 				public void run() {
 					cmbTypes.setInput(types);
-					if (currentSelection != null) cmbTypes.setSelection(currentSelection);
+					if (currentSelection != null){
+						cmbTypes.setSelection(currentSelection, true);
+					}
 				}
 			});
 		}
