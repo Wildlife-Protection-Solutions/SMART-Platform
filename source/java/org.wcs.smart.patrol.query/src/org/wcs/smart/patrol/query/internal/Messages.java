@@ -80,6 +80,7 @@ public class Messages extends NLS {
 	public static String PatrolFilter_TeamNotFound;
 	public static String PatrolFilter_TransportTypeNotFound;
 	public static String PatrolFilterTreeItem_PatrolFiltersTreeItem;
+	public static String PatrolGpxQueryExporter_GPX_ExporterName;
 	public static String PatrolGridQueryType_PatrolGriddedQueryTypeName;
 	public static String PatrolGroupBy_CouldNotParse;
 	public static String PatrolGroupBy_CouldNotResolveFilter;

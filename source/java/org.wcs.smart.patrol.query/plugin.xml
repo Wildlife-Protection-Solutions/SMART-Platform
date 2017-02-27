@@ -159,6 +159,9 @@
       <Exporter
             class="org.wcs.smart.patrol.query.exportimport.PatrolGridQueryDefinitionExporter">
       </Exporter>
+      <Exporter
+            class="org.wcs.smart.patrol.query.exportimport.PatrolGpxQueryExporter">
+      </Exporter>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
