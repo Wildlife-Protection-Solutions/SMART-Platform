@@ -75,7 +75,7 @@ public class UploadChangeLogJob extends FileUploaderJob {
 		}
 		
 		if (url == null){
-			String error = "Could not determine upload URL.  Ensure the Conservation Area exists on the Connect Server and try again.";
+			String error = Messages.UploadChangeLogJob_NoUrlError;
 			ConnectPlugIn.log(error, null);
 			onError(error);
 			return Status.OK_STATUS;

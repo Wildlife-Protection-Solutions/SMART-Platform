@@ -361,6 +361,7 @@ public class Messages extends NLS {
 	public static String SmartConnect_FileToLargeError;
 	public static String SmartConnect_GeneralError;
 	public static String SmartConnect_InvalidUserNameError;
+	public static String SmartConnect_NoUrlError;
 	public static String SmartConnect_SizeConfirmMessage;
 	public static String SmartConnect_SshError1;
 	public static String SmartConnect_SshError2;
@@ -451,6 +452,7 @@ public class Messages extends NLS {
 	public static String UploadChangeLogHandler_NothingToDo;
 	public static String UploadChangeLogHandler_Title;
 	public static String UploadChangeLogJob_JobName;
+	public static String UploadChangeLogJob_NoUrlError;
 	public static String UploadChangeLogJob_ParseError;
 	public static String UserWizardPage_message;
 	public static String UserWizardPage_passwordbutton;
