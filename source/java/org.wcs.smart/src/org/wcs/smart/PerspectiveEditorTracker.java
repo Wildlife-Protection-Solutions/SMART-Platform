@@ -40,6 +40,7 @@ import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.swt.custom.CTabFolder;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -140,7 +141,15 @@ public class PerspectiveEditorTracker implements EventHandler {
 		
 		if (activate != null && activate.getWidget() == null) return;
 		if (activate != null){
-			pService.activate(activate);
+			pService.activate(activate);	
+		}
+		
+		//tofix a problem with the editor not displaying the content of 
+		//the tab if there is only one tab in the stack;  I don't know
+		//what the source of the problem is, but this code resolves it
+		//See ticket: #1946
+		if (pstack != null && pstack.getWidget() instanceof CTabFolder && ((CTabFolder)pstack.getWidget()).getItemCount() == 1){
+			((CTabFolder)pstack.getWidget()).setSelection(0);
 		}
 	}
 
