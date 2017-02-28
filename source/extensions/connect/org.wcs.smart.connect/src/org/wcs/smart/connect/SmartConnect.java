@@ -447,7 +447,7 @@ public class SmartConnect {
 			if (r.getStatus() == Status.ACCEPTED.getStatusCode()){
 				return r.getHeaderString(HttpHeaders.LOCATION);
 			}else{
-				throw new WebApplicationException(r);
+				throw new WebApplicationException("Could not determine download URL.  Ensure the Conservation Area exists on the server and try again. ", r);
 			}
 		}finally{
 			if (r != null){

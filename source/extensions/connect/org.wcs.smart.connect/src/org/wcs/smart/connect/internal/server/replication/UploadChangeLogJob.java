@@ -74,6 +74,12 @@ public class UploadChangeLogJob extends FileUploaderJob {
 			return Status.OK_STATUS;
 		}
 		
+		if (url == null){
+			String error = "Could not determine upload URL.  Ensure the Conservation Area exists on the Connect Server and try again.";
+			ConnectPlugIn.log(error, null);
+			onError(error);
+			return Status.OK_STATUS;
+		}
 		item.setStatusUrl(url);
 		saveHistoryRecord();
 		

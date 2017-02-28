@@ -35,12 +35,15 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
@@ -85,71 +88,84 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 			return false;
 		}
 
-		//conflict checking deleting filestore items
-		if (it.getAction() == Action.FS_DELETE){
-			Criteria c = session.createCriteria(ChangeLogItem.class);
-			c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
-			c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
-			c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
-			List<ChangeLogItem> changes = c.list();
-			
-			//we there is anything other than a delete throw a conflict exception
-			//if we both deleted the same thing we will not throw a conflict
-			for (ChangeLogItem i : changes){
-				if (i.getAction() != Action.FS_DELETE){
-					throw new ConflictExceptionImpl(it);					
-				}
-			}
-			return true;
-		}
-		
-		//conflict checking updating filestore items
-		if (it.getAction() == Action.FS_UPDATE){
-			//in the logging we do not log updates to directories so this much be a file
-			//any any other file modification/addition/deletion should cause a conflict
-			Criteria c = session.createCriteria(ChangeLogItem.class);
-			c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
-			c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
-			c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
-			c.setProjection(Projections.rowCount());
-			Long cnt = (Long) c.uniqueResult();
-			if (cnt > 0){
-				throw new ConflictExceptionImpl(it);
-			}
-			
-			return true;
-		}
-		
-		if (it.getAction() ==  Action.FS_INSERT){
-			Criteria c = session.createCriteria(ChangeLogItem.class);
-			c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
-			c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
-			c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
-			
-			//if we both create the same directory this should not be a conflict
-			Path fromPath = changeLogPackage.resolve(it.getFileName());
-			if (Files.exists(fromPath)){
-				if (Files.isDirectory(fromPath)){
-					//if its a directory and all other changes are also create changes
-					//we are ok to continue
-					List<ChangeLogItem> others = (List<ChangeLogItem>) c.list();
-					for (ChangeLogItem o : others){
-						if(o.getAction() != Action.FS_INSERT){
-							throw new ConflictExceptionImpl(it);
-						}
+		try{
+			//conflict checking deleting filestore items
+			if (it.getAction() == Action.FS_DELETE){
+				Criteria c = session.createCriteria(ChangeLogItem.class);
+				c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
+				c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
+				c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
+				List<ChangeLogItem> changes = c.list();
+				
+				//if there is anything other than a delete throw a conflict exception
+				//if we both deleted the same thing we will not throw a conflict
+				for (ChangeLogItem i : changes){
+					if (i.getAction() != Action.FS_DELETE){
+						throw new ConflictExceptionImpl(it);					
 					}
-					return true;
 				}
+				return true;
 			}
 			
-			//check for conflicts
-			c.setProjection(Projections.rowCount());
-			Long cnt = (Long) c.uniqueResult();
-			if (cnt > 0){
-				throw new ConflictExceptionImpl(it);
+			//conflict checking updating filestore items
+			if (it.getAction() == Action.FS_UPDATE){
+				//in the logging we do not log updates to directories so this must be a file
+				//any any other file modification/addition/deletion should cause a conflict
+				Criteria c = session.createCriteria(ChangeLogItem.class);
+				c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
+				c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
+				c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
+				c.setProjection(Projections.rowCount());
+				Long cnt = (Long) c.uniqueResult();
+				if (cnt > 0){
+					throw new ConflictExceptionImpl(it);
+				}
+				
+				return true;
 			}
 			
-			return true;
+			if (it.getAction() ==  Action.FS_INSERT){
+				Criteria c = session.createCriteria(ChangeLogItem.class);
+				c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
+				c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
+				c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
+				
+				//if we both create the same directory this should not be a conflict
+				Path fromPath = changeLogPackage.resolve(it.getFileName());
+				if (Files.exists(fromPath)){
+					if (Files.isDirectory(fromPath)){
+						//if its a directory and all other changes are also create changes
+						//we are ok to continue
+						List<ChangeLogItem> others = (List<ChangeLogItem>) c.list();
+						for (ChangeLogItem o : others){
+							if(o.getAction() != Action.FS_INSERT){
+								throw new ConflictExceptionImpl(it);
+							}
+						}
+						return true;
+					}
+				}
+				
+				//check for conflicts
+				c.setProjection(Projections.rowCount());
+				Long cnt = (Long) c.uniqueResult();
+				if (cnt > 0){
+					throw new ConflictExceptionImpl(it);
+				}
+				
+				return true;
+			}
+		}catch (ConflictException i){
+			if (!it.getFileName().endsWith(".qix")) throw i; //$NON-NLS-1$
+			if (it.getAction() != Action.FS_UPDATE) throw i; 
+
+			//this are udig index files and are likely to be modified
+			//only care if updates
+			if (it.getAction() ==  Action.FS_UPDATE){
+				ConnectPlugIn.log("The qix file is has been modified on client and server causing potential conflict.  This conflict is ignored and file is overwriteen as this is likely a shp index file.", i);
+				//do the action anyways
+			}
+			
 		}
 
 		// Conflict checking data records
