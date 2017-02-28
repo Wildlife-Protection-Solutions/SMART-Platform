@@ -479,6 +479,9 @@ public class DataModelXmlToSmartConverter {
 	 * updates the names associated with a data model object
 	 */
 	private void updateNames(DmObject dmobject, List<NameType> names){
+		if (dmobject.getKeyId().equals("pollution")){ //$NON-NLS-1$
+			System.out.println("break test"); //$NON-NLS-1$
+		}
 		for (NameType nameType : names) {
 			String code = nameType.getLanguageCode();
 			String value = nameType.getValue();
@@ -491,8 +494,16 @@ public class DataModelXmlToSmartConverter {
 			
 			if (useAsDefault != null && useAsDefault.equals(nameType.getLanguageCode())){
 				dmobject.updateName(targetCa.getDefaultLanguage(), value);
-				
 			}
+		}
+		if (dmobject.findNameNull(targetCa.getDefaultLanguage()) == null){
+			if (!names.isEmpty()){
+				//no default name provided; lets use any of the names
+				dmobject.updateName(targetCa.getDefaultLanguage(), names.get(0).getValue());
+			}else{
+				dmobject.updateName(targetCa.getDefaultLanguage(), dmobject.getKeyId());
+			}
+			
 		}
 		
 	}
