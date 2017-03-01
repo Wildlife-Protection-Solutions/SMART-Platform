@@ -567,12 +567,9 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		defaultLayer.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				if (TrackPointDialog.this.getContents() == null || 
-						TrackPointDialog.this.getContents().isDisposed() || 
-						mapViewer == null) return;
+				if (mapViewer == null || TrackPointDialog.this.getShell().isDisposed()) return;
 				createTrackPointLayer();
 				createTrackLayer();
-
 			}
 		});
 		defaultLayer.schedule();
@@ -694,8 +691,6 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 					ReferencedEnvelope bounds = trackLayer.getBounds(monitor, mapViewer.getMap().getViewportModel().getCRS());
 					bounds.expandBy(Math.max(bounds.getWidth(), bounds.getHeight()) * 0.1);
 					mapViewer.getMap().sendCommandASync(new SetViewportBBoxCommand(bounds));
-					
-
 				}
 			};
 			getMap().sendCommandASync(command);
