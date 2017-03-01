@@ -70,6 +70,9 @@ public class PlanTargetGeoResourceInfo extends IGeoResourceInfo {
 					env.expandToInclude(new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY()));
 				}
 			}, null);
+			if (env.getArea() == 0){
+				env.expandBy(0.001);
+			}
 			this.bounds = env;
 		} catch (IOException e) {
 			SmartPlanPlugIn.log("Could not determine bounds for resource.", e); //$NON-NLS-1$

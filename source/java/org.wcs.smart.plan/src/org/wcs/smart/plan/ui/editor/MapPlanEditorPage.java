@@ -23,6 +23,7 @@ package org.wcs.smart.plan.ui.editor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,8 +42,6 @@ import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.project.command.AbstractCommand;
-import org.locationtech.udig.project.command.UndoableMapCommand;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.style.sld.SLDContent;
@@ -60,6 +59,7 @@ import org.wcs.smart.plan.map.udig.PlanTargetService;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.report.PlanPatrolMapLayer;
 import org.wcs.smart.query.common.engine.QueryExecutor;
+import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -164,12 +164,11 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 					
 		    		//target layer
 		    		final List<IGeoResource> layers = new ArrayList<IGeoResource>(planTargetService.resources(monitor));
-		    		IGeoResource tracks = createTrackPoints(monitor);
-		    		if (tracks != null){
-		    			layers.add(tracks);
-		    		}
-		    		AddPlanningLayers command = new AddPlanningLayers(layers);
+		    		
+		    		AddLayersCommand command = new AddLayersCommand(layers);
 		    		getMap().sendCommandASync(command);
+		    		
+		    		addTrackPoints(monitor);
 				}
 				
 			} catch (Exception e) {
@@ -181,7 +180,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			return Status.OK_STATUS;
 		}
 		
-		private IGeoResource createTrackPoints(IProgressMonitor monitor) throws IOException{
+		private void addTrackPoints(IProgressMonitor monitor) throws IOException{
 			final PatrolQuery pq = PatrolQueryFactory.createPatrolQuery();
 			pq.updateName(SmartDB.getCurrentLanguage(), Messages.MapPlanEditorPage_QueryName);
 			pq.setName(Messages.MapPlanEditorPage_QueryName);
@@ -200,19 +199,39 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 					}finally{
 						s.close();
 					}
+					
+					//add layer to map; only add after the query is run
+					//to ensure the bounds are computed correctly
+					IService service = QueryServiceFactory.generateQueryService(pq, parentEditor);
+
+					try{
+						List<IGeoResource> layers = (List<IGeoResource>) service.resources(monitor);
+						if (layers.size() > 0){
+							patrolLayer = layers.get(0);
+							AddLayersCommand command = new AddLayersCommand(Collections.singletonList(patrolLayer)){
+								@Override
+								public void run(IProgressMonitor monitor) throws Exception {
+									super.run(monitor);
+									Layer trackLayer = getLayers().get(0);
+									trackLayer.getStyleBlackboard().put(SLDContent.ID, PlanPatrolMapLayer.createDefaultTrackStyle());
+									trackLayer.refresh(null);		
+								}
+							};
+				    		getMap().sendCommandASync(command);
+				    		
+				    		
+						}else{
+							patrolLayer = null;
+						}
+					}catch (IOException ex){
+						SmartPlanPlugIn.log(ex.getMessage(), ex);
+					}
+			    		
+		    		
 					return Status.OK_STATUS;
 				}
 			};
 			runQueryJob.schedule();
-			//add pq to map
-			IService service = QueryServiceFactory.generateQueryService(pq, parentEditor);
-			@SuppressWarnings("unchecked")
-			List<IGeoResource> layers = (List<IGeoResource>) service.resources(monitor);
-			if (layers.size() > 0){
-				patrolLayer = layers.get(0);
-				return patrolLayer;
-			}
-			return null;
 		}
 	};
 	
@@ -261,6 +280,10 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 								session.close();
 							}
 						}
+						
+						IService service = patrolLayer.resolve(IService.class, monitor);
+						if (service instanceof IQueryService) ((IQueryService) service).refresh(monitor);
+						
 					}catch (Exception e){
 						SmartPlanPlugIn.log("Error refreshing patrols layers." + e.getMessage(), e); //$NON-NLS-1$
 					}
@@ -404,38 +427,6 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		}
 		return "observation|" + query.toString(); //$NON-NLS-1$
     }
-       
     
-    private class AddPlanningLayers extends AbstractCommand implements UndoableMapCommand{
-		
-    	private List<IGeoResource> layers = null;
-    	private AddLayersCommand command = null;
-    	
-    	private AddPlanningLayers(List<IGeoResource> layers){
-    		this.layers = layers;
-    	}
-		@Override
-		public void run(IProgressMonitor monitor) throws Exception {
-			command = new AddLayersCommand(layers, getMap().getLayersInternal().size());
-			command.setMap(getMap());
-			command.run(monitor);
-			
-			Layer trackLayer = command.getLayers().get(layers.size() - 1);
-			trackLayer.getStyleBlackboard().put(SLDContent.ID, PlanPatrolMapLayer.createDefaultTrackStyle());
-			trackLayer.refresh(null);
-		}
-		
-		@Override
-		public String getName() {
-			return Messages.MapPlanEditorPage_CommandName;
-		}
-		
-		@Override
-		public void rollback(IProgressMonitor monitor) throws Exception {
-			if (command != null){
-				command.rollback(monitor);
-			}
-		}
-    }
 }
 
