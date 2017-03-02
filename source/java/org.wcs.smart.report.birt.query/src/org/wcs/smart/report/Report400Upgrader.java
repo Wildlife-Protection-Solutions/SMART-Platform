@@ -314,6 +314,30 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 					n.getParentNode().removeChild(n);
 				}
 
+				if (dataset.size() != layers.size()){
+					dataset.clear();
+					for (String l : layers){
+						NodeList allnodes = doc.getElementsByTagName("xml-property");
+						boolean found = false;
+						for (int x = 0; x < allnodes.getLength(); x ++){
+							Node node = allnodes.item(x);
+							if (!node.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equals("queryText")) continue;
+							
+							if (!node.getTextContent().contains(l)) continue;
+							//this is the dataset
+							found = true;
+							dataset.add(node.getParentNode().getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent());
+							break;
+						}
+						
+						if (!found){
+							//cannot upgrade report blah blah balh
+							throw new Exception ("Cannot find dataset for report map layer.");
+						}
+					}
+				}
+				
+				
 				if (layers.size() > 0) {
 					Node newProp = doc.createElement(PROPERTY_TAG_NAME);
 					Node attribute = doc.createAttribute(NAME_ATT_NAME);
@@ -335,6 +359,7 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 								"org.wcs.smart.birt.map.layerType",  //$NON-NLS-1$
 								"org.wcs.smart.birt.map.geomColumn",  //$NON-NLS-1$
 								"dataSet" }; //$NON-NLS-1$ 
+					
 						String[] dataValues = new String[] { 
 								names.get(k),
 								styles.get(k),
