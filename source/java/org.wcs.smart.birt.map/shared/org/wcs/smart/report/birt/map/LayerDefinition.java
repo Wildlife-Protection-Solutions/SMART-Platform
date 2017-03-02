@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.report.birt.map;
 
+import java.util.Objects;
+
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 
 /**
@@ -53,15 +55,16 @@ public class LayerDefinition {
 	
 	@Override
 	public boolean equals(Object other){
-		if (!(other instanceof LayerDefinition)){
-			return false;
-		}
+		if (this == other) return true;
+		if (other == null) return false;
+		if (getClass() != other.getClass()) return false;
+		
 		LayerDefinition o = (LayerDefinition) other;
-		if (o.handle != null && this.handle != null){
-			return (o.handle.equals(this.handle))
-				&& this.info.equals(o.info);
-		}else{
-			return super.equals(other);
-		}
+		return Objects.equals(handle, o.handle) && Objects.equals(info,o.info);
+	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hash(handle, info);
 	}
 }

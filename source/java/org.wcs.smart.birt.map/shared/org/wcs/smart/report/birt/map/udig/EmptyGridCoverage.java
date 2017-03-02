@@ -21,23 +21,26 @@
  */
 package org.wcs.smart.report.birt.map.udig;
 
-import java.awt.image.BandedSampleModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferFloat;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.Rectangle;
 import java.io.IOException;
 
-import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
+import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.GridCoverage2DReader;
-import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.parameter.DefaultParameterDescriptor;
+import org.geotools.parameter.DefaultParameterDescriptorGroup;
+import org.geotools.parameter.ParameterGroup;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.coverage.grid.Format;
+import org.opengis.coverage.grid.GridGeometry;
+import org.opengis.parameter.GeneralParameterDescriptor;
 import org.opengis.parameter.GeneralParameterValue;
+import org.opengis.parameter.ParameterValueGroup;
 
 /**
  * Empty grid coverage for styling of raster layers
@@ -47,7 +50,6 @@ import org.opengis.parameter.GeneralParameterValue;
  */
 public class EmptyGridCoverage {
 
-	private static volatile GridCoverage2D coverage;
 	private static volatile GridCoverage2DReader reader;
 	
 	private static Object LOCK = new Object();
@@ -61,21 +63,7 @@ public class EmptyGridCoverage {
 	 * @return empty grid coverage reader
 	 */
 	public static GridCoverage2D getInstance() {
-		if (coverage != null)
-			return coverage;
-
-		synchronized (LOCK) {
-			if (coverage == null) {
-				DataBuffer buffer = new DataBufferFloat(new float[0], 0);
-				SampleModel sample = new BandedSampleModel(DataBuffer.TYPE_FLOAT, 0, 0, 1);
-				WritableRaster raster = Raster.createWritableRaster(sample, buffer, null);
-
-				Envelope2D envelope = new Envelope2D(null, 0, 0, 0, 0);
-				GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-				coverage = factory.create(System.nanoTime() + "smart", raster, envelope); //$NON-NLS-1$
-			}
-		}
-		return coverage;
+		return null;
 	}
 
 	/**
@@ -95,6 +83,54 @@ public class EmptyGridCoverage {
 	}
 	
 	private static class EmptyGridCoverage2DReader extends AbstractGridCoverage2DReader{
+		private static Format emptyFormat = new Format(){
+			
+			GridEnvelope2D gridRange = new GridEnvelope2D(new Rectangle(0,0,100,100));
+			ReferencedEnvelope env = new ReferencedEnvelope(-180.0, 180.0,-90.0, 90.0, DefaultGeographicCRS.WGS84);
+			GridGeometry2D world = new GridGeometry2D(gridRange, env);
+			DefaultParameterDescriptor<GridGeometry> gridGeometryDescriptor = new DefaultParameterDescriptor<GridGeometry>(
+					AbstractGridFormat.READ_GRIDGEOMETRY2D.getName().toString(),
+					GridGeometry.class, null, world); 
+			
+			ParameterValueGroup empty =  new ParameterGroup(new DefaultParameterDescriptorGroup("", new GeneralParameterDescriptor[]{gridGeometryDescriptor})); //$NON-NLS-1$
+			
+			@Override
+			public String getDescription() {
+				return null;
+			}
+
+			@Override
+			public String getDocURL() {
+				return null;
+			}
+
+			@Override
+			public String getName() {
+				return null;
+			}
+
+			@Override
+			public ParameterValueGroup getReadParameters() {
+				return empty;
+			}
+
+			@Override
+			public String getVendor() {
+				return null;
+			}
+
+			@Override
+			public String getVersion() {
+				return null;
+			}
+
+			@Override
+			public ParameterValueGroup getWriteParameters() {
+				return empty;
+			}
+			
+		};
+		
 		public EmptyGridCoverage2DReader(){
 			super();
 			this.originalEnvelope = new GeneralEnvelope(2);
@@ -102,7 +138,7 @@ public class EmptyGridCoverage {
 		}
 		@Override
 		public Format getFormat() {
-			return null;
+			return emptyFormat;
 		}
 
 		@Override
