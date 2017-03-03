@@ -191,5 +191,25 @@ public class PatrolLegDay extends UuidItem {
 	public void setTracks(List<Track> tracks){
 		this.tracks = tracks;
 	}
-	
+
+	/**
+	 * Clones the patrol leg day 
+	 * NOTE: This function doesn't clone anything to do with waypoints
+	 */
+	public PatrolLegDay clone (){
+		PatrolLegDay clone = new PatrolLegDay();
+		clone.setDate(date);
+		clone.setEndTime(endTime);
+		clone.setRestMinutes(restMinutes);
+		clone.setStartTime(startTime);
+		if(tracks != null && tracks.size() > 0){
+			Track t = new Track();
+			t.setDistance(getTrack().getDistance());
+			t.setGeom(getTrack().getGeom());
+			t.setPatrolLegDay(clone);
+			clone.setTracks(new ArrayList<Track>());
+			clone.getTracks().add(t);
+		}
+		return clone;
+	}
 }

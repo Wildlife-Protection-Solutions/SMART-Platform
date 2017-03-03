@@ -77,7 +77,7 @@ public class PatrolLegTable {
 	 * Creates a new patrol leg table
 	 */
 	public PatrolLegTable(){
-		
+
 	}
 	/**
 	 * Sets the visiblity of the pilot column.
@@ -154,7 +154,7 @@ public class PatrolLegTable {
 	 */
 	public TableViewer createTable(Composite parent){
 		
-		patrolLegViewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER );
+		patrolLegViewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.widthHint = 20;
 		gd.heightHint = 20;

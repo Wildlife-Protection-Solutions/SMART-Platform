@@ -90,7 +90,6 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
-import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.EmployeeLeaderPilotComposite;
 import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolIdComposite;
@@ -159,6 +158,11 @@ public class PatrolSummaryEditor extends EditorPart {
 	private boolean isMulti = false;
 	
 	private HashMap<PatrolLegDayColumn, TableViewerColumn> tableColumns = new HashMap<PatrolLegDayColumn, TableViewerColumn>();
+	
+	private Composite top, left;
+	private Table employeeTable; 
+	private Label transportTypelbl, multiLegTextlbl;
+	private Hyperlink editLinkTransportType;
 
 	/**
 	 * listener for patrol change events.
@@ -243,12 +247,12 @@ public class PatrolSummaryEditor extends EditorPart {
 				
 		patrolSection.setClient(scrolltop);
 		
-		Composite top = toolkit.createComposite(scrolltop);
+		top = toolkit.createComposite(scrolltop);
 		top.setLayout(new GridLayout(2, true));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrolltop.setContent(top);
 		
-		Composite left = toolkit.createComposite(top, SWT.NONE);
+		left = toolkit.createComposite(top, SWT.NONE);
 		GridLayout leftLayout = new GridLayout(3, false);
 		leftLayout.verticalSpacing = 10;
 		left.setLayout(leftLayout);
@@ -270,12 +274,16 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		Label lbl = null;
 		
-		if (editor.getPatrol().getLegs().size() <= 1 ){
-			lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TransportType_Label);
-			txtTransport = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
-			txtTransport.setEditable(false);
-			txtTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-			createEditLink(toolkit, left, new PatrolTransportComposite());
+		
+		transportTypelbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TransportType_Label);
+		txtTransport = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
+		txtTransport.setEditable(false);
+		txtTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		editLinkTransportType = createEditLink(toolkit, left, new PatrolTransportComposite());
+		if (editor.getPatrol().getLegs().size() > 1 ){//hide if it is a multi-leg patrols, you have to edit this per-leg in that case. 
+			txtTransport.setVisible(false);
+			transportTypelbl.setVisible(false);
+			editLinkTransportType.setVisible(false);
 		}
 		
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Armed_Label);
@@ -309,7 +317,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Member_Label);
 		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		
-		Table employeeTable = toolkit.createTable(left, SWT.V_SCROLL | SWT.H_SCROLL);
+		employeeTable = toolkit.createTable(left, SWT.V_SCROLL | SWT.H_SCROLL);
 		employeeList = new TableViewer(employeeTable);
 		employeeList.setContentProvider(ArrayContentProvider.getInstance());
 		employeeList.setLabelProvider(new EmployeeLabelProvider());
@@ -374,34 +382,31 @@ public class PatrolSummaryEditor extends EditorPart {
 		editDates.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				if (!isMulti){
-					if (showEditDialog(new DateComposite())){
-						editor.createDayPages();
-					}
-				}else{
-					//multi leg
-					if (showEditDialog(new PatrolLegsComposite(true))){
-						editor.createDayPages();
-					}
+				if (showEditDialog(new PatrolLegsComposite(true))){
+					editor.createDayPages();
+					recheckForMultiPatrol();
 				}
 			}
 		});
 		
 		
+
+		employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		editEmployee = createEditLink(toolkit, left, new EmployeeLeaderPilotComposite());
+		editEmployee.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+
+		multiLegTextlbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegPatrol_Label,SWT.WRAP);
+		multiLegTextlbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+
 		if (editor.getPatrol().getLegs().size() <=1 ){
-			//single leg patrol
-			//update employee section as we edit it here
 			isMulti = false;
-			employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-			editEmployee = createEditLink(toolkit, left, new EmployeeLeaderPilotComposite());
-			editEmployee.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+			multiLegTextlbl.setVisible(false);
 		}else{
-			//multi-day patrol
 			isMulti = true;
-			employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-			lbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegPatrol_Label,SWT.WRAP);
-			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+			editEmployee.setVisible(false);
+			multiLegTextlbl.setVisible(true);
 		}
+		
 		((GridData)employeeTable.getLayoutData()).widthHint = WIDTH_HINT;
 		((GridData)employeeTable.getLayoutData()).heightHint = EMPLOYEE_LIST_HEIGHT_HINT;
 	
@@ -487,6 +492,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		initValues();
 	}
+
 
 	/**
 	 * Creates an edit hyperlink button
@@ -824,6 +830,32 @@ public class PatrolSummaryEditor extends EditorPart {
 	public boolean isSaveAsAllowed() {
 		return false;
 	}
+	
+	private void recheckForMultiPatrol(){
+		refreshOrCreateEmployeeLink();
+		refreshPatrolSummaryTable();
+		
+		Patrol patrol = editor.getPatrol();
+		if (patrol.getLegs().size() <=1){
+			txtTransport.setText(patrol.getFirstLeg().getType().getName());
+			transportTypelbl.setVisible(true);
+			txtTransport.setVisible(true);
+			editLinkTransportType.setVisible(true);
+			editEmployee.setVisible(true);
+			multiLegTextlbl.setVisible(false);
+		}else{
+			txtTransport.setVisible(false);
+			transportTypelbl.setVisible(false);
+			editLinkTransportType.setVisible(false);
+			editEmployee.setVisible(false);
+			multiLegTextlbl.setVisible(true);
+
+		}
+	}
+	
+	private void refreshOrCreateEmployeeLink() {
+		
+	}
 
 }
 
@@ -912,5 +944,8 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 		}
 		return super.getText(element);
 	}
+	
+	
+
 }
 

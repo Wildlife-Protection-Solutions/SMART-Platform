@@ -307,6 +307,25 @@ public class Patrol extends UuidItem {
 		return PATROL_FILESTORE_LOC + File.separator + UuidUtils.getDirectoryPath(getUuid());
 	}
 
+	/*
+	 * Only Clones the simple attributes, not the legs, leg days or waypoints.
+	 */
+	public Patrol simpleClone() {
+		Patrol clone = new Patrol();
+		clone.setArmed(isArmed);
+		clone.setComment(comment);
+		clone.setConservationArea(ca);
+		clone.setEndDate(endDate);
+		clone.setId(id);
+		clone.setMandate(mandate);
+		clone.setObjective(objective);
+		clone.setPatrolType(patrolType);
+		clone.setStartDate(startDate);
+		clone.setStation(station);
+		clone.setTeam(team);
+		return clone;
+	}
+
 
 	
 }

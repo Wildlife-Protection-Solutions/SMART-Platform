@@ -153,6 +153,14 @@ public class Messages extends NLS {
 	public static String MandateDeleteAdvisor_DeleteError_Patrol;
 	public static String MandateDeleteAdvisor_DeleteError_Team;
 	public static String MandateDeleteAdvisor_InvalidObjectType;
+	public static String MergePatrolLegDialog_DialogMessage;
+	public static String MergePatrolLegDialog_DialogTitle;
+	public static String MergePatrolLegDialog_LeaderLabel;
+	public static String MergePatrolLegDialog_Pilot;
+	public static String MergePatrolLegDialog_ShellText;
+	public static String MergePatrolsDialog_CustomPatrolId;
+	public static String MergePatrolsDialog_EnterCustomId;
+	public static String MergePatrolsDialog_PatrolId;
 	public static String MoveWaypointDialog_DialogMessage;
 	public static String MoveWaypointDialog_DialogTitle;
 	public static String MoveWaypointDialog_MoveTo_Label;
@@ -349,6 +357,9 @@ public class Messages extends NLS {
 	public static String PatrolLegLeaderChangeDialog_OpCustome;
 	public static String PatrolLegLeaderChangeDialog_OpStartOfDay;
 	public static String PatrolLegLeaderChangeDialog_Time_Label;
+	public static String PatrolLegsComposite_0;
+	public static String PatrolLegsComposite_1;
+	public static String PatrolLegsComposite_2;
 	public static String PatrolLegsComposite_ChangeLeader_Button;
 	public static String PatrolLegsComposite_ChangeTransport_Button;
 	public static String PatrolLegsComposite_DeleteLeg_ConfirmDialog_Message;
@@ -361,6 +372,7 @@ public class Messages extends NLS {
 	public static String PatrolLegsComposite_LegError_C;
 	public static String PatrolLegsComposite_LegError_D;
 	public static String PatrolLegsComposite_LegError_E;
+	public static String PatrolLegsComposite_MergeLegs;
 	public static String PatrolLegsComposite_PatrolEnd_Label;
 	public static String PatrolLegsComposite_PatrolStart_Label;
 	public static String PatrolLegsComposite_RemoveLeg_Button;

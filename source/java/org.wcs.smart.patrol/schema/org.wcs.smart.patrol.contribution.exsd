@@ -3,10 +3,10 @@
 <schema targetNamespace="org.wcs.smart.patrol" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.wcs.smart.patrol" id="org.wcs.smart.patrol.editorContribution" name="Patrol Editor Contribution"/>
+         <meta.schema plugin="org.wcs.smart.patrol" id="org.wcs.smart.patrol.contribution" name="Patrol Editor Contribution"/>
       </appinfo>
       <documentation>
-         An extension point that allows users to add information to the &apos;Other&apos; tab of the patrol editor.
+         An extension point that maintains links to other items such as Intel items and plans when patrols are merged or split.
       </documentation>
    </annotation>
 
@@ -17,8 +17,9 @@
          </appinfo>
       </annotation>
       <complexType>
-         <sequence>
-            <element ref="contribution" minOccurs="1" maxOccurs="unbounded"/>
+         <sequence minOccurs="1" maxOccurs="unbounded">
+            <element ref="uieditor" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="edit" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +48,7 @@
       </complexType>
    </element>
 
-   <element name="contribution">
+   <element name="uieditor">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -56,6 +57,21 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.ui.IPatrolEditorContribution"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="edit">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.IPatrolEditContribution"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -648,10 +648,23 @@
    </extension>
    <extension
          point="org.wcs.smart.patrol.editorContribution">
-      <contribution
+      <uieditor
             class="org.wcs.smart.plan.internal.ui.patrol.PatrolPlanContribution">
-      </contribution>
+      </uieditor>
+      <edit
+            class="org.wcs.smart.plan.internal.patrol.PatrolPlanLinkCopyContribution">
+      </edit>
    </extension>
+   <extension
+         point="org.wcs.smart.patrol.contribution">
+      <uieditor
+            class="org.wcs.smart.plan.internal.ui.patrol.PatrolPlanContribution">
+      </uieditor>
+      <edit
+            class="org.wcs.smart.plan.internal.patrol.PatrolPlanLinkCopyContribution">
+      </edit>
+   </extension>
+   
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
@@ -708,6 +721,9 @@
          point="org.wcs.smart.patrol.xml">
       <contribution
             class="org.wcs.smart.plan.xml.patrol.PatrolPlanXmlExtraDataContribution">
+      </contribution>
+      <contribution
+            class="org.wcs.smart.plan.XmlExtraDataContribution1">
       </contribution>
    </extension>
    <extension

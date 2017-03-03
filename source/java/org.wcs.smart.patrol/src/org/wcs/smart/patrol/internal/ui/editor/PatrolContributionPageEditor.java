@@ -156,8 +156,10 @@ public class PatrolContributionPageEditor extends EditorPart{
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IPatrolEditorContribution.EXTENSION_ID);
 		try {
 			for (IConfigurationElement e : config) {
-				IPatrolEditorContribution page = (IPatrolEditorContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
-				items.add(page);
+				if (e.getName().equals("uieditor")){ //$NON-NLS-1$
+					IPatrolEditorContribution page = (IPatrolEditorContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
+					items.add(page);
+				}
 			}
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.CreatePatrolWizard_ErrorCreatingWizardPages, ex);
@@ -175,7 +177,11 @@ public class PatrolContributionPageEditor extends EditorPart{
 		if (Platform.getExtensionRegistry() == null) return false;
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IPatrolEditorContribution.EXTENSION_ID);
 		if (config.length > 0){
-			return true;
+			for (IConfigurationElement e : config) {
+				if (e.getName().equals("uieditor")){ //$NON-NLS-1$
+					return true;
+				}
+			}
 		}
 		return false;
 	}

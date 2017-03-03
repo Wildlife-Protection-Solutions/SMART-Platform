@@ -9,7 +9,8 @@ Require-Bundle: org.wcs.smart,
  org.eclipse.gef,
  org.wcs.smart.observation;visibility:=reexport,
  org.locationtech.udig.style.sld;bundle-version="1.2.0",
- org.wcs.smart.dataentry
+ org.wcs.smart.dataentry,
+ org.wcs.smart.hibernate.libs
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.wcs.smart.patrol.SmartPatrolPlugIn
 Eclipse-RegisterBuddy: org.wcs.smart.hibernate.libs
@@ -22,3 +23,4 @@ Export-Package: org.wcs.smart.patrol,
  org.wcs.smart.patrol.xml.in,
  org.wcs.smart.patrol.xml.model
 Bundle-Vendor: org.wcs.smart
+Import-Package: org.eclipse.birt.core.framework

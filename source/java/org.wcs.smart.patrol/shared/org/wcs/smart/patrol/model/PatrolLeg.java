@@ -218,8 +218,32 @@ public class PatrolLeg extends UuidItem {
 		Calendar c = Calendar.getInstance();
 		c.setTime(d);		
 		return createPatrolTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));		
-		
 	}
+	
+	/* Only clones id, start/end time, members and type. NOT Patrol Waypoints or waypoints themselves.
+	 * 
+	 */
+	public PatrolLeg simpleClone(){
+		PatrolLeg clone = new PatrolLeg();
+		clone.setPatrol(patrol);
+		clone.setId(id);
+		
+		//start time
+		clone.setStartDate(startDate);
+		clone.setEndDate(endDate);
+		//type
+		clone.setType(type);
+		//members
+		clone.setMembers(new ArrayList<PatrolLegMember>());
+		for (PatrolLegMember mem : members){
+			PatrolLegMember memClone = mem.clone();
+			memClone.setPatrolLeg(clone);
+			clone.getMembers().add(memClone);
+		}
+		return clone;
+	}
+	
+	
 	/**
 	 * Creates leg days for the given leg.
 	 * <p>Will remove any existing leg days

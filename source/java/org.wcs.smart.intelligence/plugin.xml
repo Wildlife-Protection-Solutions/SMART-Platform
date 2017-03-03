@@ -795,12 +795,24 @@
    </extension>
    <extension
          point="org.wcs.smart.patrol.editorContribution">
-      <contribution
+      <uieditor
             class="org.wcs.smart.intelligence.ui.patrol.ReportedIntelligenceContribution">
-      </contribution>
-      <contribution
+      </uieditor>
+      <uieditor
             class="org.wcs.smart.intelligence.ui.patrol.MotivationIntelligenceContribution">
-      </contribution>
+      </uieditor>
+      <edit
+            class="org.wcs.smart.intelligence.patrol.PatrolIntelLinkCopyContribution">
+      </edit>
+   </extension>
+   <extension
+         point="org.wcs.smart.patrol.contribution">
+      <uieditor
+            class="org.wcs.smart.intelligence.ui.patrol.ReportedIntelligenceContribution">
+      </uieditor>
+      <edit
+            class="org.wcs.smart.intelligence.patrol.PatrolIntelLinkCopyContribution">
+      </edit>
    </extension>
    <extension
          point="org.wcs.smart.patrol.wizardpage">

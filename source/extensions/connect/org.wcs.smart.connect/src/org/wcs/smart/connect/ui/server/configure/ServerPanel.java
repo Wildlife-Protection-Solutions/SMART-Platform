@@ -77,7 +77,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 		Label l = new Label(this, SWT.NONE);
 		l.setText(Messages.ServerPanel_UrlLabel);
 		
-		txtServer = new Text(this, SWT.BORDER);
+		txtServer = new Text(this, SWT.BORDER | SWT.SINGLE);
 		txtServer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		txtServer.addModifyListener(this);
 		ControlDecoration cd = createControlDecoration(txtServer);
