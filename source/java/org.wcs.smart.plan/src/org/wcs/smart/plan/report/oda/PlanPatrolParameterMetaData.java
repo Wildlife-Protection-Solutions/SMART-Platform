@@ -24,6 +24,7 @@ package org.wcs.smart.plan.report.oda;
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
+import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData.Parameter;
 /**
  * Combined query and plan parameter metadata for
  * Patrol Plan Target Query.
@@ -37,10 +38,39 @@ public class PlanPatrolParameterMetaData implements IParameterMetaData {
 	private SmartParameterMetaData query;
 	
 	public PlanPatrolParameterMetaData(){
-		plan = new PlanTargetParameterMetaData();
+		plan = new PlanTargetParameterMetaData(true, false);
 		query = new SmartParameterMetaData();
 	}
 
+	/**
+	 * Finds a parameter at a given index
+	 * 
+	 * @param index
+	 *            the parameter index
+	 * @return the parameter of null if index not found
+	 * @throws OdaException 
+	 */
+	public Object findParameter(int index) throws OdaException {
+		if (isQuery(index)){
+			return query.findParameter(index);
+		}else{
+			return plan.getParameterName(index - query.getParameterCount());	
+		}
+	}
+
+	/**
+	 * Finds a parameter by name
+	 * 
+	 * @param name
+	 *            the parameter name
+	 * @return the parameter or null if not found
+	 */
+	public Object findParameter(String name) {
+		Parameter p = query.findParameter(name);
+		if (p != null) return p;
+		return name;
+	}
+	
 	@Override
 	public int getParameterCount() throws OdaException {
 		return plan.getParameterCount() + query.getParameterCount();

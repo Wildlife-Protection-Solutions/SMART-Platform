@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.birt.report.designer.data.ui.dataset.DataSetUIUtil;
 import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.PropertyHandle;
 import org.eclipse.birt.report.model.api.StructureFactory;
 import org.eclipse.birt.report.model.api.elements.structures.CachedMetaData;
@@ -41,13 +42,26 @@ public class ColumnBindingFixer {
 	public static void fixBindings(final DataSetHandle dataset) throws Exception{
 		// refresh the columns in the query
 		//not running in display thread causes invalid thread access
+		final Exception[] errors = new Exception[]{null};
 		runInDisplayThread(new Callable(){
 			@Override
-			public void execute() throws Exception {
-				DataSetUIUtil.updateColumnCacheAfterCleanRs(dataset);
+			public void execute() {
+				try{
+					if ( dataset.getCachedMetaDataHandle( ) != null && dataset.getCachedMetaDataHandle( ).getResultSet( ) != null )
+						dataset.getCachedMetaDataHandle( ).getResultSet( ).clearValue( );
+					
+					if ( dataset instanceof OdaDataSetHandle && dataset.getPropertyHandle( OdaDataSetHandle.RESULT_SET_PROP ).isLocal( ) )
+							dataset.getPropertyHandle( OdaDataSetHandle.RESULT_SET_PROP ).setValue( new ArrayList( ) );
+					
+					DataSetUIUtil.updateColumnCache(dataset, false);
+				}catch (Throwable ex){
+					errors[0] = new Exception(ex);	
+				}
 			}	
 		});
 			
+		if (errors[0] != null) throw errors[0];
+		
 		// update the column hints to include any new columns (in
 		// particular the geometry columns); and remove any old
 		//columns
@@ -93,12 +107,17 @@ public class ColumnBindingFixer {
 		List<String> aliases = new ArrayList<String>();
 			runInDisplayThread(new Callable(){
 			@Override
-			public void execute() throws Exception {
+			public void execute() {
 				//not running in display thread causes invalid thread access
-				columnHint.clearValue();
+				try{
+					columnHint.clearValue();
+				}catch (Exception ex){
+					errors[0] = ex;
+				}
 			}	
 		});
-		
+		if (errors[0] != null) throw errors[0];
+			
 		for (final ColumnHint h : newHints){
 			String alias = (String)h.getProperty(dataset.getModule(), ColumnHint.ALIAS_MEMBER);
 			if (alias != null){
@@ -115,12 +134,16 @@ public class ColumnBindingFixer {
 			}
 			runInDisplayThread(new Callable(){
 				@Override
-				public void execute() throws Exception {
+				public void execute() {
 					//not running in display thread causes invalid thread access
-					columnHint.addItem(h);
+					try{
+						columnHint.addItem(h);
+					}catch (Exception ex){
+						errors[0] = ex;
+					}
 				}	
 			});
-			
+			if (errors[0] != null) throw errors[0];
 		}
 
 	}
@@ -141,6 +164,6 @@ public class ColumnBindingFixer {
 	}
 	
 	private interface Callable{
-		public void execute() throws Exception;
+		public void execute();
 	}
 }

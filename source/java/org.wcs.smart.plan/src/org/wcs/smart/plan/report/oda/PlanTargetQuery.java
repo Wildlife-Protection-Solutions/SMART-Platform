@@ -35,6 +35,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 
 /**
  * SMART Plan target query.
@@ -55,7 +56,11 @@ public class PlanTargetQuery implements IQuery {
 	 * Query text for including only subplan targets
 	 */
 	public static final String SUBPLAN_ONLY = "subplan"; //$NON-NLS-1$
-			
+	/**
+	 * Query text for including only all targets and adding option to filter by date
+	 */
+	public static final String ALL = "all"; //$NON-NLS-1$
+	
 	private int m_maxRows;
 		
 	//dataset metadata
@@ -63,6 +68,8 @@ public class PlanTargetQuery implements IQuery {
 	
 	//dataset parameters
 	private HashMap<Integer, Object> parameters = null;
+	
+	private String queryText;
 	private boolean onlySubplans = false;
 	
 	private SmartConnection connection;
@@ -81,6 +88,7 @@ public class PlanTargetQuery implements IQuery {
 	 */
 	public void prepare(String queryText) throws OdaException {
 		parameters = new HashMap<Integer, Object>();
+		this.queryText = queryText;
 		if (queryText.equals(SUBPLAN_ONLY)){
 			onlySubplans = true;
 		}else{
@@ -115,10 +123,23 @@ public class PlanTargetQuery implements IQuery {
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#executeQuery()
 	 */
 	public IResultSet executeQuery() throws OdaException {
-		String[] planUuids = ((String)parameters.get(1)).split(","); //$NON-NLS-1$
+		if (this.queryText.equals(ALL)){
+			Date start = null;
+			Date end = null;
+			for (int x = 1; x <= getParameterMetaData().getParameterCount(); x ++){
+				if (getParameterMetaData().getParameterName(x).equals(SmartParameterMetaData.Parameter.STARTDATE.guiName)){
+					start = (Date) parameters.get(x);
+				}else if (getParameterMetaData().getParameterName(x).equals(SmartParameterMetaData.Parameter.ENDDATE.guiName)){
+					end = (Date) parameters.get(x);
+				}
+			}
+			return new PlanTargetResultSet(start, end, (PlanTargetResultSetMetadata)getMetaData(), connection);
+		}else{
+			String[] planUuids = ((String)parameters.get(1)).split(","); //$NON-NLS-1$
 		
-		return new PlanTargetResultSet(planUuids, onlySubplans, 
+			return new PlanTargetResultSet(planUuids, onlySubplans, 
 				(PlanTargetResultSetMetadata)getMetaData(), connection);
+		}
 	}
 
 	/**
@@ -345,7 +366,11 @@ public class PlanTargetQuery implements IQuery {
 	 */
 	public IParameterMetaData getParameterMetaData() throws OdaException {
 		if (pMetadata == null) {
-			pMetadata = new PlanTargetParameterMetaData();
+			if (queryText.equals(ALL)){	//don't include planuuid as parameter
+				pMetadata = new PlanTargetParameterMetaData(false, true);
+			}else{
+				pMetadata = new PlanTargetParameterMetaData(true, false);
+			}
 		}
 		return pMetadata;
 	}

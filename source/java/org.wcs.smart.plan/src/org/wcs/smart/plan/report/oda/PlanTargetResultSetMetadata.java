@@ -21,9 +21,17 @@
  */
 package org.wcs.smart.plan.report.oda;
 
+import java.util.Locale;
+
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.model.PlanTarget;
+import org.wcs.smart.plan.model.SpatialPlanTarget;
+import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * SMART plan target result set metadata.
@@ -37,6 +45,62 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 	public static final String ID = "org.wcs.smart.plan.report.oda.SmartPlanTargets"; //$NON-NLS-1$
 	public static final String GEOM_COLUMN_NAME = "geometry"; //$NON-NLS-1$
 	
+
+	public enum Column {
+		
+		TARGE_TNAME(Messages.PlanTargetResultSetMetadata_TargetNameColumnLabel, "TargetName", java.sql.Types.VARCHAR),
+		TARGET_DESCRIPTION(Messages.PlanTargetResultSetMetadata_TargetDescriptionColumnLabel, "TargetDescription", java.sql.Types.VARCHAR),
+		STATUS_DESCRIPTION(Messages.PlanTargetResultSetMetadata_StatusDescriptionTargetLabel, "StatusDescription", java.sql.Types.VARCHAR),
+		STATUS_KEY(Messages.PlanTargetResultSetMetadata_StatusKeyTargetLabel, "targetStatus", java.sql.Types.VARCHAR),
+		PLAN_ID(Messages.PlanTargetResultSetMetadata_PlanIdColumnLabel, "PlanId", java.sql.Types.VARCHAR),
+		GEOMETRY(Messages.PlanTargetResultSetMetadata_TargetPointsGeomColumnName, GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT),
+	
+		PLAN_START_DATE("Plan Start Date", "PlanStartDate", java.sql.Types.DATE),
+		PLAN_END_DATE("Plan End Date", "PlanEndDate", java.sql.Types.DATE);
+		
+		public String name;
+		public String key;
+		public int type;
+		
+		private Column(String name, String key, int type){
+			this.name = name;
+			this.key = key;
+			this.type = type;
+		}
+		
+		public Object getValue(PlanTarget pt){
+	
+			switch(this){
+				case GEOMETRY:
+					if (pt instanceof SpatialPlanTarget){
+						SpatialPlanTarget sp = (SpatialPlanTarget)pt;
+						Coordinate[] pnts = new Coordinate[sp.getPoints().size()];
+						int i =0;
+						for (SpatialPlanTargetPoint pnt : sp.getPoints()){
+							pnts[i++] = new Coordinate(pnt.getX(), pnt.getY()); 
+						}
+						return GeometryFactoryProvider.getFactory().createMultiPoint(pnts);
+					}
+					return null;
+				case PLAN_END_DATE:
+					return pt.getPlan().getEndDate();
+				case PLAN_ID:
+					return  pt.getPlan().getId();
+				case PLAN_START_DATE:
+					return pt.getPlan().getStartDate();
+				case STATUS_DESCRIPTION:
+					return pt.getCurrentStatus().getDisplayString(Locale.getDefault());
+				case STATUS_KEY:
+					return pt.getCurrentStatus().getStatus().key;
+				case TARGET_DESCRIPTION:
+					return pt.getSummary(Locale.getDefault());
+				case TARGE_TNAME:
+					return pt.getName();
+			}
+			return null;
+		}
+	}
+	
 	public PlanTargetResultSetMetadata(){
 	}
 	
@@ -45,7 +109,7 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return 6;
+		return Column.values().length;
 	}
 
 	/**
@@ -61,15 +125,7 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		switch(index){
-		case 1: return Messages.PlanTargetResultSetMetadata_TargetNameColumnLabel;
-		case 2: return Messages.PlanTargetResultSetMetadata_TargetDescriptionColumnLabel;
-		case 3: return Messages.PlanTargetResultSetMetadata_StatusDescriptionTargetLabel;
-		case 4: return Messages.PlanTargetResultSetMetadata_StatusKeyTargetLabel;
-		case 5: return Messages.PlanTargetResultSetMetadata_PlanIdColumnLabel;
-		case 6: return Messages.PlanTargetResultSetMetadata_TargetPointsGeomColumnName;
-		}
-		return null;
+		return Column.values()[index-1].name;
 	}
 
 	/**
@@ -77,15 +133,7 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		switch(index){
-		case 1: return "TargetName"; //$NON-NLS-1$
-		case 2: return "TargetDescription"; //$NON-NLS-1$
-		case 3: return "StatusDescription"; //$NON-NLS-1$
-		case 4: return "targetStatus"; //$NON-NLS-1$
-		case 5: return "PlanId"; //$NON-NLS-1$
-		case 6: return GEOM_COLUMN_NAME;
-		}
-		return null;
+		return Column.values()[index-1].key;
 	}
 
 	/**
@@ -93,15 +141,7 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
-		switch(index){
-		case 1: return java.sql.Types.VARCHAR;
-		case 2: return java.sql.Types.VARCHAR;
-		case 3: return java.sql.Types.VARCHAR;
-		case 4: return java.sql.Types.VARCHAR;
-		case 5: return java.sql.Types.VARCHAR;
-		case 6: return java.sql.Types.JAVA_OBJECT;
-		}
-		return -1;
+		return Column.values()[index-1].type;
 	}
 
 	/**

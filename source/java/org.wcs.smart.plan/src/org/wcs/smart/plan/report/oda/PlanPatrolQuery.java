@@ -81,6 +81,7 @@ public class PlanPatrolQuery extends SmartQuery {
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IQuery#getParameterMetaData()
 	 */
+	@Override
 	public IParameterMetaData getParameterMetaData() throws OdaException {
 		if (pMetadata == null) {
 			pMetadata = new PlanPatrolParameterMetaData();
@@ -93,7 +94,8 @@ public class PlanPatrolQuery extends SmartQuery {
 	 * Execute the query
 	 */
 	public IResultSet executeQuery() throws OdaException {
-		String[] planUuids = ((String)parameters.get(3)).split(","); //$NON-NLS-1$
+		
+		String[] planUuids = ((String)parameters.get(PlanTargetParameterMetaData.PLAN_UUID_PARAM)).split(","); //$NON-NLS-1$
 		try{
 			updateQueryFilter((PatrolQuery)this.smartQuery, planUuids[0], connection.getSession());
 		}catch (Exception ex){
@@ -101,6 +103,7 @@ public class PlanPatrolQuery extends SmartQuery {
 		}
 		
 		//set query dates
+		//this is necessary to run the query that is created for this patrol
 		String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
 		org.hibernate.Query q = connection.getSession().createQuery(hql);
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
@@ -115,7 +118,7 @@ public class PlanPatrolQuery extends SmartQuery {
 		// today + one day
 		// add one day just to make sure we get everything
 		super.setObject(SmartParameterMetaData.Parameter.ENDDATE.guiName, 
-				new java.sql.Date((new Date()).getTime() + 86400000)); 
+				new java.sql.Date((new Date()).getTime() + (86400000l * 365))); 
 		
 		this.wrapperObject.prepare(this, connection);
 		return wrapperObject.executeQuery(this, connection);
@@ -172,19 +175,15 @@ public class PlanPatrolQuery extends SmartQuery {
 		return ;
 	}
 
+	@Override
 	public Object getParameterKey(int parameterId)  throws OdaException{
-		Object x = super.getParameterKey(parameterId);
-		if (x != null){
-			return x;
-		}
-		return parameterId;
+		getParameterMetaData();
+		return pMetadata.findParameter(parameterId);
 	}
 	
+	@Override
 	public Object getParameterKey(String parameterName)  throws OdaException{
-		Object x = super.getParameterKey(parameterName);
-		if (x != null){
-			return x;
-		}
-		return parameterName;
+		getParameterMetaData();
+		return pMetadata.findParameter(parameterName);
 	}
 }

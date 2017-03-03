@@ -36,19 +36,16 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
-import org.wcs.smart.plan.model.SpatialPlanTarget;
-import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
+import org.wcs.smart.plan.report.oda.PlanTargetResultSetMetadata.Column;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * SMRAT Plan target result set
@@ -85,34 +82,58 @@ public class PlanTargetResultSet  implements IResultSet {
 		Set<Plan> addedPlans = new HashSet<Plan>();
 		for (int i = 0; i < planUuids.length; i ++){
 			try{
-			Plan p = (Plan)session.createCriteria(Plan.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(planUuids[i]))).list().get(0); //$NON-NLS-1$
-			if (p != null){
-				if (!onlyChildren){
-					plans.addAll(p.getTargets());
-					m_maxRows += p.getTargets().size();
-				}else{
-					//process all kids
-					List<Plan> toProcess = new ArrayList<Plan>();
-					toProcess.addAll(p.getChildren());
-					while(toProcess.size() > 0){
-						Plan subplan = toProcess.remove(0);
-						if (!addedPlans.contains(subplan)){
-							plans.addAll(subplan.getTargets());
-							m_maxRows += subplan.getTargets().size();
-							toProcess.addAll(subplan.getChildren());
-							addedPlans.add(subplan);
+				Plan p = (Plan)session.createCriteria(Plan.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+					.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(planUuids[i]))).list().get(0); //$NON-NLS-1$
+				if (p != null){
+					if (!onlyChildren){
+						plans.addAll(p.getTargets());
+						m_maxRows += p.getTargets().size();
+					}else{
+						//process all kids
+						List<Plan> toProcess = new ArrayList<Plan>();
+						toProcess.addAll(p.getChildren());
+						while(toProcess.size() > 0){
+							Plan subplan = toProcess.remove(0);
+							if (!addedPlans.contains(subplan)){
+								plans.addAll(subplan.getTargets());
+								m_maxRows += subplan.getTargets().size();
+								toProcess.addAll(subplan.getChildren());
+								addedPlans.add(subplan);
+							}
 						}
 					}
 				}
-			}
 			}catch (Exception ex){
 				SmartPlanPlugIn.log("Error creating plan target result set", ex); //$NON-NLS-1$
 			}
 		}
 	}
 
+	public PlanTargetResultSet(Date startDate, Date endDate,
+			PlanTargetResultSetMetadata metadata, SmartConnection connection) {
+
+		this.metadata = metadata;
+		plans = new ArrayList<PlanTarget>();
+		
+		session = connection.getSession();
+
+		Criteria c = session.createCriteria(Plan.class)
+				.add(Restrictions.in("conservationArea",  connection.getConservationAreas()));
+		if (startDate != null){
+			c.add(Restrictions.ge("startDate", startDate));
+		}
+		if (endDate != null){
+			c.add(Restrictions.le("startDate", endDate));
+		}
+		
+		List<Plan> searchplans = c.list();
+		for (Plan p : searchplans){
+			plans.addAll(p.getTargets());
+		}
+		m_maxRows += plans.size();
+	}
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getMetaData()
 	 */
@@ -182,32 +203,13 @@ public class PlanTargetResultSet  implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		PlanTarget pt = plans.get(currentRow);
 		
-		if ((colIndex == 3 || colIndex == 4) &&pt.getCurrentStatus() == null){
+		if ((colIndex == Column.STATUS_KEY.ordinal() || colIndex == Column.STATUS_DESCRIPTION.ordinal()) 
+				&& pt.getCurrentStatus() == null){
 			// recompute the status using the current session
 			pt.refreshStatus(Locale.getDefault(), session);
 		}
 		
-		switch (colIndex) {
-			case 1: return pt.getName();
-			case 2: return pt.getSummary(Locale.getDefault());
-			case 3: return pt.getCurrentStatus().getDisplayString(Locale.getDefault());
-			case 4: return pt.getCurrentStatus().getStatus().key;
-			case 5: return pt.getPlan().getId();
-			case 6: 
-			{
-				if (pt instanceof SpatialPlanTarget){
-					SpatialPlanTarget sp = (SpatialPlanTarget)pt;
-					Coordinate[] pnts = new Coordinate[sp.getPoints().size()];
-					int i =0;
-					for (SpatialPlanTargetPoint pnt : sp.getPoints()){
-						pnts[i++] = new Coordinate(pnt.getX(), pnt.getY()); 
-					}
-					return GeometryFactoryProvider.getFactory().createMultiPoint(pnts);
-				}
-				return null;
-			}
-		}
-		return ""; //$NON-NLS-1$
+		return PlanTargetResultSetMetadata.Column.values()[colIndex-1].getValue(pt);
 	}
 
 	/**

@@ -858,6 +858,11 @@
                nativeDataTypeCode="93"
                odaScalarDataType="Timestamp">
          </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
       </dataSet>
    </extension>
    <extension

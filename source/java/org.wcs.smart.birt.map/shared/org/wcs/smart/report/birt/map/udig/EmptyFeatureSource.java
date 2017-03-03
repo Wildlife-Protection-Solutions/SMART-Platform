@@ -23,6 +23,7 @@ package org.wcs.smart.report.birt.map.udig;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +32,7 @@ import org.eclipse.birt.report.model.api.MemberHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ResultSetColumnHandle;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
+import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureReader;
 import org.geotools.data.Query;
@@ -123,9 +125,23 @@ public class EmptyFeatureSource extends ContentFeatureSource {
 		
 		MemberHandle resultSet = handle.getCachedMetaDataHandle().getResultSet();
 		
+		String geomName = mapInfo.getGeometryColumn();
+		
+		List<?> items = handle.getListProperty("columnHints");
+		if (items != null){
+			for(Object c : items){
+				String n = ((ColumnHint)c).getStringProperty(handle.getModule(), "columnName"); 
+				if (n.equals(geomName)){
+					String o = ((ColumnHint)c).getStringProperty(handle.getModule(), "alias");
+					if (o != null) geomName = o;
+					break; 
+				}
+			}
+		}
+		
 		for (int i=0; i < resultSet.getListValue().size(); i++) {
 			ResultSetColumnHandle resultSetColumn = (ResultSetColumnHandle)resultSet.getAt(i);
-			if (resultSetColumn.getColumnName().equalsIgnoreCase(mapInfo.getGeometryColumn())) continue;
+			if (resultSetColumn.getColumnName().equalsIgnoreCase(geomName)) continue;
 			
 			String colType = resultSetColumn.getDataType();
 			String maptype;
@@ -142,6 +158,8 @@ public class EmptyFeatureSource extends ContentFeatureSource {
 				maptype = "Date"; //$NON-NLS-1$
 			}else if (colType.equalsIgnoreCase(DesignChoiceConstants.COLUMN_DATA_TYPE_BOOLEAN)){
 				maptype = "Integer"; //$NON-NLS-1$
+			//}else if (colType.equalsIgnoreCase(DesignChoiceConstants.COLUMN_DATA_TYPE_JAVA_OBJECT)){
+				
 			}else{
 				Logger.getLogger(QueryFeatureSource.class.getName()).log(Level.SEVERE, "Query type not supported: " + colType, (Exception)null); //$NON-NLS-1$
 				continue;

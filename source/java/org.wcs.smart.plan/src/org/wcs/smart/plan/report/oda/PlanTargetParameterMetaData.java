@@ -23,6 +23,7 @@ package org.wcs.smart.plan.report.oda;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 
 /**
  * SMART Plan target query parameter metadata
@@ -32,9 +33,24 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
  */
 public class PlanTargetParameterMetaData implements IParameterMetaData {
 
+	public static final String PLAN_UUID_PARAM = "PlanUUID"; //$NON-NLS-1$
+	
+	private SmartParameterMetaData dateMetadata = null;
+	private boolean planUuid = false;
+	
+	public PlanTargetParameterMetaData(boolean includePlanUuid, boolean includeDates){
+		this.planUuid = includePlanUuid;
+		if (includeDates){
+			dateMetadata = new SmartParameterMetaData();
+		}
+	}
+	
 	@Override
 	public int getParameterCount() throws OdaException {
-		return 1;
+		int cnt = 0;
+		if (planUuid) cnt++;
+		if (dateMetadata != null) cnt += dateMetadata.getParameterCount();
+		return cnt;
 	}
 
 	@Override
@@ -44,23 +60,33 @@ public class PlanTargetParameterMetaData implements IParameterMetaData {
 
 	@Override
 	public String getParameterName(int param) throws OdaException {
-		if (param == 1){
-			return "PlanUUID"; //$NON-NLS-1$
+		if (planUuid){
+			if (param == 1) return PLAN_UUID_PARAM;
+			param = param - 1;
 		}
+		if (dateMetadata != null) return dateMetadata.getParameterName(param);
 		return null;
 	}
 
 	@Override
 	public int getParameterType(int param) throws OdaException {
-		if(param == 1){
-			return java.sql.Types.VARCHAR;
+		if (planUuid){
+			if (param == 1) return java.sql.Types.VARCHAR;
+			param = param - 1;
 		}
+		if (dateMetadata != null) return dateMetadata.getParameterType(param);
+
 		return 0;
 	}
 
 	@Override
 	public String getParameterTypeName(int param) throws OdaException {
-		return SmartPlanDriver.getNativeDataTypeName(getParameterType(param), PlanTargetQuery.SMART_PLAN_TARGET_ID);
+		if (planUuid){
+			if (param == 1) return SmartPlanDriver.getNativeDataTypeName(getParameterType(param), PlanTargetQuery.SMART_PLAN_TARGET_ID);
+			param = param - 1;
+		}
+		if (dateMetadata != null) return dateMetadata.getParameterTypeName(param);
+		return null;
 	}
 
 	@Override

@@ -42,6 +42,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -49,7 +51,6 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.report.oda.PlanTargetQuery;
 import org.wcs.smart.plan.report.oda.SmartPlanDriver;
-import org.wcs.smart.report.execute.SmartReportRunner;
 
 /**
  * SMART Plan targets dataset wizard page.
@@ -61,6 +62,8 @@ import org.wcs.smart.report.execute.SmartReportRunner;
 public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 
 	private Button btnIncludeKids = null;
+	private Button btnOpDate;
+	private Button btnOpUuid;
 	
 	public SmartPlanTargetDatasetWizardPage(String pageName) {
 		super(pageName);
@@ -78,10 +81,30 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 		Composite all = new Composite(arg0, SWT.NONE);
 		all.setLayout(new GridLayout());
 		
+		btnOpDate = new Button(all, SWT.RADIO);
+		btnOpDate.setText("Filter Targets By Plan Start Date");
+		
+		btnOpUuid = new Button(all, SWT.RADIO);
+		btnOpUuid.setText("Filter Targets By Plan UUID");
+				
 		btnIncludeKids = new Button(all, SWT.CHECK);
 		btnIncludeKids.setText(Messages.SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonName);
 		btnIncludeKids.setToolTipText(Messages.SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonTooltip);
 		btnIncludeKids.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		((GridData)btnIncludeKids.getLayoutData()).horizontalIndent = 10;
+		
+		Listener sel = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				btnIncludeKids.setEnabled(btnOpUuid.getSelection());
+			}
+		};
+		
+		btnOpDate.addListener(SWT.Selection, sel);
+		btnOpUuid.addListener(SWT.Selection, sel);
+		
+		btnOpDate.setSelection(true);
+		btnIncludeKids.setEnabled(btnOpUuid.getSelection());
 		
 		super.setControl(all);
 	}
@@ -153,7 +176,12 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 
 		//create dataests
 		IQuery query = conn.newQuery(PlanTargetQuery.SMART_PLAN_TARGET_ID);
-		String queryText = btnIncludeKids.getSelection()? PlanTargetQuery.SUBPLAN_ONLY:PlanTargetQuery.PLAN_ONLY;
+		String queryText = null;
+		if (btnOpDate.getSelection()){
+			queryText = PlanTargetQuery.ALL;
+		}else{
+			queryText = btnIncludeKids.getSelection() ? PlanTargetQuery.SUBPLAN_ONLY:PlanTargetQuery.PLAN_ONLY;
+		}
 		query.prepare(queryText);
 		dataSetDesign.setQueryText(queryText);
 
